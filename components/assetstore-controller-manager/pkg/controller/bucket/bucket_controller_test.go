@@ -52,7 +52,6 @@ func TestAdd(t *testing.T) {
 		g.Expect(err).ShouldNot(gomega.HaveOccurred())
 	})
 
-
 	t.Run("Error", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		err := Add(nil)
@@ -64,11 +63,12 @@ func TestReconcileBucketCreationSuccess(t *testing.T) {
 	// Given
 	name := "bucket-creation-success"
 	exp := expectedFor(name, namespace)
+	regionName := string(assetstorev1alpha1.BucketRegionUSEast1)
 
-	instance := fixInitialBucket(name, namespace, "test", "")
+	instance := fixInitialBucket(name, namespace, regionName, "")
 
 	bucketHandler := &automock.BucketHandler{}
-	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "test").Return(true, nil).Once()
+	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, regionName).Return(true, nil).Once()
 	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil).Once()
 	bucketHandler.On("Delete", exp.BucketName).Return(nil).Once()
@@ -265,11 +265,12 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	name := "bucket-deleted-remotely"
 	exp := expectedFor(name, namespace)
 
-	bucket := fixInitialBucket(name, namespace, "test", "")
+	regionName := string(assetstorev1alpha1.BucketRegionUSEast1)
+	bucket := fixInitialBucket(name, namespace, regionName, "")
 
 	bucketHandler := &automock.BucketHandler{}
 	bucketHandlerBefore := bucketHandler
-	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, "test").Return(true, nil).Once()
+	bucketHandler.On("CreateIfDoesntExist", exp.BucketName, regionName).Return(true, nil).Once()
 	bucketHandler.On("SetPolicyIfNotEqual", exp.BucketName, "").Return(false, nil).Once()
 	bucketHandler.On("CheckIfExists", exp.BucketName).Return(true, nil).Once()
 	bucketHandler.On("CheckIfExists", exp.BucketName).Return(false, nil).Twice()
@@ -393,7 +394,7 @@ func fixInitialBucket(name, namespace, region string, policy string) *assetstore
 			Namespace: namespace,
 		},
 		Spec: assetstorev1alpha1.BucketSpec{
-			Region: region,
+			Region: assetstorev1alpha1.BucketRegion(region),
 			Policy: policy,
 		},
 		Status: assetstorev1alpha1.BucketStatus{

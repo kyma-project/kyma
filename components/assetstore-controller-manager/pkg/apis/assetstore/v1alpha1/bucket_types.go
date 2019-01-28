@@ -19,12 +19,27 @@ type Bucket struct {
 
 // BucketSpec defines the desired state of Bucket
 type BucketSpec struct {
+	// +kubebuilder:validation:Enum=,us-east-1,us-west-1,us-west-2,eu-west-1,eu-central-1,ap-southeast-1,ap-southeast-2,ap-northeast-1,sa-east-1
 	// +optional
-	Region string `json:"region,omitempty"`
+	Region BucketRegion `json:"region,omitempty"`
 
 	// +optional
 	Policy string `json:"policy,omitempty"`
 }
+
+type BucketRegion string
+
+const (
+	BucketRegionUSEast1      BucketRegion = "us-east-1"
+	BucketRegionUSWest1                   = "us-west-1"
+	BucketRegionUSWest2                   = "us-west-2"
+	BucketRegionEUEast1                   = "eu-west-1"
+	BucketRegionEUCentral1                = "eu-central-1"
+	BucketRegionAPSoutheast1              = "ap-southeast-1"
+	BucketRegionAPSoutheast2              = "ap-southeast-2"
+	BucketRegionAPNortheast1              = "ap-northeast-1"
+	BucketRegionSAEast1                   = "sa-east-1"
+)
 
 // BucketStatus defines the observed state of Bucket
 type BucketStatus struct {

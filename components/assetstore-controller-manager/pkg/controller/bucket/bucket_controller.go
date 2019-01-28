@@ -156,7 +156,7 @@ func (r *ReconcileBucket) handleDeletionIfShould(instance *assetstorev1alpha1.Bu
 
 func (r *ReconcileBucket) handleInitialAndFailedState(instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
 	bucketName := r.bucketNameForInstance(instance)
-	handled, err := r.bucketHandler.CreateIfDoesntExist(bucketName, instance.Spec.Region)
+	handled, err := r.bucketHandler.CreateIfDoesntExist(bucketName, string(instance.Spec.Region))
 	if err != nil {
 		updateStatusErr := r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
 			Phase:   assetstorev1alpha1.BucketFailed,
