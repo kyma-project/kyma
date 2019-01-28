@@ -52,18 +52,6 @@ The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Inst
 
 >**NOTE:** For the Kyma-Installer Docker image details, refer to the `tools/kyma-installer/kyma.Dockerfile` file.
 
-## The configure-azure-broker.sh script
-
-The `configure-azure-broker.sh` script configures Azure Broker, an optional subcomponent of the `core` deployment.
-
-The Azure Broker subcomponent is part of the `core` deployment that provisions managed services in the Microsoft Azure cloud. To enable the Azure Broker, export the following environment variables:
- - AZURE_BROKER_SUBSCRIPTION_ID
- - AZURE_BROKER_TENANT_ID
- - AZURE_BROKER_CLIENT_ID
- - AZURE_BROKER_CLIENT_SECRET
-
->**NOTE:** You need to export above environment variables before executing the `installation/cmd/run.sh` script. As the Azure credentials are converted to a Kubernetes Secret, make sure the exported values are base64-encoded.
-
 ## The create-cr.sh script
 
 The `installation/scripts/create-cr.sh` script prepares the Installation custom resource from the `installation/resources/installer-cr.yaml.tpl` template. The local installation scenario uses the default Installation custom resource. The Kyma-Installer already contains local Kyma resources bundled, thus `url` is ignored by the Installer component.

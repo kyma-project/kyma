@@ -6,9 +6,6 @@ minio:
   service:
     type: NodePort
 
-azure-broker:
-  enabled: false
-
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
