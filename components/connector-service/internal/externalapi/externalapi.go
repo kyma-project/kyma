@@ -39,7 +39,6 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg Config, globalMiddlewares []mux
 
 	httphelpers.WithMiddlewares(router, globalMiddlewares)
 
-	// TODO - adjust returning of API spec
 	router.Path("/v1").Handler(http.RedirectHandler("/v1/api.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
 	router.Path("/v1/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
