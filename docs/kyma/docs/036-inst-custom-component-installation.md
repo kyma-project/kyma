@@ -46,18 +46,18 @@ To disable a component from the list of components that you install with Kyma, r
 
 >**NOTE:** This section assumes that you already have your Kyma Lite local version installed successfully.
 
-To install a component that is not installed with Kyma by default, you need to modify  the **Installation** custom resource and add to the list of components the component that you want to install:
+To install a component that is not installed with Kyma by default, modify the **Installation** custom resource and add the component that you want to install to the list of components :
 
 1. Edit the resource:
     ```
     kubectl edit installation kyma-installation
     ```
-2. Add to the list components new component, for example:
+2. Add the new component to the list of components, for example:
     ```
     - name: "jaeger"
       namespace: "kyma-system"
     ```
-3. Trigger installation
+3. Trigger the installation:
    ```
    kubectl label installation/kyma-installation action=install
    ```
