@@ -16,8 +16,8 @@ input ResourceAttributes {
 	apiVersion: String!
 	resource: String!
 	subresource: String! = ""
-    nameArg: String
-    namespaceArg: String
+	nameArg: String
+	namespaceArg: String
 }
 
 # Content
