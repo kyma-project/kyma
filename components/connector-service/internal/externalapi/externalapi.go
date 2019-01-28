@@ -19,7 +19,7 @@ type Config struct {
 	TokenService     tokens.Service
 	APIUrlsGenerator APIUrlsGenerator
 	ContextExtractor clientcontext.ConnectorClientExtractor
-	Host             string
+	CertificateURL   string
 	Subject          certificates.CSRSubject
 	CertService      certificates.Service
 }
@@ -43,21 +43,21 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg Config, globalMiddlewares []mux
 	router.Path("/v1").Handler(http.RedirectHandler("/v1/api.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
 	router.Path("/v1/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
-	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenService, appHandlerCfg.ContextExtractor, appHandlerCfg.APIUrlsGenerator, appHandlerCfg.Host, appHandlerCfg.Subject)
-	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.TokenService, appHandlerCfg.CertService, appHandlerCfg.ContextExtractor, appHandlerCfg.Host)
+	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenService, appHandlerCfg.ContextExtractor, appHandlerCfg.APIUrlsGenerator, appHandlerCfg.CertificateURL, appHandlerCfg.Subject)
+	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.TokenService, appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 
 	applicationRouter := router.PathPrefix("/v1/applications").Subrouter()
 	httphelpers.WithMiddlewares(applicationRouter, appHandlerCfg.Middlewares)
 	applicationRouter.HandleFunc("/signingRequests/info", applicationInfoHandler.GetCSRInfo).Methods(http.MethodGet)
 	applicationRouter.HandleFunc("/certificates", applicationSignatureHandler.SignCSR).Methods(http.MethodPost)
 
-	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenService, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.APIUrlsGenerator, runtimeHandlerCfg.Host, runtimeHandlerCfg.Subject)
-	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.TokenService, runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.Host)
+	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenService, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.APIUrlsGenerator, runtimeHandlerCfg.CertificateURL, runtimeHandlerCfg.Subject)
+	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.TokenService, runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 
 	runtimesRouter := router.PathPrefix("/v1/runtimes").Subrouter()
 	httphelpers.WithMiddlewares(runtimesRouter, runtimeHandlerCfg.Middlewares)
-	applicationRouter.HandleFunc("/signingRequests/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)
-	applicationRouter.HandleFunc("/certificates", runtimeSignatureHandler.SignCSR).Methods(http.MethodPost)
+	runtimesRouter.HandleFunc("/signingRequests/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)
+	runtimesRouter.HandleFunc("/certificates", runtimeSignatureHandler.SignCSR).Methods(http.MethodPost)
 
 	router.NotFoundHandler = errorhandler.NewErrorHandler(404, "Requested resource could not be found.")
 	router.MethodNotAllowedHandler = errorhandler.NewErrorHandler(405, "Method not allowed.")

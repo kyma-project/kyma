@@ -29,9 +29,10 @@ import (
 )
 
 const (
-	appCSRInfoFmt     = "https://%s/v1/applications/signingRequests/info"
-	runtimeCSRInfoFmt = "https://%s/v1/runtimes/signingRequests/info"
-	caSecretName      = "nginx-auth-ca"
+	appCSRInfoFmt            = "https://%s/v1/applications/signingRequests/info"
+	runtimeCSRInfoFmt        = "https://%s/v1/runtimes/signingRequests/info"
+	appCertificateURLFmt     = "https://%s/v1/applications/certificates"
+	runtimeCertificateURLFmt = "https://%s/v1/runtimes/certificates"
 )
 
 func main() {
@@ -107,14 +108,14 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 		Province:           env.province,
 	}
 
-	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), caSecretName, subjectValues)
+	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), opts.caSecretName, subjectValues)
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, clientcontext.ResolveApplicationContextExtender)
 	appAPIUrlsGenerator := externalapi.NewApplicationApiUrlsStrategy(opts.appRegistryHost, opts.eventsHost, opts.getInfoURL, opts.connectorServiceHost)
 
 	appHandlerConfig := externalapi.Config{
 		TokenService:     tokenService,
-		Host:             opts.connectorServiceHost,
+		CertificateURL:   fmt.Sprintf(appCertificateURLFmt, opts.connectorServiceHost),
 		Subject:          subjectValues,
 		Middlewares:      []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware},
 		ContextExtractor: clientcontext.ExtractApplicationContext,
@@ -127,7 +128,7 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 
 	runtimeHandlerConfig := externalapi.Config{
 		TokenService:     tokenService,
-		Host:             opts.connectorServiceHost,
+		CertificateURL:   fmt.Sprintf(runtimeCertificateURLFmt, opts.connectorServiceHost),
 		Subject:          subjectValues,
 		Middlewares:      []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware},
 		ContextExtractor: clientcontext.ExtractClusterContext,

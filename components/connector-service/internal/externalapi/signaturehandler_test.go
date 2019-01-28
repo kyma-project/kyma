@@ -68,7 +68,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(tokenRemover, certService, connectorClientExtractor, host)
+		signatureHandler := NewSignatureHandler(tokenRemover, certService, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -95,7 +95,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			return nil, apperrors.Internal("error")
 		}
 
-		signatureHandler := NewSignatureHandler(nil, nil, errorExtractor, host)
+		signatureHandler := NewSignatureHandler(nil, nil, errorExtractor)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -118,7 +118,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(nil, nil, connectorClientExtractor, host)
+		signatureHandler := NewSignatureHandler(nil, nil, connectorClientExtractor)
 
 		incorrectBody := []byte("incorrectBody")
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(incorrectBody))
@@ -142,7 +142,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(nil, nil, connectorClientExtractor, host)
+		signatureHandler := NewSignatureHandler(nil, nil, connectorClientExtractor)
 
 		incorrectBase64Body := compact([]byte("{\"csr\":\"not base 64\"}"))
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(incorrectBase64Body))
@@ -169,7 +169,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(nil, certService, connectorClientExtractor, host)
+		signatureHandler := NewSignatureHandler(nil, certService, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)

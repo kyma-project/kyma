@@ -12,24 +12,24 @@ import (
 )
 
 const (
-	CsrURLFormat = "https://%s/v1/applications/certificates?token=%s"
+	CertificateURLFormat = "%s?token=%s"
 )
 
 type CSRInfoHandler struct {
 	tokenCreator             tokens.Creator
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	apiInfoURLsGenerator     APIUrlsGenerator
-	host                     string
+	certificateURL           string
 	csrSubject               certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, host string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, certificateURL string, subjectValues certificates.CSRSubject) InfoHandler {
 
 	return &CSRInfoHandler{
 		tokenCreator:             tokenCreator,
 		connectorClientExtractor: connectorClientExtractor,
 		apiInfoURLsGenerator:     apiInfoURLsGenerator,
-		host:                     host,
+		certificateURL:           certificateURL,
 		csrSubject:               subjectValues,
 	}
 }
@@ -48,7 +48,7 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	csrURL := fmt.Sprintf(CsrURLFormat, ih.host, newToken)
+	csrURL := fmt.Sprintf(CertificateURLFormat, ih.certificateURL, newToken)
 	apiURLs := ih.apiInfoURLsGenerator.Generate(connectorClientContext)
 
 	certInfo := makeCertInfo(ih.csrSubject, connectorClientContext.GetCommonName())
@@ -56,8 +56,8 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 	httphelpers.RespondWithBody(w, 200, infoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }
 
-func makeCertInfo(csrSubject certificates.CSRSubject, reName string) certInfo {
-	subject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", csrSubject.OrganizationalUnit, csrSubject.Organization, csrSubject.Locality, csrSubject.Province, csrSubject.Country, reName)
+func makeCertInfo(csrSubject certificates.CSRSubject, commonName string) certInfo {
+	subject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", csrSubject.OrganizationalUnit, csrSubject.Organization, csrSubject.Locality, csrSubject.Province, csrSubject.Country, commonName)
 
 	return certInfo{
 		Subject:      subject,

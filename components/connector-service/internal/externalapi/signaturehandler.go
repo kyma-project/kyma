@@ -20,15 +20,13 @@ type signatureHandler struct {
 	tokenRemover             tokens.Remover
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	certificateService       certificates.Service
-	host                     string
 }
 
-func NewSignatureHandler(tokenRemover tokens.Remover, certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor, host string) SignatureHandler {
+func NewSignatureHandler(tokenRemover tokens.Remover, certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor) SignatureHandler {
 	return &signatureHandler{
 		tokenRemover:             tokenRemover,
 		connectorClientExtractor: connectorClientExtractor,
 		certificateService:       certificateService,
-		host:                     host,
 	}
 }
 

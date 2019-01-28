@@ -23,8 +23,9 @@ import (
 )
 
 const (
-	commonName  = "commonName"
-	application = "application"
+	commonName     = "commonName"
+	application    = "application"
+	certificateURL = "https://host/v1/applications/certificates"
 )
 
 type dummyClientContext struct{}
@@ -41,7 +42,7 @@ func (dc dummyClientContext) GetCommonName() string {
 	return commonName
 }
 
-func TestInfoHandler_GetInfo(t *testing.T) {
+func TestInfoHandler_GetCSRInfo(t *testing.T) {
 
 	url := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
 
@@ -77,7 +78,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 		apiURLsGenerator.On("Generate", dummyClientContext).Return(expectedAPI)
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, host, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -109,7 +110,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, apiURLsGenerator, host, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, apiURLsGenerator, certificateURL, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -137,7 +138,7 @@ func TestInfoHandler_GetInfo(t *testing.T) {
 
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, host, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
