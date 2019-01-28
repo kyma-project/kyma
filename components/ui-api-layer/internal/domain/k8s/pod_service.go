@@ -1,22 +1,26 @@
 package k8s
 
 import (
-	"errors"
 	"fmt"
 
 	v1 "k8s.io/api/core/v1"
-	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/validation/field"
+
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"k8s.io/client-go/tools/cache"
 )
 
 type podService struct {
-	client   v12.CoreV1Interface
+	client   corev1.CoreV1Interface
 	informer cache.SharedIndexInformer
 }
 
-func newPodService(informer cache.SharedIndexInformer, client v12.CoreV1Interface) *podService {
+func newPodService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) *podService {
 	return &podService{
 		client:   client,
 		informer: informer,
@@ -62,9 +66,9 @@ func (svc *podService) List(namespace string, pagingParams pager.PagingParams) (
 }
 
 func (svc *podService) Update(name, namespace string, update v1.Pod) (*v1.Pod, error) {
-	podKind, podAPIVersion := svc.podTypeMeta()
-	if update.Kind != podKind || update.APIVersion != podAPIVersion {
-		return nil, errors.New("pod's kind or apiVersion should not be changed")
+	err := svc.checkUpdatePreconditions(name, namespace, update)
+	if err != nil {
+		return nil, err
 	}
 
 	updated, err := svc.client.Pods(namespace).Update(&update)
@@ -81,20 +85,41 @@ func (svc *podService) Delete(name, namespace string) error {
 	return svc.client.Pods(namespace).Delete(name, nil)
 }
 
+func (svc *podService) checkUpdatePreconditions(name string, namespace string, update v1.Pod) error {
+	errorList := field.ErrorList{}
+	if name != update.Name {
+		errorList = append(errorList, field.Invalid(field.NewPath("metadata.name"), update.Name, fmt.Sprintf("name of updated object does not match the original (%s)", name)))
+	}
+	if namespace != update.Namespace {
+		errorList = append(errorList, field.Invalid(field.NewPath("metadata.namespace"), update.Namespace, fmt.Sprintf("namespace of updated object does not match the original (%s)", namespace)))
+	}
+	typeMeta := svc.podTypeMeta()
+	if update.Kind != typeMeta.Kind {
+		errorList = append(errorList, field.Invalid(field.NewPath("kind"), update.Kind, "pod's kind should not be changed"))
+	}
+	if update.APIVersion != typeMeta.APIVersion {
+		errorList = append(errorList, field.Invalid(field.NewPath("apiVersion"), update.APIVersion, "pod's apiVersion should not be changed"))
+	}
+
+	if len(errorList) > 0 {
+		return errors.NewInvalid(schema.GroupKind{
+			Group: "",
+			Kind:  "Pod",
+		}, name, errorList)
+	}
+
+	return nil
+}
+
 // Kubernetes API used by client-go doesn't provide kind and apiVersion so we have to add it here
 // See: https://github.com/kubernetes/kubernetes/issues/3030
 func (svc *podService) ensureTypeMeta(pod *v1.Pod) {
-	podKind, podAPIVersion := svc.podTypeMeta()
-	if pod.APIVersion == "" {
-		pod.APIVersion = podAPIVersion
-	}
-	if pod.Kind == "" {
-		pod.Kind = podKind
-	}
+	pod.TypeMeta = svc.podTypeMeta()
 }
 
-func (svc *podService) podTypeMeta() (kind string, apiVersion string) {
-	kind = "Pod"
-	apiVersion = "v1"
-	return
+func (svc *podService) podTypeMeta() metav1.TypeMeta {
+	return metav1.TypeMeta{
+		Kind:       "Pod",
+		APIVersion: "v1",
+	}
 }

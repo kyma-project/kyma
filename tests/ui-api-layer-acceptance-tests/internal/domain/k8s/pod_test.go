@@ -224,9 +224,9 @@ func fixPodsQuery() *graphql.Request {
 	return req
 }
 
-func fixUpdatePodMutation(update string) *graphql.Request {
-	mutation := `mutation ($name: String!, $namespace: String!, $update: JSON!) {
-					updatePod(name: $name, namespace: $namespace, update: $update) {
+func fixUpdatePodMutation(pod string) *graphql.Request {
+	mutation := `mutation ($name: String!, $namespace: String!, $pod: JSON!) {
+					updatePod(name: $name, namespace: $namespace, pod: $pod) {
 						name
 						nodeName
 						namespace
@@ -245,7 +245,7 @@ func fixUpdatePodMutation(update string) *graphql.Request {
 	req := graphql.NewRequest(mutation)
 	req.SetVar("name", podName)
 	req.SetVar("namespace", podNamespace)
-	req.SetVar("update", update)
+	req.SetVar("pod", pod)
 
 	return req
 }

@@ -2,7 +2,6 @@ package k8s
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
@@ -84,15 +83,6 @@ func (r *podResolver) UpdatePodMutation(ctx context.Context, name string, namesp
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace `%s`", pretty.Pod, name, namespace))
 		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
-	}
-
-	if name != pod.Name {
-		glog.Error(fmt.Sprintf("name of updated %s (`%s`) does not match the original (`%s`) from namespace `%s`", pretty.Pod, pod.Name, name, namespace))
-		return nil, gqlerror.NewInvalid(fmt.Sprintf("name of updated object (%s) does not match the original (%s)", pod.Name, name), pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
-	}
-	if namespace != pod.Namespace {
-		glog.Error(fmt.Sprintf("namespace of updated %s (`%s`) does not match the original (`%s`)", pretty.Pod, pod.Namespace, namespace))
-		return nil, gqlerror.NewInvalid(fmt.Sprintf("namespace of updated object (%s) does not match the original (%s)", pod.Namespace, namespace), pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
 	}
 
 	updated, err := r.podSvc.Update(name, namespace, pod)

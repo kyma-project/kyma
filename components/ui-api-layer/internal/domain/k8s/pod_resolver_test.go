@@ -248,54 +248,6 @@ func TestPodResolver_UpdatePodMutation(t *testing.T) {
 		assert.Nil(t, result)
 	})
 
-	t.Run("NameMismatch", func(t *testing.T) {
-		name := "exampleName"
-		namespace := "exampleNamespace"
-		updatedPodFix := fixPod("nameMismatch", namespace, map[string]string{
-			"test": "test",
-		})
-		gqlJSONFix := gqlschema.JSON{}
-
-		podSvc := automock.NewPodSvc()
-
-		converter := automock.NewGqlPodConverter()
-		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
-		defer converter.AssertExpectations(t)
-
-		resolver := k8s.NewPodResolver(podSvc)
-		resolver.SetInstanceConverter(converter)
-
-		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
-
-		require.Error(t, err)
-		assert.True(t, gqlerror.IsInvalid(err))
-		assert.Nil(t, result)
-	})
-
-	t.Run("NamespaceMismatch", func(t *testing.T) {
-		name := "exampleName"
-		namespace := "exampleNamespace"
-		updatedPodFix := fixPod(name, "namespaceMismatch", map[string]string{
-			"test": "test",
-		})
-		gqlJSONFix := gqlschema.JSON{}
-
-		podSvc := automock.NewPodSvc()
-
-		converter := automock.NewGqlPodConverter()
-		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
-		defer converter.AssertExpectations(t)
-
-		resolver := k8s.NewPodResolver(podSvc)
-		resolver.SetInstanceConverter(converter)
-
-		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
-
-		require.Error(t, err)
-		assert.True(t, gqlerror.IsInvalid(err))
-		assert.Nil(t, result)
-	})
-
 	t.Run("ErrorUpdating", func(t *testing.T) {
 		name := "exampleName"
 		namespace := "exampleNamespace"

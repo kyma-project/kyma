@@ -6,7 +6,7 @@ import (
 
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	v12 "k8s.io/client-go/kubernetes/typed/core/v1"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
@@ -165,6 +165,52 @@ func TestPodService_Update(t *testing.T) {
 		assert.Nil(t, pod)
 	})
 
+	t.Run("NameMismatch", func(t *testing.T) {
+		exampleName := "examplePod"
+		exampleNamespace := "exampleNamespace"
+		examplePod := fixPod(exampleName, exampleNamespace, nil)
+		podInformer, client := fixPodInformer(examplePod)
+		svc := k8s.NewPodService(podInformer, client)
+
+		update := examplePod.DeepCopy()
+		update.Name = "NameMismatch"
+		update.Labels = map[string]string{
+			"example": "example",
+		}
+
+		pod, err := svc.Update(exampleName, exampleNamespace, *update)
+		require.Error(t, err)
+		assert.True(t, errors.IsInvalid(err))
+		assert.Nil(t, pod)
+
+		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, examplePod, pod)
+	})
+
+	t.Run("NamespaceMismatch", func(t *testing.T) {
+		exampleName := "examplePod"
+		exampleNamespace := "exampleNamespace"
+		examplePod := fixPod(exampleName, exampleNamespace, nil)
+		podInformer, client := fixPodInformer(examplePod)
+		svc := k8s.NewPodService(podInformer, client)
+
+		update := examplePod.DeepCopy()
+		update.Namespace = "NamespaceMismatch"
+		update.Labels = map[string]string{
+			"example": "example",
+		}
+
+		pod, err := svc.Update(exampleName, exampleNamespace, *update)
+		require.Error(t, err)
+		assert.True(t, errors.IsInvalid(err))
+		assert.Nil(t, pod)
+
+		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		require.NoError(t, err)
+		assert.Equal(t, examplePod, pod)
+	})
+
 	t.Run("InvalidUpdate", func(t *testing.T) {
 		exampleName := "examplePod"
 		exampleNamespace := "exampleNamespace"
@@ -197,12 +243,14 @@ func TestPodService_Update(t *testing.T) {
 		update.Kind = "OtherKind"
 		pod, err := svc.Update(exampleName, exampleNamespace, *update)
 		require.Error(t, err)
+		assert.True(t, errors.IsInvalid(err))
 		assert.Nil(t, pod)
 
 		update.Kind = "Pod"
 		update.APIVersion = "OtherVersion"
 		pod, err = svc.Update(exampleName, exampleNamespace, *update)
 		require.Error(t, err)
+		assert.True(t, errors.IsInvalid(err))
 		assert.Nil(t, pod)
 
 		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
@@ -249,31 +297,26 @@ func TestPodService_Delete(t *testing.T) {
 	})
 }
 
-func fixPod(name, environment string, labels map[string]string) *v1.Pod {
+func fixPod(name, namespace string, labels map[string]string) *v1.Pod {
+	pod := fixPodWithoutTypeMeta(name, namespace, labels)
+	pod.TypeMeta = metav1.TypeMeta{
+		Kind:       "Pod",
+		APIVersion: "v1",
+	}
+	return pod
+}
+
+func fixPodWithoutTypeMeta(name, namespace string, labels map[string]string) *v1.Pod {
 	return &v1.Pod{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Pod",
-			APIVersion: "v1",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 			Labels:    labels,
 		},
 	}
 }
 
-func fixPodWithoutTypeMeta(name, environment string, labels map[string]string) *v1.Pod {
-	return &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: environment,
-			Labels:    labels,
-		},
-	}
-}
-
-func fixPodInformer(objects ...runtime.Object) (cache.SharedIndexInformer, v12.CoreV1Interface) {
+func fixPodInformer(objects ...runtime.Object) (cache.SharedIndexInformer, corev1.CoreV1Interface) {
 	client := fake.NewSimpleClientset(objects...)
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
 	informer := informerFactory.Core().V1().Pods().Informer()
@@ -281,7 +324,7 @@ func fixPodInformer(objects ...runtime.Object) (cache.SharedIndexInformer, v12.C
 	return informer, client.CoreV1()
 }
 
-func fixFailingPodInformer(objects ...runtime.Object) (cache.SharedIndexInformer, v12.CoreV1Interface) {
+func fixFailingPodInformer(objects ...runtime.Object) (cache.SharedIndexInformer, corev1.CoreV1Interface) {
 	client := fake.NewSimpleClientset(objects...)
 	client.PrependReactor("update", "pods", failingReactor)
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
