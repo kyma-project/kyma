@@ -1,6 +1,6 @@
 ---
 title: Helm overrides for Kyma installation
-type: Getting Started
+type: Tutorials
 ---
 
 Kyma packages its components into [Helm](https://github.com/helm/helm/tree/master/docs) charts that the [Installer](https://github.com/kyma-project/kyma/tree/master/components/installer) uses.
