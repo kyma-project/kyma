@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
+  name = "github.com/ghodss/yaml"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:b402bb9a24d108a9405a6f34675091b036c8b056aac843bf6ef2389a65c5cf48"
   name = "github.com/gogo/protobuf"
   packages = [
@@ -106,17 +114,20 @@
   version = "v4.20"
 
 [[projects]]
-  digest = "1:dff19c44c32f1d9161bdc92e4a9a30a9775f4c79d3f44169ce04b29ebc5b86e8"
+  digest = "1:b66362b9927bca707886bc2c1569f0bbbc407f4a623ffd9605c1805312992aa0"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1",
+    "components/connection-token-handler/pkg/client/clientset/versioned",
+    "components/connection-token-handler/pkg/client/clientset/versioned/scheme",
+    "components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "cbcb07d15ae84ed4bcd528c16a26e0962cabbad6"
-  version = "0.6.0-rc1"
+  revision = "1084956354fdc0307774b610478de6c92d424bcd"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -332,8 +343,7 @@
   revision = "173ce66c1e39d1d0f56e0b3347ff2988068aecd0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:a83d3d972031f693922d119afbcca180fa521a3c7bb5f3e70e288ce6a601168a"
+  digest = "1:0ed26acd86e249e3b24fe3770defdb389bf812f7f3f887f94adb4d46e9542481"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -367,13 +377,15 @@
     "pkg/util/sets",
     "pkg/util/validation",
     "pkg/util/validation/field",
+    "pkg/util/wait",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "UT"
-  revision = "c3a4c8673eaee0c03860dd350c0f7f6a069b5f0c"
+  revision = "eddba98df674a16931d2d4ba75edc3a389bf633a"
+  version = "kubernetes-1.12.3"
 
 [[projects]]
   digest = "1:20f641257f6c0c69ddf455a15b63b20bac524b08d90745da796d633724758bac"
@@ -448,12 +460,12 @@
   version = "v0.1.0"
 
 [[projects]]
-  digest = "1:7719608fe0b52a4ece56c2dde37bedd95b938677d1ab0f84b8a7852e4c59f849"
-  name = "sigs.k8s.io/yaml"
-  packages = ["."]
+  digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
+  name = "sigs.k8s.io/controller-runtime"
+  packages = ["pkg/runtime/scheme"]
   pruneopts = "UT"
-  revision = "fd68e9863619f6ec2fdd8625fe1f02e7c877e480"
-  version = "v1.1.0"
+  revision = "f6f0bc9611363b43664d08fb097ab13243ef621d"
+  version = "v0.1.9"
 
 [solve-meta]
   analyzer-name = "dep"
@@ -461,6 +473,7 @@
   input-imports = [
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned",
     "github.com/smartystreets/goconvey/convey",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/client-go/kubernetes",
