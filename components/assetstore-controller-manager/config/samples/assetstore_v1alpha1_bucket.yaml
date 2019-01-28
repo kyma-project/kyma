@@ -4,3 +4,26 @@ metadata:
   labels:
     controller-tools.k8s.io: "1.0"
   name: test-sample
+spec:
+  region: "us-east-1"
+  policy: >
+    {
+         "Version":"2012-10-17",
+         "Statement":[
+            {
+               "Action":[
+                  "s3:GetObject"
+               ],
+               "Effect":"Allow",
+               "Principal":{
+                  "AWS":[
+                     "*"
+                  ]
+               },
+               "Resource":[
+                  "arn:aws:s3:::my-bucket/*"
+               ],
+               "Sid":""
+            }
+         ]
+      }
