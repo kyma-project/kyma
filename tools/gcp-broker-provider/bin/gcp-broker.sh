@@ -57,6 +57,12 @@ function configureGCloud() {
     return 0
 }
 
+function deleteGoogleApplicationCredentials () {
+    rm -f "${GOOGLE_APPLICATION_CREDENTIALS}"
+}
+
+trap deleteGoogleApplicationCredentials EXIT SIGINT SIGTERM
+
 function printToolsVersions() {
     printf "kubectl version\n"
     kubectl version --short
