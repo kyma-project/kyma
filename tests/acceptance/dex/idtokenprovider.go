@@ -57,7 +57,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	// /auth/local?req=qruhpy2cqjvv4hcrbuu44mf4v
 	var loginEndpoint string
 	if authorizeResp.StatusCode == 200 {
-		loginEndpoint, err = getLocalAuthLink(authorizeResp.Body)
+		loginEndpoint, err = getLocalAuthEndpoint(authorizeResp.Body)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while fetching link to static authentication")
 		}
@@ -126,7 +126,7 @@ func readRespBody(resp *http.Response) string {
 	return string(b)
 }
 
-func getLocalAuthLink(body io.Reader) (string, error) {
+func getLocalAuthEndpoint(body io.Reader) (string, error) {
 	z := html.NewTokenizer(body)
 	for {
 		nt := z.Next()
