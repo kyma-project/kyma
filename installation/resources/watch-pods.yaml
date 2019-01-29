@@ -39,6 +39,8 @@ metadata:
   namespace: kyma-system
   labels:
     app: watch-pods
+  annotations:
+    sidecar.istio.io/inject: "false"
 spec:
   containers:
   - name: watch-pods
