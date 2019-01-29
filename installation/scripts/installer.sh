@@ -59,17 +59,6 @@ if [ $LOCAL ]; then
     INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
     INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
     
-    if [ -n "${AZURE_BROKER_SUBSCRIPTION_ID}" ]; then
-
-        echo -e "\nAzure-Broker subscription ID found in environment variables. Enabling component..."
-        bash ${CURRENT_DIR}/manage-component.sh "azure-broker" true
-
-        echo -e "\nGenerating the secret for Azure Broker..."
-        AZURE_BROKER_CONFIG=$(mktemp)
-        bash ${CURRENT_DIR}/configure-azure-broker.sh ${AZURE_BROKER_CONFIG}
-
-    fi
-
 fi
 
 if [ $CR_PATH ]; then
