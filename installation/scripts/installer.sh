@@ -31,7 +31,7 @@ do
             KNATIVE=true
             shift
             ;;
-        --p)
+        --password)
             ADMIN_PASSWORD="$2"
             shift
             shift

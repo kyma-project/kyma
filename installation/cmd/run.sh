@@ -40,7 +40,7 @@ do
             KNATIVE="--knative"
             shift
         ;;
-        --p)
+        --password)
             checkInputParameterValue "$2"
             ADMIN_PASSWORD="${2}"
             shift # past argument
@@ -80,5 +80,5 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}" --p "${ADMIN_PASSWORD}"
+bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}" --password "${ADMIN_PASSWORD}"
 rm -rf $TMPDIR
