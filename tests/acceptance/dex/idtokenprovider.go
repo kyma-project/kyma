@@ -2,13 +2,14 @@ package dex
 
 import (
 	"fmt"
-	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
 	"regexp"
 	"strings"
+
+	"github.com/pkg/errors"
 
 	"log"
 
