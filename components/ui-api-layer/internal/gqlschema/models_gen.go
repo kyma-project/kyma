@@ -104,12 +104,12 @@ type ContainerState struct {
 type CreateServiceBindingOutput struct {
 	Name                string `json:"name"`
 	ServiceInstanceName string `json:"serviceInstanceName"`
-	Environment         string `json:"environment"`
+	Namespace           string `json:"namespace"`
 }
 
 type CreateServiceBindingUsageInput struct {
 	Name              *string                             `json:"name"`
-	Environment       string                              `json:"environment"`
+	Namespace         string                              `json:"namespace"`
 	ServiceBindingRef ServiceBindingRefInput              `json:"serviceBindingRef"`
 	UsedBy            LocalObjectReferenceInput           `json:"usedBy"`
 	Parameters        *ServiceBindingUsageParametersInput `json:"parameters"`
@@ -120,18 +120,18 @@ type DeleteApplicationOutput struct {
 }
 
 type DeleteServiceBindingOutput struct {
-	Name        string `json:"name"`
-	Environment string `json:"environment"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type DeleteServiceBindingUsageOutput struct {
-	Name        string `json:"name"`
-	Environment string `json:"environment"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type Deployment struct {
 	Name                      string           `json:"name"`
-	Environment               string           `json:"environment"`
+	Namespace                 string           `json:"namespace"`
 	CreationTimestamp         time.Time        `json:"creationTimestamp"`
 	Status                    DeploymentStatus `json:"status"`
 	Labels                    Labels           `json:"labels"`
@@ -252,9 +252,9 @@ type ResourceValues struct {
 }
 
 type Secret struct {
-	Name        string `json:"name"`
-	Environment string `json:"environment"`
-	Data        JSON   `json:"data"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Data      JSON   `json:"data"`
 }
 
 type Service struct {
@@ -310,7 +310,7 @@ type ServiceBindingsStats struct {
 
 type ServiceBroker struct {
 	Name              string              `json:"name"`
-	Environment       string              `json:"environment"`
+	Namespace         string              `json:"namespace"`
 	Status            ServiceBrokerStatus `json:"status"`
 	CreationTimestamp time.Time           `json:"creationTimestamp"`
 	URL               string              `json:"url"`
@@ -330,7 +330,7 @@ type ServiceBrokerStatus struct {
 
 type ServiceInstanceCreateInput struct {
 	Name            string                                `json:"name"`
-	Environment     string                                `json:"environment"`
+	Namespace       string                                `json:"namespace"`
 	ClassRef        ServiceInstanceCreateInputResourceRef `json:"classRef"`
 	PlanRef         ServiceInstanceCreateInputResourceRef `json:"planRef"`
 	Labels          []string                              `json:"labels"`
@@ -361,7 +361,7 @@ type ServiceInstanceStatus struct {
 
 type ServicePlan struct {
 	Name                          string  `json:"name"`
-	Environment                   string  `json:"environment"`
+	Namespace                     string  `json:"namespace"`
 	DisplayName                   *string `json:"displayName"`
 	ExternalName                  string  `json:"externalName"`
 	Description                   string  `json:"description"`

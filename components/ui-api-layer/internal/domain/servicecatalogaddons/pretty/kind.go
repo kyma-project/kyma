@@ -8,8 +8,6 @@ const (
 
 	UsageKind
 	UsageKinds
-	UsageKindResource
-	UsageKindResources
 	BindableResources
 )
 
@@ -23,10 +21,6 @@ func (k Kind) String() string {
 		return "Usage Kind"
 	case UsageKinds:
 		return "Usage Kinds"
-	case UsageKindResource:
-		return "Usage Kind Resource"
-	case UsageKindResources:
-		return "Usage Kind Resources"
 	case BindableResources:
 		return "Bindable Resources"
 	default:

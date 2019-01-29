@@ -40,7 +40,7 @@ func TestServiceInstanceConverter_ToGQL(t *testing.T) {
 		in := v1beta1.ServiceInstance{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:              "exampleName",
-				Namespace:         "Environment",
+				Namespace:         "Namespace",
 				UID:               types.UID("uid"),
 				CreationTimestamp: mockTimeStamp,
 				Annotations: map[string]string{
@@ -70,8 +70,8 @@ func TestServiceInstanceConverter_ToGQL(t *testing.T) {
 		}
 
 		expected := gqlschema.ServiceInstance{
-			Name:        "exampleName",
-			Environment: "Environment",
+			Name:      "exampleName",
+			Namespace: "Namespace",
 			ClassReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        testClassName,
 				ClusterWide: true,
@@ -102,7 +102,7 @@ func TestServiceInstanceConverter_ToGQL(t *testing.T) {
 		in := v1beta1.ServiceInstance{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:              "exampleName",
-				Namespace:         "Environment",
+				Namespace:         "Namespace",
 				UID:               types.UID("uid"),
 				CreationTimestamp: mockTimeStamp,
 			},
@@ -130,8 +130,8 @@ func TestServiceInstanceConverter_ToGQL(t *testing.T) {
 		testClassName := "testClass"
 		testPlanName := "testPlan"
 		expected := gqlschema.ServiceInstance{
-			Name:        "exampleName",
-			Environment: "Environment",
+			Name:      "exampleName",
+			Namespace: "Namespace",
 			ClassReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        testClassName,
 				ClusterWide: true,
@@ -207,7 +207,7 @@ func TestServiceInstanceConverter_GQLCreateInputToInstanceCreateParameters(t *te
 		}
 		input := gqlschema.ServiceInstanceCreateInput{
 			Name:            "name",
-			Environment:     "environment",
+			Namespace:       "environment",
 			Labels:          []string{"test", "label"},
 			ParameterSchema: &JSON,
 			ClassRef: gqlschema.ServiceInstanceCreateInputResourceRef{
@@ -375,7 +375,7 @@ func fixServiceInstance(t require.TestingT) *v1beta1.ServiceInstance {
 	return &v1beta1.ServiceInstance{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:              "exampleName",
-			Namespace:         "Environment",
+			Namespace:         "Namespace",
 			UID:               types.UID("uid"),
 			CreationTimestamp: mockTimeStamp,
 		},

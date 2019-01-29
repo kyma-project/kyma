@@ -32,8 +32,8 @@ func (r *secretResolver) SecretQuery(ctx context.Context, name, env string) (*gq
 		return nil, nil
 	case err != nil:
 		glog.Error(
-			errors.Wrapf(err, "while getting %s [name: %s, environment: %s]", pretty.Secret, name, env))
-		return nil, gqlerror.New(err, pretty.Secret, gqlerror.WithName(name), gqlerror.WithEnvironment(env))
+			errors.Wrapf(err, "while getting %s [name: %s, namespace: %s]", pretty.Secret, name, env))
+		return nil, gqlerror.New(err, pretty.Secret, gqlerror.WithName(name), gqlerror.WithNamespace(env))
 	}
 
 	return r.converter.ToGQL(secret), nil

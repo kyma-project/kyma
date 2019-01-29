@@ -82,11 +82,11 @@ func TestDeploymentService_ListWithoutFunctions(t *testing.T) {
 	})
 }
 
-func fixDeployment(name, environment, kind string) *v1beta2.Deployment {
+func fixDeployment(name, namespace, kind string) *v1beta2.Deployment {
 	return &v1beta2.Deployment{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 			Labels: map[string]string{
 				kind: "",
 			},

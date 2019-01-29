@@ -4,7 +4,7 @@ import "time"
 
 type ServiceClass struct {
 	Name                string    `json:"name"`
-	Environment         string    `json:"environment"`
+	Namespace           string    `json:"environment"`
 	ExternalName        string    `json:"externalName"`
 	DisplayName         *string   `json:"displayName"`
 	CreationTimestamp   time.Time `json:"creationTimestamp"`

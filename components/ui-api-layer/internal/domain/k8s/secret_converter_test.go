@@ -26,7 +26,7 @@ func TestSecretConverter_ToGQL(t *testing.T) {
 		actualQL := sut.ToGQL(&givenSecret)
 		// THEN
 		assert.Equal(t, "my-secret", actualQL.Name)
-		assert.Equal(t, "production", actualQL.Environment)
+		assert.Equal(t, "production", actualQL.Namespace)
 		assert.Equal(t, gqlschema.JSON{"password": "secret"}, actualQL.Data)
 	})
 

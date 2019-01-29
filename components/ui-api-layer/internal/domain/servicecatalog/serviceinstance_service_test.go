@@ -24,16 +24,16 @@ import (
 func TestServiceInstanceService_Find(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		instanceName := "testExample"
-		environment := "testEnv"
+		namespace := "testEnv"
 
-		serviceInstance := fixServiceInstance(instanceName, environment)
+		serviceInstance := fixServiceInstance(instanceName, namespace)
 		serviceInstanceInformer := fixInformer(serviceInstance)
 
 		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
-		instance, err := svc.Find(instanceName, environment)
+		instance, err := svc.Find(instanceName, namespace)
 		require.NoError(t, err)
 		assert.Equal(t, serviceInstance, instance)
 	})
@@ -55,9 +55,9 @@ func TestServiceInstanceService_Find(t *testing.T) {
 
 func TestServiceInstanceService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environment := "env1"
-		serviceInstance1 := fixServiceInstance("1", environment)
-		serviceInstance2 := fixServiceInstance("2", environment)
+		namespace := "env1"
+		serviceInstance1 := fixServiceInstance("1", namespace)
+		serviceInstance2 := fixServiceInstance("2", namespace)
 		serviceInstance3 := fixServiceInstance("3", "env2")
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
@@ -66,7 +66,7 @@ func TestServiceInstanceService_List(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
-		instances, err := svc.List(environment, pager.PagingParams{})
+		instances, err := svc.List(namespace, pager.PagingParams{})
 		require.NoError(t, err)
 		assert.Equal(t, []*v1beta1.ServiceInstance{
 			serviceInstance1, serviceInstance2,
@@ -89,11 +89,11 @@ func TestServiceInstanceService_List(t *testing.T) {
 
 func TestServiceInstanceService_ListForStatus(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environment := "env1"
+		namespace := "env1"
 		status := status.ServiceInstanceStatusTypeRunning
 
-		serviceInstance1 := fixServiceInstanceWithStatus("1", environment)
-		serviceInstance2 := fixServiceInstanceWithStatus("2", environment)
+		serviceInstance1 := fixServiceInstanceWithStatus("1", namespace)
+		serviceInstance2 := fixServiceInstanceWithStatus("2", namespace)
 		serviceInstance3 := fixServiceInstanceWithStatus("3", "env2")
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
@@ -102,7 +102,7 @@ func TestServiceInstanceService_ListForStatus(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
-		instances, err := svc.ListForStatus(environment, pager.PagingParams{}, &status)
+		instances, err := svc.ListForStatus(namespace, pager.PagingParams{}, &status)
 		require.NoError(t, err)
 		assert.Equal(t, []*v1beta1.ServiceInstance{
 			serviceInstance1, serviceInstance2,
@@ -130,9 +130,9 @@ func TestServiceInstanceService_ListForClusterServiceClass(t *testing.T) {
 		className := "exampleClassName"
 		externalClassName := "exampleExternalClassName"
 
-		environment := "env1"
-		serviceInstance1 := fixServiceInstanceWithClusterPlanRef("1", environment, className, "")
-		serviceInstance2 := fixServiceInstanceWithClusterPlanRef("2", environment, "", externalClassName)
+		namespace := "env1"
+		serviceInstance1 := fixServiceInstanceWithClusterPlanRef("1", namespace, className, "")
+		serviceInstance2 := fixServiceInstanceWithClusterPlanRef("2", namespace, "", externalClassName)
 		serviceInstance3 := fixServiceInstanceWithClusterPlanRef("3", "env2", className, externalClassName)
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
@@ -176,9 +176,9 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 		className := "exampleClassName"
 		externalClassName := "exampleExternalClassName"
 
-		environment := "env1"
-		serviceInstance1 := fixServiceInstanceWithPlanRef("1", environment, className, "")
-		serviceInstance2 := fixServiceInstanceWithPlanRef("2", environment, "", externalClassName)
+		namespace := "env1"
+		serviceInstance1 := fixServiceInstanceWithPlanRef("1", namespace, className, "")
+		serviceInstance2 := fixServiceInstanceWithPlanRef("2", namespace, "", externalClassName)
 		serviceInstance3 := fixServiceInstanceWithPlanRef("3", "env2", className, externalClassName)
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
@@ -189,7 +189,7 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 			serviceInstance1, serviceInstance2, serviceInstance3,
 		}
 
-		instances, err := svc.ListForServiceClass(className, externalClassName, environment)
+		instances, err := svc.ListForServiceClass(className, externalClassName, namespace)
 		require.NoError(t, err)
 		assert.ElementsMatch(t, expected, instances)
 	})
@@ -227,7 +227,7 @@ func TestServiceInstanceService_Create(t *testing.T) {
 
 		svc := servicecatalog.NewServiceInstanceService(fixInformer(), client)
 
-		params := servicecatalog.NewServiceInstanceCreateParameters("name", "environment", []string{"test", "label"}, "planName", true, "className", true, nil)
+		params := servicecatalog.NewServiceInstanceCreateParameters("name", "namespace", []string{"test", "label"}, "planName", true, "className", true, nil)
 		result, err := svc.Create(*params)
 
 		assert.NoError(t, err)

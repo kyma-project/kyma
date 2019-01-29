@@ -12,22 +12,22 @@ import (
 
 const envLabelSelector = "env=true"
 
-type environmentService struct {
+type namespaceService struct {
 	nsInterface corev1.NamespaceInterface
 }
 
-func newEnvironmentService(nsInterface corev1.NamespaceInterface) *environmentService {
-	return &environmentService{
+func newNamespaceService(nsInterface corev1.NamespaceInterface) *namespaceService {
+	return &namespaceService{
 		nsInterface: nsInterface,
 	}
 }
 
-func (svc *environmentService) List() ([]v1.Namespace, error) {
+func (svc *namespaceService) List() ([]v1.Namespace, error) {
 	list, err := svc.nsInterface.List(metav1.ListOptions{
-		LabelSelector: envLabelSelector, // namespaces with label env=true are treated as environments
+		LabelSelector: envLabelSelector, // namespaces with label env=true are treated as customer namespaces
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing %s", pretty.Environment)
+		return nil, errors.Wrapf(err, "while listing %s", pretty.Namespace)
 	}
 
 	return list.Items, nil

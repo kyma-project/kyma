@@ -14,12 +14,12 @@ import (
 )
 
 type ApplicationLister interface {
-	ListInEnvironment(environment string) ([]*v1alpha1.Application, error)
+	ListInNamespace(namespace string) ([]*v1alpha1.Application, error)
 	ListNamespacesFor(reName string) ([]string, error)
 }
 
 type Resolver struct {
-	*environmentResolver
+	*namespaceResolver
 	*secretResolver
 	*deploymentResolver
 	*resourceQuotaResolver
@@ -43,7 +43,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
-	environmentService := newEnvironmentService(client.Namespaces())
+	namespaceService := newNamespaceService(client.Namespaces())
 	deploymentService := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
 	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
@@ -53,7 +53,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
 
 	return &Resolver{
-		environmentResolver:         newEnvironmentResolver(environmentService, applicationRetriever),
+		namespaceResolver:           newEnvironmentResolver(namespaceService, applicationRetriever),
 		secretResolver:              newSecretResolver(client),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),
