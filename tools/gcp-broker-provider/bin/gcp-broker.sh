@@ -18,7 +18,10 @@ trap cleanup EXIT SIGINT SIGTERM
 function cleanup() {
     printf  "\n- Cleaning up...\n"
     echo "Ensure gcloud credentials are removed"
-    rm -f "${GOOGLE_APPLICATION_CREDENTIALS}"
+    if [ ! -z "${GOOGLE_APPLICATION_CREDENTIALS}" ]
+    then
+        rm -f "${GOOGLE_APPLICATION_CREDENTIALS}"
+    fi
     echo "OK"
 }
 
