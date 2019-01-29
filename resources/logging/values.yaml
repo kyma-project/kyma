@@ -13,7 +13,7 @@ loki:
   image:
     repository: grafana/loki
     tag: master
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
   service:
     port: 3100
@@ -88,7 +88,7 @@ promtail:
   image:
     repository: grafana/promtail
     tag: master 
-    pullPolicy: IfNotPresent
+    pullPolicy: Always
 
   service:
     port: 3100
