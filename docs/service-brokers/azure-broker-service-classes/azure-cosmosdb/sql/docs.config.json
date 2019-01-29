@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure Cosmos DB (SQL API Database Account and Database)",
+      "description": "Documentation for Azure Cosmos DB (SQL API Database Account and Database).",
+      "id": "58d9fbbd-7041-4dbe-aabe-6268cd31de84",
+      "type":"Service Class"
+    }
+}

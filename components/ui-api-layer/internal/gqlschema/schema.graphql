@@ -452,7 +452,7 @@ type ConnectorService {
 }
 
 type ApplicationMapping {
-    environment: String!
+    namespace: String!
     application: String!
 }
 
@@ -606,7 +606,7 @@ type Query {
     apis(environment: String, namespace: String, serviceName: String, hostname: String): [API!]!
 
     application(name: String!): Application
-    applications(environment: String, first: Int, offset: Int): [Application!]!
+    applications(namespace: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
     # Depends on 'application'
@@ -622,7 +622,7 @@ type Query {
 
     content(contentType: String!, id: String!): JSON
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
-    eventActivations(environment: String!): [EventActivation!]!
+    eventActivations(namespace: String!): [EventActivation!]!
 
     limitRanges(environment: String!): [LimitRange!]!
 
@@ -646,8 +646,8 @@ type Mutation {
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
     deleteApplication(name: String!): DeleteApplicationOutput!
 
-    enableApplication(application: String!, environment: String!): ApplicationMapping
-    disableApplication(application: String!, environment: String!): ApplicationMapping
+    enableApplication(application: String!, namespace: String!): ApplicationMapping
+    disableApplication(application: String!, namespace: String!): ApplicationMapping
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
     deleteIDPPreset(name: String!): IDPPreset

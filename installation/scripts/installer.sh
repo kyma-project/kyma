@@ -22,7 +22,7 @@ do
             shift
             ;;
         --cr)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             CR_PATH="$2"
             shift # past argument
             shift # past value
@@ -31,6 +31,10 @@ do
             KNATIVE=true
             shift
             ;;
+        --*)
+            echo "Unknown flag ${1}"
+            exit 1
+        ;;
         *) # unknown option
             POSITIONAL+=("$1") # save it in an array for later
             shift # past argument
@@ -55,17 +59,6 @@ if [ $LOCAL ]; then
     INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
     INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
     
-    if [ -n "${AZURE_BROKER_SUBSCRIPTION_ID}" ]; then
-
-        echo -e "\nAzure-Broker subscription ID found in environment variables. Enabling component..."
-        bash ${CURRENT_DIR}/manage-component.sh "azure-broker" true
-
-        echo -e "\nGenerating the secret for Azure Broker..."
-        AZURE_BROKER_CONFIG=$(mktemp)
-        bash ${CURRENT_DIR}/configure-azure-broker.sh ${AZURE_BROKER_CONFIG}
-
-    fi
-
 fi
 
 if [ $CR_PATH ]; then

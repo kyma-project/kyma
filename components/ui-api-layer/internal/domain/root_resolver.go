@@ -195,12 +195,12 @@ func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, servic
 	return r.sca.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
 }
 
-func (r *mutationResolver) EnableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
-	return r.app.Resolver.EnableApplicationMutation(ctx, application, environment)
+func (r *mutationResolver) EnableApplication(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	return r.app.Resolver.EnableApplicationMutation(ctx, application, namespace)
 }
 
-func (r *mutationResolver) DisableApplication(ctx context.Context, application string, environment string) (*gqlschema.ApplicationMapping, error) {
-	return r.app.Resolver.DisableApplicationMutation(ctx, application, environment)
+func (r *mutationResolver) DisableApplication(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
+	return r.app.Resolver.DisableApplicationMutation(ctx, application, namespace)
 }
 
 func (r *mutationResolver) CreateIDPPreset(ctx context.Context, name string, issuer string, jwksURI string) (*gqlschema.IDPPreset, error) {
@@ -333,16 +333,16 @@ func (r *queryResolver) Application(ctx context.Context, name string) (*gqlschem
 	return r.app.Resolver.ApplicationQuery(ctx, name)
 }
 
-func (r *queryResolver) Applications(ctx context.Context, environment *string, first *int, offset *int) ([]gqlschema.Application, error) {
-	return r.app.Resolver.ApplicationsQuery(ctx, environment, first, offset)
+func (r *queryResolver) Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]gqlschema.Application, error) {
+	return r.app.Resolver.ApplicationsQuery(ctx, namespace, first, offset)
 }
 
 func (r *queryResolver) ConnectorService(ctx context.Context, application string) (gqlschema.ConnectorService, error) {
 	return r.app.Resolver.ConnectorServiceQuery(ctx, application)
 }
 
-func (r *queryResolver) EventActivations(ctx context.Context, environment string) ([]gqlschema.EventActivation, error) {
-	return r.app.Resolver.EventActivationsQuery(ctx, environment)
+func (r *queryResolver) EventActivations(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error) {
+	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
 }
 
 func (r *queryResolver) Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]gqlschema.API, error) {

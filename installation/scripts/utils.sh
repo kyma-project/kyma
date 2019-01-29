@@ -96,15 +96,14 @@ function showFailedResources {
   fi
 }
 
+# checkInputParameterValue is a function to check if input parameter is valid
+# There HAS to be provided argument:
+# $1 - value for input parameter
+# for example in installation/cmd/run.sh we can set --vm-driver argument, which has to have a value.
+
 function checkInputParameterValue() {
-    if [ -z "${2}" ]; then
-        echo "Value parameter for ${1} is empty"
-        echo "Make sure parameter value is neither empty nor start with two hyphens"
-        exit 1
-    fi
-    if [ "${2:0:2}" == "--" ]; then
-        echo "Invalid parameter value for ${1}:"
-        echo "${2}"
+    if [ -z "${1}" ] || [ "${1:0:2}" == "--" ]; then
+        echo "Wrong parameter value"
         echo "Make sure parameter value is neither empty nor start with two hyphens"
         exit 1
     fi

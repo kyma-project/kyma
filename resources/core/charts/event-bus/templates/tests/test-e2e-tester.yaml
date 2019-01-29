@@ -3,14 +3,14 @@ kind: ServiceAccount
 metadata:
   name:  {{ .Values.e2eTests.nameTester }}
   labels:
-    helm-chart-test: "true"  
+    helm-chart-test: "true"
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: test-core-event-bus-subs
   labels:
-    helm-chart-test: "true"  
+    helm-chart-test: "true"
 rules:
 - apiGroups: ["eventing.kyma-project.io"]
   resources: ["subscriptions"]
@@ -36,7 +36,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: test-core-event-bus-eas
   labels:
-    helm-chart-test: "true"  
+    helm-chart-test: "true"
 rules:
 - apiGroups: ["applicationconnector.kyma-project.io"]
   resources: ["eventactivations"]
@@ -47,44 +47,44 @@ apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: test-core-event-bus-eas
   labels:
-    helm-chart-test: "true"  
+    helm-chart-test: "true"
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.e2eTests.nameTester }}
-  namespace: {{ .Release.Namespace }}   
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: test-core-event-bus-eas
-  apiGroup: rbac.authorization.k8s.io        
+  apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: test-core-event-bus-k8s
   labels:
-    helm-chart-test: "true"  
+    helm-chart-test: "true"
 rules:
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["*"]
 - apiGroups: [""]
   resources: ["pods", "pods/status", "services"]
-  verbs: ["*"]  
+  verbs: ["*"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: test-core-event-bus-k8s
   labels:
-    helm-chart-test: "true"  
+    helm-chart-test: "true"
 subjects:
 - kind: ServiceAccount
   name: {{ .Values.e2eTests.nameTester }}
-  namespace: {{ .Release.Namespace }}   
+  namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
   name: test-core-event-bus-k8s
-  apiGroup: rbac.authorization.k8s.io        
+  apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
 kind: Pod
@@ -93,7 +93,7 @@ metadata:
   labels:
     helm-chart-test: "true"
   annotations:
-#    sidecar.istio.io/inject: "true"   # needed if the tester could run with side cars
+    sidecar.istio.io/inject: "false"   # needed if the tester could run with side cars
     helm.sh/hook: test-success
 spec:
   serviceAccount: {{ .Values.e2eTests.nameTester }}

@@ -1,0 +1,8 @@
+{
+  "spec":{
+    "displayName": "Azure Database for MySQL 5.7",
+    "description": "Documentation for Azure Database for MySQL - DBMS and database.",
+    "id": "997b8372-8dac-40ac-ae65-758b4a5075a5",
+    "type":"Service Class"
+  }
+}

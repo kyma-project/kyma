@@ -30,7 +30,7 @@ spec:
             push_request_timeout_ms:
               type: integer
               minimum: 0 # 0 means apply default value, which is 1000ms
-              maximum: 5000
+              maximum: 60000
             event_type:
               type: string
               minLength: 1

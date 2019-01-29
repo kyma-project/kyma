@@ -5,11 +5,13 @@ metadata:
   name: api-controller
   namespace:  {{ .Release.Namespace }}
   labels:
-    app: api-controller    
+    app: api-controller
 spec:
   replicas: 1
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: api-controller
     spec:

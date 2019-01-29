@@ -15,8 +15,10 @@ spec:
   template:
     metadata:
       name:  {{ template "name" . }}
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
-{{ include "labels.standard" . | indent 8 }}        
+{{ include "labels.standard" . | indent 8 }}
         component: oklog
     spec:
       {{- if .Values.affinity }}
