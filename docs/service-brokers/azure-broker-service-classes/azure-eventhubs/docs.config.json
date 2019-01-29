@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure Event Hubs",
+      "description": "Documentation for Azure Event Hubs.",
+      "id": "e6d06042-c52d-4cda-85e6-16d5d878314e",
+      "type":"Service Class"
+    }
+}

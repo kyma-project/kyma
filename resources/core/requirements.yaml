@@ -5,8 +5,6 @@ dependencies:
     condition: console.enabled
   - name: helm-broker
     condition: helm-broker.enabled
-  - name: azure-broker
-    condition: azure-broker.enabled
   - name: namespace-controller
     condition: namespace-controller.enabled
   - name: cluster-users

@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"bytes"
 	"encoding/json"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
@@ -63,19 +64,32 @@ func (c *podConverter) podToGQLJSON(in *v1.Pod) (gqlschema.JSON, error) {
 
 	jsonByte, err := json.Marshal(in)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while marshaling %s `%s`", pretty.Pod, in.Name)
+		return nil, errors.Wrapf(err, "while marshalling %s `%s`", pretty.Pod, in.Name)
 	}
 
 	var jsonMap map[string]interface{}
 	err = json.Unmarshal(jsonByte, &jsonMap)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while unmarshaling %s `%s` to map", pretty.Pod, in.Name)
+		return nil, errors.Wrapf(err, "while unmarshalling %s `%s` to map", pretty.Pod, in.Name)
 	}
 
 	var result gqlschema.JSON
 	err = result.UnmarshalGQL(jsonMap)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while unmarshaling %s `%s` to GQL JSON", pretty.Pod, in.Name)
+		return nil, errors.Wrapf(err, "while unmarshalling %s `%s` to GQL JSON", pretty.Pod, in.Name)
+	}
+
+	return result, nil
+}
+
+func (c *podConverter) GQLJSONToPod(in gqlschema.JSON) (v1.Pod, error) {
+	var buf bytes.Buffer
+	in.MarshalGQL(&buf)
+	bufBytes := buf.Bytes()
+	result := v1.Pod{}
+	err := json.Unmarshal(bufBytes, &result)
+	if err != nil {
+		return v1.Pod{}, errors.Wrapf(err, "while unmarshalling GQL JSON of %s", pretty.Pod)
 	}
 
 	return result, nil
