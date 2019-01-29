@@ -131,7 +131,7 @@ func getLocalAuthEndpoint(body io.Reader) (string, error) {
 	for {
 		nt := z.Next()
 		if nt == html.ErrorToken {
-			return "", fmt.Errorf("got HTML error token")
+			return "", errors.New("got HTML error token")
 		}
 
 		token := z.Token()
