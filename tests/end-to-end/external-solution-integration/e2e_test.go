@@ -46,7 +46,7 @@ func TestApplicationCRDCreation(t *testing.T) {
 	})
 }
 
-func TestSecureConnection(t *testing.T) {
+func TestSecureConnectionAndRegistration(t *testing.T) {
 
 	Convey("Given external solution", t, func() {
 
@@ -70,9 +70,10 @@ func TestSecureConnection(t *testing.T) {
 
 			Convey("When one-click-integration initiated", func() {
 
-				mockAppClient := testkit.NewMockApplicationClient()
+				mockAppClient, err := testkit.NewMockApplicationClient()
+				So(err, ShouldBeNil)
 
-				res, err := mockAppClient.ConnectToKyma(tokenRequest.Status.URL, true, false)
+				res, err := mockAppClient.ConnectToKyma(tokenRequest.Status.URL, true)
 				So(err, ShouldBeNil)
 				So(res, ShouldNotBeNil)
 
@@ -84,38 +85,17 @@ func TestSecureConnection(t *testing.T) {
 					So(res.ClusterDomain, ShouldNotBeNil)
 					So(res.EventsURL, ShouldNotBeNil)
 					So(res.MetadataURL, ShouldNotBeNil)
+
+					Convey("The services and events should be registered", func() {
+						apis, err := mockAppClient.GetAPIs()
+						So(err, ShouldBeNil)
+						So(len(*apis), ShouldBeGreaterThan, 0)
+						//TODO: Check whether events/services are properly registered
+					})
 				})
 			})
 		})
 	})
-}
-
-func TestServiceRegistration(t *testing.T) {
-
-	Convey("Given valid service data", t, func() {
-
-		Convey("When registration request is sent", func() {
-
-			Convey("It should register the service", nil)
-
-		})
-
-	})
-
-}
-
-func TestEventsRegistration(t *testing.T) {
-
-	Convey("Given valid events data", t, func() {
-
-		Convey("When registration request is sent", func() {
-
-			Convey("It should register the events", nil)
-
-		})
-
-	})
-
 }
 
 func TestBindings(t *testing.T) {
@@ -152,7 +132,7 @@ func TestBindings(t *testing.T) {
 
 }
 
-func TestLambdaCreation(t *testing.T) {
+func TestLambda(t *testing.T) {
 
 	Convey("Given Lambda's code", t, func() {
 
