@@ -284,6 +284,8 @@ type ComplexityRoot struct {
 		DeleteApplication         func(childComplexity int, name string) int
 		EnableApplication         func(childComplexity int, application string, namespace string) int
 		DisableApplication        func(childComplexity int, application string, namespace string) int
+		UpdatePod                 func(childComplexity int, name string, namespace string, pod JSON) int
+		DeletePod                 func(childComplexity int, name string, namespace string) int
 		CreateIdppreset           func(childComplexity int, name string, issuer string, jwksUri string) int
 		DeleteIdppreset           func(childComplexity int, name string) int
 	}
@@ -587,6 +589,8 @@ type MutationResolver interface {
 	DeleteApplication(ctx context.Context, name string) (DeleteApplicationOutput, error)
 	EnableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
 	DisableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
+	UpdatePod(ctx context.Context, name string, namespace string, pod JSON) (*Pod, error)
+	DeletePod(ctx context.Context, name string, namespace string) (*Pod, error)
 	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*IDPPreset, error)
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 }
@@ -953,6 +957,63 @@ func field_Mutation_disableApplication_args(rawArgs map[string]interface{}) (map
 		}
 	}
 	args["application"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_updatePod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["pod"]; ok {
+		var err error
+		err = (&arg2).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pod"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_deletePod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
@@ -2987,6 +3048,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Mutation.DisableApplication(childComplexity, args["application"].(string), args["namespace"].(string)), true
+
+	case "Mutation.updatePod":
+		if e.complexity.Mutation.UpdatePod == nil {
+			break
+		}
+
+		args, err := field_Mutation_updatePod_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePod(childComplexity, args["name"].(string), args["namespace"].(string), args["pod"].(JSON)), true
+
+	case "Mutation.deletePod":
+		if e.complexity.Mutation.DeletePod == nil {
+			break
+		}
+
+		args, err := field_Mutation_deletePod_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePod(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Mutation.createIDPPreset":
 		if e.complexity.Mutation.CreateIdppreset == nil {
@@ -9612,6 +9697,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_enableApplication(ctx, field)
 		case "disableApplication":
 			out.Values[i] = ec._Mutation_disableApplication(ctx, field)
+		case "updatePod":
+			out.Values[i] = ec._Mutation_updatePod(ctx, field)
+		case "deletePod":
+			out.Values[i] = ec._Mutation_deletePod(ctx, field)
 		case "createIDPPreset":
 			out.Values[i] = ec._Mutation_createIDPPreset(ctx, field)
 		case "deleteIDPPreset":
@@ -10007,6 +10096,76 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 	}
 
 	return ec._ApplicationMapping(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_updatePod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_updatePod_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePod(rctx, args["name"].(string), args["namespace"].(string), args["pod"].(JSON))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Pod(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deletePod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deletePod_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePod(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Pod(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -19997,6 +20156,9 @@ type Mutation {
 
     enableApplication(application: String!, namespace: String!): ApplicationMapping
     disableApplication(application: String!, namespace: String!): ApplicationMapping
+
+    updatePod(name: String!, namespace: String!, pod: JSON!): Pod
+    deletePod(name: String!, namespace: String!): Pod
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
     deleteIDPPreset(name: String!): IDPPreset
