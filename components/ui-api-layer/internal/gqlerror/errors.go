@@ -76,7 +76,7 @@ func WithName(name string) Option {
 	}
 }
 
-func WithNamespace(namespace string) Option {
+func WithEnvironment(namespace string) Option {
 	return func(gqlError *GQLError) {
 		gqlError.arguments["namespace"] = namespace
 	}
