@@ -53,8 +53,11 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	if authorizeResp.StatusCode < 200 || authorizeResp.StatusCode > 399 {
-		return nil, errors.New(fmt.Sprintf("Authorize - response error: '%s' - %s", authorizeResp.Status, readRespBody(authorizeResp)))
+	switch authorizeResp.StatusCode {
+	case http.StatusFound:
+	case http.StatusOK:
+	default:
+		return nil, fmt.Errorf("got unexpected response on authorize: %d - %s", authorizeResp.StatusCode, readRespBody(authorizeResp))
 	}
 
 	// /auth/local?req=qruhpy2cqjvv4hcrbuu44mf4v
