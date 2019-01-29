@@ -220,7 +220,7 @@ func TestBucketHandler_Delete(t *testing.T) {
 	})
 }
 
-func TestBucketHandler_SetPolicy(t *testing.T) {
+func TestBucketHandler_SetPolicyIfNotEqual(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
@@ -229,9 +229,31 @@ func TestBucketHandler_SetPolicy(t *testing.T) {
 		handler := buckethandler.New(minioCli, nil)
 
 		bucketName := "bucket"
-		policy := "readonly"
+		policy := `{"foo":"bar"}`
 
 		minioCli.On("GetBucketPolicy", bucketName).Return("none", nil).Once()
+		minioCli.On("SetBucketPolicy", bucketName, policy).Return(nil).Once()
+		defer minioCli.AssertExpectations(t)
+
+		// When
+		updated, err := handler.SetPolicyIfNotEqual(bucketName, policy)
+
+		// Then
+		g.Expect(updated).To(gomega.BeTrue())
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+	})
+
+	t.Run("SuccessOneEmpty", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		minioCli := &automock.MinioClient{}
+		handler := buckethandler.New(minioCli, nil)
+
+		bucketName := "bucket"
+		policy := `{"foo":"bar"}`
+
+		minioCli.On("GetBucketPolicy", bucketName).Return("", nil).Once()
 		minioCli.On("SetBucketPolicy", bucketName, policy).Return(nil).Once()
 		defer minioCli.AssertExpectations(t)
 
@@ -251,13 +273,35 @@ func TestBucketHandler_SetPolicy(t *testing.T) {
 		handler := buckethandler.New(minioCli, nil)
 
 		bucketName := "bucket"
-		policy := "readonly"
+		policy := `{"foo":"bar"}`
 
 		minioCli.On("GetBucketPolicy", bucketName).Return(policy, nil).Once()
 		defer minioCli.AssertExpectations(t)
 
 		// When
 		updated, err := handler.SetPolicyIfNotEqual(bucketName, policy)
+
+		// Then
+		g.Expect(updated).To(gomega.BeFalse())
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+	})
+
+	t.Run("AlreadySetWhitespaces", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		minioCli := &automock.MinioClient{}
+		handler := buckethandler.New(minioCli, nil)
+
+		bucketName := "bucket"
+		policy := `{"foo":"bar"}`
+		expectedPolicy := `{ "foo": "bar" }`
+
+		minioCli.On("GetBucketPolicy", bucketName).Return(policy, nil).Once()
+		defer minioCli.AssertExpectations(t)
+
+		// When
+		updated, err := handler.SetPolicyIfNotEqual(bucketName, expectedPolicy)
 
 		// Then
 		g.Expect(updated).To(gomega.BeFalse())
@@ -272,7 +316,7 @@ func TestBucketHandler_SetPolicy(t *testing.T) {
 		handler := buckethandler.New(minioCli, nil)
 
 		bucketName := "bucket"
-		policy := "readonly"
+		policy := `{"foo":"bar"}`
 		testErr := errors.New("test error")
 
 		minioCli.On("GetBucketPolicy", bucketName).Return("none", nil).Once()
@@ -294,7 +338,7 @@ func TestBucketHandler_SetPolicy(t *testing.T) {
 		handler := buckethandler.New(minioCli, nil)
 
 		bucketName := "bucket"
-		policy := "readonly"
+		policy := `{"foo":"bar"}`
 		testErr := errors.New("test error")
 
 		minioCli.On("GetBucketPolicy", bucketName).Return("", testErr).Once()
@@ -317,7 +361,7 @@ func TestBucketHandler_GetPolicy(t *testing.T) {
 		handler := buckethandler.New(minioCli, nil)
 
 		bucketName := "bucket"
-		expectedPolicy := "readonly"
+		expectedPolicy := `{"foo":"bar"}`
 
 		minioCli.On("GetBucketPolicy", bucketName).Return(expectedPolicy, nil).Once()
 		defer minioCli.AssertExpectations(t)
@@ -360,13 +404,35 @@ func TestBucketHandler_ComparePolicy(t *testing.T) {
 		handler := buckethandler.New(minioCli, nil)
 
 		bucketName := "bucket"
-		expectedPolicy := "readonly"
+		expectedPolicy := `{"foo":"bar"}`
 
 		minioCli.On("GetBucketPolicy", bucketName).Return(expectedPolicy, nil).Once()
 		defer minioCli.AssertExpectations(t)
 
 		// When
 		result, err := handler.ComparePolicy(bucketName, expectedPolicy)
+
+		// Then
+		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+	})
+
+	t.Run("SuccessEqualWhitespaces", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		minioCli := &automock.MinioClient{}
+		handler := buckethandler.New(minioCli, nil)
+
+		bucketName := "bucket"
+		bucketPolicy := `{ "foo": "bar" }`
+		expectedBucketPolicy := `{"foo":"bar"}`
+
+		minioCli.On("GetBucketPolicy", bucketName).Return(expectedBucketPolicy, nil).Once()
+		defer minioCli.AssertExpectations(t)
+
+		// When
+		result, err := handler.ComparePolicy(bucketName, bucketPolicy)
 
 		// Then
 		g.Expect(result).To(gomega.BeTrue())
@@ -381,7 +447,7 @@ func TestBucketHandler_ComparePolicy(t *testing.T) {
 		handler := buckethandler.New(minioCli, nil)
 
 		bucketName := "bucket"
-		policy := "readonly"
+		policy := `{"foo":"bar"}`
 
 		minioCli.On("GetBucketPolicy", bucketName).Return("none", nil).Once()
 		defer minioCli.AssertExpectations(t)
@@ -394,26 +460,6 @@ func TestBucketHandler_ComparePolicy(t *testing.T) {
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 	})
 
-	t.Run("Error", func(t *testing.T) {
-		// Given
-		g := gomega.NewGomegaWithT(t)
-
-		minioCli := &automock.MinioClient{}
-		handler := buckethandler.New(minioCli, nil)
-
-		bucketName := "bucket"
-		testErr := errors.New("test error")
-
-		minioCli.On("GetBucketPolicy", bucketName).Return("", testErr).Once()
-		defer minioCli.AssertExpectations(t)
-
-		// When
-		_, err := handler.GetPolicy(bucketName)
-
-		// Then
-		g.Expect(err.Error()).To(gomega.ContainSubstring(testErr.Error()))
-	})
-
 	t.Run("ErrorGettingPolicy", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
@@ -422,7 +468,7 @@ func TestBucketHandler_ComparePolicy(t *testing.T) {
 		handler := buckethandler.New(minioCli, nil)
 
 		bucketName := "bucket"
-		policy := "readonly"
+		policy := `{"foo":"bar"}`
 		testErr := errors.New("test error")
 
 		minioCli.On("GetBucketPolicy", bucketName).Return("", testErr).Once()

@@ -197,7 +197,7 @@ func (r *ReconcileBucket) handleReadyState(instance *assetstorev1alpha1.Bucket) 
 
 	if !exists {
 		// Bucket was created before, but has been deleted manually
-		log.Error(fmt.Errorf("bucket %s/%s has been deleted", instance.Namespace, instance.Name), "Bucket has been deleted. Setting failed status...")
+		log.Info(fmt.Sprintf("bucket %s/%s has been deleted", instance.Namespace, instance.Name))
 		r.deletionFinalizer.DeleteFrom(instance)
 		_ = r.updateStatus(instance, assetstorev1alpha1.BucketStatus{
 			Phase:   assetstorev1alpha1.BucketFailed,

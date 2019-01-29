@@ -1,6 +1,8 @@
 package buckethandler
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"github.com/go-logr/logr"
 	"github.com/pkg/errors"
@@ -96,17 +98,22 @@ func (h *bucketHandler) SetPolicyIfNotEqual(bucketName string, policy string) (b
 		return false, err
 	}
 
-	if currentPolicy == policy {
+	equal, err := h.trimAndCompare(currentPolicy, policy)
+	if err != nil {
+		return false, errors.Wrapf(err, "while comparing policies: current `%s` and new `%s`", currentPolicy, policy)
+	}
+
+	if equal {
 		h.logInfof("Current policy for bucket %s is up to date", bucketName)
 		return false, nil
 	}
 
-	h.logInfof("Current policy for bucket %s is not updated: %s", bucketName, currentPolicy)
+	h.logInfof("Current policy for bucket %s is not up to date. Current policy for the bucket is: `%s`", bucketName, currentPolicy)
 	err = h.client.SetBucketPolicy(bucketName, policy)
 	if err != nil {
-		return false, errors.Wrapf(err, "while setting policy %s for bucket %s", policy, bucketName)
+		return false, errors.Wrapf(err, "while setting policy `%s` for bucket %s", policy, bucketName)
 	}
-	h.logInfof("Policy %s set for bucket %s", policy, bucketName)
+	h.logInfof("Policy `%s` set for bucket %s", policy, bucketName)
 
 	return true, nil
 }
@@ -128,7 +135,41 @@ func (h *bucketHandler) ComparePolicy(bucketName, policy string) (bool, error) {
 		return false, errors.Wrapf(err, "while getting policy for bucket %s", bucketName)
 	}
 
-	return currentPolicy == policy, nil
+	return h.trimAndCompare(currentPolicy, policy)
+}
+
+func (h *bucketHandler) trimAndCompare(currentPolicy, newPolicy string) (bool, error) {
+	compactCurrentPolicy, err := h.compact(currentPolicy)
+	if err != nil {
+		return false, errors.Wrapf(err, "while compacting current policy `%s`", currentPolicy)
+	}
+
+	compactNewPolicy, err := h.compact(newPolicy)
+	if err != nil {
+		return false, errors.Wrapf(err, "while compacting new policy `%s`", newPolicy)
+	}
+
+	return bytes.Equal(compactCurrentPolicy, compactNewPolicy), nil
+}
+
+func (h *bucketHandler) compact(value string) ([]byte, error) {
+	if !h.isJSON(value) {
+		return []byte(value), nil
+	}
+
+	buffer := new(bytes.Buffer)
+	err := json.Compact(buffer, []byte(value))
+	if err != nil {
+		return nil, err
+	}
+
+	return buffer.Bytes(), nil
+}
+
+func (h *bucketHandler) isJSON(str string) bool {
+	var js json.RawMessage
+	err := json.Unmarshal([]byte(str), &js)
+	return err == nil
 }
 
 func (h *bucketHandler) logInfof(format string, a ...interface{}) {
