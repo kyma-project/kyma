@@ -6,23 +6,32 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"strconv"
 )
 
 type MockApplicationClient interface {
-	ConnectToKyma(tokenURL string, isLocalKyma, shouldRegister bool) (connectResponse *ConnectResponse, err error)
+	ConnectToKyma(tokenURL string, shouldRegister bool) (connectResponse *ConnectResponse, err error)
 	GetConnectionInfo() (connectResponse *ConnectResponse, err error)
+	GetAPIs() (apis *[]API, err error)
 }
 
 type mockApplicationClient struct {
+	isLocalKyma bool
 	mockBaseURL string
 	httpClient  *http.Client
 }
 
-func NewMockApplicationClient() MockApplicationClient {
+func NewMockApplicationClient() (MockApplicationClient, error) {
 	mockBaseURL := os.Getenv("MOCKBASEURL")
+	isLocal := os.Getenv("ISLOCALKYMA")
+	isLocalKyma, err := strconv.ParseBool(isLocal)
+	if err != nil {
+		return nil, err
+	}
+
 	httpClient := NewHttpClient(true)
 
-	return &mockApplicationClient{mockBaseURL: mockBaseURL, httpClient: httpClient}
+	return &mockApplicationClient{mockBaseURL: mockBaseURL, httpClient: httpClient, isLocalKyma: isLocalKyma}, nil
 }
 
 func NewHttpClient(skipVerify bool) *http.Client {
@@ -33,9 +42,8 @@ func NewHttpClient(skipVerify bool) *http.Client {
 	return client
 }
 
-func (c *mockApplicationClient) ConnectToKyma(tokenURL string, isLocalKyma, shouldRegister bool) (connectResponse *ConnectResponse, err error) {
+func (c *mockApplicationClient) ConnectToKyma(tokenURL string, shouldRegister bool) (connectResponse *ConnectResponse, err error) {
 	connectRequest := &ConnectRequest{
-		IsLocalKyma:        isLocalKyma,
 		URL:                tokenURL,
 		ShouldRegisterAPIs: shouldRegister,
 		MockHostname:       c.mockBaseURL,
@@ -51,6 +59,8 @@ func (c *mockApplicationClient) ConnectToKyma(tokenURL string, isLocalKyma, shou
 	if err != nil {
 		return nil, err
 	}
+
+	request.Form.Set("localKyma", strconv.FormatBool(c.isLocalKyma))
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
@@ -74,6 +84,8 @@ func (c *mockApplicationClient) GetConnectionInfo() (connectResponse *ConnectRes
 		return nil, err
 	}
 
+	request.Form.Set("localKyma", strconv.FormatBool(c.isLocalKyma))
+
 	response, err := c.httpClient.Do(request)
 	if err != nil {
 		return nil, err
@@ -87,4 +99,26 @@ func (c *mockApplicationClient) GetConnectionInfo() (connectResponse *ConnectRes
 	}
 
 	return connectResponse, nil
+}
+
+func (c *mockApplicationClient) GetAPIs() (apis *[]API, err error) {
+	url := c.mockBaseURL + "/apis"
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	response, err := c.httpClient.Do(request)
+	if err != nil {
+		return nil, err
+	}
+
+	apisResponse := make([]API, 0)
+
+	err = json.NewDecoder(response.Body).Decode(&apisResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	return &apisResponse, nil
 }
