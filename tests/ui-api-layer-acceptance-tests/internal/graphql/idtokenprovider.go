@@ -61,7 +61,9 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	var loginEndpoint string
 	if authorizeResp.StatusCode == 200 {
 		loginEndpoint, err = getLocalAuthLink(authorizeResp.Body)
-		return nil, errors.Wrapf(err, "while fetching link to static authentication")
+		if err != nil {
+			return nil, errors.Wrapf(err, "while fetching link to static authentication")
+		}
 	} else {
 		loginEndpoint = authorizeResp.Header.Get("location")
 		if strings.Contains(loginEndpoint, "#.*error") {
