@@ -50,11 +50,11 @@ func TestFunctionService_List(t *testing.T) {
 	})
 }
 
-func fixFunction(name, environment string) *v1beta1.Function {
+func fixFunction(name, namespace string) *v1beta1.Function {
 	return &v1beta1.Function{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 	}
 }

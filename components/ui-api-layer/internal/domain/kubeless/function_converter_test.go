@@ -21,7 +21,7 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
 			CreationTimestamp: zeroTimeStamp,
 			Trigger:           "nope",
-			Environment:       "env",
+			Namespace:         "env",
 		}
 
 		converter := functionConverter{}
