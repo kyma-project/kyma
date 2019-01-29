@@ -21,7 +21,7 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
 			CreationTimestamp: zeroTimeStamp,
 			Trigger:           "nope",
-			Namespace:         "env",
+			Namespace:         "ns",
 		}
 
 		converter := functionConverter{}
@@ -94,7 +94,7 @@ func fixFunction() *v1beta1.Function {
 				"test": "ok",
 				"ok":   "test",
 			},
-			Namespace: "env",
+			Namespace: "ns",
 		},
 		Spec: v1beta1.FunctionSpec{
 			Type: "nope",

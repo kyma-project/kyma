@@ -19,16 +19,16 @@ import (
 
 func TestFunctionService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		function1 := fixFunction("f1", "env1")
-		function2 := fixFunction("f2", "env1")
-		function3 := fixFunction("f3", "env2")
+		function1 := fixFunction("f1", "ns1")
+		function2 := fixFunction("f2", "ns1")
+		function3 := fixFunction("f3", "ns2")
 
 		informer := fixInformer(function1, function2, function3)
 
 		svc := kubeless.NewFunctionService(informer)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		result, err := svc.List("env1", pager.PagingParams{})
+		result, err := svc.List("ns1", pager.PagingParams{})
 
 		require.NoError(t, err)
 		assert.Equal(t, []*v1beta1.Function{
@@ -43,7 +43,7 @@ func TestFunctionService_List(t *testing.T) {
 		svc := kubeless.NewFunctionService(informer)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
-		result, err := svc.List("env1", pager.PagingParams{})
+		result, err := svc.List("ns1", pager.PagingParams{})
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
