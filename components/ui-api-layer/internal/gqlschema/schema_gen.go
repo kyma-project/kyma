@@ -251,7 +251,7 @@ type ComplexityRoot struct {
 		Trigger           func(childComplexity int) int
 		CreationTimestamp func(childComplexity int) int
 		Labels            func(childComplexity int) int
-		Environment       func(childComplexity int) int
+		Namespace         func(childComplexity int) int
 	}
 
 	Idppreset struct {
@@ -2831,12 +2831,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Labels(childComplexity), true
 
-	case "Function.environment":
-		if e.complexity.Function.Environment == nil {
+	case "Function.namespace":
+		if e.complexity.Function.Namespace == nil {
 			break
 		}
 
-		return e.complexity.Function.Environment(childComplexity), true
+		return e.complexity.Function.Namespace(childComplexity), true
 
 	case "IDPPreset.name":
 		if e.complexity.Idppreset.Name == nil {
@@ -9078,8 +9078,8 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._Function_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._Function_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -9203,7 +9203,7 @@ func (ec *executionContext) _Function_labels(ctx context.Context, field graphql.
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Function_environment(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+func (ec *executionContext) _Function_namespace(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -9215,7 +9215,7 @@ func (ec *executionContext) _Function_environment(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -20024,7 +20024,7 @@ type Function {
     trigger: String!
     creationTimestamp: Timestamp!
     labels: Labels!
-    environment: String!
+    namespace: String!
 }
 
 input InputTopic {
