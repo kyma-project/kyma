@@ -2,6 +2,7 @@ package dex
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -49,23 +50,23 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		return nil, err
 	}
 	if authorizeResp.StatusCode < 200 || authorizeResp.StatusCode > 399 {
-		return nil, fmt.Errorf("Authorize - response error: '%s' - %s", authorizeResp.Status, readRespBody(authorizeResp))
+		return nil, errors.New(fmt.Sprintf("Authorize - response error: '%s' - %s", authorizeResp.Status, readRespBody(authorizeResp)))
 	}
 
 	// /auth/local?req=qruhpy2cqjvv4hcrbuu44mf4v
 	var loginEndpoint string
 	if authorizeResp.StatusCode == 200 {
-		loginEndpoint = getLocalAuthLink(authorizeResp.Body)
+		loginEndpoint, err = getLocalAuthLink(authorizeResp.Body)
+		return nil, errors.Wrapf(err, "while fetching link to static authentication")
 	} else {
 		loginEndpoint = authorizeResp.Header.Get("location")
-	}
-	if strings.Contains(loginEndpoint, "#.*error") {
-		return nil, fmt.Errorf("Login - Redirected with error: '%s'", loginEndpoint)
+		if strings.Contains(loginEndpoint, "#.*error") {
+			return nil, fmt.Errorf("login - Redirected with error: '%s'", loginEndpoint)
+		}
 	}
 
-	_, err = p.httpClient.Get(p.config.dexConfig.baseUrl + loginEndpoint)
-	if err != nil {
-		return nil, err
+	if _, err := p.httpClient.Get(p.config.dexConfig.baseUrl + loginEndpoint); err != nil {
+		return nil, errors.Wrap(err, "while performing HTTP GET on login endpoint")
 	}
 
 	loginResp, err := p.httpClient.PostForm(p.config.dexConfig.baseUrl+loginEndpoint, url.Values{
@@ -73,28 +74,28 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		"password": {p.config.userCredentials.password},
 	})
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while performing HTTP POST on login endpoint")
 	}
 	if loginResp.StatusCode < 300 || loginResp.StatusCode > 399 {
-		return nil, fmt.Errorf("Login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp))
+		return nil, fmt.Errorf("login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp))
 	}
 
 	// /approval?req=qruhpy2cqjvv4hcrbuu44mf4v
 	approvalEndpoint := loginResp.Header.Get("location")
 	if strings.Contains(approvalEndpoint, "#.*error") {
-		return nil, fmt.Errorf("Approval - Redirected with error: '%s'", approvalEndpoint)
+		return nil, fmt.Errorf("approval - Redirected with error: '%s'", approvalEndpoint)
 	}
 	approvalResp, err := p.httpClient.Get(p.config.dexConfig.baseUrl + approvalEndpoint)
 	if err != nil {
 		return nil, err
 	}
 	if approvalResp.StatusCode < 300 || approvalResp.StatusCode > 399 {
-		return nil, fmt.Errorf("Approval - response error: '%s' - %s", approvalResp.Status, readRespBody(approvalResp))
+		return nil, errors.New(fmt.Sprintf("Approval - response error: '%s' - %s", approvalResp.Status, readRespBody(approvalResp)))
 	}
 
 	clientEndpoint := approvalResp.Header.Get("location")
 	if strings.Contains(clientEndpoint, "#.*error") {
-		return nil, fmt.Errorf("Client - Redirected with error: '%s'", clientEndpoint)
+		return nil, fmt.Errorf("client - Redirected with error: '%s'", clientEndpoint)
 	}
 
 	parsedUrl, parseErr := url.Parse(clientEndpoint)
@@ -122,12 +123,12 @@ func readRespBody(resp *http.Response) string {
 	return string(b)
 }
 
-func getLocalAuthLink(body io.Reader) string {
+func getLocalAuthLink(body io.Reader) (string, error) {
 	z := html.NewTokenizer(body)
 	for {
 		nt := z.Next()
 		if nt == html.ErrorToken {
-			return ""
+			return "", fmt.Errorf("got HTML error token")
 		}
 
 		token := z.Token()
@@ -140,7 +141,7 @@ func getLocalAuthLink(body io.Reader) string {
 			}
 			match, _ := regexp.MatchString("/auth/local.*", attr.Val)
 			if match {
-				return attr.Val
+				return attr.Val, nil
 			}
 		}
 	}

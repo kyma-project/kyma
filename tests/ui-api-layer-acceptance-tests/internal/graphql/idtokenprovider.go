@@ -43,15 +43,15 @@ func (p *dexIdTokenProvider) fetchIdToken() (string, error) {
 
 func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
-	authorizeResp, err1 := p.httpClient.PostForm(p.config.DexConfig.AuthorizeEndpoint, url.Values{
+	authorizeResp, err := p.httpClient.PostForm(p.config.DexConfig.AuthorizeEndpoint, url.Values{
 		"response_type": {"id_token token"},
 		"client_id":     {p.config.ClientConfig.ID},
 		"redirect_uri":  {p.config.ClientConfig.RedirectUri},
 		"scope":         {"openid profile email groups"},
 		"nonce":         {"vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM"},
 	})
-	if err1 != nil {
-		return nil, err1
+	if err != nil {
+		return nil, err
 	}
 	if authorizeResp.StatusCode < 200 || authorizeResp.StatusCode > 399 {
 		return nil, errors.New(fmt.Sprintf("Authorize - response error: '%s' - %s", authorizeResp.Status, readRespBody(authorizeResp)))
@@ -60,38 +60,38 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	// /auth/local?req=qruhpy2cqjvv4hcrbuu44mf4v
 	var loginEndpoint string
 	if authorizeResp.StatusCode == 200 {
-		loginEndpoint = getLocalAuthLink(authorizeResp.Body)
+		loginEndpoint, err = getLocalAuthLink(authorizeResp.Body)
+		return nil, errors.Wrapf(err, "while fetching link to static authentication")
 	} else {
 		loginEndpoint = authorizeResp.Header.Get("location")
-	}
-	if strings.Contains(loginEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Login - Redirected with error: '%s'", loginEndpoint))
-	}
-
-	_, err2 := p.httpClient.Get(p.config.DexConfig.BaseUrl + loginEndpoint)
-	if err2 != nil {
-		return nil, err2
+		if strings.Contains(loginEndpoint, "#.*error") {
+			return nil, fmt.Errorf("login - Redirected with error: '%s'", loginEndpoint)
+		}
 	}
 
-	loginResp, err3 := p.httpClient.PostForm(p.config.DexConfig.BaseUrl+loginEndpoint, url.Values{
+	if _, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + loginEndpoint); err != nil {
+		return nil, errors.Wrap(err, "while performing HTTP GET on login endpoint")
+	}
+
+	loginResp, err := p.httpClient.PostForm(p.config.DexConfig.BaseUrl+loginEndpoint, url.Values{
 		"login":    {p.config.UserCredentials.Username},
 		"password": {p.config.UserCredentials.Password},
 	})
-	if err3 != nil {
-		return nil, err3
+	if err != nil {
+		return nil, errors.Wrap(err, "while performing HTTP POST on login endpoint")
 	}
 	if loginResp.StatusCode < 300 || loginResp.StatusCode > 399 {
-		return nil, errors.New(fmt.Sprintf("Login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp)))
+		return nil, fmt.Errorf("login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp))
 	}
 
 	// /approval?req=qruhpy2cqjvv4hcrbuu44mf4v
 	approvalEndpoint := loginResp.Header.Get("location")
 	if strings.Contains(approvalEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Approval - Redirected with error: '%s'", approvalEndpoint))
+		return nil, fmt.Errorf("approval - Redirected with error: '%s'", approvalEndpoint)
 	}
-	approvalResp, err4 := p.httpClient.Get(p.config.DexConfig.BaseUrl + approvalEndpoint)
-	if err4 != nil {
-		return nil, err4
+	approvalResp, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + approvalEndpoint)
+	if err != nil {
+		return nil, err
 	}
 	if approvalResp.StatusCode < 300 || approvalResp.StatusCode > 399 {
 		return nil, errors.New(fmt.Sprintf("Approval - response error: '%s' - %s", approvalResp.Status, readRespBody(approvalResp)))
@@ -99,7 +99,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
 	clientEndpoint := approvalResp.Header.Get("location")
 	if strings.Contains(clientEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Client - Redirected with error: '%s'", clientEndpoint))
+		return nil, fmt.Errorf("client - Redirected with error: '%s'", clientEndpoint)
 	}
 
 	parsedUrl, parseErr := url.Parse(clientEndpoint)
@@ -107,7 +107,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		return nil, parseErr
 	}
 
-	var result map[string]string = make(map[string]string)
+	result := make(map[string]string)
 	fragmentParams := strings.Split(parsedUrl.Fragment, "&")
 	for _, param := range fragmentParams {
 		keyAndValue := strings.Split(param, "=")
@@ -127,12 +127,12 @@ func readRespBody(resp *http.Response) string {
 	return string(b)
 }
 
-func getLocalAuthLink(body io.Reader) string {
+func getLocalAuthLink(body io.Reader) (string, error) {
 	z := html.NewTokenizer(body)
 	for {
 		nt := z.Next()
 		if nt == html.ErrorToken {
-			return ""
+			return "", fmt.Errorf("got HTML error token")
 		}
 
 		token := z.Token()
@@ -145,7 +145,7 @@ func getLocalAuthLink(body io.Reader) string {
 			}
 			match, _ := regexp.MatchString("/auth/local.*", attr.Val)
 			if match {
-				return attr.Val
+				return attr.Val, nil
 			}
 		}
 	}
