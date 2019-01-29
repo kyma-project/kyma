@@ -32,7 +32,6 @@ do
             shift
             ;;
         --p)
-            checkInputParameterValue "$2"
             ADMIN_PASSWORD="$2"
             shift
             shift
