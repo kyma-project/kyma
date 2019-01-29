@@ -3,21 +3,21 @@ title: Asset Custom Resource Lifecycle
 type: Details
 ---
 
-Read about the lifecycle of the Asset Custom Resource (CR) and how other resources react to its creation, removal, and modification.
+Read about the lifecycle of the Asset Custom Resource (CR) and how other resources react to its creation, removal, or change of the bucket reference.
 
 ## Create an Asset CR
 
-When you create an Asset CR, the Asset Controller receives and event on its creation, reads its definition, verifies if the bucket exists, downloads the asset, unpacks it, and stores it in Minio Gateway.
+When you create an Asset CR, the Asset Controller receives an Event on its creation, reads its definition, verifies if the bucket exists, downloads the asset, unpacks it, and stores it in Minio Gateway.
 
 ![](assets/create-asset.svg)
 
 ## Remove an Asset CR
 
-When you remove the Asset CR, the Asset Controller receives and event on its deletion and deletes it from Minio Gateway.
+When you remove the Asset CR, the Asset Controller receives an Event on its deletion and deletes it from Minio Gateway.
 
 ![](assets/delete-asset.svg)
 
-## Modify an Asset CR
+## Change the bucket reference
 
 When you modify an Asset CR by updating the bucket reference in the Asset CR to a new one while the previous bucket still exists, the lifecycle starts again. The asset is created in a new storage location and its new URL is updated in the Asset CR.
 

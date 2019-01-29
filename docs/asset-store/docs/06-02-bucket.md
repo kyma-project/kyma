@@ -19,6 +19,30 @@ kind: Bucket
 metadata:
   name: my-bucket
   namespace: default
+spec:
+  location: "us-east-1"
+  policy: `
+     {
+      "Version":"2012-10-17",
+      "Statement":[
+         {
+            "Action":[
+               "s3:GetObject"
+            ],
+            "Effect":"Allow",
+            "Principal":{
+               "AWS":[
+                  "*"
+               ]
+            },
+            "Resource":[
+               "arn:aws:s3:::my-bucket/*"
+            ],
+            "Sid":""
+         }
+      ]
+   }
+
 ```
 
 ## Custom resource parameters
@@ -29,7 +53,9 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
-| **metadata.namespace** |    **NO**   | Specifies the Namespace in which the CR is available. |
+| **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is available. |
+| **spec.location** |    **NO**   | xxx  Specifies the [location](https://docs.minio.io/docs/golang-client-api-reference.html#MakeBucket) under which the bucket is created. If the field is empty, the bucket is created under the default location. |
+| **spec.policy** |    **NO**   | There is no policy specified for the bucket by default. To change it, specify the policy in a string that is similar to `{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::my-bucketname/*"],"Sid": ""}]}`. |
 
 
 ## Related resources and components

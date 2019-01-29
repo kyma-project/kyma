@@ -21,38 +21,11 @@ metadata:
   namespace: default
 spec:
   source:
-    mode: single / index / package
+    mode: single
     url: https://some.domain.com/main.js
   bucketRef:
     name: my-bucket
 
-```
-
-### Sample index file
-
-The CR must contain the reference to the source file, object, or asset location that the Asset Controller fetches with three different modes, where:
-- `single` specifies the direct link to the asset that needs to be fetched.
-- `index` specifies the link to the `index.yaml` file that contains a reference to files that need to be separately fetched from a given relative location.
-- `package` specifies the link to the zip or tar file that must be unzipped before uploading.
-
-See the sample of the index file with markdown and assets files:
-
-```
-apiVersion: v1
-files:
-  - name: 01-overview.md
-    metadata:
-      title: MyOverview
-      type: Overview
-  - name: 02-details.md
-    metadata:
-      title: MyDetails
-      type: Details
-  - name: 03-installation.md
-    metadata:
-      title: MyInstallation
-      type: Tutorial
-  - name: assets/diagram.svg
 ```
 
 ### Validation and mutation webhook services
@@ -69,7 +42,7 @@ metadata:
   namespace: default
 spec:
   source:
-    mode: single | index | package
+    mode: single
     url: https://some.domain.com/main.js
     validationWebhookService:
       name: swagger-operations-svc
@@ -87,7 +60,7 @@ spec:
   bucketRef:
     name: my-bucket
 status:
-  phase: Ready | Failed | Pending
+  phase: Failed
   reason: ValidationFailure
   message: "The file is not valid against the provided json schema"
   lastHeartbeatTime: "2018-01-03T07:38:24Z"
@@ -103,11 +76,23 @@ This table lists all the possible parameters of a given resource together with t
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **metadata.namespace** |    **YES**   | Defines the Namespace in which the CR is available. |
-| **spec.source.mode** |    **YES**   | Specifies if the asset is a single file, zip or tar, or a `index.yaml` file. For details on the **index** mode, see [this](#sample-index-file) section. |
+| **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the zip or tar formats. Use `single` for one file and `package` for a set of files. |
 | **spec.source.url** |    **YES**   | Specifies the location of the file. |
 | **bucketref.name** |    **YES**   | Specifies the name of the bucket for storing the asset. |
 | **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook service. |
-| **spec.source.mutationwebhookservice** |    **NO**   | Provides specification of the validation webhook service. |
+| **spec.source.validationwebhookservice.name** |    **NO**   | Provides the name of the validation webhook service. |
+| **spec.source.validationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
+| **spec.source.validationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
+| **spec.source.mutationwebhookservice** |    **NO**   | Provides specification of the mutation webhook service. |
+| **spec.source.mutationwebhookservice.name** |    **NO**   | Provides the name of the mutation webhook service. |
+| **spec.source.mutationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
+| **spec.source.mutationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
+| **spec.source.mutationwebhookservice.metadata** |    **NO**   | Provides details specification of the mutation service. |
+| **spec.bucketref.name** |    **NO**   | Provides the name of the bucket for storing the asset. |
+| **status.phase** |    **NO**   | It is automatically added to the Asset CR by the Asset Controller. It describes the status of processing the Asset CR by the Asset Controller. It can be `Ready`, `Failed`, or `Pending`. |
+| **status.reason** |    **NO**   | Provides the reason why the Asset CR processing failed or is pending.  |
+| **status.message** |    **NO**   | Describes in details why the processing failed or is pending. |
+| **status.lastheartbeattime** |    **NO**   | Provides the last time when the Asset Controller processed the Asset CR. |
 
 
 ## Related resources and components
