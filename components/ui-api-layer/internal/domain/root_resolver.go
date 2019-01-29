@@ -171,6 +171,14 @@ type mutationResolver struct {
 	*RootResolver
 }
 
+func (r *mutationResolver) UpdatePod(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Pod, error) {
+	return r.k8s.UpdatePodMutation(ctx, name, namespace, update)
+}
+
+func (r *mutationResolver) DeletePod(ctx context.Context, name string, namespace string) (*gqlschema.Pod, error) {
+	return r.k8s.DeletePodMutation(ctx, name, namespace)
+}
+
 func (r *mutationResolver) CreateServiceInstance(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
 	return r.sc.Resolver.CreateServiceInstanceMutation(ctx, params)
 }

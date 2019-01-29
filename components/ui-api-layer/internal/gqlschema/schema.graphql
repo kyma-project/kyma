@@ -649,6 +649,9 @@ type Mutation {
     enableApplication(application: String!, namespace: String!): ApplicationMapping
     disableApplication(application: String!, namespace: String!): ApplicationMapping
 
+    updatePod(name: String!, namespace: String!, pod: JSON!): Pod
+    deletePod(name: String!, namespace: String!): Pod
+
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
     deleteIDPPreset(name: String!): IDPPreset
 }
