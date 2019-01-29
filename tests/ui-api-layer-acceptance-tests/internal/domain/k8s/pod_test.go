@@ -129,7 +129,7 @@ func TestPodQueries(t *testing.T) {
 	assert.Equal(t, podNamespace, podsRes.Pods[0].Namespace)
 
 	t.Log("Updating...")
-	podRes.Pod.JSON["metadata"].(map[string]interface{})["generateName"] = "test"
+	podRes.Pod.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
 	update := stringifyJSON(podRes.Pod.JSON)
 	var updateRes updatePodMutationResponse
 	err = c.Do(fixUpdatePodMutation(update), &updateRes)
