@@ -40,6 +40,12 @@ do
             KNATIVE="--knative"
             shift
         ;;
+        --p)
+            checkInputParameterValue "$2"
+            ADMIN_PASSWORD="${2}"
+            shift # past argument
+            shift # past value
+        ;;
         --*)
             echo "Unknown flag ${1}"
             exit 1
@@ -74,5 +80,5 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}"
+bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}" --p "${ADMIN_PASSWORD}"
 rm -rf $TMPDIR

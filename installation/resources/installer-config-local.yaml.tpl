@@ -34,6 +34,7 @@ data:
   global.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"
+  global.adminPassword: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
   cluster-users.users.adminGroup: ""
 ---

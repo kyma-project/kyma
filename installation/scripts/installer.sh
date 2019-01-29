@@ -31,6 +31,12 @@ do
             KNATIVE=true
             shift
             ;;
+        --p)
+            checkInputParameterValue "$2"
+            ADMIN_PASSWORD="$2"
+            shift
+            shift
+            ;;
         --*)
             echo "Unknown flag ${1}"
             exit 1
@@ -91,6 +97,11 @@ echo -e "\nApplying installation combo yaml"
 COMBO_YAML=$(bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${AZURE_BROKER_CONFIG} ${CR_PATH})
 
 rm -rf ${AZURE_BROKER_CONFIG}
+
+if [ ${ADMIN_PASSWORD} ]; then
+    ADMIN_PASSWORD=$(echo ${ADMIN_PASSWORD} | base64)
+    COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
+fi
 
 if [ $KNATIVE ]; then
     COMBO_YAML=$(sed 's/global\.knative: .*/global.knative: "true"/g' <<<"$COMBO_YAML")
