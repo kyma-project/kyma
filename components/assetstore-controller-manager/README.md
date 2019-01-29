@@ -2,7 +2,7 @@
 
 ## Overview
 
-Asset Store is a generic, Kubernetes-native solution for storing documentation, images, API specifications, and client-side applications. It consists of two controllers: Asset Controller and Bucket Controller.
+Asset Store is a Kubernetes-native solution for storing assets, such as documentation, images, API specifications, and client-side applications. It consists of the Asset Controller and the Bucket Controller.
 
 ## Prerequisites
 
@@ -31,8 +31,8 @@ IMG={image_name}:{image_tag} make docker-build
 
 The variables are:
 
-* `{image_name}` - name of the output image (recommended: `assetstore-controller-manager`)
-* `{image_tag}` - tag of the output image (recommended: `latest`)
+* `{image_name}` which is the name of the output image. Use `assetstore-controller-manager` for the image name.
+* `{image_tag}` which is the tag of the output image. Use `latest` for the tag name.
 
 
 ## Development
@@ -46,7 +46,7 @@ dep ensure -vendor-only
 
 ### Run tests
 
-To run all unit tests, execute the following command:
+To run all unit tests, use the following command:
 
 ```bash
 make test
