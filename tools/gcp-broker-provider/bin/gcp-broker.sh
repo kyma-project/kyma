@@ -13,6 +13,16 @@ set -o errexit # exit immediately if a command exits with a non-zero status.
 readonly CURRENT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 readonly GCP_SECRET_NAME="gcp-broker-data"
 
+trap cleanup EXIT SIGINT SIGTERM
+
+function cleanup() {
+    printf  "\n- Cleaning up...\n"
+    echo "Ensure gcloud credentials are removed"
+    rm -f "${GOOGLE_APPLICATION_CREDENTIALS}"
+    echo "OK"
+}
+
+
 function discoveredUnsetVar() {
     local discoveredUnsetVar=false
     for e in WORKING_NAMESPACE; do
@@ -56,12 +66,6 @@ function configureGCloud() {
 
     return 0
 }
-
-function deleteGoogleApplicationCredentials () {
-    rm -f "${GOOGLE_APPLICATION_CREDENTIALS}"
-}
-
-trap deleteGoogleApplicationCredentials EXIT SIGINT SIGTERM
 
 function printToolsVersions() {
     printf "kubectl version\n"
