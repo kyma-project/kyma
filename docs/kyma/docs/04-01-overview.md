@@ -20,6 +20,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `monitoring` | ✅ | ⛔️ |
 | `prometheus-operator` | ✅ | ⛔️ |
 | `service-catalog` | ✅ | ✅ |
+| `nats-streaming` | ✅ | ✅ |
 
 ### Installation guides
 
