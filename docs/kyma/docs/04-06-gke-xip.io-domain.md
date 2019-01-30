@@ -67,20 +67,22 @@ Use this command to prepare a configuration file that deploys Kyma with [`xip.io
   ```
 ### Kyma installation
 
-You can either choose the pre-build image of the Kyma Installer or build your own.
+You can either choose the pre-built image of the Kyma Installer or build your own.
 
-* To build your own image:
-  1. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
-     ```
-     docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile . --build-arg INSTALLER_VERSION=63484523
-     ```
-  2. Push the image to your Docker Hub:
-     ```
-     docker tag kyma-installer:latest [YOUR_DOCKER_LOGIN]/kyma-installer:latest
-     docker push [YOUR_DOCKER_LOGIN]/kyma-installer:latest
-     ```
-* To use a prebuild image, go to [this](https://github.com/kyma-project/kyma/releases/) page and check the version of the latest release. Your URL looks as follows:
-```eu.gcr.io/kyma-project/kyma-installer:{latest version}```
+* To use a prebuilt image, go to [this](https://github.com/kyma-project/kyma/releases/) page and check the version of the latest release. Put the version number in the following URL:
+`eu.gcr.io/kyma-project/kyma-installer:{latest version}`
+  >**NOTE:** You can use version 0.6 or higher.
+
+* Build your own image that is based on the current Installer image and includes the current installation and resources charts. Run:
+  ```
+  docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile . --build-arg INSTALLER_VERSION=63484523
+  ```
+  
+  Push the image to your Docker Hub:
+  ```
+  docker tag kyma-installer:latest [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+  docker push [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+  ```
 
 In the `my-kyma.yaml` file, change the image URL to the value taken from the previous step.
 ```

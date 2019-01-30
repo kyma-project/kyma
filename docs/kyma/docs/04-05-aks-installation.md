@@ -232,7 +232,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 4. To watch the installation progress, run:
     ```
     while true; do \
-      kubectl get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}{'\n'}"; \
+      kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
       sleep 5; \
     done
     ```
