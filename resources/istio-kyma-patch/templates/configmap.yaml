@@ -83,6 +83,12 @@ data:
       }
     ]
 
+  exclude-namespaces: |
+    istio-system
+    kube-system
+    knative-build
+    knative-eventing
+
   delete: |
     deployment prometheus
     configmap prometheus
