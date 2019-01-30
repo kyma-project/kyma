@@ -8,21 +8,21 @@ This document extends the [Install Kyma locally from sources](#installation-inst
 The following snippet is the main element of the `run.sh` script:
 
 ```
-if [[ ! ${SKIP_MINIKUBE_START} ]]; then
-    bash ${SCRIPTS_DIR}/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}" ${MINIKUBE_EXTRA_ARGS}
+if [[ ! $SKIP_MINIKUBE_START ]]; then
+    bash $SCRIPTS_DIR/minikube.sh --domain "${DOMAIN}" --vm-driver "$VM_DRIVER" $MINIKUBE_EXTRA_ARGS
 fi
 
-bash ${SCRIPTS_DIR}/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
+bash $SCRIPTS_DIR/build-kyma-installer.sh --vm-driver "$VM_DRIVER"
 
 if [ -z "$CR_PATH" ]; then
 
-    TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
-    CR_PATH="${TMPDIR}/installer-cr-local.yaml"
-    bash ${SCRIPTS_DIR}/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
+    TMPDIR=`mktemp -d "$CURRENT_DIR/../../temp-XXXXXXXXXX"`
+    CR_PATH="$TMPDIR/installer-cr-local.yaml"
+    bash $SCRIPTS_DIR/create-cr.sh --output "$CR_PATH" --domain "$DOMAIN"
 
 fi
 
-bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}" --password "${ADMIN_PASSWORD}"
+bash $SCRIPTS_DIR/installer.sh --local --cr "$CR_PATH" "$KNATIVE" --password "$ADMIN_PASSWORD"
 rm -rf $TMPDIR
 ```
 Subsequent sections provide details of all involved subscripts, in the order in which the `run.sh` script triggers them.
