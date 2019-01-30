@@ -17,7 +17,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: 501c4fe5
+    version: cc09a30
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -72,7 +72,7 @@ global:
     version: 0b8409ea
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: 0b8409ea
+    version: cc09a30
 
 test:
   acceptance:
