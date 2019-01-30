@@ -69,10 +69,10 @@ global:
     version: e11a469a
   ui_api_layer:
     dir: develop/
-    version: e304c523
+    version: 0b8409ea
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: e304c523
+    version: 0b8409ea
 
 test:
   acceptance:
