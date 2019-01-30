@@ -74,12 +74,12 @@ data:
       }
     ]
 
-  exclude: |
-    istio-system
-    kube-system
+  injection-in-namespaces: |
+    istio-system disabled
+    kube-system disabled
     {{ if .Values.global.knative }}
-    knative-build
-    knative-eventing
+    knative-build disabled
+    knative-eventing disabled
     {{ end }}
 
   delete: |

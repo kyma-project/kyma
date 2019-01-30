@@ -66,12 +66,15 @@ function remove_not_used() {
   done <${CONFIG_DIR}/delete
 }
 
-function label_excluded_namespaces(){
-  echo "--> Label namespaces that should not allow sidecar injection"
-  local namespaces=$(kubectl get cm -n istio-system istio-kyma-patch-config -o jsonpath='{.data.exclude}')
-  for ns in ${namespaces}; do
-    kubectl label namespace "${ns}" "istio-injection=disabled" --overwrite
-  done
+function label_namespaces(){
+  echo "--> Add 'istio-injection' label to namespaces"
+  while read line; do
+    local name=$(cut -d' ' -f1 <<< ${line})
+    local switch=$(cut -d' ' -f2 <<< ${line})
+    set +e
+    kubectl label namespace "${name}" "istio-injection=${switch}" --overwrite
+    set -e
+  done <${CONFIG_DIR}/injection-in-namespaces
 }
 
 function configure_sidecar_injector() {
@@ -115,4 +118,4 @@ check_requirements
 configure_sidecar_injector
 run_all_patches
 remove_not_used
-label_excluded_namespaces
+label_namespaces
