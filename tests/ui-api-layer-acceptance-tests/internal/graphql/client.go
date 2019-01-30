@@ -114,7 +114,6 @@ func (c *Client) ChangeUser(user User) error {
 	}
 
 	if user != NoUser {
-
 		token, err = authenticate(config.IdProviderConfig)
 		if err != nil {
 			return err

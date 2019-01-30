@@ -15,7 +15,6 @@ import (
 )
 
 type Authorizer struct {
-
 	// authorizer determines whether a given authorization.Attributes is allowed
 	authorizer.Authorizer
 }
