@@ -69,12 +69,14 @@ function remove_not_used() {
 function label_namespaces(){
   echo "--> Add 'istio-injection' label to namespaces"
   while read line; do
-    local name=$(cut -d' ' -f1 <<< ${line})
-    local switch=$(cut -d' ' -f2 <<< ${line})
+    local name
+    name=$(cut -d' ' -f1 <<< "${line}")
+    local switch
+    switch=$(cut -d' ' -f2 <<< "${line}")
     set +e
     kubectl label namespace "${name}" "istio-injection=${switch}" --overwrite
     set -e
-  done <${CONFIG_DIR}/injection-in-namespaces
+  done <"${CONFIG_DIR}"/injection-in-namespaces
 }
 
 function configure_sidecar_injector() {
