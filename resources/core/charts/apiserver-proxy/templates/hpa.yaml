@@ -1,4 +1,4 @@
-{{ if not .Values.global.isLocalEnv }}
+{{ if and (not .Values.global.isLocalEnv) (.Capabilities.APIVersions.Has "autoscaling/v2beta1") }}
 ---
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
