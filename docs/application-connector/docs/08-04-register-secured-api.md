@@ -76,4 +76,5 @@ This is an example of the `api` section of the request body for an API secured w
             },
         }  
 ```
->**NOTE:** If the Common Name will be changed while updating API the new certificate will be generated.
+
+>**NOTE:** If the Common Name will be changed while updating the API a new certificate will be generated.
