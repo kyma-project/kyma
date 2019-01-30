@@ -3,7 +3,7 @@ title: Register a secured API
 type: Tutorials
 ---
 
-The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617) and [OAuth](https://tools.ietf.org/html/rfc6750).
+The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) and Generated Certificates.
 
 You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns a `400` code response.
 
@@ -51,3 +51,29 @@ This is an example of the `api` section of the request body for an API secured w
             },
         }  
 ```
+
+## Register a Generated Certificate-secured API
+
+Application Registry can generate private key and certificate for the registered API, and use it to make secure calls. Certificates are stored in Kubernetes secrets and can be manually switched. The secret name has the following format:
+```
+app-{APP_NAME}-{SERVICE_ID}
+```
+
+To register an API secured with a generated certificate, add a `credentials.certificateGen` object to the `api` section of the service registration request body. You must include these fields:
+
+| Field   |  Description |
+|:----------:|:------|
+| **commonName** |  Common Name of the certificate to be generated |
+
+This is an example of the `api` section of the request body for an API secured with generated certificate:
+
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "credentials": {
+            "certificateGen": {
+                "commonName": "some-common-name"
+            },
+        }  
+```
+>**NOTE:** If the Common Name will be changed while updating API the new certificate will be generated.
