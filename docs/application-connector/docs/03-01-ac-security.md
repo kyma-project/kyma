@@ -28,6 +28,7 @@ Follow these steps to disable SSL certificate verification for communication bet
 The Application Registry allows you to register APIs:
 - Secured with Basic Authentication
 - Secured with OAuth
+- Secured with generated certificate
 - Not secured
 
 The Application Proxy calls the registered APIs accordingly, basing on the security type specified in the API registration process.
