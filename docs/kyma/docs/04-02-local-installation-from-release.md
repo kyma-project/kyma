@@ -96,7 +96,7 @@ To install Kyma, follow these steps:
 
 Read [this](#installation-reinstall-kyma) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 
-To learn how to test Kyma, see [this](#installation-reinstall-kyma) document.
+To learn how to test Kyma, see [this](#details-testing-kyma) document.
 
 ## Verify the deployment
 
