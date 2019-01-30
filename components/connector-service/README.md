@@ -26,8 +26,14 @@ The Connector Service has the following parameters:
 - **namespace** - Namespace where Connector Service is deployed. The default namespace is `kyma-integration`.
 - **tokenLength** - Length of registration tokens. The default value is `64`.
 - **tokenExpirationMinutes** - Time after which tokens expire and are no longer valid. The default value is `5` minutes.
-- **domainName** - Domain name of the cluster, used for URL generating. Default domain name is `.wormhole.cluster.kyma.cx`.
-- **certificateServiceHost** - Host at which this service is accessible, used for URL generating. Default host is `cert-service.wormhole.cluster.kyma.cx`.
+- **caSecretName** - Name of the secret which contains root CA. The default value if `nginx-auth-ca`
+- **requestLogging** - Flag for logging incoming requests. `False` by default.
+- **connectorServiceHost** - Host at which this service is accessible, used for URL generating. Default host is `cert-service.wormhole.cluster.kyma.cx`.
+- **appRegistryHost** - Host at which this Application Registry is accessible. Default value is empty string.
+- **eventsHost** - Host at which this Event Service is accessible. Default value is empty string.
+- **getInfoURL** - URL at which management information is available. If not provided it will be constructed based on `connectorServiceHost`.
+- **group** - Group for which certificates will be generated. If not provided, it will be required in the request header to token endpoint.
+- **tenant** - Tenant for which certificates will be generated. If not provided, it will be required in the request header to token endpoint.
 
 Connector Service also uses following environmental variables for CSR - related information config:
 - **COUNTRY** (two-letter-long country code)

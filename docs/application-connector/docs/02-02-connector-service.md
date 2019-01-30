@@ -3,7 +3,7 @@ title: Connector Service
 type: Architecture
 ---
 
-The Connector Service generates client certificates which secure the communication between Kyma and the connected external solutions.        
+The Connector Service generates client certificates which secure the communication between Kyma and the connected external solutions as well as other Kyma clusters.        
 
 Generating a new client certificate is the first step in the process of configuring an Application (App). Kyma stores the root certificate and serves as the Certificate Authority when you configure a new App. When you generate a new client certificate, the Connector Service returns it along with the root certificate to allow validation.  
 
@@ -16,3 +16,5 @@ This diagram illustrates the client certificate generation flow in details:
     - URLs of the available APIs
     - information required to generate a CSR
 3. The external system generates a CSR based on the information provided by Kyma and sends the CSR to the designated URL. In the response, the external system receives a signed certificate. It can use the certificate to authenticate and safely communicate with Kyma.
+
+The presented flow is also valid for registering the Kyma clusters.
