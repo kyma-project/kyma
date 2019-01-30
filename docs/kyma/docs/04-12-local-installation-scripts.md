@@ -45,7 +45,7 @@ Once Minikube is up and running, the script adds local installation entries to `
 
 ## The build-kyma-installer.sh script
 
-The Kyma Installer is an application based on [Kubernetes operator](https://coreos.com/operators/). Its purpose is to install Helm charts defined in the Installation custom resource. The Kyma-Installer is a Docker image that bundles the Installer binary with Kyma charts.
+The Kyma Installer is an application based on [Kubernetes operator](https://coreos.com/operators/). Its purpose is to install Helm charts defined in the Installation custom resource. The Kyma Installer is a Docker image that bundles the Installer binary with Kyma charts.
 
 The `installation/scripts/build-kyma-installer.sh` script extracts the Kyma-Installer image name from the `installer.yaml` deployment file and uses it to build a Docker image inside Minikube. This image contains local Kyma sources from the `resources` folder.
 
