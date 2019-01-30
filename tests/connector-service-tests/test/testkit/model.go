@@ -16,20 +16,8 @@ type InfoResponse struct {
 type ApiInfo struct {
 	MetadataURL     string `json:"metadataUrl"`
 	EventsURL       string `json:"eventsUrl"`
-	GetInfoURL      string `json:"getInfoUrl"`
+	GetInfoURL      string `json:"infoUrl"`
 	CertificatesUrl string `json:"certificatesUrl"`
-}
-
-type ApplicationApi struct {
-	MetadataURL     string `json:"metadataUrl"`
-	EventsURL       string `json:"eventsUrl"`
-	InfoURL         string `json:"infoUrl"`
-	CertificatesURL string `json:"certificatesUrl"`
-}
-
-type RuntimeApi struct {
-	InfoURL         string `json:"infoUrl"`
-	CertificatesURL string `json:"certificatesUrl"`
 }
 
 type CertInfo struct {
