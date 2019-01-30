@@ -45,9 +45,6 @@ global:
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
-  binding_usage_controller:
-    dir: develop/
-    version: d1930a3d
   configurations_generator:
     dir: develop/
     version: 4a23580f
