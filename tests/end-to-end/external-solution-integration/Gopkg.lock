@@ -114,9 +114,27 @@
   version = "v4.20"
 
 [[projects]]
-  digest = "1:b66362b9927bca707886bc2c1569f0bbbc407f4a623ffd9605c1805312992aa0"
+  digest = "1:fb2d7621c69fc11b6ba50604c88515c922d61071cf40e865b40a52c72e879802"
+  name = "github.com/kubeless/kubeless"
+  packages = [
+    "pkg/apis/kubeless",
+    "pkg/apis/kubeless/v1beta1",
+    "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
+  ]
+  pruneopts = "UT"
+  revision = "3bec4b65f29d830bd6709abb07e00f11fe54d646"
+  version = "v0.6.0"
+
+[[projects]]
+  digest = "1:607f59f31a5f7cb45613ef3f50056132a427ee904a57effaf97c0b7b52990fea"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned",
+    "components/application-broker/pkg/client/clientset/versioned/scheme",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
@@ -125,6 +143,11 @@
     "components/connection-token-handler/pkg/client/clientset/versioned",
     "components/connection-token-handler/pkg/client/clientset/versioned/scheme",
     "components/connection-token-handler/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/event-bus/api/push/eventing.kyma-project.io",
+    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
+    "components/event-bus/generated/push/clientset/versioned",
+    "components/event-bus/generated/push/clientset/versioned/scheme",
+    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
   ]
   pruneopts = "UT"
   revision = "1084956354fdc0307774b610478de6c92d424bcd"
@@ -343,7 +366,7 @@
   revision = "173ce66c1e39d1d0f56e0b3347ff2988068aecd0"
 
 [[projects]]
-  digest = "1:0ed26acd86e249e3b24fe3770defdb389bf812f7f3f887f94adb4d46e9542481"
+  digest = "1:20e81d00ebab40306e54d2fae81fd150af032d5181f6baf5528215d6f9fdaba0"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -377,7 +400,6 @@
     "pkg/util/sets",
     "pkg/util/validation",
     "pkg/util/validation/field",
-    "pkg/util/wait",
     "pkg/util/yaml",
     "pkg/version",
     "pkg/watch",
@@ -471,9 +493,13 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
     "github.com/smartystreets/goconvey/convey",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/client-go/kubernetes",
