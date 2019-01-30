@@ -123,6 +123,9 @@ func (f *bundleToServiceConverter) applyOverridesOnBundleMetadata(m internal.Bun
 	}
 	// Business requirement that helm bundles are always treated as local
 	metaCopy.Labels["local"] = "true"
+	if m.ProvisionOnlyOnce {
+		metaCopy.Labels["provisionOnlyOnce"] = "true"
+	}
 
 	return metaCopy
 }

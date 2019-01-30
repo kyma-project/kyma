@@ -174,9 +174,11 @@ func (tc catalogTestCase) fixBundleWithSchemas(schemas map[internal.PlanSchemaTy
 			LongDescription:     "LongDescription",
 			DocumentationURL:    "DocumentationURL",
 			SupportURL:          "SupportURL",
+			ProvisionOnlyOnce:   true,
 			ImageURL:            "ImageURL",
 			Labels: internal.Labels{
-				"testing": "true",
+				"testing":           "true",
+				"provisionOnlyOnce": "true",
 			},
 		},
 		Tags: []internal.BundleTag{"awesome-tag"},
