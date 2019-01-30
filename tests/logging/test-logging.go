@@ -27,27 +27,32 @@ func getPodStatus(stdout string) (podName string, isReady bool) {
 }
 
 func getNumberOfNodes() int {
-	cmd := exec.Command("kubectl", "get", "nodes")
+	cmd := exec.Command("kubectl", "get", "nodes", "--no-headers")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Error while kubectl get nodes: %v", string(stdoutStderr))
 	}
+	linesToRemove := 1;
+	if strings.Contains(string(stdoutStderr), "master") {
+		linesToRemove++
+	}
 	outputArr := strings.Split(string(stdoutStderr), "\n")
-	return len(outputArr) - 2
+
+	return len(outputArr) - linesToRemove
 }
 
 func testPodsAreReady() {
 	timeout := time.After(10 * time.Minute)
 	tick := time.Tick(5 * time.Second)
-	expectedLogSpout := getNumberOfNodes()
+	expectedPromtails := getNumberOfNodes()
 	for {
 		actualPromtail := 0
 		actualLoki := 0
 
 		select {
 		case <-timeout:
-			if expectedLogSpout != actualPromtail {
-				log.Printf("Expected 'promtail' pods healthy is %d but got %d instances", expectedLogSpout, actualPromtail)
+			if expectedPromtails != actualPromtail {
+				log.Printf("Expected 'promtail' pods healthy is %d but got %d instances", expectedPromtails, actualPromtail)
 				cmd := exec.Command("kubectl", "describe", "pods", "-l", "app=promtail", "-n", namespace)
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
@@ -72,6 +77,7 @@ func testPodsAreReady() {
 				log.Fatalf("Error while kubectl get: %s ", string(stdoutStderr))
 			}
 			outputArr := strings.Split(string(stdoutStderr), "\n")
+
 			for index := range outputArr {
 				if len(outputArr[index]) != 0 {
 					podName, isReady := getPodStatus(string(outputArr[index]))
@@ -86,7 +92,7 @@ func testPodsAreReady() {
 					}
 				}
 			}
-			if expectedLogSpout == actualPromtail && expectedLoki == actualLoki {
+			if expectedPromtails == actualPromtail && expectedLoki == actualLoki {
 				log.Println("Test pods status: All Loki/Promtail pods are ready!!")
 				return
 			}
@@ -96,7 +102,7 @@ func testPodsAreReady() {
 }
 
 func testLokiLabel() {
-	resp, err := http.Get("http://logging-loki:3100/api/prom/label")
+	resp, err := http.Get("http://logging-loki-internal:3100/api/prom/label")
 
 	if err != nil {
 		log.Fatalf("Test Check Loki Label Failed: error is: %v and response is: %v", err, resp)
@@ -174,7 +180,7 @@ func deployDummyPod() {
 
 func waitForDummyPodToRun() {
 	timeout := time.After(10 * time.Minute)
-	tick := time.Tick(1 * time.Second)
+	tick := time.Tick(30 * time.Second)
 
 	for {
 		select {
@@ -201,9 +207,9 @@ func testLogs() {
 		Timeout: 45 * time.Second,
 	}
 
-	res, err := c.Get("http://logging-loki:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-")
+	res, err := c.Get("http://logging-loki-internal:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-")
 	if err != nil {
-		log.Fatalf("Error in HTTP GET to http://logging-loki:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-: %v\n", err)
+		log.Fatalf("Error in HTTP GET to http://logging-loki-internal:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-: %v\n", err)
 	}
 	defer res.Body.Close()
 	log.Printf("Log request response status : %v", res.Status)
@@ -220,6 +226,8 @@ func testLogs() {
 	if submatches != nil {
 		log.Printf("The string 'logtest-' is present in logs: %v", string(buffer))
 		return
+	} else {
+		log.Fatalf("The string 'logtest-' is not present in logs: %v", string(buffer))
 	}
 
 }
