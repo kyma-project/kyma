@@ -15,7 +15,11 @@ type RBACDirective func(ctx context.Context, obj interface{}, next graphql.Resol
 
 func NewRBACDirective(a authorizer.Authorizer) RBACDirective {
 	return func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes gqlschema.ResourceAttributes) (res interface{}, err error) {
-		u := authn.UserInfoForContext(ctx)
+		u, err := authn.UserInfoForContext(ctx)
+		if err != nil {
+			glog.Errorf("Error while receiving user information: %v", err)
+			return nil, errors.New("access denied due to problems on the server side")
+		}
 		attrs := PrepareAttributes(ctx, u, attributes)
 		authorized, _, err := a.Authorize(attrs)
 

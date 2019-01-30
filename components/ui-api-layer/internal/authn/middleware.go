@@ -5,6 +5,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/pkg/errors"
+
 	"github.com/golang/glog"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/user"
@@ -49,9 +51,16 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 	}
 }
 
-func UserInfoForContext(ctx context.Context) user.Info {
-	raw, _ := ctx.Value(userInfoCtxKey).(user.Info)
-	return raw
+func UserInfoForContext(ctx context.Context) (user.Info, error) {
+	raw := ctx.Value(userInfoCtxKey)
+	if raw == nil {
+		return &user.DefaultInfo{}, errors.New("Unable to find user info in request context")
+	}
+	userInfo, ok := raw.(user.Info)
+	if !ok {
+		return &user.DefaultInfo{}, errors.New("User info from request context does not comply with user.Info interface")
+	}
+	return userInfo, nil
 }
 
 func WithUserInfoContext(ctx context.Context, userInfo user.Info) context.Context {
