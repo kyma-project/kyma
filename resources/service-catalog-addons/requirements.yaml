@@ -1,0 +1,9 @@
+dependencies:
+- name: binding-usage-controller
+  condition: binding-usage-controller.enabled
+- name: broker-ui
+  condition: broker-ui.enabled
+- name: catalog-ui
+  condition: catalog-ui.enabled
+- name: instances-ui
+  condition: instances-ui.enabled
