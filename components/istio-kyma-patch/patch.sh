@@ -66,6 +66,19 @@ function remove_not_used() {
   done <${CONFIG_DIR}/delete
 }
 
+function label_namespaces(){
+  echo "--> Add 'istio-injection' label to namespaces"
+  while read line; do
+    local name
+    name=$(cut -d' ' -f1 <<< "${line}")
+    local switch
+    switch=$(cut -d' ' -f2 <<< "${line}")
+    set +e
+    kubectl label namespace "${name}" "istio-injection=${switch}" --overwrite
+    set -e
+  done <"${CONFIG_DIR}"/injection-in-namespaces
+}
+
 function configure_sidecar_injector() {
   echo "--> Configure sidecar injector"
   local configmap=$(kubectl -n istio-system get configmap istio-sidecar-injector -o jsonpath='{.data.config}')
@@ -107,3 +120,4 @@ check_requirements
 configure_sidecar_injector
 run_all_patches
 remove_not_used
+label_namespaces
