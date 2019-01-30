@@ -75,7 +75,9 @@ func TestAuthMiddleware(t *testing.T) {
 			So(response.Code, ShouldEqual, 0)
 		})
 		Convey("Then user.Info is added to the context", func() {
-			So(UserInfoForContext(next.r.Context()), ShouldEqual, &userInfo)
+			userInfoFromCtx, err := UserInfoForContext(next.r.Context())
+			So(userInfoFromCtx, ShouldEqual, &userInfo)
+			So(err, ShouldBeNil)
 		})
 	})
 
@@ -159,7 +161,9 @@ func TestAuthMiddleware(t *testing.T) {
 			So(response.Code, ShouldEqual, 0)
 		})
 		Convey("Then user.Info is added to the context", func() {
-			So(UserInfoForContext(next.r.Context()), ShouldEqual, &userInfo)
+			userInfoFromCtx, err := UserInfoForContext(next.r.Context())
+			So(userInfoFromCtx, ShouldEqual, &userInfo)
+			So(err, ShouldBeNil)
 		})
 	})
 }
