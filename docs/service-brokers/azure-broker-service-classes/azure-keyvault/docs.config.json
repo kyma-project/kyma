@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure Key Vault",
+      "description": "Documentation for Azure Key Vault.",
+      "id": "d90c881e-c9bb-4e07-a87b-fcfe87e03276",
+      "type":"Service Class"
+    }
+}

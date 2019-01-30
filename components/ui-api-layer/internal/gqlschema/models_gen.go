@@ -181,7 +181,7 @@ type Function struct {
 	Trigger           string    `json:"trigger"`
 	CreationTimestamp time.Time `json:"creationTimestamp"`
 	Labels            Labels    `json:"labels"`
-	Environment       string    `json:"environment"`
+	Namespace         string    `json:"namespace"`
 }
 
 type IDPPreset struct {

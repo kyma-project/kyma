@@ -74,7 +74,7 @@ type resolverConfig struct {
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
 type Resolver interface {
-	FunctionsQuery(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error)
+	FunctionsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Function, error)
 }
 
 type domainResolver struct {

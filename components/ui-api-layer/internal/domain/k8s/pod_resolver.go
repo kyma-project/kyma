@@ -12,32 +12,35 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-//go:generate mockery -name=podLister -output=automock -outpkg=automock -case=underscore
-type podLister interface {
+//go:generate mockery -name=podSvc -output=automock -outpkg=automock -case=underscore
+type podSvc interface {
 	Find(name, namespace string) (*v1.Pod, error)
 	List(namespace string, pagingParams pager.PagingParams) ([]*v1.Pod, error)
+	Update(name, namespace string, update v1.Pod) (*v1.Pod, error)
+	Delete(name, namespace string) error
 }
 
 //go:generate mockery -name=gqlPodConverter -output=automock -outpkg=automock -case=underscore
 type gqlPodConverter interface {
 	ToGQL(in *v1.Pod) (*gqlschema.Pod, error)
 	ToGQLs(in []*v1.Pod) ([]gqlschema.Pod, error)
+	GQLJSONToPod(in gqlschema.JSON) (v1.Pod, error)
 }
 
 type podResolver struct {
-	podLister    podLister
+	podSvc       podSvc
 	podConverter gqlPodConverter
 }
 
-func newPodResolver(podLister podLister) *podResolver {
+func newPodResolver(podLister podSvc) *podResolver {
 	return &podResolver{
-		podLister:    podLister,
+		podSvc:       podLister,
 		podConverter: &podConverter{},
 	}
 }
 
 func (r *podResolver) PodQuery(ctx context.Context, name, namespace string) (*gqlschema.Pod, error) {
-	pod, err := r.podLister.Find(name, namespace)
+	pod, err := r.podSvc.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s with name %s from namespace %s", pretty.Pod, name, namespace))
 		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
@@ -56,7 +59,7 @@ func (r *podResolver) PodQuery(ctx context.Context, name, namespace string) (*gq
 }
 
 func (r *podResolver) PodsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Pod, error) {
-	pods, err := r.podLister.List(namespace, pager.PagingParams{
+	pods, err := r.podSvc.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,
 	})
@@ -73,4 +76,49 @@ func (r *podResolver) PodsQuery(ctx context.Context, namespace string, first *in
 	}
 
 	return converted, nil
+}
+
+func (r *podResolver) UpdatePodMutation(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Pod, error) {
+	pod, err := r.podConverter.GQLJSONToPod(update)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace `%s`", pretty.Pod, name, namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+	}
+
+	updated, err := r.podSvc.Update(name, namespace, pod)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace %s", pretty.Pod, name, namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+	}
+
+	updatedGql, err := r.podConverter.ToGQL(updated)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s `%s` from namespace %s", pretty.Pod, name, namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+	}
+
+	return updatedGql, nil
+}
+
+func (r *podResolver) DeletePodMutation(ctx context.Context, name string, namespace string) (*gqlschema.Pod, error) {
+	pod, err := r.podSvc.Find(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while finding %s `%s` in namespace `%s`", pretty.Pod, name, namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+	}
+
+	podCopy := pod.DeepCopy()
+	deletedPod, err := r.podConverter.ToGQL(podCopy)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Pod))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+	}
+
+	err = r.podSvc.Delete(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.Pod, name, namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+	}
+
+	return deletedPod, nil
 }
