@@ -16,6 +16,27 @@ metadata:
 {{- end }}
 spec:
   ports:
+    - name: http
+      port: {{ .Values.loki.service.port }}
+      protocol: TCP
+      targetPort: {{ .Values.loki.service.port }}
+  selector:
+    app: {{ template "loki.name" . }}
+    release: {{ .Release.Name }}
+
+## This second service definition is only for internal communication between promtail and loki
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: {{ template "loki.name" . }}
+    chart: {{ template "loki.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  name: {{ template "loki.fullname" . }}-internal
+spec:
+  ports:
     - name: {{ template "loki.name" . }}
       port: {{ .Values.loki.service.port }}
       protocol: TCP

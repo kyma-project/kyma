@@ -2,12 +2,11 @@ apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
   name: {{ template "loki.fullname" . }}
-
 spec:
   origins:
-    - jwt:
-        issuer: https://dex.{{ .Values.global.domainName }}
-        jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+  - jwt:
+      issuer: https://dex.{{ .Values.global.domainName }}
+      jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
   principalBinding: USE_ORIGIN
   targets:
-    - name: {{ template "loki.fullname" . }}
+  - name: {{ template "loki.fullname" . }}

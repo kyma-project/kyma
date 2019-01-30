@@ -46,7 +46,7 @@ spec:
             - name: config
               mountPath: /etc/loki
           ports:
-            - name: {{ template "loki.name" . }}
+            - name: http
               containerPort: {{ .Values.loki.service.port }}
               protocol: TCP
 {{- with .Values.loki.livenessProbe }}
