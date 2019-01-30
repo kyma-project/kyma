@@ -59,38 +59,38 @@ func TestSecureConnectionAndRegistration(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(tokenRequest, ShouldNotBeNil)
 
-			Convey("The operator should insert token into TokenRequest CRD", nil)
+			Convey("The operator should insert token into TokenRequest CRD", func() {
+				//TODO: Polling of tokenRequest
+				time.Sleep(5 * time.Second)
 
-			//TODO: Polling of tokenRequest
-			time.Sleep(5 * time.Second)
-
-			tokenRequest, err = tokenRequestClient.GetTokenRequest(APPNAME, v1.GetOptions{})
-			So(err, ShouldBeNil)
-			So(tokenRequest.Status.Token, ShouldNotBeNil)
-
-			Convey("When one-click-integration initiated", func() {
-
-				mockAppClient, err := testkit.NewMockApplicationClient()
+				tokenRequest, err = tokenRequestClient.GetTokenRequest(APPNAME, v1.GetOptions{})
 				So(err, ShouldBeNil)
+				So(tokenRequest.Status.Token, ShouldNotBeNil)
 
-				res, err := mockAppClient.ConnectToKyma(tokenRequest.Status.URL, true)
-				So(err, ShouldBeNil)
-				So(res, ShouldNotBeNil)
+				Convey("When one-click-integration initiated", func() {
 
-				Convey("The app should be connected to Kyma", func() {
-
-					res, err = mockAppClient.GetConnectionInfo()
+					mockAppClient, err := testkit.NewMockApplicationClient()
 					So(err, ShouldBeNil)
-					So(res.AppName, ShouldEqual, APPNAME)
-					So(res.ClusterDomain, ShouldNotBeNil)
-					So(res.EventsURL, ShouldNotBeNil)
-					So(res.MetadataURL, ShouldNotBeNil)
 
-					Convey("The services and events should be registered", func() {
-						apis, err := mockAppClient.GetAPIs()
+					res, err := mockAppClient.ConnectToKyma(tokenRequest.Status.URL, true)
+					So(err, ShouldBeNil)
+					So(res, ShouldNotBeNil)
+
+					Convey("The app should be connected to Kyma", func() {
+
+						res, err = mockAppClient.GetConnectionInfo()
 						So(err, ShouldBeNil)
-						So(len(*apis), ShouldBeGreaterThan, 0)
-						//TODO: Check whether events/services are properly registered
+						So(res.AppName, ShouldEqual, APPNAME)
+						So(res.ClusterDomain, ShouldNotBeNil)
+						So(res.EventsURL, ShouldNotBeNil)
+						So(res.MetadataURL, ShouldNotBeNil)
+
+						Convey("The services and events should be registered", func() {
+							apis, err := mockAppClient.GetAPIs()
+							So(err, ShouldBeNil)
+							So(len(*apis), ShouldBeGreaterThan, 0)
+							//TODO: Check whether events/services are properly registered
+						})
 					})
 				})
 			})

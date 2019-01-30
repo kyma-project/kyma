@@ -60,7 +60,10 @@ func (c *mockApplicationClient) ConnectToKyma(tokenURL string, shouldRegister bo
 		return nil, err
 	}
 
-	request.Form.Set("localKyma", strconv.FormatBool(c.isLocalKyma))
+	request.ParseForm()
+	request.Form.Add("localKyma", strconv.FormatBool(c.isLocalKyma))
+
+	request.Header.Add("Content-Type", "application/json")
 
 	response, err := c.httpClient.Do(request)
 	if err != nil {
@@ -68,6 +71,10 @@ func (c *mockApplicationClient) ConnectToKyma(tokenURL string, shouldRegister bo
 	}
 
 	connectResponse = &ConnectResponse{}
+
+	if response.StatusCode != 200 {
+		panic(response.StatusCode)
+	}
 
 	err = json.NewDecoder(response.Body).Decode(&connectResponse)
 	if err != nil {
@@ -84,6 +91,7 @@ func (c *mockApplicationClient) GetConnectionInfo() (connectResponse *ConnectRes
 		return nil, err
 	}
 
+	request.ParseForm()
 	request.Form.Set("localKyma", strconv.FormatBool(c.isLocalKyma))
 
 	response, err := c.httpClient.Do(request)
