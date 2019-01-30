@@ -74,15 +74,6 @@ data:
       }
     ]
 
-  istio-system.namespace.patch.json: |
-    [
-      {
-        "op": "add",
-        "path": "/metadata/labels/istio-injection",
-        "value": "disabled"
-      }
-    ]
-
   delete: |
     deployment prometheus
     configmap prometheus
