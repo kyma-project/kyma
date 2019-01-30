@@ -2,8 +2,19 @@
 title: Architecture
 ---
 
-This document outlines the logging architecture of Kyma. It highlights information sources from which Logspout extracts logs to feed to OK Log.
+This document outlines the logging architecture of Kyma. It highlights information sources from which Promtail extracts logs to feed to Loki.
 
-Logspout is deployed as a stateless Daemonset and shares `/var/run/docker.sock` from the node. It then feeds the logs to OK Log through the ingest API.
+#### Agent (Promtail)
+Agent is responsible for obtaining reliable metadata that is consistent with the metadata associated with the time series / metrics. To achieve this agent use the same service discovery and label relabelling libraries as Prometheus. Agent packed up in a daemon that discovers targets, produces metadata labels and tails log files to produce stream of logs, which will be buffered on client side and the sent to the service.
 
-OK Log is deployed as a Statefulset. It is capable for storing the logs for 7 days, which is a configurable property. Read more on OK Log architectural decisions [here](https://github.com/oklog/oklog/tree/master/doc/arch).
+#### Life of a Write Request
+The server-side components on the write path wii mirror the [Cortex](https://github.com/cortexproject/cortex) architecture.
+* Writes will first hit the Distributor, which is responsible for distributing and replacing the writes to the ingesters. Loki use the Cortex consistent hash ring and distribute writes based on a hash of the entire metadata.
+* Next writes will hit a 'log ingester' which batches up writes for the same stream in memory in to 'log chunks'. When chunks reach a predefined size or age, periodically flushed to the Cortex chunk store.
+* The Cortex chunk store will be updated to reduce copying of chunk data on the read and write path and add support for writing chunks of Grafana.
+
+#### Log Chunks
+A chunk is all logs for a given label set over a certain period. the chunks support appends, seek and streaming reads.
+
+#### Life of a Query Request
+As chunks are larger than Prometheus/Cortex chunks (Cortex chunks are max 1KB in size), it is not possible to load and decompress them in their entirety. Loki support streaming and iterating over them, only decompressing the parts necessary 
