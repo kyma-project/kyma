@@ -13,7 +13,7 @@ For GraphQL queries, the UI API Layer uses caching which is based on Informers f
 
 ## Modularization
 
-The UI API Layer consists of the Kubernetes resource logic and cache for different domains, such as the Service Catalog, Application, or Kubeless. The UI API Layer introduces modularization changes which are based on toggling modules while the server is running. The enabled module sychronizes cache for its resource and enables the module's logic for all server requests. If you disable a given module, every GraphQL query, mutation, and subscription related to this module returns an error.
+The UI API Layer consists of the Kubernetes resource logic and cache for different domains, such as the Service Catalog, Application, or Kubeless. The UI API Layer introduces modularization changes which are based on toggling modules while the server is running. The enabled module synchronizes cache for its resource and enables the module's logic for all server requests. If you disable a given module, every GraphQL query, mutation, and subscription related to this module returns an error.
 
 The UI API Layer module pluggability is hidden behind a feature toggle. It is not enabled by default because the Console UI still requires resiliency improvements to ensure no errors occur when a certain Kyma component is not installed.
 
