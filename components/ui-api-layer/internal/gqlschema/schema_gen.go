@@ -307,6 +307,11 @@ type ComplexityRoot struct {
 		Json              func(childComplexity int) int
 	}
 
+	PodEvent struct {
+		Type func(childComplexity int) int
+		Pod  func(childComplexity int) int
+	}
+
 	Query struct {
 		ServiceInstance       func(childComplexity int, name string, environment string) int
 		ServiceInstances      func(childComplexity int, environment string, first *int, offset *int, status *InstanceStatusType) int
@@ -533,6 +538,7 @@ type ComplexityRoot struct {
 		ServiceBrokerEvent        func(childComplexity int, environment string) int
 		ClusterServiceBrokerEvent func(childComplexity int) int
 		ApplicationEvent          func(childComplexity int) int
+		PodEvent                  func(childComplexity int, namespace string) int
 	}
 
 	Title struct {
@@ -662,6 +668,7 @@ type SubscriptionResolver interface {
 	ServiceBrokerEvent(ctx context.Context, environment string) (<-chan ServiceBrokerEvent, error)
 	ClusterServiceBrokerEvent(ctx context.Context) (<-chan ClusterServiceBrokerEvent, error)
 	ApplicationEvent(ctx context.Context) (<-chan ApplicationEvent, error)
+	PodEvent(ctx context.Context, namespace string) (<-chan PodEvent, error)
 }
 
 func field_Mutation_createServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -2039,6 +2046,21 @@ func field_Subscription_serviceBrokerEvent_args(rawArgs map[string]interface{}) 
 
 }
 
+func field_Subscription_podEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
 func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 bool
@@ -3199,6 +3221,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Pod.Json(childComplexity), true
+
+	case "PodEvent.type":
+		if e.complexity.PodEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.PodEvent.Type(childComplexity), true
+
+	case "PodEvent.pod":
+		if e.complexity.PodEvent.Pod == nil {
+			break
+		}
+
+		return e.complexity.PodEvent.Pod(childComplexity), true
 
 	case "Query.serviceInstance":
 		if e.complexity.Query.ServiceInstance == nil {
@@ -4408,6 +4444,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ApplicationEvent(childComplexity), true
+
+	case "Subscription.podEvent":
+		if e.complexity.Subscription.PodEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_podEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.PodEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Title.name":
 		if e.complexity.Title.Name == nil {
@@ -10717,6 +10765,96 @@ func (ec *executionContext) _Pod_json(ctx context.Context, field graphql.Collect
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+var podEventImplementors = []string{"PodEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _PodEvent(ctx context.Context, sel ast.SelectionSet, obj *PodEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, podEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodEvent")
+		case "type":
+			out.Values[i] = ec._PodEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "pod":
+			out.Values[i] = ec._PodEvent_pod(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _PodEvent_type(ctx context.Context, field graphql.CollectedField, obj *PodEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "PodEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _PodEvent_pod(ctx context.Context, field graphql.CollectedField, obj *PodEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "PodEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pod, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Pod(ctx, field.Selections, &res)
 }
 
 var queryImplementors = []string{"Query"}
@@ -17146,6 +17284,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_clusterServiceBrokerEvent(ctx, fields[0])
 	case "applicationEvent":
 		return ec._Subscription_applicationEvent(ctx, fields[0])
+	case "podEvent":
+		return ec._Subscription_podEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -17320,6 +17460,37 @@ func (ec *executionContext) _Subscription_applicationEvent(ctx context.Context, 
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ApplicationEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_podEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_podEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().PodEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._PodEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -20019,6 +20190,11 @@ enum PodStatusType {
     UNKNOWN
 }
 
+type PodEvent {
+    type: SubscriptionEventType!
+    pod: Pod!
+}
+
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -20290,6 +20466,7 @@ type Subscription {
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
+    podEvent(namespace: String!): PodEvent!
 }
 
 # Schema

@@ -394,6 +394,11 @@ enum PodStatusType {
     UNKNOWN
 }
 
+type PodEvent {
+    type: SubscriptionEventType!
+    pod: Pod!
+}
+
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -665,6 +670,7 @@ type Subscription {
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
+    podEvent(namespace: String!): PodEvent!
 }
 
 # Schema

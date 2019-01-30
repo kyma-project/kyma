@@ -3,6 +3,9 @@ package k8s
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/listener"
+	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
@@ -18,6 +21,8 @@ type podSvc interface {
 	List(namespace string, pagingParams pager.PagingParams) ([]*v1.Pod, error)
 	Update(name, namespace string, update v1.Pod) (*v1.Pod, error)
 	Delete(name, namespace string) error
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }
 
 //go:generate mockery -name=gqlPodConverter -output=automock -outpkg=automock -case=underscore
@@ -76,6 +81,24 @@ func (r *podResolver) PodsQuery(ctx context.Context, namespace string, first *in
 	}
 
 	return converted, nil
+}
+
+func (r *podResolver) PodEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.PodEvent, error) {
+	channel := make(chan gqlschema.PodEvent, 1)
+	filter := func(pod *v1.Pod) bool {
+		return pod != nil && pod.Namespace == namespace
+	}
+
+	podListener := listener.NewPod(channel, filter, r.podConverter)
+
+	r.podSvc.Subscribe(podListener)
+	go func() {
+		defer close(channel)
+		defer r.podSvc.Unsubscribe(podListener)
+		<-ctx.Done()
+	}()
+
+	return channel, nil
 }
 
 func (r *podResolver) UpdatePodMutation(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Pod, error) {

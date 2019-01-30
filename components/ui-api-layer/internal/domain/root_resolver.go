@@ -399,6 +399,10 @@ func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gql
 	return r.app.Resolver.ApplicationEventSubscription(ctx)
 }
 
+func (r *subscriptionResolver) PodEvent(ctx context.Context, namespace string) (<-chan gqlschema.PodEvent, error) {
+	return r.k8s.PodEventSubscription(ctx, namespace)
+}
+
 // Service Instance
 
 type serviceInstanceResolver struct {
