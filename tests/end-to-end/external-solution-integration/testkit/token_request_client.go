@@ -6,6 +6,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/clientcmd"
 	"os"
+	"time"
 )
 
 type TokenRequestClient interface {
@@ -38,6 +39,9 @@ func (t *tokenRequestClient) CreateTokenRequest(appName string) (*v1alpha1.Token
 	tokenRequest := &v1alpha1.TokenRequest{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: appName, Namespace: t.namespace},
+		Status: v1alpha1.TokenRequestStatus{
+			ExpireAfter: v1.NewTime(time.Now().Add(5 * time.Minute)),
+		},
 	}
 
 	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Create(tokenRequest)
