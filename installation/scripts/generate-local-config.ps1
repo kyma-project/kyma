@@ -1,3 +1,7 @@
+param (
+    [string]$PASSWORD
+)
+
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 
 $CONFIG_TPL_PATH = "${CURRENT_DIR}\..\resources\installer-config-local.yaml.tpl"
@@ -6,6 +10,7 @@ $CONFIG_OUTPUT_PATH = (New-TemporaryFile).FullName
 $VERSIONS_FILE_PATH = "${CURRENT_DIR}\..\versions-overrides.env"
 
 Copy-Item -Path $CONFIG_TPL_PATH -Destination $CONFIG_OUTPUT_PATH
+(Get-Content $CONFIG_OUTPUT_PATH).replace("global.adminPassword: `"`"", global.adminPassword: "${PASSWORD}") | Set-Content $CONFIG_OUTPUT_PATH
 
 ##########
 
