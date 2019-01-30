@@ -74,13 +74,14 @@ data:
       }
     ]
 
-  injection-in-namespaces: |
-    istio-system disabled
-    kube-system disabled
-    {{ if .Values.global.knative }}
-    knative-build disabled
-    knative-eventing disabled
-    {{ end }}
+  istio-system.namespace.patch.json: |
+    [
+      {
+        "op": "add",
+        "path": "/metadata/labels/istio-injection",
+        "value": "disabled"
+      }
+    ]
 
   delete: |
     deployment prometheus
