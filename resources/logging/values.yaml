@@ -12,7 +12,7 @@ loki:
 
   image:
     repository: grafana/loki
-    tag: master
+    tag: master-3e6a75e
     pullPolicy: Always
 
   service:
@@ -87,7 +87,7 @@ promtail:
 
   image:
     repository: grafana/promtail
-    tag: master 
+    tag: master-3e6a75e
     pullPolicy: Always
 
   service:
