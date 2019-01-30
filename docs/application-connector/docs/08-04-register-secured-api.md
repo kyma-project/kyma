@@ -54,10 +54,7 @@ This is an example of the `api` section of the request body for an API secured w
 
 ## Register a Generated Certificate-secured API
 
-Application Registry can generate private key and certificate for the registered API, and use it to make secure calls. Certificates are stored in Kubernetes secrets and can be manually switched. The secret name has the following format:
-```
-app-{APP_NAME}-{SERVICE_ID}
-```
+Application Registry can generate example private key and certificate for the registered API, and use it to make secure calls. Certificates are stored in Kubernetes secrets and can be manually replaced by the Kyma administrator. 
 
 To register an API secured with a generated certificate, add a `credentials.certificateGen` object to the `api` section of the service registration request body. You must include these fields:
 
@@ -77,4 +74,13 @@ This is an example of the `api` section of the request body for an API secured w
         }  
 ```
 
->**NOTE:** If the Common Name will be changed while updating the API a new certificate will be generated.
+### Replace key and certificate
+
+To replace the private key and the certificate used during authentication, run:
+```
+kubectl -n kyma-integration patch secrets app-{APP_NAME}-{SERVICE_ID} --patch 'data: 
+  crt: {BASE64_ENCODED_CRT}
+  key: {BASE64_ENCODED_KEY}'
+```
+
+>**NOTE:** If the `certificateGen.commonName` will be changed while updating the API, a new certificate will be generated.

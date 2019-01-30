@@ -45,7 +45,11 @@ The operator listens for creating or deleting the Application custom resources a
 
 ## Application Proxy
 
-The Application Proxy is an intermediary component between a lambda function or a service and an external API registered with the Application Registry. It can call services secured with the [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism, acquire OAuth tokens, call OAuth-secured APIs and use client certificate.  
+The Application Proxy is an intermediary component between a lambda function or a service and an external API registered with the Application Registry. 
+It can call services secured with:
+- [Basic Authentication](https://tools.ietf.org/html/rfc7617) 
+- OAuth
+- Client certificates
 
 ## Access Service
 
