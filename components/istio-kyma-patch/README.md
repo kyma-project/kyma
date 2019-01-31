@@ -43,4 +43,4 @@ which patches are applied by default.
 
 5. Enable default sidecar injection. By default, sidecar injection is enabled in the Namespaces labeled with `istio-injection: enabled`. The patch reverses this behavior: sidecar injection is enabled in all Namespaces, except those labeled with `istio-injection: disabled`.
 
-6. Label the Namespaces that should not allow sidecar injection. The list of excluded Namespaces is declared under the **exclude** key in the `istio-kyma-patch-config` Configmap.
+6. Label the Namespaces that should not allow sidecar injection. The list of excluded Namespaces is declared under the **injection-in-namespaces** key in the `istio-kyma-patch-config` Configmap.
