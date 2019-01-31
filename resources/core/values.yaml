@@ -17,7 +17,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: 501c4fe5
+    version: cc09a307
   alpine_net:
     dir: develop/
     version: ed568f0f
@@ -39,7 +39,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 44b474b5
+    version: efb39f1f
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -54,7 +54,7 @@ global:
     version: f01c8848
   helm_broker:
     dir: develop/
-    version: fe43403d
+    version: 6e4d78f1
   kubeless_integration_tests:
     dir: develop/
     version: e11a469a
@@ -69,10 +69,10 @@ global:
     version: e11a469a
   ui_api_layer:
     dir: develop/
-    version: ef6d4c13
+    version: 9431ea99
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: 339a2e65
+    version: 9431ea99
 
 test:
   acceptance:

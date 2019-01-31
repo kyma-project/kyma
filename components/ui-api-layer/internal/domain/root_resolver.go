@@ -171,6 +171,14 @@ type mutationResolver struct {
 	*RootResolver
 }
 
+func (r *mutationResolver) UpdatePod(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Pod, error) {
+	return r.k8s.UpdatePodMutation(ctx, name, namespace, update)
+}
+
+func (r *mutationResolver) DeletePod(ctx context.Context, name string, namespace string) (*gqlschema.Pod, error) {
+	return r.k8s.DeletePodMutation(ctx, name, namespace)
+}
+
 func (r *mutationResolver) CreateServiceInstance(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
 	return r.sc.Resolver.CreateServiceInstanceMutation(ctx, params)
 }
@@ -345,8 +353,8 @@ func (r *queryResolver) EventActivations(ctx context.Context, namespace string) 
 	return r.app.Resolver.EventActivationsQuery(ctx, namespace)
 }
 
-func (r *queryResolver) Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
-	return r.ac.APIsQuery(ctx, environment, namespace, serviceName, hostname)
+func (r *queryResolver) Apis(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
+	return r.ac.APIsQuery(ctx, namespace, serviceName, hostname)
 }
 
 func (r *queryResolver) IDPPreset(ctx context.Context, name string) (*gqlschema.IDPPreset, error) {
@@ -389,6 +397,10 @@ func (r *subscriptionResolver) ClusterServiceBrokerEvent(ctx context.Context) (<
 
 func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
 	return r.app.Resolver.ApplicationEventSubscription(ctx)
+}
+
+func (r *subscriptionResolver) PodEvent(ctx context.Context, namespace string) (<-chan gqlschema.PodEvent, error) {
+	return r.k8s.PodEventSubscription(ctx, namespace)
 }
 
 // Service Instance

@@ -22,6 +22,7 @@ type Client struct {
 	token     string
 	endpoint  string
 	logs      []string
+	Config    config
 }
 
 func New() (*Client, error) {
@@ -43,6 +44,7 @@ func New() (*Client, error) {
 		token:     token,
 		endpoint:  config.GraphQLEndpoint,
 		logs:      []string{},
+		Config:    config,
 	}
 	client.gqlClient.Log = client.addLog
 

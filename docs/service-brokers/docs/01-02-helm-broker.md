@@ -7,7 +7,7 @@ The Helm Broker is an implementation of a service broker which runs in the Kyma 
 
 Using bundles, you can also install other brokers, such as the [Google Cloud Platform Service Broker](https://github.com/kyma-project/bundles/tree/master/bundles/gcp-service-broker-0.0.2).
 
-For more information about the Service Brokers, see the **Service Brokers overview** document.
+For more information about the Service Brokers, see [this](#overview-service-brokers) document.
 
 The Helm Broker implements the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata) (OSB API).
 To be compliant with the Service Catalog version used in Kyma, the Helm Broker supports only the following versions of the OSB API:

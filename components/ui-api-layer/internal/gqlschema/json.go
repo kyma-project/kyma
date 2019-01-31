@@ -11,6 +11,16 @@ import (
 type JSON map[string]interface{}
 
 func (y *JSON) UnmarshalGQL(v interface{}) error {
+	if in, ok := v.(string); ok {
+		var jsonMap map[string]interface{}
+		err := json.Unmarshal([]byte(in), &jsonMap)
+		if err != nil {
+			glog.Error(errors.Wrapf(err, "while unmarshalling %+v scalar object", y))
+			return errors.Wrapf(err, "while unmarshalling %+v scalar object", y)
+		}
+		v = jsonMap
+	}
+
 	value := v.(map[string]interface{})
 	*y = value
 	return nil

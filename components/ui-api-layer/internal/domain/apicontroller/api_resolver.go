@@ -26,21 +26,11 @@ func newApiResolver(lister apiLister) (*apiResolver, error) {
 	}, nil
 }
 
-func (ar *apiResolver) APIsQuery(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
-	if namespace == nil && environment == nil {
-		return nil, errors.New("One of environment or namespace is required")
-	}
-
-	var ns string
-	if namespace != nil {
-		ns = *namespace
-	} else {
-		ns = *environment
-	}
-	apis, err := ar.apiLister.List(ns, serviceName, hostname)
+func (ar *apiResolver) APIsQuery(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]gqlschema.API, error) {
+	apis, err := ar.apiLister.List(namespace, serviceName, hostname)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s for service name %v, hostname %v", pretty.APIs, serviceName, hostname))
-		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithEnvironment(ns))
+		return nil, gqlerror.New(err, pretty.APIs, gqlerror.WithEnvironment(namespace))
 	}
 
 	return ar.apiConverter.ToGQLs(apis), nil

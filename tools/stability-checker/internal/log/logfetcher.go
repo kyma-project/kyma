@@ -10,6 +10,8 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
+const stabilityCheckerContainerName = "stability-checker"
+
 // PodLogFetcher is responsible for fetching logs from a specific pod
 type PodLogFetcher struct {
 	workingNamespace string
@@ -38,7 +40,7 @@ func NewPodLogFetcher(workingNamespace, podName string) (*PodLogFetcher, error) 
 
 // GetLogsFromPod returns logs from pod
 func (p *PodLogFetcher) GetLogsFromPod() (io.ReadCloser, error) {
-	req := p.coreV1Client.Pods(p.workingNamespace).GetLogs(p.podName, &v1.PodLogOptions{})
+	req := p.coreV1Client.Pods(p.workingNamespace).GetLogs(p.podName, &v1.PodLogOptions{Container: stabilityCheckerContainerName})
 	readCloser, err := req.Stream()
 	if err != nil {
 		return nil, errors.Wrapf(err, "while streaming logs from pod %q", p.podName)

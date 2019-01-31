@@ -19,7 +19,7 @@ The Microsoft Azure Service Broker is an open source, [Open Service Broker](http
 * Azure Text Analytics
 
 See the details of each Service Class and its specification in the Service Catalog UI.
-For more information about the Service Brokers, see the Service Brokers **Overview** document.
+For more information about the Service Brokers, see [this](#overview-service-brokers) document.
 
 >**NOTE:** Kyma uses the Microsoft Azure Service Broker open source project. To ensure the best performance and stability of the product, Kyma uses a version of the Azure Service Broker that precedes the newest version released by Microsoft.
 

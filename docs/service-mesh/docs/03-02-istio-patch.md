@@ -26,5 +26,4 @@ You can use an existing installation of Istio running on Kubernetes with Kyma. T
 
 >**NOTE:** You cannot skip applying the Istio patch in the Kyma installation process.
 
-To allow such implementation, you must install Kyma without Istio. Read the **Installation with custom Istio deployment** document in the **Kyma**
-topic for more details.
+To allow such implementation, you must install Kyma without Istio. Read [this](/docs/root/kyma#installation-custom-component-installation) document for more details.

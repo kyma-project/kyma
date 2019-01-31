@@ -23,22 +23,21 @@ Provisioning an instance creates a new Azure Service Broker in the given Namespa
 
 These are the minimum stability values:
  * `Stable` - represents relative stability of the mature, production ready service modules:
-    * [Azure Database for MySQL](docs/modules/mysql.md)
-    * [Azure Database for PostgreSQL v9.6](docs/modules/postgresql.md)
-    * [Azure SQL Database](docs/modules/mssql.md)
+    * [Azure Database for MySQL](https://github.com/Azure/open-service-broker-azure/blob/v1.4.0/docs/modules/mysql.md)
+    * [Azure Database for PostgreSQL v9.6](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/postgresql.md)
+    * [Azure SQL Database](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/mssql.md)
  * `Preview` - represents relative stability of modules that are approaching a stable state:
-     * [Azure CosmosDB](docs/modules/cosmosdb.md)
-     * [Azure Redis Cache](docs/modules/rediscache.md)
-     * [Azure Database for PostgreSQL v10](docs/modules/postgresql.md)
-     * [Azure Storage](docs/modules/storage.md)
+     * [Azure CosmosDB](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/cosmosdb.md)
+     * [Azure Redis Cache](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/rediscache.md)
+     * [Azure Database for PostgreSQL v10](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/postgresql.md)
+     * [Azure Storage](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/storage.md)
  * `Experimental` - represents relative stability of the most immature service modules: 
-    * [Azure Application Insights](docs/modules/appinsights.md)
-    * [Azure Event Hubs](docs/modules/eventhubs.md)
-    * [Azure IoT Hub](docs/modules/iothub.md)
-    * [Azure Key Vault](docs/modules/keyvault.md)
-    * [Azure Search](docs/modules/search.md)
-    * [Azure Service Bus](docs/modules/servicebus.md)
-    * [Azure Text Analytics (Cognitive Services)](docs/modules/textanalytics.md)
+    * [Azure Application Insights](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/appinsights.md)
+    * [Azure Event Hubs](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/eventhubs.md)
+    * [Azure IoT Hub](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/iothub.md)
+    * [Azure Key Vault](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/keyvault.md)
+    * [Azure Service Bus](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/servicebus.md)
+    * [Azure Text Analytics (Cognitive Services)](https://github.com/Azure/open-service-broker-azure/tree/v1.4.0/docs/modules/textanalytics.md)
 
 ## Binding
 
