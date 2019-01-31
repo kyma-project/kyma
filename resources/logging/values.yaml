@@ -139,8 +139,7 @@ global:
     path: docker.io/hbalik
   test_logging:
     dir: develop/
-    version: latest
-
+    version: b17d67137
 test:
   image:
     name: logging-test
