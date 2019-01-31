@@ -79,7 +79,6 @@ data:
     kube-system disabled
     {{ if .Values.global.knative }}
     knative-build disabled
-    knative-eventing disabled
     {{ end }}
 
   delete: |
