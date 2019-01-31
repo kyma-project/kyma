@@ -40,9 +40,9 @@ This table lists all the possible parameters of a given resource together with t
 |:-----------------------------------------:|:---------:|:---------------------------------------------------------------------------------------------------------------------------|
 | **metadata.name**                         | **YES**   | Specifies the name of the CR.                                                                                              |
 | **spec.endpoint**                         | **YES**   | The HTTP endpoint to which events are delivered as a POST request.                                                         |
-| **spec.push_request_timeout_ms**          | **YES**   | The HTTP request timeout. After the timeout has expired, event are redelivered.                                            |
-| **spec.max_inflight**                     | **YES**   | The maximum number of concurrent HTTP requests to deliver events.                                                          |
-| **spec.include_subscription_name_header** | **YES**   | Boolean flag indicating if the name of the subscription should be included in the HTTP headers while delivering the event. |
-| **spec.event_type**                       | **YES**   | The event type to which the event trigger is registered.                                                                   |
-| **spec.event_type_version**               | **YES**   | The version of the event type.                                                                                             |
+| **spec.push_request_timeout_ms**          | **YES**   | The HTTP request timeout. Once the timeout expires, the Event Bus retries to deliver the Event. Set the **minimum** parameter to `0` applies the default value of 1000ms.                                   |
+| **spec.max_inflight**                     | **YES**   | The maximum number of Events delivered concurrently. The final value is the **max_inflight** value multiplied by the number of  `push` applications.                                                          |
+| **spec.include_subscription_name_header** | **YES**   | The Boolean flag indicating if the name of the subscription should be included in the HTTP headers while delivering the event. |
+| **spec.event_type**                       | **YES**   | The Event type to which the event trigger is registered. For examples, **order.created**.                                                                 |
+| **spec.event_type_version**               | **YES**   | The version of the Event type.                                                                                             |
 | **spec.source_id**                        | **YES**   | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events.|

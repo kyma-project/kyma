@@ -3,10 +3,10 @@ title: Event flow requirements
 type: Details
 ---
 
-The Event Bus enables a successful flow of the Events in Kyma when:
+The Event Bus enables a successful flow of Events in Kyma when:
 
-- The [EventActivation](#details-event-flow-requirements-activate-events) is in place.
-- You create a [Subscription](#details-event-flow-requirements-consume-events) Kubernetes custom resource and register the webhook for the lambda or a service to consume the Events.
+- You have created an [EventActivation](docs/components/event-bus#concepts) controller.
+- You have created a [Subscription](/docs/components/event-bus#custom-resource-subscription)  custom resource and register the webhook for a lambda or service to consume the Events.
 - The Events are [published](#details-event-flow-requirements-event-publishing).
 
 ## Details
@@ -15,27 +15,21 @@ See the following subsections for details on each requirement.
 
 ### Activate Events
 
-To receive Events, use EventActivation between the Namespace and the Application (App).
+Use the EventActivation to ensure the Event flow between the Namespace and the Application (App). You can also simply [bind](/docs/components/application-connector#getting-started-bind-an-application-to-a-namespace) the App to the Namespace.
 
-For example, if you define the lambda in the `test123` Namespace and want to receive the `order-created` Event type from the `ec-qa` App, you need to enable the EventActivation between the `test123` Namespace and the `ec-qa` App. Otherwise, the lambda cannot receive the `order-created` Event type.
+The diagram shows you the Event flow for a particular Namespace.
 
-![EventActivation.png](./assets/event-activation.png)
+![EventActivation.png](./assets/event-activation.svg)
+
+The App sends the Events to the Event Bus and uses the EventApplication controller to ensure the Namespace receives the Events.  If you define a lambda in the `prod123` Namespace, it receives the **order.created** Event from the App using the EventApplication controller. The lambda in `test123` Namespace does not receive any Events, since you have not enabled the  you need to enable the EventActivation. 
+
+
 
 ### Consume Events
 
-Enable lambdas and services to consume Events in Kyma between any Namespace and an App using `push`. Deliver Events to the lambda or the service by registering a webhook for it. Create a Subscription Kubernetes custom resource to register the webhook.
+Enable lambdas and services to consume Events in Kyma between any Namespace and an App using `push`. Deliver Events to the lambda or the service by registering a webhook for it. Create a [Subscription custom resource](/docs/components/event-bus#custom-resource-subscription) to register the webhook.
 
-See the table for the explanation of parameters in the Subscription custom resource.
 
-| Parameter | Description |
-|----------------|------|
-| **include_subscription_name_header** | It indicates whether the lambda or the service includes the name of the Subscription when receiving an Event. |
-| **max_inflight** | It indicates the maximum number of Events which can be delivered concurrently. The final value is the **max_inflight** number multiplied by the number of the `push` applications. |
-| **push_request_timeout_ms** | It indicates the time for which the `push` waits for the response when delivering an Event to the lambda or the service. After the specified time passes, the request times out and the Event Bus retries delivering the Event. Setting the **minimum** parameter to `0` applies the default value of 1000ms. |
-| **event_type** | The name of the Event type. For example, `order-created`.|
-| **event_type_version** | The version of the Event type. For example, `v1`. |
-| **source_id** | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events. |
-
-### Event publishing
+### Publish Events
 
 Make sure that the external solution sends Events to Kyma.
