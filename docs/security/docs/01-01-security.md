@@ -24,6 +24,6 @@ The system creates two default roles in every Namespace:
 - `kyma-admin-role` - this role gives the user full access to the Namespace.
 - `kyma-reader-role` - this role gives the user the right to read all resources in the given Namespace.
 
-For more details about Namespaces, read the **Namespaces** document in the **Kyma** topic.
+For more details about Namespaces, read [this](/docs/root/kyma#details-namespaces) document.
 
 >**NOTE:** The **Global permissions** section in the **Administration** view of the Kyma Console UI allows you to manage user-group bindings.
