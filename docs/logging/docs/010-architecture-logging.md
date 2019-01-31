@@ -18,3 +18,6 @@ A chunk is all logs for a given label set over a certain period. the chunks supp
 
 #### Life of a Query Request
 As chunks are larger than Prometheus/Cortex chunks (Cortex chunks are max 1KB in size), it is not possible to load and decompress them in their entirety. Loki support streaming and iterating over them, only decompressing the parts necessary 
+
+
+Further information consult the original [design doc](https://docs.google.com/document/d/11tjK_lvp1-SVsFZjgOTr1vV3-q6vBAsZYIQ5ZeYBkyM/view)
