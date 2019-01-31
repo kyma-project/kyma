@@ -64,43 +64,28 @@ A successful call returns the following response:
         "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/{APP_NAME}",
     },
     "certificate":{
-        "subject":"OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
+        "subject":"OU=Test,O=TestOrg,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
         "extensions": "",
         "key-algorithm": "rsa2048",
     }
 }
 ```
 
-When you connect an external solution to a local Kyma deployment, you must set the NodePort of the `application-connector-nginx-ingress-controller` for the Application Registry and for the Event Service.
-
-- To get the NodePort, run:
-  ```
-  kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
-  ```
-- Set it for the Application Registry and the Event Service using these calls:
-  ```
-  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-  ```
-  ```
-  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
-  ```
-
 ## Generate a CSR and send it to Kyma
 
-Generate a CSR using the values obtained in the previous step:
+Generate a CSR using the certificate subject data obtained in the previous step:
 ```
 openssl genrsa -out generated.key 2048
-openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=OrgUnit/O=Organization/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
+openssl req -new -sha256 -out generated.csr -key generated.key -subj "/OU=Test/O=TestOrg/L=Waldorf/ST=Waldorf/C=DE/CN={APP_NAME}"
 openssl base64 -in generated.csr
 ```
 
 Send the encoded CSR to Kyma. Run:
-
 ```
-curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' https://connector-service.{CLUSTER_DOMAIN}/v1/applications/{APP_NAME}/client-certs?token=example-token-456
+curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' {CSR_SIGNING_URL_WITH_TOKEN}
 ```
 
-The response contains a valid client certificate signed by the Kyma Certificate Authority:
+The response contains a valid client certificate signed by the Kyma Certificate Authority.
 ```
 {
     "crt":"BASE64_ENCODED_CRT"
@@ -108,3 +93,19 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 ```
 
 After you receive the certificate, decode it and use it in your application. Register the services of your external solution through the Application Registry.
+
+## Call the Metadata and Event services on local deployment
+
+When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-nginx-ingress-controller` to successfully call the Metadata Service and the Event Service.
+
+- To get the NodePort, run:
+  ```
+  kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
+  ```
+- When you send requests to the Metadata Service and the Event Service, pass the NodePort along with the generated certificate and key. For example:
+  ```
+  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+  ```
+  ```
+  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/events --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+  ```

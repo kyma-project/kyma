@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure Cosmos DB Database Account (MongoDB API)",
+      "description": "Documentation for Azure Cosmos DB Database Account (MongoDB API).",
+      "id": "8797a079-5346-4e84-8018-b7d5ea5c0e3a",
+      "type":"Service Class"
+    }
+}

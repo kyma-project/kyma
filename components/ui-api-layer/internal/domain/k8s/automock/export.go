@@ -32,8 +32,8 @@ func NewResourceQuotaStatusChecker() *resourceQuotaStatusChecker {
 	return new(resourceQuotaStatusChecker)
 }
 
-func NewPodLister() *podLister {
-	return new(podLister)
+func NewPodSvc() *podSvc {
+	return new(podSvc)
 }
 
 func NewGqlPodConverter() *gqlPodConverter {

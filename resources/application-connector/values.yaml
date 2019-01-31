@@ -12,7 +12,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: 93dd20c2
+    version: ddaf7c1e
   application_operator_tests:
     dir: develop/
     version: 0c447819

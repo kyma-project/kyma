@@ -181,7 +181,7 @@ type Function struct {
 	Trigger           string    `json:"trigger"`
 	CreationTimestamp time.Time `json:"creationTimestamp"`
 	Labels            Labels    `json:"labels"`
-	Environment       string    `json:"environment"`
+	Namespace         string    `json:"namespace"`
 }
 
 type IDPPreset struct {
@@ -237,6 +237,11 @@ type ResourceAttributes struct {
 	Subresource  string  `json:"subresource"`
 	NameArg      *string `json:"nameArg"`
 	NamespaceArg *string `json:"namespaceArg"`
+}
+
+type PodEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	Pod  Pod                   `json:"pod"`
 }
 
 type ResourceQuota struct {

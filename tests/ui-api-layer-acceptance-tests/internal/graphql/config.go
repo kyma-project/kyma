@@ -30,6 +30,7 @@ type envConfig struct {
 type config struct {
 	GraphQLEndpoint  string
 	IdProviderConfig idProviderConfig
+	EnvConfig        envConfig
 }
 
 type idProviderConfig struct {
@@ -61,7 +62,7 @@ func loadConfig(userContext User) (config, error) {
 		return config{}, errors.Wrap(err, "while loading environment variables")
 	}
 
-	config := config{}
+	config := config{EnvConfig: env}
 
 	graphQLEndpoint := env.GraphQLEndpoint
 	if graphQLEndpoint == "" {
