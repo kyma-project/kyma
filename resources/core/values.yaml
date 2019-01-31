@@ -32,9 +32,6 @@ global:
   acceptance_tests:
     dir: develop/
     version: cc09a307
-  alpine_net:
-    dir: develop/
-    version: ed568f0f
   api_controller:
     dir: develop/
     version: 8c274255
