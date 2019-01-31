@@ -229,6 +229,11 @@ type Pod struct {
 	JSON              JSON             `json:"json"`
 }
 
+type PodEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	Pod  Pod                   `json:"pod"`
+}
+
 type ResourceAttributes struct {
 	Verb         string  `json:"verb"`
 	APIGroup     string  `json:"apiGroup"`
@@ -237,11 +242,6 @@ type ResourceAttributes struct {
 	Subresource  string  `json:"subresource"`
 	NameArg      *string `json:"nameArg"`
 	NamespaceArg *string `json:"namespaceArg"`
-}
-
-type PodEvent struct {
-	Type SubscriptionEventType `json:"type"`
-	Pod  Pod                   `json:"pod"`
 }
 
 type ResourceQuota struct {

@@ -19910,8 +19910,8 @@ input ResourceAttributes {
 	apiVersion: String!
 	resource: String!
 	subresource: String! = ""
-    nameArg: String
-    namespaceArg: String
+	nameArg: String
+	namespaceArg: String
 }
 
 # Content
@@ -20565,7 +20565,7 @@ type Mutation {
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
 
-	createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 }
 
