@@ -19,7 +19,7 @@ The whole concept of Asset Store relies on these elements:
 
 - **Mutation Service** which is an optional service which you can create to ensure that the asset is modified according to the mutation specification defined in the Asset CR before it is uploaded to the bucket. The service returns the modified asset to the Asset Controller.
 
-- **Minio Gateway** which is a Minio cluster mode which is a production-scalable storage solution. It ensure flexibility of using asset storage from major cloud providers, including Azure Blob Storage, Amazon S3, and Google Cloud Storage.
+- **Minio Gateway** which is a Minio cluster mode which is a production-scalable storage solution. It ensures flexibility of using asset storage from major cloud providers, including Azure Blob Storage, Amazon S3, and Google Cloud Storage.
 
 ## Asset flow
 

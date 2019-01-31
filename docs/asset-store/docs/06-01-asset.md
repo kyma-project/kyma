@@ -87,7 +87,7 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.source.mutationwebhookservice.name** |    **NO**   | Provides the name of the mutation webhook service. |
 | **spec.source.mutationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
 | **spec.source.mutationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
-| **spec.source.mutationwebhookservice.metadata** |    **NO**   | Provides details specification of the mutation service. |
+| **spec.source.mutationwebhookservice.metadata** |    **NO**   | Provides detailed specification of the mutation service. |
 | **spec.bucketref.name** |    **NO**   | Provides the name of the bucket for storing the asset. |
 | **status.phase** |    **NO**   | It is automatically added to the Asset CR by the Asset Controller. It describes the status of processing the Asset CR by the Asset Controller. It can be `Ready`, `Failed`, or `Pending`. |
 | **status.reason** |    **NO**   | Provides the reason why the Asset CR processing failed or is pending.  |
