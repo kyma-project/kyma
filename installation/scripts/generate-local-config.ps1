@@ -17,8 +17,6 @@ if(${PASSWORD} -ne "") {
   (Get-Content $CONFIG_OUTPUT_PATH).replace("global.adminPassword: `"`"", "global.adminPassword: `"${ENCODED_PASSWORD}`"") | Set-Content $CONFIG_OUTPUT_PATH
 }
 
-(Get-Content $CONFIG_OUTPUT_PATH).replace("global.adminPassword: `"`"", "global.adminPassword: `"${PASSWORD}`"") | Set-Content $CONFIG_OUTPUT_PATH
-
 ##########
 
 Write-Output "Applying configuration"
