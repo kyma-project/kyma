@@ -27,4 +27,4 @@ Unfortunately, this causes duplication of data as the assets from the previous b
 
 ## Other changes
 
-The Asset Controller does not act upon other changes in the Asset CR than the change of the bucket reference. Thus, if the location of the source files or the **mode** of the files changes, you need to remove the old Asset CD and create a new one with the correct details.
+The Asset Controller does not act upon changes in the Asset CR other than the change of the bucket reference. Thus, if the location of the source files or the **mode** of the files changes, you need to remove the old Asset CD and create a new one with the correct details.
