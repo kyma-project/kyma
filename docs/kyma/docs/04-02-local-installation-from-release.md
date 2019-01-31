@@ -147,7 +147,7 @@ By default, the Horizontal Pod Autoscaler (HPA) is not enabled in your local Kym
 
 Kyma uses the `autoscaling/v1` stable version, which supports only CPU autoscaling. Once enabled, HPA automatically scales the number of lambda function Pods based on the observed CPU utilization.
 
->**NOTE:** The `autoscaling/v1` version does not support custom metrics. To use such metrics, you need the `autoscaling/v2beta2` version.
+>**NOTE:** The `autoscaling/v1` version does not support custom metrics. To use such metrics, you need the `autoscaling/v2beta1` version.
 
 Follow these steps to enable HPA:
 
