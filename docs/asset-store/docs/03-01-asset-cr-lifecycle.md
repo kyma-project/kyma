@@ -3,7 +3,7 @@ title: Asset Custom Resource Lifecycle
 type: Details
 ---
 
-Read about the lifecycle of the Asset Custom Resource (CR) and how other resources react to its creation, removal, or the change in the bucket reference.
+Read about the lifecycle of the Asset custom resource (CR) and how other resources react to its creation, removal, or the change in the bucket reference.
 
 ## Create an Asset CR
 

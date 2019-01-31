@@ -3,7 +3,7 @@ title: Bucket Custom Resource Lifecycle
 type: Details
 ---
 
-Read about the lifecycle of the Bucket Custom Resource (CR) and how other resources react to its creation and removal.
+Read about the lifecycle of the Bucket custom resource (CR) and how other resources react to its creation and removal.
 
 
 ## Create a Bucket CR
