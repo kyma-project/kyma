@@ -18,6 +18,8 @@ spec:
       maxUnavailable: 0
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "stability-checker.fullname" . }}
         chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
