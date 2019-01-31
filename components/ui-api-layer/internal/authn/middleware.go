@@ -37,10 +37,8 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 			u, ok, err := a.AuthenticateRequest(r)
 			if err != nil {
 				glog.Errorf("Unable to authenticate the request due to an error: %v", err)
-				http.Error(w, "Unauthorized", http.StatusUnauthorized)
-				return
 			}
-			if !ok {
+			if !ok || err != nil {
 				http.Error(w, "Unauthorized", http.StatusUnauthorized)
 				return
 			}
