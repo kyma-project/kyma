@@ -1,0 +1,38 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    nginx.ingress.kubernetes.io/ingress-class: "nginx"
+    nginx.ingress.kubernetes.io/allow-http: "false"
+    nginx.ingress.kubernetes.io/auth-tls-pass-certificate-to-upstream: "false"
+    nginx.ingress.kubernetes.io/auth-tls-secret: {{ .Values.ingress.authSecret }}
+    nginx.ingress.kubernetes.io/auth-tls-verify-client: "on"
+    nginx.ingress.kubernetes.io/auth-tls-verify-depth: "3"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Subject $ssl_client_s_dn;
+spec:
+  rules:
+  - host: gateway.{{ .Values.global.domainName }}
+    http:
+      paths:
+      - path: /v1/applications/management/info
+        backend:
+          serviceName: connector-service-external-api.kyma-integration.svc.cluster.local
+          servicePort: 8081
+      - path: /v1/runtimes/management/info
+        backend:
+          serviceName: connector-service-external-api.kyma-integration.svc.cluster.local
+          servicePort: 8081
+
+  tls:
+  - hosts:
+    - gateway.{{ .Values.global.domainName }}
+    secretName: {{ .Values.ingress.tlsSecret }}
