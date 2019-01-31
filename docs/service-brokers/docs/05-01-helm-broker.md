@@ -41,7 +41,7 @@ Follow these steps to change the configuration and make the Helm Broker fetch bu
   ```
   > **NOTE:** You can skip the `yaml` filename in the URL if the name of the file is `index.yaml`. In that case, your URL should be equal to `http://custom.bundles-repository/`.
 
-3. Install Kyma on Minikube. See the **Install Kyma locally from the release** document to learn how.
+3. Install Kyma on Minikube. See [this](/docs/master/root/kyma#installation-install-kyma-locally-from-the-release) document to learn how.
 
 ### Configure repository URLs in the runtime
 
@@ -51,11 +51,11 @@ Follow these steps to add the repository URL:
 
  ```bash
  URLS=$(kubectl get -n kyma-system deployment/core-helm-broker --output=jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="APP_REPOSITORY_URLS")].value}')
- 
+
  kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_URLS="$URLS;http://custom.bundles-repository/bundles.yaml"
- 
+
  # At the moment, there is a bug in Minikube. As a result, for the local installation you need to manually edit the broker and bump the relistRequests attribute.
- 
+
  kubectl edit clusterservicebrokers core-helm-broker
  ```
 
@@ -66,4 +66,3 @@ Follow these steps to add the repository URL:
  ```
 
 Running the Helm Broker triggers the Service Catalog synchronization automatically. New ClusterServiceClasses appear after a half-minute.
-
