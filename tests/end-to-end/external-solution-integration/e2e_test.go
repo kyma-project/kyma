@@ -9,9 +9,10 @@ import (
 )
 
 const (
-	APPNAME     = "e2e-app"
-	ACCESSLABEL = "a1b2c3"
-	NAMESPACE   = "kyma-integration"
+	APPNAME             = "e2e-app"
+	ACCESSLABEL         = "a1b2c3"
+	NAMESPACE           = "production"
+	INTEGRATIONAMESPACE = "kyma-integration"
 )
 
 func TestApplicationCRDCreation(t *testing.T) {
@@ -20,7 +21,7 @@ func TestApplicationCRDCreation(t *testing.T) {
 
 		Convey("When CRD created", func() {
 
-			K8SClient, err := testkit.NewK8sResourcesClient(NAMESPACE)
+			K8SClient, err := testkit.NewK8sResourcesClient(INTEGRATIONAMESPACE)
 			So(err, ShouldBeNil)
 
 			app, err := K8SClient.CreateDummyApplication(APPNAME, ACCESSLABEL, false)
@@ -52,7 +53,7 @@ func TestSecureConnectionAndRegistration(t *testing.T) {
 
 		Convey("When token requested", func() {
 
-			tokenRequestClient, err := testkit.NewTokenRequestClient(NAMESPACE)
+			tokenRequestClient, err := testkit.NewTokenRequestClient(INTEGRATIONAMESPACE)
 			So(err, ShouldBeNil)
 
 			tokenRequest, err := tokenRequestClient.CreateTokenRequest(APPNAME)
@@ -102,64 +103,47 @@ func TestBindings(t *testing.T) {
 
 	Convey("Given application and environment", t, func() {
 
-		Convey("When binding is created", func() {
-
-			Convey("It should generate proper service classes", nil)
-
-		})
-
-	})
-
-	Convey("Given service and environment", t, func() {
+		lambdaClient, err := testkit.NewLambdaClient(NAMESPACE)
+		So(err, ShouldBeNil)
 
 		Convey("When binding is created", func() {
 
-			Convey("It should create proper service instances", nil)
+			_, err := lambdaClient.CreateMapping(APPNAME)
+			So(err, ShouldBeNil)
 
+			Convey("It should generate proper service classes", func() {
+
+			})
 		})
-
 	})
-
-	Convey("Given events and environment", t, func() {
-
-		Convey("When binding is created", func() {
-
-			Convey("It should create proper service instances", nil)
-
-		})
-
-	})
-
 }
 
 func TestLambda(t *testing.T) {
 
 	Convey("Given Lambda's code", t, func() {
 
-		Convey("When event-trigger created", func() {
+		Convey("When lambda and bindings are created", func() {
 
-			Convey("It should be accessible within the system", nil)
+			lambdaClient, err := testkit.NewLambdaClient(NAMESPACE)
+			So(err, ShouldBeNil)
 
+			err = lambdaClient.DeployLambda(APPNAME)
+			So(err, ShouldBeNil)
+
+			_, err = lambdaClient.CreateEventActivation(APPNAME)
+			So(err, ShouldBeNil)
+
+			_, err = lambdaClient.CreateSubscription(APPNAME)
+			So(err, ShouldBeNil)
+
+			//TODO: Create servicebinding for lamda-OCC
+
+			Convey("When event is sent", func() {
+
+				Convey("Lambda should react to the event", func() {
+
+				})
+			})
 		})
-
-		Convey("When lambda is created", func() {
-
-			Convey("It should provide proper infrastructure", nil)
-
-		})
-
-		Convey("When service binding is created", func() {
-
-			Convey("It should be containing information on lambda's triggers", nil)
-
-		})
-
-		Convey("When event is sent", func() {
-
-			Convey("Lambda should react to the event", nil)
-
-		})
-
 	})
-
 }
