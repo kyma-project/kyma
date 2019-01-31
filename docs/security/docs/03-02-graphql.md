@@ -21,8 +21,5 @@ The implementation assigns GraphQL actions to specific Kubernetes verbs:
 
 ## Available GraphQL actions
 
-To access cluster resources through GraphQL, an action securing given resource must be defined in the cluster.
-To see the list of actions available in your cluster, run this command:
-
-
-Alternatively, see the [GraphQL schema](/kyma/components/ui-api-layer/internal/gqlschema/schema.graphql) file to see the list of actions implemented in every Kyma cluster by default.
+To access cluster resources through GraphQL, an action securing given resource must be defined and implemented in the cluster.
+See the [GraphQL schema](/kyma/components/ui-api-layer/internal/gqlschema/schema.graphql) file to see the list of actions implemented in every Kyma cluster by default.
