@@ -158,4 +158,151 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
+
+	t.Run("should use headers if present", func(t *testing.T) {
+		//given
+		newToken := "newToken"
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
+
+		apiURLsGenerator := NewApplicationApiUrlsStrategy("", "", "", "")
+
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		require.NoError(t, err)
+		req.Header.Add(BaseEventsPathHeader, "events.base.path")
+		req.Header.Add(BaseMetadataPathHeader, "metadata.base.path")
+		expectedMetadataUrl := "https://metadata.base.path/application/v1/metadata/services"
+		expectedEventsUrl := "https://events.base.path/application/v1/events"
+
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+
+		rr := httptest.NewRecorder()
+
+		//when
+		infoHandler.GetCSRInfo(rr, req)
+
+		//then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var infoResponse infoResponse
+		infoResponse.API = &applicationApi{}
+		err = json.Unmarshal(responseBody, &infoResponse)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		api := infoResponse.API.(*applicationApi)
+		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
+		assert.Equal(t, expectedEventsUrl, api.EventsURL)
+	})
+
+	t.Run("should use default value for empty header", func(t *testing.T) {
+		//given
+		newToken := "newToken"
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
+
+		apiURLsGenerator := NewApplicationApiUrlsStrategy("metadata.default.path", "", "", "")
+
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		require.NoError(t, err)
+		req.Header.Add(BaseEventsPathHeader, "events.base.path")
+		req.Header.Add(BaseMetadataPathHeader, "")
+		expectedMetadataUrl := "https://metadata.default.path/application/v1/metadata/services"
+		expectedEventsUrl := "https://events.base.path/application/v1/events"
+
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+
+		rr := httptest.NewRecorder()
+
+		//when
+		infoHandler.GetCSRInfo(rr, req)
+
+		//then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var infoResponse infoResponse
+		infoResponse.API = &applicationApi{}
+		err = json.Unmarshal(responseBody, &infoResponse)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		api := infoResponse.API.(*applicationApi)
+		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
+		assert.Equal(t, expectedEventsUrl, api.EventsURL)
+	})
+
+	t.Run("should use default value for non-existing header", func(t *testing.T) {
+		//given
+		newToken := "newToken"
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
+
+		apiURLsGenerator := NewApplicationApiUrlsStrategy("metadata.default.path", "", "", "")
+
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		require.NoError(t, err)
+		req.Header.Add(BaseEventsPathHeader, "events.base.path")
+		expectedMetadataUrl := "https://metadata.default.path/application/v1/metadata/services"
+		expectedEventsUrl := "https://events.base.path/application/v1/events"
+
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+
+		rr := httptest.NewRecorder()
+
+		//when
+		infoHandler.GetCSRInfo(rr, req)
+
+		//then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var infoResponse infoResponse
+		infoResponse.API = &applicationApi{}
+		err = json.Unmarshal(responseBody, &infoResponse)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		api := infoResponse.API.(*applicationApi)
+		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
+		assert.Equal(t, expectedEventsUrl, api.EventsURL)
+	})
+
+	t.Run("should return empty url when both header and default value are empty", func(t *testing.T) {
+		//given
+		newToken := "newToken"
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
+
+		apiURLsGenerator := NewApplicationApiUrlsStrategy("", "", "", "")
+
+		req, err := http.NewRequest(http.MethodGet, url, nil)
+		require.NoError(t, err)
+		req.Header.Add(BaseEventsPathHeader, "events.base.path")
+		req.Header.Add(BaseMetadataPathHeader, "")
+		expectedMetadataUrl := ""
+		expectedEventsUrl := "https://events.base.path/application/v1/events"
+
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+
+		rr := httptest.NewRecorder()
+
+		//when
+		infoHandler.GetCSRInfo(rr, req)
+
+		//then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var infoResponse infoResponse
+		infoResponse.API = &applicationApi{}
+		err = json.Unmarshal(responseBody, &infoResponse)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		api := infoResponse.API.(*applicationApi)
+		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
+		assert.Equal(t, expectedEventsUrl, api.EventsURL)
+	})
 }

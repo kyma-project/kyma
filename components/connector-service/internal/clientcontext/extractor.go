@@ -10,13 +10,25 @@ import (
 
 type ConnectorClientExtractor func(ctx context.Context) (ConnectorClientContext, apperrors.AppError)
 
+type ExtendedApplicationContext struct {
+	ApplicationContext
+	RuntimeURLs
+}
+
 func ExtractApplicationContext(ctx context.Context) (ConnectorClientContext, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)
 	if !ok {
 		return nil, apperrors.Internal("Failed to create params when reading ApplicationContext")
 	}
 
-	return appCtx, nil
+	// TODO - extract runtime URLs
+	//runtimeUrls, ok :=
+
+	extendedCtx := &ExtendedApplicationContext{
+		ApplicationContext: appCtx,
+	}
+
+	return extendedCtx, nil
 }
 
 func ExtractClusterContext(ctx context.Context) (ConnectorClientContext, apperrors.AppError) {

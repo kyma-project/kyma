@@ -18,11 +18,15 @@ type infoResponse struct {
 	CertificateInfo certInfo    `json:"certificate"`
 }
 
-type applicationApi struct {
-	MetadataURL     string `json:"metadataUrl"`
-	EventsURL       string `json:"eventsUrl"`
+type api struct {
+	runtimeURLs
 	InfoURL         string `json:"infoUrl"`
 	CertificatesURL string `json:"certificatesUrl"`
+}
+
+type runtimeURLs struct {
+	MetadataURL string `json:"metadataUrl"`
+	EventsURL   string `json:"eventsUrl"`
 }
 
 type runtimeApi struct {

@@ -12,7 +12,9 @@ import (
 )
 
 const (
-	CertificateURLFormat = "%s?token=%s"
+	CertificateURLFormat   = "%s?token=%s"
+	BaseEventsPathHeader   = "Base-Events-Path"
+	BaseMetadataPathHeader = "Base-Metadata-Path"
 )
 
 type CSRInfoHandler struct {
@@ -46,6 +48,12 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
+	}
+
+	apiURLs := api{
+		CertificatesURL: "dwadaw",
+		InfoURL:         "dwadw",
+		runtimeURLs:     connectorClientContext.GetRuntimeUrls(),
 	}
 
 	csrURL := fmt.Sprintf(CertificateURLFormat, ih.certificateURL, newToken)
