@@ -19,14 +19,19 @@ type Authorizer struct {
 	authorizer.Authorizer
 }
 
-func NewAuthorizer(client authorizationclient.SubjectAccessReviewInterface) (authorizer.Authorizer, error) {
+type SARCacheConfig struct {
+	AllowCacheTTL time.Duration `envconfig:"default=5m"`
+	DenyCacheTTL  time.Duration `envconfig:"default=30s"`
+}
+
+func NewAuthorizer(client authorizationclient.SubjectAccessReviewInterface, cacheConfig SARCacheConfig) (authorizer.Authorizer, error) {
 	if client == nil {
 		return nil, errors.New("no client provided, cannot use webhook authorization")
 	}
 	authorizerConfig := authorizerfactory.DelegatingAuthorizerConfig{
 		SubjectAccessReviewClient: client,
-		AllowCacheTTL:             5 * time.Minute,
-		DenyCacheTTL:              30 * time.Second,
+		AllowCacheTTL:             cacheConfig.AllowCacheTTL,
+		DenyCacheTTL:              cacheConfig.DenyCacheTTL,
 	}
 	a, err := authorizerConfig.New()
 

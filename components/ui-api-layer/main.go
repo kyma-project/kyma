@@ -45,6 +45,7 @@ type config struct {
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config
 	OIDC                 authn.OIDCConfig
+	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles
 }
 
@@ -65,7 +66,7 @@ func main() {
 	authenticator, err := authn.NewOIDCAuthenticator(&cfg.OIDC)
 	exitOnError(err, "Error while creating OIDC authenticator")
 	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
-	authorizer, err := authz.NewAuthorizer(sarClient)
+	authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
 	exitOnError(err, "Failed to create authorizer")
 
 	stopCh := signal.SetupChannel()
