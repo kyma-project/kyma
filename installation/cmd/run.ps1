@@ -2,7 +2,8 @@ param (
     [string]$CR_PATH = "",
     [switch]$SKIP_MINIKUBE_START = $false,
     [switch]$KNATIVE = $false,
-    [string]$VM_DRIVER = "hyperv"
+    [string]$VM_DRIVER = "hyperv",
+    [string]$PASSWORD = ""
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
@@ -26,7 +27,7 @@ if ($SKIP_MINIKUBE_START -eq $false) {
 
 Invoke-Expression -Command "${SCRIPTS_DIR}\build-kyma-installer.ps1 -vm_driver ${VM_DRIVER}"
 
-Invoke-Expression -Command "${SCRIPTS_DIR}\generate-local-config.ps1"
+Invoke-Expression -Command "${SCRIPTS_DIR}\generate-local-config.ps1 -password '${PASSWORD}'"
 
 $CR_PATH = (New-TemporaryFile).FullName
 
