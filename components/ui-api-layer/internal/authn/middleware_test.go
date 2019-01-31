@@ -6,8 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/pkg/errors"
-	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/apiserver/pkg/authentication/user"
 )
 
@@ -15,48 +16,45 @@ func TestAuthMiddleware(t *testing.T) {
 
 	userInfo := user.DefaultInfo{Name: "Test User", UID: "deadbeef", Groups: []string{"admins", "testers"}}
 
-	Convey("When HTTP request is unauthorised", t, func() {
-
+	t.Run("When HTTP request is unauthorised", func(t *testing.T) {
 		reject := &mockAuthenticator{Authorised: false}
 		middleware := AuthMiddleware(reject)
 		next := &mockHandler{}
 		response := httptest.NewRecorder()
 		middleware(next).ServeHTTP(response, newHttpRequest())
 
-		Convey("Then authorizer is called with token", func() {
-			So(reject.Called, ShouldBeTrue)
-			So(reject.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
+		t.Run("Then authorizer is called with token", func(t *testing.T) {
+			assert.True(t, reject.Called)
+			assert.Equal(t, "Bearer token", reject.LastReq.Header.Get("authorization"))
 		})
-		Convey("Then next handler is not called", func() {
-			So(next.Called, ShouldBeFalse)
+		t.Run("Then next handler is not called", func(t *testing.T) {
+			assert.False(t, next.Called)
 		})
-		Convey("Then request is rejected with status code unauthorised", func() {
-			So(response.Code, ShouldEqual, http.StatusUnauthorized)
+		t.Run("Then request is rejected with status code unauthorised", func(t *testing.T) {
+			assert.Equal(t, http.StatusUnauthorized, response.Code)
 		})
 	})
 
-	Convey("When authentication error occurs on HTTP request", t, func() {
-
+	t.Run("When authentication error occurs on HTTP request", func(t *testing.T) {
 		erroneous := &mockAuthenticator{Err: errors.New("failure")}
 		middleware := AuthMiddleware(erroneous)
 		next := &mockHandler{}
 		response := httptest.NewRecorder()
 		middleware(next).ServeHTTP(response, newHttpRequest())
 
-		Convey("Then authorizer is called with token", func() {
-			So(erroneous.Called, ShouldBeTrue)
-			So(erroneous.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
+		t.Run("Then authorizer is called with token", func(t *testing.T) {
+			assert.True(t, erroneous.Called)
+			assert.Equal(t, "Bearer token", erroneous.LastReq.Header.Get("authorization"))
 		})
-		Convey("Then next handler is not called", func() {
-			So(next.Called, ShouldBeFalse)
+		t.Run("Then next handler is not called", func(t *testing.T) {
+			assert.False(t, next.Called)
 		})
-		Convey("Then request is rejected with status code unauthorised", func() {
-			So(response.Code, ShouldEqual, http.StatusUnauthorized)
+		t.Run("Then request is rejected with status code unauthorised", func(t *testing.T) {
+			assert.Equal(t, http.StatusUnauthorized, response.Code)
 		})
 	})
 
-	Convey("When HTTP request is authenticated", t, func() {
-
+	t.Run("When HTTP request is authenticated", func(t *testing.T) {
 		authenticated := &mockAuthenticator{Authorised: true, UserInfo: &userInfo}
 		middleware := AuthMiddleware(authenticated)
 		next := &mockHandler{}
@@ -64,25 +62,24 @@ func TestAuthMiddleware(t *testing.T) {
 		response.Code = 0
 		middleware(next).ServeHTTP(response, newHttpRequest())
 
-		Convey("Then authorizer is called with token", func() {
-			So(authenticated.Called, ShouldBeTrue)
-			So(authenticated.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
+		t.Run("Then authorizer is called with token", func(t *testing.T) {
+			assert.True(t, authenticated.Called)
+			assert.Equal(t, "Bearer token", authenticated.LastReq.Header.Get("authorization"))
 		})
-		Convey("Then next handler is called", func() {
-			So(next.Called, ShouldBeTrue)
+		t.Run("Then next handler is called", func(t *testing.T) {
+			assert.True(t, next.Called)
 		})
-		Convey("Then status code is not set", func() {
-			So(response.Code, ShouldEqual, 0)
+		t.Run("Then status code is not set", func(t *testing.T) {
+			assert.Equal(t, 0, response.Code)
 		})
-		Convey("Then user.Info is added to the context", func() {
+		t.Run("Then user.Info is added to the context", func(t *testing.T) {
 			userInfoFromCtx, err := UserInfoForContext(next.r.Context())
-			So(userInfoFromCtx, ShouldEqual, &userInfo)
-			So(err, ShouldBeNil)
+			assert.Equal(t, &userInfo, userInfoFromCtx)
+			assert.Nil(t, err)
 		})
 	})
 
-	Convey("When websocket request has malformed protocol header", t, func() {
-
+	t.Run("When websocket request has malformed protocol header", func(t *testing.T) {
 		authenticated := &mockAuthenticator{Authorised: true, UserInfo: &userInfo}
 		middleware := AuthMiddleware(authenticated)
 		next := &mockHandler{}
@@ -90,59 +87,56 @@ func TestAuthMiddleware(t *testing.T) {
 		response.Code = 0
 		middleware(next).ServeHTTP(response, newMalformedWebsocketRequest())
 
-		Convey("Must not call authorizer", func() {
-			So(authenticated.Called, ShouldBeFalse)
+		t.Run("Must not call authorizer", func(t *testing.T) {
+			assert.False(t, authenticated.Called)
 		})
-		Convey("Then next handler is not called", func() {
-			So(next.Called, ShouldBeFalse)
+		t.Run("Then next handler is not called", func(t *testing.T) {
+			assert.False(t, next.Called)
 		})
-		Convey("Then request is rejected with status bad request", func() {
-			So(response.Code, ShouldEqual, http.StatusBadRequest)
+		t.Run("Then request is rejected with status bad request", func(t *testing.T) {
+			assert.Equal(t, http.StatusBadRequest, response.Code)
 		})
 	})
 
-	Convey("When Websocket request is unauthorised", t, func() {
-
+	t.Run("When Websocket request is unauthorised", func(t *testing.T) {
 		reject := &mockAuthenticator{Authorised: false}
 		middleware := AuthMiddleware(reject)
 		next := &mockHandler{}
 		response := httptest.NewRecorder()
 		middleware(next).ServeHTTP(response, newWebsocketRequest())
 
-		Convey("Then authorizer is called with token", func() {
-			So(reject.Called, ShouldBeTrue)
-			So(reject.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
+		t.Run("Then authorizer is called with token", func(t *testing.T) {
+			assert.True(t, reject.Called)
+			assert.Equal(t, "Bearer token", reject.LastReq.Header.Get("authorization"))
 		})
-		Convey("Then next handler is not called", func() {
-			So(next.Called, ShouldBeFalse)
+		t.Run("Then next handler is not called", func(t *testing.T) {
+			assert.False(t, next.Called)
 		})
-		Convey("Then request is rejected with status code unauthorised", func() {
-			So(response.Code, ShouldEqual, http.StatusUnauthorized)
+		t.Run("Then request is rejected with status code unauthorised", func(t *testing.T) {
+			assert.Equal(t, http.StatusUnauthorized, response.Code)
 		})
 	})
 
-	Convey("When authentication error occurs on Websocket request", t, func() {
-
+	t.Run("When authentication error occurs on Websocket request", func(t *testing.T) {
 		erroneous := &mockAuthenticator{Err: errors.New("failure")}
 		middleware := AuthMiddleware(erroneous)
 		next := &mockHandler{}
 		response := httptest.NewRecorder()
 		middleware(next).ServeHTTP(response, newWebsocketRequest())
 
-		Convey("Then authorizer is called with token", func() {
-			So(erroneous.Called, ShouldBeTrue)
-			So(erroneous.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
+		t.Run("Then authorizer is called with token", func(t *testing.T) {
+			assert.True(t, erroneous.Called)
+			assert.Equal(t, "Bearer token", erroneous.LastReq.Header.Get("authorization"))
 		})
-		Convey("Then next handler is not called", func() {
-			So(next.Called, ShouldBeFalse)
+		t.Run("Then next handler is not called", func(t *testing.T) {
+			assert.False(t, next.Called)
 		})
-		Convey("Then request is rejected with status code unauthorised", func() {
-			So(response.Code, ShouldEqual, http.StatusUnauthorized)
+		t.Run("Then request is rejected with status code unauthorised", func(t *testing.T) {
+			assert.Equal(t, http.StatusUnauthorized, response.Code)
 		})
 	})
 
-	Convey("When Websocket request is authenticated", t, func() {
-
+	t.Run("When Websocket request is authenticated", func(t *testing.T) {
 		authenticated := &mockAuthenticator{Authorised: true, UserInfo: &userInfo}
 		middleware := AuthMiddleware(authenticated)
 		next := &mockHandler{}
@@ -150,20 +144,20 @@ func TestAuthMiddleware(t *testing.T) {
 		response.Code = 0
 		middleware(next).ServeHTTP(response, newWebsocketRequest())
 
-		Convey("Then authorizer is called with token", func() {
-			So(authenticated.Called, ShouldBeTrue)
-			So(authenticated.LastReq.Header.Get("authorization"), ShouldEqual, "Bearer token")
+		t.Run("Then authorizer is called with token", func(t *testing.T) {
+			assert.True(t, authenticated.Called)
+			assert.Equal(t, "Bearer token", authenticated.LastReq.Header.Get("authorization"))
 		})
-		Convey("Then next handler is called", func() {
-			So(next.Called, ShouldBeTrue)
+		t.Run("Then next handler is called", func(t *testing.T) {
+			assert.True(t, next.Called)
 		})
-		Convey("Then status code is not set", func() {
-			So(response.Code, ShouldEqual, 0)
+		t.Run("Then status code is not set", func(t *testing.T) {
+			assert.Equal(t, 0, response.Code)
 		})
-		Convey("Then user.Info is added to the context", func() {
+		t.Run("Then user.Info is added to the context", func(t *testing.T) {
 			userInfoFromCtx, err := UserInfoForContext(next.r.Context())
-			So(userInfoFromCtx, ShouldEqual, &userInfo)
-			So(err, ShouldBeNil)
+			assert.Equal(t, &userInfo, userInfoFromCtx)
+			assert.Nil(t, err)
 		})
 	})
 }

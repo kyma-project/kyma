@@ -3,38 +3,38 @@ package authz
 import (
 	"testing"
 
-	. "github.com/smartystreets/goconvey/convey"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestPrepareAttributes(t *testing.T) {
 
-	Convey("When no arg is required", t, func() {
+	t.Run("When no arg is required", func(t *testing.T) {
 
 		gqlAttributes := noArgsAttributes()
 		authAttributes := PrepareAttributes(noArgsContext(), &userInfo, gqlAttributes)
 
-		verifyCommonAttributes(authAttributes)
+		verifyCommonAttributes(t, authAttributes)
 
-		Convey("Then namespace is empty", func() {
-			So(authAttributes.GetNamespace(), ShouldBeEmpty)
+		t.Run("Then namespace is empty", func(t *testing.T) {
+			assert.Empty(t, authAttributes.GetNamespace())
 		})
-		Convey("Then name is empty", func() {
-			So(authAttributes.GetName(), ShouldBeEmpty)
+		t.Run("Then name is empty", func(t *testing.T) {
+			assert.Empty(t, authAttributes.GetName())
 		})
 
 	})
 
-	Convey("When args are required", t, func() {
+	t.Run("When args are required", func(t *testing.T) {
 		gqlAttributes := withArgsAttributes()
 		authAttributes := PrepareAttributes(withArgsContext(), &userInfo, gqlAttributes)
 
-		verifyCommonAttributes(authAttributes)
+		verifyCommonAttributes(t, authAttributes)
 
-		Convey("Then namespace is set", func() {
-			So(authAttributes.GetNamespace(), ShouldEqual, namespace)
+		t.Run("Then namespace is set", func(t *testing.T) {
+			assert.Equal(t, namespace, authAttributes.GetNamespace())
 		})
-		Convey("Then name is set", func() {
-			So(authAttributes.GetName(), ShouldEqual, name)
+		t.Run("Then name is set", func(t *testing.T) {
+			assert.Equal(t, name, authAttributes.GetName())
 		})
 	})
 }

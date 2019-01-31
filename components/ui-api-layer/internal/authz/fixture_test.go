@@ -2,10 +2,12 @@ package authz
 
 import (
 	"context"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
-	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 )
@@ -63,26 +65,26 @@ func withArgsContext() context.Context {
 	return graphql.WithResolverContext(context.Background(), &resolver)
 }
 
-func verifyCommonAttributes(authAttributes authorizer.Attributes) {
-	Convey("Then user is set", func() {
-		So(authAttributes.GetUser(), ShouldEqual, &userInfo)
+func verifyCommonAttributes(t *testing.T, authAttributes authorizer.Attributes) {
+	t.Run("Then user is set", func(t *testing.T) {
+		assert.Equal(t, &userInfo, authAttributes.GetUser())
 	})
-	Convey("Then verb is set", func() {
-		So(authAttributes.GetVerb(), ShouldEqual, verb)
+	t.Run("Then verb is set", func(t *testing.T) {
+		assert.Equal(t, verb, authAttributes.GetVerb())
 	})
-	Convey("Then API group is set", func() {
-		So(authAttributes.GetAPIGroup(), ShouldEqual, apiGroup)
+	t.Run("Then API group is set", func(t *testing.T) {
+		assert.Equal(t, apiGroup, authAttributes.GetAPIGroup())
 	})
-	Convey("Then API version is set", func() {
-		So(authAttributes.GetAPIVersion(), ShouldEqual, apiVersion)
+	t.Run("Then API version is set", func(t *testing.T) {
+		assert.Equal(t, apiVersion, authAttributes.GetAPIVersion())
 	})
-	Convey("Then resource is set", func() {
-		So(authAttributes.GetResource(), ShouldEqual, resource)
+	t.Run("Then resource is set", func(t *testing.T) {
+		assert.Equal(t, resource, authAttributes.GetResource())
 	})
-	Convey("Then subresource is set", func() {
-		So(authAttributes.GetSubresource(), ShouldEqual, subresource)
+	t.Run("Then subresource is set", func(t *testing.T) {
+		assert.Equal(t, subresource, authAttributes.GetSubresource())
 	})
-	Convey("Then ResourceRequest is true", func() {
-		So(authAttributes.IsResourceRequest(), ShouldBeTrue)
+	t.Run("Then ResourceRequest is true", func(t *testing.T) {
+		assert.True(t, authAttributes.IsResourceRequest())
 	})
 }

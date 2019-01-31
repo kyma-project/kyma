@@ -4,16 +4,16 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
-
-	. "github.com/smartystreets/goconvey/convey"
 )
 
 func TestNewRBACDirective(t *testing.T) {
 	ctx := authn.WithUserInfoContext(withArgsContext(), &userInfo)
 
-	Convey("When decision is 'allow'", t, func() {
+	t.Run("When decision is 'allow'", func(t *testing.T) {
 		authorizerMock := &mockAuthorizer{decision: authorizer.DecisionAllow}
 		resolver := &mockResolver{}
 
@@ -23,18 +23,18 @@ func TestNewRBACDirective(t *testing.T) {
 
 		_, err := directive(ctx, 0, resolver.Mock, attributes)
 
-		Convey("Then authorizer is called with proper attributes", func() {
-			verifyCommonAttributes(authorizerMock.lastCallAttributes)
+		t.Run("Then authorizer is called with proper attributes", func(t *testing.T) {
+			verifyCommonAttributes(t, authorizerMock.lastCallAttributes)
 		})
-		Convey("Then next resolver is called with input context", func() {
-			So(resolver.lastCallContext, ShouldEqual, ctx)
+		t.Run("Then next resolver is called with input context", func(t *testing.T) {
+			assert.Equal(t, ctx, resolver.lastCallContext)
 		})
-		Convey("Then no error is returned", func() {
-			So(err, ShouldBeNil)
+		t.Run("Then no error is returned", func(t *testing.T) {
+			assert.Nil(t, err)
 		})
 	})
 
-	Convey("When decision is 'deny'", t, func() {
+	t.Run("When decision is 'deny'", func(t *testing.T) {
 		authorizerMock := &mockAuthorizer{decision: authorizer.DecisionDeny}
 		resolver := &mockResolver{}
 		attributes := withArgsAttributes()
@@ -43,18 +43,18 @@ func TestNewRBACDirective(t *testing.T) {
 
 		_, err := directive(ctx, 0, resolver.Mock, attributes)
 
-		Convey("Then authorizer is called with proper attributes", func() {
-			verifyCommonAttributes(authorizerMock.lastCallAttributes)
+		t.Run("Then authorizer is called with proper attributes", func(t *testing.T) {
+			verifyCommonAttributes(t, authorizerMock.lastCallAttributes)
 		})
-		Convey("Then next resolver is not called", func() {
-			So(resolver.lastCallContext, ShouldEqual, nil)
+		t.Run("Then next resolver is not called", func(t *testing.T) {
+			assert.Equal(t, nil, resolver.lastCallContext)
 		})
-		Convey("Then error is returned", func() {
-			So(err, ShouldNotBeNil)
+		t.Run("Then error is returned", func(t *testing.T) {
+			assert.NotNil(t, err)
 		})
 	})
 
-	Convey("When decision is 'no opinion'", t, func() {
+	t.Run("When decision is 'no opinion'", func(t *testing.T) {
 		authorizerMock := &mockAuthorizer{decision: authorizer.DecisionNoOpinion}
 		resolver := &mockResolver{}
 		attributes := withArgsAttributes()
@@ -63,14 +63,14 @@ func TestNewRBACDirective(t *testing.T) {
 
 		_, err := directive(ctx, 0, resolver.Mock, attributes)
 
-		Convey("Then authorizer is called with proper attributes", func() {
-			verifyCommonAttributes(authorizerMock.lastCallAttributes)
+		t.Run("Then authorizer is called with proper attributes", func(t *testing.T) {
+			verifyCommonAttributes(t, authorizerMock.lastCallAttributes)
 		})
-		Convey("Then next resolver is not called", func() {
-			So(resolver.lastCallContext, ShouldEqual, nil)
+		t.Run("Then next resolver is not called", func(t *testing.T) {
+			assert.Equal(t, nil, resolver.lastCallContext)
 		})
-		Convey("Then error is returned", func() {
-			So(err, ShouldNotBeNil)
+		t.Run("Then error is returned", func(t *testing.T) {
+			assert.NotNil(t, err)
 		})
 	})
 }
