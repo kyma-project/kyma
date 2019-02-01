@@ -28,14 +28,14 @@ func NewResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer ca
 
 // Pod
 
-func NewPodResolver(podLister podLister) *podResolver {
-	return newPodResolver(podLister)
+func NewPodResolver(podSvc podSvc) *podResolver {
+	return newPodResolver(podSvc)
 }
 
 func (r *podResolver) SetInstanceConverter(converter gqlPodConverter) {
 	r.podConverter = converter
 }
 
-func NewPodService(informer cache.SharedIndexInformer) *podService {
-	return newPodService(informer)
+func NewPodService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) *podService {
+	return newPodService(informer, client)
 }

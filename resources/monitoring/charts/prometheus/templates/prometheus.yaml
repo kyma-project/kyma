@@ -12,6 +12,9 @@ metadata:
 {{- end }}
   name: {{ .Release.Name }}
 spec:
+  podMetadata:
+    annotations:
+      sidecar.istio.io/inject: "false"
 {{- if .Values.alertingEndpoints }}
   alerting:
     alertmanagers:

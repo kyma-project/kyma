@@ -251,7 +251,7 @@ type ComplexityRoot struct {
 		Trigger           func(childComplexity int) int
 		CreationTimestamp func(childComplexity int) int
 		Labels            func(childComplexity int) int
-		Environment       func(childComplexity int) int
+		Namespace         func(childComplexity int) int
 	}
 
 	Idppreset struct {
@@ -289,6 +289,8 @@ type ComplexityRoot struct {
 		DeleteApplication         func(childComplexity int, name string) int
 		EnableApplication         func(childComplexity int, application string, namespace string) int
 		DisableApplication        func(childComplexity int, application string, namespace string) int
+		UpdatePod                 func(childComplexity int, name string, namespace string, pod JSON) int
+		DeletePod                 func(childComplexity int, name string, namespace string) int
 		CreateIdppreset           func(childComplexity int, name string, issuer string, jwksUri string) int
 		DeleteIdppreset           func(childComplexity int, name string) int
 	}
@@ -303,6 +305,11 @@ type ComplexityRoot struct {
 		Status            func(childComplexity int) int
 		ContainerStates   func(childComplexity int) int
 		Json              func(childComplexity int) int
+	}
+
+	PodEvent struct {
+		Type func(childComplexity int) int
+		Pod  func(childComplexity int) int
 	}
 
 	Query struct {
@@ -321,7 +328,7 @@ type ComplexityRoot struct {
 		UsageKinds            func(childComplexity int, first *int, offset *int) int
 		UsageKindResources    func(childComplexity int, usageKind string, environment string) int
 		BindableResources     func(childComplexity int, environment string) int
-		Apis                  func(childComplexity int, environment *string, namespace *string, serviceName *string, hostname *string) int
+		Apis                  func(childComplexity int, namespace string, serviceName *string, hostname *string) int
 		Application           func(childComplexity int, name string) int
 		Applications          func(childComplexity int, namespace *string, first *int, offset *int) int
 		ConnectorService      func(childComplexity int, application string) int
@@ -531,6 +538,7 @@ type ComplexityRoot struct {
 		ServiceBrokerEvent        func(childComplexity int, environment string) int
 		ClusterServiceBrokerEvent func(childComplexity int) int
 		ApplicationEvent          func(childComplexity int) int
+		PodEvent                  func(childComplexity int, namespace string) int
 	}
 
 	Title struct {
@@ -591,6 +599,8 @@ type MutationResolver interface {
 	DeleteApplication(ctx context.Context, name string) (DeleteApplicationOutput, error)
 	EnableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
 	DisableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
+	UpdatePod(ctx context.Context, name string, namespace string, pod JSON) (*Pod, error)
+	DeletePod(ctx context.Context, name string, namespace string) (*Pod, error)
 	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*IDPPreset, error)
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 }
@@ -610,7 +620,7 @@ type QueryResolver interface {
 	UsageKinds(ctx context.Context, first *int, offset *int) ([]UsageKind, error)
 	UsageKindResources(ctx context.Context, usageKind string, environment string) ([]UsageKindResource, error)
 	BindableResources(ctx context.Context, environment string) ([]BindableResourcesOutputItem, error)
-	Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]API, error)
+	Apis(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]API, error)
 	Application(ctx context.Context, name string) (*Application, error)
 	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
@@ -658,6 +668,7 @@ type SubscriptionResolver interface {
 	ServiceBrokerEvent(ctx context.Context, environment string) (<-chan ServiceBrokerEvent, error)
 	ClusterServiceBrokerEvent(ctx context.Context) (<-chan ClusterServiceBrokerEvent, error)
 	ApplicationEvent(ctx context.Context) (<-chan ApplicationEvent, error)
+	PodEvent(ctx context.Context, namespace string) (<-chan PodEvent, error)
 }
 
 func field_Mutation_createServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -955,6 +966,63 @@ func field_Mutation_disableApplication_args(rawArgs map[string]interface{}) (map
 		}
 	}
 	args["application"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_updatePod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["pod"]; ok {
+		var err error
+		err = (&arg2).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pod"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_deletePod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
@@ -1452,22 +1520,17 @@ func field_Query_bindableResources_args(rawArgs map[string]interface{}) (map[str
 
 func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["environment"]; ok {
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
-			arg0 = &ptr1
-		}
-
+		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 *string
-	if tmp, ok := rawArgs["namespace"]; ok {
+	if tmp, ok := rawArgs["serviceName"]; ok {
 		var err error
 		var ptr1 string
 		if tmp != nil {
@@ -1479,9 +1542,9 @@ func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface
 			return nil, err
 		}
 	}
-	args["namespace"] = arg1
+	args["serviceName"] = arg1
 	var arg2 *string
-	if tmp, ok := rawArgs["serviceName"]; ok {
+	if tmp, ok := rawArgs["hostname"]; ok {
 		var err error
 		var ptr1 string
 		if tmp != nil {
@@ -1493,21 +1556,7 @@ func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface
 			return nil, err
 		}
 	}
-	args["serviceName"] = arg2
-	var arg3 *string
-	if tmp, ok := rawArgs["hostname"]; ok {
-		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
-			arg3 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["hostname"] = arg3
+	args["hostname"] = arg2
 	return args, nil
 
 }
@@ -1993,6 +2042,21 @@ func field_Subscription_serviceBrokerEvent_args(rawArgs map[string]interface{}) 
 		}
 	}
 	args["environment"] = arg0
+	return args, nil
+
+}
+
+func field_Subscription_podEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -2831,12 +2895,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Labels(childComplexity), true
 
-	case "Function.environment":
-		if e.complexity.Function.Environment == nil {
+	case "Function.namespace":
+		if e.complexity.Function.Namespace == nil {
 			break
 		}
 
-		return e.complexity.Function.Environment(childComplexity), true
+		return e.complexity.Function.Namespace(childComplexity), true
 
 	case "IDPPreset.name":
 		if e.complexity.Idppreset.Name == nil {
@@ -3047,6 +3111,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DisableApplication(childComplexity, args["application"].(string), args["namespace"].(string)), true
 
+	case "Mutation.updatePod":
+		if e.complexity.Mutation.UpdatePod == nil {
+			break
+		}
+
+		args, err := field_Mutation_updatePod_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePod(childComplexity, args["name"].(string), args["namespace"].(string), args["pod"].(JSON)), true
+
+	case "Mutation.deletePod":
+		if e.complexity.Mutation.DeletePod == nil {
+			break
+		}
+
+		args, err := field_Mutation_deletePod_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePod(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
 	case "Mutation.createIDPPreset":
 		if e.complexity.Mutation.CreateIdppreset == nil {
 			break
@@ -3133,6 +3221,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Pod.Json(childComplexity), true
+
+	case "PodEvent.type":
+		if e.complexity.PodEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.PodEvent.Type(childComplexity), true
+
+	case "PodEvent.pod":
+		if e.complexity.PodEvent.Pod == nil {
+			break
+		}
+
+		return e.complexity.PodEvent.Pod(childComplexity), true
 
 	case "Query.serviceInstance":
 		if e.complexity.Query.ServiceInstance == nil {
@@ -3324,7 +3426,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Apis(childComplexity, args["environment"].(*string), args["namespace"].(*string), args["serviceName"].(*string), args["hostname"].(*string)), true
+		return e.complexity.Query.Apis(childComplexity, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string)), true
 
 	case "Query.application":
 		if e.complexity.Query.Application == nil {
@@ -4342,6 +4444,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ApplicationEvent(childComplexity), true
+
+	case "Subscription.podEvent":
+		if e.complexity.Subscription.PodEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_podEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.PodEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Title.name":
 		if e.complexity.Title.Name == nil {
@@ -9078,8 +9192,8 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._Function_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._Function_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -9203,7 +9317,7 @@ func (ec *executionContext) _Function_labels(ctx context.Context, field graphql.
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Function_environment(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+func (ec *executionContext) _Function_namespace(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -9215,7 +9329,7 @@ func (ec *executionContext) _Function_environment(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -9766,6 +9880,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_enableApplication(ctx, field)
 		case "disableApplication":
 			out.Values[i] = ec._Mutation_disableApplication(ctx, field)
+		case "updatePod":
+			out.Values[i] = ec._Mutation_updatePod(ctx, field)
+		case "deletePod":
+			out.Values[i] = ec._Mutation_deletePod(ctx, field)
 		case "createIDPPreset":
 			out.Values[i] = ec._Mutation_createIDPPreset(ctx, field)
 		case "deleteIDPPreset":
@@ -10161,6 +10279,76 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 	}
 
 	return ec._ApplicationMapping(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_updatePod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_updatePod_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePod(rctx, args["name"].(string), args["namespace"].(string), args["pod"].(JSON))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Pod(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deletePod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deletePod_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePod(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Pod(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -10577,6 +10765,96 @@ func (ec *executionContext) _Pod_json(ctx context.Context, field graphql.Collect
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+var podEventImplementors = []string{"PodEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _PodEvent(ctx context.Context, sel ast.SelectionSet, obj *PodEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, podEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodEvent")
+		case "type":
+			out.Values[i] = ec._PodEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "pod":
+			out.Values[i] = ec._PodEvent_pod(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _PodEvent_type(ctx context.Context, field graphql.CollectedField, obj *PodEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "PodEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _PodEvent_pod(ctx context.Context, field graphql.CollectedField, obj *PodEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "PodEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pod, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Pod(ctx, field.Selections, &res)
 }
 
 var queryImplementors = []string{"Query"}
@@ -11666,7 +11944,7 @@ func (ec *executionContext) _Query_apis(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Apis(rctx, args["environment"].(*string), args["namespace"].(*string), args["serviceName"].(*string), args["hostname"].(*string))
+		return ec.resolvers.Query().Apis(rctx, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -17006,6 +17284,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_clusterServiceBrokerEvent(ctx, fields[0])
 	case "applicationEvent":
 		return ec._Subscription_applicationEvent(ctx, fields[0])
+	case "podEvent":
+		return ec._Subscription_podEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -17180,6 +17460,37 @@ func (ec *executionContext) _Subscription_applicationEvent(ctx context.Context, 
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ApplicationEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_podEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_podEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().PodEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._PodEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -19879,6 +20190,11 @@ enum PodStatusType {
     UNKNOWN
 }
 
+type PodEvent {
+    type: SubscriptionEventType!
+    pod: Pod!
+}
+
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -20024,7 +20340,7 @@ type Function {
     trigger: String!
     creationTimestamp: Timestamp!
     labels: Labels!
-    environment: String!
+    namespace: String!
 }
 
 input InputTopic {
@@ -20088,7 +20404,7 @@ type Query {
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
     bindableResources(environment: String!): [BindableResourcesOutputItem!]!
 
-    apis(environment: String, namespace: String, serviceName: String, hostname: String): [API!]!
+    apis(namespace: String!, serviceName: String, hostname: String): [API!]!
 
     application(name: String!): Application
     applications(namespace: String, first: Int, offset: Int): [Application!]!
@@ -20134,6 +20450,9 @@ type Mutation {
     enableApplication(application: String!, namespace: String!): ApplicationMapping
     disableApplication(application: String!, namespace: String!): ApplicationMapping
 
+    updatePod(name: String!, namespace: String!, pod: JSON!): Pod
+    deletePod(name: String!, namespace: String!): Pod
+
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
     deleteIDPPreset(name: String!): IDPPreset
 }
@@ -20147,6 +20466,7 @@ type Subscription {
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
+    podEvent(namespace: String!): PodEvent!
 }
 
 # Schema

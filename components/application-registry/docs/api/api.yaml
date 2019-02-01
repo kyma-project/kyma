@@ -227,6 +227,12 @@ components:
         spec:
           type: 'object'
           description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
+        SpecificationUrl:
+          type: 'string'
+          format: 'uri'
+        ApiType:
+          type: 'string'
+          description: 'API type, for example OData'
       required:
         - targetUrl
     Events:
@@ -276,6 +282,8 @@ components:
           $ref: '#/components/schemas/OAuth'
         basic:
           $ref: '#/components/schemas/Basic'
+        certificateGen:
+          $ref: '#/components/schemas/CertificateGen'
     OAuth:
       type: 'object'
       properties:
@@ -296,6 +304,11 @@ components:
         username:
           type: 'string'
         password:
+          type: 'string'
+    CertificateGen:
+      type: 'object'
+      properties:
+        commonName:
           type: 'string'
     MetadataErrorResponse:
       type: 'object'

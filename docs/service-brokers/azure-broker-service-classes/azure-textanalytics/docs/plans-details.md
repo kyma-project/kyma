@@ -32,12 +32,11 @@ These are the provisioning parameters:
 
 ### Credentials
 
-The binding returns the following connection details and credentials:
+Binding returns the following connection details:
 
 | Parameter Name | Type | Description |
 |----------------|------|-------------|
-| **host** | `string` | The fully-qualified address of the MySQL Server. |
-| **port** | `int	` | The port number to connect to on the MySQL Server. |
-| **database** | `string` | The name of the database. |
-| **username** | `string` | The name of the database user. |
-| **password** | `string` | The password for the database user. |
+| **textAnalyticsEndpoint** | `string` | The text analytics API endpoint address. |
+| **textAnalyticsKey** | `string` | The text analytics API access key. |
+| **textAnalyticsName** | `string` | The name of the text analytics API. |
+

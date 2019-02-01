@@ -66,27 +66,41 @@ function remove_not_used() {
   done <${CONFIG_DIR}/delete
 }
 
+function label_namespaces(){
+  echo "--> Add 'istio-injection' label to namespaces"
+  while read line; do
+    local name
+    name=$(cut -d' ' -f1 <<< "${line}")
+    local switch
+    switch=$(cut -d' ' -f2 <<< "${line}")
+    set +e
+    kubectl label namespace "${name}" "istio-injection=${switch}" --overwrite
+    set -e
+  done <"${CONFIG_DIR}"/injection-in-namespaces
+}
+
 function configure_sidecar_injector() {
   echo "--> Configure sidecar injector"
   local configmap=$(kubectl -n istio-system get configmap istio-sidecar-injector -o jsonpath='{.data.config}')
-  local alreadyEnabled=$(grep "policy: enabled" <<< "$configmap")
-  if [[ -n ${alreadyEnabled} ]]; then
-    # Disable automatic injecting
-    configmap=$(sed 's/policy: enabled/policy: disabled/' <<< "$configmap")
-    configmap=$(sed 's/\[\[ \.ProxyConfig\.ZipkinAddress \]\]/zipkin.kyma-system:9411/g' <<< "$configmap")
-
-    # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
-    # Add limits to already existing resources sections
-    configmap=$(sed 's|    resources:|    resources:\n      limits: { memory: 128Mi, cpu: 100m }\n      requests: { memory: 128Mi, cpu: 10m }|' <<< "$configmap")
-    # In case there is no limits section add one at the beginning of container definition. It serves as default.
-    configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 128Mi, cpu: 100m }, requests: { memory: 128Mi, cpu: 10m } }|' <<< "$configmap")
-
-    # Escape new lines and double quotes for kubectl
-    configmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$configmap")
-    configmap=$(sed 's/"/\\"/g' <<< "$configmap")
-
-    kubectl patch -n istio-system configmap istio-sidecar-injector --type merge -p '{"data": {"config":"'"$configmap"'"}}'
+  local policyDisabled=$(grep "policy: disabled" <<< "$configmap")
+  if [[ -n ${policyDisabled} ]]; then
+    # Force automatic injecting
+    configmap=$(sed 's/policy: disabled/policy: enabled/' <<< "$configmap")
   fi
+
+  configmap=$(sed 's/\[\[ \.ProxyConfig\.ZipkinAddress \]\]/zipkin.kyma-system:9411/g' <<< "$configmap")
+
+  # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
+  # Add limits to already existing resources sections
+  configmap=$(sed 's|    resources:|    resources:\n      limits: { memory: 128Mi, cpu: 100m }\n      requests: { memory: 128Mi, cpu: 10m }|' <<< "$configmap")
+  # In case there is no limits section add one at the beginning of container definition. It serves as default.
+  configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 128Mi, cpu: 100m }, requests: { memory: 128Mi, cpu: 10m } }|' <<< "$configmap")
+
+  # Escape new lines and double quotes for kubectl
+  configmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$configmap")
+  configmap=$(sed 's/"/\\"/g' <<< "$configmap")
+
+  kubectl patch -n istio-system configmap istio-sidecar-injector --type merge -p '{"data": {"config":"'"$configmap"'"}}'
 }
 
 function check_requirements() {
@@ -106,3 +120,4 @@ check_requirements
 configure_sidecar_injector
 run_all_patches
 remove_not_used
+label_namespaces

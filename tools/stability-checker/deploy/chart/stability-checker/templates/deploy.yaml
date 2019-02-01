@@ -32,7 +32,8 @@ spec:
             claimName: {{ .Values.storage.claimName }}
 
       containers:
-      - name: {{ .Chart.Name }}
+      # The container name is hardcoded in the stability checker, do not change it
+      - name: stability-checker
         image: "{{ .Values.containerRegistry.path }}/develop/stability-checker:{{ .Values.image.tag }}"
         imagePullPolicy: "{{ .Values.image.pullPolicy }}"
 

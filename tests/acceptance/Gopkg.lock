@@ -217,6 +217,8 @@
   name = "golang.org/x/net"
   packages = [
     "context",
+    "html",
+    "html/atom",
     "http2",
     "http2/hpack",
     "idna",
@@ -434,6 +436,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "478e205b2f315b259a8cc1efbeff1223e85c39b5548add812269b6b39822ee44"
+  inputs-digest = "5f8a077a92d1961e0a83bac4c5b864ec0d3749f004fcf723c18404312ea5e73d"
   solver-name = "gps-cdcl"
   solver-version = 1

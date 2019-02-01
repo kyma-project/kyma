@@ -5,6 +5,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: knative-eventing
+  labels:
+    istio-injection: enabled  
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -111,6 +113,8 @@ spec:
   replicas: 1
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"       
       labels:
         app: eventing-controller
     spec:
@@ -120,7 +124,7 @@ spec:
         - -stderrthreshold
         - INFO
         - --experimentalControllers=subscription.eventing.knative.dev
-        image: gcr.io/knative-releases/github.com/knative/eventing/cmd/controller@sha256:bfb8bf951f2ccead13e5d999f3c8e44a5c815f89eef03391aa061e19407bcd9b
+        image: eu.gcr.io/kyma-project/event-bus/knative/controller@sha256:bf9419305fb7482c6b4edd7d47506dc5bd4e7b9120c1f1eb344789147759d7be
         name: eventing-controller
         terminationMessagePolicy: FallbackToLogsOnError
         volumeMounts:
@@ -280,6 +284,8 @@ spec:
       role: controller
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"     
       labels:
         clusterChannelProvisioner: in-memory-channel
         role: controller
