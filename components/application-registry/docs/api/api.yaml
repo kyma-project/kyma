@@ -238,15 +238,15 @@ components:
     Documentation:
       type: 'object'
       properties:
-        displayName: 
+        displayName:
           type: 'string'
-        description: 
+        description:
           type: 'string'
         type:
           type: 'string'
         tags:
           type: 'array'
-          items: 
+          items:
             type: 'string'
         docs:
           type: 'array'
@@ -276,6 +276,8 @@ components:
           $ref: '#/components/schemas/OAuth'
         basic:
           $ref: '#/components/schemas/Basic'
+        certificateGen:
+          $ref: '#/components/schemas/CertificateGen'
     OAuth:
       type: 'object'
       properties:
@@ -296,6 +298,11 @@ components:
         username:
           type: 'string'
         password:
+          type: 'string'
+    CertificateGen:
+      type: 'object'
+      properties:
+        commonName:
           type: 'string'
     MetadataErrorResponse:
       type: 'object'
