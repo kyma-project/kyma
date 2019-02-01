@@ -40,12 +40,13 @@ func TestChartRefGobEncodeDecode(t *testing.T) {
 }
 
 func TestCanBeProvision(t *testing.T) {
+	// Given
 	namespace := internal.Namespace("test-bundle-namespace")
 	collection := []*internal.Instance{
-		&internal.Instance{ServiceID: "a1", Namespace: "test-bundle-namespace"},
-		&internal.Instance{ServiceID: "a2", Namespace: "test-bundle-namespace"},
-		&internal.Instance{ServiceID: "a3", Namespace: "test-bundle-namespace"},
-		&internal.Instance{ServiceID: "a2", Namespace: "other-bundle-namespace"},
+		{ServiceID: "a1", Namespace: "test-bundle-namespace"},
+		{ServiceID: "a2", Namespace: "test-bundle-namespace"},
+		{ServiceID: "a3", Namespace: "test-bundle-namespace"},
+		{ServiceID: "a2", Namespace: "other-bundle-namespace"},
 	}
 
 	bundleExist := internal.Bundle{
@@ -67,28 +68,10 @@ func TestCanBeProvision(t *testing.T) {
 		ID: "a1",
 	}
 
-	respExist := bundleExist.CanBeProvision(namespace, collection)
-	if respExist {
-		t.Fatalf("Bundle with id %q cannot be provision in namespace %q but is.", bundleExist.ID, namespace)
-	}
-
-	respOtherNs := bundleExist.CanBeProvision("other-bundle-namespace", collection)
-	if !respOtherNs {
-		t.Fatalf("Bundle with id %q can be provision in other namespace %q but is not.", bundleExist.ID, "other-bundle-namespace")
-	}
-
-	respNotExist := bundleNotExist.CanBeProvision(namespace, collection)
-	if !respNotExist {
-		t.Fatalf("Bundle with id %q can be provision in namespace %q but is not.", bundleNotExist.ID, namespace)
-	}
-
-	respManyProvision := bundleManyProvision.CanBeProvision(namespace, collection)
-	if !respManyProvision {
-		t.Fatal("Bundle with provision flag can be provision but is not")
-	}
-
-	respExistOtherNs := bundleExist.CanBeProvision("other-ns", collection)
-	if !respExistOtherNs {
-		t.Fatalf("Bundle with id %q can be provision in other namespace %q but is not.", bundleExist.ID, namespace)
-	}
+	// WHEN/THEN
+	assert.False(t, bundleExist.IsProvisioningAllowed(namespace, collection))
+	assert.True(t, bundleExist.IsProvisioningAllowed("other-bundle-namespace", collection))
+	assert.True(t, bundleExist.IsProvisioningAllowed("other-ns", collection))
+	assert.True(t, bundleNotExist.IsProvisioningAllowed(namespace, collection))
+	assert.True(t, bundleManyProvision.IsProvisioningAllowed(namespace, collection))
 }

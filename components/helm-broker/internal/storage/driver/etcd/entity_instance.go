@@ -91,6 +91,8 @@ func (s *Instance) Get(id internal.InstanceID) (*internal.Instance, error) {
 func (s *Instance) GetAll() ([]*internal.Instance, error) {
 	out := []*internal.Instance{}
 
+	// special chart NULL hex (\x00) is used to select all entities with prefix defined during create new instance
+	// empty string is not allowed for etcd/clientv3 library
 	resp, err := s.kv.Get(context.TODO(), "\x00", clientv3.WithFromKey())
 	if err != nil {
 		return nil, errors.Wrap(err, "while get collection from storage")

@@ -143,9 +143,9 @@ type Bundle struct {
 	PlanUpdatable       *bool
 }
 
-// CanBeProvision determines bundle can be provision on indicated namespace
+// IsProvisioningAllowed determines bundle can be provision on indicated namespace
 // if bundle has provisionOnlyOnce flag on true then check if bundle already exist in this namespace
-func (b Bundle) CanBeProvision(namespace Namespace, collection []*Instance) bool {
+func (b Bundle) IsProvisioningAllowed(namespace Namespace, collection []*Instance) bool {
 	if !b.Metadata.ProvisionOnlyOnce {
 		return true
 	}

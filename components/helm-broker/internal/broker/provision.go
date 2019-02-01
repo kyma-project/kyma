@@ -77,8 +77,9 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting instance collection")
 	}
-	if !bundle.CanBeProvision(namespace, instances) {
-		return nil, errors.New("during provisioning bundle with once instance while bundle instance already exist")
+	if !bundle.IsProvisioningAllowed(namespace, instances) {
+		svc.log.Infof("bundle with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", bundle.Name, bundle.ID, namespace)
+		return nil, errors.New("this bundle has a provisioningOnlyOnce flag. An instance of this bundle already exists")
 	}
 
 	id, err := svc.operationIDProvider()
