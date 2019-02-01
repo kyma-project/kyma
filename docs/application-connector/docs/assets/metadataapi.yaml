@@ -227,6 +227,12 @@ components:
         spec:
           type: 'object'
           description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
+        SpecificationUrl:
+          type: 'string'
+          format: 'uri'
+        ApiType:
+          type: 'string'
+          description: 'API type, for example OData'
       required:
         - targetUrl
     Events:
