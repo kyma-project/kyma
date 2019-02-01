@@ -17,6 +17,7 @@ metadata:
     nginx.ingress.kubernetes.io/auth-tls-verify-depth: "3"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/proxy-body-size: 5m
     nginx.ingress.kubernetes.io/configuration-snippet: |
       if ($ssl_client_s_dn !~ (.*(CN={{ .Release.Name }}(,|]|$)).*)) {
           return 403;

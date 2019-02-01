@@ -12,6 +12,7 @@ import (
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish/application"
 	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
+	test "github.com/kyma-project/kyma/components/event-bus/test/util"
 	"github.com/nats-io/nats-streaming-server/server"
 	"github.com/stretchr/testify/assert"
 
@@ -48,32 +49,32 @@ func TestMain(m *testing.M) {
 }
 
 func TestPublishWithSourceIdInPayload(t *testing.T) {
-	subject, requestPayload := buildDefaultTestSubjectAndPayload()
+	subject, requestPayload := test.BuildDefaultTestSubjectAndPayload()
 	sub, _ := sc.Subscribe(subject, func(m *stan.Msg) {
 		msg = m
 	})
-	responseBody, statusCode := performPublishRequest(t, publishServer.URL, requestPayload)
+	responseBody, statusCode := test.PerformPublishRequest(t, publishServer.URL, requestPayload)
 	verifyPublish(t, statusCode, sub, responseBody, requestPayload)
 }
 
 func TestPublishWithSourceIdInHeader(t *testing.T) {
-	subject := buildDefaultTestSubject()
-	requestPayload := buildDefaultTestPayloadWithoutSourceId()
+	subject := test.BuildDefaultTestSubject()
+	requestPayload := test.BuildDefaultTestPayloadWithoutSourceId()
 	sub, _ := sc.Subscribe(subject, func(m *stan.Msg) {
 		msg = m
 	})
-	responseBody, statusCode := performPublishRequestWithHeaders(t, publishServer.URL, requestPayload, map[string]string{api.HeaderSourceId: testSourceID})
+	responseBody, statusCode := test.PerformPublishRequestWithHeaders(t, publishServer.URL, requestPayload, map[string]string{api.HeaderSourceId: test.TestSourceID})
 
-	verifyPublish(t, statusCode, sub, responseBody, buildDefaultTestPayload())
+	verifyPublish(t, statusCode, sub, responseBody, test.BuildDefaultTestPayload())
 }
 
 func TestPublishWithSourceIdInPayloadAndHeaderAndPayloadOneIsGivenPrecedence(t *testing.T) {
-	subject := buildDefaultTestSubject()
-	requestPayload := buildDefaultTestPayload()
+	subject := test.BuildDefaultTestSubject()
+	requestPayload := test.BuildDefaultTestPayload()
 	sub, _ := sc.Subscribe(subject, func(m *stan.Msg) {
 		msg = m
 	})
-	responseBody, statusCode := performPublishRequestWithHeaders(t, publishServer.URL, requestPayload, map[string]string{api.HeaderSourceId: testSourceIDInHeader})
+	responseBody, statusCode := test.PerformPublishRequestWithHeaders(t, publishServer.URL, requestPayload, map[string]string{api.HeaderSourceId: test.TestSourceIDInHeader})
 	verifyPublish(t, statusCode, sub, responseBody, requestPayload)
 }
 
@@ -98,7 +99,7 @@ func verifyPublish(t *testing.T, statusCode int, sub stan.Subscription, response
 		time.Sleep(interval * time.Second)
 		i++
 	}
-	verifyReceivedMsg(t, requestPayload, msg.Data)
+	test.VerifyReceivedMsg(t, requestPayload, msg.Data)
 	sub.Unsubscribe()
 }
 
@@ -110,77 +111,77 @@ func TestStatus(t *testing.T) {
 }
 
 func TestPublishWithBadPayload(t *testing.T) {
-	payload := buildDefaultTestBadPayload()
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, nil, api.ErrorTypeBadPayload)
+	payload := test.BuildDefaultTestBadPayload()
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, nil, api.ErrorTypeBadPayload)
 }
 
 func TestPublishWithoutSourceId(t *testing.T) {
-	payload := buildDefaultTestPayloadWithoutSourceId()
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldSourceId+"/"+api.HeaderSourceId, api.ErrorTypeValidationViolation)
+	payload := test.BuildDefaultTestPayloadWithoutSourceId()
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldSourceId+"/"+api.HeaderSourceId, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishWithoutEventType(t *testing.T) {
-	payload := buildDefaultTestPayloadWithoutEventType()
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventType, api.ErrorTypeValidationViolation)
+	payload := test.BuildDefaultTestPayloadWithoutEventType()
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventType, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishWithoutEventTypeVersion(t *testing.T) {
-	payload := buildDefaultTestPayloadWithoutEventTypeVersion()
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTypeVersion, api.ErrorTypeValidationViolation)
+	payload := test.BuildDefaultTestPayloadWithoutEventTypeVersion()
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTypeVersion, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishWithoutEventTime(t *testing.T) {
-	payload := buildDefaultTestPayloadWithoutEventTime()
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTime, api.ErrorTypeValidationViolation)
+	payload := test.BuildDefaultTestPayloadWithoutEventTime()
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTime, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishWithoutData(t *testing.T) {
-	payload := buildDefaultTestPayloadWithoutData()
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldData, api.ErrorTypeValidationViolation)
+	payload := test.BuildDefaultTestPayloadWithoutData()
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldData, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishWithEmptyData(t *testing.T) {
-	payload := buildDefaultTestPayloadWithEmptyData()
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldData, api.ErrorTypeValidationViolation)
+	payload := test.BuildDefaultTestPayloadWithEmptyData()
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldData, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishInvalidEventTypeVersion(t *testing.T) {
-	payload := buildTestPayload(testSourceID, testEventType, testEventTypeVersionInvalid, testEventID,
-		testEventTime, testData)
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTypeVersion, api.ErrorTypeValidationViolation)
+	payload := test.BuildTestPayload(test.TestSourceID, test.TestEventType, test.TestEventTypeVersionInvalid, test.TestEventID,
+		test.TestEventTime, test.TestData)
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTypeVersion, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishInvalidEventTime(t *testing.T) {
-	payload := buildTestPayload(testSourceID, testEventType, testEventTypeVersion, testEventID,
-		testEventTimeInvalid, testData)
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTime, api.ErrorTypeValidationViolation)
+	payload := test.BuildTestPayload(test.TestSourceID, test.TestEventType, test.TestEventTypeVersion, test.TestEventID,
+		test.TestEventTimeInvalid, test.TestData)
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventTime, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishInvalidEventId(t *testing.T) {
-	payload := buildTestPayload(testSourceID, testEventType, testEventTypeVersion, testEventIDInvalid,
-		testEventTime, testData)
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventId, api.ErrorTypeValidationViolation)
+	payload := test.BuildTestPayload(test.TestSourceID, test.TestEventType, test.TestEventTypeVersion, test.TestEventIDInvalid,
+		test.TestEventTime, test.TestData)
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldEventId, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishInvalidSourceIdInPayload(t *testing.T) {
-	payload := buildTestPayload(testSourceIdInvalid, testEventType, testEventTypeVersion, testEventID,
-		testEventTime, testData)
-	body, statusCode := performPublishRequest(t, publishServer.URL, payload)
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldSourceId, api.ErrorTypeValidationViolation)
+	payload := test.BuildTestPayload(test.TestSourceIdInvalid, test.TestEventType, test.TestEventTypeVersion, test.TestEventID,
+		test.TestEventTime, test.TestData)
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.FieldSourceId, api.ErrorTypeValidationViolation)
 }
 
 func TestPublishInvalidSourceIdInHeader(t *testing.T) {
-	payload := buildDefaultTestPayloadWithoutSourceId()
-	body, statusCode := performPublishRequestWithHeaders(t, publishServer.URL, payload, map[string]string{api.HeaderSourceId: testSourceIdInvalid})
-	assertExpectedError(t, body, statusCode, http.StatusBadRequest, api.HeaderSourceId, api.ErrorTypeValidationViolation)
+	payload := test.BuildDefaultTestPayloadWithoutSourceId()
+	body, statusCode := test.PerformPublishRequestWithHeaders(t, publishServer.URL, payload, map[string]string{api.HeaderSourceId: test.TestSourceIdInvalid})
+	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.HeaderSourceId, api.ErrorTypeValidationViolation)
 }

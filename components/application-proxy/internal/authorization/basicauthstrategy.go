@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 
 	"github.com/kyma-project/kyma/components/application-proxy/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-proxy/internal/httpconsts"
@@ -21,7 +22,7 @@ func newBasicAuthStrategy(username, password string) basicAuthStrategy {
 	}
 }
 
-func (b basicAuthStrategy) AddAuthorizationHeader(r *http.Request) apperrors.AppError {
+func (b basicAuthStrategy) AddAuthorization(r *http.Request, _ *httputil.ReverseProxy) apperrors.AppError {
 	r.Header.Set(httpconsts.HeaderAuthorization, fmt.Sprintf("Basic %s", basicAuth(b.username, b.password)))
 
 	return nil

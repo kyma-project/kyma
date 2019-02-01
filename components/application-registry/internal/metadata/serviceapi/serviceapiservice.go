@@ -133,7 +133,7 @@ func (sas defaultService) Update(application, id string, api *model.API) (*appli
 	}
 
 	if api.Credentials != nil {
-		credentials, err := sas.secretsService.Update(application, id, api.Credentials)
+		credentials, err := sas.secretsService.Upsert(application, id, api.Credentials)
 		if err != nil {
 			return nil, err
 		}

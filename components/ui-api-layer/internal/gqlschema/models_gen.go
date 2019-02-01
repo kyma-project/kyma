@@ -28,7 +28,7 @@ type ApplicationEvent struct {
 }
 
 type ApplicationMapping struct {
-	Environment string `json:"environment"`
+	Namespace   string `json:"namespace"`
 	Application string `json:"application"`
 }
 
@@ -93,6 +93,12 @@ type ConnectorService struct {
 type Container struct {
 	Name  string `json:"name"`
 	Image string `json:"image"`
+}
+
+type ContainerState struct {
+	State   ContainerStateType `json:"state"`
+	Reason  string             `json:"reason"`
+	Message string             `json:"message"`
 }
 
 type CreateServiceBindingOutput struct {
@@ -175,7 +181,7 @@ type Function struct {
 	Trigger           string    `json:"trigger"`
 	CreationTimestamp time.Time `json:"creationTimestamp"`
 	Labels            Labels    `json:"labels"`
-	Environment       string    `json:"environment"`
+	Namespace         string    `json:"namespace"`
 }
 
 type IDPPreset struct {
@@ -209,6 +215,23 @@ type LocalObjectReference struct {
 type LocalObjectReferenceInput struct {
 	Kind string `json:"kind"`
 	Name string `json:"name"`
+}
+
+type Pod struct {
+	Name              string           `json:"name"`
+	NodeName          string           `json:"nodeName"`
+	Namespace         string           `json:"namespace"`
+	RestartCount      int              `json:"restartCount"`
+	CreationTimestamp time.Time        `json:"creationTimestamp"`
+	Labels            Labels           `json:"labels"`
+	Status            PodStatusType    `json:"status"`
+	ContainerStates   []ContainerState `json:"containerStates"`
+	JSON              JSON             `json:"json"`
+}
+
+type PodEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	Pod  Pod                   `json:"pod"`
 }
 
 type ResourceQuota struct {
@@ -437,6 +460,43 @@ func (e AuthenticationPolicyType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type ContainerStateType string
+
+const (
+	ContainerStateTypeWaiting    ContainerStateType = "WAITING"
+	ContainerStateTypeRunning    ContainerStateType = "RUNNING"
+	ContainerStateTypeTerminated ContainerStateType = "TERMINATED"
+)
+
+func (e ContainerStateType) IsValid() bool {
+	switch e {
+	case ContainerStateTypeWaiting, ContainerStateTypeRunning, ContainerStateTypeTerminated:
+		return true
+	}
+	return false
+}
+
+func (e ContainerStateType) String() string {
+	return string(e)
+}
+
+func (e *ContainerStateType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ContainerStateType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ContainerStateType", str)
+	}
+	return nil
+}
+
+func (e ContainerStateType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type InstanceStatusType string
 
 const (
@@ -509,6 +569,45 @@ func (e *LimitType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e LimitType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PodStatusType string
+
+const (
+	PodStatusTypePending   PodStatusType = "PENDING"
+	PodStatusTypeRunning   PodStatusType = "RUNNING"
+	PodStatusTypeSucceeded PodStatusType = "SUCCEEDED"
+	PodStatusTypeFailed    PodStatusType = "FAILED"
+	PodStatusTypeUnknown   PodStatusType = "UNKNOWN"
+)
+
+func (e PodStatusType) IsValid() bool {
+	switch e {
+	case PodStatusTypePending, PodStatusTypeRunning, PodStatusTypeSucceeded, PodStatusTypeFailed, PodStatusTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e PodStatusType) String() string {
+	return string(e)
+}
+
+func (e *PodStatusType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PodStatusType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PodStatusType", str)
+	}
+	return nil
+}
+
+func (e PodStatusType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

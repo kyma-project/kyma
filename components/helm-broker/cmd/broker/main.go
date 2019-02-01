@@ -77,7 +77,7 @@ func main() {
 
 		// Running Helm Broker does not mean it is visible to the service catalog
 		// This is the reason of the check cfg.HelmBrokerURL
-		waitForHelmBrokerIsReady(cfg.HelmBrokerURL, 90*time.Second, log)
+		waitForHelmBrokerIsReady(cfg.HelmBrokerURL, 15*time.Second, log)
 		log.Infof("%s service ready", cfg.HelmBrokerURL)
 
 		err := brokerSyncer.Sync(cfg.ClusterServiceBrokerName, 5)
@@ -111,7 +111,7 @@ func waitForHelmBrokerIsReady(url string, timeout time.Duration, log logrus.Fiel
 			} else {
 				log.Errorf("Last call response status: %s", r.StatusCode)
 			}
-			break
+			return
 		default:
 			time.Sleep(time.Second)
 		}

@@ -6,9 +6,9 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
-MINIKUBE_VERSION=0.28.2
-KUBERNETES_VERSION=1.10.0
-KUBECTL_CLI_VERSION=1.10.0
+MINIKUBE_VERSION=0.33.0
+KUBERNETES_VERSION=1.11.5
+KUBECTL_CLI_VERSION=1.11.0
 VM_DRIVER=hyperkit
 DISK_SIZE=20g
 MEMORY=8192
@@ -23,28 +23,32 @@ do
 
     case ${key} in
         --disk-size)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             DISK_SIZE="$2"
             shift
             shift
             ;;
         --vm-driver)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             VM_DRIVER="$2"
             shift # past argument
             shift # past value
             ;;
         --memory)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             MEMORY="$2"
             shift
             shift
             ;;
         --domain)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             MINIKUBE_DOMAIN="$2"
             shift # past argument
             shift # past value
+            ;;
+        --*)
+            echo "Unknown flag ${1}"
+            exit 1
             ;;
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
@@ -83,9 +87,9 @@ function waitForMinikubeToBeUp() {
       sleep 1
     done
 
-    # In case apiserver is not available get localkube logs
+    # In case apiserver is not available get minikube logs
     if [[ -z "$STATUS" ]] && [[ "$VM_DRIVER" = "none" ]]; then
-      cat /var/lib/localkube/localkube.err
+      cat /var/lib/minikube/minikube.err
     fi
 
     set -o errexit
@@ -100,7 +104,7 @@ function fixDindMinikubeIssue() {
 }
 
 function checkIfMinikubeIsInitialized() {
-    local status=$(minikube status --format "{{.MinikubeStatus}}")
+    local status=$(minikube status --format "{{.Host}}")
     if [ -n "${status}" ]; then
         log "Minikube is already initialized" red
         read -p "Do you want to remove previous minikube cluster [y/N]: " deleteMinikube
@@ -194,16 +198,13 @@ function start() {
     minikube start \
     --memory $MEMORY \
     --cpus 4 \
-    --extra-config=apiserver.Authorization.Mode=RBAC \
-    --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
-    --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
-    --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
-    --extra-config=apiserver.admission-control="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
+    --extra-config=apiserver.authorization-mode=RBAC \
+    --extra-config=apiserver.cors-allowed-origins="http://*" \
+    --extra-config=apiserver.enable-admission-plugins="DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook" \
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
     --disk-size=$DISK_SIZE \
-    --feature-gates="MountPropagation=false" \
-    -b=localkube
+    --bootstrapper=kubeadm
 
     waitForMinikubeToBeUp
 

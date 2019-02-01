@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestFunctionConverter_ToGQL(t *testing.T) {
@@ -21,7 +21,7 @@ func TestFunctionConverter_ToGQL(t *testing.T) {
 			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
 			CreationTimestamp: zeroTimeStamp,
 			Trigger:           "nope",
-			Environment:       "env",
+			Namespace:         "ns",
 		}
 
 		converter := functionConverter{}
@@ -94,7 +94,7 @@ func fixFunction() *v1beta1.Function {
 				"test": "ok",
 				"ok":   "test",
 			},
-			Namespace: "env",
+			Namespace: "ns",
 		},
 		Spec: v1beta1.FunctionSpec{
 			Type: "nope",

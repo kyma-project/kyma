@@ -18,7 +18,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		updateCacheEntryFunction := func(id string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnathorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: 500}
 
 		// when
@@ -38,7 +38,9 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		defer ts.Close()
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil)
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(nil)
 		authStrategyMock.On("Invalidate").Return()
 
 		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock)
@@ -46,7 +48,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnathorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: 401}
 
 		// when
@@ -66,7 +68,9 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		defer ts.Close()
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil)
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(nil)
 		authStrategyMock.On("Invalidate").Return()
 
 		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock)
@@ -74,7 +78,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnathorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
 		// when
@@ -90,7 +94,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		updateCacheEntryFunction := func(id string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnathorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
 		rr.retried = true
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
@@ -107,7 +111,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		updateCacheEntryFunction := func(id string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnathorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
 		rr.retried = true
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
@@ -128,7 +132,9 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		defer ts.Close()
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil)
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(nil)
 		authStrategyMock.On("Invalidate").Return()
 
 		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock)
@@ -136,7 +142,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnathorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -156,7 +162,9 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		defer ts.Close()
 
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(nil)
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(nil)
 		authStrategyMock.On("Invalidate").Return()
 
 		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock)
@@ -164,7 +172,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnathorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
 		// when
@@ -184,7 +192,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnathorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -198,7 +206,9 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 	t.Run("should return error if failed to add authorization header", func(t *testing.T) {
 		// given
 		authStrategyMock := &authMock.Strategy{}
-		authStrategyMock.On("AddAuthorizationHeader", mock.AnythingOfType("*http.Request")).Return(apperrors.Internal("failed"))
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			Return(apperrors.Internal("failed"))
 		authStrategyMock.On("Invalidate").Return()
 
 		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, "", authStrategyMock)
@@ -206,7 +216,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnathorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when

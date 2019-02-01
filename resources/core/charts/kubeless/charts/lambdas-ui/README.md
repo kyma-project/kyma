@@ -16,7 +16,7 @@ It allows you to manage lambda functions, which are the key part of Kyma capabil
 - Add and remove labels.
 - Enable API security.
 - Select the function size.
-- Direct access to Lambda dashboard. 
+- Direct access to Lambda dashboard.
 
 ### Configuration
 
@@ -41,15 +41,15 @@ resources:
     memory: '100Mi'
 ```
 
-- You can configure the sizes using the following parameters: 
+- You can configure the sizes using the following parameters:
 1. S: `{memory: '128Mi', cpu: '100m', minReplicas: 1, maxReplicas: 2}`
 2. M: `{memory: '256Mi', cpu: '500m', minReplicas: 2, maxReplicas: 5}`
 3. L: `{memory: '512Mi', cpu: '1.0',  minReplicas: 5, maxReplicas: 10}`
 4. XL:`{memory: '1024Mi', cpu: '2.0', minReplicas: 10, maxReplicas: 20}`
 
->**NOTE:** The size of the function may exhaust the resources of the Environment. When creating a function, keep in mind the configured resource quotas.
+>**NOTE:** The size of the function may exhaust the resources of the Namespace. When creating a function, keep in mind the configured resource quotas.
 
-The yaml file shows a sample M size function. 
+The yaml file shows a sample M size function.
 
 The function includes the container **test** with the `spec.deployment.spec.containers[0].resources` configuration, as well as the configuration for the **horizontalPodAutoscaler**.
 

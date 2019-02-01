@@ -31,3 +31,11 @@ func NewLimitRangeLister() *limitRangeLister {
 func NewResourceQuotaStatusChecker() *resourceQuotaStatusChecker {
 	return new(resourceQuotaStatusChecker)
 }
+
+func NewPodSvc() *podSvc {
+	return new(podSvc)
+}
+
+func NewGqlPodConverter() *gqlPodConverter {
+	return new(gqlPodConverter)
+}

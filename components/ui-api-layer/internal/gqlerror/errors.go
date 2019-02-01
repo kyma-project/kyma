@@ -76,9 +76,9 @@ func WithName(name string) Option {
 	}
 }
 
-func WithEnvironment(environment string) Option {
+func WithEnvironment(namespace string) Option {
 	return func(gqlError *GQLError) {
-		gqlError.arguments["environment"] = environment
+		gqlError.arguments["namespace"] = namespace
 	}
 }
 

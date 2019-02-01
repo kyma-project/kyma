@@ -10,13 +10,13 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestApiResolver_APIsQuery(t *testing.T) {
-	environment := "test-1"
+	namespace := "test-1"
 
-	t.Run("Should return a list of APIs", func(t *testing.T) {
+	t.Run("Should return a list of APIs for namespace", func(t *testing.T) {
 		apis := []*v1alpha2.Api{
 			{
 				ObjectMeta: v1.ObjectMeta{
@@ -42,12 +42,12 @@ func TestApiResolver_APIsQuery(t *testing.T) {
 		var empty *string = nil
 
 		service := automock.NewApiLister()
-		service.On("List", environment, empty, empty).Return(apis, nil).Once()
+		service.On("List", namespace, empty, empty).Return(apis, nil).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
 
-		result, err := resolver.APIsQuery(nil, environment, nil, nil)
+		result, err := resolver.APIsQuery(nil, namespace, nil, nil)
 
 		service.AssertExpectations(t)
 		require.NoError(t, err)
@@ -58,12 +58,12 @@ func TestApiResolver_APIsQuery(t *testing.T) {
 		var empty *string = nil
 
 		service := automock.NewApiLister()
-		service.On("List", environment, empty, empty).Return(nil, errors.New("test")).Once()
+		service.On("List", namespace, empty, empty).Return(nil, errors.New("test")).Once()
 
 		resolver, err := newApiResolver(service)
 		require.NoError(t, err)
 
-		_, err = resolver.APIsQuery(nil, environment, nil, nil)
+		_, err = resolver.APIsQuery(nil, namespace, nil, nil)
 
 		service.AssertExpectations(t)
 		require.Error(t, err)

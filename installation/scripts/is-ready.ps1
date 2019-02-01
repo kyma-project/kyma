@@ -20,7 +20,7 @@ while($true) {
 }
 
 # Checking if POD is ready to operate
-$pods = (Invoke-Expression -Command $cmdPods | Out-String).Trim().Split("`n")
+$pods = (Invoke-Expression -Command $cmdPods | Out-String).Trim().Split(" ")
 for($i = 0; $i -lt $pods.Length; $i += 1) {
     $pod = $pods[$i]
     while($true) {

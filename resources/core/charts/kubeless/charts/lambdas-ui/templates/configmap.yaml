@@ -18,5 +18,12 @@ data:
           {size:{ name: 'M', memory: '256Mi', cpu: '500m', minReplicas: 2, maxReplicas: 5, description: '' }},
           {size:{ name: 'L', memory: '512Mi', cpu: '1.0',  minReplicas: 5, maxReplicas: 10, description: '' }},
           {size:{ name: 'XL', memory: '1024Mi', cpu: '2.0', minReplicas: 10, maxReplicas: 20, description: '' }}
-        ]
+        ],
+      subscriptionConfig:{
+        pushRequestTimeoutMS: 60000,
+        maxInFlight: 400,
+        includeSubscriptionNameHeader: true,
+        eventType: "",
+        eventTypeVersion: "",
+      }
     };

@@ -25,3 +25,17 @@ func NewSecretResolver(secretGetter v1.SecretsGetter) *secretResolver {
 func NewResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer cache.SharedIndexInformer, ssInformer cache.SharedIndexInformer, podClient v1.CoreV1Interface) *resourceQuotaService {
 	return newResourceQuotaService(rqInformer, rsInformer, ssInformer, podClient)
 }
+
+// Pod
+
+func NewPodResolver(podSvc podSvc) *podResolver {
+	return newPodResolver(podSvc)
+}
+
+func (r *podResolver) SetInstanceConverter(converter gqlPodConverter) {
+	r.podConverter = converter
+}
+
+func NewPodService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) *podService {
+	return newPodService(informer, client)
+}

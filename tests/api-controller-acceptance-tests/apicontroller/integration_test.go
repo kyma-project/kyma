@@ -2,11 +2,11 @@ package apicontroller
 
 import (
 	"fmt"
+	"github.com/avast/retry-go"
 	"github.com/kyma-project/kyma/common/ingressgateway"
 	"math/rand"
 	"net/http"
 	"os"
-	"path/filepath"
 	"testing"
 	"time"
 
@@ -16,9 +16,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
+	"github.com/pkg/errors"
 )
 
 type integrationTestContext struct{}
@@ -28,11 +26,6 @@ func TestIntegrationSpec(t *testing.T) {
 	domainName := os.Getenv(domainNameEnv)
 	if domainName == "" {
 		t.Fatal("Domain name not set.")
-	}
-
-	namespace := os.Getenv(namespaceEnv)
-	if namespace == "" {
-		t.Fatal("Namespace not set.")
 	}
 
 	ctx := integrationTestContext{}
@@ -45,11 +38,8 @@ func TestIntegrationSpec(t *testing.T) {
 		t.Fatalf("Cannot get ingressgateway client: %s", err)
 	}
 
-	kubeConfig := ctx.defaultConfigOrExit()
-	k8sInterface := ctx.k8sInterfaceOrExit(kubeConfig)
-
 	t.Logf("Set up...")
-	fixture := setUpOrExit(k8sInterface, namespace, testID)
+	fixture := setUpOrExit(k8sClient, namespace, testID)
 
 	var lastAPI *kymaApi.Api
 
@@ -177,7 +167,7 @@ func (integrationTestContext) hostnameFor(testID, domainName string, hostWithDom
 
 func (ctx integrationTestContext) validateAPISecured(httpClient *http.Client, api *kymaApi.Api) {
 
-	response, err := ctx.withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
+	response, err := ctx.withRetries(func() (*http.Response, error) {
 		return httpClient.Get(fmt.Sprintf("https://%s", api.Spec.Hostname))
 	}, ctx.httpUnauthorizedPredicate)
 
@@ -187,7 +177,7 @@ func (ctx integrationTestContext) validateAPISecured(httpClient *http.Client, ap
 
 func (ctx integrationTestContext) validateAPINotSecured(httpClient *http.Client, hostname string) {
 
-	response, err := ctx.withRetries(maxRetries, minimalNumberOfCorrectResults, func() (*http.Response, error) {
+	response, err := ctx.withRetries(func() (*http.Response, error) {
 		return httpClient.Get(fmt.Sprintf("https://%s", hostname))
 	}, ctx.httpOkPredicate)
 
@@ -195,43 +185,31 @@ func (ctx integrationTestContext) validateAPINotSecured(httpClient *http.Client,
 	So(response.StatusCode, ShouldEqual, http.StatusOK)
 }
 
-func (integrationTestContext) withRetries(maxRetries, minCorrect int, httpCall func() (*http.Response, error), shouldRetryPredicate func(*http.Response) bool) (*http.Response, error) {
+func (integrationTestContext) withRetries(httpCall func() (*http.Response, error), shouldRetry func(*http.Response) bool) (*http.Response, error) {
+	var retries uint = 120
+	delay := 1 * time.Second
 
 	var response *http.Response
-	var err error
 
-	count := 0
-	retry := true
-	for retryNo := 0; retry; retryNo++ {
-
-		log.Debugf("[%d / %d] Retrying...", retryNo, maxRetries)
+	err := retry.Do(func() error {
+		var err error
 		response, err = httpCall()
 
 		if err != nil {
-			log.Errorf("[%d / %d] Got error: %s", retryNo, maxRetries, err)
-			count = 0
-		} else if shouldRetryPredicate(response) {
-			log.Errorf("[%d / %d] Got response: %s", retryNo, maxRetries, response.Status)
-			count = 0
-		} else {
-			log.Infof("Got expected response %d in a row.", count+1)
-			if count++; count == minCorrect {
-				log.Infof("Reached minimal number of expected responses in a row. Do not need to retry anymore.")
-				retry = false
-			}
+			return err
 		}
-
-		if retry {
-
-			if retryNo >= maxRetries {
-				// do not retry anymore
-				log.Infof("No more retries (max retries exceeded).")
-				retry = false
-			} else {
-				time.Sleep(retrySleep)
-			}
+		if shouldRetry(response) {
+			return errors.Errorf("unexpected response: %s", response.Status)
 		}
-	}
+		return nil
+	},
+		retry.Attempts(retries),
+		retry.Delay(delay),
+		retry.DelayType(retry.FixedDelay),
+		retry.OnRetry(func(retryNo uint, err error) {
+			log.Errorf("[%d / %d] Status: %s", retryNo, retries, err)
+		}),
+	)
 
 	return response, err
 }
@@ -242,31 +220,6 @@ func (integrationTestContext) httpOkPredicate(response *http.Response) bool {
 
 func (integrationTestContext) httpUnauthorizedPredicate(response *http.Response) bool {
 	return response.StatusCode != 401
-}
-
-func (integrationTestContext) defaultConfigOrExit() *rest.Config {
-
-	kubeConfigLocation := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-
-	kubeConfig, err := clientcmd.BuildConfigFromFlags("", kubeConfigLocation)
-	if err != nil {
-		log.Debugf("unable to load local kube config. Root cause: %v", err)
-		if config, err2 := rest.InClusterConfig(); err2 != nil {
-			log.Fatalf("unable to load kube config. Root cause: %v", err2)
-		} else {
-			kubeConfig = config
-		}
-	}
-	return kubeConfig
-}
-
-func (integrationTestContext) k8sInterfaceOrExit(kubeConfig *rest.Config) kubernetes.Interface {
-
-	k8sInterface, k8sErr := kubernetes.NewForConfig(kubeConfig)
-	if k8sErr != nil {
-		log.Fatalf("can create k8s clientset. Root cause: %v", k8sErr)
-	}
-	return k8sInterface
 }
 
 func (integrationTestContext) generateTestID(n int) string {

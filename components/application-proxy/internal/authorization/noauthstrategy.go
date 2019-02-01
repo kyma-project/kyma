@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"net/http"
+	"net/http/httputil"
 
 	"github.com/kyma-project/kyma/components/application-proxy/internal/apperrors"
 )
@@ -13,7 +14,7 @@ func newNoAuthStrategy() noAuthStrategy {
 type noAuthStrategy struct {
 }
 
-func (ns noAuthStrategy) AddAuthorizationHeader(r *http.Request) apperrors.AppError {
+func (ns noAuthStrategy) AddAuthorization(_ *http.Request, _ *httputil.ReverseProxy) apperrors.AppError {
 	return nil
 }
 

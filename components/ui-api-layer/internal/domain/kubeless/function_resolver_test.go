@@ -12,11 +12,11 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestFunctionResolver_FunctionsQuery(t *testing.T) {
-	environment := "test"
+	namespace := "test"
 	pagingParams := pager.PagingParams{}
 
 	t.Run("Success", func(t *testing.T) {
@@ -35,12 +35,12 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		}
 
 		svc := automock.NewFunctionLister()
-		svc.On("List", environment, pagingParams).Return(functions, nil).Once()
+		svc.On("List", namespace, pagingParams).Return(functions, nil).Once()
 
 		resolver, err := kubeless.NewFunctionResolver(svc)
 		require.NoError(t, err)
 
-		result, err := resolver.FunctionsQuery(nil, environment, nil, nil)
+		result, err := resolver.FunctionsQuery(nil, namespace, nil, nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, []gqlschema.Function{expected, expected}, result)
@@ -52,24 +52,24 @@ func TestFunctionResolver_FunctionsQuery(t *testing.T) {
 		var expected []gqlschema.Function
 
 		svc := automock.NewFunctionLister()
-		svc.On("List", environment, pagingParams).Return(functions, nil).Once()
+		svc.On("List", namespace, pagingParams).Return(functions, nil).Once()
 
 		resolver, err := kubeless.NewFunctionResolver(svc)
 		require.NoError(t, err)
 
-		result, err := resolver.FunctionsQuery(nil, environment, nil, nil)
+		result, err := resolver.FunctionsQuery(nil, namespace, nil, nil)
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("Error", func(t *testing.T) {
 		svc := automock.NewFunctionLister()
-		svc.On("List", environment, pagingParams).Return(nil, errors.New("test")).Once()
+		svc.On("List", namespace, pagingParams).Return(nil, errors.New("test")).Once()
 
 		resolver, err := kubeless.NewFunctionResolver(svc)
 		require.NoError(t, err)
 
-		_, err = resolver.FunctionsQuery(nil, environment, nil, nil)
+		_, err = resolver.FunctionsQuery(nil, namespace, nil, nil)
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
 	})

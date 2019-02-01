@@ -118,6 +118,7 @@ func (hc *Client) UpgradeRelease(chartDir, releaseName, overrides string) (*rls.
 		helm.UpdateValueOverrides([]byte(overrides)),
 		helm.ReuseValues(false),
 		helm.UpgradeTimeout(3600),
+		helm.UpgradeWait(true),
 	)
 }
 
