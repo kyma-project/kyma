@@ -60,9 +60,6 @@ global:
   event_bus_tests:
     dir: develop/
     version: f01c8848
-  helm_broker:
-    dir: develop/
-    version: a9a96379
   kubeless_integration_tests:
     dir: develop/
     version: e11a469a
