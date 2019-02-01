@@ -55,10 +55,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 			Token: token,
 		}
 
-		tokenCreator := &mocks.Creator{}
-		tokenCreator.On("Save", applicationContext).Return(token, nil)
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Save", applicationContext).Return(token, nil)
 
-		tokenHandler := NewTokenHandler(tokenCreator, csrURL, connectorClientExtractor)
+		tokenHandler := NewTokenHandler(tokenManager, csrURL, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
@@ -78,7 +78,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 		assert.Equal(t, http.StatusCreated, rr.Code)
 		assert.EqualValues(t, expectedTokenResponse, tokenResponse)
-		tokenCreator.AssertExpectations(t)
+		tokenManager.AssertExpectations(t)
 	})
 
 	t.Run("should create token for cluster context", func(t *testing.T) {
@@ -94,10 +94,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 			Token: token,
 		}
 
-		tokenCreator := &mocks.Creator{}
-		tokenCreator.On("Save", clusterContext).Return(token, nil)
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Save", clusterContext).Return(token, nil)
 
-		tokenHandler := NewTokenHandler(tokenCreator, csrURL, connectorClientExtractor)
+		tokenHandler := NewTokenHandler(tokenManager, csrURL, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
@@ -117,7 +117,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 		assert.Equal(t, http.StatusCreated, rr.Code)
 		assert.EqualValues(t, expectedTokenResponse, tokenResponse)
-		tokenCreator.AssertExpectations(t)
+		tokenManager.AssertExpectations(t)
 	})
 
 	t.Run("should return 500 when failed to parse context", func(t *testing.T) {
@@ -150,10 +150,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should return 500 when failed to save", func(t *testing.T) {
 		// given
-		tokenCreator := &mocks.Creator{}
-		tokenCreator.On("Save", applicationContext).Return("", apperrors.Internal("error"))
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Save", applicationContext).Return("", apperrors.Internal("error"))
 
-		tokenHandler := NewTokenHandler(tokenCreator, "", connectorClientExtractor)
+		tokenHandler := NewTokenHandler(tokenManager, "", connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)

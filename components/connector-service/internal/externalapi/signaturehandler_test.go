@@ -57,8 +57,8 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			ClientCertificate: clientCertificate,
 		}
 
-		tokenRemover := &tokensMock.Remover{}
-		tokenRemover.On("Delete", token).Return()
+		tokenManager := &tokensMock.Manager{}
+		tokenManager.On("Delete", token).Return()
 
 		certService := &certMock.Service{}
 		certService.On("SignCSR", decodedCSR, commonName).Return(encodedChain, nil)
@@ -68,7 +68,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(tokenRemover, certService, connectorClientExtractor)
+		signatureHandler := NewSignatureHandler(tokenManager, certService, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)

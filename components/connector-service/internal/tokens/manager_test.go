@@ -1,10 +1,9 @@
 package tokens
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache/mocks"
@@ -13,8 +12,9 @@ import (
 )
 
 const (
-	token   = "abc"
-	payload = "data"
+	token    = "abc"
+	payload  = "data"
+	tokenTTL = time.Duration(5) * time.Minute
 )
 
 type dummySerializable struct {
@@ -26,7 +26,7 @@ func (params dummySerializable) ToJSON() ([]byte, error) {
 	return params.Value, params.Error
 }
 
-func TestService_Save(t *testing.T) {
+func TestManager_Save(t *testing.T) {
 	t.Run("should trigger Put metod on token store", func(t *testing.T) {
 
 		serializable := dummySerializable{
@@ -35,12 +35,12 @@ func TestService_Save(t *testing.T) {
 		}
 
 		tokenCache := &mocks.TokenCache{}
-		tokenCache.On("Put", token, payload)
+		tokenCache.On("Put", token, payload, tokenTTL)
 		tokenGenerator := func() (string, apperrors.AppError) { return token, nil }
 
-		tokenService := NewTokenService(tokenCache, tokenGenerator)
+		tokenManager := NewTokenManager(tokenTTL, tokenCache, tokenGenerator)
 
-		generatedToken, err := tokenService.Save(serializable)
+		generatedToken, err := tokenManager.Save(serializable)
 
 		require.NoError(t, err)
 		assert.Equal(t, token, generatedToken)
@@ -52,7 +52,7 @@ func TestService_Save(t *testing.T) {
 			Value: nil,
 			Error: errors.New("error"),
 		}
-		tokenService := NewTokenService(nil, nil)
+		tokenService := NewTokenManager(tokenTTL, nil, nil)
 
 		_, err := tokenService.Save(serializable)
 
@@ -67,7 +67,7 @@ func TestService_Save(t *testing.T) {
 		}
 
 		tokenGenerator := func() (string, apperrors.AppError) { return "", apperrors.Internal("error") }
-		tokenService := NewTokenService(nil, tokenGenerator)
+		tokenService := NewTokenManager(tokenTTL, nil, tokenGenerator)
 
 		_, err := tokenService.Save(serializable)
 
@@ -87,68 +87,14 @@ func TestTokenService_Replace(t *testing.T) {
 
 		tokenCache := &mocks.TokenCache{}
 		tokenCache.On("Delete", token)
-		tokenCache.On("Put", newToken, payload)
+		tokenCache.On("Put", newToken, payload, tokenTTL)
 		tokenGenerator := func() (string, apperrors.AppError) { return newToken, nil }
 
-		tokenService := NewTokenService(tokenCache, tokenGenerator)
+		tokenService := NewTokenManager(tokenTTL, tokenCache, tokenGenerator)
 
 		generatedToken, err := tokenService.Replace(token, serializable)
 
 		require.NoError(t, err)
 		assert.Equal(t, newToken, generatedToken)
 	})
-}
-
-func TestTokenService_Resolve(t *testing.T) {
-
-	type data struct {
-		Data string `json:"data"`
-	}
-
-	t.Run("shoud resolve token", func(t *testing.T) {
-		// given
-		dummyString := "data"
-		encodedData := string(compact([]byte("{\"data\":\"data\"}")))
-		dummyData := data{Data: dummyString}
-
-		tokenCache := &mocks.TokenCache{}
-		tokenCache.On("Get", token).Return(encodedData, true)
-
-		var destination data
-
-		tokenService := NewTokenService(tokenCache, nil)
-
-		// when
-		err := tokenService.Resolve(token, &destination)
-
-		// then
-		require.NoError(t, err)
-		assert.Equal(t, dummyData.Data, destination.Data)
-	})
-
-	t.Run("should return error when token not found", func(t *testing.T) {
-		// given
-		tokenCache := &mocks.TokenCache{}
-		tokenCache.On("Get", token).Return("", false)
-
-		var destination data
-
-		tokenService := NewTokenService(tokenCache, nil)
-
-		// when
-		err := tokenService.Resolve(token, &destination)
-
-		// then
-		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeNotFound, err.Code())
-	})
-}
-
-func compact(src []byte) []byte {
-	buffer := new(bytes.Buffer)
-	err := json.Compact(buffer, src)
-	if err != nil {
-		return src
-	}
-	return buffer.Bytes()
 }

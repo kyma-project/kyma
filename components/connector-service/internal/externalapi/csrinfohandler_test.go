@@ -72,13 +72,13 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 			KeyAlgorithm: "rsa2048",
 		}
 
-		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
+		tokenManager := &tokenMocks.Manager{}
+		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 		apiURLsGenerator.On("Generate", dummyClientContext).Return(expectedAPI)
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -103,14 +103,14 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		// given
-		tokenCreator := &tokenMocks.Creator{}
+		tokenManager := &tokenMocks.Manager{}
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
 		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, apiURLsGenerator, certificateURL, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -133,12 +133,12 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to replace token", func(t *testing.T) {
 		// given
-		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
+		tokenManager := &tokenMocks.Manager{}
+		tokenManager.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
 
 		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)

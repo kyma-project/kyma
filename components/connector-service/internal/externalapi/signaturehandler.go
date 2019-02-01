@@ -17,14 +17,14 @@ import (
 )
 
 type signatureHandler struct {
-	tokenRemover             tokens.Remover
+	tokenManager             tokens.Manager
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	certificateService       certificates.Service
 }
 
-func NewSignatureHandler(tokenRemover tokens.Remover, certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor) SignatureHandler {
+func NewSignatureHandler(tokenManager tokens.Manager, certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor) SignatureHandler {
 	return &signatureHandler{
-		tokenRemover:             tokenRemover,
+		tokenManager:             tokenManager,
 		connectorClientExtractor: connectorClientExtractor,
 		certificateService:       certificateService,
 	}
@@ -56,7 +56,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sh.tokenRemover.Delete(token)
+	sh.tokenManager.Delete(token)
 
 	httphelpers.RespondWithBody(w, 201, toCertResponse(encodedCertificatesChain))
 }

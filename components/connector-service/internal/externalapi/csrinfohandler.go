@@ -16,17 +16,17 @@ const (
 )
 
 type CSRInfoHandler struct {
-	tokenCreator             tokens.Creator
+	tokenManager             tokens.Manager
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	apiInfoURLsGenerator     APIUrlsGenerator
 	certificateURL           string
 	csrSubject               certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, certificateURL string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor clientcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, certificateURL string, subjectValues certificates.CSRSubject) InfoHandler {
 
 	return &CSRInfoHandler{
-		tokenCreator:             tokenCreator,
+		tokenManager:             tokenManager,
 		connectorClientExtractor: connectorClientExtractor,
 		apiInfoURLsGenerator:     apiInfoURLsGenerator,
 		certificateURL:           certificateURL,
@@ -42,7 +42,7 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newToken, err := ih.tokenCreator.Replace(token, connectorClientContext)
+	newToken, err := ih.tokenManager.Replace(token, connectorClientContext)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return

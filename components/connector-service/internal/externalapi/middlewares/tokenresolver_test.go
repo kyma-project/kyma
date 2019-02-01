@@ -19,8 +19,7 @@ const (
 	token      = "token"
 )
 
-type dummyContextExtender struct {
-}
+type dummyContextExtender struct{}
 
 func (dce dummyContextExtender) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, dummyKey, dummyValue)
