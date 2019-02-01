@@ -4,7 +4,7 @@ import "time"
 
 type ServiceInstance struct {
 	Name              string                      `json:"name"`
-	Namespace         string                      `json:"environment"`
+	Namespace         string                      `json:"namespace"`
 	ClassReference    *ServiceInstanceResourceRef `json:"classReference"`
 	PlanReference     *ServiceInstanceResourceRef `json:"planReference"`
 	PlanSpec          *JSON                       `json:"planSpec"`
