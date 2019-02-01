@@ -14,13 +14,13 @@ import (
 const TokenURLFormat = "%s?token=%s"
 
 type tokenHandler struct {
-	tokenCreator             tokens.Creator
+	tokenManager             tokens.Manager
 	csrInfoURL               string
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 }
 
-func NewTokenHandler(tokenService tokens.Creator, csrInfoURL string, connectorClientExtractor clientcontext.ConnectorClientExtractor) TokenHandler {
-	return &tokenHandler{tokenCreator: tokenService, csrInfoURL: csrInfoURL, connectorClientExtractor: connectorClientExtractor}
+func NewTokenHandler(tokenManager tokens.Manager, csrInfoURL string, connectorClientExtractor clientcontext.ConnectorClientExtractor) TokenHandler {
+	return &tokenHandler{tokenManager: tokenManager, csrInfoURL: csrInfoURL, connectorClientExtractor: connectorClientExtractor}
 }
 
 func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +30,7 @@ func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	token, err := th.tokenCreator.Save(connectorClientContext)
+	token, err := th.tokenManager.Save(connectorClientContext)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return

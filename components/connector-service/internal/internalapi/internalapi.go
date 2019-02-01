@@ -13,7 +13,7 @@ import (
 
 type Config struct {
 	Middlewares      []mux.MiddlewareFunc
-	TokenCreator     tokens.Creator
+	TokenManager     tokens.Manager
 	CSRInfoURL       string
 	ContextExtractor clientcontext.ConnectorClientExtractor
 }
@@ -26,13 +26,13 @@ func NewHandler(globalMiddlewares []mux.MiddlewareFunc, appCfg Config, runtimeCf
 	router := mux.NewRouter()
 	httphelpers.WithMiddlewares(router, globalMiddlewares)
 
-	appTokenHandler := NewTokenHandler(appCfg.TokenCreator, appCfg.CSRInfoURL, appCfg.ContextExtractor)
+	appTokenHandler := NewTokenHandler(appCfg.TokenManager, appCfg.CSRInfoURL, appCfg.ContextExtractor)
 
 	applicationTokenRouter := router.PathPrefix("/v1/applications").Subrouter()
 	httphelpers.WithMiddlewares(applicationTokenRouter, appCfg.Middlewares)
 	applicationTokenRouter.HandleFunc("/tokens", appTokenHandler.CreateToken).Methods(http.MethodPost)
 
-	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenCreator, runtimeCfg.CSRInfoURL, runtimeCfg.ContextExtractor)
+	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenManager, runtimeCfg.CSRInfoURL, runtimeCfg.ContextExtractor)
 
 	clusterTokenRouter := router.PathPrefix("/v1/runtimes").Subrouter()
 	httphelpers.WithMiddlewares(clusterTokenRouter, runtimeCfg.Middlewares)
