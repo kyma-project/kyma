@@ -19,7 +19,7 @@ Follow these steps to get the `kubeconfig` file and configure the CLI to connect
 4. Open a terminal window.
 5. Export the `KUBECONFIG` environment variable to point to the downloaded `kubeconfig`. Run this command:
   ```
-  export KUBECONFIG={path_to_downloaded_kubeconfig}
+  export KUBECONFIG={KUBECONFIG_FILE_PATH}
   ```
   >**NOTE:** Drag and drop the `kubeconfig` file in the terminal to easily add the path of the file to the `export KUBECONFIG` command you run.
 

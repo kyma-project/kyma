@@ -1,9 +1,9 @@
 ---
 title: Add an Identity Provider to Dex
-type: Details
+type: Tutorials
 ---
 
-Add external, OpenID Connect compliant authentication providers to Kyma using [Dex connectors](https://github.com/coreos/dex#connectors). Follow the instructions below to add a GitHub connector and use it to authenticate users in Kyma.
+Add external, OpenID Connect compliant authentication providers to Kyma using [Dex connectors](https://github.com/coreos/dex#connectors). Follow this tutorial to add a GitHub connector and use it to authenticate users in Kyma.
 
 >**NOTE:** Groups in the Github are represented as teams. See [this](https://help.github.com/articles/organizing-members-into-teams/) document to learn how to manage teams in Github.
 
