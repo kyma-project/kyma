@@ -12,8 +12,11 @@ import (
 
 type EventingClient interface {
 	CreateMapping(appName string) (*acV1.ApplicationMapping, error)
+	DeleteMapping(appName string, options *metav1.DeleteOptions) error
 	CreateEventActivation(appName string) (*acV1.EventActivation, error)
+	DeleteEventActivation(appName string, options *metav1.DeleteOptions) error
 	CreateSubscription(appName string) (*subscriptionV1.Subscription, error)
+	DeleteSubscription(appName string, options *metav1.DeleteOptions) error
 }
 
 type eventingClient struct {
@@ -56,6 +59,10 @@ func (c *eventingClient) CreateMapping(appName string) (*acV1.ApplicationMapping
 	return c.appConnClientSet.ApplicationconnectorV1alpha1().ApplicationMappings(c.namespace).Create(am)
 }
 
+func (c *eventingClient) DeleteMapping(appName string, options *metav1.DeleteOptions) error {
+	return c.appConnClientSet.ApplicationconnectorV1alpha1().ApplicationMappings(c.namespace).Delete(appName, options)
+}
+
 func (c *eventingClient) CreateEventActivation(appName string) (*acV1.EventActivation, error) {
 	eaSpec := acV1.EventActivationSpec{
 		DisplayName: "Commerce-events",
@@ -70,6 +77,10 @@ func (c *eventingClient) CreateEventActivation(appName string) (*acV1.EventActiv
 	}
 
 	return c.appConnClientSet.ApplicationconnectorV1alpha1().EventActivations(c.namespace).Create(ea)
+}
+
+func (c *eventingClient) DeleteEventActivation(appName string, options *metav1.DeleteOptions) error {
+	return c.appConnClientSet.ApplicationconnectorV1alpha1().EventActivations(c.namespace).Delete(appName, options)
 }
 
 func (c *eventingClient) CreateSubscription(appName string) (*subscriptionV1.Subscription, error) {
@@ -91,4 +102,8 @@ func (c *eventingClient) CreateSubscription(appName string) (*subscriptionV1.Sub
 	}
 
 	return c.subscriptionClientSet.EventingV1alpha1().Subscriptions(c.namespace).Create(sub)
+}
+
+func (c *eventingClient) DeleteSubscription(appName string, options *metav1.DeleteOptions) error {
+	return c.subscriptionClientSet.EventingV1alpha1().Subscriptions(c.namespace).Delete(appName, options)
 }
