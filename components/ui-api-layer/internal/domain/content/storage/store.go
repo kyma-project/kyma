@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/golang/glog"
+
 	"github.com/pkg/errors"
 )
 
@@ -67,7 +69,12 @@ func (s *store) NotificationChannel(stop <-chan struct{}) <-chan notification {
 func (s *store) object(id, filename string, value interface{}) (bool, error) {
 	objectName := fmt.Sprintf("%s/%s", id, filename)
 	reader, err := s.client.Object(s.bucketName, objectName)
-	defer reader.Close()
+	defer func() {
+		err := reader.Close()
+		if err != nil {
+			glog.Warningf("Unable to close object reader. Cause: %v", err)
+		}
+	}()
 	if err != nil {
 		return false, errors.Wrapf(err, "while getting object `%s`", objectName)
 	}

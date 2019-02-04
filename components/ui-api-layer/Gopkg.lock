@@ -192,6 +192,14 @@
   version = "v1.1.5"
 
 [[projects]]
+  name = "github.com/kisielk/errcheck"
+  packages = [
+    ".",
+    "internal/errcheck"
+  ]
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
+
+[[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
@@ -852,6 +860,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "0555f06df5689c37edb5276cfa5efb0fc2f35dbea8362f0582853078294e9637"
+  inputs-digest = "f6b0506047b17577d2c1e35e5269abc9afd04e3e1249ea39ec16a965a76b91ec"
   solver-name = "gps-cdcl"
   solver-version = 1

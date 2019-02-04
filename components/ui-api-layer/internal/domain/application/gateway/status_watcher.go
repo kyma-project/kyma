@@ -102,8 +102,14 @@ func (s *gatewayStatusWatcher) isHealthy(url string) (bool, error) {
 		return false, err
 	}
 	defer func() {
-		_ = iosafety.DrainReader(resp.Body)
-		resp.Body.Close()
+		err := iosafety.DrainReader(resp.Body)
+		if err != nil {
+			glog.Warningf("Unable to drain body reader. Cause: %v", err)
+		}
+		err = resp.Body.Close()
+		if err != nil {
+			glog.Warningf("Unable to close body reader. Cause: %v", err)
+		}
 	}()
 
 	if resp.StatusCode != http.StatusOK {

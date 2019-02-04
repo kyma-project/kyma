@@ -19,14 +19,14 @@ type serviceBindingService struct {
 	nameFunc func() string
 }
 
-func newServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, informer cache.SharedIndexInformer, nameFunc func() string) *serviceBindingService {
+func newServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, informer cache.SharedIndexInformer, nameFunc func() string) (*serviceBindingService, error) {
 	svc := &serviceBindingService{
 		client:   client,
 		informer: informer,
 		nameFunc: nameFunc,
 	}
 
-	informer.AddIndexers(cache.Indexers{
+	err := informer.AddIndexers(cache.Indexers{
 		"relatedServiceInstanceName": func(obj interface{}) ([]string, error) {
 			serviceBinding, err := svc.toServiceBinding(obj)
 			if err != nil {
@@ -37,13 +37,16 @@ func newServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, inf
 			return []string{key}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
 
 	svc.notifier = notifier
 
-	return svc
+	return svc, nil
 }
 
 func (f *serviceBindingService) Create(ns string, sb *api.ServiceBinding) (*api.ServiceBinding, error) {

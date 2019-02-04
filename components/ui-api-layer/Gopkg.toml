@@ -9,7 +9,12 @@ required = [
     "k8s.io/code-generator/cmd/informer-gen",
     "k8s.io/code-generator/cmd/openapi-gen",
     "github.com/kyma-project/kyma/tools/failery",
+    "github.com/kisielk/errcheck",
 ]
+
+[[constraint]]
+  name = "github.com/kisielk/errcheck"
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
 
 [[override]]
   name = "golang.org/x/net"

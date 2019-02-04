@@ -13,8 +13,8 @@ type serviceClassService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newServiceClassService(informer cache.SharedIndexInformer) *serviceClassService {
-	informer.AddIndexers(cache.Indexers{
+func newServiceClassService(informer cache.SharedIndexInformer) (*serviceClassService, error) {
+	err := informer.AddIndexers(cache.Indexers{
 		"externalName": func(obj interface{}) ([]string, error) {
 			entity, ok := obj.(*v1beta1.ServiceClass)
 			if !ok {
@@ -24,10 +24,13 @@ func newServiceClassService(informer cache.SharedIndexInformer) *serviceClassSer
 			return []string{fmt.Sprintf("%s/%s", entity.Namespace, entity.Spec.ExternalName)}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	return &serviceClassService{
 		informer: informer,
-	}
+	}, nil
 }
 
 func (svc *serviceClassService) Find(name, namespace string) (*v1beta1.ServiceClass, error) {

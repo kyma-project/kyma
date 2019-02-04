@@ -28,7 +28,7 @@ type serviceBindingUsageService struct {
 	nameFunc func() string
 }
 
-func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, nameFunc func() string) *serviceBindingUsageService {
+func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, nameFunc func() string) (*serviceBindingUsageService, error) {
 	svc := &serviceBindingUsageService{
 		client:      client,
 		informer:    informer,
@@ -36,7 +36,7 @@ func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interfa
 		nameFunc:    nameFunc,
 	}
 
-	informer.AddIndexers(cache.Indexers{
+	err := informer.AddIndexers(cache.Indexers{
 		"usedBy": func(obj interface{}) ([]string, error) {
 			serviceBindingUsage, err := svc.toServiceBindingUsage(obj)
 			if err != nil {
@@ -48,13 +48,16 @@ func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interfa
 			return []string{key}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
 
 	svc.notifier = notifier
 
-	return svc
+	return svc, nil
 }
 
 func (f *serviceBindingUsageService) Create(namespace string, sb *api.ServiceBindingUsage) (*api.ServiceBindingUsage, error) {

@@ -75,7 +75,10 @@ func (r *PluggableContainer) Enable() error {
 
 	r.informerFactory = bindingUsageInformers.NewSharedInformerFactory(serviceBindingUsageClient, informerResyncPeriod)
 	usageKindService := newUsageKindService(serviceBindingUsageClient.ServicecatalogV1alpha1(), dynamicClient, r.informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer())
-	serviceBindingUsageService := newServiceBindingUsageService(serviceBindingUsageClient.ServicecatalogV1alpha1(), r.informerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), r.cfg.scRetriever, name.Generate)
+	serviceBindingUsageService, err := newServiceBindingUsageService(serviceBindingUsageClient.ServicecatalogV1alpha1(), r.informerFactory.Servicecatalog().V1alpha1().ServiceBindingUsages().Informer(), r.cfg.scRetriever, name.Generate)
+	if err != nil {
+		return errors.Wrap(err, "while creating service binding usage service")
+	}
 
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{

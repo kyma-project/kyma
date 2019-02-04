@@ -44,7 +44,10 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
 	namespaceService := newNamespaceService(client.Namespaces())
-	deploymentService := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
+	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating deployment service")
+	}
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
 	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 

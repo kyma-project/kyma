@@ -90,6 +90,14 @@
   version = "v1.1.5"
 
 [[projects]]
+  name = "github.com/kisielk/errcheck"
+  packages = [
+    ".",
+    "internal/errcheck"
+  ]
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
+
+[[projects]]
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
@@ -390,6 +398,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "00065fee0d70cae1a2dc6d25f6f8c7a018ae464945c14a57c252430bb3cccffd"
+  inputs-digest = "b79ce30f91691d0c7855213e0cf94c33e125edff124331b24f501c440b7f36ab"
   solver-name = "gps-cdcl"
   solver-version = 1
