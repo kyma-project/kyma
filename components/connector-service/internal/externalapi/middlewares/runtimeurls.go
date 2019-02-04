@@ -25,7 +25,7 @@ func NewRuntimeURLsMiddleware(defaultMetadataHost string, defaultEventsHost stri
 
 func (cc *runtimeURLsMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		runtimeURLs := &clientcontext.RuntimeURLs{
+		runtimeURLs := &clientcontext.APIHosts{
 			MetadataHost: r.Header.Get(BaseMetadataHostHeader),
 			EventsHost:   r.Header.Get(BaseEventsHostHeader),
 		}

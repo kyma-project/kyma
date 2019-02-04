@@ -113,29 +113,29 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), opts.caSecretName, subjectValues)
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, clientcontext.ResolveApplicationContextExtender)
-	appAPIUrlsGenerator := externalapi.NewApplicationApiUrlsStrategy(opts.appRegistryHost, opts.eventsHost, opts.getInfoURL, opts.connectorServiceHost)
 
 	appHandlerConfig := externalapi.Config{
-		TokenService:     tokenService,
-		CertificateURL:   fmt.Sprintf(appCertificateURLFmt, opts.connectorServiceHost),
-		Subject:          subjectValues,
-		Middlewares:      []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware},
-		ContextExtractor: clientcontext.ExtractApplicationContext,
-		APIUrlsGenerator: appAPIUrlsGenerator,
-		CertService:      certificateService,
+		TokenService:         tokenService,
+		CertificateURL:       fmt.Sprintf(appCertificateURLFmt, opts.connectorServiceHost),
+		GetInfoURL:           opts.getInfoURL,
+		ConnectorServiceHost: opts.connectorServiceHost,
+		Subject:              subjectValues,
+		Middlewares:          []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware},
+		ContextExtractor:     clientcontext.ExtractApplicationContext,
+		CertService:          certificateService,
 	}
 
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, clientcontext.ResolveClusterContextExtender)
-	runtimeAPIUrlsGenerator := externalapi.NewRuntimeApiUrlsStrategy(opts.connectorServiceHost)
 
 	runtimeHandlerConfig := externalapi.Config{
-		TokenService:     tokenService,
-		CertificateURL:   fmt.Sprintf(runtimeCertificateURLFmt, opts.connectorServiceHost),
-		Subject:          subjectValues,
-		Middlewares:      []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware},
-		ContextExtractor: clientcontext.ExtractClusterContext,
-		APIUrlsGenerator: runtimeAPIUrlsGenerator,
-		CertService:      certificateService,
+		TokenService:         tokenService,
+		CertificateURL:       fmt.Sprintf(runtimeCertificateURLFmt, opts.connectorServiceHost),
+		GetInfoURL:           opts.getInfoURL,
+		ConnectorServiceHost: opts.connectorServiceHost,
+		Subject:              subjectValues,
+		Middlewares:          []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware},
+		ContextExtractor:     clientcontext.ExtractClusterContext,
+		CertService:          certificateService,
 	}
 
 	return externalapi.NewHandler(appHandlerConfig, runtimeHandlerConfig, globalMiddlewares)

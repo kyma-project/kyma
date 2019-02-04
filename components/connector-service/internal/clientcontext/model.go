@@ -8,7 +8,7 @@ import (
 const (
 	ApplicationHeader     = "Application"
 	ApplicationContextKey = "ApplicationContext"
-	RuntimeURLsKey        = "RuntimeURLs"
+	APIHostsKey           = "APIHosts"
 
 	ClusterContextKey = "ClusterContext"
 	TenantHeader      = "Tenant"
@@ -31,9 +31,13 @@ type ConnectorClientReader interface {
 	GetCommonName() string
 }
 
+type ExtendedApplicationContext struct {
+	ApplicationContext
+	RuntimeURLs
+}
+
 type ApplicationContext struct {
 	Application    string
-	RuntimeUrls    *RuntimeURLs
 	ClusterContext ClusterContext
 }
 
@@ -102,11 +106,16 @@ func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
 }
 
-type RuntimeURLs struct {
+type APIHosts struct {
 	EventsHost   string
 	MetadataHost string
 }
 
-func (r *RuntimeURLs) ExtendContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, RuntimeURLsKey, r)
+type RuntimeURLs struct {
+	EventsURL   string `json:"metadataUrl"`
+	MetadataURL string `json:"eventsUrl"`
+}
+
+func (r APIHosts) ExtendContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, APIHostsKey, r)
 }

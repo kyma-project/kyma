@@ -2,18 +2,21 @@ package clientcontext
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
+const (
+	MetadataURLFormat = "https://%s/%s/v1/metadata/services"
+	EventsURLFormat   = "https://%s/%s/v1/events"
+)
+
 type ConnectorClientExtractor func(ctx context.Context) (ConnectorClientContext, apperrors.AppError)
 
-type ExtendedApplicationContext struct {
-	ApplicationContext
-	RuntimeURLs
-}
+// TODO - decide if only host should be passed
 
 func ExtractApplicationContext(ctx context.Context) (ConnectorClientContext, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)
@@ -21,11 +24,20 @@ func ExtractApplicationContext(ctx context.Context) (ConnectorClientContext, app
 		return nil, apperrors.Internal("Failed to create params when reading ApplicationContext")
 	}
 
-	// TODO - extract runtime URLs
-	//runtimeUrls, ok :=
+	apiHosts, ok := ctx.Value(APIHostsKey).(APIHosts)
+	if !ok {
+		return appCtx, nil
+	}
+
+	metadataURL := fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataHost, appCtx.GetApplication())
+	eventsURL := fmt.Sprintf(EventsURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
 
 	extendedCtx := &ExtendedApplicationContext{
 		ApplicationContext: appCtx,
+		RuntimeURLs: RuntimeURLs{
+			MetadataURL: metadataURL,
+			EventsURL:   eventsURL,
+		},
 	}
 
 	return extendedCtx, nil

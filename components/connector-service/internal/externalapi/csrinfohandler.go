@@ -15,24 +15,34 @@ const (
 	CertificateURLFormat   = "%s?token=%s"
 	BaseEventsPathHeader   = "Base-Events-Path"
 	BaseMetadataPathHeader = "Base-Metadata-Path"
+
+	AppURLFormat     = "https://%s/v1/applications/%s"
+	RuntimeURLFormat = "https://%s/v1/runtimes/%s"
+
+	CertsEndpoint          = "certificates"
+	ManagementInfoEndpoint = "management/info"
 )
 
 type CSRInfoHandler struct {
 	tokenCreator             tokens.Creator
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
-	apiInfoURLsGenerator     APIUrlsGenerator
 	certificateURL           string
+	getInfoURL               string
+	connectorServiceHost     string
 	csrSubject               certificates.CSRSubject
+	urlFormat                string
 }
 
-func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, certificateURL string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, certificateURL, getInfoURL, connectorServiceHost string, subjectValues certificates.CSRSubject, urlFormat string) InfoHandler {
 
 	return &CSRInfoHandler{
 		tokenCreator:             tokenCreator,
 		connectorClientExtractor: connectorClientExtractor,
-		apiInfoURLsGenerator:     apiInfoURLsGenerator,
 		certificateURL:           certificateURL,
+		getInfoURL:               getInfoURL,
+		connectorServiceHost:     connectorServiceHost,
 		csrSubject:               subjectValues,
+		urlFormat:                urlFormat,
 	}
 }
 
@@ -50,14 +60,20 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	host := ih.connectorServiceHost
+	infoURL := ih.getInfoURL
+
+	if infoURL == "" {
+		infoURL = fmt.Sprintf(ih.urlFormat, host, ManagementInfoEndpoint)
+	}
+
 	apiURLs := api{
-		CertificatesURL: "dwadaw",
-		InfoURL:         "dwadw",
-		runtimeURLs:     connectorClientContext.GetRuntimeUrls(),
+		CertificatesURL: fmt.Sprintf(ih.urlFormat, host, CertsEndpoint),
+		InfoURL:         infoURL,
+		RuntimeURLs:     connectorClientContext.GetRuntimeUrls(),
 	}
 
 	csrURL := fmt.Sprintf(CertificateURLFormat, ih.certificateURL, newToken)
-	apiURLs := ih.apiInfoURLsGenerator.Generate(connectorClientContext)
 
 	certInfo := makeCertInfo(ih.csrSubject, connectorClientContext.GetCommonName())
 

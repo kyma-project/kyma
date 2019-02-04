@@ -25,7 +25,7 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			ctxValue := ctx.Value(clientcontext.RuntimeURLsKey).(*clientcontext.RuntimeURLs)
+			ctxValue := ctx.Value(clientcontext.APIHostsKey).(clientcontext.APIHosts)
 			assert.Equal(t, baseEventHost, ctxValue.EventsHost)
 			assert.Equal(t, baseMetadataHost, ctxValue.MetadataHost)
 			w.WriteHeader(http.StatusOK)
@@ -53,7 +53,7 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			ctxValue := ctx.Value(clientcontext.RuntimeURLsKey).(*clientcontext.RuntimeURLs)
+			ctxValue := ctx.Value(clientcontext.APIHostsKey).(clientcontext.APIHosts)
 			assert.Equal(t, defaultEventsHost, ctxValue.EventsHost)
 			assert.Equal(t, defaultMetadataHost, ctxValue.MetadataHost)
 			w.WriteHeader(http.StatusOK)

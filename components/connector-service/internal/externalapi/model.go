@@ -1,6 +1,9 @@
 package externalapi
 
-import "github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+import (
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+)
 
 type certRequest struct {
 	CSR string `json:"csr"`
@@ -19,14 +22,9 @@ type infoResponse struct {
 }
 
 type api struct {
-	runtimeURLs
+	*clientcontext.RuntimeURLs
 	InfoURL         string `json:"infoUrl"`
 	CertificatesURL string `json:"certificatesUrl"`
-}
-
-type runtimeURLs struct {
-	MetadataURL string `json:"metadataUrl"`
-	EventsURL   string `json:"eventsUrl"`
 }
 
 type runtimeApi struct {

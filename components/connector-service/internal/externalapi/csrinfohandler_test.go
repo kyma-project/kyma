@@ -12,8 +12,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/mocks"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
@@ -25,7 +23,7 @@ import (
 const (
 	commonName     = "commonName"
 	application    = "application"
-	certificateURL = "https://host/v1/applications/certificates"
+	certificateURL = "https://connector-service.kyma.cx/v1/applications/certificates"
 )
 
 type dummyClientContext struct{}
@@ -42,7 +40,14 @@ func (dc dummyClientContext) GetCommonName() string {
 	return commonName
 }
 
+func (dc dummyClientContext) GetRuntimeUrls() *clientcontext.RuntimeURLs {
+	return &clientcontext.RuntimeURLs{}
+}
+
 func TestInfoHandler_GetCSRInfo(t *testing.T) {
+
+	host := "connector-service.kyma.cx"
+	infoURL := "connector-service.test.cluster.kyma.cx/v1/applications/management/info"
 
 	url := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
 
@@ -64,21 +69,21 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		newToken := "newToken"
 		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/certificates?token=%s", host, newToken)
 
-		expectedAPI := "dummyAPI"
-
 		expectedCertInfo := certInfo{
 			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),
 			Extensions:   "",
 			KeyAlgorithm: "rsa2048",
 		}
 
+		expectedAPI := api{
+			CertificatesURL: "https://connector-service.kyma.cx/v1/applications/certificates",
+			InfoURL:         "connector-service.test.cluster.kyma.cx/v1/applications/management/info",
+		}
+
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		apiURLsGenerator := &mocks.APIUrlsGenerator{}
-		apiURLsGenerator.On("Generate", dummyClientContext).Return(expectedAPI)
-
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -92,25 +97,26 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse infoResponse
+		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, expectedSignUrl, infoResponse.CsrURL)
-		assert.EqualValues(t, expectedAPI, infoResponse.API)
+		assert.EqualValues(t, expectedAPI.CertificatesURL, infoResponse.API.(*api).CertificatesURL)
+		assert.EqualValues(t, expectedAPI.InfoURL, infoResponse.API.(*api).InfoURL)
 		assert.EqualValues(t, expectedCertInfo, infoResponse.CertificateInfo)
 	})
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		// given
 		tokenCreator := &tokenMocks.Creator{}
-		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
 		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -136,9 +142,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
 
-		apiURLsGenerator := &mocks.APIUrlsGenerator{}
-
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -165,8 +169,6 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		apiURLsGenerator := NewApplicationApiUrlsStrategy("", "", "", "")
-
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 		req.Header.Add(BaseEventsPathHeader, "events.base.path")
@@ -174,7 +176,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		expectedMetadataUrl := "https://metadata.base.path/application/v1/metadata/services"
 		expectedEventsUrl := "https://events.base.path/application/v1/events"
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
 
 		rr := httptest.NewRecorder()
 
@@ -186,12 +188,12 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse infoResponse
-		infoResponse.API = &applicationApi{}
+		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
-		api := infoResponse.API.(*applicationApi)
+		api := infoResponse.API.(*api)
 		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
 		assert.Equal(t, expectedEventsUrl, api.EventsURL)
 	})
@@ -202,8 +204,6 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		apiURLsGenerator := NewApplicationApiUrlsStrategy("metadata.default.path", "", "", "")
-
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 		req.Header.Add(BaseEventsPathHeader, "events.base.path")
@@ -211,7 +211,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		expectedMetadataUrl := "https://metadata.default.path/application/v1/metadata/services"
 		expectedEventsUrl := "https://events.base.path/application/v1/events"
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
 
 		rr := httptest.NewRecorder()
 
@@ -223,12 +223,12 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse infoResponse
-		infoResponse.API = &applicationApi{}
+		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
-		api := infoResponse.API.(*applicationApi)
+		api := infoResponse.API.(*api)
 		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
 		assert.Equal(t, expectedEventsUrl, api.EventsURL)
 	})
@@ -239,15 +239,13 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		apiURLsGenerator := NewApplicationApiUrlsStrategy("metadata.default.path", "", "", "")
-
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 		req.Header.Add(BaseEventsPathHeader, "events.base.path")
 		expectedMetadataUrl := "https://metadata.default.path/application/v1/metadata/services"
 		expectedEventsUrl := "https://events.base.path/application/v1/events"
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
 
 		rr := httptest.NewRecorder()
 
@@ -259,12 +257,12 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse infoResponse
-		infoResponse.API = &applicationApi{}
+		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
-		api := infoResponse.API.(*applicationApi)
+		api := infoResponse.API.(*api)
 		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
 		assert.Equal(t, expectedEventsUrl, api.EventsURL)
 	})
@@ -275,8 +273,6 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		apiURLsGenerator := NewApplicationApiUrlsStrategy("", "", "", "")
-
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 		req.Header.Add(BaseEventsPathHeader, "events.base.path")
@@ -284,7 +280,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		expectedMetadataUrl := ""
 		expectedEventsUrl := "https://events.base.path/application/v1/events"
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
 
 		rr := httptest.NewRecorder()
 
@@ -296,12 +292,12 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse infoResponse
-		infoResponse.API = &applicationApi{}
+		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
-		api := infoResponse.API.(*applicationApi)
+		api := infoResponse.API.(*api)
 		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
 		assert.Equal(t, expectedEventsUrl, api.EventsURL)
 	})
