@@ -46,7 +46,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ template "push.name" . }}
+        app: "event-http-dispatcher-service" #This is changed because of tracing UI. 
         release: {{ .Release.Name }}
     spec:
       containers:
