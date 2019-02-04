@@ -3,6 +3,7 @@ package authz
 import (
 	"context"
 	"errors"
+	"reflect"
 	"time"
 
 	"github.com/99designs/gqlgen/graphql"
@@ -39,17 +40,54 @@ func NewAuthorizer(client authorizationclient.SubjectAccessReviewInterface, cach
 }
 
 // PrepareAttributes prepares attributes for authorization
-func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.ResourceAttributes) authorizer.Attributes {
+func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.ResourceAttributes, obj interface{}) (authorizer.Attributes, error) {
 	resolverCtx := graphql.GetResolverContext(ctx)
 
 	var name string
-	if attributes.NameArg != nil {
-		name = resolverCtx.Args[*attributes.NameArg].(string)
-	}
-
 	var namespace string
-	if attributes.NamespaceArg != nil {
-		namespace = resolverCtx.Args[*attributes.NamespaceArg].(string)
+
+	if attributes.IsChildResolver {
+		val := reflect.Indirect(reflect.ValueOf(obj))
+
+		for i := 0; i < val.NumField(); i++ {
+			fieldName := val.Type().Field(i).Name
+
+			if attributes.NameArg != nil {
+				if nameArg := *attributes.NameArg; fieldName == nameArg {
+					// if field does not contain string
+					if val.Field(i).Kind() != reflect.String {
+						return nil, errors.New("there are problems with receiving name value from passed object")
+					}
+					name = val.String()
+				}
+			}
+
+			if attributes.NamespaceArg != nil {
+				if namespaceArg := *attributes.NamespaceArg; fieldName == namespaceArg {
+					// if field does not contain string
+					if val.Field(i).Kind() != reflect.String {
+						return nil, errors.New("there are problems with receiving namespace value from passed object")
+					}
+					namespace = val.String()
+				}
+			}
+		}
+
+		if attributes.NameArg != nil && name == "" {
+			return nil, errors.New("name field in passed object not found")
+		}
+		if attributes.NamespaceArg != nil && namespace == "" {
+			return nil, errors.New("namespace field in passed object not found")
+		}
+	} else {
+
+		if attributes.NameArg != nil {
+			name = resolverCtx.Args[*attributes.NameArg].(string)
+		}
+
+		if attributes.NamespaceArg != nil {
+			namespace = resolverCtx.Args[*attributes.NamespaceArg].(string)
+		}
 	}
 
 	return authorizer.AttributesRecord{
@@ -62,5 +100,5 @@ func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.Re
 		Subresource:     attributes.Subresource,
 		Name:            name,
 		ResourceRequest: true,
-	}
+	}, nil
 }

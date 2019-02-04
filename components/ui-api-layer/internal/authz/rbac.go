@@ -20,7 +20,12 @@ func NewRBACDirective(a authorizer.Authorizer) RBACDirective {
 			glog.Errorf("Error while receiving user information: %v", err)
 			return nil, errors.New("access denied due to problems on the server side")
 		}
-		attrs := PrepareAttributes(ctx, u, attributes)
+
+		attrs, err := PrepareAttributes(ctx, u, attributes, obj)
+		if err != nil {
+			glog.Errorf("Error while obtaining attributes for authorization: %v", err)
+			return nil, errors.New("access denied due to problems on the server side")
+		}
 		authorized, _, err := a.Authorize(attrs)
 
 		if authorized != authorizer.DecisionAllow {

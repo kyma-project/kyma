@@ -19709,6 +19709,12 @@ func UnmarshalResourceAttributes(v interface{}) (ResourceAttributes, error) {
 			if err != nil {
 				return it, err
 			}
+		case "isChildResolver":
+			var err error
+			it.IsChildResolver, err = graphql.UnmarshalBoolean(v)
+			if err != nil {
+				return it, err
+			}
 		}
 	}
 
@@ -19912,6 +19918,7 @@ input ResourceAttributes {
 	subresource: String! = ""
 	nameArg: String
 	namespaceArg: String
+	isChildResolver: Boolean! = false
 }
 
 # Content
@@ -19952,7 +19959,7 @@ type ServiceInstance {
     servicePlan: ServicePlan
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: ServiceBindings!
+    serviceBindings: ServiceBindings! @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Environment", isChildResolver: true})
 
     # Depends on servicecatalogaddons domain
     serviceBindingUsages: [ServiceBindingUsage!]
@@ -20492,8 +20499,8 @@ type BackendModule {
 # Queries
 
 type Query {
-    serviceInstance(name: String!, environment: String!): ServiceInstance @HasAccess(attributes: {resource: "ServiceInstance", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
-    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "ServiceInstance", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
+    serviceInstance(name: String!, environment: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
+    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
     clusterServiceClass(name: String!): ClusterServiceClass
@@ -20506,7 +20513,7 @@ type Query {
     serviceBroker(name: String!, environment: String!): ServiceBroker
 
     serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
-    serviceBinding(name: String!, environment: String!): ServiceBinding @HasAccess(attributes: {resource: "ServiceBinding", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
+    serviceBinding(name: String!, environment: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
@@ -20537,12 +20544,12 @@ type Query {
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
     eventActivations(namespace: String!): [EventActivation!]!
 
-    limitRanges(environment: String!): [LimitRange!]! @HasAccess(attributes: {resource: "LimitRange", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environment"})
+    limitRanges(environment: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "environment"})
 
     backendModules: [BackendModule!]!
 
-    IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "IDPPresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations
@@ -20565,15 +20572,15 @@ type Mutation {
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
 
-    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 }
 
 # Subscriptions
 
 type Subscription {
     serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
-    serviceBindingEvent(environment: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "ServiceBinding", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
+    serviceBindingEvent(environment: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "environment"})
     serviceBindingUsageEvent(environment: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,

@@ -235,13 +235,14 @@ type PodEvent struct {
 }
 
 type ResourceAttributes struct {
-	Verb         string  `json:"verb"`
-	APIGroup     string  `json:"apiGroup"`
-	APIVersion   string  `json:"apiVersion"`
-	Resource     string  `json:"resource"`
-	Subresource  string  `json:"subresource"`
-	NameArg      *string `json:"nameArg"`
-	NamespaceArg *string `json:"namespaceArg"`
+	Verb            string  `json:"verb"`
+	APIGroup        string  `json:"apiGroup"`
+	APIVersion      string  `json:"apiVersion"`
+	Resource        string  `json:"resource"`
+	Subresource     string  `json:"subresource"`
+	NameArg         *string `json:"nameArg"`
+	NamespaceArg    *string `json:"namespaceArg"`
+	IsChildResolver bool    `json:"isChildResolver"`
 }
 
 type ResourceQuota struct {
