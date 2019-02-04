@@ -56,9 +56,10 @@ func (c *lambdaClient) DeleteLambda(appName string, options *metav1.DeleteOption
 }
 
 func (c *lambdaClient) createLambda(name string) *kubelessV1.Function {
+	//TODO: Modify lambda's code - it can handle URL to gist
 	lambdaSpec := kubelessV1.FunctionSpec{
 		Handler:             "e2e.entrypoint",
-		Function:            "module.exports={'entrypoint':(event,context)=>{console.log(777)}}",
+		Function:            "module.exports={'entrypoint':(event,context)=>{console.log(\"IMPLEMENT_ME\")}}",
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
 		Deps:                "",

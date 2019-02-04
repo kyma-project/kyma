@@ -201,5 +201,7 @@ func TestCleanup(t *testing.T) {
 			err = K8SClient.DeleteApplication(appName, deleteOptions)
 			So(err, ShouldBeNil)
 		})
+
+		//TODO: Delete servicebinding
 	})
 }
