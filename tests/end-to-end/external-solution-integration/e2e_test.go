@@ -61,7 +61,7 @@ func TestSecureConnectionAndRegistration(t *testing.T) {
 			So(tokenRequest, ShouldNotBeNil)
 
 			Convey("The operator should insert token into TokenRequest CRD", func() {
-				//TODO: Polling of tokenRequest
+				//TODO: Polling of tokenRequest (may not be needed, needs double-check)
 				time.Sleep(5 * time.Second)
 
 				tokenRequest, err = tokenRequestClient.GetTokenRequest(APPNAME, v1.GetOptions{})
@@ -103,12 +103,12 @@ func TestBindings(t *testing.T) {
 
 	Convey("Given application and environment", t, func() {
 
-		lambdaClient, err := testkit.NewLambdaClient(NAMESPACE)
+		eventingClient, err := testkit.NewEventingClient(NAMESPACE)
 		So(err, ShouldBeNil)
 
 		Convey("When binding is created", func() {
 
-			_, err := lambdaClient.CreateMapping(APPNAME)
+			_, err := eventingClient.CreateMapping(APPNAME)
 			So(err, ShouldBeNil)
 
 			Convey("It should generate proper service classes", func() {
@@ -130,17 +130,24 @@ func TestLambda(t *testing.T) {
 			err = lambdaClient.DeployLambda(APPNAME)
 			So(err, ShouldBeNil)
 
-			_, err = lambdaClient.CreateEventActivation(APPNAME)
+			eventingClient, err := testkit.NewEventingClient(NAMESPACE)
 			So(err, ShouldBeNil)
 
-			_, err = lambdaClient.CreateSubscription(APPNAME)
+			_, err = eventingClient.CreateEventActivation(APPNAME)
+			So(err, ShouldBeNil)
+
+			_, err = eventingClient.CreateSubscription(APPNAME)
 			So(err, ShouldBeNil)
 
 			//TODO: Create servicebinding for lamda-OCC
 
 			Convey("When event is sent", func() {
 
+				//TODO: Send an event via mock-app
+
 				Convey("Lambda should react to the event", func() {
+
+					//TODO: Check response / mock-app / database state
 
 				})
 			})
