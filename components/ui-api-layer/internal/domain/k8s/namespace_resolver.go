@@ -17,30 +17,30 @@ import (
 
 // TODO: Write tests
 
-//go:generate mockery -name=envLister -output=automock -outpkg=automock -case=underscore
-type envLister interface {
+//go:generate mockery -name=nsLister -output=automock -outpkg=automock -case=underscore
+type nsLister interface {
 	List() ([]v1.Namespace, error)
 }
 
-type environmentResolver struct {
-	envLister    envLister
+type namespaceResolver struct {
+	nsLister     nsLister
 	appRetriever shared.ApplicationRetriever
 }
 
-func newEnvironmentResolver(envLister envLister, appRetriever shared.ApplicationRetriever) *environmentResolver {
-	return &environmentResolver{
-		envLister:    envLister,
+func newNamespaceResolver(nsLister nsLister, appRetriever shared.ApplicationRetriever) *namespaceResolver {
+	return &namespaceResolver{
+		nsLister:     nsLister,
 		appRetriever: appRetriever,
 	}
 }
 
 // TODO: Split this query into two
-func (r *environmentResolver) EnvironmentsQuery(ctx context.Context, applicationName *string) ([]gqlschema.Environment, error) {
+func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName *string) ([]gqlschema.Namespace, error) {
 	var err error
 
 	var namespaces []v1.Namespace
 	if applicationName == nil {
-		namespaces, err = r.envLister.List()
+		namespaces, err = r.nsLister.List()
 	} else {
 		var namespaceNames []string
 		namespaceNames, err = r.appRetriever.Application().ListNamespacesFor(*applicationName)
@@ -60,32 +60,32 @@ func (r *environmentResolver) EnvironmentsQuery(ctx context.Context, application
 			return nil, err
 		}
 
-		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Environments))
-		return nil, gqlerror.New(err, pretty.Environments)
+		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Namespaces))
+		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
 
-	var environments []gqlschema.Environment
-	for _, ns := range namespaces {
-		environments = append(environments, gqlschema.Environment{
-			Name: ns.Name,
+	var ns []gqlschema.Namespace
+	for _, n := range namespaces {
+		ns = append(ns, gqlschema.Namespace{
+			Name: n.Name,
 		})
 	}
 
-	return environments, nil
+	return ns, nil
 }
 
-func (r *environmentResolver) ApplicationsField(ctx context.Context, obj *gqlschema.Environment) ([]string, error) {
+func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
 	if obj == nil {
-		return nil, errors.New("Cannot get application field for environment")
+		return nil, errors.New("Cannot get application field for namespace")
 	}
 
-	items, err := r.appRetriever.Application().ListInEnvironment(obj.Name)
+	items, err := r.appRetriever.Application().ListInNamespace(obj.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err
 		}
 
-		return nil, errors.Wrapf(err, "while listing %s for env", appPretty.Application)
+		return nil, errors.Wrapf(err, "while listing %s for namespace %s", appPretty.Application, obj.Name)
 	}
 
 	var appNames []string

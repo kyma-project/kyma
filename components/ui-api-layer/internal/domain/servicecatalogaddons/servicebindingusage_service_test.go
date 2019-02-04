@@ -160,7 +160,7 @@ func TestBindingUsageServiceListForServiceInstanceErrors(t *testing.T) {
 		// WHEN
 		_, err := sut.ListForServiceInstance("prod", "redis-instance")
 		// THEN
-		assert.EqualError(t, err, "while getting ServiceBindings for instance [env: prod, name: redis-instance]: some error")
+		assert.EqualError(t, err, "while getting ServiceBindings for instance [namespace: prod, name: redis-instance]: some error")
 	})
 }
 

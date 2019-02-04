@@ -11,13 +11,13 @@ type ServiceBindingFinderLister struct {
 	mock.Mock
 }
 
-// Find provides a mock function with given fields: env, name
-func (_m *ServiceBindingFinderLister) Find(env string, name string) (*v1beta1.ServiceBinding, error) {
-	ret := _m.Called(env, name)
+// Find provides a mock function with given fields: ns, name
+func (_m *ServiceBindingFinderLister) Find(ns string, name string) (*v1beta1.ServiceBinding, error) {
+	ret := _m.Called(ns, name)
 
 	var r0 *v1beta1.ServiceBinding
 	if rf, ok := ret.Get(0).(func(string, string) *v1beta1.ServiceBinding); ok {
-		r0 = rf(env, name)
+		r0 = rf(ns, name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1beta1.ServiceBinding)
@@ -26,7 +26,7 @@ func (_m *ServiceBindingFinderLister) Find(env string, name string) (*v1beta1.Se
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(env, name)
+		r1 = rf(ns, name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -34,13 +34,13 @@ func (_m *ServiceBindingFinderLister) Find(env string, name string) (*v1beta1.Se
 	return r0, r1
 }
 
-// ListForServiceInstance provides a mock function with given fields: env, instanceName
-func (_m *ServiceBindingFinderLister) ListForServiceInstance(env string, instanceName string) ([]*v1beta1.ServiceBinding, error) {
-	ret := _m.Called(env, instanceName)
+// ListForServiceInstance provides a mock function with given fields: ns, instanceName
+func (_m *ServiceBindingFinderLister) ListForServiceInstance(ns string, instanceName string) ([]*v1beta1.ServiceBinding, error) {
+	ret := _m.Called(ns, instanceName)
 
 	var r0 []*v1beta1.ServiceBinding
 	if rf, ok := ret.Get(0).(func(string, string) []*v1beta1.ServiceBinding); ok {
-		r0 = rf(env, instanceName)
+		r0 = rf(ns, instanceName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1beta1.ServiceBinding)
@@ -49,7 +49,7 @@ func (_m *ServiceBindingFinderLister) ListForServiceInstance(env string, instanc
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(env, instanceName)
+		r1 = rf(ns, instanceName)
 	} else {
 		r1 = ret.Error(1)
 	}

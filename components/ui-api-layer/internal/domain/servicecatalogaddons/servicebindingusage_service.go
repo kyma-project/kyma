@@ -57,19 +57,19 @@ func newServiceBindingUsageService(client v1alpha1.ServicecatalogV1alpha1Interfa
 	return svc
 }
 
-func (f *serviceBindingUsageService) Create(env string, sb *api.ServiceBindingUsage) (*api.ServiceBindingUsage, error) {
+func (f *serviceBindingUsageService) Create(namespace string, sb *api.ServiceBindingUsage) (*api.ServiceBindingUsage, error) {
 	if sb.Name == "" {
 		sb.Name = f.nameFunc()
 	}
-	return f.client.ServiceBindingUsages(env).Create(sb)
+	return f.client.ServiceBindingUsages(namespace).Create(sb)
 }
 
-func (f *serviceBindingUsageService) Delete(env string, name string) error {
-	return f.client.ServiceBindingUsages(env).Delete(name, &v1.DeleteOptions{})
+func (f *serviceBindingUsageService) Delete(namespace string, name string) error {
+	return f.client.ServiceBindingUsages(namespace).Delete(name, &v1.DeleteOptions{})
 }
 
-func (f *serviceBindingUsageService) Find(env string, name string) (*api.ServiceBindingUsage, error) {
-	key := fmt.Sprintf("%s/%s", env, name)
+func (f *serviceBindingUsageService) Find(namespace string, name string) (*api.ServiceBindingUsage, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
 	item, exists, err := f.informer.GetStore().GetByKey(key)
 	if err != nil || !exists {
 		return nil, err
@@ -78,8 +78,8 @@ func (f *serviceBindingUsageService) Find(env string, name string) (*api.Service
 	return f.toServiceBindingUsage(item)
 }
 
-func (f *serviceBindingUsageService) List(env string) ([]*api.ServiceBindingUsage, error) {
-	items, err := f.informer.GetIndexer().ByIndex("namespace", env)
+func (f *serviceBindingUsageService) List(namespace string) ([]*api.ServiceBindingUsage, error) {
+	items, err := f.informer.GetIndexer().ByIndex("namespace", namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -87,10 +87,10 @@ func (f *serviceBindingUsageService) List(env string) ([]*api.ServiceBindingUsag
 	return f.toServiceBindingUsages(items)
 }
 
-func (f *serviceBindingUsageService) ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBindingUsage, error) {
-	bindings, err := f.scRetriever.ServiceBinding().ListForServiceInstance(env, instanceName)
+func (f *serviceBindingUsageService) ListForServiceInstance(namespace string, instanceName string) ([]*api.ServiceBindingUsage, error) {
+	bindings, err := f.scRetriever.ServiceBinding().ListForServiceInstance(namespace, instanceName)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting ServiceBindings for instance [env: %s, name: %s]", env, instanceName)
+		return nil, errors.Wrapf(err, "while getting ServiceBindings for instance [namespace: %s, name: %s]", namespace, instanceName)
 	}
 
 	bindingNames := make(map[string]struct{})
@@ -98,9 +98,9 @@ func (f *serviceBindingUsageService) ListForServiceInstance(env string, instance
 		bindingNames[binding.Name] = struct{}{}
 	}
 
-	usages, err := f.List(env)
+	usages, err := f.List(namespace)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting all ServiceBindingUsages from env: %s", env)
+		return nil, errors.Wrapf(err, "while getting all ServiceBindingUsages from namespace: %s", namespace)
 	}
 	filteredUsages := make([]*api.ServiceBindingUsage, 0)
 	for _, usage := range usages {
@@ -111,8 +111,8 @@ func (f *serviceBindingUsageService) ListForServiceInstance(env string, instance
 	return filteredUsages, nil
 }
 
-func (f *serviceBindingUsageService) ListForDeployment(environment, kind, deploymentName string) ([]*api.ServiceBindingUsage, error) {
-	key := fmt.Sprintf("%s/%s/%s", environment, strings.ToLower(kind), deploymentName)
+func (f *serviceBindingUsageService) ListForDeployment(namespace, kind, deploymentName string) ([]*api.ServiceBindingUsage, error) {
+	key := fmt.Sprintf("%s/%s/%s", namespace, strings.ToLower(kind), deploymentName)
 	indexer := f.informer.GetIndexer()
 	items, err := indexer.ByIndex("usedBy", key)
 	if err != nil {

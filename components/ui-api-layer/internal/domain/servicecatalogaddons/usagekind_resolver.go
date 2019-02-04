@@ -15,7 +15,6 @@ import (
 //go:generate mockery -name=usageKindServices -output=automock -outpkg=automock -case=underscore
 type usageKindServices interface {
 	List(params pager.PagingParams) ([]*v1alpha1.UsageKind, error)
-	ListUsageKindResources(usageKind string, environment string) ([]gqlschema.UsageKindResource, error)
 }
 
 type usageKindResolver struct {
@@ -37,14 +36,4 @@ func (rsv *usageKindResolver) ListUsageKinds(ctx context.Context, first *int, of
 		return nil, gqlerror.New(err, pretty.UsageKinds)
 	}
 	return rsv.converter.ToGQLs(res), nil
-}
-
-func (rsv *usageKindResolver) ListServiceUsageKindResources(ctx context.Context, usageKind string, environment string) ([]gqlschema.UsageKindResource, error) {
-	res, err := rsv.svc.ListUsageKindResources(usageKind, environment)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s for %s `%s` in environment `%s`", pretty.UsageKindResource, pretty.UsageKind, usageKind, environment))
-		return nil, gqlerror.New(err, pretty.UsageKindResource, gqlerror.WithEnvironment(environment))
-	}
-
-	return res, nil
 }

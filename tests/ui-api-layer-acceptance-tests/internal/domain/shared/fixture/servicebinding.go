@@ -7,11 +7,11 @@ import (
 func ServiceBinding(bindingName, instanceName, namespace string) shared.ServiceBinding {
 	return shared.ServiceBinding{
 		Name:                bindingName,
-		Environment:         namespace,
+		Namespace:           namespace,
 		ServiceInstanceName: instanceName,
 		Secret: shared.Secret{
-			Name:        bindingName,
-			Environment: namespace,
+			Name:      bindingName,
+			Namespace: namespace,
 		},
 		Status: shared.ServiceBindingStatus{
 			Type: shared.ServiceBindingStatusTypeReady,

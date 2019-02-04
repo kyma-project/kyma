@@ -9,6 +9,6 @@ type ApplicationRetriever interface {
 
 //go:generate mockery -name=ApplicationLister -output=automock -outpkg=automock -case=underscore
 type ApplicationLister interface {
-	ListInEnvironment(environment string) ([]*v1alpha1.Application, error)
+	ListInNamespace(namespace string) ([]*v1alpha1.Application, error)
 	ListNamespacesFor(appName string) ([]string, error)
 }
