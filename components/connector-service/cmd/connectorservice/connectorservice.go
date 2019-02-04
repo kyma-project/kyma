@@ -113,6 +113,7 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), opts.caSecretName, subjectValues)
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenService, clientcontext.ResolveApplicationContextExtender)
+	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.appRegistryHost, opts.eventsHost)
 
 	appHandlerConfig := externalapi.Config{
 		TokenService:         tokenService,
@@ -120,7 +121,7 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 		GetInfoURL:           opts.getInfoURL,
 		ConnectorServiceHost: opts.connectorServiceHost,
 		Subject:              subjectValues,
-		Middlewares:          []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware},
+		Middlewares:          []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
 		ContextExtractor:     clientcontext.ExtractApplicationContext,
 		CertService:          certificateService,
 	}
@@ -133,7 +134,7 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 		GetInfoURL:           opts.getInfoURL,
 		ConnectorServiceHost: opts.connectorServiceHost,
 		Subject:              subjectValues,
-		Middlewares:          []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware},
+		Middlewares:          []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
 		ContextExtractor:     clientcontext.ExtractClusterContext,
 		CertService:          certificateService,
 	}
