@@ -43,11 +43,11 @@ func checkMetricsAndlabels(metric string, labels ...string) error {
 }
 
 func checkLambdaUIDashboard() {
-	err := checkMetricsAndlabels("istio_requests_total", "destination_service", "response_code")
+	err := checkMetricsAndlabels("istio_requests_total", "destination_service", "response_code", "source_workload")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = checkMetricsAndlabels("istio_requests_total", "destination_service", "response_code", "source_workload")
+	err = checkMetricsAndlabels("istio_request_duration_seconds_bucket", "destination_service")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -75,8 +75,9 @@ func checkLambdaUIDashboard() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = checkMetricsAndlabels("kube_service_labels", "label_created_by", "namespace")
+	err = checkMetricsAndlabels("kube_service_labels", "namespace")
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Printf("Test lambda dashboards: Success")
 }
