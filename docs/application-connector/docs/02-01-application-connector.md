@@ -37,11 +37,18 @@ An App represents an external solution connected to Kyma. It handles the integra
 Using the components of the Application Connector, the App creates a coherent identity for a connected external solution and ensures its separation.
 All Apps are created through the Application custom resource, which also stores all of the relevant metadata. You can map an App to many Kyma Namespaces and use the APIs and the Event Catalogs of the connected external solution within their context.
 
+# Application Broker
+
+The Application Broker (AB) observes all the Application custom resources and exposes their APIs and Events as ServiceClasses to the Service Catalog. When the list of remote the ServiceClasses of an Application is available in the Service Catalog, you can create an ApplicationMapping, provision those ServiceClasses, and enable them for Kyma services. This allows you to extend the functionality of existing systems.
+
+The AB implements the [Open Service Broker API](https://www.openservicebrokerapi.org/). For more details about the Service Brokers, see [this](/docs/components/service-brokers#overview-service-brokers) documentation.
+
 ## Application Operator
 
 The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of Application Proxy and Event Service for every custom resource.         
 
 >**NOTE:** Every Application custom resource corresponds to a single App to which you can connect an external solution.
+
 
 ## Application Proxy
 
