@@ -9,10 +9,10 @@ import (
 )
 
 const (
-	APPNAME             = "e2e-app"
-	ACCESSLABEL         = "a1b2c3"
-	NAMESPACE           = "production"
-	INTEGRATIONAMESPACE = "kyma-integration"
+	appName              = "e2e-app"
+	accessLabel          = "a1b2c3"
+	namespace            = "production"
+	integrationNamespace = "kyma-integration"
 )
 
 func TestApplicationCRDCreation(t *testing.T) {
@@ -21,24 +21,24 @@ func TestApplicationCRDCreation(t *testing.T) {
 
 		Convey("When CRD created", func() {
 
-			K8SClient, err := testkit.NewK8sResourcesClient(INTEGRATIONAMESPACE)
+			K8SClient, err := testkit.NewK8sResourcesClient(integrationNamespace)
 			So(err, ShouldBeNil)
 
-			app, err := K8SClient.CreateDummyApplication(APPNAME, ACCESSLABEL, false)
+			app, err := K8SClient.CreateDummyApplication(appName, accessLabel, false)
 			So(err, ShouldBeNil)
 			So(app, ShouldNotBeNil)
 
 			Convey("The data within CRD should match Application Data", func() {
 
-				app, err := K8SClient.GetApplication(APPNAME, v1.GetOptions{})
+				app, err := K8SClient.GetApplication(appName, v1.GetOptions{})
 				So(err, ShouldBeNil)
-				So(app.Name, ShouldEqual, APPNAME)
-				So(app.Spec.AccessLabel, ShouldEqual, ACCESSLABEL)
+				So(app.Name, ShouldEqual, appName)
+				So(app.Spec.AccessLabel, ShouldEqual, accessLabel)
 				So(app.Spec.SkipInstallation, ShouldEqual, false)
 
 				time.Sleep(5 * time.Second)
 
-				checker := testkit.NewK8sChecker(K8SClient, APPNAME)
+				checker := testkit.NewK8sChecker(K8SClient, appName)
 				err = checker.CheckK8sResources()
 
 				So(err, ShouldBeNil)
@@ -53,10 +53,10 @@ func TestSecureConnectionAndRegistration(t *testing.T) {
 
 		Convey("When token requested", func() {
 
-			tokenRequestClient, err := testkit.NewTokenRequestClient(INTEGRATIONAMESPACE)
+			tokenRequestClient, err := testkit.NewTokenRequestClient(integrationNamespace)
 			So(err, ShouldBeNil)
 
-			tokenRequest, err := tokenRequestClient.CreateTokenRequest(APPNAME)
+			tokenRequest, err := tokenRequestClient.CreateTokenRequest(appName)
 			So(err, ShouldBeNil)
 			So(tokenRequest, ShouldNotBeNil)
 
@@ -64,7 +64,7 @@ func TestSecureConnectionAndRegistration(t *testing.T) {
 				//TODO: Polling of tokenRequest (may not be needed, needs double-check)
 				time.Sleep(5 * time.Second)
 
-				tokenRequest, err = tokenRequestClient.GetTokenRequest(APPNAME, v1.GetOptions{})
+				tokenRequest, err = tokenRequestClient.GetTokenRequest(appName, v1.GetOptions{})
 				So(err, ShouldBeNil)
 				So(tokenRequest.Status.Token, ShouldNotBeNil)
 
@@ -81,7 +81,7 @@ func TestSecureConnectionAndRegistration(t *testing.T) {
 
 						res, err = mockAppClient.GetConnectionInfo()
 						So(err, ShouldBeNil)
-						So(res.AppName, ShouldEqual, APPNAME)
+						So(res.AppName, ShouldEqual, appName)
 						So(res.ClusterDomain, ShouldNotBeNil)
 						So(res.EventsURL, ShouldNotBeNil)
 						So(res.MetadataURL, ShouldNotBeNil)
@@ -103,16 +103,16 @@ func TestBindings(t *testing.T) {
 
 	Convey("Given application and environment", t, func() {
 
-		eventingClient, err := testkit.NewEventingClient(NAMESPACE)
+		eventingClient, err := testkit.NewEventingClient(namespace)
 		So(err, ShouldBeNil)
 
 		Convey("When binding is created", func() {
 
-			_, err := eventingClient.CreateMapping(APPNAME)
+			_, err := eventingClient.CreateMapping(appName)
 			So(err, ShouldBeNil)
 
 			Convey("It should generate proper service classes", func() {
-
+				//TODO: Check service classes
 			})
 		})
 	})
@@ -124,19 +124,19 @@ func TestLambda(t *testing.T) {
 
 		Convey("When lambda and bindings are created", func() {
 
-			lambdaClient, err := testkit.NewLambdaClient(NAMESPACE)
+			lambdaClient, err := testkit.NewLambdaClient(namespace)
 			So(err, ShouldBeNil)
 
-			err = lambdaClient.DeployLambda(APPNAME)
+			err = lambdaClient.DeployLambda(appName)
 			So(err, ShouldBeNil)
 
-			eventingClient, err := testkit.NewEventingClient(NAMESPACE)
+			eventingClient, err := testkit.NewEventingClient(namespace)
 			So(err, ShouldBeNil)
 
-			_, err = eventingClient.CreateEventActivation(APPNAME)
+			_, err = eventingClient.CreateEventActivation(appName)
 			So(err, ShouldBeNil)
 
-			_, err = eventingClient.CreateSubscription(APPNAME)
+			_, err = eventingClient.CreateSubscription(appName)
 			So(err, ShouldBeNil)
 
 			//TODO: Create servicebinding for lamda-OCC
@@ -151,6 +151,55 @@ func TestLambda(t *testing.T) {
 
 				})
 			})
+		})
+	})
+}
+
+func TestCleanup(t *testing.T) {
+	Convey("Given delete options", t, func() {
+
+		deleteOptions := &v1.DeleteOptions{}
+
+		Convey("It should delete a Lambda", func() {
+
+			lambdaClient, err := testkit.NewLambdaClient(namespace)
+			So(err, ShouldBeNil)
+
+			err = lambdaClient.DeleteLambda(appName, deleteOptions)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("It should delete Subscriptions, EventActivations and ApplicationMappings", func() {
+
+			eventingClient, err := testkit.NewEventingClient(namespace)
+			So(err, ShouldBeNil)
+
+			err = eventingClient.DeleteMapping(appName, deleteOptions)
+			So(err, ShouldBeNil)
+
+			err = eventingClient.DeleteEventActivation(appName, deleteOptions)
+			So(err, ShouldBeNil)
+
+			err = eventingClient.DeleteSubscription(appName, deleteOptions)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("It should delete TokenRequest", func() {
+
+			tokenRequestClient, err := testkit.NewTokenRequestClient(integrationNamespace)
+			So(err, ShouldBeNil)
+
+			err = tokenRequestClient.DeleteTokenRequest(appName, deleteOptions)
+			So(err, ShouldBeNil)
+		})
+
+		Convey("It should delete Application", func() {
+
+			K8SClient, err := testkit.NewK8sResourcesClient(integrationNamespace)
+			So(err, ShouldBeNil)
+
+			err = K8SClient.DeleteApplication(appName, deleteOptions)
+			So(err, ShouldBeNil)
 		})
 	})
 }

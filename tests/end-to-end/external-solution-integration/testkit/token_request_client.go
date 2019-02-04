@@ -12,6 +12,7 @@ import (
 type TokenRequestClient interface {
 	CreateTokenRequest(appName string) (*v1alpha1.TokenRequest, error)
 	GetTokenRequest(appName string, options v1.GetOptions) (*v1alpha1.TokenRequest, error)
+	DeleteTokenRequest(appName string, options *v1.DeleteOptions) error
 }
 
 type tokenRequestClient struct {
@@ -49,4 +50,8 @@ func (t *tokenRequestClient) CreateTokenRequest(appName string) (*v1alpha1.Token
 
 func (t *tokenRequestClient) GetTokenRequest(appName string, options v1.GetOptions) (*v1alpha1.TokenRequest, error) {
 	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Get(appName, options)
+}
+
+func (t *tokenRequestClient) DeleteTokenRequest(appName string, options *v1.DeleteOptions) error {
+	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Delete(appName, options)
 }
