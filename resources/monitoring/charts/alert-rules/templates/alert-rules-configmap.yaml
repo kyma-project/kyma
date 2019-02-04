@@ -20,5 +20,6 @@ data:
   alert.rules: |-
     {{- include "unhealthy-pods-rules.yaml.tpl" . | indent 4}}
     {{- include "pvc-90-percent-full-rule.yaml.tpl" . | indent 4}}
-    {{ - include "cpu-90-percent-usage-rule.yaml.tpl" . | indent 4}}
+    {{- include "cpu-90-percent-usage-rule.yaml.tpl" . | indent 4}}
+    {{- include "mem-90-percent-usage-rule.yaml.tpl" . | indent 4}}
 {{ end }}
