@@ -79,7 +79,7 @@
 /resources/core/charts/gateway/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `helm-broker` subchart
-/resources/core/charts/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
 /resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
