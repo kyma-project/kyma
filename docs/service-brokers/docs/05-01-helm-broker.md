@@ -50,19 +50,19 @@ Follow these steps to add the repository URL:
 1. Add a new bundle repository URL:
 
  ```bash
- URLS=$(kubectl get -n kyma-system deployment/core-helm-broker --output=jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="APP_REPOSITORY_URLS")].value}')
-
- kubectl set env -n kyma-system deployment/core-helm-broker -e APP_REPOSITORY_URLS="$URLS;http://custom.bundles-repository/bundles.yaml"
-
+ URLS=$(kubectl get -n kyma-system deployment/helm-broker --output=jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="APP_REPOSITORY_URLS")].value}')
+ 
+ kubectl set env -n kyma-system deployment/helm-broker -e APP_REPOSITORY_URLS="$URLS;http://custom.bundles-repository/bundles.yaml"
+ 
  # At the moment, there is a bug in Minikube. As a result, for the local installation you need to manually edit the broker and bump the relistRequests attribute.
-
- kubectl edit clusterservicebrokers core-helm-broker
+ 
+ kubectl edit clusterservicebrokers helm-broker
  ```
 
 2. Wait for the Helm Broker to run using the following command:
 
  ```bash
- kubectl get pod -n kyma-system -l app=core-helm-broker
+ kubectl get pod -n kyma-system -l app=helm-broker
  ```
 
 Running the Helm Broker triggers the Service Catalog synchronization automatically. New ClusterServiceClasses appear after a half-minute.

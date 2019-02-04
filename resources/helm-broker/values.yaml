@@ -22,15 +22,18 @@ config:
 
       etcd:
         endpoints:
-          - http://core-helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379
+          - http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379
     - driver: memory
       provide:
         chart: ~
         bundle: ~
 
-
-etcd:
-  # By default etcd subchart will be release with name "core-etcd", and it's to much generic
-  # but currently there is no way to pass to the etcd subchart a parent Release.Name, see https://github.com/kubernetes/helm/issues/2506
-  # so to make it more verbose I've added nameOverride and now the release name will be "core-helm-broker-etcd"
-  nameOverride: "helm-broker-etcd"
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  helm_broker:
+    dir: develop/
+    version: a9a96379
+  alpine_net:
+    dir: develop/
+    version: ed568f0f

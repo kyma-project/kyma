@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Chart.Name }}:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.global.containerRegistry.path }}/brokers-ui:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
@@ -29,7 +29,7 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: {{ .Chart.Name }}-config
+          name: {{ .Chart.Name }}
           items:
           - key: config.js
             path: config.js
