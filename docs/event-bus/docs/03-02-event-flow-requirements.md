@@ -9,13 +9,11 @@ The Event Bus enables a successful flow of Events in Kyma when:
 - You have created a [Subscription](/docs/components/event-bus#custom-resource-subscription) custom resource and registered the webhook for a lambda or service to consume the Events.
 - The Events are [published](#details-event-flow-requirements-event-publishing).
 
-## Details
-
-Read the following subsections for details on the requirements.
 
 ### Activate Events
 
-Use the EventActivation to ensure the Event flow between the Namespace and the Application (App). You can also simply [bind](/docs/components/application-connector#getting-started-bind-an-application-to-a-namespace) the App to the Namespace.
+Enable the EventActivation controller to ensure the Event flow between the Namespace and the Application (App). 
+Alternatively, use the [Console](/docs/components/console#overview-overview) to [bind](/docs/components/application-connector#getting-started-bind-an-application-to-a-namespace) the App to the Namespace and add the service to the Namespace using the Service Catalog.
 
 The diagram shows you the Event activation flow for a given Namespace.
 
@@ -26,7 +24,7 @@ The App sends the Events to the Event Bus and uses the EventApplication controll
 
 ### Consume Events
 
-Configure the lambdas and services to use `push` for consuming Events coming from the App. To make sure the lambda or the service receive the Events, register a webhook for them by creating a [Subscription custom resource](/docs/components/event-bus#custom-resource-subscription). 
+Configure the lambdas and services to use `push` command for consuming Events coming from the App. To make sure the lambda or the service receive the Events, register a webhook for them by creating a [Subscription custom resource](/docs/components/event-bus#custom-resource-subscription). 
 
 ### Publish Events
 
