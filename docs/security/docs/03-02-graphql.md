@@ -3,7 +3,7 @@ title: GraphQL
 type: Details
 ---
 
-Kyma uses a custom [GraphQL](https://graphql.org/) implementation in the UI API Layer and deploys an RBAC-based logic to control access to the GraphQL endpoint.
+Kyma uses a custom [GraphQL](https://graphql.org/) implementation in the UI API Layer and deploys an RBAC-based logic to control access to the GraphQL endpoint. All calls to the GraphQL endpoint require a valid Kyma token for authentication.
 
 The authorization in GraphQL uses RBAC, which means that:
   - All of the Roles, RoleBindings, ClusterRoles and CluserRoleBindings that you create and assign are effective and give the same permissions when the users interact with the cluster resources both through the CLI and the GraphQL endpoints.
@@ -13,9 +13,9 @@ The implementation assigns GraphQL actions to specific Kubernetes verbs:
 
 | GraphQL action | Kubernetes verb(s) |
 |:---|:---|
-| **query** | GET (for a single resource), LIST (for multiple resources) |
-| **mutation** | CREATE, DELETE |
-| **subscription** | WATCH |
+| **query** | get (for a single resource), list (for multiple resources) |
+| **mutation** | create, delete |
+| **subscription** | watch |
 
 > **NOTE:** Due to the nature of Kubernetes, you can secure specific resources specified by their name only for queries and mutations. Subscriptions work only with entire resource groups, such as kinds, and therefore don't allow for such level of granularity.
 
@@ -24,39 +24,31 @@ The implementation assigns GraphQL actions to specific Kubernetes verbs:
 To access cluster resources through GraphQL, an action securing given resource must be defined and implemented in the cluster.
 See the [GraphQL schema](https://github.com/kyma-project/kyma/blob/master/components/ui-api-layer/internal/gqlschema/schema.graphql) file to see the list of actions implemented in every Kyma cluster by default.
 
-### Structure of a defined GraphQL action
+## Secure a defined GraphQL action
 
-This is an example GraphQL query implemented in Kyma out of the box. This query secures the access to IDPPreset custom resources. When used by a user whose permissions match these defined by the [directive](https://graphql.org/learn/queries/#directives), the query returns a single IDPPreset custom resource with the specified name.
-```
-IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-```
+This is an example GraphQL action implemented in Kyma out of the box.
 
-| Defined GraphQL action element | Description |
-|:----------|:------|
-| `IDPPreset(name: String!)` |  Name of the query followed by a string that specifies the name of the queried resource. |
-| `: IDPPreset` | Defines the type of object returned by the query. In this case it's a single IDPPreset custom resource. |
-| `@HasAccess(attributes:` | Defines the GraphQL directive that secures the access to the resource. |
-| `resource: "IDPPreset"` | Defines the type of secured Kubernetes resource, in this case all IDPPreset custom resources. |
-| `verb: "get"` | Defines the secured interaction type. Defines the GraphQL action type, which in this case is "query". |
-| `apiGroup: "authentication.kyma-project.io"` | Defines the apiGroup to which the user must have access to get the result of this query. |
-| `apiVersion: "v1alpha1"` | Specifies the apiVersion of the query subject. |
+  ```
+  IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "IDPPreset", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+  ```
 
-### Secure a defined GraphQL action
+This query secures the access to [IDPPreset](#custom-resource-idppreset) custom resources with specific names. To access it, the user must be bound to a role that allows to access:
+  - resources of the IDPPreset kind
+  - the Kubernetes verb `get`
+  - the `authentication.kyma-project.io` apiGroup
 
-To allow access to the example query, create an RBAC role in the cluster and bind it to a user or a client. This role allows access specifically to the example query:
 
-```
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: Role
-metadata:
-  name: kyma-idpp-query-example
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-  annotations:
-    "helm.sh/hook-weight": "0"
-rules:
-- apiGroups: ["authentication.kyma-project.io"]
-  resources: ["IDPPresets"]
-  verbs: ["get"]
-```
+To allow access specifically to the example query, create this RBAC role in the cluster and bind it to a user or a client:
+
+  ```
+  apiVersion: rbac.authorization.k8s.io/v1beta1
+  kind: Role
+  metadata:
+    name: kyma-idpp-query-example
+  rules:
+  - apiGroups: ["authentication.kyma-project.io"]
+    resources: ["idppresets"]
+    verbs: ["get"]
+  ```
+
+> **NOTE:** To learn more about RBAC authorization in a Kubernetes cluster, read [this](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) document.
