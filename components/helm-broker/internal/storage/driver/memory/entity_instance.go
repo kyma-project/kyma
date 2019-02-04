@@ -52,6 +52,17 @@ func (s *Instance) Get(id internal.InstanceID) (*internal.Instance, error) {
 	return i, nil
 }
 
+// GetAll returns collection of Instance objects from storage
+func (s *Instance) GetAll() ([]*internal.Instance, error) {
+	out := []*internal.Instance{}
+
+	for _, instance := range s.storage {
+		out = append(out, instance)
+	}
+
+	return out, nil
+}
+
 // Remove removing object from storage.
 func (s *Instance) Remove(id internal.InstanceID) error {
 	defer unlock(s.lockW())

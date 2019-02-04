@@ -31,6 +31,29 @@ func (_m *InstanceStorage) Get(id internal.InstanceID) (*internal.Instance, erro
 	return r0, r1
 }
 
+// GetAll provides a mock function with given fields:
+func (_m *InstanceStorage) GetAll() ([]*internal.Instance, error) {
+	ret := _m.Called()
+
+	var r0 []*internal.Instance
+	if rf, ok := ret.Get(0).(func() []*internal.Instance); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*internal.Instance)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func() error); ok {
+		r1 = rf()
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // Insert provides a mock function with given fields: i
 func (_m *InstanceStorage) Insert(i *internal.Instance) error {
 	ret := _m.Called(i)
