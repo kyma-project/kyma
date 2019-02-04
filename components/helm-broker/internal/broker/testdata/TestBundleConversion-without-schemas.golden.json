@@ -23,10 +23,12 @@
     "imageUrl": "ImageURL",
     "labels": {
       "local": "true",
-      "testing": "true"
+      "testing": "true",
+      "provisionOnlyOnce": "true"
     },
     "longDescription": "LongDescription",
     "providerDisplayName": "ProviderDisplayName",
-    "supportUrl": "SupportURL"
+    "supportUrl": "SupportURL",
+    "provisionOnlyOnce": true
   }
 }

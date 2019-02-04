@@ -29,6 +29,7 @@ type FormMeta struct {
 	SupportURL          string            `yaml:"supportURL"`
 	ImageURL            string            `yaml:"imageURL"`
 	Bindable            bool              `yaml:"bindable"`
+	ProvisionOnlyOnce   bool              `yaml:"provisionOnlyOnce"`
 	Labels              map[string]string `yaml:"labels"`
 	Requires            []string          `yaml:"requires"`
 	BindingsRetrievable bool              `yaml:"bindingsRetrievable"`
@@ -135,6 +136,7 @@ func (f *form) ToModel(c *chart.Chart) (internal.Bundle, error) {
 			LongDescription:     f.Meta.LongDescription,
 			ProviderDisplayName: f.Meta.ProviderDisplayName,
 			SupportURL:          f.Meta.SupportURL,
+			ProvisionOnlyOnce:   f.Meta.ProvisionOnlyOnce,
 			Labels:              f.Meta.MapLabelsToModel(),
 		},
 		Tags:                f.Meta.MapTagsToModel(),
