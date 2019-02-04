@@ -87,12 +87,14 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.source.mutationwebhookservice.name** |    **NO**   | Provides the name of the mutation webhook service. |
 | **spec.source.mutationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
 | **spec.source.mutationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
-| **spec.source.mutationwebhookservice.metadata** |    **NO**   | Provides detailed specification of the mutation service. |
+| **spec.source.mutationwebhookservice.metadata** |    **NO**   | Provides detailed metadata specific for a given mutation service and its functionality. |
 | **spec.bucketref.name** |    **NO**   | Provides the name of the bucket for storing the asset. |
-| **status.phase** |    **NO**   | It is automatically added to the Asset CR by the Asset Controller. It describes the status of processing the Asset CR by the Asset Controller. It can be `Ready`, `Failed`, or `Pending`. |
-| **status.reason** |    **NO**   | Provides the reason why the Asset CR processing failed or is pending.  |
-| **status.message** |    **NO**   | Describes in details why the processing failed or is pending. |
-| **status.lastheartbeattime** |    **NO**   | Provides the last time when the Asset Controller processed the Asset CR. |
+| **status.phase** |    **Not applicable**   | It is automatically added to the Asset CR by the Asset Controller. It describes the status of processing the Asset CR by the Asset Controller. It can be `Ready`, `Failed`, or `Pending`. |
+| **status.reason** |    **Not applicable**   | Provides the reason why the Asset CR processing failed or is pending.  |
+| **status.message** |    **Not applicable**   | Describes a human-readable message on the CR processing progress, success, or failure. |
+| **status.lastheartbeattime** |    **Not applicable**   | Provides the last time when the Asset Controller processed the Asset CR. |
+
+> **NOTE:** All parameters marked as **Not applicable** are added automatically to the CR by the Asset Controller.
 
 
 ## Related resources and components

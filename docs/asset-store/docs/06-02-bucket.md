@@ -17,32 +17,51 @@ This is a sample resource that defines the storage bucket configuration.
 apiVersion: assetstore.kyma-project.io/v1alpha1
 kind: Bucket
 metadata:
-  name: my-bucket
+  name: test-sample
   namespace: default
 spec:
-  location: "us-east-1"
-  policy: `
-     {
+  region: "us-east-1"
+  policy: >
+    {
       "Version":"2012-10-17",
       "Statement":[
-         {
-            "Action":[
-               "s3:GetObject"
-            ],
-            "Effect":"Allow",
-            "Principal":{
-               "AWS":[
-                  "*"
-               ]
-            },
-            "Resource":[
-               "arn:aws:s3:::my-bucket/*"
-            ],
-            "Sid":""
-         }
+      {
+        "Effect":"Allow",
+        "Principal":{
+          "AWS":[
+            "*"
+          ]
+        },
+        "Action":[
+          "s3:GetBucketLocation",
+          "s3:ListBucket"
+        ],
+        "Resource":[
+          "arn:aws:s3:::ns-default-test-sample"
+        ]
+      },
+      {
+        "Effect":"Allow",
+        "Principal":{
+          "AWS":[
+            "*"
+          ]
+        },
+        "Action":[
+          "s3:GetObject"
+        ],
+        "Resource":[
+          "arn:aws:s3:::ns-default-test-sample/*"
+        ]
+      }
       ]
-   }
-
+    }
+status:
+  lastHeartbeatTime: "2019-02-04T11:50:26Z"
+  message: Bucket policy has been updated successfully
+  phase: Ready
+  reason: BucketPolicyUpdated
+  url: https://minio.kyma.local/ns-default-test-sample
 ```
 
 ## Custom resource parameters
@@ -52,11 +71,16 @@ This table lists all the possible parameters of a given resource together with t
 
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR. |
+| **metadata.name** |    **YES**   | Specifies the name of the CR which is also the name of the bucket storage. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is available. |
-| **spec.location** |    **NO**   | xxx  Specifies the [location](https://docs.minio.io/docs/golang-client-api-reference.html#MakeBucket) under which the bucket is created. If the field is empty, the bucket is created under the default location. |
-| **spec.policy** |    **NO**   | There is no policy specified for the bucket by default. To change it, specify the policy in a string that is similar to `{"Version": "2012-10-17","Statement": [{"Action": ["s3:GetObject"],"Effect": "Allow","Principal": {"AWS": ["*"]},"Resource": ["arn:aws:s3:::my-bucketname/*"],"Sid": ""}]}`. |
+| **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the bucket is created. If the field is empty, the bucket is created under the default location. |
+| **status.lastheartbeattime** |    **Not applicable**    | Provides the last time when the Bucket Controller processed the Bucket CR. |
+| **status.message** |    **Not applicable**    | Describes a human-readable message on the CR processing success or failure. |
+| **status.phase** |    **Not applicable**    | It is automatically added to the Bucket CR by the Bucket Controller. It describes the status of processing the Bucket CR by the Bucket Controller. It can be `Ready` or `Failed`. |
+| **status.reason** |    **Not applicable**    | Provides information on the Bucket CR processing success or failure. |
+| **status.url** |    **Not applicable**   | Provides the address of the bucket storage under which the asset is available. |
 
+> **NOTE:** All parameters marked as **Not applicable** are added automatically to the CR by the Bucket Controller.
 
 ## Related resources and components
 
