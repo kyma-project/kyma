@@ -4,6 +4,8 @@ test:
   image:
     name: test-logging-monitoring
 global:
+  isLocalEnv: false
+  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging_monitoring:

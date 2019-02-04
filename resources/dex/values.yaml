@@ -12,6 +12,8 @@ oidc:
   jaegerClientName: 'Jaeger UI'
 
 global:
+  isLocalEnv: false
+  knative: false
   gateway:
     name: kyma-gateway
   static_users_generator:

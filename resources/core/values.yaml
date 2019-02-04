@@ -5,8 +5,22 @@ dex:
 minio:
   service:
     type: NodePort
+  accessKey: "admin"
+  secretKey: "topSecretKey"
+  resources:
+    limits:
+      memory: 128Mi
+      cpu: 250m
+
+console:
+  cluster:
+    headerLogoUrl: "assets/logo.svg"
+    headerTitle: ""
+    faviconUrl: "favicon.ico"
 
 global:
+  isLocalEnv: false
+  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
