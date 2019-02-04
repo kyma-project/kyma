@@ -108,7 +108,8 @@ promtail:
     #   memory: 128Mi
 
   ## Pod Annotations
-  #podAnnotations:
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
 
   ## Deployment annotations
   # annotations: {}
