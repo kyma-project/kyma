@@ -38,6 +38,7 @@ func TestDeprovisionServiceDeprovisionSuccess(t *testing.T) {
 	ts.HelmClientMock.ExpectOnDelete(ts.Exp.ReleaseName).Once()
 
 	ts.InstBindDataMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
+	ts.InstStorageMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
 
 	ts.OpIDProviderFake = func() (internal.OperationID, error) {
 		return ts.Exp.OperationID, nil
