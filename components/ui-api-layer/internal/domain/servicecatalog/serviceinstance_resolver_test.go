@@ -438,15 +438,15 @@ func TestServiceInstanceResolver_ServiceInstanceClusterServiceClassField(t *test
 
 func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		planName := "name"
 		expected := &gqlschema.ServicePlan{
 			Name:      planName,
-			Namespace: env,
+			Namespace: ns,
 		}
 		resource := &v1beta1.ServicePlan{}
 		resourceGetter := automock.NewServicePlanGetter()
-		resourceGetter.On("Find", planName, env).Return(resource, nil).Once()
+		resourceGetter.On("Find", planName, ns).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := automock.NewGQLServicePlanConverter()
@@ -455,7 +455,7 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 
 		parentObj := gqlschema.ServiceInstance{
 			Name:      "test",
-			Namespace: env,
+			Namespace: ns,
 			PlanReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        planName,
 				ClusterWide: false,
@@ -472,15 +472,15 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		name := "name"
 		resourceGetter := automock.NewServicePlanGetter()
-		resourceGetter.On("Find", name, env).Return(nil, nil).Once()
+		resourceGetter.On("Find", name, ns).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
 			Name:      "test",
-			Namespace: env,
+			Namespace: ns,
 			PlanReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -496,10 +496,10 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 	})
 
 	t.Run("ServicePlanName not provided", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		parentObj := gqlschema.ServiceInstance{
 			Name:          "test",
-			Namespace:     env,
+			Namespace:     ns,
 			PlanReference: nil,
 		}
 
@@ -513,15 +513,15 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		expectedErr := errors.New("Test")
-		env := "env"
+		ns := "ns"
 		name := "name"
 		resourceGetter := automock.NewServicePlanGetter()
-		resourceGetter.On("Find", name, env).Return(nil, expectedErr).Once()
+		resourceGetter.On("Find", name, ns).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
 			Name:      "test",
-			Namespace: env,
+			Namespace: ns,
 			PlanReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -542,14 +542,14 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 	t.Run("Success", func(t *testing.T) {
 		expected := &gqlschema.ServiceClass{
 			Name:      "Test",
-			Namespace: "env",
+			Namespace: "ns",
 		}
 
-		env := "env"
+		ns := "ns"
 		name := "name"
 		resource := &v1beta1.ServiceClass{}
 		resourceGetter := automock.NewServiceClassListGetter()
-		resourceGetter.On("Find", name, env).Return(resource, nil).Once()
+		resourceGetter.On("Find", name, ns).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := automock.NewGQLServiceClassConverter()
@@ -558,7 +558,7 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 
 		parentObj := gqlschema.ServiceInstance{
 			Name:      "test",
-			Namespace: env,
+			Namespace: ns,
 			ClassReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -575,15 +575,15 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		name := "name"
 		resourceGetter := automock.NewServiceClassListGetter()
-		resourceGetter.On("Find", name, env).Return(nil, nil).Once()
+		resourceGetter.On("Find", name, ns).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
 			Name:      "test",
-			Namespace: env,
+			Namespace: ns,
 			ClassReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -599,10 +599,10 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 	})
 
 	t.Run("ServiceClassName not provided", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		parentObj := gqlschema.ServiceInstance{
 			Name:           "test",
-			Namespace:      env,
+			Namespace:      ns,
 			ClassReference: nil,
 		}
 
@@ -615,16 +615,16 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		expectedErr := errors.New("Test")
 		name := "name"
 		resourceGetter := automock.NewServiceClassListGetter()
-		resourceGetter.On("Find", name, env).Return(nil, expectedErr).Once()
+		resourceGetter.On("Find", name, ns).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
 			Name:      "test",
-			Namespace: env,
+			Namespace: ns,
 			ClassReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -713,7 +713,7 @@ func TestServiceInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 	})
 
 	t.Run("Local", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 
 		for _, tc := range []struct {
 			// Input
@@ -738,9 +738,9 @@ func TestServiceInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 			plan := &v1beta1.ServicePlan{}
 
 			planGetter := automock.NewServicePlanGetter()
-			planGetter.On("Find", planName, env).Return(plan, tc.planErr).Once()
+			planGetter.On("Find", planName, ns).Return(plan, tc.planErr).Once()
 			classGetter := automock.NewServiceClassListGetter()
-			classGetter.On("Find", className, env).Return(class, tc.classErr).Once()
+			classGetter.On("Find", className, ns).Return(class, tc.classErr).Once()
 			instanceSvc := servicecatalog.NewMockServiceInstanceService()
 			instanceSvc.On("IsBindableWithLocalRefs", class, plan).Return(tc.instanceBindable).Once()
 
@@ -764,7 +764,7 @@ func TestServiceInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 
 			parentObj := &gqlschema.ServiceInstance{
 				Name:           "test",
-				Namespace:      env,
+				Namespace:      ns,
 				ClassReference: classReference,
 				PlanReference:  planReference,
 			}

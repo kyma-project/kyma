@@ -16,7 +16,7 @@ import (
 
 func TestServicePlanService_Find(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		nsName := "env"
+		nsName := "ns"
 		planName := "testExample"
 		servicePlan := fixServicePlan(planName, "test", planName, nsName)
 		client := fake.NewSimpleClientset(servicePlan)
@@ -43,7 +43,7 @@ func TestServicePlanService_Find(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		plan, err := svc.Find("doesntExist", "env")
+		plan, err := svc.Find("doesntExist", "ns")
 		require.NoError(t, err)
 		assert.Nil(t, plan)
 	})
@@ -51,7 +51,7 @@ func TestServicePlanService_Find(t *testing.T) {
 
 func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		nsName := "env"
+		nsName := "ns"
 		className := "test"
 		planName := "testExample"
 		externalName := "testExternal"
@@ -80,14 +80,14 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		plan, err := svc.FindByExternalName("doesntExist", "none", "env")
+		plan, err := svc.FindByExternalName("doesntExist", "none", "ns")
 
 		require.NoError(t, err)
 		assert.Nil(t, plan)
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		nsName := "env"
+		nsName := "ns"
 		className := "duplicateName"
 		externalName := "duplicateName"
 		client := fake.NewSimpleClientset(
@@ -111,7 +111,7 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 
 func TestServicePlanService_ListForClass(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		nsName := "env"
+		nsName := "ns"
 		className := "testClassName"
 
 		servicePlan1 := fixServicePlan("1", className, "1", nsName)
@@ -143,7 +143,7 @@ func TestServicePlanService_ListForClass(t *testing.T) {
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
 		var emptyArray []*v1beta1.ServicePlan
-		plans, err := svc.ListForServiceClass("doesntExist", "env")
+		plans, err := svc.ListForServiceClass("doesntExist", "ns")
 		require.NoError(t, err)
 		assert.Equal(t, emptyArray, plans)
 	})

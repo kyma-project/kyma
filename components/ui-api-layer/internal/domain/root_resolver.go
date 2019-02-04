@@ -150,7 +150,7 @@ func (r *RootResolver) ServiceInstance() gqlschema.ServiceInstanceResolver {
 }
 
 func (r *RootResolver) Namespace() gqlschema.NamespaceResolver {
-	return &environmentResolver{r.k8s}
+	return &namespaceResolver{r.k8s}
 }
 
 func (r *RootResolver) Query() gqlschema.QueryResolver {
@@ -187,20 +187,20 @@ func (r *mutationResolver) DeleteServiceInstance(ctx context.Context, name strin
 	return r.sc.Resolver.DeleteServiceInstanceMutation(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
-	return r.sc.Resolver.CreateServiceBindingMutation(ctx, serviceBindingName, serviceInstanceName, env, parameters)
+func (r *mutationResolver) CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName, ns string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
+	return r.sc.Resolver.CreateServiceBindingMutation(ctx, serviceBindingName, serviceInstanceName, ns, parameters)
 }
 
-func (r *mutationResolver) DeleteServiceBinding(ctx context.Context, serviceBindingName string, env string) (*gqlschema.DeleteServiceBindingOutput, error) {
-	return r.sc.Resolver.DeleteServiceBindingMutation(ctx, serviceBindingName, env)
+func (r *mutationResolver) DeleteServiceBinding(ctx context.Context, serviceBindingName string, ns string) (*gqlschema.DeleteServiceBindingOutput, error) {
+	return r.sc.Resolver.DeleteServiceBindingMutation(ctx, serviceBindingName, ns)
 }
 
 func (r *mutationResolver) CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
 	return r.sca.Resolver.CreateServiceBindingUsageMutation(ctx, createServiceBindingUsageInput)
 }
 
-func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, env string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
-	return r.sca.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, env)
+func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, ns string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
+	return r.sca.Resolver.DeleteServiceBindingUsageMutation(ctx, serviceBindingUsageName, ns)
 }
 
 func (r *mutationResolver) EnableApplication(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
@@ -245,8 +245,8 @@ func (r *queryResolver) Deployments(ctx context.Context, namespace string, exclu
 	return r.k8s.DeploymentsQuery(ctx, namespace, excludeFunctions)
 }
 
-func (r *queryResolver) LimitRanges(ctx context.Context, env string) ([]gqlschema.LimitRange, error) {
-	return r.k8s.LimitRangesQuery(ctx, env)
+func (r *queryResolver) LimitRanges(ctx context.Context, ns string) ([]gqlschema.LimitRange, error) {
+	return r.k8s.LimitRangesQuery(ctx, ns)
 }
 
 func (r *queryResolver) ResourceQuotas(ctx context.Context, namespace string) ([]gqlschema.ResourceQuota, error) {
@@ -536,10 +536,10 @@ func (r *clusterServiceClassResolver) Content(ctx context.Context, obj *gqlschem
 	return r.sc.Resolver.ClusterServiceClassContentField(ctx, obj)
 }
 
-type environmentResolver struct {
+type namespaceResolver struct {
 	k8s *k8s.Resolver
 }
 
-func (r *environmentResolver) Applications(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
+func (r *namespaceResolver) Applications(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {
 	return r.k8s.ApplicationsField(ctx, obj)
 }

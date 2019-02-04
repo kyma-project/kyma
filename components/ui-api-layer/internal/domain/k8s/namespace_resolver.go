@@ -27,7 +27,7 @@ type namespaceResolver struct {
 	appRetriever shared.ApplicationRetriever
 }
 
-func newEnvironmentResolver(nsLister nsLister, appRetriever shared.ApplicationRetriever) *namespaceResolver {
+func newNamespaceResolver(nsLister nsLister, appRetriever shared.ApplicationRetriever) *namespaceResolver {
 	return &namespaceResolver{
 		nsLister:     nsLister,
 		appRetriever: appRetriever,
@@ -85,7 +85,7 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 			return nil, err
 		}
 
-		return nil, errors.Wrapf(err, "while listing %s for namespace %s", appPretty.Application, gqlerror.WithNamespace(obj.Name))
+		return nil, errors.Wrapf(err, "while listing %s for namespace %s", appPretty.Application, obj.Name)
 	}
 
 	var appNames []string

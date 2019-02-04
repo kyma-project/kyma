@@ -207,7 +207,7 @@ func TestServiceInstanceConverter_GQLCreateInputToInstanceCreateParameters(t *te
 		}
 		input := gqlschema.ServiceInstanceCreateInput{
 			Name:            "name",
-			Namespace:       "environment",
+			Namespace:       "ns",
 			Labels:          []string{"test", "label"},
 			ParameterSchema: &JSON,
 			ClassRef: gqlschema.ServiceInstanceCreateInputResourceRef{
@@ -221,7 +221,7 @@ func TestServiceInstanceConverter_GQLCreateInputToInstanceCreateParameters(t *te
 		}
 		expected := &serviceInstanceCreateParameters{
 			Name:      "name",
-			Namespace: "environment",
+			Namespace: "ns",
 			Labels:    []string{"test", "label"},
 			Schema:    JSON,
 			ClassRef: instanceCreateResourceRef{

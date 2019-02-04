@@ -24,7 +24,7 @@ import (
 func TestServiceInstanceService_Find(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		instanceName := "testExample"
-		namespace := "testEnv"
+		namespace := "testNs"
 
 		serviceInstance := fixServiceInstance(instanceName, namespace)
 		serviceInstanceInformer := fixInformer(serviceInstance)
@@ -47,7 +47,7 @@ func TestServiceInstanceService_Find(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
-		instance, err := svc.Find("doesntExist", "notExistingEnv")
+		instance, err := svc.Find("doesntExist", "notExistingNs")
 		require.NoError(t, err)
 		assert.Nil(t, instance)
 	})
@@ -55,10 +55,10 @@ func TestServiceInstanceService_Find(t *testing.T) {
 
 func TestServiceInstanceService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		namespace := "env1"
+		namespace := "ns"
 		serviceInstance1 := fixServiceInstance("1", namespace)
 		serviceInstance2 := fixServiceInstance("2", namespace)
-		serviceInstance3 := fixServiceInstance("3", "env2")
+		serviceInstance3 := fixServiceInstance("3", "ns3")
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
@@ -89,12 +89,12 @@ func TestServiceInstanceService_List(t *testing.T) {
 
 func TestServiceInstanceService_ListForStatus(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		namespace := "env1"
+		namespace := "ns"
 		status := status.ServiceInstanceStatusTypeRunning
 
 		serviceInstance1 := fixServiceInstanceWithStatus("1", namespace)
 		serviceInstance2 := fixServiceInstanceWithStatus("2", namespace)
-		serviceInstance3 := fixServiceInstanceWithStatus("3", "env2")
+		serviceInstance3 := fixServiceInstanceWithStatus("3", "ns2")
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
@@ -130,10 +130,10 @@ func TestServiceInstanceService_ListForClusterServiceClass(t *testing.T) {
 		className := "exampleClassName"
 		externalClassName := "exampleExternalClassName"
 
-		namespace := "env1"
+		namespace := "ns"
 		serviceInstance1 := fixServiceInstanceWithClusterPlanRef("1", namespace, className, "")
 		serviceInstance2 := fixServiceInstanceWithClusterPlanRef("2", namespace, "", externalClassName)
-		serviceInstance3 := fixServiceInstanceWithClusterPlanRef("3", "env2", className, externalClassName)
+		serviceInstance3 := fixServiceInstanceWithClusterPlanRef("3", "ns2", className, externalClassName)
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
@@ -155,9 +155,9 @@ func TestServiceInstanceService_ListForClusterServiceClass(t *testing.T) {
 		testClassName := "test"
 		testExternalClassName := "test"
 
-		serviceInstance1 := fixServiceInstanceWithClusterPlanRef("1", "env1", className, "")
-		serviceInstance2 := fixServiceInstanceWithClusterPlanRef("2", "env2", "", externalClassName)
-		serviceInstance3 := fixServiceInstanceWithClusterPlanRef("3", "env3", className, externalClassName)
+		serviceInstance1 := fixServiceInstanceWithClusterPlanRef("1", "ns", className, "")
+		serviceInstance2 := fixServiceInstanceWithClusterPlanRef("2", "ns2", "", externalClassName)
+		serviceInstance3 := fixServiceInstanceWithClusterPlanRef("3", "ns3", className, externalClassName)
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
@@ -176,10 +176,10 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 		className := "exampleClassName"
 		externalClassName := "exampleExternalClassName"
 
-		namespace := "env1"
+		namespace := "ns"
 		serviceInstance1 := fixServiceInstanceWithPlanRef("1", namespace, className, "")
 		serviceInstance2 := fixServiceInstanceWithPlanRef("2", namespace, "", externalClassName)
-		serviceInstance3 := fixServiceInstanceWithPlanRef("3", "env2", className, externalClassName)
+		serviceInstance3 := fixServiceInstanceWithPlanRef("3", "ns2", className, externalClassName)
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
@@ -201,9 +201,9 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 		testClassName := "test"
 		testExternalClassName := "test"
 
-		serviceInstance1 := fixServiceInstanceWithPlanRef("1", "env1", className, "")
-		serviceInstance2 := fixServiceInstanceWithPlanRef("2", "env2", "", externalClassName)
-		serviceInstance3 := fixServiceInstanceWithPlanRef("3", "env3", className, externalClassName)
+		serviceInstance1 := fixServiceInstanceWithPlanRef("1", "ns", className, "")
+		serviceInstance2 := fixServiceInstanceWithPlanRef("2", "ns2", "", externalClassName)
+		serviceInstance3 := fixServiceInstanceWithPlanRef("3", "ns3", className, externalClassName)
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 

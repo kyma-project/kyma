@@ -17,7 +17,7 @@ import (
 
 func TestServiceClassService_GetServiceClass(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		nsName := "env"
+		nsName := "ns"
 		className := "testExample"
 		serviceClass := fixServiceClass(className, className, nsName)
 		client := fake.NewSimpleClientset(serviceClass)
@@ -44,7 +44,7 @@ func TestServiceClassService_GetServiceClass(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		class, err := svc.Find("doesntExist", "env")
+		class, err := svc.Find("doesntExist", "ns")
 
 		require.NoError(t, err)
 		assert.Nil(t, class)
@@ -55,7 +55,7 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		className := "testExample"
 		externalName := "testExternal"
-		nsName := "exampleEnv"
+		nsName := "exampleNs"
 		serviceClass := fixServiceClass(className, externalName, nsName)
 		client := fake.NewSimpleClientset(serviceClass)
 
@@ -81,14 +81,14 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		class, err := svc.FindByExternalName("doesntExist", "env")
+		class, err := svc.FindByExternalName("doesntExist", "ns")
 
 		require.NoError(t, err)
 		assert.Nil(t, class)
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		nsName := "env"
+		nsName := "ns"
 		externalName := "duplicateName"
 		client := fake.NewSimpleClientset(
 			fixServiceClass("1", externalName, nsName),
@@ -111,7 +111,7 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 
 func TestServiceClassService_ListServiceClasses(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		nsName := "exampleEnv"
+		nsName := "exampleNs"
 		serviceClass1 := fixServiceClass("1", "1", nsName)
 		serviceClass2 := fixServiceClass("2", "2", nsName)
 		serviceClass3 := fixServiceClass("3", "3", nsName)
@@ -142,7 +142,7 @@ func TestServiceClassService_ListServiceClasses(t *testing.T) {
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
 		var emptyArray []*v1beta1.ServiceClass
-		classes, err := svc.List("env", pager.PagingParams{})
+		classes, err := svc.List("ns", pager.PagingParams{})
 		require.NoError(t, err)
 		assert.Equal(t, emptyArray, classes)
 	})

@@ -53,7 +53,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
 
 	return &Resolver{
-		namespaceResolver:           newEnvironmentResolver(namespaceService, applicationRetriever),
+		namespaceResolver:           newNamespaceResolver(namespaceService, applicationRetriever),
 		secretResolver:              newSecretResolver(client),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),

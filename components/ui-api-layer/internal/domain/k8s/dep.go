@@ -12,5 +12,5 @@ type deploymentGetter interface {
 
 //go:generate mockery -name=limitRangeLister -output=automock -outpkg=automock -case=underscore
 type limitRangeLister interface {
-	List(env string) ([]*v1.LimitRange, error)
+	List(ns string) ([]*v1.LimitRange, error)
 }
