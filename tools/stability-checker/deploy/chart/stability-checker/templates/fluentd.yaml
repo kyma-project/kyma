@@ -1,0 +1,65 @@
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: fluentd-read
+rules:
+- apiGroups: [""]
+  resources:
+  - namespaces
+  - pods
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fluentd-config
+data:
+  fluent.conf: |
+    <match fluent.**>
+      @type null
+    </match>
+    <source>
+      @type tail
+      path /var/log/containers/stability-checker*.log
+      pos_file /tmp/fluentd-containers.log.pos
+      time_format %Y-%m-%dT%H:%M:%S.%NZ
+      tag kubernetes.*
+      format json
+      read_from_head true
+    </source>
+    <filter kubernetes.**>
+      @type kubernetes_metadata
+    </filter>
+    <match kubernetes.var.log.containers.**fluentd**.log>
+      @type null
+    </match>
+    <match kubernetes.var.log.containers.**kube-system**.log>
+      @type null
+    </match>
+    <match not_used.**>
+      @type stdout
+    </match>
+
+    <match kubernetes.**>
+      @type gcs
+
+      project kyma-project
+      keyfile /etc/google/service-account.json
+      bucket stability-checker-logs
+      object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
+      path {{ .Values.clusterName }}/%Y-%m/%d/
+
+      # if you want to use ${tag} or %Y/%m/%d/ like syntax in path / object_key_format,
+      # need to specify tag for ${tag} and time for %Y/%m/%d in <buffer> argument.
+      <buffer tag,time>
+        @type memory
+
+        timekey 1h
+        timekey_wait 10m
+        timekey_use_utc true
+      </buffer>
+
+      <format>
+        @type single_value
+      </format>
+    </match>
