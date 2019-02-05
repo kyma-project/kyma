@@ -17,7 +17,7 @@ func TestTokenService_Resolve(t *testing.T) {
 		Data string `json:"data"`
 	}
 
-	t.Run("shoud resolve token", func(t *testing.T) {
+	t.Run("should resolve token", func(t *testing.T) {
 		// given
 		dummyString := "data"
 		encodedData := string(compact([]byte("{\"data\":\"data\"}")))

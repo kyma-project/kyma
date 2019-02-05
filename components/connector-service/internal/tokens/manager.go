@@ -36,7 +36,7 @@ func NewTokenManager(tokenTTL time.Duration, store tokencache.TokenCache, genera
 func (svc *tokenManager) Save(serializableContext Serializer) (string, apperrors.AppError) {
 	jsonData, err := serializableContext.ToJSON()
 	if err != nil {
-		return "", apperrors.Internal("Faild to serilize token params to JSON, %s", err.Error())
+		return "", apperrors.Internal("Failed to serialize token params to JSON, %s", err.Error())
 	}
 
 	token, err := svc.generator()

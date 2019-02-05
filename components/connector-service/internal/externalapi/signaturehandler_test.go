@@ -87,6 +87,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		assert.Equal(t, certChainBase64, certResponse.CRTChain)
 		assert.Equal(t, http.StatusCreated, rr.Code)
+		tokenManager.AssertExpectations(t)
 	})
 
 	t.Run("should return 500 when failed to extract client context", func(t *testing.T) {

@@ -27,7 +27,7 @@ The Connector Service has the following parameters:
 - **tokenLength** - Length of registration tokens. The default value is `64`.
 - **appTokenExpirationMinutes** - Time after which tokens for applications expire and are no longer valid. The default value is `5` minutes.
 - **runtimeTokenExpirationMinutes** - Time after which tokens for runtimes expire and are no longer valid. The default value is `10` minutes.
-- **caSecretName** - Name of the secret which contains root CA. The default value if `nginx-auth-ca`
+- **caSecretName** - Name of the secret which contains root CA. The default value is `nginx-auth-ca`
 - **requestLogging** - Flag for logging incoming requests. `False` by default.
 - **connectorServiceHost** - Host at which this service is accessible, used for URL generating. Default host is `cert-service.wormhole.cluster.kyma.cx`.
 - **appRegistryHost** - Host at which this Application Registry is accessible. Default value is empty string.
