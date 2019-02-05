@@ -39,7 +39,7 @@ This ServiceClass has a **bindable** flag set to `false` which means that after 
 6. The Application Connector sends an Event to the lambda through the Event Bus.
 
 
-![Event Service Class](./assets/006-AB-event-service-class.png)
+![Event Service Class](./assets/006-AB-event-service-class.svg)
 
 ## Provisioning and binding for both the API and Event ServiceClass
 
