@@ -7,6 +7,5 @@ global:
     dir: develop/
     version: 84219cbc
   istio_kyma_patch:
-    dir: develop/
-    version: a44f2188
-
+    dir: pr/
+    version: PR-2584
