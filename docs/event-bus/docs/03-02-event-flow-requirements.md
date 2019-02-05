@@ -13,7 +13,7 @@ The Event Bus enables a successful flow of Events in Kyma when:
 ### Activate Events
 
 Enable the EventActivation controller to ensure the Event flow between the Namespace and the Application (App). 
-Alternatively, [bind](/docs/components/application-connector#getting-started-bind-an-application-to-a-namespace) the App to the Namespace and create a Service instance.
+Alternatively,[bind](/docs/components/application-connector#getting-started-bind-an-application-to-a-namespace) the App to the Namespace and create a Service instance.
 
 The diagram shows you the Event activation flow for a given Namespace.
 
@@ -28,4 +28,4 @@ Configure the lambdas and services to use the `push` command for consuming Event
 
 ### Publish Events
 
-Make sure that the external solution sends Events to Kyma.
+Make sure that the external solution sends Events to Kyma. For details of the Event flow see [this](/docs/components/event-bus#architecture) document.
