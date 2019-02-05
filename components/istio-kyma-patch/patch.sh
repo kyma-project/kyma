@@ -98,7 +98,7 @@ function configure_sidecar_injector() {
     if [[ "$INSERTED" -gt 2 ]]; then
       echo "Patch already applied for ${CONTAINER}"
     else
-      configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 128Mi, cpu: 100m }, requests: { memory: 128Mi, cpu: 10m } }|' <<< "$configmap")
+      configmap=$(sed "s|  - name: ${CONTAINER}|  - name: ${CONTAINER}\n    resources: { limits: { memory: 128Mi, cpu: 100m }, requests: { memory: 128Mi, cpu: 10m } }|" <<< "$configmap")
     fi
   done
 
