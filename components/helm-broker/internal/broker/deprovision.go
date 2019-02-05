@@ -126,7 +126,7 @@ func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, 
 		// 3. Then deprovisioning is wrongly marked as failed
 		case err == nil, IsNotFoundError(err):
 		default:
-			return fmt.Errorf("cannot remove instance bind data from storage: %s", err.Error())
+			return errors.Wrap(err, "while removing instance bind data from storage")
 		}
 
 		// remove instance entity from storage
@@ -134,7 +134,7 @@ func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, 
 		switch {
 		case err == nil, IsNotFoundError(err):
 		default:
-			return fmt.Errorf("cannot remove instance entity from storage: %s", err.Error())
+			return errors.Wrap(err, "while removing instance entity from storage")
 		}
 
 		return nil

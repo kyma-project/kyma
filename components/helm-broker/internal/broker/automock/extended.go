@@ -31,6 +31,10 @@ func (_m *InstanceStorage) ExpectOnRemove(iID internal.InstanceID) *mock.Call {
 	return _m.On("Remove", iID).Return(nil)
 }
 
+func (_m *InstanceStorage) ExpectErrorRemove(iID internal.InstanceID, err error) *mock.Call {
+	return _m.On("Remove", iID).Return(err)
+}
+
 func (_m *InstanceStorage) ExpectErrorOnGet(iID internal.InstanceID, err error) *mock.Call {
 	return _m.On("Get", iID).Return(nil, err)
 }
