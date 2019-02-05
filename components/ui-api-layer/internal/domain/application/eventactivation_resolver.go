@@ -25,7 +25,7 @@ type eventActivationResolver struct {
 
 //go:generate mockery -name=eventActivationLister -output=automock -outpkg=automock -case=underscore
 type eventActivationLister interface {
-	List(environment string) ([]*v1alpha1.EventActivation, error)
+	List(namespace string) ([]*v1alpha1.EventActivation, error)
 }
 
 func newEventActivationResolver(service eventActivationLister, contentRetriever shared.ContentRetriever) *eventActivationResolver {
@@ -40,7 +40,7 @@ func (r *eventActivationResolver) EventActivationsQuery(ctx context.Context, nam
 	items, err := r.service.List(namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s in `%s` namespace", pretty.EventActivations, namespace))
-		return nil, gqlerror.New(err, pretty.EventActivations, gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.EventActivations, gqlerror.WithNamespace(namespace))
 	}
 
 	return r.converter.ToGQLs(items), nil

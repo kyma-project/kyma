@@ -95,8 +95,8 @@ func TestServiceBindingResolver_DeleteServiceBindingMutation(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Equal(t, &gqlschema.DeleteServiceBindingOutput{
-			Name:        "redis-binding",
-			Environment: "production",
+			Name:      "redis-binding",
+			Namespace: "production",
 		}, result)
 	})
 
@@ -220,7 +220,7 @@ func fixServiceBindingGQLToRedis() *gqlschema.ServiceBinding {
 	return &gqlschema.ServiceBinding{
 		Name:                "redis-binding",
 		ServiceInstanceName: "redis",
-		Environment:         "production",
+		Namespace:           "production",
 		Status: gqlschema.ServiceBindingStatus{
 			Type: gqlschema.ServiceBindingStatusTypePending,
 		},
@@ -229,7 +229,7 @@ func fixServiceBindingGQLToRedis() *gqlschema.ServiceBinding {
 
 func fixCreateServiceBindingOutput() *gqlschema.CreateServiceBindingOutput {
 	return &gqlschema.CreateServiceBindingOutput{
-		Environment:         "production",
+		Namespace:           "production",
 		ServiceInstanceName: "redis",
 		Name:                "redis-binding",
 	}

@@ -17,8 +17,8 @@ func newEventActivationService(informer cache.SharedIndexInformer) *eventActivat
 	}
 }
 
-func (svc *eventActivationService) List(environment string) ([]*v1alpha1.EventActivation, error) {
-	items, err := svc.informer.GetIndexer().ByIndex("namespace", environment)
+func (svc *eventActivationService) List(namespace string) ([]*v1alpha1.EventActivation, error) {
+	items, err := svc.informer.GetIndexer().ByIndex("namespace", namespace)
 	if err != nil {
 		return nil, err
 	}

@@ -38,6 +38,7 @@ func TestDeprovisionServiceDeprovisionSuccess(t *testing.T) {
 	ts.HelmClientMock.ExpectOnDelete(ts.Exp.ReleaseName).Once()
 
 	ts.InstBindDataMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
+	ts.InstStorageMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
 
 	ts.OpIDProviderFake = func() (internal.OperationID, error) {
 		return ts.Exp.OperationID, nil
@@ -89,7 +90,7 @@ func TestDeprovisionServiceDeprovisionFailureAsync(t *testing.T) {
 			ts.InstStorageMock.ExpectOnGet(ts.Exp.InstanceID, ts.FixInstance()).Once()
 
 			ts.OpStorageMock.ExpectOnInsert(ts.FixInstanceOperation()).Once()
-			expDesc := fmt.Sprintf("deprovisioning failed on error: cannot remove instance bind data from storage: %s", fixErr)
+			expDesc := fmt.Sprintf("deprovisioning failed on error: while removing instance bind data from storage: %s", fixErr)
 			ts.OpStorageMock.ExpectOnUpdateStateDesc(ts.Exp.InstanceID, ts.Exp.OperationID, internal.OperationStateFailed, expDesc).
 				Run(func(args mock.Arguments) {
 					close(ts.UpdateStateDescMethodCalled)
@@ -98,6 +99,24 @@ func TestDeprovisionServiceDeprovisionFailureAsync(t *testing.T) {
 			ts.HelmClientMock.ExpectOnDelete(ts.Exp.ReleaseName).Once()
 
 			ts.InstBindDataMock.ExpectErrorRemove(ts.Exp.InstanceID, fixErr).Once()
+		},
+		"on instance Remove": func(ts *deprovisionServiceTestSuite) {
+			ts.InstStateGetterMock.ExpectOnIsDeprovisioned(ts.Exp.InstanceID, false).Once()
+			ts.InstStateGetterMock.ExpectOnIsDeprovisioningInProgress(ts.Exp.InstanceID, internal.OperationID(""), false).Once()
+
+			ts.InstStorageMock.ExpectOnGet(ts.Exp.InstanceID, ts.FixInstance()).Once()
+
+			ts.OpStorageMock.ExpectOnInsert(ts.FixInstanceOperation()).Once()
+			expDesc := fmt.Sprintf("deprovisioning failed on error: while removing instance entity from storage: %s", fixErr)
+			ts.OpStorageMock.ExpectOnUpdateStateDesc(ts.Exp.InstanceID, ts.Exp.OperationID, internal.OperationStateFailed, expDesc).
+				Run(func(args mock.Arguments) {
+					close(ts.UpdateStateDescMethodCalled)
+				}).Once()
+
+			ts.HelmClientMock.ExpectOnDelete(ts.Exp.ReleaseName).Once()
+			ts.InstBindDataMock.ExpectOnRemove(ts.Exp.InstanceID).Once()
+
+			ts.InstStorageMock.ExpectErrorRemove(ts.Exp.InstanceID, fixErr).Once()
 		},
 	} {
 		t.Run(tn, func(t *testing.T) {

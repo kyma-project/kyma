@@ -159,14 +159,14 @@ func TestServiceListAllApplicationsSuccess(t *testing.T) {
 	assert.Contains(t, nsList, fixAppA)
 }
 
-func TestServiceListApplicationsInEnvironmentSuccess(t *testing.T) {
+func TestServiceListApplicationsInNamespaceSuccess(t *testing.T) {
 	// given
-	const fixEnvironment = "prod"
+	const fixNamespace = "prod"
 
 	fixAppA := fixApplicationCR("app-name-a")
 	fixAppB := fixApplicationCR("app-name-b")
-	fixMappingAppA := fixApplicationMappingCR("app-name-a", fixEnvironment)
-	fixMappingAppB := fixApplicationMappingCR("app-name-b", fixEnvironment)
+	fixMappingAppA := fixApplicationMappingCR("app-name-a", fixNamespace)
+	fixMappingAppB := fixApplicationMappingCR("app-name-b", fixNamespace)
 
 	// Mapping
 	mCli := mappingFakeCli.NewSimpleClientset(&fixMappingAppA, &fixMappingAppB)
@@ -188,7 +188,7 @@ func TestServiceListApplicationsInEnvironmentSuccess(t *testing.T) {
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, aInformer)
 
 	// when
-	nsList, err := svc.ListInEnvironment(fixEnvironment)
+	nsList, err := svc.ListInNamespace(fixNamespace)
 
 	// then
 	require.NoError(t, err)

@@ -22,11 +22,11 @@ type limitRangeResolver struct {
 	lister    limitRangeLister
 }
 
-func (lr *limitRangeResolver) LimitRangesQuery(ctx context.Context, env string) ([]gqlschema.LimitRange, error) {
-	limitRange, err := lr.lister.List(env)
+func (lr *limitRangeResolver) LimitRangesQuery(ctx context.Context, namespace string) ([]gqlschema.LimitRange, error) {
+	limitRange, err := lr.lister.List(namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "Cannot list %s from `%s` environment", pretty.LimitRanges, env))
-		return nil, gqlerror.New(err, pretty.LimitRanges, gqlerror.WithEnvironment(env))
+		glog.Error(errors.Wrapf(err, "Cannot list %s from `%s` namespace", pretty.LimitRanges, namespace))
+		return nil, gqlerror.New(err, pretty.LimitRanges, gqlerror.WithNamespace(namespace))
 	}
 
 	return lr.converter.ToGQLs(limitRange), nil

@@ -64,9 +64,9 @@ func TestNewAlreadyExists(t *testing.T) {
 		kind     fmt.Stringer
 		opts     []gqlerror.Option
 	}{
-		{"AllParamsProvided", someTestKind, []gqlerror.Option{gqlerror.WithEnvironment("production"), gqlerror.WithName("name"), gqlerror.WithDetails("details")}},
+		{"AllParamsProvided", someTestKind, []gqlerror.Option{gqlerror.WithNamespace("production"), gqlerror.WithName("name"), gqlerror.WithDetails("details")}},
 		{"NoKindNoOpts", nil, nil},
-		{"NoKind", nil, []gqlerror.Option{gqlerror.WithEnvironment("namespace"), gqlerror.WithName("name")}},
+		{"NoKind", nil, []gqlerror.Option{gqlerror.WithNamespace("namespace"), gqlerror.WithName("name")}},
 		{"NoOpts", someTestKind, nil},
 	}
 
@@ -89,9 +89,9 @@ func TestNewNotFound(t *testing.T) {
 		kind     fmt.Stringer
 		opts     []gqlerror.Option
 	}{
-		{"AllParamsProvided", someTestKind, []gqlerror.Option{gqlerror.WithEnvironment("namespace"), gqlerror.WithName("name"), gqlerror.WithDetails("some details")}},
+		{"AllParamsProvided", someTestKind, []gqlerror.Option{gqlerror.WithNamespace("namespace"), gqlerror.WithName("name"), gqlerror.WithDetails("some details")}},
 		{"NoKindNoOpts", nil, nil},
-		{"NoKind", nil, []gqlerror.Option{gqlerror.WithEnvironment("namespace"), gqlerror.WithName("name")}},
+		{"NoKind", nil, []gqlerror.Option{gqlerror.WithNamespace("namespace"), gqlerror.WithName("name")}},
 		{"NoOpts", someTestKind, nil},
 	}
 
@@ -127,9 +127,9 @@ func TestNewInvalid(t *testing.T) {
 		kind     fmt.Stringer
 		opts     []gqlerror.Option
 	}{
-		{"AllParamsProvided", fixErr, someTestKind, []gqlerror.Option{gqlerror.WithEnvironment("namespace"), gqlerror.WithName("name"), gqlerror.WithDetails("some details")}},
+		{"AllParamsProvided", fixErr, someTestKind, []gqlerror.Option{gqlerror.WithNamespace("namespace"), gqlerror.WithName("name"), gqlerror.WithDetails("some details")}},
 		{"NoKindNoOpts", fixErr, nil, nil},
-		{"NoKind", fixErr, nil, []gqlerror.Option{gqlerror.WithEnvironment("namespace"), gqlerror.WithName("name")}},
+		{"NoKind", fixErr, nil, []gqlerror.Option{gqlerror.WithNamespace("namespace"), gqlerror.WithName("name")}},
 		{"NoOpts", fixErr, someTestKind, nil},
 	}
 
@@ -222,7 +222,7 @@ func TestIsInvalid(t *testing.T) {
 		expected bool
 	}{
 		{"Internal", gqlerror.NewInternal(), false},
-		{"Invalid", gqlerror.NewInvalid("fix", nil, gqlerror.WithEnvironment("namespace")), true},
+		{"Invalid", gqlerror.NewInvalid("fix", nil, gqlerror.WithNamespace("namespace")), true},
 		{"NotFound", gqlerror.NewNotFound(nil), false},
 		{"Generic", errors.New("generic"), false},
 		{"Nil", nil, false},

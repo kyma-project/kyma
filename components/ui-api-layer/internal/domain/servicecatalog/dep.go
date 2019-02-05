@@ -12,8 +12,8 @@ import (
 
 //go:generate mockery -name=serviceClassGetter -output=automock -outpkg=automock -case=underscore
 type serviceClassGetter interface {
-	Find(name, environment string) (*v1beta1.ServiceClass, error)
-	FindByExternalName(externalName, environment string) (*v1beta1.ServiceClass, error)
+	Find(name, namespace string) (*v1beta1.ServiceClass, error)
+	FindByExternalName(externalName, namespace string) (*v1beta1.ServiceClass, error)
 }
 
 // ClusterServiceClass
@@ -27,9 +27,9 @@ type clusterServiceClassGetter interface {
 // ServiceInstance
 //go:generate mockery -name=serviceInstanceLister -output=automock -outpkg=automock -case=underscore
 type serviceInstanceLister interface {
-	Find(name, environment string) (*v1beta1.ServiceInstance, error)
-	List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceInstance, error)
-	ListForStatus(environment string, pagingParams pager.PagingParams, status *status.ServiceInstanceStatusType) ([]*v1beta1.ServiceInstance, error)
+	Find(name, namespace string) (*v1beta1.ServiceInstance, error)
+	List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceInstance, error)
+	ListForStatus(namespace string, pagingParams pager.PagingParams, status *status.ServiceInstanceStatusType) ([]*v1beta1.ServiceInstance, error)
 }
 
 //go:generate mockery -name=serviceInstanceSvc -inpkg -case=underscore
@@ -74,10 +74,10 @@ type gqlServicePlanConverter interface {
 
 //go:generate mockery -name=serviceBindingOperations -output=automock -outpkg=automock -case=underscore
 type serviceBindingOperations interface {
-	Create(env string, sb *v1beta1.ServiceBinding) (*v1beta1.ServiceBinding, error)
-	Delete(env string, name string) error
-	Find(env string, name string) (*v1beta1.ServiceBinding, error)
-	ListForServiceInstance(env string, instanceName string) ([]*v1beta1.ServiceBinding, error)
+	Create(namespace string, sb *v1beta1.ServiceBinding) (*v1beta1.ServiceBinding, error)
+	Delete(namespace string, name string) error
+	Find(namespace string, name string) (*v1beta1.ServiceBinding, error)
+	ListForServiceInstance(namespace string, instanceName string) ([]*v1beta1.ServiceBinding, error)
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
 }

@@ -33,18 +33,9 @@ func (_m *Resolver) DeleteServiceBindingUsageMutation(ctx context.Context, servi
 	return r0, r1
 }
 
-// ListBindableResources provides a failing mock function with given fields: ctx, environment
-func (_m *Resolver) ListBindableResources(ctx context.Context, environment string) ([]gqlschema.BindableResourcesOutputItem, error) {
+// ListBindableResources provides a failing mock function with given fields: ctx, namespace
+func (_m *Resolver) ListBindableResources(ctx context.Context, namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
 	var r0 []gqlschema.BindableResourcesOutputItem
-	var r1 error
-	r1 = _m.err
-
-	return r0, r1
-}
-
-// ListServiceUsageKindResources provides a failing mock function with given fields: ctx, usageKind, environment
-func (_m *Resolver) ListServiceUsageKindResources(ctx context.Context, usageKind string, environment string) ([]gqlschema.UsageKindResource, error) {
-	var r0 []gqlschema.UsageKindResource
 	var r1 error
 	r1 = _m.err
 
@@ -60,8 +51,8 @@ func (_m *Resolver) ListUsageKinds(ctx context.Context, first *int, offset *int)
 	return r0, r1
 }
 
-// ServiceBindingUsageEventSubscription provides a failing mock function with given fields: ctx, environment
-func (_m *Resolver) ServiceBindingUsageEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+// ServiceBindingUsageEventSubscription provides a failing mock function with given fields: ctx, namespace
+func (_m *Resolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
 	var r0 <-chan gqlschema.ServiceBindingUsageEvent
 	var r1 error
 	r1 = _m.err
@@ -69,8 +60,8 @@ func (_m *Resolver) ServiceBindingUsageEventSubscription(ctx context.Context, en
 	return r0, r1
 }
 
-// ServiceBindingUsageQuery provides a failing mock function with given fields: ctx, name, environment
-func (_m *Resolver) ServiceBindingUsageQuery(ctx context.Context, name string, environment string) (*gqlschema.ServiceBindingUsage, error) {
+// ServiceBindingUsageQuery provides a failing mock function with given fields: ctx, name, namespace
+func (_m *Resolver) ServiceBindingUsageQuery(ctx context.Context, name string, namespace string) (*gqlschema.ServiceBindingUsage, error) {
 	var r0 *gqlschema.ServiceBindingUsage
 	var r1 error
 	r1 = _m.err
