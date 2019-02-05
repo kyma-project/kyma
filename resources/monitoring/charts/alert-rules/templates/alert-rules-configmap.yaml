@@ -19,4 +19,5 @@ data:
 {{ else }}
   alert.rules: |-
     {{- include "kyma-rules.yaml.tpl" . | indent 4}}
+    {{- include "rest-services-alert-rules.yaml.tpl" . | indent 4}}
 {{ end }}
