@@ -78,7 +78,7 @@ You can either choose the pre-built image of the Kyma Installer or build your ow
   ```
   docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile .
   ```
-  Create a new `kyma-installer` public repository on [Docker Hub](https://hub.docker.com/)  and push the image:
+  Create a new `kyma-installer` public repository on [Docker Hub](https://hub.docker.com/) and push the image:
   ```
   docker tag kyma-installer:latest {YOUR_DOCKER_LOGIN}/kyma-installer:latest
   docker push {YOUR_DOCKER_LOGIN}/kyma-installer:latest
