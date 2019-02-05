@@ -91,8 +91,8 @@ const (
 )
 
 func fixLimitRangeQuery() *graphql.Request {
-	query := `query ($environment: String!) {
-				limitRanges(environment: $environment) {
+	query := `query ($namespace: String!) {
+				limitRanges(namespace: $namespace) {
 					name
 					limits {
 						limitType
@@ -109,7 +109,7 @@ func fixLimitRangeQuery() *graphql.Request {
 				}
 			}`
 	req := graphql.NewRequest(query)
-	req.SetVar("environment", limitRangeNamespace)
+	req.SetVar("namespace", limitRangeNamespace)
 
 	return req
 }

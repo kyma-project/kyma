@@ -39,7 +39,7 @@ type notifier interface {
 	DeleteListener(observer resource.Listener)
 }
 
-// applicationService provides listing environments along with Applications.
+// applicationService provides listing namespaces along with Applications.
 // It provides also Applications enabling/disabling in given namespace.
 type applicationService struct {
 	aCli        appCli.ApplicationconnectorV1alpha1Interface
@@ -188,8 +188,8 @@ func (svc *applicationService) List(params pager.PagingParams) ([]*v1alpha1.Appl
 	return res, nil
 }
 
-func (svc *applicationService) ListInEnvironment(environment string) ([]*v1alpha1.Application, error) {
-	mappings, err := svc.mappingLister.ApplicationMappings(environment).List(labels.Everything())
+func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Application, error) {
+	mappings, err := svc.mappingLister.ApplicationMappings(namespace).List(labels.Everything())
 	if err != nil {
 		return nil, errors.Wrapf(err, "while listing %s", pretty.ApplicationMapping)
 	}

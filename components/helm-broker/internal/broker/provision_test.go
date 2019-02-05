@@ -44,6 +44,10 @@ func (ts *provisionServiceTestSuite) FixInstance() internal.Instance {
 	return *ts.Exp.NewInstance()
 }
 
+func (ts *provisionServiceTestSuite) FixInstanceCollection() []*internal.Instance {
+	return ts.Exp.NewInstanceCollection()
+}
+
 func (ts *provisionServiceTestSuite) FixInstanceOperation() internal.InstanceOperation {
 	return *ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateInProgress)
 }
@@ -84,7 +88,9 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	iiMock := &automock.InstanceStorage{}
 	defer iiMock.AssertExpectations(t)
 	expInstance := ts.FixInstance()
+	expInstanceCollection := ts.FixInstanceCollection()
 	iiMock.On("Insert", &expInstance).Return(nil).Once()
+	iiMock.On("GetAll").Return(expInstanceCollection, nil)
 
 	ioMock := &automock.OperationStorage{}
 	defer ioMock.AssertExpectations(t)
@@ -172,7 +178,9 @@ func TestProvisionServiceProvisionFailureAsync(t *testing.T) {
 	iiMock := &automock.InstanceStorage{}
 	defer iiMock.AssertExpectations(t)
 	expInstance := ts.FixInstance()
+	expInstanceCollection := ts.FixInstanceCollection()
 	iiMock.On("Insert", &expInstance).Return(nil).Once()
+	iiMock.On("GetAll").Return(expInstanceCollection, nil)
 
 	ioMock := &automock.OperationStorage{}
 	defer ioMock.AssertExpectations(t)

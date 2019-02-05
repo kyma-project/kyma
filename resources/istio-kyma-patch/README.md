@@ -9,4 +9,4 @@ By default, following changes are applied:
  * Configuration of the [sidecar injector](../../components/istio-kyma-patch/README.md).
  * The Egressgateway, Ingressgateway, policy, and telemetry are configured to use Zipkin from the `kyma-system` Namespace.
  * Monitoring and tracing related resources are deleted.
- * Default sidecar injection for Istio is enabled.
+ * Sidecar injection is enabled in all Namespaces, except those labeled with `istio-injection: disabled`.

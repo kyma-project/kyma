@@ -3,7 +3,7 @@ package gqlschema
 type ServiceBinding struct {
 	Name                string
 	ServiceInstanceName string
-	Environment         string
+	Namespace           string
 	SecretName          string
 	Status              ServiceBindingStatus
 	Parameters          JSON

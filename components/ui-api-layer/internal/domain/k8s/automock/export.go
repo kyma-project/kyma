@@ -4,10 +4,6 @@ func NewDeploymentLister() *deploymentLister {
 	return new(deploymentLister)
 }
 
-func NewEnvLister() *envLister {
-	return new(envLister)
-}
-
 func NewResourceQuotaLister() *resourceQuotaLister {
 	return new(resourceQuotaLister)
 }
@@ -32,8 +28,8 @@ func NewResourceQuotaStatusChecker() *resourceQuotaStatusChecker {
 	return new(resourceQuotaStatusChecker)
 }
 
-func NewPodLister() *podLister {
-	return new(podLister)
+func NewPodSvc() *podSvc {
+	return new(podSvc)
 }
 
 func NewGqlPodConverter() *gqlPodConverter {

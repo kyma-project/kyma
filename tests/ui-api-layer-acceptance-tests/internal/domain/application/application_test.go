@@ -22,12 +22,12 @@ type applicationMutationOutput struct {
 }
 
 type application struct {
-	Name                  string
-	Description           string
-	Labels                map[string]string
-	Services              []applicationService
-	EnabledInEnvironments []string
-	Status                string
+	Name                string
+	Description         string
+	Labels              map[string]string
+	Services            []applicationService
+	EnabledInNamespaces []string
+	Status              string
 }
 
 type applicationService struct {
@@ -147,7 +147,7 @@ func appFields() string {
 		name
 		description
 		labels
-		enabledInEnvironments
+		enabledInNamespaces
 		status               
 		services {
 			id                 

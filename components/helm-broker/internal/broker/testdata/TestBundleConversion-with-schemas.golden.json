@@ -50,10 +50,12 @@
     "imageUrl": "ImageURL",
     "labels": {
       "local": "true",
+      "provisionOnlyOnce": "true",
       "testing": "true"
     },
     "longDescription": "LongDescription",
     "providerDisplayName": "ProviderDisplayName",
-    "supportUrl": "SupportURL"
+    "supportUrl": "SupportURL",
+    "provisionOnlyOnce": true
   }
 }

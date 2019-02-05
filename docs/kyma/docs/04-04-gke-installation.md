@@ -12,7 +12,7 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
 - [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 
->**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the **Install Kyma on a GKE cluster with wildcard DNS** document which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
+>**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see [this](#installation-install-kyma-on-a-gke-cluster-with-wildcard-dns) document which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io.
 
 ## DNS setup
 
@@ -103,7 +103,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     ```
     gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.10.7" --machine-type "n1-standard-2" \
+    --cluster-version "1.11.5" --machine-type "n1-standard-2" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 

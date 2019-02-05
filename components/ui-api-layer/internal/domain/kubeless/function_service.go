@@ -18,8 +18,8 @@ func newFunctionService(informer cache.SharedIndexInformer) *functionService {
 	}
 }
 
-func (svc *functionService) List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.Function, error) {
-	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", environment).Limit(pagingParams)
+func (svc *functionService) List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.Function, error) {
+	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", namespace).Limit(pagingParams)
 	if err != nil {
 		return nil, err
 	}

@@ -20,6 +20,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `monitoring` | ✅ | ⛔️ |
 | `prometheus-operator` | ✅ | ⛔️ |
 | `service-catalog` | ✅ | ✅ |
+| `nats-streaming` | ✅ | ✅ |
 
 ### Installation guides
 
@@ -39,6 +40,6 @@ Read rest of the installation documents to learn how to:
 - [Disable the selected components' installation or install them separately](#installation-custom-component-installation)
 - [Update Kyma](#installation-update-kyma)
 - [Reinstall Kyma](#installation-reinstall-kyma)
-- [Get in-depth knowledge about the installation scripts](#installation-local-installation-scripts)
+- [Get in-depth knowledge about the installation scripts](#installation-local-installation-scripts-deep-dive)
 
 >**NOTE:** Make sure to check whether the version of the documentation in the left pane of the `kyma-project.io` is compatible with your Kyma version.

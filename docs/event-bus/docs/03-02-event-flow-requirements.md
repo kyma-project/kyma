@@ -34,10 +34,7 @@ See the table for the explanation of parameters in the Subscription custom resou
 | **push_request_timeout_ms** | It indicates the time for which the `push` waits for the response when delivering an Event to the lambda or the service. After the specified time passes, the request times out and the Event Bus retries delivering the Event. Setting the **minimum** parameter to `0` applies the default value of 1000ms. |
 | **event_type** | The name of the Event type. For example, `order-created`.|
 | **event_type_version** | The version of the Event type. For example, `v1`. |
-| **source** | Details of the App that the Event originates from. |
-| **source_environment** | The source Namespace of the Event. |
-| **source_namespace** | The parameter that uniquely identifies the organization publishing the Event. |
-| **source_type** | The type of the Event source. For example, `commerce`. |
+| **source_id** | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events. |
 
 ### Event publishing
 

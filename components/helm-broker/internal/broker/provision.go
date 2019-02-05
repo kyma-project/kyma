@@ -18,6 +18,7 @@ type provisionService struct {
 	bundleIDGetter           bundleIDGetter
 	chartGetter              chartGetter
 	instanceInserter         instanceInserter
+	instanceGetter           instanceGetter
 	instanceStateGetter      instanceStateProvisionGetter
 	operationInserter        operationInserter
 	operationUpdater         operationUpdater
@@ -60,36 +61,32 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		return &osb.ProvisionResponse{Async: true, OperationKey: &opKeyInProgress}, nil
 	}
 
+	namespace, err := getNamespaceFromContext(req.Context)
+	if err != nil {
+		return nil, errors.Wrap(err, "while getting namespace from context")
+	}
+
+	// bundleID is in 1:1 match with serviceID (from service catalog)
+	svcID := internal.ServiceID(req.ServiceID)
+	bundleID := internal.BundleID(svcID)
+	bundle, err := svc.bundleIDGetter.GetByID(bundleID)
+	if err != nil {
+		return nil, errors.Wrap(err, "while getting bundle")
+	}
+	instances, err := svc.instanceGetter.GetAll()
+	if err != nil {
+		return nil, errors.Wrap(err, "while getting instance collection")
+	}
+	if !bundle.IsProvisioningAllowed(namespace, instances) {
+		svc.log.Infof("bundle with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", bundle.Name, bundle.ID, namespace)
+		return nil, errors.New("this bundle has a provisioningOnlyOnce flag. An instance of this bundle already exists")
+	}
+
 	id, err := svc.operationIDProvider()
 	if err != nil {
 		return nil, errors.Wrap(err, "while generating ID for operation")
 	}
 	opID := internal.OperationID(id)
-
-	namespace, err := getNamespaceFromContext(req.Context)
-
-	if err != nil {
-		return nil, errors.Wrap(err, "while getting namespace from context")
-	}
-
-	svcID := internal.ServiceID(req.ServiceID)
-	svcPlanID := internal.ServicePlanID(req.PlanID)
-
-	// bundleID/planID is in 1:1 match with serviceID/servicePlanID (from service catalog)
-	bundleID := internal.BundleID(svcID)
-	bundlePlanID := internal.BundlePlanID(svcPlanID)
-
-	bundle, err := svc.bundleIDGetter.GetByID(bundleID)
-	if err != nil {
-		return nil, errors.Wrap(err, "while getting bundle")
-	}
-
-	bundlePlan, found := bundle.Plans[bundlePlanID]
-	if !found {
-		return nil, errors.Errorf("bundle does not contain requested plan (planID: %s)", bundlePlanID)
-	}
-
-	releaseName := createReleaseName(bundle.Name, bundlePlan.Name, iID)
 
 	// TODO: add support for calculating ParamHash
 	paramHash := "TODO"
@@ -105,6 +102,16 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	if err := svc.operationInserter.Insert(&op); err != nil {
 		return nil, errors.Wrap(err, "while inserting instance operation to storage")
 	}
+
+	svcPlanID := internal.ServicePlanID(req.PlanID)
+
+	// bundlePlanID is in 1:1 match with servicePlanID (from service catalog)
+	bundlePlanID := internal.BundlePlanID(svcPlanID)
+	bundlePlan, found := bundle.Plans[bundlePlanID]
+	if !found {
+		return nil, errors.Errorf("bundle does not contain requested plan (planID: %s)", bundlePlanID)
+	}
+	releaseName := createReleaseName(bundle.Name, bundlePlan.Name, iID)
 
 	i := internal.Instance{
 		ID:            iID,

@@ -52,6 +52,9 @@ The `meta.yaml` file is mandatory as it contains information about the bundle. S
 | **bindingsRetrievable** |   false  |     The **bindingRetrievable** field specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
 |   **planUpdatable**     |   false  |     The **planUpdatable** field specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
 |       **requires**      |   false  |     The **requires** field defines a list of permissions the user must grant to the instances of this service.          |
+| **provisionOnlyOnce**   |   false  |     Defines that the bundle can be provisioned only once in a given Namespace. The default value is `false` |
+
+> **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`. 
 
 ### The chart directory
 

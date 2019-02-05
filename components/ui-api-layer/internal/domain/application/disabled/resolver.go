@@ -15,8 +15,8 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
-// ApplicationEnabledInEnvironmentsField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ApplicationEnabledInEnvironmentsField(ctx context.Context, obj *gqlschema.Application) ([]string, error) {
+// ApplicationEnabledInNamespacesField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ApplicationEnabledInNamespacesField(ctx context.Context, obj *gqlschema.Application) ([]string, error) {
 	var r0 []string
 	var r1 error
 	r1 = _m.err

@@ -29,5 +29,5 @@ The following flags are accessible to start and configure the previously built b
 
 ### Run the image
 ```
-docker run --rm --env "ARGS=-maxWaitingPeriod=10m -ignorePodsPattern='sf-core-azure-broker-docs-*'" watch-pods:latest
+docker run --rm --env "ARGS=-maxWaitingPeriod=10m -ignorePodsPattern='core-azure-broker-docs-*'" watch-pods:latest
 ```
