@@ -37,8 +37,8 @@ func NewValidator(webhook assethook.Webhook, timeout time.Duration) Validator {
 }
 
 func (w *validationWebhook) Validate(ctx context.Context, basePath string, files []string, asset *v1alpha1.Asset) (ValidationResult, error) {
-	errCh := make(chan error)
-	rspCh := make(chan webhookv1alpha1.ValidationResponse)
+	errCh := make(chan error, 1)
+	rspCh := make(chan webhookv1alpha1.ValidationResponse, 1)
 
 	go func() {
 		defer close(errCh)
