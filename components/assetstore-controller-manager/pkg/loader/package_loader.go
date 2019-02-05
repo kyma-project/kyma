@@ -52,7 +52,7 @@ func (l *loader) selectEngine(filename string) (func(src, dst string) ([]string,
 	switch {
 	case extension == ".zip":
 		return l.unpackZip, nil
-	case extension == ".tar":
+	case extension == ".tar" || extension == ".tgz" || strings.HasSuffix(strings.ToLower(filename), ".tar.gz"):
 		return l.unpackTar, nil
 	}
 

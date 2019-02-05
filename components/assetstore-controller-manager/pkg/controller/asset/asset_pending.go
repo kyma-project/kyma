@@ -24,13 +24,11 @@ func (r *ReconcileAsset) onPending(asset *assetstorev1alpha1.Asset, bucket *asse
 	if !result.Success {
 		return reconcile.Result{}, r.setStatusWebhookFailed(asset, ReasonValidationFailed, fmt.Sprintf("%+v", result.Messages))
 	}
-	r.sendEvent(asset, EventNormal, ReasonValidated, "Validated files provided by asset")
 
 	if err := r.mutate(context.Background(), asset, basePath, files); err != nil {
 		r.setStatusWebhookFailed(asset, ReasonMutaationFailed, fmt.Sprintf("%+v", err))
 		return reconcile.Result{}, errors.Wrapf(err, "while mutating Asset")
 	}
-	r.sendEvent(asset, EventNormal, ReasonMutated, "Mutated files provided by asset")
 
 	if err := r.upload(context.Background(), asset, basePath, files); err != nil {
 		r.sendEvent(asset, EventWarning, ReasonError, "Upload to bucket failed")
@@ -62,6 +60,8 @@ func (r *ReconcileAsset) validate(ctx context.Context, instance *assetstorev1alp
 		return webhook.ValidationResult{}, err
 	}
 
+	r.sendEvent(instance, EventNormal, ReasonValidated, "Validated files provided by asset")
+
 	return result, nil
 }
 
@@ -70,7 +70,13 @@ func (r *ReconcileAsset) mutate(ctx context.Context, instance *assetstorev1alpha
 		return nil
 	}
 
-	return r.mutator.Mutate(ctx, basePath, files, instance)
+	if err := r.mutator.Mutate(ctx, basePath, files, instance); err != nil {
+		return err
+	}
+
+	r.sendEvent(instance, EventNormal, ReasonMutated, "Mutated files provided by asset")
+
+	return nil
 }
 
 func (r *ReconcileAsset) upload(ctx context.Context, instance *assetstorev1alpha1.Asset, basePath string, files []string) error {
