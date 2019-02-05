@@ -15,19 +15,23 @@ type certResponse struct {
 	CaCRT     string `json:"caCrt"`
 }
 
-type infoResponse struct {
+type csrInfoResponse struct {
 	CsrURL          string      `json:"csrUrl"`
 	API             interface{} `json:"api"`
 	CertificateInfo certInfo    `json:"certificate"`
 }
 
-type api struct {
-	*clientcontext.RuntimeURLs
-	InfoURL         string `json:"infoUrl"`
-	CertificatesURL string `json:"certificatesUrl"`
+type mgmtInfoReponse struct {
+	URLs interface{} `json:"urls"`
 }
 
-type runtimeApi struct {
+type mgmtURLs struct {
+	*clientcontext.RuntimeURLs
+	RenewCertURL string `json:"renewCertURL"`
+}
+
+type api struct {
+	*clientcontext.RuntimeURLs
 	InfoURL         string `json:"infoUrl"`
 	CertificatesURL string `json:"certificatesUrl"`
 }

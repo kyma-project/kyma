@@ -12,9 +12,7 @@ import (
 )
 
 const (
-	CertificateURLFormat   = "%s?token=%s"
-	BaseEventsPathHeader   = "Base-Events-Path"
-	BaseMetadataPathHeader = "Base-Metadata-Path"
+	CertificateURLFormat = "%s?token=%s"
 
 	AppURLFormat     = "https://%s/v1/applications/%s"
 	RuntimeURLFormat = "https://%s/v1/runtimes/%s"
@@ -33,7 +31,7 @@ type CSRInfoHandler struct {
 	urlFormat                string
 }
 
-func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, certificateURL, getInfoURL, connectorServiceHost string, subjectValues certificates.CSRSubject, urlFormat string) InfoHandler {
+func NewCSRInfoHandler(tokenCreator tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, certificateURL, getInfoURL, connectorServiceHost string, subjectValues certificates.CSRSubject, urlFormat string) CSRGetInfoHandler {
 
 	return &CSRInfoHandler{
 		tokenCreator:             tokenCreator,
@@ -66,7 +64,7 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 
 	certInfo := makeCertInfo(ih.csrSubject, connectorClientContext.GetCommonName())
 
-	httphelpers.RespondWithBody(w, 200, infoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
+	httphelpers.RespondWithBody(w, 200, csrInfoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }
 
 func (ih *CSRInfoHandler) makeApiURLs(connectorClientContext clientcontext.ConnectorClientContext) api {

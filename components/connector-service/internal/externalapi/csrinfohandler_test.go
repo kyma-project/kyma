@@ -44,7 +44,7 @@ func (dc dummyClientContext) GetRuntimeUrls() *clientcontext.RuntimeURLs {
 	return &clientcontext.RuntimeURLs{}
 }
 
-func TestInfoHandler_GetCSRInfo(t *testing.T) {
+func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
 	host := "connector-service.kyma.cx"
 	infoURL := "https://connector-service.test.cluster.kyma.cx/v1/applications/management/info"
@@ -96,7 +96,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var infoResponse infoResponse
+		var infoResponse csrInfoResponse
 		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
@@ -133,7 +133,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var infoResponse infoResponse
+		var infoResponse csrInfoResponse
 		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
@@ -197,7 +197,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 
-	t.Run("should retrieve metadata and events url from context", func(t *testing.T) {
+	t.Run("should retrieve metadata and events urls from context", func(t *testing.T) {
 		//given
 		expectedMetadataUrl := "https://metadata.base.path/application/v1/metadata/services"
 		expectedEventsUrl := "https://events.base.path/application/v1/events"
@@ -232,7 +232,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var infoResponse infoResponse
+		var infoResponse csrInfoResponse
 		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)

@@ -29,8 +29,12 @@ type SignatureHandler interface {
 	SignCSR(w http.ResponseWriter, r *http.Request)
 }
 
-type InfoHandler interface {
+type CSRGetInfoHandler interface {
 	GetCSRInfo(w http.ResponseWriter, r *http.Request)
+}
+
+type MngmtGetInfoHandler interface {
+	GetManagementInfo(w http.ResponseWriter, r *http.Request)
 }
 
 const apiSpecPath = "connectorapi.yaml"
@@ -43,8 +47,8 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg Config, globalMiddlewares []mux
 	router.Path("/v1").Handler(http.RedirectHandler("/v1/api.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
 	router.Path("/v1/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
-	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenService, appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateURL, runtimeHandlerCfg.GetInfoURL, runtimeHandlerCfg.ConnectorServiceHost, appHandlerCfg.Subject, AppURLFormat)
-	applicationManagementInfoHandler := NewManagementInfoHandler()
+	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenService, appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateURL, appHandlerCfg.GetInfoURL, appHandlerCfg.ConnectorServiceHost, appHandlerCfg.Subject, AppURLFormat)
+	applicationManagementInfoHandler := NewManagementInfoHandler(appHandlerCfg.ContextExtractor, appHandlerCfg.ConnectorServiceHost)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.TokenService, appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 
 	applicationRouter := router.PathPrefix("/v1/applications").Subrouter()
@@ -54,7 +58,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg Config, globalMiddlewares []mux
 	applicationRouter.HandleFunc("/certificates", applicationSignatureHandler.SignCSR).Methods(http.MethodPost)
 
 	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenService, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateURL, runtimeHandlerCfg.GetInfoURL, runtimeHandlerCfg.ConnectorServiceHost, runtimeHandlerCfg.Subject, RuntimeURLFormat)
-	runtimeManagementInfoHandler := NewManagementInfoHandler()
+	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ConnectorServiceHost)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.TokenService, runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 
 	runtimesRouter := router.PathPrefix("/v1/runtimes").Subrouter()
