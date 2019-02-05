@@ -35,7 +35,7 @@ func checkMetricsAndlabels(metric string, labels ...string) error {
 		}
 
 		if len(s.Data) < 1 {
-			return fmt.Errorf("Metric or Lable not found: %s, %s", l, metric)
+			return fmt.Errorf("Metric or Label not found: %s, %s", metric, l)
 		}
 	}
 
