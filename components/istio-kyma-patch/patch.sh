@@ -48,7 +48,7 @@ function run_all_patches() {
     local result=$?
     set -e
     echo "$out"
-    if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"NotFound"* ]]; then
+    if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"NotFound"* ]] && [[ ! "$out" = *"not patched"* ]]; then
         exit ${result}
     fi
   done
@@ -106,7 +106,15 @@ function configure_sidecar_injector() {
   configmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$configmap")
   configmap=$(sed 's/"/\\"/g' <<< "$configmap")
 
-  kubectl patch -n istio-system configmap istio-sidecar-injector --type merge -p '{"data": {"config":"'"$configmap"'"}}'
+  set +e
+  local out
+  out=$(kubectl patch -n istio-system configmap istio-sidecar-injector --type merge -p '{"data": {"config":"'"$configmap"'"}}')
+  local result=$?
+  set -e
+  echo "$out"
+  if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"not patched"* ]]; then
+    exit ${result}
+  fi
 }
 
 function check_requirements() {
@@ -122,7 +130,7 @@ function check_requirements() {
 require_istio_system
 require_istio_version
 require_mtls_disabled
-check_requirements
+#check_requirements
 configure_sidecar_injector
 run_all_patches
 remove_not_used
