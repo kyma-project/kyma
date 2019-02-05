@@ -1,5 +1,5 @@
 ---
-title: Bucket Custom Resource Lifecycle
+title: Bucket custom resource lifecycle
 type: Details
 ---
 

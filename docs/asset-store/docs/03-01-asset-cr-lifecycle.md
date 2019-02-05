@@ -1,5 +1,5 @@
 ---
-title: Asset Custom Resource Lifecycle
+title: Asset custom resource lifecycle
 type: Details
 ---
 
