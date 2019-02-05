@@ -77,6 +77,7 @@ func main() {
 	testPodsAreReady()
 	testQueryTargets(prometheusURL)
 	testGrafanaIsReady(grafanaURL)
+	checkLambdaUIDashboard()
 
 	log.Printf("Logging and monitoring tests are successful!")
 }
