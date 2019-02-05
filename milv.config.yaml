@@ -26,7 +26,7 @@ files:
   - path: "./kyma/docs/helm-broker/docs/05-01-helm-broker.md"
     config:
       white-list-external: ["custom.bundles-repository"]
-  - path: "./kyma/docss/helm-broker/docs/05-01-helm-broker.md"
+  - path: "./kyma/docs/helm-broker/docs/05-01-helm-broker.md"
     config:
       white-list-external: ["$KYMA_RELEASE_VERSION"]
   - path: "./kyma/docs/kyma/docs/04-07-aks-xip.io-domain.md"
