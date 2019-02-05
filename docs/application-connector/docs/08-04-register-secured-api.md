@@ -3,7 +3,7 @@ title: Register a secured API
 type: Tutorials
 ---
 
-The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) and Generated Certificates.
+The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750) and through generated client certificates.
 
 You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns a `400` code response.
 
@@ -52,7 +52,7 @@ This is an example of the `api` section of the request body for an API secured w
         }  
 ```
 
-## Register a Generated Certificate-secured API
+## Register an API secured with generated client certificates
 
 Application Registry can generate example private key and certificate for the registered API, and use it to make secure calls. Certificates are stored in Kubernetes secrets and can be manually replaced by the Kyma administrator. 
 
