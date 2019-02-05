@@ -20,7 +20,7 @@ func (c *serviceBrokerConverter) ToGQL(item *v1beta1.ServiceBroker) (*gqlschema.
 
 	broker := gqlschema.ServiceBroker{
 		Name:              item.Name,
-		Environment:       item.Namespace,
+		Namespace:         item.Namespace,
 		Status:            returnStatus,
 		CreationTimestamp: item.CreationTimestamp.Time,
 		Labels:            item.Labels,

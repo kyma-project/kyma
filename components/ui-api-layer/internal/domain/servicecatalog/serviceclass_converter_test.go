@@ -62,7 +62,7 @@ func TestServiceClassConverter_ToGQL(t *testing.T) {
 		longDescription := "exampleLongDescription"
 		expected := gqlschema.ServiceClass{
 			Name:                "exampleName",
-			Environment:         "exampleNamespace",
+			Namespace:           "exampleNamespace",
 			ExternalName:        "ExampleExternalName",
 			DisplayName:         &displayName,
 			Description:         "ExampleDescription",

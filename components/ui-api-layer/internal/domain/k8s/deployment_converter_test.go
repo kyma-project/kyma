@@ -21,7 +21,7 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 		expected := &gqlschema.Deployment{
 			Name:              "name",
 			CreationTimestamp: zeroTimeStamp,
-			Environment:       "namespace",
+			Namespace:         "namespace",
 			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
 			Status: gqlschema.DeploymentStatus{
 				Replicas:          1,

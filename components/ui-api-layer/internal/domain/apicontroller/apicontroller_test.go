@@ -43,7 +43,7 @@ func checkExportedFields(t *testing.T, resolver *apicontroller.PluggableResolver
 
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
-	val, err := resolver.Resolver.APIsQuery(ctx, &namespace, &namespace, nil, nil)
+	val, err := resolver.Resolver.APIsQuery(ctx, namespace, nil, nil)
 	if enabled {
 		require.NoError(t, err)
 	} else {

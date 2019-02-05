@@ -64,7 +64,7 @@ func (c *serviceInstanceConverter) ToGQL(in *v1beta1.ServiceInstance) (*gqlschem
 
 	instance := gqlschema.ServiceInstance{
 		Name:              in.Name,
-		Environment:       in.Namespace,
+		Namespace:         in.Namespace,
 		PlanReference:     planReference,
 		ClassReference:    classReference,
 		PlanSpec:          servicePlanSpec,
@@ -108,7 +108,7 @@ func (c *serviceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *
 
 	parameters := serviceInstanceCreateParameters{
 		Name:      in.Name,
-		Namespace: in.Environment,
+		Namespace: in.Namespace,
 		Labels:    labels,
 		Schema:    parameterSchema,
 		ClassRef: instanceCreateResourceRef{

@@ -6,7 +6,7 @@ param (
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
-$KUBERNETES_VERSION = "1.10.0"
+$KUBERNETES_VERSION = "1.11.5"
 
 Write-Output @"
 ################################################################################
@@ -15,7 +15,7 @@ Write-Output @"
 "@
 
 function CheckIfMinikubeIsInitialized() {
-    $cmd = "minikube status --format '{{.MinikubeStatus}}'"
+    $cmd = "minikube status --format '{{.Host}}'"
     $minikubeStatus = (Invoke-Expression -Command $cmd) | Out-String
 
     if ($minikubeStatus -ne "") {
@@ -40,16 +40,13 @@ function StartMinikube() {
     $cmd = "minikube start"`
         + " --memory ${MEMORY}"`
         + " --cpus 4"`
-        + " --extra-config=apiserver.Authorization.Mode=RBAC"`
-        + " --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList='.*'"`
-        + " --extra-config=controller-manager.ClusterSigningCertFile='/var/lib/localkube/certs/ca.crt'"`
-        + " --extra-config=controller-manager.ClusterSigningKeyFile='/var/lib/localkube/certs/ca.key'"`
-        + " --extra-config=apiserver.admission-control='LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota'"`
+        + " --extra-config=apiserver.authorization-mode=RBAC"`
+	+ " --extra-config=apiserver.cors-allowed-origins='http://*'"`
+        + " --extra-config=apiserver.enable-admission-plugins='DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook'"`
         + " --kubernetes-version=v${KUBERNETES_VERSION}"`
-        + " --feature-gates='MountPropagation=false'"`
         + " --disk-size=${DISK_SIZE}"`
         + " --vm-driver=${VM_DRIVER}"`
-        + " -b=localkube"
+        + " --bootstrapper=kubeadm"
 
     if ($VM_DRIVER -eq "hyperv") {
         $cmd += " --hyperv-virtual-switch='${env.HYPERV_VIRTUAL_SW}'"
@@ -69,7 +66,7 @@ function WaitForMinikubeToBeUp() {
         $counter += 1
         Write-Output "Keep calm, there are ${limit} possibilities and so far it is attempt number ${counter}"
 
-        $cmd = "minikube status --format '{{.MinikubeStatus}}'"
+        $cmd = "minikube status --format '{{.Host}}'"
         $clusterStatus = (Invoke-Expression -Command $cmd) | Out-String
         $clusterStatus = $clusterStatus.Trim()
         if ($clusterStatus -eq "Running") {

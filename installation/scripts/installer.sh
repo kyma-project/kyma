@@ -31,6 +31,11 @@ do
             KNATIVE=true
             shift
             ;;
+        --password)
+            ADMIN_PASSWORD="$2"
+            shift
+            shift
+            ;;
         --*)
             echo "Unknown flag ${1}"
             exit 1
@@ -58,7 +63,7 @@ if [ $LOCAL ]; then
 
     INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
     INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
-    
+
 fi
 
 if [ $CR_PATH ]; then
@@ -81,11 +86,16 @@ COMBO_YAML=$(bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG
 
 rm -rf ${AZURE_BROKER_CONFIG}
 
-if [ $KNATIVE ]; then
-    COMBO_YAML=$(sed 's/global\.knative: .*/global.knative: "true"/g' <<<"$COMBO_YAML")
+if [ ${ADMIN_PASSWORD} ]; then
+    ADMIN_PASSWORD=$(echo ${ADMIN_PASSWORD} | base64)
+    COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
 fi
 
 kubectl apply -f - <<<"$COMBO_YAML"
+
+if [ $KNATIVE ]; then
+    kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true"}}'
+fi
 
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh

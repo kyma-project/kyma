@@ -14,9 +14,9 @@ const (
 	entityNamespaceBundleMappingNV = "nv"
 
 	entityNamespaceChart             = "chart"
-	entityNamespaceInstance          = "instance"
-	entityNamespaceInstanceOperation = "instanceOperation"
-	entityNamespaceInstanceBindData  = "instanceBindData"
+	entityNamespaceInstance          = "instance/"
+	entityNamespaceInstanceOperation = "instanceOperation/"
+	entityNamespaceInstanceBindData  = "instanceBindData/"
 )
 
 // Config holds configuration for etcd access in storage.

@@ -13,8 +13,8 @@ func (*secretConverter) ToGQL(in *v1.Secret) *gqlschema.Secret {
 	}
 
 	out := &gqlschema.Secret{
-		Name:        in.Name,
-		Environment: in.Namespace,
+		Name:      in.Name,
+		Namespace: in.Namespace,
 	}
 	out.Data = make(gqlschema.JSON)
 	for k, v := range in.Data {

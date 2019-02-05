@@ -33,15 +33,14 @@ The update procedure consists of three main steps:
 
 - If you update an existing component, make all required changes to the Helm charts of the component located in the [`resource`](https://github.com/kyma-project/kyma/tree/master/resources) directory.
 
-
 - If you add a new component to your Kyma deployment, add a top-level Helm chart for that component. Additionally, run this command to edit the Installation custom resource and add the new component to the installed components list:
   ```
   kubectl edit installation kyma-installation
   ```
 
   > **NOTE:** Read [this](#custom-resource-installation) document to learn more about the Installation custom resource.
-     
-     
+
+
 - If you introduced changes in overrides, update the existing ConfigMaps and Secrets. Add new ConfigMaps and Secrets if required. See [this](#getting-started-helm-overrides-for-kyma-installation) document for more information on overrides.
 
 
@@ -53,14 +52,14 @@ The update procedure consists of three main steps:
   ```  
   > **NOTE:** If you started Kyma with the `run.sh` script with a `--vm-driver {value}` parameter, provide the same parameter to the `build-kyma-installer.sh` script.
 
-- Restart the Kyma-Installer Pod:  
+- Restart the Kyma Installer Pod:  
   ```
   kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}
   ```
 
 ## Update the Kyma Installer on a cluster deployment
 
-- Build a new image for the Kyma Installer: 
+- Build a new image for the Kyma Installer:
   ```
   docker build -t {IMAGE_NAME}:{IMAGE_TAG} -f tools/kyma-installer/kyma.Dockerfile .
   ```

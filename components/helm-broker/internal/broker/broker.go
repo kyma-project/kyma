@@ -74,6 +74,7 @@ type (
 	}
 	instanceGetter interface {
 		Get(id internal.InstanceID) (*internal.Instance, error)
+		GetAll() ([]*internal.Instance, error)
 	}
 	instanceRemover interface {
 		Remove(id internal.InstanceID) error
@@ -164,6 +165,7 @@ func newWithIDProvider(bs bundleStorage, cs chartStorage, os operationStorage, i
 			bundleIDGetter:   bs,
 			chartGetter:      cs,
 			instanceInserter: is,
+			instanceGetter:   is,
 			instanceStateGetter: &instanceStateService{
 				operationCollectionGetter: os,
 			},
