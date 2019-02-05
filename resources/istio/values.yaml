@@ -28,10 +28,10 @@ global:
     resources:
       requests:
         cpu: 10m
-      #  memory: 128Mi
-      # limits:
-      #   cpu: 100m
-      #   memory: 128Mi
+        memory: 10Mi
+      limits:
+        cpu: 10m
+        memory: 10Mi
 
     # Controls number of Proxy worker threads.
     # If set to 0 (default), then start worker thread for each CPU thread/core.

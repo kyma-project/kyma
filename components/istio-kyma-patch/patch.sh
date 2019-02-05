@@ -91,10 +91,16 @@ function configure_sidecar_injector() {
   configmap=$(sed 's/\[\[ \.ProxyConfig\.ZipkinAddress \]\]/zipkin.kyma-system:9411/g' <<< "$configmap")
 
   # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
-  # Add limits to already existing resources sections
-  configmap=$(sed 's|    resources:|    resources:\n      limits: { memory: 128Mi, cpu: 100m }\n      requests: { memory: 128Mi, cpu: 10m }|' <<< "$configmap")
   # In case there is no limits section add one at the beginning of container definition. It serves as default.
-  configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 128Mi, cpu: 100m }, requests: { memory: 128Mi, cpu: 10m } }|' <<< "$configmap")
+  CONTAINERS="istio-init istio-proxy"
+  for CONTAINER in $CONTAINERS; do
+    INSERTED=$(sed -n "/- name: ${CONTAINER}/,/image:/p" <<< "$configmap" | wc -l)
+    if [[ "$INSERTED" -gt 2 ]]; then
+      echo "Patch already applied for ${CONTAINER}"
+    else
+      configmap=$(sed 's|  - name: istio-\(.*\)|  - name: istio-\1\'$'\n    resources: { limits: { memory: 128Mi, cpu: 100m }, requests: { memory: 128Mi, cpu: 10m } }|' <<< "$configmap")
+    fi
+  done
 
   # Escape new lines and double quotes for kubectl
   configmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$configmap")
