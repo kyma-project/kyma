@@ -60,24 +60,26 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	host := ih.connectorServiceHost
-	infoURL := ih.getInfoURL
-
-	if infoURL == "" {
-		infoURL = fmt.Sprintf(ih.urlFormat, host, ManagementInfoEndpoint)
-	}
-
-	apiURLs := api{
-		CertificatesURL: fmt.Sprintf(ih.urlFormat, host, CertsEndpoint),
-		InfoURL:         infoURL,
-		RuntimeURLs:     connectorClientContext.GetRuntimeUrls(),
-	}
+	apiURLs := ih.makeApiURLs(connectorClientContext)
 
 	csrURL := fmt.Sprintf(CertificateURLFormat, ih.certificateURL, newToken)
 
 	certInfo := makeCertInfo(ih.csrSubject, connectorClientContext.GetCommonName())
 
 	httphelpers.RespondWithBody(w, 200, infoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
+}
+
+func (ih *CSRInfoHandler) makeApiURLs(connectorClientContext clientcontext.ConnectorClientContext) api {
+	host := ih.connectorServiceHost
+	infoURL := ih.getInfoURL
+	if infoURL == "" {
+		infoURL = fmt.Sprintf(ih.urlFormat, host, ManagementInfoEndpoint)
+	}
+	return api{
+		CertificatesURL: fmt.Sprintf(ih.urlFormat, host, CertsEndpoint),
+		InfoURL:         infoURL,
+		RuntimeURLs:     connectorClientContext.GetRuntimeUrls(),
+	}
 }
 
 func makeCertInfo(csrSubject certificates.CSRSubject, commonName string) certInfo {
