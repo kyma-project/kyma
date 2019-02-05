@@ -18,10 +18,10 @@ When this process is complete, you can provision and bind your services.
 ## Provisioning and binding for an API ServiceClass
 
 This ServiceClass has a **bindable** flag set to `true` which means that you have to provision a ServiceInstance and bind it to the service or lambda to connect to the given API. The provisioning and binding workflow for an API ServiceClass consists of the following steps:
-1. Select a given API ServiceClass from the Service Catalog.
-2. Provision this ServiceClass by creating its ServiceInstance in the given Namespace.
+1. Select an API ServiceClass from the Service Catalog.
+2. Provision this ServiceClass by creating its ServiceInstance in a Namespace.
 3. Bind your ServiceInstance to the service or lambda. During the binding process, ServiceBinding and ServiceBindingUsage resources are created.
-    * ServiceBinding contains a Secret with a GatewayURL needed to connect to the given API.
+    * ServiceBinding contains a Secret with a GatewayURL required to connect to the given API.
     * ServiceBindingUsage injects the Secret, together with the label given during the registration process, to the lambda or service.
 4. The service or lambda calls the API through the Application Connector. The Application Connector verifies the label to check if you have the authorization to access this API.
 5. After verifying the label, the Application Connector allows you to access the Application API.
