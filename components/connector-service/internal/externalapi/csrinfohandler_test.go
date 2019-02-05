@@ -197,122 +197,29 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 
-	t.Run("should use headers if present", func(t *testing.T) {
+	t.Run("should retrieve metadata and events url from context", func(t *testing.T) {
 		//given
-		newToken := "newToken"
-		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
-
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		require.NoError(t, err)
-		req.Header.Set(BaseEventsPathHeader, "events.base.path")
-		req.Header.Set(BaseMetadataPathHeader, "metadata.base.path")
 		expectedMetadataUrl := "https://metadata.base.path/application/v1/metadata/services"
 		expectedEventsUrl := "https://events.base.path/application/v1/events"
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
+		extendedCtx := &clientcontext.ExtendedApplicationContext{
+			ApplicationContext: clientcontext.ApplicationContext{},
+			RuntimeURLs: clientcontext.RuntimeURLs{
+				MetadataURL: "https://metadata.base.path/application/v1/metadata/services",
+				EventsURL:   "https://events.base.path/application/v1/events",
+			},
+		}
 
-		rr := httptest.NewRecorder()
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+			return *extendedCtx, nil
+		}
 
-		//when
-		infoHandler.GetCSRInfo(rr, req)
-
-		//then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var infoResponse infoResponse
-		infoResponse.API = &api{}
-		err = json.Unmarshal(responseBody, &infoResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusOK, rr.Code)
-		api := infoResponse.API.(*api)
-		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
-		assert.Equal(t, expectedEventsUrl, api.EventsURL)
-	})
-
-	t.Run("should use default value for empty header", func(t *testing.T) {
-		//given
 		newToken := "newToken"
 		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
+		tokenCreator.On("Replace", token, *extendedCtx).Return(newToken, nil)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
-		req.Header.Add(BaseEventsPathHeader, "events.base.path")
-		req.Header.Add(BaseMetadataPathHeader, "")
-		expectedMetadataUrl := "https://metadata.default.path/application/v1/metadata/services"
-		expectedEventsUrl := "https://events.base.path/application/v1/events"
-
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
-
-		rr := httptest.NewRecorder()
-
-		//when
-		infoHandler.GetCSRInfo(rr, req)
-
-		//then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var infoResponse infoResponse
-		infoResponse.API = &api{}
-		err = json.Unmarshal(responseBody, &infoResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusOK, rr.Code)
-		api := infoResponse.API.(*api)
-		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
-		assert.Equal(t, expectedEventsUrl, api.EventsURL)
-	})
-
-	t.Run("should use default value for non-existing header", func(t *testing.T) {
-		//given
-		newToken := "newToken"
-		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
-
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		require.NoError(t, err)
-		req.Header.Add(BaseEventsPathHeader, "events.base.path")
-		expectedMetadataUrl := "https://metadata.default.path/application/v1/metadata/services"
-		expectedEventsUrl := "https://events.base.path/application/v1/events"
-
-		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
-
-		rr := httptest.NewRecorder()
-
-		//when
-		infoHandler.GetCSRInfo(rr, req)
-
-		//then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var infoResponse infoResponse
-		infoResponse.API = &api{}
-		err = json.Unmarshal(responseBody, &infoResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusOK, rr.Code)
-		api := infoResponse.API.(*api)
-		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
-		assert.Equal(t, expectedEventsUrl, api.EventsURL)
-	})
-
-	t.Run("should return empty url when both header and default value are empty", func(t *testing.T) {
-		//given
-		newToken := "newToken"
-		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Replace", token, dummyClientContext).Return(newToken, nil)
-
-		req, err := http.NewRequest(http.MethodGet, url, nil)
-		require.NoError(t, err)
-		req.Header.Add(BaseEventsPathHeader, "events.base.path")
-		req.Header.Add(BaseMetadataPathHeader, "")
-		expectedMetadataUrl := ""
-		expectedEventsUrl := "https://events.base.path/application/v1/events"
 
 		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, certificateURL, infoURL, host, subjectValues, AppURLFormat)
 

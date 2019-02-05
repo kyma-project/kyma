@@ -71,6 +71,10 @@ func (appCtx ApplicationContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
 }
 
+func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
+	return &extAppCtx.RuntimeURLs
+}
+
 type ClusterContext struct {
 	Group  string
 	Tenant string
