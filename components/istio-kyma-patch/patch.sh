@@ -130,7 +130,7 @@ function check_requirements() {
 require_istio_system
 require_istio_version
 require_mtls_disabled
-#check_requirements
+check_requirements
 configure_sidecar_injector
 run_all_patches
 remove_not_used
