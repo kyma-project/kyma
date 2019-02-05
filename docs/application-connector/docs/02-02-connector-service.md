@@ -16,4 +16,3 @@ This diagram illustrates the client certificate generation flow in details:
     - URLs of the available APIs
     - information required to generate a CSR
 3. The external system generates a CSR based on the information provided by Kyma and sends the CSR to the designated URL. In the response, the external system receives a signed certificate. It can use the certificate to authenticate and safely communicate with Kyma.
-
