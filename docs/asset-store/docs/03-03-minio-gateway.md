@@ -15,7 +15,7 @@ The Asset Store ensures that both usage scenarios work for Kyma, without additio
 
 Minio is an open-source asset storage server with Amazon S3 compatible API. It can be used for storing various types of assets, such as documents, images, or videos. The size of such an asset can range from a few KBs to a maximum of 5TB.
 
-In the context of the Asset Store, it is the Asset Controller that stores all assets in Minio, in a dedicated storage space.
+In the context of the Asset Store, the Asset Controller stores all assets in Minio, in a dedicated storage space.
 
 ![](assets/minio.svg)
 
