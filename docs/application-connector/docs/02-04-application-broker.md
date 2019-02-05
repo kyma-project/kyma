@@ -11,7 +11,7 @@ The Application Broker (AB) workflow consists of the following steps:
 4. The Service Catalog fetches services that the `application-broker` Service Broker exposes.
 5. The Service Catalog creates a ServiceClass for each service received from the Service Broker.
 
-![AB architecture](./assets/001-AB-architecture.svg)
+![AB architecture](./assets/004-AB-architecture.svg)
 
 When this process is complete, you can provision and bind your services.
 
@@ -26,7 +26,7 @@ This ServiceClass has a **bindable** flag set to `true` which means that you hav
 4. The service or lambda calls the API through the Application Connector. The Application Connector verifies the label to check if you have the authorization to access this API.
 5. After verifying the label, the Application Connector allows you to access the Application API.
 
-![API Service Class](./assets/020-AB-API-service-class.png)
+![API Service Class](./assets/005-AB-API-service-class.svg)
 
 ## Provisioning and binding for an Event ServiceClass
 
@@ -39,7 +39,7 @@ This ServiceClass has a **bindable** flag set to `false` which means that after 
 6. The Application Connector sends an Event to the lambda through the Event Bus.
 
 
-![Event Service Class](./assets/020-AB-event-service-class.png)
+![Event Service Class](./assets/006-AB-event-service-class.png)
 
 ## Provisioning and binding for both the API and Event ServiceClass
 
