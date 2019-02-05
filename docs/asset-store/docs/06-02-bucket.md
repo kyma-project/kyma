@@ -58,7 +58,7 @@ spec:
     }
 status:
   lastHeartbeatTime: "2019-02-04T11:50:26Z"
-  message: Bucket policy has been updated successfully
+  message: Bucket policy has been updated
   phase: Ready
   reason: BucketPolicyUpdated
   url: https://minio.kyma.local/ns-default-test-sample

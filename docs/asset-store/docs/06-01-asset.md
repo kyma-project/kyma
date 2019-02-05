@@ -64,6 +64,11 @@ status:
   reason: ValidationFailure
   message: "The file is not valid against the provided json schema"
   lastHeartbeatTime: "2018-01-03T07:38:24Z"
+  assetRef:
+    assets:
+    - README.md
+    - directory/subdirectory/file.md
+    baseUrl: https://minio.kyma.local/ns-default-test-sample/asset-sample
 
 ```
 
@@ -93,6 +98,10 @@ This table lists all the possible parameters of a given resource together with t
 | **status.reason** |    **Not applicable**   | Provides the reason why the Asset CR processing failed or is pending.  |
 | **status.message** |    **Not applicable**   | Describes a human-readable message on the CR processing progress, success, or failure. |
 | **status.lastheartbeattime** |    **Not applicable**   | Provides the last time when the Asset Controller processed the Asset CR. |
+| **status.assetref** |    **Not applicable**   | Provides details on the location of the assets stored in the bucket.   |
+| **status.assetref.assets** |    **Not applicable**   | Provides the relative path to the given asset in the storage bucket. |
+| **status.assetref.baseurl** |    **Not applicable**   | Specifies the absolute path to the location of the assets in the storage bucket.   |
+
 
 > **NOTE:** All parameters marked as **Not applicable** are added automatically to the CR by the Asset Controller.
 
