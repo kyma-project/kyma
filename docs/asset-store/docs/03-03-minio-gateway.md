@@ -13,7 +13,7 @@ The Asset Store ensures that both usage scenarios work for Kyma, without additio
 
 ## Local storage
 
-Minio is an open-source asset storage server with Amazon S3 compatible API. It can be used for storing various types of assets, such as documents, images, or videos. The size of such an asset can range from a few KBs to a maximum of 5TB.
+Minio is an open-source asset storage server with Amazon S3 compatible API. It can be used for storing various types of assets, such as documents, files, or images.
 
 In the context of the Asset Store, the Asset Controller stores all assets in Minio, in a dedicated storage space.
 
@@ -22,10 +22,10 @@ In the context of the Asset Store, the Asset Controller stores all assets in Min
 
 ## Production storage
 
-Minio does not scale for the production use due to its limits in file sizes and HTTP requests and responses. The Gateway mode, Minio's scalable counterpart, gives you more flexibility as it allows you to use the asset storage services from such major cloud providers as Azure, Amazon, and Google. Similarly to Minio, the Gateway mode
- compatible with Amazon S3 APIs
+For the production purposes, the Asset Store uses Minio Gateway which:
 
-adds Amazon S3 compatibility to the external storage.
-
+- Is a multi-cloud solution that offers the flexibility to choose a given cloud provider for the specific Kyma installation, including Azure, Amazon, and Google
+- Supports data replication and CDN configuration
+- Is also compatible with Amazon S3 APIs
 
 ![](assets/minio-gateway.svg)
