@@ -13,7 +13,7 @@ kubectl get crd subscriptions.eventing.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource that creates an event trigger for a lambda with the `order.created` event.
+This is a sample resource that creates an `order.created` Event trigger for a lambda.
 
 ```yaml
 apiVersion: eventing.kyma-project.io/v1alpha1
