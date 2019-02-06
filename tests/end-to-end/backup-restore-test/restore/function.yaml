@@ -9,7 +9,7 @@ spec:
   function: |
     module.exports = {
       hello: function(event, context) {
-        return event
+        return(event.data)
       }
     }
   service:

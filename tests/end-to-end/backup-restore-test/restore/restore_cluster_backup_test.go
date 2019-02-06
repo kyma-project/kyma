@@ -73,13 +73,14 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 				So(func() string {
 					return getFunctionState(namespace, functionName)
 				}, shouldReturnSubstringEventually, "Running", 60*time.Second, 1*time.Second)
-				// So(func() string {
-				// 	value, err := getFunctionOutput(fmt.Sprintf("http://%s.%s:8080", functionName, namespace), namespace, functionName)
-				// 	if err != nil {
-				// 		t.Fatalf("Could not get function output: %v", err)
-				// 	}
-				// 	return value
-				// }, shouldReturnSubstringEventually, testUUID, 60*time.Second, 1*time.Second)
+				So(func() string {
+					host := fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
+					value, err := getFunctionOutput(host, namespace, functionName)
+					if err != nil {
+						t.Fatalf("Could not get function output for host%v: %v", host, err)
+					}
+					return value
+				}, shouldReturnSubstringEventually, testUUID.String(), 60*time.Second, 1*time.Second)
 			})
 		})
 	})
@@ -131,13 +132,13 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 			So(func() string {
 				return getFunctionState(namespace, functionName)
 			}, shouldReturnSubstringEventually, "Running", 60*time.Second, 1*time.Second)
-			// So(func() string {
-			// 	value, err := getFunctionOutput(fmt.Sprintf("http://%s.%s:8080", functionName, namespace), namespace, functionName)
-			// 	if err != nil {
-			// 		t.Fatalf("Could not get function output: %v", err)
-			// 	}
-			// 	return value
-			// }, shouldReturnSubstringEventually, testUUID, 60*time.Second, 1*time.Second)
+			So(func() string {
+				value, err := getFunctionOutput(fmt.Sprintf("http://%s.%s:8080", functionName, namespace), namespace, functionName)
+				if err != nil {
+					t.Fatalf("Could not get function output: %v", err)
+				}
+				return value
+			}, shouldReturnSubstringEventually, testUUID.String(), 60*time.Second, 1*time.Second)
 
 		})
 
@@ -236,6 +237,6 @@ func getFunctionOutput(host, namespace, name string) (string, error) {
 		}
 		return string(bodyBytes), err
 	}
-	return "", fmt.Errorf("Status was: %v", resp.StatusCode)
+	return "", err
 
 }
