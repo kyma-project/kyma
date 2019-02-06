@@ -66,7 +66,7 @@ status:
 
 ## Custom resource parameters
 
-This table lists all the possible parameters of a given resource together with their descriptions:
+This table lists all possible parameters of a given resource together with their descriptions:
 
 
 | Parameter   |      Mandatory      |  Description |

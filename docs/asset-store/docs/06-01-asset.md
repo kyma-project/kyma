@@ -31,8 +31,8 @@ spec:
 ### Validation and mutation webhook services
 
 You can also define validation and mutation services:
-- **Validation webhook** reference to a service that performs the validation of fetched assets before they are uploaded to the bucket. It can be a list of several different validation webhooks and all of them should be processed even if one is failing. It can refer either to the validation of a specific file against a specification or to the security validation. The validation webhook returns the validation status.
-- **Mutation webhook** reference to a service that acts similarly to the validation service. The difference is that it mutates the asset instead of just validating it. For example, this can be an asset rewriting through the `regex` operation or `keyvalue`, or the modification in the JSON specification. The mutation webhook returns modified files instead of information on the status.
+- **Validation webhook** performs the validation of fetched assets before they are uploaded to the bucket. It can be a list of several different validation webhooks and all of them should be processed even if one fails. It can refer either to the validation of a specific file against a specification or to the security validation. The validation webhook returns the validation status.
+- **Mutation webhook** acts similarly to the validation service. The difference is that it mutates the asset instead of just validating it. For example, this can be an asset rewriting through the `regex` operation or `keyvalue`, or the modification in the JSON specification. The mutation webhook returns modified files instead of information on the status.
 
 ```
 apiVersion: assetstore.kyma-project.io/v1alpha1
@@ -74,14 +74,14 @@ status:
 
 ## Custom resource parameters
 
-This table lists all the possible parameters of a given resource together with their descriptions:
+This table lists all possible parameters of a given resource together with their descriptions:
 
 
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **metadata.namespace** |    **YES**   | Defines the Namespace in which the CR is available. |
-| **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the zip or tar formats. Use `single` for one file and `package` for a set of files. |
+| **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files. |
 | **spec.source.url** |    **YES**   | Specifies the location of the file. |
 | **bucketref.name** |    **YES**   | Specifies the name of the bucket for storing the asset. |
 | **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook service. |
