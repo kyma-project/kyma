@@ -70,6 +70,10 @@ func (s *ApiStatus) IsHostnameOccupied() bool {
 	return s.VirtualServiceStatus.IsHostnameOccupied()
 }
 
+func (s *ApiStatus) IsTargetServiceOccupied() bool {
+	return s.VirtualServiceStatus.IsTargetServiceOccupied()
+}
+
 func (s *ApiStatus) SetInProgress() {
 	s.AuthenticationStatus = kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.InProgress,

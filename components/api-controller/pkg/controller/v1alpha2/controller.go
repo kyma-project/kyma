@@ -2,6 +2,7 @@ package v1alpha2
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/labels"
 
 	log "github.com/sirupsen/logrus"
 
@@ -204,20 +205,49 @@ func (c *Controller) onCreate(api *kymaApi.Api) error {
 	}
 	defer apiStatusHelper.Update()
 
-	metaDto := toMetaDto(api)
-
-	createVirtualServiceStatus := c.createVirtualService(metaDto, api, apiStatusHelper)
-
-	if createVirtualServiceStatus.IsError() {
+	if validateAPIStatus := c.validateAPI(api, apiStatusHelper); validateAPIStatus.IsError() || validateAPIStatus.IsServiceOccupied() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 	}
 
-	createAuthenticationStatus := c.createAuthentication(metaDto, api, apiStatusHelper)
+	metaDto := toMetaDto(api)
 
-	if createAuthenticationStatus.IsError() {
+	if createVirtualServiceStatus := c.createVirtualService(metaDto, api, apiStatusHelper); createVirtualServiceStatus.IsError() {
+		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
+	}
+
+	if createAuthenticationStatus := c.createAuthentication(metaDto, api, apiStatusHelper); createAuthenticationStatus.IsError() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 	}
 	return nil
+}
+
+func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
+
+	setStatus := func(code kymaMeta.StatusCode, lastError string) kymaMeta.StatusCode {
+		status := &kymaMeta.GatewayResourceStatus{
+			Code:      code,
+			LastError: lastError,
+		}
+		apiStatusHelper.SetVirtualServiceStatus(status)
+		return code
+	}
+
+	targetServiceName := newAPI.Spec.Service.Name
+
+	existingAPIs, err := c.apisLister.List(labels.Everything())
+	if err != nil {
+		log.Errorf("Error while validating API %s/%s ver: %s. Root cause: %s", newAPI.Namespace, newAPI.Name, newAPI.ResourceVersion, err)
+		return setStatus(kymaMeta.Error, err.Error())
+	}
+
+	for _, a := range existingAPIs {
+		if a.Spec.Service.Name == targetServiceName && a.GetUID() != newAPI.GetUID() {
+			log.Debugf("An API has already been created for service %s", newAPI.Spec.Service.Name)
+			return setStatus(kymaMeta.TargetServiceOccupied, "")
+		}
+	}
+
+	return kymaMeta.InProgress
 }
 
 func (c *Controller) createVirtualService(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
@@ -319,6 +349,10 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 		newApi.Status.SetInProgress()
 	}
 	defer apiStatusHelper.Update()
+
+	if validateAPIStatus := c.validateAPI(newApi, apiStatusHelper); validateAPIStatus.IsError() || validateAPIStatus.IsServiceOccupied() {
+		return fmt.Errorf("error while processing create: %s/%s ver: %s", newApi.Namespace, newApi.Name, newApi.ResourceVersion)
+	}
 
 	oldMetaDto := toMetaDto(oldApi)
 	newMetaDto := toMetaDto(newApi)

@@ -18,6 +18,7 @@ const (
 	Done
 	Error
 	HostnameOccupied
+	TargetServiceOccupied
 )
 
 func (s StatusCode) IsEmpty() bool {
@@ -38,6 +39,10 @@ func (s StatusCode) IsError() bool {
 
 func (s StatusCode) IsHostnameOccupied() bool {
 	return s == HostnameOccupied
+}
+
+func (s StatusCode) IsServiceOccupied() bool {
+	return s == TargetServiceOccupied
 }
 
 type GatewayResourceStatus struct {
@@ -68,6 +73,10 @@ func (s *GatewayResourceStatus) IsError() bool {
 
 func (s *GatewayResourceStatus) IsHostnameOccupied() bool {
 	return s.Code.IsHostnameOccupied()
+}
+
+func (s *GatewayResourceStatus) IsTargetServiceOccupied() bool {
+	return s.Code.IsServiceOccupied()
 }
 
 type GatewayResource struct {
