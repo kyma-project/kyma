@@ -1,0 +1,43 @@
+{{ define "kyma-rules.yaml.tpl" }}
+groups:
+- name: pod-not-running-rule
+  rules:
+  - alert: SystemPodNotRunning
+    expr: (kube_pod_container_status_running { namespace=~"kyma-.*|kube-.*|istio-.*", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|(.*-(tests|dummy))" } == 0)
+    for: 60s
+    labels:
+      severity: critical
+    annotations:
+      description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+      summary: "{{`{{ $labels.pod }}`}} is not running"
+- name: cpu-90-percent-usage-rule
+  rules:
+  - alert: CPU90PercentUsage
+    expr:   max(kube_pod_labels{label_alertcpu=~"yes*"}) by (label_alertcpu,pod) * on(pod) group_right(label_alertcpu) label_replace(sum by(pod_name)(rate(container_cpu_usage_seconds_total{namespace="kyma-system"}[2m]))*100 > 90, "pod", "$1", "pod_name", "(.+)")
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description:  "Pod {{`{{$labels.pod}}`}} is having {{`{{$value}}`}} % usage"
+      summary: "Pod {{`{{$labels.pod}}`}} is having {{`{{$value}}`}} % usage"
+- name: mem-90-percent-usage-rule
+  rules:
+  - alert: MEM90PercentUsage
+    expr:   sum(container_memory_working_set_bytes) by (pod_name) / sum(label_join(kube_pod_container_resource_limits_memory_bytes, "pod_name", "", "pod")) by (pod_name)  * on(pod_name) group_left(app)   label_replace(max(kube_pod_labels{label_alertmem=~"yes*"}) by (pod), "pod_name", "$1", "pod", "(.*)") * 100 > 90
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description:  "Pod {{`{{$labels.pod_name}}`}} is having {{`{{$value}}`}} % usage"
+      summary: "Pod {{`{{$labels.pod_name}}`}} is having {{`{{$value}}`}} % usage"
+- name: pvc-90-percent-full-rule
+  rules:
+  - alert: PVC90PercentFull
+    expr: kubelet_volume_stats_used_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark" } / kubelet_volume_stats_available_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark"} * 100 > 90
+    for: 10m
+    labels:
+      severity: critical
+    annotations:
+      description:  "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+      summary: "PVC {{`{{$labels.exported_namespace}}`}}/{{`{{$labels.persistentvolumeclaim}}`}} is using {{`{{$value}}`}} % of the available volume"
+{{ end }}
