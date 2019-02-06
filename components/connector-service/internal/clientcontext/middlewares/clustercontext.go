@@ -28,7 +28,7 @@ func (cc *clusterContextMiddleware) Middleware(handler http.Handler) http.Handle
 		clusterContext := cc.readClusterContextFromRequest(r)
 
 		if clusterContext.IsEmpty() {
-			httphelpers.RespondWithError(w, apperrors.BadRequest("Cluster context is empty"))
+			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified."))
 			return
 		}
 

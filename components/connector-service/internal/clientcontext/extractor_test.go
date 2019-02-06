@@ -79,7 +79,7 @@ func Test_ResolveApplicationContextExtender(t *testing.T) {
 			Return(nil)
 
 		// when
-		extender, err := ResolveApplicationContextExtender(token, tokenResolver)
+		extender, err := NewApplicationContextExtender(token, tokenResolver)
 
 		// then
 		require.NoError(t, err)
@@ -94,7 +94,7 @@ func Test_ResolveApplicationContextExtender(t *testing.T) {
 			Return(apperrors.Internal("error"))
 
 		// when
-		extender, err := ResolveApplicationContextExtender(token, tokenResolver)
+		extender, err := NewApplicationContextExtender(token, tokenResolver)
 
 		// then
 		require.Error(t, err)
@@ -111,7 +111,7 @@ func Test_ResolveClusterContextExtender(t *testing.T) {
 			Return(apperrors.Internal("error"))
 
 		// when
-		extender, err := ResolveClusterContextExtender(token, tokenResolver)
+		extender, err := NewClusterContextExtender(token, tokenResolver)
 
 		// then
 		require.Error(t, err)

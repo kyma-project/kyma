@@ -23,10 +23,13 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			clusterCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			applicationCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
 			require.True(t, ok)
 
-			assert.Equal(t, testApplication, clusterCtx.Application)
+			assert.Equal(t, testApplication, applicationCtx.Application)
+			assert.Equal(t, testTenant, applicationCtx.ClusterContext.Tenant)
+			assert.Equal(t, testGroup, applicationCtx.ClusterContext.Group)
+
 			w.WriteHeader(http.StatusOK)
 		})
 
@@ -75,14 +78,17 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			clusterCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			applicationCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
 			require.True(t, ok)
 
-			assert.Equal(t, testApplication, clusterCtx.Application)
+			assert.Equal(t, testApplication, applicationCtx.Application)
+			assert.Equal(t, defaultTenant, applicationCtx.ClusterContext.Tenant)
+			assert.Equal(t, defaultGroup, applicationCtx.ClusterContext.Group)
+
 			w.WriteHeader(http.StatusOK)
 		})
 
-		emptyClusterContextMiddleware := &clusterContextMiddleware{
+		clusterContextMiddleware := &clusterContextMiddleware{
 			defaultTenant: defaultTenant,
 			defaultGroup:  defaultGroup,
 		}
@@ -93,7 +99,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewApplicationContextMiddleware(emptyClusterContextMiddleware)
+		middleware := NewApplicationContextMiddleware(clusterContextMiddleware)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
