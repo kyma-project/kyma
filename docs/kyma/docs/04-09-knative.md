@@ -19,7 +19,7 @@ Ensure that you created the local Kubernetes cluster with `10240Mb` memory and `
 
 Run the following command before triggering the Kyma installation process:
 ```
-kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true"}}'
+kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
 ```
 
 ## Knative with local deployment from sources
@@ -34,5 +34,5 @@ When you install Kyma locally from sources, add the `--knative` argument to the 
 
 Run the following command before triggering the Kyma installation process:
 ```
-kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true"}}'
+kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
 ```

@@ -30,6 +30,8 @@ spec:
       namespace: "natss"
     - name: "core"
       namespace: "kyma-system"
+    - name: "event-bus"
+      namespace: "kyma-system"
     - name: "application-connector"
       namespace: "kyma-system"
     #- name: "ark"
