@@ -4,9 +4,9 @@
 controller:
   image:
     pullPolicy: IfNotPresent
-    location: eu.gcr.io/kyma-project/event-bus/knative/natss/controller@sha256:c1561149ac50fa46a210bbdc135d4f2bc9ff427b9bfb25baa83f4562dde50987
+    location: eu.gcr.io/kyma-project/event-bus/knative/natss/controller:604de5d6
 dispatcher:
   image:
     pullPolicy: IfNotPresent
-    location: eu.gcr.io/kyma-project/event-bus/knative/natss/dispatcher@sha256:f18b4c53be9e34cbf7ac946738e08722b30e073575b77dbec1fd8f430c0abd6d
+    location: eu.gcr.io/kyma-project/event-bus/knative/natss/dispatcher:604de5d6
     

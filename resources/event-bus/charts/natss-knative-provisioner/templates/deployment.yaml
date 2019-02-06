@@ -89,7 +89,6 @@ spec:
       serviceAccountName: natss-controller
       containers:
         - name: controller
-          #image: eu.gcr.io/kyma-project/event-bus/knative/natss/controller@sha256:c1561149ac50fa46a210bbdc135d4f2bc9ff427b9bfb25baa83f4562dde50987
           image: {{ .Values.controller.image.location }}
           imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
 
@@ -163,6 +162,5 @@ spec:
       serviceAccountName: natss-dispatcher
       containers:
         - name: dispatcher
-          #image: eu.gcr.io/kyma-project/event-bus/knative/natss/dispatcher@sha256:f18b4c53be9e34cbf7ac946738e08722b30e073575b77dbec1fd8f430c0abd6d
           image: {{ .Values.dispatcher.image.location }}
           imagePullPolicy: {{ .Values.dispatcher.image.pullPolicy }}
