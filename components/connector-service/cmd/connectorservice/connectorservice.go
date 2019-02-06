@@ -139,7 +139,20 @@ func newExternalHandler(tokenService tokens.Service, opts *options, env *environ
 		CertService:          certificateService,
 	}
 
-	return externalapi.NewHandler(appHandlerConfig, runtimeHandlerConfig, globalMiddlewares)
+	appContextFromSubjMiddleware := clientcontextmiddlewares.NewAppContextFromSubjMiddleware()
+
+	appManagementInfoHandlerConfig := externalapi.Config{
+		ConnectorServiceHost: opts.connectorServiceHost,
+		Middlewares:          []mux.MiddlewareFunc{appContextFromSubjMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
+		ContextExtractor:     clientcontext.ExtractApplicationContext,
+	}
+
+	runtimeManagementInfoHandlerConfig := externalapi.Config{
+		ConnectorServiceHost: opts.connectorServiceHost,
+		ContextExtractor:     clientcontext.ExtractStubApplicationContext,
+	}
+
+	return externalapi.NewHandler(appHandlerConfig, runtimeHandlerConfig, appManagementInfoHandlerConfig, runtimeManagementInfoHandlerConfig, globalMiddlewares)
 }
 
 func newInternalHandler(tokenService tokens.Service, opts *options, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
