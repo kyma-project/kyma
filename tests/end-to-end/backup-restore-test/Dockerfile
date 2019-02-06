@@ -1,4 +1,4 @@
-FROM golang:1.9-alpine3.7 as builder
+FROM golang:1.10-alpine as builder
 
 ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test
 WORKDIR ${SRC_DIR}
