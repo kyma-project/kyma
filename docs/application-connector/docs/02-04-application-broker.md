@@ -1,5 +1,5 @@
 ---
-title: The Application Broker architecture
+title: Application Broker
 type: Architecture
 ---
 
