@@ -46,10 +46,28 @@ data:
 {{- end }}
 {{ else }}
   alert.rules: |-
-    {{- include "unhealthy-pods-rules.yaml.tpl" . | indent 4}}
+    {{- include "kyma-rules.yaml.tpl" . | indent 4}}
 {{ end }}
 ```
-Under the **data. alert.rules** parameter, there is a configuration of the [unhealthy-pods-rules.yaml](templates/unhealthy-pods-rules.yaml) file, which creates a rule for alerting when a Pod is not running.
+Under the **data. alert.rules** parameter, there is a configuration of the [kyma-rules.yaml](templates/kyma-rules.yaml) file, which creates a rule for following cases:
+
+*  Alerting when a Pod is not running
+
+   The Alertmanager sends out alerts when one of the pods is not running in any of the system Namespaces such as `kyma-system`, `kyma-integration`, `istio-system`, `kube-public` or `kube-system`
+
+* Monitoring Persistent Volume Claims (PVC)
+
+  The Alertmanager triggers the rule when PVC in any of the system Namespaces such as `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public` or `kube-system` exceeds  90%. In such a case, increase the capacity of PVCs.
+
+* Monitoring CPU Usage
+
+  The Alertmanager trigger the rule when CPU usage is above 90% in the pods in the namespace `kyma-system`. For the alert rule to fire for a pod its necessary that label `alertcpu: "yes"` is passed to the pods.
+
+* Monitoring Memrory usage
+
+  The Alertmanager trigger the rule when Memory usage is above 90% in the pods in the namespace `kyma-system`. For the alert rule to fire for a pod its necessary that label `alertmem: "yes"` is passed to the pods.
+
+An example for alerting when a pod is not running is shown below
 
 ```yaml
 {{ define "unhealthy-pods-rules.yaml.tpl" }}
@@ -82,7 +100,7 @@ Resource metrics such as **cpu and memory** are also served by kube-state-metric
 | Metric name| Metric type | Labels/tags |
 | ---------- | ----------- | ----------- |
 | kube_pod_container_resource_requests | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
-| kube_pod_container_resource_limits | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
+| **kube_pod_container_resource_limits** | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
 
 [Here](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md) is the complete list of Pod Metrics
 
@@ -96,8 +114,6 @@ Resource metrics such as **cpu and memory** are also served by kube-state-metric
 - kube_pod_container_resource_requests_nvidia_gpu_devices
 - kube_pod_container_resource_limits_nvidia_gpu_devices
 
-### Monitoring Persistent Volume Claims
-The [pvc-rules.yaml](templates/pvc-rules.yaml) configuration, located under the **data.alert.rules** parameter, specifes an alerting rule for the `PersistentVolumeClaim` (PVC). The Alertmanager triggers the rule when PVC in any of the system Namespaces such as `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public` or `kube-system` exceeds  90%. In such a case, increase the capacity of PVCs.
 
 
 ### Configure Alertmanager
