@@ -230,7 +230,7 @@ serviceMonitorsSelector: {}
 serviceMonitors:
 - name: istio-mesh
   serviceMonitorSelectorLabels:
-    prometheus: core
+    prometheus: monitoring
   selector:
     istio: mixer
   namespaceSelector:

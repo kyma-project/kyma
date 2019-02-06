@@ -19,8 +19,8 @@ import (
 
 //go:generate mockery -name=appSvc -output=automock -outpkg=automock -case=underscore
 type appSvc interface {
-	ListInEnvironment(environment string) ([]*appTypes.Application, error)
-	ListNamespacesFor(reName string) ([]string, error)
+	ListInNamespace(namespace string) ([]*appTypes.Application, error)
+	ListNamespacesFor(appName string) ([]string, error)
 	Find(name string) (*appTypes.Application, error)
 	List(params pager.PagingParams) ([]*appTypes.Application, error)
 	Update(name string, description string, labels gqlschema.Labels) (*appTypes.Application, error)
@@ -44,9 +44,9 @@ type applicationResolver struct {
 	statusGetter statusGetter
 }
 
-func NewApplicationResolver(reSvc appSvc, statusGetter statusGetter) *applicationResolver {
+func NewApplicationResolver(appSvc appSvc, statusGetter statusGetter) *applicationResolver {
 	return &applicationResolver{
-		appSvc:       reSvc,
+		appSvc:       appSvc,
 		statusGetter: statusGetter,
 		appConverter: applicationConverter{},
 	}
@@ -79,10 +79,10 @@ func (r *applicationResolver) ApplicationsQuery(ctx context.Context, namespace *
 		}
 	} else { // retrieve only for given namespace
 		// TODO: Add support for paging.
-		items, err = r.appSvc.ListInEnvironment(*namespace)
+		items, err = r.appSvc.ListInNamespace(*namespace)
 		if err != nil {
 			glog.Error(errors.Wrapf(err, "while listing %s for namespace %v", pretty.Applications, namespace))
-			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications, gqlerror.WithEnvironment(*namespace))
+			return []gqlschema.Application{}, gqlerror.New(err, pretty.Applications, gqlerror.WithNamespace(*namespace))
 		}
 	}
 
@@ -164,7 +164,7 @@ func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, app
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.Application))
-		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithNamespace(namespace))
 	}
 
 	return &gqlschema.ApplicationMapping{
@@ -177,7 +177,7 @@ func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, ap
 	err := r.appSvc.Disable(namespace, application)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while disabling %s", pretty.Application))
-		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithNamespace(namespace))
 	}
 
 	return &gqlschema.ApplicationMapping{
@@ -186,16 +186,16 @@ func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, ap
 	}, nil
 }
 
-func (r *applicationResolver) ApplicationEnabledInEnvironmentsField(ctx context.Context, obj *gqlschema.Application) ([]string, error) {
+func (r *applicationResolver) ApplicationEnabledInNamespacesField(ctx context.Context, obj *gqlschema.Application) ([]string, error) {
 	if obj == nil {
-		glog.Error(fmt.Errorf("while resolving 'EnabledInEnvironments' field obj is empty"))
+		glog.Error(fmt.Errorf("while resolving 'EnabledInNamespaces' field obj is empty"))
 		return []string{}, gqlerror.NewInternal()
 	}
 
 	items, err := r.appSvc.ListNamespacesFor(obj.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s for %s %q", pretty.Environments, pretty.Application, obj.Name))
-		return []string{}, gqlerror.New(err, pretty.Environments)
+		glog.Error(errors.Wrapf(err, "while listing %s for %s %q", pretty.Namespaces, pretty.Application, obj.Name))
+		return []string{}, gqlerror.New(err, pretty.Namespaces)
 	}
 	return items, nil
 }

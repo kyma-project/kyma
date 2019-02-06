@@ -16,9 +16,9 @@ import (
 
 func TestServicePlanService_Find(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environmentName := "env"
+		nsName := "ns"
 		planName := "testExample"
-		servicePlan := fixServicePlan(planName, "test", planName, environmentName)
+		servicePlan := fixServicePlan(planName, "test", planName, nsName)
 		client := fake.NewSimpleClientset(servicePlan)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -28,7 +28,7 @@ func TestServicePlanService_Find(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		plan, err := svc.Find(planName, environmentName)
+		plan, err := svc.Find(planName, nsName)
 		require.NoError(t, err)
 		assert.Equal(t, servicePlan, plan)
 	})
@@ -43,7 +43,7 @@ func TestServicePlanService_Find(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		plan, err := svc.Find("doesntExist", "env")
+		plan, err := svc.Find("doesntExist", "ns")
 		require.NoError(t, err)
 		assert.Nil(t, plan)
 	})
@@ -51,11 +51,11 @@ func TestServicePlanService_Find(t *testing.T) {
 
 func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environmentName := "env"
+		nsName := "ns"
 		className := "test"
 		planName := "testExample"
 		externalName := "testExternal"
-		servicePlan := fixServicePlan(planName, className, externalName, environmentName)
+		servicePlan := fixServicePlan(planName, className, externalName, nsName)
 		client := fake.NewSimpleClientset(servicePlan)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -65,7 +65,7 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		plan, err := svc.FindByExternalName(externalName, className, environmentName)
+		plan, err := svc.FindByExternalName(externalName, className, nsName)
 		require.NoError(t, err)
 		assert.Equal(t, servicePlan, plan)
 	})
@@ -80,20 +80,20 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		plan, err := svc.FindByExternalName("doesntExist", "none", "env")
+		plan, err := svc.FindByExternalName("doesntExist", "none", "ns")
 
 		require.NoError(t, err)
 		assert.Nil(t, plan)
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		environmentName := "env"
+		nsName := "ns"
 		className := "duplicateName"
 		externalName := "duplicateName"
 		client := fake.NewSimpleClientset(
-			fixServicePlan("1", className, externalName, environmentName),
-			fixServicePlan("2", className, externalName, environmentName),
-			fixServicePlan("3", className, externalName, environmentName),
+			fixServicePlan("1", className, externalName, nsName),
+			fixServicePlan("2", className, externalName, nsName),
+			fixServicePlan("3", className, externalName, nsName),
 		)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -103,7 +103,7 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		_, err := svc.FindByExternalName(externalName, className, environmentName)
+		_, err := svc.FindByExternalName(externalName, className, nsName)
 
 		assert.Error(t, err)
 	})
@@ -111,12 +111,12 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 
 func TestServicePlanService_ListForClass(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environmentName := "env"
+		nsName := "ns"
 		className := "testClassName"
 
-		servicePlan1 := fixServicePlan("1", className, "1", environmentName)
-		servicePlan2 := fixServicePlan("2", className, "2", environmentName)
-		servicePlan3 := fixServicePlan("3", className, "3", environmentName)
+		servicePlan1 := fixServicePlan("1", className, "1", nsName)
+		servicePlan2 := fixServicePlan("2", className, "2", nsName)
+		servicePlan3 := fixServicePlan("3", className, "3", nsName)
 		client := fake.NewSimpleClientset(servicePlan1, servicePlan2, servicePlan3)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -126,7 +126,7 @@ func TestServicePlanService_ListForClass(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		plans, err := svc.ListForServiceClass(className, environmentName)
+		plans, err := svc.ListForServiceClass(className, nsName)
 		require.NoError(t, err)
 		assert.Equal(t, []*v1beta1.ServicePlan{
 			servicePlan1, servicePlan2, servicePlan3,
@@ -143,14 +143,14 @@ func TestServicePlanService_ListForClass(t *testing.T) {
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
 		var emptyArray []*v1beta1.ServicePlan
-		plans, err := svc.ListForServiceClass("doesntExist", "env")
+		plans, err := svc.ListForServiceClass("doesntExist", "ns")
 		require.NoError(t, err)
 		assert.Equal(t, emptyArray, plans)
 	})
 
 }
 
-func fixServicePlan(name, relatedServiceClassName, externalName, environment string) *v1beta1.ServicePlan {
+func fixServicePlan(name, relatedServiceClassName, externalName, namespace string) *v1beta1.ServicePlan {
 	plan := v1beta1.ServicePlan{
 		Spec: v1beta1.ServicePlanSpec{
 			CommonServicePlanSpec: v1beta1.CommonServicePlanSpec{
@@ -162,7 +162,7 @@ func fixServicePlan(name, relatedServiceClassName, externalName, environment str
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 	}
 

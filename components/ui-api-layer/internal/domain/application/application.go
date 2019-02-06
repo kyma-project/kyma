@@ -8,7 +8,6 @@ import (
 
 	"k8s.io/client-go/kubernetes"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
 	"github.com/pkg/errors"
@@ -21,12 +20,13 @@ import (
 	mappingInformer "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/disabled"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application/gateway"
 )
 
 //go:generate failery -name=ApplicationLister -case=underscore -output disabled -outpkg disabled
 type ApplicationLister interface {
-	ListInEnvironment(environment string) ([]*v1alpha1.Application, error)
+	ListInNamespace(namespace string) ([]*v1alpha1.Application, error)
 	ListNamespacesFor(appName string) ([]string, error)
 }
 
@@ -177,7 +177,7 @@ type Resolver interface {
 	ConnectorServiceQuery(ctx context.Context, application string) (gqlschema.ConnectorService, error)
 	EnableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error)
 	DisableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error)
-	ApplicationEnabledInEnvironmentsField(ctx context.Context, obj *gqlschema.Application) ([]string, error)
+	ApplicationEnabledInNamespacesField(ctx context.Context, obj *gqlschema.Application) ([]string, error)
 	ApplicationStatusField(ctx context.Context, app *gqlschema.Application) (gqlschema.ApplicationStatus, error)
 	EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error)
 	EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error)

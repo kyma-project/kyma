@@ -1,13 +1,15 @@
 knative:
   ingressgateway:
     service:
-      type: NodePort
+      type: LoadBalancer
   gateway:
     tls:
       enabled: true
   domainName: example.com
 
 global:
+  isLocalEnv: false
+  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:

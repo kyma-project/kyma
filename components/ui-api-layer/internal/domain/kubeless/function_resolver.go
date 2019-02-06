@@ -15,7 +15,7 @@ import (
 
 //go:generate mockery -name=functionLister -output=automock -outpkg=automock -case=underscore
 type functionLister interface {
-	List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.Function, error)
+	List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.Function, error)
 }
 
 type functionResolver struct {
@@ -34,14 +34,14 @@ func newFunctionResolver(functionLister functionLister) (*functionResolver, erro
 	}, nil
 }
 
-func (r *functionResolver) FunctionsQuery(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.Function, error) {
-	functions, err := r.functionLister.List(environment, pager.PagingParams{
+func (r *functionResolver) FunctionsQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Function, error) {
+	functions, err := r.functionLister.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,
 	})
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s for environment %s", pretty.Functions, environment))
-		return nil, gqlerror.New(err, pretty.Functions, gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while listing %s for namespace %s", pretty.Functions, namespace))
+		return nil, gqlerror.New(err, pretty.Functions, gqlerror.WithNamespace(namespace))
 	}
 
 	return r.functionConverter.ToGQLs(functions), nil

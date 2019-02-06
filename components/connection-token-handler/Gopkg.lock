@@ -547,6 +547,7 @@
   name = "k8s.io/client-go"
   packages = [
     "discovery",
+    "discovery/fake",
     "dynamic",
     "kubernetes",
     "kubernetes/scheme",
@@ -588,6 +589,7 @@
     "rest",
     "rest/watch",
     "restmapper",
+    "testing",
     "third_party/forked/golang/template",
     "tools/auth",
     "tools/cache",
@@ -616,7 +618,7 @@
   version = "kubernetes-1.11.2"
 
 [[projects]]
-  branch = "master"
+  branch = "release-1.10"
   name = "k8s.io/code-generator"
   packages = [
     "cmd/client-gen",
@@ -631,7 +633,7 @@
     "cmd/deepcopy-gen/args",
     "pkg/util"
   ]
-  revision = "405721ab9678fde04d78961eec9498820d80408d"
+  revision = "edc41f23fa918716df540b1486477d62237010e4"
 
 [[projects]]
   branch = "master"
@@ -717,6 +719,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "df4bc0fcf27fa531503e585c9146bf52e0d95fd44be71650e46110081fefa9c1"
+  inputs-digest = "63fcdd2f611718a66ec0458b052e18596bc00ed588bd41872a892f95b9c325c6"
   solver-name = "gps-cdcl"
   solver-version = 1

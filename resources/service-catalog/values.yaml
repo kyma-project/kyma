@@ -1,7 +1,13 @@
 etcd-stateful:
-  replicaCount: 1
+  replicaCount: 3
+  etcd:
+    resources:
+      limits:
+        memory: 512Mi
 
 global:
+  isLocalEnv: false
+  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
