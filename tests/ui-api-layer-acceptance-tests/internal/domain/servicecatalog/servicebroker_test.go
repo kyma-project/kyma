@@ -14,7 +14,7 @@ import (
 
 type ServiceBroker struct {
 	Name              string
-	Environment       string
+	Namespace         string
 	CreationTimestamp int
 	Url               string
 	Labels            map[string]interface{}
@@ -42,7 +42,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	expectedResource := broker()
 	resourceDetailsQuery := `
 		name
-		environment
+		namespace
 		creationTimestamp
 		url
 		labels
@@ -55,14 +55,14 @@ func TestServiceBrokerQueries(t *testing.T) {
 
 	t.Run("MultipleResources", func(t *testing.T) {
 		query := fmt.Sprintf(`
-			query ($environment: String!) {
-				serviceBrokers(environment: $environment) {
+			query ($namespace: String!) {
+				serviceBrokers(namespace: $namespace) {
 					%s
 				}
 			}	
 		`, resourceDetailsQuery)
 		req := graphql.NewRequest(query)
-		req.SetVar("environment", expectedResource.Environment)
+		req.SetVar("namespace", expectedResource.Namespace)
 
 		var res serviceBrokersQueryResponse
 		err = c.Do(req, &res)
@@ -73,15 +73,15 @@ func TestServiceBrokerQueries(t *testing.T) {
 
 	t.Run("SingleResource", func(t *testing.T) {
 		query := fmt.Sprintf(`
-			query ($name: String!, $environment: String!) {
-				serviceBroker(name: $name, environment: $environment) {
+			query ($name: String!, $namespace: String!) {
+				serviceBroker(name: $name, namespace: $namespace) {
 					%s
 				}
 			}
 		`, resourceDetailsQuery)
 		req := graphql.NewRequest(query)
 		req.SetVar("name", expectedResource.Name)
-		req.SetVar("environment", expectedResource.Environment)
+		req.SetVar("namespace", expectedResource.Namespace)
 
 		var res serviceBrokerQueryResponse
 		err = c.Do(req, &res)
@@ -98,8 +98,8 @@ func checkBroker(t *testing.T, expected, actual ServiceBroker) {
 	// Url
 	assert.Contains(t, actual.Url, expected.Name)
 
-	// Environment
-	assert.Equal(t, expected.Environment, actual.Environment)
+	// Namespace
+	assert.Equal(t, expected.Namespace, actual.Namespace)
 
 	// Status
 	assert.Equal(t, expected.Status.Ready, actual.Status.Ready)
@@ -122,8 +122,8 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedEleme
 
 func broker() ServiceBroker {
 	return ServiceBroker{
-		Name:        tester.BrokerReleaseName,
-		Environment: TestNamespace,
+		Name:      tester.BrokerReleaseName,
+		Namespace: TestNamespace,
 		Status: ServiceBrokerStatus{
 			Ready: true,
 		},

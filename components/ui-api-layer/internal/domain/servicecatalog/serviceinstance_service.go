@@ -83,8 +83,8 @@ func newServiceInstanceService(informer cache.SharedIndexInformer, client client
 	}
 }
 
-func (svc *serviceInstanceService) Find(name, environment string) (*v1beta1.ServiceInstance, error) {
-	key := fmt.Sprintf("%s/%s", environment, name)
+func (svc *serviceInstanceService) Find(name, namespace string) (*v1beta1.ServiceInstance, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
 
 	item, exists, err := svc.informer.GetStore().GetByKey(key)
 	if err != nil || !exists {
@@ -99,8 +99,8 @@ func (svc *serviceInstanceService) Find(name, environment string) (*v1beta1.Serv
 	return serviceInstance, nil
 }
 
-func (svc *serviceInstanceService) List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceInstance, error) {
-	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", environment).Limit(pagingParams)
+func (svc *serviceInstanceService) List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceInstance, error) {
+	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", namespace).Limit(pagingParams)
 	if err != nil {
 		return nil, err
 	}
@@ -117,8 +117,8 @@ func (svc *serviceInstanceService) List(environment string, pagingParams pager.P
 	return serviceInstances, nil
 }
 
-func (svc *serviceInstanceService) ListForStatus(environment string, pagingParams pager.PagingParams, status *status.ServiceInstanceStatusType) ([]*v1beta1.ServiceInstance, error) {
-	key := fmt.Sprintf("%s/%s", environment, *status)
+func (svc *serviceInstanceService) ListForStatus(namespace string, pagingParams pager.PagingParams, status *status.ServiceInstanceStatusType) ([]*v1beta1.ServiceInstance, error) {
+	key := fmt.Sprintf("%s/%s", namespace, *status)
 	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "statusType", key).Limit(pagingParams)
 	if err != nil {
 		return nil, err
@@ -162,7 +162,7 @@ func (svc *serviceInstanceService) ListForClusterServiceClass(className, externa
 	return svc.uniqueInstances(serviceInstances), nil
 }
 
-func (svc *serviceInstanceService) ListForServiceClass(className, externalClassName string, environment string) ([]*v1beta1.ServiceInstance, error) {
+func (svc *serviceInstanceService) ListForServiceClass(className, externalClassName string, namespace string) ([]*v1beta1.ServiceInstance, error) {
 	indexer := svc.informer.GetIndexer()
 	itemsByClassName, err := indexer.ByIndex("serviceClassName", className)
 	if err != nil {

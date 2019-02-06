@@ -42,7 +42,7 @@ func (p *servicePlanConverter) ToGQL(item *v1beta1.ServicePlan) (*gqlschema.Serv
 	displayName := resource.ToStringPtr(externalMetadata["displayName"])
 	plan := gqlschema.ServicePlan{
 		Name:                          item.Name,
-		Environment:                   item.Namespace,
+		Namespace:                     item.Namespace,
 		ExternalName:                  item.Spec.ExternalName,
 		DisplayName:                   displayName,
 		Description:                   item.Spec.Description,

@@ -12,7 +12,7 @@ import (
 
 //go:generate mockery -name=bindableResourceLister -output=automock -outpkg=automock -case=underscore
 type bindableResourceLister interface {
-	ListResources(environment string) ([]gqlschema.BindableResourcesOutputItem, error)
+	ListResources(namespace string) ([]gqlschema.BindableResourcesOutputItem, error)
 }
 
 type bindableResourcesResolver struct {
@@ -27,11 +27,11 @@ func newBindableResourcesResolver(lister bindableResourceLister) *bindableResour
 	}
 }
 
-func (rsv *bindableResourcesResolver) ListBindableResources(ctx context.Context, environment string) ([]gqlschema.BindableResourcesOutputItem, error) {
-	res, err := rsv.lister.ListResources(environment)
+func (rsv *bindableResourcesResolver) ListBindableResources(ctx context.Context, namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
+	res, err := rsv.lister.ListResources(namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s for %s in environment `%s`", pretty.BindableResources, pretty.UsageKind, environment))
-		return nil, gqlerror.New(err, pretty.BindableResources, gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while listing %s for %s in namespace `%s`", pretty.BindableResources, pretty.UsageKind, namespace))
+		return nil, gqlerror.New(err, pretty.BindableResources, gqlerror.WithNamespace(namespace))
 	}
 
 	return res, nil

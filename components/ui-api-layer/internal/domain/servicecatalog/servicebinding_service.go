@@ -46,19 +46,19 @@ func newServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, inf
 	return svc
 }
 
-func (f *serviceBindingService) Create(env string, sb *api.ServiceBinding) (*api.ServiceBinding, error) {
+func (f *serviceBindingService) Create(ns string, sb *api.ServiceBinding) (*api.ServiceBinding, error) {
 	if sb.Name == "" {
 		sb.Name = f.nameFunc()
 	}
-	return f.client.ServiceBindings(env).Create(sb)
+	return f.client.ServiceBindings(ns).Create(sb)
 }
 
-func (f *serviceBindingService) Delete(env string, name string) error {
-	return f.client.ServiceBindings(env).Delete(name, &v1.DeleteOptions{})
+func (f *serviceBindingService) Delete(ns string, name string) error {
+	return f.client.ServiceBindings(ns).Delete(name, &v1.DeleteOptions{})
 }
 
-func (f *serviceBindingService) Find(env string, name string) (*api.ServiceBinding, error) {
-	key := fmt.Sprintf("%s/%s", env, name)
+func (f *serviceBindingService) Find(ns string, name string) (*api.ServiceBinding, error) {
+	key := fmt.Sprintf("%s/%s", ns, name)
 	item, exists, err := f.informer.GetStore().GetByKey(key)
 	if err != nil || !exists {
 		return nil, err
@@ -67,8 +67,8 @@ func (f *serviceBindingService) Find(env string, name string) (*api.ServiceBindi
 	return f.toServiceBinding(item)
 }
 
-func (f *serviceBindingService) ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBinding, error) {
-	key := fmt.Sprintf("%s/%s", env, instanceName)
+func (f *serviceBindingService) ListForServiceInstance(ns string, instanceName string) ([]*api.ServiceBinding, error) {
+	key := fmt.Sprintf("%s/%s", ns, instanceName)
 	items, err := f.informer.GetIndexer().ByIndex("relatedServiceInstanceName", key)
 	if err != nil {
 		return nil, err

@@ -1,7 +1,7 @@
 # General topic
 - name: kyma
 - name: service-catalog
-- name: service-brokers
+- name: helm-broker
 - name: application-connector
 - name: event-bus
 - name: service-mesh

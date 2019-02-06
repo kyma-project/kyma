@@ -45,11 +45,11 @@ func TestEventActivationService_List(t *testing.T) {
 	})
 }
 
-func fixEventActivation(environment, name string) *v1alpha1.EventActivation {
+func fixEventActivation(namespace, name string) *v1alpha1.EventActivation {
 	return &v1alpha1.EventActivation{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			SourceID:    "picco-bello",

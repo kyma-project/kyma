@@ -1,19 +1,37 @@
 openapi: '3.0.0'
 info:
   version: '1.0.0'
-  title: 'Kyma Connector API'
+  title: 'Kyma Connector Service API'
 paths:
-  /v1/applications/{APP_NAME}/tokens:
+  /v1/health:
+    get:
+      summary: 'Returns health status'
+      tags:
+      - health API
+      responses:
+        '200':
+          description: 'The service is up.'
+  /v1/applications/tokens:
     post:
       parameters:
-      - in: path
-        name: APP_NAME
-        description: 'Name of the Application.'
-        required: true
+      - in: header
+        name: Group
         schema:
           type: string
+          format: uuid
+        required: false
+      - in: header
+        name: Tenant
+        schema:
+          type: string
+        required: false
+      - in: header
+        name: Application
+        schema:
+          type: string
+        required: true
       tags:
-      - internal API
+      - applications internal API
       summary: 'Creates a token used for certificate signing flow.'
       responses:
         '201':
@@ -22,37 +40,51 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/tokenResponse'
+        '400':
+          description: 'Required headers not specified.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
         '500':
           description: 'Server error.'
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
-  /v1/applications/{APP_NAME}/info:
+  /v1/applications/signingRequests/info:
     get:
       parameters:
-      - in: path
-        name: APP_NAME
-        description: 'Name of the Application.'
-        required: true
-        schema:
-          type: string
       - in: query
         name: token
         description: 'Access Token fetched from /tokens endpoint.'
         required: true
         schema:
           type: string
+      - in: header
+        name: EventsHost
+        description: 'Value of the URL to Event service which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      - in: header
+        name: MetadataHost
+        description: 'Value of the URL to Application Registry which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
       tags:
-      - external API
-      summary: 'Allows for fetching proper information for future CSR.'
+      - applications external API
+      summary: 'Allows for fetching information for CSR.'
       responses:
         '200':
           description: 'Successful operation.'
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/infoResponse'
+                $ref: '#/components/schemas/csrApplicationInfoResponse'
         '403':
           description: 'Invalid token'
           content:
@@ -65,15 +97,9 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
-  /v1/applications/{APP_NAME}/client-certs:
+  /v1/applications/certificates:
     post:
       parameters:
-      - in: path
-        name: APP_NAME
-        description: 'Name of the Application.'
-        required: true
-        schema:
-          type: string
       - in: query
         name: token
         description: 'Access Token fetched from /tokens endpoint.'
@@ -81,7 +107,7 @@ paths:
         schema:
           type: string
       tags:
-      - external API
+      - applications external API
       summary: 'Signs CSR.'
       requestBody:
         description: 'The CSR to be signed'
@@ -121,6 +147,117 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
+  /v1/runtimes/tokens:
+    post:
+      parameters:
+      - in: header
+        name: Group
+        schema:
+          type: string
+          format: uuid
+        required: false
+      - in: header
+        name: Tenant
+        schema:
+          type: string
+        required: false
+      tags:
+      - runtimes internal API
+      summary: 'Creates a token used for certificate signing flow.'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeTokenResponse'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/signingRequests/info:
+    get:
+      parameters:
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
+      tags:
+      - runtimes external API
+      summary: 'Allows for fetching information for CSR.'
+      responses:
+        '200':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrRuntimeInfoResponse'
+        '403':
+          description: 'Invalid token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/certificates:
+    post:
+      parameters:
+      - in: query
+        name: token
+        description: 'Access Token fetched from /tokens endpoint.'
+        required: true
+        schema:
+          type: string
+      tags:
+      - runtimes external API
+      summary: 'Signs CSR.'
+      requestBody:
+        description: 'The CSR to be signed'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/csrRequest'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrResponse'
+        '400':
+          description: 'Improper subject values, lack of values in CSR or Group header not specified.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '403':
+          description: 'Invalid token'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '404':
+          description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
 components:
   schemas:
     tokenResponse:
@@ -128,7 +265,16 @@ components:
       properties:
         url:
           type: 'string'
-          example: 'https://cert-service.kyma.cluster.cx/v1/applications/{APP_NAME}/info?token=1edfc34g'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/info?token=1edfc34g'
+        token:
+          type: 'string'
+          example: '1edfc34g'
+    runtimeTokenResponse:
+      type: 'object'
+      properties:
+        url:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/runtimes/info?token=1edfc34g'
         token:
           type: 'string'
           example: '1edfc34g'
@@ -137,34 +283,67 @@ components:
       properties:
         subject:
           type: 'string'
-          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}'
+          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={TENANT}{GROUP}{APP_NAME}'
         extensions:
           type: 'string'
         key-algorithm:
           type: 'string'
           example: 'rsa2048'
-    apiURLs:
+    csrAplicationApiURLs:
       type: 'object'
       properties:
         metadataUrl:
           type: 'string'
-          example: 'gateway.wormhole.kyma.cluster.cx/{APP_NAME}/v1/metadata/services'
+          example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/metadata/services'
         eventsUrl:
           type: 'string'
-          example: 'gateway.wormhole.kyma.cluster.cx/{APP_NAME}/v1/events'
+          example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/events'
         certificatesUrl:
           type: 'string'
-          example: 'certificate-service.kyma.cluster.cx/v1/applications/{APP_NAME}'
-    infoResponse:
+          example: 'https://certificate-service.kyma.cluster.cx/v1/applications'
+        infoUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/management/info'
+    csrApplicationInfoResponse:
       type: 'object'
       properties:
-        url:
+        csrUrl:
           type: 'string'
-          example: 'https://cert-service.kyma.cluster.cx/v1/applications/{APP_NAME}/client-certs?token=1edfc34g'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates?token=1edfc34g'
         api:
-          $ref: '#/components/schemas/apiURLs'
+          $ref: '#/components/schemas/csrAplicationApiURLs'
         certificate:
           $ref: '#/components/schemas/cert'
+    csrRuntimeApiURLs:
+      type: 'object'
+      properties:
+        infoUrl:
+          type: 'string'
+          example: 'connector-service.test.cluster.kyma.cx/v1/runtimes/management/info'
+        certificatesUrl:
+          type: 'string'
+          example: 'https://certificate-service.kyma.cluster.cx/v1/applications'
+    csrRuntimeInfoResponse:
+      type: 'object'
+      properties:
+        signUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/runtimes/certificates?token=1edfc34g'
+        api:
+          $ref: '#/components/schemas/csrRuntimeApiURLs'
+        certificate:
+          $ref: '#/components/schemas/runtimeCert'
+    runtimeCert:
+      type: 'object'
+      properties:
+        subject:
+          type: 'string'
+          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={TENANT}{GROUP}'
+        extensions:
+          type: 'string'
+        key-algorithm:
+          type: 'string'
+          example: 'rsa2048'
     appError:
       type: 'object'
       properties:
@@ -185,4 +364,12 @@ components:
         crt:
           type: 'string'
           description: 'Base64 encoded certificates chain.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkNMSUVOVCBDRVJUSUZJQ0FURSBGSUxFIChUSElTIElTIEpVU1QgQU4gRVhBTVBMRSkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KU0VSVkVSIENFUlRJRklDQVRFIEZJTEUgKFRISVMgSVMgSlVTVCBBTiBFWEFNUExFKQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t'
+        clientCrt:
+          type: 'string'
+          description: 'Base64 encoded client certificate.'
+          example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkNMSUVOVCBDRVJUSUZJQ0FURSBGSUxFIChUSElTIElTIEpVU1QgQU4gRVhBTVBMRSkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KU0VSVkVSIENFUlRJRklDQVRFIEZJTEUgKFRISVMgSVMgSlVTVCBBTiBFWEFNUExFKQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t'
+        caCrt:
+          type: 'string'
+          description: 'Base64 encoded CA certificate.'
           example: 'LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCkNMSUVOVCBDRVJUSUZJQ0FURSBGSUxFIChUSElTIElTIEpVU1QgQU4gRVhBTVBMRSkKLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQotLS0tLUJFR0lOIENFUlRJRklDQVRFLS0tLS0KU0VSVkVSIENFUlRJRklDQVRFIEZJTEUgKFRISVMgSVMgSlVTVCBBTiBFWEFNUExFKQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0t'

@@ -42,7 +42,7 @@ A successful call returns the following response:
     application: {APP_NAME}
     state: OK
     token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
-    url: https://connector-service.kyma.local/v1/applications/test/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
+    url: https://connector-service.kyma.local/v1/applications/signingRequests/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
   ```
 
 ## Get the CSR information and configuration details from Kyma
@@ -61,7 +61,8 @@ A successful call returns the following response:
     "api":{
         "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
         "eventsUrl":        "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
-        "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/{APP_NAME}",
+        "infoUrl":          "https://connector-service.kyma.local/v1/applications/management/info",
+        "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/certificates",
     },
     "certificate":{
         "subject":"OU=Test,O=TestOrg,L=Waldorf,ST=Waldorf,C=DE,CN={APP_NAME}",
