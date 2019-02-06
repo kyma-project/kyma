@@ -243,8 +243,8 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 
 	for _, a := range existingAPIs {
 		if a.Spec.Service.Name == targetServiceName && a.GetUID() != newAPI.GetUID() {
-			log.Debugf("An API has already been created for service %s", newAPI.Spec.Service.Name)
-			return setStatus(kymaMeta.TargetServiceOccupied, "")
+			log.Errorf("An API has already been created for service %s", newAPI.Spec.Service.Name)
+			return setStatus(kymaMeta.TargetServiceOccupied, "API for the target service already exists")
 		}
 	}
 
