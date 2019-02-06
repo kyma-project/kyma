@@ -26,8 +26,9 @@ Follow these steps to disable SSL certificate verification for communication bet
 ## Override the API security type
 
 The Application Registry allows you to register APIs:
-- Secured with Basic Authentication
+- Secured with [Basic Authentication](https://tools.ietf.org/html/rfc7617)
 - Secured with OAuth
+- Secured with generated client certificates
 - Not secured
 
 The Application Proxy calls the registered APIs accordingly, basing on the security type specified in the API registration process.
