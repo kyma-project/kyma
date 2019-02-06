@@ -56,7 +56,7 @@ global:
     version: 6e0a7fe2
   kubeless_integration_tests:
     dir: develop/
-    version: e11a469a
+    version: 78f999a7
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
