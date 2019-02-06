@@ -25,15 +25,15 @@ type secretResolver struct {
 	converter    secretConverter
 }
 
-func (r *secretResolver) SecretQuery(ctx context.Context, name, env string) (*gqlschema.Secret, error) {
-	secret, err := r.secretGetter.Secrets(env).Get(name, metav1.GetOptions{})
+func (r *secretResolver) SecretQuery(ctx context.Context, name, ns string) (*gqlschema.Secret, error) {
+	secret, err := r.secretGetter.Secrets(ns).Get(name, metav1.GetOptions{})
 	switch {
 	case apierrors.IsNotFound(err):
 		return nil, nil
 	case err != nil:
 		glog.Error(
-			errors.Wrapf(err, "while getting %s [name: %s, environment: %s]", pretty.Secret, name, env))
-		return nil, gqlerror.New(err, pretty.Secret, gqlerror.WithName(name), gqlerror.WithEnvironment(env))
+			errors.Wrapf(err, "while getting %s [name: %s, namespace: %s]", pretty.Secret, name, ns))
+		return nil, gqlerror.New(err, pretty.Secret, gqlerror.WithName(name), gqlerror.WithNamespace(ns))
 	}
 
 	return r.converter.ToGQL(secret), nil

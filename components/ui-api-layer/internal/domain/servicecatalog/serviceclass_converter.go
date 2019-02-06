@@ -35,7 +35,7 @@ func (c *serviceClassConverter) ToGQL(in *v1beta1.ServiceClass) (*gqlschema.Serv
 
 	class := gqlschema.ServiceClass{
 		Name:                in.Name,
-		Environment:         in.Namespace,
+		Namespace:           in.Namespace,
 		ExternalName:        in.Spec.ExternalName,
 		DisplayName:         displayName,
 		Description:         in.Spec.Description,

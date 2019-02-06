@@ -8,5 +8,5 @@ port: 8080
 service:
   type: ClusterIP
 trace:
-  serviceName: publish-service
-  operationName: send-to-internal-broker
+  serviceName: event-publish-service
+  operationName: publish-the-event

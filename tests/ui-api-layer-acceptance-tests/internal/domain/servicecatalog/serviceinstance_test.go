@@ -49,7 +49,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	resourceDetailsQuery := instanceDetailsFields()
 
 	t.Log(fmt.Sprintf("Subscribe instance created by %s", tester.ClusterServiceBroker))
-	subscription := subscribeInstance(c, instanceEventDetailsFields(), expectedResourceFromClusterServiceClass.Environment)
+	subscription := subscribeInstance(c, instanceEventDetailsFields(), expectedResourceFromClusterServiceClass.Namespace)
 	defer subscription.Close()
 
 	t.Log(fmt.Sprintf("Create instance from %s", tester.ClusterServiceBroker))
@@ -65,7 +65,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceEvent(t, expectedEvent, event)
 
 	t.Log(("Wait for instance Ready created by %s"), tester.ClusterServiceBroker)
-	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Create instance from %s", tester.ServiceBroker))
@@ -75,7 +75,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, createRes.CreateServiceInstance)
 
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
-	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", tester.ClusterServiceBroker))
@@ -99,11 +99,11 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 
 	// We must again wait for RUNNING status of created instances, because sometimes Kubernetess change status from RUNNING to PROVISIONING at the first queries - Query Single Resource
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ClusterServiceBroker))
-	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
-	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log("Query Multiple Resources With Status")
@@ -120,7 +120,7 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, deleteRes.DeleteServiceInstance)
 
 	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ClusterServiceBroker))
-	err = wait.ForServiceInstanceDeletion(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceDeletion(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
 	t.Log(fmt.Sprintf("Delete instance created by %s", tester.ServiceBroker))
@@ -130,16 +130,16 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, deleteRes.DeleteServiceInstance)
 
 	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ServiceBroker))
-	err = wait.ForServiceInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Environment, svcatCli)
+	err = wait.ForServiceInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 }
 
 func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance, clusterWide bool) (instanceCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
-			mutation ($name: String!, $environment: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
+			mutation ($name: String!, $namespace: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
 				createServiceInstance(params: {
     				name: $name,
-    				environment: $environment,
+    				namespace: $namespace,
 					classRef: {
 						externalName: $externalServiceClassName,
 						clusterWide: %v,
@@ -157,7 +157,7 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 		`, clusterWide, clusterWide, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
-	req.SetVar("environment", expectedResource.Environment)
+	req.SetVar("namespace", expectedResource.Namespace)
 	if clusterWide {
 		req.SetVar("externalPlanName", expectedResource.ClusterServicePlan.ExternalName)
 		req.SetVar("externalServiceClassName", expectedResource.ClusterServiceClass.ExternalName)
@@ -174,16 +174,16 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	return res, err
 }
 
-func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, environment string) *graphql.Subscription {
+func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace string) *graphql.Subscription {
 	query := fmt.Sprintf(`
-			subscription ($environment: String!) {
-				serviceInstanceEvent(environment: $environment) {
+			subscription ($namespace: String!) {
+				serviceInstanceEvent(namespace: $namespace) {
 					%s
 				}
 			}
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
-	req.SetVar("environment", environment)
+	req.SetVar("namespace", namespace)
 
 	return c.Subscribe(req)
 }
@@ -197,16 +197,16 @@ func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expecte
 	return res, err
 }
 
-func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, environment string) (instancesQueryResponse, error) {
+func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
 	query := fmt.Sprintf(`
-			query ($environment: String!) {
-				serviceInstances(environment: $environment) {
+			query ($namespace: String!) {
+				serviceInstances(namespace: $namespace) {
 					%s
 				}
 			}	
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
-	req.SetVar("environment", environment)
+	req.SetVar("namespace", namespace)
 
 	var res instancesQueryResponse
 	err := c.Do(req, &res)
@@ -214,16 +214,16 @@ func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, environment
 	return res, err
 }
 
-func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, environment string) (instancesQueryResponse, error) {
+func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
 	query := fmt.Sprintf(`
-			query ($environment: String!, $status: InstanceStatusType) {
-				serviceInstances(environment: $environment, status: $status) {
+			query ($namespace: String!, $status: InstanceStatusType) {
+				serviceInstances(namespace: $namespace, status: $status) {
 					%s
 				}
 			}	
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
-	req.SetVar("environment", environment)
+	req.SetVar("namespace", namespace)
 	req.SetVar("status", shared.ServiceInstanceStatusTypeRunning)
 
 	var res instancesQueryResponse
@@ -234,15 +234,15 @@ func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, e
 
 func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceDeleteMutationResponse, error) {
 	query := fmt.Sprintf(`
-			mutation ($name: String!, $environment: String!) {
-				deleteServiceInstance(name: $name, environment: $environment) {
+			mutation ($name: String!, $namespace: String!) {
+				deleteServiceInstance(name: $name, namespace: $namespace) {
 					%s
 				}
 			}
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
-	req.SetVar("environment", expectedResource.Environment)
+	req.SetVar("namespace", expectedResource.Namespace)
 
 	var res instanceDeleteMutationResponse
 	err := c.Do(req, &res)
@@ -252,15 +252,15 @@ func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 
 func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
 	query := fmt.Sprintf(`
-			query ($name: String!, $environment: String!) {
-				serviceInstance(name: $name, environment: $environment) {
+			query ($name: String!, $namespace: String!) {
+				serviceInstance(name: $name, namespace: $namespace) {
 					%s
 				}
 			}
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
-	req.SetVar("environment", expectedResource.Environment)
+	req.SetVar("namespace", expectedResource.Namespace)
 
 	return req
 }
@@ -268,7 +268,7 @@ func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource sh
 func instanceDetailsFields() string {
 	return `
 		name
-		environment
+		namespace
 		planSpec
 		bindable
 		creationTimestamp
@@ -321,7 +321,7 @@ func instanceDetailsFields() string {
 		 }
 		 serviceClass {
 			name
-			environment
+			namespace
 			externalName
 			displayName
 			creationTimestamp
@@ -338,10 +338,10 @@ func instanceDetailsFields() string {
 			items {
 				name
 				serviceInstanceName
-				environment
+				namespace
 				secret {
 					name
-					environment
+					namespace
 					data
 				}
 			}
@@ -354,7 +354,7 @@ func instanceDetailsFields() string {
         }
 		serviceBindingUsages {
 			name
-			environment
+			namespace
 			usedBy {
 				kind
 				name
@@ -376,8 +376,8 @@ func checkInstanceFromClusterServiceClass(t *testing.T, expected, actual shared.
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
-	// Environment
-	assert.Equal(t, expected.Environment, actual.Environment)
+	// Namespace
+	assert.Equal(t, expected.Namespace, actual.Namespace)
 
 	// ClusterServicePlan.Name
 	assert.Equal(t, expected.ClusterServicePlan.Name, actual.ClusterServicePlan.Name)
@@ -392,8 +392,8 @@ func checkInstanceFromServiceClass(t *testing.T, expected, actual shared.Service
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
-	// Environment
-	assert.Equal(t, expected.Environment, actual.Environment)
+	// Namespace
+	assert.Equal(t, expected.Namespace, actual.Namespace)
 
 	// ServicePlan.Name
 	assert.Equal(t, expected.ServicePlan.Name, actual.ServicePlan.Name)
@@ -401,8 +401,8 @@ func checkInstanceFromServiceClass(t *testing.T, expected, actual shared.Service
 	// ServiceClass.Name
 	assert.Equal(t, expected.ServiceClass.Name, actual.ServiceClass.Name)
 
-	// ServiceClass.Environment
-	assert.Equal(t, expected.ServiceClass.Environment, actual.ServiceClass.Environment)
+	// ServiceClass.Namespace
+	assert.Equal(t, expected.ServiceClass.Namespace, actual.ServiceClass.Namespace)
 }
 
 func assertInstanceFromClusterServiceClassExistsAndEqual(t *testing.T, expectedElement shared.ServiceInstance, arr []shared.ServiceInstance) {
@@ -433,9 +433,9 @@ func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement 
 
 func instanceFromServiceClass(name string) shared.ServiceInstance {
 	return shared.ServiceInstance{
-		Name:        name,
-		Environment: TestNamespace,
-		Labels:      []string{"test", "test2"},
+		Name:      name,
+		Namespace: TestNamespace,
+		Labels:    []string{"test", "test2"},
 		PlanSpec: map[string]interface{}{
 			"first": "1",
 			"second": map[string]interface{}{
@@ -449,7 +449,7 @@ func instanceFromServiceClass(name string) shared.ServiceInstance {
 		ServiceClass: shared.ServiceClass{
 			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
 			ExternalName: "user-provided-service",
-			Environment:  TestNamespace,
+			Namespace:    TestNamespace,
 		},
 		Status: shared.ServiceInstanceStatus{
 			Type: shared.ServiceInstanceStatusTypeRunning,

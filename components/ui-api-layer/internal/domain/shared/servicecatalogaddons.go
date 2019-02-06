@@ -11,5 +11,5 @@ type ServiceCatalogAddonsRetriever interface {
 
 //go:generate mockery -name=ServiceBindingUsageLister -output=automock -outpkg=automock -case=underscore
 type ServiceBindingUsageLister interface {
-	ListForDeployment(environment, kind, deploymentName string) ([]*usageApi.ServiceBindingUsage, error)
+	ListForDeployment(ns, kind, deploymentName string) ([]*usageApi.ServiceBindingUsage, error)
 }

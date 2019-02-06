@@ -75,6 +75,10 @@ spec:
         - "{{ .Values.controllerManager.verbosity }}"
         - --resync-interval
         - {{ .Values.controllerManager.resyncInterval }}
+        {{ if .Values.controllerManager.operationPollingMaximumBackoffDuration -}}
+        - --operation-polling-maximum-backoff-duration
+        - {{ .Values.controllerManager.operationPollingMaximumBackoffDuration }}
+        {{- end }}
         {{ if .Values.controllerManager.brokerRelistIntervalActivated -}}
         - --broker-relist-interval
         - {{ .Values.controllerManager.brokerRelistInterval }}
@@ -105,23 +109,23 @@ spec:
         readinessProbe:
           httpGet:
             port: 8444
-            path: /healthz
+            path: /healthz/ready
             scheme: HTTPS
           failureThreshold: 1
           initialDelaySeconds: 20
           periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 2
+          timeoutSeconds: 5
         livenessProbe:
           httpGet:
             port: 8444
             path: /healthz
             scheme: HTTPS
           failureThreshold: 3
-          initialDelaySeconds: 20
+          initialDelaySeconds: 40
           periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 2
+          timeoutSeconds: 5
         {{- end }}
       {{ if .Values.controllerManager.nodeSelector }}
       nodeSelector:

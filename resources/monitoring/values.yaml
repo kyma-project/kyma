@@ -10,7 +10,7 @@ global:
     path: eu.gcr.io/kyma-project
   test_logging_monitoring:
     dir: develop/
-    version: a568ffb2
+    version: 5db9d1b3
   istio:
     tls:
       secretName: istio-ingress-certs

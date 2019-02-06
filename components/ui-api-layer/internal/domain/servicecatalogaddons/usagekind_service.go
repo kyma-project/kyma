@@ -48,7 +48,7 @@ func (svc *usageKindService) List(params pager.PagingParams) ([]*v1alpha1.UsageK
 	return res, nil
 }
 
-func (svc *usageKindService) ListResources(environment string) ([]gqlschema.BindableResourcesOutputItem, error) {
+func (svc *usageKindService) ListResources(namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
 	results := make([]gqlschema.BindableResourcesOutputItem, 0)
 	usageKinds := svc.informer.GetStore().List()
 	for _, item := range usageKinds {
@@ -57,7 +57,7 @@ func (svc *usageKindService) ListResources(environment string) ([]gqlschema.Bind
 			return nil, fmt.Errorf("incorrect item type: %T, should be: *UsageKind", item)
 		}
 
-		ukResources, err := svc.listResourcesForUsageKind(uk, environment)
+		ukResources, err := svc.listResourcesForUsageKind(uk, namespace)
 		if err != nil {
 			return nil, errors.Wrap(err, "while listing target resources")
 		}
@@ -71,21 +71,12 @@ func (svc *usageKindService) ListResources(environment string) ([]gqlschema.Bind
 	return results, nil
 }
 
-func (svc *usageKindService) ListUsageKindResources(usageKind string, environment string) ([]gqlschema.UsageKindResource, error) {
-	target, err := svc.scClient.UsageKinds().Get(usageKind, v1.GetOptions{})
-	if err != nil {
-		return nil, errors.Wrapf(err, "while getting UsageKind: %s", usageKind)
-	}
-
-	return svc.listResourcesForUsageKind(target, environment)
-}
-
-func (svc *usageKindService) listResourcesForUsageKind(uk *v1alpha1.UsageKind, environment string) ([]gqlschema.UsageKindResource, error) {
+func (svc *usageKindService) listResourcesForUsageKind(uk *v1alpha1.UsageKind, namespace string) ([]gqlschema.UsageKindResource, error) {
 	list, err := svc.dynamicClient.Resource(schema.GroupVersionResource{
 		Version:  uk.Spec.Resource.Version,
 		Group:    uk.Spec.Resource.Group,
 		Resource: strings.ToLower(uk.Spec.Resource.Kind) + "s",
-	}).Namespace(environment).List(v1.ListOptions{})
+	}).Namespace(namespace).List(v1.ListOptions{})
 	if err != nil {
 		return nil, errors.Wrap(err, "while listing target resources")
 	}
@@ -97,7 +88,7 @@ func (svc *usageKindService) listResourcesForUsageKind(uk *v1alpha1.UsageKind, e
 		}
 		results = append(results, gqlschema.UsageKindResource{
 			Name:      item.GetName(),
-			Namespace: environment,
+			Namespace: namespace,
 		})
 	}
 

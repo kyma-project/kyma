@@ -41,7 +41,7 @@ func (r *functionResolver) FunctionsQuery(ctx context.Context, namespace string,
 	})
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s for namespace %s", pretty.Functions, namespace))
-		return nil, gqlerror.New(err, pretty.Functions, gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Functions, gqlerror.WithNamespace(namespace))
 	}
 
 	return r.functionConverter.ToGQLs(functions), nil

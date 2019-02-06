@@ -86,8 +86,8 @@ func TestResourceQuotaQuery(t *testing.T) {
 }
 
 func fixListResourceQuotasQuery() *graphql.Request {
-	query := `query($environment: String!) {
-				resourceQuotas(environment: $environment) {
+	query := `query($namespace: String!) {
+				resourceQuotas(namespace: $namespace) {
 					name
 					pods
 					limits {
@@ -101,19 +101,19 @@ func fixListResourceQuotasQuery() *graphql.Request {
 				}
 			}`
 	r := graphql.NewRequest(query)
-	r.SetVar("environment", resourceQuotaNamespace)
+	r.SetVar("namespace", resourceQuotaNamespace)
 
 	return r
 }
 
 func fixResourceQuotasStatusQuery() *graphql.Request {
-	query := `query($environment: String!) {
-				  resourceQuotasStatus(environment: $environment) {
+	query := `query($namespace: String!) {
+				  resourceQuotasStatus(namespace: $namespace) {
 					exceeded
 				  }
 				}`
 	r := graphql.NewRequest(query)
-	r.SetVar("environment", resourceQuotaNamespace)
+	r.SetVar("namespace", resourceQuotaNamespace)
 
 	return r
 }

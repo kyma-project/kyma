@@ -31,7 +31,7 @@ func TestSecretResolver(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 	assert.Equal(t, "my-secret", actualSecret.Name)
-	assert.Equal(t, "production", actualSecret.Environment)
+	assert.Equal(t, "production", actualSecret.Namespace)
 }
 
 func TestSecretResolverOnNotFound(t *testing.T) {
