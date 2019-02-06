@@ -13,13 +13,13 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 	url := "https://connector-service.kyma.local"
 
-	defaultEventsHost := "https://gateway.kyma.local.events"
-	defaultMetadataHost := "https://gateway.kyma.local.metadata"
+	defaultEventsHost := "gateway.kyma.local.events"
+	defaultMetadataHost := "gateway.kyma.local.metadata"
 
 	t.Run("should set headers values when present", func(t *testing.T) {
 		//given
-		baseEventHost := "https://gateway.headers.events"
-		baseMetadataHost := "https://gateway.headers.metadata"
+		baseEventHost := "gateway.headers.events"
+		baseMetadataHost := "gateway.headers.metadata"
 
 		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultMetadataHost, defaultEventsHost)
 

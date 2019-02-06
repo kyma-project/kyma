@@ -8,6 +8,7 @@ import (
 const (
 	ApplicationHeader     = "Application"
 	ApplicationContextKey = "ApplicationContext"
+	SubjectHeader         = "Subject"
 	APIHostsKey           = "APIHosts"
 
 	ClusterContextKey = "ClusterContext"
