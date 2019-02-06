@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/retriever"
+
 	"github.com/pkg/errors"
 
 	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -107,11 +109,11 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 		serviceInstanceNameA: fmt.Sprintf("acc-test-instance-a-%s", randID),
 		bindingNameA:         fmt.Sprintf("acc-test-credential-a-%s", randID),
-		appSvcNameA:          fmt.Sprintf("acc-test-svc-id-a-%s", randID),
+		appSvcIDA:            fmt.Sprintf("acc-test-svc-id-a-%s", randID),
 
 		serviceInstanceNameB: fmt.Sprintf("acc-test-instance-b-%s", randID),
 		bindingNameB:         fmt.Sprintf("acc-test-credential-b-%s", randID),
-		appSvcNameB:          fmt.Sprintf("acc-test-svc-id-b-%s", randID),
+		appSvcIDB:            fmt.Sprintf("acc-test-svc-id-b-%s", randID),
 	}
 }
 
@@ -128,12 +130,12 @@ type TestSuite struct {
 
 	serviceInstanceNameA string
 	classExternalNameA   string
-	appSvcNameA          string
+	appSvcIDA            string
 	bindingNameA         string
 
 	serviceInstanceNameB string
 	classExternalNameB   string
-	appSvcNameB          string
+	appSvcIDB            string
 	bindingNameB         string
 
 	stubsDockerImage string
@@ -197,8 +199,8 @@ func (ts *TestSuite) fixApplication() *appTypes.Application {
 			SkipInstallation: true,
 			Services: []appTypes.Service{
 				{
-					ID:   ts.appSvcNameA,
-					Name: ts.appSvcNameA,
+					ID:   ts.appSvcIDA,
+					Name: ts.appSvcIDA,
 					Labels: map[string]string{
 						"connected-app": ts.applicationName,
 					},
@@ -215,8 +217,8 @@ func (ts *TestSuite) fixApplication() *appTypes.Application {
 					},
 				},
 				{
-					ID:   ts.appSvcNameB,
-					Name: ts.appSvcNameB,
+					ID:   ts.appSvcIDB,
+					Name: ts.appSvcIDB,
 					Labels: map[string]string{
 						"connected-app": ts.applicationName,
 					},
@@ -483,28 +485,30 @@ func (ts *TestSuite) waitForAppServiceClasses(timeout time.Duration) {
 
 func (ts *TestSuite) serviceClassIsAvailableA() func() error {
 	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	scCli := clientSet.ServicecatalogV1beta1()
 	require.NoError(ts.t, err)
 
 	return func() error {
-		class, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.appSvcNameA, metav1.GetOptions{})
+		sc, err := retriever.ServiceClassByExternalID(scCli, ts.namespace, ts.appSvcIDA)
 		if err != nil {
 			return err
 		}
-		ts.classExternalNameA = class.Spec.ExternalName
+		ts.classExternalNameA = sc.Spec.ExternalName
 		return nil
 	}
 }
 
 func (ts *TestSuite) serviceClassIsAvailableB() func() error {
 	clientSet, err := scClient.NewForConfig(ts.k8sClientCfg)
+	scCli := clientSet.ServicecatalogV1beta1()
 	require.NoError(ts.t, err)
 
 	return func() error {
-		class, err := clientSet.ServicecatalogV1beta1().ServiceClasses(ts.namespace).Get(ts.appSvcNameB, metav1.GetOptions{})
+		sc, err := retriever.ServiceClassByExternalID(scCli, ts.namespace, ts.appSvcIDB)
 		if err != nil {
 			return err
 		}
-		ts.classExternalNameB = class.Spec.ExternalName
+		ts.classExternalNameB = sc.Spec.ExternalName
 		return nil
 	}
 }
