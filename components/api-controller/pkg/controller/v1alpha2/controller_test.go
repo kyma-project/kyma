@@ -2,12 +2,13 @@ package v1alpha2
 
 import (
 	"errors"
+	"testing"
+
 	kymaMeta "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1"
 	apis "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	listers "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/listers/gateway.kyma-project.io/v1alpha2"
 	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/labels"
-	"testing"
 )
 
 var fixHostnameTestCases = []struct {
@@ -27,7 +28,7 @@ func TestFixHostname(t *testing.T) {
 	}
 }
 
-type fakeAPILister struct{
+type fakeAPILister struct {
 	name string
 }
 
@@ -44,7 +45,9 @@ func (l *fakeAPILister) Apis(namespace string) listers.ApiNamespaceLister { retu
 
 type failingFakeAPILister struct{}
 
-func (fl *failingFakeAPILister) List(selector labels.Selector) (ret []*apis.Api, err error) { return nil, errors.New("unable to list existing APIs") }
+func (fl *failingFakeAPILister) List(selector labels.Selector) (ret []*apis.Api, err error) {
+	return nil, errors.New("unable to list existing APIs")
+}
 
 func (fl *failingFakeAPILister) Apis(namespace string) listers.ApiNamespaceLister { return nil }
 
@@ -117,7 +120,7 @@ func TestValidateApi(t *testing.T) {
 			})
 		})
 
-		Convey("is called in OnUpdate context", func(){
+		Convey("is called in OnUpdate context", func() {
 
 			//given
 			testAPI.Spec.Service.Name = "occupied-service"
