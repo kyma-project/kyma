@@ -11,9 +11,6 @@ spec:
   replicas: 1
   template:
     metadata:
-    # temp disabled, looks like dex with sidecar have some problems affecting apiserver->dex communication used to verify id_tokens
-      annotations:
-        sidecar.istio.io/inject: "false"
       labels:
         app: dex
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
