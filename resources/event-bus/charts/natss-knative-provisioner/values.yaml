@@ -9,4 +9,4 @@ dispatcher:
   image:
     pullPolicy: IfNotPresent
     location: eu.gcr.io/kyma-project/event-bus/knative/natss/dispatcher:604de5d6
-    
+
