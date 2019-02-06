@@ -55,6 +55,7 @@ data:
         @type file
 
         flush_at_shutdown true
+        path /var/log/fluentd/
 
         timekey 1h
         timekey_wait 10m
