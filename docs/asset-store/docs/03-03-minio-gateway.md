@@ -11,7 +11,7 @@ Depending on the usage scenario, you can:
 
 The Asset Store ensures that both usage scenarios work for Kyma, without additional configuration of the in-build controllers.
 
-## Local storage
+## Development mode storage
 
 Minio is an open-source asset storage server with Amazon S3 compatible API. It can be used for storing various types of assets, such as documents, files, or images.
 
@@ -25,7 +25,8 @@ In the context of the Asset Store, the Asset Controller stores all assets in Min
 For the production purposes, the Asset Store uses Minio Gateway which:
 
 - Is a multi-cloud solution that offers the flexibility to choose a given cloud provider for the specific Kyma installation, including Azure, Amazon, and Google
-- Supports data replication and CDN configuration
+- Allows for the use of various cloud providers that support the data replication and CDN configuration
 - Is also compatible with Amazon S3 APIs
+
 
 ![](assets/minio-gateway.svg)
