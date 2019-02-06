@@ -21,8 +21,8 @@ func newServiceBrokerService(informer cache.SharedIndexInformer) *serviceBrokerS
 	}
 }
 
-func (svc *serviceBrokerService) Find(name, environment string) (*v1beta1.ServiceBroker, error) {
-	key := fmt.Sprintf("%s/%s", environment, name)
+func (svc *serviceBrokerService) Find(name, namespace string) (*v1beta1.ServiceBroker, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
 	item, exists, err := svc.informer.GetStore().GetByKey(key)
 	if err != nil || !exists {
 		return nil, err
@@ -36,8 +36,8 @@ func (svc *serviceBrokerService) Find(name, environment string) (*v1beta1.Servic
 	return serviceBroker, nil
 }
 
-func (svc *serviceBrokerService) List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceBroker, error) {
-	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", environment).Limit(pagingParams)
+func (svc *serviceBrokerService) List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceBroker, error) {
+	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", namespace).Limit(pagingParams)
 	if err != nil {
 		return nil, err
 	}

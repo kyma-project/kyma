@@ -14,7 +14,7 @@ func (c *deploymentConverter) ToGQL(in *api.Deployment) *gqlschema.Deployment {
 
 	return &gqlschema.Deployment{
 		Name:              in.Name,
-		Environment:       in.Namespace,
+		Namespace:         in.Namespace,
 		CreationTimestamp: in.CreationTimestamp.Time,
 		Labels:            in.Labels,
 		Status:            c.toGQLStatus(*in),

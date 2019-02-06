@@ -30,8 +30,8 @@ func newServiceClassService(informer cache.SharedIndexInformer) *serviceClassSer
 	}
 }
 
-func (svc *serviceClassService) Find(name, environment string) (*v1beta1.ServiceClass, error) {
-	key := fmt.Sprintf("%s/%s", environment, name)
+func (svc *serviceClassService) Find(name, namespace string) (*v1beta1.ServiceClass, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
 	item, exists, err := svc.informer.GetStore().GetByKey(key)
 	if err != nil || !exists {
 		return nil, err
@@ -45,8 +45,8 @@ func (svc *serviceClassService) Find(name, environment string) (*v1beta1.Service
 	return serviceClass, nil
 }
 
-func (svc *serviceClassService) FindByExternalName(externalName, environment string) (*v1beta1.ServiceClass, error) {
-	key := fmt.Sprintf("%s/%s", environment, externalName)
+func (svc *serviceClassService) FindByExternalName(externalName, namespace string) (*v1beta1.ServiceClass, error) {
+	key := fmt.Sprintf("%s/%s", namespace, externalName)
 	items, err := svc.informer.GetIndexer().ByIndex("externalName", key)
 	if err != nil {
 		return nil, err
@@ -69,8 +69,8 @@ func (svc *serviceClassService) FindByExternalName(externalName, environment str
 	return serviceClass, nil
 }
 
-func (svc *serviceClassService) List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceClass, error) {
-	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", environment).Limit(pagingParams)
+func (svc *serviceClassService) List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceClass, error) {
+	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", namespace).Limit(pagingParams)
 	if err != nil {
 		return nil, err
 	}

@@ -21,7 +21,7 @@ func (c *serviceBindingConverter) ToCreateOutputGQL(in *api.ServiceBinding) *gql
 
 	return &gqlschema.CreateServiceBindingOutput{
 		Name:                in.Name,
-		Environment:         in.Namespace,
+		Namespace:           in.Namespace,
 		ServiceInstanceName: in.Spec.ServiceInstanceRef.Name,
 	}
 }
@@ -33,13 +33,13 @@ func (c *serviceBindingConverter) ToGQL(in *api.ServiceBinding) (*gqlschema.Serv
 
 	params, err := c.extractParameters(in.Spec.Parameters)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while extracting parameters from service binding [name: %s][environment: %s]", in.Name, in.Namespace)
+		return nil, errors.Wrapf(err, "while extracting parameters from service binding [name: %s][namespace: %s]", in.Name, in.Namespace)
 	}
 
 	return &gqlschema.ServiceBinding{
 		Name:                in.Name,
 		ServiceInstanceName: in.Spec.ServiceInstanceRef.Name,
-		Environment:         in.Namespace,
+		Namespace:           in.Namespace,
 		SecretName:          in.Spec.SecretName,
 		Status:              c.extractor.Status(in.Status.Conditions),
 		Parameters:          params,
@@ -51,7 +51,7 @@ func (c *serviceBindingConverter) ToGQLs(in []*api.ServiceBinding) (gqlschema.Se
 	for _, item := range in {
 		converted, err := c.ToGQL(item)
 		if err != nil {
-			return gqlschema.ServiceBindings{}, errors.Wrapf(err, "while converting service binding [name: %s][environment: %s]", item.Name, item.Namespace)
+			return gqlschema.ServiceBindings{}, errors.Wrapf(err, "while converting service binding [name: %s][namespace: %s]", item.Name, item.Namespace)
 		}
 		if converted != nil {
 			c.addStat(converted.Status.Type, &result.Stats)

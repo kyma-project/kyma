@@ -2,11 +2,11 @@
 
 ## Overview
 
-The Application Broker (AB) fetches all available Applications and exposes their APIs and Events to the Service Catalog as service classes.
-When the applications list is available in the Service Catalog, you can provision those service classes and enable Kyma services to use them.
+The Application Broker (AB) fetches all available Applications and exposes their APIs and Events to the Service Catalog as Service Classes.
+When the Applications list is available in the Service Catalog, you can provision those Service Classes and enable Kyma services to use them.
 
-An Application represents a product connected to the Kyma instance.
+>**NOTE:** An Application represents a product connected to the Kyma instance.
 
 ## Details
 
-For more detailed information about AB, check the [docs](../../../../docs/service-brokers/docs) repository.
+For more detailed information about the AB, check the [docs](../../../../docs/application-connector/docs) repository.

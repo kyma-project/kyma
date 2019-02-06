@@ -11,13 +11,13 @@ type ServiceBindingUsageLister struct {
 	mock.Mock
 }
 
-// ListForDeployment provides a mock function with given fields: environment, kind, deploymentName
-func (_m *ServiceBindingUsageLister) ListForDeployment(environment string, kind string, deploymentName string) ([]*v1alpha1.ServiceBindingUsage, error) {
-	ret := _m.Called(environment, kind, deploymentName)
+// ListForDeployment provides a mock function with given fields: ns, kind, deploymentName
+func (_m *ServiceBindingUsageLister) ListForDeployment(ns string, kind string, deploymentName string) ([]*v1alpha1.ServiceBindingUsage, error) {
+	ret := _m.Called(ns, kind, deploymentName)
 
 	var r0 []*v1alpha1.ServiceBindingUsage
 	if rf, ok := ret.Get(0).(func(string, string, string) []*v1alpha1.ServiceBindingUsage); ok {
-		r0 = rf(environment, kind, deploymentName)
+		r0 = rf(ns, kind, deploymentName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1alpha1.ServiceBindingUsage)
@@ -26,7 +26,7 @@ func (_m *ServiceBindingUsageLister) ListForDeployment(environment string, kind 
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
-		r1 = rf(environment, kind, deploymentName)
+		r1 = rf(ns, kind, deploymentName)
 	} else {
 		r1 = ret.Error(1)
 	}

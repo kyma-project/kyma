@@ -28,7 +28,7 @@ func TestServiceClassesQueries(t *testing.T) {
 	expectedResource := serviceClass()
 	resourceDetailsQuery := `
 		name
-		environment
+		namespace
 		externalName
 		displayName
 		creationTimestamp
@@ -54,14 +54,14 @@ func TestServiceClassesQueries(t *testing.T) {
 
 	t.Run("MultipleResources", func(t *testing.T) {
 		query := fmt.Sprintf(`
-			query ($environment: String!) {
-				serviceClasses(environment: $environment) {
+			query ($namespace: String!) {
+				serviceClasses(namespace: $namespace) {
 					%s
 				}
 			}	
 		`, resourceDetailsQuery)
 		req := graphql.NewRequest(query)
-		req.SetVar("environment", expectedResource.Environment)
+		req.SetVar("namespace", expectedResource.Namespace)
 
 		var res serviceClassesQueryResponse
 		err = c.Do(req, &res)
@@ -72,15 +72,15 @@ func TestServiceClassesQueries(t *testing.T) {
 
 	t.Run("SingleResource", func(t *testing.T) {
 		query := fmt.Sprintf(`
-			query ($name: String!, $environment: String!) {
-				serviceClass(name: $name, environment: $environment) {
+			query ($name: String!, $namespace: String!) {
+				serviceClass(name: $name, namespace: $namespace) {
 					%s
 				}
 			}	
 		`, resourceDetailsQuery)
 		req := graphql.NewRequest(query)
 		req.SetVar("name", expectedResource.Name)
-		req.SetVar("environment", expectedResource.Environment)
+		req.SetVar("namespace", expectedResource.Namespace)
 
 		var res serviceClassQueryResponse
 		err = c.Do(req, &res)
@@ -94,8 +94,8 @@ func checkClass(t *testing.T, expected, actual shared.ServiceClass) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
-	// Environment
-	assert.Equal(t, expected.Environment, actual.Environment)
+	// Namespace
+	assert.Equal(t, expected.Namespace, actual.Namespace)
 
 	// ExternalName
 	assert.Equal(t, expected.ExternalName, actual.ExternalName)
@@ -145,7 +145,7 @@ func assertPlanExistsAndEqual(t *testing.T, arr []shared.ServicePlan, expectedEl
 func serviceClass() shared.ServiceClass {
 	return shared.ServiceClass{
 		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-		Environment:  TestNamespace,
+		Namespace:    TestNamespace,
 		ExternalName: "user-provided-service",
 		Activated:    false,
 		Plans: []shared.ServicePlan{

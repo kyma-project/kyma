@@ -180,6 +180,7 @@ func newWithIDProvider(bs bundleStorage, cs chartStorage, os operationStorage, i
 		},
 		deprovisioner: &deprovisionService{
 			instanceGetter:    is,
+			instanceRemover:   is,
 			operationInserter: os,
 			instanceStateGetter: &instanceStateService{
 				operationCollectionGetter: os,

@@ -18,26 +18,26 @@ import (
 )
 
 func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
-	environment := "test"
+	nsName := "test"
 
 	t.Run("Success with default", func(t *testing.T) {
-		deployment := fixDeployment("test", environment, "function")
+		deployment := fixDeployment("test", nsName, "function")
 		deployments := []*v1beta2.Deployment{deployment, deployment}
 
 		expected := gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
+			Name:      "test",
+			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
 
 		svc := automock.NewDeploymentLister()
-		svc.On("List", environment).Return(deployments, nil).Once()
+		svc.On("List", nsName).Return(deployments, nil).Once()
 		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return(deployments, nil).Once()
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
-		result, err := resolver.DeploymentsQuery(nil, environment, nil)
+		result, err := resolver.DeploymentsQuery(nil, nsName, nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, []gqlschema.Deployment{expected, expected}, result)
@@ -45,23 +45,23 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 	})
 
 	t.Run("Success with functions", func(t *testing.T) {
-		deployment := fixDeployment("test", environment, "deployment")
+		deployment := fixDeployment("test", nsName, "deployment")
 		deployments := []*v1beta2.Deployment{deployment, deployment}
 
 		expected := gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
+			Name:      "test",
+			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"deployment": "",
 			},
 		}
 
 		svc := automock.NewDeploymentLister()
-		svc.On("List", environment).Return(deployments, nil).Once()
+		svc.On("List", nsName).Return(deployments, nil).Once()
 		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return(deployments, nil).Once()
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
-		result, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(false))
+		result, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(false))
 
 		require.NoError(t, err)
 		assert.Equal(t, []gqlschema.Deployment{expected, expected}, result)
@@ -69,12 +69,12 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 	})
 
 	t.Run("Success without functions", func(t *testing.T) {
-		deployment := fixDeployment("test", environment, "function")
+		deployment := fixDeployment("test", nsName, "function")
 		deployments := []*v1beta2.Deployment{deployment, deployment}
 
 		expected := gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
+			Name:      "test",
+			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
@@ -82,10 +82,10 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 		svc := automock.NewDeploymentLister()
 		svc.On("List", mock.Anything, mock.Anything).Return(deployments, nil).Once()
-		svc.On("ListWithoutFunctions", environment).Return(deployments, nil).Once()
+		svc.On("ListWithoutFunctions", nsName).Return(deployments, nil).Once()
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
-		result, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(true))
+		result, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(true))
 
 		require.NoError(t, err)
 		assert.Equal(t, []gqlschema.Deployment{expected, expected}, result)
@@ -94,11 +94,11 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Not found with functions", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
-		svc.On("List", environment).Return([]*v1beta2.Deployment{}, nil).Once()
+		svc.On("List", nsName).Return([]*v1beta2.Deployment{}, nil).Once()
 		svc.On("ListWithoutFunctions", mock.Anything, mock.Anything).Return([]*v1beta2.Deployment{}, nil).Once()
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
-		result, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(false))
+		result, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(false))
 
 		require.NoError(t, err)
 		assert.Empty(t, result)
@@ -108,10 +108,10 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 	t.Run("Not found without functions", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
 		svc.On("List", mock.Anything, mock.Anything).Return([]*v1beta2.Deployment{}, nil).Once()
-		svc.On("ListWithoutFunctions", environment).Return([]*v1beta2.Deployment{}, nil).Once()
+		svc.On("ListWithoutFunctions", nsName).Return([]*v1beta2.Deployment{}, nil).Once()
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
-		result, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(true))
+		result, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(true))
 
 		require.NoError(t, err)
 		assert.Empty(t, result)
@@ -120,11 +120,11 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Error with functions", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
-		svc.On("List", environment).Return(nil, errors.New("test")).Once()
+		svc.On("List", nsName).Return(nil, errors.New("test")).Once()
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
-		_, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(false))
+		_, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(false))
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -132,11 +132,11 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 
 	t.Run("Error without functions", func(t *testing.T) {
 		svc := automock.NewDeploymentLister()
-		svc.On("ListWithoutFunctions", environment).Return(nil, errors.New("test")).Once()
+		svc.On("ListWithoutFunctions", nsName).Return(nil, errors.New("test")).Once()
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewDeploymentResolver(svc, nil, nil)
 
-		_, err := resolver.DeploymentsQuery(nil, environment, getBoolPointer(true))
+		_, err := resolver.DeploymentsQuery(nil, nsName, getBoolPointer(true))
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -144,13 +144,13 @@ func TestDeploymentResolver_DeploymentsQuery(t *testing.T) {
 }
 
 func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.T) {
-	environment := "test"
+	nsName := "test"
 
 	t.Run("Success for deployment", func(t *testing.T) {
 		deployment := &gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
-			Labels:      gqlschema.Labels{},
+			Name:      "test",
+			Namespace: nsName,
+			Labels:    gqlschema.Labels{},
 		}
 
 		usage := &v1alpha1.ServiceBindingUsage{
@@ -170,9 +170,9 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		}
 
 		lister := new(scMock.ServiceBindingUsageLister)
-		lister.On("ListForDeployment", deployment.Environment, "deployment", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
+		lister.On("ListForDeployment", deployment.Namespace, "deployment", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
 		getter := new(scMock.ServiceBindingFinderLister)
-		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(binding, nil)
+		getter.On("Find", deployment.Namespace, usage.Spec.ServiceBindingRef.Name).Return(binding, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
 		scRetriever.On("ServiceBinding").Return(getter)
@@ -191,8 +191,8 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 	t.Run("Success for function", func(t *testing.T) {
 		deployment := &gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
+			Name:      "test",
+			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
@@ -215,9 +215,9 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		}
 
 		lister := new(scMock.ServiceBindingUsageLister)
-		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
+		lister.On("ListForDeployment", deployment.Namespace, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
 		getter := new(scMock.ServiceBindingFinderLister)
-		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(binding, nil)
+		getter.On("Find", deployment.Namespace, usage.Spec.ServiceBindingRef.Name).Return(binding, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
 		scRetriever.On("ServiceBinding").Return(getter)
@@ -236,15 +236,15 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 	t.Run("No usages", func(t *testing.T) {
 		deployment := &gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
+			Name:      "test",
+			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
 
 		lister := new(scMock.ServiceBindingUsageLister)
-		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{}, nil)
+		lister.On("ListForDeployment", deployment.Namespace, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{}, nil)
 
 		scaRetriever := new(scMock.ServiceCatalogAddonsRetriever)
 		scaRetriever.On("ServiceBindingUsage").Return(lister)
@@ -258,8 +258,8 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 	t.Run("No binding", func(t *testing.T) {
 		deployment := &gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
+			Name:      "test",
+			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
@@ -274,9 +274,9 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		}
 
 		lister := new(scMock.ServiceBindingUsageLister)
-		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
+		lister.On("ListForDeployment", deployment.Namespace, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
 		getter := new(scMock.ServiceBindingFinderLister)
-		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(nil, nil)
+		getter.On("Find", deployment.Namespace, usage.Spec.ServiceBindingRef.Name).Return(nil, nil)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)
 		scRetriever.On("ServiceBinding").Return(getter)
@@ -301,15 +301,15 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 	t.Run("Error while listing usages", func(t *testing.T) {
 		deployment := &gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
+			Name:      "test",
+			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
 		}
 
 		lister := new(scMock.ServiceBindingUsageLister)
-		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{}, errors.New("trolololo"))
+		lister.On("ListForDeployment", deployment.Namespace, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{}, errors.New("trolololo"))
 		defer lister.AssertExpectations(t)
 
 		scaRetriever := new(scMock.ServiceCatalogAddonsRetriever)
@@ -324,8 +324,8 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 
 	t.Run("Error while getting binding", func(t *testing.T) {
 		deployment := &gqlschema.Deployment{
-			Name:        "test",
-			Environment: environment,
+			Name:      "test",
+			Namespace: nsName,
 			Labels: gqlschema.Labels{
 				"function": "",
 			},
@@ -340,10 +340,10 @@ func TestDeploymentResolver_DeploymentBoundServiceInstanceNamesField(t *testing.
 		}
 
 		lister := new(scMock.ServiceBindingUsageLister)
-		lister.On("ListForDeployment", deployment.Environment, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
+		lister.On("ListForDeployment", deployment.Namespace, "function", deployment.Name).Return([]*v1alpha1.ServiceBindingUsage{usage}, nil)
 		defer lister.AssertExpectations(t)
 		getter := new(scMock.ServiceBindingFinderLister)
-		getter.On("Find", deployment.Environment, usage.Spec.ServiceBindingRef.Name).Return(nil, errors.New("trolololo"))
+		getter.On("Find", deployment.Namespace, usage.Spec.ServiceBindingRef.Name).Return(nil, errors.New("trolololo"))
 		defer getter.AssertExpectations(t)
 
 		scRetriever := new(scMock.ServiceCatalogRetriever)

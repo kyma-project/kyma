@@ -32,9 +32,6 @@ global:
   acceptance_tests:
     dir: develop/
     version: cc09a307
-  alpine_net:
-    dir: develop/
-    version: ed568f0f
   api_controller:
     dir: develop/
     version: 8c274255
@@ -45,15 +42,12 @@ global:
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
-  binding_usage_controller:
-    dir: develop/
-    version: d1930a3d
   configurations_generator:
     dir: develop/
     version: 4a23580f
   docs:
     dir: develop/
-    version: efb39f1f
+    version: 9b99bcfd
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -66,9 +60,6 @@ global:
   event_bus_tests:
     dir: develop/
     version: f01c8848
-  helm_broker:
-    dir: develop/
-    version: a9a96379
   kubeless_integration_tests:
     dir: develop/
     version: e11a469a
@@ -83,10 +74,10 @@ global:
     version: e11a469a
   ui_api_layer:
     dir: develop/
-    version: 9431ea99
+    version: a4f92ea2
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: 9431ea99
+    version: a4f92ea2
 
 test:
   acceptance:
