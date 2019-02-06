@@ -39,6 +39,9 @@
 # The `configurations-generator` subchart
 /resources/core/charts/configurations-generator @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
+# The `assetstore` subchart
+/resources/assetstore/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
+
 # The `application-connector` chart
 /resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -89,9 +92,6 @@
 
 # The `logging` subchart
 /resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
-
-# The `minio` subchart
-/resources/core/charts/minio/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @magicmatatjahu
 
 # The `event-bus` chart
 /resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91

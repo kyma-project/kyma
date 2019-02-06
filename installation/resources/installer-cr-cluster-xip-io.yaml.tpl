@@ -28,6 +28,8 @@ spec:
       namespace: "kyma-system"
     - name: "nats-streaming"
       namespace: "natss"
+    - name: "assetstore"
+      namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
     - name: "event-bus"

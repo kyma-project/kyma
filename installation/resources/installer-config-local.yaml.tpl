@@ -51,18 +51,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-data:
-  minio.resources.requests.memory: 64Mi
-  minio.resources.limits.cpu: 100m
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
@@ -103,3 +91,15 @@ metadata:
 data:
   knative.ingressgateway.service.type: NodePort
   knative.domainName: "kyma.local"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: assetstore-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+data:
+  minio.resources.requests.memory: 64Mi
+  minio.resources.limits.cpu: 100m
