@@ -52,7 +52,9 @@ data:
       # if you want to use ${tag} or %Y/%m/%d/ like syntax in path / object_key_format,
       # need to specify tag for ${tag} and time for %Y/%m/%d in <buffer> argument.
       <buffer tag,time>
-        @type memory
+        @type file
+
+        flush_at_shutdown true
 
         timekey 1h
         timekey_wait 10m
