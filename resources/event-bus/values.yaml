@@ -18,6 +18,11 @@ global:
     resources:
       limits:
         memory: "32M"
+  publishKnative:
+    maxRequests: 16
+    resources:
+      limits:
+        memory: "32M"
   push:
     http:
       subscriptionNameHeader: "Kyma-Subscription"
