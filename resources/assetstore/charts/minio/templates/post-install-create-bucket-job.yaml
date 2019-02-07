@@ -14,6 +14,10 @@ metadata:
 spec:
   template:
     metadata:
+      # MODIFIED: Block - START
+      annotations:
+        sidecar.istio.io/inject: "false"
+      # MODIFIED: Block - END
       labels:
         app: {{ template "minio.name" . }}
         release: {{ .Release.Name }}
