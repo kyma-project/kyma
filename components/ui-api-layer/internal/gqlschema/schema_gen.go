@@ -343,9 +343,9 @@ type ComplexityRoot struct {
 		Topics                func(childComplexity int, input []InputTopic, internal *bool) int
 		EventActivations      func(childComplexity int, namespace string) int
 		LimitRanges           func(childComplexity int, namespace string) int
+		BackendModules        func(childComplexity int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
-		BackendModules        func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -634,9 +634,9 @@ type QueryResolver interface {
 	Topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
 	EventActivations(ctx context.Context, namespace string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, namespace string) ([]LimitRange, error)
+	BackendModules(ctx context.Context) ([]BackendModule, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
-	BackendModules(ctx context.Context) ([]BackendModule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -20386,7 +20386,7 @@ type BackendModule {
 # Queries
 
 type Query {
-	serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
+    serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
@@ -20398,8 +20398,8 @@ type Query {
     clusterServiceBroker(name: String!): ClusterServiceBroker
     serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
     serviceBroker(name: String!, namespace: String!): ServiceBroker
-
-	serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
+    
+    serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
     serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
