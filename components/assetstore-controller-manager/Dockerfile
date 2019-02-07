@@ -14,5 +14,22 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/kyma
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /
+
+#
+# Install certificates
+#
+
+RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
+
+#
+# Copy binary
+#
+
+
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/assetstore-controller-manager/manager .
+
+#
+# Run app
+#
+
 ENTRYPOINT ["/manager"]
