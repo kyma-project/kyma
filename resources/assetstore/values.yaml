@@ -15,8 +15,11 @@ minio:
   secretKey: topSecretKey
   replicas: 1
 
-  DeploymentStrategy:
-    type: Recreate
+  deployment:
+    strategy:
+      type: Recreate
+    annotations:
+      sidecar.istio.io/inject: "false"
   
   service:
     annotations:

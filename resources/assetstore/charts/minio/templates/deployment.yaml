@@ -10,8 +10,10 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   # MODIFIED: Block - START
+{{- if .Values.deployment.strategy }}
   strategy:
-{{ toYaml .Values.DeploymentStrategy | indent 4 }}
+{{ toYaml .Values.deployment.strategy | indent 4 }}
+{{- end }}
   # MODIFIED: Block - END
   {{- if .Values.nasgateway.enabled }}
   replicas: {{ .Values.nasgateway.replicas }}
@@ -36,8 +38,10 @@ spec:
     metadata:
       name: {{ template "minio.fullname" . }}
       # MODIFIED: Block - START
+      {{- if .Values.deployment.annotations }}
       annotations:
-        sidecar.istio.io/inject: "false"
+{{ toYaml .Values.deployment.annotations | indent 8 }}
+      {{- end }}
       # MODIFIED: Block - END
       labels:
         app: {{ template "minio.name" . }}
