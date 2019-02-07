@@ -8,28 +8,28 @@ groups:
     labels:
       severity: critical
     annotations:
-      description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+      description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod_name }}`}} is not running"
       summary: "{{`{{ $labels.pod }}`}} is not running"
 - name: cpu-90-percent-usage-rule-kyma-system
   rules:
   - alert: CPU90PercentUsageKymaSystem
-    expr:   sum (rate(container_cpu_usage_seconds_total{namespace="kyma-system"}[2m])) by (pod_name) * on(pod_name) group_left(app) label_replace(max(kube_pod_labels{label_alertcpu=~"yes*"}) by (pod), "pod_name", "$1", "pod", "(.*)") * 100 > 90
+    expr:   sum (rate(container_cpu_usage_seconds_total{namespace="kyma-system"}[2m])) by (pod_name) * on(pod_name) group_left(app) label_replace(max(kube_pod_labels{label_alertcpu="yes"}) by (pod), "pod_name", "$1", "pod", "(.*)") * 100 > 90
     for: 10m
     labels:
       severity: critical
     annotations:
-      description:  "Pod {{`{{$labels.pod}}`}} in namespace: kyma-system is having {{`{{$value}}`}} % usage"
-      summary: "Pod {{`{{$labels.pod}}`}} in namespace: kyma-system is having {{`{{$value}}`}} % usage"
+      description:  "Pod {{`{{$labels.pod_name}}`}} in namespace: kyma-system is having {{`{{$value}}`}} % usage"
+      summary: "Pod {{`{{$labels.pod_name}}`}} in namespace: kyma-system is having {{`{{$value}}`}} % usage"
 - name: mem-90-percent-usage-rule-kyma-system
   rules:
   - alert: MEM90PercentUsageKymaSystem
-    expr:   sum(container_memory_working_set_bytes{namespace="kyma-system"}) by (pod_name) / sum(label_join(kube_pod_container_resource_limits_memory_bytes, "pod_name", "", "pod")) by (pod_name)  * on(pod_name) group_left(app)   label_replace(max(kube_pod_labels{label_alertmem=~"yes*"}) by (pod), "pod_name", "$1", "pod", "(.*)") * 100 > 90
+    expr:   sum(container_memory_working_set_bytes{namespace="kyma-system"}) by (pod_name) / sum(label_join(kube_pod_container_resource_limits_memory_bytes, "pod_name", "", "pod")) by (pod_name)  * on(pod_name) group_left(app)   label_replace(max(kube_pod_labels{label_alertmem="yes"}) by (pod), "pod_name", "$1", "pod", "(.*)") * 100 > 90
     for: 10m
     labels:
       severity: critical
     annotations:
-      description:  "Pod {{$labels.pod}} in namespace: kyma-system is having {{$value}} % usage"
-      summary: "Pod {{$labels.pod}} in namespace: kyma-system is having {{$value}} % usage"
+      description:  "Pod {{`{{$labels.pod_name}}`}} in namespace: kyma-system is having {{`{{$value}}`}} % usage"
+      summary: "Pod {{`{{$labels.pod_name}}`}} in namespace: kyma-system is having {{`{{$value}}`}} % usage"
 - name: pvc-90-percent-full-rule
   rules:
   - alert: PVC90PercentFull

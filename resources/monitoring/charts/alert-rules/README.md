@@ -63,7 +63,7 @@ Under the **data. alert.rules** parameter, there is a configuration of the [kyma
 
   The Alertmanager trigger the rule when CPU usage is above 90% in the pods in the namespace `kyma-system`. For the alert rule to fire for a pod its necessary that label `alertcpu: "yes"` is passed to the pods.
 
-* Monitoring Memrory usage
+* Monitoring Memory usage
 
   The Alertmanager trigger the rule when Memory usage is above 90% in the pods in the namespace `kyma-system`. For the alert rule to fire for a pod its necessary that label `alertmem: "yes"` is passed to the pods.
 
@@ -100,7 +100,7 @@ Resource metrics such as **cpu and memory** are also served by kube-state-metric
 | Metric name| Metric type | Labels/tags |
 | ---------- | ----------- | ----------- |
 | kube_pod_container_resource_requests | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
-| **kube_pod_container_resource_limits** | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
+| kube_pod_container_resource_limits | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
 
 [Here](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md) is the complete list of Pod Metrics
 
