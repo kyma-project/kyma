@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:236d7e1bdb50d8f68559af37dbcf9d142d56b431c9b2176d41e2a009b664cda8"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9b3b1e0f5f99ae461456d768e7d301a7acdaa2d8"
+  version = "v1.1.0"
+
+[[projects]]
   branch = "master"
   digest = "1:f14d1b50e0075fb00177f12a96dd7addf93d1e2883c25befd17285b779549795"
   name = "github.com/gopherjs/gopherjs"
@@ -44,6 +52,9 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = ["github.com/smartystreets/goconvey/convey"]
+  input-imports = [
+    "github.com/google/uuid",
+    "github.com/smartystreets/goconvey/convey",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
