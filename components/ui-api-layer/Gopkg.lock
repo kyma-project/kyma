@@ -14,8 +14,8 @@
     "internal/gopath",
     "internal/imports"
   ]
-  revision = "3a7f37c7e22a8fedce430c4d340ad5c1351198f4"
-  version = "v0.7.1"
+  revision = "da1e07f5876c0fb79cbad19006f7135be08590d6"
+  version = "v0.7.2"
 
 [[projects]]
   name = "github.com/PuerkitoBio/purell"
@@ -74,8 +74,8 @@
     ".",
     "log"
   ]
-  revision = "3eb9738c1697594ea6e71a7156a9bb32ed216cf0"
-  version = "v2.8.0"
+  revision = "e37671aced663c8d3a395bd301857e26dcf4340c"
+  version = "v2.8.1"
 
 [[projects]]
   name = "github.com/ghodss/yaml"
@@ -162,16 +162,10 @@
   version = "v0.2.0"
 
 [[projects]]
-  name = "github.com/gorilla/context"
-  packages = ["."]
-  revision = "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
-  version = "v1.1.1"
-
-[[projects]]
   name = "github.com/gorilla/mux"
   packages = ["."]
-  revision = "e3702bed27f0d39777b0b37b664b6280e8ef8fbf"
-  version = "v1.6.2"
+  revision = "a7962380ca08b5a188038c69871b8d3fbdf31e89"
+  version = "v1.7.0"
 
 [[projects]]
   name = "github.com/gorilla/websocket"
@@ -186,7 +180,7 @@
     ".",
     "diskcache"
   ]
-  revision = "c63ab54fda8f77302f8d414e19933f2b6026a089"
+  revision = "7a902570cb17174de4ac788094f8ebedec136f57"
 
 [[projects]]
   name = "github.com/hashicorp/golang-lru"
@@ -200,8 +194,8 @@
 [[projects]]
   name = "github.com/imdario/mergo"
   packages = ["."]
-  revision = "9f23e2d6bd2a77f959b2bf6acdbefd708a83a4a4"
-  version = "v0.3.6"
+  revision = "7c29201646fa3de8506f701213473dd407f19646"
+  version = "v0.3.7"
 
 [[projects]]
   name = "github.com/json-iterator/go"
@@ -357,8 +351,8 @@
 [[projects]]
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
-  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
-  version = "v1.0.0"
+  revision = "af06845cf3004701891bf4fdb884bfe4920b3727"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/moby/moby"
@@ -468,8 +462,8 @@
     "validator",
     "validator/rules"
   ]
-  revision = "e805d08bb209b1accdea76bd2327811858d81985"
-  version = "v1.0.0"
+  revision = "b850e94a0bf8eab2820054638d96def671b7ae4e"
+  version = "v1.1.0"
 
 [[projects]]
   name = "github.com/vrischmann/envconfig"
@@ -485,7 +479,7 @@
     "pbkdf2",
     "ssh/terminal"
   ]
-  revision = "45a5f77698d342a8c2ef8423abdf0ba6880b008a"
+  revision = "b8fe1690c61389d7d2a8074a507d1d40c5d30448"
 
 [[projects]]
   branch = "release-branch.go1.10"
@@ -507,7 +501,7 @@
     ".",
     "internal"
   ]
-  revision = "d668ce993890a79bda886613ee587a69dd5da7a6"
+  revision = "99b60b757ec124ebb7d6b7e97f153b19c10ce163"
 
 [[projects]]
   branch = "master"
@@ -516,7 +510,7 @@
     "unix",
     "windows"
   ]
-  revision = "48ac38b7c8cbedd50b1613c0fccacfc7d88dfcdf"
+  revision = "41f3e6584952bb034a481797859f6ab34b6803bd"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -563,9 +557,10 @@
     "imports",
     "internal/fastwalk",
     "internal/gopathwalk",
+    "internal/module",
     "internal/semver"
   ]
-  revision = "aa033095749b3c5414cb40cb5fb235173be6b186"
+  revision = "44bcb96178d39510d2bb8a61ef1c08b85bb24a45"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -909,7 +904,7 @@
     "parser",
     "types"
   ]
-  revision = "fd15ee9cc2f77baa4f31e59e6acbf21146455073"
+  revision = "0689ccc1d7d65d9dd1bedcc3b0b1ed7df91ba266"
 
 [[projects]]
   name = "k8s.io/klog"
@@ -928,7 +923,7 @@
     "pkg/util/proto",
     "pkg/util/sets"
   ]
-  revision = "0317810137be915b9cf888946c6e115c1bfac693"
+  revision = "fd29a9f2f42946ceb3fbd87518e0f2f4343da168"
 
 [solve-meta]
   analyzer-name = "dep"
