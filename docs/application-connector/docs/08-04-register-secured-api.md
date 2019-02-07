@@ -7,7 +7,7 @@ The Application Registry allows you to register a secured API for every service.
 
 You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns a `400` code response.
 
->**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this, process follow [this](r#tutorials-register-a-service) tutorial.
+>**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow [this](r#tutorials-register-a-service) tutorial.
 
 ## Register a Basic Authentication-secured API
 
