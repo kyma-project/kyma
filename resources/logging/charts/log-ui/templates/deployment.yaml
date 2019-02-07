@@ -1,3 +1,4 @@
+{{- if .Values.global.uiapp.create }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -14,8 +15,6 @@ spec:
       labels:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -33,3 +32,4 @@ spec:
             items:
             - key: config.js
               path: config.js
+{{- end }}

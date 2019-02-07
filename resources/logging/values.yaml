@@ -108,8 +108,7 @@ promtail:
     #   memory: 128Mi
 
   ## Pod Annotations
-  podAnnotations:
-    sidecar.istio.io/inject: "false"
+  #podAnnotations:
 
   ## Deployment annotations
   # annotations: {}
@@ -136,6 +135,8 @@ promtail:
   affinity: {}
 
 global:
+  uiapp:
+    create: false
   containerRegistry:
     path: docker.io/hbalik
   test_logging:

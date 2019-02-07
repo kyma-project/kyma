@@ -1,9 +1,10 @@
+{{- if .Values.global.uiapp.create }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   name: {{ template "loki.fullname" . }}
   labels:
-    app: loki
+    app: {{ template "loki.name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -16,7 +17,7 @@ spec:
         regex: /.*
     route:
     - destination:
-        host: logging-loki
+        host: {{ template "loki.fullname" . }}
         port:
           number: {{ .Values.loki.service.port  }}
     corsPolicy:
@@ -27,3 +28,4 @@ spec:
       - authorization
   gateways:
   - kyma-gateway
+{{- end }}

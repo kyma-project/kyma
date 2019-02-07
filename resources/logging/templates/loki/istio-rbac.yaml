@@ -1,0 +1,50 @@
+{{- if .Values.global.uiapp.create }}
+apiVersion: rbac.istio.io/v1alpha1
+kind: ServiceRole
+metadata:
+  name: loki-intern-role
+  namespace: kyma-system
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  rules:
+  - services: ["logging-loki.kyma-system.svc.cluster.local"]
+    methods: ["GET", "POST", "HEAD"]
+{{- end }}
+
+---
+{{- if .Values.global.uiapp.create }}
+apiVersion: rbac.istio.io/v1alpha1
+kind: ServiceRoleBinding
+metadata:
+  name: bind-loki-intern-role
+  namespace: kyma-system
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  subjects:
+  - properties:
+      request.auth.claims[email]: "*@sap.com"
+  roleRef:
+    kind: ServiceRole
+    name: loki-intern-role
+{{- end }}
+---
+{{- if .Values.global.uiapp.create }}
+apiVersion: rbac.istio.io/v1alpha1
+kind: RbacConfig
+metadata:
+  name: default
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  mode: ON_WITH_INCLUSION
+  inclusion:
+    services: ["logging-loki.kyma-system.svc.cluster.local"]
+{{- end }}
