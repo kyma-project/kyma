@@ -7,7 +7,7 @@ The Application Registry allows you to register a secured API for every service.
 
 You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns a `400` code response.
 
->**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow [this](r#tutorials-register-a-service) tutorial.
+>**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this, process follow [this](r#tutorials-register-a-service) tutorial.
 
 ## Register a Basic Authentication-secured API
 
@@ -54,14 +54,15 @@ This is an example of the `api` section of the request body for an API secured w
         }  
 ```
 
-## Register an API secured with generated client certificates
+## Register a client certificate-secured API
 
-To register an API and secure it with generated client certificates, you must add the `credentials.certificateGen` object to the `api` section of the service registration request body.
-You must include this field:
+To register an API and secure it with client certificates, you must add the `credentials.certificateGen` object to the `api` section of the service registration request body. The Application Registry generates a ready to use certificate and key pair for every API registered this way. You can use the generated pair or replace it with your own certificate and key.
+
+Include this field in the service registration request body:
 
 | Field   |  Description |
 |:----------:|:------|
-| **commonName** |  Name of the generated certificate.  |
+| **commonName** |  Name of the generated certificate. Set as the `CN` field of the certificate Subject.  |
 
 This is an example of the `api` section of the request body for an API secured with generated client certificates:
 
@@ -79,7 +80,15 @@ This is an example of the `api` section of the request body for an API secured w
 
 ### Details
 
-When you register an API with the `credentials.certificateGen` object, the Application Registry generates a SHA256withRSA-encrypted certificate and matching key. The certificate and key pair is stored in a Secret in the `kyma-integration` Namespace. To fetch the certificate and key encoded with base64, run this command:
+When you register an API with the `credentials.certificateGen` object, the Application Registry generates a SHA256withRSA-encrypted certificate and matching key. To enable communication between Kyma and an API secured with this authentication method, set the certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
+
+The certificate and key pair is stored in a Secret in the `kyma-integration` Namespace. List all Secrets and find the one created for your API:
+
+```
+kubectl -n kyma-integration get secrets
+```
+
+To fetch the certificate and key encoded with base64, run this command:
 
 ```
 kubectl -n kyma-integration get secrets app-{APP_NAME}-{SERVICE_ID}
@@ -87,7 +96,6 @@ kubectl -n kyma-integration get secrets app-{APP_NAME}-{SERVICE_ID}
 
 >**NOTE:** Replace the `APP_NAME` placeholder with the name of the Application used to connect the external solution that is the origin of the API. Replace the `SERVICE_ID` placeholder with the ID of the registered service to which the API belongs. You get this ID after you register an external solution's service in Kyma.
 
-To enable communication between Kyma and an API secured with this authentication method, set the generated certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
 
 If the generated certificate doesn't meet your security standards or specific needs, you can use a custom certificate-key pair for authentication. To replace the generated certificate and key with a custom pair in Kyma, run this command:
 
