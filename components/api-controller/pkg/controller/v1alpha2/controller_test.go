@@ -110,7 +110,7 @@ func TestValidateApi(t *testing.T) {
 
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
-			Convey("it should update the helper with error and return the \"Error\" status code", func() {
+			Convey("it should update the helper with an error and return the \"Error\" status code", func() {
 
 				//when
 				statusCode := c.validateAPI(testAPI, statusHelper)
@@ -131,7 +131,7 @@ func TestValidateApi(t *testing.T) {
 
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
-			Convey("it should return the \"InProgress\" status code if the service has not been changed", func() {
+			Convey("it should return the \"Successful\" status code if the service has not been changed", func() {
 
 				//when
 				statusCode := c.validateAPI(testAPI, statusHelper)
