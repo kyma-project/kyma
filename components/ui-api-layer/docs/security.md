@@ -1,16 +1,16 @@
 # Authentication
 
-The application checks if Authorization token passed by user is signed by Dex. It is the standard way of performing Authentication in Kyma, which is usually done inside the Istio sidecars on components with Policy specified. In this application it is perfomed by middleware.
+The application checks if Authorization token passed by user is signed by Dex. It is the standard way of performing Authentication in Kyma, which is usually done inside the Istio sidecars in components with Policy specified. In this application it is perfomed by middleware.
 
 # Authorization
 
 ## Overview
 
-For overview of authorization read [this document](/docs/security/03-02-graphql.md).
+For overview of authorization read [this document](/docs/security/docs/03-02-graphql.md).
 
 ## How to secure a query/mutation/subscription
 
-All the queries/mutations/subscriptions are defined in [`schema.graphql`](link) file in `components/ui-api-layer/internal/gqlschema/` directory. It is also the place where @HasAccess directive is defined. 
+All the queries/mutations/subscriptions are defined in [`schema.graphql`](../internal/gqlschema/schema.graphql) file in `components/ui-api-layer/internal/gqlschema/` directory. It is also the place where @HasAccess directive is defined. 
 
 @HasAccess directive is used to secure the action or a field in a type. It is used as a middleware before the resolver code is executed. You can use the following query as an example on how to secure an action. You can find the detailed explanation in the table below.
 
