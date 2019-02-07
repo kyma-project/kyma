@@ -1,4 +1,4 @@
-# Backup and Restore E2E Tests
+# Backup and restore E2E tests
 
 ## Overview
 
