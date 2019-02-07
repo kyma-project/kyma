@@ -295,11 +295,11 @@ func (svc *applicationService) extractErrorCause(body io.ReadCloser) error {
 func (svc *applicationService) drainAndCloseBody(body io.ReadCloser) {
 	err := iosafety.DrainReader(body)
 	if err != nil {
-		glog.Warningf("Unable to drain body reader. Cause: %v", err)
+		glog.Errorf("Unable to drain body reader. Cause: %v", err)
 	}
 	err = body.Close()
 	if err != nil {
-		glog.Warningf("Unable to close body reader. Cause: %v", err)
+		glog.Errorf("Unable to close body reader. Cause: %v", err)
 	}
 }
 

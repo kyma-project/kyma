@@ -72,7 +72,7 @@ func (s *store) object(id, filename string, value interface{}) (bool, error) {
 	defer func() {
 		err := reader.Close()
 		if err != nil {
-			glog.Warningf("Unable to close object reader. Cause: %v", err)
+			glog.Errorf("Unable to close object reader. Cause: %v", err)
 		}
 	}()
 	if err != nil {

@@ -504,7 +504,7 @@ func newTestServer(data string, statusCode int) *httptest.Server {
 		w.WriteHeader(statusCode)
 		_, err := fmt.Fprintln(w, data)
 		if err != nil {
-			glog.Warningf("Unable to write response body. Cause: %v", err)
+			glog.Errorf("Unable to write response body. Cause: %v", err)
 		}
 	}))
 }

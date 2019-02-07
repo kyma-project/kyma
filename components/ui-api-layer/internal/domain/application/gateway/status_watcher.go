@@ -104,11 +104,11 @@ func (s *gatewayStatusWatcher) isHealthy(url string) (bool, error) {
 	defer func() {
 		err := iosafety.DrainReader(resp.Body)
 		if err != nil {
-			glog.Warningf("Unable to drain body reader. Cause: %v", err)
+			glog.Errorf("Unable to drain body reader. Cause: %v", err)
 		}
 		err = resp.Body.Close()
 		if err != nil {
-			glog.Warningf("Unable to close body reader. Cause: %v", err)
+			glog.Errorf("Unable to close body reader. Cause: %v", err)
 		}
 	}()
 
