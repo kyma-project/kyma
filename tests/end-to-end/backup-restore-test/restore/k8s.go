@@ -46,7 +46,6 @@ func getFunctionState(namespace, name string) (output string) {
 }
 
 func printLogsFunctionPodContainers(namespace, name string) string {
-	log.Fatalln(name, namespace)
 	functionPodsCmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "-l", "function="+name, "-ojsonpath={.items[0].metadata.name}")
 	functionPodName, err := functionPodsCmd.CombinedOutput()
 	var logs string
@@ -78,8 +77,8 @@ func printLogsFunctionPodContainers(namespace, name string) string {
 	return logs
 }
 
-func getFunctionOutput(host, namespace, name string) (string, error) {
-	resp, err := http.Post(host, "text/plain", bytes.NewBuffer([]byte(testUUID.String())))
+func getFunctionOutput(host, namespace, name, testUUID string) (string, error) {
+	resp, err := http.Post(host, "text/plain", bytes.NewBufferString(testUUID))
 	if err != nil {
 		return "", err
 	}

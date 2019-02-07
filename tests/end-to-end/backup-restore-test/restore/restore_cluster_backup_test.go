@@ -27,9 +27,9 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 				}, ShouldReturnSubstringEventually, "Running", 60*time.Second, 1*time.Second, func() string { return printLogsFunctionPodContainers(namespace, functionName) })
 				So(func() string {
 					host := fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
-					value, err := getFunctionOutput(host, namespace, functionName)
+					value, err := getFunctionOutput(host, namespace, functionName, testUUID.String())
 					if err != nil {
-						t.Fatalf("Could not get function output for host%v: %v", host, err)
+						return "Host not reachable. Retrying"
 					}
 					return value
 				}, ShouldReturnSubstringEventually, testUUID.String(), 60*time.Second, 1*time.Second)
@@ -85,9 +85,10 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 				return getFunctionState(namespace, functionName)
 			}, ShouldReturnSubstringEventually, "Running", 60*time.Second, 1*time.Second, func() string { return printLogsFunctionPodContainers(namespace, functionName) })
 			So(func() string {
-				value, err := getFunctionOutput(fmt.Sprintf("http://%s.%s:8080", functionName, namespace), namespace, functionName)
+				host := fmt.Sprintf("http://%s.%s:8080", functionName, namespace)
+				value, err := getFunctionOutput(host, namespace, functionName, testUUID.String())
 				if err != nil {
-					t.Fatalf("Could not get function output: %v", err)
+					return "Host not reachable. Retrying"
 				}
 				return value
 			}, ShouldReturnSubstringEventually, testUUID.String(), 60*time.Second, 1*time.Second)
