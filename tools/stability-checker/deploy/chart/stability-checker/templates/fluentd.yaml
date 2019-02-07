@@ -24,7 +24,9 @@ data:
       pos_file /tmp/fluentd-containers.log.pos
       time_format %Y-%m-%dT%H:%M:%S.%NZ
       tag kubernetes.*
-      format none
+      <parse>
+        @type none
+      </parse>
       read_from_head true
     </source>
     <filter kubernetes.**>
