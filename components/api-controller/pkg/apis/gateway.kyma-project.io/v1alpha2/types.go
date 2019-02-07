@@ -46,24 +46,25 @@ type JwtAuthentication struct {
 }
 
 type ApiStatus struct {
+	ValidationStatus     kymaMeta.GatewayResourceStatus `json:"apiValidationStatus,omitempty"`
 	AuthenticationStatus kymaMeta.GatewayResourceStatus `json:"authenticationStatus,omitempty"`
 	VirtualServiceStatus kymaMeta.GatewayResourceStatus `json:"virtualServiceStatus,omitempty"`
 }
 
 func (s *ApiStatus) IsEmpty() bool {
-	return s.VirtualServiceStatus.IsEmpty() && s.AuthenticationStatus.IsEmpty()
+	return s.VirtualServiceStatus.IsEmpty() && s.AuthenticationStatus.IsEmpty() && s.ValidationStatus.IsEmpty()
 }
 
 func (s *ApiStatus) IsDone() bool {
-	return s.VirtualServiceStatus.IsDone() && s.AuthenticationStatus.IsDone()
+	return s.VirtualServiceStatus.IsDone() && s.AuthenticationStatus.IsDone() && s.ValidationStatus.IsDone()
 }
 
 func (s *ApiStatus) IsInProgress() bool {
-	return s.VirtualServiceStatus.IsInProgress() || s.AuthenticationStatus.IsInProgress()
+	return s.VirtualServiceStatus.IsInProgress() || s.AuthenticationStatus.IsInProgress() || s.ValidationStatus.IsInProgress()
 }
 
 func (s *ApiStatus) IsError() bool {
-	return s.VirtualServiceStatus.IsError() || s.AuthenticationStatus.IsError()
+	return s.VirtualServiceStatus.IsError() || s.AuthenticationStatus.IsError() || s.ValidationStatus.IsError()
 }
 
 func (s *ApiStatus) IsHostnameOccupied() bool {
@@ -71,10 +72,13 @@ func (s *ApiStatus) IsHostnameOccupied() bool {
 }
 
 func (s *ApiStatus) IsTargetServiceOccupied() bool {
-	return s.VirtualServiceStatus.IsTargetServiceOccupied()
+	return s.ValidationStatus.IsTargetServiceOccupied()
 }
 
 func (s *ApiStatus) SetInProgress() {
+	s.ValidationStatus = kymaMeta.GatewayResourceStatus{
+		Code: kymaMeta.InProgress,
+	}
 	s.AuthenticationStatus = kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.InProgress,
 	}

@@ -41,7 +41,7 @@ func (s StatusCode) IsHostnameOccupied() bool {
 	return s == HostnameOccupied
 }
 
-func (s StatusCode) IsServiceOccupied() bool {
+func (s StatusCode) IsTargetServiceOccupied() bool {
 	return s == TargetServiceOccupied
 }
 
@@ -76,7 +76,7 @@ func (s *GatewayResourceStatus) IsHostnameOccupied() bool {
 }
 
 func (s *GatewayResourceStatus) IsTargetServiceOccupied() bool {
-	return s.Code.IsServiceOccupied()
+	return s.Code.IsTargetServiceOccupied()
 }
 
 type GatewayResource struct {

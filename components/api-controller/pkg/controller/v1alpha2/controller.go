@@ -206,7 +206,7 @@ func (c *Controller) onCreate(api *kymaApi.Api) error {
 	}
 	defer apiStatusHelper.Update()
 
-	if validateAPIStatus := c.validateAPI(api, apiStatusHelper); validateAPIStatus.IsError() || validateAPIStatus.IsServiceOccupied() {
+	if validateAPIStatus := c.validateAPI(api, apiStatusHelper); validateAPIStatus.IsError() || validateAPIStatus.IsTargetServiceOccupied() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 	}
 
@@ -229,7 +229,7 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 			Code:      code,
 			LastError: lastError,
 		}
-		apiStatusHelper.SetVirtualServiceStatus(status)
+		apiStatusHelper.SetValidationStatus(status)
 		return code
 	}
 
@@ -248,7 +248,9 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 		}
 	}
 
-	return kymaMeta.InProgress
+	setStatus(kymaMeta.Done, "")
+
+	return kymaMeta.Done
 }
 
 func (c *Controller) createVirtualService(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
@@ -351,7 +353,7 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 	}
 	defer apiStatusHelper.Update()
 
-	if validateAPIStatus := c.validateAPI(newApi, apiStatusHelper); validateAPIStatus.IsError() || validateAPIStatus.IsServiceOccupied() {
+	if validateAPIStatus := c.validateAPI(newApi, apiStatusHelper); validateAPIStatus.IsError() || validateAPIStatus.IsTargetServiceOccupied() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", newApi.Namespace, newApi.Name, newApi.ResourceVersion)
 	}
 

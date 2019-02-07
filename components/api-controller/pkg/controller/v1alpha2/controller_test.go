@@ -68,15 +68,16 @@ func TestValidateApi(t *testing.T) {
 
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
-			Convey("it must not update the helper and should return the \"InProgress\" status code", func() {
+			Convey("it should update the helper with the \"Done\" status code and return this code", func() {
 
 				//when
 				statusCode := c.validateAPI(testAPI, statusHelper)
 
 				//then
-				So(statusHelper.hasChanged, ShouldBeFalse)
-				So(statusHelper.apiCopy.Status.IsInProgress(), ShouldBeTrue)
-				So(statusCode, ShouldEqual, kymaMeta.InProgress)
+				So(statusHelper.hasChanged, ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.ValidationStatus.IsDone(), ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
+				So(statusCode, ShouldEqual, kymaMeta.Done)
 			})
 		})
 
@@ -87,13 +88,14 @@ func TestValidateApi(t *testing.T) {
 
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
-			Convey("it should update the helper and return the \"TargetServiceOccupied\" status code", func() {
+			Convey("it should update the helper with the \"TargetServiceOccupied\" status code and return this code", func() {
 
 				//when
 				statusCode := c.validateAPI(testAPI, statusHelper)
 
 				//then
 				So(statusHelper.hasChanged, ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.ValidationStatus.IsDone(), ShouldBeFalse)
 				So(statusHelper.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeTrue)
 				So(statusCode, ShouldEqual, kymaMeta.TargetServiceOccupied)
 			})
@@ -115,6 +117,7 @@ func TestValidateApi(t *testing.T) {
 
 				//then
 				So(statusHelper.hasChanged, ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.ValidationStatus.IsDone(), ShouldBeFalse)
 				So(statusHelper.apiCopy.Status.IsError(), ShouldBeTrue)
 				So(statusCode, ShouldEqual, kymaMeta.Error)
 			})
@@ -134,9 +137,10 @@ func TestValidateApi(t *testing.T) {
 				statusCode := c.validateAPI(testAPI, statusHelper)
 
 				//then
-				So(statusHelper.hasChanged, ShouldBeFalse)
-				So(statusHelper.apiCopy.Status.IsInProgress(), ShouldBeTrue)
-				So(statusCode, ShouldEqual, kymaMeta.InProgress)
+				So(statusHelper.hasChanged, ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.ValidationStatus.IsDone(), ShouldBeTrue)
+				So(statusHelper.apiCopy.Status.IsTargetServiceOccupied(), ShouldBeFalse)
+				So(statusCode, ShouldEqual, kymaMeta.Done)
 			})
 		})
 	})

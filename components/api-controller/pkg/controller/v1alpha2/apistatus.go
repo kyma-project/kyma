@@ -21,6 +21,11 @@ func NewApiStatusHelper(kymaInterface kyma.Interface, api *kymaApi.Api) *ApiStat
 	}
 }
 
+func (su *ApiStatusHelper) SetValidationStatus(validationStatus *kymaMeta.GatewayResourceStatus) {
+	su.apiCopy.Status.ValidationStatus = *validationStatus
+	su.hasChanged = true
+}
+
 func (su *ApiStatusHelper) SetAuthenticationStatus(authStatus *kymaMeta.GatewayResourceStatus) {
 	su.apiCopy.Status.AuthenticationStatus = *authStatus
 	su.hasChanged = true
