@@ -35,8 +35,9 @@ type fakeAPILister struct {
 func (l *fakeAPILister) List(selector labels.Selector) (ret []*apis.Api, err error) {
 
 	fakeAPI := &apis.Api{}
+	fakeAPI.SetName("existing-api")
+	fakeAPI.SetNamespace("test-ns")
 	fakeAPI.Spec.Service.Name = "occupied-service"
-	fakeAPI.SetUID("0")
 
 	return []*apis.Api{fakeAPI}, nil
 }
@@ -57,9 +58,11 @@ func TestValidateApi(t *testing.T) {
 
 		c := &Controller{}
 		c.apisLister = &fakeAPILister{}
+
 		testAPI := &apis.Api{}
+		testAPI.SetName("test-api-1")
+		testAPI.SetNamespace("test-ns")
 		testAPI.Status.SetInProgress()
-		testAPI.SetUID("1")
 
 		Convey("is fed with an API for a non-occupied service", func() {
 
@@ -126,8 +129,8 @@ func TestValidateApi(t *testing.T) {
 		Convey("is called in OnUpdate context", func() {
 
 			//given
+			testAPI.SetName("existing-api")
 			testAPI.Spec.Service.Name = "occupied-service"
-			testAPI.SetUID("0")
 
 			statusHelper := NewApiStatusHelper(nil, testAPI)
 
