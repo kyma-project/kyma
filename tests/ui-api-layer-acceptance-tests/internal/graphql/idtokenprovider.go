@@ -123,7 +123,12 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 }
 
 func readRespBody(resp *http.Response) string {
-	defer resp.Body.Close()
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Printf("WARNING: Unable to close response body. Cause: %v", err)
+		}
+	}()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("WARNING: Unable to read response body (status: '%s'). Root cause: %v", resp.Status, err)
@@ -148,7 +153,11 @@ func getLocalAuthEndpoint(body io.Reader) (string, error) {
 			if attr.Key != "href" {
 				continue
 			}
-			match, _ := regexp.MatchString("/auth/local.*", attr.Val)
+			match, err := regexp.MatchString("/auth/local.*", attr.Val)
+			if err != nil {
+				log.Printf("WARNING: Unable to match string. Cause: %v", err)
+				return "", err
+			}
 			if match {
 				return attr.Val, nil
 			}

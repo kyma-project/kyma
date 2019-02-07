@@ -24,7 +24,8 @@ func TestServicePlanService_Find(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer()
 
-		svc := servicecatalog.NewServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -39,7 +40,8 @@ func TestServicePlanService_Find(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer()
 
-		svc := servicecatalog.NewServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -61,7 +63,8 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer()
 
-		svc := servicecatalog.NewServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -76,7 +79,8 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer()
 
-		svc := servicecatalog.NewServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -99,11 +103,12 @@ func TestServicePlanService_FindByExternalNameForClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer()
 
-		svc := servicecatalog.NewServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		_, err := svc.FindByExternalName(externalName, className, nsName)
+		_, err = svc.FindByExternalName(externalName, className, nsName)
 
 		assert.Error(t, err)
 	})
@@ -122,7 +127,8 @@ func TestServicePlanService_ListForClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer()
 
-		svc := servicecatalog.NewServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -138,7 +144,8 @@ func TestServicePlanService_ListForClass(t *testing.T) {
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer()
-		svc := servicecatalog.NewServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 

@@ -21,7 +21,11 @@ func (y *JSON) UnmarshalGQL(v interface{}) error {
 		v = jsonMap
 	}
 
-	value := v.(map[string]interface{})
+	value, ok := v.(map[string]interface{})
+	if !ok {
+		glog.Error(errors.Errorf("Unable to convert interface %T to map[string]interface{}", v))
+		return errors.Errorf("Unable to convert interface %T to map[string]interface{}", v)
+	}
 	*y = value
 	return nil
 }
@@ -31,6 +35,11 @@ func (y JSON) MarshalGQL(w io.Writer) {
 	bytes, err := json.Marshal(y)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while marshalling %+v scalar object", y))
+		return
 	}
-	w.Write(bytes)
+	_, err = w.Write(bytes)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while writing marshalled %+v object", y))
+		return
+	}
 }

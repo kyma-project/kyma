@@ -10,7 +10,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 )
 
-func NewServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *serviceInstanceService {
+func NewServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) (*serviceInstanceService, error) {
 	return newServiceInstanceService(informer, client)
 }
 
@@ -18,8 +18,8 @@ func NewServiceInstanceResolver(serviceInstanceSvc serviceInstanceSvc, clusterSe
 	return newServiceInstanceResolver(serviceInstanceSvc, clusterServicePlanGetter, clusterServiceClassGetter, servicePlanGetter, serviceClassGetter)
 }
 
-func NewMockServiceInstanceConverter() *mockGqlInstanceConverter {
-	return new(mockGqlInstanceConverter)
+func NewMockServiceInstanceConverter() *mockGqlServiceInstanceConverter {
+	return new(mockGqlServiceInstanceConverter)
 }
 
 func NewMockServiceInstanceService() *mockServiceInstanceSvc {
@@ -65,7 +65,7 @@ func (r *serviceInstanceResolver) SetServicePlanConverter(converter gqlServicePl
 
 // ServiceClass
 
-func NewServiceClassService(informer cache.SharedIndexInformer) *serviceClassService {
+func NewServiceClassService(informer cache.SharedIndexInformer) (*serviceClassService, error) {
 	return newServiceClassService(informer)
 }
 
@@ -83,7 +83,7 @@ func (r *serviceClassResolver) SetPlanConverter(converter gqlServicePlanConverte
 
 // ClusterServiceClass
 
-func NewClusterServiceClassService(informer cache.SharedIndexInformer) *clusterServiceClassService {
+func NewClusterServiceClassService(informer cache.SharedIndexInformer) (*clusterServiceClassService, error) {
 	return newClusterServiceClassService(informer)
 }
 
@@ -129,11 +129,11 @@ func NewServiceBrokerService(informer cache.SharedIndexInformer) *serviceBrokerS
 
 // ServicePlan
 
-func NewServicePlanService(informer cache.SharedIndexInformer) *servicePlanService {
+func NewServicePlanService(informer cache.SharedIndexInformer) (*servicePlanService, error) {
 	return newServicePlanService(informer)
 }
 
-func NewClusterServicePlanService(informer cache.SharedIndexInformer) *clusterServicePlanService {
+func NewClusterServicePlanService(informer cache.SharedIndexInformer) (*clusterServicePlanService, error) {
 	return newClusterServicePlanService(informer)
 }
 
@@ -142,7 +142,7 @@ func NewClusterServicePlanService(informer cache.SharedIndexInformer) *clusterSe
 func NewServiceBindingResolver(sbService serviceBindingOperations) *serviceBindingResolver {
 	return newServiceBindingResolver(sbService)
 }
-func NewServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, informer cache.SharedIndexInformer, sbName string) *serviceBindingService {
+func NewServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, informer cache.SharedIndexInformer, sbName string) (*serviceBindingService, error) {
 	return newServiceBindingService(client, informer, func() string {
 		return sbName
 	})

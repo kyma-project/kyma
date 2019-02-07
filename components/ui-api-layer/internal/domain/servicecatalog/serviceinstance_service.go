@@ -24,9 +24,9 @@ type serviceInstanceService struct {
 	instanceExt status.InstanceExtractor
 }
 
-func newServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *serviceInstanceService {
+func newServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) (*serviceInstanceService, error) {
 	instanceExt := status.InstanceExtractor{}
-	informer.AddIndexers(cache.Indexers{
+	err := informer.AddIndexers(cache.Indexers{
 		"externalClusterServiceClassName": func(obj interface{}) ([]string, error) {
 			serviceInstance, ok := obj.(*v1beta1.ServiceInstance)
 			if !ok {
@@ -71,6 +71,9 @@ func newServiceInstanceService(informer cache.SharedIndexInformer, client client
 			return []string{key}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
@@ -80,7 +83,7 @@ func newServiceInstanceService(informer cache.SharedIndexInformer, client client
 		client:      client,
 		notifier:    notifier,
 		instanceExt: instanceExt,
-	}
+	}, nil
 }
 
 func (svc *serviceInstanceService) Find(name, namespace string) (*v1beta1.ServiceInstance, error) {

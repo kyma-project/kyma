@@ -29,7 +29,8 @@ func TestServiceInstanceService_Find(t *testing.T) {
 		serviceInstance := fixServiceInstance(instanceName, namespace)
 		serviceInstanceInformer := fixInformer(serviceInstance)
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
@@ -43,7 +44,8 @@ func TestServiceInstanceService_Find(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceInstanceInformer := informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer()
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
@@ -62,7 +64,8 @@ func TestServiceInstanceService_List(t *testing.T) {
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
@@ -76,7 +79,8 @@ func TestServiceInstanceService_List(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		serviceInstanceInformer := fixInformer()
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
@@ -98,7 +102,8 @@ func TestServiceInstanceService_ListForStatus(t *testing.T) {
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
@@ -114,7 +119,8 @@ func TestServiceInstanceService_ListForStatus(t *testing.T) {
 
 		serviceInstanceInformer := fixInformer()
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
@@ -137,7 +143,8 @@ func TestServiceInstanceService_ListForClusterServiceClass(t *testing.T) {
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 		expected := []*v1beta1.ServiceInstance{
 			serviceInstance1, serviceInstance2, serviceInstance3,
@@ -161,7 +168,8 @@ func TestServiceInstanceService_ListForClusterServiceClass(t *testing.T) {
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
 		var emptyArray []*v1beta1.ServiceInstance
@@ -183,7 +191,8 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 		expected := []*v1beta1.ServiceInstance{
 			serviceInstance1, serviceInstance2, serviceInstance3,
@@ -207,7 +216,8 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 
 		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
 
-		svc := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
 		var emptyArray []*v1beta1.ServiceInstance
@@ -225,7 +235,8 @@ func TestServiceInstanceService_Create(t *testing.T) {
 			return true, expected, nil
 		})
 
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), client)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), client)
+		require.NoError(t, err)
 
 		params := servicecatalog.NewServiceInstanceCreateParameters("name", "namespace", []string{"test", "label"}, "planName", true, "className", true, nil)
 		result, err := svc.Create(*params)
@@ -240,9 +251,10 @@ func TestServiceInstanceService_Delete(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		instance := fixServiceInstance("test", "test")
 		client := fake.NewSimpleClientset(instance)
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), client)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), client)
+		require.NoError(t, err)
 
-		err := svc.Delete("test", "test")
+		err = svc.Delete("test", "test")
 
 		assert.NoError(t, err)
 	})
@@ -254,9 +266,10 @@ func TestServiceInstanceService_Delete(t *testing.T) {
 		client.PrependReactor("*", "*", func(action testing2.Action) (handled bool, ret runtime.Object, err error) {
 			return true, nil, testErr
 		})
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), client)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), client)
+		require.NoError(t, err)
 
-		err := svc.Delete("test", "test")
+		err = svc.Delete("test", "test")
 
 		assert.Equal(t, testErr, err)
 	})
@@ -292,7 +305,8 @@ func TestServiceInstanceService_IsBindableWithClusterRefs(t *testing.T) {
 				},
 			},
 		}
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 
 		result := svc.IsBindableWithClusterRefs(class, plan)
 
@@ -330,7 +344,8 @@ func TestServiceInstanceService_IsBindableWithLocalRefs(t *testing.T) {
 				},
 			},
 		}
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 
 		result := svc.IsBindableWithLocalRefs(class, plan)
 
@@ -340,13 +355,15 @@ func TestServiceInstanceService_IsBindableWithLocalRefs(t *testing.T) {
 
 func TestServiceInstanceService_Subscribe(t *testing.T) {
 	t.Run("Simple", func(t *testing.T) {
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 		instanceListener := listener.NewInstance(nil, nil, nil)
 		svc.Subscribe(instanceListener)
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 		instanceListener := listener.NewInstance(nil, nil, nil)
 
 		svc.Subscribe(instanceListener)
@@ -354,7 +371,8 @@ func TestServiceInstanceService_Subscribe(t *testing.T) {
 	})
 
 	t.Run("Multiple", func(t *testing.T) {
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 		instanceListenerA := listener.NewInstance(nil, nil, nil)
 		instanceListenerB := listener.NewInstance(nil, nil, nil)
 
@@ -363,7 +381,8 @@ func TestServiceInstanceService_Subscribe(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 
 		svc.Subscribe(nil)
 	})
@@ -371,7 +390,8 @@ func TestServiceInstanceService_Subscribe(t *testing.T) {
 
 func TestServiceInstanceService_Unsubscribe(t *testing.T) {
 	t.Run("Existing", func(t *testing.T) {
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 		instanceListener := listener.NewInstance(nil, nil, nil)
 		svc.Subscribe(instanceListener)
 
@@ -379,7 +399,8 @@ func TestServiceInstanceService_Unsubscribe(t *testing.T) {
 	})
 
 	t.Run("Duplicated", func(t *testing.T) {
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 		instanceListener := listener.NewInstance(nil, nil, nil)
 		svc.Subscribe(instanceListener)
 		svc.Subscribe(instanceListener)
@@ -388,7 +409,8 @@ func TestServiceInstanceService_Unsubscribe(t *testing.T) {
 	})
 
 	t.Run("Multiple", func(t *testing.T) {
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 		instanceListenerA := listener.NewInstance(nil, nil, nil)
 		instanceListenerB := listener.NewInstance(nil, nil, nil)
 		svc.Subscribe(instanceListenerA)
@@ -398,7 +420,8 @@ func TestServiceInstanceService_Unsubscribe(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		svc := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		svc, err := servicecatalog.NewServiceInstanceService(fixInformer(), nil)
+		require.NoError(t, err)
 
 		svc.Unsubscribe(nil)
 	})
