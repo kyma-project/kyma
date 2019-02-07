@@ -58,7 +58,7 @@ func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.Re
 					if val.Field(i).Kind() != reflect.String {
 						return nil, errors.New("there are problems with receiving name value from passed object")
 					}
-					name = val.String()
+					name = val.Field(i).String()
 				}
 			}
 
@@ -68,7 +68,7 @@ func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.Re
 					if val.Field(i).Kind() != reflect.String {
 						return nil, errors.New("there are problems with receiving namespace value from passed object")
 					}
-					namespace = val.String()
+					namespace = val.Field(i).String()
 				}
 			}
 		}
@@ -82,11 +82,25 @@ func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.Re
 	} else {
 
 		if attributes.NameArg != nil {
-			name = resolverCtx.Args[*attributes.NameArg].(string)
+			var ok bool
+			name, ok = resolverCtx.Args[*attributes.NameArg].(string)
+			if !ok {
+				return nil, errors.New("name in arguments found, but can't be converted to string")
+			}
+			if name == "" {
+				return nil, errors.New("name in arguments not found")
+			}
 		}
 
 		if attributes.NamespaceArg != nil {
-			namespace = resolverCtx.Args[*attributes.NamespaceArg].(string)
+			var ok bool
+			namespace, ok = resolverCtx.Args[*attributes.NamespaceArg].(string)
+			if !ok {
+				return nil, errors.New("namespace in arguments found, but can't be converted to string")
+			}
+			if namespace == "" {
+				return nil, errors.New("namespace in arguments not found")
+			}
 		}
 	}
 

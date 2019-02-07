@@ -17,7 +17,7 @@ func TestNewRBACDirective(t *testing.T) {
 		authorizerMock := &mockAuthorizer{decision: authorizer.DecisionAllow}
 		resolver := &mockResolver{}
 
-		attributes := withArgsAttributes()
+		attributes := withArgsAttributes(withoutChildResolverSet)
 
 		directive := NewRBACDirective(authorizerMock)
 
@@ -37,7 +37,7 @@ func TestNewRBACDirective(t *testing.T) {
 	t.Run("When decision is 'deny'", func(t *testing.T) {
 		authorizerMock := &mockAuthorizer{decision: authorizer.DecisionDeny}
 		resolver := &mockResolver{}
-		attributes := withArgsAttributes()
+		attributes := withArgsAttributes(withoutChildResolverSet)
 
 		directive := NewRBACDirective(authorizerMock)
 
@@ -57,7 +57,7 @@ func TestNewRBACDirective(t *testing.T) {
 	t.Run("When decision is 'no opinion'", func(t *testing.T) {
 		authorizerMock := &mockAuthorizer{decision: authorizer.DecisionNoOpinion}
 		resolver := &mockResolver{}
-		attributes := withArgsAttributes()
+		attributes := withArgsAttributes(withoutChildResolverSet)
 
 		directive := NewRBACDirective(authorizerMock)
 

@@ -23,32 +23,54 @@ const (
 )
 
 var (
-	namespaceArg = "my-namespace"
-	nameArg      = "my-name"
+	namespaceArg = "MyNamespace"
+	nameArg      = "MyName"
 	userInfo     = user.DefaultInfo{Name: "Test User", UID: "deadbeef", Groups: []string{"admins", "testers"}}
 )
 
-func noArgsAttributes() gqlschema.ResourceAttributes {
+type ChildResolverSetting bool
+
+const (
+	withChildResolverSet    = true
+	withoutChildResolverSet = false
+)
+
+func noArgsAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
 	return gqlschema.ResourceAttributes{
-		Verb:         verb,
-		APIGroup:     apiGroup,
-		APIVersion:   apiVersion,
-		Resource:     resource,
-		Subresource:  subresource,
-		NameArg:      nil,
-		NamespaceArg: nil,
+		Verb:            verb,
+		APIGroup:        apiGroup,
+		APIVersion:      apiVersion,
+		Resource:        resource,
+		Subresource:     subresource,
+		NameArg:         nil,
+		NamespaceArg:    nil,
+		IsChildResolver: bool(isChildResolver),
 	}
 }
 
-func withArgsAttributes() gqlschema.ResourceAttributes {
+func withArgsAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
 	return gqlschema.ResourceAttributes{
-		Verb:         verb,
-		APIGroup:     apiGroup,
-		APIVersion:   apiVersion,
-		Resource:     resource,
-		Subresource:  subresource,
-		NameArg:      &nameArg,
-		NamespaceArg: &namespaceArg,
+		Verb:            verb,
+		APIGroup:        apiGroup,
+		APIVersion:      apiVersion,
+		Resource:        resource,
+		Subresource:     subresource,
+		NameArg:         &nameArg,
+		NamespaceArg:    &namespaceArg,
+		IsChildResolver: bool(isChildResolver),
+	}
+}
+
+func withNamespaceArgAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
+	return gqlschema.ResourceAttributes{
+		Verb:            verb,
+		APIGroup:        apiGroup,
+		APIVersion:      apiVersion,
+		Resource:        resource,
+		Subresource:     subresource,
+		NameArg:         nil,
+		NamespaceArg:    &namespaceArg,
+		IsChildResolver: bool(isChildResolver),
 	}
 }
 
