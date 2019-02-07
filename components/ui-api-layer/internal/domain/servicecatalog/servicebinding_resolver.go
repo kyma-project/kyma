@@ -88,20 +88,20 @@ func (r *serviceBindingResolver) ServiceBindingQuery(ctx context.Context, name, 
 	return out, nil
 }
 
-func (r *serviceBindingResolver) ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, namespace string) (gqlschema.ServiceBindings, error) {
+func (r *serviceBindingResolver) ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, namespace string) (*gqlschema.ServiceBindings, error) {
 	list, err := r.operations.ListForServiceInstance(namespace, instanceName)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting many %s to Instance [instance name: %s. namespace: %s]", pretty.ServiceBindings, instanceName, namespace))
-		return gqlschema.ServiceBindings{}, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithNamespace(namespace))
+		return nil, gqlerror.New(err, pretty.ServiceBinding, gqlerror.WithNamespace(namespace))
 	}
 
 	out, err := r.converter.ToGQLs(list)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting many %s for %s `%s`", pretty.ServiceBindings, pretty.ServiceInstance, instanceName))
-		return gqlschema.ServiceBindings{}, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(instanceName), gqlerror.WithNamespace(namespace))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(instanceName), gqlerror.WithNamespace(namespace))
 	}
 
-	return out, nil
+	return &out, nil
 }
 
 func (r *serviceBindingResolver) ServiceBindingEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingEvent, error) {

@@ -657,7 +657,7 @@ type ServiceInstanceResolver interface {
 	ServicePlan(ctx context.Context, obj *ServiceInstance) (*ServicePlan, error)
 	ClusterServicePlan(ctx context.Context, obj *ServiceInstance) (*ClusterServicePlan, error)
 	Bindable(ctx context.Context, obj *ServiceInstance) (bool, error)
-	ServiceBindings(ctx context.Context, obj *ServiceInstance) (ServiceBindings, error)
+	ServiceBindings(ctx context.Context, obj *ServiceInstance) (*ServiceBindings, error)
 	ServiceBindingUsages(ctx context.Context, obj *ServiceInstance) ([]ServiceBindingUsage, error)
 }
 type SubscriptionResolver interface {
@@ -16073,9 +16073,6 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._ServiceInstance_serviceBindings(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		case "serviceBindingUsages":
@@ -16485,16 +16482,17 @@ func (ec *executionContext) _ServiceInstance_serviceBindings(ctx context.Context
 		return ec.resolvers.ServiceInstance().ServiceBindings(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(ServiceBindings)
+	res := resTmp.(*ServiceBindings)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._ServiceBindings(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ServiceBindings(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -19846,7 +19844,7 @@ type ServiceInstance {
     servicePlan: ServicePlan
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: ServiceBindings! @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
+    serviceBindings: ServiceBindings @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
 
     # Depends on servicecatalogaddons domain
     serviceBindingUsages: [ServiceBindingUsage!]
