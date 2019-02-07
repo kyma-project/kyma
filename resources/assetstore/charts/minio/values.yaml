@@ -22,12 +22,6 @@ mcImage:
 ##
 mode: standalone
 
-## Update strategy for Deployments
-DeploymentUpdate:
-  type: RollingUpdate
-  maxUnavailable: 0
-  maxSurge: 100%
-
 ## Update strategy for StatefulSets
 StatefulSetUpdate:
   updateStrategy: RollingUpdate

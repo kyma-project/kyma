@@ -99,7 +99,7 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: core
+    component: assetstore
 data:
   minio.resources.requests.memory: 64Mi
   minio.resources.limits.cpu: 100m

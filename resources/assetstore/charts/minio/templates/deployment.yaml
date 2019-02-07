@@ -9,11 +9,10 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  # MODIFIED: Block - START
   strategy:
-    type: {{ .Values.DeploymentUpdate.type }}
-    rollingUpdate:
-      maxSurge: {{ .Values.DeploymentUpdate.maxSurge }}
-      maxUnavailable: {{ .Values.DeploymentUpdate.maxUnavailable }}
+{{ toYaml .Values.DeploymentStrategy | indent 4 }}
+  # MODIFIED: Block - END
   {{- if .Values.nasgateway.enabled }}
   replicas: {{ .Values.nasgateway.replicas }}
   {{- end }}
