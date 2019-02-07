@@ -3,7 +3,7 @@ title: Register a secured API
 type: Tutorials
 ---
 
-The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and generated client certificates.
+The Application Registry allows you to register a secured API for every service. The supported authentication methods are [Basic Authentication](https://tools.ietf.org/html/rfc7617), [OAuth](https://tools.ietf.org/html/rfc6750), and client certificates.
 
 You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns a `400` code response.
 
@@ -91,13 +91,13 @@ kubectl -n kyma-integration get secrets
 To fetch the certificate and key encoded with base64, run this command:
 
 ```
-kubectl -n kyma-integration get secrets app-{APP_NAME}-{SERVICE_ID}
+kubectl -n kyma-integration get secrets app-{APP_NAME}-{SERVICE_ID} -o yaml
 ```
 
 >**NOTE:** Replace the `APP_NAME` placeholder with the name of the Application used to connect the external solution that is the origin of the API. Replace the `SERVICE_ID` placeholder with the ID of the registered service to which the API belongs. You get this ID after you register an external solution's service in Kyma.
 
 
-If the generated certificate doesn't meet your security standards or specific needs, you can use a custom certificate-key pair for authentication. To replace the generated certificate and key with a custom pair in Kyma, run this command:
+If the API you registered provides a certificate-key pair or the generated certificate doesn't meet your security standards or specific needs, you can use a custom certificate-key pair for authentication. To replace the Kyma-generated pair with your certificate and key, run this command:
 
 ```
 kubectl -n kyma-integration patch secrets app-{APP_NAME}-{SERVICE_ID} --patch 'data:
