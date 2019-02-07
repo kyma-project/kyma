@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project contains the end to end tests that it runs as part of the Kyma on Google Cloud Platform. The tests is written in Go. 
+This project contains end-to-end tests that it runs as part of the  Kyma on Google Cloud Platform installation. The tests are written in Go. 
 
 - Create resources on Kyma Cluster (e.g. functions).
 - Backup Cluster.
