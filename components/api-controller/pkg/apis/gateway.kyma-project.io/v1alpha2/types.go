@@ -46,7 +46,7 @@ type JwtAuthentication struct {
 }
 
 type ApiStatus struct {
-	ValidationStatus     kymaMeta.GatewayResourceStatus `json:"apiValidationStatus,omitempty"`
+	ValidationStatus     kymaMeta.GatewayResourceStatus `json:"validationStatus,omitempty"`
 	AuthenticationStatus kymaMeta.GatewayResourceStatus `json:"authenticationStatus,omitempty"`
 	VirtualServiceStatus kymaMeta.GatewayResourceStatus `json:"virtualServiceStatus,omitempty"`
 }
