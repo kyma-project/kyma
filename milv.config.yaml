@@ -34,4 +34,4 @@ files:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
   - path: "./kyma/docs/kyma/docs/04-06-gke-xip.io-domain.md"
     config:
-      white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
+      white-list-external: ["https://console.{WILDCARD_DNS}.xip.io", "https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml", "https://github.com/kyma-project/kyma/releases/download/$KYMA_RELEASE_VERSION/kyma-config-cluster.yaml", "https://github.com/kyma-project/kyma/releases/download/$KYMA_RELEASE_VERSION/kyma-installer-cluster.yaml"]
