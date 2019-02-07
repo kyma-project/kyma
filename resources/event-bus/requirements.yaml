@@ -5,5 +5,7 @@ dependencies:
     condition: global.kymaEventBus
   - name: sub-validator
     condition: global.kymaEventBus
+  - name: natss-knative-provisioner
+    condition: global.knative    
   - name: publish-knative
     condition: global.knative
