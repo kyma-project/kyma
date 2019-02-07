@@ -79,7 +79,7 @@ Install Kyma using a pre-built Installer image, or an Installer image built from
 
 2. Create the Installer image URL following this format: 
   ```
-  `eu.gcr.io/kyma-project/kyma-installer:{RELEASE_VERSION}`
+  eu.gcr.io/kyma-project/kyma-installer:{RELEASE_VERSION}
   ```
 3. Set the Installer image URL as the value of the **image** field in the `my-kyma.yaml` you created.
 
