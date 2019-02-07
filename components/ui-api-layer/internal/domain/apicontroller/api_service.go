@@ -17,8 +17,8 @@ func newApiService(informer cache.SharedIndexInformer) *apiService {
 	}
 }
 
-func (svc *apiService) List(environment string, serviceName *string, hostname *string) ([]*v1alpha2.Api, error) {
-	items, err := svc.informer.GetIndexer().ByIndex("namespace", environment)
+func (svc *apiService) List(namespace string, serviceName *string, hostname *string) ([]*v1alpha2.Api, error) {
+	items, err := svc.informer.GetIndexer().ByIndex("namespace", namespace)
 	if err != nil {
 		return nil, err
 	}

@@ -33,8 +33,8 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Len(t, result, 2)
-		assert.Contains(t, result, *fixGQLEventActivation("test", "event1"))
-		assert.Contains(t, result, *fixGQLEventActivation("test", "event2"))
+		assert.Contains(t, result, *fixGQLEventActivation("event1"))
+		assert.Contains(t, result, *fixGQLEventActivation("event2"))
 	})
 
 	t.Run("Not found", func(t *testing.T) {
@@ -90,7 +90,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever.On("AsyncApiSpec").Return(getter)
 
 		resolver := application.NewEventActivationResolver(nil, retriever)
-		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
+		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.NoError(t, err)
 		assert.Len(t, result, 2)
@@ -107,7 +107,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever.On("AsyncApiSpec").Return(getter)
 
 		resolver := application.NewEventActivationResolver(nil, retriever)
-		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
+		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.NoError(t, err)
 		assert.Empty(t, result)
@@ -128,7 +128,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever.On("AsyncApiSpec").Return(getter)
 
 		resolver := application.NewEventActivationResolver(nil, retriever)
-		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
+		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -156,14 +156,14 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever.On("AsyncApiSpec").Return(getter)
 
 		resolver := application.NewEventActivationResolver(nil, retriever)
-		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("env", "test"))
+		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
 	})
 }
 
-func fixGQLEventActivation(environment, name string) *gqlschema.EventActivation {
+func fixGQLEventActivation(name string) *gqlschema.EventActivation {
 	return &gqlschema.EventActivation{
 		Name:        name,
 		DisplayName: "aha!",

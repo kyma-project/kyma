@@ -25,9 +25,16 @@ The Connector Service has the following parameters:
 - **internalAPIPort** - This port exposes the Connector Service within Kubernetes cluster. The default port is `8080`.
 - **namespace** - Namespace where Connector Service is deployed. The default namespace is `kyma-integration`.
 - **tokenLength** - Length of registration tokens. The default value is `64`.
-- **tokenExpirationMinutes** - Time after which tokens expire and are no longer valid. The default value is `5` minutes.
-- **domainName** - Domain name of the cluster, used for URL generating. Default domain name is `.wormhole.cluster.kyma.cx`.
-- **certificateServiceHost** - Host at which this service is accessible, used for URL generating. Default host is `cert-service.wormhole.cluster.kyma.cx`.
+- **appTokenExpirationMinutes** - Time after which tokens for applications expire and are no longer valid. The default value is `5` minutes.
+- **runtimeTokenExpirationMinutes** - Time after which tokens for runtimes expire and are no longer valid. The default value is `10` minutes.
+- **caSecretName** - Name of the secret which contains the root Certificate Authority (CA). The default value is `nginx-auth-ca`.
+- **requestLogging** - Flag for logging incoming requests. It is set to `False` by default.
+- **connectorServiceHost** - Host under which this service is accessible. It is used for generating the URL. The default host is `cert-service.wormhole.cluster.kyma.cx`.
+- **appRegistryHost** - Host under which the Application Registry is accessible. The default value is an empty string.
+- **eventsHost** - Host under which the Event Service is accessible. The default value is an empty string.
+- **getInfoURL** - URL at which the management information is available. If not provided, it bases on `connectorServiceHost`.
+- **group** - Group for which certificates are generated. If the chart does not provide the default value, you must specify it in the request header to the token endpoint.
+- **tenant** - Tenant for which certificates are generated. If the chart does not provide the default value, you must specify it in the request header to the token endpoint.
 
 Connector Service also uses following environmental variables for CSR - related information config:
 - **COUNTRY** (two-letter-long country code)

@@ -6,9 +6,9 @@ import (
 
 func ServiceInstance(name string, namespace string) shared.ServiceInstance {
 	return shared.ServiceInstance{
-		Name:        name,
-		Environment: namespace,
-		Labels:      []string{"test", "test2"},
+		Name:      name,
+		Namespace: namespace,
+		Labels:    []string{"test", "test2"},
 		PlanSpec: map[string]interface{}{
 			"first": "1",
 			"second": map[string]interface{}{

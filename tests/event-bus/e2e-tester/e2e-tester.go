@@ -52,8 +52,8 @@ var (
 func main() {
 	flags := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
-	publishEventEndpointURL = flags.String("publish-event-uri", "http://core-publish:8080/v1/events", "publish service events endpoint `URL`")
-	publishStatusEndpointURL = flags.String("publish-status-uri", "http://core-publish:8080/v1/status/ready", "publish service status endpoint `URL`")
+	publishEventEndpointURL = flags.String("publish-event-uri", "http://event-bus-publish:8080/v1/events", "publish service events endpoint `URL`")
+	publishStatusEndpointURL = flags.String("publish-status-uri", "http://event-bus-publish:8080/v1/status/ready", "publish service status endpoint `URL`")
 	namespace = flags.String("ns", "kyma-system", "k8s `namespace` in which test app is running")
 	subscriberImage := flags.String("subscriber-image", "", "subscriber Docker `image` name")
 	subscriberEventEndpointURL = flags.String("subscriber-events-uri", "http://"+util.SubscriberName+":9000/v1/events", "subscriber service events endpoint `URL`")

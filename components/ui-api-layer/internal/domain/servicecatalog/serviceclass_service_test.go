@@ -17,9 +17,9 @@ import (
 
 func TestServiceClassService_GetServiceClass(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environmentName := "env"
+		nsName := "ns"
 		className := "testExample"
-		serviceClass := fixServiceClass(className, className, environmentName)
+		serviceClass := fixServiceClass(className, className, nsName)
 		client := fake.NewSimpleClientset(serviceClass)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -29,7 +29,7 @@ func TestServiceClassService_GetServiceClass(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		class, err := svc.Find(className, environmentName)
+		class, err := svc.Find(className, nsName)
 		require.NoError(t, err)
 		assert.Equal(t, serviceClass, class)
 	})
@@ -44,7 +44,7 @@ func TestServiceClassService_GetServiceClass(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		class, err := svc.Find("doesntExist", "env")
+		class, err := svc.Find("doesntExist", "ns")
 
 		require.NoError(t, err)
 		assert.Nil(t, class)
@@ -55,8 +55,8 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		className := "testExample"
 		externalName := "testExternal"
-		environmentName := "exampleEnv"
-		serviceClass := fixServiceClass(className, externalName, environmentName)
+		nsName := "exampleNs"
+		serviceClass := fixServiceClass(className, externalName, nsName)
 		client := fake.NewSimpleClientset(serviceClass)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -66,7 +66,7 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		class, err := svc.FindByExternalName(externalName, environmentName)
+		class, err := svc.FindByExternalName(externalName, nsName)
 		require.NoError(t, err)
 		assert.Equal(t, serviceClass, class)
 	})
@@ -81,19 +81,19 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		class, err := svc.FindByExternalName("doesntExist", "env")
+		class, err := svc.FindByExternalName("doesntExist", "ns")
 
 		require.NoError(t, err)
 		assert.Nil(t, class)
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		environmentName := "env"
+		nsName := "ns"
 		externalName := "duplicateName"
 		client := fake.NewSimpleClientset(
-			fixServiceClass("1", externalName, environmentName),
-			fixServiceClass("2", externalName, environmentName),
-			fixServiceClass("3", externalName, environmentName),
+			fixServiceClass("1", externalName, nsName),
+			fixServiceClass("2", externalName, nsName),
+			fixServiceClass("3", externalName, nsName),
 		)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -103,7 +103,7 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		_, err := svc.FindByExternalName(externalName, environmentName)
+		_, err := svc.FindByExternalName(externalName, nsName)
 
 		assert.Error(t, err)
 	})
@@ -111,10 +111,10 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 
 func TestServiceClassService_ListServiceClasses(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environmentName := "exampleEnv"
-		serviceClass1 := fixServiceClass("1", "1", environmentName)
-		serviceClass2 := fixServiceClass("2", "2", environmentName)
-		serviceClass3 := fixServiceClass("3", "3", environmentName)
+		nsName := "exampleNs"
+		serviceClass1 := fixServiceClass("1", "1", nsName)
+		serviceClass2 := fixServiceClass("2", "2", nsName)
+		serviceClass3 := fixServiceClass("3", "3", nsName)
 		client := fake.NewSimpleClientset(serviceClass1, serviceClass2, serviceClass3)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -124,7 +124,7 @@ func TestServiceClassService_ListServiceClasses(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		classes, err := svc.List(environmentName, pager.PagingParams{})
+		classes, err := svc.List(nsName, pager.PagingParams{})
 		require.NoError(t, err)
 		assert.Equal(t, []*v1beta1.ServiceClass{
 			serviceClass1, serviceClass2, serviceClass3,
@@ -142,13 +142,13 @@ func TestServiceClassService_ListServiceClasses(t *testing.T) {
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
 		var emptyArray []*v1beta1.ServiceClass
-		classes, err := svc.List("env", pager.PagingParams{})
+		classes, err := svc.List("ns", pager.PagingParams{})
 		require.NoError(t, err)
 		assert.Equal(t, emptyArray, classes)
 	})
 }
 
-func fixServiceClass(name, externalName, environment string) *v1beta1.ServiceClass {
+func fixServiceClass(name, externalName, namespace string) *v1beta1.ServiceClass {
 	class := v1beta1.ServiceClass{
 		Spec: v1beta1.ServiceClassSpec{
 			CommonServiceClassSpec: v1beta1.CommonServiceClassSpec{
@@ -158,7 +158,7 @@ func fixServiceClass(name, externalName, environment string) *v1beta1.ServiceCla
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 	}
 	return &class

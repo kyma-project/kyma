@@ -9,9 +9,10 @@ metadata:
     "helm-chart-test": "true"
 spec:
   hostNetwork: true
+  serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:3a2b4411
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:5c700851
       imagePullPolicy: IfNotPresent
       resources:
          requests:

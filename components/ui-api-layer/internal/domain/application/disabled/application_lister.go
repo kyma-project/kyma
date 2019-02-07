@@ -14,8 +14,8 @@ func NewApplicationLister(err error) *ApplicationLister {
 	return &ApplicationLister{err: err}
 }
 
-// ListInEnvironment provides a failing mock function with given fields: environment
-func (_m *ApplicationLister) ListInEnvironment(environment string) ([]*v1alpha1.Application, error) {
+// ListInNamespace provides a failing mock function with given fields: namespace
+func (_m *ApplicationLister) ListInNamespace(namespace string) ([]*v1alpha1.Application, error) {
 	var r0 []*v1alpha1.Application
 	var r1 error
 	r1 = _m.err

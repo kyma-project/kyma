@@ -9,8 +9,8 @@ const (
 	Application
 	Applications
 	ConnectorService
-	Environment
-	Environments
+	Namespace
+	Namespaces
 	ApplicationMapping
 )
 
@@ -28,10 +28,10 @@ func (k Kind) String() string {
 		return "Applications"
 	case ConnectorService:
 		return "Connector Service"
-	case Environment:
-		return "Environment"
-	case Environments:
-		return "Environments"
+	case Namespace:
+		return "Namespace"
+	case Namespaces:
+		return "Namespaces"
 	case ApplicationMapping:
 		return "ApplicationMapping"
 	default:

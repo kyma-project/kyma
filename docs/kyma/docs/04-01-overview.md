@@ -26,7 +26,8 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 
 Follow these installation guides to install Kyma locally:
 
-- [Installation guides](#installation-guides)
+- [Install Kyma locally from a release](#installation-install-kyma-locally-from-the-release)
+- [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources)
 
 You can also install Kyma depending on the supported cloud providers:
 - [Install Kyma on a GKE cluster](#installation-install-kyma-on-a-gke-cluster)

@@ -22,8 +22,8 @@ type gqlServiceBrokerConverter interface {
 
 //go:generate mockery -name=serviceBrokerSvc -output=automock -outpkg=automock -case=underscore
 type serviceBrokerSvc interface {
-	Find(name, environment string) (*v1beta1.ServiceBroker, error)
-	List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceBroker, error)
+	Find(name, namespace string) (*v1beta1.ServiceBroker, error)
+	List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceBroker, error)
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
 }
@@ -40,8 +40,8 @@ func newServiceBrokerResolver(serviceBrokerSvc serviceBrokerSvc) *serviceBrokerR
 	}
 }
 
-func (r *serviceBrokerResolver) ServiceBrokersQuery(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
-	items, err := r.serviceBrokerSvc.List(environment, pager.PagingParams{
+func (r *serviceBrokerResolver) ServiceBrokersQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceBroker, error) {
+	items, err := r.serviceBrokerSvc.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,
 	})
@@ -60,8 +60,8 @@ func (r *serviceBrokerResolver) ServiceBrokersQuery(ctx context.Context, environ
 	return serviceBrokers, nil
 }
 
-func (r *serviceBrokerResolver) ServiceBrokerQuery(ctx context.Context, name string, environment string) (*gqlschema.ServiceBroker, error) {
-	serviceBroker, err := r.serviceBrokerSvc.Find(name, environment)
+func (r *serviceBrokerResolver) ServiceBrokerQuery(ctx context.Context, name string, namespace string) (*gqlschema.ServiceBroker, error) {
+	serviceBroker, err := r.serviceBrokerSvc.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s", pretty.ServiceBroker))
 		return nil, gqlerror.New(err, pretty.ServiceBroker, gqlerror.WithName(name))
@@ -79,10 +79,10 @@ func (r *serviceBrokerResolver) ServiceBrokerQuery(ctx context.Context, name str
 	return result, nil
 }
 
-func (r *serviceBrokerResolver) ServiceBrokerEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceBrokerEvent, error) {
+func (r *serviceBrokerResolver) ServiceBrokerEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBrokerEvent, error) {
 	channel := make(chan gqlschema.ServiceBrokerEvent, 1)
 	filter := func(entity *v1beta1.ServiceBroker) bool {
-		return entity != nil && entity.Namespace == environment
+		return entity != nil && entity.Namespace == namespace
 	}
 
 	instanceListener := listener.NewServiceBroker(channel, filter, r.brokerConverter)

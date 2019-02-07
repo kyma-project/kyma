@@ -27,8 +27,8 @@ type ServiceBindingUsageEvent struct {
 }
 
 type DeleteServiceBindingUsageOutput struct {
-	Name        string
-	Environment string
+	Name      string
+	Namespace string
 }
 
 type instanceQueryResponse struct {
@@ -123,11 +123,11 @@ type bindingUsageTestSuite struct {
 
 func (s *bindingUsageTestSuite) fixServiceBindingUsage(name, serviceBindingName, deploymentName string) shared.ServiceBindingUsage {
 	return shared.ServiceBindingUsage{
-		Name:        name,
-		Environment: TestNamespace,
+		Name:      name,
+		Namespace: TestNamespace,
 		ServiceBinding: shared.ServiceBinding{
-			Name:        serviceBindingName,
-			Environment: TestNamespace,
+			Name:      serviceBindingName,
+			Namespace: TestNamespace,
 		},
 		UsedBy: shared.LocalObjectReference{
 			Name: deploymentName,
@@ -148,7 +148,7 @@ func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 	require.NoError(s.t, err)
 
 	s.t.Log("Wait for Instance")
-	err = wait.ForServiceInstanceReady(s.givenInstance.Name, s.givenInstance.Environment, s.svcatCli)
+	err = wait.ForServiceInstanceReady(s.givenInstance.Name, s.givenInstance.Namespace, s.svcatCli)
 	require.NoError(s.t, err)
 
 	s.t.Log("Create Binding")
@@ -156,7 +156,7 @@ func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 	require.NoError(s.t, err)
 
 	s.t.Log("Wait for Binding")
-	err = wait.ForServiceBindingReady(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
+	err = wait.ForServiceBindingReady(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli)
 	require.NoError(s.t, err)
 }
 
@@ -199,10 +199,10 @@ func (s *bindingUsageTestSuite) deleteBinding() error {
 
 func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutationResponse, error) {
 	query := fmt.Sprintf(`
-		mutation ($name: String!, $environment: String!, $serviceBindingRefName: String!, $usedByName: String!, $usedByKind: String!) {
+		mutation ($name: String!, $namespace: String!, $serviceBindingRefName: String!, $usedByName: String!, $usedByKind: String!) {
 			createServiceBindingUsage(createServiceBindingUsageInput: {
 				name: $name,
-				environment: $environment,
+				namespace: $namespace,
 				serviceBindingRef: {
 					name: $serviceBindingRefName,
 				},
@@ -217,7 +217,7 @@ func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutation
 	`, s.bindingUsageDetailsFields())
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.givenBindingUsage.Name)
-	req.SetVar("environment", s.givenBindingUsage.Environment)
+	req.SetVar("namespace", s.givenBindingUsage.Namespace)
 	req.SetVar("serviceBindingRefName", s.givenBindingUsage.ServiceBinding.Name)
 	req.SetVar("usedByName", s.givenBindingUsage.UsedBy.Name)
 	req.SetVar("usedByKind", s.givenBindingUsage.UsedBy.Kind)
@@ -230,15 +230,15 @@ func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutation
 
 func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
 	query := fmt.Sprintf(`
-			query ($name: String!, $environment: String!) {
-				serviceInstance(name: $name, environment: $environment) {
+			query ($name: String!, $namespace: String!) {
+				serviceInstance(name: $name, namespace: $namespace) {
 					%s
 				}
 			}
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
-	req.SetVar("environment", expectedResource.Environment)
+	req.SetVar("namespace", expectedResource.Namespace)
 
 	return req
 }
@@ -257,14 +257,14 @@ func (s *bindingUsageTestSuite) queryServiceInstance() (instanceQueryResponse, e
 		name
 		serviceBindingUsages {
 			name
-			environment
+			namespace
 			serviceBinding {
 				name
 				serviceInstanceName
-				environment
+				namespace
 				secret {
 					name
-					environment
+					namespace
 					data
 				}
 			}
@@ -285,7 +285,7 @@ func (s *bindingUsageTestSuite) deleteServiceInstanceAndBinding() {
 	assert.NoError(s.t, err)
 
 	s.t.Log("Wait for binding deletion")
-	err = wait.ForServiceBindingDeletion(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
+	err = wait.ForServiceBindingDeletion(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli)
 	assert.NoError(s.t, err)
 
 	s.t.Log("Delete Instance")
@@ -293,22 +293,22 @@ func (s *bindingUsageTestSuite) deleteServiceInstanceAndBinding() {
 	assert.NoError(s.t, err)
 
 	s.t.Log("Wait for instance deletion")
-	err = wait.ForServiceInstanceDeletion(s.givenBinding.Name, s.givenBinding.Environment, s.svcatCli)
+	err = wait.ForServiceInstanceDeletion(s.givenBinding.Name, s.givenBinding.Namespace, s.svcatCli)
 	assert.NoError(s.t, err)
 }
 
 func (s *bindingUsageTestSuite) deleteBindingUsage() (bindingUsageDeleteMutationResponse, error) {
 	query := `
-		mutation ($name: String!, $environment: String!) {
-			deleteServiceBindingUsage(serviceBindingUsageName: $name, environment: $environment) {
+		mutation ($name: String!, $namespace: String!) {
+			deleteServiceBindingUsage(serviceBindingUsageName: $name, namespace: $namespace) {
 				name
-				environment
+				namespace
 			}
 		}
 	`
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.givenBindingUsage.Name)
-	req.SetVar("environment", s.givenBindingUsage.Environment)
+	req.SetVar("namespace", s.givenBindingUsage.Namespace)
 
 	var res bindingUsageDeleteMutationResponse
 	err := s.gqlCli.Do(req, &res)
@@ -318,9 +318,9 @@ func (s *bindingUsageTestSuite) deleteBindingUsage() (bindingUsageDeleteMutation
 
 func (s *bindingUsageTestSuite) assertEqualBindingUsage(expected, actual shared.ServiceBindingUsage) {
 	assert.Equal(s.t, expected.Name, actual.Name)
-	assert.Equal(s.t, expected.Environment, actual.Environment)
+	assert.Equal(s.t, expected.Namespace, actual.Namespace)
 	assert.Equal(s.t, expected.Name, actual.ServiceBinding.Name)
-	assert.Equal(s.t, expected.Environment, actual.ServiceBinding.Environment)
+	assert.Equal(s.t, expected.Namespace, actual.ServiceBinding.Namespace)
 	assert.Equal(s.t, expected.UsedBy.Name, actual.UsedBy.Name)
 	assert.Equal(s.t, expected.UsedBy.Kind, actual.UsedBy.Kind)
 
@@ -346,15 +346,15 @@ func (s *bindingUsageTestSuite) assertServiceInstanceContainsServiceBindingUsage
 
 func (s *bindingUsageTestSuite) queryBindingUsage() (bindingUsageQueryResponse, error) {
 	query := fmt.Sprintf(`
-		query ($name: String!, $environment: String!) {
-			serviceBindingUsage(name: $name, environment: $environment) {
+		query ($name: String!, $namespace: String!) {
+			serviceBindingUsage(name: $name, namespace: $namespace) {
 				%s
 			}
 		}
 	`, s.bindingUsageDetailsFields())
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.givenBindingUsage.Name)
-	req.SetVar("environment", s.givenBindingUsage.Environment)
+	req.SetVar("namespace", s.givenBindingUsage.Namespace)
 
 	var res bindingUsageQueryResponse
 	err := s.gqlCli.Do(req, &res)
@@ -364,20 +364,20 @@ func (s *bindingUsageTestSuite) queryBindingUsage() (bindingUsageQueryResponse, 
 
 func (s *bindingUsageTestSuite) assertBindingUsageDeleteResponse(response bindingUsageDeleteMutationResponse) {
 	assert.Equal(s.t, s.givenBindingUsage.Name, response.DeleteServiceBindingUsage.Name)
-	assert.Equal(s.t, s.givenBindingUsage.Environment, response.DeleteServiceBindingUsage.Environment)
+	assert.Equal(s.t, s.givenBindingUsage.Namespace, response.DeleteServiceBindingUsage.Namespace)
 }
 
 func (s *bindingUsageTestSuite) bindingUsageDetailsFields() string {
 	return `
 		name
-		environment
+		namespace
 		serviceBinding {
 			name
 			serviceInstanceName
-			environment
+			namespace
 			secret {
 				name
-				environment
+				namespace
 				data
 			}
 		}
@@ -393,14 +393,14 @@ func (s *bindingUsageTestSuite) bindingUsageDetailsFields() string {
 
 func (s *bindingUsageTestSuite) subscribeBindingUsage() *graphql.Subscription {
 	query := fmt.Sprintf(`
-			subscription ($environment: String!) {
-				serviceBindingUsageEvent(environment: $environment) {
+			subscription ($namespace: String!) {
+				serviceBindingUsageEvent(namespace: $namespace) {
 					%s
 				}
 			}
 		`, s.bindingUsageEventDetailsFields())
 	req := graphql.NewRequest(query)
-	req.SetVar("environment", s.givenBindingUsage.Environment)
+	req.SetVar("namespace", s.givenBindingUsage.Namespace)
 
 	return s.gqlCli.Subscribe(req)
 }

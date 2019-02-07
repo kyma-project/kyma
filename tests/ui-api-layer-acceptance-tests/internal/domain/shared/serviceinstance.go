@@ -2,7 +2,7 @@ package shared
 
 type ServiceInstance struct {
 	Name                 string
-	Environment          string
+	Namespace            string
 	ClassReference       ServiceInstanceResourceRef
 	PlanReference        ServiceInstanceResourceRef
 	PlanSpec             map[string]interface{}

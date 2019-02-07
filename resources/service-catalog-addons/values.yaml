@@ -1,0 +1,9 @@
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  istio:
+    gateway:
+      name: kyma-gateway
+  binding_usage_controller:
+    dir: develop/
+    version: d1930a3d

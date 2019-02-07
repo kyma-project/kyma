@@ -46,7 +46,7 @@ To disable a component from the list of components that you install with Kyma, r
 
 >**NOTE:** This section assumes that you already have your Kyma Lite local version installed successfully.
 
-To install a component that is not installed with Kyma by default, modify the **Installation** custom resource and add the component that you want to install to the list of components :
+To install a component that is not installed with Kyma by default, modify the [Installation](#custom-resource-installation) custom resource and add the component that you want to install to the list of components :
 
 1. Edit the resource:
     ```

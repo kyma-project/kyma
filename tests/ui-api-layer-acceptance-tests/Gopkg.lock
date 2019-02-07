@@ -113,12 +113,6 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
-    "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
-    "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
-    "components/binding-usage-controller/pkg/client/clientset/versioned",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/scheme",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/scheme",
@@ -368,7 +362,6 @@
   packages = [
     "discovery",
     "kubernetes/scheme",
-    "kubernetes/typed/apps/v1beta1",
     "kubernetes/typed/core/v1",
     "pkg/apis/clientauthentication",
     "pkg/apis/clientauthentication/v1alpha1",
@@ -397,6 +390,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6dc43d3ebd9a5f576b9f2fbf5af446f21ae969c32bab70b3545e15dae9818c4a"
+  inputs-digest = "00065fee0d70cae1a2dc6d25f6f8c7a018ae464945c14a57c252430bb3cccffd"
   solver-name = "gps-cdcl"
   solver-version = 1
