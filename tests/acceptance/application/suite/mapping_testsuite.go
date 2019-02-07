@@ -10,6 +10,7 @@ import (
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	appCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/retriever"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -85,13 +86,16 @@ func (ts *MappingTestSuite) TearDown() {
 }
 
 func (ts *MappingTestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
-	repeat.FuncAtMost(ts.t, func() error {
-		_, err := ts.scClient.ServiceClasses(ts.MappedNs).Get(ts.osbServiceId, metav1.GetOptions{})
+	fn := func() error {
+		_, err := retriever.ServiceClassByExternalID(ts.scClient, ts.MappedNs, ts.osbServiceId)
 		if err != nil {
-			return errors.Wrapf(err, "error while getting service class %s", ts.osbServiceId)
+			return err
 		}
+
 		return nil
-	}, timeout)
+	}
+
+	repeat.FuncAtMost(ts.t, fn, timeout)
 }
 
 func (ts *MappingTestSuite) WaitForServiceBrokerWithTimeout(timeout time.Duration) {
@@ -118,7 +122,7 @@ func (ts *MappingTestSuite) EnsureServiceBrokerNotExistWithTimeout(timeout time.
 }
 
 func (ts *MappingTestSuite) EnsureServiceClassNotExist(namespace string) {
-	_, err := ts.scClient.ServiceClasses(namespace).Get(ts.osbServiceId, metav1.GetOptions{})
+	_, err := retriever.ServiceClassByExternalID(ts.scClient, ts.MappedNs, ts.osbServiceId)
 	assert.True(ts.t, apierrors.IsNotFound(err))
 }
 
