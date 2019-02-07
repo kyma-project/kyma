@@ -8,5 +8,4 @@ global:
     version: 84219cbc
   istio_kyma_patch:
     dir: develop/
-    version: a44f2188
-
+    version: 0079a9be
