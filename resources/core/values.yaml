@@ -30,8 +30,8 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: pr/
-    version: PR-2635
+    dir: develop/
+    version: e12b49fc
   api_controller:
     dir: develop/
     version: 8c274255
