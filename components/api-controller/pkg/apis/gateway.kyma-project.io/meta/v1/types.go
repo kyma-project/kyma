@@ -15,7 +15,7 @@ func (c *StatusCode) String() string {
 const (
 	Empty StatusCode = iota
 	InProgress
-	Done
+	Successful
 	Error
 	HostnameOccupied
 	TargetServiceOccupied
@@ -29,8 +29,8 @@ func (s StatusCode) IsInProgress() bool {
 	return s == InProgress
 }
 
-func (s StatusCode) IsDone() bool {
-	return s == Done
+func (s StatusCode) IsSuccessful() bool {
+	return s == Successful
 }
 
 func (s StatusCode) IsError() bool {
@@ -63,8 +63,8 @@ func (s *GatewayResourceStatus) IsInProgress() bool {
 	return s.Code.IsInProgress()
 }
 
-func (s *GatewayResourceStatus) IsDone() bool {
-	return s.Code.IsDone()
+func (s *GatewayResourceStatus) IsSuccessful() bool {
+	return s.Code.IsSuccessful()
 }
 
 func (s *GatewayResourceStatus) IsError() bool {

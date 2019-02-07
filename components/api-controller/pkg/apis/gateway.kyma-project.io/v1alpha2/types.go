@@ -46,7 +46,7 @@ type JwtAuthentication struct {
 }
 
 type ApiStatus struct {
-	ValidationStatus     kymaMeta.GatewayResourceStatus `json:"validationStatus,omitempty"`
+	ValidationStatus     kymaMeta.StatusCode            `json:"validationStatus,omitempty"`
 	AuthenticationStatus kymaMeta.GatewayResourceStatus `json:"authenticationStatus,omitempty"`
 	VirtualServiceStatus kymaMeta.GatewayResourceStatus `json:"virtualServiceStatus,omitempty"`
 }
@@ -56,7 +56,7 @@ func (s *ApiStatus) IsEmpty() bool {
 }
 
 func (s *ApiStatus) IsDone() bool {
-	return s.VirtualServiceStatus.IsDone() && s.AuthenticationStatus.IsDone() && s.ValidationStatus.IsDone()
+	return s.VirtualServiceStatus.IsSuccessful() && s.AuthenticationStatus.IsSuccessful() && s.ValidationStatus.IsSuccessful()
 }
 
 func (s *ApiStatus) IsInProgress() bool {
@@ -76,9 +76,7 @@ func (s *ApiStatus) IsTargetServiceOccupied() bool {
 }
 
 func (s *ApiStatus) SetInProgress() {
-	s.ValidationStatus = kymaMeta.GatewayResourceStatus{
-		Code: kymaMeta.InProgress,
-	}
+	s.ValidationStatus = kymaMeta.InProgress
 	s.AuthenticationStatus = kymaMeta.GatewayResourceStatus{
 		Code: kymaMeta.InProgress,
 	}
