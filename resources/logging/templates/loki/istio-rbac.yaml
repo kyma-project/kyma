@@ -27,7 +27,7 @@ metadata:
     release: {{ .Release.Name }}
 spec:
   subjects:
-  - user: "cluster.local/nc/kyma-system/sa/logging-loki"
+  - user: "cluster.local/ns/kyma-system/sa/logging-loki"
   - properties:
       request.auth.claims[email]: "*@sap.com"
   roleRef:
