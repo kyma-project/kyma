@@ -1,8 +1,3 @@
-{{/* vim: set filetype=mustache: */}}
-{{/*
-Expand the name of the publish subchart.
-*/}}
-
 {{- define "publish-knative.name" -}}
 {{- printf "publish-knative" -}}
 {{- end -}}
@@ -11,7 +6,7 @@ Expand the name of the publish subchart.
 {{- printf "%s-%s" .Release.Name "publish-knative" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 
-{{- define "service.name" -}}
+{{- define "publish-knative.service.name" -}}
 {{- printf "%s-%s" .Release.Name "publish" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 

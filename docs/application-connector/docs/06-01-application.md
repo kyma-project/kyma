@@ -32,7 +32,6 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
-| **spec.source** |    **NO**   | Identifies the Application in the cluster. |
 | **spec.description** |    **NO**   | Describes the connected Application.  |
 | **spec.accessLabel** |    **NO**   | Labels the App when an ApplicationMapping is created. |
 | **spec.labels** |    **NO**   | Defines the labels of the App. |
