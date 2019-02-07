@@ -1,8 +1,9 @@
 package servicecatalog
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"k8s.io/client-go/tools/cache"
@@ -12,8 +13,8 @@ type servicePlanService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newServicePlanService(informer cache.SharedIndexInformer) *servicePlanService {
-	informer.AddIndexers(cache.Indexers{
+func newServicePlanService(informer cache.SharedIndexInformer) (*servicePlanService, error) {
+	err := informer.AddIndexers(cache.Indexers{
 		"relatedServiceClassName": func(obj interface{}) ([]string, error) {
 			entity, ok := obj.(*v1beta1.ServicePlan)
 			if !ok {
@@ -32,10 +33,13 @@ func newServicePlanService(informer cache.SharedIndexInformer) *servicePlanServi
 			return []string{str}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	return &servicePlanService{
 		informer: informer,
-	}
+	}, nil
 }
 
 func (svc *servicePlanService) Find(name, namespace string) (*v1beta1.ServicePlan, error) {

@@ -23,7 +23,8 @@ func TestClusterServicePlanService_Find(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer()
 
-		svc := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -38,7 +39,8 @@ func TestClusterServicePlanService_Find(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer()
 
-		svc := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -59,7 +61,8 @@ func TestClusterServicePlanService_FindByExternalNameForClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer()
 
-		svc := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -74,7 +77,8 @@ func TestClusterServicePlanService_FindByExternalNameForClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer()
 
-		svc := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -96,11 +100,12 @@ func TestClusterServicePlanService_FindByExternalNameForClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer()
 
-		svc := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
-		_, err := svc.FindByExternalName(externalName, className)
+		_, err = svc.FindByExternalName(externalName, className)
 
 		assert.Error(t, err)
 	})
@@ -118,7 +123,8 @@ func TestClusterServicePlanService_ListForClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer()
 
-		svc := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 
@@ -134,7 +140,8 @@ func TestClusterServicePlanService_ListForClass(t *testing.T) {
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		servicePlanInformer := informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer()
-		svc := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		svc, err := servicecatalog.NewClusterServicePlanService(servicePlanInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, servicePlanInformer)
 

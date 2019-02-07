@@ -24,7 +24,8 @@ func TestDeploymentService_List(t *testing.T) {
 		deployment4 := fixDeployment("four", "ns2", "function")
 
 		informer := fixDeploymentInformer(deployment1, deployment2, deployment3, deployment4)
-		svc := k8s.NewDeploymentService(informer)
+		svc, err := k8s.NewDeploymentService(informer)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 		result, err := svc.List("ns1")
@@ -39,7 +40,8 @@ func TestDeploymentService_List(t *testing.T) {
 		var expected []*v1beta2.Deployment
 
 		informer := fixDeploymentInformer()
-		svc := k8s.NewDeploymentService(informer)
+		svc, err := k8s.NewDeploymentService(informer)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 		result, err := svc.List("ns1")
@@ -57,7 +59,8 @@ func TestDeploymentService_ListWithoutFunctions(t *testing.T) {
 		deployment4 := fixDeployment("four", "ns2", "function")
 
 		informer := fixDeploymentInformer(deployment1, deployment2, deployment3, deployment4)
-		svc := k8s.NewDeploymentService(informer)
+		svc, err := k8s.NewDeploymentService(informer)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 		result, err := svc.ListWithoutFunctions("ns1")
@@ -72,7 +75,8 @@ func TestDeploymentService_ListWithoutFunctions(t *testing.T) {
 		var expected []*v1beta2.Deployment
 
 		informer := fixDeploymentInformer()
-		svc := k8s.NewDeploymentService(informer)
+		svc, err := k8s.NewDeploymentService(informer)
+		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
 
 		result, err := svc.ListWithoutFunctions("ns1")

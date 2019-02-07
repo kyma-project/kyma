@@ -95,7 +95,10 @@ func exitOnError(err error, context string) {
 
 func parseFlags(cfg config) {
 	if cfg.Verbose {
-		flag.Set("stderrthreshold", "INFO")
+		err := flag.Set("stderrthreshold", "INFO")
+		if err != nil {
+			glog.Error(errors.Wrap(err, "while parsing flags"))
+		}
 	}
 	flag.Parse()
 }

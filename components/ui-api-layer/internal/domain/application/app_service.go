@@ -56,7 +56,7 @@ type applicationService struct {
 }
 
 func newApplicationService(cfg Config, aCli appCli.ApplicationconnectorV1alpha1Interface, mCli mappingCli.ApplicationconnectorV1alpha1Interface, mInformer cache.SharedIndexInformer, mLister mappingLister.ApplicationMappingLister, appInformer cache.SharedIndexInformer) (*applicationService, error) {
-	mInformer.AddIndexers(cache.Indexers{
+	err := mInformer.AddIndexers(cache.Indexers{
 		appMappingNameIndex: func(obj interface{}) ([]string, error) {
 			mapping, ok := obj.(*mappingTypes.ApplicationMapping)
 			if !ok {
@@ -66,6 +66,9 @@ func newApplicationService(cfg Config, aCli appCli.ApplicationconnectorV1alpha1I
 			return []string{mapping.Name}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	notifier := resource.NewNotifier()
 	appInformer.AddEventHandler(notifier)
@@ -293,8 +296,14 @@ func (svc *applicationService) extractErrorCause(body io.ReadCloser) error {
 }
 
 func (svc *applicationService) drainAndCloseBody(body io.ReadCloser) {
-	_ = iosafety.DrainReader(body)
-	body.Close()
+	err := iosafety.DrainReader(body)
+	if err != nil {
+		glog.Errorf("Unable to drain body reader. Cause: %v", err)
+	}
+	err = body.Close()
+	if err != nil {
+		glog.Errorf("Unable to close body reader. Cause: %v", err)
+	}
 }
 
 func (svc *applicationService) Subscribe(listener resource.Listener) {
