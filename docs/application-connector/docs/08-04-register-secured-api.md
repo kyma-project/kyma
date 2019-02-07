@@ -80,7 +80,7 @@ This is an example of the `api` section of the request body for an API secured w
 
 ### Details
 
-When you register an API with the `credentials.certificateGen` object, the Application Registry generates a SHA256withRSA-encrypted certificate and matching key. To enable communication between Kyma and an API secured with this authentication method, set the certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
+When you register an API with the `credentials.certificateGen` object, the Application Registry generates a SHA256withRSA-encrypted certificate and a matching key. To enable communication between Kyma and an API secured with this authentication method, set the certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
 
 The certificate and key pair is stored in a Secret in the `kyma-integration` Namespace. List all Secrets and find the one created for your API:
 
