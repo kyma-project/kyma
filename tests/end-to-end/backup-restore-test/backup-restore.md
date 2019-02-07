@@ -7,7 +7,7 @@ This project contains end-to-end tests that it runs as part of the  Kyma on Goog
 - Create resources, such as functions on the Kyma cluster.
 - Backup the cluster.
 - Recreate Cluster.
-- Restore Data and check if the restored resources are working like expected.
+- Restore data and check if the restored resources work as expected.
 
 ## Usage
 
