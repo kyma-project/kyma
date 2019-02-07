@@ -24,18 +24,18 @@ type TokenHandler interface {
 
 func NewHandler(globalMiddlewares []mux.MiddlewareFunc, appCfg Config, runtimeCfg Config) http.Handler {
 	router := mux.NewRouter()
-	httphelpers.WithMiddlewares(router, globalMiddlewares)
+	httphelpers.WithMiddlewares(globalMiddlewares, router)
 
 	appTokenHandler := NewTokenHandler(appCfg.TokenCreator, appCfg.CSRInfoURL, appCfg.ContextExtractor)
 
 	applicationTokenRouter := router.PathPrefix("/v1/applications").Subrouter()
-	httphelpers.WithMiddlewares(applicationTokenRouter, appCfg.Middlewares)
+	httphelpers.WithMiddlewares(appCfg.Middlewares, applicationTokenRouter)
 	applicationTokenRouter.HandleFunc("/tokens", appTokenHandler.CreateToken).Methods(http.MethodPost)
 
 	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenCreator, runtimeCfg.CSRInfoURL, runtimeCfg.ContextExtractor)
 
 	clusterTokenRouter := router.PathPrefix("/v1/runtimes").Subrouter()
-	httphelpers.WithMiddlewares(clusterTokenRouter, runtimeCfg.Middlewares)
+	httphelpers.WithMiddlewares(runtimeCfg.Middlewares, clusterTokenRouter)
 	clusterTokenRouter.HandleFunc("/tokens", runtimeTokenHandler.CreateToken).Methods(http.MethodPost)
 
 	router.NotFoundHandler = errorhandler.NewErrorHandler(404, "Requested resource could not be found.")
