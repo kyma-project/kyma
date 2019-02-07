@@ -29,7 +29,7 @@ This diagram provides an overview of the basic Asset Store workflow and the role
 
 1. Create a bucket through a Bucket CR.
 2. Create an Asset CR in which you specify the reference to the asset source location and the name of the bucket in which you want to store it.
-3. The AC listens for new Events and acts upon receiving the Event on the Asset CR creation.
+3. The AC listens for new Events and acts upon receiving the Asset CR creation Event.
 4. The AC reads the CR definition and checks if the bucket is available.
 5. If it is available, the AC fetches the asset from the source location provided in the CR. If the asset is a ZIP or TAR file, the AC unpacks the asset before uploading it into the bucket.
 6. Optionally, the AC validates or modifies the asset if such a requirement is defined in the Asset CR. The AC communicates with the validation and mutation services and validates or modifies the asset according to the specification defined in the Asset CR.
