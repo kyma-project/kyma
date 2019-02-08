@@ -16,7 +16,7 @@ The `@HasAccess` directive is used to secure the action or a field in a type. It
 
 Use the following query as an example on how to secure a GraphQL action:
 ```
-limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "Namespace", isChildResolver: false})
+limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", isChildResolver: false})
 ```
 
 Reference this table for details on the elements that make up a defined and secured GraphQL action:
@@ -30,5 +30,5 @@ Reference this table for details on the elements that make up a defined and secu
 | `verb: "list"` | Defines the secured interaction type. It is related to action type, which in this case is "query". |
 | `apiGroup: ""` | Defines the apiGroup to which the user must have access to get the result of this query. In this case it is empty because limitRanges is the resource built into Kubernetes, not some Custom Resource created by us. |
 | `apiVersion: "v1alpha1"` | Specifies the apiVersion of the query subject. |
-| `namespaceArg: "Namespace"` | Specifies the name of the argument or field in the parent object from which the resource Namespace is fetched. |
-| `isChildResolver: false` | (Optional) Specifies if the directive is set on a field in a type. Determines if the Namespace should be fetched from the parent object instead of the argumentsnot available in the child object. By default it is set to `false`. |
+| `namespaceArg: "namespace"` | Specifies the name of the argument or field in the parent object from which the resource namespace is fetched. |
+| `isChildResolver: false` | (Optional) Specifies if the directive is set on a field in a type. Determines if the namespace argument should be fetched from the parent object. By default it is set to `false`. |
