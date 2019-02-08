@@ -46,8 +46,8 @@ global:
     dir: develop/
     version: 4a23580f
   docs:
-    dir: pr/
-    version: PR-2637
+    dir: develop/
+    version: 69f4e672
   namespace_controller:
     dir: develop/
     version: 429bfbcc
