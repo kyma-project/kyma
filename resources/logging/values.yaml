@@ -80,5 +80,5 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
-    dir: develop/
-    version: e11a469a
+    dir:
+    version: 0.7.0-rc1
