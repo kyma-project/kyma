@@ -14,13 +14,11 @@ func (r *ReconcileAsset) onPending(asset *assetstorev1alpha1.Asset, bucket *asse
 	basePath, files, err := r.download(asset)
 	defer r.loader.Clean(basePath)
 	if err != nil {
-		log.Info(fmt.Sprintf("Cannot download asset: %+v", err))
 		return r.setStatusFailed(asset, ReasonError, fmt.Sprintf("Cannot download asset: %s", err.Error()))
 	}
 
 	result, err := r.validate(context.Background(), asset, basePath, files)
 	if err != nil {
-		log.Info(fmt.Sprintf("Cannot validate asset: %+v", err))
 		return r.setStatusFailed(asset, ReasonError, fmt.Sprintf("Cannot validate asset: %s", err.Error()))
 	}
 	if !result.Success {
@@ -28,12 +26,10 @@ func (r *ReconcileAsset) onPending(asset *assetstorev1alpha1.Asset, bucket *asse
 	}
 
 	if err := r.mutate(context.Background(), asset, basePath, files); err != nil {
-		log.Info(fmt.Sprintf("Cannot mutate asset: %+v", err))
 		return r.setStatusFailed(asset, ReasonMutationFailed, fmt.Sprintf("Cannot mutate asset: %s", err.Error()))
 	}
 
 	if err := r.upload(context.Background(), asset, basePath, files); err != nil {
-		log.Info(fmt.Sprintf("Cannot upload asset to store: %+v", err))
 		return r.setStatusFailed(asset, ReasonError, fmt.Sprintf("Cannot upload asset to store: %s", err.Error()))
 	}
 	r.sendEvent(asset, EventNormal, ReasonUploaded, "Uploaded files to bucket")

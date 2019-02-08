@@ -6,7 +6,6 @@ import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook"
 	webhookv1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/api/v1alpha1"
-	errorsPkg "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/errors"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"time"
@@ -26,7 +25,12 @@ type validationWebhook struct {
 
 type ValidationResult struct {
 	Success  bool
-	Messages map[string][]string
+	Messages map[string][]ValidationMessage
+}
+
+type ValidationMessage struct {
+	Filename string
+	Message  string
 }
 
 func NewValidator(webhook assethook.Webhook, timeout time.Duration) Validator {
@@ -47,8 +51,8 @@ func (w *validationWebhook) Validate(ctx context.Context, basePath string, files
 	}
 
 	passed := true
-	var errors []error
-	results := make(map[string][]string)
+	var errorMessages []string
+	results := make(map[string][]ValidationMessage)
 	for _, service := range asset.Spec.Source.ValidationWebhookService {
 		metadata := w.parseMetadata(service.Metadata)
 
@@ -62,21 +66,22 @@ func (w *validationWebhook) Validate(ctx context.Context, basePath string, files
 
 		response, err := w.validate(ctx, url, request)
 		if err != nil {
-			errors = append(errors, err)
+			errorMessages = append(errorMessages, err.Error())
+			continue
 		}
 
 		messages := w.parseResponse(response)
 		if len(messages) > 0 {
 			passed = false
-			name := fmt.Sprintf("%s/%s", service.Namespace, service.Name)
+			name := fmt.Sprintf("%s/%s%s", service.Namespace, service.Name, service.Endpoint)
 			results[name] = messages
 		}
 	}
 
-	if len(errors) > 0 {
+	if len(errorMessages) > 0 {
 		return ValidationResult{
 			Success: false,
-		}, errorsPkg.NewMultiError("error during validation", errors)
+		}, fmt.Errorf("error during validation: %+v", errorMessages)
 	}
 
 	return ValidationResult{
@@ -85,11 +90,11 @@ func (w *validationWebhook) Validate(ctx context.Context, basePath string, files
 	}, nil
 }
 
-func (w *validationWebhook) parseResponse(response *webhookv1alpha1.ValidationResponse) []string {
-	var messages []string
-	for _, status := range response.Status {
+func (w *validationWebhook) parseResponse(response *webhookv1alpha1.ValidationResponse) []ValidationMessage {
+	var messages []ValidationMessage
+	for key, status := range response.Status {
 		if status.Status != webhookv1alpha1.ValidationSuccess {
-			messages = append(messages, status.Message)
+			messages = append(messages, ValidationMessage{Filename: key, Message: status.Message})
 		}
 	}
 
