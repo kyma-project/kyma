@@ -10,7 +10,7 @@ The end-to-end test scenario looks as follows:
 - Create a new function in the namespace
 - Verify that the function works
 
-- Backup the namespace and all the resources in the namespace
+- Back up the Namespace and all the resources in it.
 - Remove the namespace and all its components from the cluster
 
 - Restore the namespace and its content from the backup
