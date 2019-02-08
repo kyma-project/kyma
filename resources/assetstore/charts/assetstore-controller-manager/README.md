@@ -2,8 +2,8 @@
 
 ## Overview
 
-The Asset Store Controller Manager manages creation of buckets and uploading assets to storage server like Google Cloud Storage.
+The Asset Store Controller Manager manages the creation of buckets and upload of assets to such storage servers as the Google Cloud Storage.
 
 ## Details
 
-For more information, see the README document in the [Asset Store Controller Manager](https://github.com/kyma-project/kyma/tree/master/components/assetstore-controller-manager) repository.
+For more information, see the `README.md` document in the [Asset Store Controller Manager](https://github.com/kyma-project/kyma/tree/master/components/assetstore-controller-manager) repository.
