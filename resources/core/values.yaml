@@ -33,11 +33,11 @@ global:
     dir: develop/
     version: cc09a307
   api_controller:
-    dir: pr/
-    version: PR-2621
+    dir: develop/
+    version: bc120200
   api_controller_acceptance_tests:
-    dir: pr/
-    version: PR-2648
+    dir: develop/
+    version: 736988df
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
