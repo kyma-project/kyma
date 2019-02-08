@@ -24,7 +24,7 @@ The whole concept of the Asset Store relies on the following components:
 
 This diagram provides an overview of the basic Asset Store workflow and the role of particular components in this process:
 
-![](assets/asset-store-architecture.svg)
+![](./assets/asset-store-architecture.svg)
 
 1. Create a bucket through a Bucket CR.
 2. Create an Asset CR in which you specify the reference to the asset source location and the name of the bucket in which you want to store it.
