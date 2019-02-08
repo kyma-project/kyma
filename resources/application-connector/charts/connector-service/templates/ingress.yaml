@@ -2,6 +2,7 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: {{ template "fullname" . }}
+  namespace: {{ .Values.global.namespace }}
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
@@ -25,11 +26,11 @@ spec:
       paths:
       - path: /v1/applications/management/info
         backend:
-          serviceName: {{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local
+          serviceName: {{ .Chart.Name }}-external-api
           servicePort: {{ .Values.ingress.externalapi.port }}
       - path: /v1/runtimes/management/info
         backend:
-          serviceName: {{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local
+          serviceName: {{ .Chart.Name }}-external-api
           servicePort: {{ .Values.ingress.externalapi.port }}
 
   tls:
