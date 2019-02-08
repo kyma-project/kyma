@@ -1,4 +1,4 @@
-package bucket
+package asset
 
 import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store"
@@ -7,8 +7,11 @@ import (
 )
 
 type Config struct {
-	Store                 store.Config
-	BucketRequeueInterval time.Duration `envconfig:"default=5m"`
+	Store                store.Config
+	AssetRequeueInterval time.Duration `envconfig:"default=5m"`
+	TemporaryDirectory   string        `envconfig:"default=/tmp"`
+	MutationTimeout      time.Duration `envconfig:"default=1m"`
+	ValidationTimeout    time.Duration `envconfig:"default=1m"`
 }
 
 func loadConfig(prefix string) (Config, error) {
