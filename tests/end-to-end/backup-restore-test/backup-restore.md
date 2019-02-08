@@ -18,7 +18,8 @@ The end-to-end test scenario looks as follows:
 
 ## Usage
 
-In order to run this end-to-end test just run
+Use the following command to run the test:
+
 
 ```
 helm install deploy/chart/backup-test --namespace end-to-end --name backup-test
