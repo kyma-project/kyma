@@ -26,11 +26,11 @@ spec:
       - path: /v1/applications/management/info
         backend:
           serviceName: {{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local
-          servicePort: {{ .Values.ingress.externalAPIPort.port }}
+          servicePort: {{ .Values.ingress.externalapi.port }}
       - path: /v1/runtimes/management/info
         backend:
           serviceName: {{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local
-          servicePort: {{ .Values.ingress.externalAPIPort.port }}
+          servicePort: {{ .Values.ingress.externalapi.port }}
 
   tls:
   - hosts:
