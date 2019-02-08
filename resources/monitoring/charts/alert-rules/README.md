@@ -53,19 +53,19 @@ The **data. alert.rules** parameter includes the configuration in [kyma-rules.ya
 
 *  Alert when a Pod is not running
 
-  The Alertmanager sends out alerts when one of the Pods is not running in `kyma-system`, `kyma-integration`, `istio-system`, `kube-public` or `kube-system` Namespaces.
+    The Alertmanager sends out alerts when one of the Pods is not running in `kyma-system`, `kyma-integration`, `istio-system`, `kube-public`, or `kube-system` Namespaces.
 
 * Monitor Persistent Volume Claims (PVC)
 
-  The Alertmanager triggers the rule when PVC exceeds  90%  for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public` or `kube-system`. In such a case, increase the capacity of PVC.
+    The Alertmanager triggers the rule when PVC exceeds  90%  for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. In such a case, increase the capacity of PVC.
 
 * Monitor CPU Usage
 
-  The Alertmanager triggers the rule when CPU usage exceeds 90%. for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertcpu: "yes"` label to Pods.
+    The Alertmanager triggers the rule when CPU usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertcpu: "yes"` label to Pods.
 
 * Monitor Memory usage
 
-  The Alertmanager triggers the rule when Memory usage is above 90% in the pods in the namespace `kyma-system`. For the alert rule to fire for a pod its necessary that label `alertmem: "yes"` is passed to the pods.
+    The Alertmanager triggers the rule when Memory usage exceeds 90% for the Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertmem: "yes"` to Pods.
 
 This is an example for alerting when a Pod is not running:
 
