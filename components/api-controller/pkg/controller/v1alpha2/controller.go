@@ -231,15 +231,8 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 			return status
 		}
 
-		apiStatusHelper.SetAuthenticationStatus(&kymaMeta.GatewayResourceStatus{
-			Code:     kymaMeta.Error,
-			Resource: newAPI.Status.AuthenticationStatus.Resource,
-		})
-		apiStatusHelper.SetVirtualServiceStatus(&kymaMeta.GatewayResourceStatus{
-			Code:     kymaMeta.Error,
-			Resource: newAPI.Status.VirtualServiceStatus.Resource,
-		})
-
+		apiStatusHelper.SetAuthenticationStatusCode(kymaMeta.Error)
+		apiStatusHelper.SetVirtualServiceStatusCode(kymaMeta.Error)
 		apiStatusHelper.SetValidationStatus(status)
 
 		return status

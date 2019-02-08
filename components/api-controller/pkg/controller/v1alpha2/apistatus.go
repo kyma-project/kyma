@@ -31,8 +31,18 @@ func (su *ApiStatusHelper) SetAuthenticationStatus(authStatus *kymaMeta.GatewayR
 	su.hasChanged = true
 }
 
+func (su *ApiStatusHelper) SetAuthenticationStatusCode(code kymaMeta.StatusCode) {
+	su.apiCopy.Status.AuthenticationStatus.Code = code
+	su.hasChanged = true
+}
+
 func (su *ApiStatusHelper) SetVirtualServiceStatus(virtualServiceStatus *kymaMeta.GatewayResourceStatus) {
 	su.apiCopy.Status.VirtualServiceStatus = *virtualServiceStatus
+	su.hasChanged = true
+}
+
+func (su *ApiStatusHelper) SetVirtualServiceStatusCode(code kymaMeta.StatusCode) {
+	su.apiCopy.Status.VirtualServiceStatus.Code = code
 	su.hasChanged = true
 }
 
