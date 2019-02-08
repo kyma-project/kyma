@@ -1,4 +1,4 @@
-{{ define "rest-services-alert-rules.yaml.tpl"}}
+{{ define "alert-rules-rest-services.yaml.tpl"}}
 groups:
 - name: rest-services.rules
   rules:
