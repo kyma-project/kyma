@@ -9,7 +9,7 @@ required = [
 
 [[constraint]]
   name = "github.com/machinebox/graphql"
-  revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
+  revision = "3a92531802258604bd12793465c2e28bc4b2fc85"
 
 [[constraint]]
   name = "github.com/pkg/errors"

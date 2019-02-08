@@ -55,6 +55,14 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:c91a5363a19174cb0181832821a7bb9da0aeefb5e2180724614b1005c2269712"
+  name = "github.com/coreos/go-oidc"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "1180514eaf4d9f38d0d19eef639a1d695e066e72"
+  version = "v2.0.0"
+
+[[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -196,6 +204,14 @@
   pruneopts = "NUT"
   revision = "7c663266750e7d82587642f65e60bc4083f1f84e"
   version = "v0.2.0"
+
+[[projects]]
+  digest = "1:f9c7b395f10bd6d881b1f2d71715906b4481a04e46870cdd2647d50caa3358c2"
+  name = "github.com/gorilla/mux"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "a7962380ca08b5a188038c69871b8d3fbdf31e89"
+  version = "v1.7.0"
 
 [[projects]]
   digest = "1:4a0c072e44da763409da72d41492373a034baf2e6d849c76d239b4abdfbb6c49"
@@ -475,6 +491,17 @@
   version = "v1.0.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:e91bc1b1cfb1a99107ad015ff3803071d13dc12924ed1fdf9c9d54346bcbbf6e"
+  name = "github.com/pquerna/cachecontrol"
+  packages = [
+    ".",
+    "cacheobject",
+  ]
+  pruneopts = "NUT"
+  revision = "1555304b9b35fdd2b425bccf1a5613677705e7d0"
+
+[[projects]]
   digest = "1:f250ca51e5b9215bc2df18f92060a9a835e9f85ab18ebbba0e1a6ef1f8fcdbfe"
   name = "github.com/rs/cors"
   packages = ["."]
@@ -551,26 +578,32 @@
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:2b6cc5f08ea4ec1499cb7f9282fef8d1558423152d1b7f046f30187bbc5076be"
+  digest = "1:dc2fb9fbadabda2bc4f23a952449600109a85d77ba9bd9a8b707610bd0b8ee7a"
   name = "github.com/vrischmann/envconfig"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "7a443243d539c9595dd8aa7f03a6f68707b80e66"
-  version = "v1.1.0"
+  revision = "d647766a494a7182c05fa4ddd1702c2c307a770d"
 
 [[projects]]
   branch = "master"
-  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
+  digest = "1:b06f45abbe7431aec373695c6cf9770a051fa4ac81ad31b3fa73ddf3bb76bb27"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "ed25519",
+    "ed25519/internal/edwards25519",
+    "pbkdf2",
+    "ssh/terminal",
+  ]
   pruneopts = "NUT"
   revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
 
 [[projects]]
   branch = "release-branch.go1.10"
-  digest = "1:aff5fb0c8a4eaa5967146b2efa1a1e59b6195cf40574ab4983a5f222898f0660"
+  digest = "1:d0265dccbb98193d3e4fc66d31cadb1f35f6369db499b84ad87e5e3567b8a562"
   name = "golang.org/x/net"
   packages = [
+    "context",
+    "context/ctxhttp",
     "http2",
     "http2/hpack",
     "idna",
@@ -578,6 +611,17 @@
   ]
   pruneopts = "NUT"
   revision = "0ed95abb35c445290478a5348a7b38bb154135fd"
+
+[[projects]]
+  branch = "master"
+  digest = "1:9822dde4525c2bc0130c4b8d209cb08b3ab68d4865972b20fe213fc2f732d9db"
+  name = "golang.org/x/oauth2"
+  packages = [
+    ".",
+    "internal",
+  ]
+  pruneopts = "NUT"
+  revision = "99b60b757ec124ebb7d6b7e97f153b19c10ce163"
 
 [[projects]]
   branch = "master"
@@ -646,12 +690,40 @@
   revision = "aa033095749b3c5414cb40cb5fb235173be6b186"
 
 [[projects]]
+  digest = "1:34c10243da5972105edd1b4b883e2bd918fbb3f73fbe14d6af6929e547173494"
+  name = "google.golang.org/appengine"
+  packages = [
+    "internal",
+    "internal/base",
+    "internal/datastore",
+    "internal/log",
+    "internal/remote_api",
+    "internal/urlfetch",
+    "urlfetch",
+  ]
+  pruneopts = "NUT"
+  revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
+  version = "v1.4.0"
+
+[[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
   name = "gopkg.in/inf.v0"
   packages = ["."]
   pruneopts = "NUT"
   revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
   version = "v0.9.1"
+
+[[projects]]
+  digest = "1:b36ebe2478bf5da49c27d8c49d75d1d5cc7fdbd6be1ab464916f9c3a3e3228a4"
+  name = "gopkg.in/square/go-jose.v2"
+  packages = [
+    ".",
+    "cipher",
+    "json",
+  ]
+  pruneopts = "NUT"
+  revision = "e94fb177d3668d35ab39c61cbb2f311550557e83"
+  version = "v2.2.2"
 
 [[projects]]
   digest = "1:18108594151654e9e696b27b181b953f9a90b16bf14d253dd1b397b025a1487f"
@@ -747,6 +819,23 @@
   ]
   pruneopts = "NUT"
   revision = "def12e63c512da17043b4f0293f52d1006603d9f"
+  version = "kubernetes-1.11.3"
+
+[[projects]]
+  digest = "1:872ab2abbd4d05901f8c6ab819aeb47b8b16a662d15089383be940b0217f4556"
+  name = "k8s.io/apiserver"
+  packages = [
+    "pkg/authentication/authenticator",
+    "pkg/authentication/request/bearertoken",
+    "pkg/authentication/user",
+    "pkg/authorization/authorizer",
+    "pkg/authorization/authorizerfactory",
+    "pkg/util/webhook",
+    "plugin/pkg/authenticator/token/oidc",
+    "plugin/pkg/authorizer/webhook",
+  ]
+  pruneopts = "NUT"
+  revision = "386115dd78fde3efc2366cb381420a4dd0157348"
   version = "kubernetes-1.11.3"
 
 [[projects]]
@@ -997,6 +1086,7 @@
     "github.com/99designs/gqlgen/handler",
     "github.com/allegro/bigcache",
     "github.com/golang/glog",
+    "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
     "github.com/kisielk/errcheck",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
@@ -1063,6 +1153,12 @@
     "k8s.io/apimachinery/pkg/util/runtime",
     "k8s.io/apimachinery/pkg/util/validation/field",
     "k8s.io/apimachinery/pkg/watch",
+    "k8s.io/apiserver/pkg/authentication/authenticator",
+    "k8s.io/apiserver/pkg/authentication/request/bearertoken",
+    "k8s.io/apiserver/pkg/authentication/user",
+    "k8s.io/apiserver/pkg/authorization/authorizer",
+    "k8s.io/apiserver/pkg/authorization/authorizerfactory",
+    "k8s.io/apiserver/plugin/pkg/authenticator/token/oidc",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
     "k8s.io/client-go/dynamic",
@@ -1070,6 +1166,7 @@
     "k8s.io/client-go/informers",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
+    "k8s.io/client-go/kubernetes/typed/authorization/v1beta1",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
