@@ -18,6 +18,6 @@ When you create a Bucket CR, the Bucket Controller (BC) receives a CR creation E
 
 When you remove the Bucket CR, the BC receives a CR deletion Event and removes the bucket with the whole content from Minio Gateway.
 
-The Asset Controller (AC) also monitors the status of the referenced bucket. The AC checks the Bucket CR status to make sure the bucket exists. If the bucket is deleted, the AC receives information that the files are no longer accessible and the bucket was removed. The AC updates the status of the Asset CR to `ready: False` and the asset storage reference is removed. The Asset CR is not removed and you can use it later for a new bucket.
+The Asset Controller (AC) also monitors the status of the referenced bucket. The AC checks the Bucket CR status to make sure the bucket exists. If you delete the bucket, the AC receives information that the files are no longer accessible and the bucket was removed. The AC updates the status of the Asset CR to `ready: False` and removes the asset storage reference. The Asset CR is still available and you can use it later for a new bucket.
 
 ![](assets/delete-bucket.svg)

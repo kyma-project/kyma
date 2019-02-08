@@ -19,7 +19,7 @@ When you remove the Asset CR, the AC receives a CR deletion Event and deletes it
 
 ## Change the bucket reference
 
-When you modify an Asset CR by updating the bucket reference in the Asset CR to a new one, while the previous bucket still exists, the lifecycle starts again. The asset is created in a new storage location and this location is updated in the Asset CR.
+When you modify an Asset CR by updating the bucket reference in the Asset CR to a new one while the previous bucket still exists, the lifecycle starts again. The asset is created in a new storage location and this location is updated in the Asset CR.
 
 Unfortunately, this causes duplication of data as the assets from the previous bucket storage are not cleaned up by default. Thus, to avoid multiplication of assets, first remove one Bucket CR and then modify the existing Asset CR with a new bucket reference.
 

@@ -13,7 +13,7 @@ The whole concept of the Asset Store relies on the following components:
 
 - **Bucket CR** is an obligatory [CR](#custom-resource-bucket) in which you define the name of the bucket for storing assets.
 
-- **Bucket Controller** that manages the [Bucket CR lifecycle](#details-bucket-custom-resource-lifecycle).
+- **Bucket Controller** manages the [Bucket CR lifecycle](#details-bucket-custom-resource-lifecycle).
 
 - **Validation Service** is an optional service which ensures that the asset meets the validation requirements specified in the Asset CR before uploading it to the bucket. The service returns the validation status to the AC.
 

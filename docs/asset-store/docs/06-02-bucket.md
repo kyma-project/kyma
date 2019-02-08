@@ -73,14 +73,14 @@ This table lists all possible parameters of a given resource together with their
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR which is also the name of the bucket storage. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is available. |
-| **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the bucket is created. If the field is empty, the bucket is created under the default location. |
+| **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
 | **status.lastheartbeattime** |    **Not applicable**    | Provides the last time when the Bucket Controller processed the Bucket CR. |
 | **status.message** |    **Not applicable**    | Describes a human-readable message on the CR processing success or failure. |
-| **status.phase** |    **Not applicable**    | It is automatically added to the Bucket CR by the Bucket Controller. It describes the status of processing the Bucket CR by the Bucket Controller. It can be `Ready` or `Failed`. |
+| **status.phase** |    **Not applicable**    | The Bucket Controller automatically adds it to the Bucket CR. It describes the status of processing the Bucket CR by the Bucket Controller. It can be `Ready` or `Failed`. |
 | **status.reason** |    **Not applicable**    | Provides information on the Bucket CR processing success or failure. |
 | **status.url** |    **Not applicable**   | Provides the address of the bucket storage under which the asset is available. |
 
-> **NOTE:** All parameters marked as **Not applicable** are added automatically to the CR by the Bucket Controller.
+> **NOTE:** The Bucket Controller automatically adds all parameters marked as **Not applicable** to the Bucket CR.
 
 ## Related resources and components
 
