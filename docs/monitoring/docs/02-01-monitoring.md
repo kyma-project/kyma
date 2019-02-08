@@ -5,7 +5,7 @@ title: Architecture
 This document outlines the monitoring architecture of Kyma, highlighting information sources that Prometheus polls for data to process.
 
 
-![Monitoring architecture in Kyma](assets/monitoring.png)
+![Monitoring architecture in Kyma](./assets/monitoring.png)
 
 
 ## The Prometheus Operator
