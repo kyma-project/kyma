@@ -255,16 +255,21 @@ func TestComponentSpec(t *testing.T) {
 
 			_, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
 			So(err, ShouldBeNil)
+			defer ctx.cleanUpAPI(kymaClient, api, t, false, namespace)
 
-			_, err = kymaClient.GatewayV1alpha2().Apis(namespace).Create(testedApi)
+			originalTestedApi, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(testedApi)
+			So(err, ShouldBeNil)
+			defer ctx.cleanUpAPI(kymaClient, testedApi, t, false, namespace)
+
+			originalTestedApi, err = ctx.awaitAPIChanged(kymaClient, originalTestedApi, true, true, namespace)
 			So(err, ShouldBeNil)
 
-			originalTestedApi, err := ctx.awaitAPIChanged(kymaClient, testedApi, true, true, namespace)
+			testedApi, err = ctx.awaitAPIChanged(kymaClient, originalTestedApi, false, false, namespace)
 			So(err, ShouldBeNil)
 
 			testedApi.Spec.Service.Name = testService
 
-			_, err = kymaClient.GatewayV1alpha2().Apis(namespace).Update(testedApi)
+			testedApi, err = kymaClient.GatewayV1alpha2().Apis(namespace).Update(testedApi)
 			So(err, ShouldBeNil)
 
 			err = retry.Do(func() error {
@@ -320,8 +325,10 @@ func TestComponentSpec(t *testing.T) {
 			So(testedApi.Status.AuthenticationStatus.IsSuccessful(), ShouldBeTrue)
 			So(testedApi.Status.VirtualServiceStatus.IsSuccessful(), ShouldBeTrue)
 
-			So(testedApi.Status.AuthenticationStatus.Resource, ctx.ShouldDeepEqual, originalTestedApi.Status.AuthenticationStatus.Resource)
-			So(testedApi.Status.VirtualServiceStatus.Resource, ctx.ShouldDeepEqual, originalTestedApi.Status.VirtualServiceStatus.Resource)
+			So(testedApi.Status.AuthenticationStatus.Resource.Name, ctx.ShouldDeepEqual, originalTestedApi.Status.AuthenticationStatus.Resource.Name)
+			So(testedApi.Status.AuthenticationStatus.Resource.Uid, ctx.ShouldDeepEqual, originalTestedApi.Status.AuthenticationStatus.Resource.Uid)
+			So(testedApi.Status.VirtualServiceStatus.Resource.Name, ctx.ShouldDeepEqual, originalTestedApi.Status.VirtualServiceStatus.Resource.Name)
+			So(testedApi.Status.VirtualServiceStatus.Resource.Uid, ctx.ShouldDeepEqual, originalTestedApi.Status.VirtualServiceStatus.Resource.Uid)
 
 		})
 
