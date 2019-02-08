@@ -59,8 +59,8 @@ data:
         flush_at_shutdown true
         path /var/log/fluentd/
 
-        timekey 1h
-        timekey_wait 10m
+        timekey 10m
+        timekey_wait 1m
         timekey_use_utc true
       </buffer>
 
