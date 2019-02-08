@@ -46,6 +46,7 @@ type clusterServiceClassResolver struct {
 	instanceLister   instanceListerByClusterServiceClass
 	contentRetriever shared.ContentRetriever
 	classConverter   gqlClusterServiceClassConverter
+	instanceConverter gqlServiceInstanceConverter
 	planConverter    gqlClusterServicePlanConverter
 }
 
@@ -57,6 +58,7 @@ func newClusterServiceClassResolver(classLister clusterServiceClassListGetter, p
 		contentRetriever: contentRetriever,
 		classConverter:   &clusterServiceClassConverter{},
 		planConverter:    &clusterServicePlanConverter{},
+		instanceConverter: &serviceInstanceConverter{},
 	}
 }
 
@@ -120,19 +122,34 @@ func (r *clusterServiceClassResolver) ClusterServiceClassPlansField(ctx context.
 	return convertedPlans, nil
 }
 
-func (r *clusterServiceClassResolver) ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error) {
+func (r *clusterServiceClassResolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ServiceInstance, error) {
 	if obj == nil {
 		glog.Error(fmt.Errorf("%s cannot be empty in order to resolve activated field", pretty.ClusterServiceClass))
-		return false, gqlerror.NewInternal()
+		return nil, gqlerror.NewInternal()
 	}
 
 	items, err := r.instanceLister.ListForClusterServiceClass(obj.Name, obj.ExternalName)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s for %s %s", pretty.ServiceInstances, pretty.ClusterServiceClass, obj.Name))
-		return false, gqlerror.New(err, pretty.ServiceInstances)
+		return nil, gqlerror.New(err, pretty.ServiceInstances)
 	}
 
-	return len(items) > 0, nil
+	instances, err := r.instanceConverter.ToGQLs(items)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
+		return nil, gqlerror.New(err, pretty.ServiceInstance)
+	}
+
+	return instances, nil
+}
+
+func (r *clusterServiceClassResolver) ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error) {
+	instances, err := r.ClusterServiceClassInstancesField(ctx, obj)
+	if err != nil {
+		return false, err
+	}
+
+	return len(instances) > 0, nil
 }
 
 func (r *clusterServiceClassResolver) ClusterServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {

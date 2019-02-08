@@ -494,6 +494,10 @@ type serviceClassResolver struct {
 	sc *servicecatalog.PluggableContainer
 }
 
+func (r *serviceClassResolver) Instances(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
+	return r.sc.Resolver.ServiceClassInstancesField(ctx, obj)
+}
+
 func (r *serviceClassResolver) Activated(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
 	return r.sc.Resolver.ServiceClassActivatedField(ctx, obj)
 }
@@ -518,6 +522,10 @@ func (r *serviceClassResolver) Content(ctx context.Context, obj *gqlschema.Servi
 
 type clusterServiceClassResolver struct {
 	sc *servicecatalog.PluggableContainer
+}
+
+func (r *clusterServiceClassResolver) Instances(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ServiceInstance, error) {
+	return r.sc.Resolver.ClusterServiceClassInstancesField(ctx, obj)
 }
 
 func (r *clusterServiceClassResolver) Activated(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error) {

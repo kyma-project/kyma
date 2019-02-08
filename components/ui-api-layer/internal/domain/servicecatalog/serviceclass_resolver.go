@@ -46,6 +46,7 @@ type serviceClassResolver struct {
 	instanceLister   instanceListerByServiceClass
 	contentRetriever shared.ContentRetriever
 	classConverter   gqlServiceClassConverter
+	instanceConverter gqlServiceInstanceConverter
 	planConverter    gqlServicePlanConverter
 }
 
@@ -57,6 +58,7 @@ func newServiceClassResolver(classLister serviceClassListGetter, planLister serv
 		contentRetriever: contentRetriever,
 		classConverter:   &serviceClassConverter{},
 		planConverter:    &servicePlanConverter{},
+		instanceConverter: &serviceInstanceConverter{},
 	}
 }
 func (r *serviceClassResolver) ServiceClassQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceClass, error) {
@@ -119,19 +121,35 @@ func (r *serviceClassResolver) ServiceClassPlansField(ctx context.Context, obj *
 	return convertedPlans, nil
 }
 
-func (r *serviceClassResolver) ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
+func (r *serviceClassResolver) ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
+
 	if obj == nil {
 		glog.Error(fmt.Errorf("%s cannot be empty in order to resolve activated field", pretty.ServiceClass))
-		return false, gqlerror.NewInternal()
+		return nil, gqlerror.NewInternal()
 	}
 
 	items, err := r.instanceLister.ListForServiceClass(obj.Name, obj.ExternalName, obj.Namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s for %s %s", pretty.ServiceInstances, pretty.ServiceClass, obj.Name))
-		return false, gqlerror.New(err, pretty.ServiceInstances)
+		return nil, gqlerror.New(err, pretty.ServiceInstances)
 	}
 
-	return len(items) > 0, nil
+	instances, err := r.instanceConverter.ToGQLs(items)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
+		return nil, gqlerror.New(err, pretty.ServiceInstance)
+	}
+
+	return instances, nil
+}
+
+func (r *serviceClassResolver) ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
+	instances, err := r.ServiceClassInstancesField(ctx, obj)
+	if err != nil {
+		return false, err
+	}
+
+	return len(instances) > 0, nil
 }
 
 func (r *serviceClassResolver) ServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
