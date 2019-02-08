@@ -6,7 +6,7 @@ This project contains end-to-end tests run during Kyma installation on Google Cl
 
 The end-to-end test scenario looks as follows:
 
-- Create a new namespace
+- Create a new Namespace.
 - Create a new function in the Namespace.
 - Verify that the function works.
 
