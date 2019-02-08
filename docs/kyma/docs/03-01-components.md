@@ -19,10 +19,9 @@ The Service Mesh is an infrastructure layer that handles service-to-service comm
 
 Kyma security enforces RBAC (Role Based Access Control) in the cluster. [Dex](https://github.com/coreos/dex) handles the identity management and identity provider integration. It allows you to integrate any [OpenID Connect](https://openid.net/connect/) or SAML2-compliant identity provider with Kyma using [connectors](https://github.com/coreos/dex#connectors). Additionally, Dex provides a static user store which gives you more flexibility when managing access to your cluster.   
 
-## Service Brokers
+## Helm Broker
 
-Service Brokers are [Open Service Broker API](https://www.openservicebrokerapi.org/)-compatible servers that manage the lifecycle of one or more services. Each Service Broker registered in Kyma presents the services it offers to the Service Catalog. You can provision these services on a cluster level through the Service Catalog. Out of the box, Kyma comes with three Service Brokers.
-You can register more [Open Service Broker API](https://www.openservicebrokerapi.org/)-compatible Service Brokers in Kyma and provision the services they offer using the Service Catalog.
+The Helm Broker is an implementation of a service broker which runs in the Kyma cluster and deploys Kubernetes native resources using [Helm](https://github.com/kubernetes/helm) and Kyma bundles. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. For example, a bundle can provide plan definitions or binding details. The Helm Broker fetches bundle definitions from an HTTP server. By default, the Helm Broker fetches bundles from the newest release with the [Semantic Versioning](https://semver.org/) pattern available at the [`bundles`](https://github.com/kyma-project/bundles/releases) repository.
 
 ## Application Connector
 
