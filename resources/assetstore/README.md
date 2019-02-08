@@ -2,8 +2,6 @@
 
 ## Overview
 
-The Service Catalog Add-ons provide Kyma add-ons to the [Service Catalog](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/README.md).
-
 These chart consist of the following items:
 * Asset Store Controller Manager
 * Minio
