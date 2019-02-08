@@ -172,8 +172,7 @@ func (r *ReconcileAsset) isOnCreate(instance *assetstorev1alpha1.Asset) bool {
 }
 
 func (r *ReconcileAsset) isOnError(instance *assetstorev1alpha1.Asset) bool {
-	return time.Now().After(instance.Status.LastHeartbeatTime.Time.Add(r.requeueInterval)) &&
-		instance.Status.Phase == assetstorev1alpha1.AssetFailed &&
+	return instance.Status.Phase == assetstorev1alpha1.AssetFailed &&
 		instance.Status.Reason == string(ReasonError)
 }
 
