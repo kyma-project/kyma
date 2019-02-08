@@ -60,9 +60,6 @@ subjects:
 - kind: User
   name: user2@kyma.cx
   apiGroup: rbac.authorization.k8s.io
-- kind: User
-  name: read-only-user@kyma.cx
-  apiGroup: rbac.authorization.k8s.io
 {{- range .Values.bindings.kymaView.groups }}
 - kind: Group
   name: {{ .  }}

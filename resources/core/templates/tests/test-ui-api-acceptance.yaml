@@ -16,36 +16,16 @@ spec:
       env:
         - name: DOMAIN
           value: "{{ .Values.global.domainName }}"
-        - name: ADMIN_EMAIL
+        - name: USERNAME
           valueFrom:
             secretKeyRef:
               name: admin-user
               key: email
-        - name: ADMIN_PASSWORD
+        - name: PASSWORD
           valueFrom:
             secretKeyRef:
               name: admin-user
               key: password
-        - name: READ_ONLY_USER_EMAIL
-          valueFrom:
-              secretKeyRef:
-                  name: test-read-only-user
-                  key: email
-        - name: READ_ONLY_USER_PASSWORD
-          valueFrom:
-              secretKeyRef:
-                  name: test-read-only-user
-                  key: password
-        - name: NO_RIGHTS_USER_EMAIL
-          valueFrom:
-              secretKeyRef:
-                  name: test-no-rights-user
-                  key: email
-        - name: NO_RIGHTS_USER_PASSWORD
-          valueFrom:
-              secretKeyRef:
-                  name: test-no-rights-user
-                  key: password
         - name: DEX_CONFIGURATION_FILE
           value: /etc/dex/cfg/config.yaml
       resources:
