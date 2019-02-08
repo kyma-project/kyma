@@ -42,7 +42,8 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "master"
+  branch = "validate-api-for-service"
+  source = "https://github.com/jakkab/kyma.git"
 
 [[constraint]]
   name = "github.com/go-test/deep"

@@ -99,7 +99,7 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "master"
+  branch = "validate-api-for-service"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/ingressgateway",
@@ -117,7 +117,8 @@
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
   ]
-  revision = "e317ebe1138298091cef2f93131311674aa0dd72"
+  revision = "2b69ce2fafe4ee4b4c90f17978a18de29d542b1a"
+  source = "https://github.com/jakkab/kyma.git"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -371,6 +372,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e960a90d636b8470127fc262ca6acc4bc2ad268d92777c571518a20543ce14b9"
+  inputs-digest = "22ae571ffc81730c36b321a13ec239219639fdef52a7785ecee6f5ea7a20c7ba"
   solver-name = "gps-cdcl"
   solver-version = 1

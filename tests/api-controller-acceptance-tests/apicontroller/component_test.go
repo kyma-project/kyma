@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"math/rand"
 	"os"
 	"strings"
@@ -201,29 +202,37 @@ func TestComponentSpec(t *testing.T) {
 			testedApi := ctx.apiFor(testedID, domainName, namespace, apiSecurityDisabled, true)
 			testedApi.Spec.Service.Name = testService
 
-			kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
-			lastAPI, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(testedApi)
+			_, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
+			So(err, ShouldBeNil)
+
+			testedApi, err = kymaClient.GatewayV1alpha2().Apis(namespace).Create(testedApi)
+			So(err, ShouldBeNil)
+			So(testedApi, ShouldNotBeNil)
+			So(testedApi.ResourceVersion, ShouldNotBeEmpty)
+
+			err = retry.Do(func() error {
+
+				var err error
+
+				testedApi, err = kymaClient.GatewayV1alpha2().Apis(namespace).Get(testedApi.Name, metav1.GetOptions{})
+				if err != nil {
+					return err
+				}
+
+				if !testedApi.Status.IsTargetServiceOccupied() {
+					return errors.Errorf("Incorrect status: %s", testedApi.Status.ValidationStatus)
+				}
+
+				return nil
+
+			})
 
 			So(err, ShouldBeNil)
-			So(lastAPI, ShouldNotBeNil)
-			So(lastAPI.ResourceVersion, ShouldNotBeEmpty)
-
-			time.Sleep(5 * time.Second)
-
-			lastAPI, err = kymaClient.GatewayV1alpha2().Apis(namespace).Get(lastAPI.Name, metav1.GetOptions{})
-			So(err, ShouldBeNil)
-			//So(lastAPI.Status.IsTargetServiceOccupied(), ShouldBeTrue)
-			So(lastAPI.Status.AuthenticationStatus.IsEmpty(), ShouldBeTrue)
-			So(lastAPI.Status.VirtualServiceStatus.IsEmpty(), ShouldBeTrue)
-
-			policy, err := istioAuthClient.AuthenticationV1alpha1().Policies(namespace).Get(lastAPI.Status.AuthenticationStatus.Resource.Name, metav1.GetOptions{})
-			So(err, ShouldNotBeNil)
-			So(policy, ShouldBeNil)
-
-			virtualService, err := istioNetClient.NetworkingV1alpha3().VirtualServices(namespace).Get(lastAPI.Status.VirtualServiceStatus.Resource.Name, metav1.GetOptions{})
-			So(err, ShouldNotBeNil)
-			So(virtualService, ShouldBeNil)
-
+			So(testedApi.Status.IsTargetServiceOccupied(), ShouldBeTrue)
+			So(testedApi.Status.AuthenticationStatus.IsEmpty(), ShouldBeTrue)
+			So(testedApi.Status.VirtualServiceStatus.IsEmpty(), ShouldBeTrue)
+			So(testedApi.Status.AuthenticationStatus.Resource.Name, ShouldBeEmpty)
+			So(testedApi.Status.VirtualServiceStatus.Resource.Name, ShouldBeEmpty)
 		})
 
 		Convey("delete API and all its related resources", func() {
