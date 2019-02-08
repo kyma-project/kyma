@@ -59,12 +59,7 @@ spec:
                 name: assetstore-minio
                 key: secretkey
         resources:
-          limits:
-            cpu: 100m
-            memory: 30Mi
-          requests:
-            cpu: 100m
-            memory: 20Mi
+{{ toYaml .Values.resources | indent 10 }}
         ports:
           - containerPort: {{ .Values.service.internalPort }}
         volumeMounts: []
