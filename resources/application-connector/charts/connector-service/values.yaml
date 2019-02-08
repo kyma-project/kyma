@@ -7,7 +7,7 @@ deployment:
     tokenLength: 64
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
-    caSecretName: connector-service-app-ca
+    caSecretName: nginx-auth-ca
     getInfoURL: ""
     group: "default"
     tenant: "default"
@@ -26,9 +26,16 @@ service:
     serviceType: ClusterIP
     port: *internalAPIPort
 
+ingress:
+  externalapi:
+    port: *externalAPIPort
+  authSecret: kyma-integration/nginx-auth-ca
+  tlsSecret: ingress-tls-cert
+
 tests:
   skipSslVerify: false
   group: ""
   tenant: ""
   image:
     pullPolicy: IfNotPresent
+
