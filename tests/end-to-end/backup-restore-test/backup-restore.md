@@ -26,4 +26,4 @@ helm install deploy/chart/backup-test --namespace end-to-end --name backup-test
 helm test backup-test
 ```
 
-The test creates a new namespace called `restore-test-<UUID>`. This namespace contains all resources created during the test.
+The test creates a new Namespace called `restore-test-<UUID>`. This Namespace contains all resources created during the test.
