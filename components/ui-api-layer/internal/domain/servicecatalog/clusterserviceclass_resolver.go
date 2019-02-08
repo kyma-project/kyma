@@ -41,23 +41,23 @@ type instanceListerByClusterServiceClass interface {
 }
 
 type clusterServiceClassResolver struct {
-	classLister      clusterServiceClassListGetter
-	planLister       clusterServicePlanLister
-	instanceLister   instanceListerByClusterServiceClass
-	contentRetriever shared.ContentRetriever
-	classConverter   gqlClusterServiceClassConverter
+	classLister       clusterServiceClassListGetter
+	planLister        clusterServicePlanLister
+	instanceLister    instanceListerByClusterServiceClass
+	contentRetriever  shared.ContentRetriever
+	classConverter    gqlClusterServiceClassConverter
 	instanceConverter gqlServiceInstanceConverter
-	planConverter    gqlClusterServicePlanConverter
+	planConverter     gqlClusterServicePlanConverter
 }
 
 func newClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, contentRetriever shared.ContentRetriever) *clusterServiceClassResolver {
 	return &clusterServiceClassResolver{
-		classLister:      classLister,
-		planLister:       planLister,
-		instanceLister:   instanceLister,
-		contentRetriever: contentRetriever,
-		classConverter:   &clusterServiceClassConverter{},
-		planConverter:    &clusterServicePlanConverter{},
+		classLister:       classLister,
+		planLister:        planLister,
+		instanceLister:    instanceLister,
+		contentRetriever:  contentRetriever,
+		classConverter:    &clusterServiceClassConverter{},
+		planConverter:     &clusterServicePlanConverter{},
 		instanceConverter: &serviceInstanceConverter{},
 	}
 }

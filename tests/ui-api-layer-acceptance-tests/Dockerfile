@@ -1,4 +1,4 @@
-FROM golang:1.11.5-alpine3.9 as builder
+FROM golang:1.11.4-alpine3.8 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests
 WORKDIR ${BASE_APP_DIR}
@@ -22,7 +22,7 @@ RUN cd ${BASE_APP_DIR}/internal/domain && \
     CGO_ENABLED=0 go test -tags=acceptance ./${dir} -c || exit 1 \
     ; done
 
-FROM alpine:3.9
+FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 

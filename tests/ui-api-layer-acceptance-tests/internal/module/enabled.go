@@ -1,8 +1,9 @@
 package module
 
 import (
-	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 	"log"
+
+	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 )
 
 type BackendModule struct {
