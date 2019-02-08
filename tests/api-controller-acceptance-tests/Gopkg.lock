@@ -117,7 +117,7 @@
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/networking.istio.io/clientset/versioned/typed/networking.istio.io/v1alpha3"
   ]
-  revision = "0a2fbbf583009f17567940099e32659398218a50"
+  revision = "b4638ef361d7e3b37c585efbc1a01e456364a286"
   source = "https://github.com/jakkab/kyma.git"
 
 [[projects]]
