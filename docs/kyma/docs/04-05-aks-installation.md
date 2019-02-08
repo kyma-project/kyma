@@ -183,7 +183,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 1. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
 
     ```
-    docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile . --build-arg INSTALLER_VERSION=63484523
+    docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile .
     ```
 
 2. Push the image to your Docker Hub:
@@ -232,7 +232,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
 4. To watch the installation progress, run:
     ```
     while true; do \
-      kubectl get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}{'\n'}"; \
+      kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
       sleep 5; \
     done
     ```

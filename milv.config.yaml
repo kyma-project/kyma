@@ -1,4 +1,4 @@
-white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com"]
+white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION"]
 black-list: ["/vendor/"]
 black-list-internal: ["./kyma/docs/"]
 timeout: 60
@@ -26,9 +26,9 @@ files:
   - path: "./kyma/docs/helm-broker/docs/05-01-helm-broker.md"
     config:
       white-list-external: ["custom.bundles-repository"]
-  - path: "./kyma/docs/helm-broker/docs/05-01-helm-broker.md"
-    config:
-      white-list-external: ["$KYMA_RELEASE_VERSION"]
   - path: "./kyma/docs/kyma/docs/04-07-aks-xip.io-domain.md"
+    config:
+      white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
+  - path: "./kyma/docs/kyma/docs/04-06-gke-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
