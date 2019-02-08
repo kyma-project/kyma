@@ -6,4 +6,4 @@ The Asset Store Controller Manager manages creation of buckets and uploading ass
 
 ## Details
 
-For more information, see the README document in the [Asset Store Controller Manager](https://github.com/kyma-project/kyma/tree/master/components/assetstore-controller-anager) repository.
+For more information, see the README document in the [Asset Store Controller Manager](https://github.com/kyma-project/kyma/tree/master/components/assetstore-controller-manager) repository.
