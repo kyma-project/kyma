@@ -181,7 +181,7 @@ gcsgateway:
   # Number of parallel instances
   replicas: 4
   # credential json file of service account key
-  gcsKeyJson: ""
+  gcsKeySecret: ""
   # Google cloud project-id
   projectId: ""
 

@@ -7,7 +7,6 @@ global:
   assetstore_controller_manager:
     dir: pr/
     version: PR-2542
-# eu.gcr.io/kyma-project/pr/assetstore-controller-manager:PR-2542
 
 minio:
   mode: standalone
@@ -20,7 +19,7 @@ minio:
       type: Recreate
     annotations:
       sidecar.istio.io/inject: "false"
-  
+
   service:
     annotations:
       auth.istio.io/9000: NONE
