@@ -20,8 +20,7 @@ The end-to-end test scenario looks as follows:
 
 Use the following command to run the test:
 
-
-```
+```shell
 helm install deploy/chart/backup-test --namespace end-to-end --name backup-test
 helm test backup-test
 ```
