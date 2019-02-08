@@ -14,40 +14,42 @@ func (r *ReconcileAsset) onPending(asset *assetstorev1alpha1.Asset, bucket *asse
 	basePath, files, err := r.download(asset)
 	defer r.loader.Clean(basePath)
 	if err != nil {
-		return reconcile.Result{}, err
+		log.Info(fmt.Sprintf("Cannot download asset: %+v", err))
+		return r.setStatusFailed(asset, ReasonError, fmt.Sprintf("Cannot download asset: %s", err.Error()))
 	}
 
 	result, err := r.validate(context.Background(), asset, basePath, files)
 	if err != nil {
-		return reconcile.Result{}, errors.Wrapf(err, "while validating Asset")
+		log.Info(fmt.Sprintf("Cannot validate asset: %+v", err))
+		return r.setStatusFailed(asset, ReasonError, fmt.Sprintf("Cannot validate asset: %s", err.Error()))
 	}
 	if !result.Success {
-		return reconcile.Result{}, r.setStatusWebhookFailed(asset, ReasonValidationFailed, fmt.Sprintf("%+v", result.Messages))
+		return r.setStatusFailed(asset, ReasonValidationFailed, fmt.Sprintf("Validation failed: %+v", result.Messages))
 	}
 
 	if err := r.mutate(context.Background(), asset, basePath, files); err != nil {
-		r.setStatusWebhookFailed(asset, ReasonMutationFailed, fmt.Sprintf("%+v", err))
-		return reconcile.Result{}, errors.Wrapf(err, "while mutating Asset")
+		log.Info(fmt.Sprintf("Cannot mutate asset: %+v", err))
+		return r.setStatusFailed(asset, ReasonMutationFailed, fmt.Sprintf("Cannot mutate asset: %s", err.Error()))
 	}
 
 	if err := r.upload(context.Background(), asset, basePath, files); err != nil {
-		r.sendEvent(asset, EventWarning, ReasonError, "Upload to bucket failed")
-		return reconcile.Result{}, errors.Wrapf(err, "while uploading Asset")
+		log.Info(fmt.Sprintf("Cannot upload asset to store: %+v", err))
+		return r.setStatusFailed(asset, ReasonError, fmt.Sprintf("Cannot upload asset to store: %s", err.Error()))
 	}
 	r.sendEvent(asset, EventNormal, ReasonUploaded, "Uploaded files to bucket")
 
 	if err := r.setStatusReady(asset, bucket.Status.Url, files); err != nil {
-		return reconcile.Result{}, err
+		log.Info(fmt.Sprintf("Error while setting status to Ready: %+v", err))
+		return reconcile.Result{RequeueAfter: r.requeueInterval}, err
 	}
 
 	return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
 }
 
-func (r *ReconcileAsset) setStatusWebhookFailed(instance *assetstorev1alpha1.Asset, reason AssetReason, message string) error {
+func (r *ReconcileAsset) setStatusFailed(instance *assetstorev1alpha1.Asset, reason AssetReason, message string) (reconcile.Result, error) {
 	r.sendEvent(instance, EventWarning, reason, message)
 	status := r.status(assetstorev1alpha1.AssetFailed, reason, message)
-
-	return r.updateStatus(instance, status)
+	return reconcile.Result{RequeueAfter: r.requeueInterval}, r.updateStatus(instance, status)
 }
 
 func (r *ReconcileAsset) validate(ctx context.Context, instance *assetstorev1alpha1.Asset, basePath string, files []string) (webhook.ValidationResult, error) {

@@ -79,7 +79,21 @@ func prepareReconcilerTest(t *testing.T, mocks *mocks) *testSuite {
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	reconciler := newReconciler(mgr, 60*time.Hour, mocks.uploader, mocks.loader, mocks.bucketLister, mocks.cleaner, finalizer.New(deleteAssetFinalizerName), mocks.validator, mocks.mutator)
+	reconciler := &ReconcileAsset{
+		Client:          mgr.GetClient(),
+		scheme:          mgr.GetScheme(),
+		recorder:        mgr.GetRecorder("asset-controller"),
+		requeueInterval: 60 * time.Hour,
+
+		uploader:        mocks.uploader,
+		loader:          mocks.loader,
+		bucketLister:    mocks.bucketLister,
+		cleaner:         mocks.cleaner,
+		deleteFinalizer: finalizer.New(deleteAssetFinalizerName),
+		validator:       mocks.validator,
+		mutator:         mocks.mutator,
+	}
+
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	recFn, requests := SetupTestReconcile(reconciler)

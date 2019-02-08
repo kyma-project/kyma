@@ -139,19 +139,21 @@ func (r *ReconcileAsset) Reconcile(request reconcile.Request) (reconcile.Result,
 	case r.isObjectBeingDeleted(&instance.ObjectMeta):
 		return r.onDelete(instance, bucketReady)
 	case r.isOnCreate(instance):
-		return r.setDefaultStatus(instance)
+		return r.schedule(instance)
 	case !bucketReady:
 		return r.onBucketNotReady(instance)
 	case instance.Status.Phase == assetstorev1alpha1.AssetReady:
 		return r.onReady(instance)
 	case instance.Status.Phase == assetstorev1alpha1.AssetPending:
 		return r.onPending(instance, bucket)
+	case r.isOnError(instance):
+		return r.onError(instance)
 	}
 
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileAsset) setDefaultStatus(asset *assetstorev1alpha1.Asset) (reconcile.Result, error) {
+func (r *ReconcileAsset) schedule(asset *assetstorev1alpha1.Asset) (reconcile.Result, error) {
 	message := fmt.Sprintf("Scheduled asset %s/%s", asset.Namespace, asset.Name)
 	r.sendEvent(asset, EventNormal, ReasonScheduled, message)
 	status := r.status(assetstorev1alpha1.AssetPending, ReasonScheduled, message)
@@ -167,6 +169,20 @@ func (r *ReconcileAsset) isBucketReady(bucket *assetstorev1alpha1.Bucket) bool {
 
 func (r *ReconcileAsset) isOnCreate(instance *assetstorev1alpha1.Asset) bool {
 	return len(instance.Status.Phase) == 0
+}
+
+func (r *ReconcileAsset) isOnError(instance *assetstorev1alpha1.Asset) bool {
+	return time.Now().After(instance.Status.LastHeartbeatTime.Time.Add(r.requeueInterval)) &&
+		instance.Status.Phase == assetstorev1alpha1.AssetFailed &&
+		instance.Status.Reason == string(ReasonError)
+}
+
+func (r *ReconcileAsset) onError(instance *assetstorev1alpha1.Asset) (reconcile.Result, error) {
+	if time.Now().Before(instance.Status.LastHeartbeatTime.Time.Add(r.requeueInterval)) {
+		return reconcile.Result{RequeueAfter: r.requeueInterval}, nil
+	}
+
+	return r.schedule(instance)
 }
 
 func (r *ReconcileAsset) onBucketNotReady(instance *assetstorev1alpha1.Asset) (reconcile.Result, error) {

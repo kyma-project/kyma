@@ -1,4 +1,4 @@
-package errorsPkg
+package errors
 
 type MultiError struct {
 	message string
@@ -25,7 +25,7 @@ func IsMultiError(err error) bool {
 		Errors() []error
 	}
 
-	switch _ := err.(type) {
+	switch err.(type) {
 	case errorWithErrors:
 		return true
 	}

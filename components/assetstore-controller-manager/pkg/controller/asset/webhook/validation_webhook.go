@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook"
 	webhookv1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/api/v1alpha1"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/errorsPkg"
+	errorsPkg "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/errors"
 	"github.com/pkg/errors"
 	"io/ioutil"
 	"time"

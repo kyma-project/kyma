@@ -2,7 +2,7 @@ package cleaner
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/errorsPkg"
+	errorsPkg "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/errors"
 	"github.com/minio/minio-go"
 )
 
@@ -42,9 +42,13 @@ func New(minioClient MinioClient) Cleaner {
 
 func (c *cleaner) Clean(ctx context.Context, bucket, objectPrefix string) error {
 	keys, errors := c.listObjectsKeys(bucket, objectPrefix)
-	if len(errors) > 0 || len(keys) == 0 {
+	if len(errors) > 0 {
 		return errorsPkg.NewMultiError("cannot list objects in bucket", errors)
 	}
+	if len(keys) == 0 {
+		return nil
+	}
+
 	objectsCh := make(chan string)
 
 	go func() {
