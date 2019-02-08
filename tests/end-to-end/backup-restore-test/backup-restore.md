@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project contains end-to-end tests that it runs as part of the  Kyma on Google Cloud Platform installation. The tests are written in Go. 
+This project contains end-to-end tests run during Kyma installation on Google Cloud Platform. The tests are written in Go. 
 
 The end-to-end test scenario looks as follows:
 
