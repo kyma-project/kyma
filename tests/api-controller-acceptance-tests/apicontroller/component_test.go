@@ -195,11 +195,13 @@ func TestComponentSpec(t *testing.T) {
 			testService := "test-srv"
 
 			id := ctx.generateTestID(testIDLength)
+			t.Logf("Running test: %s", id)
 			api := ctx.apiFor(id, domainName, namespace, apiSecurityEnabled, true)
 			api.Spec.Service.Name = testService
 
 			testedID := ctx.generateTestID(testIDLength)
-			testedApi := ctx.apiFor(testedID, domainName, namespace, apiSecurityDisabled, true)
+			t.Logf("Running test: %s", testedID)
+			testedApi := ctx.apiFor(testedID, domainName, namespace, apiSecurityEnabled, true)
 			testedApi.Spec.Service.Name = testService
 
 			_, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
@@ -242,11 +244,13 @@ func TestComponentSpec(t *testing.T) {
 			testService := "test-srv"
 
 			id := ctx.generateTestID(testIDLength)
+			t.Logf("Running test: %s", id)
 			api := ctx.apiFor(id, domainName, namespace, apiSecurityEnabled, true)
 			api.Spec.Service.Name = testService
 
 			testedID := ctx.generateTestID(testIDLength)
-			testedApi := ctx.apiFor(testedID, domainName, namespace, apiSecurityDisabled, true)
+			t.Logf("Running test: %s", testedID)
+			testedApi := ctx.apiFor(testedID, domainName, namespace, apiSecurityEnabled, true)
 			testedApi.Spec.Service.Name = initialService
 
 			_, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
