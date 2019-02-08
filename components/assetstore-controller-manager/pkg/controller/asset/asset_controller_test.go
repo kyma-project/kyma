@@ -118,7 +118,7 @@ func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 	testData.asset.Status = v1alpha1.AssetStatus{LastHeartbeatTime: v1.Now()}
 
 	mocks := newMocks()
-	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Twice()
+	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(3)
 	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.validator.On("Validate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(webhook.ValidationResult{Success: true}, nil).Once()
