@@ -55,7 +55,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 	csrApplicationRouter.HandleFunc("/info", applicationInfoHandler.GetCSRInfo).Methods(http.MethodGet)
 
 	certApplicationRouter := router.PathPrefix("/v1/applications/certificates").Subrouter()
-	certApplicationRouter.HandleFunc("/", applicationSignatureHandler.SignCSR).Methods(http.MethodPost)
+	certApplicationRouter.HandleFunc("", applicationSignatureHandler.SignCSR).Methods(http.MethodPost)
 
 	httphelpers.WithMiddlewares(appHandlerCfg.Middlewares, csrApplicationRouter, certApplicationRouter)
 
@@ -72,7 +72,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 	csrRuntimesRouter.HandleFunc("/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)
 
 	certRuntimesRouter := router.PathPrefix("/v1/runtimes/certificates").Subrouter()
-	certRuntimesRouter.HandleFunc("/", runtimeSignatureHandler.SignCSR).Methods(http.MethodPost)
+	certRuntimesRouter.HandleFunc("", runtimeSignatureHandler.SignCSR).Methods(http.MethodPost)
 
 	httphelpers.WithMiddlewares(runtimeHandlerCfg.Middlewares, csrRuntimesRouter, certApplicationRouter)
 
