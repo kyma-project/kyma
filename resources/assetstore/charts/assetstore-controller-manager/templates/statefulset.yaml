@@ -58,10 +58,17 @@ spec:
               secretKeyRef:
                 name: assetstore-minio
                 key: secretkey
+          - name: APP_TEMPORARY_DIRECTORY
+            value: /tmp
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         ports:
           - containerPort: {{ .Values.service.internalPort }}
-        volumeMounts: []
+        volumeMounts:
+          - mountPath: /tmp
+            name: tmp-empty-dir
       terminationGracePeriodSeconds: 10
-      volumes: []
+      volumes:
+        - name: tmp-empty-dir
+          emptyDir:
+            medium: "Memory" # mount a tmpfs (RAM-backed filesystem). Default emptyDir volumes are stored on whatever medium is backing the node - that might be disk or SSD or network storage, depending on your environment.
