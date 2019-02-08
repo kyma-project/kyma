@@ -1,6 +1,5 @@
 #
-# This is a temporary hack because there is no separate chart with documentation in Kyma.
-# TODO: Move file to separate chart 
+# TODO: Remove it when Documentation will be migrated to Asset Store
 #
 
 apiVersion: settings.svcat.k8s.io/v1alpha1
