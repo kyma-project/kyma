@@ -190,7 +190,7 @@ func TestComponentSpec(t *testing.T) {
 		})
 
 		Convey("create API should not process the request if another API exists for target service", func() {
-			t.Log("duplicate API for a service")
+			t.Log("create API: duplicate API for a service")
 
 			testService := "test-srv"
 
@@ -234,6 +234,59 @@ func TestComponentSpec(t *testing.T) {
 			So(testedApi.Status.AuthenticationStatus.Resource.Name, ShouldBeEmpty)
 			So(testedApi.Status.VirtualServiceStatus.Resource.Name, ShouldBeEmpty)
 		})
+
+		Convey("update API should not process the request if another API exists for updated target service", func() {
+			t.Log("update API: duplicate API for a service")
+
+			initialService := "unoccupiedService"
+			testService := "test-srv"
+
+			id := ctx.generateTestID(testIDLength)
+			api := ctx.apiFor(id, domainName, namespace, apiSecurityEnabled, true)
+			api.Spec.Service.Name = testService
+
+			testedID := ctx.generateTestID(testIDLength)
+			testedApi := ctx.apiFor(testedID, domainName, namespace, apiSecurityDisabled, true)
+			testedApi.Spec.Service.Name = initialService
+
+			_, err := kymaClient.GatewayV1alpha2().Apis(namespace).Create(api)
+			So(err, ShouldBeNil)
+
+			_, err = kymaClient.GatewayV1alpha2().Apis(namespace).Create(testedApi)
+			So(err, ShouldBeNil)
+
+			originalTestedApi, err := ctx.awaitAPIChanged(kymaClient, testedApi, true, true, namespace)
+			So(err, ShouldBeNil)
+
+			testedApi.Spec.Service.Name = testService
+
+			_, err = kymaClient.GatewayV1alpha2().Apis(namespace).Update(testedApi)
+			So(err, ShouldBeNil)
+
+			err = retry.Do(func() error {
+
+				var err error
+
+				testedApi, err = kymaClient.GatewayV1alpha2().Apis(namespace).Get(testedApi.Name, metav1.GetOptions{})
+				if err != nil {
+					return err
+				}
+
+				if !testedApi.Status.IsTargetServiceOccupied() {
+					return errors.Errorf("Incorrect status: %s", testedApi.Status.ValidationStatus)
+				}
+
+				return nil
+
+			})
+
+			So(err, ShouldBeNil)
+			So(testedApi.Status.IsTargetServiceOccupied(), ShouldBeTrue)
+
+			So(testedApi.Status.AuthenticationStatus, ctx.ShouldDeepEqual, originalTestedApi.Status.AuthenticationStatus)
+			So(testedApi.Status.VirtualServiceStatus, ctx.ShouldDeepEqual, originalTestedApi.Status.VirtualServiceStatus)
+		})
+
 
 		Convey("delete API and all its related resources", func() {
 			t.Log("delete API and all its related resources")
