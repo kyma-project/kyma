@@ -229,8 +229,8 @@ func TestComponentSpec(t *testing.T) {
 
 			So(err, ShouldBeNil)
 			So(testedApi.Status.IsTargetServiceOccupied(), ShouldBeTrue)
-			So(testedApi.Status.AuthenticationStatus.IsEmpty(), ShouldBeTrue)
-			So(testedApi.Status.VirtualServiceStatus.IsEmpty(), ShouldBeTrue)
+			So(testedApi.Status.AuthenticationStatus.IsError(), ShouldBeTrue)
+			So(testedApi.Status.VirtualServiceStatus.IsError(), ShouldBeTrue)
 			So(testedApi.Status.AuthenticationStatus.Resource.Name, ShouldBeEmpty)
 			So(testedApi.Status.VirtualServiceStatus.Resource.Name, ShouldBeEmpty)
 		})
@@ -283,10 +283,43 @@ func TestComponentSpec(t *testing.T) {
 			So(err, ShouldBeNil)
 			So(testedApi.Status.IsTargetServiceOccupied(), ShouldBeTrue)
 
-			So(testedApi.Status.AuthenticationStatus, ctx.ShouldDeepEqual, originalTestedApi.Status.AuthenticationStatus)
-			So(testedApi.Status.VirtualServiceStatus, ctx.ShouldDeepEqual, originalTestedApi.Status.VirtualServiceStatus)
-		})
+			So(testedApi.Status.AuthenticationStatus.IsError(), ShouldBeTrue)
+			So(testedApi.Status.VirtualServiceStatus.IsError(), ShouldBeTrue)
 
+			So(testedApi.Status.AuthenticationStatus.Resource, ctx.ShouldDeepEqual, originalTestedApi.Status.AuthenticationStatus.Resource)
+			So(testedApi.Status.VirtualServiceStatus.Resource, ctx.ShouldDeepEqual, originalTestedApi.Status.VirtualServiceStatus.Resource)
+
+			testedApi.Spec.Service.Name = initialService
+
+			_, err = kymaClient.GatewayV1alpha2().Apis(namespace).Update(testedApi)
+			So(err, ShouldBeNil)
+
+			err = retry.Do(func() error {
+
+				var err error
+
+				testedApi, err = kymaClient.GatewayV1alpha2().Apis(namespace).Get(testedApi.Name, metav1.GetOptions{})
+				if err != nil {
+					return err
+				}
+
+				if !testedApi.Status.IsSuccessful() {
+					return errors.Errorf("Incorrect status: %s", testedApi.Status.ValidationStatus)
+				}
+
+				return nil
+
+			})
+
+			So(err, ShouldBeNil)
+
+			So(testedApi.Status.AuthenticationStatus.IsSuccessful(), ShouldBeTrue)
+			So(testedApi.Status.VirtualServiceStatus.IsSuccessful(), ShouldBeTrue)
+
+			So(testedApi.Status.AuthenticationStatus.Resource, ctx.ShouldDeepEqual, originalTestedApi.Status.AuthenticationStatus.Resource)
+			So(testedApi.Status.VirtualServiceStatus.Resource, ctx.ShouldDeepEqual, originalTestedApi.Status.VirtualServiceStatus.Resource)
+
+		})
 
 		Convey("delete API and all its related resources", func() {
 			t.Log("delete API and all its related resources")
