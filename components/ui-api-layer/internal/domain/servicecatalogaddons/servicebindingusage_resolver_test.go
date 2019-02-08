@@ -87,8 +87,8 @@ func TestServiceBindingUsageResolver_DeleteServiceBindingUsageMutation(t *testin
 
 		require.NoError(t, err)
 		assert.Equal(t, &gqlschema.DeleteServiceBindingUsageOutput{
-			Name:        "test",
-			Environment: "test",
+			Name:      "test",
+			Namespace: "test",
 		}, result)
 	})
 
@@ -202,8 +202,8 @@ func TestServiceBindingUsageResolver_ServiceBindingUsagesOfInstanceQuery(t *test
 
 func fixServiceBindingUsage() *gqlschema.ServiceBindingUsage {
 	return &gqlschema.ServiceBindingUsage{
-		Name:        "sbu-name",
-		Environment: "test-ns",
+		Name:      "sbu-name",
+		Namespace: "test-ns",
 		UsedBy: gqlschema.LocalObjectReference{
 			Kind: "Deployment",
 			Name: "sample-deployment",
@@ -218,8 +218,8 @@ func fixServiceBindingUsage() *gqlschema.ServiceBindingUsage {
 func fixCreateServiceBindingUsageInput() *gqlschema.CreateServiceBindingUsageInput {
 	name := "sbu-name"
 	return &gqlschema.CreateServiceBindingUsageInput{
-		Name:        &name,
-		Environment: "test-ns",
+		Name:      &name,
+		Namespace: "test-ns",
 		ServiceBindingRef: gqlschema.ServiceBindingRefInput{
 			Name: "binding-name",
 		},

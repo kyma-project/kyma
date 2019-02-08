@@ -37,7 +37,8 @@ func TestCache_Initialize(t *testing.T) {
 		cache.Initialize(stop)
 		cache.Initialize(stop)
 
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 	})
 
 	t.Run("Initialize once", func(t *testing.T) {
@@ -57,7 +58,8 @@ func TestCache_Initialize(t *testing.T) {
 
 		cache.Initialize(stop)
 
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 	})
 }
 
@@ -93,7 +95,8 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.ApiSpec(id)
 
@@ -121,7 +124,8 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		apiSpec, exists, err := cache.ApiSpec(id)
 
@@ -147,7 +151,8 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		apiSpec, exists, err := cache.ApiSpec(id)
 
@@ -174,7 +179,8 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.ApiSpec(id)
 
@@ -199,7 +205,8 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.ApiSpec(id)
 
@@ -227,7 +234,8 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.ApiSpec(id)
 
@@ -254,7 +262,8 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.ApiSpec(id)
 
@@ -389,7 +398,8 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.AsyncApiSpec(id)
 
@@ -417,7 +427,8 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		apiSpec, exists, err := cache.AsyncApiSpec(id)
 
@@ -443,7 +454,8 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		apiSpec, exists, err := cache.AsyncApiSpec(id)
 
@@ -470,7 +482,8 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.AsyncApiSpec(id)
 
@@ -495,7 +508,8 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.AsyncApiSpec(id)
 
@@ -523,7 +537,8 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.AsyncApiSpec(id)
 
@@ -550,7 +565,8 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.AsyncApiSpec(id)
 
@@ -685,7 +701,8 @@ func TestCache_Content_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.Content(id)
 
@@ -713,7 +730,8 @@ func TestCache_Content_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		apiSpec, exists, err := cache.Content(id)
 
@@ -739,7 +757,8 @@ func TestCache_Content_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		apiSpec, exists, err := cache.Content(id)
 
@@ -766,7 +785,8 @@ func TestCache_Content_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.Content(id)
 
@@ -791,7 +811,8 @@ func TestCache_Content_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.Content(id)
 
@@ -819,7 +840,8 @@ func TestCache_Content_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.Content(id)
 
@@ -846,7 +868,8 @@ func TestCache_Content_Initialized(t *testing.T) {
 		defer storeGetter.AssertExpectations(t)
 
 		cache.Initialize(stop)
-		waitAtMost(cache.IsSynced, synchronizationTimeout)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
 
 		_, exists, err := cache.Content(id)
 

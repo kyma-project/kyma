@@ -104,29 +104,29 @@ func fixInformer(objects ...runtime.Object) informers.SharedInformerFactory {
 	return informerFactory
 }
 
-func fixResourceQuota(name, environment string) *v1.ResourceQuota {
+func fixResourceQuota(name, namespace string) *v1.ResourceQuota {
 	return &v1.ResourceQuota{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 	}
 }
 
-func fixReplicaSet(name, environment string) *apps.ReplicaSet {
+func fixReplicaSet(name, namespace string) *apps.ReplicaSet {
 	return &apps.ReplicaSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 	}
 }
 
-func fixStatefulSet(name, environment string) *apps.StatefulSet {
+func fixStatefulSet(name, namespace string) *apps.StatefulSet {
 	return &apps.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 	}
 }

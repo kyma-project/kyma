@@ -1,10 +1,15 @@
 required = [
     "golang.org/x/tools/cmd/goimports",
+    "github.com/kisielk/errcheck",
 ]
 
 [[constraint]]
+  name = "github.com/kisielk/errcheck"
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
+
+[[constraint]]
   name = "github.com/machinebox/graphql"
-  revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
+  revision = "3a92531802258604bd12793465c2e28bc4b2fc85"
 
 [[constraint]]
   name = "github.com/pkg/errors"

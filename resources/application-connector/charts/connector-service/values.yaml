@@ -5,7 +5,12 @@ deployment:
     internalAPIPort: &internalAPIPort 8080
     externalAPIPort: &externalAPIPort 8081
     tokenLength: 64
-    tokenExpirationMinutes: 5
+    appTokenExpirationMinutes: 5
+    runtimeTokenExpirationMinutes: 10
+    caSecretName: nginx-auth-ca
+    getInfoURL: ""
+    group: "default"
+    tenant: "default"
   envvars:
     country: DE
     organization: Organization
@@ -23,5 +28,7 @@ service:
 
 tests:
   skipSslVerify: false
+  group: ""
+  tenant: ""
   image:
     pullPolicy: IfNotPresent

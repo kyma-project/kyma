@@ -30,8 +30,8 @@ func (c *serviceBindingUsageConverter) ToGQL(in *api.ServiceBindingUsage) (*gqls
 	}
 
 	gqlSBU := gqlschema.ServiceBindingUsage{
-		Name:        in.Name,
-		Environment: in.Namespace,
+		Name:      in.Name,
+		Namespace: in.Namespace,
 		UsedBy: gqlschema.LocalObjectReference{
 			Name: in.Spec.UsedBy.Name,
 			Kind: in.Spec.UsedBy.Kind,

@@ -2,17 +2,12 @@ package apitests
 
 import (
 	"crypto/rsa"
-	"crypto/tls"
-	"fmt"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	. "net/http"
+	"net/http"
 	"net/url"
 	"testing"
 	"time"
 
-	"io/ioutil"
-
-	"gopkg.in/yaml.v2"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/require"
@@ -30,11 +25,59 @@ func TestConnector(t *testing.T) {
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
-	app, e := k8sResourcesClient.CreateDummyApplication("app-connector-test-0", "", false)
-
-	client := testkit.NewConnectorClient(app.Name, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
-
+	app, e := k8sResourcesClient.CreateDummyApplication("app-connector-test-0", "", true)
 	require.NoError(t, e)
+
+	defer func() {
+		k8sResourcesClient.DeleteApplication(app.Name, &v1.DeleteOptions{})
+	}()
+
+	t.Run("Connector Service flow for Application", func(t *testing.T) {
+		appTokenRequest := createApplicationTokenRequest(t, config, "test")
+		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
+	})
+
+	t.Run("Connector Service flow for Runtime", func(t *testing.T) {
+		runtimeTokenRequest := createRuntimeTokenRequest(t, config)
+		certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+	})
+}
+
+func createApplicationTokenRequest(t *testing.T, config testkit.TestConfig, appName string) *http.Request {
+	tokenURL := config.InternalAPIUrl + "/v1/applications/tokens"
+
+	request := createTokenRequest(t, tokenURL, config)
+	request.Header.Set(testkit.ApplicationHeader, appName)
+
+	return request
+}
+
+func createRuntimeTokenRequest(t *testing.T, config testkit.TestConfig) *http.Request {
+	tokenURL := config.InternalAPIUrl + "/v1/runtimes/tokens"
+
+	request := createTokenRequest(t, tokenURL, config)
+
+	return request
+}
+
+func createTokenRequest(t *testing.T, tokenURL string, config testkit.TestConfig) *http.Request {
+	request, err := http.NewRequest(http.MethodPost, tokenURL, nil)
+	require.NoError(t, err)
+
+	if config.Group != "" {
+		request.Header.Set(testkit.GroupHeader, config.Group)
+	}
+
+	if config.Tenant != "" {
+		request.Header.Set(testkit.TenantHeader, config.Tenant)
+	}
+
+	return request
+}
+
+func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
+
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
 	clientKey := testkit.CreateKey(t)
 
@@ -43,13 +86,13 @@ func TestConnector(t *testing.T) {
 		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		//then
-		require.NotEmpty(t, crtResponse.Crt)
+		require.NotEmpty(t, crtResponse.CRTChain)
 
 		// when
-		certificates := testkit.DecodeAndParseCert(t, crtResponse)
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 
 		// then
-		clientsCrt := certificates[0]
+		clientsCrt := certificates.CRTChain[0]
 		testkit.CheckIfSubjectEquals(t, infoResponse.Certificate.Subject, clientsCrt)
 	})
 
@@ -58,13 +101,13 @@ func TestConnector(t *testing.T) {
 		crtResponse, _ := createCertificateChain(t, client, clientKey)
 
 		//then
-		require.NotEmpty(t, crtResponse.Crt)
+		require.NotEmpty(t, crtResponse.CRTChain)
 
 		// when
-		certificates := testkit.DecodeAndParseCert(t, crtResponse)
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 
 		// then
-		require.Equal(t, 2, len(certificates))
+		require.Equal(t, 2, len(certificates.CRTChain))
 	})
 
 	t.Run("client cert should be signed by server cert", func(t *testing.T) {
@@ -72,13 +115,32 @@ func TestConnector(t *testing.T) {
 		crtResponse, _ := createCertificateChain(t, client, clientKey)
 
 		//then
-		require.NotEmpty(t, crtResponse.Crt)
+		require.NotEmpty(t, crtResponse.CRTChain)
 
 		// when
-		certificates := testkit.DecodeAndParseCert(t, crtResponse)
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 
 		//then
-		testkit.CheckIfCertIsSigned(t, certificates)
+		testkit.CheckIfCertIsSigned(t, certificates.CRTChain)
+	})
+
+	t.Run("should respond with client certificate together with CA crt", func(t *testing.T) {
+		// when
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
+
+		//then
+		require.NotEmpty(t, crtResponse.CRTChain)
+
+		// when
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+
+		// then
+		clientsCrt := certificates.CRTChain[0]
+		testkit.CheckIfSubjectEquals(t, infoResponse.Certificate.Subject, clientsCrt)
+		require.Equal(t, certificates.ClientCRT, clientsCrt)
+
+		caCrt := certificates.CRTChain[1]
+		require.Equal(t, certificates.CaCRT, caCrt)
 	})
 
 	t.Run("should validate CSR subject", func(t *testing.T) {
@@ -107,40 +169,9 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, StatusBadRequest, err.StatusCode)
-		require.Equal(t, StatusBadRequest, err.ErrorResponse.Code)
-		require.Equal(t, "CSR: Invalid CName provided.", err.ErrorResponse.Error)
-	})
-
-	t.Run("should accept only one token per application", func(t *testing.T) {
-		// when
-		tokenResponse := client.CreateToken(t)
-
-		// then
-		require.NotEmpty(t, tokenResponse.Token)
-		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
-
-		// when
-		tokenResponse2 := client.CreateToken(t)
-
-		// then
-		require.NotEmpty(t, tokenResponse2.Token)
-		require.Contains(t, tokenResponse2.URL, "token="+tokenResponse2.Token)
-
-		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL)
-
-		// then
-		require.Nil(t, infoResponse)
-		require.Equal(t, StatusForbidden, errorResponse.StatusCode)
-
-		// when
-		infoResponse2, errorResponse2 := client.GetInfo(t, tokenResponse2.URL)
-
-		// then
-		require.Nil(t, errorResponse2)
-		require.NotEmpty(t, infoResponse2.CertUrl)
-		require.Equal(t, "rsa2048", infoResponse2.Certificate.KeyAlgorithm)
+		require.Equal(t, http.StatusBadRequest, err.StatusCode)
+		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
+		require.Equal(t, "CSR: Invalid common name provided.", err.ErrorResponse.Error)
 	})
 
 	t.Run("should return error for wrong token on info endpoint", func(t *testing.T) {
@@ -158,8 +189,8 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, StatusForbidden, err.StatusCode)
-		require.Equal(t, StatusForbidden, err.ErrorResponse.Code)
+		require.Equal(t, http.StatusForbidden, err.StatusCode)
+		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
 		require.Equal(t, "Invalid token.", err.ErrorResponse.Error)
 	})
 
@@ -190,8 +221,8 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, StatusForbidden, err.StatusCode)
-		require.Equal(t, StatusForbidden, err.ErrorResponse.Code)
+		require.Equal(t, http.StatusForbidden, err.StatusCode)
+		require.Equal(t, http.StatusForbidden, err.ErrorResponse.Code)
 		require.Equal(t, "Invalid token.", err.ErrorResponse.Error)
 	})
 
@@ -216,110 +247,11 @@ func TestConnector(t *testing.T) {
 
 		// then
 		require.NotNil(t, err)
-		require.Equal(t, StatusBadRequest, err.StatusCode)
-		require.Equal(t, StatusBadRequest, err.ErrorResponse.Code)
+		require.Equal(t, http.StatusBadRequest, err.StatusCode)
+		require.Equal(t, http.StatusBadRequest, err.ErrorResponse.Code)
 		require.Equal(t, "There was an error while parsing the base64 content. An incorrect value was provided.", err.ErrorResponse.Error)
 	})
-	k8sResourcesClient.DeleteApplication(app.Name, &v1.DeleteOptions{})
-}
 
-func TestApiSpec(t *testing.T) {
-
-	apiSpecPath := "/v1/api.yaml"
-
-	config, err := testkit.ReadConfig()
-	require.NoError(t, err)
-
-	hc := testkit.NewHttpClient(config.SkipSslVerify)
-
-	t.Run("should receive api spec", func(t *testing.T) {
-		// when
-		response, err := hc.Get(config.ExternalAPIUrl + apiSpecPath)
-
-		// then
-		require.NoError(t, err)
-		require.Equal(t, StatusOK, response.StatusCode)
-
-		// when
-		body, err := ioutil.ReadAll(response.Body)
-
-		// then
-		require.NoError(t, err)
-
-		var apiSpec struct{}
-		err = yaml.Unmarshal(body, &apiSpec)
-		require.NoError(t, err)
-	})
-
-	t.Run("should receive 301 when accessing base path", func(t *testing.T) {
-		// given
-		hc.CheckRedirect = func(req *Request, via []*Request) error {
-			require.Equal(t, apiSpecPath, req.URL.Path)
-			return ErrUseLastResponse
-		}
-
-		// when
-		response, err := hc.Get(config.ExternalAPIUrl + "/v1")
-
-		// then
-		require.NoError(t, err)
-		require.Equal(t, StatusMovedPermanently, response.StatusCode)
-	})
-}
-
-func TestCertificateValidation(t *testing.T) {
-
-	config, err := testkit.ReadConfig()
-	require.NoError(t, err)
-
-	gatewayUrlFormat := config.GatewayUrl + "/%s/v1/metadata/services"
-
-	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
-	require.NoError(t, err)
-	testApp, err := k8sResourcesClient.CreateDummyApplication("app-connector-test-1", "", false)
-	require.NoError(t, err)
-	forbiddenApp, err := k8sResourcesClient.CreateDummyApplication("app-connector-test-2", "", false)
-	require.NoError(t, err)
-
-	client := testkit.NewConnectorClient(testApp.Name, config.InternalAPIUrl, config.ExternalAPIUrl, config.SkipSslVerify)
-
-	clientKey := testkit.CreateKey(t)
-	tlsClient := createTLSClientWithCert(t, client, clientKey, config.SkipSslVerify)
-
-	t.Run("should access application", func(t *testing.T) {
-		// when
-		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, testApp.Name)
-
-		// then
-		require.NoError(t, err)
-		require.Equal(t, StatusOK, response.StatusCode)
-	})
-
-	t.Run("should receive 403 when accessing RE with invalid CN", func(t *testing.T) {
-		// when
-		response, err := repeatUntilIngressIsCreated(tlsClient, gatewayUrlFormat, forbiddenApp.Name)
-
-		// then
-		require.NoError(t, err)
-		require.Equal(t, StatusForbidden, response.StatusCode)
-	})
-
-	k8sResourcesClient.DeleteApplication(testApp.Name, &v1.DeleteOptions{})
-	k8sResourcesClient.DeleteApplication(forbiddenApp.Name, &v1.DeleteOptions{})
-}
-
-func repeatUntilIngressIsCreated(tlsClient *Client, gatewayUrlFormat string, appName string) (*Response, error) {
-	var response *Response
-	var err error
-	for i := 0; (shouldRetry(response, err)) && i < retryCount; i++ {
-		response, err = tlsClient.Get(fmt.Sprintf(gatewayUrlFormat, appName))
-		time.Sleep(retryWaitTimeSeconds)
-	}
-	return response, err
-}
-
-func shouldRetry(response *Response, err error) bool {
-	return response == nil || StatusNotFound == response.StatusCode || err != nil
 }
 
 func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClient, key *rsa.PrivateKey) (*testkit.CrtResponse, *testkit.InfoResponse) {
@@ -349,31 +281,6 @@ func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClien
 	require.Nil(t, errorResponse)
 
 	return crtResponse, infoResponse
-}
-
-func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, key *rsa.PrivateKey, skipVerify bool) *Client {
-	crtResponse, _ := createCertificateChain(t, client, key)
-	require.NotEmpty(t, crtResponse.Crt)
-	clientCertBytes, _ := testkit.CrtResponseToPemBytes(t, crtResponse)
-
-	tlsCert := tls.Certificate{
-		Certificate: [][]byte{clientCertBytes},
-		PrivateKey:  key,
-	}
-
-	tlsConfig := &tls.Config{
-		Certificates:       []tls.Certificate{tlsCert},
-		ClientAuth:         tls.RequireAndVerifyClientCert,
-		InsecureSkipVerify: skipVerify,
-	}
-
-	transport := &Transport{
-		TLSClientConfig: tlsConfig,
-	}
-
-	return &Client{
-		Transport: transport,
-	}
 }
 
 func replaceToken(originalUrl string, newToken string) string {

@@ -24,9 +24,9 @@ type serviceInstanceService struct {
 	instanceExt status.InstanceExtractor
 }
 
-func newServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) *serviceInstanceService {
+func newServiceInstanceService(informer cache.SharedIndexInformer, client clientset.Interface) (*serviceInstanceService, error) {
 	instanceExt := status.InstanceExtractor{}
-	informer.AddIndexers(cache.Indexers{
+	err := informer.AddIndexers(cache.Indexers{
 		"externalClusterServiceClassName": func(obj interface{}) ([]string, error) {
 			serviceInstance, ok := obj.(*v1beta1.ServiceInstance)
 			if !ok {
@@ -71,6 +71,9 @@ func newServiceInstanceService(informer cache.SharedIndexInformer, client client
 			return []string{key}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
@@ -80,11 +83,11 @@ func newServiceInstanceService(informer cache.SharedIndexInformer, client client
 		client:      client,
 		notifier:    notifier,
 		instanceExt: instanceExt,
-	}
+	}, nil
 }
 
-func (svc *serviceInstanceService) Find(name, environment string) (*v1beta1.ServiceInstance, error) {
-	key := fmt.Sprintf("%s/%s", environment, name)
+func (svc *serviceInstanceService) Find(name, namespace string) (*v1beta1.ServiceInstance, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
 
 	item, exists, err := svc.informer.GetStore().GetByKey(key)
 	if err != nil || !exists {
@@ -99,8 +102,8 @@ func (svc *serviceInstanceService) Find(name, environment string) (*v1beta1.Serv
 	return serviceInstance, nil
 }
 
-func (svc *serviceInstanceService) List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceInstance, error) {
-	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", environment).Limit(pagingParams)
+func (svc *serviceInstanceService) List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceInstance, error) {
+	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", namespace).Limit(pagingParams)
 	if err != nil {
 		return nil, err
 	}
@@ -117,8 +120,8 @@ func (svc *serviceInstanceService) List(environment string, pagingParams pager.P
 	return serviceInstances, nil
 }
 
-func (svc *serviceInstanceService) ListForStatus(environment string, pagingParams pager.PagingParams, status *status.ServiceInstanceStatusType) ([]*v1beta1.ServiceInstance, error) {
-	key := fmt.Sprintf("%s/%s", environment, *status)
+func (svc *serviceInstanceService) ListForStatus(namespace string, pagingParams pager.PagingParams, status *status.ServiceInstanceStatusType) ([]*v1beta1.ServiceInstance, error) {
+	key := fmt.Sprintf("%s/%s", namespace, *status)
 	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "statusType", key).Limit(pagingParams)
 	if err != nil {
 		return nil, err
@@ -162,7 +165,7 @@ func (svc *serviceInstanceService) ListForClusterServiceClass(className, externa
 	return svc.uniqueInstances(serviceInstances), nil
 }
 
-func (svc *serviceInstanceService) ListForServiceClass(className, externalClassName string, environment string) ([]*v1beta1.ServiceInstance, error) {
+func (svc *serviceInstanceService) ListForServiceClass(className, externalClassName string, namespace string) ([]*v1beta1.ServiceInstance, error) {
 	indexer := svc.informer.GetIndexer()
 	itemsByClassName, err := indexer.ByIndex("serviceClassName", className)
 	if err != nil {

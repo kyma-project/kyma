@@ -1,7 +1,7 @@
 # General topic
 - name: kyma
 - name: service-catalog
-- name: service-brokers
+- name: helm-broker
 - name: application-connector
 - name: event-bus
 - name: service-mesh
@@ -12,6 +12,7 @@
 - name: security
 - name: logging
 - name: console
+- name: asset-store
 
 # Azure Broker
 - name: azure-mysql-5.7-dbms-and-database

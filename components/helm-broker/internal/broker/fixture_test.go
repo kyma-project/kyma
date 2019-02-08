@@ -65,6 +65,23 @@ func (exp *expAll) Populate() {
 	exp.ParamsHash = "TODO"
 }
 
+func (exp *expAll) NewInstanceCollection() []*internal.Instance {
+	return []*internal.Instance{
+		&internal.Instance{
+			ServiceID: "new-id-not-exist-0",
+			Namespace: "fix-namespace",
+		},
+		&internal.Instance{
+			ServiceID: "new-id-not-exist-1",
+			Namespace: "fix-namespace",
+		},
+		&internal.Instance{
+			ServiceID: "new-id-not-exist-2",
+			Namespace: "fix-namespace",
+		},
+	}
+}
+
 func (exp *expAll) NewChart() *chart.Chart {
 	return &chart.Chart{
 		Metadata: &chart.Metadata{

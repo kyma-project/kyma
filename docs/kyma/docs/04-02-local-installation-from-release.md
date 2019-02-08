@@ -11,8 +11,8 @@ To run Kyma locally, clone this Git repository to your machine and check out the
 
 Additionally, download these tools:
 
-- [Minikube](https://github.com/kubernetes/minikube) 0.28.2
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.10.0
+- [Minikube](https://github.com/kubernetes/minikube) 0.33.0
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.11.0
 - [Helm](https://github.com/kubernetes/helm) 2.10.0
 - [jq](https://stedolan.github.io/jq/)
 
@@ -40,11 +40,11 @@ Follow these steps to "always trust" the Kyma certificate on Mac:
 
 >**NOTE:** "Always trusting" the certificate does not work with Mozilla Firefox.
 
-To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read the **Access Application Connector on local Kyma** in the **Application Connector** topic to learn more.
+To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/docs/root/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
 ## Install Kyma on Minikube
 
-You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. To learn how to install only the specific ones, see the **Install subcomponents** document for details.
+You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. Read [this](/docs/root/kyma#installation-custom-component-installation) document to learn how to install only the selected subcomponents.
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
@@ -94,8 +94,9 @@ To install Kyma, follow these steps:
   ./scripts/is-installed.sh
   ```
 
-Read the **Reinstall Kyma** document to learn how to reinstall Kyma without deleting the cluster from Minikube.
-To learn how to test Kyma, see the **Testing Kyma** document.
+Read [this](#installation-reinstall-kyma) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
+
+To learn how to test Kyma, see [this](#details-testing-kyma) document.
 
 ## Verify the deployment
 
@@ -142,13 +143,13 @@ http://192.168.64.44:30000
 
 ## Enable Horizontal Pod Autoscaler (HPA)
 
-By default, the Horizontal Pod Autoscaler is not enabled in your local Kyma installation, so you need to enable it manually.
+By default, the Horizontal Pod Autoscaler (HPA) is not enabled in your local Kyma installation, so you need to enable it manually.
 
-Kyma uses the autoscaling/v1 stable version, which only provides support for CPU autoscaling. Once enabled, HPA automatically scales the number of lambda function Pods based on observed CPU utilization.
+Kyma uses the `autoscaling/v1` stable version, which supports only CPU autoscaling. Once enabled, HPA automatically scales the number of lambda function Pods based on the observed CPU utilization.
 
->**NOTE:** The autoscaling/v1 version does not support custom metrics. To use such metrics, you need the autoscaling/v2beta2 version.
+>**NOTE:** The `autoscaling/v1` version does not support custom metrics. To use such metrics, you need the `autoscaling/v2beta1` version.
 
-To enable Horizontal Pod Autoscaler, follow these steps:
+Follow these steps to enable HPA:
 
 1. Enable the metrics server for resource metrics by running the following command:
   ```
@@ -165,15 +166,15 @@ To enable Horizontal Pod Autoscaler, follow these steps:
 Use the `minikube.sh` script to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
 
 1. Stop the Minikube cluster with Kyma installed. Run:
-```
-minikube stop
-```
+  ```
+  minikube stop
+  ```
 2. Restart the cluster without reinstalling Kyma. Run:
-```
-./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
-```
+  ```
+  ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
+  ```
 
-The script discovers that a minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the script to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
+The script discovers that a Minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the script to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
 
 To verify that the restart is successful, run this command and check if all Pods have the `RUNNING` status:
 
@@ -194,4 +195,5 @@ kubectl get pods --all-namespaces
 ```
 
 The command retrieves all Pods from all Namespaces, the status of the Pods, and their instance numbers. Check if the STATUS column shows Running for all Pods. If any of the Pods that you require do not start successfully, perform the installation again.
+
 If the problem persists, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.

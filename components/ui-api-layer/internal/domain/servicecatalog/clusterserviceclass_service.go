@@ -13,8 +13,8 @@ type clusterServiceClassService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newClusterServiceClassService(informer cache.SharedIndexInformer) *clusterServiceClassService {
-	informer.AddIndexers(cache.Indexers{
+func newClusterServiceClassService(informer cache.SharedIndexInformer) (*clusterServiceClassService, error) {
+	err := informer.AddIndexers(cache.Indexers{
 		"externalName": func(obj interface{}) ([]string, error) {
 			entity, ok := obj.(*v1beta1.ClusterServiceClass)
 			if !ok {
@@ -24,10 +24,13 @@ func newClusterServiceClassService(informer cache.SharedIndexInformer) *clusterS
 			return []string{entity.Spec.ExternalName}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	return &clusterServiceClassService{
 		informer: informer,
-	}
+	}, nil
 }
 
 func (svc *clusterServiceClassService) Find(name string) (*v1beta1.ClusterServiceClass, error) {

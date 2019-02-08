@@ -12,6 +12,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1"
 	bindingusage "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
+	"github.com/kyma-project/kyma/tests/acceptance/pkg/retriever"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/require"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -88,27 +89,17 @@ func (ts *TestSuite) Setup() {
 }
 
 func (ts *TestSuite) WaitForServiceClassWithTimeout(timeout time.Duration) {
-	done := time.After(timeout)
-
-	for {
-		// if error occurs, try again
-		sc, err := ts.scCli.ServiceClasses(ts.namespace).Get(ts.osbServiceId, metav1.GetOptions{})
-		if err == nil {
-			ts.serviceClass = sc
-			return
+	fn := func() error {
+		sc, err := retriever.ServiceClassByExternalID(ts.scCli, ts.namespace, ts.osbServiceId)
+		if err != nil {
+			return err
 		}
 
-		if !apierrors.IsNotFound(err) {
-			ts.t.Logf("error while getting service class: %s", err.Error())
-		}
-
-		select {
-		case <-done:
-			require.Fail(ts.t, fmt.Sprintf("timeout while waiting for service class %s", ts.osbServiceId))
-		default:
-			time.Sleep(time.Second)
-		}
+		ts.serviceClass = sc
+		return nil
 	}
+
+	repeat.FuncAtMost(ts.t, fn, timeout)
 }
 
 func (ts *TestSuite) ProvisionServiceInstance(timeout time.Duration) {

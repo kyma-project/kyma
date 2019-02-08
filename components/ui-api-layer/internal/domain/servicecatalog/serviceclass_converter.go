@@ -31,11 +31,14 @@ func (c *serviceClassConverter) ToGQL(in *v1beta1.ServiceClass) (*gqlschema.Serv
 	longDescription := resource.ToStringPtr(externalMetadata["longDescription"])
 
 	var labels gqlschema.Labels
-	labels.UnmarshalGQL(externalMetadata["labels"])
+	err = labels.UnmarshalGQL(externalMetadata["labels"])
+	if err != nil {
+		return nil, errors.Wrapf(err, "while unmarshalling labels in ServiceClass `%s`", in.Name)
+	}
 
 	class := gqlschema.ServiceClass{
 		Name:                in.Name,
-		Environment:         in.Namespace,
+		Namespace:           in.Namespace,
 		ExternalName:        in.Spec.ExternalName,
 		DisplayName:         displayName,
 		Description:         in.Spec.Description,
