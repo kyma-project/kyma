@@ -30,7 +30,6 @@ func TestSuccess(t *testing.T) {
 	ts.mockInstanceStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, nil).Once()
 	ts.mockInstanceStateGetter.On("IsDeprovisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, nil).Once()
 
-
 	logSink := spy.NewLogSink()
 	sut := NewDeprovisioner(ts.mockInstanceStorage, ts.mockInstanceStateGetter, ts.mockOperationStorage, ts.mockOperationStorage, ts.mockOperationStorage, ts.OpIDProviderFake, logSink.Logger)
 
@@ -108,7 +107,7 @@ func TestErrorOnIsDeprovisionedInstance(t *testing.T) {
 
 	mockStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, fixError())
 
-	sut := NewDeprovisioner(nil, mockStateGetter, nil, nil, nil,nil, spy.NewLogDummy())
+	sut := NewDeprovisioner(nil, mockStateGetter, nil, nil, nil, nil, spy.NewLogDummy())
 	// WHEN
 	_, err := sut.Deprovision(context.Background(), osbContext{}, fixDeprovisionRequest())
 
@@ -125,7 +124,7 @@ func TestErrorOnDeprovisioningInProgressInstance(t *testing.T) {
 	mockStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, nil)
 	mockStateGetter.On("IsDeprovisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, fixError())
 
-	sut := NewDeprovisioner(nil, mockStateGetter, nil, nil, nil,nil, spy.NewLogDummy())
+	sut := NewDeprovisioner(nil, mockStateGetter, nil, nil, nil, nil, spy.NewLogDummy())
 	// WHEN
 	_, err := sut.Deprovision(context.Background(), osbContext{}, fixDeprovisionRequest())
 
