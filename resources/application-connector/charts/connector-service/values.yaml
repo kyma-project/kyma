@@ -26,6 +26,12 @@ service:
     serviceType: ClusterIP
     port: *internalAPIPort
 
+ingress:
+  externalapi:
+    port: *externalAPIPort
+  authSecret: kyma-integration/nginx-auth-ca
+  tlsSecret: ingress-tls-cert
+
 tests:
   skipSslVerify: false
   group: ""

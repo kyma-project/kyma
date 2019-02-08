@@ -25,12 +25,12 @@ spec:
       paths:
       - path: /v1/applications/management/info
         backend:
-          serviceName: connector-service-external-api.kyma-integration.svc.cluster.local
-          servicePort: 8081
+          serviceName: {{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local
+          servicePort: {{ .Values.ingress.externalAPIPort.port }}
       - path: /v1/runtimes/management/info
         backend:
-          serviceName: connector-service-external-api.kyma-integration.svc.cluster.local
-          servicePort: 8081
+          serviceName: {{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local
+          servicePort: {{ .Values.ingress.externalAPIPort.port }}
 
   tls:
   - hosts:
