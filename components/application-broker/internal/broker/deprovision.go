@@ -2,6 +2,7 @@ package broker
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
@@ -12,12 +13,13 @@ import (
 )
 
 // NewDeprovisioner creates new Deprovisioner
-func NewDeprovisioner(instStorage instanceStorage, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, opIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *DeprovisionService {
+func NewDeprovisioner(instStorage instanceStorage, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, operationRemover operationRemover, opIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *DeprovisionService {
 	return &DeprovisionService{
 		instStorage:         instStorage,
 		instanceStateGetter: instanceStateGetter,
 		operationInserter:   operationInserter,
 		operationUpdater:    operationUpdater,
+		operationRemover:    operationRemover,
 		operationIDProvider: opIDProvider,
 		log:                 log.WithField("service", "deprovisioner"),
 	}
@@ -30,6 +32,7 @@ type DeprovisionService struct {
 	operationIDProvider func() (internal.OperationID, error)
 	operationInserter   operationInserter
 	operationUpdater    operationUpdater
+	operationRemover    operationRemover
 
 	log       logrus.FieldLogger
 	mu        sync.Mutex
@@ -73,11 +76,6 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 		return nil, errors.Wrap(err, "while generating ID for operation")
 	}
 
-	iNs, err := svc.instStorage.Get(iID)
-	if err != nil {
-		return nil, errors.Wrap(err, "while getting instance from storage")
-	}
-
 	paramHash := "TODO"
 	op := internal.InstanceOperation{
 		InstanceID:  iID,
@@ -105,15 +103,15 @@ func (svc *DeprovisionService) Deprovision(ctx context.Context, osbCtx osbContex
 		OperationKey: &opKey,
 	}
 
-	svc.doAsync(iID, operationID, req.ServiceID, iNs.Namespace)
+	svc.doAsync(iID, operationID, req.ServiceID)
 	return resp, nil
 }
 
-func (svc *DeprovisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, appID string, ns internal.Namespace) {
-	go svc.do(iID, opID, appID, ns)
+func (svc *DeprovisionService) doAsync(iID internal.InstanceID, opID internal.OperationID, appID string) {
+	go svc.do(iID, opID, appID)
 }
 
-func (svc *DeprovisionService) do(iID internal.InstanceID, opID internal.OperationID, appID string, ns internal.Namespace) {
+func (svc *DeprovisionService) do(iID internal.InstanceID, opID internal.OperationID, appID string) {
 	if svc.asyncHook != nil {
 		defer svc.asyncHook()
 	}
@@ -121,7 +119,21 @@ func (svc *DeprovisionService) do(iID internal.InstanceID, opID internal.Operati
 	opState := internal.OperationStateSucceeded
 	opDesc := "deprovision succeeded"
 
-	// currently, there is no any action, but it is a place for future - any deprovisioning action should be put here
+	// remove instance entity from storage
+	fDo := func() error {
+		err := svc.operationRemover.Remove(iID, opID)
+		switch {
+		case err == nil, IsNotFoundError(err):
+		default:
+			return errors.Wrap(err, "while removing instance entity from storage")
+		}
+		return nil
+	}
+
+	if err := fDo(); err != nil {
+		opState = internal.OperationStateFailed
+		opDesc = fmt.Sprintf("deprovisioning failed on error: %s", err.Error())
+	}
 
 	if err := svc.operationUpdater.UpdateStateDesc(iID, opID, opState, &opDesc); err != nil {
 		svc.log.Errorf("Cannot update state for instance [%s]: [%v]\n", iID, err)
