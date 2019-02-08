@@ -49,7 +49,8 @@ data:
     {{- include "kyma-rules.yaml.tpl" . | indent 4}}
 {{ end }}
 ```
-The **data. alert.rules** parameter includes the configuration in [kyma-rules.yaml](templates/kyma-rules.yaml) file, which creates rules in the following cases:
+The **data. alert.rules** parameter includes the configuration in the [kyma-rules.yaml](templates/kyma-rules.yaml) file, which creates rules in the following cases:
+
 
 *  Alert when a Pod is not running
 
@@ -65,7 +66,7 @@ The **data. alert.rules** parameter includes the configuration in [kyma-rules.ya
 
 * Monitor Memory usage
 
-    The Alertmanager triggers the rule when Memory usage exceeds 90% for the Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertmem: "yes"` to Pods.
+    The Alertmanager triggers the rule when Memory usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertmem: "yes"` to Pods.
 
 This is an example for alerting when a Pod is not running:
 
