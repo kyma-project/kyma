@@ -5,7 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 	"net/http"
-	"strings"
+	"regexp"
 )
 
 type appContextFromSubjMiddleware struct{}
@@ -38,7 +38,8 @@ func extractApplicationFromSubject(r *http.Request) string {
 		return ""
 	}
 
-	index := strings.LastIndex(subject, "CN")
+	re := regexp.MustCompile("CN=([^,]+)")
+	matches := re.FindStringSubmatch(subject)
 
-	return subject[index+3:]
+	return matches[1]
 }
