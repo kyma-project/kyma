@@ -11,7 +11,7 @@ RUN curl -Lo /tmp/ark.tgz https://github.com/heptio/ark/releases/download/v0.10.
 RUN curl -Lo /tmp/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.10.0/bin/linux/amd64/kubectl && chmod +x /tmp/kubectl 
 
 FROM alpine:3.8
-RUN apk --no-cache upgrade && apk --no-cache add curl iputils
+RUN apk --no-cache upgrade && apk --no-cache add curl
 
 LABEL source = git@github.com:kyma-project/kyma.git
 RUN mkdir -p /root/.kube && touch /root/.kube/config
