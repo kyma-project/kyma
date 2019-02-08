@@ -1,6 +1,5 @@
 ---
-title: Asset Store
-type: Architecture
+title: Architecture
 ---
 
 ## Resources

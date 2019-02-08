@@ -1,6 +1,5 @@
 ---
-title: Asset Store
-type: Overview
+title: Overview
 ---
 
 The Asset Store is a Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications.
