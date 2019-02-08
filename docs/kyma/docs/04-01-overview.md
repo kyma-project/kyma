@@ -13,6 +13,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
 | `ark` | ✅ | ⛔️ |
+| `assetstore` | ✅ | ✅ |
 | `dex` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
 | `jaeger` | ✅ | ⛔️ |
