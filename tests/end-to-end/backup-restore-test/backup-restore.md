@@ -8,7 +8,7 @@ The end-to-end test scenario looks as follows:
 
 - Create a new namespace
 - Create a new function in the Namespace.
-- Verify that the function works
+- Verify that the function works.
 
 - Back up the Namespace and all the resources in it.
 - Remove the namespace and all its components from the cluster
