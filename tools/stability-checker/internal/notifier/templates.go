@@ -29,11 +29,12 @@ const (
 	{{- if .FailedExecutions }}
 	_*Run*_` +
 		"```" +
-		"kubectl exec -n {{ .TestRunnerInfo.Namespace }} {{ .TestRunnerInfo.PodName }} -- logs-printer --ids=" + `
+		"kubectl logs -n {{ .TestRunnerInfo.Namespace }} {{ .TestRunnerInfo.PodName }} stability-checker | jq -s '.[]| select(" + `
 			{{- range $index, $element := .FailedExecutions -}}
-					{{- if ne $index 0 -}},{{- end -}}
-					{{- $element.ID -}}
+					{{- if ne $index 0 }} or {{ end -}}
+					.log."test-run-id" == "{{- $element.ID -}}"
 			{{- end -}}` +
+		")' | jq -r '.log.time + \" \" + .log.message'" +
 		"```" +
 		` _*to get more info about failed tests.*_
 	{{- end -}}

@@ -173,7 +173,7 @@ type Resolver interface {
 	CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error)
 	DeleteServiceBindingMutation(ctx context.Context, serviceBindingName, env string) (*gqlschema.DeleteServiceBindingOutput, error)
 	ServiceBindingQuery(ctx context.Context, name, env string) (*gqlschema.ServiceBinding, error)
-	ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, namespace string) (gqlschema.ServiceBindings, error)
+	ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, namespace string) (*gqlschema.ServiceBindings, error)
 	ServiceBindingEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingEvent, error)
 }
 

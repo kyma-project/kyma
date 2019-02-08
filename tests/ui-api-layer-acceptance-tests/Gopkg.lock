@@ -88,22 +88,22 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7fdf3223c7372d1ced0b98bf53457c5e89d89aecbad9a77ba9fcc6e01f9e5621"
+  digest = "1:a86d65bc23eea505cd9139178e4d889733928fe165c7a008f41eaab039edf9df"
   name = "github.com/gregjones/httpcache"
   packages = [
     ".",
     "diskcache",
   ]
   pruneopts = "NUT"
-  revision = "c63ab54fda8f77302f8d414e19933f2b6026a089"
+  revision = "7a902570cb17174de4ac788094f8ebedec136f57"
 
 [[projects]]
-  digest = "1:9a52adf44086cead3b384e5d0dbf7a1c1cce65e67552ee3383a8561c42a18cd3"
+  digest = "1:aaa38889f11896ee3644d77e17dc7764cc47f5f3d3b488268df2af2b52541c5f"
   name = "github.com/imdario/mergo"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "9f23e2d6bd2a77f959b2bf6acdbefd708a83a4a4"
-  version = "v0.3.6"
+  revision = "7c29201646fa3de8506f701213473dd407f19646"
+  version = "v0.3.7"
 
 [[projects]]
   digest = "1:8e36686e8b139f8fe240c1d5cf3a145bc675c22ff8e707857cdd3ae17b00d728"
@@ -164,11 +164,11 @@
   revision = "ab3d772008f8b831dc831882fe7fdb9665b1fdb7"
 
 [[projects]]
-  digest = "1:8139f3ca1f0523e8db13e12c21b5c1b3ec2f396ae27c64ca1bc126f8136d2e7f"
+  digest = "1:d946fa644b263e26091e0ae20cd12ee958ab869926abbc2d111fbd39902f91eb"
   name = "github.com/machinebox/graphql"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "05b17f3157491bbfa5d6fc2006443a272d960d15"
+  revision = "3a92531802258604bd12793465c2e28bc4b2fc85"
 
 [[projects]]
   digest = "1:a45ae66dea4c899d79fceb116accfa1892105c251f0dcd9a217ddc276b42ec68"
@@ -211,12 +211,12 @@
   version = "v2.0.1"
 
 [[projects]]
-  digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
+  digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
   name = "github.com/pkg/errors"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
-  version = "v0.8.0"
+  revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
+  version = "v0.8.1"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -235,15 +235,15 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:0331452965d8695c0a5633e0f509012987681a654f388f2ad0c3b2d7f7004b1c"
+  digest = "1:85adecf1dbfae5769cc62a8bcea6498f8e9f0e2452e4e6686eb36fa4428a5a6e"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
     "require",
   ]
   pruneopts = "NUT"
-  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
-  version = "v1.2.2"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:2b6cc5f08ea4ec1499cb7f9282fef8d1558423152d1b7f046f30187bbc5076be"
@@ -255,15 +255,15 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:38f553aff0273ad6f367cb0a0f8b6eecbaef8dc6cb8b50e57b6a81c1d5b1e332"
+  digest = "1:fde12c4da6237363bf36b81b59aa36a43d28061167ec4acb0d41fc49464e28b9"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
+  revision = "b8fe1690c61389d7d2a8074a507d1d40c5d30448"
 
 [[projects]]
   branch = "master"
-  digest = "1:de6740411888ea13c7ed73d66b5718ea33580901d9cd1d08430c78e3dfa3547d"
+  digest = "1:a4f0218ca7c21716a0bed3ed51e899c592121086a983f3ee7249df82019a7ee2"
   name = "golang.org/x/net"
   packages = [
     "html",
@@ -274,18 +274,18 @@
     "idna",
   ]
   pruneopts = "NUT"
-  revision = "927f97764cc334a6575f4b7a1584a147864d5723"
+  revision = "65e2d4e15006aab9813ff8769e768bbf4bb667a0"
 
 [[projects]]
   branch = "master"
-  digest = "1:b5da9f75e020ec1f263b98525d57b99107cedfc86904ae4103100077663b9242"
+  digest = "1:ffd29eb618685ec12a86853e79be6d0a5dc7eeb2de4f97820a944735d9b5a3a3"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "b4a75ba826a64a70990f11a225237acd6ef35c9f"
+  revision = "41f3e6584952bb034a481797859f6ab34b6803bd"
 
 [[projects]]
   digest = "1:e7071ed636b5422cc51c0e3a6cebc229d6c9fffc528814b519a980641422d619"
@@ -320,7 +320,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:dec6c6b6c491d3d7a5f56bd3da949bdca481739a62c6f4bca2714a71c7af51d6"
+  digest = "1:849e1ab274cc58121de7558d8cad12bf9dfe65d8315f3a081126c8442c66455e"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -334,10 +334,11 @@
     "imports",
     "internal/fastwalk",
     "internal/gopathwalk",
+    "internal/module",
     "internal/semver",
   ]
   pruneopts = "NUT"
-  revision = "d00ac6d27372a4273825635281f2dc360d4be563"
+  revision = "44bcb96178d39510d2bb8a61ef1c08b85bb24a45"
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"

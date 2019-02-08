@@ -145,7 +145,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 2. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
 
     ```
-    docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile . --build-arg INSTALLER_VERSION=63484523
+    docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile .
     ```
 
 3. Push the image to your Docker Hub:
@@ -191,7 +191,15 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 6. To watch the installation progress, run:
     ```
-    kubectl get pods --all-namespaces -w
+    while true; do \
+      kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
+      sleep 5; \
+    done
+    ```
+    After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
+    In case of an error, you can fetch the logs from the Installer by running:
+    ```
+    kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
 

@@ -30,3 +30,5 @@ spec:
       id: logging
     - displayName: Console
       id: console
+    - displayName: Asset Store
+      id: asset-store
