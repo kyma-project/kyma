@@ -24,7 +24,8 @@ func TestClusterServiceClassService_GetServiceClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer()
 
-		svc := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -39,7 +40,8 @@ func TestClusterServiceClassService_GetServiceClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer()
 
-		svc := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -60,7 +62,8 @@ func TestClusterServiceClassService_FindByExternalName(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer()
 
-		svc := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -75,7 +78,8 @@ func TestClusterServiceClassService_FindByExternalName(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer()
 
-		svc := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -96,11 +100,12 @@ func TestClusterServiceClassService_FindByExternalName(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer()
 
-		svc := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		_, err := svc.FindByExternalName(externalName)
+		_, err = svc.FindByExternalName(externalName)
 
 		assert.Error(t, err)
 	})
@@ -116,7 +121,8 @@ func TestClusterServiceClassService_ListServiceClasses(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer()
 
-		svc := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -133,7 +139,8 @@ func TestClusterServiceClassService_ListServiceClasses(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer()
 
-		svc := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewClusterServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 

@@ -9,6 +9,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	applicationHeader = "Application"
+)
+
 // TokenDto represents data structure returned from connector-service
 type TokenDto struct {
 	URL   string `json:"url"`
@@ -31,9 +35,17 @@ func (c *connectorServiceClient) FetchToken(appName string) (*TokenDto, error) {
 		return nil, errors.New("appName cannot be empty")
 	}
 
-	url := fmt.Sprintf("%s/v1/applications/%s/tokens", c.connectorServiceURL, appName)
+	url := fmt.Sprintf("%s/v1/applications/tokens", c.connectorServiceURL)
 
-	res, err := c.Post(url, "application/json", nil)
+	req, err := http.NewRequest(http.MethodPost, url, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "creating token request")
+	}
+
+	req.Header.Set(applicationHeader, appName)
+	req.Header.Set("Content-Type", "application/json")
+
+	res, err := c.Do(req)
 	if err != nil {
 		return nil, errors.Wrap(err, "while issuing POST request")
 	}

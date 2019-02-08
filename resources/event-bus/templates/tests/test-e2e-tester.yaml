@@ -8,7 +8,7 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: test-core-event-bus-subs
+  name: test-event-bus-subs
   labels:
     helm-chart-test: "true"
 rules:
@@ -19,7 +19,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: test-core-event-bus-subs
+  name: test-event-bus-subs
   labels:
     helm-chart-test: "true"
 subjects:
@@ -28,13 +28,13 @@ subjects:
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: test-core-event-bus-subs
+  name: test-event-bus-subs
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: test-core-event-bus-eas
+  name: test-event-bus-eas
   labels:
     helm-chart-test: "true"
 rules:
@@ -45,7 +45,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: test-core-event-bus-eas
+  name: test-event-bus-eas
   labels:
     helm-chart-test: "true"
 subjects:
@@ -54,13 +54,13 @@ subjects:
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: test-core-event-bus-eas
+  name: test-event-bus-eas
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: test-core-event-bus-k8s
+  name: test-event-bus-k8s
   labels:
     helm-chart-test: "true"
 rules:
@@ -74,7 +74,7 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: test-core-event-bus-k8s
+  name: test-event-bus-k8s
   labels:
     helm-chart-test: "true"
 subjects:
@@ -83,7 +83,7 @@ subjects:
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: ClusterRole
-  name: test-core-event-bus-k8s
+  name: test-event-bus-k8s
   apiGroup: rbac.authorization.k8s.io
 ---
 apiVersion: v1
@@ -102,5 +102,7 @@ spec:
     imagePullPolicy: IfNotPresent
     name: {{ .Values.e2eTests.nameTester }}
     args:
+      - publish-event-uri=http://event-bus-publish:8080/v1/events 
+      - publish-status-uri=http://event-bus-publish:8080/v1/status/ready
       - -subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-subscriber:{{ .Values.global.event_bus_tests.version }}
   restartPolicy: Never

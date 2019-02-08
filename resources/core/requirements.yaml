@@ -7,8 +7,6 @@ dependencies:
     condition: namespace-controller.enabled
   - name: cluster-users
     condition: cluster-users.enabled
-  - name: event-bus
-    condition: event-bus.enabled
   - name: kubeless
     condition: kubeless.enabled
   - name: ui-api

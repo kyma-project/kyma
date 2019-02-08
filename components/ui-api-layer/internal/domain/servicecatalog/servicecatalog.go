@@ -73,14 +73,33 @@ func (r *PluggableContainer) Enable() error {
 	informerFactory := catalogInformers.NewSharedInformerFactory(client, informerResyncPeriod)
 	r.informerFactory = informerFactory
 
-	serviceInstanceService := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), client)
-	servicePlanService := newServicePlanService(informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer())
-	serviceClassService := newServiceClassService(informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer())
-	serviceBrokerService := newServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ServiceBrokers().Informer())
-	serviceBindingService := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
+	serviceInstanceService, err := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), client)
+	if err != nil {
+		return errors.Wrapf(err, "while creating service instance service")
+	}
+	servicePlanService, err := newServicePlanService(informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer())
+	if err != nil {
+		return errors.Wrapf(err, "while creating service plan service")
 
-	clusterServiceClassService := newClusterServiceClassService(informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer())
-	clusterServicePlanService := newClusterServicePlanService(informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer())
+	}
+	serviceClassService, err := newServiceClassService(informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer())
+	if err != nil {
+		return errors.Wrapf(err, "while creating service class service")
+	}
+	serviceBrokerService := newServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ServiceBrokers().Informer())
+	serviceBindingService, err := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
+	if err != nil {
+		return errors.Wrapf(err, "while creating service binding service")
+	}
+
+	clusterServiceClassService, err := newClusterServiceClassService(informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer())
+	if err != nil {
+		return errors.Wrapf(err, "while creating cluster service class service")
+	}
+	clusterServicePlanService, err := newClusterServicePlanService(informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer())
+	if err != nil {
+		return errors.Wrapf(err, "while creating cluster service plan service")
+	}
 	clusterServiceBrokerService := newClusterServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ClusterServiceBrokers().Informer())
 
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {

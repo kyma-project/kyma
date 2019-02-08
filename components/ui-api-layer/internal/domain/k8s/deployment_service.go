@@ -12,12 +12,12 @@ type deploymentService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newDeploymentService(informer cache.SharedIndexInformer) *deploymentService {
+func newDeploymentService(informer cache.SharedIndexInformer) (*deploymentService, error) {
 	svc := &deploymentService{
 		informer: informer,
 	}
 
-	informer.AddIndexers(cache.Indexers{
+	err := informer.AddIndexers(cache.Indexers{
 		"functionFilter": func(obj interface{}) ([]string, error) {
 			deployment, err := svc.toDeployment(obj)
 			if err != nil {
@@ -29,8 +29,11 @@ func newDeploymentService(informer cache.SharedIndexInformer) *deploymentService
 			return []string{key}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
-	return svc
+	return svc, nil
 }
 
 func (svc *deploymentService) Find(name string, namespace string) (*api.Deployment, error) {

@@ -10,7 +10,7 @@ import (
 
 // Binding usage
 
-func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, sbuName string) *serviceBindingUsageService {
+func NewServiceBindingUsageService(buInterface v1alpha1.ServicecatalogV1alpha1Interface, informer cache.SharedIndexInformer, scRetriever shared.ServiceCatalogRetriever, sbuName string) (*serviceBindingUsageService, error) {
 	return newServiceBindingUsageService(buInterface, informer, scRetriever, func() string {
 		return sbuName
 	})

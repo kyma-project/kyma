@@ -36,7 +36,11 @@ func (y Labels) MarshalGQL(w io.Writer) {
 		glog.Error(errors.Wrapf(err, "while marshalling %+v scalar object", y))
 		return
 	}
-	w.Write(bytes)
+	_, err = w.Write(bytes)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while writing marshalled %+v object", y))
+		return
+	}
 }
 
 func (y *Labels) convertToLabels(labels map[string]interface{}) (Labels, error) {
