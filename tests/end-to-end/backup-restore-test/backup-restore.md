@@ -11,7 +11,7 @@ The end-to-end test scenario looks as follows:
 - Verify that the function works.
 
 - Back up the Namespace and all the resources in it.
-- Remove the namespace and all its components from the cluster
+- Remove the Namespace and all its components from the cluster.
 
 - Restore the namespace and its content from the backup
 - Verify the function contained in the restored namespace works
