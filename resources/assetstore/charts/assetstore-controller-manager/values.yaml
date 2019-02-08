@@ -1,6 +1,6 @@
 replicaCount: 1
 image:
-  pullPolicy: Allways
+  pullPolicy: Always
 service:
   type: ClusterIP
   externalPort: 80
