@@ -160,8 +160,8 @@ func (_m *Resolver) ServiceBindingQuery(ctx context.Context, name string, env st
 }
 
 // ServiceBindingsToInstanceQuery provides a failing mock function with given fields: ctx, instanceName, namespace
-func (_m *Resolver) ServiceBindingsToInstanceQuery(ctx context.Context, instanceName string, namespace string) (gqlschema.ServiceBindings, error) {
-	var r0 gqlschema.ServiceBindings
+func (_m *Resolver) ServiceBindingsToInstanceQuery(ctx context.Context, instanceName string, namespace string) (*gqlschema.ServiceBindings, error) {
+	var r0 *gqlschema.ServiceBindings
 	var r1 error
 	r1 = _m.err
 

@@ -7,7 +7,13 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authn"
+
+	authenticatorpkg "k8s.io/apiserver/pkg/authentication/authenticator"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/experimental"
+	"k8s.io/client-go/kubernetes"
 
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/golang/glog"
@@ -20,6 +26,7 @@ import (
 
 	"github.com/99designs/gqlgen/handler"
 	"github.com/gorilla/websocket"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/authz"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/application"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
@@ -37,6 +44,8 @@ type config struct {
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config
+	OIDC                 authn.OIDCConfig
+	SARCacheConfig       authz.SARCacheConfig
 	FeatureToggles       experimental.FeatureToggles
 }
 
@@ -51,13 +60,24 @@ func main() {
 	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.Application, cfg.InformerResyncPeriod, cfg.FeatureToggles)
 	exitOnError(err, "Error while creating resolvers")
 
+	kubeClient, err := kubernetes.NewForConfig(k8sConfig)
+	exitOnError(err, "Failed to instantiate Kubernetes client")
+
+	authenticator, err := authn.NewOIDCAuthenticator(&cfg.OIDC)
+	exitOnError(err, "Error while creating OIDC authenticator")
+	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
+	authorizer, err := authz.NewAuthorizer(sarClient, cfg.SARCacheConfig)
+	exitOnError(err, "Failed to create authorizer")
+
 	stopCh := signal.SetupChannel()
 	resolvers.WaitForCacheSync(stopCh)
 
-	executableSchema := gqlschema.NewExecutableSchema(gqlschema.Config{Resolvers: resolvers})
+	c := gqlschema.Config{Resolvers: resolvers}
+	c.Directives.HasAccess = authz.NewRBACDirective(authorizer)
+	executableSchema := gqlschema.NewExecutableSchema(c)
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 
-	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema)
+	runServer(stopCh, addr, cfg.AllowedOrigins, executableSchema, authenticator)
 }
 
 func loadConfig(prefix string) (config, error) {
@@ -98,14 +118,17 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	return config, nil
 }
 
-func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schema graphql.ExecutableSchema) {
+func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schema graphql.ExecutableSchema, authenticator authenticatorpkg.Request) {
 	if len(allowedOrigins) == 0 {
 		allowedOrigins = []string{"*"}
 	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/", handler.Playground("Dataloader", "/graphql"))
-	mux.Handle("/graphql", handler.GraphQL(schema,
+	router := mux.NewRouter()
+
+	router.Use(authn.AuthMiddleware(authenticator))
+
+	router.HandleFunc("/", handler.Playground("Dataloader", "/graphql"))
+	router.HandleFunc("/graphql", handler.GraphQL(schema,
 		handler.WebsocketUpgrader(websocket.Upgrader{
 			CheckOrigin: origin.CheckFn(allowedOrigins),
 		}),
@@ -119,7 +142,7 @@ func runServer(stop <-chan struct{}, addr string, allowedOrigins []string, schem
 		AllowCredentials:   true,
 		AllowedHeaders:     []string{"*"},
 		OptionsPassthrough: false,
-	}).Handler(mux)
+	}).Handler(router)
 
 	srv := &http.Server{Addr: addr, Handler: serverHandler}
 

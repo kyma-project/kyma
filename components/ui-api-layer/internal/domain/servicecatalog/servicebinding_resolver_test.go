@@ -180,7 +180,7 @@ func TestServiceBindingResolver_ServiceBindingsToInstanceQuery(t *testing.T) {
 		result, err := resolver.ServiceBindingsToInstanceQuery(nil, "redis", "production")
 
 		require.NoError(t, err)
-		assert.Equal(t, gqlschema.ServiceBindings{
+		assert.Equal(t, &gqlschema.ServiceBindings{
 			Items: []gqlschema.ServiceBinding{
 				*fixServiceBindingGQLToRedis(),
 				*fixServiceBindingGQLToRedis(),
