@@ -26,7 +26,7 @@ func (r *ReconcileAsset) onPending(asset *assetstorev1alpha1.Asset, bucket *asse
 	}
 
 	if err := r.mutate(context.Background(), asset, basePath, files); err != nil {
-		r.setStatusWebhookFailed(asset, ReasonMutaationFailed, fmt.Sprintf("%+v", err))
+		r.setStatusWebhookFailed(asset, ReasonMutationFailed, fmt.Sprintf("%+v", err))
 		return reconcile.Result{}, errors.Wrapf(err, "while mutating Asset")
 	}
 

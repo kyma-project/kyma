@@ -12,7 +12,7 @@ const (
 	ReasonError          AssetReason = "Error"
 
 	ReasonMutated          AssetReason = "Mutated"
-	ReasonMutaationFailed  AssetReason = "MutationFailed"
+	ReasonMutationFailed   AssetReason = "MutationFailed"
 	ReasonValidated        AssetReason = "Validated"
 	ReasonValidationFailed AssetReason = "ValidationFailed"
 

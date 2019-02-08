@@ -51,15 +51,15 @@ func (l *loader) selectEngine(filename string) (func(src, dst string) ([]string,
 
 	switch {
 	case extension == ".zip":
-		return l.unpackZip, nil
+		return l.unpackZIP, nil
 	case extension == ".tar" || extension == ".tgz" || strings.HasSuffix(strings.ToLower(filename), ".tar.gz"):
-		return l.unpackTar, nil
+		return l.unpackTAR, nil
 	}
 
-	return nil, fmt.Errorf("not supporte file type %s", extension)
+	return nil, fmt.Errorf("not supported file type %s", extension)
 }
 
-func (l *loader) unpackTar(src, dst string) ([]string, error) {
+func (l *loader) unpackTAR(src, dst string) ([]string, error) {
 	var filenames []string
 	file, err := os.Open(src)
 	if err != nil {
@@ -69,7 +69,7 @@ func (l *loader) unpackTar(src, dst string) ([]string, error) {
 
 	var reader io.Reader
 	extension := strings.ToLower(filepath.Ext(src))
-	if extension == ".gz" || extension == ".tgz" {
+	if extension == ".gz" || extension == ".gzip" || extension == ".tgz" {
 		reader, err = gzip.NewReader(file)
 		if err != nil {
 			return nil, errors.Wrap(err, "while creating GZIP reader")
@@ -109,7 +109,7 @@ unpack:
 	return filenames, nil
 }
 
-func (l *loader) unpackZip(src, dest string) ([]string, error) {
+func (l *loader) unpackZIP(src, dest string) ([]string, error) {
 	var filenames []string
 
 	zipReader, err := zip.OpenReader(src)
@@ -119,7 +119,7 @@ func (l *loader) unpackZip(src, dest string) ([]string, error) {
 	defer zipReader.Close()
 
 	for _, file := range zipReader.File {
-		path, isDir, err := l.handleZipEntry(file, dest)
+		path, isDir, err := l.handleZIPEntry(file, dest)
 		if err != nil {
 			return nil, errors.Wrap(err, "while handling ZIP entry")
 		}
@@ -132,7 +132,7 @@ func (l *loader) unpackZip(src, dest string) ([]string, error) {
 	return filenames, nil
 }
 
-func (l *loader) handleZipEntry(file *zip.File, dst string) (string, bool, error) {
+func (l *loader) handleZIPEntry(file *zip.File, dst string) (string, bool, error) {
 	fileReader, err := file.Open()
 	if err != nil {
 		return "", false, err

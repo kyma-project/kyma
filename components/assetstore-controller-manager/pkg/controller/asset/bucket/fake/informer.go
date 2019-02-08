@@ -31,11 +31,11 @@ func NewInformer(objects ...Object) *Informer {
 var _ cache.SharedIndexInformer = &Informer{}
 
 func (i *Informer) AddEventHandler(handler cache.ResourceEventHandler) {
-	panic("implement me")
+	panic("stub")
 }
 
 func (i *Informer) AddEventHandlerWithResyncPeriod(handler cache.ResourceEventHandler, resyncPeriod time.Duration) {
-	panic("implement me")
+	panic("stub")
 }
 
 func (i *Informer) GetStore() cache.Store {
@@ -43,27 +43,27 @@ func (i *Informer) GetStore() cache.Store {
 }
 
 func (i *Informer) GetController() cache.Controller {
-	panic("implement me")
+	panic("stub")
 }
 
 func (i *Informer) Run(stopCh <-chan struct{}) {
-	panic("implement me")
+	panic("stub")
 }
 
 func (i *Informer) HasSynced() bool {
-	panic("implement me")
+	panic("stub")
 }
 
 func (i *Informer) LastSyncResourceVersion() string {
-	panic("implement me")
+	panic("stub")
 }
 
 func (i *Informer) AddIndexers(indexers cache.Indexers) error {
-	panic("implement me")
+	panic("stub")
 }
 
 func (i *Informer) GetIndexer() cache.Indexer {
-	panic("implement me")
+	panic("stub")
 }
 
 type store struct {
@@ -84,27 +84,27 @@ func (s *store) getKey(object Object) string {
 }
 
 func (s *store) Add(obj interface{}) error {
-	panic("implement me")
+	panic("stub")
 }
 
 func (s *store) Update(obj interface{}) error {
-	panic("implement me")
+	panic("stub")
 }
 
 func (s *store) Delete(obj interface{}) error {
-	panic("implement me")
+	panic("stub")
 }
 
 func (s *store) List() []interface{} {
-	panic("implement me")
+	panic("stub")
 }
 
 func (s *store) ListKeys() []string {
-	panic("implement me")
+	panic("stub")
 }
 
 func (s *store) Get(obj interface{}) (item interface{}, exists bool, err error) {
-	panic("implement me")
+	panic("stub")
 }
 
 func (s *store) GetByKey(key string) (item interface{}, exists bool, err error) {
@@ -118,9 +118,9 @@ func (s *store) GetByKey(key string) (item interface{}, exists bool, err error) 
 }
 
 func (s *store) Replace([]interface{}, string) error {
-	panic("implement me")
+	panic("stub")
 }
 
 func (s *store) Resync() error {
-	panic("implement me")
+	panic("stub")
 }

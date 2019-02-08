@@ -144,7 +144,7 @@ func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
-	g.Expect(asset.Status.Reason).To(gomega.Equal(string(ReasonMutaationFailed)))
+	g.Expect(asset.Status.Reason).To(gomega.Equal(string(ReasonMutationFailed)))
 	g.Expect(asset.Finalizers).NotTo(gomega.ContainElement(deleteAssetFinalizerName))
 }
 

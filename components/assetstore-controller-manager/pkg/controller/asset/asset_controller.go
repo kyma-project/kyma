@@ -61,34 +61,22 @@ func Add(mgr manager.Manager) error {
 	}
 	bucketService := bucket.New(bucketInformer)
 
-	reconciler := newReconciler(mgr,
-		cfg.AssetRequeueInterval,
-		uploader,
-		loader,
-		bucketService,
-		cleaner,
-		deleteFinalizer,
-		validator,
-		mutator)
-
-	return add(mgr, reconciler)
-}
-
-func newReconciler(mgr manager.Manager, requeueInterval time.Duration, uploader uploader.Uploader, loader loader.Loader, bucketLister bucket.Lister, cleaner cleaner.Cleaner, deleteFinalizer finalizer.Finalizer, validator webhook.Validator, mutator webhook.Mutator) reconcile.Reconciler {
-	return &ReconcileAsset{
+	reconciler := &ReconcileAsset{
 		Client:          mgr.GetClient(),
 		scheme:          mgr.GetScheme(),
 		recorder:        mgr.GetRecorder("asset-controller"),
-		requeueInterval: requeueInterval,
+		requeueInterval: cfg.AssetRequeueInterval,
 
 		uploader:        uploader,
 		loader:          loader,
-		bucketLister:    bucketLister,
+		bucketLister:    bucketService,
 		cleaner:         cleaner,
 		deleteFinalizer: deleteFinalizer,
 		validator:       validator,
 		mutator:         mutator,
 	}
+
+	return add(mgr, reconciler)
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -128,7 +116,6 @@ type ReconcileAsset struct {
 
 // Reconcile reads that state of the cluster for a Asset object and makes changes based on the state read
 // and what is in the Asset.Spec
-// Automatically generate RBAC rules to allow the Controller to read and write Deployments
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch

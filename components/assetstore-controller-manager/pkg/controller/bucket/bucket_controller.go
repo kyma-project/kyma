@@ -128,7 +128,7 @@ func (r *ReconcileBucket) addFinalizerIfShould(instance *assetstorev1alpha1.Buck
 	}
 
 	if r.deletionFinalizer.IsDefinedIn(instance) {
-		// FinalizerManager has been already added
+		// Finalizer has been already added
 		return
 	}
 

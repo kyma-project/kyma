@@ -2,6 +2,7 @@ package cleaner
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/errorsPkg"
 	"github.com/minio/minio-go"
 )
 
@@ -16,6 +17,19 @@ type Cleaner interface {
 	Clean(ctx context.Context, bucket, objectPrefix string) error
 }
 
+type CleanError struct {
+	message string
+	errors  []error
+}
+
+func (e *CleanError) Error() string {
+	return e.message
+}
+
+func (e *CleanError) Errors() []error {
+	return e.errors
+}
+
 type cleaner struct {
 	minioClient MinioClient
 }
@@ -27,9 +41,9 @@ func New(minioClient MinioClient) Cleaner {
 }
 
 func (c *cleaner) Clean(ctx context.Context, bucket, objectPrefix string) error {
-	keys, err := c.listObjectsKeys(bucket, objectPrefix)
-	if err != nil || len(keys) == 0 {
-		return err
+	keys, errors := c.listObjectsKeys(bucket, objectPrefix)
+	if len(errors) > 0 || len(keys) == 0 {
+		return errorsPkg.NewMultiError("cannot list objects in bucket", errors)
 	}
 	objectsCh := make(chan string)
 
@@ -41,25 +55,31 @@ func (c *cleaner) Clean(ctx context.Context, bucket, objectPrefix string) error 
 		}
 	}()
 
-	for rErr := range c.minioClient.RemoveObjectsWithContext(ctx, bucket, objectsCh) {
-		err = rErr.Err
+	for err := range c.minioClient.RemoveObjectsWithContext(ctx, bucket, objectsCh) {
+		errors = append(errors, err.Err)
 	}
 
-	return err
+	if len(errors) > 0 {
+		return errorsPkg.NewMultiError("cannot delete objects from bucket", errors)
+	}
+
+	return nil
 }
 
-func (c *cleaner) listObjectsKeys(bucket, objectPrefix string) ([]string, error) {
+func (c *cleaner) listObjectsKeys(bucket, objectPrefix string) ([]string, []error) {
 	var result []string
 
 	doneCh := make(chan struct{})
 	defer close(doneCh)
 
+	var errors []error
 	for message := range c.minioClient.ListObjects(bucket, objectPrefix, true, doneCh) {
 		if message.Err != nil {
-			return nil, message.Err
+			errors = append(errors, message.Err)
 		}
+
 		result = append(result, message.Key)
 	}
 
-	return result, nil
+	return result, errors
 }

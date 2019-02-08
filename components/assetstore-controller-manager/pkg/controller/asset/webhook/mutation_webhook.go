@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook"
 	assethookv1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/api/v1alpha1"
+	"github.com/pkg/errors"
 	"io/ioutil"
 	"time"
 )
@@ -43,10 +44,10 @@ func (w *mutationWebhook) Mutate(ctx context.Context, basePath string, files []s
 			Assets:    assets,
 			Metadata:  metadata,
 		}
-		response := new(assethookv1alpha1.MutationResponse)
 		url := w.getWebhookUrl(service)
 
-		if err := w.mutate(ctx, url, request, response); err != nil {
+		response, err := w.mutate(ctx, url, request)
+		if err != nil {
 			return err
 		}
 
@@ -58,9 +59,15 @@ func (w *mutationWebhook) Mutate(ctx context.Context, basePath string, files []s
 	return nil
 }
 
-func (w *mutationWebhook) mutate(ctx context.Context, url string, request *assethookv1alpha1.MutationRequest, response *assethookv1alpha1.MutationResponse) error {
+func (w *mutationWebhook) mutate(ctx context.Context, url string, request *assethookv1alpha1.MutationRequest) (*assethookv1alpha1.MutationResponse, error) {
 	context, cancel := context.WithTimeout(ctx, w.timeout)
 	defer cancel()
 
-	return w.webhook.Call(context, url, request, response)
+	response := new(assethookv1alpha1.MutationResponse)
+	err := w.webhook.Call(context, url, request, response)
+	if err != nil {
+		return nil, errors.Wrap(err, "while sending mutation request")
+	}
+
+	return response, nil
 }

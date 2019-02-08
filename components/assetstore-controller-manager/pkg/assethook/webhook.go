@@ -43,11 +43,7 @@ func (w *webhook) Call(ctx context.Context, url string, request interface{}, res
 	if err != nil {
 		return errors.Wrapf(err, "while sending request to webhook")
 	}
-	defer func() {
-		if httpResponse.Body != nil {
-			httpResponse.Body.Close()
-		}
-	}()
+	defer httpResponse.Body.Close()
 
 	if httpResponse.StatusCode < 200 || httpResponse.StatusCode > 299 {
 		return errors.New(httpResponse.Status)
