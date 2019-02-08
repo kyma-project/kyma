@@ -55,7 +55,7 @@ func (s *ApiStatus) IsEmpty() bool {
 	return s.VirtualServiceStatus.IsEmpty() && s.AuthenticationStatus.IsEmpty() && s.ValidationStatus.IsEmpty()
 }
 
-func (s *ApiStatus) IsDone() bool {
+func (s *ApiStatus) IsSuccessful() bool {
 	return s.VirtualServiceStatus.IsSuccessful() && s.AuthenticationStatus.IsSuccessful() && s.ValidationStatus.IsSuccessful()
 }
 

@@ -28,12 +28,11 @@ func TestFixHostname(t *testing.T) {
 	}
 }
 
-type fakeAPILister struct {
-	name string
-}
+type fakeAPINamespaceLister struct{}
 
-func (l *fakeAPILister) List(selector labels.Selector) (ret []*apis.Api, err error) {
+func (fnl *fakeAPINamespaceLister) Get(name string) (*apis.Api, error) { return nil, nil }
 
+func (fnl *fakeAPINamespaceLister) List(selector labels.Selector) (ret []*apis.Api, err error) {
 	fakeAPI := &apis.Api{}
 	fakeAPI.SetName("existing-api")
 	fakeAPI.SetNamespace("test-ns")
@@ -42,15 +41,31 @@ func (l *fakeAPILister) List(selector labels.Selector) (ret []*apis.Api, err err
 	return []*apis.Api{fakeAPI}, nil
 }
 
-func (l *fakeAPILister) Apis(namespace string) listers.ApiNamespaceLister { return nil }
+type failingFakeAPINamespaceLister struct{}
 
-type failingFakeAPILister struct{}
+func (ffnl *failingFakeAPINamespaceLister) Get(name string) (*apis.Api, error) { return nil, nil }
 
-func (fl *failingFakeAPILister) List(selector labels.Selector) (ret []*apis.Api, err error) {
+func (ffnl *failingFakeAPINamespaceLister) List(selector labels.Selector) (ret []*apis.Api, err error) {
 	return nil, errors.New("unable to list existing APIs")
 }
 
-func (fl *failingFakeAPILister) Apis(namespace string) listers.ApiNamespaceLister { return nil }
+type fakeAPILister struct{}
+
+func (fal *fakeAPILister) List(selector labels.Selector) (ret []*apis.Api, err error) { return nil, nil }
+
+func (fal *fakeAPILister) Apis(namespace string) listers.ApiNamespaceLister {
+	return &fakeAPINamespaceLister{}
+}
+
+type failingFakeAPILister struct{}
+
+func (ffal *failingFakeAPILister) List(selector labels.Selector) (ret []*apis.Api, err error) {
+	return nil, nil
+}
+
+func (ffal *failingFakeAPILister) Apis(namespace string) listers.ApiNamespaceLister {
+	return &failingFakeAPINamespaceLister{}
+}
 
 func TestValidateApi(t *testing.T) {
 

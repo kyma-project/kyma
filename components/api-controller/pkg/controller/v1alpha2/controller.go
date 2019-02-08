@@ -243,14 +243,14 @@ func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatus
 
 	targetServiceName := newAPI.Spec.Service.Name
 
-	existingAPIs, err := c.apisLister.List(labels.Everything())
+	existingAPIs, err := c.apisLister.Apis(newAPI.GetNamespace()).List(labels.Everything())
 	if err != nil {
 		log.Errorf("Error while listing APIs %s/%s ver: %s. Root cause: %s", newAPI.Namespace, newAPI.Name, newAPI.ResourceVersion, err)
 		return setStatus(kymaMeta.Error)
 	}
 
 	for _, a := range existingAPIs {
-		if a.GetNamespace() == newAPI.GetNamespace() && a.Spec.Service.Name == targetServiceName && a.GetName() != newAPI.GetName() {
+		if a.Spec.Service.Name == targetServiceName && a.GetName() != newAPI.GetName() {
 			log.Errorf("An API has already been created for service %s/%s", newAPI.Namespace, newAPI.Spec.Service.Name)
 			return setStatus(kymaMeta.TargetServiceOccupied)
 		}
@@ -354,7 +354,7 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 	}
 
 	apiStatusHelper := c.apiStatusHelperFor(newApi)
-	if newApi.Status.IsDone() {
+	if newApi.Status.IsSuccessful() {
 		newApi.Status.SetInProgress()
 	}
 	defer apiStatusHelper.Update()
