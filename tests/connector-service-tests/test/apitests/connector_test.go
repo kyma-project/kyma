@@ -34,10 +34,13 @@ func TestConnector(t *testing.T) {
 	}()
 
 	t.Run("Connector Service flow for Application", func(t *testing.T) {
-		appTokenRequest := createApplicationTokenRequest(t, config, "testCertGenApp")
+		appName := "testCertGenApp"
+		appTokenRequest := createApplicationTokenRequest(t, config, appName)
 		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
-		appTokenRequest = createApplicationTokenRequest(t, config, "testCSRInfoApp")
-		getCSRInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify)
+
+		appName = "testCSRInfoApp"
+		appTokenRequest = createApplicationTokenRequest(t, config, appName)
+		getCSRInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
 	})
 
 	t.Run("Connector Service flow for Runtime", func(t *testing.T) {
@@ -261,7 +264,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 }
 
-func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
+func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -270,8 +273,8 @@ func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		metadataHost := "metadata.kyma.test.cx"
 		eventsHost := "events.kyma.test.cx"
 
-		expectedMetadataURL := "https://metadata.kyma.test.cx/testCSRInfoApp/v1/metadata/services"
-		expectedEventsURL := "https://metadata.kyma.test.cx/testCSRInfoApp/v1/events"
+		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
+		expectedEventsURL := "https://metadata.kyma.test.cx/" + appName + "/v1/events"
 
 		// when
 		tokenResponse := client.CreateToken(t)
@@ -292,8 +295,8 @@ func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 
 	t.Run("should use default values to build CSR info response when headers are not given", func(t *testing.T) {
 		// given
-		expectedMetadataURL := ""
-		expectedEventsURL := ""
+		expectedMetadataURL := defaultGatewayUrl + "/" + appName + "/metadata/services"
+		expectedEventsURL := defaultGatewayUrl + "/" + appName + "/events"
 
 		// when
 		tokenResponse := client.CreateToken(t)
