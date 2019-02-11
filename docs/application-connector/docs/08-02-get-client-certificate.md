@@ -95,6 +95,25 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 
 After you receive the certificate, decode it and use it in your application. Register the services of your external solution through the Application Registry.
 
+## Get the management information from Kyma
+
+Use the link you got in the configuration details to fetch the management information using certificate. Run:
+```
+curl {INFO_URL}
+```
+>**NOTE:** If Application Registry or Event Service runs on different Kyma you can specify their hosts using `Base-Metadata-Host` and `Base-Events-Host` headers in the call.
+
+A successful call returns the following response:
+```
+{
+  "urls": {
+    "metadataUrl": "{BASE_METADATA_PATH}/{APP_NAME}/v1/metadata/services",
+    "eventsUrl": "{BASE_EVENTS_PATH}/{APP_NAME}/v1/events",
+    "renewCertUrl": "{BASE_RENEWAL_PATH}/v1/applications/certificates/renewals"
+  }
+}
+```
+
 ## Call the Metadata and Event services on local deployment
 
 When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-nginx-ingress-controller` to successfully call the Metadata Service and the Event Service.

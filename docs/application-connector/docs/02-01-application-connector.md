@@ -17,6 +17,7 @@ You can access every exposed Application (App) through its gateway by using the 
 The Connector Service:
 - Handles the exchange of client certificates for a given RE.
 - Provides the Application Registry and Event Service endpoints.
+- Provides endpoint returning information for the connected Applications and connected Kyma clusters.
 - Signs client certificates using the server-side certificate stored in a Kubernetes Secret.
 
 ## Application Registry
