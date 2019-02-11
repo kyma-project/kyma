@@ -295,8 +295,13 @@ func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 
 	t.Run("should use default values to build CSR info response when headers are not given", func(t *testing.T) {
 		// given
-		expectedMetadataURL := defaultGatewayUrl + "/" + appName + "/metadata/services"
-		expectedEventsURL := defaultGatewayUrl + "/" + appName + "/events"
+		expectedMetadataURL := defaultGatewayUrl
+		expectedEventsURL := defaultGatewayUrl
+
+		if defaultGatewayUrl != "" {
+			expectedMetadataURL += "/" + appName + "/metadata/services"
+			expectedEventsURL += "/" + appName + "/events"
+		}
 
 		// when
 		tokenResponse := client.CreateToken(t)
