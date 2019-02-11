@@ -8,8 +8,9 @@ This section describes the Kyma components.
 
 ## Service Catalog
 
-The Service Catalog lists all of the services available to Kyma users through the registered Service Brokers. Using the Service Catalog, you can provision new services in the
+The Service Catalog lists all of the services available to Kyma users through the registered Service Brokers. Use the Service Catalog to provision new services in the
 Kyma [Kubernetes](https://kubernetes.io/) cluster and create bindings between the provisioned service and an application.
+
 
 ## Service Mesh
 
@@ -19,10 +20,9 @@ The Service Mesh is an infrastructure layer that handles service-to-service comm
 
 Kyma security enforces RBAC (Role Based Access Control) in the cluster. [Dex](https://github.com/coreos/dex) handles the identity management and identity provider integration. It allows you to integrate any [OpenID Connect](https://openid.net/connect/) or SAML2-compliant identity provider with Kyma using [connectors](https://github.com/coreos/dex#connectors). Additionally, Dex provides a static user store which gives you more flexibility when managing access to your cluster.   
 
-## Service Brokers
+## Helm Broker
 
-Service Brokers are [Open Service Broker API](https://www.openservicebrokerapi.org/)-compatible servers that manage the lifecycle of one or more services. Each Service Broker registered in Kyma presents the services it offers to the Service Catalog. You can provision these services on a cluster level through the Service Catalog. Out of the box, Kyma comes with three Service Brokers.
-You can register more [Open Service Broker API](https://www.openservicebrokerapi.org/)-compatible Service Brokers in Kyma and provision the services they offer using the Service Catalog.
+The Helm Broker is a Service Broker which runs in the Kyma cluster and deploys Kubernetes native resources using [Helm](https://github.com/kubernetes/helm) and Kyma bundles. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. Use bundles to install the [GCP Broker](/components/service-catalog#service-brokers-gcp-broker) and the [Azure Service Broker](/components/service-catalog#service-brokers-azure-service-broker) in Kyma.
 
 ## Application Connector
 
