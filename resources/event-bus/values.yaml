@@ -5,7 +5,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: 0.7.0-rc1
+    dir:
     version: 0.7.0-rc1
   event_bus_tests:
     dir: 
