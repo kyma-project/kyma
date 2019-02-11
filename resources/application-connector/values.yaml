@@ -19,8 +19,8 @@ global:
     dir: develop/
     version: 0c447819
   connector_service:
-    dir: develop/
-    version: fa0de1b9
+    dir: pr/
+    version: PR-2690
   connector_service_tests:
     dir: develop/
     version: fa0de1b9

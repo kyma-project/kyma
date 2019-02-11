@@ -11,6 +11,7 @@ deployment:
     getInfoURL: ""
     group: "default"
     tenant: "default"
+    validityTime: "92d"
   envvars:
     country: DE
     organization: Organization
