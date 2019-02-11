@@ -21,7 +21,6 @@ func TestSuccess(t *testing.T) {
 	ts.OpIDProviderFake = func() (internal.OperationID, error) {
 		return fixOperationID(), nil
 	}
-	//ts.mockInstanceStorage.On("Get", fixInstanceID()).Return(fixNewInstance(), nil)
 	ts.mockInstanceStorage.On("Remove", fixInstanceID()).Return(nil)
 	ts.mockOperationStorage.On("Insert", fixNewRemoveInstanceOperation()).Return(nil)
 	ts.mockOperationStorage.On("Remove", fixInstanceID(), fixOperationID()).Return(nil)
