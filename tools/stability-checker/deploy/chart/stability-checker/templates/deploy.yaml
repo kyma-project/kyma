@@ -30,6 +30,7 @@ spec:
         - name: testing-script-volume
           persistentVolumeClaim:
             claimName: {{ .Values.storage.claimName }}
+        {{ if .Values.fluentd.enabled }}
         - name: config
           emptyDir: {}
         - name: fluentconfig
@@ -44,7 +45,9 @@ spec:
         - name: google-creds
           secret:
             secretName: sa-stability-fluentd-storage-writer
+        {{ end }}
 
+      {{ if .Values.fluentd.enabled }}
       initContainers:
         - name: copy-fluentd-config
           image: alpine:3.9
@@ -54,8 +57,10 @@ spec:
             mountPath: /config-volume
           - name: config
             mountPath: /etc/fluentd
+      {{ end }}
 
       containers:
+      {{ if .Values.fluentd.enabled }}
       - name: fluentd
         image: fluent/fluentd-kubernetes-daemonset:v1.3.3-debian-gcs-1.0
         env:
@@ -79,6 +84,7 @@ spec:
           - name: google-creds
             mountPath: /etc/google
             readOnly: true
+      {{ end }}
       # The container name is hardcoded in the stability checker, do not change it
       - name: stability-checker
         image: "{{ .Values.containerRegistry.path }}/develop/stability-checker:{{ .Values.image.tag }}"

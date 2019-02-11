@@ -14,6 +14,11 @@ image:
 storage:
   claimName: "stability-test-scripts-pvc"
 
+fluentd:
+  enabled: true
+  project: "kyma-project"
+  bucket: "stability-checker-logs"
+
 clusterName: "need-to-be-provided"
 pathToTestingScript: "/data/input/testing.sh"
 slackClientWebhookUrl: "need-to-be-provided"
