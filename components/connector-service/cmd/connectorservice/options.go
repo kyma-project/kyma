@@ -1,10 +1,16 @@
 package main
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"os"
+	"strconv"
+	"time"
 )
+
+const defaultCertificateValidityTime = 90 * 24 * time.Hour
 
 type options struct {
 	appName                       string
@@ -22,6 +28,7 @@ type options struct {
 	getInfoURL                    string
 	group                         string
 	tenant                        string
+	certificateValidityTime       time.Duration
 }
 
 type environment struct {
@@ -48,8 +55,14 @@ func parseArgs() *options {
 	getInfoURL := flag.String("getInfoURL", "", "URL at which management information is available.")
 	group := flag.String("group", "", "Default group")
 	tenant := flag.String("tenant", "", "Default tenant")
+	certificateValidityTime := flag.String("certificateValidityTime", "90d", "Validity time of certificates issued by this service.")
 
 	flag.Parse()
+
+	validityTime, err := parseDuration(*certificateValidityTime)
+	if err != nil {
+		logrus.Infof("Failed to parse time: %s, using default value.", err)
+	}
 
 	return &options{
 		appName:                       *appName,
@@ -67,6 +80,7 @@ func parseArgs() *options {
 		appRegistryHost:               *appRegistryHost,
 		eventsHost:                    *eventsHost,
 		getInfoURL:                    *getInfoURL,
+		certificateValidityTime:       validityTime,
 	}
 }
 
@@ -74,11 +88,11 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --requestLogging=%t "+
 		"--connectorServiceHost=%s --appRegistryHost=%s --eventsHost=%s "+
-		"--getInfoURL=%s --group=%s --tenant=%s",
+		"--getInfoURL=%s --group=%s --tenant=%s --certificateValidityTime=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.requestLogging,
 		o.connectorServiceHost, o.appRegistryHost, o.eventsHost,
-		o.getInfoURL, o.group, o.tenant)
+		o.getInfoURL, o.group, o.tenant, o.certificateValidityTime)
 }
 
 func parseEnv() *environment {
@@ -89,6 +103,23 @@ func parseEnv() *environment {
 		locality:           os.Getenv("LOCALITY"),
 		province:           os.Getenv("PROVINCE"),
 	}
+}
+
+func parseDuration(durationString string) (time.Duration, error) {
+	unitsMap := map[string]time.Duration{"m": time.Minute, "h": time.Hour, "d": 24 * time.Hour}
+
+	timeUnit := durationString[len(durationString)-1:]
+	_, ok := unitsMap[timeUnit]
+	if !ok {
+		return defaultCertificateValidityTime, errors.New(fmt.Sprintf("unrecognized time unit provided: %s", timeUnit))
+	}
+
+	timeLength, err := strconv.Atoi(durationString[:len(durationString)-1])
+	if err != nil {
+		return defaultCertificateValidityTime, err
+	}
+
+	return time.Duration(timeLength) * unitsMap[timeUnit], nil
 }
 
 func (e *environment) String() string {
