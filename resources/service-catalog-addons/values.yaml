@@ -5,5 +5,5 @@ global:
     gateway:
       name: kyma-gateway
   binding_usage_controller:
-    dir: develop/
-    version: d1930a3d
+    dir: 
+    version: 0.7.0-rc1

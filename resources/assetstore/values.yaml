@@ -5,8 +5,8 @@ global:
     gateway:
       name: kyma-gateway
   assetstore_controller_manager:
-    dir: develop/
-    version: 13c1a61d
+    dir: 
+    version: 0.7.0-rc1
 
 minio:
   mode: standalone
