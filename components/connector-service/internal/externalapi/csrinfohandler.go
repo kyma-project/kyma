@@ -36,6 +36,7 @@ func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor cli
 }
 
 func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
+	// TODO - not needed if removal handled in middleware
 	token := r.URL.Query().Get("token")
 	connectorClientContext, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {

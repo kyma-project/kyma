@@ -8,8 +8,9 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -25,16 +26,8 @@ func (dce dummyContextExtender) ExtendContext(ctx context.Context) context.Conte
 	return context.WithValue(ctx, dummyKey, dummyValue)
 }
 
-func dummyExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
-	return dummyContextExtender{}, nil
-}
-
-func notFoundExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
-	return dummyContextExtender{}, apperrors.NotFound("Not found")
-}
-
-func internalErrorExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
-	return dummyContextExtender{}, apperrors.Internal("Error")
+func dummyExtender() clientcontext.ContextExtender {
+	return dummyContextExtender{}
 }
 
 func TestTokenResolver_Middleware(t *testing.T) {
@@ -48,12 +41,16 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
+		tokenResolver := &mocks.Resolver{}
+		tokenResolver.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+			Return(nil)
+
 		req, err := http.NewRequest("GET", "/?token="+token, nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(nil, dummyExtender)
+		middleware := NewTokenResolverMiddleware(tokenResolver, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -90,12 +87,16 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		req, err := http.NewRequest("GET", "/", nil)
+		tokenResolver := &mocks.Resolver{}
+		tokenResolver.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+			Return(apperrors.NotFound("error"))
+
+		req, err := http.NewRequest("GET", "/?token="+token, nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(nil, notFoundExtender)
+		middleware := NewTokenResolverMiddleware(tokenResolver, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -111,12 +112,16 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
+		tokenResolver := &mocks.Resolver{}
+		tokenResolver.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+			Return(apperrors.Internal("error"))
+
 		req, err := http.NewRequest("GET", "/?token="+token, nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(nil, internalErrorExtender)
+		middleware := NewTokenResolverMiddleware(tokenResolver, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)

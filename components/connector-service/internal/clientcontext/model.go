@@ -27,6 +27,14 @@ type ContextExtender interface {
 	ExtendContext(ctx context.Context) context.Context
 }
 
+func NewClusterContextExtender() ContextExtender {
+	return ClusterContext{}
+}
+
+func NewApplicationContextExtender() ContextExtender {
+	return ApplicationContext{}
+}
+
 type ConnectorClientReader interface {
 	GetApplication() string
 	GetCommonName() string

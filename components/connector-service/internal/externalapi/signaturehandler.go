@@ -31,6 +31,7 @@ func NewSignatureHandler(tokenManager tokens.Manager, certificateService certifi
 }
 
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
+	// TODO - needed only for removal
 	token := r.URL.Query().Get("token")
 	connectorClientContext, err := sh.connectorClientExtractor(r.Context())
 	if err != nil {
@@ -38,7 +39,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	signingRequest, err := sh.readCertRequest(r)
+	signingRequest, err := readCertRequest(r)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
@@ -56,12 +57,13 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// TODO - could be handled in middleware
 	sh.tokenManager.Delete(token)
 
-	httphelpers.RespondWithBody(w, 201, toCertResponse(encodedCertificatesChain))
+	httphelpers.RespondWithBody(w, http.StatusCreated, toCertResponse(encodedCertificatesChain))
 }
 
-func (sh *signatureHandler) readCertRequest(r *http.Request) (*certRequest, apperrors.AppError) {
+func readCertRequest(r *http.Request) (*certRequest, apperrors.AppError) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return nil, apperrors.Internal("Error while reading request body: %s", err)
