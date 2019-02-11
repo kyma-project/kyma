@@ -54,7 +54,7 @@ func TestLoader_Load_NotSupported(t *testing.T) {
 	}
 
 	// When
-	_, files, err := loader.Load("test", "asset", "other")
+	_, files, err := loader.Load("test", "asset", "other", "")
 
 	// Then
 	g.Expect(err).To(gomega.HaveOccurred())

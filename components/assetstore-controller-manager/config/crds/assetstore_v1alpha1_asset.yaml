@@ -37,6 +37,8 @@ spec:
               type: object
             source:
               properties:
+                filter:
+                  type: string
                 mode:
                   enum:
                   - single

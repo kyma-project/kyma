@@ -49,13 +49,84 @@ func TestLoader_Load_Package(t *testing.T) {
 			}
 
 			// When
-			basePath, files, err := loader.Load(testCase.path, "asset", v1alpha1.AssetPackage)
+			basePath, files, err := loader.Load(testCase.path, "asset", v1alpha1.AssetPackage, "")
 			defer loader.Clean(basePath)
 
 			// Then
 			g.Expect(err).NotTo(gomega.HaveOccurred())
 			g.Expect(files).To(gomega.HaveLen(2))
 			g.Expect(files).To(gomega.ConsistOf(expected))
+		})
+	}
+}
+
+func TestLoader_Load_WithFilter(t *testing.T) {
+	for testName, testCase := range map[string]struct {
+		filter   string
+		expected []string
+	}{
+		"AllFiles": {
+			filter: ".*",
+			expected: []string{
+				"test/README.md",
+				"test/nested/nested.md",
+				"swagger.json",
+				"docs/README.md",
+			},
+		},
+		"MarkdownFiles": {
+			filter: ".*\\.md$",
+			expected: []string{
+				"test/README.md",
+				"test/nested/nested.md",
+				"docs/README.md",
+			},
+		},
+		"ReadmeFiles": {
+			filter: "(^|/)README\\.md$",
+			expected: []string{
+				"test/README.md",
+				"docs/README.md",
+			},
+		},
+		"FilesFromTestDirectory": {
+			filter: "^test/.*",
+			expected: []string{
+				"test/README.md",
+				"test/nested/nested.md",
+			},
+		},
+		"NoFiles": {
+			filter:   "^nomatch$",
+			expected: []string{},
+		},
+	} {
+		t.Run(testName, func(t *testing.T) {
+			// Given
+			g := gomega.NewGomegaWithT(t)
+
+			tmpDir := "../../tmp"
+			testPath := "./testdata/complex.zip"
+			err := os.MkdirAll(tmpDir, os.ModePerm)
+			g.Expect(err).NotTo(gomega.HaveOccurred())
+			defer os.RemoveAll(tmpDir)
+
+			loader := &loader{
+				temporaryDir:    tmpDir,
+				osRemoveAllFunc: os.RemoveAll,
+				osCreateFunc:    os.Create,
+				httpGetFunc:     getFile(testPath),
+				ioutilTempDir:   ioutil.TempDir,
+			}
+
+			// When
+			basePath, files, err := loader.Load(testPath, "asset", v1alpha1.AssetPackage, testCase.filter)
+			defer loader.Clean(basePath)
+
+			// Then
+			g.Expect(err).NotTo(gomega.HaveOccurred())
+			g.Expect(files).To(gomega.HaveLen(len(testCase.expected)))
+			g.Expect(files).To(gomega.ConsistOf(testCase.expected))
 		})
 	}
 }

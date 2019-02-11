@@ -21,8 +21,9 @@ metadata:
   namespace: default
 spec:
   source:
-    mode: single
-    url: https://some.domain.com/main.js
+    mode: package
+    url: https://some.domain.com/structure.zip
+    filter: .*\.md$
   bucketRef:
     name: my-bucket
 
@@ -83,7 +84,7 @@ This table lists all possible parameters of a given resource together with their
 | **metadata.namespace** |    **YES**   | Defines the Namespace in which the CR is available. |
 | **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files. |
 | **spec.source.url** |    **YES**   | Specifies the location of the file. |
-| **bucketref.name** |    **YES**   | Specifies the name of the bucket for storing the asset. |
+| **spec.source.filter** |    **NO**   | Specifies the regex pattern used to select files from package that should be stored. |
 | **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook services. |
 | **spec.source.validationwebhookservice.name** |    **NO**   | Provides the name of the validation webhook service. |
 | **spec.source.validationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
@@ -93,7 +94,7 @@ This table lists all possible parameters of a given resource together with their
 | **spec.source.mutationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
 | **spec.source.mutationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
 | **spec.source.mutationwebhookservice.metadata** |    **NO**   | Provides detailed metadata specific for a given mutation service and its functionality. |
-| **spec.bucketref.name** |    **NO**   | Provides the name of the bucket for storing the asset. |
+| **spec.bucketref.name** |    **YES**   | Provides the name of the bucket for storing the asset. |
 | **status.phase** |    **Not applicable**   | The Asset Controller adds it to the Asset CR. It describes the status of processing the Asset CR by the Asset Controller. It can be `Ready`, `Failed`, or `Pending`. |
 | **status.reason** |    **Not applicable**   | Provides the reason why the Asset CR processing failed or is pending.  |
 | **status.message** |    **Not applicable**   | Describes a human-readable message on the CR processing progress, success, or failure. |

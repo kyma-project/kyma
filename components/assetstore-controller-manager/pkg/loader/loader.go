@@ -23,7 +23,7 @@ type loader struct {
 
 //go:generate mockery -name=Loader -output=automock -outpkg=automock -case=underscore
 type Loader interface {
-	Load(src, assetName string, mode v1alpha1.AssetMode) (string, []string, error)
+	Load(src, assetName string, mode v1alpha1.AssetMode, filter string) (string, []string, error)
 	Clean(path string) error
 }
 
@@ -41,12 +41,12 @@ func New(temporaryDir string) Loader {
 	}
 }
 
-func (l *loader) Load(src, assetName string, mode v1alpha1.AssetMode) (string, []string, error) {
+func (l *loader) Load(src, assetName string, mode v1alpha1.AssetMode, filter string) (string, []string, error) {
 	switch mode {
 	case v1alpha1.AssetSingle:
 		return l.loadSingle(src, assetName)
 	case v1alpha1.AssetPackage:
-		return l.loadPackage(src, assetName)
+		return l.loadPackage(src, assetName, filter)
 	}
 
 	return "", nil, fmt.Errorf("not supported source mode %+v", mode)
