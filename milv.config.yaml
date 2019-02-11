@@ -29,9 +29,6 @@ files:
   - path: "./kyma/docs/kyma/docs/04-07-aks-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
-  - path: "./kyma/components/ui-api-layer/docs/security.md"
-    config:
-      white-list-internal: ["../internal/gqlschema/schema.graphql"]
   - path: "./kyma/docs/kyma/docs/04-06-gke-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
