@@ -17,8 +17,7 @@ const (
 	AppURLFormat     = "https://%s/v1/applications/%s"
 	RuntimeURLFormat = "https://%s/v1/runtimes/%s"
 
-	CertsEndpoint          = "certificates"
-	ManagementInfoEndpoint = "management/info"
+	CertsEndpoint = "certificates"
 )
 
 type CSRInfoHandler struct {
