@@ -29,8 +29,15 @@ func ExtractApplicationContext(ctx context.Context) (ConnectorClientContext, app
 		return appCtx, nil
 	}
 
-	metadataURL := fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataHost, appCtx.GetApplication())
-	eventsURL := fmt.Sprintf(EventsURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
+	metadataURL := ""
+	eventsURL := ""
+
+	if apiHosts.MetadataHost != "" {
+		metadataURL = fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataHost, appCtx.GetApplication())
+	}
+	if apiHosts.EventsHost != "" {
+		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
+	}
 
 	extendedCtx := &ExtendedApplicationContext{
 		ApplicationContext: appCtx,
@@ -51,7 +58,6 @@ func ExtractClusterContext(ctx context.Context) (ConnectorClientContext, apperro
 
 	return clusterCtx, nil
 }
-
 
 func ExtractStubApplicationContext(ctx context.Context) (ConnectorClientContext, apperrors.AppError) {
 	extendedCtx := &ExtendedApplicationContext{
