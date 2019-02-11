@@ -3,7 +3,7 @@ title: Azure Service Broker
 type: Service Brokers
 ---
 
-The Microsoft Azure Service Broker is an open source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Microsoft Azure public cloud. Kyma provides Namespace-scoped Azure Service Broker. In each Namespace, you can configure the Azure Service Broker against different subscriptions. Install the Azure Service Broker by provisioning the **Azure Service Broker** class provided by the Helm Broker.
+The Microsoft Azure Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the Microsoft Azure public cloud. Kyma provides Namespace-scoped Azure Service Broker. In each Namespace, you can configure the Azure Service Broker against different subscriptions. Install the Azure Service Broker by provisioning the **Azure Service Broker** class provided by the Helm Broker.
 
 ![azure broker class](./assets/azure-service-broker-class.png)
 
