@@ -11,7 +11,7 @@ Using bundles, you can also install these brokers:
 * [Azure Service Broker](/components/service-catalog#service-brokers-azure-service-broker)
 
 To get the bundles that the Helm Broker provides, go to the [`bundles`](https://github.com/kyma-project/bundles) repository.
-For more information about the Service Brokers, see [this](/components/service-catalog#service-brokers-service-brokers) document.
+For more information about Service Brokers, see [this](/components/service-catalog#service-brokers-service-brokers) document.
 
 The Helm Broker implements the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata) (OSB API).
 To be compliant with the Service Catalog version used in Kyma, the Helm Broker supports only the following versions of the OSB API:
