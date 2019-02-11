@@ -6,7 +6,9 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
-MINIKUBE_VERSION=0.33.0
+# Supported Minikube Versions: MINIKUBE_VERSION_MIN (inclusive) up to MINIKUBE_VERSION_MAX (exclusive)
+MINIKUBE_VERSION_MIN=0.33.0
+MINIKUBE_VERSION_MAX=0.34.0
 KUBERNETES_VERSION=1.11.5
 KUBECTL_CLI_VERSION=1.11.0
 VM_DRIVER=hyperkit
@@ -117,8 +119,9 @@ function checkIfMinikubeIsInitialized() {
 function checkMinikubeVersion() {
     local version=$(minikube version | awk '{print  $3}')
 
-    if [[ "${version}" != *"${MINIKUBE_VERSION}"* ]]; then
-        echo "Your minikube is in ${version}. v${MINIKUBE_VERSION} is supported version of minikube. Install supported version!"
+    if [[ "$(echo "${version}\n${MINIKUBE_VERSION_MIN}" | sort -V | head -n1)" = "${MINIKUBE_VERSION_MIN}" ]] && "$(echo "$version\n${MINIKUBE_VERSION_MAX}" | sort -V | head -n1)" = "${version}" ]]; then
+        
+        echo "Your minikube is in ${version}. v${MINIKUBE_VERSION_MIN} - v${MINIKUBE_VERSION_MAX} are supported versions of minikube. Please install a supported version!"
         exit -1
     fi
 }
