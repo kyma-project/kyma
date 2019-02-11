@@ -13,10 +13,18 @@ func createNamespace(namespace string) string {
 	command := "kubectl"
 	args := []string{"create", "namespace", namespace}
 	stdout, stderr, err := runCommand(command, args)
+	result := ""
 	if err != nil {
 		return stderr.String()
 	}
-	return stdout.String()
+	result = stdout.String()
+	args = []string{"label", "namespace", namespace, "env=true", "istio-injection=enabled"}
+	stdout, stderr, err = runCommand(command, args)
+	if err != nil {
+		return stderr.String()
+	}
+	result += stdout.String()
+	return result
 }
 
 func createFunction(functionYaml, namespace string) {
