@@ -135,6 +135,7 @@ promtail:
   affinity: {}
 
 global:
+  ## to deploy console ui app
   uiapp:
     create: false
   containerRegistry:
@@ -142,6 +143,9 @@ global:
   test_logging:
     dir: develop/
     version: b17d67137
+  ## to enable auth and authz set value to true
+  rbac:
+    create: false
 test:
   image:
     name: logging-test

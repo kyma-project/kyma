@@ -1,4 +1,4 @@
-{{- if .Values.global.uiapp.create }}
+{{- if .Values.global.rbac.create }}
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRole
 metadata:
@@ -15,7 +15,7 @@ spec:
 {{- end }}
 
 ---
-{{- if .Values.global.uiapp.create }}
+{{- if .Values.global.rbac.create }}
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRoleBinding
 metadata:
@@ -35,7 +35,7 @@ spec:
     name: loki-intern-role
 {{- end }}
 ---
-{{- if .Values.global.uiapp.create }}
+{{- if .Values.global.rbac.create }}
 apiVersion: rbac.istio.io/v1alpha1
 kind: RbacConfig
 metadata:

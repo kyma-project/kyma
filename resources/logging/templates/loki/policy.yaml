@@ -1,4 +1,4 @@
-{{- if .Values.global.uiapp.create }}
+{{- if .Values.global.rbac.create }}
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -27,7 +27,7 @@ spec:
 
 {{- end }}
 ---
-{{- if .Values.global.uiapp.create }}
+{{- if .Values.global.rbac.create }}
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
