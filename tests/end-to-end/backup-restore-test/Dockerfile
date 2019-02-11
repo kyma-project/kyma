@@ -20,7 +20,6 @@ COPY --from=builder /tmp/ark /usr/bin/ark
 COPY --from=builder /tmp/kubectl /usr/bin/kubectl
 COPY --from=builder /restore.test /restore.test
 COPY restore/function.yaml /function.yaml
-COPY restore/gateway.yaml /gateway.yaml
 
 COPY entrypoint.sh /entrypoint.sh
 
