@@ -29,6 +29,7 @@ type InstanceOperation interface {
 	Insert(*internal.InstanceOperation) error
 	Get(internal.InstanceID, internal.OperationID) (*internal.InstanceOperation, error)
 	GetAll(internal.InstanceID) ([]*internal.InstanceOperation, error)
+	GetLast(internal.InstanceID) (*internal.InstanceOperation, error)
 	UpdateState(internal.InstanceID, internal.OperationID, internal.OperationState) error
 	UpdateStateDesc(internal.InstanceID, internal.OperationID, internal.OperationState, *string) error
 	Remove(internal.InstanceID, internal.OperationID) error

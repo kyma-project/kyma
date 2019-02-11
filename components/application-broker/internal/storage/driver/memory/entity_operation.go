@@ -1,6 +1,7 @@
 package memory
 
 import (
+	"sort"
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-broker/internal"
@@ -22,6 +23,15 @@ type InstanceOperation struct {
 	storage     map[internal.InstanceID]map[internal.OperationID]*internal.InstanceOperation
 	nowProvider pTime.NowProvider
 }
+
+// instanceOperations implements sort.Interface and allows you to sort the slice of *internal.InstanceOperation
+// by CreatedAt property in a descending order.
+type instanceOperations []*internal.InstanceOperation
+
+func (b instanceOperations) Len() int           { return len(b) }
+func (b instanceOperations) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
+func (b instanceOperations) Less(i, j int) bool { return b[i].CreatedAt.After(b[j].CreatedAt) }
+
 
 // WithTimeProvider allows for passing custom time provider.
 // Used mostly in testing.
@@ -91,7 +101,7 @@ func (s *InstanceOperation) get(iID internal.InstanceID, opID internal.Operation
 func (s *InstanceOperation) GetAll(iID internal.InstanceID) ([]*internal.InstanceOperation, error) {
 	defer unlock(s.lockR())
 
-	out := []*internal.InstanceOperation{}
+	out := instanceOperations{}
 
 	opsForInstance, found := s.storage[iID]
 	if !found {
@@ -101,9 +111,27 @@ func (s *InstanceOperation) GetAll(iID internal.InstanceID) ([]*internal.Instanc
 	for i := range opsForInstance {
 		out = append(out, opsForInstance[i])
 	}
-
+	sort.Sort(instanceOperations(out))
 	return out, nil
 }
+
+// Get returns last inserted object from storage.
+func (s *InstanceOperation) GetLast(iID internal.InstanceID) (*internal.InstanceOperation, error) {
+	defer unlock(s.lockR())
+
+	ops, err := s.GetAll(iID)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(ops) ==  0 {
+		return nil, notFoundError{}
+	}
+	io := ops[0]
+
+	return io, nil
+}
+
 
 // UpdateState modifies state on object in storage.
 func (s *InstanceOperation) UpdateState(iID internal.InstanceID, opID internal.OperationID, state internal.OperationState) error {

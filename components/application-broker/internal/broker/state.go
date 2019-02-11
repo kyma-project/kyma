@@ -62,9 +62,7 @@ OpsLoop:
 }
 
 func (svc *instanceStateService) IsDeprovisioned(iID internal.InstanceID) (bool, error) {
-	result := false
-
-	ops, err := svc.operationCollectionGetter.GetAll(iID)
+	op, err := svc.operationCollectionGetter.GetLast(iID)
 	switch {
 	case err == nil:
 	case IsNotFoundError(err):
@@ -73,22 +71,20 @@ func (svc *instanceStateService) IsDeprovisioned(iID internal.InstanceID) (bool,
 		return false, errors.Wrap(err, "while getting operations from storage")
 	}
 
-OpsLoop:
-	for _, op := range ops {
-		if op.Type == internal.OperationTypeRemove && op.State == internal.OperationStateSucceeded {
-			result = true
-			break OpsLoop
-		}
+	if op.Type == internal.OperationTypeRemove && op.State == internal.OperationStateSucceeded {
+		return true, nil
 	}
 
-	return result, nil
+
+	return false, nil
 }
 
 func (svc *instanceStateService) IsDeprovisioningInProgress(iID internal.InstanceID) (internal.OperationID, bool, error) {
 	resultInProgress := false
 	var resultOpID internal.OperationID
 
-	ops, err := svc.operationCollectionGetter.GetAll(iID)
+	op, err := svc.operationCollectionGetter.GetLast(iID)
+
 	switch {
 	case err == nil:
 	case IsNotFoundError(err):
@@ -97,14 +93,9 @@ func (svc *instanceStateService) IsDeprovisioningInProgress(iID internal.Instanc
 		return resultOpID, false, errors.Wrap(err, "while getting operations from storage")
 	}
 
-OpsLoop:
-	for _, op := range ops {
-		if op.Type == internal.OperationTypeRemove && op.State == internal.OperationStateInProgress {
-			resultInProgress = true
-			resultOpID = op.OperationID
-			break OpsLoop
-		}
+	if op.Type == internal.OperationTypeRemove && op.State == internal.OperationStateInProgress{
+		resultInProgress = true
+		resultOpID = op.OperationID
 	}
-
 	return resultOpID, resultInProgress, nil
 }
