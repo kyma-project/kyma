@@ -26,10 +26,10 @@ This diagram provides an overview of the basic Asset Store workflow and the role
 
 ![](./assets/asset-store-architecture.svg)
 
-1. Create a bucket through a Bucket CR.
+1. The Kyma user creates a bucket through a Bucket CR.
 2. The Bucket Controller listens for new Events and acts upon receiving the Bucket CR creation Event.
 3. The Bucket Controller creates the bucket in the Minio Gateway storage.
-4. Create an Asset CR in which you specify the reference to the asset source location and the name of the bucket in which you want to store it.
+4. The Kyma user creates an Asset CR which specifies the reference to the asset source location and the name of the bucket for storing the asset.
 5. The AC listens for new Events and acts upon receiving the Asset CR creation Event.
 6. The AC reads the CR definition and checks if the bucket is available.
 7. If it is available, the AC fetches the asset from the source location provided in the CR. If the asset is a ZIP or TAR file, the AC unpacks the asset before uploading it into the bucket.
