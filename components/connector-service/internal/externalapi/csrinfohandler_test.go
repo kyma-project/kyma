@@ -79,13 +79,13 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
 		expectedAPI := api{
 			CertificatesURL: fmt.Sprintf(AppURLFormat, host, CertsEndpoint),
-			InfoURL:         fmt.Sprintf(AppURLFormat, host, ManagementInfoEndpoint),
+			InfoURL:         infoURL,
 		}
 
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, appCertificateURL, "", host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, appCertificateURL, infoURL, host, subjectValues, AppURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -123,13 +123,13 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
 		expectedAPI := api{
 			CertificatesURL: fmt.Sprintf(RuntimeURLFormat, host, CertsEndpoint),
-			InfoURL:         fmt.Sprintf(RuntimeURLFormat, host, ManagementInfoEndpoint),
+			InfoURL:         infoURL,
 		}
 
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, runtimeCertificateURL, "", host, subjectValues, RuntimeURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, runtimeCertificateURL, infoURL, host, subjectValues, RuntimeURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, urlRuntimes, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)

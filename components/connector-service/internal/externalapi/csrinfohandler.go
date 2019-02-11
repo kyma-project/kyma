@@ -31,7 +31,6 @@ type CSRInfoHandler struct {
 	urlFormat                string
 }
 
-
 func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor clientcontext.ConnectorClientExtractor, certificateURL, getInfoURL, connectorServiceHost string, subjectValues certificates.CSRSubject, urlFormat string) CSRGetInfoHandler {
 
 	return &CSRInfoHandler{
@@ -71,9 +70,6 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 func (ih *CSRInfoHandler) makeApiURLs(connectorClientContext clientcontext.ConnectorClientContext) api {
 	host := ih.connectorServiceHost
 	infoURL := ih.getInfoURL
-	if infoURL == "" {
-		infoURL = fmt.Sprintf(ih.urlFormat, host, ManagementInfoEndpoint)
-	}
 	return api{
 		CertificatesURL: fmt.Sprintf(ih.urlFormat, host, CertsEndpoint),
 		InfoURL:         infoURL,
