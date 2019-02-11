@@ -31,6 +31,6 @@ Reference this table for details on the elements that make up a defined and secu
 | `apiGroup: ""` | Defines the apiGroup to which the user must have access to get the result of this query. In this case it is empty because limitRanges is the resource built into Kubernetes, not some Custom Resource created by us. |
 | `apiVersion: "v1alpha1"` | Specifies the apiVersion of the query subject. |
 | `namespaceArg: "namespace"` | Specifies the name of the argument or field in the parent object from which the resource namespace is fetched. |
-| `isChildResolver: false` | Required to be "true" for fields nested in types which have to be secured. Determines if the namespace argument should be fetched from the parent object. By default it is set to `false`. |
+| `isChildResolver: false` | Must be "true" for fields nested in types which have to be secured. Determines if the `namespace` argument should be fetched from the parent object. By default, it is set to `false`. |
 
 If the directive is set on a field nested in a type, the value returned from a query returning that type depends on the type modifier set on the field. If the field is set as Non-Null, as described [here](https://graphql.github.io/learn/schema/#lists-and-non-null), the error will be returned in case the user has no rights to access the child resource. If the field is not set as Non-Null, only the child field will be returned as null.
