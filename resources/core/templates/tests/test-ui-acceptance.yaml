@@ -13,7 +13,6 @@ spec:
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
       image: {{ .Values.global.containerRegistry.path }}/ui-tests:b3fcb6b9
-      # image: eu.gcr.io/kyma-project/pr/ui-tests:PR-532
       imagePullPolicy: IfNotPresent
       resources:
          requests:
