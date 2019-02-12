@@ -1,4 +1,4 @@
-package asset
+package clusterasset
 
 import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
@@ -80,13 +80,13 @@ func prepareReconcilerTest(t *testing.T, mocks *mocks) *testSuite {
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	handler := asset.New(mgr.GetRecorder("asset-controller"), mocks.store, mocks.loader, bucketFinder(mgr), mocks.validator, mocks.mutator)
-	reconciler := &ReconcileAsset{
+	handler := asset.New(mgr.GetRecorder("clusterasset-controller"), mocks.store, mocks.loader, bucketFinder(mgr), mocks.validator, mocks.mutator)
+	reconciler := &ReconcileClusterAsset{
 		Client:         mgr.GetClient(),
 		scheme:         mgr.GetScheme(),
 		handler:        handler,
 		relistInterval: 60 * time.Hour,
-		finalizer:      finalizer.New(deleteAssetFinalizerName),
+		finalizer:      finalizer.New(deleteClusterAssetFinalizerName),
 	}
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())

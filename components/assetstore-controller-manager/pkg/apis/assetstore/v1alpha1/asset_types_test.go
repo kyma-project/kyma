@@ -19,12 +19,11 @@ func TestStorageAsset(t *testing.T) {
 			Name:      "foo",
 			Namespace: "default",
 		},
-		Status: AssetStatus{
-			LastHeartbeatTime: metav1.Now(),
-		},
 		Spec: AssetSpec{
-			Source: AssetSource{
-				Mode: AssetSingle,
+			CommonAssetSpec: CommonAssetSpec{
+				Source: AssetSource{
+					Mode: AssetSingle,
+				},
 			},
 		},
 	}

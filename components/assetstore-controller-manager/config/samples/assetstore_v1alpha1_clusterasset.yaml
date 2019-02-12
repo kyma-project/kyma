@@ -1,11 +1,9 @@
 apiVersion: assetstore.kyma-project.io/v1alpha1
-kind: Bucket
+kind: ClusterAsset
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-  name: test-sample
-  namespace: default
+  name: clusterasset-sample
 spec:
-  region: "us-east-1"
-  policy: writeonly
-
+  # Add fields here
+  foo: bar

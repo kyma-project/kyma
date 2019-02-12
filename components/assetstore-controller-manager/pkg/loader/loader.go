@@ -2,6 +2,7 @@ package loader
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -68,6 +69,10 @@ func (l *loader) download(destination, source string) error {
 		return err
 	}
 	defer response.Body.Close()
+
+	if response.StatusCode < 200 || response.StatusCode > 299 {
+		return errors.New(response.Status)
+	}
 
 	_, err = io.Copy(file, response.Body)
 	if err != nil {

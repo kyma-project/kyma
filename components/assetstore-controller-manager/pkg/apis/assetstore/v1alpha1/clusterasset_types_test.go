@@ -1,29 +1,33 @@
 package v1alpha1
 
 import (
-	"testing"
-
+	"context"
 	"github.com/onsi/gomega"
-	"golang.org/x/net/context"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
+	"testing"
 )
 
-func TestStorageBucket(t *testing.T) {
+func TestStorageClusterAsset(t *testing.T) {
 	key := types.NamespacedName{
-		Name:      "foo",
-		Namespace: "default",
+		Name: "foo",
 	}
-	created := &Bucket{
+	created := &ClusterAsset{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo",
-			Namespace: "default",
+			Name: "foo",
+		},
+		Spec: ClusterAssetSpec{
+			CommonAssetSpec: CommonAssetSpec{
+				Source: AssetSource{
+					Mode: AssetSingle,
+				},
+			},
 		},
 	}
 	g := gomega.NewGomegaWithT(t)
 
 	// Test Create
-	fetched := &Bucket{}
+	fetched := &ClusterAsset{}
 	g.Expect(c.Create(context.TODO(), created)).NotTo(gomega.HaveOccurred())
 
 	g.Expect(c.Get(context.TODO(), key, fetched)).NotTo(gomega.HaveOccurred())

@@ -1,8 +1,9 @@
-package asset
+package clusterbucket
 
 import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/asset"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/bucket"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store"
 	stdlog "log"
 	"os"
 	"path/filepath"
@@ -73,20 +74,20 @@ type testSuite struct {
 	finishTest func()
 }
 
-func prepareReconcilerTest(t *testing.T, mocks *mocks) *testSuite {
+func prepareReconcilerTest(t *testing.T, store store.Store) *testSuite {
 	g := gomega.NewGomegaWithT(t)
 	mgr, err := manager.New(cfg, manager.Options{})
 	c := mgr.GetClient()
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	handler := asset.New(mgr.GetRecorder("asset-controller"), mocks.store, mocks.loader, bucketFinder(mgr), mocks.validator, mocks.mutator)
-	reconciler := &ReconcileAsset{
+	handler := bucket.New(mgr.GetRecorder("clusterasset-controller"), store, "https://minio.kyma.local")
+	reconciler := &ReconcileClusterBucket{
 		Client:         mgr.GetClient(),
 		scheme:         mgr.GetScheme(),
 		handler:        handler,
 		relistInterval: 60 * time.Hour,
-		finalizer:      finalizer.New(deleteAssetFinalizerName),
+		finalizer:      finalizer.New(deleteBucketFinalizerName),
 	}
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())

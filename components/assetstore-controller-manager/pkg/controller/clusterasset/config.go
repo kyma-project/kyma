@@ -1,11 +1,13 @@
-package asset
+package clusterasset
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/loader"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store"
+
 	"github.com/vrischmann/envconfig"
-	"time"
 )
 
 type Config struct {
@@ -13,7 +15,7 @@ type Config struct {
 	Loader  loader.Config
 	Webhook assethook.Config
 
-	AssetRelistInterval time.Duration `envconfig:"default=5m"`
+	ClusterAssetRelistInterval time.Duration `envconfig:"default=5m"`
 }
 
 func loadConfig(prefix string) (Config, error) {

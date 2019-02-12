@@ -1,4 +1,4 @@
-package asset
+package clusterasset
 
 import (
 	"context"
@@ -26,11 +26,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 
-var log = logf.Log.WithName("asset-controller")
+var log = logf.Log.WithName("clusterasset-controller")
 
-const deleteAssetFinalizerName = "deleteasset.finalizers.assetstore.kyma-project.io"
+const deleteClusterAssetFinalizerName = "deleteclusterasset.finalizers.assetstore.kyma-project.io"
 
-// Add creates a new Asset Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
+// Add creates a new ClusterAsset Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	cfg, err := loadConfig("APP")
@@ -46,19 +46,19 @@ func Add(mgr manager.Manager) error {
 	store := store.New(minioClient)
 	loader := loader.New(cfg.Loader.TemporaryDirectory)
 	findBucketFnc := bucketFinder(mgr)
-	deleteFinalizer := finalizer.New(deleteAssetFinalizerName)
+	deleteFinalizer := finalizer.New(deleteClusterAssetFinalizerName)
 
 	assethook := assethook.New(&http.Client{})
 	validator := engine.NewValidator(assethook, cfg.Webhook.ValidationTimeout)
 	mutator := engine.NewMutator(assethook, cfg.Webhook.MutationTimeout)
 
-	assetHandler := asset.New(mgr.GetRecorder("asset-controller"), store, loader, findBucketFnc, validator, mutator)
+	assetHandler := asset.New(mgr.GetRecorder("clusterasset-controller"), store, loader, findBucketFnc, validator, mutator)
 
-	reconciler := &ReconcileAsset{
+	reconciler := &ReconcileClusterAsset{
 		Client:         mgr.GetClient(),
 		scheme:         mgr.GetScheme(),
 		handler:        assetHandler,
-		relistInterval: cfg.AssetRelistInterval,
+		relistInterval: cfg.ClusterAssetRelistInterval,
 		finalizer:      deleteFinalizer,
 	}
 
@@ -67,7 +67,7 @@ func Add(mgr manager.Manager) error {
 
 func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name string) (*assetstorev1alpha1.CommonBucketStatus, bool, error) {
 	return func(ctx context.Context, namespace, name string) (*assetstorev1alpha1.CommonBucketStatus, bool, error) {
-		instance := &assetstorev1alpha1.Bucket{}
+		instance := &assetstorev1alpha1.ClusterBucket{}
 
 		namespacedName := types.NamespacedName{
 			Namespace: namespace,
@@ -90,24 +90,24 @@ func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("asset-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("clusterasset-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
-		return errors.Wrapf(err, "while creating asset-controller")
+		return err
 	}
 
-	// Watch for changes to Asset
-	err = c.Watch(&source.Kind{Type: &assetstorev1alpha1.Asset{}}, &handler.EnqueueRequestForObject{})
+	// Watch for changes to ClusterAsset
+	err = c.Watch(&source.Kind{Type: &assetstorev1alpha1.ClusterAsset{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
-		return errors.Wrapf(err, "while watching Assets")
+		return err
 	}
 
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileAsset{}
+var _ reconcile.Reconciler = &ReconcileClusterAsset{}
 
-// ReconcileAsset reconciles a Asset object
-type ReconcileAsset struct {
+// ReconcileClusterAsset reconciles a ClusterAsset object
+type ReconcileClusterAsset struct {
 	client.Client
 	scheme *runtime.Scheme
 
@@ -116,15 +116,15 @@ type ReconcileAsset struct {
 	finalizer      finalizer.Finalizer
 }
 
-// Reconcile reads that state of the cluster for a Asset object and makes changes based on the state read
-// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch
+// Reconcile reads that state of the cluster for a ClusterAsset object and makes changes based on the state read
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterassets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterbuckets,verbs=get;list;watch
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
-func (r *ReconcileAsset) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
-	instance := &assetstorev1alpha1.Asset{}
+	instance := &assetstorev1alpha1.ClusterAsset{}
 	err := r.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -152,7 +152,7 @@ func (r *ReconcileAsset) Reconcile(request reconcile.Request) (reconcile.Result,
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileAsset) onDelete(ctx context.Context, instance *assetstorev1alpha1.Asset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onDelete(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		return reconcile.Result{}, nil
 	}
@@ -170,7 +170,7 @@ func (r *ReconcileAsset) onDelete(ctx context.Context, instance *assetstorev1alp
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileAsset) onPending(ctx context.Context, instance *assetstorev1alpha1.Asset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onPending(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
 	status := r.handler.OnPending(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
 
 	if err := r.updateStatus(ctx, instance, status); err != nil {
@@ -180,7 +180,7 @@ func (r *ReconcileAsset) onPending(ctx context.Context, instance *assetstorev1al
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileAsset) onReady(ctx context.Context, instance *assetstorev1alpha1.Asset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onReady(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
 	status := r.handler.OnReady(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
 
 	if err := r.updateStatus(ctx, instance, status); err != nil {
@@ -190,7 +190,7 @@ func (r *ReconcileAsset) onReady(ctx context.Context, instance *assetstorev1alph
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileAsset) onFailed(ctx context.Context, instance *assetstorev1alpha1.Asset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onFailed(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
 	status, err := r.handler.OnFailed(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -203,7 +203,7 @@ func (r *ReconcileAsset) onFailed(ctx context.Context, instance *assetstorev1alp
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileAsset) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha1.Asset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		r.finalizer.AddTo(instance)
 		return reconcile.Result{Requeue: true}, r.Update(ctx, instance)
@@ -217,7 +217,7 @@ func (r *ReconcileAsset) onAddOrUpdate(ctx context.Context, instance *assetstore
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileAsset) updateStatus(ctx context.Context, instance *assetstorev1alpha1.Asset, commonStatus assetstorev1alpha1.CommonAssetStatus) error {
+func (r *ReconcileClusterAsset) updateStatus(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset, commonStatus assetstorev1alpha1.CommonAssetStatus) error {
 	toUpdate := instance.DeepCopy()
 	toUpdate.Status.CommonAssetStatus = commonStatus
 

@@ -1,4 +1,4 @@
-package bucket
+package clusterbucket
 
 import (
 	"context"
@@ -20,11 +20,11 @@ import (
 	"time"
 )
 
-var log = logf.Log.WithName("bucket-controller")
+var log = logf.Log.WithName("clusterbucket-controller")
 
-const deleteBucketFinalizerName = "deletebucket.finalizers.assetstore.kyma-project.io"
+const deleteBucketFinalizerName = "deleteclusterbucket.finalizers.assetstore.kyma-project.io"
 
-// Add creates a new Bucket Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
+// Add creates a new ClusterBucket Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
 func Add(mgr manager.Manager) error {
 	cfg, err := loadConfig("APP")
@@ -39,13 +39,13 @@ func Add(mgr manager.Manager) error {
 
 	store := store.New(minioClient)
 	deletionFinalizer := finalizer.New(deleteBucketFinalizerName)
-	handler := bucket.New(mgr.GetRecorder("bucket-controller"), store, cfg.Store.ExternalEndpoint)
+	handler := bucket.New(mgr.GetRecorder("clusterbucket-controller"), store, cfg.Store.ExternalEndpoint)
 
-	reconciler := &ReconcileBucket{
+	reconciler := &ReconcileClusterBucket{
 		Client:         mgr.GetClient(),
 		scheme:         mgr.GetScheme(),
 		handler:        handler,
-		relistInterval: cfg.BucketRequeueInterval,
+		relistInterval: cfg.ClusterBucketRelistInterval,
 		finalizer:      deletionFinalizer,
 	}
 
@@ -55,13 +55,13 @@ func Add(mgr manager.Manager) error {
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("bucket-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("clusterbucket-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
 
-	// Watch for changes to Bucket
-	err = c.Watch(&source.Kind{Type: &assetstorev1alpha1.Bucket{}}, &handler.EnqueueRequestForObject{})
+	// Watch for changes to ClusterBucket
+	err = c.Watch(&source.Kind{Type: &assetstorev1alpha1.ClusterBucket{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -69,10 +69,10 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileBucket{}
+var _ reconcile.Reconciler = &ReconcileClusterBucket{}
 
-// ReconcileBucket reconciles a Bucket object
-type ReconcileBucket struct {
+// ReconcileClusterBucket reconciles a ClusterBucket object
+type ReconcileClusterBucket struct {
 	client.Client
 	scheme *runtime.Scheme
 
@@ -81,14 +81,14 @@ type ReconcileBucket struct {
 	finalizer      finalizer.Finalizer
 }
 
-// Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
-// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
+// Reconcile reads that state of the cluster for a ClusterBucket object and makes changes based on the state read
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterbuckets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
-func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
-	instance := &assetstorev1alpha1.Bucket{}
+	instance := &assetstorev1alpha1.ClusterBucket{}
 	err := r.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -114,7 +114,7 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBucket) onFailed(ctx context.Context, instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) onFailed(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket) (reconcile.Result, error) {
 	status, err := r.handler.OnFailed(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -127,7 +127,7 @@ func (r *ReconcileBucket) onFailed(ctx context.Context, instance *assetstorev1al
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileBucket) onReady(ctx context.Context, instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) onReady(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket) (reconcile.Result, error) {
 	status := r.handler.OnReady(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
 
 	if err := r.updateStatus(ctx, instance, status); err != nil {
@@ -137,7 +137,7 @@ func (r *ReconcileBucket) onReady(ctx context.Context, instance *assetstorev1alp
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileBucket) onDelete(ctx context.Context, instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) onDelete(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		return reconcile.Result{}, nil
 	}
@@ -156,7 +156,7 @@ func (r *ReconcileBucket) onDelete(ctx context.Context, instance *assetstorev1al
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBucket) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		r.finalizer.AddTo(instance)
 		return reconcile.Result{Requeue: true}, r.Update(ctx, instance)
@@ -171,11 +171,10 @@ func (r *ReconcileBucket) onAddOrUpdate(ctx context.Context, instance *assetstor
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileBucket) updateStatus(ctx context.Context, instance *assetstorev1alpha1.Bucket, commonStatus assetstorev1alpha1.CommonBucketStatus) error {
-	toUpdate := instance.DeepCopy()
-	toUpdate.Status.CommonBucketStatus = commonStatus
+func (r *ReconcileClusterBucket) updateStatus(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket, commonStatus assetstorev1alpha1.CommonBucketStatus) error {
+	instance.Status.CommonBucketStatus = commonStatus
 
-	if err := r.Status().Update(ctx, toUpdate); err != nil {
+	if err := r.Status().Update(ctx, instance); err != nil {
 		return errors.Wrap(err, "while updating status")
 	}
 
