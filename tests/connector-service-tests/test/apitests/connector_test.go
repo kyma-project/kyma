@@ -359,6 +359,8 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
+	clientKey := testkit.CreateKey(t)
+
 	t.Run("should use headers to build management info response", func(t *testing.T) {
 		// given
 		metadataHost := "metadata.kyma.test.cx"
@@ -367,6 +369,14 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
 		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
 		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
+
+		// when
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
+		require.NotEmpty(t, crtResponse.CRTChain)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+
+		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
 
 		// when
 		tokenResponse := client.CreateToken(t)
@@ -402,6 +412,14 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		}
 
 		// when
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
+		require.NotEmpty(t, crtResponse.CRTChain)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+
+		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
+
+		// when
 		tokenResponse := client.CreateToken(t)
 		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
 		csrInfoResponse, errorResponse := client.GetInfo(t, request)
@@ -430,6 +448,14 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
 		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
 		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
+
+		// when
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
+		require.NotEmpty(t, crtResponse.CRTChain)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+
+		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
 
 		// when
 		tokenResponse := client.CreateToken(t)
@@ -464,11 +490,22 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 }
 
 func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string) {
+
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	clientKey := testkit.CreateKey(t)
 
 	t.Run("should provide not empty management info response", func(t *testing.T) {
 		// given
 		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
+
+		// when
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
+		require.NotEmpty(t, crtResponse.CRTChain)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+
+		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
 
 		// when
 		tokenResponse := client.CreateToken(t)
@@ -492,6 +529,14 @@ func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, sk
 	t.Run("should be accessible multiple times", func(t *testing.T) {
 		// given
 		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
+
+		// when
+		crtResponse, _ := createCertificateChain(t, client, clientKey)
+		require.NotEmpty(t, crtResponse.CRTChain)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+
+		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
 
 		// when
 		tokenResponse := client.CreateToken(t)

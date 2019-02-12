@@ -3,6 +3,7 @@ package testkit
 import (
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"net/http"
 	"net/http/httputil"
@@ -45,6 +46,25 @@ func NewHttpClient(skipVerify bool) *http.Client {
 	}
 	client := &http.Client{Transport: tr}
 	return client
+}
+
+func NewCertificatedHttpClient(certs []*x509.Certificate, tokenRequest *http.Request, skipVerify bool) ConnectorClient {
+	certPool := x509.NewCertPool()
+	for _, cert := range certs {
+		certPool.AddCert(cert)
+	}
+	transport := &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: skipVerify,
+			RootCAs: certPool,
+		},
+	}
+	client := &http.Client{Transport: transport}
+
+	return connectorClient{
+		httpClient: client,
+		tokenRequest: tokenRequest,
+	}
 }
 
 func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
