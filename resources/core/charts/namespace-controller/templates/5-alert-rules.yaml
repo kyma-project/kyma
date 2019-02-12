@@ -9,21 +9,13 @@ metadata:
 data:
   alert.rules: |-
     groups:
-    - name: namespace-controller-hardware-rules
+    - name: namespace-controller-utilization-rule
       rules:
-      - alert: namespace-controller-high-memory-usage-alert
-        expr: container_memory_usage_bytes{namespace="kyma-system",pod_name=~"^core-namespace-controller-(.*)", container_name!="POD", container_name!=""} / 1024 / 1024 > {{ .Values.alertValues.memory }}
+      - alert: namespace-controller-memory-usage-alert
+        expr: ((scalar(container_memory_usage_bytes{container_name="namespace-controller"}) / max(kube_pod_container_resource_limits_memory_bytes{container="namespace-controller"}) by (container_name)) > bool {{ .Values.alertValues.memoryRatio }}) == 1
         for: 15s
         labels:
-          severity: critical
+          severity: high
         annotations:
           description: "High memory usage"
-          summary: "Usage of the memory is above {{ .Values.alertValues.memory }}MiB"
-      - alert: namespace-controller-high-cpu-usage-alert
-        expr: rate(container_cpu_usage_seconds_total{pod_name=~"^core-namespace-controller-(.*)", container_name!="POD", container_name!=""}[1m]) > {{ .Values.alertValues.cpu }}
-        for: 15s
-        labels:
-          severity: critical
-        annotations:
-          description: "High CPU usage"
-          summary: "Usage of the CPU is higher than {{ .Values.alertValues.cpu }}"
+          summary: "Utilization factor of memory is above {{ .Values.alertValues.memoryRatio }}"
