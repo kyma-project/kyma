@@ -115,7 +115,7 @@ func (s *InstanceOperation) GetAll(iID internal.InstanceID) ([]*internal.Instanc
 	return out, nil
 }
 
-// Get returns last inserted object from storage.
+// GetLast returns last inserted object from storage.
 func (s *InstanceOperation) GetLast(iID internal.InstanceID) (*internal.InstanceOperation, error) {
 	defer unlock(s.lockR())
 
