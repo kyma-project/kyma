@@ -378,7 +378,7 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		// then
 		managementInfoURL := csrInfoResponse.Api.GetInfoURL
 
-		//when
+		// when
 		request = client.BuildGetInfoRequest(t, managementInfoURL, metadataHost, eventsHost)
 		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
 		require.Nil(t, errorResponse)
@@ -411,9 +411,49 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		// then
 		managementInfoURL := csrInfoResponse.Api.GetInfoURL
 
-		//when
+		// when
 		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
 		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
+		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
+		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
+	})
+
+	t.Run("should be accessible multiple times", func(t *testing.T) {
+		// given
+		metadataHost := "metadata.kyma.test.cx"
+		eventsHost := "events.kyma.test.cx"
+
+		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
+		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
+		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
+
+		// when
+		tokenResponse := client.CreateToken(t)
+		request := client.BuildGetInfoRequest(t, tokenResponse.URL, metadataHost, eventsHost)
+		csrInfoResponse, errorResponse := client.GetInfo(t, request)
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
+
+		// then
+		managementInfoURL := csrInfoResponse.Api.GetInfoURL
+
+		// when
+		request = client.BuildGetInfoRequest(t, managementInfoURL, metadataHost, eventsHost)
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
+		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
+		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
+
+		// when
+		request = client.BuildGetInfoRequest(t, managementInfoURL, metadataHost, eventsHost)
+		mgmInfoResponse, errorResponse = client.GetMgmInfo(t, request)
 		require.Nil(t, errorResponse)
 
 		// then
@@ -427,6 +467,7 @@ func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, sk
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
 	t.Run("should provide not empty management info response", func(t *testing.T) {
+		// given
 		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
 
 		// when
@@ -439,9 +480,40 @@ func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, sk
 		// then
 		managementInfoURL := csrInfoResponse.Api.GetInfoURL
 
-		//when
+		// when
 		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
 		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
+	})
+
+	t.Run("should be accessible multiple times", func(t *testing.T) {
+		// given
+		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
+
+		// when
+		tokenResponse := client.CreateToken(t)
+		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
+		csrInfoResponse, errorResponse := client.GetInfo(t, request)
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
+
+		// then
+		managementInfoURL := csrInfoResponse.Api.GetInfoURL
+
+		// when
+		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
+
+		// when
+		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
+		mgmInfoResponse, errorResponse = client.GetMgmInfo(t, request)
 		require.Nil(t, errorResponse)
 
 		// then
