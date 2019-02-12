@@ -7,7 +7,7 @@ deployment:
     tokenLength: 64
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
-    caSecretName: nginx-auth-ca
+    caSecretName: connector-service-app-ca
     getInfoURL: ""
     group: "default"
     tenant: "default"
