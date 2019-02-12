@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"os"
 	"testing"
+	"time"
 )
 
 func TestOptions_ParseEnv(t *testing.T) {
@@ -33,14 +34,40 @@ func TestOptions_ParseEnv(t *testing.T) {
 
 func TestOptions_ParseDuration(t *testing.T) {
 	t.Run("should parse proper duration string", func(t *testing.T) {
+		//given
+		durationString := "30h"
 
+		//when
+		res, err := parseDuration(durationString)
+
+		//then
+		assert.NoError(t, err)
+		assert.Equal(t, time.Duration(30)*time.Hour, res)
 	})
 
 	t.Run("should return an error and default duration on invalid time unit", func(t *testing.T) {
+		//given
+		invalidDurationString := "4u"
 
+		//when
+		res, err := parseDuration(invalidDurationString)
+
+		//then
+		assert.Equal(t, defaultCertificateValidityTime, res)
+		assert.Error(t, err)
+		assert.Equal(t, "unrecognized time unit provided: u", err.Error())
 	})
 
 	t.Run("should return an error and default duration on invalid time value", func(t *testing.T) {
+		//given
+		invalidDurationString := "abcdh"
 
+		//when
+		res, err := parseDuration(invalidDurationString)
+
+		//then
+		assert.Equal(t, defaultCertificateValidityTime, res)
+		assert.Error(t, err)
+		assert.Equal(t, "strconv.Atoi: parsing \"abcd\": invalid syntax", err.Error())
 	})
 }

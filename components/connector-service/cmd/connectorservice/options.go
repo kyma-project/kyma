@@ -108,6 +108,11 @@ func parseEnv() *environment {
 	}
 }
 
+func (e *environment) String() string {
+	return fmt.Sprintf("COUNTRY=%s ORGANIZATION=%s ORGANIZATIONALUNIT=%s LOCALITY=%s PROVINCE=%s",
+		e.country, e.organization, e.organizationalUnit, e.locality, e.province)
+}
+
 func parseDuration(durationString string) (time.Duration, error) {
 	unitsMap := map[string]time.Duration{"m": time.Minute, "h": time.Hour, "d": 24 * time.Hour}
 
@@ -123,9 +128,4 @@ func parseDuration(durationString string) (time.Duration, error) {
 	}
 
 	return time.Duration(timeLength) * unitsMap[timeUnit], nil
-}
-
-func (e *environment) String() string {
-	return fmt.Sprintf("COUNTRY=%s ORGANIZATION=%s ORGANIZATIONALUNIT=%s LOCALITY=%s PROVINCE=%s",
-		e.country, e.organization, e.organizationalUnit, e.locality, e.province)
 }
