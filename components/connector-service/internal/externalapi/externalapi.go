@@ -16,7 +16,7 @@ import (
 
 type Config struct {
 	Middlewares       []mux.MiddlewareFunc
-	TokenManager      tokens.Manager
+	TokenCreator      tokens.Creator
 	ContextExtractor  clientcontext.ConnectorClientExtractor
 	ManagementInfoURL string
 	BaseURL           string
@@ -46,9 +46,9 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 	router.Path("/v1").Handler(http.RedirectHandler("/v1/api.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
 	router.Path("/v1/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
-	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenManager, appHandlerCfg.ContextExtractor, appHandlerCfg.ManagementInfoURL, appHandlerCfg.Subject, appHandlerCfg.BaseURL)
+	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenCreator, appHandlerCfg.ContextExtractor, appHandlerCfg.ManagementInfoURL, appHandlerCfg.Subject, appHandlerCfg.BaseURL)
 	applicationManagementInfoHandler := NewManagementInfoHandler(appMngmtInfoHandlerCfg.ContextExtractor)
-	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.TokenManager, appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
+	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 
 	csrApplicationRouter := router.PathPrefix("/v1/applications/signingRequests").Subrouter()
 	csrApplicationRouter.HandleFunc("/info", applicationInfoHandler.GetCSRInfo).Methods(http.MethodGet)
@@ -63,9 +63,9 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 
 	httphelpers.WithMiddlewares(appMngmtInfoHandlerCfg.Middlewares, mngmtApplicationRouter)
 
-	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenManager, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.Subject, runtimeHandlerCfg.BaseURL)
+	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenCreator, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.Subject, runtimeHandlerCfg.BaseURL)
 	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeMngmtInfoHandlerCfg.ContextExtractor)
-	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.TokenManager, runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
+	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 
 	csrRuntimesRouter := router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()
 	csrRuntimesRouter.HandleFunc("/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)

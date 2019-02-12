@@ -38,7 +38,7 @@ func TestManager_Save(t *testing.T) {
 		tokenCache.On("Put", token, payload, tokenTTL)
 		tokenGenerator := func() (string, apperrors.AppError) { return token, nil }
 
-		tokenManager := NewTokenManager(tokenTTL, tokenCache, tokenGenerator)
+		tokenManager := NewTokenCreator(tokenTTL, tokenCache, tokenGenerator)
 
 		generatedToken, err := tokenManager.Save(serializable)
 
@@ -52,7 +52,7 @@ func TestManager_Save(t *testing.T) {
 			Value: nil,
 			Error: errors.New("error"),
 		}
-		tokenService := NewTokenManager(tokenTTL, nil, nil)
+		tokenService := NewTokenCreator(tokenTTL, nil, nil)
 
 		_, err := tokenService.Save(serializable)
 
@@ -67,34 +67,10 @@ func TestManager_Save(t *testing.T) {
 		}
 
 		tokenGenerator := func() (string, apperrors.AppError) { return "", apperrors.Internal("error") }
-		tokenService := NewTokenManager(tokenTTL, nil, tokenGenerator)
+		tokenService := NewTokenCreator(tokenTTL, nil, tokenGenerator)
 
 		_, err := tokenService.Save(serializable)
 
 		require.Error(t, err)
-	})
-}
-
-func TestTokenService_Replace(t *testing.T) {
-	newToken := "newToken"
-
-	t.Run("should delete token before saving new one", func(t *testing.T) {
-
-		serializable := dummySerializable{
-			Value: []byte(payload),
-			Error: nil,
-		}
-
-		tokenCache := &mocks.TokenCache{}
-		tokenCache.On("Delete", token)
-		tokenCache.On("Put", newToken, payload, tokenTTL)
-		tokenGenerator := func() (string, apperrors.AppError) { return newToken, nil }
-
-		tokenService := NewTokenManager(tokenTTL, tokenCache, tokenGenerator)
-
-		generatedToken, err := tokenService.Replace(token, serializable)
-
-		require.NoError(t, err)
-		assert.Equal(t, newToken, generatedToken)
 	})
 }

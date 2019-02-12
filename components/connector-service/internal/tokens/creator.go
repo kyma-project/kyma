@@ -13,27 +13,25 @@ type Serializer interface {
 	ToJSON() ([]byte, error)
 }
 
-type Manager interface {
+type Creator interface {
 	Save(serializableContext Serializer) (string, apperrors.AppError)
-	Replace(token string, serializableContext Serializer) (string, apperrors.AppError)
-	Delete(token string)
 }
 
-type tokenManager struct {
+type tokenCreator struct {
 	tokenTTL  time.Duration
 	store     tokencache.TokenCache
 	generator Generator
 }
 
-func NewTokenManager(tokenTTL time.Duration, store tokencache.TokenCache, generator Generator) *tokenManager {
-	return &tokenManager{
+func NewTokenCreator(tokenTTL time.Duration, store tokencache.TokenCache, generator Generator) *tokenCreator {
+	return &tokenCreator{
 		tokenTTL:  tokenTTL,
 		store:     store,
 		generator: generator,
 	}
 }
 
-func (svc *tokenManager) Save(serializableContext Serializer) (string, apperrors.AppError) {
+func (svc *tokenCreator) Save(serializableContext Serializer) (string, apperrors.AppError) {
 	jsonData, err := serializableContext.ToJSON()
 	if err != nil {
 		return "", apperrors.Internal("Failed to serialize token params to JSON, %s", err.Error())
@@ -47,14 +45,4 @@ func (svc *tokenManager) Save(serializableContext Serializer) (string, apperrors
 	svc.store.Put(token, string(jsonData), svc.tokenTTL)
 
 	return token, nil
-}
-
-func (svc *tokenManager) Replace(token string, serializableContext Serializer) (string, apperrors.AppError) {
-	svc.store.Delete(token)
-
-	return svc.Save(serializableContext)
-}
-
-func (svc *tokenManager) Delete(token string) {
-	svc.store.Delete(token)
 }

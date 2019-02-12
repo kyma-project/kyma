@@ -17,14 +17,14 @@ const (
 )
 
 type CSRInfoHandler struct {
-	tokenManager             tokens.Manager
+	tokenManager             tokens.Creator
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	getInfoURL               string
 	baseURL                  string
 	csrSubject               certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor clientcontext.ConnectorClientExtractor, getInfoURL string, subjectValues certificates.CSRSubject, baseURL string) CSRGetInfoHandler {
+func NewCSRInfoHandler(tokenManager tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, getInfoURL string, subjectValues certificates.CSRSubject, baseURL string) CSRGetInfoHandler {
 
 	return &CSRInfoHandler{
 		tokenManager:             tokenManager,
@@ -36,15 +36,13 @@ func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor cli
 }
 
 func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
-	// TODO - not needed if removal handled in middleware
-	token := r.URL.Query().Get("token")
 	connectorClientContext, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	newToken, err := ih.tokenManager.Replace(token, connectorClientContext)
+	newToken, err := ih.tokenManager.Save(connectorClientContext)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return

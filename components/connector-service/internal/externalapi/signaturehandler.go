@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
@@ -17,22 +15,18 @@ import (
 )
 
 type signatureHandler struct {
-	tokenManager             tokens.Manager
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	certificateService       certificates.Service
 }
 
-func NewSignatureHandler(tokenManager tokens.Manager, certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor) SignatureHandler {
+func NewSignatureHandler(certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor) SignatureHandler {
 	return &signatureHandler{
-		tokenManager:             tokenManager,
 		connectorClientExtractor: connectorClientExtractor,
 		certificateService:       certificateService,
 	}
 }
 
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
-	// TODO - needed only for removal
-	token := r.URL.Query().Get("token")
 	connectorClientContext, err := sh.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
@@ -56,9 +50,6 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
-
-	// TODO - could be handled in middleware
-	sh.tokenManager.Delete(token)
 
 	httphelpers.RespondWithBody(w, http.StatusCreated, toCertResponse(encodedCertificatesChain))
 }

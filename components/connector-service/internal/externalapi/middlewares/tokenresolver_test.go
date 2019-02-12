@@ -41,16 +41,17 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		tokenResolver := &mocks.Resolver{}
-		tokenResolver.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
 			Return(nil)
+		tokenManager.On("Delete", token).Return(nil)
 
 		req, err := http.NewRequest("GET", "/?token="+token, nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(tokenResolver, dummyExtender)
+		middleware := NewTokenResolverMiddleware(tokenManager, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -58,6 +59,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusOK, rr.Code)
+		tokenManager.AssertExpectations(t)
 	})
 
 	t.Run("should return 403 when there is no token sent", func(t *testing.T) {
@@ -87,8 +89,8 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		tokenResolver := &mocks.Resolver{}
-		tokenResolver.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
 			Return(apperrors.NotFound("error"))
 
 		req, err := http.NewRequest("GET", "/?token="+token, nil)
@@ -96,7 +98,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(tokenResolver, dummyExtender)
+		middleware := NewTokenResolverMiddleware(tokenManager, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -104,6 +106,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusForbidden, rr.Code)
+		tokenManager.AssertExpectations(t)
 	})
 
 	t.Run("should return 500 when internal error occured", func(t *testing.T) {
@@ -112,8 +115,8 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		tokenResolver := &mocks.Resolver{}
-		tokenResolver.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
 			Return(apperrors.Internal("error"))
 
 		req, err := http.NewRequest("GET", "/?token="+token, nil)
@@ -121,7 +124,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(tokenResolver, dummyExtender)
+		middleware := NewTokenResolverMiddleware(tokenManager, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -129,5 +132,6 @@ func TestTokenResolver_Middleware(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+		tokenManager.AssertExpectations(t)
 	})
 }

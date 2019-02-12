@@ -7,21 +7,22 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
 )
 
-type Resolver interface {
+type Manager interface {
 	Resolve(token string, destination interface{}) apperrors.AppError
+	Delete(token string)
 }
 
-type tokenResolver struct {
+type tokenManager struct {
 	store tokencache.TokenCache
 }
 
-func NewTokenResolver(store tokencache.TokenCache) *tokenResolver {
-	return &tokenResolver{
+func NewTokenManager(store tokencache.TokenCache) *tokenManager {
+	return &tokenManager{
 		store: store,
 	}
 }
 
-func (svc *tokenResolver) Resolve(token string, destination interface{}) apperrors.AppError {
+func (svc *tokenManager) Resolve(token string, destination interface{}) apperrors.AppError {
 	encodedParams, found := svc.store.Get(token)
 	if !found {
 		return apperrors.NotFound("Token not found")
@@ -33,4 +34,8 @@ func (svc *tokenResolver) Resolve(token string, destination interface{}) apperro
 	}
 
 	return nil
+}
+
+func (svc *tokenManager) Delete(token string) {
+	svc.store.Delete(token)
 }

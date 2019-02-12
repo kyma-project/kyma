@@ -28,11 +28,11 @@ type ContextExtender interface {
 }
 
 func NewClusterContextExtender() ContextExtender {
-	return ClusterContext{}
+	return &ClusterContext{}
 }
 
 func NewApplicationContextExtender() ContextExtender {
-	return ApplicationContext{}
+	return &ApplicationContext{}
 }
 
 type ConnectorClientReader interface {

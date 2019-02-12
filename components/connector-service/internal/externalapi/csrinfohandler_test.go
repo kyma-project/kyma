@@ -90,10 +90,10 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			InfoURL:         infoURL,
 		}
 
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", dummyClientContext).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -132,10 +132,10 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			return dummyClientContextWithEmptyURLs, nil
 		}
 
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContextWithEmptyURLs).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", token, dummyClientContextWithEmptyURLs).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -166,10 +166,10 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			InfoURL: predefinedGetInfoURL,
 		}
 
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", token, dummyClientContext).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, predefinedGetInfoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, predefinedGetInfoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -192,13 +192,13 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		// given
-		tokenManager := &tokenMocks.Manager{}
+		tokenCreator := &tokenMocks.Creator{}
 
 		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -219,12 +219,12 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 
-	t.Run("should return 500 when failed to replace token", func(t *testing.T) {
+	t.Run("should return 500 when failed to save token", func(t *testing.T) {
 		// given
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", dummyClientContext).Return("", apperrors.Internal("error"))
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -262,13 +262,13 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			return *extendedCtx, nil
 		}
 
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, *extendedCtx).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", token, *extendedCtx).Return(newToken, nil)
 
 		req, err := http.NewRequest(http.MethodGet, urlApps, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
 		rr := httptest.NewRecorder()
 

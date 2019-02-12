@@ -28,7 +28,7 @@ func TestTokenService_Resolve(t *testing.T) {
 
 		var destination data
 
-		tokenResolver := NewTokenResolver(tokenCache)
+		tokenResolver := NewTokenManager(tokenCache)
 
 		// when
 		err := tokenResolver.Resolve(token, &destination)
@@ -45,7 +45,7 @@ func TestTokenService_Resolve(t *testing.T) {
 
 		var destination data
 
-		tokenResolver := NewTokenResolver(tokenCache)
+		tokenResolver := NewTokenManager(tokenCache)
 
 		// when
 		err := tokenResolver.Resolve(token, &destination)

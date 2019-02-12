@@ -12,13 +12,13 @@ import (
 type ExtenderConstructor func() clientcontext.ContextExtender
 
 type tokenResolverMiddleware struct {
-	tokenResolver       tokens.Resolver
+	tokenManager        tokens.Manager
 	extenderConstructor ExtenderConstructor
 }
 
-func NewTokenResolverMiddleware(tokenResolver tokens.Resolver, extenderConstructor ExtenderConstructor) *tokenResolverMiddleware {
+func NewTokenResolverMiddleware(tokenManager tokens.Manager, extenderConstructor ExtenderConstructor) *tokenResolverMiddleware {
 	return &tokenResolverMiddleware{
-		tokenResolver:       tokenResolver,
+		tokenManager:        tokenManager,
 		extenderConstructor: extenderConstructor,
 	}
 }
@@ -33,7 +33,7 @@ func (cc *tokenResolverMiddleware) Middleware(handler http.Handler) http.Handler
 
 		connectorClientContext := cc.extenderConstructor()
 
-		err := cc.tokenResolver.Resolve(token, &connectorClientContext)
+		err := cc.tokenManager.Resolve(token, connectorClientContext)
 		if err != nil {
 			if err.Code() == apperrors.CodeNotFound {
 				httphelpers.RespondWithError(w, apperrors.Forbidden("Invalid token."))
@@ -45,9 +45,12 @@ func (cc *tokenResolverMiddleware) Middleware(handler http.Handler) http.Handler
 		}
 
 		reqWithCtx := r.WithContext(connectorClientContext.ExtendContext(r.Context()))
+		writerWithStatus := httphelpers.WriterWithStatus{ResponseWriter: w}
 
-		handler.ServeHTTP(w, reqWithCtx)
+		handler.ServeHTTP(&writerWithStatus, reqWithCtx)
 
-		// TODO - delete token from cache here
+		if writerWithStatus.IsSuccessful() {
+			cc.tokenManager.Delete(token)
+		}
 	})
 }

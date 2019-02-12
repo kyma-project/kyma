@@ -14,12 +14,12 @@ import (
 const TokenURLFormat = "%s?token=%s"
 
 type tokenHandler struct {
-	tokenManager             tokens.Manager
+	tokenManager             tokens.Creator
 	csrInfoURL               string
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 }
 
-func NewTokenHandler(tokenManager tokens.Manager, csrInfoURL string, connectorClientExtractor clientcontext.ConnectorClientExtractor) TokenHandler {
+func NewTokenHandler(tokenManager tokens.Creator, csrInfoURL string, connectorClientExtractor clientcontext.ConnectorClientExtractor) TokenHandler {
 	return &tokenHandler{tokenManager: tokenManager, csrInfoURL: csrInfoURL, connectorClientExtractor: connectorClientExtractor}
 }
 

@@ -13,7 +13,7 @@ import (
 
 type Config struct {
 	Middlewares      []mux.MiddlewareFunc
-	TokenManager     tokens.Manager
+	TokenManager     tokens.Creator
 	CSRInfoURL       string
 	ContextExtractor clientcontext.ConnectorClientExtractor
 }
