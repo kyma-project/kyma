@@ -10,7 +10,7 @@
 /common/ @mszostok @aszecowka @piotrmiskiewicz @sjanota @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach @sjanota @kubadz @Demonsthere @kfurgol
+/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @sjanota @kubadz @Demonsthere @kfurgol
 
 # The `installation` PowerShell scripts
 /installation/**/*.ps1 @crabtree @venturasr
@@ -272,7 +272,7 @@
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
 
 # The gcp-broker-provider directory
-/tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
+/tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The changelog-generator directory
 /tools/changelog-generator/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
@@ -290,7 +290,7 @@
 /tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The tools/kyma-installer directory
-/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @mwieczorek @jasiu001 @adamwalach @kubadz @sjanota @kfurgol @Demonsthere
+/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @sjanota @kfurgol @Demonsthere
 
 # The tools/load-test directory
 /tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
