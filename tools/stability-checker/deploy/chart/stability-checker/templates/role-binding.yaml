@@ -12,7 +12,7 @@ subjects:
 - kind: ServiceAccount
   name: {{ template "stability-checker.name" . }}
   namespace: {{ .Release.Namespace}}
-{{ if .Values.fluentd.project }}
+{{ if .Values.logsPersistence.enabled }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding

@@ -1,4 +1,4 @@
-{{ if .Values.fluentd.enabled }}
+{{ if .Values.logsPersistence.enabled }}
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
@@ -40,9 +40,9 @@ data:
     <match kubernetes.**>
       @type gcs
 
-      project {{ .Values.fluentd.project }}
+      project {{ .Values.logsPersistence.project }}
       keyfile /etc/google/service-account.json
-      bucket {{ .Values.fluentd.bucket }}
+      bucket {{ .Values.logsPersistence.bucket }}
       object_key_format %{path}%{time_slice}_%{index}.%{file_extension}
       path {{ .Values.clusterName }}/%Y-%m/%d/
 

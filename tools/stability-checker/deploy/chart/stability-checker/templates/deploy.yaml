@@ -30,7 +30,7 @@ spec:
         - name: testing-script-volume
           persistentVolumeClaim:
             claimName: {{ .Values.storage.claimName }}
-        {{ if .Values.fluentd.enabled }}
+        {{ if .Values.logsPersistence.enabled }}
         - name: config
           emptyDir: {}
         - name: fluentconfig
@@ -47,7 +47,7 @@ spec:
             secretName: sa-stability-fluentd-storage-writer
         {{ end }}
 
-      {{ if .Values.fluentd.enabled }}
+      {{ if .Values.logsPersistence.enabled }}
       initContainers:
         - name: copy-fluentd-config
           image: alpine:3.9
@@ -60,7 +60,7 @@ spec:
       {{ end }}
 
       containers:
-      {{ if .Values.fluentd.enabled }}
+      {{ if .Values.logsPersistence.enabled }}
       - name: fluentd
         image: fluent/fluentd-kubernetes-daemonset:v1.3.3-debian-gcs-1.0
         env:

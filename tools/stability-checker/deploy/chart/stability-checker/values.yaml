@@ -14,8 +14,8 @@ image:
 storage:
   claimName: "stability-test-scripts-pvc"
 
-fluentd:
-  enabled: true
+logsPersistence:
+  enabled: false
   project: "kyma-project"
   bucket: "stability-checker-logs"
 
