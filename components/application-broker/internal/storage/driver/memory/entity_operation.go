@@ -32,7 +32,6 @@ func (b instanceOperations) Len() int           { return len(b) }
 func (b instanceOperations) Swap(i, j int)      { b[i], b[j] = b[j], b[i] }
 func (b instanceOperations) Less(i, j int) bool { return b[i].CreatedAt.After(b[j].CreatedAt) }
 
-
 // WithTimeProvider allows for passing custom time provider.
 // Used mostly in testing.
 func (s *InstanceOperation) WithTimeProvider(nowProvider func() time.Time) *InstanceOperation {
@@ -124,14 +123,13 @@ func (s *InstanceOperation) GetLast(iID internal.InstanceID) (*internal.Instance
 		return nil, err
 	}
 
-	if len(ops) ==  0 {
+	if len(ops) == 0 {
 		return nil, notFoundError{}
 	}
 	io := ops[0]
 
 	return io, nil
 }
-
 
 // UpdateState modifies state on object in storage.
 func (s *InstanceOperation) UpdateState(iID internal.InstanceID, opID internal.OperationID, state internal.OperationState) error {

@@ -75,7 +75,6 @@ func (svc *instanceStateService) IsDeprovisioned(iID internal.InstanceID) (bool,
 		return true, nil
 	}
 
-
 	return false, nil
 }
 
@@ -93,7 +92,7 @@ func (svc *instanceStateService) IsDeprovisioningInProgress(iID internal.Instanc
 		return resultOpID, false, errors.Wrap(err, "while getting operations from storage")
 	}
 
-	if op.Type == internal.OperationTypeRemove && op.State == internal.OperationStateInProgress{
+	if op.Type == internal.OperationTypeRemove && op.State == internal.OperationStateInProgress {
 		resultInProgress = true
 		resultOpID = op.OperationID
 	}
