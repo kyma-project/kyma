@@ -16,23 +16,29 @@ To use the Kyma cluster and install the example, download these tools:
 
 ## Steps
 
-### Download configuration for kubectl
+### Get the kubeconfig file and configure the CLI
 
-Follow these steps to download **kubeconfig** and configure kubectl to access the Kyma cluster:
-1. Access the Console UI and download the **kubectl** file from the settings page.
-2. Place downloaded file in the following location: `$HOME/.kube/kubeconfig`.
-3. Point **kubectl** to the configuration file using the terminal: `export KUBECONFIG=$HOME/.kube/kubeconfig`.
-4. Confirm **kubectl** is configured to use your cluster: `kubectl cluster-info`.
+Follow these steps to get the `kubeconfig` file and configure the CLI to connect to the cluster:
 
-### Set the cluster domain variable
+1. Access the Console UI of your Kyma cluster.
+2. Click **Administration**.
+3. Click the **Download config** button to download the `kubeconfig` file to a selected location on your machine.
+4. Open a terminal window.
+5. Export the `KUBECONFIG` environment variable to point to the downloaded `kubeconfig`. Run this command:
+  ```
+  export KUBECONFIG={KUBECONFIG_FILE_PATH}
+  ```
+  >**NOTE:** Drag and drop the `kubeconfig` file in the terminal to easily add the path of the file to the `export KUBECONFIG` command you run.
 
-The commands throughout this guide use URLs that require you to provide the domain of the cluster which you are using. To complete this configuration, set the variable `yourClusterDomain` to the domain of your cluster.
+6. Run `kubectl cluster-info` to check if the CLI is connected to the correct cluster.
 
-For example, if your cluster's domain is `demo.cluster.kyma.cx`, run the following command:
+### Set the cluster domain as an environment variable
 
-   ```bash
-   export yourClusterDomain='demo.cluster.kyma.cx'
-   ```
+The commands in this guide use URLs that require you to provide the domain of the cluster which you are using.
+Export the domain of your cluster as an environment variable. Run:  
+  ```
+  export yourClusterDomain='{YOUR_CLUSTER_DOMAIN}'
+  ```
 
 ### Deploy and expose a sample standalone service
 
