@@ -5,7 +5,7 @@ type: Tutorials
 
 Follow this tutorial to learn how to develop a service locally. You can immediately see all the changes made in a local Kyma installation based on Minikube, without building a Docker image and publishing it to a Docker registry, such as the Docker Hub.
 
-Using the same example service, this guide explains how to build a Docker image for your service, publish it to the Docker registry, and deploy it to the local Kyma installation. The instructions base on Minikube, but you can also use the image that you create and the Kubernetes resource definitions that you use on the Kyma cluster.
+Using the same example service, this tutorial explains how to build a Docker image for your service, publish it to the Docker registry, and deploy it to the local Kyma installation. The instructions base on Minikube, but you can also use the image that you create and the Kubernetes resource definitions that you use on the Kyma cluster.
 
 >**NOTE:** The deployment works both on local Kyma installation and on the Kyma cluster.
 

@@ -24,7 +24,7 @@ Follow these steps to get the `kubeconfig` file and configure the CLI to connect
 2. Click **Administration**.
 3. Click the **Download config** button to download the `kubeconfig` file to a selected location on your machine.
 4. Open a terminal window.
-5. Export the `KUBECONFIG` environment variable to point to the downloaded `kubeconfig`. Run this command:
+5. Export the **KUBECONFIG** environment variable to point to the downloaded `kubeconfig`. Run this command:
   ```
   export KUBECONFIG={KUBECONFIG_FILE_PATH}
   ```
@@ -34,7 +34,7 @@ Follow these steps to get the `kubeconfig` file and configure the CLI to connect
 
 ### Set the cluster domain as an environment variable
 
-The commands in this guide use URLs that require you to provide the domain of the cluster which you are using.
+The commands in this guide use URLs in which you must provide the domain of the cluster that you use.
 Export the domain of your cluster as an environment variable. Run:  
   ```
   export yourClusterDomain='{YOUR_CLUSTER_DOMAIN}'
