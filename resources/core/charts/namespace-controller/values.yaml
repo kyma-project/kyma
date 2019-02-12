@@ -18,3 +18,9 @@ resourceQuota:
   requestsMemory: 2.8Gi
   # Sum of all container memory limits must not exceed this value.
   limitsMemory: 3Gi
+
+alertValues:
+  # 80% of default memory limit defined in installer.yaml file
+  memory: 76.8
+  # Average value is about 0.0000282, noticed peaks over 0.0002
+  cpu: 0.0002000
