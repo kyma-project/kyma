@@ -84,7 +84,7 @@ This table lists all possible parameters of a given resource together with their
 | **metadata.namespace** |    **YES**   | Defines the Namespace in which the CR is available. |
 | **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files. |
 | **spec.source.url** |    **YES**   | Specifies the location of the file. |
-| **spec.source.filter** |    **NO**   | Specifies the regex pattern used to select files from package that should be stored. |
+| **spec.source.filter** |    **NO**   | Specifies the regex pattern used to select files to store from the package. |
 | **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook services. |
 | **spec.source.validationwebhookservice.name** |    **NO**   | Provides the name of the validation webhook service. |
 | **spec.source.validationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
