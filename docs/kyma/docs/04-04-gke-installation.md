@@ -167,7 +167,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 ## Deploy Kyma
 
-1. Configure kubectl to use your new cluster. Run:  add yourself as the cluster admin, and deploy Kyma Installer with your configuration.
+1. Configure kubectl to use your new cluster. Run:
     ```
     gcloud container clusters get-credentials $CLUSTER_NAME --zone europe-west1-b --project $PROJECT
     ```
