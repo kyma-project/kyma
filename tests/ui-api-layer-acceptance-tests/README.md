@@ -54,12 +54,6 @@ Run acceptance tests using the following command:
   ```bash
   DOMAIN=nightly.kyma.cx go test ./... -tags=acceptance
   ```
-  
-To run the tests against the UI API Layer with module pluggability turned on, add the following environment variable:
-  
-```bash
-MODULE_PLUGGABILITY=true
-```
 
 ### Verify the code
 

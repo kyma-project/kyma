@@ -142,6 +142,7 @@ type ComplexityRoot struct {
 		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
+		Instances           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
@@ -480,6 +481,7 @@ type ComplexityRoot struct {
 		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
+		Instances           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
@@ -574,6 +576,7 @@ type ApplicationResolver interface {
 type ClusterServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ClusterServiceClass) ([]ClusterServicePlan, error)
 	Activated(ctx context.Context, obj *ClusterServiceClass) (bool, error)
+	Instances(ctx context.Context, obj *ClusterServiceClass) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
@@ -647,6 +650,7 @@ type ServiceBindingUsageResolver interface {
 type ServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ServiceClass) ([]ServicePlan, error)
 	Activated(ctx context.Context, obj *ServiceClass) (bool, error)
+	Instances(ctx context.Context, obj *ServiceClass) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ServiceClass) (*JSON, error)
@@ -2472,6 +2476,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterServiceClass.Activated(childComplexity), true
 
+	case "ClusterServiceClass.instances":
+		if e.complexity.ClusterServiceClass.Instances == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Instances(childComplexity), true
+
 	case "ClusterServiceClass.apiSpec":
 		if e.complexity.ClusterServiceClass.ApiSpec == nil {
 			break
@@ -4122,6 +4133,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServiceClass.Activated(childComplexity), true
+
+	case "ServiceClass.instances":
+		if e.complexity.ServiceClass.Instances == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.Instances(childComplexity), true
 
 	case "ServiceClass.apiSpec":
 		if e.complexity.ServiceClass.ApiSpec == nil {
@@ -6415,6 +6433,15 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 				}
 				wg.Done()
 			}(i, field)
+		case "instances":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_instances(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "apiSpec":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -6868,6 +6895,66 @@ func (ec *executionContext) _ClusterServiceClass_activated(ctx context.Context, 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_instances(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ClusterServiceClass().Instances(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceInstance)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceInstance(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -15424,6 +15511,15 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 				}
 				wg.Done()
 			}(i, field)
+		case "instances":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceClass_instances(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "apiSpec":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -15904,6 +16000,66 @@ func (ec *executionContext) _ServiceClass_activated(ctx context.Context, field g
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceClass_instances(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServiceClass().Instances(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceInstance)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceInstance(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -19921,6 +20077,7 @@ type ServiceClass {
     labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
@@ -19941,6 +20098,7 @@ type ClusterServiceClass {
     labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
