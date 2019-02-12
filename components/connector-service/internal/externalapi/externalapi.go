@@ -15,13 +15,22 @@ import (
 )
 
 type Config struct {
-	Middlewares       []mux.MiddlewareFunc
-	TokenCreator      tokens.Creator
+	TokenCreator     tokens.Creator
 	ContextExtractor  clientcontext.ConnectorClientExtractor
 	ManagementInfoURL string
 	BaseURL           string
 	Subject           certificates.CSRSubject
 	CertService       certificates.Service
+}
+
+type MiddlewaresList struct {
+	AppCSRInfoMiddlewares []mux.MiddlewareFunc
+	AppSigningMiddlewares []mux.MiddlewareFunc
+	AppRenewalMiddlewares []mux.MiddlewareFunc
+
+	RuntimeCSRInfoMiddlewares []mux.MiddlewareFunc
+	RuntimeSigningMiddlewares []mux.MiddlewareFunc
+	RuntimeRenewalMiddlewares []mux.MiddlewareFunc
 }
 
 type SignatureHandler interface {
@@ -38,7 +47,7 @@ type ManagementGetInfoHandler interface {
 
 const apiSpecPath = "connectorapi.yaml"
 
-func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtimeMngmtInfoHandlerCfg Config, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
+func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtimeMngmtInfoHandlerCfg Config, middlewaresList MiddlewaresList, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
 	router := mux.NewRouter()
 
 	httphelpers.WithMiddlewares(globalMiddlewares, router)
@@ -49,6 +58,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenCreator, appHandlerCfg.ContextExtractor, appHandlerCfg.ManagementInfoURL, appHandlerCfg.Subject, appHandlerCfg.BaseURL)
 	applicationManagementInfoHandler := NewManagementInfoHandler(appMngmtInfoHandlerCfg.ContextExtractor)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
+	applicationRenewalHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 
 	csrApplicationRouter := router.PathPrefix("/v1/applications/signingRequests").Subrouter()
 	csrApplicationRouter.HandleFunc("/info", applicationInfoHandler.GetCSRInfo).Methods(http.MethodGet)
@@ -66,6 +76,12 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenCreator, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.Subject, runtimeHandlerCfg.BaseURL)
 	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeMngmtInfoHandlerCfg.ContextExtractor)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
+	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
+
+	appRenewalRouter := router.Path("/v1/applications/certificates/renewals").Subrouter()
+	// TODO - use middlewares
+	appRenewalRouter.HandleFunc("", applicationRenewalHandler.SignCSR)
+
 
 	csrRuntimesRouter := router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()
 	csrRuntimesRouter.HandleFunc("/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)
@@ -77,6 +93,10 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 
 	mngmtRuntimeRouter := router.PathPrefix("/v1/runtimes/management").Subrouter()
 	mngmtRuntimeRouter.HandleFunc("/info", runtimeManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)
+
+	runtimeRenewalRouter := router.Path("/v1/runtimes/certificates/renewals").Subrouter()
+	// TODO - use middlewares
+	runtimeRenewalRouter.HandleFunc("", runtimeRenewalHandler.SignCSR)
 
 	router.NotFoundHandler = errorhandler.NewErrorHandler(404, "Requested resource could not be found.")
 	router.MethodNotAllowedHandler = errorhandler.NewErrorHandler(405, "Method not allowed.")
