@@ -5,10 +5,11 @@ import (
 	"flag"
 	"fmt"
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/pkg/signal"
+	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
-	"io/ioutil"
 	"net/http"
 	"time"
 )
@@ -25,11 +26,11 @@ type config struct {
 		SecretKey string
 	}
 	Bucket struct {
-		Name   string `envconfig:"default=resources"`
-		Region string `envconfig:"default=us-east-1"`
+		Private string `envconfig:"default=private"`
+		Public  string `envconfig:"default=public"`
 	}
 	MaxUploadWorkers int           `envconfig:"default=10"`
-	UploadTimeout    time.Duration `envconfig:"default=1h"`
+	UploadTimeout    time.Duration `envconfig:"default=30m"`
 	Verbose          bool          `envconfig:"default=false"`
 }
 
@@ -44,8 +45,64 @@ func main() {
 	defer cancel()
 	cancelOnInterrupt(stopCh, ctx, cancel)
 
+	client, err := minio.New(cfg.Upload.Endpoint, cfg.Upload.AccessKey, cfg.Upload.SecretKey, cfg.Upload.Secure)
+	fatalOnError(err, "Error during upload client initialization")
+
+	mux := http.NewServeMux()
+	mux.HandleFunc("/upload", func(wr http.ResponseWriter, rq *http.Request) {
+		err := rq.ParseMultipartForm(32 << 20)
+		if err != nil {
+			return
+		}
+		defer rq.MultipartForm.RemoveAll()
+
+		privateFiles := rq.MultipartForm.File["private"]
+		publicFiles := rq.MultipartForm.File["public"]
+		filesCount := len(publicFiles) + len(privateFiles)
+
+		u := uploader.New(client, cfg.UploadTimeout, cfg.MaxUploadWorkers)
+
+		fileToUploadCh := make(chan uploader.FileUpload, filesCount)
+
+		go func() {
+			for _, file := range publicFiles {
+				fileToUploadCh <- uploader.FileUpload{
+					Bucket: cfg.Bucket.Public,
+					File:   file,
+				}
+			}
+			for _, file := range privateFiles {
+				fileToUploadCh <- uploader.FileUpload{
+					Bucket: cfg.Bucket.Private,
+					File:   file,
+				}
+			}
+			close(fileToUploadCh)
+		}()
+
+		err = u.UploadFiles(context.Background(), fileToUploadCh, filesCount)
+		if err != nil {
+			glog.Error(errors.Wrapf(err, "while uploading files"))
+		}
+
+		//TODO: Return results
+		wr.WriteHeader(http.StatusCreated)
+	})
+
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
-	runServer(stopCh, addr)
+	srv := &http.Server{Addr: addr, Handler: mux}
+	glog.Infof("Listening on %s", addr)
+
+	go func() {
+		<-stopCh
+		if err := srv.Shutdown(context.Background()); err != nil {
+			glog.Errorf("HTTP server Shutdown: %v", err)
+		}
+	}()
+
+	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
+		glog.Errorf("HTTP server ListenAndServe: %v", err)
+	}
 }
 
 // cancelOnInterrupt calls cancel function when os.Interrupt or SIGTERM is received
@@ -79,60 +136,5 @@ func fatalOnError(err error, context string) {
 	if err != nil {
 		wrappedError := errors.Wrap(err, context)
 		glog.Fatal(wrappedError)
-	}
-}
-
-func runServer(stop <-chan struct{}, addr string) {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/upload", func(wr http.ResponseWriter, rq *http.Request) {
-
-		err := rq.ParseMultipartForm(32 << 20)
-		if err != nil {
-			return
-		}
-
-		filesMap := rq.MultipartForm.File
-		for i := range filesMap {
-			for _, file := range filesMap[i] {
-				glog.Infof("Opening file %s...", file.Filename)
-
-				openFile, err := file.Open()
-				if err != nil {
-					glog.Errorf("while opening file %s", file.Filename)
-				}
-
-
-				bytes, err := ioutil.ReadAll(openFile)
-				if err != nil {
-					glog.Errorf("while opening file %s", file.Filename)
-				}
-
-				fmt.Println(string(bytes))
-
-				err = openFile.Close()
-				if err != nil {
-					glog.Errorf("while closing file %s", file.Filename)
-				}
-			}
-
-		}
-
-		return
-	})
-
-	srv := &http.Server{Addr: addr, Handler: mux}
-
-	glog.Infof("Listening on %s", addr)
-
-	go func() {
-		<-stop
-		// Interrupt signal received - shut down the server
-		if err := srv.Shutdown(context.Background()); err != nil {
-			glog.Errorf("HTTP server Shutdown: %v", err)
-		}
-	}()
-
-	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
-		glog.Errorf("HTTP server ListenAndServe: %v", err)
 	}
 }

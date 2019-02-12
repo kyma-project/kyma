@@ -19,10 +19,9 @@ type MinioClient interface {
 		opts minio.PutObjectOptions) (n int64, err error)
 }
 
-type FileToUpload struct {
-	Name string
-	Size int64
-	FileHeader *multipart.FileHeader
+type FileUpload struct {
+	Bucket string
+	File *multipart.FileHeader
 }
 
 // Uploader is an abstraction layer for Minio client
@@ -42,11 +41,8 @@ func New(client MinioClient, uploadTimeout time.Duration, maxUploadWorkers int) 
 }
 
 // UploadFiles uploads multiple files (Files struct) to particular bucket
-func (u *Uploader) UploadFiles(ctx context.Context, files []FileToUpload, bucketName string) error {
-	filesCount := len(files)
-	uploadErrorsChannel := make(chan error, filesCount)
-	filesChannel := u.makeClosedChannelWithFiles(files, filesCount)
-
+func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload, filesCount int) error {
+	uploadErrorsChannel := make(chan error)
 	contextWithTimeout, cancel := context.WithTimeout(ctx, u.UploadTimeout)
 	defer cancel()
 
@@ -66,11 +62,11 @@ func (u *Uploader) UploadFiles(ctx context.Context, files []FileToUpload, bucket
 				}
 
 				select {
-				case file, ok := <-filesChannel:
+				case upload, ok := <-filesChannel:
 					if !ok {
 						return
 					}
-					uploadErrorsChannel <- u.uploadFile(contextWithTimeout, file, bucketName)
+					uploadErrorsChannel <- u.uploadFile(contextWithTimeout, upload)
 				default:
 				}
 			}
@@ -79,16 +75,7 @@ func (u *Uploader) UploadFiles(ctx context.Context, files []FileToUpload, bucket
 
 	waitGroup.Wait()
 	close(uploadErrorsChannel)
-	return ConsumeUploadErrors(uploadErrorsChannel)
-}
-
-func (u *Uploader) makeClosedChannelWithFiles(files []filereader.File, filesCount int) chan filereader.File {
-	filesChannel := make(chan filereader.File, filesCount)
-	for _, file := range files {
-		filesChannel <- file
-	}
-	close(filesChannel)
-	return filesChannel
+	return consumeUploadErrors(uploadErrorsChannel)
 }
 
 func (u *Uploader) countNeededWorkers(filesCount, maxUploadWorkers int) int {
@@ -99,25 +86,26 @@ func (u *Uploader) countNeededWorkers(filesCount, maxUploadWorkers int) int {
 }
 
 // UploadFile uploads single file from given path to particular bucket
-func (u *Uploader) uploadFile(ctx context.Context, file FileToUpload, bucketName string) error {
-	f, err := file.FileHeader.Open()
+func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) error {
+	file := fileUpload.File
+	f, err := fileUpload.File.Open()
 	if err != nil {
-		return errors.Wrapf(err,"while opening file %s", file.Name)
+		return errors.Wrapf(err, "while opening file %s", file.Filename)
 	}
 	defer f.Close()
 
-	glog.Infof("Uploading `%s`...\n", file.Name)
+	glog.Infof("Uploading `%s`...\n", file.Filename)
 
-	_, err = u.client.PutObjectWithContext(ctx, bucketName, file.Name, f, file.Size, minio.PutObjectOptions{})
+	_, err = u.client.PutObjectWithContext(ctx, fileUpload.Bucket, file.Filename, f, file.Size, minio.PutObjectOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Error while uploading file `%s` into `%s`", file.name, bucketName)
+		return errors.Wrapf(err, "Error while uploading file `%s` into `%s`", file.Filename, fileUpload.Bucket)
 	}
 
 	return nil
 }
 
-// ConsumeUploadErrors consolidates all error messages into one and returns it
-func ConsumeUploadErrors(channel chan error) error {
+// consumeUploadErrors consolidates all error messages into one and returns it
+func consumeUploadErrors(channel chan error) error {
 	var messages []string
 	for err := range channel {
 		if err != nil {
