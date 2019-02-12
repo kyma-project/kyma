@@ -30,7 +30,6 @@ type DeprovisionService struct {
 	operationIDProvider func() (internal.OperationID, error)
 	operationInserter   operationInserter
 	operationUpdater    operationUpdater
-	operationRemover    operationRemover
 
 	log       logrus.FieldLogger
 	mu        sync.Mutex

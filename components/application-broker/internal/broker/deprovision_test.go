@@ -2,7 +2,6 @@ package broker
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/broker/automock"
 	"github.com/kyma-project/kyma/components/application-broker/platform/logger/spy"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 )
 
