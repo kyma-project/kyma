@@ -40,12 +40,22 @@ func TestConnector(t *testing.T) {
 
 		appName = "testCSRInfoApp"
 		appTokenRequest = createApplicationTokenRequest(t, config, appName)
-		getCSRInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+		getAppCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+
+		appName = "testMgmInfoApp"
+		appTokenRequest = createApplicationTokenRequest(t, config, appName)
+		getAppMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
 	})
 
 	t.Run("Connector Service flow for Runtime", func(t *testing.T) {
 		runtimeTokenRequest := createRuntimeTokenRequest(t, config)
 		certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+
+		runtimeTokenRequest = createRuntimeTokenRequest(t, config)
+		getRuntimeCsrInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+
+		runtimeTokenRequest = createRuntimeTokenRequest(t, config)
+		getRuntimeMgmInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify, config.GatewayUrl)
 	})
 }
 
@@ -264,7 +274,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 }
 
-func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -274,7 +284,7 @@ func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		eventsHost := "events.kyma.test.cx"
 
 		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
-		expectedEventsURL := "https://metadata.kyma.test.cx/" + appName + "/v1/events"
+		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
 
 		// when
 		tokenResponse := client.CreateToken(t)
@@ -299,8 +309,8 @@ func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		expectedEventsURL := defaultGatewayUrl
 
 		if defaultGatewayUrl != "" {
-			expectedMetadataURL += "/" + appName + "/metadata/services"
-			expectedEventsURL += "/" + appName + "/events"
+			expectedMetadataURL += "/" + appName + "/v1/metadata/services"
+			expectedEventsURL += "/" + appName + "/v1/events"
 		}
 
 		// when
@@ -318,6 +328,124 @@ func getCSRInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		require.Nil(t, errorResponse)
 		assert.Equal(t, expectedEventsURL, infoResponse.Api.EventsURL)
 		assert.Equal(t, expectedMetadataURL, infoResponse.Api.MetadataURL)
+	})
+}
+
+func getRuntimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
+
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	t.Run("should provide not empty CSR info response", func(t *testing.T) {
+		// when
+		tokenResponse := client.CreateToken(t)
+
+		// then
+		require.NotEmpty(t, tokenResponse.Token)
+		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
+
+		// when
+		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
+		infoResponse, errorResponse := client.GetInfo(t, request)
+
+		// then
+		require.Nil(t, errorResponse)
+		assert.NotEmpty(t, infoResponse.CertUrl)
+		assert.NotEmpty(t, infoResponse.Api)
+		assert.NotEmpty(t, infoResponse.Certificate)
+	})
+}
+
+func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	t.Run("should use headers to build management info response", func(t *testing.T) {
+		// given
+		metadataHost := "metadata.kyma.test.cx"
+		eventsHost := "events.kyma.test.cx"
+
+		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
+		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
+		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
+
+		// when
+		tokenResponse := client.CreateToken(t)
+		request := client.BuildGetInfoRequest(t, tokenResponse.URL, metadataHost, eventsHost)
+		csrInfoResponse, errorResponse := client.GetInfo(t, request)
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
+
+		// then
+		managementInfoURL := csrInfoResponse.Api.GetInfoURL
+
+		//when
+		request = client.BuildGetInfoRequest(t, managementInfoURL, metadataHost, eventsHost)
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
+		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
+		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
+	})
+
+	t.Run("should use default values to build management info response when headers are not given", func(t *testing.T) {
+		// given
+		expectedMetadataURL := defaultGatewayUrl
+		expectedEventsURL := defaultGatewayUrl
+		expectedRenewCertURL := defaultGatewayUrl
+
+		if defaultGatewayUrl != "" {
+			expectedMetadataURL += "/" + appName + "/v1/metadata/services"
+			expectedEventsURL += "/" + appName + "/v1/events"
+			expectedRenewCertURL += "/v1/applications/certificates/renewals"
+		}
+
+		// when
+		tokenResponse := client.CreateToken(t)
+		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
+		csrInfoResponse, errorResponse := client.GetInfo(t, request)
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
+
+		// then
+		managementInfoURL := csrInfoResponse.Api.GetInfoURL
+
+		//when
+		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
+		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
+		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
+	})
+}
+
+func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string) {
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	t.Run("should provide not empty management info response", func(t *testing.T) {
+		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
+
+		// when
+		tokenResponse := client.CreateToken(t)
+		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
+		csrInfoResponse, errorResponse := client.GetInfo(t, request)
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
+
+		// then
+		managementInfoURL := csrInfoResponse.Api.GetInfoURL
+
+		//when
+		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
 	})
 }
 

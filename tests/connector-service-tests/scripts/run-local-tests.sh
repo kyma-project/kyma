@@ -65,4 +65,4 @@ echo ""
 
 sleep 5
 
-kubectl -n kyma-integration logs connector-service-tests -f connector-service-tests
+kubectl -n kyma-integration logs connector-service-tests -f -c connector-service-tests
