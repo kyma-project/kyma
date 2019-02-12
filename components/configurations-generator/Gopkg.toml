@@ -29,6 +29,15 @@ required = [
 ]
 
 [[constraint]]
+  name = "k8s.io/apiserver"
+  version = "kubernetes-1.11.3"
+
+[[constraint]]
+  name = "github.com/vrischmann/envconfig"
+  # revision with support of slices default values
+  revision = "d647766a494a7182c05fa4ddd1702c2c307a770d"
+
+[[constraint]]
   name = "github.com/gorilla/mux"
   version = "1.6.1"
 

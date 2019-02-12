@@ -23,11 +23,16 @@ Use the following arguments to configure the application:
 | Name | Required | Default | Description |
 | -----|---------|--------|------------ |
 | port | No | 8000 | Application port. |
-| kube-config-custer-name | Yes | |  Name of the Kubernetes cluster. |
+| kube-config-cluster-name | Yes | |  Name of the Kubernetes cluster. |
 | kube-config-url | Yes | | URL of the Kubernetes Apiserver. |
-| kube-config-ca | Yes, if kube-config-ca-file not specified | | Certificate Authority of the Kubernetes cluster. |
-| kube-config-ca-file | Yes, if kube-config-ca not specified | | File with Certificate Authority of the Kubernetes cluster. |
+| kube-config-ca-file | Yes | | Path of the file with Certificate Authority of the Kubernetes cluster. |
 | kube-config-ns | No | | Default namespace of the Kubernetes context. |
+| oidc-issuer-url | Yes | | The URL of the OpenID issuer. Used to verify the OIDC JSON Web Token (JWT). |
+| oidc-client-id | Yes | | The client ID for the OpenID Connect client. |
+| oidc-username-claim | No | email | Identifier of the user in JWT claim. |
+| oidc-groups-claim | No | groups | Identifier of groups in JWT claim. |
+| oidc-username-prefix | No | | If provided, all users will be prefixed with this value to prevent conflicts with other authentication strategies. |
+| oidc-groups-prefix | No | | If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies. |
 
 ### Run a local version
 
@@ -39,9 +44,10 @@ To run the application without building the binary, execute the following comman
 go run cmd/generator/main.go \
   -kube-config-custer-name=minikue \
   -kube-config-url=:8443 \
-  -kube-config-ca-file=~/.minikube/ca.crt
+  -kube-config-ca-file=~/.minikube/ca.crt \
+  -oidc-issuer-url="https://dex.kyma.local" \
+  -oidc-client-id="kyma-client"
 ```
-
 
 ## Development
 

@@ -5,73 +5,155 @@ import (
 	"flag"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/configurations-generator/internal/authn"
 	"github.com/kyma-project/kyma/components/configurations-generator/pkg/kube_config"
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	oidcIssuerURLFlag = "oidc-issuer-url"
+	oidcClientIDFlag  = "oidc-client-id"
+	clusterNameFlag   = "kube-config-cluster-name"
+	apiserverURLFlag  = "kube-config-url"
+	clusterCAFileFlag = "kube-config-ca-file"
+)
+
 func main() {
 
-	port := flag.Int("port", 8000, "Application port")
-	clusterNameArg := flag.String("kube-config-cluster-name", "", "Name of the Kubernetes cluster")
-	urlArg := flag.String("kube-config-url", "", "URL of the Kubernetes Apiserver")
-	caArg := flag.String("kube-config-ca", "", "Certificate Authority of the Kubernetes cluster")
-	caFileArg := flag.String("kube-config-ca-file", "", "File with Certificate Authority of the Kubernetes cluster")
-	namespaceArg := flag.String("kube-config-ns", "", "Default namespace of the Kubernetes context")
-	flag.Parse()
+	cfg := readAppConfig()
 
-	log.Infof("Starting configurations generator on port: %d...", *port)
+	log.Infof("Starting configurations generator on port: %d...", cfg.port)
 
-	kubeConfig := KubeConfigFromArgs(clusterNameArg, urlArg, caArg, caFileArg, namespaceArg)
+	oidcAuthenticator, err := authn.NewOIDCAuthenticator(&cfg.oidc)
+	if err != nil {
+		log.Fatalf("Cannot create OIDC Authenticator, %v", err)
+	}
+
+	kubeConfig := kube_config.NewKubeConfig(cfg.clusterName, cfg.apiserverURL, cfg.clusterCA, cfg.namespace)
+
 	kubeConfigEndpoints := kube_config.NewEndpoints(kubeConfig)
 
 	router := mux.NewRouter()
+	router.Use(authn.AuthMiddleware(oidcAuthenticator))
 	router.Methods("GET").Path("/kube-config").HandlerFunc(kubeConfigEndpoints.GetKubeConfig)
 
-	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(*port), router))
+	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(cfg.port), router))
 }
 
-func KubeConfigFromArgs(clusterNameArg, urlArg, caArg, caFileArg, namespaceArg *string) *kube_config.KubeConfig {
+func readAppConfig() *appConfig {
 
-	var clusterName, url, ca, namespace string
+	portArg := flag.Int("port", 8000, "Application port")
+	clusterNameArg := flag.String(clusterNameFlag, "", "Name of the Kubernetes cluster")
+	apiserverUrlArg := flag.String(apiserverURLFlag, "", "URL of the Kubernetes Apiserver")
+	clusterCAFileArg := flag.String(clusterCAFileFlag, "", "File with Certificate Authority of the Kubernetes cluster, also used for OIDC authentication")
+	namespaceArg := flag.String("kube-config-ns", "", "Default namespace of the Kubernetes context")
 
-	if clusterNameArg == nil || *clusterNameArg == "" {
-		log.Fatal("Name of the Kubernetes cluster is required.")
-	} else {
-		clusterName = *clusterNameArg
+	oidcIssuerURLArg := flag.String(oidcIssuerURLFlag, "", "OIDC: The URL of the OpenID issuer. Used to verify the OIDC JSON Web Token (JWT)")
+	oidcClientIDArg := flag.String(oidcClientIDFlag, "", "OIDC: The client ID for the OpenID Connect client")
+	oidcUsernameClaimArg := flag.String("oidc-username-claim", "email", "OIDC: Identifier of the user in JWT claim")
+	oidcGroupsClaimArg := flag.String("oidc-groups-claim", "groups", "OIDC: Identifier of groups in JWT claim")
+	oidcUsernamePrefixArg := flag.String("oidc-username-prefix", "", "OIDC: If provided, all users will be prefixed with this value to prevent conflicts with other authentication strategies")
+	oidcGroupsPrefixArg := flag.String("oidc-groups-prefix", "", "OIDC: If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies")
+
+	var oidcSupportedSigningAlgsArg multiValFlag = []string{"RS256"}
+	flag.Var(&oidcSupportedSigningAlgsArg, "oidc-supported-signing-algs", "OIDC supported signing algorithms")
+
+	flag.Parse()
+
+	errors := false
+
+	if *clusterNameArg == "" {
+		log.Errorf("Name of the Kubernetes cluster is required (-%s)", clusterNameFlag)
+		errors = true
 	}
 
-	if urlArg == nil || *urlArg == "" {
-		log.Fatal("URL of the Kubernetes Apiserver is required.")
-	} else {
-		url = *urlArg
+	if *apiserverUrlArg == "" {
+		log.Errorf("URL of the Kubernetes Apiserver is required (-%s)", apiserverURLFlag)
+		errors = true
 	}
 
-	if caArg == nil || *caArg == "" {
-		ca = readCaFromFile(caFileArg)
-	} else {
-		ca = *caArg
+	if *clusterCAFileArg == "" {
+		log.Errorf("Cluster CA file path is required (-%s)", clusterCAFileFlag)
+		errors = true
 	}
 
-	if namespaceArg != nil {
-		namespace = *namespaceArg
+	if *oidcIssuerURLArg == "" {
+		log.Errorf("OIDC Issuer URL is required (-%s)", oidcIssuerURLFlag)
+		errors = true
 	}
 
-	return kube_config.NewKubeConfig(clusterName, url, ca, namespace)
+	if *oidcClientIDArg == "" {
+		log.Errorf("OIDC Client ID is required (-%s)", oidcClientIDFlag)
+		errors = true
+	}
+
+	if errors {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	clusterCAValue := readCAFromFile(*clusterCAFileArg)
+
+	return &appConfig{
+		port:         *portArg,
+		clusterName:  *clusterNameArg,
+		apiserverURL: *apiserverUrlArg,
+		clusterCA:    clusterCAValue,
+		namespace:    *namespaceArg,
+		oidc: authn.OIDCConfig{
+			IssuerURL:            *oidcIssuerURLArg,
+			ClientID:             *oidcClientIDArg,
+			CAFile:               *clusterCAFileArg,
+			UsernameClaim:        *oidcUsernameClaimArg,
+			UsernamePrefix:       *oidcUsernamePrefixArg,
+			GroupsClaim:          *oidcGroupsClaimArg,
+			GroupsPrefix:         *oidcGroupsPrefixArg,
+			SupportedSigningAlgs: oidcSupportedSigningAlgsArg,
+		},
+	}
 }
 
-func readCaFromFile(caFileArg *string) string {
+func readCAFromFile(caFile string) string {
 
-	if caFileArg == nil || *caFileArg == "" {
-		log.Fatal("Certificate Authority of the Kubernetes cluster is required.")
-	}
-
-	caBytes, caErr := ioutil.ReadFile(*caFileArg)
+	caBytes, caErr := ioutil.ReadFile(caFile)
 	if caErr != nil {
 		log.Fatalf("Error while reading Certificate Authority of the Kubernetes cluster. Root cause: %v", caErr)
 	}
 
 	return base64.StdEncoding.EncodeToString(caBytes)
+}
+
+type appConfig struct {
+	port         int
+	clusterName  string
+	apiserverURL string
+	clusterCA    string
+	namespace    string
+	oidc         authn.OIDCConfig
+}
+
+//Support for multi-valued flag: -flagName=val1 -flagName=val2 etc.
+type multiValFlag []string
+
+func (vals *multiValFlag) String() string {
+	res := "["
+
+	if len(*vals) > 0 {
+		res = res + (*vals)[0]
+	}
+
+	for _, v := range *vals {
+		res = res + ", " + v
+	}
+	res = res + "]"
+	return res
+}
+
+func (vals *multiValFlag) Set(value string) error {
+	*vals = append(*vals, value)
+	return nil
 }
