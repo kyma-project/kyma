@@ -29,6 +29,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: application-registry-tests
+  annotations:
+    sidecar.istio.io/inject: “false”
 spec:
   containers:
   - name: application-registry-tests
