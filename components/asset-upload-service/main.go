@@ -19,11 +19,11 @@ type config struct {
 	Host   string `envconfig:"default=127.0.0.1"`
 	Port   int    `envconfig:"default=3003"`
 	Upload struct {
-		Endpoint  string `envconfig:"default=minio.kyma.local"`
+		Endpoint  string `envconfig:"default=play.minio.io"`
 		Port      int    `envconfig:"default=9000"`
 		Secure    bool   `envconfig:"default=true"`
-		AccessKey string
-		SecretKey string
+		AccessKey string `envconfig:"default=Q3AM3UQ867SPQQA43P2F"`
+		SecretKey string `envconfig:"default=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"`
 	}
 	Bucket struct {
 		Private string `envconfig:"default=private"`
@@ -45,7 +45,8 @@ func main() {
 	defer cancel()
 	cancelOnInterrupt(stopCh, ctx, cancel)
 
-	client, err := minio.New(cfg.Upload.Endpoint, cfg.Upload.AccessKey, cfg.Upload.SecretKey, cfg.Upload.Secure)
+	endpoint := fmt.Sprintf("%s:%d", cfg.Upload.Endpoint, cfg.Upload.Port)
+	client, err := minio.New(endpoint, cfg.Upload.AccessKey, cfg.Upload.SecretKey, cfg.Upload.Secure)
 	fatalOnError(err, "Error during upload client initialization")
 
 	mux := http.NewServeMux()
@@ -55,6 +56,10 @@ func main() {
 			return
 		}
 		defer rq.MultipartForm.RemoveAll()
+
+
+		//TODO: Handle directory param
+		//directory := rq.MultipartForm.Value["directory"]
 
 		privateFiles := rq.MultipartForm.File["private"]
 		publicFiles := rq.MultipartForm.File["public"]
@@ -86,6 +91,7 @@ func main() {
 		}
 
 		//TODO: Return results
+		glog.Infof("Finished processing request with uploading %d files.", filesCount)
 		wr.WriteHeader(http.StatusCreated)
 	})
 

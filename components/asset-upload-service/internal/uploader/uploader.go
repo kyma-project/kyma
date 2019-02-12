@@ -21,7 +21,7 @@ type MinioClient interface {
 
 type FileUpload struct {
 	Bucket string
-	File *multipart.FileHeader
+	File   *multipart.FileHeader
 }
 
 // Uploader is an abstraction layer for Minio client
@@ -42,7 +42,7 @@ func New(client MinioClient, uploadTimeout time.Duration, maxUploadWorkers int) 
 
 // UploadFiles uploads multiple files (Files struct) to particular bucket
 func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload, filesCount int) error {
-	uploadErrorsChannel := make(chan error)
+	uploadErrorsChannel := make(chan error, filesCount)
 	contextWithTimeout, cancel := context.WithTimeout(ctx, u.UploadTimeout)
 	defer cancel()
 
@@ -73,6 +73,7 @@ func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload
 		}()
 	}
 
+
 	waitGroup.Wait()
 	close(uploadErrorsChannel)
 	return consumeUploadErrors(uploadErrorsChannel)
@@ -100,6 +101,8 @@ func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) error 
 	if err != nil {
 		return errors.Wrapf(err, "Error while uploading file `%s` into `%s`", file.Filename, fileUpload.Bucket)
 	}
+
+	glog.Infof("Upload succeeded for `%s`.\n", file.Filename)
 
 	return nil
 }
