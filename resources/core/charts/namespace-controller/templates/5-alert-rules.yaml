@@ -12,7 +12,7 @@ data:
     - name: namespace-controller-hardware-alerts
       rules:
       - alert: namespace-controller-high-memory-usage-alert
-        expr: sum by(container_name) (container_memory_usage_bytes{namespace="kyma-system",pod_name=~"^core-namespace-controller-(.*)", container_name!="POD", container_name!=""}) / 1024 / 1024 > {{ .Values.alertValues.memory }}
+        expr: container_memory_usage_bytes{namespace="kyma-system",pod_name=~"^core-namespace-controller-(.*)", container_name!="POD", container_name!=""} / 1024 / 1024 > {{ .Values.alertValues.memory }}
         for: 15s
         labels:
           severity: critical
@@ -20,7 +20,7 @@ data:
           description: "High memory usage"
           summary: "Usage of the memory is above {{ .Values.alertValues.memory }}MiB"
       - alert: namespace-controller-high-cpu-usage-alert
-        expr: sum by (container_name)(rate(container_cpu_usage_seconds_total{pod_name=~"^core-namespace-controller-(.*)", container_name!="POD", container_name!=""}[1m])) > {{ .Values.alertValues.cpu }}
+        expr: rate(container_cpu_usage_seconds_total{pod_name=~"^core-namespace-controller-(.*)", container_name!="POD", container_name!=""}[1m]) > {{ .Values.alertValues.cpu }}
         for: 15s
         labels:
           severity: critical
