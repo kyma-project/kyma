@@ -21,7 +21,7 @@ metadata:
       proxy_set_header Subject $ssl_client_s_dn;
 spec:
   rules:
-  - host: connector-service.{{ .Values.global.domainName }}
+  - host: gateway.{{ .Values.global.domainName }}
     http:
       paths:
       - path: /v1/applications/management/info
@@ -35,5 +35,5 @@ spec:
 
   tls:
   - hosts:
-    - connector-service.{{ .Values.global.domainName }}
+    - gateway.{{ .Values.global.domainName }}
     secretName: {{ .Values.ingress.tlsSecret }}

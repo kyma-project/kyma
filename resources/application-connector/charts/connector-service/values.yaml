@@ -8,7 +8,7 @@ deployment:
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
     caSecretName: connector-service-app-ca
-    getInfoURL: ""
+    getInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/applications/management/info
     group: "default"
     tenant: "default"
   envvars:

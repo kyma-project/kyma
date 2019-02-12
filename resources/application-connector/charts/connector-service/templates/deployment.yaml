@@ -40,7 +40,7 @@ spec:
           - "--connectorServiceHost=connector-service.{{ .Values.global.domainName }}"
           - "--appRegistryHost=gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}"
           - "--eventsHost=gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}"
-          - "--getInfoURL={{ .Values.deployment.args.getInfoURL }}"
+          - "--getInfoURL={{ tpl .Values.deployment.args.getInfoURL . }}"
           - "--group={{ .Values.deployment.args.group }}"
           - "--tenant={{ .Values.deployment.args.tenant }}"
         env:
