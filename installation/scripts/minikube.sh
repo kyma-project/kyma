@@ -121,8 +121,7 @@ function checkMinikubeVersion() {
 
     if [[ "$(echo "${version}\n${MINIKUBE_VERSION_MIN}" | sort -V | head -n1)" = "${MINIKUBE_VERSION_MIN}" ]] && "$(echo "$version\n${MINIKUBE_VERSION_MAX}" | sort -V | head -n1)" = "${version}" ]]; then
         
-        echo "Your minikube is in ${version}. v${MINIKUBE_VERSION_MIN} - v${MINIKUBE_VERSION_MAX} are supported versions of minikube. Please install a supported version!"
-        exit -1
+        log "Your minikube is in ${version}. v${MINIKUBE_VERSION_MIN} - v${MINIKUBE_VERSION_MAX} are supported versions of minikube. Please install a supported version!" yellow
     fi
 }
 
