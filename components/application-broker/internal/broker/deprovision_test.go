@@ -85,9 +85,9 @@ func TestErrorOnRemovingInstance(t *testing.T) {
 	ts.OpIDProviderFake = func() (internal.OperationID, error) {
 		return fixOperationID(), nil
 	}
+	ts.mockInstanceStorage.On("Get", fixInstanceID()).Return(fixNewInstance(), nil)
 	ts.mockInstanceStorage.On("Remove", fixInstanceID()).Return(errors.New("simple error"))
 	ts.mockOperationStorage.On("Insert", fixNewRemoveInstanceOperation()).Return(nil)
-	ts.mockInstanceStorage.On("Get", fixInstanceID()).Return(fixNewInstance(), nil)
 	ts.mockInstanceStateGetter.On("IsDeprovisioned", fixInstanceID()).Return(false, nil).Once()
 	ts.mockInstanceStateGetter.On("IsDeprovisioningInProgress", fixInstanceID()).Return(internal.OperationID(""), false, nil).Once()
 
