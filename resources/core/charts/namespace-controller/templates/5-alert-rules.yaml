@@ -9,7 +9,7 @@ metadata:
 data:
   alert.rules: |-
     groups:
-    - name: namespace-controller-hardware-alerts
+    - name: namespace-controller-hardware-rules
       rules:
       - alert: namespace-controller-high-memory-usage-alert
         expr: container_memory_usage_bytes{namespace="kyma-system",pod_name=~"^core-namespace-controller-(.*)", container_name!="POD", container_name!=""} / 1024 / 1024 > {{ .Values.alertValues.memory }}
