@@ -15,9 +15,6 @@ const (
 	skipVerifyEnvName     = "SKIP_SSL_VERIFY"
 	tenantEnvName         = "TENANT"
 	groupEnvName          = "GROUP"
-
-	baseEventsHostHeader   = "Base-Events-Host"
-	baseMetadataHostHeader = "Base-Metadata-Host"
 )
 
 type TestConfig struct {

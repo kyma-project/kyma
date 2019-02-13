@@ -17,6 +17,9 @@ import (
 const (
 	retryWaitTimeSeconds = 5 * time.Second
 	retryCount           = 20
+
+	baseEventsHostHeader   = "EventsHost"
+	baseMetadataHostHeader = "MetadataHost"
 )
 
 func TestConnector(t *testing.T) {
@@ -168,8 +171,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-		infoResponse, errorResponse := client.GetInfo(t, request)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -202,8 +204,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		wrongUrl := replaceToken(tokenResponse.URL, "incorrect-token")
 
 		// when
-		request := client.BuildGetInfoRequest(t, wrongUrl, "", "")
-		_, err := client.GetInfo(t, request)
+		_, err := client.GetInfo(t, wrongUrl, nil)
 
 		// then
 		require.NotNil(t, err)
@@ -221,8 +222,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-		infoResponse, errorResponse := client.GetInfo(t, request)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -254,8 +254,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-		infoResponse, errorResponse := client.GetInfo(t, request)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -294,10 +293,10 @@ func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, metadataHost, eventsHost)
-		infoResponse, errorResponse := client.GetInfo(t, request)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, createHostsHeaders(metadataHost, eventsHost))
 
 		// then
+		// TODO - should check ManagementInfoURL when its returned properly
 		require.Nil(t, errorResponse)
 		assert.Equal(t, expectedEventsURL, infoResponse.Api.EventsURL)
 		assert.Equal(t, expectedMetadataURL, infoResponse.Api.MetadataURL)
@@ -321,14 +320,15 @@ func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-		infoResponse, errorResponse := client.GetInfo(t, request)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
 
 		// then
 		require.Nil(t, errorResponse)
 		assert.Equal(t, expectedEventsURL, infoResponse.Api.EventsURL)
 		assert.Equal(t, expectedMetadataURL, infoResponse.Api.MetadataURL)
 	})
+
+	// TODO - test with empty values
 }
 
 func getRuntimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
@@ -344,10 +344,10 @@ func getRuntimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, sk
 		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 		// when
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-		infoResponse, errorResponse := client.GetInfo(t, request)
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
 
 		// then
+		// TODO - should check ManagementInfoURL when its returned properly
 		require.Nil(t, errorResponse)
 		assert.NotEmpty(t, infoResponse.CertUrl)
 		assert.NotEmpty(t, infoResponse.Api)
@@ -368,125 +368,56 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
 		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
-		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
 
 		// when
-		crtResponse, _ := createCertificateChain(t, client, clientKey)
-		require.NotEmpty(t, crtResponse.CRTChain)
-
-		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-
-		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
-
-		// when
-		tokenResponse := client.CreateToken(t)
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, metadataHost, eventsHost)
-		csrInfoResponse, errorResponse := client.GetInfo(t, request)
-		require.Nil(t, errorResponse)
-		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
 
 		// then
-		managementInfoURL := csrInfoResponse.Api.GetInfoURL
+		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.GetInfoURL)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
 		// when
-		request = client.BuildGetInfoRequest(t, managementInfoURL, metadataHost, eventsHost)
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.GetInfoURL, createHostsHeaders(metadataHost, eventsHost))
 		require.Nil(t, errorResponse)
 
 		// then
 		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
-		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
 	})
 
 	t.Run("should use default values to build management info response when headers are not given", func(t *testing.T) {
 		// given
 		expectedMetadataURL := defaultGatewayUrl
 		expectedEventsURL := defaultGatewayUrl
-		expectedRenewCertURL := defaultGatewayUrl
 
 		if defaultGatewayUrl != "" {
 			expectedMetadataURL += "/" + appName + "/v1/metadata/services"
 			expectedEventsURL += "/" + appName + "/v1/events"
-			expectedRenewCertURL += "/v1/applications/certificates/renewals"
 		}
 
 		// when
-		crtResponse, _ := createCertificateChain(t, client, clientKey)
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
+
+		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.GetInfoURL)
 
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-
-		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
-
-		// when
-		tokenResponse := client.CreateToken(t)
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-		csrInfoResponse, errorResponse := client.GetInfo(t, request)
-		require.Nil(t, errorResponse)
-		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
-
-		// then
-		managementInfoURL := csrInfoResponse.Api.GetInfoURL
+		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
 		// when
-		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.GetInfoURL, nil)
 		require.Nil(t, errorResponse)
 
 		// then
 		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
-		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
 	})
 
-	t.Run("should be accessible multiple times", func(t *testing.T) {
-		// given
-		metadataHost := "metadata.kyma.test.cx"
-		eventsHost := "events.kyma.test.cx"
-
-		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
-		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
-		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
-
-		// when
-		crtResponse, _ := createCertificateChain(t, client, clientKey)
-		require.NotEmpty(t, crtResponse.CRTChain)
-
-		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-
-		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
-
-		// when
-		tokenResponse := client.CreateToken(t)
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, metadataHost, eventsHost)
-		csrInfoResponse, errorResponse := client.GetInfo(t, request)
-		require.Nil(t, errorResponse)
-		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
-
-		// then
-		managementInfoURL := csrInfoResponse.Api.GetInfoURL
-
-		// when
-		request = client.BuildGetInfoRequest(t, managementInfoURL, metadataHost, eventsHost)
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
-		require.Nil(t, errorResponse)
-
-		// then
-		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
-		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
-		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
-
-		// when
-		request = client.BuildGetInfoRequest(t, managementInfoURL, metadataHost, eventsHost)
-		mgmInfoResponse, errorResponse = client.GetMgmInfo(t, request)
-		require.Nil(t, errorResponse)
-
-		// then
-		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
-		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
-		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
-	})
+	// TODO - test with empty headers when implemented
 }
 
 func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string) {
@@ -496,74 +427,24 @@ func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, sk
 	clientKey := testkit.CreateKey(t)
 
 	t.Run("should provide not empty management info response", func(t *testing.T) {
-		// given
-		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
-
 		// when
-		crtResponse, _ := createCertificateChain(t, client, clientKey)
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
+
+		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.GetInfoURL)
 
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-
-		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
-
-		// when
-		tokenResponse := client.CreateToken(t)
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-		csrInfoResponse, errorResponse := client.GetInfo(t, request)
-		require.Nil(t, errorResponse)
-		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
-
-		// then
-		managementInfoURL := csrInfoResponse.Api.GetInfoURL
+		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
 		// when
-		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.GetInfoURL, nil)
 		require.Nil(t, errorResponse)
 
 		// then
-		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
+		assert.NotEmpty(t, mgmInfoResponse)
 	})
 
-	t.Run("should be accessible multiple times", func(t *testing.T) {
-		// given
-		expectedRenewCertURL := defaultGatewayUrl + "/v1/applications/certificates/renewals"
-
-		// when
-		crtResponse, _ := createCertificateChain(t, client, clientKey)
-		require.NotEmpty(t, crtResponse.CRTChain)
-
-		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-
-		client := testkit.NewCertificatedHttpClient(certificates.CRTChain, tokenRequest, skipVerify)
-
-		// when
-		tokenResponse := client.CreateToken(t)
-		request := client.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-		csrInfoResponse, errorResponse := client.GetInfo(t, request)
-		require.Nil(t, errorResponse)
-		require.NotEmpty(t, csrInfoResponse.Api.GetInfoURL)
-
-		// then
-		managementInfoURL := csrInfoResponse.Api.GetInfoURL
-
-		// when
-		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, request)
-		require.Nil(t, errorResponse)
-
-		// then
-		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
-
-		// when
-		request = client.BuildGetInfoRequest(t, managementInfoURL, "", "")
-		mgmInfoResponse, errorResponse = client.GetMgmInfo(t, request)
-		require.Nil(t, errorResponse)
-
-		// then
-		assert.Equal(t, expectedRenewCertURL, mgmInfoResponse.RenewCertUrl)
-	})
 }
 
 func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClient, key *rsa.PrivateKey) (*testkit.CrtResponse, *testkit.InfoResponse) {
@@ -575,8 +456,7 @@ func createCertificateChain(t *testing.T, connectorClient testkit.ConnectorClien
 	require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
 
 	// when
-	request := connectorClient.BuildGetInfoRequest(t, tokenResponse.URL, "", "")
-	infoResponse, errorResponse := connectorClient.GetInfo(t, request)
+	infoResponse, errorResponse := connectorClient.GetInfo(t, tokenResponse.URL, nil)
 
 	// then
 	require.Nil(t, errorResponse)
@@ -604,4 +484,11 @@ func replaceToken(originalUrl string, newToken string) string {
 	parsedUrl.RawQuery = queryParams.Encode()
 
 	return parsedUrl.String()
+}
+
+func createHostsHeaders(metadataHost string, eventsHost string) map[string]string {
+	return map[string]string{
+		baseMetadataHostHeader: metadataHost,
+		baseEventsHostHeader:   eventsHost,
+	}
 }
