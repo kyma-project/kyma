@@ -193,12 +193,12 @@ func (l *loader) filterFiles(files []string, filter string) ([]string, error) {
 	}
 
 	filtered := []string{}
+	regex, err := regexp.Compile(filter)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while compiling file filter regex")
+	}
 	for _, value := range files {
-		matched, err := regexp.MatchString(filter, value)
-		if err != nil {
-			return nil, errors.Wrapf(err, "while compiling file filter regex")
-		}
-		if matched {
+		if regex.MatchString(value) {
 			filtered = append(filtered, value)
 		}
 	}
