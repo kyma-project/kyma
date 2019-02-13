@@ -5,7 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"github.com/golang/glog"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
 	"github.com/kyma-project/kyma/components/asset-upload-service/pkg/signal"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
@@ -25,10 +26,7 @@ type config struct {
 		AccessKey string `envconfig:"default=Q3AM3UQ867SPQQA43P2F"`
 		SecretKey string `envconfig:"default=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"`
 	}
-	Bucket struct {
-		Private string `envconfig:"default=private"`
-		Public  string `envconfig:"default=public"`
-	}
+	Bucket           bucket.Config
 	MaxUploadWorkers int           `envconfig:"default=10"`
 	UploadTimeout    time.Duration `envconfig:"default=30m"`
 	Verbose          bool          `envconfig:"default=false"`
@@ -49,51 +47,14 @@ func main() {
 	client, err := minio.New(endpoint, cfg.Upload.AccessKey, cfg.Upload.SecretKey, cfg.Upload.Secure)
 	fatalOnError(err, "Error during upload client initialization")
 
+	handler := bucket.NewHandler(client, cfg.Bucket)
+	buckets, err := handler.CreateSystemBuckets()
+	fatalOnError(err, "Error during creating buckets")
+
+	//TODO: Read and Save bucket names from configmap
+
 	mux := http.NewServeMux()
-	mux.HandleFunc("/upload", func(wr http.ResponseWriter, rq *http.Request) {
-		err := rq.ParseMultipartForm(32 << 20)
-		if err != nil {
-			return
-		}
-		defer rq.MultipartForm.RemoveAll()
-
-
-		//TODO: Handle directory param
-		//directory := rq.MultipartForm.Value["directory"]
-
-		privateFiles := rq.MultipartForm.File["private"]
-		publicFiles := rq.MultipartForm.File["public"]
-		filesCount := len(publicFiles) + len(privateFiles)
-
-		u := uploader.New(client, cfg.UploadTimeout, cfg.MaxUploadWorkers)
-
-		fileToUploadCh := make(chan uploader.FileUpload, filesCount)
-
-		go func() {
-			for _, file := range publicFiles {
-				fileToUploadCh <- uploader.FileUpload{
-					Bucket: cfg.Bucket.Public,
-					File:   file,
-				}
-			}
-			for _, file := range privateFiles {
-				fileToUploadCh <- uploader.FileUpload{
-					Bucket: cfg.Bucket.Private,
-					File:   file,
-				}
-			}
-			close(fileToUploadCh)
-		}()
-
-		err = u.UploadFiles(context.Background(), fileToUploadCh, filesCount)
-		if err != nil {
-			glog.Error(errors.Wrapf(err, "while uploading files"))
-		}
-
-		//TODO: Return results
-		glog.Infof("Finished processing request with uploading %d files.", filesCount)
-		wr.WriteHeader(http.StatusCreated)
-	})
+	mux.Handle("/upload", requesthandler.New(client, buckets, cfg.UploadTimeout, cfg.MaxUploadWorkers))
 
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: mux}

@@ -76,7 +76,7 @@ func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload
 
 	waitGroup.Wait()
 	close(uploadErrorsChannel)
-	return consumeUploadErrors(uploadErrorsChannel)
+	return ConsumeUploadErrors(uploadErrorsChannel)
 }
 
 func (u *Uploader) countNeededWorkers(filesCount, maxUploadWorkers int) int {
@@ -108,7 +108,7 @@ func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) error 
 }
 
 // consumeUploadErrors consolidates all error messages into one and returns it
-func consumeUploadErrors(channel chan error) error {
+func ConsumeUploadErrors(channel chan error) error {
 	var messages []string
 	for err := range channel {
 		if err != nil {
