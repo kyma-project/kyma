@@ -111,7 +111,7 @@ const (
 	StateUninstalled StateEnum = "Uninstalled"
 
 	// StateInProgress means installation/update/uninstallation is running
-	StateInProgress StateEnum = "InP rogress"
+	StateInProgress StateEnum = "InProgress"
 
 	// StateError means an error condition occurred during install/update/uninstall operation
 	StateError StateEnum = "Error"
