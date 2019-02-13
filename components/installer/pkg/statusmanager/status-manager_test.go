@@ -1,13 +1,14 @@
 package statusmanager
 
 import (
+	"errors"
 	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/consts"
 
 	installationv1alpha1 "github.com/kyma-project/kyma/components/installer/pkg/apis/installer/v1alpha1"
-	fake "github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/installer/pkg/client/clientset/versioned/fake"
 	installationInformers "github.com/kyma-project/kyma/components/installer/pkg/client/informers/externalversions"
 	. "github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -100,6 +101,9 @@ func TestStatusManager(t *testing.T) {
 		Convey("should update state and description only", func() {
 			expectedState := installationv1alpha1.StateError
 			expectedDescription := "installing kyma"
+			expectedComponent := "installer"
+			expectedLog := "failed to do something"
+			expectedError := errors.New(expectedLog)
 
 			givenURL := "fakeURL"
 			givenVersion := "0.0.1"
@@ -116,7 +120,7 @@ func TestStatusManager(t *testing.T) {
 			}
 			testStatusManager := getTestSetup(testInst)
 
-			err := testStatusManager.Error(expectedDescription)
+			err := testStatusManager.Error(expectedComponent, expectedDescription, expectedError)
 
 			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
 
@@ -125,18 +129,25 @@ func TestStatusManager(t *testing.T) {
 			So(kymaInst.Status.Description, ShouldEqual, expectedDescription)
 			So(kymaInst.Status.URL, ShouldEqual, "")
 			So(kymaInst.Status.KymaVersion, ShouldEqual, "")
+			So(len(kymaInst.Status.ErrorLog), ShouldEqual, 1)
+			So(kymaInst.Status.ErrorLog[0].Component, ShouldEqual, expectedComponent)
+			So(kymaInst.Status.ErrorLog[0].Log, ShouldEqual, expectedLog)
 		})
 
-		Convey("should update state, description only and clear URL and KymaVersion", func() {
+		Convey("should update state, description, append to error log and clear URL and KymaVersion", func() {
 			oldState := installationv1alpha1.StateInstalled
 			oldDescription := "kyma installed"
 			oldURL := "installedURL"
 			oldVersion := "0.0.1"
+			oldErrorLog := installationv1alpha1.ErrorLogEntry{Component: "some-component", Log: "some old error"}
 
 			testDescription := "updating kyma"
 			testState := installationv1alpha1.StateError
 			testURL := "fakeURL"
 			testVersion := "0.0.2"
+			testComponent := "other-component"
+			testLog := "another error in later attempt"
+			testError := errors.New(testLog)
 
 			testInst := &installationv1alpha1.Installation{
 				ObjectMeta: metav1.ObjectMeta{
@@ -152,11 +163,12 @@ func TestStatusManager(t *testing.T) {
 					Description: oldDescription,
 					URL:         oldURL,
 					KymaVersion: oldVersion,
+					ErrorLog:    []installationv1alpha1.ErrorLogEntry{oldErrorLog},
 				},
 			}
 			testStatusManager := getTestSetup(testInst)
 
-			err := testStatusManager.Error(testDescription)
+			err := testStatusManager.Error(testComponent, testDescription, testError)
 
 			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
 
@@ -165,6 +177,11 @@ func TestStatusManager(t *testing.T) {
 			So(kymaInst.Status.Description, ShouldEqual, testDescription)
 			So(kymaInst.Status.URL, ShouldEqual, "")
 			So(kymaInst.Status.KymaVersion, ShouldEqual, "")
+			So(len(kymaInst.Status.ErrorLog), ShouldEqual, 2)
+			So(kymaInst.Status.ErrorLog[0].Component, ShouldEqual, oldErrorLog.Component)
+			So(kymaInst.Status.ErrorLog[0].Log, ShouldEqual, oldErrorLog.Log)
+			So(kymaInst.Status.ErrorLog[1].Component, ShouldEqual, testComponent)
+			So(kymaInst.Status.ErrorLog[1].Log, ShouldEqual, testLog)
 		})
 	})
 
@@ -208,6 +225,7 @@ func TestStatusManager(t *testing.T) {
 			So(kymaInst.Status.Description, ShouldEqual, testDescription)
 			So(kymaInst.Status.URL, ShouldEqual, testURL)
 			So(kymaInst.Status.KymaVersion, ShouldEqual, testVersion)
+			So(kymaInst.Status.ErrorLog, ShouldBeEmpty)
 		})
 	})
 }
