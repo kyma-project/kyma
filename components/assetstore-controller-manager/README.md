@@ -10,6 +10,7 @@ Use the following tools to set up the project:
 
 * [Go distribution](https://golang.org)
 * [Docker](https://www.docker.com/)
+* [Kubebuilder](https://github.com/kubernetes-sigs/kubebuilder)
 
 ## Usage
 
@@ -41,7 +42,7 @@ The variables are:
 
 This project uses `dep` as a dependency manager. To install all required dependencies, use the following command:
 ```bash
-dep ensure -vendor-only
+make resolve
 ```
 
 ### Run tests

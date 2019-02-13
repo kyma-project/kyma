@@ -55,6 +55,8 @@ spec:
               type: string
             reason:
               type: string
+            url:
+              type: string
           type: object
   version: v1alpha1
 status:

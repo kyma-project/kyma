@@ -45,11 +45,11 @@ spec:
     mode: single
     url: https://some.domain.com/main.js
     validationWebhookService:
-      name: swagger-operations-svc
+    - name: swagger-operations-svc
       namespace: default
       endpoint: "/validate"
     mutationWebhookService:
-      name: swagger-operations-svc
+    - name: swagger-operations-svc
       namespace: default
       endpoint: "/mutate"
       metadata:
@@ -84,11 +84,11 @@ This table lists all possible parameters of a given resource together with their
 | **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files. |
 | **spec.source.url** |    **YES**   | Specifies the location of the file. |
 | **bucketref.name** |    **YES**   | Specifies the name of the bucket for storing the asset. |
-| **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook service. |
+| **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook services. |
 | **spec.source.validationwebhookservice.name** |    **NO**   | Provides the name of the validation webhook service. |
 | **spec.source.validationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
 | **spec.source.validationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
-| **spec.source.mutationwebhookservice** |    **NO**   | Provides specification of the mutation webhook service. |
+| **spec.source.mutationwebhookservice** |    **NO**   | Provides specification of the mutation webhook services. |
 | **spec.source.mutationwebhookservice.name** |    **NO**   | Provides the name of the mutation webhook service. |
 | **spec.source.mutationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
 | **spec.source.mutationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |

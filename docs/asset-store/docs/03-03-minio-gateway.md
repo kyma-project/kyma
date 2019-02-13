@@ -17,7 +17,7 @@ Minio is an open-source asset storage server with Amazon S3 compatible API. You 
 
 In the context of the Asset Store, the Asset Controller stores all assets in Minio, in a dedicated storage space.
 
-![](assets/minio.svg)
+![](./assets/minio.svg)
 
 
 ## Production storage
@@ -29,4 +29,4 @@ For the production purposes, the Asset Store uses Minio Gateway which:
 - Is compatible with Amazon S3 APIs
 
 
-![](assets/minio-gateway.svg)
+![](./assets/minio-gateway.svg)

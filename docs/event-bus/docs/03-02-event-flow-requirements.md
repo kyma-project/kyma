@@ -5,15 +5,15 @@ type: Details
 
 The Event Bus enables a successful flow of Events in Kyma when:
 
-- You have enabled the [EventActivation](docs/components/event-bus#concepts) controller.
-- You have created a [Subscription](/docs/components/event-bus#custom-resource-subscription) custom resource and registered the webhook for a lambda or service to consume the Events.
+- You have enabled the [EventActivation](/components/event-bus#details-basic-concepts) controller.
+- You have created a [Subscription](/components/event-bus#custom-resource-subscription) custom resource and registered the webhook for a lambda or service to consume the Events.
 - The Events are [published](#details-event-flow-requirements-event-publishing).
 
 
 ### Activate Events
 
 Enable the EventActivation controller to ensure the Event flow between the Namespace and the Application (App). 
-Alternatively, [bind](/docs/components/application-connector#getting-started-bind-an-application-to-a-namespace) the App to the Namespace and create a Service Instance.
+Alternatively, [bind](/components/application-connector#tutorials-bind-an-application-to-a-namespace) the App to the Namespace and create a Service Instance.
 
 The diagram shows you the Event activation flow for a given Namespace.
 
@@ -24,8 +24,8 @@ The App sends the Events to the Event Bus and uses the EventApplication controll
 
 ### Consume Events
 
-Configure lambdas and services to use the `push` command for consuming Events coming from the App. To make sure the lambda or the service receive the Events, register a webhook for them by creating a [Subscription custom resource](/docs/components/event-bus#custom-resource-subscription). 
+Configure lambdas and services to use the `push` command for consuming Events coming from the App. To make sure the lambda or the service receive the Events, register a webhook for them by creating a [Subscription custom resource](/components/event-bus#custom-resource-subscription). 
 
 ### Publish Events
 
-Make sure that the external solution sends Events to Kyma. For details of the Event flow, see [this](/docs/components/event-bus#architecture) document.
+Make sure that the external solution sends Events to Kyma. For details of the Event flow, see [this](/components/event-bus#architecture-architecture) document.
