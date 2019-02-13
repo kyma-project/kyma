@@ -3,7 +3,6 @@ package testkit
 import (
 	"bytes"
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/json"
 	"net/http"
 	"net/http/httputil"
@@ -20,10 +19,9 @@ const (
 
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
-	GetInfo(t *testing.T, request *http.Request) (*InfoResponse, *Error)
+	GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error)
 	GetMgmInfo(t *testing.T, request *http.Request) (*ManagementInfoResponse, *Error)
 	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
-	BuildGetInfoRequest(t *testing.T, url string, metadataHost string, eventsHost string) *http.Request
 }
 
 type connectorClient struct {
@@ -48,25 +46,6 @@ func NewHttpClient(skipVerify bool) *http.Client {
 	return client
 }
 
-func NewCertificatedHttpClient(certs []*x509.Certificate, tokenRequest *http.Request, skipVerify bool) ConnectorClient {
-	certPool := x509.NewCertPool()
-	for _, cert := range certs {
-		certPool.AddCert(cert)
-	}
-	transport := &http.Transport{
-		TLSClientConfig: &tls.Config{
-			InsecureSkipVerify: skipVerify,
-			RootCAs: certPool,
-		},
-	}
-	client := &http.Client{Transport: transport}
-
-	return connectorClient{
-		httpClient: client,
-		tokenRequest: tokenRequest,
-	}
-}
-
 func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
 	response, err := cc.httpClient.Do(cc.tokenRequest)
 	require.NoError(t, err)
@@ -84,7 +63,9 @@ func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
 	return tokenResponse
 }
 
-func (cc connectorClient) GetInfo(t *testing.T, request *http.Request) (*InfoResponse, *Error) {
+func (cc connectorClient) GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error) {
+	request := getRequestWithHeaders(t, url, headers)
+
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusOK {
@@ -104,38 +85,6 @@ func (cc connectorClient) GetInfo(t *testing.T, request *http.Request) (*InfoRes
 	require.NoError(t, err)
 
 	return infoResponse, nil
-}
-
-func (cc connectorClient) BuildGetInfoRequest(t *testing.T, url string, metadataHost string, eventsHost string) *http.Request {
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
-
-	request.Header.Set(baseMetadataHostHeader, metadataHost)
-	request.Header.Set(baseEventsHostHeader, eventsHost)
-
-	return request
-}
-
-func (cc connectorClient) GetMgmInfo(t *testing.T, request *http.Request) (*ManagementInfoResponse, *Error) {
-	response, err := cc.httpClient.Do(request)
-	require.NoError(t, err)
-	if response.StatusCode != http.StatusOK {
-		logResponse(t, response)
-
-		errorResponse := ErrorResponse{}
-		err = json.NewDecoder(response.Body).Decode(&errorResponse)
-		require.NoError(t, err)
-		return nil, &Error{response.StatusCode, errorResponse}
-	}
-
-	require.Equal(t, http.StatusOK, response.StatusCode)
-
-	mgmInfoResponse := &ManagementInfoResponse{}
-
-	err = json.NewDecoder(response.Body).Decode(&mgmInfoResponse)
-	require.NoError(t, err)
-
-	return mgmInfoResponse, nil
 }
 
 func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error) {
@@ -165,6 +114,19 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 	require.NoError(t, err)
 
 	return crtResponse, nil
+}
+
+func getRequestWithHeaders(t *testing.T, url string, headers map[string]string) *http.Request {
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	require.NoError(t, err)
+
+	if headers != nil {
+		for k, v := range headers {
+			request.Header.Set(k, v)
+		}
+	}
+
+	return request
 }
 
 func logResponse(t *testing.T, resp *http.Response) {

@@ -78,22 +78,5 @@ func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, skipV
 	require.NotEmpty(t, crtResponse.CRTChain)
 	clientCertBytes := testkit.EncodedCertToPemBytes(t, crtResponse.ClientCRT)
 
-	tlsCert := tls.Certificate{
-		Certificate: [][]byte{clientCertBytes},
-		PrivateKey:  key,
-	}
-
-	tlsConfig := &tls.Config{
-		Certificates:       []tls.Certificate{tlsCert},
-		ClientAuth:         tls.RequireAndVerifyClientCert,
-		InsecureSkipVerify: skipVerify,
-	}
-
-	transport := &http.Transport{
-		TLSClientConfig: tlsConfig,
-	}
-
-	return &http.Client{
-		Transport: transport,
-	}
+	return testkit.NewTLSClientWithCert(skipVerify, key, clientCertBytes)
 }
