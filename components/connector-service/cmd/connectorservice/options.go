@@ -63,7 +63,7 @@ func parseArgs() *options {
 
 	validityTime, err := parseDuration(*certificateValidityTime)
 	if err != nil {
-		logrus.Infof("Failed to parse time: %s, using default value.", err)
+		logrus.Infof("Failed to parse certificate validity time: %s, using default value.", err)
 	}
 
 	return &options{
