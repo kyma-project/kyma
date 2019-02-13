@@ -1,14 +1,24 @@
 package fileheader
 
-import "mime/multipart"
+import (
+	"io"
+	"mime/multipart"
+)
 
 //go:generate mockery -name=FileHeader -output=automock -outpkg=automock -case=underscore
 type FileHeader interface {
 	Filename() string
 	Size() int64
-	Open() (multipart.File, error)
+	Open() (File, error)
 }
 
+//go:generate mockery -name=File -output=automock -outpkg=automock -case=underscore
+type File interface {
+	io.Reader
+	io.ReaderAt
+	io.Seeker
+	io.Closer
+}
 
 type multipartFileHeader struct {
 	*multipart.FileHeader
@@ -22,7 +32,7 @@ func (h *multipartFileHeader) Size() int64 {
 	return h.FileHeader.Size
 }
 
-func (h *multipartFileHeader) Open() (multipart.File, error) {
+func (h *multipartFileHeader) Open() (File, error) {
 	return h.FileHeader.Open()
 }
 
