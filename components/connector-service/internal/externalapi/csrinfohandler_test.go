@@ -45,7 +45,7 @@ func (dc dummyClientContext) GetRuntimeUrls() *clientcontext.RuntimeURLs {
 
 func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
-	host := "connector-service.kyma.cx"
+	baseURL := "https://connector-service.kyma.cx/v1/applications/"
 	infoURL := "https://connector-service.test.cluster.kyma.cx/v1/applications/management/info"
 
 	urlApps := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
@@ -66,7 +66,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 	t.Run("should successfully get csr info", func(t *testing.T) {
 		// given
 		newToken := "newToken"
-		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/certificates?token=%s", host, newToken)
+		expectedSignUrl := fmt.Sprintf("%scertificates?token=%s", baseURL, newToken)
 
 		expectedCertInfo := certInfo{
 			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),
@@ -75,14 +75,14 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		}
 
 		expectedAPI := api{
-			CertificatesURL: fmt.Sprintf(AppURLFormat, host, CertsEndpoint),
+			CertificatesURL: baseURL + CertsEndpoint,
 			InfoURL:         infoURL,
 		}
 
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -117,7 +117,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, predefinedGetInfoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, predefinedGetInfoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -146,7 +146,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, infoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -172,7 +172,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -217,7 +217,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, urlApps, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
 		rr := httptest.NewRecorder()
 

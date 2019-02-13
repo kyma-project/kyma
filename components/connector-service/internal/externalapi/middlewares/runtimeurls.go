@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	BaseEventsHostHeader   = "EventsHost"
-	BaseMetadataHostHeader = "MetadataHost"
+	//Header names are not fully consistent with documentation, due to net/http library. It changes all header names to start with uppercase, with following lowercase letters
+	BaseEventsHostHeader   = "Eventshost"
+	BaseMetadataHostHeader = "Metadatahost"
 )
 
 type runtimeURLsMiddleware struct {
@@ -26,16 +27,18 @@ func NewRuntimeURLsMiddleware(defaultMetadataHost string, defaultEventsHost stri
 func (cc *runtimeURLsMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		runtimeURLs := &clientcontext.APIHosts{
-			MetadataHost: r.Header.Get(BaseMetadataHostHeader),
-			EventsHost:   r.Header.Get(BaseEventsHostHeader),
+			MetadataHost: cc.defaultMetadataHost,
+			EventsHost:   cc.defaultEventsHost,
 		}
 
-		if runtimeURLs.MetadataHost == "" {
-			runtimeURLs.MetadataHost = cc.defaultMetadataHost
+		metadataHosts, found := r.Header[BaseMetadataHostHeader]
+		if found {
+			runtimeURLs.MetadataHost = metadataHosts[0]
 		}
 
-		if runtimeURLs.EventsHost == "" {
-			runtimeURLs.EventsHost = cc.defaultEventsHost
+		eventsHost, found := r.Header[BaseEventsHostHeader]
+		if found {
+			runtimeURLs.EventsHost = eventsHost[0]
 		}
 
 		reqWithCtx := r.WithContext(runtimeURLs.ExtendContext(r.Context()))

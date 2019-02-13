@@ -21,7 +21,7 @@ func (cc *appContextFromSubjMiddleware) Middleware(handler http.Handler) http.Ha
 		}
 
 		if appContext.Application == "" {
-			httphelpers.RespondWithError(w, apperrors.BadRequest("Application context is empty"))
+			httphelpers.RespondWithError(w, apperrors.BadRequest("Client-Certificate-Subject header is empty"))
 			return
 		}
 
