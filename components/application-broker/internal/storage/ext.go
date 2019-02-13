@@ -1,6 +1,8 @@
 package storage
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 )
 
@@ -33,6 +35,7 @@ type InstanceOperation interface {
 	UpdateState(internal.InstanceID, internal.OperationID, internal.OperationState) error
 	UpdateStateDesc(internal.InstanceID, internal.OperationID, internal.OperationState, *string) error
 	Remove(internal.InstanceID, internal.OperationID) error
+	WithTimeProvider(func() time.Time)
 }
 
 // IsNotFoundError checks if given error is NotFound error

@@ -34,9 +34,8 @@ func (b instanceOperations) Less(i, j int) bool { return b[i].CreatedAt.After(b[
 
 // WithTimeProvider allows for passing custom time provider.
 // Used mostly in testing.
-func (s *InstanceOperation) WithTimeProvider(nowProvider func() time.Time) *InstanceOperation {
+func (s *InstanceOperation) WithTimeProvider(nowProvider func() time.Time) {
 	s.nowProvider = nowProvider
-	return s
 }
 
 // Insert inserts object into storage.
