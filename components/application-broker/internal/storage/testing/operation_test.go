@@ -75,52 +75,6 @@ func TestGetAllSortOrder(t *testing.T) {
 
 }
 
-//func TestOperationFindOne(t *testing.T) {
-//	tRunDrivers(t, "Success/Found/MatchNamespaceAndClass", func(t *testing.T, sf storage.Factory) {
-//		// GIVEN:
-//		ts := newOperationTestSuite(t, sf)
-//		ts.PopulateStorage()
-//		exp := ts.MustGetFixture("B3")
-//
-//		// WHEN:
-//		got, err := ts.s.FindOne(func(i *internal.InstanceOperation) bool {
-//			if i.Namespace != exp.Namespace {
-//				return false
-//			}
-//			if i.ServiceID != exp.ServiceID {
-//				return false
-//			}
-//			return true
-//		})
-//
-//		// THEN:
-//		assert.NoError(t, err)
-//		ts.AssertOperationEqual(exp, got)
-//	})
-//
-//	tRunDrivers(t, "Success/NotFound/MatchNamespaceButNotClass", func(t *testing.T, sf storage.Factory) {
-//		// GIVEN:
-//		ts := newOperationTestSuite(t, sf)
-//		ts.PopulateStorage()
-//		exp := ts.MustGetFixture("B3")
-//
-//		// WHEN:
-//		got, err := ts.s.FindOne(func(i *internal.InstanceOperation) bool {
-//			if i.Namespace != exp.Namespace {
-//				return false
-//			}
-//			if i.ServiceID != internal.ServiceID("not-existing-service-id") {
-//				return false
-//			}
-//			return true
-//		})
-//
-//		// THEN:
-//		assert.NoError(t, err)
-//		assert.Nil(t, got)
-//	})
-//}
-
 func TestOperationInsert(t *testing.T) {
 	tRunDrivers(t, "Success/New", func(t *testing.T, sf storage.Factory) {
 		// GIVEN:
