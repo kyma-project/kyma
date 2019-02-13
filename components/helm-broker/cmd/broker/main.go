@@ -13,10 +13,10 @@ import (
 
 	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	"github.com/knative/pkg/configmap"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
@@ -24,6 +24,8 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 func main() {
@@ -42,8 +44,6 @@ func main() {
 
 	log := logger.New(&cfg.Logger)
 
-	bLoader := bundle.NewLoader(cfg.TmpDir, log)
-
 	storageConfig := storage.ConfigList(cfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	fatalOnError(err)
@@ -53,13 +53,38 @@ func main() {
 	fatalOnError(err)
 	csbInterface := scClientSet.ServicecatalogV1beta1().ClusterServiceBrokers()
 
+	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), log)
 	brokerSyncer := broker.NewClusterServiceBrokerSyncer(csbInterface, log)
 
-	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), log)
-	for _, repoCfg := range cfg.RepositoryConfigs() {
-		repoProvider := bundle.NewProvider(bundle.NewHTTPRepository(repoCfg), bLoader, log.WithField("URL", repoCfg.URL))
-		bundleSyncer.AddProvider(repoCfg.URL, repoProvider)
-	}
+	bLoader := bundle.NewLoader(cfg.TmpDir, log)
+	stopCh := make(chan struct{})
+
+	reposUpdater := bundle.NewUpdater(sFact.Bundle(), log)
+	reposWatcher := configmap.NewInformedWatcher(clientset, cfg.Namespace)
+	reposWatcher.Watch(cfg.ReposURLsName, func(configMap *v1.ConfigMap) {
+		url := configMap.Data[cfg.ReposURLsKey]
+
+		if !reposUpdater.IsURLChanged(url) {
+			return
+		}
+		repositories, err := reposUpdater.SwitchRepositories(url)
+		if err != nil {
+			log.Errorf("Could not load repositories from url: %s: %v", url, err)
+			return
+		}
+
+		bundleSyncer.CleanProviders()
+		for _, repoCfg := range repositories {
+			repoProvider := bundle.NewProvider(bundle.NewHTTPRepository(repoCfg), bLoader, log.WithField("URL", repoCfg.URL))
+			bundleSyncer.AddProvider(repoCfg.URL, repoProvider)
+		}
+
+		bundleSyncer.Execute()
+		if err := brokerSyncer.Sync(cfg.ClusterServiceBrokerName, 5); err != nil {
+			log.Errorf("Could not synchronize the broker: %s: %v", cfg.ClusterServiceBrokerName, err)
+		}
+	})
+	fatalOnError(reposWatcher.Start(stopCh))
 
 	helmClient := helm.NewClient(cfg.Helm, log)
 

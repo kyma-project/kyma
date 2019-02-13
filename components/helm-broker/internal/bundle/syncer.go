@@ -48,6 +48,11 @@ func (s *Syncer) AddProvider(url string, provider provider) {
 	s.repositories[url] = provider
 }
 
+// CleanProviders is executed only on repositories update to remove providers from previous URL.
+func (s *Syncer) CleanProviders() {
+	s.repositories = map[string]provider{}
+}
+
 // Execute performs bundles storage with repositories synchronization.
 func (s *Syncer) Execute() {
 	// Syncer must not be used in parallel
