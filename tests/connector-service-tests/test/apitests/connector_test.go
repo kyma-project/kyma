@@ -317,7 +317,26 @@ func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
 	})
 
-	// TODO - test with empty values
+	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
+		// given
+		expectedMetadataURL := ""
+		expectedEventsURL := ""
+
+		// when
+		tokenResponse := client.CreateToken(t)
+
+		// then
+		require.NotEmpty(t, tokenResponse.Token)
+		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
+
+		// when
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, createHostsHeaders("", ""))
+
+		// then
+		require.Nil(t, errorResponse)
+		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
+		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
+	})
 }
 
 func getRuntimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
@@ -406,7 +425,29 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
 	})
 
-	// TODO - test with empty headers when implemented
+	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
+		// given
+		expectedMetadataURL := ""
+		expectedEventsURL := ""
+
+		// when
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
+
+		// then
+		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.GetInfoURL)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
+
+		// when
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.GetInfoURL, createHostsHeaders("", ""))
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
+		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
+	})
 }
 
 func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
