@@ -1,8 +1,9 @@
 package middlewares
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 )
 
 const (

@@ -65,7 +65,6 @@ func (cc securedConnectorClient) GetMgmInfo(t *testing.T, url string, headers ma
 	require.Equal(t, http.StatusOK, response.StatusCode)
 
 	mgmInfoResponse := &ManagementInfoResponse{}
-
 	err = json.NewDecoder(response.Body).Decode(&mgmInfoResponse)
 	require.NoError(t, err)
 

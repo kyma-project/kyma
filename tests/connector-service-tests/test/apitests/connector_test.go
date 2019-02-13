@@ -7,8 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
-
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -18,23 +16,14 @@ const (
 	retryWaitTimeSeconds = 5 * time.Second
 	retryCount           = 20
 
-	baseEventsHostHeader   = "EventsHost"
-	baseMetadataHostHeader = "MetadataHost"
+	eventsHostHeader   = "EventsHost"
+	metadataHostHeader = "MetadataHost"
 )
 
 func TestConnector(t *testing.T) {
 
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
-
-	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
-	require.NoError(t, err)
-	app, e := k8sResourcesClient.CreateDummyApplication("app-connector-test-0", "", true)
-	require.NoError(t, e)
-
-	defer func() {
-		k8sResourcesClient.DeleteApplication(app.Name, &v1.DeleteOptions{})
-	}()
 
 	t.Run("Connector Service flow for Application", func(t *testing.T) {
 		appName := "testCertGenApp"
@@ -58,7 +47,7 @@ func TestConnector(t *testing.T) {
 		getRuntimeCsrInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 
 		runtimeTokenRequest = createRuntimeTokenRequest(t, config)
-		getRuntimeMgmInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify, config.GatewayUrl)
+		getRuntimeMgmInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 	})
 }
 
@@ -298,8 +287,8 @@ func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		// then
 		// TODO - should check ManagementInfoURL when its returned properly
 		require.Nil(t, errorResponse)
-		assert.Equal(t, expectedEventsURL, infoResponse.Api.EventsURL)
-		assert.Equal(t, expectedMetadataURL, infoResponse.Api.MetadataURL)
+		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
+		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
 	})
 
 	t.Run("should use default values to build CSR info response when headers are not given", func(t *testing.T) {
@@ -324,8 +313,8 @@ func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 		// then
 		require.Nil(t, errorResponse)
-		assert.Equal(t, expectedEventsURL, infoResponse.Api.EventsURL)
-		assert.Equal(t, expectedMetadataURL, infoResponse.Api.MetadataURL)
+		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
+		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
 	})
 
 	// TODO - test with empty values
@@ -384,8 +373,8 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Nil(t, errorResponse)
 
 		// then
-		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
-		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
+		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
+		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
 	})
 
 	t.Run("should use default values to build management info response when headers are not given", func(t *testing.T) {
@@ -413,14 +402,14 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Nil(t, errorResponse)
 
 		// then
-		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.MetadataUrl)
-		assert.Equal(t, expectedEventsURL, mgmInfoResponse.EventsUrl)
+		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
+		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
 	})
 
 	// TODO - test with empty headers when implemented
 }
 
-func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string) {
+func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -442,7 +431,7 @@ func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, sk
 		require.Nil(t, errorResponse)
 
 		// then
-		assert.NotEmpty(t, mgmInfoResponse)
+		assert.NotEmpty(t, mgmInfoResponse.URLs)
 	})
 
 }
@@ -488,7 +477,7 @@ func replaceToken(originalUrl string, newToken string) string {
 
 func createHostsHeaders(metadataHost string, eventsHost string) map[string]string {
 	return map[string]string{
-		baseMetadataHostHeader: metadataHost,
-		baseEventsHostHeader:   eventsHost,
+		metadataHostHeader: metadataHost,
+		eventsHostHeader:   eventsHost,
 	}
 }

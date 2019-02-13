@@ -120,7 +120,7 @@ func newExternalHandler(tokenResolver tokens.Resolver, tokenManagerProvider toke
 
 	appHandlerConfig := externalapi.Config{
 		TokenManager:         tokenManagerProvider.WithTTL(appTokenTTLMinutes),
-		GetInfoURL:           opts.getInfoURL,
+		ManagementInfoURL:    opts.appsInfoURL,
 		ConnectorServiceHost: opts.connectorServiceHost,
 		Subject:              subjectValues,
 		Middlewares:          []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
@@ -133,7 +133,7 @@ func newExternalHandler(tokenResolver tokens.Resolver, tokenManagerProvider toke
 
 	runtimeHandlerConfig := externalapi.Config{
 		TokenManager:         tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
-		GetInfoURL:           opts.getInfoURL,
+		ManagementInfoURL:    opts.runtimesInfoURL,
 		ConnectorServiceHost: opts.connectorServiceHost,
 		Subject:              subjectValues,
 		Middlewares:          []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},

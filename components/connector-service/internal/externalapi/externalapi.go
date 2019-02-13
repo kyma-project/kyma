@@ -23,7 +23,7 @@ type Config struct {
 	Middlewares          []mux.MiddlewareFunc
 	TokenManager         tokens.Manager
 	ContextExtractor     clientcontext.ConnectorClientExtractor
-	GetInfoURL           string
+	ManagementInfoURL    string
 	ConnectorServiceHost string
 	Subject              certificates.CSRSubject
 	CertService          certificates.Service
@@ -51,7 +51,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 	router.Path("/v1").Handler(http.RedirectHandler("/v1/api.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
 	router.Path("/v1/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
-	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenManager, appHandlerCfg.ContextExtractor, appHandlerCfg.GetInfoURL, appHandlerCfg.ConnectorServiceHost, appHandlerCfg.Subject, AppURLFormat)
+	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenManager, appHandlerCfg.ContextExtractor, appHandlerCfg.ManagementInfoURL, appHandlerCfg.ConnectorServiceHost, appHandlerCfg.Subject, AppURLFormat)
 	applicationManagementInfoHandler := NewManagementInfoHandler(appMngmtInfoHandlerCfg.ContextExtractor, appMngmtInfoHandlerCfg.ConnectorServiceHost, AppURLFormat)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.TokenManager, appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 
@@ -68,7 +68,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 
 	httphelpers.WithMiddlewares(appMngmtInfoHandlerCfg.Middlewares, mngmtApplicationRouter)
 
-	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenManager, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.GetInfoURL, runtimeHandlerCfg.ConnectorServiceHost, runtimeHandlerCfg.Subject, RuntimeURLFormat)
+	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenManager, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.ConnectorServiceHost, runtimeHandlerCfg.Subject, RuntimeURLFormat)
 	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeMngmtInfoHandlerCfg.ContextExtractor, runtimeMngmtInfoHandlerCfg.ConnectorServiceHost, RuntimeURLFormat)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.TokenManager, runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 
