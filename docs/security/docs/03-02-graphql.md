@@ -13,7 +13,7 @@ The implementation assigns GraphQL actions to specific Kubernetes verbs:
 
 | GraphQL action | Kubernetes verb(s) |
 |:---|:---|
-| **query** | get (for a single resource), list (for multiple resources) |
+| **query** | get (for a single resource) <br> list (for multiple resources) |
 | **mutation** | create, delete |
 | **subscription** | watch |
 
