@@ -21,6 +21,8 @@ type AssetSource struct {
 	// +kubebuilder:validation:Enum=single,package,index
 	Mode AssetMode `json:"mode"`
 	Url  string    `json:"url"`
+	// +optional
+	Filter string `json:"filter,omitempty"`
 
 	// +optional
 	ValidationWebhookService []AssetWebhookService `json:"validationWebhookService,omitempty"`

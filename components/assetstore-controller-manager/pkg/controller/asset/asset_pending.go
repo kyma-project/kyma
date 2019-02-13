@@ -84,7 +84,7 @@ func (r *ReconcileAsset) upload(ctx context.Context, instance *assetstorev1alpha
 }
 
 func (r *ReconcileAsset) download(instance *assetstorev1alpha1.Asset) (string, []string, error) {
-	basePath, files, err := r.loader.Load(instance.Spec.Source.Url, instance.Name, instance.Spec.Source.Mode)
+	basePath, files, err := r.loader.Load(instance.Spec.Source.Url, instance.Name, instance.Spec.Source.Mode, instance.Spec.Source.Filter)
 	if err != nil {
 		return "", nil, errors.Wrapf(err, "while downloading Asset")
 	}
