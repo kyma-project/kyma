@@ -16,8 +16,6 @@ const (
 
 type ConnectorClientExtractor func(ctx context.Context) (ConnectorClientContext, apperrors.AppError)
 
-// TODO - decide if only host should be passed
-
 func ExtractApplicationContext(ctx context.Context) (ConnectorClientContext, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)
 	if !ok {
@@ -66,7 +64,7 @@ func ExtractStubApplicationContext(ctx context.Context) (ConnectorClientContext,
 	return extendedCtx, nil
 }
 
-func ResolveClusterContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
+func NewClusterContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
 	var clusterContext ClusterContext
 	err := tokenResolver.Resolve(token, &clusterContext)
 

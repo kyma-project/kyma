@@ -12,30 +12,24 @@ import (
 )
 
 const (
-	CertificateURLFormat = "%s?token=%s"
-
-	AppURLFormat     = "https://%s/v1/applications/%s"
-	RuntimeURLFormat = "https://%s/v1/runtimes/%s"
-
+	TokenFormat   = "?token=%s"
 	CertsEndpoint = "certificates"
 )
 
 type CSRInfoHandler struct {
 	tokenManager             tokens.Manager
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
-	certificateURL           string
 	getInfoURL               string
 	connectorServiceHost     string
 	csrSubject               certificates.CSRSubject
 	urlFormat                string
 }
 
-func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor clientcontext.ConnectorClientExtractor, certificateURL, getInfoURL, connectorServiceHost string, subjectValues certificates.CSRSubject, urlFormat string) CSRGetInfoHandler {
+func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor clientcontext.ConnectorClientExtractor, getInfoURL, connectorServiceHost string, subjectValues certificates.CSRSubject, urlFormat string) CSRGetInfoHandler {
 
 	return &CSRInfoHandler{
 		tokenManager:             tokenManager,
 		connectorClientExtractor: connectorClientExtractor,
-		certificateURL:           certificateURL,
 		getInfoURL:               getInfoURL,
 		connectorServiceHost:     connectorServiceHost,
 		csrSubject:               subjectValues,
@@ -59,11 +53,18 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 
 	apiURLs := ih.makeApiURLs(connectorClientContext)
 
-	csrURL := fmt.Sprintf(CertificateURLFormat, ih.certificateURL, newToken)
+	csrURL := ih.makeCSRURLs(newToken)
 
 	certInfo := makeCertInfo(ih.csrSubject, connectorClientContext.GetCommonName())
 
 	httphelpers.RespondWithBody(w, 200, csrInfoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
+}
+
+func (ih *CSRInfoHandler) makeCSRURLs(newToken string) string {
+	csrURL := fmt.Sprintf(ih.urlFormat, ih.connectorServiceHost, CertsEndpoint)
+	tokenParam := fmt.Sprintf(TokenFormat, newToken)
+
+	return csrURL + tokenParam
 }
 
 func (ih *CSRInfoHandler) makeApiURLs(connectorClientContext clientcontext.ConnectorClientContext) api {

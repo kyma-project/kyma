@@ -30,10 +30,8 @@ import (
 )
 
 const (
-	appCSRInfoFmt            = "https://%s/v1/applications/signingRequests/info"
-	runtimeCSRInfoFmt        = "https://%s/v1/runtimes/signingRequests/info"
-	appCertificateURLFmt     = "https://%s/v1/applications/certificates"
-	runtimeCertificateURLFmt = "https://%s/v1/runtimes/certificates"
+	appCSRInfoFmt     = "https://%s/v1/applications/signingRequests/info"
+	runtimeCSRInfoFmt = "https://%s/v1/runtimes/signingRequests/info"
 )
 
 func main() {
@@ -122,7 +120,6 @@ func newExternalHandler(tokenResolver tokens.Resolver, tokenManagerProvider toke
 
 	appHandlerConfig := externalapi.Config{
 		TokenManager:         tokenManagerProvider.WithTTL(appTokenTTLMinutes),
-		CertificateURL:       fmt.Sprintf(appCertificateURLFmt, opts.connectorServiceHost),
 		GetInfoURL:           opts.getInfoURL,
 		ConnectorServiceHost: opts.connectorServiceHost,
 		Subject:              subjectValues,
@@ -131,12 +128,11 @@ func newExternalHandler(tokenResolver tokens.Resolver, tokenManagerProvider toke
 		CertService:          certificateService,
 	}
 
-	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenResolver, clientcontext.ResolveClusterContextExtender)
+	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenResolver, clientcontext.NewClusterContextExtender)
 	runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
 
 	runtimeHandlerConfig := externalapi.Config{
 		TokenManager:         tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
-		CertificateURL:       fmt.Sprintf(runtimeCertificateURLFmt, opts.connectorServiceHost),
 		GetInfoURL:           opts.getInfoURL,
 		ConnectorServiceHost: opts.connectorServiceHost,
 		Subject:              subjectValues,

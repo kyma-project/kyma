@@ -16,13 +16,13 @@ type certResponse struct {
 }
 
 type csrInfoResponse struct {
-	CsrURL          string      `json:"csrUrl"`
-	API             interface{} `json:"api"`
-	CertificateInfo certInfo    `json:"certificate"`
+	CsrURL          string   `json:"csrUrl"`
+	API             api      `json:"api"`
+	CertificateInfo certInfo `json:"certificate"`
 }
 
 type mgmtInfoReponse struct {
-	URLs interface{} `json:"urls"`
+	URLs mgmtURLs `json:"urls"`
 }
 
 type mgmtURLs struct {
