@@ -30,7 +30,6 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "true"
-  global.knative: "false"
   global.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"
@@ -48,18 +47,6 @@ metadata:
     component: application-connector
 data:
   connector-service.tests.skipSslVerify: "true"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: core-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-data:
-  minio.resources.requests.memory: 64Mi
-  minio.resources.limits.cpu: 100m
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -104,3 +91,15 @@ metadata:
 data:
   knative.ingressgateway.service.type: NodePort
   knative.domainName: "kyma.local"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: assetstore-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: assetstore
+data:
+  minio.resources.requests.memory: 64Mi
+  minio.resources.limits.cpu: 100m

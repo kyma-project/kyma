@@ -39,7 +39,8 @@ func TestPodConverter_ToGQL(t *testing.T) {
 				},
 			},
 		}
-		expectedJSON, _ := converter.podToGQLJSON(&in)
+		expectedJSON, err := converter.podToGQLJSON(&in)
+		require.NoError(t, err)
 		expected := gqlschema.Pod{
 			Name:              "exampleName",
 			NodeName:          "exampleNodeName",
@@ -66,7 +67,8 @@ func TestPodConverter_ToGQL(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		converter := &podConverter{}
-		emptyPodJSON, _ := converter.podToGQLJSON(&v1.Pod{})
+		emptyPodJSON, err := converter.podToGQLJSON(&v1.Pod{})
+		require.NoError(t, err)
 		expected := &gqlschema.Pod{
 			Status:          gqlschema.PodStatusTypeUnknown,
 			ContainerStates: []gqlschema.ContainerState{},

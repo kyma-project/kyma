@@ -25,7 +25,8 @@ func TestServiceClassService_GetServiceClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer()
 
-		svc := servicecatalog.NewServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -40,7 +41,8 @@ func TestServiceClassService_GetServiceClass(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer()
 
-		svc := servicecatalog.NewServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -62,7 +64,8 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer()
 
-		svc := servicecatalog.NewServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -77,7 +80,8 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer()
 
-		svc := servicecatalog.NewServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -99,11 +103,12 @@ func TestServiceClassService_FindByExternalName(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer()
 
-		svc := servicecatalog.NewServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
-		_, err := svc.FindByExternalName(externalName, nsName)
+		_, err = svc.FindByExternalName(externalName, nsName)
 
 		assert.Error(t, err)
 	})
@@ -120,7 +125,8 @@ func TestServiceClassService_ListServiceClasses(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer()
 
-		svc := servicecatalog.NewServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 
@@ -137,7 +143,8 @@ func TestServiceClassService_ListServiceClasses(t *testing.T) {
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 		serviceClassInformer := informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer()
 
-		svc := servicecatalog.NewServiceClassService(serviceClassInformer)
+		svc, err := servicecatalog.NewServiceClassService(serviceClassInformer)
+		require.NoError(t, err)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceClassInformer)
 

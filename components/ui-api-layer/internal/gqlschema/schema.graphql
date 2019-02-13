@@ -6,6 +6,21 @@ scalar Labels
 
 scalar Timestamp
 
+# Directives
+
+directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
+
+input ResourceAttributes {
+	verb: String!
+	apiGroup: String!
+	apiVersion: String!
+	resource: String!
+	subresource: String! = ""
+	nameArg: String
+	namespaceArg: String
+	isChildResolver: Boolean! = false
+}
+
 # Content
 
 
@@ -44,7 +59,7 @@ type ServiceInstance {
     servicePlan: ServicePlan
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: ServiceBindings!
+    serviceBindings: ServiceBindings @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
 
     # Depends on servicecatalogaddons domain
     serviceBindingUsages: [ServiceBindingUsage!]
@@ -121,6 +136,7 @@ type ServiceClass {
     labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
@@ -141,6 +157,7 @@ type ClusterServiceClass {
     labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
@@ -584,8 +601,8 @@ type BackendModule {
 # Queries
 
 type Query {
-    serviceInstance(name: String!, namespace: String!): ServiceInstance
-    serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]!
+    serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
+    serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
     clusterServiceClass(name: String!): ClusterServiceClass
@@ -596,9 +613,9 @@ type Query {
     clusterServiceBroker(name: String!): ClusterServiceBroker
     serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
     serviceBroker(name: String!, namespace: String!): ServiceBroker
-
+    
     serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
-    serviceBinding(name: String!, namespace: String!): ServiceBinding
+    serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
@@ -625,12 +642,12 @@ type Query {
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
     eventActivations(namespace: String!): [EventActivation!]!
 
-    limitRanges(namespace: String!): [LimitRange!]!
-
-    IDPPreset(name: String!): IDPPreset
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]!
+    limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     backendModules: [BackendModule!]!
+
+    IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations
@@ -653,15 +670,15 @@ type Mutation {
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
 
-    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
-    deleteIDPPreset(name: String!): IDPPreset
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 }
 
 # Subscriptions
 
 type Subscription {
     serviceInstanceEvent(namespace: String!): ServiceInstanceEvent!
-    serviceBindingEvent(namespace: String!): ServiceBindingEvent!
+    serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(namespace: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,

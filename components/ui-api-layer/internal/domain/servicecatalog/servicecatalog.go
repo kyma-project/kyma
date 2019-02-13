@@ -73,14 +73,33 @@ func (r *PluggableContainer) Enable() error {
 	informerFactory := catalogInformers.NewSharedInformerFactory(client, informerResyncPeriod)
 	r.informerFactory = informerFactory
 
-	serviceInstanceService := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), client)
-	servicePlanService := newServicePlanService(informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer())
-	serviceClassService := newServiceClassService(informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer())
-	serviceBrokerService := newServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ServiceBrokers().Informer())
-	serviceBindingService := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
+	serviceInstanceService, err := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), client)
+	if err != nil {
+		return errors.Wrapf(err, "while creating service instance service")
+	}
+	servicePlanService, err := newServicePlanService(informerFactory.Servicecatalog().V1beta1().ServicePlans().Informer())
+	if err != nil {
+		return errors.Wrapf(err, "while creating service plan service")
 
-	clusterServiceClassService := newClusterServiceClassService(informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer())
-	clusterServicePlanService := newClusterServicePlanService(informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer())
+	}
+	serviceClassService, err := newServiceClassService(informerFactory.Servicecatalog().V1beta1().ServiceClasses().Informer())
+	if err != nil {
+		return errors.Wrapf(err, "while creating service class service")
+	}
+	serviceBrokerService := newServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ServiceBrokers().Informer())
+	serviceBindingService, err := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
+	if err != nil {
+		return errors.Wrapf(err, "while creating service binding service")
+	}
+
+	clusterServiceClassService, err := newClusterServiceClassService(informerFactory.Servicecatalog().V1beta1().ClusterServiceClasses().Informer())
+	if err != nil {
+		return errors.Wrapf(err, "while creating cluster service class service")
+	}
+	clusterServicePlanService, err := newClusterServicePlanService(informerFactory.Servicecatalog().V1beta1().ClusterServicePlans().Informer())
+	if err != nil {
+		return errors.Wrapf(err, "while creating cluster service plan service")
+	}
 	clusterServiceBrokerService := newClusterServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ClusterServiceBrokers().Informer())
 
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
@@ -119,6 +138,7 @@ type Resolver interface {
 	ClusterServiceClassQuery(ctx context.Context, name string) (*gqlschema.ClusterServiceClass, error)
 	ClusterServiceClassesQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterServiceClass, error)
 	ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error)
+	ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ServiceInstance, error)
 	ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error)
 	ClusterServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error)
 	ClusterServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error)
@@ -127,6 +147,7 @@ type Resolver interface {
 	ServiceClassQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceClass, error)
 	ServiceClassesQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceClass, error)
 	ServiceClassPlansField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error)
+	ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error)
 	ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error)
 	ServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error)
 	ServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error)
@@ -154,7 +175,7 @@ type Resolver interface {
 	CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error)
 	DeleteServiceBindingMutation(ctx context.Context, serviceBindingName, env string) (*gqlschema.DeleteServiceBindingOutput, error)
 	ServiceBindingQuery(ctx context.Context, name, env string) (*gqlschema.ServiceBinding, error)
-	ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, namespace string) (gqlschema.ServiceBindings, error)
+	ServiceBindingsToInstanceQuery(ctx context.Context, instanceName, namespace string) (*gqlschema.ServiceBindings, error)
 	ServiceBindingEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingEvent, error)
 }
 

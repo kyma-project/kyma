@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "publish-knative.service.name" . }}
+  labels:
+{{ include "publish-knative.labels.standard" . | indent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.port }}
+  selector:
+    app: {{ template "publish-knative.name" . }}
+    release: {{ .Release.Name }}

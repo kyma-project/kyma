@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/glog"
+
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingFakeCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	mappingInformer "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
@@ -500,7 +502,10 @@ func newDummyInformer() cache.SharedIndexInformer {
 func newTestServer(data string, statusCode int) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(statusCode)
-		fmt.Fprintln(w, data)
+		_, err := fmt.Fprintln(w, data)
+		if err != nil {
+			glog.Errorf("Unable to write response body. Cause: %v", err)
+		}
 	}))
 }
 

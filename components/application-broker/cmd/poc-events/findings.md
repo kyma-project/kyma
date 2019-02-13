@@ -31,7 +31,7 @@ To add `UpdateStatus` method to Application client, following actions has to be 
 - add Status field for type `Application`
 - remove annotation `+genclient:noStatus`
 
-[API Conventions](https://github.com/kubernetes/community/blob/master/contributors/devel/api-conventions.md#spec-and-status) contains information how Status should looks like:
+[API Conventions](https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#spec-and-status) contains information how Status should looks like:
 
 >Spec and Status:
 

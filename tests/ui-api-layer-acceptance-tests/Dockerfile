@@ -1,4 +1,4 @@
-FROM golang:1.10.4-alpine3.8 as builder
+FROM golang:1.11.4-alpine3.8 as builder
 
 ENV BASE_APP_DIR /go/src/github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests
 WORKDIR ${BASE_APP_DIR}
@@ -19,7 +19,7 @@ RUN mkdir -p /app
 RUN cd ${BASE_APP_DIR}/internal/domain && \
     for dir in $(ls -1FA | grep / | tr -d /); do \
     echo "Building test package ${dir}..."; \
-    go test -tags=acceptance ./${dir} -c || exit 1 \
+    CGO_ENABLED=0 go test -tags=acceptance ./${dir} -c || exit 1 \
     ; done
 
 FROM alpine:3.8

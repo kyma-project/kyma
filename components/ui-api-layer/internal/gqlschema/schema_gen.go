@@ -47,6 +47,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	HasAccess func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes ResourceAttributes) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -141,6 +142,7 @@ type ComplexityRoot struct {
 		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
+		Instances           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
@@ -342,9 +344,9 @@ type ComplexityRoot struct {
 		Topics                func(childComplexity int, input []InputTopic, internal *bool) int
 		EventActivations      func(childComplexity int, namespace string) int
 		LimitRanges           func(childComplexity int, namespace string) int
+		BackendModules        func(childComplexity int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
-		BackendModules        func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -479,6 +481,7 @@ type ComplexityRoot struct {
 		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
+		Instances           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
@@ -573,6 +576,7 @@ type ApplicationResolver interface {
 type ClusterServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ClusterServiceClass) ([]ClusterServicePlan, error)
 	Activated(ctx context.Context, obj *ClusterServiceClass) (bool, error)
+	Instances(ctx context.Context, obj *ClusterServiceClass) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
@@ -633,9 +637,9 @@ type QueryResolver interface {
 	Topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
 	EventActivations(ctx context.Context, namespace string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, namespace string) ([]LimitRange, error)
+	BackendModules(ctx context.Context) ([]BackendModule, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
-	BackendModules(ctx context.Context) ([]BackendModule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -646,6 +650,7 @@ type ServiceBindingUsageResolver interface {
 type ServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ServiceClass) ([]ServicePlan, error)
 	Activated(ctx context.Context, obj *ServiceClass) (bool, error)
+	Instances(ctx context.Context, obj *ServiceClass) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ServiceClass) (*JSON, error)
@@ -656,7 +661,7 @@ type ServiceInstanceResolver interface {
 	ServicePlan(ctx context.Context, obj *ServiceInstance) (*ServicePlan, error)
 	ClusterServicePlan(ctx context.Context, obj *ServiceInstance) (*ClusterServicePlan, error)
 	Bindable(ctx context.Context, obj *ServiceInstance) (bool, error)
-	ServiceBindings(ctx context.Context, obj *ServiceInstance) (ServiceBindings, error)
+	ServiceBindings(ctx context.Context, obj *ServiceInstance) (*ServiceBindings, error)
 	ServiceBindingUsages(ctx context.Context, obj *ServiceInstance) ([]ServiceBindingUsage, error)
 }
 type SubscriptionResolver interface {
@@ -2065,6 +2070,21 @@ func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]in
 
 }
 
+func dir_HasAccess_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 ResourceAttributes
+	if tmp, ok := rawArgs["attributes"]; ok {
+		var err error
+		arg0, err = UnmarshalResourceAttributes(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["attributes"] = arg0
+	return args, nil
+
+}
+
 type executableSchema struct {
 	resolvers  ResolverRoot
 	directives DirectiveRoot
@@ -2455,6 +2475,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterServiceClass.Activated(childComplexity), true
+
+	case "ClusterServiceClass.instances":
+		if e.complexity.ClusterServiceClass.Instances == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Instances(childComplexity), true
 
 	case "ClusterServiceClass.apiSpec":
 		if e.complexity.ClusterServiceClass.ApiSpec == nil {
@@ -3558,6 +3585,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.LimitRanges(childComplexity, args["namespace"].(string)), true
 
+	case "Query.backendModules":
+		if e.complexity.Query.BackendModules == nil {
+			break
+		}
+
+		return e.complexity.Query.BackendModules(childComplexity), true
+
 	case "Query.IDPPreset":
 		if e.complexity.Query.Idppreset == nil {
 			break
@@ -3581,13 +3615,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Idppresets(childComplexity, args["first"].(*int), args["offset"].(*int)), true
-
-	case "Query.backendModules":
-		if e.complexity.Query.BackendModules == nil {
-			break
-		}
-
-		return e.complexity.Query.BackendModules(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -4106,6 +4133,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServiceClass.Activated(childComplexity), true
+
+	case "ServiceClass.instances":
+		if e.complexity.ServiceClass.Instances == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.Instances(childComplexity), true
 
 	case "ServiceClass.apiSpec":
 		if e.complexity.ServiceClass.ApiSpec == nil {
@@ -6399,6 +6433,15 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 				}
 				wg.Done()
 			}(i, field)
+		case "instances":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_instances(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "apiSpec":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -6852,6 +6895,66 @@ func (ec *executionContext) _ClusterServiceClass_activated(ctx context.Context, 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_instances(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ClusterServiceClass().Instances(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceInstance)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceInstance(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -11066,6 +11169,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "backendModules":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_backendModules(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "IDPPreset":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -11076,15 +11188,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_IDPPresets(ctx, field)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
-				wg.Done()
-			}(i, field)
-		case "backendModules":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_backendModules(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -12642,6 +12745,66 @@ func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphq
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_backendModules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BackendModules(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]BackendModule)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._BackendModule(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query_IDPPreset(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -12729,66 +12892,6 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._IDPPreset(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Query_backendModules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().BackendModules(rctx)
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]BackendModule)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._BackendModule(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -15408,6 +15511,15 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 				}
 				wg.Done()
 			}(i, field)
+		case "instances":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceClass_instances(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "apiSpec":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -15891,6 +16003,66 @@ func (ec *executionContext) _ServiceClass_activated(ctx context.Context, field g
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _ServiceClass_instances(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServiceClass().Instances(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceInstance)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceInstance(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _ServiceClass_apiSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -16057,9 +16229,6 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._ServiceInstance_serviceBindings(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		case "serviceBindingUsages":
@@ -16469,16 +16638,17 @@ func (ec *executionContext) _ServiceInstance_serviceBindings(ctx context.Context
 		return ec.resolvers.ServiceInstance().ServiceBindings(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(ServiceBindings)
+	res := resTmp.(*ServiceBindings)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._ServiceBindings(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ServiceBindings(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -19522,6 +19692,76 @@ func UnmarshalLocalObjectReferenceInput(v interface{}) (LocalObjectReferenceInpu
 	return it, nil
 }
 
+func UnmarshalResourceAttributes(v interface{}) (ResourceAttributes, error) {
+	var it ResourceAttributes
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "verb":
+			var err error
+			it.Verb, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "apiGroup":
+			var err error
+			it.APIGroup, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "apiVersion":
+			var err error
+			it.APIVersion, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "resource":
+			var err error
+			it.Resource, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "subresource":
+			var err error
+			it.Subresource, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "nameArg":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.NameArg = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "namespaceArg":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.NamespaceArg = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "isChildResolver":
+			var err error
+			it.IsChildResolver, err = graphql.UnmarshalBoolean(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalServiceBindingRefInput(v interface{}) (ServiceBindingRefInput, error) {
 	var it ServiceBindingRefInput
 	var asMap = v.(map[string]interface{})
@@ -19658,6 +19898,24 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			ret = nil
 		}
 	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "HasAccess":
+			if ec.directives.HasAccess != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := dir_HasAccess_args(rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.HasAccess(ctx, obj, n, args["attributes"].(ResourceAttributes))
+				}
+			}
+		}
+	}
 	res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -19688,6 +19946,21 @@ scalar JSON
 scalar Labels
 
 scalar Timestamp
+
+# Directives
+
+directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
+
+input ResourceAttributes {
+	verb: String!
+	apiGroup: String!
+	apiVersion: String!
+	resource: String!
+	subresource: String! = ""
+	nameArg: String
+	namespaceArg: String
+	isChildResolver: Boolean! = false
+}
 
 # Content
 
@@ -19727,7 +20000,7 @@ type ServiceInstance {
     servicePlan: ServicePlan
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: ServiceBindings!
+    serviceBindings: ServiceBindings @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
 
     # Depends on servicecatalogaddons domain
     serviceBindingUsages: [ServiceBindingUsage!]
@@ -19804,6 +20077,7 @@ type ServiceClass {
     labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
@@ -19824,6 +20098,7 @@ type ClusterServiceClass {
     labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
@@ -20267,8 +20542,8 @@ type BackendModule {
 # Queries
 
 type Query {
-    serviceInstance(name: String!, namespace: String!): ServiceInstance
-    serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]!
+    serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
+    serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
     clusterServiceClass(name: String!): ClusterServiceClass
@@ -20279,9 +20554,9 @@ type Query {
     clusterServiceBroker(name: String!): ClusterServiceBroker
     serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
     serviceBroker(name: String!, namespace: String!): ServiceBroker
-
+    
     serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
-    serviceBinding(name: String!, namespace: String!): ServiceBinding
+    serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
@@ -20308,12 +20583,12 @@ type Query {
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
     eventActivations(namespace: String!): [EventActivation!]!
 
-    limitRanges(namespace: String!): [LimitRange!]!
-
-    IDPPreset(name: String!): IDPPreset
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]!
+    limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     backendModules: [BackendModule!]!
+
+    IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations
@@ -20336,15 +20611,15 @@ type Mutation {
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
 
-    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
-    deleteIDPPreset(name: String!): IDPPreset
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 }
 
 # Subscriptions
 
 type Subscription {
     serviceInstanceEvent(namespace: String!): ServiceInstanceEvent!
-    serviceBindingEvent(namespace: String!): ServiceBindingEvent!
+    serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent!
     serviceBrokerEvent(namespace: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,

@@ -39,7 +39,7 @@ type RootResolver struct {
 func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 
-	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer, featureToggles.ModulePluggability)
+	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer)
 
 	contentContainer, err := content.New(contentCfg)
 	if err != nil {
@@ -426,7 +426,7 @@ func (r *serviceInstanceResolver) Bindable(ctx context.Context, obj *gqlschema.S
 	return r.sc.Resolver.ServiceInstanceBindableField(ctx, obj)
 }
 
-func (r *serviceInstanceResolver) ServiceBindings(ctx context.Context, obj *gqlschema.ServiceInstance) (gqlschema.ServiceBindings, error) {
+func (r *serviceInstanceResolver) ServiceBindings(ctx context.Context, obj *gqlschema.ServiceInstance) (*gqlschema.ServiceBindings, error) {
 	return r.sc.Resolver.ServiceBindingsToInstanceQuery(ctx, obj.Name, obj.Namespace)
 }
 
@@ -494,6 +494,10 @@ type serviceClassResolver struct {
 	sc *servicecatalog.PluggableContainer
 }
 
+func (r *serviceClassResolver) Instances(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
+	return r.sc.Resolver.ServiceClassInstancesField(ctx, obj)
+}
+
 func (r *serviceClassResolver) Activated(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
 	return r.sc.Resolver.ServiceClassActivatedField(ctx, obj)
 }
@@ -518,6 +522,10 @@ func (r *serviceClassResolver) Content(ctx context.Context, obj *gqlschema.Servi
 
 type clusterServiceClassResolver struct {
 	sc *servicecatalog.PluggableContainer
+}
+
+func (r *clusterServiceClassResolver) Instances(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ServiceInstance, error) {
+	return r.sc.Resolver.ClusterServiceClassInstancesField(ctx, obj)
 }
 
 func (r *clusterServiceClassResolver) Activated(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error) {

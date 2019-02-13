@@ -8,22 +8,23 @@ a scenario requires using a self-signed TLS certificate.
 
 This solution is not suitable for a production environment but makes for a great playground which allows you to get to know the product better.
 
+>**NOTE:** This feature requires Kyma version 0.6 or higher.
+
 ## Prerequisites
 
 The prerequisites match these listed in [this](#installation-install-kyma-on-a-gke-cluster) document. However, you don't need to prepare a domain for your cluster as it is replaced by a wildcard DNS provided by [`xip.io`](http://xip.io/).
 
->**NOTE:** This feature requires Kyma version 0.6 or higher.
+Follow [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-gke-cluster) section to prepare your GKE cluster.
 
-## Installation
-
-The installation process follows the steps outlined in the [Install Kyma on a GKE cluster](#installation-install-kyma-on-a-gke-cluster) document. Follow [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-gke-cluster) section to prepare your cluster.
-
-In addition to exporting the desired cluster name as an environment variable, make sure to export your GCP project name. Run:
+Additionally, export your GCP project name as an environment variable. Run:
 ```
 export PROJECT={YOUR_GCP_PROJECT_NAME}
 ```
 
+## Allocate required IP addresses for your cluster
+
 When you install Kyma with the wildcard DNS, you can use one of two approaches to allocating the required IP addresses for your cluster:
+
 - Dynamic IP allocation - can be used with [Knative](#installation-installation-with-knative) eventing and serverless, but disables the Application Connector. 
 - Manual IP allocation - cannot be used with [Knative](#installation-installation-with-knative) eventing and serverless, but leaves the Application Connector functional. 
 
@@ -31,13 +32,11 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
 
 ### Dynamic IP allocation
 
-1. Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
+Use this command to prepare a configuration file that deploys Kyma with [`xip.io`](http://xip.io/) providing a wildcard DNS:
 ```
 (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__.*__//g" > my-kyma.yaml
 ```
 >**NOTE:** Using this approach disables the Application Connector. 
-
-2. Follow [these](#installation-install-kyma-on-a-gke-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.
 
 ### Manual IP allocation
 
@@ -67,10 +66,41 @@ Follow the respective instructions to deploy a cluster Kyma cluster with wildcar
   ```
 (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster-xip-io.yaml.tpl) | sed -e "s/__EXTERNAL_PUBLIC_IP__/$EXTERNAL_PUBLIC_IP/g" | sed -e "s/__REMOTE_ENV_IP__/$CONNECTOR_IP/g" | sed -e "s/__APPLICATION_CONNECTOR_DOMAIN__/$CONNECTOR_IP.xip.io/g" | sed -e "s/__SKIP_SSL_VERIFY__/true/g" | sed -e "s/__.*__//g" > my-kyma.yaml
   ```
-3. Follow [these](#installation-install-kyma-on-a-gke-cluster-deploy-kyma) instructions to install Kyma using the configuration file you prepared.  
 
+## Prepare Kyma Installer image 
 
-### Add the xip.io self-signed certificate to your OS trusted certificates
+Install Kyma using a pre-built Installer image, or an Installer image built from sources.  
+
+### Pre-built image
+ 
+1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose a release from which you want to use the Installer image. 
+
+>**NOTE:** You can use Kyma version 0.6 or higher.
+
+2. Create the Installer image URL following this format: 
+  ```
+  eu.gcr.io/kyma-project/kyma-installer:{RELEASE_VERSION}
+  ```
+3. Set the Installer image URL as the value of the **image** field in the `my-kyma.yaml` you created.
+
+4. Install Kyma following [these](#installation-install-kyma-on-a-gke-cluster-deploy-kyma) instructions.    
+
+### Image built from sources
+
+1. Build your image. Run:
+  ```
+  docker build -t kyma-installer:latest -f tools/kyma-installer/kyma.Dockerfile .
+  ```
+2. Create a new `kyma-installer` public repository on [Docker Hub](https://hub.docker.com/) and push your image:
+  ```
+  docker tag kyma-installer:latest {YOUR_DOCKER_LOGIN}/kyma-installer:latest
+  docker push {YOUR_DOCKER_LOGIN}/kyma-installer:latest
+  ```
+3. Set the Installer image URL as the value of the **image** field in the `my-kyma.yaml` you created.
+
+4. Install Kyma following [these](#installation-install-kyma-on-a-gke-cluster-deploy-kyma) instructions.    
+
+## Add the xip.io self-signed certificate to your OS trusted certificates
 
 After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS run:
 ```

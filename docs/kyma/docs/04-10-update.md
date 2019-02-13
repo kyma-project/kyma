@@ -77,7 +77,7 @@ The update procedure consists of three main steps:
            - image: <your_image_name>:<your_tag>
              imagePullPolicy: Always
     ```  
-  > **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart  the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`
+  > **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`
 
 ## Trigger the update process
 

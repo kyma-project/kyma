@@ -78,6 +78,15 @@ func (_m *Resolver) ClusterServiceClassContentField(ctx context.Context, obj *gq
 	return r0, r1
 }
 
+// ClusterServiceClassInstancesField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ServiceInstance, error) {
+	var r0 []gqlschema.ServiceInstance
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ClusterServiceClassPlansField provides a failing mock function with given fields: ctx, obj
 func (_m *Resolver) ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error) {
 	var r0 []gqlschema.ClusterServicePlan
@@ -160,8 +169,8 @@ func (_m *Resolver) ServiceBindingQuery(ctx context.Context, name string, env st
 }
 
 // ServiceBindingsToInstanceQuery provides a failing mock function with given fields: ctx, instanceName, namespace
-func (_m *Resolver) ServiceBindingsToInstanceQuery(ctx context.Context, instanceName string, namespace string) (gqlschema.ServiceBindings, error) {
-	var r0 gqlschema.ServiceBindings
+func (_m *Resolver) ServiceBindingsToInstanceQuery(ctx context.Context, instanceName string, namespace string) (*gqlschema.ServiceBindings, error) {
+	var r0 *gqlschema.ServiceBindings
 	var r1 error
 	r1 = _m.err
 
@@ -225,6 +234,15 @@ func (_m *Resolver) ServiceClassAsyncApiSpecField(ctx context.Context, obj *gqls
 // ServiceClassContentField provides a failing mock function with given fields: ctx, obj
 func (_m *Resolver) ServiceClassContentField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
 	var r0 *gqlschema.JSON
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ServiceClassInstancesField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
+	var r0 []gqlschema.ServiceInstance
 	var r1 error
 	r1 = _m.err
 

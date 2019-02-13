@@ -46,10 +46,29 @@ data:
 {{- end }}
 {{ else }}
   alert.rules: |-
-    {{- include "unhealthy-pods-rules.yaml.tpl" . | indent 4}}
+    {{- include "kyma-rules.yaml.tpl" . | indent 4}}
 {{ end }}
 ```
-Under the **data. alert.rules** parameter, there is a configuration of the [unhealthy-pods-rules.yaml](templates/unhealthy-pods-rules.yaml) file, which creates a rule for alerting when a Pod is not running.
+The **data. alert.rules** parameter includes the configuration in the [kyma-rules.yaml](templates/kyma-rules.yaml) file, which creates rules in the following cases:
+
+
+*  Alert when a Pod is not running
+
+    The Alertmanager sends out alerts when one of the Pods is not running in `kyma-system`, `kyma-integration`, `istio-system`, `kube-public`, or `kube-system` Namespaces.
+
+* Monitor Persistent Volume Claims (PVC)
+
+    The Alertmanager triggers the rule when PVC exceeds  90%  for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. In such a case, increase the capacity of PVC.
+
+* Monitor CPU Usage
+
+    The Alertmanager triggers the rule when CPU usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertcpu: "yes"` label to Pods.
+
+* Monitor Memory usage
+
+    The Alertmanager triggers the rule when Memory usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertmem: "yes"` to Pods.
+
+This is an example for alerting when a Pod is not running:
 
 ```yaml
 {{ define "unhealthy-pods-rules.yaml.tpl" }}
@@ -96,8 +115,6 @@ Resource metrics such as **cpu and memory** are also served by kube-state-metric
 - kube_pod_container_resource_requests_nvidia_gpu_devices
 - kube_pod_container_resource_limits_nvidia_gpu_devices
 
-### Monitoring Persistent Volume Claims
-The [pvc-rules.yaml](templates/pvc-rules.yaml) configuration, located under the **data.alert.rules** parameter, specifes an alerting rule for the `PersistentVolumeClaim` (PVC). The Alertmanager triggers the rule when PVC in any of the system Namespaces such as `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public` or `kube-system` exceeds  90%. In such a case, increase the capacity of PVCs.
 
 
 ### Configure Alertmanager
