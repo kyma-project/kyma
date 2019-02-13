@@ -21,10 +21,8 @@ import (
 )
 
 const (
-	commonName            = "commonName"
-	application           = "application"
-	appCertificateURL     = "https://connector-service.kyma.cx/v1/applications/certificates"
-	runtimeCertificateURL = "https://connector-service.kyma.cx/v1/runtimes/certificates"
+	commonName  = "commonName"
+	application = "application"
 )
 
 type dummyClientContext struct{}
@@ -51,7 +49,6 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 	infoURL := "https://connector-service.test.cluster.kyma.cx/v1/applications/management/info"
 
 	urlApps := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
-	urlRuntimes := fmt.Sprintf("/v1/runtimes/signingRequests/info?token=%s", token)
 
 	subjectValues := certificates.CSRSubject{
 		Country:            country,
@@ -85,7 +82,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, appCertificateURL, infoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, host, subjectValues, AppURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -99,58 +96,12 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse csrInfoResponse
-		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, expectedSignUrl, infoResponse.CsrURL)
-		assert.EqualValues(t, expectedAPI.CertificatesURL, infoResponse.API.(*api).CertificatesURL)
-		assert.EqualValues(t, expectedAPI.InfoURL, infoResponse.API.(*api).InfoURL)
-		assert.EqualValues(t, expectedCertInfo, infoResponse.CertificateInfo)
-	})
-
-	t.Run("should successfully get csr info for runtime", func(t *testing.T) {
-		// given
-		newToken := "newToken"
-		expectedSignUrl := fmt.Sprintf("https://%s/v1/runtimes/certificates?token=%s", host, newToken)
-
-		expectedCertInfo := certInfo{
-			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),
-			Extensions:   "",
-			KeyAlgorithm: "rsa2048",
-		}
-
-		expectedAPI := api{
-			CertificatesURL: fmt.Sprintf(RuntimeURLFormat, host, CertsEndpoint),
-			InfoURL:         infoURL,
-		}
-
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
-
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, runtimeCertificateURL, infoURL, host, subjectValues, RuntimeURLFormat)
-
-		req, err := http.NewRequest(http.MethodPost, urlRuntimes, bytes.NewReader(tokenRequestRaw))
-		require.NoError(t, err)
-		rr := httptest.NewRecorder()
-
-		// when
-		infoHandler.GetCSRInfo(rr, req)
-
-		// then
-		responseBody, err := ioutil.ReadAll(rr.Body)
-		require.NoError(t, err)
-
-		var infoResponse csrInfoResponse
-		infoResponse.API = &api{}
-		err = json.Unmarshal(responseBody, &infoResponse)
-		require.NoError(t, err)
-
-		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.Equal(t, expectedSignUrl, infoResponse.CsrURL)
-		assert.EqualValues(t, expectedAPI.CertificatesURL, infoResponse.API.(*api).CertificatesURL)
-		assert.EqualValues(t, expectedAPI.InfoURL, infoResponse.API.(*api).InfoURL)
+		assert.EqualValues(t, expectedAPI, infoResponse.API)
 		assert.EqualValues(t, expectedCertInfo, infoResponse.CertificateInfo)
 	})
 
@@ -166,7 +117,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, appCertificateURL, predefinedGetInfoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, predefinedGetInfoURL, host, subjectValues, AppURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -180,12 +131,11 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse csrInfoResponse
-		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
-		assert.EqualValues(t, expectedAPI.InfoURL, infoResponse.API.(*api).InfoURL)
+		assert.EqualValues(t, expectedAPI.InfoURL, infoResponse.API.InfoURL)
 	})
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
@@ -196,7 +146,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, appCertificateURL, infoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, infoURL, host, subjectValues, AppURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -222,7 +172,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, appCertificateURL, infoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, host, subjectValues, AppURLFormat)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -267,7 +217,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, urlApps, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, appCertificateURL, infoURL, host, subjectValues, AppURLFormat)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, host, subjectValues, AppURLFormat)
 
 		rr := httptest.NewRecorder()
 
@@ -279,12 +229,11 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse csrInfoResponse
-		infoResponse.API = &api{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, rr.Code)
-		api := infoResponse.API.(*api)
+		api := infoResponse.API
 		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
 		assert.Equal(t, expectedEventsUrl, api.EventsURL)
 	})

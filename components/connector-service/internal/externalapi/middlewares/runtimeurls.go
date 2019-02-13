@@ -6,9 +6,8 @@ import (
 )
 
 const (
-	// TODO - discuss headers naming
-	BaseEventsHostHeader   = "Base-Events-Host"
-	BaseMetadataHostHeader = "Base-Metadata-Host"
+	BaseEventsHostHeader   = "EventsHost"
+	BaseMetadataHostHeader = "MetadataHost"
 )
 
 type runtimeURLsMiddleware struct {

@@ -14,11 +14,15 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
 )
 
+const (
+	AppURLFormat     = "https://%s/v1/applications/%s"
+	RuntimeURLFormat = "https://%s/v1/runtimes/%s"
+)
+
 type Config struct {
 	Middlewares          []mux.MiddlewareFunc
 	TokenManager         tokens.Manager
 	ContextExtractor     clientcontext.ConnectorClientExtractor
-	CertificateURL       string
 	GetInfoURL           string
 	ConnectorServiceHost string
 	Subject              certificates.CSRSubject
@@ -33,7 +37,7 @@ type CSRGetInfoHandler interface {
 	GetCSRInfo(w http.ResponseWriter, r *http.Request)
 }
 
-type MngmtGetInfoHandler interface {
+type ManagementGetInfoHandler interface {
 	GetManagementInfo(w http.ResponseWriter, r *http.Request)
 }
 
@@ -47,8 +51,8 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 	router.Path("/v1").Handler(http.RedirectHandler("/v1/api.yaml", http.StatusMovedPermanently)).Methods(http.MethodGet)
 	router.Path("/v1/api.yaml").Handler(NewStaticFileHandler(apiSpecPath)).Methods(http.MethodGet)
 
-	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenManager, appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateURL, appHandlerCfg.GetInfoURL, appHandlerCfg.ConnectorServiceHost, appHandlerCfg.Subject, AppURLFormat)
-	applicationManagementInfoHandler := NewManagementInfoHandler(appMngmtInfoHandlerCfg.ContextExtractor, appMngmtInfoHandlerCfg.ConnectorServiceHost)
+	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenManager, appHandlerCfg.ContextExtractor, appHandlerCfg.GetInfoURL, appHandlerCfg.ConnectorServiceHost, appHandlerCfg.Subject, AppURLFormat)
+	applicationManagementInfoHandler := NewManagementInfoHandler(appMngmtInfoHandlerCfg.ContextExtractor, appMngmtInfoHandlerCfg.ConnectorServiceHost, AppURLFormat)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.TokenManager, appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 
 	csrApplicationRouter := router.PathPrefix("/v1/applications/signingRequests").Subrouter()
@@ -64,8 +68,8 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 
 	httphelpers.WithMiddlewares(appMngmtInfoHandlerCfg.Middlewares, mngmtApplicationRouter)
 
-	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenManager, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateURL, runtimeHandlerCfg.GetInfoURL, runtimeHandlerCfg.ConnectorServiceHost, runtimeHandlerCfg.Subject, RuntimeURLFormat)
-	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeMngmtInfoHandlerCfg.ContextExtractor, runtimeMngmtInfoHandlerCfg.ConnectorServiceHost)
+	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenManager, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.GetInfoURL, runtimeHandlerCfg.ConnectorServiceHost, runtimeHandlerCfg.Subject, RuntimeURLFormat)
+	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeMngmtInfoHandlerCfg.ContextExtractor, runtimeMngmtInfoHandlerCfg.ConnectorServiceHost, RuntimeURLFormat)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.TokenManager, runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 
 	csrRuntimesRouter := router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()
@@ -74,7 +78,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg, appMngmtInfoHandlerCfg, runtim
 	certRuntimesRouter := router.PathPrefix("/v1/runtimes/certificates").Subrouter()
 	certRuntimesRouter.HandleFunc("", runtimeSignatureHandler.SignCSR).Methods(http.MethodPost)
 
-	httphelpers.WithMiddlewares(runtimeHandlerCfg.Middlewares, csrRuntimesRouter, certApplicationRouter)
+	httphelpers.WithMiddlewares(runtimeHandlerCfg.Middlewares, csrRuntimesRouter, certRuntimesRouter)
 
 	mngmtRuntimeRouter := router.PathPrefix("/v1/runtimes/management").Subrouter()
 	mngmtRuntimeRouter.HandleFunc("/info", runtimeManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)

@@ -8,18 +8,20 @@ import (
 )
 
 const (
-	RenewCertURLFormat = "https://%s/v1/applications/certificates/renewals"
+	RenewCertEndpoint = "certificates/renewals"
 )
 
 type ManagementInfoHandler struct {
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	connectorServiceHost     string
+	urlFormat                string
 }
 
-func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, connectorServiceHost string) *ManagementInfoHandler {
+func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, connectorServiceHost string, urlFormat string) *ManagementInfoHandler {
 	return &ManagementInfoHandler{
 		connectorClientExtractor: connectorClientExtractor,
 		connectorServiceHost:     connectorServiceHost,
+		urlFormat:                urlFormat,
 	}
 }
 
@@ -38,6 +40,6 @@ func (ih *ManagementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 func (ih *ManagementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
 	return mgmtURLs{
 		RuntimeURLs:  connectorClientContext.GetRuntimeUrls(),
-		RenewCertURL: fmt.Sprintf(RenewCertURLFormat, ih.connectorServiceHost),
+		RenewCertURL: fmt.Sprintf(ih.urlFormat, ih.connectorServiceHost, RenewCertEndpoint),
 	}
 }

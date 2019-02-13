@@ -111,7 +111,7 @@ func Test_ResolveClusterContextExtender(t *testing.T) {
 			Return(apperrors.Internal("error"))
 
 		// when
-		extender, err := ResolveClusterContextExtender(token, tokenResolver)
+		extender, err := NewClusterContextExtender(token, tokenResolver)
 
 		// then
 		require.Error(t, err)

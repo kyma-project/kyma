@@ -39,7 +39,7 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, host)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, host, AppURLFormat)
 
 		rr := httptest.NewRecorder()
 
@@ -51,12 +51,11 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse mgmtInfoReponse
-		infoResponse.URLs = &mgmtURLs{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		urls := infoResponse.URLs.(*mgmtURLs)
+		urls := infoResponse.URLs
 
 		assert.Equal(t, expectedMetadataURL, urls.MetadataURL)
 		assert.Equal(t, expectedEventsURL, urls.EventsURL)
@@ -67,7 +66,7 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 		//given
 		url := "/v1/runtimes/management/info"
 
-		expectedRenewalsURL := "https://connector-service.kyma.cx/v1/applications/certificates/renewals"
+		expectedRenewalsURL := "https://connector-service.kyma.cx/v1/runtimes/certificates/renewals"
 
 		clusterCtx := &clientcontext.ClusterContext{}
 
@@ -78,7 +77,7 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, host)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, host, RuntimeURLFormat)
 
 		rr := httptest.NewRecorder()
 
@@ -90,12 +89,11 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 		require.NoError(t, err)
 
 		var infoResponse mgmtInfoReponse
-		infoResponse.URLs = &mgmtURLs{}
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 		assert.Equal(t, http.StatusOK, rr.Code)
 
-		urls := infoResponse.URLs.(*mgmtURLs)
+		urls := infoResponse.URLs
 
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
 	})
