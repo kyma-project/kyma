@@ -18,8 +18,8 @@ const (
 	retryWaitTimeSeconds = 5 * time.Second
 	retryCount           = 20
 
-	baseEventsHostHeader   = "Base-Events-Host"
-	baseMetadataHostHeader = "Base-Metadata-Host"
+	baseEventsHostHeader   = "EventsHost"
+	baseMetadataHostHeader = "MetadataHost"
 )
 
 func TestConnector(t *testing.T) {

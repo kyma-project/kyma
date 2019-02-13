@@ -1,7 +1,6 @@
 package apitests
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 	"testing"

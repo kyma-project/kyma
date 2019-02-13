@@ -20,7 +20,6 @@ const (
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
 	GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error)
-	GetMgmInfo(t *testing.T, request *http.Request) (*ManagementInfoResponse, *Error)
 	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
 }
 
