@@ -59,10 +59,18 @@ function configureGCloud() {
             exit 1
         fi
 
-         echo "${saKey}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
+        echo "${saKey}" > "${GOOGLE_APPLICATION_CREDENTIALS}"
 
         gcloud config set project "${projectName}"
+        if [[ $? -ne 0 ]] ; then
+          exit 1
+        fi
+
         gcloud auth activate-service-account --key-file=${GOOGLE_APPLICATION_CREDENTIALS}
+        if [[ $? -ne 0 ]] ; then
+          exit 1
+        fi
+
     else
         return 1
     fi
