@@ -12,7 +12,7 @@ data:
     - name: namespace-controller-utilization-rule
       rules:
       - alert: namespace-controller-memory-usage-alert
-        expr: ((scalar(container_memory_usage_bytes{container_name="namespace-controller"}) / max(kube_pod_container_resource_limits_memory_bytes{container="namespace-controller"}) by (container_name)) > bool {{ .Values.alertValues.memoryRatio }}) == 1
+        expr: ((scalar(container_memory_usage_bytes{container_name="namespace-controller"}) / max(kube_pod_container_resource_limits_memory_bytes{container="namespace-controller"})) > bool {{ .Values.alertValues.memoryRatio }}) == 1
         for: 15s
         labels:
           severity: high
