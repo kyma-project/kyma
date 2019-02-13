@@ -11,4 +11,4 @@ To change the maximum payload size for an API definition, edit the configuration
 kubectl -n kyma-integration edit ingress {APPLICATION_NAME}-application
 ```
 
-The maximum payload size is defined by the `nginx.ingress.kubernetes.io/proxy-body-size` annotation. By default, every Application you create comes with the payload limit set to 5 MB. You can adjust the size to fit the needs of your implementation.
+The maximum payload size is defined by the `nginx.ingress.kubernetes.io/proxy-body-size` annotation. By default, every Application you create comes with the payload size limit set to 5 MB. You can adjust it to fit the needs of your implementation.
