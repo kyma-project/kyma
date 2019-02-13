@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/pkg/errors"
 	"net/http"
@@ -33,8 +34,11 @@ func (r RequestHandler) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 	}
 	defer rq.MultipartForm.RemoveAll()
 
-	//TODO: Handle directory param
+	//TODO: Handle directory param + randomize if not specified
 	//directory := rq.MultipartForm.Value["directory"]
+	//if directory := "" {
+	//
+	//}
 
 	privateFiles := rq.MultipartForm.File["private"]
 	publicFiles := rq.MultipartForm.File["public"]
@@ -48,13 +52,13 @@ func (r RequestHandler) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
 		for _, file := range publicFiles {
 			fileToUploadCh <- uploader.FileUpload{
 				Bucket: r.buckets.Public,
-				File:   file,
+				File:   fileheader.FromMultipart(file),
 			}
 		}
 		for _, file := range privateFiles {
 			fileToUploadCh <- uploader.FileUpload{
 				Bucket: r.buckets.Private,
-				File:   file,
+				File:   fileheader.FromMultipart(file),
 			}
 		}
 		close(fileToUploadCh)

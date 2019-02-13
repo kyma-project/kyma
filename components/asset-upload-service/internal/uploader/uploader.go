@@ -2,8 +2,8 @@ package uploader
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
 	"io"
-	"mime/multipart"
 	"strings"
 	"sync"
 	"time"
@@ -21,7 +21,7 @@ type MinioClient interface {
 
 type FileUpload struct {
 	Bucket string
-	File   *multipart.FileHeader
+	File   fileheader.FileHeader
 }
 
 // Uploader is an abstraction layer for Minio client
@@ -91,18 +91,18 @@ func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) error 
 	file := fileUpload.File
 	f, err := fileUpload.File.Open()
 	if err != nil {
-		return errors.Wrapf(err, "while opening file %s", file.Filename)
+		return errors.Wrapf(err, "while opening file %s", file.Filename())
 	}
 	defer f.Close()
 
-	glog.Infof("Uploading `%s`...\n", file.Filename)
+	glog.Infof("Uploading `%s`...\n", file.Filename())
 
-	_, err = u.client.PutObjectWithContext(ctx, fileUpload.Bucket, file.Filename, f, file.Size, minio.PutObjectOptions{})
+	_, err = u.client.PutObjectWithContext(ctx, fileUpload.Bucket, file.Filename(), f, file.Size(), minio.PutObjectOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "Error while uploading file `%s` into `%s`", file.Filename, fileUpload.Bucket)
+		return errors.Wrapf(err, "Error while uploading file `%s` into `%s`", file.Filename(), fileUpload.Bucket)
 	}
 
-	glog.Infof("Upload succeeded for `%s`.\n", file.Filename)
+	glog.Infof("Upload succeeded for `%s`.\n", file.Filename())
 
 	return nil
 }
