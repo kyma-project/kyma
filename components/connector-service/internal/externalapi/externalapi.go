@@ -15,13 +15,13 @@ import (
 )
 
 type Config struct {
-	Middlewares      []mux.MiddlewareFunc
-	TokenManager     tokens.Manager
-	ContextExtractor clientcontext.ConnectorClientExtractor
-	ManagementInfoURL       string
-	BaseURL          string
-	Subject          certificates.CSRSubject
-	CertService      certificates.Service
+	Middlewares       []mux.MiddlewareFunc
+	TokenManager      tokens.Manager
+	ContextExtractor  clientcontext.ConnectorClientExtractor
+	ManagementInfoURL string
+	BaseURL           string
+	Subject           certificates.CSRSubject
+	CertService       certificates.Service
 }
 
 type SignatureHandler interface {

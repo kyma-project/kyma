@@ -123,13 +123,13 @@ func newExternalHandler(tokenResolver tokens.Resolver, tokenManagerProvider toke
 	baseAppURL := fmt.Sprintf(AppURLFormat, opts.connectorServiceHost)
 
 	appHandlerConfig := externalapi.Config{
-		TokenManager:     tokenManagerProvider.WithTTL(appTokenTTLMinutes),
-		ManagementInfoURL:    opts.appsInfoURL,
-		BaseURL:          baseAppURL,
-		Subject:          subjectValues,
-		Middlewares:      []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
-		ContextExtractor: clientcontext.ExtractApplicationContext,
-		CertService:      certificateService,
+		TokenManager:      tokenManagerProvider.WithTTL(appTokenTTLMinutes),
+		ManagementInfoURL: opts.appsInfoURL,
+		BaseURL:           baseAppURL,
+		Subject:           subjectValues,
+		Middlewares:       []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
+		ContextExtractor:  clientcontext.ExtractApplicationContext,
+		CertService:       certificateService,
 	}
 
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenResolver, clientcontext.NewClusterContextExtender)
@@ -138,13 +138,13 @@ func newExternalHandler(tokenResolver tokens.Resolver, tokenManagerProvider toke
 	baseRuntimeURL := fmt.Sprintf(RuntimeURLFormat, opts.connectorServiceHost)
 
 	runtimeHandlerConfig := externalapi.Config{
-		TokenManager:     tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
-		ManagementInfoURL:    opts.runtimesInfoURL,
-		BaseURL:          baseRuntimeURL,
-		Subject:          subjectValues,
-		Middlewares:      []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
-		ContextExtractor: clientcontext.ExtractClusterContext,
-		CertService:      certificateService,
+		TokenManager:      tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
+		ManagementInfoURL: opts.runtimesInfoURL,
+		BaseURL:           baseRuntimeURL,
+		Subject:           subjectValues,
+		Middlewares:       []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
+		ContextExtractor:  clientcontext.ExtractClusterContext,
+		CertService:       certificateService,
 	}
 
 	appContextFromSubjMiddleware := clientcontextmiddlewares.NewAppContextFromSubjMiddleware()
