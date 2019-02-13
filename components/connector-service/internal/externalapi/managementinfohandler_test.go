@@ -14,7 +14,6 @@ import (
 )
 
 func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
-	host := "connector-service.kyma.cx"
 
 	t.Run("should successfully get management info urls for application", func(t *testing.T) {
 		//given
@@ -22,7 +21,7 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 
 		expectedMetadataURL := "https://metadata.base.path/application/v1/metadata/services"
 		expectedEventsURL := "https://events.base.path/application/v1/events"
-		expectedRenewalsURL := "https://connector-service.kyma.cx/v1/applications/certificates/renewals"
+		expectedRenewalsURL := ""
 
 		extClientCtx := &clientcontext.ExtendedApplicationContext{
 			ApplicationContext: clientcontext.ApplicationContext{},
@@ -39,7 +38,7 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, host, AppURLFormat)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor)
 
 		rr := httptest.NewRecorder()
 
@@ -66,7 +65,7 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 		//given
 		url := "/v1/runtimes/management/info"
 
-		expectedRenewalsURL := "https://connector-service.kyma.cx/v1/runtimes/certificates/renewals"
+		expectedRenewalsURL := ""
 
 		clusterCtx := &clientcontext.ClusterContext{}
 
@@ -77,7 +76,7 @@ func TestMngmtInfoHandler_GetCSRInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, host, RuntimeURLFormat)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor)
 
 		rr := httptest.NewRecorder()
 

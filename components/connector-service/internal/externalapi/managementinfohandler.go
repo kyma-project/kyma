@@ -1,7 +1,6 @@
 package externalapi
 
 import (
-	"fmt"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 	"net/http"
@@ -13,15 +12,11 @@ const (
 
 type ManagementInfoHandler struct {
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
-	connectorServiceHost     string
-	urlFormat                string
 }
 
-func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, connectorServiceHost string, urlFormat string) *ManagementInfoHandler {
+func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor) *ManagementInfoHandler {
 	return &ManagementInfoHandler{
 		connectorClientExtractor: connectorClientExtractor,
-		connectorServiceHost:     connectorServiceHost,
-		urlFormat:                urlFormat,
 	}
 }
 
@@ -40,6 +35,6 @@ func (ih *ManagementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 func (ih *ManagementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
 	return mgmtURLs{
 		RuntimeURLs:  connectorClientContext.GetRuntimeUrls(),
-		RenewCertURL: fmt.Sprintf(ih.urlFormat, ih.connectorServiceHost, RenewCertEndpoint),
+		RenewCertURL: "",
 	}
 }

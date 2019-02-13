@@ -10,14 +10,14 @@ import (
 )
 
 const (
-	subject = "C=US, ST=California, L=San Francisco, O=Wikimedia Foundation, Inc., CN=test-app"
+	subject = "/C=DE/ST=Waldorf/L=Waldorf/O=Organization/OU=OrgUnit/CN=test-app"
 )
 
 func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
+	expectedCName := "test-app"
+
 	t.Run("should extract Common Name", func(t *testing.T) {
 		//given
-		expectedCName := "test-app"
-
 		req, err := http.NewRequest("GET", "/", nil)
 		require.NoError(t, err)
 		req.Header.Set(clientcontext.SubjectHeader, subject)
@@ -31,8 +31,6 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 	t.Run("should set context based on header", func(t *testing.T) {
 		// given
-		expectedCName := "test-app"
-
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			clusterCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
@@ -60,7 +58,6 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 	t.Run("should return 400 when no Subject header is passed", func(t *testing.T) {
 		// given
-
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
