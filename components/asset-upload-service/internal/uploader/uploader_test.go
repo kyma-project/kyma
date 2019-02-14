@@ -13,11 +13,9 @@ import (
 	"time"
 
 	"github.com/minio/minio-go"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestUploader_UploadFiles(t *testing.T) {
-
 	t.Run("Success", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
@@ -37,12 +35,29 @@ func TestUploader_UploadFiles(t *testing.T) {
 
 		files := []uploader.FileUpload{
 			{
-				Bucket: "test",
-				File:   mock1,
+				Bucket:    "test",
+				File:      mock1,
+				Directory: "testDir",
 			},
 			{
+				Bucket:    "test2",
+				File:      mock2,
+				Directory: "testDir",
+			},
+		}
+
+		expectedResult := []uploader.UploadResult{
+			{
+				FileName: "test1.yaml",
+				RemotePath: "https://minio.example.com/test/testDir/test1.yaml",
+				Bucket: "test",
+				Size: -1,
+			},
+			{
+				FileName: "test2.yaml",
+				RemotePath: "https://minio.example.com/test2/testDir/test2.yaml",
 				Bucket: "test2",
-				File:   mock2,
+				Size: -1,
 			},
 		}
 
@@ -53,17 +68,18 @@ func TestUploader_UploadFiles(t *testing.T) {
 		ctxArgFn := func(ctx context.Context) bool { return true }
 
 		clientMock := new(automock.MinioClient)
-		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "test", "test1.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
-		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "test2", "test2.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
+		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "test", "testDir/test1.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
+		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "test2", "testDir/test2.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
 		defer clientMock.AssertExpectations(t)
 
-		uploadClient := uploader.New(clientMock, timeout, 5)
+		uploadClient := uploader.New(clientMock, "https://minio.example.com", timeout, 5)
 
 		// When
-		err = uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
+		res, err := uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
+		g.Expect(res).To(gomega.Equal(expectedResult))
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -87,12 +103,14 @@ func TestUploader_UploadFiles(t *testing.T) {
 		bucketName := "test"
 		files := []uploader.FileUpload{
 			{
-				Bucket: bucketName,
-				File:   mock1,
+				Bucket:    bucketName,
+				File:      mock1,
+				Directory: "testDir",
 			},
 			{
-				Bucket: bucketName,
-				File:   mock2,
+				Bucket:    bucketName,
+				File:      mock2,
+				Directory: "testDir",
 			},
 		}
 
@@ -103,14 +121,14 @@ func TestUploader_UploadFiles(t *testing.T) {
 		ctxArgFn := func(ctx context.Context) bool { return true }
 
 		clientMock := new(automock.MinioClient)
-		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), bucketName, "test1.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), testErr).Once()
-		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), bucketName, "test2.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), testErr).Once()
+		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), bucketName, "testDir/test1.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), testErr).Once()
+		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), bucketName, "testDir/test2.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), testErr).Once()
 		defer clientMock.AssertExpectations(t)
 
-		uploadClient := uploader.New(clientMock, timeout, 5)
+		uploadClient := uploader.New(clientMock, "https://minio.example.com", timeout, 5)
 
 		// When
-		err = uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
+		_, err = uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -123,24 +141,88 @@ func TestUploader_UploadFiles(t *testing.T) {
 	})
 }
 
-func TestConsumeUploadErrors(t *testing.T) {
-	t.Run("Returning no error in empty channel", func(t *testing.T) {
-		noErrorChan := make(chan error, 2)
-		close(noErrorChan)
+func TestUploader_PopulateErrors(t *testing.T) {
+	t.Run("Errors", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
 
-		actualError := uploader.ConsumeUploadErrors(noErrorChan)
-		assert.Nil(t, actualError)
+		errCh := make(chan error, 2)
+		errCh <- errors.New("Test 1")
+		errCh <- errors.New("Test 2")
+		close(errCh)
+
+		u := uploader.Uploader{}
+
+		// When
+		err := u.PopulateErrors(errCh)
+
+		// Then
+		g.Expect(err).To(gomega.HaveOccurred())
+		g.Expect(err.Error()).To(gomega.Equal("Test 1;\nTest 2"))
 	})
 
-	t.Run("Consolidating errors from channel", func(t *testing.T) {
-		errorChan := make(chan error, 2)
-		errorChan <- errors.New("Test 1")
-		errorChan <- errors.New("Test 2")
-		close(errorChan)
+	t.Run("No Errors", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
 
-		actualError := uploader.ConsumeUploadErrors(errorChan)
-		assert.EqualError(t, actualError, "Test 1;\nTest 2")
+		errCh := make(chan error)
+		close(errCh)
+
+		u := uploader.Uploader{}
+
+		// When
+		err := u.PopulateErrors(errCh)
+
+		// Then
+		g.Expect(err).NotTo(gomega.HaveOccurred())
 	})
+}
+
+func TestUploader_PopulateResults(t *testing.T) {
+	t.Run("Results", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		res1 := uploader.UploadResult{
+			FileName: "test.yaml",
+		}
+		res2 := uploader.UploadResult{
+			FileName: "test2.yaml",
+		}
+
+		resultsCh := make(chan *uploader.UploadResult, 3)
+		resultsCh <- &res1
+		resultsCh <- &res2
+		resultsCh <- nil
+		close(resultsCh)
+
+		u := uploader.Uploader{}
+
+		// When
+		res := u.PopulateResults(resultsCh)
+
+		// Then
+		g.Expect(res).To(gomega.HaveLen(2))
+		g.Expect(res).To(gomega.ContainElement(res1))
+		g.Expect(res).To(gomega.ContainElement(res2))
+	})
+
+	t.Run("No Results", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+
+		resultsCh := make(chan *uploader.UploadResult, 3)
+		close(resultsCh)
+
+		u := uploader.Uploader{}
+
+		// When
+		res := u.PopulateResults(resultsCh)
+
+		// Then
+		g.Expect(res).To(gomega.BeEmpty())
+	})
+
 }
 
 func testUploads(files []uploader.FileUpload) (chan uploader.FileUpload, int) {

@@ -1,6 +1,7 @@
 package bucket_test
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket/automock"
 	"github.com/onsi/gomega"
@@ -124,11 +125,13 @@ func TestHandler_CreateSystemBuckets(t *testing.T) {
 		minioCli := &automock.BucketClient{}
 		handler := bucket.NewHandler(minioCli, cfg)
 
-		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(publicPrefix))).Return(false, nil).Times(5)
-		minioCli.On("MakeBucket", mock.MatchedBy(testBucketNameFn(publicPrefix)), region).Return(testErr).Times(5)
+		times := 5
 
-		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(privatePrefix))).Return(false, nil).Times(5)
-		minioCli.On("MakeBucket", mock.MatchedBy(testBucketNameFn(privatePrefix)), region).Return(testErr).Times(5)
+		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(publicPrefix))).Return(false, nil).Maybe()
+		minioCli.On("MakeBucket", mock.MatchedBy(testBucketNameFn(publicPrefix)), region).Return(testErr).Maybe()
+
+		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(privatePrefix))).Return(false, nil).Times(times)
+		minioCli.On("MakeBucket", mock.MatchedBy(testBucketNameFn(privatePrefix)), region).Return(testErr).Times(times)
 
 		defer minioCli.AssertExpectations(t)
 
@@ -241,6 +244,7 @@ func TestBucketHandler_CreateIfDoesntExist(t *testing.T) {
 
 func testBucketNameFn(prefix string) func(string) bool {
 	return func(bucketName string) bool {
+		fmt.Println("bucket name", bucketName)
 		return strings.HasPrefix(bucketName, prefix)
 	}
 }

@@ -123,8 +123,7 @@ func (h *Handler) tryCreatingBucket(prefix string) (string, error) {
 }
 
 func (h *Handler) generateBucketName(prefix string) string {
-	epochMillis := time.Now().UnixNano() / 1000000
-	suffix := strconv.FormatInt(epochMillis, 36)
-
+	unixNano := time.Now().UnixNano()
+	suffix := strconv.FormatInt(unixNano, 32)
 	return fmt.Sprintf("%s-%s", prefix, suffix)
 }
