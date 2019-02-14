@@ -21,13 +21,28 @@ func NewApiStatusHelper(kymaInterface kyma.Interface, api *kymaApi.Api) *ApiStat
 	}
 }
 
+func (su *ApiStatusHelper) SetValidationStatus(validationStatus kymaMeta.StatusCode) {
+	su.apiCopy.Status.ValidationStatus = validationStatus
+	su.hasChanged = true
+}
+
 func (su *ApiStatusHelper) SetAuthenticationStatus(authStatus *kymaMeta.GatewayResourceStatus) {
 	su.apiCopy.Status.AuthenticationStatus = *authStatus
 	su.hasChanged = true
 }
 
+func (su *ApiStatusHelper) SetAuthenticationStatusCode(code kymaMeta.StatusCode) {
+	su.apiCopy.Status.AuthenticationStatus.Code = code
+	su.hasChanged = true
+}
+
 func (su *ApiStatusHelper) SetVirtualServiceStatus(virtualServiceStatus *kymaMeta.GatewayResourceStatus) {
 	su.apiCopy.Status.VirtualServiceStatus = *virtualServiceStatus
+	su.hasChanged = true
+}
+
+func (su *ApiStatusHelper) SetVirtualServiceStatusCode(code kymaMeta.StatusCode) {
+	su.apiCopy.Status.VirtualServiceStatus.Code = code
 	su.hasChanged = true
 }
 

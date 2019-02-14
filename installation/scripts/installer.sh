@@ -63,7 +63,7 @@ if [ $LOCAL ]; then
 
     INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
     INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
-    
+
 fi
 
 if [ $CR_PATH ]; then
@@ -91,11 +91,11 @@ if [ ${ADMIN_PASSWORD} ]; then
     COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
 fi
 
-if [ $KNATIVE ]; then
-    COMBO_YAML=$(sed 's/global\.knative: .*/global.knative: "true"/g' <<<"$COMBO_YAML")
-fi
-
 kubectl apply -f - <<<"$COMBO_YAML"
+
+if [ $KNATIVE ]; then
+    kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
+fi
 
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh

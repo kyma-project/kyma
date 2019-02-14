@@ -3,9 +3,9 @@ title: Publish a service Docker image and deploy it to Kyma
 type: Tutorials
 ---
 
-In the tutorial for local development of a service, you can learn how to develop a service locally. You can immediately see all the changes made in the local Kyma installation based on Minikube, without building a Docker image and publishing it to a Docker registry, such as the Docker Hub.
+Follow this tutorial to learn how to develop a service locally. You can immediately see all the changes made in a local Kyma installation based on Minikube, without building a Docker image and publishing it to a Docker registry, such as the Docker Hub.
 
-Using the same example service, this guide explains how to build a Docker image for your service, publish it to the Docker registry, and deploy it to the local Kyma installation. The instructions base on Minikube, but you can also use the image that you create, and the Kubernetes resource definitions that you use on the Kyma cluster.
+Using the same example service, this tutorial explains how to build a Docker image for your service, publish it to the Docker registry, and deploy it to the local Kyma installation. The instructions base on Minikube, but you can also use the image that you create and the Kubernetes resource definitions that you use on the Kyma cluster.
 
 >**NOTE:** The deployment works both on local Kyma installation and on the Kyma cluster.
 
@@ -34,24 +34,17 @@ This guide bases on Docker Hub. However, there are many other Docker registries 
 
 ### Push the image to the Docker Hub
 
-1. Tag the local image with a proper name required in the registry: `docker tag example-http-db-service {username}/example-http-db-service:0.0.1`.
-2. Push the image to the registry: `docker push {username}/example-http-db-service:0.0.1`.
-```shell
-#This is how it looks in the terminal
+1. Tag the local image with a proper name required in the registry: `docker tag example-http-db-service {USERNAME}/example-http-db-service:0.0.1`.
+2. Push the image to the registry: `docker push {USERNAME}/example-http-db-service:0.0.1`.
 
-The push refers to repository [docker.io/{username}/example-http-db-service]
-4302273b9e11: Pushed
-5835bd463c0e: Pushed
-0.0.1: digest: sha256:9ec28342806f50b92c9b42fa36d979c0454aafcdda6845b362e2efb9816d1439 size: 734
-```
->**NOTE:** To verify if the image is successfully published, check if it is available online at the following address: `https://hub.docker.com/r/{username}/example-http-db-service/`
+>**NOTE:** To verify if the image is successfully published, check if it is available online at the following address: `https://hub.docker.com/r/{USERNAME}/example-http-db-service/`
 
 ### Deploy to Kyma
 
 The `http-db-service` example contains sample Kubernetes resource definitions needed for the basic Kyma deployment. Find them in the `deployment` folder. Perform the following modifications to use your newly-published image in the local Kyma installation:
 
 1. Go to the `deployment` directory.
-2. Edit the `deployment.yaml` file. Change the **image** attribute to `{username}/example-http-db-service:0.0.1`.
+2. Edit the `deployment.yaml` file. Change the **image** attribute to `{USERNAME}/example-http-db-service:0.0.1`.
 3. Create the new resources in local Kyma using these commands: `kubectl create -f deployment.yaml -n stage && kubectl create -f ingress.yaml -n stage`.
 4. Edit your `/etc/hosts` to add the new `http-db-service.kyma.local` host to the list of hosts associated with your `minikube ip`. Follow these steps:
     - Open a terminal window and run: `sudo vim /etc/hosts`

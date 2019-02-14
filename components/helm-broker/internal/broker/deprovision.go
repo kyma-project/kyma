@@ -14,6 +14,7 @@ import (
 
 type deprovisionService struct {
 	instanceGetter          instanceGetter
+	instanceRemover         instanceRemover
 	instanceStateGetter     instanceStateDeprovisionGetter
 	operationInserter       operationInserter
 	operationUpdater        operationUpdater
@@ -90,7 +91,7 @@ func (svc *deprovisionService) Deprovision(ctx context.Context, osbCtx OsbContex
 		return nil, errors.Wrap(err, "while inserting instance operation to storage")
 	}
 
-	svc.doAsync(ctx, iID, opID, i.Namespace, i.ReleaseName)
+	svc.doAsync(ctx, iID, opID, i.ReleaseName)
 
 	opKey := osb.OperationKey(op.OperationID)
 	resp := &osb.DeprovisionResponse{
@@ -101,15 +102,15 @@ func (svc *deprovisionService) Deprovision(ctx context.Context, osbCtx OsbContex
 	return resp, nil
 }
 
-func (svc *deprovisionService) doAsync(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, namespace internal.Namespace, releaseName internal.ReleaseName) {
+func (svc *deprovisionService) doAsync(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, releaseName internal.ReleaseName) {
 	if svc.testHookAsyncCalled != nil {
 		svc.testHookAsyncCalled(opID)
 	}
-	go svc.do(ctx, iID, opID, namespace, releaseName)
+	go svc.do(ctx, iID, opID, releaseName)
 }
 
 // do is called asynchronously
-func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, namespace internal.Namespace, releaseName internal.ReleaseName) {
+func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, releaseName internal.ReleaseName) {
 
 	fDo := func() error {
 		if err := svc.helmDeleter.Delete(releaseName); err != nil {
@@ -125,7 +126,15 @@ func (svc *deprovisionService) do(ctx context.Context, iID internal.InstanceID, 
 		// 3. Then deprovisioning is wrongly marked as failed
 		case err == nil, IsNotFoundError(err):
 		default:
-			return fmt.Errorf("cannot remove instance bind data from storage: %s", err.Error())
+			return errors.Wrap(err, "while removing instance bind data from storage")
+		}
+
+		// remove instance entity from storage
+		err = svc.instanceRemover.Remove(iID)
+		switch {
+		case err == nil, IsNotFoundError(err):
+		default:
+			return errors.Wrap(err, "while removing instance entity from storage")
 		}
 
 		return nil

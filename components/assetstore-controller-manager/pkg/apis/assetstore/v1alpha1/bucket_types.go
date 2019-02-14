@@ -43,6 +43,7 @@ const (
 
 // BucketStatus defines the observed state of Bucket
 type BucketStatus struct {
+	Url               string      `json:"url,omitempty"`
 	Phase             BucketPhase `json:"phase,omitempty"`
 	Message           string      `json:"message,omitempty"`
 	Reason            string      `json:"reason,omitempty"`

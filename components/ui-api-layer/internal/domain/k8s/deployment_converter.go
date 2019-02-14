@@ -14,7 +14,7 @@ func (c *deploymentConverter) ToGQL(in *api.Deployment) *gqlschema.Deployment {
 
 	return &gqlschema.Deployment{
 		Name:              in.Name,
-		Environment:       in.Namespace,
+		Namespace:         in.Namespace,
 		CreationTimestamp: in.CreationTimestamp.Time,
 		Labels:            in.Labels,
 		Status:            c.toGQLStatus(*in),
@@ -56,8 +56,8 @@ func (c *deploymentConverter) toGQLCondition(in api.DeploymentCondition) gqlsche
 		Message:                 in.Message,
 		LastUpdateTimestamp:     in.LastUpdateTime.Time,
 		LastTransitionTimestamp: in.LastTransitionTime.Time,
-		Type:   string(in.Type),
-		Status: string(in.Status),
+		Type:                    string(in.Type),
+		Status:                  string(in.Status),
 	}
 }
 

@@ -13,16 +13,20 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
 | `ark` | ✅ | ⛔️ |
+| `assetstore` | ✅ | ✅ |
 | `dex` | ✅ | ✅ |
+| `helm-broker` | ✅ | ✅ |
 | `istio` | ✅ | ✅ |
+| `istio-kyma-patch` | ✅ | ✅ |
 | `jaeger` | ✅ | ⛔️ |
 | `logging` | ✅ | ⛔️ |
 | `monitoring` | ✅ | ⛔️ |
 | `prometheus-operator` | ✅ | ⛔️ |
 | `service-catalog` | ✅ | ✅ |
+| `service-catalog-addons` | ✅ | ✅ |
 | `nats-streaming` | ✅ | ✅ |
 
-### Installation guides
+## Installation guides
 
 Follow these installation guides to install Kyma locally:
 

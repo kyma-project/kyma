@@ -3,6 +3,8 @@ package bucket
 import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/buckethandler"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/cleaner"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
 	"github.com/onsi/gomega"
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
@@ -71,14 +73,14 @@ type testSuite struct {
 	finishTest func()
 }
 
-func prepareReconcilerTest(t *testing.T, handler buckethandler.BucketHandler) *testSuite {
+func prepareReconcilerTest(t *testing.T, handler buckethandler.BucketHandler, cleaner cleaner.Cleaner) *testSuite {
 	g := gomega.NewGomegaWithT(t)
 	mgr, err := manager.New(cfg, manager.Options{})
 	c := mgr.GetClient()
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	reconciler, err := newReconciler(mgr, handler, 60*time.Hour)
+	reconciler, err := newReconciler(mgr, handler, cleaner, finalizer.New(DeleteBucketFinalizerName), 60*time.Hour, "https://minio.kyma.local")
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	recFn, requests := SetupTestReconcile(reconciler)

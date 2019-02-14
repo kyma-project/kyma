@@ -21,7 +21,7 @@ import (
 //go:generate mockery -name=serviceClassListGetter -output=automock -outpkg=automock -case=underscore
 type serviceClassListGetter interface {
 	serviceClassGetter
-	List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceClass, error)
+	List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceClass, error)
 }
 
 //go:generate mockery -name=gqlServiceClassConverter -output=automock -outpkg=automock -case=underscore
@@ -32,35 +32,37 @@ type gqlServiceClassConverter interface {
 
 //go:generate mockery -name=servicePlanLister  -output=automock -outpkg=automock -case=underscore
 type servicePlanLister interface {
-	ListForServiceClass(name string, environment string) ([]*v1beta1.ServicePlan, error)
+	ListForServiceClass(name string, namespace string) ([]*v1beta1.ServicePlan, error)
 }
 
 //go:generate mockery -name=instanceListerByServiceClass -output=automock -outpkg=automock -case=underscore
 type instanceListerByServiceClass interface {
-	ListForServiceClass(className, externalClassName string, environment string) ([]*v1beta1.ServiceInstance, error)
+	ListForServiceClass(className, externalClassName string, namespace string) ([]*v1beta1.ServiceInstance, error)
 }
 
 type serviceClassResolver struct {
-	classLister      serviceClassListGetter
-	planLister       servicePlanLister
-	instanceLister   instanceListerByServiceClass
-	contentRetriever shared.ContentRetriever
-	classConverter   gqlServiceClassConverter
-	planConverter    gqlServicePlanConverter
+	classLister       serviceClassListGetter
+	planLister        servicePlanLister
+	instanceLister    instanceListerByServiceClass
+	contentRetriever  shared.ContentRetriever
+	classConverter    gqlServiceClassConverter
+	instanceConverter gqlServiceInstanceConverter
+	planConverter     gqlServicePlanConverter
 }
 
 func newServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, contentRetriever shared.ContentRetriever) *serviceClassResolver {
 	return &serviceClassResolver{
-		classLister:      classLister,
-		planLister:       planLister,
-		instanceLister:   instanceLister,
-		contentRetriever: contentRetriever,
-		classConverter:   &serviceClassConverter{},
-		planConverter:    &servicePlanConverter{},
+		classLister:       classLister,
+		planLister:        planLister,
+		instanceLister:    instanceLister,
+		contentRetriever:  contentRetriever,
+		classConverter:    &serviceClassConverter{},
+		planConverter:     &servicePlanConverter{},
+		instanceConverter: &serviceInstanceConverter{},
 	}
 }
-func (r *serviceClassResolver) ServiceClassQuery(ctx context.Context, name, environment string) (*gqlschema.ServiceClass, error) {
-	serviceClass, err := r.classLister.Find(name, environment)
+func (r *serviceClassResolver) ServiceClassQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceClass, error) {
+	serviceClass, err := r.classLister.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s with name %s", pretty.ServiceClass, name))
 		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(name))
@@ -78,8 +80,8 @@ func (r *serviceClassResolver) ServiceClassQuery(ctx context.Context, name, envi
 	return result, nil
 }
 
-func (r *serviceClassResolver) ServiceClassesQuery(ctx context.Context, environment string, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
-	items, err := r.classLister.List(environment, pager.PagingParams{
+func (r *serviceClassResolver) ServiceClassesQuery(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ServiceClass, error) {
+	items, err := r.classLister.List(namespace, pager.PagingParams{
 		First:  first,
 		Offset: offset,
 	})
@@ -104,7 +106,7 @@ func (r *serviceClassResolver) ServiceClassPlansField(ctx context.Context, obj *
 		return nil, gqlerror.NewInternal()
 	}
 
-	items, err := r.planLister.ListForServiceClass(obj.Name, obj.Environment)
+	items, err := r.planLister.ListForServiceClass(obj.Name, obj.Namespace)
 	if err != nil {
 		glog.Error(errors.Wrap(err, "while getting %s"), pretty.ServicePlans)
 		return nil, gqlerror.New(err, pretty.ServicePlans)
@@ -119,19 +121,35 @@ func (r *serviceClassResolver) ServiceClassPlansField(ctx context.Context, obj *
 	return convertedPlans, nil
 }
 
-func (r *serviceClassResolver) ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
+func (r *serviceClassResolver) ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
+
 	if obj == nil {
 		glog.Error(fmt.Errorf("%s cannot be empty in order to resolve activated field", pretty.ServiceClass))
-		return false, gqlerror.NewInternal()
+		return nil, gqlerror.NewInternal()
 	}
 
-	items, err := r.instanceLister.ListForServiceClass(obj.Name, obj.ExternalName, obj.Environment)
+	items, err := r.instanceLister.ListForServiceClass(obj.Name, obj.ExternalName, obj.Namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s for %s %s", pretty.ServiceInstances, pretty.ServiceClass, obj.Name))
-		return false, gqlerror.New(err, pretty.ServiceInstances)
+		return nil, gqlerror.New(err, pretty.ServiceInstances)
 	}
 
-	return len(items) > 0, nil
+	instances, err := r.instanceConverter.ToGQLs(items)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
+		return nil, gqlerror.New(err, pretty.ServiceInstance)
+	}
+
+	return instances, nil
+}
+
+func (r *serviceClassResolver) ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error) {
+	instances, err := r.ServiceClassInstancesField(ctx, obj)
+	if err != nil {
+		return false, err
+	}
+
+	return len(instances) > 0, nil
 }
 
 func (r *serviceClassResolver) ServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {

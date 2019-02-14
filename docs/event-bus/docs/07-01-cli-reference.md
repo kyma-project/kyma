@@ -6,7 +6,7 @@ title: CLI reference
 
 ## Details
 
-This section describes the resource names to use in the kubectl command line, the command syntax, and examples of use.
+This section describes the resource names to use in kubectl, the command syntax, and examples of use.
 
 ### Resource types
 
@@ -18,7 +18,7 @@ Event Bus operations use the following resources:
 
 ### Syntax
 
-Follow the `kubectl` syntax, `kubectl {command} {type} {name} {flags}`, where:
+Follow the kubectl syntax, `kubectl {command} {type} {name} {flags}`, where:
 
 * {command} is any command, such as `describe`.
 * {type} is a resource type, such as `clusterserviceclass`.

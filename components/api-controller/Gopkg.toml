@@ -39,6 +39,10 @@ required = [
   name = "github.com/satori/go.uuid"
   version = "1.2.0"
 
+[[constraint]]
+  name = "github.com/smartystreets/goconvey"
+  version = "1.6.3"
+
 [prune]
   go-tests = true
   unused-packages = true

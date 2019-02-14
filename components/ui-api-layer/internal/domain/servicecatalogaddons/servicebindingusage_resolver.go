@@ -16,10 +16,10 @@ import (
 
 //go:generate mockery -name=serviceBindingUsageOperations -output=automock -outpkg=automock -case=underscore
 type serviceBindingUsageOperations interface {
-	Create(env string, sb *api.ServiceBindingUsage) (*api.ServiceBindingUsage, error)
-	Delete(env string, name string) error
-	Find(env string, name string) (*api.ServiceBindingUsage, error)
-	ListForServiceInstance(env string, instanceName string) ([]*api.ServiceBindingUsage, error)
+	Create(namespace string, sb *api.ServiceBindingUsage) (*api.ServiceBindingUsage, error)
+	Delete(namespace string, name string) error
+	Find(namespace string, name string) (*api.ServiceBindingUsage, error)
+	ListForServiceInstance(namespace string, instanceName string) ([]*api.ServiceBindingUsage, error)
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
 }
@@ -42,16 +42,16 @@ func (r *serviceBindingUsageResolver) CreateServiceBindingUsageMutation(ctx cont
 		glog.Error(errors.Wrapf(err, "while creating %s from input [%+v]", pretty.ServiceBindingUsage, input))
 		return nil, gqlerror.New(err, pretty.ServiceBindingUsage)
 	}
-	bu, err := r.operations.Create(input.Environment, inBindingUsage)
+	bu, err := r.operations.Create(input.Namespace, inBindingUsage)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s from input [%v]", pretty.ServiceBindingUsage, input))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithEnvironment(input.Environment))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithNamespace(input.Namespace))
 	}
 
 	out, err := r.converter.ToGQL(bu)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceBindingUsage))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithEnvironment(input.Environment))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithNamespace(input.Namespace))
 	}
 
 	return out, nil
@@ -60,52 +60,52 @@ func (r *serviceBindingUsageResolver) CreateServiceBindingUsageMutation(ctx cont
 func (r *serviceBindingUsageResolver) DeleteServiceBindingUsageMutation(ctx context.Context, serviceBindingUsageName, namespace string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {
 	err := r.operations.Delete(namespace, serviceBindingUsageName)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while deleting %s with name `%s` from environment `%s`", pretty.ServiceBindingUsage, serviceBindingUsageName, namespace))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(serviceBindingUsageName), gqlerror.WithEnvironment(namespace))
+		glog.Error(errors.Wrapf(err, "while deleting %s with name `%s` from namespace `%s`", pretty.ServiceBindingUsage, serviceBindingUsageName, namespace))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(serviceBindingUsageName), gqlerror.WithNamespace(namespace))
 	}
 
 	return &gqlschema.DeleteServiceBindingUsageOutput{
-		Environment: namespace,
-		Name:        serviceBindingUsageName,
+		Namespace: namespace,
+		Name:      serviceBindingUsageName,
 	}, nil
 }
 
-func (r *serviceBindingUsageResolver) ServiceBindingUsageQuery(ctx context.Context, name, environment string) (*gqlschema.ServiceBindingUsage, error) {
-	usage, err := r.operations.Find(environment, name)
+func (r *serviceBindingUsageResolver) ServiceBindingUsageQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceBindingUsage, error) {
+	usage, err := r.operations.Find(namespace, name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting single %s [name: %s, environment: %s]", pretty.ServiceBindingUsage, name, environment))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while getting single %s [name: %s, namespace: %s]", pretty.ServiceBindingUsage, name, namespace))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	out, err := r.converter.ToGQL(usage)
 	if err != nil {
 		glog.Error(
 			errors.Wrapf(err,
-				"while getting single %s [name: %s, environment: %s]: while converting %s to QL representation", pretty.ServiceBindingUsage,
-				name, environment, pretty.ServiceBindingUsage))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+				"while getting single %s [name: %s, namespace: %s]: while converting %s to QL representation", pretty.ServiceBindingUsage,
+				name, namespace, pretty.ServiceBindingUsage))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 	return out, nil
 }
 
-func (r *serviceBindingUsageResolver) ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName, env string) ([]gqlschema.ServiceBindingUsage, error) {
-	usages, err := r.operations.ListForServiceInstance(env, instanceName)
+func (r *serviceBindingUsageResolver) ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName, namespace string) ([]gqlschema.ServiceBindingUsage, error) {
+	usages, err := r.operations.ListForServiceInstance(namespace, instanceName)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s of instance [environment: %s, instance: %s]", pretty.ServiceBindingUsages, env, instanceName))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsages, gqlerror.WithEnvironment(env), gqlerror.WithCustomArgument("instanceName", instanceName))
+		glog.Error(errors.Wrapf(err, "while getting %s of instance [namespace: %s, instance: %s]", pretty.ServiceBindingUsages, namespace, instanceName))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsages, gqlerror.WithNamespace(namespace), gqlerror.WithCustomArgument("instanceName", instanceName))
 	}
 	out, err := r.converter.ToGQLs(usages)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s of instance [environment: %s, instance: %s]", pretty.ServiceBindingUsages, env, instanceName))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsages, gqlerror.WithEnvironment(env), gqlerror.WithCustomArgument("instanceName", instanceName))
+		glog.Error(errors.Wrapf(err, "while converting %s of instance [namespace: %s, instance: %s]", pretty.ServiceBindingUsages, namespace, instanceName))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsages, gqlerror.WithNamespace(namespace), gqlerror.WithCustomArgument("instanceName", instanceName))
 	}
 	return out, nil
 }
 
-func (r *serviceBindingUsageResolver) ServiceBindingUsageEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
+func (r *serviceBindingUsageResolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
 	channel := make(chan gqlschema.ServiceBindingUsageEvent, 1)
 	filter := func(bindingUsage *api.ServiceBindingUsage) bool {
-		return bindingUsage != nil && bindingUsage.Namespace == environment
+		return bindingUsage != nil && bindingUsage.Namespace == namespace
 	}
 
 	bindingUsageListener := listener.NewBindingUsage(channel, filter, &r.converter)

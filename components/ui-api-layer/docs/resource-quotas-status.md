@@ -10,26 +10,26 @@ Resource         Used       Hard
 limits.memory    7348440Ki  10Gi
 requests.memory  3727576Ki  7Gi
 ```
-When the `used` values of the ResourceQuota exceed the `hard` values, the resource creation in the Environment is blocked.
+When the `used` values of the ResourceQuota exceed the `hard` values, the resource creation in the Namespace is blocked.
 
 The ResourceQuotasStatus contains the flag and the list of exceeded ResourceQuotas limits, together with a set of resources which exceed that limits. The value of the flag informs you if any ResourceQuota is exceeded in any possible way.
 
-The ResourceQuotasStatus detects if any ReplicaSet or StatefulSet in your Environment is blocked by the ResourceQuota and therefore cannot progress.
+The ResourceQuotasStatus detects if any ReplicaSet or StatefulSet in your Namespace is blocked by the ResourceQuota and therefore cannot progress.
 To check if any ReplicaSet or StatefulSet is blocked, calculate the required number of resources to create another replica. If there are not enough resources to create another replica, return the ResourceQuotaStatus with the flag set to `true`.
 
 The Console calls for the ResourceQuotasStatus automatically. The calls are triggered after: 
-- switching the Environment
+- switching the Namespace
 - uploading a resource
 - creating a lambda 
-- opening Environment's details
+- opening Namespace's details
 
 ## Implementation
 
 This section contains the steps of the ResourceQuotaStatus implementation.
 
-### Calculate the available resources in the Environment
+### Calculate the available resources in the Namespace
 
-To calculate the number of available resources in the given Environment, list the ResourceQuotas and loop through them.
+To calculate the number of available resources in the given Namespace, list the ResourceQuotas and loop through them.
 You can get the available number of resources by calculating the difference from **.spec.hard** and **.status.used** in each ResourceQuota.
 For each resource limit specified in the ResourceQuotas, you must calculate the available number of resources using the ResourceQuota with the lowest **.spec.hard** value for that resource type.
 
@@ -56,14 +56,14 @@ If there is not enough resources to create the next replica and the number of re
 
 ### End of checking
 
-When both checks have passed and the resources usage in the given Environment did not exceed any ResourceQuota limit, return the ResourceQuotasStatus with a flag set to `false`.
+When both checks have passed and the resources usage in the given Namespace did not exceed any ResourceQuota limit, return the ResourceQuotasStatus with a flag set to `false`.
 
 ## Examples of the query and the response
 
 The ResourceQuotasStatus query looks as follows:
 ```graphql
 query{
-  resourceQuotasStatus(environment:"production"){
+  resourceQuotasStatus(namespace:"production"){
     exceeded
     exceededQuotas{
       quotaName
@@ -106,7 +106,7 @@ Exceeded response looks like this:
     }
 ```
 - **exceeded** equals `true` if any ResourceQuota is exceeded.
-- **exceededQuotas** contains the list of exceeded ResourceQuotas limits and set of resources which exceed the limits. The list is empty if there are no exceeded ResourceQuotas in your Environment.
+- **exceededQuotas** contains the list of exceeded ResourceQuotas limits and set of resources which exceed the limits. The list is empty if there are no exceeded ResourceQuotas in your Namespace.
 - **quotaName** represents the name of the ResourceQuota with exceeded limit.
 - **resourceName** represents the name of the resource which exceeded the ResourceQuota limit.
 - **affectedResources** contains the list of resources which exceed the defined **resourceName** limit from the **quotaName** ResourceQuota.

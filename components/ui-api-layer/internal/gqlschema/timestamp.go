@@ -5,13 +5,19 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/golang/glog"
+
 	"github.com/99designs/gqlgen/graphql"
 	"github.com/pkg/errors"
 )
 
 func MarshalTimestamp(t time.Time) graphql.Marshaler {
 	return graphql.WriterFunc(func(w io.Writer) {
-		io.WriteString(w, strconv.FormatInt(t.Unix(), 10))
+		_, err := io.WriteString(w, strconv.FormatInt(t.Unix(), 10))
+		if err != nil {
+			glog.Error(errors.Wrap(err, "while writing marshalled timestamp"))
+			return
+		}
 	})
 }
 

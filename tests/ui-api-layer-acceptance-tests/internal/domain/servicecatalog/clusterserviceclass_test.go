@@ -40,6 +40,10 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 		tags
 		labels
 		activated
+		instances {
+			name
+			namespace
+		}
 		plans {
 			name
 			displayName

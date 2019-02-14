@@ -1,4 +1,6 @@
 global:
+  isLocalEnv: false
+  knative: false
   namespace: kyma-integration
   nginx:
     namespace: kyma-system
@@ -12,19 +14,19 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: ddaf7c1e
+    version: 803cd115
   application_operator_tests:
     dir: develop/
     version: 0c447819
   connector_service:
     dir: develop/
-    version: 93dd20c2
+    version: fa0de1b9
   connector_service_tests:
     dir: develop/
-    version: 501c4fe5
+    version: fa0de1b9
   connection_token_handler:
     dir: develop/
-    version: 93dd20c2
+    version: fa0de1b9
   event_service:
     dir: develop/
     version: 6e0a7fe2

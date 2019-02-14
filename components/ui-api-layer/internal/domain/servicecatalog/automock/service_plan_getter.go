@@ -11,13 +11,13 @@ type servicePlanGetter struct {
 	mock.Mock
 }
 
-// Find provides a mock function with given fields: name, environment
-func (_m *servicePlanGetter) Find(name string, environment string) (*v1beta1.ServicePlan, error) {
-	ret := _m.Called(name, environment)
+// Find provides a mock function with given fields: name, namespace
+func (_m *servicePlanGetter) Find(name string, namespace string) (*v1beta1.ServicePlan, error) {
+	ret := _m.Called(name, namespace)
 
 	var r0 *v1beta1.ServicePlan
 	if rf, ok := ret.Get(0).(func(string, string) *v1beta1.ServicePlan); ok {
-		r0 = rf(name, environment)
+		r0 = rf(name, namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1beta1.ServicePlan)
@@ -26,7 +26,7 @@ func (_m *servicePlanGetter) Find(name string, environment string) (*v1beta1.Ser
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(name, environment)
+		r1 = rf(name, namespace)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -34,13 +34,13 @@ func (_m *servicePlanGetter) Find(name string, environment string) (*v1beta1.Ser
 	return r0, r1
 }
 
-// FindByExternalName provides a mock function with given fields: planExternalName, className, environment
-func (_m *servicePlanGetter) FindByExternalName(planExternalName string, className string, environment string) (*v1beta1.ServicePlan, error) {
-	ret := _m.Called(planExternalName, className, environment)
+// FindByExternalName provides a mock function with given fields: planExternalName, className, namespace
+func (_m *servicePlanGetter) FindByExternalName(planExternalName string, className string, namespace string) (*v1beta1.ServicePlan, error) {
+	ret := _m.Called(planExternalName, className, namespace)
 
 	var r0 *v1beta1.ServicePlan
 	if rf, ok := ret.Get(0).(func(string, string, string) *v1beta1.ServicePlan); ok {
-		r0 = rf(planExternalName, className, environment)
+		r0 = rf(planExternalName, className, namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1beta1.ServicePlan)
@@ -49,7 +49,7 @@ func (_m *servicePlanGetter) FindByExternalName(planExternalName string, classNa
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string, string) error); ok {
-		r1 = rf(planExternalName, className, environment)
+		r1 = rf(planExternalName, className, namespace)
 	} else {
 		r1 = ret.Error(1)
 	}

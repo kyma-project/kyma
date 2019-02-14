@@ -33,6 +33,9 @@ rules:
 - apiGroups: ["", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma-project.io", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma-project.io", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "networking.istio.io"]
   resources: ["*"]
   verbs: ["get", "list"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["selfsubjectrulesreviews"]
+  verbs: ["create"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["get", "list"]
 ---
@@ -56,6 +59,9 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 - kind: User
   name: user2@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+- kind: User
+  name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
 {{- range .Values.bindings.kymaView.groups }}
 - kind: Group
@@ -81,6 +87,9 @@ rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["get", "list"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["selfsubjectrulesreviews"]
+  verbs: ["create"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["*"]
 ---

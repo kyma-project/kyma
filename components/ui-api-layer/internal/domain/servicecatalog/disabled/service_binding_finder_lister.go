@@ -14,8 +14,8 @@ func NewServiceBindingFinderLister(err error) *ServiceBindingFinderLister {
 	return &ServiceBindingFinderLister{err: err}
 }
 
-// Find provides a failing mock function with given fields: env, name
-func (_m *ServiceBindingFinderLister) Find(env string, name string) (*v1beta1.ServiceBinding, error) {
+// Find provides a failing mock function with given fields: namespace, name
+func (_m *ServiceBindingFinderLister) Find(namespace string, name string) (*v1beta1.ServiceBinding, error) {
 	var r0 *v1beta1.ServiceBinding
 	var r1 error
 	r1 = _m.err
@@ -23,8 +23,8 @@ func (_m *ServiceBindingFinderLister) Find(env string, name string) (*v1beta1.Se
 	return r0, r1
 }
 
-// ListForServiceInstance provides a failing mock function with given fields: env, instanceName
-func (_m *ServiceBindingFinderLister) ListForServiceInstance(env string, instanceName string) ([]*v1beta1.ServiceBinding, error) {
+// ListForServiceInstance provides a failing mock function with given fields: namespace, instanceName
+func (_m *ServiceBindingFinderLister) ListForServiceInstance(namespace string, instanceName string) ([]*v1beta1.ServiceBinding, error) {
 	var r0 []*v1beta1.ServiceBinding
 	var r1 error
 	r1 = _m.err

@@ -29,8 +29,9 @@ const (
 	appMappingNameIndex = "mapping-name"
 	// This regex comes from the k8s resource name validation and has been checked against traversal attack
 	// https://github.com/kubernetes/kubernetes/blob/v1.10.1/staging/src/k8s.io/apimachinery/pkg/util/validation/validation.go#L126
-	appNameRegex     = `^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`
-	maxUpdateRetries = 5
+	appNameRegex      = `^(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])$`
+	maxUpdateRetries  = 5
+	applicationHeader = "Application"
 )
 
 type notifier interface {
@@ -38,7 +39,7 @@ type notifier interface {
 	DeleteListener(observer resource.Listener)
 }
 
-// applicationService provides listing environments along with Applications.
+// applicationService provides listing namespaces along with Applications.
 // It provides also Applications enabling/disabling in given namespace.
 type applicationService struct {
 	aCli        appCli.ApplicationconnectorV1alpha1Interface
@@ -55,7 +56,7 @@ type applicationService struct {
 }
 
 func newApplicationService(cfg Config, aCli appCli.ApplicationconnectorV1alpha1Interface, mCli mappingCli.ApplicationconnectorV1alpha1Interface, mInformer cache.SharedIndexInformer, mLister mappingLister.ApplicationMappingLister, appInformer cache.SharedIndexInformer) (*applicationService, error) {
-	mInformer.AddIndexers(cache.Indexers{
+	err := mInformer.AddIndexers(cache.Indexers{
 		appMappingNameIndex: func(obj interface{}) ([]string, error) {
 			mapping, ok := obj.(*mappingTypes.ApplicationMapping)
 			if !ok {
@@ -65,6 +66,9 @@ func newApplicationService(cfg Config, aCli appCli.ApplicationconnectorV1alpha1I
 			return []string{mapping.Name}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	notifier := resource.NewNotifier()
 	appInformer.AddEventHandler(notifier)
@@ -187,8 +191,8 @@ func (svc *applicationService) List(params pager.PagingParams) ([]*v1alpha1.Appl
 	return res, nil
 }
 
-func (svc *applicationService) ListInEnvironment(environment string) ([]*v1alpha1.Application, error) {
-	mappings, err := svc.mappingLister.ApplicationMappings(environment).List(labels.Everything())
+func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Application, error) {
+	mappings, err := svc.mappingLister.ApplicationMappings(namespace).List(labels.Everything())
 	if err != nil {
 		return nil, errors.Wrapf(err, "while listing %s", pretty.ApplicationMapping)
 	}
@@ -241,12 +245,14 @@ func (svc *applicationService) GetConnectionURL(appName string) (string, error) 
 	if ok := svc.appNameRegex.MatchString(appName); !ok {
 		return "", fmt.Errorf("%s name %q does not match regex: %s", pretty.Application, appName, appNameRegex)
 	}
-	reqURL := fmt.Sprintf("%s/v1/applications/%s/tokens", svc.connectorSvcURL, appName)
+	reqURL := fmt.Sprintf("%s/v1/applications/tokens", svc.connectorSvcURL)
 
 	req, err := http.NewRequest(http.MethodPost, reqURL, nil)
 	if err != nil {
 		return "", errors.Wrap(err, "while creating HTTP request")
 	}
+
+	req.Header.Set(applicationHeader, appName)
 
 	resp, err := svc.httpClient.Do(req)
 	if err != nil {
@@ -290,8 +296,14 @@ func (svc *applicationService) extractErrorCause(body io.ReadCloser) error {
 }
 
 func (svc *applicationService) drainAndCloseBody(body io.ReadCloser) {
-	_ = iosafety.DrainReader(body)
-	body.Close()
+	err := iosafety.DrainReader(body)
+	if err != nil {
+		glog.Errorf("Unable to drain body reader. Cause: %v", err)
+	}
+	err = body.Close()
+	if err != nil {
+		glog.Errorf("Unable to close body reader. Cause: %v", err)
+	}
 }
 
 func (svc *applicationService) Subscribe(listener resource.Listener) {

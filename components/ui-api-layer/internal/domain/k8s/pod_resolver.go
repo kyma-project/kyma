@@ -48,7 +48,7 @@ func (r *podResolver) PodQuery(ctx context.Context, name, namespace string) (*gq
 	pod, err := r.podSvc.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s with name %s from namespace %s", pretty.Pod, name, namespace))
-		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 	if pod == nil {
 		return nil, nil
@@ -57,7 +57,7 @@ func (r *podResolver) PodQuery(ctx context.Context, name, namespace string) (*gq
 	converted, err := r.podConverter.ToGQL(pod)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s from namespace %s", pretty.Pod, namespace))
-		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return converted, nil
@@ -71,13 +71,13 @@ func (r *podResolver) PodsQuery(ctx context.Context, namespace string, first *in
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s from namespace %s", pretty.Pods, namespace))
-		return nil, gqlerror.New(err, pretty.Pods, gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pods, gqlerror.WithNamespace(namespace))
 	}
 
 	converted, err := r.podConverter.ToGQLs(pods)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s from namespace %s", pretty.Pods, namespace))
-		return nil, gqlerror.New(err, pretty.Pods, gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pods, gqlerror.WithNamespace(namespace))
 	}
 
 	return converted, nil
@@ -105,19 +105,19 @@ func (r *podResolver) UpdatePodMutation(ctx context.Context, name string, namesp
 	pod, err := r.podConverter.GQLJSONToPod(update)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace `%s`", pretty.Pod, name, namespace))
-		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	updated, err := r.podSvc.Update(name, namespace, pod)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace %s", pretty.Pod, name, namespace))
-		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	updatedGql, err := r.podConverter.ToGQL(updated)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s `%s` from namespace %s", pretty.Pod, name, namespace))
-		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return updatedGql, nil
@@ -127,20 +127,20 @@ func (r *podResolver) DeletePodMutation(ctx context.Context, name string, namesp
 	pod, err := r.podSvc.Find(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while finding %s `%s` in namespace `%s`", pretty.Pod, name, namespace))
-		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	podCopy := pod.DeepCopy()
 	deletedPod, err := r.podConverter.ToGQL(podCopy)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Pod))
-		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	err = r.podSvc.Delete(name, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.Pod, name, namespace))
-		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithEnvironment(namespace))
+		return nil, gqlerror.New(err, pretty.Pod, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return deletedPod, nil
