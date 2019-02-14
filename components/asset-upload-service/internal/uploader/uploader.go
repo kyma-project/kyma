@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
 	"io"
-	"strings"
 	"sync"
 	"time"
 
@@ -27,16 +26,16 @@ type FileUpload struct {
 }
 
 type UploadResult struct {
-	FileName   string
-	RemotePath string
-	Bucket     string
-	Size       int64
+	FileName   string `json:"fileName"`
+	RemotePath string `json:"remotePath"`
+	Bucket     string `json:"bucket"`
+	Size       int64  `json:"size"`
 }
 
 // Uploader is an abstraction layer for Minio client
 type Uploader struct {
 	client           MinioClient
-	uploadOrigin   string
+	uploadOrigin     string
 	UploadTimeout    time.Duration
 	MaxUploadWorkers int
 }
@@ -47,12 +46,12 @@ func New(client MinioClient, uploadOrigin string, uploadTimeout time.Duration, m
 		client:           client,
 		UploadTimeout:    uploadTimeout,
 		MaxUploadWorkers: maxUploadWorkers,
-		uploadOrigin:   uploadOrigin,
+		uploadOrigin:     uploadOrigin,
 	}
 }
 
 // UploadFiles uploads multiple files (Files struct) to particular bucket
-func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload, filesCount int) ([]UploadResult, error) {
+func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload, filesCount int) ([]UploadResult, []error) {
 	errorsCh := make(chan error, filesCount)
 	resultsCh := make(chan *UploadResult, filesCount)
 
@@ -117,17 +116,18 @@ func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) (*Uplo
 	}
 	defer f.Close()
 
-	glog.Infof("Uploading `%s`...\n", file.Filename())
-
 	fileName := file.Filename()
 	fileSize := file.Size()
 	objectName := fmt.Sprintf("%s/%s", fileUpload.Directory, fileName)
+
+	glog.Infof("Uploading `%s` into bucket `%s`...\n", objectName, fileUpload.Bucket)
+
 	_, err = u.client.PutObjectWithContext(ctx, fileUpload.Bucket, objectName, f, fileSize, minio.PutObjectOptions{})
 	if err != nil {
-		return nil, errors.Wrapf(err, "Error while uploading file `%s` into `%s`", file.Filename(), fileUpload.Bucket)
+		return nil, errors.Wrapf(err, "Error while uploading file `%s` into `%s`", objectName, fileUpload.Bucket)
 	}
 
-	glog.Infof("Upload succeeded for `%s`.\n", file.Filename())
+	glog.Infof("Upload succeeded for `%s`.\n", objectName)
 
 	result := &UploadResult{
 		FileName:   fileName,
@@ -153,22 +153,16 @@ func (u *Uploader) populateResults(resultsCh chan *UploadResult) []UploadResult 
 }
 
 // consumeUploadErrors consolidates all error messages into one and returns it
-func (u *Uploader) populateErrors(errorsCh chan error) error {
-	var messages []string
+func (u *Uploader) populateErrors(errorsCh chan error) []error {
+	var messages []error
 	for err := range errorsCh {
 		if err != nil {
-			messages = append(messages, err.Error())
+			messages = append(messages, err)
 		}
 	}
 
-	if len(messages) > 0 {
-		message := strings.Join(messages, ";\n")
-		return errors.New(message)
-	}
-
-	return nil
+	return messages
 }
-
 
 func Origin(uploadEndpoint string, secure bool) string {
 	uploadProtocol := fmt.Sprint("http")

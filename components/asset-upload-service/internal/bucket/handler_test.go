@@ -30,6 +30,7 @@ func TestHandler_CreateSystemBuckets(t *testing.T) {
 
 		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(publicPrefix))).Return(false, nil).Once()
 		minioCli.On("MakeBucket", mock.MatchedBy(testBucketNameFn(publicPrefix)), region).Return(nil).Once()
+		minioCli.On("SetBucketPolicy", mock.MatchedBy(testBucketNameFn(publicPrefix)), mock.MatchedBy(func(policy string) bool { return true })).Return(nil).Once()
 		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(privatePrefix))).Return(false, nil).Once()
 		minioCli.On("MakeBucket", mock.MatchedBy(testBucketNameFn(privatePrefix)), region).Return(nil).Once()
 		defer minioCli.AssertExpectations(t)
@@ -60,6 +61,7 @@ func TestHandler_CreateSystemBuckets(t *testing.T) {
 		handler := bucket.NewHandler(minioCli, cfg)
 
 		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(publicPrefix))).Return(true, nil).Once()
+		minioCli.On("SetBucketPolicy", mock.MatchedBy(testBucketNameFn(publicPrefix)), mock.MatchedBy(func(policy string) bool { return true })).Return(nil).Once()
 		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(privatePrefix))).Return(true, nil).Once()
 		defer minioCli.AssertExpectations(t)
 
@@ -92,6 +94,7 @@ func TestHandler_CreateSystemBuckets(t *testing.T) {
 		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(publicPrefix))).Return(false, testErr).Once()
 		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(publicPrefix))).Return(false, nil).Once()
 		minioCli.On("MakeBucket", mock.MatchedBy(testBucketNameFn(publicPrefix)), region).Return(nil).Once()
+		minioCli.On("SetBucketPolicy", mock.MatchedBy(testBucketNameFn(publicPrefix)), mock.MatchedBy(func(policy string) bool { return true })).Return(nil).Once()
 
 		minioCli.On("BucketExists", mock.MatchedBy(testBucketNameFn(privatePrefix))).Return(false, nil).Twice()
 		minioCli.On("MakeBucket", mock.MatchedBy(testBucketNameFn(privatePrefix)), region).Return(testErr).Once()

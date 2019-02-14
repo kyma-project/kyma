@@ -3,7 +3,6 @@ package uploader_test
 import (
 	"context"
 	"errors"
-	"fmt"
 	fautomock "github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader/automock"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader/automock"
@@ -75,10 +74,10 @@ func TestUploader_UploadFiles(t *testing.T) {
 		uploadClient := uploader.New(clientMock, "https://minio.example.com", timeout, 5)
 
 		// When
-		res, err := uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
+		res, errs := uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
 
 		// Then
-		g.Expect(err).NotTo(gomega.HaveOccurred())
+		g.Expect(errs).To(gomega.BeEmpty())
 		g.Expect(res).To(gomega.Equal(expectedResult))
 	})
 
@@ -128,16 +127,15 @@ func TestUploader_UploadFiles(t *testing.T) {
 		uploadClient := uploader.New(clientMock, "https://minio.example.com", timeout, 5)
 
 		// When
-		_, err = uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
+		_, errs := uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
 
 		// Then
-		g.Expect(err).To(gomega.HaveOccurred())
+		g.Expect(errs).To(gomega.HaveLen(2))
 
-		for _, file := range files {
-			g.Expect(err.Error()).To(gomega.ContainSubstring(fmt.Sprintf("while uploading file `%s` into `%s`: %s", file.File.Filename(), bucketName, testErr)))
+		for _, err := range errs {
+			g.Expect(err.Error()).To(gomega.ContainSubstring("while uploading file"))
 		}
 		clientMock.AssertExpectations(t)
-
 	})
 }
 
@@ -146,19 +144,23 @@ func TestUploader_PopulateErrors(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
+		elem1 := errors.New("Test 1")
+		elem2 := errors.New("Test 2")
+
 		errCh := make(chan error, 2)
-		errCh <- errors.New("Test 1")
-		errCh <- errors.New("Test 2")
+		errCh <- elem1
+		errCh <- elem2
 		close(errCh)
 
 		u := uploader.Uploader{}
 
 		// When
-		err := u.PopulateErrors(errCh)
+		errs := u.PopulateErrors(errCh)
 
 		// Then
-		g.Expect(err).To(gomega.HaveOccurred())
-		g.Expect(err.Error()).To(gomega.Equal("Test 1;\nTest 2"))
+		g.Expect(errs).To(gomega.HaveLen(2))
+		g.Expect(errs).To(gomega.ContainElement(elem1))
+		g.Expect(errs).To(gomega.ContainElement(elem2))
 	})
 
 	t.Run("No Errors", func(t *testing.T) {
@@ -171,10 +173,10 @@ func TestUploader_PopulateErrors(t *testing.T) {
 		u := uploader.Uploader{}
 
 		// When
-		err := u.PopulateErrors(errCh)
+		errs := u.PopulateErrors(errCh)
 
 		// Then
-		g.Expect(err).NotTo(gomega.HaveOccurred())
+		g.Expect(errs).To(gomega.BeEmpty())
 	})
 }
 

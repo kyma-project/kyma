@@ -1,11 +1,13 @@
 package bucket
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"strconv"
 	"time"
+	"github.com/minio/minio-go/pkg/policy"
 )
 
 // creationRetries defines how many times every bucket should be tried to create
@@ -61,6 +63,16 @@ func (h *Handler) CreateSystemBuckets() (SystemBucketNames, error) {
 		return SystemBucketNames{}, errors.Wrapf(err, "while creating public bucket with prefix %s", h.cfg.PublicPrefix)
 	}
 
+	readOnlyPolicy, err := h.bucketPolicyString(public, policy.BucketPolicyReadOnly)
+	if err != nil {
+		return SystemBucketNames{}, errors.Wrapf(err, "while creating policy for %s bucket", public)
+	}
+
+	err = h.SetPolicy(public, readOnlyPolicy)
+	if err != nil {
+		return SystemBucketNames{}, errors.Wrapf(err, "while setting policy %s for %s bucket", readOnlyPolicy, public)
+	}
+
 	return SystemBucketNames{
 		Private: private,
 		Public:  public,
@@ -92,10 +104,11 @@ func (h *Handler) CreateIfDoesntExist(bucketName, bucketRegion string) error {
 // SetPolicy sets provided policy on a given bucket
 func (h *Handler) SetPolicy(bucketName, policy string) error {
 	glog.Infof("Setting `%s` policy on bucket `%s`...\n", policy, bucketName)
-	err := h.client.SetBucketPolicy(bucketName, "policy")
+	err := h.client.SetBucketPolicy(bucketName, policy)
 	if err != nil {
 		return errors.Wrapf(err, "while setting bucket policy on bucket `%s`", bucketName)
 	}
+	glog.Infof("Policy successfully set on bucket `%s`\n", bucketName)
 	return nil
 }
 
@@ -103,7 +116,7 @@ func (h *Handler) tryCreatingBucket(prefix string) (string, error) {
 	bucketName := h.generateBucketName(prefix)
 
 	for i := 0; i < creationRetries; i++ {
-		glog.Infof("Trying to create a bucket with prefix %s - retry %d of %d", prefix, i, creationRetries)
+		glog.Infof("Trying to create a bucket with prefix %s (attempt %d of %d)", prefix, i+1, creationRetries)
 		err := h.CreateIfDoesntExist(bucketName, h.cfg.Region)
 		if err != nil {
 			if i == creationRetries-1 {
@@ -116,10 +129,26 @@ func (h *Handler) tryCreatingBucket(prefix string) (string, error) {
 		}
 
 		// No error - exiting
+		glog.Infof("Bucket `%s` created", bucketName)
 		return bucketName, nil
 	}
 
 	return "", errors.New("Bucket creation retrying failed")
+}
+
+func (h *Handler) bucketPolicyString(bucketName string, bucketPolicy policy.BucketPolicy) (string, error) {
+	statements := policy.SetPolicy([]policy.Statement{}, bucketPolicy, bucketName, "*")
+	p := policy.BucketAccessPolicy{
+		Version:    "2012-10-17", // Fixed version
+		Statements: statements,
+	}
+
+	bytes, err := json.Marshal(p)
+	if err != nil {
+		return "", errors.Wrapf(err, "while marshalling policy")
+	}
+
+	return string(bytes), nil
 }
 
 func (h *Handler) generateBucketName(prefix string) string {

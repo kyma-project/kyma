@@ -19,11 +19,12 @@ type RequestHandler struct {
 	uploadTimeout    time.Duration
 	maxUploadWorkers int
 	buckets          bucket.SystemBucketNames
-	uploadOrigin   string
+	uploadOrigin     string
 }
 
 type response struct {
-	UploadedFiles []uploader.UploadResult
+	UploadedFiles []uploader.UploadResult `json:"uploadedFiles"`
+	Errors        []string                `json:"errors"`
 }
 
 func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *RequestHandler {
@@ -32,7 +33,7 @@ func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadOr
 		uploadTimeout:    uploadTimeout,
 		maxUploadWorkers: maxUploadWorkers,
 		buckets:          buckets,
-		uploadOrigin:   uploadOrigin,
+		uploadOrigin:     uploadOrigin,
 	}
 }
 
@@ -45,9 +46,12 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	defer rq.MultipartForm.RemoveAll()
 
 	directoryValues := rq.MultipartForm.Value["directory"]
-	directory := directoryValues[0]
-	if directory == "" {
+
+	var directory string
+	if directoryValues == nil {
 		directory = r.generateDirectoryName()
+	} else {
+		directory = directoryValues[0]
 	}
 
 	privateFiles := rq.MultipartForm.File["private"]
@@ -56,15 +60,17 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	u := uploader.New(r.client, r.uploadOrigin, r.uploadTimeout, r.maxUploadWorkers)
 	fileToUploadCh := r.populateFilesChannel(publicFiles, privateFiles, filesCount, directory)
-	uploadedFiles, err := u.UploadFiles(context.Background(), fileToUploadCh, filesCount)
-	if err != nil {
-		wrappedErr := errors.Wrapf(err, "while uploading files")
-		r.writeInternalError(w, wrappedErr)
-	}
+	uploadedFiles, errs := u.UploadFiles(context.Background(), fileToUploadCh, filesCount)
 
 	glog.Infof("Finished processing request with uploading %d files.", filesCount)
+
+	var errMessages []string
+	for _, err := range errs {
+		errMessages = append(errMessages, err.Error())
+	}
 	r.writeResponse(w, response{
 		UploadedFiles: uploadedFiles,
+		Errors:        errMessages,
 	})
 }
 
@@ -105,7 +111,15 @@ func (r *RequestHandler) writeResponse(w http.ResponseWriter, resp response) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
+
+	var status int
+	if len(resp.Errors) > 0 {
+		status = http.StatusInternalServerError
+	} else {
+		status = http.StatusCreated
+	}
+
+	w.WriteHeader(status)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
 		wrappedErr := errors.Wrapf(err, "while writing JSON response")

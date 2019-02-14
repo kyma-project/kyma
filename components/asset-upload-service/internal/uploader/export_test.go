@@ -1,6 +1,6 @@
 package uploader
 
-func (u *Uploader) PopulateErrors(errorsCh chan error) error {
+func (u *Uploader) PopulateErrors(errorsCh chan error) []error {
 	return u.populateErrors(errorsCh)
 }
 

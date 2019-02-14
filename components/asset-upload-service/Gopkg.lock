@@ -34,12 +34,13 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:d25d86eabe6a6039f465a076d2f8293bb2b5545f26b2796df696d20fed198e10"
+  digest = "1:825f6ae0840146dee0396b5c55c1599f862815d063a898d259707c63fadfec4b"
   name = "github.com/minio/minio-go"
   packages = [
     ".",
     "pkg/credentials",
     "pkg/encrypt",
+    "pkg/policy",
     "pkg/s3signer",
     "pkg/s3utils",
     "pkg/set",
@@ -110,12 +111,11 @@
   version = "v0.1.1"
 
 [[projects]]
-  digest = "1:b762f96c1183763894e8dabbac5f8e8d5821754b6e2686a8c398a174b7a58ff5"
+  digest = "1:0bcc464dabcfad5393daf87c3f8142911d0f6c52569b837e91a1c15e890265f3"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
     "mock",
-    "require",
   ]
   pruneopts = "UT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
@@ -225,11 +225,10 @@
   input-imports = [
     "github.com/golang/glog",
     "github.com/minio/minio-go",
+    "github.com/minio/minio-go/pkg/policy",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
-    "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
-    "github.com/stretchr/testify/require",
     "github.com/vrischmann/envconfig",
   ]
   solver-name = "gps-cdcl"
