@@ -225,6 +225,34 @@ func TestUploader_PopulateResults(t *testing.T) {
 
 }
 
+func TestOrigin(t *testing.T) {
+	t.Run("Not secure", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		endpoint := "minio.example.local:9000"
+		secure := false
+
+		// When
+		origin := uploader.Origin(endpoint, secure)
+
+		// Then
+		g.Expect(origin).To(gomega.Equal("http://minio.example.local:9000"))
+	})
+
+	t.Run("Secure", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		endpoint := "minio.foo.bar"
+		secure := true
+
+		// When
+		origin := uploader.Origin(endpoint, secure)
+
+		// Then
+		g.Expect(origin).To(gomega.Equal("https://minio.foo.bar"))
+	})
+}
+
 func testUploads(files []uploader.FileUpload) (chan uploader.FileUpload, int) {
 	filesCount := len(files)
 

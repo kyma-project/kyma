@@ -2,12 +2,15 @@ package requesthandler
 
 import (
 	"context"
+	"encoding/json"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/pkg/errors"
+	"mime/multipart"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -15,63 +18,101 @@ type RequestHandler struct {
 	client           uploader.MinioClient
 	uploadTimeout    time.Duration
 	maxUploadWorkers int
-	buckets          bucket.SystemBucketNames,
+	buckets          bucket.SystemBucketNames
+	uploadOrigin   string
 }
 
-func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadTimeout time.Duration, maxUploadWorkers int) *RequestHandler {
+type response struct {
+	UploadedFiles []uploader.UploadResult
+}
+
+func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *RequestHandler {
 	return &RequestHandler{
 		client:           client,
 		uploadTimeout:    uploadTimeout,
 		maxUploadWorkers: maxUploadWorkers,
 		buckets:          buckets,
+		uploadOrigin:   uploadOrigin,
 	}
 }
 
-func (r RequestHandler) ServeHTTP(wr http.ResponseWriter, rq *http.Request) {
+func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	err := rq.ParseMultipartForm(32 << 20)
 	if err != nil {
-		return
+		wrappedErr := errors.Wrap(err, "while parsing multipart request")
+		r.writeInternalError(w, wrappedErr)
 	}
 	defer rq.MultipartForm.RemoveAll()
 
-	//TODO: Handle directory param + randomize if not specified
-	//directory := rq.MultipartForm.Value["directory"]
-	//if directory := "" {
-	//
-	//}
+	directoryValues := rq.MultipartForm.Value["directory"]
+	directory := directoryValues[0]
+	if directory == "" {
+		directory = r.generateDirectoryName()
+	}
 
 	privateFiles := rq.MultipartForm.File["private"]
 	publicFiles := rq.MultipartForm.File["public"]
 	filesCount := len(publicFiles) + len(privateFiles)
 
-	u := uploader.New(r.client, r.uploadTimeout, r.maxUploadWorkers)
+	u := uploader.New(r.client, r.uploadOrigin, r.uploadTimeout, r.maxUploadWorkers)
+	fileToUploadCh := r.populateFilesChannel(publicFiles, privateFiles, filesCount, directory)
+	uploadedFiles, err := u.UploadFiles(context.Background(), fileToUploadCh, filesCount)
+	if err != nil {
+		wrappedErr := errors.Wrapf(err, "while uploading files")
+		r.writeInternalError(w, wrappedErr)
+	}
 
-	fileToUploadCh := make(chan uploader.FileUpload, filesCount)
+	glog.Infof("Finished processing request with uploading %d files.", filesCount)
+	r.writeResponse(w, response{
+		UploadedFiles: uploadedFiles,
+	})
+}
+
+func (r *RequestHandler) generateDirectoryName() string {
+	unixTime := time.Now().Unix()
+	return strconv.FormatInt(unixTime, 32)
+}
+
+func (r *RequestHandler) populateFilesChannel(publicFiles, privateFiles []*multipart.FileHeader, filesCount int, directory string) chan uploader.FileUpload {
+	filesCh := make(chan uploader.FileUpload, filesCount)
 
 	go func() {
 		for _, file := range publicFiles {
-			fileToUploadCh <- uploader.FileUpload{
-				Bucket: r.buckets.Public,
-				File:   fileheader.FromMultipart(file),
+			filesCh <- uploader.FileUpload{
+				Bucket:    r.buckets.Public,
+				File:      fileheader.FromMultipart(file),
+				Directory: directory,
 			}
 		}
 		for _, file := range privateFiles {
-			fileToUploadCh <- uploader.FileUpload{
-				Bucket: r.buckets.Private,
-				File:   fileheader.FromMultipart(file),
+			filesCh <- uploader.FileUpload{
+				Bucket:    r.buckets.Private,
+				File:      fileheader.FromMultipart(file),
+				Directory: directory,
 			}
 		}
-		close(fileToUploadCh)
+		close(filesCh)
 	}()
 
-	err = u.UploadFiles(context.Background(), fileToUploadCh, filesCount)
+	return filesCh
+}
+
+func (r *RequestHandler) writeResponse(w http.ResponseWriter, resp response) {
+	jsonResponse, err := json.Marshal(resp)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while uploading files"))
+		wrappedErr := errors.Wrapf(err, "while marshalling JSON response")
+		r.writeInternalError(w, wrappedErr)
 	}
 
-	//TODO: Return results
-	glog.Infof("Finished processing request with uploading %d files.", filesCount)
-	wr.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
+	_, err = w.Write(jsonResponse)
+	if err != nil {
+		wrappedErr := errors.Wrapf(err, "while writing JSON response")
+		r.writeInternalError(w, wrappedErr)
+	}
+}
 
-
+func (r *RequestHandler) writeInternalError(w http.ResponseWriter, err error) {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
 }

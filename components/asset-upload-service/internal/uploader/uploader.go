@@ -36,18 +36,18 @@ type UploadResult struct {
 // Uploader is an abstraction layer for Minio client
 type Uploader struct {
 	client           MinioClient
-	storeEndpoint    string
+	uploadOrigin   string
 	UploadTimeout    time.Duration
 	MaxUploadWorkers int
 }
 
 // New returns a new instance of Uploader
-func New(client MinioClient, storeEndpoint string, uploadTimeout time.Duration, maxUploadWorkers int) *Uploader {
+func New(client MinioClient, uploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *Uploader {
 	return &Uploader{
 		client:           client,
 		UploadTimeout:    uploadTimeout,
 		MaxUploadWorkers: maxUploadWorkers,
-		storeEndpoint:    storeEndpoint,
+		uploadOrigin:   uploadOrigin,
 	}
 }
 
@@ -97,8 +97,8 @@ func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload
 	close(errorsCh)
 
 	result := u.populateResults(resultsCh)
-	errors := u.populateErrors(errorsCh)
-	return result, errors
+	errs := u.populateErrors(errorsCh)
+	return result, errs
 }
 
 func (u *Uploader) countNeededWorkers(filesCount, maxUploadWorkers int) int {
@@ -133,7 +133,7 @@ func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) (*Uplo
 		FileName:   fileName,
 		Size:       fileSize,
 		Bucket:     fileUpload.Bucket,
-		RemotePath: fmt.Sprintf("%s/%s/%s", u.storeEndpoint, fileUpload.Bucket, objectName),
+		RemotePath: fmt.Sprintf("%s/%s/%s", u.uploadOrigin, fileUpload.Bucket, objectName),
 	}
 
 	return result, nil
@@ -167,4 +167,14 @@ func (u *Uploader) populateErrors(errorsCh chan error) error {
 	}
 
 	return nil
+}
+
+
+func Origin(uploadEndpoint string, secure bool) string {
+	uploadProtocol := fmt.Sprint("http")
+	if secure {
+		uploadProtocol = uploadProtocol + "s"
+	}
+
+	return fmt.Sprintf("%s://%s", uploadProtocol, uploadEndpoint)
 }

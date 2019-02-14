@@ -7,6 +7,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/pkg/signal"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
@@ -43,8 +44,9 @@ func main() {
 	defer cancel()
 	cancelOnInterrupt(stopCh, ctx, cancel)
 
-	endpoint := fmt.Sprintf("%s:%d", cfg.Upload.Endpoint, cfg.Upload.Port)
-	client, err := minio.New(endpoint, cfg.Upload.AccessKey, cfg.Upload.SecretKey, cfg.Upload.Secure)
+	uploadEndpoint := fmt.Sprintf("%s:%d", cfg.Upload.Endpoint, cfg.Upload.Port)
+
+	client, err := minio.New(uploadEndpoint, cfg.Upload.AccessKey, cfg.Upload.SecretKey, cfg.Upload.Secure)
 	fatalOnError(err, "Error during upload client initialization")
 
 	handler := bucket.NewHandler(client, cfg.Bucket)
@@ -54,7 +56,7 @@ func main() {
 	//TODO: Read and Save bucket names from configmap
 
 	mux := http.NewServeMux()
-	mux.Handle("/upload", requesthandler.New(client, buckets, cfg.UploadTimeout, cfg.MaxUploadWorkers))
+	mux.Handle("/upload", requesthandler.New(client, buckets, uploader.Origin(uploadEndpoint, cfg.Upload.Secure), cfg.UploadTimeout, cfg.MaxUploadWorkers))
 
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: mux}
