@@ -16,6 +16,6 @@ The AC gives you this functionality:
 - Allows to map an App to a Kyma Namespace and use its registered APIs and Event catalogs in the context of that Namespace.
 - Integrates the registered APIs and Event catalogs with the Kyma Service Catalog.
 
-The scaling of all AC components is independent and automatic, which allows to adjust it to fit the needs of the implementation built using Kyma.
+All of the AC components scale independently, which allows to adjust it to fit the needs of the implementation built using Kyma.
 
 >**NOTE:** To learn more about the concept of Namespaces in Kyma, read [this](/root/kyma#details-namespaces) document.
