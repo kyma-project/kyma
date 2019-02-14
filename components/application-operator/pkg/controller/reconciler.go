@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	appReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -120,9 +121,9 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 		}
 
 		return r.installApplication(application)
-	} else {
-		return r.checkApplicationStatus(application)
 	}
+
+	return r.checkApplicationStatus(application)
 }
 
 func shouldBeRemoved(application *v1alpha1.Application) bool {
@@ -135,7 +136,20 @@ func shouldSkipInstallation(application *v1alpha1.Application) bool {
 
 func (r *applicationReconciler) installApplication(application *v1alpha1.Application) (string, string, error) {
 	log.Infof("Installing release for %s Application...", application.Name)
-	status, description, err := r.releaseManager.InstallChart(application.Name)
+
+	overridesData := r.releaseManager.GetOverridesDefaults()
+	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
+		overridesData.SubjectCN = fmt.Sprintf("%s;%s;%s", application.Spec.Tenant, application.Spec.Group, application.Name)
+	} else {
+		overridesData.SubjectCN = application.Name
+	}
+
+	overrides, err := kymahelm.ParseOverrides(overridesData, appReleases.OverridesTemplate)
+	if err != nil {
+		return "", "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
+	}
+
+	status, description, err := r.releaseManager.InstallChart(application.Name, overrides)
 	if err != nil {
 		return "", "", errors.Wrapf(err, "Error installing release for %s Application", application.Name)
 	}

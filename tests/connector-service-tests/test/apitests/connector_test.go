@@ -34,13 +34,15 @@ func TestConnector(t *testing.T) {
 		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
 	})
 
-	t.Run("Connector Service flow for Runtime", func(t *testing.T) {
-		runtimeTokenRequest := createRuntimeTokenRequest(t, config)
-		certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-		runtimeCsrInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-		runtimeMgmInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-		certificateRotationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-	})
+	if config.Central {
+		t.Run("Connector Service flow for Runtime", func(t *testing.T) {
+			runtimeTokenRequest := createRuntimeTokenRequest(t, config)
+			certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+			runtimeCsrInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+			runtimeMgmInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+			certificateRotationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+		})
+	}
 }
 
 func createApplicationTokenRequest(t *testing.T, config testkit.TestConfig, appName string) *http.Request {

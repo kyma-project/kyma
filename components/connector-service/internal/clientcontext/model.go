@@ -4,19 +4,55 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/logging"
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	ApplicationHeader     = "Application"
-	ApplicationContextKey = "ApplicationContext"
-	SubjectHeader         = "Client-Certificate-Subject"
-	APIHostsKey           = "APIHosts"
+type clientContextKey string
 
-	ClusterContextKey = "ClusterContext"
-	TenantHeader      = "Tenant"
-	GroupHeader       = "Group"
+// CtxRequired type defines if context is mandatory
+type CtxRequiredType bool
+
+const (
+	// ApplicationHeader is key represeting Application in headers
+	ApplicationHeader = "Application"
+
+	// ApplicationContextKey is the key value for storing Application in context
+	ApplicationContextKey clientContextKey = "ApplicationContext"
+
+	// SubjectHeader is key represeting client certificate subject set in headers
+	SubjectHeader = "Client-Certificate-Subject"
+
+	// APIHostsKey is the key value for storing API hosts in context
+	APIHostsKey clientContextKey = "APIHosts"
+
+	// ClusterContextKey is the key value for storing cluster data in context
+	ClusterContextKey clientContextKey = "ClusterContext"
+
+	// TenantHeader is key represeting Tenant in headers
+	TenantHeader = "Tenant"
+
+	// GroupHeader is key represeting Group in headers
+	GroupHeader = "Group"
+
+	// SubjectCNSeparator holds separator for values packed in CN of Subject
+	SubjectCNSeparator = ";"
+
+	// GroupEmpty represents empty value for Group
+	GroupEmpty = ""
+
+	// TenantEmpty represents empty value for Tenant
+	TenantEmpty = ""
+
+	// ApplicationEmpty represents empty value for Application
+	ApplicationEmpty = ""
+
+	// CtxRequired represents value for required context
+	CtxRequired CtxRequiredType = true
+
+	// CtxNotRequired represents value for not required context
+	CtxNotRequired CtxRequiredType = false
 )
 
 type ClientContextService interface {
@@ -55,7 +91,7 @@ type ApplicationContext struct {
 
 // IsEmpty returns false if Application is set
 func (appCtx ApplicationContext) IsEmpty() bool {
-	return appCtx.Application == "" || appCtx.ClusterContext.IsEmpty()
+	return appCtx.Application == ApplicationEmpty
 }
 
 // ToJSON parses ApplicationContext to JSON
@@ -75,8 +111,12 @@ func (appCtx ApplicationContext) GetApplication() string {
 
 // GetCommonName returns expected Common Name value for the Application
 func (appCtx ApplicationContext) GetCommonName() string {
-	// TODO - adjust CN format after decision is made
-	return appCtx.Application
+	if appCtx.ClusterContext.IsEmpty() {
+		return appCtx.Application
+	}
+
+	return fmt.Sprintf("%s%s%s%s%s", appCtx.ClusterContext.Tenant, SubjectCNSeparator,
+		appCtx.ClusterContext.Group, SubjectCNSeparator, appCtx.Application)
 }
 
 func (appCtx ApplicationContext) GetRuntimeUrls() *RuntimeURLs {
@@ -98,7 +138,7 @@ type ClusterContext struct {
 
 // IsEmpty returns false if both Group and Tenant are set
 func (clsCtx ClusterContext) IsEmpty() bool {
-	return clsCtx.Group == "" || clsCtx.Tenant == ""
+	return clsCtx.Group == GroupEmpty || clsCtx.Tenant == TenantEmpty
 }
 
 // ToJSON parses ClusterContext to JSON
@@ -111,10 +151,14 @@ func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context 
 	return context.WithValue(ctx, ClusterContextKey, clsCtx)
 }
 
+// GetApplication returns empty string
+func (clsCtx ClusterContext) GetApplication() string {
+	return ApplicationEmpty
+}
+
 // GetCommonName returns expected Common Name value for the Cluster
 func (clsCtx ClusterContext) GetCommonName() string {
-	// TODO - adjust CN format after decision is made
-	return fmt.Sprintf("%s;%s", clsCtx.Tenant, clsCtx.Group)
+	return fmt.Sprintf("%s%s%s", clsCtx.Tenant, SubjectCNSeparator, clsCtx.Group)
 }
 
 func (clsCtx ClusterContext) GetLogger() *logrus.Entry {

@@ -10,28 +10,33 @@ const (
 )
 
 type ReleaseManager interface {
-	InstallChart(name string) (hapi_4.Status_Code, string, error)
+	GetOverridesDefaults() OverridesData
+	InstallChart(name, overrides string) (hapi_4.Status_Code, string, error)
 	DeleteReleaseIfExists(name string) error
 	CheckReleaseExistence(name string) (bool, error)
 	CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error)
 }
 
 type releaseManager struct {
-	helmClient kymahelm.HelmClient
-	overrides  string
-	namespace  string
+	helmClient        kymahelm.HelmClient
+	overridesDefaults OverridesData
+	namespace         string
 }
 
-func NewReleaseManager(helmClient kymahelm.HelmClient, overrides string, namespace string) ReleaseManager {
+func NewReleaseManager(helmClient kymahelm.HelmClient, overridesDefaults OverridesData, namespace string) ReleaseManager {
 	return &releaseManager{
-		helmClient: helmClient,
-		overrides:  overrides,
-		namespace:  namespace,
+		helmClient:        helmClient,
+		overridesDefaults: overridesDefaults,
+		namespace:         namespace,
 	}
 }
 
-func (r *releaseManager) InstallChart(name string) (hapi_4.Status_Code, string, error) {
-	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, r.namespace, name, r.overrides)
+func (r releaseManager) GetOverridesDefaults() OverridesData {
+	return r.overridesDefaults
+}
+
+func (r *releaseManager) InstallChart(name, overrides string) (hapi_4.Status_Code, string, error) {
+	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, r.namespace, name, overrides)
 	if err != nil {
 		return hapi_4.Status_FAILED, "", err
 	}
