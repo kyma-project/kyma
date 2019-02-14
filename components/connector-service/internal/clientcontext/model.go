@@ -117,8 +117,8 @@ type APIHosts struct {
 }
 
 type RuntimeURLs struct {
-	EventsURL   string `json:"eventsUrl,omitempty"`
-	MetadataURL string `json:"metadataUrl,omitempty"`
+	EventsURL   string `json:"eventsUrl"`
+	MetadataURL string `json:"metadataUrl"`
 }
 
 func (r APIHosts) ExtendContext(ctx context.Context) context.Context {

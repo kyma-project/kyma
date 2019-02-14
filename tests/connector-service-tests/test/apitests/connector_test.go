@@ -26,17 +26,14 @@ func TestConnector(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("Connector Service flow for Application", func(t *testing.T) {
-		appName := "testCertGenApp"
-		appTokenRequest := createApplicationTokenRequest(t, config, appName)
+		appTokenRequest := createApplicationTokenRequest(t, config, "testCertGenApp")
 		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
 
-		appName = "testCSRInfoApp"
-		appTokenRequest = createApplicationTokenRequest(t, config, appName)
-		getAppCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+		appTokenRequest = createApplicationTokenRequest(t, config, "testCSRInfoApp")
+		appCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, "testCSRInfoApp")
 
-		appName = "testMgmInfoApp"
-		appTokenRequest = createApplicationTokenRequest(t, config, appName)
-		getAppMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+		appTokenRequest = createApplicationTokenRequest(t, config, "testMgmInfoApp")
+		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, "testMgmInfoApp")
 	})
 
 	t.Run("Connector Service flow for Runtime", func(t *testing.T) {
@@ -44,10 +41,10 @@ func TestConnector(t *testing.T) {
 		certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 
 		runtimeTokenRequest = createRuntimeTokenRequest(t, config)
-		getRuntimeCsrInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+		runtimeCsrInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 
 		runtimeTokenRequest = createRuntimeTokenRequest(t, config)
-		getRuntimeMgmInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+		runtimeMgmInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 	})
 }
 
@@ -262,7 +259,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 }
 
-func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -285,7 +282,6 @@ func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, createHostsHeaders(metadataHost, eventsHost))
 
 		// then
-		// TODO - should check ManagementInfoURL when its returned properly
 		require.Nil(t, errorResponse)
 		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
 		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
@@ -339,7 +335,7 @@ func getAppCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 	})
 }
 
-func getRuntimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
+func runtimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -355,7 +351,6 @@ func getRuntimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, sk
 		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
 
 		// then
-		// TODO - should check ManagementInfoURL when its returned properly
 		require.Nil(t, errorResponse)
 		assert.NotEmpty(t, infoResponse.CertUrl)
 		assert.NotEmpty(t, infoResponse.Api)
@@ -363,7 +358,7 @@ func getRuntimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, sk
 	})
 }
 
-func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -450,7 +445,7 @@ func getAppMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVe
 	})
 }
 
-func getRuntimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
+func runtimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
