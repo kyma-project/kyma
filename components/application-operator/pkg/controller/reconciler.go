@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	appReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -135,7 +136,22 @@ func shouldSkipInstallation(application *v1alpha1.Application) bool {
 
 func (r *applicationReconciler) installApplication(application *v1alpha1.Application) (string, string, error) {
 	log.Infof("Installing release for %s Application...", application.Name)
-	status, description, err := r.releaseManager.InstallChart(application.Name)
+
+	overridesData := r.releaseManager.GetOverridesDefaults()
+	if application.Spec.HasTenant() == true {
+		overridesData.Tenant = application.Spec.Tenant
+	}
+
+	if application.Spec.HasGroup() == true {
+		overridesData.Group = application.Spec.Group
+	}
+
+	overrides, err := kymahelm.ParseOverrides(overridesData, appReleases.OverridesTemplate)
+	if err != nil {
+		return "", "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
+	}
+
+	status, description, err := r.releaseManager.InstallChart(application.Name, overrides)
 	if err != nil {
 		return "", "", errors.Wrapf(err, "Error installing release for %s Application", application.Name)
 	}
