@@ -42,7 +42,7 @@ To run the application without building the binary, execute the following comman
 
 ```bash
 go run cmd/generator/main.go \
-  -kube-config-custer-name=minikue \
+  -kube-config-cluster-name=minikube \
   -kube-config-url=:8443 \
   -kube-config-ca-file=~/.minikube/ca.crt \
   -oidc-issuer-url="https://dex.kyma.local" \
