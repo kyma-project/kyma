@@ -79,10 +79,41 @@ func (s *Instance) Get(id internal.InstanceID) (*internal.Instance, error) {
 		return nil, errors.New("more than one element matching requested id, should never happen")
 	}
 
-	dec := gob.NewDecoder(bytes.NewReader(resp.Kvs[0].Value))
+	i, err := s.decodeInstance(resp.Kvs[0].Value)
+	if err != nil {
+		return nil, errors.Wrap(err, "while decoding single DSO")
+	}
+
+	return i, nil
+}
+
+// GetAll returns collection of Instance objects from storage
+func (s *Instance) GetAll() ([]*internal.Instance, error) {
+	out := []*internal.Instance{}
+
+	// special chart NULL hex (\x00) is used to select all entities with prefix defined during create new instance
+	// empty string is not allowed for etcd/clientv3 library
+	resp, err := s.kv.Get(context.TODO(), "\x00", clientv3.WithFromKey())
+	if err != nil {
+		return nil, errors.Wrap(err, "while get collection from storage")
+	}
+
+	for _, rawInst := range resp.Kvs {
+		i, err := s.decodeInstance(rawInst.Value)
+		if err != nil {
+			return nil, errors.Wrap(err, "while decoding DSO collection")
+		}
+		out = append(out, i)
+	}
+
+	return out, nil
+}
+
+func (s *Instance) decodeInstance(raw []byte) (*internal.Instance, error) {
+	dec := gob.NewDecoder(bytes.NewReader(raw))
 	var i internal.Instance
 	if err := dec.Decode(&i); err != nil {
-		return nil, errors.Wrap(err, "while decoding DSO")
+		return nil, err
 	}
 
 	return &i, nil

@@ -24,7 +24,7 @@ func TestAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = oauthStrategy.AddAuthorizationHeader(request)
+		err = oauthStrategy.AddAuthorization(request, proxyStub)
 
 		// then
 		require.NoError(t, err)
@@ -57,7 +57,7 @@ func TestAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = oauthStrategy.AddAuthorizationHeader(request)
+		err = oauthStrategy.AddAuthorization(request, proxyStub)
 
 		// then
 		require.Error(t, err)

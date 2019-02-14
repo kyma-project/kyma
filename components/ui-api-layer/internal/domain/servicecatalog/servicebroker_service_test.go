@@ -21,8 +21,8 @@ import (
 func TestServiceBrokerService_GetServiceBroker(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		brokerName := "testExample"
-		environmentName := "exampleEnv"
-		serviceBroker := fixServiceBroker(brokerName, environmentName)
+		nsName := "exampleNs"
+		serviceBroker := fixServiceBroker(brokerName, nsName)
 		client := fake.NewSimpleClientset(serviceBroker)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -32,7 +32,7 @@ func TestServiceBrokerService_GetServiceBroker(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceBrokerInformer)
 
-		broker, err := svc.Find(brokerName, environmentName)
+		broker, err := svc.Find(brokerName, nsName)
 		require.NoError(t, err)
 		assert.Equal(t, serviceBroker, broker)
 	})
@@ -47,7 +47,7 @@ func TestServiceBrokerService_GetServiceBroker(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceBrokerInformer)
 
-		broker, err := svc.Find("doesntExist", "env")
+		broker, err := svc.Find("doesntExist", "ns")
 		require.NoError(t, err)
 		assert.Nil(t, broker)
 	})
@@ -55,10 +55,10 @@ func TestServiceBrokerService_GetServiceBroker(t *testing.T) {
 
 func TestServiceBrokerService_ListServiceBrokers(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environmentName := "exampleEnv"
-		serviceBroker1 := fixServiceBroker("1", environmentName)
-		serviceBroker2 := fixServiceBroker("2", environmentName)
-		serviceBroker3 := fixServiceBroker("3", environmentName)
+		nsName := "exampleNs"
+		serviceBroker1 := fixServiceBroker("1", nsName)
+		serviceBroker2 := fixServiceBroker("2", nsName)
+		serviceBroker3 := fixServiceBroker("3", nsName)
 		client := fake.NewSimpleClientset(serviceBroker1, serviceBroker2, serviceBroker3)
 
 		informerFactory := externalversions.NewSharedInformerFactory(client, 0)
@@ -68,7 +68,7 @@ func TestServiceBrokerService_ListServiceBrokers(t *testing.T) {
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceBrokerInformer)
 
-		brokers, err := svc.List(environmentName, pager.PagingParams{})
+		brokers, err := svc.List(nsName, pager.PagingParams{})
 		require.NoError(t, err)
 		assert.Equal(t, []*v1beta1.ServiceBroker{
 			serviceBroker1, serviceBroker2, serviceBroker3,
@@ -86,7 +86,7 @@ func TestServiceBrokerService_ListServiceBrokers(t *testing.T) {
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceBrokerInformer)
 
 		var emptyArray []*v1beta1.ServiceBroker
-		brokers, err := svc.List("env", pager.PagingParams{})
+		brokers, err := svc.List("ns", pager.PagingParams{})
 		require.NoError(t, err)
 		assert.Equal(t, emptyArray, brokers)
 	})

@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -26,7 +26,7 @@ func TestSecretConverter_ToGQL(t *testing.T) {
 		actualQL := sut.ToGQL(&givenSecret)
 		// THEN
 		assert.Equal(t, "my-secret", actualQL.Name)
-		assert.Equal(t, "production", actualQL.Environment)
+		assert.Equal(t, "production", actualQL.Namespace)
 		assert.Equal(t, gqlschema.JSON{"password": "secret"}, actualQL.Data)
 	})
 

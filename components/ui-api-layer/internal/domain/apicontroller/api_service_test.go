@@ -10,13 +10,13 @@ import (
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 )
 
 func TestApiService_List(t *testing.T) {
-	t.Run("Should filter by environment", func(t *testing.T) {
+	t.Run("Should filter by namespace", func(t *testing.T) {
 		api1 := fixAPIWith("test-1", "test-1", "", "")
 		api2 := fixAPIWith("test-1", "test-2", "", "")
 		api3 := fixAPIWith("test-2", "test-1", "", "")
@@ -34,7 +34,7 @@ func TestApiService_List(t *testing.T) {
 		}, result)
 	})
 
-	t.Run("Should filter by environment and hostname", func(t *testing.T) {
+	t.Run("Should filter by namespace and hostname", func(t *testing.T) {
 		hostname := "abc"
 
 		api1 := fixAPIWith("test-1", "test-1", hostname, "")
@@ -54,7 +54,7 @@ func TestApiService_List(t *testing.T) {
 		}, result)
 	})
 
-	t.Run("Should filter by environment and serviceName", func(t *testing.T) {
+	t.Run("Should filter by namespace and serviceName", func(t *testing.T) {
 		serviceName := "abc"
 
 		api1 := fixAPIWith("test-2", "test-1", "", serviceName)
@@ -74,7 +74,7 @@ func TestApiService_List(t *testing.T) {
 		}, result)
 	})
 
-	t.Run("Should filter by environment serviceName and hostname", func(t *testing.T) {
+	t.Run("Should filter by namespace serviceName and hostname", func(t *testing.T) {
 		serviceName := "abc"
 		hostname := "cba"
 
@@ -96,11 +96,11 @@ func TestApiService_List(t *testing.T) {
 	})
 }
 
-func fixAPIWith(name, environment, hostname, serviceName string) *v1alpha2.Api {
+func fixAPIWith(name, namespace, hostname, serviceName string) *v1alpha2.Api {
 	return &v1alpha2.Api{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 		Spec: v1alpha2.ApiSpec{
 			Hostname: hostname,

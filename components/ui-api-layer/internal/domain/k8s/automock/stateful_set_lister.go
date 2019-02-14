@@ -10,13 +10,13 @@ type statefulSetLister struct {
 	mock.Mock
 }
 
-// ListStatefulSets provides a mock function with given fields: environment
-func (_m *statefulSetLister) ListStatefulSets(environment string) ([]*v1.StatefulSet, error) {
-	ret := _m.Called(environment)
+// ListStatefulSets provides a mock function with given fields: namespace
+func (_m *statefulSetLister) ListStatefulSets(namespace string) ([]*v1.StatefulSet, error) {
+	ret := _m.Called(namespace)
 
 	var r0 []*v1.StatefulSet
 	if rf, ok := ret.Get(0).(func(string) []*v1.StatefulSet); ok {
-		r0 = rf(environment)
+		r0 = rf(namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1.StatefulSet)
@@ -25,7 +25,7 @@ func (_m *statefulSetLister) ListStatefulSets(environment string) ([]*v1.Statefu
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(environment)
+		r1 = rf(namespace)
 	} else {
 		r1 = ret.Error(1)
 	}

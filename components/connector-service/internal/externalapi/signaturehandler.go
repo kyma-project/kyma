@@ -1,110 +1,64 @@
 package externalapi
 
 import (
-	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/gorilla/mux"
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
 )
 
 type signatureHandler struct {
-	tokenCache        tokencache.TokenCache
-	certUtil          certificates.CertificateUtility
-	secretsRepository secrets.Repository
-	host              string
-	domainName        string
-	csr               csrInfo
+	tokenManager             tokens.Manager
+	connectorClientExtractor clientcontext.ConnectorClientExtractor
+	certificateService       certificates.Service
 }
 
-func NewSignatureHandler(tokenCache tokencache.TokenCache, certUtil certificates.CertificateUtility, secretsRepository secrets.Repository,
-	host string, domainName string, subjectValues certificates.CSRSubject) SignatureHandler {
-	csr := csrInfo{
-		Country:            subjectValues.Country,
-		Organization:       subjectValues.Organization,
-		OrganizationalUnit: subjectValues.OrganizationalUnit,
-		Locality:           subjectValues.Locality,
-		Province:           subjectValues.Province,
-	}
-
+func NewSignatureHandler(tokenManager tokens.Manager, certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor) SignatureHandler {
 	return &signatureHandler{
-		tokenCache:        tokenCache,
-		certUtil:          certUtil,
-		secretsRepository: secretsRepository,
-		host:              host, domainName: domainName,
-		csr: csr,
+		tokenManager:             tokenManager,
+		connectorClientExtractor: connectorClientExtractor,
+		certificateService:       certificateService,
 	}
 }
 
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 	token := r.URL.Query().Get("token")
-	if token == "" {
-		respondWithError(w, apperrors.Forbidden("Token not provided."))
+	connectorClientContext, err := sh.connectorClientExtractor(r.Context())
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	reName := mux.Vars(r)["appName"]
-
-	cachedToken, found := sh.tokenCache.Get(reName)
-	if !found || cachedToken != token {
-		respondWithError(w, apperrors.Forbidden("Invalid token."))
+	signingRequest, err := sh.readCertRequest(r)
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	tokenRequest, appErr := sh.readCertRequest(r)
-	if appErr != nil {
-		respondWithError(w, appErr)
+	rawCSR, err := decodeStringFromBase64(signingRequest.CSR)
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	csr, appErr := sh.loadAndCheckCSR(tokenRequest.CSR, reName)
-	if appErr != nil {
-		respondWithError(w, appErr)
+	encodedCertificatesChain, err := sh.certificateService.SignCSR(rawCSR, connectorClientContext.GetCommonName())
+	if err != nil {
+		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	signedCrt, appErr := sh.signCSR("nginx-auth-ca", csr)
-	if appErr != nil {
-		respondWithError(w, appErr)
-		return
-	}
+	sh.tokenManager.Delete(token)
 
-	sh.tokenCache.Delete(reName)
-
-	respondWithBody(w, 201, certResponse{CRT: signedCrt})
-}
-
-func (sh *signatureHandler) signCSR(secretName string, csr *x509.CertificateRequest) (
-	string, apperrors.AppError) {
-
-	caCrtBytesEncoded, caKeyBytesEncoded, appErr := sh.secretsRepository.Get(secretName)
-	if appErr != nil {
-		return "", appErr
-	}
-
-	caCrt, appErr := sh.certUtil.LoadCert(caCrtBytesEncoded)
-	if appErr != nil {
-		return "", appErr
-	}
-
-	caKey, appErr := sh.certUtil.LoadKey(caKeyBytesEncoded)
-	if appErr != nil {
-		return "", appErr
-	}
-
-	signedCrt, appErr := sh.certUtil.CreateCrtChain(caCrt, csr, caKey)
-	if appErr != nil {
-		return "", appErr
-	}
-
-	return signedCrt, nil
+	httphelpers.RespondWithBody(w, 201, toCertResponse(encodedCertificatesChain))
 }
 
 func (sh *signatureHandler) readCertRequest(r *http.Request) (*certRequest, apperrors.AppError) {
@@ -123,42 +77,11 @@ func (sh *signatureHandler) readCertRequest(r *http.Request) (*certRequest, appe
 	return &tokenRequest, nil
 }
 
-func (sh *signatureHandler) loadAndCheckCSR(encodedData string, reName string) (*x509.CertificateRequest, apperrors.AppError) {
-	csr, appErr := sh.certUtil.LoadCSR(encodedData)
-	if appErr != nil {
-		return nil, appErr
+func decodeStringFromBase64(string string) ([]byte, apperrors.AppError) {
+	bytes, err := base64.StdEncoding.DecodeString(string)
+	if err != nil {
+		return nil, apperrors.BadRequest("There was an error while parsing the base64 content. An incorrect value was provided.")
 	}
 
-	subjectValues := certificates.CSRSubject{
-		CName:              reName,
-		Country:            sh.csr.Country,
-		Organization:       sh.csr.Organization,
-		OrganizationalUnit: sh.csr.OrganizationalUnit,
-		Locality:           sh.csr.Locality,
-		Province:           sh.csr.Province,
-	}
-
-	appErr = sh.certUtil.CheckCSRValues(csr, subjectValues)
-	if appErr != nil {
-		return nil, appErr
-	}
-
-	return csr, nil
-}
-
-func respondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
-	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
-
-	respond(w, statusCode)
-	json.NewEncoder(w).Encode(responseBody)
-}
-
-func respond(w http.ResponseWriter, statusCode int) {
-	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
-	w.WriteHeader(statusCode)
-}
-
-func respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) {
-	respond(w, statusCode)
-	json.NewEncoder(w).Encode(responseBody)
+	return bytes, nil
 }

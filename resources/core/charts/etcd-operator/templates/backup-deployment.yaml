@@ -17,6 +17,8 @@ spec:
   template:
     metadata:
       name: {{ template "name" . }}-backup
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "name" . }}-backup
         release: {{ .Release.Name }}

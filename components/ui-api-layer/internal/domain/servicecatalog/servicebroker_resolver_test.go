@@ -15,20 +15,20 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestServiceBrokerResolver_ServiceBrokerQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "name"
-		env := "env"
+		ns := "ns"
 		expected := &gqlschema.ServiceBroker{
 			Name: "Test",
 		}
 		resource := &v1beta1.ServiceBroker{}
 
 		svc := automock.NewServiceBrokerService()
-		svc.On("Find", name, env).
+		svc.On("Find", name, ns).
 			Return(resource, nil).Once()
 		defer svc.AssertExpectations(t)
 
@@ -39,7 +39,7 @@ func TestServiceBrokerResolver_ServiceBrokerQuery(t *testing.T) {
 		resolver := servicecatalog.NewServiceBrokerResolver(svc)
 		resolver.SetBrokerConverter(converter)
 
-		result, err := resolver.ServiceBrokerQuery(nil, name, env)
+		result, err := resolver.ServiceBrokerQuery(nil, name, ns)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -47,14 +47,14 @@ func TestServiceBrokerResolver_ServiceBrokerQuery(t *testing.T) {
 
 	t.Run("NotFound", func(t *testing.T) {
 		name := "name"
-		env := "env"
+		ns := "ns"
 		svc := automock.NewServiceBrokerService()
-		svc.On("Find", name, env).Return(nil, nil).Once()
+		svc.On("Find", name, ns).Return(nil, nil).Once()
 		defer svc.AssertExpectations(t)
 
 		resolver := servicecatalog.NewServiceBrokerResolver(svc)
 
-		result, err := resolver.ServiceBrokerQuery(nil, name, env)
+		result, err := resolver.ServiceBrokerQuery(nil, name, ns)
 
 		require.NoError(t, err)
 		assert.Nil(t, result)
@@ -62,18 +62,18 @@ func TestServiceBrokerResolver_ServiceBrokerQuery(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		name := "name"
-		env := "env"
+		ns := "ns"
 		expected := errors.New("Test")
 
 		resource := &v1beta1.ServiceBroker{}
 
 		svc := automock.NewServiceBrokerService()
-		svc.On("Find", name, env).Return(resource, expected).Once()
+		svc.On("Find", name, ns).Return(resource, expected).Once()
 		defer svc.AssertExpectations(t)
 
 		resolver := servicecatalog.NewServiceBrokerResolver(svc)
 
-		result, err := resolver.ServiceBrokerQuery(nil, name, env)
+		result, err := resolver.ServiceBrokerQuery(nil, name, ns)
 
 		assert.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -83,7 +83,7 @@ func TestServiceBrokerResolver_ServiceBrokerQuery(t *testing.T) {
 
 func TestServiceBrokerResolver_ServiceBrokersQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		resource :=
 			&v1beta1.ServiceBroker{
 				ObjectMeta: v1.ObjectMeta{
@@ -102,7 +102,7 @@ func TestServiceBrokerResolver_ServiceBrokersQuery(t *testing.T) {
 		}
 
 		svc := automock.NewServiceBrokerService()
-		svc.On("List", env, pager.PagingParams{}).Return(resources, nil).Once()
+		svc.On("List", ns, pager.PagingParams{}).Return(resources, nil).Once()
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLServiceBrokerConverter()
@@ -112,40 +112,40 @@ func TestServiceBrokerResolver_ServiceBrokersQuery(t *testing.T) {
 		resolver := servicecatalog.NewServiceBrokerResolver(svc)
 		resolver.SetBrokerConverter(converter)
 
-		result, err := resolver.ServiceBrokersQuery(nil, env, nil, nil)
+		result, err := resolver.ServiceBrokersQuery(nil, ns, nil, nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		var resources []*v1beta1.ServiceBroker
 
 		svc := automock.NewServiceBrokerService()
-		svc.On("List", env, pager.PagingParams{}).Return(resources, nil).Once()
+		svc.On("List", ns, pager.PagingParams{}).Return(resources, nil).Once()
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceBrokerResolver(svc)
 		var expected []gqlschema.ServiceBroker
 
-		result, err := resolver.ServiceBrokersQuery(nil, env, nil, nil)
+		result, err := resolver.ServiceBrokersQuery(nil, ns, nil, nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		expected := errors.New("Test")
 
 		var resources []*v1beta1.ServiceBroker
 
 		svc := automock.NewServiceBrokerService()
-		svc.On("List", env, pager.PagingParams{}).Return(resources, expected).Once()
+		svc.On("List", ns, pager.PagingParams{}).Return(resources, expected).Once()
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceBrokerResolver(svc)
 
-		_, err := resolver.ServiceBrokersQuery(nil, env, nil, nil)
+		_, err := resolver.ServiceBrokersQuery(nil, ns, nil, nil)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

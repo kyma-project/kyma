@@ -5,6 +5,7 @@ metadata:
   name: {{ .Chart.Name }}-tests
   namespace: {{ .Values.global.namespace }}
   annotations:
+    sidecar.istio.io/inject: "false"
     "helm.sh/hook": test-success
   labels:
     "helm-chart-test": "true"
@@ -22,6 +23,10 @@ spec:
       value: https://gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}
     - name: SKIP_SSL_VERIFY
       value: "{{ .Values.tests.skipSslVerify }}"
+    - name: GROUP
+      value: "{{ .Values.tests.group }}"
+    - name: TENANT
+      value: "{{ .Values.tests.tenant }}"
 
   restartPolicy: Never
 {{ end }}

@@ -5,30 +5,22 @@ import (
 	"encoding/base64"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
 )
 
 type TokenGenerator interface {
-	NewToken(app string) (string, apperrors.AppError)
+	NewToken() (string, apperrors.AppError)
 }
 
 type tokenGenerator struct {
 	tokenLength int
-	tokenCache  tokencache.TokenCache
 }
 
-func NewTokenGenerator(tokenLength int, tokenCache tokencache.TokenCache) TokenGenerator {
-	return &tokenGenerator{tokenLength: tokenLength, tokenCache: tokenCache}
+func NewTokenGenerator(tokenLength int) TokenGenerator {
+	return &tokenGenerator{tokenLength: tokenLength}
 }
 
-func (tg *tokenGenerator) NewToken(app string) (string, apperrors.AppError) {
-	token, err := generateRandomString(tg.tokenLength)
-	if err != nil {
-		return "", err
-	}
-
-	tg.tokenCache.Put(app, token)
-	return token, nil
+func (tg *tokenGenerator) NewToken() (string, apperrors.AppError) {
+	return generateRandomString(tg.tokenLength)
 }
 
 func generateRandomBytes(number int) ([]byte, apperrors.AppError) {

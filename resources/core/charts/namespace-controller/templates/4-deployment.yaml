@@ -15,9 +15,13 @@ spec:
       maxUnavailable: 0
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
+        kyma-alerts: enabled
+        kyma-grafana: enabled
     spec:
       serviceAccountName: {{ template "name" . }}-service-account
       containers:

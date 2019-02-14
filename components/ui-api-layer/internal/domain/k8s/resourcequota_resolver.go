@@ -8,12 +8,12 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 //go:generate mockery -name=resourceQuotaLister -output=automock -outpkg=automock -case=underscore
 type resourceQuotaLister interface {
-	ListResourceQuotas(environment string) ([]*v1.ResourceQuota, error)
+	ListResourceQuotas(namespace string) ([]*v1.ResourceQuota, error)
 }
 
 func newResourceQuotaResolver(resourceQuotaLister resourceQuotaLister) *resourceQuotaResolver {
@@ -28,12 +28,12 @@ type resourceQuotaResolver struct {
 	converter *resourceQuotaConverter
 }
 
-func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, environment string) ([]gqlschema.ResourceQuota, error) {
-	items, err := r.rqLister.ListResourceQuotas(environment)
+func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, namespace string) ([]gqlschema.ResourceQuota, error) {
+	items, err := r.rqLister.ListResourceQuotas(namespace)
 	if err != nil {
 		glog.Error(
-			errors.Wrapf(err, "while listing %s [environment: %s]", pretty.ResourceQuotas, environment))
-		return nil, gqlerror.New(err, pretty.ResourceQuotas, gqlerror.WithEnvironment(environment))
+			errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.ResourceQuotas, namespace))
+		return nil, gqlerror.New(err, pretty.ResourceQuotas, gqlerror.WithNamespace(namespace))
 	}
 
 	return r.converter.ToGQLs(items), nil

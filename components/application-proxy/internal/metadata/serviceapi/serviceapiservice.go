@@ -8,12 +8,16 @@ import (
 )
 
 const (
-	ClientIDKey     = "clientId"
-	ClientSecretKey = "clientSecret"
-	UsernameKey     = "username"
-	PasswordKey     = "password"
-	TypeOAuth       = "OAuth"
-	TypeBasic       = "BasicAuth"
+	ClientIDKey        = "clientId"
+	ClientSecretKey    = "clientSecret"
+	UsernameKey        = "username"
+	PasswordKey        = "password"
+	TypeOAuth          = "OAuth"
+	TypeBasic          = "Basic"
+	TypeCertificateGen = "CertificateGen"
+	PrivateKeyKey      = "key"
+	CertificateKey     = "crt"
+	CommonNameKey      = "commonName"
 )
 
 // Service manages API definition of a service
@@ -56,6 +60,10 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 			api.Credentials = &model.Credentials{
 				BasicAuth: getBasicAuthCredentials(secret),
 			}
+		} else if credentialsType == TypeCertificateGen {
+			api.Credentials = &model.Credentials{
+				CertificateGen: getCertificateGenCredentials(secret),
+			}
 		} else {
 			api.Credentials = nil
 		}
@@ -76,5 +84,13 @@ func getBasicAuthCredentials(secret map[string][]byte) *model.BasicAuth {
 	return &model.BasicAuth{
 		Username: string(secret[UsernameKey]),
 		Password: string(secret[PasswordKey]),
+	}
+}
+
+func getCertificateGenCredentials(secret map[string][]byte) *model.CertificateGen {
+	return &model.CertificateGen{
+		CommonName:  string(secret[CommonNameKey]),
+		Certificate: secret[CertificateKey],
+		PrivateKey:  secret[PrivateKeyKey],
 	}
 }

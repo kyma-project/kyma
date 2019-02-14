@@ -1776,8 +1776,8 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "core-helm-broker-etcd-stateful-client",
-          "value": "core-helm-broker-etcd-stateful-client"
+          "text": "helm-broker-etcd-stateful-client",
+          "value": "helm-broker-etcd-stateful-client"
         },
         "datasource": "Prometheus",
         "hide": 0,

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestBindingUsageConversionToGQLCornerCases(t *testing.T) {
@@ -75,7 +75,7 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 					Kind: "Deployment",
 				},
 				ServiceBindingName: "redis-binding",
-				Environment:        "production",
+				Namespace:          "production",
 			},
 		},
 		"with env prefix": {
@@ -93,7 +93,7 @@ func TestBindingUsageConversionToGQL(t *testing.T) {
 					Kind: "Deployment",
 				},
 				ServiceBindingName: "redis-binding",
-				Environment:        "production",
+				Namespace:          "production",
 				Parameters: &gqlschema.ServiceBindingUsageParameters{
 					EnvPrefix: &gqlschema.EnvPrefix{Name: "ENV_PREFIX"},
 				},
@@ -181,8 +181,8 @@ func TestBindingUsageConversionInput(t *testing.T) {
 		},
 		"with env prefix": {
 			givenSBUInput: &gqlschema.CreateServiceBindingUsageInput{
-				Name:        ptr("usage"),
-				Environment: "production",
+				Name:      ptr("usage"),
+				Namespace: "production",
 				ServiceBindingRef: gqlschema.ServiceBindingRefInput{
 					Name: "redis-binding",
 				},
@@ -218,8 +218,8 @@ func TestBindingUsageConversionInput(t *testing.T) {
 		},
 		"without env prefix": {
 			givenSBUInput: &gqlschema.CreateServiceBindingUsageInput{
-				Name:        ptr("usage"),
-				Environment: "production",
+				Name:      ptr("usage"),
+				Namespace: "production",
 				ServiceBindingRef: gqlschema.ServiceBindingRefInput{
 					Name: "redis-binding",
 				},

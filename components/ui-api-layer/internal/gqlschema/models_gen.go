@@ -28,7 +28,7 @@ type ApplicationEvent struct {
 }
 
 type ApplicationMapping struct {
-	Environment string `json:"environment"`
+	Namespace   string `json:"namespace"`
 	Application string `json:"application"`
 }
 
@@ -95,15 +95,21 @@ type Container struct {
 	Image string `json:"image"`
 }
 
+type ContainerState struct {
+	State   ContainerStateType `json:"state"`
+	Reason  string             `json:"reason"`
+	Message string             `json:"message"`
+}
+
 type CreateServiceBindingOutput struct {
 	Name                string `json:"name"`
 	ServiceInstanceName string `json:"serviceInstanceName"`
-	Environment         string `json:"environment"`
+	Namespace           string `json:"namespace"`
 }
 
 type CreateServiceBindingUsageInput struct {
 	Name              *string                             `json:"name"`
-	Environment       string                              `json:"environment"`
+	Namespace         string                              `json:"namespace"`
 	ServiceBindingRef ServiceBindingRefInput              `json:"serviceBindingRef"`
 	UsedBy            LocalObjectReferenceInput           `json:"usedBy"`
 	Parameters        *ServiceBindingUsageParametersInput `json:"parameters"`
@@ -114,18 +120,18 @@ type DeleteApplicationOutput struct {
 }
 
 type DeleteServiceBindingOutput struct {
-	Name        string `json:"name"`
-	Environment string `json:"environment"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type DeleteServiceBindingUsageOutput struct {
-	Name        string `json:"name"`
-	Environment string `json:"environment"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
 }
 
 type Deployment struct {
 	Name                      string           `json:"name"`
-	Environment               string           `json:"environment"`
+	Namespace                 string           `json:"namespace"`
 	CreationTimestamp         time.Time        `json:"creationTimestamp"`
 	Status                    DeploymentStatus `json:"status"`
 	Labels                    Labels           `json:"labels"`
@@ -175,7 +181,7 @@ type Function struct {
 	Trigger           string    `json:"trigger"`
 	CreationTimestamp time.Time `json:"creationTimestamp"`
 	Labels            Labels    `json:"labels"`
-	Environment       string    `json:"environment"`
+	Namespace         string    `json:"namespace"`
 }
 
 type IDPPreset struct {
@@ -211,6 +217,34 @@ type LocalObjectReferenceInput struct {
 	Name string `json:"name"`
 }
 
+type Pod struct {
+	Name              string           `json:"name"`
+	NodeName          string           `json:"nodeName"`
+	Namespace         string           `json:"namespace"`
+	RestartCount      int              `json:"restartCount"`
+	CreationTimestamp time.Time        `json:"creationTimestamp"`
+	Labels            Labels           `json:"labels"`
+	Status            PodStatusType    `json:"status"`
+	ContainerStates   []ContainerState `json:"containerStates"`
+	JSON              JSON             `json:"json"`
+}
+
+type PodEvent struct {
+	Type SubscriptionEventType `json:"type"`
+	Pod  Pod                   `json:"pod"`
+}
+
+type ResourceAttributes struct {
+	Verb            string  `json:"verb"`
+	APIGroup        string  `json:"apiGroup"`
+	APIVersion      string  `json:"apiVersion"`
+	Resource        string  `json:"resource"`
+	Subresource     string  `json:"subresource"`
+	NameArg         *string `json:"nameArg"`
+	NamespaceArg    *string `json:"namespaceArg"`
+	IsChildResolver bool    `json:"isChildResolver"`
+}
+
 type ResourceQuota struct {
 	Name     string         `json:"name"`
 	Pods     *string        `json:"pods"`
@@ -234,9 +268,9 @@ type ResourceValues struct {
 }
 
 type Secret struct {
-	Name        string `json:"name"`
-	Environment string `json:"environment"`
-	Data        JSON   `json:"data"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	Data      JSON   `json:"data"`
 }
 
 type Service struct {
@@ -292,7 +326,7 @@ type ServiceBindingsStats struct {
 
 type ServiceBroker struct {
 	Name              string              `json:"name"`
-	Environment       string              `json:"environment"`
+	Namespace         string              `json:"namespace"`
 	Status            ServiceBrokerStatus `json:"status"`
 	CreationTimestamp time.Time           `json:"creationTimestamp"`
 	URL               string              `json:"url"`
@@ -312,7 +346,7 @@ type ServiceBrokerStatus struct {
 
 type ServiceInstanceCreateInput struct {
 	Name            string                                `json:"name"`
-	Environment     string                                `json:"environment"`
+	Namespace       string                                `json:"namespace"`
 	ClassRef        ServiceInstanceCreateInputResourceRef `json:"classRef"`
 	PlanRef         ServiceInstanceCreateInputResourceRef `json:"planRef"`
 	Labels          []string                              `json:"labels"`
@@ -343,7 +377,7 @@ type ServiceInstanceStatus struct {
 
 type ServicePlan struct {
 	Name                          string  `json:"name"`
-	Environment                   string  `json:"environment"`
+	Namespace                     string  `json:"namespace"`
 	DisplayName                   *string `json:"displayName"`
 	ExternalName                  string  `json:"externalName"`
 	Description                   string  `json:"description"`
@@ -437,6 +471,43 @@ func (e AuthenticationPolicyType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type ContainerStateType string
+
+const (
+	ContainerStateTypeWaiting    ContainerStateType = "WAITING"
+	ContainerStateTypeRunning    ContainerStateType = "RUNNING"
+	ContainerStateTypeTerminated ContainerStateType = "TERMINATED"
+)
+
+func (e ContainerStateType) IsValid() bool {
+	switch e {
+	case ContainerStateTypeWaiting, ContainerStateTypeRunning, ContainerStateTypeTerminated:
+		return true
+	}
+	return false
+}
+
+func (e ContainerStateType) String() string {
+	return string(e)
+}
+
+func (e *ContainerStateType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ContainerStateType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ContainerStateType", str)
+	}
+	return nil
+}
+
+func (e ContainerStateType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type InstanceStatusType string
 
 const (
@@ -509,6 +580,45 @@ func (e *LimitType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e LimitType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type PodStatusType string
+
+const (
+	PodStatusTypePending   PodStatusType = "PENDING"
+	PodStatusTypeRunning   PodStatusType = "RUNNING"
+	PodStatusTypeSucceeded PodStatusType = "SUCCEEDED"
+	PodStatusTypeFailed    PodStatusType = "FAILED"
+	PodStatusTypeUnknown   PodStatusType = "UNKNOWN"
+)
+
+func (e PodStatusType) IsValid() bool {
+	switch e {
+	case PodStatusTypePending, PodStatusTypeRunning, PodStatusTypeSucceeded, PodStatusTypeFailed, PodStatusTypeUnknown:
+		return true
+	}
+	return false
+}
+
+func (e PodStatusType) String() string {
+	return string(e)
+}
+
+func (e *PodStatusType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = PodStatusType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid PodStatusType", str)
+	}
+	return nil
+}
+
+func (e PodStatusType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

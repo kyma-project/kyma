@@ -5,9 +5,15 @@ metadata:
   labels:
     app: {{ template "name" . }}
 rules:
+  - apiGroups: ["authorization.k8s.io"]
+    resources: ["subjectaccessreviews"]
+    verbs: ["get", "list", "watch", "create", "delete"]
   - apiGroups: [""]
     resources: ["*"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list", "watch", "update", "delete"]
   - apiGroups: ["extensions", "apps"]
     resources: ["deployments"]
     verbs: ["get", "list", "watch"]

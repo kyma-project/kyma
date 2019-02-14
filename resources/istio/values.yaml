@@ -28,10 +28,10 @@ global:
     resources:
       requests:
         cpu: 10m
-      #  memory: 128Mi
-      # limits:
-      #   cpu: 100m
-      #   memory: 128Mi
+        memory: 128Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
 
     # Controls number of Proxy worker threads.
     # If set to 0 (default), then start worker thread for each CPU thread/core.
@@ -52,7 +52,7 @@ global:
     # example: includeIPRanges: "172.30.0.0/16,172.20.0.0/16"
     # would only capture egress traffic on those two IP Ranges, all other outbound traffic would
     # be allowed by the sidecar
-    includeIPRanges: "*"
+    includeIPRanges: "10.0.0.1/8" # Adjust for Kyma, previous value: "*"
     excludeIPRanges: ""
 
     # istio ingress capture whitelist
@@ -366,6 +366,13 @@ mixer:
     hub: docker.io/prom
     tag: v0.6.0
 
+  # Adjust for Kyma installation, previously wasn't defined
+  resources:
+    limits:
+      memory: 1Gi
+    requests:
+      memory: 256Mi
+
 #
 # pilot configuration
 #
@@ -381,7 +388,9 @@ pilot:
   resources:
     requests:
       cpu: 500m
-      memory: 2048Mi
+      memory: 512Mi # Adjust for Kyma, previous value: 2048Mi
+    limits: # Adjust for Kyma, previous wasn't defined
+      memory: 2Gi
   env:
     PILOT_PUSH_THROTTLE_COUNT: 100
     GODEBUG: gctrace=2

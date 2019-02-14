@@ -4,6 +4,7 @@ kind: Pod
 metadata:
   name: test-{{ template "fullname" . }}-acceptance
   annotations:
+    sidecar.istio.io/inject: "false"
     "helm.sh/hook": test-success
   labels:
     "helm-chart-test": "true"
@@ -14,7 +15,7 @@ spec:
       image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
       env:
       - name: HELM_BROKER_URL
-        value: http://{{.Release.Name }}-helm-broker.{{ .Release.Namespace }}.svc.cluster.local
+        value: http://helm-broker.kyma-system.svc.cluster.local
       - name: RELEASE_NAMESPACE
         value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
       - name: KYMA_DOMAIN

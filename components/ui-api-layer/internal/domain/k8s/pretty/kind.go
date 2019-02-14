@@ -5,10 +5,12 @@ type Kind int
 const (
 	Deployment Kind = iota
 	Deployments
-	Environment
-	Environments
+	Namespace
+	Namespaces
 	LimitRange
 	LimitRanges
+	Pod
+	Pods
 	ReplicaSets
 	StatefulSets
 	ResourceQuota
@@ -24,14 +26,18 @@ func (k Kind) String() string {
 		return "Deployment"
 	case Deployments:
 		return "Deployments"
-	case Environment:
-		return "Environment"
-	case Environments:
-		return "Environments"
+	case Namespace:
+		return "Namespace"
+	case Namespaces:
+		return "Namespaces"
 	case LimitRange:
 		return "Limit Range"
 	case LimitRanges:
 		return "Limit Ranges"
+	case Pod:
+		return "Pod"
+	case Pods:
+		return "Pods"
 	case ReplicaSets:
 		return "Replica Sets"
 	case StatefulSets:

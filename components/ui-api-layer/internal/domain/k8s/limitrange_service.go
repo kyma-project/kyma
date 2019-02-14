@@ -2,7 +2,7 @@ package k8s
 
 import (
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -16,10 +16,10 @@ type limitRangeService struct {
 	informer cache.SharedIndexInformer
 }
 
-func (svc *limitRangeService) List(env string) ([]*v1.LimitRange, error) {
-	items, err := svc.informer.GetIndexer().ByIndex(cache.NamespaceIndex, env)
+func (svc *limitRangeService) List(ns string) ([]*v1.LimitRange, error) {
+	items, err := svc.informer.GetIndexer().ByIndex(cache.NamespaceIndex, ns)
 	if err != nil {
-		return []*v1.LimitRange{}, errors.Wrapf(err, "cannot list limit ranges from ns: %s", env)
+		return []*v1.LimitRange{}, errors.Wrapf(err, "cannot list limit ranges from ns: %s", ns)
 	}
 
 	var result []*v1.LimitRange

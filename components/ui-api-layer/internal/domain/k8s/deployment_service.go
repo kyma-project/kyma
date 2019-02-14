@@ -12,12 +12,12 @@ type deploymentService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newDeploymentService(informer cache.SharedIndexInformer) *deploymentService {
+func newDeploymentService(informer cache.SharedIndexInformer) (*deploymentService, error) {
 	svc := &deploymentService{
 		informer: informer,
 	}
 
-	informer.AddIndexers(cache.Indexers{
+	err := informer.AddIndexers(cache.Indexers{
 		"functionFilter": func(obj interface{}) ([]string, error) {
 			deployment, err := svc.toDeployment(obj)
 			if err != nil {
@@ -29,12 +29,15 @@ func newDeploymentService(informer cache.SharedIndexInformer) *deploymentService
 			return []string{key}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
-	return svc
+	return svc, nil
 }
 
-func (svc *deploymentService) Find(name string, environment string) (*api.Deployment, error) {
-	key := fmt.Sprintf("%s/%s", environment, name)
+func (svc *deploymentService) Find(name string, namespace string) (*api.Deployment, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
 
 	item, exists, err := svc.informer.GetStore().GetByKey(key)
 	if err != nil || !exists {
@@ -49,8 +52,8 @@ func (svc *deploymentService) Find(name string, environment string) (*api.Deploy
 	return deploy, nil
 }
 
-func (svc *deploymentService) List(environment string) ([]*api.Deployment, error) {
-	items, err := svc.informer.GetIndexer().ByIndex("namespace", environment)
+func (svc *deploymentService) List(namespace string) ([]*api.Deployment, error) {
+	items, err := svc.informer.GetIndexer().ByIndex("namespace", namespace)
 	if err != nil {
 		return nil, err
 	}
@@ -58,8 +61,8 @@ func (svc *deploymentService) List(environment string) ([]*api.Deployment, error
 	return svc.toDeployments(items)
 }
 
-func (svc *deploymentService) ListWithoutFunctions(environment string) ([]*api.Deployment, error) {
-	key := fmt.Sprintf("%s/false", environment)
+func (svc *deploymentService) ListWithoutFunctions(namespace string) ([]*api.Deployment, error) {
+	key := fmt.Sprintf("%s/false", namespace)
 	items, err := svc.informer.GetIndexer().ByIndex("functionFilter", key)
 	if err != nil {
 		return nil, err

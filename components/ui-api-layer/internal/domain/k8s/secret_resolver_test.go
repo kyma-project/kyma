@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
@@ -31,7 +31,7 @@ func TestSecretResolver(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 	assert.Equal(t, "my-secret", actualSecret.Name)
-	assert.Equal(t, "production", actualSecret.Environment)
+	assert.Equal(t, "production", actualSecret.Namespace)
 }
 
 func TestSecretResolverOnNotFound(t *testing.T) {

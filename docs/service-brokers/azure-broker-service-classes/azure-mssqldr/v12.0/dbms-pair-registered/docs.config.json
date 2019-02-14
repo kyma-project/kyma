@@ -1,0 +1,8 @@
+{
+    "spec": {
+      "displayName": "Azure SQL 12.0 - disaster recovery DBMS pair registered",
+      "description": "Documentation for Azure SQL 12.0-- disaster recovery DBMS pair registered",
+      "id": "00ce53a3-d6c3-4c24-8cb2-3f48d3b161d8",
+      "type":"Service Class"
+    }
+}

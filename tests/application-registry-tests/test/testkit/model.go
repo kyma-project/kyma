@@ -58,8 +58,9 @@ type API struct {
 }
 
 type Credentials struct {
-	Oauth *Oauth `json:"oauth,omitempty"`
-	Basic *Basic `json:"basic,omitempty"`
+	Oauth          *Oauth          `json:"oauth,omitempty"`
+	Basic          *Basic          `json:"basic,omitempty"`
+	CertificateGen *CertificateGen `json:"certificateGen, omitempty"`
 }
 
 type Oauth struct {
@@ -71,6 +72,10 @@ type Oauth struct {
 type Basic struct {
 	Username string `json:"username"`
 	Password string `json:"password"`
+}
+
+type CertificateGen struct {
+	CommonName string `json:"commonName"`
 }
 
 type Events struct {

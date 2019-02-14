@@ -16,7 +16,11 @@ export KUBECONFIG="{path to kubeconfig}"
 2. Provision volume with a testing script, which then will be used by the Stability Checker. You can use the `local/provision_volume.sh` script. 
 The script copies all files placed in the `local/input` directory to PV.
 
-3. Install the Stability Checker as a Helm chart and provide the proper configuration:
+3. The Stability Checker does not send logs to the Google Cloud Storage bucket by default.
+To enable log forwarding, create the Secret with credentials to the google account and name it `sa-stability-fluentd-storage-writer`.
+Additionally, set the **logsPersistence.enabled** parameter in the `deploy/chart/stability-checker/values.yaml` file to `true`.
+
+4. Install the Stability Checker as a Helm chart and provide the proper configuration:
 
 ```
 helm install deploy/chart/stability-checker \

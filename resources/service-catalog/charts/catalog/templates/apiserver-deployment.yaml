@@ -7,6 +7,8 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/apiregistration.yaml") . | sha256sum }}
 spec:
   replicas: {{ .Values.apiserver.replicas }}
   minReadySeconds: {{ .Values.apiserver.minReadySeconds }}
@@ -27,8 +29,9 @@ spec:
         release: "{{ .Release.Name }}"
         releaseRevision: "{{ .Release.Revision }}"
         heritage: "{{ .Release.Service }}"
-      {{ if .Values.apiserver.annotations }}
       annotations:
+        sidecar.istio.io/inject: "false"
+      {{ if .Values.apiserver.annotations }}
 {{ toYaml .Values.apiserver.annotations | indent 8 }}
       {{- end }}
     spec:
@@ -90,13 +93,13 @@ spec:
         readinessProbe:
           httpGet:
             port: 8443
-            path: /healthz
+            path: /healthz/ready
             scheme: HTTPS
           failureThreshold: 1
           initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 2
+          timeoutSeconds: 5
         livenessProbe:
           httpGet:
             port: 8443
@@ -106,7 +109,7 @@ spec:
           initialDelaySeconds: 10
           periodSeconds: 10
           successThreshold: 1
-          timeoutSeconds: 2
+          timeoutSeconds: 5
         {{- end }}
       {{- if and (eq .Values.apiserver.storage.type "etcd") .Values.apiserver.storage.etcd.useEmbedded }}
       - name: etcd

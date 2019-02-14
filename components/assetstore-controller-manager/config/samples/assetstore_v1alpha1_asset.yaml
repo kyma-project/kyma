@@ -1,0 +1,13 @@
+apiVersion: assetstore.kyma-project.io/v1alpha1
+kind: Asset
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: asset-sample
+  namespace: default
+spec:
+  bucketRef:
+    name: test-sample
+  source:
+    url: https://raw.githubusercontent.com/kyma-project/kyma/master/README.md
+    mode: single

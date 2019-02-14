@@ -16,7 +16,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/module"
-	"github.com/minio/minio-go"
+	minio "github.com/minio/minio-go"
 )
 
 type contentRetriever struct {

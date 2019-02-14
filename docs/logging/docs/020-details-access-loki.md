@@ -1,5 +1,5 @@
 ---
-title: Access OK Log
+title: Access Logs
 type: Details
 ---
 

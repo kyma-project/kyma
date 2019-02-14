@@ -11,7 +11,7 @@ import (
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 )
@@ -45,11 +45,11 @@ func TestEventActivationService_List(t *testing.T) {
 	})
 }
 
-func fixEventActivation(environment, name string) *v1alpha1.EventActivation {
+func fixEventActivation(namespace, name string) *v1alpha1.EventActivation {
 	return &v1alpha1.EventActivation{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 		Spec: v1alpha1.EventActivationSpec{
 			SourceID:    "picco-bello",

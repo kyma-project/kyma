@@ -7,16 +7,30 @@ import (
 	"github.com/vrischmann/envconfig"
 )
 
+type User string
+
+const (
+	AdminUser    User = "admin"
+	ReadOnlyUser User = "read-only"
+	NoRightsUser User = "no-rights"
+	NoUser       User = "no-user"
+)
+
 type envConfig struct {
-	Domain          string `envconfig:"default=kyma.local"`
-	GraphQLEndpoint string `envconfig:"optional,GRAPHQL_ENDPOINT"`
-	Username        string
-	Password        string
+	Domain               string `envconfig:"default=kyma.local"`
+	GraphQLEndpoint      string `envconfig:"optional,GRAPHQL_ENDPOINT"`
+	AdminEmail           string
+	AdminPassword        string
+	ReadOnlyUserEmail    string
+	ReadOnlyUserPassword string
+	NoRightsUserEmail    string
+	NoRightsUserPassword string
 }
 
 type config struct {
 	GraphQLEndpoint  string
 	IdProviderConfig idProviderConfig
+	EnvConfig        envConfig
 }
 
 type idProviderConfig struct {
@@ -41,14 +55,14 @@ type userCredentials struct {
 	Password string
 }
 
-func loadConfig() (config, error) {
+func loadConfig(userContext User) (config, error) {
 	env := envConfig{}
 	err := envconfig.Init(&env)
 	if err != nil {
 		return config{}, errors.Wrap(err, "while loading environment variables")
 	}
 
-	config := config{}
+	config := config{EnvConfig: env}
 
 	graphQLEndpoint := env.GraphQLEndpoint
 	if graphQLEndpoint == "" {
@@ -66,11 +80,25 @@ func loadConfig() (config, error) {
 			ID:          "kyma-client",
 			RedirectUri: "http://127.0.0.1:5555/callback",
 		},
+	}
 
-		UserCredentials: userCredentials{
-			Username: env.Username,
-			Password: env.Password,
-		},
+	switch userContext {
+
+	case AdminUser:
+		config.IdProviderConfig.UserCredentials = userCredentials{
+			Username: env.AdminEmail,
+			Password: env.AdminPassword,
+		}
+	case ReadOnlyUser:
+		config.IdProviderConfig.UserCredentials = userCredentials{
+			Username: env.ReadOnlyUserEmail,
+			Password: env.ReadOnlyUserPassword,
+		}
+	case NoRightsUser:
+		config.IdProviderConfig.UserCredentials = userCredentials{
+			Username: env.NoRightsUserEmail,
+			Password: env.NoRightsUserPassword,
+		}
 	}
 
 	return config, nil

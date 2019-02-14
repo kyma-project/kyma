@@ -3,6 +3,8 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: kyma-installer
+  labels:
+    istio-injection: disabled
 ---
 apiVersion: v1
 kind: LimitRange
@@ -23,19 +25,6 @@ spec:
       # If a node has not enough memory, such pod will not be created.
       memory: 32Mi
     type: Container
----
-apiVersion: v1
-kind: ResourceQuota
-metadata:
-  name: kyma-default
-  namespace: kyma-installer
-spec:
-  hard:
-    # The sum of all pod memory requests must not exceed this value.
-    requests.memory: 384Mi
-
-    # The sum of all pod memory limit must not exceed this value.
-    limits.memory: 512Mi
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition

@@ -35,9 +35,9 @@ type ResolverRoot interface {
 	Application() ApplicationResolver
 	ClusterServiceClass() ClusterServiceClassResolver
 	Deployment() DeploymentResolver
-	Environment() EnvironmentResolver
 	EventActivation() EventActivationResolver
 	Mutation() MutationResolver
+	Namespace() NamespaceResolver
 	Query() QueryResolver
 	ServiceBinding() ServiceBindingResolver
 	ServiceBindingUsage() ServiceBindingUsageResolver
@@ -47,6 +47,7 @@ type ResolverRoot interface {
 }
 
 type DirectiveRoot struct {
+	HasAccess func(ctx context.Context, obj interface{}, next graphql.Resolver, attributes ResourceAttributes) (res interface{}, err error)
 }
 
 type ComplexityRoot struct {
@@ -58,12 +59,12 @@ type ComplexityRoot struct {
 	}
 
 	Application struct {
-		Name                  func(childComplexity int) int
-		Description           func(childComplexity int) int
-		Labels                func(childComplexity int) int
-		Services              func(childComplexity int) int
-		EnabledInEnvironments func(childComplexity int) int
-		Status                func(childComplexity int) int
+		Name                func(childComplexity int) int
+		Description         func(childComplexity int) int
+		Labels              func(childComplexity int) int
+		Services            func(childComplexity int) int
+		EnabledInNamespaces func(childComplexity int) int
+		Status              func(childComplexity int) int
 	}
 
 	ApplicationEntry struct {
@@ -78,7 +79,7 @@ type ComplexityRoot struct {
 	}
 
 	ApplicationMapping struct {
-		Environment func(childComplexity int) int
+		Namespace   func(childComplexity int) int
 		Application func(childComplexity int) int
 	}
 
@@ -141,6 +142,7 @@ type ComplexityRoot struct {
 		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
+		Instances           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
@@ -165,10 +167,16 @@ type ComplexityRoot struct {
 		Image func(childComplexity int) int
 	}
 
+	ContainerState struct {
+		State   func(childComplexity int) int
+		Reason  func(childComplexity int) int
+		Message func(childComplexity int) int
+	}
+
 	CreateServiceBindingOutput struct {
 		Name                func(childComplexity int) int
 		ServiceInstanceName func(childComplexity int) int
-		Environment         func(childComplexity int) int
+		Namespace           func(childComplexity int) int
 	}
 
 	DeleteApplicationOutput struct {
@@ -176,18 +184,18 @@ type ComplexityRoot struct {
 	}
 
 	DeleteServiceBindingOutput struct {
-		Name        func(childComplexity int) int
-		Environment func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
 	}
 
 	DeleteServiceBindingUsageOutput struct {
-		Name        func(childComplexity int) int
-		Environment func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
 	}
 
 	Deployment struct {
 		Name                      func(childComplexity int) int
-		Environment               func(childComplexity int) int
+		Namespace                 func(childComplexity int) int
 		CreationTimestamp         func(childComplexity int) int
 		Status                    func(childComplexity int) int
 		Labels                    func(childComplexity int) int
@@ -216,11 +224,6 @@ type ComplexityRoot struct {
 		Name func(childComplexity int) int
 	}
 
-	Environment struct {
-		Name         func(childComplexity int) int
-		Applications func(childComplexity int) int
-	}
-
 	EventActivation struct {
 		Name        func(childComplexity int) int
 		DisplayName func(childComplexity int) int
@@ -245,7 +248,7 @@ type ComplexityRoot struct {
 		Trigger           func(childComplexity int) int
 		CreationTimestamp func(childComplexity int) int
 		Labels            func(childComplexity int) int
-		Environment       func(childComplexity int) int
+		Namespace         func(childComplexity int) int
 	}
 
 	Idppreset struct {
@@ -273,52 +276,77 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateServiceInstance     func(childComplexity int, params ServiceInstanceCreateInput) int
-		DeleteServiceInstance     func(childComplexity int, name string, environment string) int
-		CreateServiceBinding      func(childComplexity int, serviceBindingName *string, serviceInstanceName string, environment string, parameters *JSON) int
-		DeleteServiceBinding      func(childComplexity int, serviceBindingName string, environment string) int
+		DeleteServiceInstance     func(childComplexity int, name string, namespace string) int
+		CreateServiceBinding      func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters *JSON) int
+		DeleteServiceBinding      func(childComplexity int, serviceBindingName string, namespace string) int
 		CreateServiceBindingUsage func(childComplexity int, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
-		DeleteServiceBindingUsage func(childComplexity int, serviceBindingUsageName string, environment string) int
+		DeleteServiceBindingUsage func(childComplexity int, serviceBindingUsageName string, namespace string) int
 		CreateApplication         func(childComplexity int, name string, description *string, labels *Labels) int
 		UpdateApplication         func(childComplexity int, name string, description *string, labels *Labels) int
 		DeleteApplication         func(childComplexity int, name string) int
-		EnableApplication         func(childComplexity int, application string, environment string) int
-		DisableApplication        func(childComplexity int, application string, environment string) int
+		EnableApplication         func(childComplexity int, application string, namespace string) int
+		DisableApplication        func(childComplexity int, application string, namespace string) int
+		UpdatePod                 func(childComplexity int, name string, namespace string, pod JSON) int
+		DeletePod                 func(childComplexity int, name string, namespace string) int
 		CreateIdppreset           func(childComplexity int, name string, issuer string, jwksUri string) int
 		DeleteIdppreset           func(childComplexity int, name string) int
 	}
 
+	Namespace struct {
+		Name         func(childComplexity int) int
+		Applications func(childComplexity int) int
+	}
+
+	Pod struct {
+		Name              func(childComplexity int) int
+		NodeName          func(childComplexity int) int
+		Namespace         func(childComplexity int) int
+		RestartCount      func(childComplexity int) int
+		CreationTimestamp func(childComplexity int) int
+		Labels            func(childComplexity int) int
+		Status            func(childComplexity int) int
+		ContainerStates   func(childComplexity int) int
+		Json              func(childComplexity int) int
+	}
+
+	PodEvent struct {
+		Type func(childComplexity int) int
+		Pod  func(childComplexity int) int
+	}
+
 	Query struct {
-		ServiceInstance       func(childComplexity int, name string, environment string) int
-		ServiceInstances      func(childComplexity int, environment string, first *int, offset *int, status *InstanceStatusType) int
+		ServiceInstance       func(childComplexity int, name string, namespace string) int
+		ServiceInstances      func(childComplexity int, namespace string, first *int, offset *int, status *InstanceStatusType) int
 		ClusterServiceClasses func(childComplexity int, first *int, offset *int) int
 		ClusterServiceClass   func(childComplexity int, name string) int
-		ServiceClasses        func(childComplexity int, environment string, first *int, offset *int) int
-		ServiceClass          func(childComplexity int, environment string, name string) int
+		ServiceClasses        func(childComplexity int, namespace string, first *int, offset *int) int
+		ServiceClass          func(childComplexity int, namespace string, name string) int
 		ClusterServiceBrokers func(childComplexity int, first *int, offset *int) int
 		ClusterServiceBroker  func(childComplexity int, name string) int
-		ServiceBrokers        func(childComplexity int, environment string, first *int, offset *int) int
-		ServiceBroker         func(childComplexity int, name string, environment string) int
-		ServiceBindingUsage   func(childComplexity int, name string, environment string) int
-		ServiceBinding        func(childComplexity int, name string, environment string) int
+		ServiceBrokers        func(childComplexity int, namespace string, first *int, offset *int) int
+		ServiceBroker         func(childComplexity int, name string, namespace string) int
+		ServiceBindingUsage   func(childComplexity int, name string, namespace string) int
+		ServiceBinding        func(childComplexity int, name string, namespace string) int
 		UsageKinds            func(childComplexity int, first *int, offset *int) int
-		UsageKindResources    func(childComplexity int, usageKind string, environment string) int
-		BindableResources     func(childComplexity int, environment string) int
-		Apis                  func(childComplexity int, environment *string, namespace *string, serviceName *string, hostname *string) int
+		BindableResources     func(childComplexity int, namespace string) int
+		Apis                  func(childComplexity int, namespace string, serviceName *string, hostname *string) int
 		Application           func(childComplexity int, name string) int
-		Applications          func(childComplexity int, environment *string, first *int, offset *int) int
+		Applications          func(childComplexity int, namespace *string, first *int, offset *int) int
 		ConnectorService      func(childComplexity int, application string) int
-		Environments          func(childComplexity int, application *string) int
-		Deployments           func(childComplexity int, environment string, excludeFunctions *bool) int
-		ResourceQuotas        func(childComplexity int, environment string) int
-		ResourceQuotasStatus  func(childComplexity int, environment string) int
-		Functions             func(childComplexity int, environment string, first *int, offset *int) int
+		Namespaces            func(childComplexity int, application *string) int
+		Deployments           func(childComplexity int, namespace string, excludeFunctions *bool) int
+		Pod                   func(childComplexity int, name string, namespace string) int
+		Pods                  func(childComplexity int, namespace string, first *int, offset *int) int
+		ResourceQuotas        func(childComplexity int, namespace string) int
+		ResourceQuotasStatus  func(childComplexity int, namespace string) int
+		Functions             func(childComplexity int, namespace string, first *int, offset *int) int
 		Content               func(childComplexity int, contentType string, id string) int
 		Topics                func(childComplexity int, input []InputTopic, internal *bool) int
-		EventActivations      func(childComplexity int, environment string) int
-		LimitRanges           func(childComplexity int, environment string) int
+		EventActivations      func(childComplexity int, namespace string) int
+		LimitRanges           func(childComplexity int, namespace string) int
+		BackendModules        func(childComplexity int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
-		BackendModules        func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -344,9 +372,9 @@ type ComplexityRoot struct {
 	}
 
 	Secret struct {
-		Name        func(childComplexity int) int
-		Environment func(childComplexity int) int
-		Data        func(childComplexity int) int
+		Name      func(childComplexity int) int
+		Namespace func(childComplexity int) int
+		Data      func(childComplexity int) int
 	}
 
 	Section struct {
@@ -364,7 +392,7 @@ type ComplexityRoot struct {
 	ServiceBinding struct {
 		Name                func(childComplexity int) int
 		ServiceInstanceName func(childComplexity int) int
-		Environment         func(childComplexity int) int
+		Namespace           func(childComplexity int) int
 		Secret              func(childComplexity int) int
 		Status              func(childComplexity int) int
 		Parameters          func(childComplexity int) int
@@ -383,7 +411,7 @@ type ComplexityRoot struct {
 
 	ServiceBindingUsage struct {
 		Name           func(childComplexity int) int
-		Environment    func(childComplexity int) int
+		Namespace      func(childComplexity int) int
 		ServiceBinding func(childComplexity int) int
 		UsedBy         func(childComplexity int) int
 		Parameters     func(childComplexity int) int
@@ -419,7 +447,7 @@ type ComplexityRoot struct {
 
 	ServiceBroker struct {
 		Name              func(childComplexity int) int
-		Environment       func(childComplexity int) int
+		Namespace         func(childComplexity int) int
 		Status            func(childComplexity int) int
 		CreationTimestamp func(childComplexity int) int
 		Url               func(childComplexity int) int
@@ -439,7 +467,7 @@ type ComplexityRoot struct {
 
 	ServiceClass struct {
 		Name                func(childComplexity int) int
-		Environment         func(childComplexity int) int
+		Namespace           func(childComplexity int) int
 		ExternalName        func(childComplexity int) int
 		DisplayName         func(childComplexity int) int
 		CreationTimestamp   func(childComplexity int) int
@@ -453,6 +481,7 @@ type ComplexityRoot struct {
 		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
+		Instances           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
@@ -460,7 +489,7 @@ type ComplexityRoot struct {
 
 	ServiceInstance struct {
 		Name                 func(childComplexity int) int
-		Environment          func(childComplexity int) int
+		Namespace            func(childComplexity int) int
 		PlanSpec             func(childComplexity int) int
 		CreationTimestamp    func(childComplexity int) int
 		Labels               func(childComplexity int) int
@@ -495,7 +524,7 @@ type ComplexityRoot struct {
 
 	ServicePlan struct {
 		Name                          func(childComplexity int) int
-		Environment                   func(childComplexity int) int
+		Namespace                     func(childComplexity int) int
 		DisplayName                   func(childComplexity int) int
 		ExternalName                  func(childComplexity int) int
 		Description                   func(childComplexity int) int
@@ -505,12 +534,13 @@ type ComplexityRoot struct {
 	}
 
 	Subscription struct {
-		ServiceInstanceEvent      func(childComplexity int, environment string) int
-		ServiceBindingEvent       func(childComplexity int, environment string) int
-		ServiceBindingUsageEvent  func(childComplexity int, environment string) int
-		ServiceBrokerEvent        func(childComplexity int, environment string) int
+		ServiceInstanceEvent      func(childComplexity int, namespace string) int
+		ServiceBindingEvent       func(childComplexity int, namespace string) int
+		ServiceBindingUsageEvent  func(childComplexity int, namespace string) int
+		ServiceBrokerEvent        func(childComplexity int, namespace string) int
 		ClusterServiceBrokerEvent func(childComplexity int) int
 		ApplicationEvent          func(childComplexity int) int
+		PodEvent                  func(childComplexity int, namespace string) int
 	}
 
 	Title struct {
@@ -540,12 +570,13 @@ type ComplexityRoot struct {
 }
 
 type ApplicationResolver interface {
-	EnabledInEnvironments(ctx context.Context, obj *Application) ([]string, error)
+	EnabledInNamespaces(ctx context.Context, obj *Application) ([]string, error)
 	Status(ctx context.Context, obj *Application) (ApplicationStatus, error)
 }
 type ClusterServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ClusterServiceClass) ([]ClusterServicePlan, error)
 	Activated(ctx context.Context, obj *ClusterServiceClass) (bool, error)
+	Instances(ctx context.Context, obj *ClusterServiceClass) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
@@ -553,59 +584,62 @@ type ClusterServiceClassResolver interface {
 type DeploymentResolver interface {
 	BoundServiceInstanceNames(ctx context.Context, obj *Deployment) ([]string, error)
 }
-type EnvironmentResolver interface {
-	Applications(ctx context.Context, obj *Environment) ([]string, error)
-}
 type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]EventActivationEvent, error)
 }
 type MutationResolver interface {
 	CreateServiceInstance(ctx context.Context, params ServiceInstanceCreateInput) (*ServiceInstance, error)
-	DeleteServiceInstance(ctx context.Context, name string, environment string) (*ServiceInstance, error)
-	CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName string, environment string, parameters *JSON) (*CreateServiceBindingOutput, error)
-	DeleteServiceBinding(ctx context.Context, serviceBindingName string, environment string) (*DeleteServiceBindingOutput, error)
+	DeleteServiceInstance(ctx context.Context, name string, namespace string) (*ServiceInstance, error)
+	CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName string, namespace string, parameters *JSON) (*CreateServiceBindingOutput, error)
+	DeleteServiceBinding(ctx context.Context, serviceBindingName string, namespace string) (*DeleteServiceBindingOutput, error)
 	CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *CreateServiceBindingUsageInput) (*ServiceBindingUsage, error)
-	DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, environment string) (*DeleteServiceBindingUsageOutput, error)
+	DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, namespace string) (*DeleteServiceBindingUsageOutput, error)
 	CreateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	UpdateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	DeleteApplication(ctx context.Context, name string) (DeleteApplicationOutput, error)
-	EnableApplication(ctx context.Context, application string, environment string) (*ApplicationMapping, error)
-	DisableApplication(ctx context.Context, application string, environment string) (*ApplicationMapping, error)
+	EnableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
+	DisableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
+	UpdatePod(ctx context.Context, name string, namespace string, pod JSON) (*Pod, error)
+	DeletePod(ctx context.Context, name string, namespace string) (*Pod, error)
 	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*IDPPreset, error)
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 }
+type NamespaceResolver interface {
+	Applications(ctx context.Context, obj *Namespace) ([]string, error)
+}
 type QueryResolver interface {
-	ServiceInstance(ctx context.Context, name string, environment string) (*ServiceInstance, error)
-	ServiceInstances(ctx context.Context, environment string, first *int, offset *int, status *InstanceStatusType) ([]ServiceInstance, error)
+	ServiceInstance(ctx context.Context, name string, namespace string) (*ServiceInstance, error)
+	ServiceInstances(ctx context.Context, namespace string, first *int, offset *int, status *InstanceStatusType) ([]ServiceInstance, error)
 	ClusterServiceClasses(ctx context.Context, first *int, offset *int) ([]ClusterServiceClass, error)
 	ClusterServiceClass(ctx context.Context, name string) (*ClusterServiceClass, error)
-	ServiceClasses(ctx context.Context, environment string, first *int, offset *int) ([]ServiceClass, error)
-	ServiceClass(ctx context.Context, environment string, name string) (*ServiceClass, error)
+	ServiceClasses(ctx context.Context, namespace string, first *int, offset *int) ([]ServiceClass, error)
+	ServiceClass(ctx context.Context, namespace string, name string) (*ServiceClass, error)
 	ClusterServiceBrokers(ctx context.Context, first *int, offset *int) ([]ClusterServiceBroker, error)
 	ClusterServiceBroker(ctx context.Context, name string) (*ClusterServiceBroker, error)
-	ServiceBrokers(ctx context.Context, environment string, first *int, offset *int) ([]ServiceBroker, error)
-	ServiceBroker(ctx context.Context, name string, environment string) (*ServiceBroker, error)
-	ServiceBindingUsage(ctx context.Context, name string, environment string) (*ServiceBindingUsage, error)
-	ServiceBinding(ctx context.Context, name string, environment string) (*ServiceBinding, error)
+	ServiceBrokers(ctx context.Context, namespace string, first *int, offset *int) ([]ServiceBroker, error)
+	ServiceBroker(ctx context.Context, name string, namespace string) (*ServiceBroker, error)
+	ServiceBindingUsage(ctx context.Context, name string, namespace string) (*ServiceBindingUsage, error)
+	ServiceBinding(ctx context.Context, name string, namespace string) (*ServiceBinding, error)
 	UsageKinds(ctx context.Context, first *int, offset *int) ([]UsageKind, error)
-	UsageKindResources(ctx context.Context, usageKind string, environment string) ([]UsageKindResource, error)
-	BindableResources(ctx context.Context, environment string) ([]BindableResourcesOutputItem, error)
-	Apis(ctx context.Context, environment *string, namespace *string, serviceName *string, hostname *string) ([]API, error)
+	BindableResources(ctx context.Context, namespace string) ([]BindableResourcesOutputItem, error)
+	Apis(ctx context.Context, namespace string, serviceName *string, hostname *string) ([]API, error)
 	Application(ctx context.Context, name string) (*Application, error)
-	Applications(ctx context.Context, environment *string, first *int, offset *int) ([]Application, error)
+	Applications(ctx context.Context, namespace *string, first *int, offset *int) ([]Application, error)
 	ConnectorService(ctx context.Context, application string) (ConnectorService, error)
-	Environments(ctx context.Context, application *string) ([]Environment, error)
-	Deployments(ctx context.Context, environment string, excludeFunctions *bool) ([]Deployment, error)
-	ResourceQuotas(ctx context.Context, environment string) ([]ResourceQuota, error)
-	ResourceQuotasStatus(ctx context.Context, environment string) (ResourceQuotasStatus, error)
-	Functions(ctx context.Context, environment string, first *int, offset *int) ([]Function, error)
+	Namespaces(ctx context.Context, application *string) ([]Namespace, error)
+	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
+	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
+	Pods(ctx context.Context, namespace string, first *int, offset *int) ([]Pod, error)
+	ResourceQuotas(ctx context.Context, namespace string) ([]ResourceQuota, error)
+	ResourceQuotasStatus(ctx context.Context, namespace string) (ResourceQuotasStatus, error)
+	Functions(ctx context.Context, namespace string, first *int, offset *int) ([]Function, error)
 	Content(ctx context.Context, contentType string, id string) (*JSON, error)
 	Topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
-	EventActivations(ctx context.Context, environment string) ([]EventActivation, error)
-	LimitRanges(ctx context.Context, environment string) ([]LimitRange, error)
+	EventActivations(ctx context.Context, namespace string) ([]EventActivation, error)
+	LimitRanges(ctx context.Context, namespace string) ([]LimitRange, error)
+	BackendModules(ctx context.Context) ([]BackendModule, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
-	BackendModules(ctx context.Context) ([]BackendModule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -616,6 +650,7 @@ type ServiceBindingUsageResolver interface {
 type ServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ServiceClass) ([]ServicePlan, error)
 	Activated(ctx context.Context, obj *ServiceClass) (bool, error)
+	Instances(ctx context.Context, obj *ServiceClass) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ServiceClass) (*JSON, error)
@@ -626,16 +661,17 @@ type ServiceInstanceResolver interface {
 	ServicePlan(ctx context.Context, obj *ServiceInstance) (*ServicePlan, error)
 	ClusterServicePlan(ctx context.Context, obj *ServiceInstance) (*ClusterServicePlan, error)
 	Bindable(ctx context.Context, obj *ServiceInstance) (bool, error)
-	ServiceBindings(ctx context.Context, obj *ServiceInstance) (ServiceBindings, error)
+	ServiceBindings(ctx context.Context, obj *ServiceInstance) (*ServiceBindings, error)
 	ServiceBindingUsages(ctx context.Context, obj *ServiceInstance) ([]ServiceBindingUsage, error)
 }
 type SubscriptionResolver interface {
-	ServiceInstanceEvent(ctx context.Context, environment string) (<-chan ServiceInstanceEvent, error)
-	ServiceBindingEvent(ctx context.Context, environment string) (<-chan ServiceBindingEvent, error)
-	ServiceBindingUsageEvent(ctx context.Context, environment string) (<-chan ServiceBindingUsageEvent, error)
-	ServiceBrokerEvent(ctx context.Context, environment string) (<-chan ServiceBrokerEvent, error)
+	ServiceInstanceEvent(ctx context.Context, namespace string) (<-chan ServiceInstanceEvent, error)
+	ServiceBindingEvent(ctx context.Context, namespace string) (<-chan ServiceBindingEvent, error)
+	ServiceBindingUsageEvent(ctx context.Context, namespace string) (<-chan ServiceBindingUsageEvent, error)
+	ServiceBrokerEvent(ctx context.Context, namespace string) (<-chan ServiceBrokerEvent, error)
 	ClusterServiceBrokerEvent(ctx context.Context) (<-chan ClusterServiceBrokerEvent, error)
 	ApplicationEvent(ctx context.Context) (<-chan ApplicationEvent, error)
+	PodEvent(ctx context.Context, namespace string) (<-chan PodEvent, error)
 }
 
 func field_Mutation_createServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -665,14 +701,14 @@ func field_Mutation_deleteServiceInstance_args(rawArgs map[string]interface{}) (
 	}
 	args["name"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -703,14 +739,14 @@ func field_Mutation_createServiceBinding_args(rawArgs map[string]interface{}) (m
 	}
 	args["serviceInstanceName"] = arg1
 	var arg2 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg2, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg2
+	args["namespace"] = arg2
 	var arg3 *JSON
 	if tmp, ok := rawArgs["parameters"]; ok {
 		var err error
@@ -741,14 +777,14 @@ func field_Mutation_deleteServiceBinding_args(rawArgs map[string]interface{}) (m
 	}
 	args["serviceBindingName"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -785,14 +821,14 @@ func field_Mutation_deleteServiceBindingUsage_args(rawArgs map[string]interface{
 	}
 	args["serviceBindingUsageName"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -910,14 +946,14 @@ func field_Mutation_enableApplication_args(rawArgs map[string]interface{}) (map[
 	}
 	args["application"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -934,14 +970,71 @@ func field_Mutation_disableApplication_args(rawArgs map[string]interface{}) (map
 	}
 	args["application"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_updatePod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["pod"]; ok {
+		var err error
+		err = (&arg2).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["pod"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_deletePod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -1006,14 +1099,14 @@ func field_Query_serviceInstance_args(rawArgs map[string]interface{}) (map[strin
 	}
 	args["name"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -1021,14 +1114,14 @@ func field_Query_serviceInstance_args(rawArgs map[string]interface{}) (map[strin
 func field_Query_serviceInstances_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["first"]; ok {
 		var err error
@@ -1127,14 +1220,14 @@ func field_Query_clusterServiceClass_args(rawArgs map[string]interface{}) (map[s
 func field_Query_serviceClasses_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["first"]; ok {
 		var err error
@@ -1170,14 +1263,14 @@ func field_Query_serviceClasses_args(rawArgs map[string]interface{}) (map[string
 func field_Query_serviceClass_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 string
 	if tmp, ok := rawArgs["name"]; ok {
 		var err error
@@ -1243,14 +1336,14 @@ func field_Query_clusterServiceBroker_args(rawArgs map[string]interface{}) (map[
 func field_Query_serviceBrokers_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["first"]; ok {
 		var err error
@@ -1295,14 +1388,14 @@ func field_Query_serviceBroker_args(rawArgs map[string]interface{}) (map[string]
 	}
 	args["name"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -1319,14 +1412,14 @@ func field_Query_serviceBindingUsage_args(rawArgs map[string]interface{}) (map[s
 	}
 	args["name"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -1343,14 +1436,14 @@ func field_Query_serviceBinding_args(rawArgs map[string]interface{}) (map[string
 	}
 	args["name"] = arg0
 	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg1, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg1
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -1389,63 +1482,34 @@ func field_Query_usageKinds_args(rawArgs map[string]interface{}) (map[string]int
 
 }
 
-func field_Query_usageKindResources_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["usageKind"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["usageKind"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["environment"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["environment"] = arg1
-	return args, nil
-
-}
-
 func field_Query_bindableResources_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	return args, nil
 
 }
 
 func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 *string
-	if tmp, ok := rawArgs["environment"]; ok {
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
-			arg0 = &ptr1
-		}
-
+		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 *string
-	if tmp, ok := rawArgs["namespace"]; ok {
+	if tmp, ok := rawArgs["serviceName"]; ok {
 		var err error
 		var ptr1 string
 		if tmp != nil {
@@ -1457,9 +1521,9 @@ func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface
 			return nil, err
 		}
 	}
-	args["namespace"] = arg1
+	args["serviceName"] = arg1
 	var arg2 *string
-	if tmp, ok := rawArgs["serviceName"]; ok {
+	if tmp, ok := rawArgs["hostname"]; ok {
 		var err error
 		var ptr1 string
 		if tmp != nil {
@@ -1471,21 +1535,7 @@ func field_Query_apis_args(rawArgs map[string]interface{}) (map[string]interface
 			return nil, err
 		}
 	}
-	args["serviceName"] = arg2
-	var arg3 *string
-	if tmp, ok := rawArgs["hostname"]; ok {
-		var err error
-		var ptr1 string
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalString(tmp)
-			arg3 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["hostname"] = arg3
+	args["hostname"] = arg2
 	return args, nil
 
 }
@@ -1508,7 +1558,7 @@ func field_Query_application_args(rawArgs map[string]interface{}) (map[string]in
 func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 *string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		var ptr1 string
 		if tmp != nil {
@@ -1520,7 +1570,7 @@ func field_Query_applications_args(rawArgs map[string]interface{}) (map[string]i
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["first"]; ok {
 		var err error
@@ -1568,7 +1618,7 @@ func field_Query_connectorService_args(rawArgs map[string]interface{}) (map[stri
 
 }
 
-func field_Query_environments_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_namespaces_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 *string
 	if tmp, ok := rawArgs["application"]; ok {
@@ -1591,14 +1641,14 @@ func field_Query_environments_args(rawArgs map[string]interface{}) (map[string]i
 func field_Query_deployments_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 *bool
 	if tmp, ok := rawArgs["excludeFunctions"]; ok {
 		var err error
@@ -1617,17 +1667,84 @@ func field_Query_deployments_args(rawArgs map[string]interface{}) (map[string]in
 
 }
 
-func field_Query_resourceQuotas_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_pod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["name"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Query_pods_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg2
+	return args, nil
+
+}
+
+func field_Query_resourceQuotas_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -1635,14 +1752,14 @@ func field_Query_resourceQuotas_args(rawArgs map[string]interface{}) (map[string
 func field_Query_resourceQuotasStatus_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -1650,14 +1767,14 @@ func field_Query_resourceQuotasStatus_args(rawArgs map[string]interface{}) (map[
 func field_Query_functions_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	var arg1 *int
 	if tmp, ok := rawArgs["first"]; ok {
 		var err error
@@ -1757,14 +1874,14 @@ func field_Query_topics_args(rawArgs map[string]interface{}) (map[string]interfa
 func field_Query_eventActivations_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -1772,14 +1889,14 @@ func field_Query_eventActivations_args(rawArgs map[string]interface{}) (map[stri
 func field_Query_limitRanges_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -1851,14 +1968,14 @@ func field_Query___type_args(rawArgs map[string]interface{}) (map[string]interfa
 func field_Subscription_serviceInstanceEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -1866,14 +1983,14 @@ func field_Subscription_serviceInstanceEvent_args(rawArgs map[string]interface{}
 func field_Subscription_serviceBindingEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -1881,14 +1998,14 @@ func field_Subscription_serviceBindingEvent_args(rawArgs map[string]interface{})
 func field_Subscription_serviceBindingUsageEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -1896,14 +2013,29 @@ func field_Subscription_serviceBindingUsageEvent_args(rawArgs map[string]interfa
 func field_Subscription_serviceBrokerEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
-	if tmp, ok := rawArgs["environment"]; ok {
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["environment"] = arg0
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
+func field_Subscription_podEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
 	return args, nil
 
 }
@@ -1934,6 +2066,21 @@ func field___Type_enumValues_args(rawArgs map[string]interface{}) (map[string]in
 		}
 	}
 	args["includeDeprecated"] = arg0
+	return args, nil
+
+}
+
+func dir_HasAccess_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 ResourceAttributes
+	if tmp, ok := rawArgs["attributes"]; ok {
+		var err error
+		arg0, err = UnmarshalResourceAttributes(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["attributes"] = arg0
 	return args, nil
 
 }
@@ -2007,12 +2154,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Application.Services(childComplexity), true
 
-	case "Application.enabledInEnvironments":
-		if e.complexity.Application.EnabledInEnvironments == nil {
+	case "Application.enabledInNamespaces":
+		if e.complexity.Application.EnabledInNamespaces == nil {
 			break
 		}
 
-		return e.complexity.Application.EnabledInEnvironments(childComplexity), true
+		return e.complexity.Application.EnabledInNamespaces(childComplexity), true
 
 	case "Application.status":
 		if e.complexity.Application.Status == nil {
@@ -2056,12 +2203,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ApplicationEvent.Application(childComplexity), true
 
-	case "ApplicationMapping.environment":
-		if e.complexity.ApplicationMapping.Environment == nil {
+	case "ApplicationMapping.namespace":
+		if e.complexity.ApplicationMapping.Namespace == nil {
 			break
 		}
 
-		return e.complexity.ApplicationMapping.Environment(childComplexity), true
+		return e.complexity.ApplicationMapping.Namespace(childComplexity), true
 
 	case "ApplicationMapping.application":
 		if e.complexity.ApplicationMapping.Application == nil {
@@ -2329,6 +2476,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterServiceClass.Activated(childComplexity), true
 
+	case "ClusterServiceClass.instances":
+		if e.complexity.ClusterServiceClass.Instances == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.Instances(childComplexity), true
+
 	case "ClusterServiceClass.apiSpec":
 		if e.complexity.ClusterServiceClass.ApiSpec == nil {
 			break
@@ -2420,6 +2574,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Container.Image(childComplexity), true
 
+	case "ContainerState.state":
+		if e.complexity.ContainerState.State == nil {
+			break
+		}
+
+		return e.complexity.ContainerState.State(childComplexity), true
+
+	case "ContainerState.reason":
+		if e.complexity.ContainerState.Reason == nil {
+			break
+		}
+
+		return e.complexity.ContainerState.Reason(childComplexity), true
+
+	case "ContainerState.message":
+		if e.complexity.ContainerState.Message == nil {
+			break
+		}
+
+		return e.complexity.ContainerState.Message(childComplexity), true
+
 	case "CreateServiceBindingOutput.name":
 		if e.complexity.CreateServiceBindingOutput.Name == nil {
 			break
@@ -2434,12 +2609,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.CreateServiceBindingOutput.ServiceInstanceName(childComplexity), true
 
-	case "CreateServiceBindingOutput.environment":
-		if e.complexity.CreateServiceBindingOutput.Environment == nil {
+	case "CreateServiceBindingOutput.namespace":
+		if e.complexity.CreateServiceBindingOutput.Namespace == nil {
 			break
 		}
 
-		return e.complexity.CreateServiceBindingOutput.Environment(childComplexity), true
+		return e.complexity.CreateServiceBindingOutput.Namespace(childComplexity), true
 
 	case "DeleteApplicationOutput.name":
 		if e.complexity.DeleteApplicationOutput.Name == nil {
@@ -2455,12 +2630,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DeleteServiceBindingOutput.Name(childComplexity), true
 
-	case "DeleteServiceBindingOutput.environment":
-		if e.complexity.DeleteServiceBindingOutput.Environment == nil {
+	case "DeleteServiceBindingOutput.namespace":
+		if e.complexity.DeleteServiceBindingOutput.Namespace == nil {
 			break
 		}
 
-		return e.complexity.DeleteServiceBindingOutput.Environment(childComplexity), true
+		return e.complexity.DeleteServiceBindingOutput.Namespace(childComplexity), true
 
 	case "DeleteServiceBindingUsageOutput.name":
 		if e.complexity.DeleteServiceBindingUsageOutput.Name == nil {
@@ -2469,12 +2644,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DeleteServiceBindingUsageOutput.Name(childComplexity), true
 
-	case "DeleteServiceBindingUsageOutput.environment":
-		if e.complexity.DeleteServiceBindingUsageOutput.Environment == nil {
+	case "DeleteServiceBindingUsageOutput.namespace":
+		if e.complexity.DeleteServiceBindingUsageOutput.Namespace == nil {
 			break
 		}
 
-		return e.complexity.DeleteServiceBindingUsageOutput.Environment(childComplexity), true
+		return e.complexity.DeleteServiceBindingUsageOutput.Namespace(childComplexity), true
 
 	case "Deployment.name":
 		if e.complexity.Deployment.Name == nil {
@@ -2483,12 +2658,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Deployment.Name(childComplexity), true
 
-	case "Deployment.environment":
-		if e.complexity.Deployment.Environment == nil {
+	case "Deployment.namespace":
+		if e.complexity.Deployment.Namespace == nil {
 			break
 		}
 
-		return e.complexity.Deployment.Environment(childComplexity), true
+		return e.complexity.Deployment.Namespace(childComplexity), true
 
 	case "Deployment.creationTimestamp":
 		if e.complexity.Deployment.CreationTimestamp == nil {
@@ -2609,20 +2784,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EnvPrefix.Name(childComplexity), true
 
-	case "Environment.name":
-		if e.complexity.Environment.Name == nil {
-			break
-		}
-
-		return e.complexity.Environment.Name(childComplexity), true
-
-	case "Environment.applications":
-		if e.complexity.Environment.Applications == nil {
-			break
-		}
-
-		return e.complexity.Environment.Applications(childComplexity), true
-
 	case "EventActivation.name":
 		if e.complexity.EventActivation.Name == nil {
 			break
@@ -2721,12 +2882,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Function.Labels(childComplexity), true
 
-	case "Function.environment":
-		if e.complexity.Function.Environment == nil {
+	case "Function.namespace":
+		if e.complexity.Function.Namespace == nil {
 			break
 		}
 
-		return e.complexity.Function.Environment(childComplexity), true
+		return e.complexity.Function.Namespace(childComplexity), true
 
 	case "IDPPreset.name":
 		if e.complexity.Idppreset.Name == nil {
@@ -2827,7 +2988,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteServiceInstance(childComplexity, args["name"].(string), args["environment"].(string)), true
+		return e.complexity.Mutation.DeleteServiceInstance(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Mutation.createServiceBinding":
 		if e.complexity.Mutation.CreateServiceBinding == nil {
@@ -2839,7 +3000,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateServiceBinding(childComplexity, args["serviceBindingName"].(*string), args["serviceInstanceName"].(string), args["environment"].(string), args["parameters"].(*JSON)), true
+		return e.complexity.Mutation.CreateServiceBinding(childComplexity, args["serviceBindingName"].(*string), args["serviceInstanceName"].(string), args["namespace"].(string), args["parameters"].(*JSON)), true
 
 	case "Mutation.deleteServiceBinding":
 		if e.complexity.Mutation.DeleteServiceBinding == nil {
@@ -2851,7 +3012,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteServiceBinding(childComplexity, args["serviceBindingName"].(string), args["environment"].(string)), true
+		return e.complexity.Mutation.DeleteServiceBinding(childComplexity, args["serviceBindingName"].(string), args["namespace"].(string)), true
 
 	case "Mutation.createServiceBindingUsage":
 		if e.complexity.Mutation.CreateServiceBindingUsage == nil {
@@ -2875,7 +3036,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteServiceBindingUsage(childComplexity, args["serviceBindingUsageName"].(string), args["environment"].(string)), true
+		return e.complexity.Mutation.DeleteServiceBindingUsage(childComplexity, args["serviceBindingUsageName"].(string), args["namespace"].(string)), true
 
 	case "Mutation.createApplication":
 		if e.complexity.Mutation.CreateApplication == nil {
@@ -2923,7 +3084,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EnableApplication(childComplexity, args["application"].(string), args["environment"].(string)), true
+		return e.complexity.Mutation.EnableApplication(childComplexity, args["application"].(string), args["namespace"].(string)), true
 
 	case "Mutation.disableApplication":
 		if e.complexity.Mutation.DisableApplication == nil {
@@ -2935,7 +3096,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DisableApplication(childComplexity, args["application"].(string), args["environment"].(string)), true
+		return e.complexity.Mutation.DisableApplication(childComplexity, args["application"].(string), args["namespace"].(string)), true
+
+	case "Mutation.updatePod":
+		if e.complexity.Mutation.UpdatePod == nil {
+			break
+		}
+
+		args, err := field_Mutation_updatePod_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdatePod(childComplexity, args["name"].(string), args["namespace"].(string), args["pod"].(JSON)), true
+
+	case "Mutation.deletePod":
+		if e.complexity.Mutation.DeletePod == nil {
+			break
+		}
+
+		args, err := field_Mutation_deletePod_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeletePod(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Mutation.createIDPPreset":
 		if e.complexity.Mutation.CreateIdppreset == nil {
@@ -2961,6 +3146,97 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteIdppreset(childComplexity, args["name"].(string)), true
 
+	case "Namespace.name":
+		if e.complexity.Namespace.Name == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Name(childComplexity), true
+
+	case "Namespace.applications":
+		if e.complexity.Namespace.Applications == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Applications(childComplexity), true
+
+	case "Pod.name":
+		if e.complexity.Pod.Name == nil {
+			break
+		}
+
+		return e.complexity.Pod.Name(childComplexity), true
+
+	case "Pod.nodeName":
+		if e.complexity.Pod.NodeName == nil {
+			break
+		}
+
+		return e.complexity.Pod.NodeName(childComplexity), true
+
+	case "Pod.namespace":
+		if e.complexity.Pod.Namespace == nil {
+			break
+		}
+
+		return e.complexity.Pod.Namespace(childComplexity), true
+
+	case "Pod.restartCount":
+		if e.complexity.Pod.RestartCount == nil {
+			break
+		}
+
+		return e.complexity.Pod.RestartCount(childComplexity), true
+
+	case "Pod.creationTimestamp":
+		if e.complexity.Pod.CreationTimestamp == nil {
+			break
+		}
+
+		return e.complexity.Pod.CreationTimestamp(childComplexity), true
+
+	case "Pod.labels":
+		if e.complexity.Pod.Labels == nil {
+			break
+		}
+
+		return e.complexity.Pod.Labels(childComplexity), true
+
+	case "Pod.status":
+		if e.complexity.Pod.Status == nil {
+			break
+		}
+
+		return e.complexity.Pod.Status(childComplexity), true
+
+	case "Pod.containerStates":
+		if e.complexity.Pod.ContainerStates == nil {
+			break
+		}
+
+		return e.complexity.Pod.ContainerStates(childComplexity), true
+
+	case "Pod.json":
+		if e.complexity.Pod.Json == nil {
+			break
+		}
+
+		return e.complexity.Pod.Json(childComplexity), true
+
+	case "PodEvent.type":
+		if e.complexity.PodEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.PodEvent.Type(childComplexity), true
+
+	case "PodEvent.pod":
+		if e.complexity.PodEvent.Pod == nil {
+			break
+		}
+
+		return e.complexity.PodEvent.Pod(childComplexity), true
+
 	case "Query.serviceInstance":
 		if e.complexity.Query.ServiceInstance == nil {
 			break
@@ -2971,7 +3247,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceInstance(childComplexity, args["name"].(string), args["environment"].(string)), true
+		return e.complexity.Query.ServiceInstance(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Query.serviceInstances":
 		if e.complexity.Query.ServiceInstances == nil {
@@ -2983,7 +3259,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceInstances(childComplexity, args["environment"].(string), args["first"].(*int), args["offset"].(*int), args["status"].(*InstanceStatusType)), true
+		return e.complexity.Query.ServiceInstances(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int), args["status"].(*InstanceStatusType)), true
 
 	case "Query.clusterServiceClasses":
 		if e.complexity.Query.ClusterServiceClasses == nil {
@@ -3019,7 +3295,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceClasses(childComplexity, args["environment"].(string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.ServiceClasses(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.serviceClass":
 		if e.complexity.Query.ServiceClass == nil {
@@ -3031,7 +3307,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceClass(childComplexity, args["environment"].(string), args["name"].(string)), true
+		return e.complexity.Query.ServiceClass(childComplexity, args["namespace"].(string), args["name"].(string)), true
 
 	case "Query.clusterServiceBrokers":
 		if e.complexity.Query.ClusterServiceBrokers == nil {
@@ -3067,7 +3343,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceBrokers(childComplexity, args["environment"].(string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.ServiceBrokers(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.serviceBroker":
 		if e.complexity.Query.ServiceBroker == nil {
@@ -3079,7 +3355,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceBroker(childComplexity, args["name"].(string), args["environment"].(string)), true
+		return e.complexity.Query.ServiceBroker(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Query.serviceBindingUsage":
 		if e.complexity.Query.ServiceBindingUsage == nil {
@@ -3091,7 +3367,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceBindingUsage(childComplexity, args["name"].(string), args["environment"].(string)), true
+		return e.complexity.Query.ServiceBindingUsage(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Query.serviceBinding":
 		if e.complexity.Query.ServiceBinding == nil {
@@ -3103,7 +3379,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ServiceBinding(childComplexity, args["name"].(string), args["environment"].(string)), true
+		return e.complexity.Query.ServiceBinding(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Query.usageKinds":
 		if e.complexity.Query.UsageKinds == nil {
@@ -3117,18 +3393,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.UsageKinds(childComplexity, args["first"].(*int), args["offset"].(*int)), true
 
-	case "Query.usageKindResources":
-		if e.complexity.Query.UsageKindResources == nil {
-			break
-		}
-
-		args, err := field_Query_usageKindResources_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.UsageKindResources(childComplexity, args["usageKind"].(string), args["environment"].(string)), true
-
 	case "Query.bindableResources":
 		if e.complexity.Query.BindableResources == nil {
 			break
@@ -3139,7 +3403,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.BindableResources(childComplexity, args["environment"].(string)), true
+		return e.complexity.Query.BindableResources(childComplexity, args["namespace"].(string)), true
 
 	case "Query.apis":
 		if e.complexity.Query.Apis == nil {
@@ -3151,7 +3415,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Apis(childComplexity, args["environment"].(*string), args["namespace"].(*string), args["serviceName"].(*string), args["hostname"].(*string)), true
+		return e.complexity.Query.Apis(childComplexity, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string)), true
 
 	case "Query.application":
 		if e.complexity.Query.Application == nil {
@@ -3175,7 +3439,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Applications(childComplexity, args["environment"].(*string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Applications(childComplexity, args["namespace"].(*string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.connectorService":
 		if e.complexity.Query.ConnectorService == nil {
@@ -3189,17 +3453,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ConnectorService(childComplexity, args["application"].(string)), true
 
-	case "Query.environments":
-		if e.complexity.Query.Environments == nil {
+	case "Query.namespaces":
+		if e.complexity.Query.Namespaces == nil {
 			break
 		}
 
-		args, err := field_Query_environments_args(rawArgs)
+		args, err := field_Query_namespaces_args(rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Environments(childComplexity, args["application"].(*string)), true
+		return e.complexity.Query.Namespaces(childComplexity, args["application"].(*string)), true
 
 	case "Query.deployments":
 		if e.complexity.Query.Deployments == nil {
@@ -3211,7 +3475,31 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Deployments(childComplexity, args["environment"].(string), args["excludeFunctions"].(*bool)), true
+		return e.complexity.Query.Deployments(childComplexity, args["namespace"].(string), args["excludeFunctions"].(*bool)), true
+
+	case "Query.pod":
+		if e.complexity.Query.Pod == nil {
+			break
+		}
+
+		args, err := field_Query_pod_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Pod(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.pods":
+		if e.complexity.Query.Pods == nil {
+			break
+		}
+
+		args, err := field_Query_pods_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Pods(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.resourceQuotas":
 		if e.complexity.Query.ResourceQuotas == nil {
@@ -3223,7 +3511,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ResourceQuotas(childComplexity, args["environment"].(string)), true
+		return e.complexity.Query.ResourceQuotas(childComplexity, args["namespace"].(string)), true
 
 	case "Query.resourceQuotasStatus":
 		if e.complexity.Query.ResourceQuotasStatus == nil {
@@ -3235,7 +3523,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.ResourceQuotasStatus(childComplexity, args["environment"].(string)), true
+		return e.complexity.Query.ResourceQuotasStatus(childComplexity, args["namespace"].(string)), true
 
 	case "Query.functions":
 		if e.complexity.Query.Functions == nil {
@@ -3247,7 +3535,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Functions(childComplexity, args["environment"].(string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Functions(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.content":
 		if e.complexity.Query.Content == nil {
@@ -3283,7 +3571,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.EventActivations(childComplexity, args["environment"].(string)), true
+		return e.complexity.Query.EventActivations(childComplexity, args["namespace"].(string)), true
 
 	case "Query.limitRanges":
 		if e.complexity.Query.LimitRanges == nil {
@@ -3295,7 +3583,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.LimitRanges(childComplexity, args["environment"].(string)), true
+		return e.complexity.Query.LimitRanges(childComplexity, args["namespace"].(string)), true
+
+	case "Query.backendModules":
+		if e.complexity.Query.BackendModules == nil {
+			break
+		}
+
+		return e.complexity.Query.BackendModules(childComplexity), true
 
 	case "Query.IDPPreset":
 		if e.complexity.Query.Idppreset == nil {
@@ -3320,13 +3615,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Idppresets(childComplexity, args["first"].(*int), args["offset"].(*int)), true
-
-	case "Query.backendModules":
-		if e.complexity.Query.BackendModules == nil {
-			break
-		}
-
-		return e.complexity.Query.BackendModules(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -3405,12 +3693,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Secret.Name(childComplexity), true
 
-	case "Secret.environment":
-		if e.complexity.Secret.Environment == nil {
+	case "Secret.namespace":
+		if e.complexity.Secret.Namespace == nil {
 			break
 		}
 
-		return e.complexity.Secret.Environment(childComplexity), true
+		return e.complexity.Secret.Namespace(childComplexity), true
 
 	case "Secret.data":
 		if e.complexity.Secret.Data == nil {
@@ -3475,12 +3763,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBinding.ServiceInstanceName(childComplexity), true
 
-	case "ServiceBinding.environment":
-		if e.complexity.ServiceBinding.Environment == nil {
+	case "ServiceBinding.namespace":
+		if e.complexity.ServiceBinding.Namespace == nil {
 			break
 		}
 
-		return e.complexity.ServiceBinding.Environment(childComplexity), true
+		return e.complexity.ServiceBinding.Namespace(childComplexity), true
 
 	case "ServiceBinding.secret":
 		if e.complexity.ServiceBinding.Secret == nil {
@@ -3545,12 +3833,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBindingUsage.Name(childComplexity), true
 
-	case "ServiceBindingUsage.environment":
-		if e.complexity.ServiceBindingUsage.Environment == nil {
+	case "ServiceBindingUsage.namespace":
+		if e.complexity.ServiceBindingUsage.Namespace == nil {
 			break
 		}
 
-		return e.complexity.ServiceBindingUsage.Environment(childComplexity), true
+		return e.complexity.ServiceBindingUsage.Namespace(childComplexity), true
 
 	case "ServiceBindingUsage.serviceBinding":
 		if e.complexity.ServiceBindingUsage.ServiceBinding == nil {
@@ -3671,12 +3959,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceBroker.Name(childComplexity), true
 
-	case "ServiceBroker.environment":
-		if e.complexity.ServiceBroker.Environment == nil {
+	case "ServiceBroker.namespace":
+		if e.complexity.ServiceBroker.Namespace == nil {
 			break
 		}
 
-		return e.complexity.ServiceBroker.Environment(childComplexity), true
+		return e.complexity.ServiceBroker.Namespace(childComplexity), true
 
 	case "ServiceBroker.status":
 		if e.complexity.ServiceBroker.Status == nil {
@@ -3748,12 +4036,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceClass.Name(childComplexity), true
 
-	case "ServiceClass.environment":
-		if e.complexity.ServiceClass.Environment == nil {
+	case "ServiceClass.namespace":
+		if e.complexity.ServiceClass.Namespace == nil {
 			break
 		}
 
-		return e.complexity.ServiceClass.Environment(childComplexity), true
+		return e.complexity.ServiceClass.Namespace(childComplexity), true
 
 	case "ServiceClass.externalName":
 		if e.complexity.ServiceClass.ExternalName == nil {
@@ -3846,6 +4134,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceClass.Activated(childComplexity), true
 
+	case "ServiceClass.instances":
+		if e.complexity.ServiceClass.Instances == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.Instances(childComplexity), true
+
 	case "ServiceClass.apiSpec":
 		if e.complexity.ServiceClass.ApiSpec == nil {
 			break
@@ -3874,12 +4169,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceInstance.Name(childComplexity), true
 
-	case "ServiceInstance.environment":
-		if e.complexity.ServiceInstance.Environment == nil {
+	case "ServiceInstance.namespace":
+		if e.complexity.ServiceInstance.Namespace == nil {
 			break
 		}
 
-		return e.complexity.ServiceInstance.Environment(childComplexity), true
+		return e.complexity.ServiceInstance.Namespace(childComplexity), true
 
 	case "ServiceInstance.planSpec":
 		if e.complexity.ServiceInstance.PlanSpec == nil {
@@ -4035,12 +4330,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServicePlan.Name(childComplexity), true
 
-	case "ServicePlan.environment":
-		if e.complexity.ServicePlan.Environment == nil {
+	case "ServicePlan.namespace":
+		if e.complexity.ServicePlan.Namespace == nil {
 			break
 		}
 
-		return e.complexity.ServicePlan.Environment(childComplexity), true
+		return e.complexity.ServicePlan.Namespace(childComplexity), true
 
 	case "ServicePlan.displayName":
 		if e.complexity.ServicePlan.DisplayName == nil {
@@ -4094,7 +4389,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ServiceInstanceEvent(childComplexity, args["environment"].(string)), true
+		return e.complexity.Subscription.ServiceInstanceEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Subscription.serviceBindingEvent":
 		if e.complexity.Subscription.ServiceBindingEvent == nil {
@@ -4106,7 +4401,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ServiceBindingEvent(childComplexity, args["environment"].(string)), true
+		return e.complexity.Subscription.ServiceBindingEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Subscription.serviceBindingUsageEvent":
 		if e.complexity.Subscription.ServiceBindingUsageEvent == nil {
@@ -4118,7 +4413,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ServiceBindingUsageEvent(childComplexity, args["environment"].(string)), true
+		return e.complexity.Subscription.ServiceBindingUsageEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Subscription.serviceBrokerEvent":
 		if e.complexity.Subscription.ServiceBrokerEvent == nil {
@@ -4130,7 +4425,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Subscription.ServiceBrokerEvent(childComplexity, args["environment"].(string)), true
+		return e.complexity.Subscription.ServiceBrokerEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Subscription.clusterServiceBrokerEvent":
 		if e.complexity.Subscription.ClusterServiceBrokerEvent == nil {
@@ -4145,6 +4440,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ApplicationEvent(childComplexity), true
+
+	case "Subscription.podEvent":
+		if e.complexity.Subscription.PodEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_podEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.PodEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Title.name":
 		if e.complexity.Title.Name == nil {
@@ -4534,10 +4841,10 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "enabledInEnvironments":
+		case "enabledInNamespaces":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Application_enabledInEnvironments(ctx, field, obj)
+				out.Values[i] = ec._Application_enabledInNamespaces(ctx, field, obj)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -4705,7 +5012,7 @@ func (ec *executionContext) _Application_services(ctx context.Context, field gra
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Application_enabledInEnvironments(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+func (ec *executionContext) _Application_enabledInNamespaces(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -4717,7 +5024,7 @@ func (ec *executionContext) _Application_enabledInEnvironments(ctx context.Conte
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Application().EnabledInEnvironments(rctx, obj)
+		return ec.resolvers.Application().EnabledInNamespaces(rctx, obj)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -4988,8 +5295,8 @@ func (ec *executionContext) _ApplicationMapping(ctx context.Context, sel ast.Sel
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("ApplicationMapping")
-		case "environment":
-			out.Values[i] = ec._ApplicationMapping_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._ApplicationMapping_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -5010,7 +5317,7 @@ func (ec *executionContext) _ApplicationMapping(ctx context.Context, sel ast.Sel
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ApplicationMapping_environment(ctx context.Context, field graphql.CollectedField, obj *ApplicationMapping) graphql.Marshaler {
+func (ec *executionContext) _ApplicationMapping_namespace(ctx context.Context, field graphql.CollectedField, obj *ApplicationMapping) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -5022,7 +5329,7 @@ func (ec *executionContext) _ApplicationMapping_environment(ctx context.Context,
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -6126,6 +6433,15 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 				}
 				wg.Done()
 			}(i, field)
+		case "instances":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_instances(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "apiSpec":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -6579,6 +6895,66 @@ func (ec *executionContext) _ClusterServiceClass_activated(ctx context.Context, 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_instances(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ClusterServiceClass().Instances(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceInstance)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceInstance(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -7054,6 +7430,127 @@ func (ec *executionContext) _Container_image(ctx context.Context, field graphql.
 	return graphql.MarshalString(res)
 }
 
+var containerStateImplementors = []string{"ContainerState"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ContainerState(ctx context.Context, sel ast.SelectionSet, obj *ContainerState) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, containerStateImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ContainerState")
+		case "state":
+			out.Values[i] = ec._ContainerState_state(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "reason":
+			out.Values[i] = ec._ContainerState_reason(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "message":
+			out.Values[i] = ec._ContainerState_message(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ContainerState_state(ctx context.Context, field graphql.CollectedField, obj *ContainerState) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ContainerState",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.State, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ContainerStateType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ContainerState_reason(ctx context.Context, field graphql.CollectedField, obj *ContainerState) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ContainerState",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Reason, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ContainerState_message(ctx context.Context, field graphql.CollectedField, obj *ContainerState) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ContainerState",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Message, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
 var createServiceBindingOutputImplementors = []string{"CreateServiceBindingOutput"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -7078,8 +7575,8 @@ func (ec *executionContext) _CreateServiceBindingOutput(ctx context.Context, sel
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._CreateServiceBindingOutput_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._CreateServiceBindingOutput_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -7149,7 +7646,7 @@ func (ec *executionContext) _CreateServiceBindingOutput_serviceInstanceName(ctx 
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _CreateServiceBindingOutput_environment(ctx context.Context, field graphql.CollectedField, obj *CreateServiceBindingOutput) graphql.Marshaler {
+func (ec *executionContext) _CreateServiceBindingOutput_namespace(ctx context.Context, field graphql.CollectedField, obj *CreateServiceBindingOutput) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -7161,7 +7658,7 @@ func (ec *executionContext) _CreateServiceBindingOutput_environment(ctx context.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -7251,8 +7748,8 @@ func (ec *executionContext) _DeleteServiceBindingOutput(ctx context.Context, sel
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._DeleteServiceBindingOutput_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._DeleteServiceBindingOutput_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -7295,7 +7792,7 @@ func (ec *executionContext) _DeleteServiceBindingOutput_name(ctx context.Context
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _DeleteServiceBindingOutput_environment(ctx context.Context, field graphql.CollectedField, obj *DeleteServiceBindingOutput) graphql.Marshaler {
+func (ec *executionContext) _DeleteServiceBindingOutput_namespace(ctx context.Context, field graphql.CollectedField, obj *DeleteServiceBindingOutput) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -7307,7 +7804,7 @@ func (ec *executionContext) _DeleteServiceBindingOutput_environment(ctx context.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -7340,8 +7837,8 @@ func (ec *executionContext) _DeleteServiceBindingUsageOutput(ctx context.Context
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._DeleteServiceBindingUsageOutput_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._DeleteServiceBindingUsageOutput_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -7384,7 +7881,7 @@ func (ec *executionContext) _DeleteServiceBindingUsageOutput_name(ctx context.Co
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _DeleteServiceBindingUsageOutput_environment(ctx context.Context, field graphql.CollectedField, obj *DeleteServiceBindingUsageOutput) graphql.Marshaler {
+func (ec *executionContext) _DeleteServiceBindingUsageOutput_namespace(ctx context.Context, field graphql.CollectedField, obj *DeleteServiceBindingUsageOutput) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -7396,7 +7893,7 @@ func (ec *executionContext) _DeleteServiceBindingUsageOutput_environment(ctx con
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -7430,8 +7927,8 @@ func (ec *executionContext) _Deployment(ctx context.Context, sel ast.SelectionSe
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._Deployment_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._Deployment_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -7500,7 +7997,7 @@ func (ec *executionContext) _Deployment_name(ctx context.Context, field graphql.
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Deployment_environment(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
+func (ec *executionContext) _Deployment_namespace(ctx context.Context, field graphql.CollectedField, obj *Deployment) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -7512,7 +8009,7 @@ func (ec *executionContext) _Deployment_environment(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -8193,103 +8690,6 @@ func (ec *executionContext) _EnvPrefix_name(ctx context.Context, field graphql.C
 	return graphql.MarshalString(res)
 }
 
-var environmentImplementors = []string{"Environment"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Environment(ctx context.Context, sel ast.SelectionSet, obj *Environment) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, environmentImplementors)
-
-	var wg sync.WaitGroup
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Environment")
-		case "name":
-			out.Values[i] = ec._Environment_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "applications":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Environment_applications(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-	wg.Wait()
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Environment_name(ctx context.Context, field graphql.CollectedField, obj *Environment) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Environment",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Environment_applications(ctx context.Context, field graphql.CollectedField, obj *Environment) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Environment",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Environment().Applications(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-
-	for idx1 := range res {
-		arr1[idx1] = func() graphql.Marshaler {
-			return graphql.MarshalString(res[idx1])
-		}()
-	}
-
-	return arr1
-}
-
 var eventActivationImplementors = []string{"EventActivation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -8760,8 +9160,8 @@ func (ec *executionContext) _Function(ctx context.Context, sel ast.SelectionSet,
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._Function_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._Function_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -8885,7 +9285,7 @@ func (ec *executionContext) _Function_labels(ctx context.Context, field graphql.
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Function_environment(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
+func (ec *executionContext) _Function_namespace(ctx context.Context, field graphql.CollectedField, obj *Function) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -8897,7 +9297,7 @@ func (ec *executionContext) _Function_environment(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -9448,6 +9848,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_enableApplication(ctx, field)
 		case "disableApplication":
 			out.Values[i] = ec._Mutation_disableApplication(ctx, field)
+		case "updatePod":
+			out.Values[i] = ec._Mutation_updatePod(ctx, field)
+		case "deletePod":
+			out.Values[i] = ec._Mutation_deletePod(ctx, field)
 		case "createIDPPreset":
 			out.Values[i] = ec._Mutation_createIDPPreset(ctx, field)
 		case "deleteIDPPreset":
@@ -9517,7 +9921,7 @@ func (ec *executionContext) _Mutation_deleteServiceInstance(ctx context.Context,
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteServiceInstance(rctx, args["name"].(string), args["environment"].(string))
+		return ec.resolvers.Mutation().DeleteServiceInstance(rctx, args["name"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -9552,7 +9956,7 @@ func (ec *executionContext) _Mutation_createServiceBinding(ctx context.Context, 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateServiceBinding(rctx, args["serviceBindingName"].(*string), args["serviceInstanceName"].(string), args["environment"].(string), args["parameters"].(*JSON))
+		return ec.resolvers.Mutation().CreateServiceBinding(rctx, args["serviceBindingName"].(*string), args["serviceInstanceName"].(string), args["namespace"].(string), args["parameters"].(*JSON))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -9587,7 +9991,7 @@ func (ec *executionContext) _Mutation_deleteServiceBinding(ctx context.Context, 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteServiceBinding(rctx, args["serviceBindingName"].(string), args["environment"].(string))
+		return ec.resolvers.Mutation().DeleteServiceBinding(rctx, args["serviceBindingName"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -9657,7 +10061,7 @@ func (ec *executionContext) _Mutation_deleteServiceBindingUsage(ctx context.Cont
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DeleteServiceBindingUsage(rctx, args["serviceBindingUsageName"].(string), args["environment"].(string))
+		return ec.resolvers.Mutation().DeleteServiceBindingUsage(rctx, args["serviceBindingUsageName"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -9794,7 +10198,7 @@ func (ec *executionContext) _Mutation_enableApplication(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["environment"].(string))
+		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -9829,7 +10233,7 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().DisableApplication(rctx, args["application"].(string), args["environment"].(string))
+		return ec.resolvers.Mutation().DisableApplication(rctx, args["application"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -9843,6 +10247,76 @@ func (ec *executionContext) _Mutation_disableApplication(ctx context.Context, fi
 	}
 
 	return ec._ApplicationMapping(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_updatePod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_updatePod_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdatePod(rctx, args["name"].(string), args["namespace"].(string), args["pod"].(JSON))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Pod(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deletePod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deletePod_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeletePod(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Pod(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -9913,6 +10387,539 @@ func (ec *executionContext) _Mutation_deleteIDPPreset(ctx context.Context, field
 	}
 
 	return ec._IDPPreset(ctx, field.Selections, res)
+}
+
+var namespaceImplementors = []string{"Namespace"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet, obj *Namespace) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, namespaceImplementors)
+
+	var wg sync.WaitGroup
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Namespace")
+		case "name":
+			out.Values[i] = ec._Namespace_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "applications":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Namespace_applications(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	wg.Wait()
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_applications(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Namespace().Applications(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
+}
+
+var podImplementors = []string{"Pod"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Pod(ctx context.Context, sel ast.SelectionSet, obj *Pod) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, podImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Pod")
+		case "name":
+			out.Values[i] = ec._Pod_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "nodeName":
+			out.Values[i] = ec._Pod_nodeName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._Pod_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "restartCount":
+			out.Values[i] = ec._Pod_restartCount(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "creationTimestamp":
+			out.Values[i] = ec._Pod_creationTimestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "labels":
+			out.Values[i] = ec._Pod_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._Pod_status(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "containerStates":
+			out.Values[i] = ec._Pod_containerStates(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "json":
+			out.Values[i] = ec._Pod_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_name(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_nodeName(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NodeName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_namespace(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_restartCount(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RestartCount, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreationTimestamp, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return MarshalTimestamp(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_labels(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_status(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(PodStatusType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_containerStates(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ContainerStates, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ContainerState)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ContainerState(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Pod_json(ctx context.Context, field graphql.CollectedField, obj *Pod) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Pod",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JSON, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+var podEventImplementors = []string{"PodEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _PodEvent(ctx context.Context, sel ast.SelectionSet, obj *PodEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, podEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("PodEvent")
+		case "type":
+			out.Values[i] = ec._PodEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "pod":
+			out.Values[i] = ec._PodEvent_pod(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _PodEvent_type(ctx context.Context, field graphql.CollectedField, obj *PodEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "PodEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _PodEvent_pod(ctx context.Context, field graphql.CollectedField, obj *PodEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "PodEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pod, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Pod(ctx, field.Selections, &res)
 }
 
 var queryImplementors = []string{"Query"}
@@ -10030,15 +11037,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
-		case "usageKindResources":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_usageKindResources(ctx, field)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
-				wg.Done()
-			}(i, field)
 		case "bindableResources":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -10081,10 +11079,10 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
-		case "environments":
+		case "namespaces":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_environments(ctx, field)
+				out.Values[i] = ec._Query_namespaces(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -10094,6 +11092,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_deployments(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "pod":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_pod(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "pods":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_pods(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -10156,6 +11169,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "backendModules":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_backendModules(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "IDPPreset":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -10166,15 +11188,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_IDPPresets(ctx, field)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
-				wg.Done()
-			}(i, field)
-		case "backendModules":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_backendModules(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -10214,7 +11227,7 @@ func (ec *executionContext) _Query_serviceInstance(ctx context.Context, field gr
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServiceInstance(rctx, args["name"].(string), args["environment"].(string))
+		return ec.resolvers.Query().ServiceInstance(rctx, args["name"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -10249,7 +11262,7 @@ func (ec *executionContext) _Query_serviceInstances(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServiceInstances(rctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int), args["status"].(*InstanceStatusType))
+		return ec.resolvers.Query().ServiceInstances(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int), args["status"].(*InstanceStatusType))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10416,7 +11429,7 @@ func (ec *executionContext) _Query_serviceClasses(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServiceClasses(rctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().ServiceClasses(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10482,7 +11495,7 @@ func (ec *executionContext) _Query_serviceClass(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServiceClass(rctx, args["environment"].(string), args["name"].(string))
+		return ec.resolvers.Query().ServiceClass(rctx, args["namespace"].(string), args["name"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -10618,7 +11631,7 @@ func (ec *executionContext) _Query_serviceBrokers(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServiceBrokers(rctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().ServiceBrokers(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10684,7 +11697,7 @@ func (ec *executionContext) _Query_serviceBroker(ctx context.Context, field grap
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServiceBroker(rctx, args["name"].(string), args["environment"].(string))
+		return ec.resolvers.Query().ServiceBroker(rctx, args["name"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -10719,7 +11732,7 @@ func (ec *executionContext) _Query_serviceBindingUsage(ctx context.Context, fiel
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServiceBindingUsage(rctx, args["name"].(string), args["environment"].(string))
+		return ec.resolvers.Query().ServiceBindingUsage(rctx, args["name"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -10754,7 +11767,7 @@ func (ec *executionContext) _Query_serviceBinding(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ServiceBinding(rctx, args["name"].(string), args["environment"].(string))
+		return ec.resolvers.Query().ServiceBinding(rctx, args["name"].(string), args["namespace"].(string))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -10837,72 +11850,6 @@ func (ec *executionContext) _Query_usageKinds(ctx context.Context, field graphql
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_usageKindResources(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_usageKindResources_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().UsageKindResources(rctx, args["usageKind"].(string), args["environment"].(string))
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]UsageKindResource)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._UsageKindResource(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
-}
-
-// nolint: vetshadow
 func (ec *executionContext) _Query_bindableResources(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -10921,7 +11868,7 @@ func (ec *executionContext) _Query_bindableResources(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().BindableResources(rctx, args["environment"].(string))
+		return ec.resolvers.Query().BindableResources(rctx, args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -10987,7 +11934,7 @@ func (ec *executionContext) _Query_apis(ctx context.Context, field graphql.Colle
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Apis(rctx, args["environment"].(*string), args["namespace"].(*string), args["serviceName"].(*string), args["hostname"].(*string))
+		return ec.resolvers.Query().Apis(rctx, args["namespace"].(string), args["serviceName"].(*string), args["hostname"].(*string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11088,7 +12035,7 @@ func (ec *executionContext) _Query_applications(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Applications(rctx, args["environment"].(*string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Applications(rctx, args["namespace"].(*string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11170,11 +12117,11 @@ func (ec *executionContext) _Query_connectorService(ctx context.Context, field g
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_environments(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_namespaces(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_environments_args(rawArgs)
+	args, err := field_Query_namespaces_args(rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -11188,7 +12135,7 @@ func (ec *executionContext) _Query_environments(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Environments(rctx, args["application"].(*string))
+		return ec.resolvers.Query().Namespaces(rctx, args["application"].(*string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11196,7 +12143,7 @@ func (ec *executionContext) _Query_environments(ctx context.Context, field graph
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]Environment)
+	res := resTmp.([]Namespace)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -11221,7 +12168,7 @@ func (ec *executionContext) _Query_environments(ctx context.Context, field graph
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._Environment(ctx, field.Selections, &res[idx1])
+				return ec._Namespace(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -11254,7 +12201,7 @@ func (ec *executionContext) _Query_deployments(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Deployments(rctx, args["environment"].(string), args["excludeFunctions"].(*bool))
+		return ec.resolvers.Query().Deployments(rctx, args["namespace"].(string), args["excludeFunctions"].(*bool))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11302,6 +12249,107 @@ func (ec *executionContext) _Query_deployments(ctx context.Context, field graphq
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_pod(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_pod_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Pod(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Pod(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_pods(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_pods_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Pods(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Pod)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Pod(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -11320,7 +12368,7 @@ func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ResourceQuotas(rctx, args["environment"].(string))
+		return ec.resolvers.Query().ResourceQuotas(rctx, args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11386,7 +12434,7 @@ func (ec *executionContext) _Query_resourceQuotasStatus(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ResourceQuotasStatus(rctx, args["environment"].(string))
+		return ec.resolvers.Query().ResourceQuotasStatus(rctx, args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11420,7 +12468,7 @@ func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Functions(rctx, args["environment"].(string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Functions(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11583,7 +12631,7 @@ func (ec *executionContext) _Query_eventActivations(ctx context.Context, field g
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().EventActivations(rctx, args["environment"].(string))
+		return ec.resolvers.Query().EventActivations(rctx, args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11649,7 +12697,7 @@ func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphq
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().LimitRanges(rctx, args["environment"].(string))
+		return ec.resolvers.Query().LimitRanges(rctx, args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -11683,6 +12731,66 @@ func (ec *executionContext) _Query_limitRanges(ctx context.Context, field graphq
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._LimitRange(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_backendModules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().BackendModules(rctx)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]BackendModule)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._BackendModule(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -11784,66 +12892,6 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._IDPPreset(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Query_backendModules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().BackendModules(rctx)
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]BackendModule)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._BackendModule(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -12385,8 +13433,8 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._Secret_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._Secret_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -12434,7 +13482,7 @@ func (ec *executionContext) _Secret_name(ctx context.Context, field graphql.Coll
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Secret_environment(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+func (ec *executionContext) _Secret_namespace(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -12446,7 +13494,7 @@ func (ec *executionContext) _Secret_environment(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -12787,8 +13835,8 @@ func (ec *executionContext) _ServiceBinding(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._ServiceBinding_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._ServiceBinding_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -12871,7 +13919,7 @@ func (ec *executionContext) _ServiceBinding_serviceInstanceName(ctx context.Cont
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceBinding_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
+func (ec *executionContext) _ServiceBinding_namespace(ctx context.Context, field graphql.CollectedField, obj *ServiceBinding) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -12883,7 +13931,7 @@ func (ec *executionContext) _ServiceBinding_environment(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -13209,8 +14257,8 @@ func (ec *executionContext) _ServiceBindingUsage(ctx context.Context, sel ast.Se
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._ServiceBindingUsage_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._ServiceBindingUsage_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -13271,7 +14319,7 @@ func (ec *executionContext) _ServiceBindingUsage_name(ctx context.Context, field
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceBindingUsage_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsage) graphql.Marshaler {
+func (ec *executionContext) _ServiceBindingUsage_namespace(ctx context.Context, field graphql.CollectedField, obj *ServiceBindingUsage) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -13283,7 +14331,7 @@ func (ec *executionContext) _ServiceBindingUsage_environment(ctx context.Context
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -13973,8 +15021,8 @@ func (ec *executionContext) _ServiceBroker(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._ServiceBroker_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._ServiceBroker_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -14037,7 +15085,7 @@ func (ec *executionContext) _ServiceBroker_name(ctx context.Context, field graph
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceBroker_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
+func (ec *executionContext) _ServiceBroker_namespace(ctx context.Context, field graphql.CollectedField, obj *ServiceBroker) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -14049,7 +15097,7 @@ func (ec *executionContext) _ServiceBroker_environment(ctx context.Context, fiel
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -14403,8 +15451,8 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._ServiceClass_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._ServiceClass_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -14458,6 +15506,15 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._ServiceClass_activated(ctx, field, obj)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "instances":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceClass_instances(ctx, field, obj)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -14520,7 +15577,7 @@ func (ec *executionContext) _ServiceClass_name(ctx context.Context, field graphq
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceClass_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+func (ec *executionContext) _ServiceClass_namespace(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -14532,7 +15589,7 @@ func (ec *executionContext) _ServiceClass_environment(ctx context.Context, field
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -14946,6 +16003,66 @@ func (ec *executionContext) _ServiceClass_activated(ctx context.Context, field g
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _ServiceClass_instances(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServiceClass().Instances(rctx, obj)
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServiceInstance)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServiceInstance(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _ServiceClass_apiSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -15049,8 +16166,8 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._ServiceInstance_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._ServiceInstance_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -15112,9 +16229,6 @@ func (ec *executionContext) _ServiceInstance(ctx context.Context, sel ast.Select
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._ServiceInstance_serviceBindings(ctx, field, obj)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
 				wg.Done()
 			}(i, field)
 		case "serviceBindingUsages":
@@ -15162,7 +16276,7 @@ func (ec *executionContext) _ServiceInstance_name(ctx context.Context, field gra
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServiceInstance_environment(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
+func (ec *executionContext) _ServiceInstance_namespace(ctx context.Context, field graphql.CollectedField, obj *ServiceInstance) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -15174,7 +16288,7 @@ func (ec *executionContext) _ServiceInstance_environment(ctx context.Context, fi
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -15524,16 +16638,17 @@ func (ec *executionContext) _ServiceInstance_serviceBindings(ctx context.Context
 		return ec.resolvers.ServiceInstance().ServiceBindings(rctx, obj)
 	})
 	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
 		return graphql.Null
 	}
-	res := resTmp.(ServiceBindings)
+	res := resTmp.(*ServiceBindings)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._ServiceBindings(ctx, field.Selections, &res)
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ServiceBindings(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -15944,8 +17059,8 @@ func (ec *executionContext) _ServicePlan(ctx context.Context, sel ast.SelectionS
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "environment":
-			out.Values[i] = ec._ServicePlan_environment(ctx, field, obj)
+		case "namespace":
+			out.Values[i] = ec._ServicePlan_namespace(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -16009,7 +17124,7 @@ func (ec *executionContext) _ServicePlan_name(ctx context.Context, field graphql
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ServicePlan_environment(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
+func (ec *executionContext) _ServicePlan_namespace(ctx context.Context, field graphql.CollectedField, obj *ServicePlan) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -16021,7 +17136,7 @@ func (ec *executionContext) _ServicePlan_environment(ctx context.Context, field 
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Environment, nil
+		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -16226,6 +17341,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_clusterServiceBrokerEvent(ctx, fields[0])
 	case "applicationEvent":
 		return ec._Subscription_applicationEvent(ctx, fields[0])
+	case "podEvent":
+		return ec._Subscription_podEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -16244,7 +17361,7 @@ func (ec *executionContext) _Subscription_serviceInstanceEvent(ctx context.Conte
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
 	rctx := ctx
-	results, err := ec.resolvers.Subscription().ServiceInstanceEvent(rctx, args["environment"].(string))
+	results, err := ec.resolvers.Subscription().ServiceInstanceEvent(rctx, args["namespace"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -16275,7 +17392,7 @@ func (ec *executionContext) _Subscription_serviceBindingEvent(ctx context.Contex
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
 	rctx := ctx
-	results, err := ec.resolvers.Subscription().ServiceBindingEvent(rctx, args["environment"].(string))
+	results, err := ec.resolvers.Subscription().ServiceBindingEvent(rctx, args["namespace"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -16306,7 +17423,7 @@ func (ec *executionContext) _Subscription_serviceBindingUsageEvent(ctx context.C
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
 	rctx := ctx
-	results, err := ec.resolvers.Subscription().ServiceBindingUsageEvent(rctx, args["environment"].(string))
+	results, err := ec.resolvers.Subscription().ServiceBindingUsageEvent(rctx, args["namespace"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -16337,7 +17454,7 @@ func (ec *executionContext) _Subscription_serviceBrokerEvent(ctx context.Context
 	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
 	//          and Tracer stack
 	rctx := ctx
-	results, err := ec.resolvers.Subscription().ServiceBrokerEvent(rctx, args["environment"].(string))
+	results, err := ec.resolvers.Subscription().ServiceBrokerEvent(rctx, args["namespace"].(string))
 	if err != nil {
 		ec.Error(ctx, err)
 		return nil
@@ -16400,6 +17517,37 @@ func (ec *executionContext) _Subscription_applicationEvent(ctx context.Context, 
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ApplicationEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_podEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_podEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().PodEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._PodEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -18443,9 +19591,9 @@ func UnmarshalCreateServiceBindingUsageInput(v interface{}) (CreateServiceBindin
 			if err != nil {
 				return it, err
 			}
-		case "environment":
+		case "namespace":
 			var err error
-			it.Environment, err = graphql.UnmarshalString(v)
+			it.Namespace, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
 			}
@@ -18544,6 +19692,76 @@ func UnmarshalLocalObjectReferenceInput(v interface{}) (LocalObjectReferenceInpu
 	return it, nil
 }
 
+func UnmarshalResourceAttributes(v interface{}) (ResourceAttributes, error) {
+	var it ResourceAttributes
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "verb":
+			var err error
+			it.Verb, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "apiGroup":
+			var err error
+			it.APIGroup, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "apiVersion":
+			var err error
+			it.APIVersion, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "resource":
+			var err error
+			it.Resource, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "subresource":
+			var err error
+			it.Subresource, err = graphql.UnmarshalString(v)
+			if err != nil {
+				return it, err
+			}
+		case "nameArg":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.NameArg = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "namespaceArg":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.NamespaceArg = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "isChildResolver":
+			var err error
+			it.IsChildResolver, err = graphql.UnmarshalBoolean(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalServiceBindingRefInput(v interface{}) (ServiceBindingRefInput, error) {
 	var it ServiceBindingRefInput
 	var asMap = v.(map[string]interface{})
@@ -18597,9 +19815,9 @@ func UnmarshalServiceInstanceCreateInput(v interface{}) (ServiceInstanceCreateIn
 			if err != nil {
 				return it, err
 			}
-		case "environment":
+		case "namespace":
 			var err error
-			it.Environment, err = graphql.UnmarshalString(v)
+			it.Namespace, err = graphql.UnmarshalString(v)
 			if err != nil {
 				return it, err
 			}
@@ -18680,6 +19898,24 @@ func (ec *executionContext) FieldMiddleware(ctx context.Context, obj interface{}
 			ret = nil
 		}
 	}()
+	rctx := graphql.GetResolverContext(ctx)
+	for _, d := range rctx.Field.Definition.Directives {
+		switch d.Name {
+		case "HasAccess":
+			if ec.directives.HasAccess != nil {
+				rawArgs := d.ArgumentMap(ec.Variables)
+				args, err := dir_HasAccess_args(rawArgs)
+				if err != nil {
+					ec.Error(ctx, err)
+					return nil
+				}
+				n := next
+				next = func(ctx context.Context) (interface{}, error) {
+					return ec.directives.HasAccess(ctx, obj, n, args["attributes"].(ResourceAttributes))
+				}
+			}
+		}
+	}
 	res, err := ec.ResolverMiddleware(ctx, next)
 	if err != nil {
 		ec.Error(ctx, err)
@@ -18711,6 +19947,21 @@ scalar Labels
 
 scalar Timestamp
 
+# Directives
+
+directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
+
+input ResourceAttributes {
+	verb: String!
+	apiGroup: String!
+	apiVersion: String!
+	resource: String!
+	subresource: String! = ""
+	nameArg: String
+	namespaceArg: String
+	isChildResolver: Boolean! = false
+}
+
 # Content
 
 
@@ -18737,7 +19988,7 @@ type TopicEntry {
 
 type ServiceInstance {
     name: String!
-    environment: String!
+    namespace: String!
     planSpec: JSON
     creationTimestamp: Timestamp!
     labels: [String!]!
@@ -18749,7 +20000,7 @@ type ServiceInstance {
     servicePlan: ServicePlan
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: ServiceBindings!
+    serviceBindings: ServiceBindings @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
 
     # Depends on servicecatalogaddons domain
     serviceBindingUsages: [ServiceBindingUsage!]
@@ -18798,7 +20049,7 @@ enum SubscriptionEventType {
 
 input ServiceInstanceCreateInput {
     name: String!
-    environment: String!
+    namespace: String!
     classRef: ServiceInstanceCreateInputResourceRef!
     planRef: ServiceInstanceCreateInputResourceRef!
     labels: [String!]!
@@ -18812,7 +20063,7 @@ input ServiceInstanceCreateInputResourceRef {
 
 type ServiceClass {
     name: String!
-    environment: String!
+    namespace: String!
     externalName: String!
     displayName: String
     creationTimestamp: Timestamp!
@@ -18826,6 +20077,7 @@ type ServiceClass {
     labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
@@ -18846,6 +20098,7 @@ type ClusterServiceClass {
     labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
@@ -18853,7 +20106,7 @@ type ClusterServiceClass {
 
 type ServicePlan {
     name: String!
-    environment: String!
+    namespace: String!
     displayName: String
     externalName: String!
     description: String!
@@ -18874,7 +20127,7 @@ type ClusterServicePlan {
 
 type ServiceBroker {
     name: String!
-    environment: String!
+    namespace: String!
     status: ServiceBrokerStatus!
     creationTimestamp: Timestamp!
     url: String!
@@ -18910,7 +20163,7 @@ type ServiceBindingsStats {
 type ServiceBinding {
     name: String!
     serviceInstanceName: String!
-    environment: String!
+    namespace: String!
     secret: Secret
     status: ServiceBindingStatus!
     parameters: JSON
@@ -18939,28 +20192,28 @@ type ServiceBindingEvent {
 type CreateServiceBindingOutput {
     name: String!
     serviceInstanceName: String!
-    environment: String!
+    namespace: String!
 }
 
 type Secret {
     name: String!
-    environment: String!
+    namespace: String!
     data: JSON!
 }
 
 type DeleteServiceBindingOutput {
     name: String!
-    environment: String!
+    namespace: String!
 }
 
 type DeleteServiceBindingUsageOutput {
     name: String!
-    environment: String!
+    namespace: String!
 }
 
 type ServiceBindingUsage {
     name: String!
-    environment: String!
+    namespace: String!
     serviceBinding: ServiceBinding
     usedBy: LocalObjectReference!
     parameters: ServiceBindingUsageParameters
@@ -19022,7 +20275,7 @@ type ResourceType {
 
 input CreateServiceBindingUsageInput {
     name: String
-    environment: String!
+    namespace: String!
     serviceBindingRef: ServiceBindingRefInput!
     usedBy: LocalObjectReferenceInput!
     parameters: ServiceBindingUsageParametersInput
@@ -19069,7 +20322,7 @@ type DeploymentCondition {
 
 type Deployment {
     name: String!
-    environment: String!
+    namespace: String!
     creationTimestamp: Timestamp!
     status: DeploymentStatus!
     labels: Labels!
@@ -19077,6 +20330,43 @@ type Deployment {
 
     # Depends on servicecatalog and servicecatalogaddons modules
     boundServiceInstanceNames: [String!]
+}
+
+type Pod {
+    name: String!
+    nodeName: String!
+    namespace: String!
+    restartCount: Int!
+    creationTimestamp: Timestamp!
+    labels: Labels!
+    status: PodStatusType!
+    containerStates: [ContainerState!]!
+    json: JSON!
+}
+
+enum PodStatusType {
+    PENDING
+    RUNNING
+    SUCCEEDED
+    FAILED
+    UNKNOWN
+}
+
+type PodEvent {
+    type: SubscriptionEventType!
+    pod: Pod!
+}
+
+type ContainerState {
+    state: ContainerStateType!
+    reason: String!
+    message: String!
+}
+
+enum ContainerStateType {
+    WAITING
+    RUNNING
+    TERMINATED
 }
 
 type ResourceValues {
@@ -19104,7 +20394,7 @@ type ExceededQuota {
 
 # Applications
 
-type Environment {
+type Namespace {
     name: String!
 
     # Depends on application module
@@ -19116,7 +20406,7 @@ type Application {
     description: String!
     labels: Labels!
     services: [ApplicationService!]!
-    enabledInEnvironments: [String!]!
+    enabledInNamespaces: [String!]!
     status: ApplicationStatus!
 }
 
@@ -19125,7 +20415,7 @@ type ConnectorService {
 }
 
 type ApplicationMapping {
-    environment: String!
+    namespace: String!
     application: String!
 }
 
@@ -19212,7 +20502,7 @@ type Function {
     trigger: String!
     creationTimestamp: Timestamp!
     labels: Labels!
-    environment: String!
+    namespace: String!
 }
 
 input InputTopic {
@@ -19252,87 +20542,89 @@ type BackendModule {
 # Queries
 
 type Query {
-    serviceInstance(name: String!, environment: String!): ServiceInstance
-    serviceInstances(environment: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]!
+    serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
+    serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
     clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
     clusterServiceClass(name: String!): ClusterServiceClass
-    serviceClasses(environment: String!, first: Int, offset: Int): [ServiceClass!]!
-    serviceClass(environment: String!, name: String!): ServiceClass
+    serviceClasses(namespace: String!, first: Int, offset: Int): [ServiceClass!]!
+    serviceClass(namespace: String!, name: String!): ServiceClass
 
     clusterServiceBrokers(first: Int, offset: Int): [ClusterServiceBroker!]!
     clusterServiceBroker(name: String!): ClusterServiceBroker
-    serviceBrokers(environment: String!, first: Int, offset: Int): [ServiceBroker!]!
-    serviceBroker(name: String!, environment: String!): ServiceBroker
-
-    serviceBindingUsage(name: String!, environment: String!): ServiceBindingUsage
-    serviceBinding(name: String!, environment: String!): ServiceBinding
+    serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
+    serviceBroker(name: String!, namespace: String!): ServiceBroker
+    
+    serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
+    serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
 
-    # The query returns all instances of the resources specified by the usageKind parameter in the given environment. The result contains the resources which do not have the metadata.ownerReference.
-    # DEPRECATED - will be changed by bindable resources query.
-    usageKindResources(usageKind: String!, environment: String!): [UsageKindResource!]!
-
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
-    bindableResources(environment: String!): [BindableResourcesOutputItem!]!
+    bindableResources(namespace: String!): [BindableResourcesOutputItem!]!
 
-    apis(environment: String, namespace: String, serviceName: String, hostname: String): [API!]!
+    apis(namespace: String!, serviceName: String, hostname: String): [API!]!
 
     application(name: String!): Application
-    applications(environment: String, first: Int, offset: Int): [Application!]!
+    applications(namespace: String, first: Int, offset: Int): [Application!]!
     connectorService(application: String!): ConnectorService!
 
     # Depends on 'application'
-    environments(application: String): [Environment!]!
+    namespaces(application: String): [Namespace!]!
 
-    deployments(environment: String!, excludeFunctions: Boolean): [Deployment!]!
-    resourceQuotas(environment: String!): [ResourceQuota!]!
-    resourceQuotasStatus(environment: String!): ResourceQuotasStatus!
+    deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]!
+    pod(name: String!, namespace: String!): Pod
+    pods(namespace: String!, first: Int, offset: Int): [Pod!]!
+    resourceQuotas(namespace: String!): [ResourceQuota!]!
+    resourceQuotasStatus(namespace: String!): ResourceQuotasStatus!
 
-    functions(environment: String!, first: Int, offset: Int): [Function!]!
+    functions(namespace: String!, first: Int, offset: Int): [Function!]!
 
     content(contentType: String!, id: String!): JSON
     topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
-    eventActivations(environment: String!): [EventActivation!]!
+    eventActivations(namespace: String!): [EventActivation!]!
 
-    limitRanges(environment: String!): [LimitRange!]!
-
-    IDPPreset(name: String!): IDPPreset
-    IDPPresets(first: Int, offset: Int): [IDPPreset!]!
+    limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     backendModules: [BackendModule!]!
+
+    IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations
 
 type Mutation {
     createServiceInstance(params: ServiceInstanceCreateInput!): ServiceInstance
-    deleteServiceInstance(name: String!, environment: String!): ServiceInstance
-    createServiceBinding(serviceBindingName: String, serviceInstanceName: String!, environment: String!, parameters: JSON): CreateServiceBindingOutput
-    deleteServiceBinding(serviceBindingName: String!, environment: String!): DeleteServiceBindingOutput
+    deleteServiceInstance(name: String!, namespace: String!): ServiceInstance
+    createServiceBinding(serviceBindingName: String, serviceInstanceName: String!, namespace: String!, parameters: JSON): CreateServiceBindingOutput
+    deleteServiceBinding(serviceBindingName: String!, namespace: String!): DeleteServiceBindingOutput
     createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
-    deleteServiceBindingUsage(serviceBindingUsageName: String!, environment: String!): DeleteServiceBindingUsageOutput
+    deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput
 
     createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
     deleteApplication(name: String!): DeleteApplicationOutput!
 
-    enableApplication(application: String!, environment: String!): ApplicationMapping
-    disableApplication(application: String!, environment: String!): ApplicationMapping
+    enableApplication(application: String!, namespace: String!): ApplicationMapping
+    disableApplication(application: String!, namespace: String!): ApplicationMapping
 
-    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset
-    deleteIDPPreset(name: String!): IDPPreset
+    updatePod(name: String!, namespace: String!, pod: JSON!): Pod
+    deletePod(name: String!, namespace: String!): Pod
+
+    createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+    deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 }
 
 # Subscriptions
 
 type Subscription {
-    serviceInstanceEvent(environment: String!): ServiceInstanceEvent!
-    serviceBindingEvent(environment: String!): ServiceBindingEvent!
-    serviceBindingUsageEvent(environment: String!): ServiceBindingUsageEvent!
-    serviceBrokerEvent(environment: String!): ServiceBrokerEvent!
+    serviceInstanceEvent(namespace: String!): ServiceInstanceEvent!
+    serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+    serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent!
+    serviceBrokerEvent(namespace: String!): ServiceBrokerEvent!
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
+    podEvent(namespace: String!): PodEvent!
 }
 
 # Schema

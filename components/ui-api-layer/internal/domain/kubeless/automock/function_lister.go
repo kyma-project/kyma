@@ -11,13 +11,13 @@ type functionLister struct {
 	mock.Mock
 }
 
-// List provides a mock function with given fields: environment, pagingParams
-func (_m *functionLister) List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.Function, error) {
-	ret := _m.Called(environment, pagingParams)
+// List provides a mock function with given fields: namespace, pagingParams
+func (_m *functionLister) List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.Function, error) {
+	ret := _m.Called(namespace, pagingParams)
 
 	var r0 []*v1beta1.Function
 	if rf, ok := ret.Get(0).(func(string, pager.PagingParams) []*v1beta1.Function); ok {
-		r0 = rf(environment, pagingParams)
+		r0 = rf(namespace, pagingParams)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1beta1.Function)
@@ -26,7 +26,7 @@ func (_m *functionLister) List(environment string, pagingParams pager.PagingPara
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, pager.PagingParams) error); ok {
-		r1 = rf(environment, pagingParams)
+		r1 = rf(namespace, pagingParams)
 	} else {
 		r1 = ret.Error(1)
 	}

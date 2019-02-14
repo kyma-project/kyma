@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 	appsApi "k8s.io/api/apps/v1beta2"
 	coreApi "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestDeploymentConverter_ToGQL(t *testing.T) {
@@ -21,7 +21,7 @@ func TestDeploymentConverter_ToGQL(t *testing.T) {
 		expected := &gqlschema.Deployment{
 			Name:              "name",
 			CreationTimestamp: zeroTimeStamp,
-			Environment:       "namespace",
+			Namespace:         "namespace",
 			Labels:            gqlschema.Labels{"test": "ok", "ok": "test"},
 			Status: gqlschema.DeploymentStatus{
 				Replicas:          1,

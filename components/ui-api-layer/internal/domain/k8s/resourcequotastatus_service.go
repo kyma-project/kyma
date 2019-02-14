@@ -7,18 +7,18 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 //go:generate mockery -name=replicaSetLister -output=automock -outpkg=automock -case=underscore
 type replicaSetLister interface {
-	ListReplicaSets(environment string) ([]*apps.ReplicaSet, error)
+	ListReplicaSets(namespace string) ([]*apps.ReplicaSet, error)
 }
 
 //go:generate mockery -name=statefulSetLister -output=automock -outpkg=automock -case=underscore
 type statefulSetLister interface {
-	ListStatefulSets(environment string) ([]*apps.StatefulSet, error)
+	ListStatefulSets(namespace string) ([]*apps.StatefulSet, error)
 }
 
 type exceededRef struct {
@@ -60,20 +60,20 @@ const (
 	stsKind = "StatefulSet"
 )
 
-func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(environment string) (gqlschema.ResourceQuotasStatus, error) {
+func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(namespace string) (gqlschema.ResourceQuotasStatus, error) {
 	resourcesToCheck := []v1.ResourceName{
 		v1.ResourceRequestsMemory,
 		v1.ResourceLimitsMemory,
 		v1.ResourceRequestsCPU,
 		v1.ResourceLimitsCPU,
 	}
-	resourceQuotas, err := svc.rqLister.ListResourceQuotas(environment)
+	resourceQuotas, err := svc.rqLister.ListResourceQuotas(namespace)
 	if err != nil {
-		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while listing %s [environment: %s]", pretty.ResourceQuotas, environment)
+		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.ResourceQuotas, namespace)
 	}
-	resourcesRequests, err := svc.checkResourcesRequests(environment, resourcesToCheck, resourceQuotas)
+	resourcesRequests, err := svc.checkResourcesRequests(namespace, resourcesToCheck, resourceQuotas)
 	if err != nil {
-		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while checking resources requests [environment: %s]", environment)
+		return gqlschema.ResourceQuotasStatus{}, errors.Wrapf(err, "while checking resources requests [namespace: %s]", namespace)
 	}
 	if len(resourcesRequests) > 0 {
 		return gqlschema.ResourceQuotasStatus{
@@ -85,18 +85,18 @@ func (svc *resourceQuotaStatusService) CheckResourceQuotaStatus(environment stri
 	return gqlschema.ResourceQuotasStatus{Exceeded: false}, nil
 }
 
-func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) (map[string]map[v1.ResourceName][]string, error) {
+func (svc *resourceQuotaStatusService) checkResourcesRequests(namespace string, resourcesToCheck []v1.ResourceName, resourceQuotas []*v1.ResourceQuota) (map[string]map[v1.ResourceName][]string, error) {
 	// If the desired number of replicas is not reached, check if any ResourceQuota blocks the progress of the ReplicaSet.
 	// To calculate how many resources the ReplicaSet needs to progress, sum up the resource usage of all containers in the replica Pod. You must also calculate the difference from `.spec.hard` and `.status.used`.
 	// In the ReplicaSet you have also check if it does not have OwnerReference to the Deployment. It is because that Deployment allows you to define maxUnavailable number of replicas. You must take this into account when you check number of desired replicas.
 	result := make(map[string]map[v1.ResourceName][]string)
-	defaultLimits, err := svc.getDefaultLimits(environment)
+	defaultLimits, err := svc.getDefaultLimits(namespace)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting default limits [environment: %s]", environment)
+		return nil, errors.Wrapf(err, "while getting default limits [namespace: %s]", namespace)
 	}
-	replicaSets, err := svc.rsLister.ListReplicaSets(environment)
+	replicaSets, err := svc.rsLister.ListReplicaSets(namespace)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing %s [environment: %s]", pretty.ReplicaSets, environment)
+		return nil, errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.ReplicaSets, namespace)
 	}
 	for _, rs := range replicaSets {
 		if *rs.Spec.Replicas > rs.Status.Replicas {
@@ -111,9 +111,9 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string
 
 	// For each StatefulSet that has a number of replicas lower than expected, check if any ResourceQuota blocks the progress of the StatefulSet.
 	// To calculate how many resources the StatefulSet needs to progress, sum up the resource usage of all containers in the replica Pod. You must also calculate the difference from `.spec.hard` and `.status.used`.
-	statefulSets, err := svc.ssLister.ListStatefulSets(environment)
+	statefulSets, err := svc.ssLister.ListStatefulSets(namespace)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing %s [environment: %s]", pretty.StatefulSets, environment)
+		return nil, errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.StatefulSets, namespace)
 	}
 	for _, ss := range statefulSets {
 		if *ss.Spec.Replicas > ss.Status.Replicas {
@@ -128,10 +128,10 @@ func (svc *resourceQuotaStatusService) checkResourcesRequests(environment string
 	return result, nil
 }
 
-func (svc *resourceQuotaStatusService) getDefaultLimits(environment string) (ranges, error) {
-	limitRanges, err := svc.lrLister.List(environment)
+func (svc *resourceQuotaStatusService) getDefaultLimits(namespace string) (ranges, error) {
+	limitRanges, err := svc.lrLister.List(namespace)
 	if err != nil {
-		return ranges{}, errors.Wrapf(err, "while listing %s [environment: %s]", pretty.LimitRanges, environment)
+		return ranges{}, errors.Wrapf(err, "while listing %s [namespace: %s]", pretty.LimitRanges, namespace)
 	}
 	defaultRanges := ranges{}
 	for _, lr := range limitRanges {

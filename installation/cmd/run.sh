@@ -25,13 +25,13 @@ do
             shift # past argument
         ;;
         --cr)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             CR_PATH="$2"
             shift # past argument
             shift # past value
         ;;
         --vm-driver)
-            checkInputParameterValue "$1" "$2"
+            checkInputParameterValue "$2"
             VM_DRIVER="$2"
             shift
             shift
@@ -39,6 +39,16 @@ do
         --knative)
             KNATIVE="--knative"
             shift
+        ;;
+        --password)
+            checkInputParameterValue "$2"
+            ADMIN_PASSWORD="${2}"
+            shift # past argument
+            shift # past value
+        ;;
+        --*)
+            echo "Unknown flag ${1}"
+            exit 1
         ;;
         *)    # unknown option
             POSITIONAL+=("$1") # save it in an array for later
@@ -70,5 +80,5 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}"
+bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}" --password "${ADMIN_PASSWORD}"
 rm -rf $TMPDIR

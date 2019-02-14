@@ -30,10 +30,10 @@ metadata:
     installer: overrides
 data:
   global.isLocalEnv: "true"
-  global.knative: "false"
   global.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"
+  global.adminPassword: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
   cluster-users.users.adminGroup: ""
 ---
@@ -51,29 +51,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-data:
-  console.cluster.headerLogoUrl: "assets/logo.svg"
-  console.cluster.headerTitle: ""
-  console.cluster.faviconUrl: "favicon.ico"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
     component: istio
 data:
-  global.proxy.includeIPRanges: "10.0.0.1/8"
-
-  security.enabled: "true"
-
   gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
 
@@ -95,6 +78,7 @@ metadata:
     component: service-catalog
 data:
   etcd-stateful.etcd.resources.limits.memory: 256Mi
+  etcd-stateful.replicaCount: "1"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -107,3 +91,15 @@ metadata:
 data:
   knative.ingressgateway.service.type: NodePort
   knative.domainName: "kyma.local"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: assetstore-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: assetstore
+data:
+  minio.resources.requests.memory: 64Mi
+  minio.resources.limits.cpu: 100m

@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	apps "k8s.io/api/apps/v1"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/informers"
@@ -104,39 +104,29 @@ func fixInformer(objects ...runtime.Object) informers.SharedInformerFactory {
 	return informerFactory
 }
 
-func fixResourceQuota(name, environment string) *v1.ResourceQuota {
+func fixResourceQuota(name, namespace string) *v1.ResourceQuota {
 	return &v1.ResourceQuota{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 	}
 }
 
-func fixReplicaSet(name, environment string) *apps.ReplicaSet {
+func fixReplicaSet(name, namespace string) *apps.ReplicaSet {
 	return &apps.ReplicaSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
+			Namespace: namespace,
 		},
 	}
 }
 
-func fixStatefulSet(name, environment string) *apps.StatefulSet {
+func fixStatefulSet(name, namespace string) *apps.StatefulSet {
 	return &apps.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
-			Namespace: environment,
-		},
-	}
-}
-
-func fixPod(name, environment string, labels map[string]string) *v1.Pod {
-	return &v1.Pod{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: environment,
-			Labels:    labels,
+			Namespace: namespace,
 		},
 	}
 }

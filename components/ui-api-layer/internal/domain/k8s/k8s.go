@@ -9,22 +9,23 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/client-go/informers"
 	k8sClientset "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/typed/core/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
 
 type ApplicationLister interface {
-	ListInEnvironment(environment string) ([]*v1alpha1.Application, error)
+	ListInNamespace(namespace string) ([]*v1alpha1.Application, error)
 	ListNamespacesFor(reName string) ([]string, error)
 }
 
 type Resolver struct {
-	*environmentResolver
+	*namespaceResolver
 	*secretResolver
 	*deploymentResolver
 	*resourceQuotaResolver
 	*resourceQuotaStatusResolver
 	*limitRangeResolver
+	*podResolver
 
 	informerFactory informers.SharedInformerFactory
 }
@@ -42,18 +43,23 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
-	environmentService := newEnvironmentService(client.Namespaces())
-	deploymentService := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
+	namespaceService := newNamespaceService(client.Namespaces())
+	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating deployment service")
+	}
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
+	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 
 	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
 
 	return &Resolver{
-		environmentResolver:         newEnvironmentResolver(environmentService, applicationRetriever),
+		namespaceResolver:           newNamespaceResolver(namespaceService, applicationRetriever),
 		secretResolver:              newSecretResolver(client),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
+		podResolver:                 newPodResolver(podService),
 		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
 		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),

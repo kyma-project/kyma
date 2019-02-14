@@ -8,7 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
@@ -45,7 +45,7 @@ func TestServiceBindingConverter_ToGQLs(t *testing.T) {
 			Items: []gqlschema.ServiceBinding{
 				{
 					Name:                "service-binding",
-					Environment:         "production",
+					Namespace:           "production",
 					ServiceInstanceName: "instance",
 					SecretName:          "secret-name",
 					Status: gqlschema.ServiceBindingStatus{
@@ -55,7 +55,7 @@ func TestServiceBindingConverter_ToGQLs(t *testing.T) {
 				},
 				{
 					Name:                "service-binding",
-					Environment:         "production",
+					Namespace:           "production",
 					ServiceInstanceName: "instance",
 					SecretName:          "secret-name",
 					Status: gqlschema.ServiceBindingStatus{
@@ -65,7 +65,7 @@ func TestServiceBindingConverter_ToGQLs(t *testing.T) {
 				},
 				{
 					Name:                "service-binding",
-					Environment:         "production",
+					Namespace:           "production",
 					ServiceInstanceName: "instance",
 					SecretName:          "secret-name",
 					Status: gqlschema.ServiceBindingStatus{
@@ -108,7 +108,7 @@ func TestServiceBindingConverter_ToGQLs(t *testing.T) {
 			Items: []gqlschema.ServiceBinding{
 				{
 					Name:                "service-binding",
-					Environment:         "production",
+					Namespace:           "production",
 					ServiceInstanceName: "instance",
 					SecretName:          "secret-name",
 					Status: gqlschema.ServiceBindingStatus{
@@ -154,7 +154,7 @@ func TestServiceBindingConversionToGQL(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 	assert.Equal(t, "service-binding", actual.Name)
-	assert.Equal(t, "production", actual.Environment)
+	assert.Equal(t, "production", actual.Namespace)
 	assert.Equal(t, "secret-name", actual.SecretName)
 	assert.Equal(t, "instance", actual.ServiceInstanceName)
 }
@@ -166,7 +166,7 @@ func TestServiceBindingConversionToCreateOutputGQL(t *testing.T) {
 	actual := sut.ToCreateOutputGQL(fixBinding(api.ServiceBindingConditionReady))
 	// THEN
 	assert.Equal(t, "service-binding", actual.Name)
-	assert.Equal(t, "production", actual.Environment)
+	assert.Equal(t, "production", actual.Namespace)
 	assert.Equal(t, "instance", actual.ServiceInstanceName)
 }
 
@@ -175,7 +175,7 @@ func TestServiceBindingConversionError(t *testing.T) {
 	var (
 		sut         = serviceBindingConverter{}
 		errBinding  = fixErrBinding()
-		expectedErr = fmt.Sprintf("while extracting parameters from service binding [name: %s][environment: %s]: while unmarshalling binding parameters: invalid character 'o' in literal null (expecting 'u')", errBinding.Name, errBinding.Namespace)
+		expectedErr = fmt.Sprintf("while extracting parameters from service binding [name: %s][namespace: %s]: while unmarshalling binding parameters: invalid character 'o' in literal null (expecting 'u')", errBinding.Name, errBinding.Namespace)
 	)
 
 	// WHEN

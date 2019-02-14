@@ -18,8 +18,8 @@ import (
 
 //go:generate mockery -name=deploymentLister -output=automock -outpkg=automock -case=underscore
 type deploymentLister interface {
-	List(environment string) ([]*api.Deployment, error)
-	ListWithoutFunctions(environment string) ([]*api.Deployment, error)
+	List(namespace string) ([]*api.Deployment, error)
+	ListWithoutFunctions(namespace string) ([]*api.Deployment, error)
 }
 
 type deploymentResolver struct {
@@ -37,18 +37,18 @@ func newDeploymentResolver(deploymentLister deploymentLister, scRetriever shared
 	}
 }
 
-func (r *deploymentResolver) DeploymentsQuery(ctx context.Context, environment string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
+func (r *deploymentResolver) DeploymentsQuery(ctx context.Context, namespace string, excludeFunctions *bool) ([]gqlschema.Deployment, error) {
 	var deployments []*v1beta2.Deployment
 	var err error
 	if excludeFunctions == nil || !*excludeFunctions {
-		deployments, err = r.deploymentLister.List(environment)
+		deployments, err = r.deploymentLister.List(namespace)
 	} else {
-		deployments, err = r.deploymentLister.ListWithoutFunctions(environment)
+		deployments, err = r.deploymentLister.ListWithoutFunctions(namespace)
 	}
 
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s in environment `%s`", pretty.Deployments, environment))
-		return nil, gqlerror.New(err, pretty.Deployments, gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while listing %s in namespace `%s`", pretty.Deployments, namespace))
+		return nil, gqlerror.New(err, pretty.Deployments, gqlerror.WithNamespace(namespace))
 	}
 
 	return r.deploymentConverter.ToGQLs(deployments), nil
@@ -65,26 +65,26 @@ func (r *deploymentResolver) DeploymentBoundServiceInstanceNamesField(ctx contex
 		kind = "function"
 	}
 
-	usages, err := r.scaRetriever.ServiceBindingUsage().ListForDeployment(deployment.Environment, kind, deployment.Name)
+	usages, err := r.scaRetriever.ServiceBindingUsage().ListForDeployment(deployment.Namespace, kind, deployment.Name)
 	if err != nil {
 		if module.IsDisabledModuleError(err) {
 			return nil, err
 		}
 
-		glog.Error(errors.Wrapf(err, "while listing %s for %s in environment `%s`, name `%s` and kind `%s`", scaPretty.ServiceBindingUsages, pretty.Deployment, deployment.Environment, deployment.Name, kind))
-		return nil, gqlerror.New(err, scaPretty.ServiceBindingUsages, gqlerror.WithEnvironment(deployment.Environment))
+		glog.Error(errors.Wrapf(err, "while listing %s for %s in namespace `%s`, name `%s` and kind `%s`", scaPretty.ServiceBindingUsages, pretty.Deployment, deployment.Namespace, deployment.Name, kind))
+		return nil, gqlerror.New(err, scaPretty.ServiceBindingUsages, gqlerror.WithNamespace(deployment.Namespace))
 	}
 
 	instanceNames := make(map[string]struct{})
 	for _, usage := range usages {
-		binding, err := r.scRetriever.ServiceBinding().Find(deployment.Environment, usage.Spec.ServiceBindingRef.Name)
+		binding, err := r.scRetriever.ServiceBinding().Find(deployment.Namespace, usage.Spec.ServiceBindingRef.Name)
 		if err != nil {
 			if module.IsDisabledModuleError(err) {
 				return nil, err
 			}
 
-			glog.Error(errors.Wrapf(err, "while gathering %s for environment `%s` with name `%s`", scPretty.ServiceBinding, deployment.Environment, usage.Spec.ServiceBindingRef.Name))
-			return nil, gqlerror.New(err, scPretty.ServiceBinding, gqlerror.WithName(usage.Spec.ServiceBindingRef.Name), gqlerror.WithEnvironment(deployment.Environment))
+			glog.Error(errors.Wrapf(err, "while gathering %s for namespace `%s` with name `%s`", scPretty.ServiceBinding, deployment.Namespace, usage.Spec.ServiceBindingRef.Name))
+			return nil, gqlerror.New(err, scPretty.ServiceBinding, gqlerror.WithName(usage.Spec.ServiceBindingRef.Name), gqlerror.WithNamespace(deployment.Namespace))
 		}
 
 		if binding != nil {
