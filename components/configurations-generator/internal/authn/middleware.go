@@ -13,7 +13,7 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 
 			restoreAuthHeaderValue := r.Header.Get("Authorization") //Preserve original value
 
-			u, ok, err := a.AuthenticateRequest(r) //Strips "Authorization" Header value on auth success!
+			_, ok, err := a.AuthenticateRequest(r) //Strips "Authorization" Header value on auth success!
 			if err != nil {
 				log.Errorf("Unable to authenticate the request due to an error: %v", err)
 			}
