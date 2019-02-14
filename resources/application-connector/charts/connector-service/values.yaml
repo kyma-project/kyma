@@ -10,8 +10,6 @@ deployment:
     caSecretName: connector-service-app-ca
     appsInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/applications/management/info
     runtimesInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/runtimes/management/info
-    group: "default"
-    tenant: "default"
     validityTime: "92d"
   envvars:
     country: DE
@@ -38,6 +36,7 @@ tests:
   skipSslVerify: false
   group: ""
   tenant: ""
+  central: false
   image:
     pullPolicy: IfNotPresent
 

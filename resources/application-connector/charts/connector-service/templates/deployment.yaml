@@ -43,8 +43,6 @@ spec:
           - "--eventsHost=gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}"
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
           - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
-          - "--group={{ .Values.deployment.args.group }}"
-          - "--tenant={{ .Values.deployment.args.tenant }}"
           - "--certificateValidityTime={{ .Values.deployment.args.validityTime }}"
         env:
           - name: COUNTRY
