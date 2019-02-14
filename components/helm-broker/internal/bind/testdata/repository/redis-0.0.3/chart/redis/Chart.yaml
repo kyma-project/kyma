@@ -6,7 +6,7 @@ keywords:
 - redis
 - keyvalue
 - database
-home: https://redis.io/
+home: http://redis.io/
 icon: https://bitnami.com/assets/stacks/redis/img/redis-stack-220x234.png
 sources:
 - https://github.com/bitnami/bitnami-docker-redis
