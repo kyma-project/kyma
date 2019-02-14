@@ -6,12 +6,15 @@ import (
 	"fmt"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/configurer"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/pkg/signal"
+	restclient "k8s.io/client-go/rest"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
+	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"time"
 )
@@ -20,6 +23,8 @@ import (
 type config struct {
 	Host   string `envconfig:"default=127.0.0.1"`
 	Port   int    `envconfig:"default=3003"`
+	KubeconfigPath       string   `envconfig:"optional"`
+	ConfigMap configurer.Config
 	Upload struct {
 		Endpoint  string `envconfig:"default=play.minio.io"`
 		Port      int    `envconfig:"default=9000"`
@@ -36,7 +41,10 @@ type config struct {
 func main() {
 	cfg, err := loadConfig("APP")
 	parseFlags(cfg)
-	fatalOnError(err, "Error while loading app config")
+	exitOnError(err, "Error while loading app config")
+
+	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
+	exitOnError(err, "Error while initializing REST client config")
 
 	stopCh := signal.SetupChannel()
 
@@ -47,13 +55,22 @@ func main() {
 	uploadEndpoint := fmt.Sprintf("%s:%d", cfg.Upload.Endpoint, cfg.Upload.Port)
 
 	client, err := minio.New(uploadEndpoint, cfg.Upload.AccessKey, cfg.Upload.SecretKey, cfg.Upload.Secure)
-	fatalOnError(err, "Error during upload client initialization")
+	exitOnError(err, "Error during upload client initialization")
 
-	handler := bucket.NewHandler(client, cfg.Bucket)
-	buckets, err := handler.CreateSystemBuckets()
-	fatalOnError(err, "Error during creating buckets")
+	c, err := configurer.New(k8sConfig, cfg.ConfigMap)
+	exitOnError(err, "Error during configurer creation")
 
-	//TODO: Read and Save bucket names from configmap
+	var buckets bucket.SystemBucketNames
+	sharedConfig, exists, err := c.LoadIfExists()
+	exitOnError(err, "Error during loading configuration")
+
+	if !exists {
+		handler := bucket.NewHandler(client, cfg.Bucket)
+		buckets, err = handler.CreateSystemBuckets()
+		exitOnError(err, "Error during creating system buckets")
+	} else {
+		buckets = sharedConfig.SystemBuckets
+	}
 
 	mux := http.NewServeMux()
 	mux.Handle("/upload", requesthandler.New(client, buckets, uploader.Origin(uploadEndpoint, cfg.Upload.Secure), cfg.UploadTimeout, cfg.MaxUploadWorkers))
@@ -72,6 +89,21 @@ func main() {
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		glog.Errorf("HTTP server ListenAndServe: %v", err)
 	}
+}
+
+func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
+	var config *restclient.Config
+	var err error
+	if kubeconfigPath != "" {
+		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+	} else {
+		config, err = restclient.InClusterConfig()
+	}
+
+	if err != nil {
+		return nil, err
+	}
+	return config, nil
 }
 
 // cancelOnInterrupt calls cancel function when os.Interrupt or SIGTERM is received
@@ -101,7 +133,7 @@ func loadConfig(prefix string) (config, error) {
 	return cfg, err
 }
 
-func fatalOnError(err error, context string) {
+func exitOnError(err error, context string) {
 	if err != nil {
 		wrappedError := errors.Wrap(err, context)
 		glog.Fatal(wrappedError)
