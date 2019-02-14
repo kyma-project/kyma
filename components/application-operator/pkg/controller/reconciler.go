@@ -138,12 +138,10 @@ func (r *applicationReconciler) installApplication(application *v1alpha1.Applica
 	log.Infof("Installing release for %s Application...", application.Name)
 
 	overridesData := r.releaseManager.GetOverridesDefaults()
-	if application.Spec.HasTenant() == true {
-		overridesData.Tenant = application.Spec.Tenant
-	}
-
-	if application.Spec.HasGroup() == true {
-		overridesData.Group = application.Spec.Group
+	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
+		overridesData.SubjectCN = fmt.Sprintf("%s;%s;%s", application.Spec.Tenant, application.Spec.Group, application.Name)
+	} else {
+		overridesData.SubjectCN = application.Name
 	}
 
 	overrides, err := kymahelm.ParseOverrides(overridesData, appReleases.OverridesTemplate)

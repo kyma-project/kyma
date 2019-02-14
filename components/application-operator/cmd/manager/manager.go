@@ -70,8 +70,6 @@ func newReleaseManager(options *options) (appRelease.ReleaseManager, error) {
 		ApplicationProxyImage:  options.applicationProxyImage,
 		EventServiceImage:      options.eventServiceImage,
 		EventServiceTestsImage: options.eventServiceTestsImage,
-		Tenant:                 options.defaultTenant,
-		Group:                  options.defaultGroup,
 	}
 
 	helmClient := kymahelm.NewClient(options.tillerUrl, options.installationTimeout)

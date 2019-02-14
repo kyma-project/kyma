@@ -56,8 +56,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
     applicationProxyImage: 
     eventServiceImage: 
     eventServiceTestsImage: 
-    tenant: 
-    group: `
+    subjectCN: app-name`
 
 	t.Run("should install chart when new application is created", func(t *testing.T) {
 		// given

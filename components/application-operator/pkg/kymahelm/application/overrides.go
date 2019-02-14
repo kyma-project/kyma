@@ -6,8 +6,7 @@ const (
     applicationProxyImage: {{ .ApplicationProxyImage }}
     eventServiceImage: {{ .EventServiceImage }}
     eventServiceTestsImage: {{ .EventServiceTestsImage }}
-    tenant: {{ .Tenant }}
-    group: {{ .Group }}`
+    subjectCN: {{ .SubjectCN }}`
 )
 
 type OverridesData struct {
@@ -15,6 +14,5 @@ type OverridesData struct {
 	ApplicationProxyImage  string
 	EventServiceImage      string
 	EventServiceTestsImage string
-	Tenant                 string
-	Group                  string
+	SubjectCN              string
 }

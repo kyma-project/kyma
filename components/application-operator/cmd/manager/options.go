@@ -15,8 +15,6 @@ type options struct {
 	applicationProxyImage  string
 	eventServiceImage      string
 	eventServiceTestsImage string
-	defaultTenant          string
-	defaultGroup           string
 }
 
 func parseArgs() *options {
@@ -31,9 +29,6 @@ func parseArgs() *options {
 	eventServiceImage := flag.String("eventServiceImage", "", "The image of the Event Service to use")
 	eventServiceTestsImage := flag.String("eventServiceTestsImage", "", "The image of the Event Service Tests to use")
 
-	defaultTenant := flag.String("tenant", "", "Default tenant")
-	defaultGroup := flag.String("group", "", "Default group")
-
 	flag.Parse()
 
 	return &options{
@@ -46,15 +41,12 @@ func parseArgs() *options {
 		applicationProxyImage:  *applicationProxyImage,
 		eventServiceImage:      *eventServiceImage,
 		eventServiceTestsImage: *eventServiceTestsImage,
-		defaultTenant:          *defaultTenant,
-		defaultGroup:           *defaultGroup,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s --syncPeriod=%d --installationTimeout=%d "+
-		"--applicationProxyImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s --tenant=%s --group=%s",
+		"--applicationProxyImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s",
 		o.appName, o.domainName, o.namespace, o.tillerUrl, o.syncPeriod, o.installationTimeout,
-		o.applicationProxyImage, o.eventServiceImage, o.eventServiceTestsImage, o.defaultTenant,
-		o.defaultGroup)
+		o.applicationProxyImage, o.eventServiceImage, o.eventServiceTestsImage)
 }
