@@ -121,9 +121,9 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 		}
 
 		return r.installApplication(application)
-	} else {
-		return r.checkApplicationStatus(application)
 	}
+
+	return r.checkApplicationStatus(application)
 }
 
 func shouldBeRemoved(application *v1alpha1.Application) bool {
