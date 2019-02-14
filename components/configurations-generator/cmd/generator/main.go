@@ -59,7 +59,7 @@ func readAppConfig() *appConfig {
 	oidcUsernamePrefixArg := flag.String("oidc-username-prefix", "", "OIDC: If provided, all users will be prefixed with this value to prevent conflicts with other authentication strategies")
 	oidcGroupsPrefixArg := flag.String("oidc-groups-prefix", "", "OIDC: If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies")
 
-	var oidcSupportedSigningAlgsArg multiValFlag = []string{"RS256"}
+	var oidcSupportedSigningAlgsArg multiValFlag = []string{}
 	flag.Var(&oidcSupportedSigningAlgsArg, "oidc-supported-signing-algs", "OIDC supported signing algorithms")
 
 	flag.Parse()
@@ -94,6 +94,10 @@ func readAppConfig() *appConfig {
 	if errors {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	if len(oidcSupportedSigningAlgsArg) == 0 {
+		oidcSupportedSigningAlgsArg = []string{"RS256"}
 	}
 
 	clusterCAValue := readCAFromFile(*clusterCAFileArg)
