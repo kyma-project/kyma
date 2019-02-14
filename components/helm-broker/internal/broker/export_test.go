@@ -7,6 +7,6 @@ func NewOSBContext(originatingIdentity, apiVersion string) *OsbContext {
 	}
 }
 
-func NewCatalogSyncerService(underlying catalogGetter, syncer syncer) *catalogSyncerService {
-	return newCatalogSyncerService(underlying, syncer)
+func NewCatalogSyncerService(underlying catalogGetter) *catalogSyncerService {
+	return newCatalogSyncerService(underlying)
 }

@@ -22,7 +22,6 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 )
@@ -56,7 +55,6 @@ func newOSBAPITestSuite(t *testing.T) *osbapiTestSuite {
 		&fakeBindTmplRenderer{},
 		&fakeBindTmplResolver{},
 		ts.HelmClient,
-		bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), logSink.Logger),
 		logSink.Logger, ts.OperationIDProvider)
 
 	return ts

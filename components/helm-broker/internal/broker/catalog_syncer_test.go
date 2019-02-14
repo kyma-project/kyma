@@ -19,11 +19,7 @@ func TestCatalogSyncerSuccess(t *testing.T) {
 	underlying.On("GetCatalog", mock.Anything, osbCtx).Return(fixCatalogResponse(), nil).Once()
 	defer underlying.AssertExpectations(t)
 
-	syncer := &automock.Syncer{}
-	syncer.On("Execute").Once()
-	defer syncer.AssertExpectations(t)
-
-	svc := broker.NewCatalogSyncerService(underlying, syncer)
+	svc := broker.NewCatalogSyncerService(underlying)
 
 	// WHEN
 	resp, err := svc.GetCatalog(context.Background(), osbCtx)

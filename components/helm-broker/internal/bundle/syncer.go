@@ -11,7 +11,7 @@ import (
 )
 
 //go:generate mockery -name=bundleOperations -output=automock -outpkg=automock -case=underscore
-//go:generate mockery -name=provider -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=Provider -output=automock -outpkg=automock -case=underscore
 
 type bundleOperations interface {
 	FindAll() ([]*internal.Bundle, error)
@@ -19,14 +19,14 @@ type bundleOperations interface {
 	Upsert(*internal.Bundle) (replace bool, err error)
 }
 
-// provider contains method which provides CompleteBundle items.
-type provider interface {
+// Provider contains method which provides CompleteBundle items.
+type Provider interface {
 	ProvideBundles() ([]CompleteBundle, error)
 }
 
 // Syncer is responsible for loading bundles from bundle providers and stores it into the storage.
 type Syncer struct {
-	repositories    map[string]provider
+	repositories    map[string]Provider
 	bundleStorage   bundleOperations
 	chartOperations storage.Chart
 	log             *logrus.Entry
@@ -36,21 +36,21 @@ type Syncer struct {
 // NewSyncer returns new Syncer instance.
 func NewSyncer(bundleOperations bundleOperations, chartOperations storage.Chart, log logrus.FieldLogger) *Syncer {
 	return &Syncer{
-		repositories:    map[string]provider{},
+		repositories:    map[string]Provider{},
 		bundleStorage:   bundleOperations,
 		chartOperations: chartOperations,
 		log:             log.WithField("service", "syncer"),
 	}
 }
 
-// AddProvider registers new provider which provides bundles from a repository and enrich bundles with the url.
-func (s *Syncer) AddProvider(url string, provider provider) {
+// AddProvider registers new Provider which provides bundles from a repository and enrich bundles with the url.
+func (s *Syncer) AddProvider(url string, provider Provider) {
 	s.repositories[url] = provider
 }
 
 // CleanProviders is executed only on repositories update to remove providers from previous URL.
 func (s *Syncer) CleanProviders() {
-	s.repositories = map[string]provider{}
+	s.repositories = map[string]Provider{}
 }
 
 // Execute performs bundles storage with repositories synchronization.
@@ -72,7 +72,7 @@ func (s *Syncer) Execute() {
 
 	resultChan := make(chan bundlesChange)
 	for url, repo := range s.repositories {
-		go func(p provider, b []*internal.Bundle, u string) {
+		go func(p Provider, b []*internal.Bundle, u string) {
 			// gather bundles from external repos
 			change := s.generateBundlesChange(p, b, u)
 			resultChan <- change
@@ -185,7 +185,7 @@ func (s *Syncer) removeBundle(id internal.BundleID, existingBundle *internal.Bun
 	}
 }
 
-func (s *Syncer) generateBundlesChange(repo provider, existingBundles []*internal.Bundle, url string) bundlesChange {
+func (s *Syncer) generateBundlesChange(repo Provider, existingBundles []*internal.Bundle, url string) bundlesChange {
 	items, err := repo.ProvideBundles()
 	if err != nil {
 		s.log.Errorf("Could not load bundles from the repository %s, error: %s", url, err.Error())

@@ -24,7 +24,6 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
-	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -53,45 +52,25 @@ func main() {
 	fatalOnError(err)
 	csbInterface := scClientSet.ServicecatalogV1beta1().ClusterServiceBrokers()
 
+	// broker sync
+	stopCh := make(chan struct{})
+	bLoader := bundle.NewLoader(cfg.TmpDir, log)
 	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), log)
 	brokerSyncer := broker.NewClusterServiceBrokerSyncer(csbInterface, log)
+	cfgMapInformer := configmap.NewInformedWatcher(clientset, cfg.Namespace)
 
-	bLoader := bundle.NewLoader(cfg.TmpDir, log)
-	stopCh := make(chan struct{})
+	repositoryWatcher := bundle.NewRepositoryWatcher(sFact.Bundle(), bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log)
+	err = repositoryWatcher.StartWatchMapData(cfg.ReposURLsName, cfg.ReposURLsKey, stopCh)
+	fatalOnError(err)
 
-	reposUpdater := bundle.NewUpdater(sFact.Bundle(), log)
-	reposWatcher := configmap.NewInformedWatcher(clientset, cfg.Namespace)
-	reposWatcher.Watch(cfg.ReposURLsName, func(configMap *v1.ConfigMap) {
-		url := configMap.Data[cfg.ReposURLsKey]
-
-		if !reposUpdater.IsURLChanged(url) {
-			return
-		}
-		repositories, err := reposUpdater.SwitchRepositories(url)
-		if err != nil {
-			log.Errorf("Could not load repositories from url: %s: %v", url, err)
-			return
-		}
-
-		bundleSyncer.CleanProviders()
-		for _, repoCfg := range repositories {
-			repoProvider := bundle.NewProvider(bundle.NewHTTPRepository(repoCfg), bLoader, log.WithField("URL", repoCfg.URL))
-			bundleSyncer.AddProvider(repoCfg.URL, repoProvider)
-		}
-
-		bundleSyncer.Execute()
-		if err := brokerSyncer.Sync(cfg.ClusterServiceBrokerName, 5); err != nil {
-			log.Errorf("Could not synchronize the broker: %s: %v", cfg.ClusterServiceBrokerName, err)
-		}
-	})
-	fatalOnError(reposWatcher.Start(stopCh))
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+	cancelOnChanInterrupt(ctx, stopCh, cancelFunc)
 
 	helmClient := helm.NewClient(cfg.Helm, log)
 
 	srv := broker.New(sFact.Bundle(), sFact.Chart(), sFact.InstanceOperation(), sFact.Instance(), sFact.InstanceBindData(),
-		bind.NewRenderer(), bind.NewResolver(clientset.CoreV1()), helmClient, bundleSyncer, log)
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
+		bind.NewRenderer(), bind.NewResolver(clientset.CoreV1()), helmClient, log)
 	cancelOnInterrupt(ctx, cancelFunc)
 
 	startedCh := make(chan struct{})
@@ -157,6 +136,21 @@ func cancelOnInterrupt(ctx context.Context, cancel context.CancelFunc) {
 		select {
 		case <-ctx.Done():
 		case <-c:
+			cancel()
+		}
+	}()
+}
+
+// cancelOnInterrupt closes given channel and also calls cancel func when os.Interrupt or SIGTERM is received
+func cancelOnChanInterrupt(ctx context.Context, ch chan<- struct{}, cancel context.CancelFunc) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		select {
+		case <-ctx.Done():
+			close(ch)
+		case <-c:
+			close(ch)
 			cancel()
 		}
 	}()
