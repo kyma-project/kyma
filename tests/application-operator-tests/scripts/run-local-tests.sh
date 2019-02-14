@@ -29,6 +29,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: application-operator-tests
+  annotations:
+   sidecar.istio.io/inject: “false”
 spec:
   containers:
   - name: application-operator-tests

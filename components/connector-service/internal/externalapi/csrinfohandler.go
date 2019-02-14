@@ -12,24 +12,25 @@ import (
 )
 
 const (
-	CertificateURLFormat = "%s?token=%s"
+	TokenFormat   = "?token=%s"
+	CertsEndpoint = "certificates"
 )
 
 type CSRInfoHandler struct {
 	tokenManager             tokens.Manager
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
-	apiInfoURLsGenerator     APIUrlsGenerator
-	certificateURL           string
+	getInfoURL               string
+	baseURL                  string
 	csrSubject               certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor clientcontext.ConnectorClientExtractor, apiInfoURLsGenerator APIUrlsGenerator, certificateURL string, subjectValues certificates.CSRSubject) InfoHandler {
+func NewCSRInfoHandler(tokenManager tokens.Manager, connectorClientExtractor clientcontext.ConnectorClientExtractor, getInfoURL string, subjectValues certificates.CSRSubject, baseURL string) CSRGetInfoHandler {
 
 	return &CSRInfoHandler{
 		tokenManager:             tokenManager,
 		connectorClientExtractor: connectorClientExtractor,
-		apiInfoURLsGenerator:     apiInfoURLsGenerator,
-		certificateURL:           certificateURL,
+		getInfoURL:               getInfoURL,
+		baseURL:                  baseURL,
 		csrSubject:               subjectValues,
 	}
 }
@@ -48,12 +49,29 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	csrURL := fmt.Sprintf(CertificateURLFormat, ih.certificateURL, newToken)
-	apiURLs := ih.apiInfoURLsGenerator.Generate(connectorClientContext)
+	apiURLs := ih.makeApiURLs(connectorClientContext)
+
+	csrURL := ih.makeCSRURLs(newToken)
 
 	certInfo := makeCertInfo(ih.csrSubject, connectorClientContext.GetCommonName())
 
-	httphelpers.RespondWithBody(w, 200, infoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
+	httphelpers.RespondWithBody(w, 200, csrInfoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
+}
+
+func (ih *CSRInfoHandler) makeCSRURLs(newToken string) string {
+	csrURL := ih.baseURL + CertsEndpoint
+	tokenParam := fmt.Sprintf(TokenFormat, newToken)
+
+	return csrURL + tokenParam
+}
+
+func (ih *CSRInfoHandler) makeApiURLs(connectorClientContext clientcontext.ConnectorClientContext) api {
+	infoURL := ih.getInfoURL
+	return api{
+		CertificatesURL: ih.baseURL + CertsEndpoint,
+		InfoURL:         infoURL,
+		RuntimeURLs:     connectorClientContext.GetRuntimeUrls(),
+	}
 }
 
 func makeCertInfo(csrSubject certificates.CSRSubject, commonName string) certInfo {

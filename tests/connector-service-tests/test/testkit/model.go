@@ -13,9 +13,22 @@ type InfoResponse struct {
 	Certificate CertInfo `json:"certificate"`
 }
 
+type ManagementInfoResponse struct {
+	URLs ManagementInfoURLs `json:"urls"`
+}
+
+type ManagementInfoURLs struct {
+	*RuntimeURLs
+	RenewCertUrl string `json:"renewCertUrl"`
+}
+
+type RuntimeURLs struct {
+	MetadataUrl string `json:"metadataUrl"`
+	EventsUrl   string `json:"eventsUrl"`
+}
+
 type ApiInfo struct {
-	MetadataURL     string `json:"metadataUrl"`
-	EventsURL       string `json:"eventsUrl"`
+	*RuntimeURLs
 	GetInfoURL      string `json:"infoUrl"`
 	CertificatesUrl string `json:"certificatesUrl"`
 }

@@ -47,7 +47,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 69f4e672
+    version: 2a321562
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -68,10 +68,10 @@ global:
     version: e11a469a
   ui_api_layer:
     dir: develop/
-    version: "84200976"
+    version: "0b5f866d"
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: "84200976"
+    version: "0b5f866d"
 
 test:
   acceptance:

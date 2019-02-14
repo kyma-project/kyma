@@ -12,8 +12,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/mocks"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
@@ -23,9 +21,8 @@ import (
 )
 
 const (
-	commonName     = "commonName"
-	application    = "application"
-	certificateURL = "https://host/v1/applications/certificates"
+	commonName  = "commonName"
+	application = "application"
 )
 
 type dummyClientContext struct{}
@@ -42,9 +39,28 @@ func (dc dummyClientContext) GetCommonName() string {
 	return commonName
 }
 
-func TestInfoHandler_GetCSRInfo(t *testing.T) {
+func (dc dummyClientContext) GetRuntimeUrls() *clientcontext.RuntimeURLs {
+	return nil
+}
 
-	url := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
+type dummyClientContextWithEmptyURLs struct {
+	dummyClientContext
+}
+
+func (dc dummyClientContextWithEmptyURLs) GetRuntimeUrls() *clientcontext.RuntimeURLs {
+	return &clientcontext.RuntimeURLs{
+		MetadataURL: "",
+		EventsURL:   "",
+	}
+}
+
+func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
+
+	baseURL := "https://connector-service.kyma.cx/v1/applications/"
+	infoURL := "https://connector-service.test.cluster.kyma.cx/v1/applications/management/info"
+	newToken := "newToken"
+
+	urlApps := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
 
 	subjectValues := certificates.CSRSubject{
 		Country:            country,
@@ -59,28 +75,27 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		return dummyClientContext, nil
 	}
 
+	expectedSignUrl := fmt.Sprintf("%scertificates?token=%s", baseURL, newToken)
+
+	expectedCertInfo := certInfo{
+		Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),
+		Extensions:   "",
+		KeyAlgorithm: "rsa2048",
+	}
+
 	t.Run("should successfully get csr info", func(t *testing.T) {
 		// given
-		newToken := "newToken"
-		expectedSignUrl := fmt.Sprintf("https://%s/v1/applications/certificates?token=%s", host, newToken)
-
-		expectedAPI := "dummyAPI"
-
-		expectedCertInfo := certInfo{
-			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),
-			Extensions:   "",
-			KeyAlgorithm: "rsa2048",
+		expectedAPI := api{
+			CertificatesURL: baseURL + CertsEndpoint,
+			InfoURL:         infoURL,
 		}
 
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
 
-		apiURLsGenerator := &mocks.APIUrlsGenerator{}
-		apiURLsGenerator.On("Generate", dummyClientContext).Return(expectedAPI)
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
+		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
@@ -91,7 +106,7 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var infoResponse infoResponse
+		var infoResponse csrInfoResponse
 		err = json.Unmarshal(responseBody, &infoResponse)
 		require.NoError(t, err)
 
@@ -101,18 +116,91 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		assert.EqualValues(t, expectedCertInfo, infoResponse.CertificateInfo)
 	})
 
+	t.Run("should get csr info with empty URLs", func(t *testing.T) {
+		// given
+		expectedAPI := api{
+			CertificatesURL: baseURL + CertsEndpoint,
+			InfoURL:         infoURL,
+			RuntimeURLs: &clientcontext.RuntimeURLs{
+				MetadataURL: "",
+				EventsURL:   "",
+			},
+		}
+
+		dummyClientContextWithEmptyURLs := &dummyClientContextWithEmptyURLs{dummyClientContext: dummyClientContext}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+			return dummyClientContextWithEmptyURLs, nil
+		}
+
+		tokenManager := &tokenMocks.Manager{}
+		tokenManager.On("Replace", token, dummyClientContextWithEmptyURLs).Return(newToken, nil)
+
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+
+		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
+		require.NoError(t, err)
+		rr := httptest.NewRecorder()
+
+		// when
+		infoHandler.GetCSRInfo(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var infoResponse csrInfoResponse
+		err = json.Unmarshal(responseBody, &infoResponse)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, expectedSignUrl, infoResponse.CsrURL)
+		assert.EqualValues(t, expectedAPI, infoResponse.API)
+		assert.EqualValues(t, expectedCertInfo, infoResponse.CertificateInfo)
+	})
+
+	t.Run("should use predefined getInfoURL", func(t *testing.T) {
+		// given
+		predefinedGetInfoURL := "https://predefined.test.cluster.kyma.cx/v1/applications/management/info"
+
+		expectedAPI := api{
+			InfoURL: predefinedGetInfoURL,
+		}
+
+		tokenManager := &tokenMocks.Manager{}
+		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
+
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, predefinedGetInfoURL, subjectValues, baseURL)
+
+		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
+		require.NoError(t, err)
+		rr := httptest.NewRecorder()
+
+		// when
+		infoHandler.GetCSRInfo(rr, req)
+
+		// then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var infoResponse csrInfoResponse
+		err = json.Unmarshal(responseBody, &infoResponse)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.EqualValues(t, expectedAPI.InfoURL, infoResponse.API.InfoURL)
+	})
+
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		// given
 		tokenManager := &tokenMocks.Manager{}
-		apiURLsGenerator := &mocks.APIUrlsGenerator{}
 
 		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, apiURLsGenerator, certificateURL, subjectValues)
+		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, infoURL, subjectValues, baseURL)
 
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
+		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
@@ -136,11 +224,9 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenManager := &tokenMocks.Manager{}
 		tokenManager.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
 
-		apiURLsGenerator := &mocks.APIUrlsGenerator{}
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, apiURLsGenerator, certificateURL, subjectValues)
-
-		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
+		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
 		rr := httptest.NewRecorder()
 
@@ -157,5 +243,49 @@ func TestInfoHandler_GetCSRInfo(t *testing.T) {
 
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	})
+
+	t.Run("should retrieve metadata and events urls from context", func(t *testing.T) {
+		//given
+		expectedMetadataUrl := "https://metadata.base.path/application/v1/metadata/services"
+		expectedEventsUrl := "https://events.base.path/application/v1/events"
+
+		extendedCtx := &clientcontext.ExtendedApplicationContext{
+			ApplicationContext: clientcontext.ApplicationContext{},
+			RuntimeURLs: clientcontext.RuntimeURLs{
+				MetadataURL: "https://metadata.base.path/application/v1/metadata/services",
+				EventsURL:   "https://events.base.path/application/v1/events",
+			},
+		}
+
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+			return *extendedCtx, nil
+		}
+
+		tokenManager := &tokenMocks.Manager{}
+		tokenManager.On("Replace", token, *extendedCtx).Return(newToken, nil)
+
+		req, err := http.NewRequest(http.MethodGet, urlApps, nil)
+		require.NoError(t, err)
+
+		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+
+		rr := httptest.NewRecorder()
+
+		//when
+		infoHandler.GetCSRInfo(rr, req)
+
+		//then
+		responseBody, err := ioutil.ReadAll(rr.Body)
+		require.NoError(t, err)
+
+		var infoResponse csrInfoResponse
+		err = json.Unmarshal(responseBody, &infoResponse)
+		require.NoError(t, err)
+
+		assert.Equal(t, http.StatusOK, rr.Code)
+		api := infoResponse.API
+		assert.Equal(t, expectedMetadataUrl, api.MetadataURL)
+		assert.Equal(t, expectedEventsUrl, api.EventsURL)
 	})
 }

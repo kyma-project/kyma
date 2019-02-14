@@ -136,6 +136,7 @@ type ServiceClass {
     labels: Labels!
     plans: [ServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
@@ -156,6 +157,7 @@ type ClusterServiceClass {
     labels: Labels!
     plans: [ClusterServicePlan!]!
     activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON

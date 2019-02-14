@@ -77,7 +77,7 @@ func TestReconcileAssetCreationSuccess(t *testing.T) {
 
 	mocks := newMocks()
 	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(4)
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.validator.On("Validate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(webhook.ValidationResult{Success: true}, nil).Once()
 	mocks.mutator.On("Mutate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(nil).Once()
@@ -119,7 +119,7 @@ func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 
 	mocks := newMocks()
 	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(3)
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.validator.On("Validate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(webhook.ValidationResult{Success: true}, nil).Once()
 	mocks.mutator.On("Mutate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(fmt.Errorf("surprise!")).Once()
@@ -156,7 +156,7 @@ func TestReconcileAssetCreationSuccessValidationFailed(t *testing.T) {
 
 	mocks := newMocks()
 	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(3)
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.validator.On("Validate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(webhook.ValidationResult{Success: false}, nil).Once()
 	defer mocks.AssertExpetactions(t)
@@ -194,7 +194,7 @@ func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
 
 	mocks := newMocks()
 	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(4)
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.uploader.On("Upload", mock.Anything, testData.minioBucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
 	mocks.uploader.On("ContainsAll", testData.minioBucketName, testData.assetName, testData.files).Return(true, nil).Once()
@@ -299,7 +299,7 @@ func TestReconcileAssetReadyLostFiles(t *testing.T) {
 
 	mocks := newMocks()
 	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(4)
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.uploader.On("Upload", mock.Anything, testData.minioBucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
 	mocks.uploader.On("ContainsAll", testData.minioBucketName, testData.assetName, testData.files).Return(false, nil).Once()
@@ -425,8 +425,9 @@ func newTestData(name string) *testData {
 		Spec: v1alpha1.AssetSpec{
 			BucketRef: v1alpha1.AssetBucketRef{Name: bucketName},
 			Source: v1alpha1.AssetSource{
-				Url:  sourceUrl,
-				Mode: v1alpha1.AssetSingle,
+				Url:    sourceUrl,
+				Mode:   v1alpha1.AssetSingle,
+				Filter: "",
 				ValidationWebhookService: []v1alpha1.AssetWebhookService{
 					{
 						Namespace: "test",

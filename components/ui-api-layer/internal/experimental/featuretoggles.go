@@ -1,5 +1,6 @@
 package experimental
 
+// FeatureToggles stores toggles for experimental features
 type FeatureToggles struct {
-	ModulePluggability bool `envconfig:"default=false,MODULE_PLUGGABILITY"`
+	// No features toggle at the moment
 }

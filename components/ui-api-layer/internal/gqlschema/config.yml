@@ -44,6 +44,8 @@ models:
     fields:
       plans:
         resolver: true
+      instances:
+        resolver: true
       activated:
         resolver: true
       apiSpec:
@@ -56,6 +58,8 @@ models:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.ClusterServiceClass"
     fields:
       plans:
+        resolver: true
+      instances:
         resolver: true
       activated:
         resolver: true
