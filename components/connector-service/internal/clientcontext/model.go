@@ -8,6 +8,8 @@ import (
 const (
 	ApplicationHeader     = "Application"
 	ApplicationContextKey = "ApplicationContext"
+	SubjectHeader         = "Client-Certificate-Subject"
+	APIHostsKey           = "APIHosts"
 
 	ClusterContextKey = "ClusterContext"
 	TenantHeader      = "Tenant"
@@ -18,6 +20,7 @@ type ConnectorClientContext interface {
 	GetApplication() string
 	ToJSON() ([]byte, error)
 	GetCommonName() string
+	GetRuntimeUrls() *RuntimeURLs
 }
 
 type ContextExtender interface {
@@ -27,6 +30,11 @@ type ContextExtender interface {
 type ConnectorClientReader interface {
 	GetApplication() string
 	GetCommonName() string
+}
+
+type ExtendedApplicationContext struct {
+	ApplicationContext
+	RuntimeURLs
 }
 
 type ApplicationContext struct {
@@ -60,6 +68,14 @@ func (appCtx ApplicationContext) GetCommonName() string {
 	return appCtx.Application
 }
 
+func (appCtx ApplicationContext) GetRuntimeUrls() *RuntimeURLs {
+	return nil
+}
+
+func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
+	return &extAppCtx.RuntimeURLs
+}
+
 type ClusterContext struct {
 	Group  string
 	Tenant string
@@ -89,4 +105,22 @@ func (clsCtx ClusterContext) GetApplication() string {
 func (clsCtx ClusterContext) GetCommonName() string {
 	// TODO - adjust CN format after decision is made
 	return clsCtx.Group + clsCtx.Tenant
+}
+
+func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {
+	return nil
+}
+
+type APIHosts struct {
+	EventsHost   string
+	MetadataHost string
+}
+
+type RuntimeURLs struct {
+	EventsURL   string `json:"eventsUrl"`
+	MetadataURL string `json:"metadataUrl"`
+}
+
+func (r APIHosts) ExtendContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, APIHostsKey, r)
 }

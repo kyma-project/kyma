@@ -19,7 +19,8 @@ type options struct {
 	connectorServiceHost          string
 	appRegistryHost               string
 	eventsHost                    string
-	getInfoURL                    string
+	appsInfoURL                   string
+	runtimesInfoURL               string
 	group                         string
 	tenant                        string
 }
@@ -45,7 +46,8 @@ func parseArgs() *options {
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
 	appRegistryHost := flag.String("appRegistryHost", "", "Host at which this Application Registry is accessible.")
 	eventsHost := flag.String("eventsHost", "", "Host at which this Event Service is accessible.")
-	getInfoURL := flag.String("getInfoURL", "", "URL at which management information is available.")
+	appsInfoURL := flag.String("appsInfoURL", "", "URL at which management information is available.")
+	runtimesInfoURL := flag.String("runtimesInfoURL", "", "URL at which management information is available.")
 	group := flag.String("group", "", "Default group")
 	tenant := flag.String("tenant", "", "Default tenant")
 
@@ -66,7 +68,8 @@ func parseArgs() *options {
 		tenant:                        *tenant,
 		appRegistryHost:               *appRegistryHost,
 		eventsHost:                    *eventsHost,
-		getInfoURL:                    *getInfoURL,
+		appsInfoURL:                   *appsInfoURL,
+		runtimesInfoURL:               *runtimesInfoURL,
 	}
 }
 
@@ -74,11 +77,11 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --requestLogging=%t "+
 		"--connectorServiceHost=%s --appRegistryHost=%s --eventsHost=%s "+
-		"--getInfoURL=%s --group=%s --tenant=%s",
+		"--appsInfoURL=%s --runtimesInfoURL=%s --group=%s --tenant=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.requestLogging,
 		o.connectorServiceHost, o.appRegistryHost, o.eventsHost,
-		o.getInfoURL, o.group, o.tenant)
+		o.appsInfoURL, o.runtimesInfoURL, o.group, o.tenant)
 }
 
 func parseEnv() *environment {
