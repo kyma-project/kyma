@@ -133,7 +133,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		}
 
 		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Save", token, dummyClientContextWithEmptyURLs).Return(newToken, nil)
+		tokenCreator.On("Save", dummyClientContextWithEmptyURLs).Return(newToken, nil)
 
 		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, infoURL, subjectValues, baseURL)
 
@@ -167,7 +167,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		}
 
 		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Save", token, dummyClientContext).Return(newToken, nil)
+		tokenCreator.On("Save", dummyClientContext).Return(newToken, nil)
 
 		infoHandler := NewCSRInfoHandler(tokenCreator, connectorClientExtractor, predefinedGetInfoURL, subjectValues, baseURL)
 
@@ -263,7 +263,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		}
 
 		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Save", token, *extendedCtx).Return(newToken, nil)
+		tokenCreator.On("Save", *extendedCtx).Return(newToken, nil)
 
 		req, err := http.NewRequest(http.MethodGet, urlApps, nil)
 		require.NoError(t, err)

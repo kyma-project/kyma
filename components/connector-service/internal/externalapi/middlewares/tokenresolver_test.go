@@ -10,7 +10,6 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,12 +21,14 @@ const (
 
 type dummyContextExtender struct{}
 
-func (dce dummyContextExtender) ExtendContext(ctx context.Context) context.Context {
+func (dce *dummyContextExtender) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, dummyKey, dummyValue)
 }
 
+var dummyExtenderObject = &dummyContextExtender{}
+
 func dummyExtender() clientcontext.ContextExtender {
-	return dummyContextExtender{}
+	return dummyExtenderObject
 }
 
 func TestTokenResolver_Middleware(t *testing.T) {
@@ -42,7 +43,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 		})
 
 		tokenManager := &mocks.Manager{}
-		tokenManager.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+		tokenManager.On("Resolve", token, dummyExtenderObject).
 			Return(nil)
 		tokenManager.On("Delete", token).Return(nil)
 
@@ -90,7 +91,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 		})
 
 		tokenManager := &mocks.Manager{}
-		tokenManager.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+		tokenManager.On("Resolve", token, dummyExtenderObject).
 			Return(apperrors.NotFound("error"))
 
 		req, err := http.NewRequest("GET", "/?token="+token, nil)
@@ -116,7 +117,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 		})
 
 		tokenManager := &mocks.Manager{}
-		tokenManager.On("Resolve", token, mock.AnythingOfType("*clientcontext.ContextExtender")).
+		tokenManager.On("Resolve", token, dummyExtenderObject).
 			Return(apperrors.Internal("error"))
 
 		req, err := http.NewRequest("GET", "/?token="+token, nil)

@@ -10,17 +10,17 @@ const (
 	RenewCertEndpoint = "certificates/renewals"
 )
 
-type ManagementInfoHandler struct {
+type managementInfoHandler struct {
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 }
 
-func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor) *ManagementInfoHandler {
-	return &ManagementInfoHandler{
+func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor) *managementInfoHandler {
+	return &managementInfoHandler{
 		connectorClientExtractor: connectorClientExtractor,
 	}
 }
 
-func (ih *ManagementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *http.Request) {
+func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *http.Request) {
 	connectorClientContext, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
@@ -32,7 +32,7 @@ func (ih *ManagementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 	httphelpers.RespondWithBody(w, 200, mgmtInfoReponse{URLs: urls})
 }
 
-func (ih *ManagementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
+func (ih *managementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
 	return mgmtURLs{
 		RuntimeURLs:  connectorClientContext.GetRuntimeUrls(),
 		RenewCertURL: "",

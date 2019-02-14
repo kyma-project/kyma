@@ -16,7 +16,7 @@ const (
 	CertsEndpoint = "certificates"
 )
 
-type CSRInfoHandler struct {
+type csrInfoHandler struct {
 	tokenManager             tokens.Creator
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	getInfoURL               string
@@ -24,9 +24,9 @@ type CSRInfoHandler struct {
 	csrSubject               certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenManager tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, getInfoURL string, subjectValues certificates.CSRSubject, baseURL string) CSRGetInfoHandler {
+func NewCSRInfoHandler(tokenManager tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, getInfoURL string, subjectValues certificates.CSRSubject, baseURL string) CSRInfoHandler {
 
-	return &CSRInfoHandler{
+	return &csrInfoHandler{
 		tokenManager:             tokenManager,
 		connectorClientExtractor: connectorClientExtractor,
 		getInfoURL:               getInfoURL,
@@ -35,7 +35,7 @@ func NewCSRInfoHandler(tokenManager tokens.Creator, connectorClientExtractor cli
 	}
 }
 
-func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
+func (ih *csrInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 	connectorClientContext, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
@@ -57,14 +57,14 @@ func (ih *CSRInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 	httphelpers.RespondWithBody(w, 200, csrInfoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }
 
-func (ih *CSRInfoHandler) makeCSRURLs(newToken string) string {
+func (ih *csrInfoHandler) makeCSRURLs(newToken string) string {
 	csrURL := ih.baseURL + CertsEndpoint
 	tokenParam := fmt.Sprintf(TokenFormat, newToken)
 
 	return csrURL + tokenParam
 }
 
-func (ih *CSRInfoHandler) makeApiURLs(connectorClientContext clientcontext.ConnectorClientContext) api {
+func (ih *csrInfoHandler) makeApiURLs(connectorClientContext clientcontext.ConnectorClientContext) api {
 	infoURL := ih.getInfoURL
 	return api{
 		CertificatesURL: ih.baseURL + CertsEndpoint,
