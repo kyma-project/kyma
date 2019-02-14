@@ -20,8 +20,8 @@ spec:
       labels:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
-        kyma-alerts: enabled
-        kyma-grafana: enabled
+        alertmem: "yes"
+        alertcpu: "yes"
     spec:
       serviceAccountName: {{ template "name" . }}-service-account
       containers:
