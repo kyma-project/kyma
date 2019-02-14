@@ -12,7 +12,7 @@ spec:
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: eu.gcr.io/kyma-project/pr/ui-tests:PR-532
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:c1c23e81
       imagePullPolicy: IfNotPresent
       resources:
          requests:
