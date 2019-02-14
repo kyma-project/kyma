@@ -31,13 +31,13 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: cc09a307
+    version: e12b49fc
   api_controller:
     dir: develop/
-    version: 8c274255
+    version: bc120200
   api_controller_acceptance_tests:
     dir: develop/
-    version: 36d68d98
+    version: 736988df
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
@@ -47,7 +47,7 @@ global:
     version: 4a23580f
   docs:
     dir: develop/
-    version: 9b99bcfd
+    version: 2a321562
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -68,10 +68,10 @@ global:
     version: e11a469a
   ui_api_layer:
     dir: develop/
-    version: b5be5d68
+    version: "0b5f866d"
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: b5be5d68
+    version: "0b5f866d"
 
 test:
   acceptance:

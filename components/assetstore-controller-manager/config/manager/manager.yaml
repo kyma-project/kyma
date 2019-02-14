@@ -44,8 +44,8 @@ spec:
       containers:
       - command:
         - /manager
-        image: controller:latest
-        imagePullPolicy: Always
+        image: assetstore-controller-manager:latest
+        imagePullPolicy: IfNotPresent
         name: manager
         env:
           - name: POD_NAMESPACE
@@ -54,6 +54,12 @@ spec:
                 fieldPath: metadata.namespace
           - name: SECRET_NAME
             value: $(WEBHOOK_SECRET_NAME)
+          - name: APP_ACCESS_KEY
+            value: ""
+          - name: APP_SECRET_KEY
+            value: ""
+          - name: APP_ENDPOINT
+            value: "play.minio.io:9000"
         resources:
           limits:
             cpu: 100m

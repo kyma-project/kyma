@@ -24,13 +24,15 @@ The whole concept of the Asset Store relies on the following components:
 
 This diagram provides an overview of the basic Asset Store workflow and the role of particular components in this process:
 
-![](assets/asset-store-architecture.svg)
+![](./assets/asset-store-architecture.svg)
 
-1. Create a bucket through a Bucket CR.
-2. Create an Asset CR in which you specify the reference to the asset source location and the name of the bucket in which you want to store it.
-3. The AC listens for new Events and acts upon receiving the Asset CR creation Event.
-4. The AC reads the CR definition and checks if the bucket is available.
-5. If it is available, the AC fetches the asset from the source location provided in the CR. If the asset is a ZIP or TAR file, the AC unpacks the asset before uploading it into the bucket.
-6. Optionally, the AC validates or modifies the asset if such a requirement is defined in the Asset CR. The AC communicates with the validation and mutation services and validates or modifies the asset according to the specification defined in the Asset CR.
-7. The AC uploads the asset to Minio Gateway, into the bucket specified in the Asset CR.
-8. The AC updates the status of the Asset CR with the information on the storage location of the file in the bucket.
+1. The Kyma user creates a bucket through a Bucket CR.
+2. The Bucket Controller listens for new Events and acts upon receiving the Bucket CR creation Event.
+3. The Bucket Controller creates the bucket in the Minio Gateway storage.
+4. The Kyma user creates an Asset CR which specifies the reference to the asset source location and the name of the bucket for storing the asset.
+5. The AC listens for new Events and acts upon receiving the Asset CR creation Event.
+6. The AC reads the CR definition, checks if the Bucket CR is available, and if its name matches the bucket name referenced in the Asset CR. It also verifies if the Bucket CR is in the `Ready` phase.
+7. If the Bucket CR is available, the AC fetches the asset from the source location provided in the CR. If the asset is a ZIP or TAR file, the AC unpacks and optionally filters the asset before uploading it into the bucket.
+8. Optionally, the AC validates or modifies the asset if such a requirement is defined in the Asset CR. The AC communicates with the validation and mutation services and validates or modifies the asset according to the specification defined in the Asset CR.
+9. The AC uploads the asset to Minio Gateway, into the bucket specified in the Asset CR.
+10. The AC updates the status of the Asset CR with the storage location of the file in the bucket.

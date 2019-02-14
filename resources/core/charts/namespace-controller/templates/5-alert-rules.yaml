@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    app: Kyma
+    prometheus: monitoring
+    role: alert-rules
+  name: namespace-controller-alerts
+data:
+  alert.rules: |-
+    groups:
+    - name: namespace-controller-utilization-rule
+      rules:
+      - alert: namespace-controller-memory-usage-alert
+        expr: ((scalar(container_memory_usage_bytes{container_name="namespace-controller"}) / max(kube_pod_container_resource_limits_memory_bytes{container="namespace-controller"})) > bool {{ .Values.alertValues.memoryRatio }}) == 1
+        for: 15s
+        labels:
+          severity: high
+        annotations:
+          description: "High memory usage"
+          summary: "Utilization factor of memory is above {{ .Values.alertValues.memoryRatio }}"

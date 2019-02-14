@@ -40,15 +40,15 @@ Follow these steps to "always trust" the Kyma certificate on Mac:
 
 >**NOTE:** "Always trusting" the certificate does not work with Mozilla Firefox.
 
-To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/docs/root/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
+To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
 ## Install Kyma on Minikube
 
-You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. Read [this](/docs/root/kyma#installation-custom-component-installation) document to learn how to install only the selected subcomponents.
+You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. Read [this](/root/kyma#installation-custom-component-installation) document to learn how to install only the selected subcomponents.
 
 > **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
 
-> **NOTE:** Logging and Monitoring subcomponents are not included by default when you install Kyma on Minikube. You can install them using the instructions provided [here](../../../resources/README.md).
+> **NOTE:** Logging and Monitoring subcomponents are not included by default when you install Kyma on Minikube. You can install them using the instructions provided [here](https://github.com/kyma-project/kyma/tree/master/resources).
 
 To install Kyma, follow these steps:
 

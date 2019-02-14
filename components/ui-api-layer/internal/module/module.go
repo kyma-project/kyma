@@ -14,14 +14,8 @@ type PluggableModule interface {
 	Name() string
 }
 
-func MakePluggableFunc(informer cache.SharedIndexInformer, pluggabilityEnabled bool) func(PluggableModule) {
+func MakePluggableFunc(informer cache.SharedIndexInformer) func(PluggableModule) {
 	return func(module PluggableModule) {
-		if !pluggabilityEnabled {
-			err := module.Enable()
-			printModuleErrorIfShould(err, module, "enabling")
-			return
-		}
-
 		glog.Infof("Making the '%s' module pluggable...", module.Name())
 		eventHandler := newEventHandler(module)
 		informer.AddEventHandler(eventHandler)

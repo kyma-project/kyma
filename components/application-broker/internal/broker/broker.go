@@ -14,6 +14,7 @@ import (
 //go:generate mockery -name=appFinder -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=instanceGetter -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=serviceInstanceGetter -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=operationStorage -output=automock -outpkg=automock -case=underscore
 
 type (
 	applicationFinder interface {
@@ -35,6 +36,7 @@ type (
 	}
 	operationCollectionGetter interface {
 		GetAll(iID internal.InstanceID) ([]*internal.InstanceOperation, error)
+		GetLast(iID internal.InstanceID) (*internal.InstanceOperation, error)
 	}
 	operationUpdater interface {
 		UpdateState(iID internal.InstanceID, opID internal.OperationID, state internal.OperationState) error

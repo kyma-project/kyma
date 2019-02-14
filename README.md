@@ -5,8 +5,7 @@
 [![Go Report Card](https://goreportcard.com/badge/kyma-project/kyma)](https://goreportcard.com/report/github.com/kyma-project/kyma)
 [![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](http://slack.kyma-project.io)
 [![Twitter](https://img.shields.io/badge/twitter-@kymaproject-blue.svg)](https://twitter.com/kymaproject)
-
-
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma?ref=badge_shield)
 
 
 ## Overview

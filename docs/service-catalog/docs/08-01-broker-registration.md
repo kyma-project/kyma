@@ -3,7 +3,7 @@ title: Register a broker in the Service Catalog
 type: Tutorials
 ---
 
-This Getting Started guide shows how to register a broker in the Service Catalog. The broker can be either a Namespace-scoped ServiceBroker or a cluster-wide ClusterServiceBroker. Follow this guide to register a cluster-wide or Namespace-scoped version of the  [UPS Broker](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker).
+This tutorial shows you how to register a broker in the Service Catalog. The broker can be either a Namespace-scoped ServiceBroker or a cluster-wide ClusterServiceBroker. Follow this guide to register a cluster-wide or Namespace-scoped version of the sample [UPS Broker](https://github.com/kubernetes-incubator/service-catalog/tree/master/charts/ups-broker).
 
 ## Prerequisites
 
