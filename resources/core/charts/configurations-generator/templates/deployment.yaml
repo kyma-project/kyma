@@ -14,8 +14,6 @@ spec:
         app: {{ template "name" . }}
         tlsSecret: ingress-tls-cert
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-      annotations:
-        sidecar.istio.io/inject: "true"
     spec:
       {{ if .Values.global.isLocalEnv }}
       hostNetwork: true
