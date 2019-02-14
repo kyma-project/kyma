@@ -7,8 +7,7 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
 # Supported Minikube Versions: MINIKUBE_VERSION_MIN (inclusive) up to MINIKUBE_VERSION_MAX (exclusive)
-MINIKUBE_VERSION_MIN=0.33.0
-MINIKUBE_VERSION_MAX=0.34.0
+MINIKUBE_VERSION=0.33.0
 KUBERNETES_VERSION=1.11.5
 KUBECTL_CLI_VERSION=1.11.0
 VM_DRIVER=hyperkit
@@ -117,11 +116,17 @@ function checkIfMinikubeIsInitialized() {
 }
 
 function checkMinikubeVersion() {
-    local version=$(minikube version | awk '{print  $3}')
+    local version=$(minikube version | awk '{print  $3}' | sed s/v// )
+    local version_clean=$(echo $version | awk -F '.' '{print $1"."$2;}')
+    local supported_version_min=$(echo ${MINIKUBE_VERSION} | awk -F '.' '{print $1"."--$2;}')
+    local supported_version_max=$(echo ${MINIKUBE_VERSION} | awk -F '.' '{printf "%d.%d", $1, ++$2;}')
 
-    if [[ "$(echo "${version}\n${MINIKUBE_VERSION_MIN}" | sort -V | head -n1)" = "${MINIKUBE_VERSION_MIN}" ]] && "$(echo "$version\n${MINIKUBE_VERSION_MAX}" | sort -V | head -n1)" = "${version}" ]]; then
-        
-        log "Your minikube is in ${version}. v${MINIKUBE_VERSION_MIN} - v${MINIKUBE_VERSION_MAX} are supported versions of minikube. Please install a supported version!" yellow
+    if [[ "$(printf "${version_clean}\n${supported_version_min}" | sort -V | head -n1)" == "${version_clean}" ]]; then
+        log "Your minikube is in ${version}. Your version is older than the supported version of minikube (v$MINIKUBE_VERSION)" yellow
+    fi
+
+    if [[ "$(printf "${version_clean}\n${supported_version_max}" | sort -V | head -n1)" == "${supported_version_max}" ]]; then
+        log "Your minikube is in ${version}. Your version is newer than the supported version of minikube (v$MINIKUBE_VERSION)" yellow
     fi
 }
 
@@ -149,7 +154,7 @@ function addDevDomainsToEtcHosts() {
     log "Minikube IP address: ${minikubeIP}" green
 
     if [[ "$VM_DRIVER" != "none" ]]; then
-        log "Adding ${hostnames} to /etc/hosts on Minikube" yellow
+        log "Adding ${hostnames} to /etc/hosts on Minikube" yellow 
         minikube ssh "echo \"127.0.0.1 ${hostnames}\" | sudo tee -a /etc/hosts"
 
         # Delete old host alias
