@@ -10,12 +10,12 @@ import (
 type OIDCConfig struct {
 	IssuerURL            string
 	ClientID             string
-	CAFile               string   `envconfig:"optional"`
-	UsernameClaim        string   `envconfig:"default=email"`
-	UsernamePrefix       string   `envconfig:"optional"`
-	GroupsClaim          string   `envconfig:"default=groups"`
-	GroupsPrefix         string   `envconfig:"optional"`
-	SupportedSigningAlgs []string `envconfig:"default=RS256"`
+	CAFile               string
+	UsernameClaim        string
+	UsernamePrefix       string
+	GroupsClaim          string
+	GroupsPrefix         string
+	SupportedSigningAlgs []string
 }
 
 // NewOIDCAuthenticator returns OIDC authenticator
