@@ -8,7 +8,7 @@ import (
 
 // Deployment
 
-func NewDeploymentService(informer cache.SharedIndexInformer) *deploymentService {
+func NewDeploymentService(informer cache.SharedIndexInformer) (*deploymentService, error) {
 	return newDeploymentService(informer)
 }
 

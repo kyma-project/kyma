@@ -10,13 +10,13 @@ type resourceQuotaLister struct {
 	mock.Mock
 }
 
-// ListResourceQuotas provides a mock function with given fields: environment
-func (_m *resourceQuotaLister) ListResourceQuotas(environment string) ([]*v1.ResourceQuota, error) {
-	ret := _m.Called(environment)
+// ListResourceQuotas provides a mock function with given fields: namespace
+func (_m *resourceQuotaLister) ListResourceQuotas(namespace string) ([]*v1.ResourceQuota, error) {
+	ret := _m.Called(namespace)
 
 	var r0 []*v1.ResourceQuota
 	if rf, ok := ret.Get(0).(func(string) []*v1.ResourceQuota); ok {
-		r0 = rf(environment)
+		r0 = rf(namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1.ResourceQuota)
@@ -25,7 +25,7 @@ func (_m *resourceQuotaLister) ListResourceQuotas(environment string) ([]*v1.Res
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(environment)
+		r1 = rf(namespace)
 	} else {
 		r1 = ret.Error(1)
 	}

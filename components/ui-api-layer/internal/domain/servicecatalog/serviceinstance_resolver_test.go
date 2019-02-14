@@ -25,10 +25,10 @@ func TestServiceInstanceResolver_ServiceInstanceQuery(t *testing.T) {
 			Name: "Test",
 		}
 		name := "name"
-		environment := "environment"
+		namespace := "namespace"
 		resource := &v1beta1.ServiceInstance{}
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("Find", name, environment).Return(resource, nil).Once()
+		resourceGetter.On("Find", name, namespace).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := servicecatalog.NewMockServiceInstanceConverter()
@@ -38,7 +38,7 @@ func TestServiceInstanceResolver_ServiceInstanceQuery(t *testing.T) {
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 		resolver.SetInstanceConverter(converter)
 
-		result, err := resolver.ServiceInstanceQuery(nil, name, environment)
+		result, err := resolver.ServiceInstanceQuery(nil, name, namespace)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -46,14 +46,14 @@ func TestServiceInstanceResolver_ServiceInstanceQuery(t *testing.T) {
 
 	t.Run("NotFound", func(t *testing.T) {
 		name := "name"
-		environment := "environment"
+		namespace := "namespace"
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("Find", name, environment).Return(nil, nil).Once()
+		resourceGetter.On("Find", name, namespace).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 
-		result, err := resolver.ServiceInstanceQuery(nil, name, environment)
+		result, err := resolver.ServiceInstanceQuery(nil, name, namespace)
 
 		require.NoError(t, err)
 		assert.Nil(t, result)
@@ -62,14 +62,14 @@ func TestServiceInstanceResolver_ServiceInstanceQuery(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		expected := errors.New("Test")
 		name := "name"
-		environment := "environment"
+		namespace := "namespace"
 		resource := &v1beta1.ServiceInstance{}
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("Find", name, environment).Return(resource, expected).Once()
+		resourceGetter.On("Find", name, namespace).Return(resource, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 
-		result, err := resolver.ServiceInstanceQuery(nil, name, environment)
+		result, err := resolver.ServiceInstanceQuery(nil, name, namespace)
 
 		assert.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -79,7 +79,7 @@ func TestServiceInstanceResolver_ServiceInstanceQuery(t *testing.T) {
 
 func TestServiceInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environment := "environment"
+		namespace := "namespace"
 		resource :=
 			&v1beta1.ServiceInstance{
 				ObjectMeta: v1.ObjectMeta{
@@ -99,7 +99,7 @@ func TestServiceInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 		}
 
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("List", environment, pager.PagingParams{}).Return(resources, nil).Once()
+		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := servicecatalog.NewMockServiceInstanceConverter()
@@ -109,23 +109,23 @@ func TestServiceInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 		resolver.SetInstanceConverter(converter)
 
-		result, err := resolver.ServiceInstancesQuery(nil, environment, nil, nil, nil)
+		result, err := resolver.ServiceInstancesQuery(nil, namespace, nil, nil, nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		environment := "environment"
+		namespace := "namespace"
 		var resources []*v1beta1.ServiceInstance
 
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("List", environment, pager.PagingParams{}).Return(resources, nil).Once()
+		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 		var expected []gqlschema.ServiceInstance
 
-		result, err := resolver.ServiceInstancesQuery(nil, environment, nil, nil, nil)
+		result, err := resolver.ServiceInstancesQuery(nil, namespace, nil, nil, nil)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -134,15 +134,15 @@ func TestServiceInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		expected := errors.New("Test")
 
-		environment := "environment"
+		namespace := "namespace"
 		var resources []*v1beta1.ServiceInstance
 
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("List", environment, pager.PagingParams{}).Return(resources, expected).Once()
+		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 
-		_, err := resolver.ServiceInstancesQuery(nil, environment, nil, nil, nil)
+		_, err := resolver.ServiceInstancesQuery(nil, namespace, nil, nil, nil)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -151,7 +151,7 @@ func TestServiceInstanceResolver_ServiceInstancesQuery(t *testing.T) {
 
 func TestServiceInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		environment := "environment"
+		namespace := "namespace"
 		resource :=
 			&v1beta1.ServiceInstance{
 				ObjectMeta: v1.ObjectMeta{
@@ -195,7 +195,7 @@ func TestServiceInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 		gqlStatusType := gqlschema.InstanceStatusTypeRunning
 
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("ListForStatus", environment, pager.PagingParams{}, &statusType).Return(resources, nil).Once()
+		resourceGetter.On("ListForStatus", namespace, pager.PagingParams{}, &statusType).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := servicecatalog.NewMockServiceInstanceConverter()
@@ -206,25 +206,25 @@ func TestServiceInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 		resolver.SetInstanceConverter(converter)
 
-		result, err := resolver.ServiceInstancesQuery(nil, environment, nil, nil, &gqlStatusType)
+		result, err := resolver.ServiceInstancesQuery(nil, namespace, nil, nil, &gqlStatusType)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		environment := "environment"
+		namespace := "namespace"
 		statusType := status.ServiceInstanceStatusTypeRunning
 		gqlStatusType := gqlschema.InstanceStatusTypeRunning
 		var resources []*v1beta1.ServiceInstance
 
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("ListForStatus", environment, pager.PagingParams{}, &statusType).Return(resources, nil).Once()
+		resourceGetter.On("ListForStatus", namespace, pager.PagingParams{}, &statusType).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 		var expected []gqlschema.ServiceInstance
 
-		result, err := resolver.ServiceInstancesQuery(nil, environment, nil, nil, &gqlStatusType)
+		result, err := resolver.ServiceInstancesQuery(nil, namespace, nil, nil, &gqlStatusType)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -233,17 +233,17 @@ func TestServiceInstanceResolver_ServiceInstancesWithStatusQuery(t *testing.T) {
 	t.Run("Error", func(t *testing.T) {
 		expected := errors.New("Test")
 
-		environment := "environment"
+		namespace := "namespace"
 		statusType := status.ServiceInstanceStatusTypeRunning
 		gqlStatusType := gqlschema.InstanceStatusTypeRunning
 		var resources []*v1beta1.ServiceInstance
 
 		resourceGetter := servicecatalog.NewMockServiceInstanceService()
-		resourceGetter.On("ListForStatus", environment, pager.PagingParams{}, &statusType).Return(resources, expected).Once()
+		resourceGetter.On("ListForStatus", namespace, pager.PagingParams{}, &statusType).Return(resources, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := servicecatalog.NewServiceInstanceResolver(resourceGetter, nil, nil, nil, nil)
 
-		_, err := resolver.ServiceInstancesQuery(nil, environment, nil, nil, &gqlStatusType)
+		_, err := resolver.ServiceInstancesQuery(nil, namespace, nil, nil, &gqlStatusType)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -438,15 +438,15 @@ func TestServiceInstanceResolver_ServiceInstanceClusterServiceClassField(t *test
 
 func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		planName := "name"
 		expected := &gqlschema.ServicePlan{
-			Name:        planName,
-			Environment: env,
+			Name:      planName,
+			Namespace: ns,
 		}
 		resource := &v1beta1.ServicePlan{}
 		resourceGetter := automock.NewServicePlanGetter()
-		resourceGetter.On("Find", planName, env).Return(resource, nil).Once()
+		resourceGetter.On("Find", planName, ns).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := automock.NewGQLServicePlanConverter()
@@ -454,8 +454,8 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
-			Name:        "test",
-			Environment: env,
+			Name:      "test",
+			Namespace: ns,
 			PlanReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        planName,
 				ClusterWide: false,
@@ -472,15 +472,15 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		name := "name"
 		resourceGetter := automock.NewServicePlanGetter()
-		resourceGetter.On("Find", name, env).Return(nil, nil).Once()
+		resourceGetter.On("Find", name, ns).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
-			Name:        "test",
-			Environment: env,
+			Name:      "test",
+			Namespace: ns,
 			PlanReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -496,10 +496,10 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 	})
 
 	t.Run("ServicePlanName not provided", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		parentObj := gqlschema.ServiceInstance{
 			Name:          "test",
-			Environment:   env,
+			Namespace:     ns,
 			PlanReference: nil,
 		}
 
@@ -513,15 +513,15 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 
 	t.Run("Error", func(t *testing.T) {
 		expectedErr := errors.New("Test")
-		env := "env"
+		ns := "ns"
 		name := "name"
 		resourceGetter := automock.NewServicePlanGetter()
-		resourceGetter.On("Find", name, env).Return(nil, expectedErr).Once()
+		resourceGetter.On("Find", name, ns).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
-			Name:        "test",
-			Environment: env,
+			Name:      "test",
+			Namespace: ns,
 			PlanReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -541,15 +541,15 @@ func TestServiceInstanceResolver_ServiceInstanceServicePlanField(t *testing.T) {
 func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		expected := &gqlschema.ServiceClass{
-			Name:        "Test",
-			Environment: "env",
+			Name:      "Test",
+			Namespace: "ns",
 		}
 
-		env := "env"
+		ns := "ns"
 		name := "name"
 		resource := &v1beta1.ServiceClass{}
 		resourceGetter := automock.NewServiceClassListGetter()
-		resourceGetter.On("Find", name, env).Return(resource, nil).Once()
+		resourceGetter.On("Find", name, ns).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		converter := automock.NewGQLServiceClassConverter()
@@ -557,8 +557,8 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 		defer converter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
-			Name:        "test",
-			Environment: env,
+			Name:      "test",
+			Namespace: ns,
 			ClassReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -575,15 +575,15 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		name := "name"
 		resourceGetter := automock.NewServiceClassListGetter()
-		resourceGetter.On("Find", name, env).Return(nil, nil).Once()
+		resourceGetter.On("Find", name, ns).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
-			Name:        "test",
-			Environment: env,
+			Name:      "test",
+			Namespace: ns,
 			ClassReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -599,10 +599,10 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 	})
 
 	t.Run("ServiceClassName not provided", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		parentObj := gqlschema.ServiceInstance{
 			Name:           "test",
-			Environment:    env,
+			Namespace:      ns,
 			ClassReference: nil,
 		}
 
@@ -615,16 +615,16 @@ func TestServiceInstanceResolver_ServiceInstanceServiceClassField(t *testing.T) 
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 		expectedErr := errors.New("Test")
 		name := "name"
 		resourceGetter := automock.NewServiceClassListGetter()
-		resourceGetter.On("Find", name, env).Return(nil, expectedErr).Once()
+		resourceGetter.On("Find", name, ns).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
 		parentObj := gqlschema.ServiceInstance{
-			Name:        "test",
-			Environment: env,
+			Name:      "test",
+			Namespace: ns,
 			ClassReference: &gqlschema.ServiceInstanceResourceRef{
 				Name:        name,
 				ClusterWide: false,
@@ -713,7 +713,7 @@ func TestServiceInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 	})
 
 	t.Run("Local", func(t *testing.T) {
-		env := "env"
+		ns := "ns"
 
 		for _, tc := range []struct {
 			// Input
@@ -738,9 +738,9 @@ func TestServiceInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 			plan := &v1beta1.ServicePlan{}
 
 			planGetter := automock.NewServicePlanGetter()
-			planGetter.On("Find", planName, env).Return(plan, tc.planErr).Once()
+			planGetter.On("Find", planName, ns).Return(plan, tc.planErr).Once()
 			classGetter := automock.NewServiceClassListGetter()
-			classGetter.On("Find", className, env).Return(class, tc.classErr).Once()
+			classGetter.On("Find", className, ns).Return(class, tc.classErr).Once()
 			instanceSvc := servicecatalog.NewMockServiceInstanceService()
 			instanceSvc.On("IsBindableWithLocalRefs", class, plan).Return(tc.instanceBindable).Once()
 
@@ -764,7 +764,7 @@ func TestServiceInstanceResolver_ServiceInstanceBindableField(t *testing.T) {
 
 			parentObj := &gqlschema.ServiceInstance{
 				Name:           "test",
-				Environment:    env,
+				Namespace:      ns,
 				ClassReference: classReference,
 				PlanReference:  planReference,
 			}

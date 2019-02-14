@@ -6,13 +6,18 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 
 image:
-  tag: 03f5224a
+  tag: 1fe19d8b
   # valid values are "IfNotPresent", "Never", and "Always"
   pullPolicy: "IfNotPresent"
 
 
 storage:
   claimName: "stability-test-scripts-pvc"
+
+logsPersistence:
+  enabled: false
+  project: "kyma-project"
+  bucket: "stability-checker-logs"
 
 clusterName: "need-to-be-provided"
 pathToTestingScript: "/data/input/testing.sh"

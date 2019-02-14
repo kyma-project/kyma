@@ -4,28 +4,22 @@ import (
 	"encoding/base64"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache/mocks"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 const (
 	tokenLength = 10
-	reName      = "appName"
 )
 
 func TestTokenGenerator_NewToken(t *testing.T) {
 
 	t.Run("should generate token", func(t *testing.T) {
 		// given
-		tokenCache := &mocks.TokenCache{}
-		tokenCache.On("Put", reName, mock.AnythingOfType("string"))
-
-		tokenGenerator := NewTokenGenerator(tokenLength, tokenCache)
+		tokenGenerator := NewTokenGenerator(tokenLength)
 
 		// when
-		newToken, apperr := tokenGenerator.NewToken(reName)
+		newToken, apperr := tokenGenerator.NewToken()
 
 		// then
 		require.NoError(t, apperr)

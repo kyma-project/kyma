@@ -31,7 +31,7 @@ The three binaries of `Event Bus` reside under `cmd/event-bus-XXXX` "e.g. `cmd/e
 
 ## Knative NATS Streaming provisioner
 
-To use [NATS Streaming based provisioner](https://github.com/knative/eventing/tree/master/pkg/provisioners/natss), the controller and dispatcher images have to be available in GCR.
+To use [NATS Streaming based provisioner](https://github.com/knative/eventing/tree/master/contrib/natss/config), the controller and dispatcher images have to be available in GCR.
 
 [`ko`](https://github.com/google/go-containerregistry/tree/master/cmd/ko) allows you to publish an image for a Golang application without a Dockerfile by building the application and creating a Docker image out of it. Perform the following steps to publish Docker images for the controller and dispatcher of Nats Streaming provisioner on Knative:
 
@@ -51,7 +51,7 @@ gcloud auth configure-docker
 
 3. Clone [knative/eventing](https://github.com/knative/eventing) and check out the release branch you want to create the images from.
 
-4. Go to the [`natss`](https://github.com/knative/eventing/tree/master/pkg/provisioners/natss) folder:
+4. Go to the [`natss`](https://github.com/knative/eventing/tree/master/contrib/natss/config) folder:
 
 ```
 cd eventing/pkg/provisioners/natss

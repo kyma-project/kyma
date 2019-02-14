@@ -11,20 +11,20 @@ type resourceQuotaStatusChecker struct {
 	mock.Mock
 }
 
-// CheckResourceQuotaStatus provides a mock function with given fields: environment
-func (_m *resourceQuotaStatusChecker) CheckResourceQuotaStatus(environment string) (gqlschema.ResourceQuotasStatus, error) {
-	ret := _m.Called(environment)
+// CheckResourceQuotaStatus provides a mock function with given fields: namespace
+func (_m *resourceQuotaStatusChecker) CheckResourceQuotaStatus(namespace string) (gqlschema.ResourceQuotasStatus, error) {
+	ret := _m.Called(namespace)
 
 	var r0 gqlschema.ResourceQuotasStatus
 	if rf, ok := ret.Get(0).(func(string) gqlschema.ResourceQuotasStatus); ok {
-		r0 = rf(environment)
+		r0 = rf(namespace)
 	} else {
 		r0 = ret.Get(0).(gqlschema.ResourceQuotasStatus)
 	}
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(environment)
+		r1 = rf(namespace)
 	} else {
 		r1 = ret.Error(1)
 	}

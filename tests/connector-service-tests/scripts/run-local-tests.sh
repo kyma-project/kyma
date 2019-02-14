@@ -33,6 +33,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: connector-service-tests
+  annotations:
+    sidecar.istio.io/inject: “false”
 spec:
   hostAliases:
   - ip: "$MINIKUBE_IP"

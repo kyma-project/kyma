@@ -1,0 +1,42 @@
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  istio:
+    gateway:
+      name: kyma-gateway
+  assetstore_controller_manager:
+    dir: develop/
+    version: 2a321562
+
+minio:
+  mode: standalone
+  accessKey: admin
+  secretKey: topSecretKey
+  replicas: 1
+
+  deployment:
+    strategy:
+      type: Recreate
+    annotations:
+      sidecar.istio.io/inject: "false"
+
+  service:
+    annotations:
+      auth.istio.io/9000: NONE
+  
+  environment:
+    MINIO_BROWSER: "off"
+  
+  defaultBucket:
+    enabled: true
+    name: content
+    policy: download
+    pruge: false
+  
+  resources:
+    requests:
+      memory: 32Mi
+      cpu: 10m
+    limits:
+      memory: 64Mi
+      cpu: 100m

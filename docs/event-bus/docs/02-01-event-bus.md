@@ -42,8 +42,8 @@ See the diagram and a step-by-step description of the Event verification process
 
 ![Event validation process](./assets/event-validation.png)
 
-1. Kyma user defines a lambda or a service.
-2. Kyma user creates a Subscription custom resource.
+1. The Kyma user defines a lambda or a service.
+2. The Kyma user creates a Subscription custom resource.
 3. The sub-validator reads the new Subscription.
 4. The sub-validator refers to the EventActivation resource to check if the Event in the Subscription is activated for the given Namespace.
 5. The sub-validator updates the Subscription resource accordingly.

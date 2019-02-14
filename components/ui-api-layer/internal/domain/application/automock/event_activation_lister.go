@@ -10,13 +10,13 @@ type eventActivationLister struct {
 	mock.Mock
 }
 
-// List provides a mock function with given fields: environment
-func (_m *eventActivationLister) List(environment string) ([]*v1alpha1.EventActivation, error) {
-	ret := _m.Called(environment)
+// List provides a mock function with given fields: namespace
+func (_m *eventActivationLister) List(namespace string) ([]*v1alpha1.EventActivation, error) {
+	ret := _m.Called(namespace)
 
 	var r0 []*v1alpha1.EventActivation
 	if rf, ok := ret.Get(0).(func(string) []*v1alpha1.EventActivation); ok {
-		r0 = rf(environment)
+		r0 = rf(namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1alpha1.EventActivation)
@@ -25,7 +25,7 @@ func (_m *eventActivationLister) List(environment string) ([]*v1alpha1.EventActi
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(environment)
+		r1 = rf(namespace)
 	} else {
 		r1 = ret.Error(1)
 	}

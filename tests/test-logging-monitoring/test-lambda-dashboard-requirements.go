@@ -30,12 +30,12 @@ func checkMetricsAndlabels(metric string, labels ...string) error {
 		bodyBytes, _ := ioutil.ReadAll(resp.Body)
 		json.Unmarshal(bodyBytes, &s)
 
-		if s.Status != "success" {
-			return fmt.Errorf("Call to prometheus failed with response: %v", s)
+		if resp.StatusCode != 200 && s.Status != "success" {
+			return fmt.Errorf("Call to prometheus failed with response_status: %v,response: %v, status code: %d, ", s.Status, s.Data, resp.StatusCode)
 		}
 
 		if len(s.Data) < 1 {
-			return fmt.Errorf("Metric or Lable not found: %s, %s", l, metric)
+			return fmt.Errorf("Metric or Label not found: %s, %s", metric, l)
 		}
 	}
 
@@ -43,11 +43,11 @@ func checkMetricsAndlabels(metric string, labels ...string) error {
 }
 
 func checkLambdaUIDashboard() {
-	err := checkMetricsAndlabels("istio_requests_total", "destination_service", "response_code")
+	err := checkMetricsAndlabels("istio_requests_total", "destination_service", "response_code", "source_workload")
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = checkMetricsAndlabels("istio_requests_total", "destination_service", "response_code", "source_workload")
+	err = checkMetricsAndlabels("istio_request_duration_seconds_bucket", "destination_service")
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -75,8 +75,9 @@ func checkLambdaUIDashboard() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	err = checkMetricsAndlabels("kube_service_labels", "label_created_by", "namespace")
+	err = checkMetricsAndlabels("kube_service_labels", "namespace")
 	if err != nil {
 		log.Fatalln(err)
 	}
+	log.Printf("Test lambda dashboards: Success")
 }

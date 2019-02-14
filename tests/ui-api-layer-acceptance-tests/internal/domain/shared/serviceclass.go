@@ -2,7 +2,7 @@ package shared
 
 type ServiceClass struct {
 	Name                string
-	Environment         string
+	Namespace           string
 	ExternalName        string
 	DisplayName         string
 	CreationTimestamp   int

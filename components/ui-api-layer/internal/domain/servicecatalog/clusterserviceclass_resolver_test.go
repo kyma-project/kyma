@@ -141,6 +141,84 @@ func TestClusterServiceClassResolver_ClusterServiceClassesQuery(t *testing.T) {
 	})
 }
 
+func TestClusterServiceClassResolver_ClusterServiceClassInstancesField(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "name"
+		ns := "ns"
+		externalName := "externalName"
+		resources := []*v1beta1.ServiceInstance{
+			fixServiceInstance("foo", "ns"),
+			fixServiceInstance("bar", "ns"),
+		}
+		expected := []gqlschema.ServiceInstance{
+			{Name: "foo", Namespace: ns},
+			{Name: "bar", Namespace: ns},
+		}
+
+		resourceGetter := automock.NewInstanceListerByClusterServiceClass()
+		resourceGetter.On("ListForClusterServiceClass", name, externalName).Return(resources, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		parentObj := gqlschema.ClusterServiceClass{
+			Name:         name,
+			ExternalName: externalName,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
+
+		result, err := resolver.ClusterServiceClassInstancesField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Len(t, result, len(expected))
+		for idx, e := range expected {
+			assert.Equal(t, e.Name, result[idx].Name)
+			assert.Equal(t, e.Namespace, result[idx].Namespace)
+		}
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		name := "name"
+		externalName := "externalName"
+		var expected []gqlschema.ServiceInstance
+		resourceGetter := automock.NewInstanceListerByClusterServiceClass()
+		resourceGetter.On("ListForClusterServiceClass", name, externalName).Return(nil, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		parentObj := &gqlschema.ClusterServiceClass{
+			Name:         name,
+			ExternalName: externalName,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
+
+		result, err := resolver.ClusterServiceClassInstancesField(nil, parentObj)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		expectedErr := errors.New("Test")
+		name := "name"
+		externalName := "externalName"
+		resourceGetter := automock.NewInstanceListerByClusterServiceClass()
+		resourceGetter.On("ListForClusterServiceClass", name, externalName).Return(nil, expectedErr).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		parentObj := gqlschema.ClusterServiceClass{
+			Name:         name,
+			ExternalName: externalName,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
+
+		_, err := resolver.ClusterServiceClassInstancesField(nil, &parentObj)
+
+		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+	})
+}
+
 func TestClusterServiceClassResolver_ClusterServiceClassActivatedField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		expected := true

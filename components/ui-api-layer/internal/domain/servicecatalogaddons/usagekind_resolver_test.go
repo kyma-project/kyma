@@ -42,28 +42,6 @@ func TestUsageKindResolver_ListUsageKinds(t *testing.T) {
 	assert.Equal(t, fixUsageKindsListGQL(), resp)
 }
 
-func TestUsageKindResolver_ListUsageKindResources_Empty(t *testing.T) {
-	// GIVEN
-	svc := automock.NewUsageKindServices()
-	svc.On("ListUsageKindResources", "fix-A", fixUsageKindResourceNamespace()).
-		Return([]gqlschema.UsageKindResource{}, nil).
-		Once()
-	defer svc.AssertExpectations(t)
-
-	client := fake.NewSimpleClientset()
-	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-
-	informer := informerFactory.Servicecatalog().V1alpha1().UsageKinds().Informer()
-	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-	resolver := newUsageKindResolver(svc)
-
-	// WHEN
-	_, err := resolver.ListServiceUsageKindResources(context.Background(), "fix-A", fixUsageKindResourceNamespace())
-
-	// THEN
-	require.NoError(t, err)
-}
-
 func fixUsageKindsList() []*v1alpha1.UsageKind {
 	return []*v1alpha1.UsageKind{
 		fixUsageKind("fix-A"),

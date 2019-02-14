@@ -1,0 +1,5 @@
+dependencies:
+- name: minio
+  condition: minio.enabled
+# - name: assetstore-controller-manager
+#   condition: assetstore-controller-manager.enabled

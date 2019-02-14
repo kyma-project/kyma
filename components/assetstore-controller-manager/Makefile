@@ -1,8 +1,17 @@
 
 # Image URL to use all building/pushing image targets
-IMG ?= controller:latest
+APP_NAME ?= assetstore-controller-manager
+IMG ?= $(APP_NAME):latest
+IMG-CI = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME):$(DOCKER_TAG)
 
 all: test manager
+
+# Resolve dependencies
+resolve:
+	dep ensure -v -vendor-only
+
+setup:
+	go get github.com/vektra/mockery/.../
 
 # Run tests
 test: generate fmt vet manifests
@@ -21,8 +30,7 @@ install: manifests
 	kubectl apply -f config/crds
 
 # Deploy controller in the configured Kubernetes cluster in ~/.kube/config
-deploy: manifests
-	kubectl apply -f config/crds
+deploy: install
 	kustomize build config/default | kubectl apply -f -
 
 # Generate manifests e.g. CRD, RBAC etc.
@@ -42,11 +50,16 @@ generate:
 	go generate ./pkg/... ./cmd/...
 
 # Build the docker image
-docker-build: test
+docker-build: resolve test
 	docker build . -t ${IMG}
 	@echo "updating kustomize image patch file for manager resource"
 	sed -i'' -e 's@image: .*@image: '"${IMG}"'@' ./config/default/manager_image_patch.yaml
 
 # Push the docker image
 docker-push:
-	docker push ${IMG}
+	docker tag $(IMG) $(IMG-CI)
+	docker push $(IMG-CI)
+
+ci-pr: setup docker-build docker-push
+ci-master: setup docker-build docker-push
+ci-release: setup docker-build docker-push

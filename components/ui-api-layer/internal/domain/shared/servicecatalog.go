@@ -11,6 +11,6 @@ type ServiceCatalogRetriever interface {
 
 //go:generate mockery -name=ServiceBindingFinderLister -output=automock -outpkg=automock -case=underscore
 type ServiceBindingFinderLister interface {
-	Find(env string, name string) (*bindingApi.ServiceBinding, error)
-	ListForServiceInstance(env string, instanceName string) ([]*bindingApi.ServiceBinding, error)
+	Find(ns string, name string) (*bindingApi.ServiceBinding, error)
+	ListForServiceInstance(ns string, instanceName string) ([]*bindingApi.ServiceBinding, error)
 }

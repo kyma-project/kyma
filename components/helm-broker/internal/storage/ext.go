@@ -29,6 +29,7 @@ type Chart interface {
 type Instance interface {
 	Insert(*internal.Instance) error
 	Get(id internal.InstanceID) (*internal.Instance, error)
+	GetAll() ([]*internal.Instance, error)
 	Remove(id internal.InstanceID) error
 }
 

@@ -13,13 +13,13 @@ type serviceInstanceLister struct {
 	mock.Mock
 }
 
-// Find provides a mock function with given fields: name, environment
-func (_m *serviceInstanceLister) Find(name string, environment string) (*v1beta1.ServiceInstance, error) {
-	ret := _m.Called(name, environment)
+// Find provides a mock function with given fields: name, namespace
+func (_m *serviceInstanceLister) Find(name string, namespace string) (*v1beta1.ServiceInstance, error) {
+	ret := _m.Called(name, namespace)
 
 	var r0 *v1beta1.ServiceInstance
 	if rf, ok := ret.Get(0).(func(string, string) *v1beta1.ServiceInstance); ok {
-		r0 = rf(name, environment)
+		r0 = rf(name, namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1beta1.ServiceInstance)
@@ -28,7 +28,7 @@ func (_m *serviceInstanceLister) Find(name string, environment string) (*v1beta1
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(name, environment)
+		r1 = rf(name, namespace)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -36,13 +36,13 @@ func (_m *serviceInstanceLister) Find(name string, environment string) (*v1beta1
 	return r0, r1
 }
 
-// List provides a mock function with given fields: environment, pagingParams
-func (_m *serviceInstanceLister) List(environment string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceInstance, error) {
-	ret := _m.Called(environment, pagingParams)
+// List provides a mock function with given fields: namespace, pagingParams
+func (_m *serviceInstanceLister) List(namespace string, pagingParams pager.PagingParams) ([]*v1beta1.ServiceInstance, error) {
+	ret := _m.Called(namespace, pagingParams)
 
 	var r0 []*v1beta1.ServiceInstance
 	if rf, ok := ret.Get(0).(func(string, pager.PagingParams) []*v1beta1.ServiceInstance); ok {
-		r0 = rf(environment, pagingParams)
+		r0 = rf(namespace, pagingParams)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1beta1.ServiceInstance)
@@ -51,7 +51,7 @@ func (_m *serviceInstanceLister) List(environment string, pagingParams pager.Pag
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, pager.PagingParams) error); ok {
-		r1 = rf(environment, pagingParams)
+		r1 = rf(namespace, pagingParams)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -59,13 +59,13 @@ func (_m *serviceInstanceLister) List(environment string, pagingParams pager.Pag
 	return r0, r1
 }
 
-// ListForStatus provides a mock function with given fields: environment, pagingParams, _a2
-func (_m *serviceInstanceLister) ListForStatus(environment string, pagingParams pager.PagingParams, _a2 *status.ServiceInstanceStatusType) ([]*v1beta1.ServiceInstance, error) {
-	ret := _m.Called(environment, pagingParams, _a2)
+// ListForStatus provides a mock function with given fields: namespace, pagingParams, _a2
+func (_m *serviceInstanceLister) ListForStatus(namespace string, pagingParams pager.PagingParams, _a2 *status.ServiceInstanceStatusType) ([]*v1beta1.ServiceInstance, error) {
+	ret := _m.Called(namespace, pagingParams, _a2)
 
 	var r0 []*v1beta1.ServiceInstance
 	if rf, ok := ret.Get(0).(func(string, pager.PagingParams, *status.ServiceInstanceStatusType) []*v1beta1.ServiceInstance); ok {
-		r0 = rf(environment, pagingParams, _a2)
+		r0 = rf(namespace, pagingParams, _a2)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1beta1.ServiceInstance)
@@ -74,7 +74,7 @@ func (_m *serviceInstanceLister) ListForStatus(environment string, pagingParams 
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, pager.PagingParams, *status.ServiceInstanceStatusType) error); ok {
-		r1 = rf(environment, pagingParams, _a2)
+		r1 = rf(namespace, pagingParams, _a2)
 	} else {
 		r1 = ret.Error(1)
 	}

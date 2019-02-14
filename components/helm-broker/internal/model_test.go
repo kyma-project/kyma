@@ -38,3 +38,40 @@ func TestChartRefGobEncodeDecode(t *testing.T) {
 		})
 	}
 }
+
+func TestCanBeProvision(t *testing.T) {
+	// Given
+	namespace := internal.Namespace("test-bundle-namespace")
+	collection := []*internal.Instance{
+		{ServiceID: "a1", Namespace: "test-bundle-namespace"},
+		{ServiceID: "a2", Namespace: "test-bundle-namespace"},
+		{ServiceID: "a3", Namespace: "test-bundle-namespace"},
+		{ServiceID: "a2", Namespace: "other-bundle-namespace"},
+	}
+
+	bundleExist := internal.Bundle{
+		Metadata: internal.BundleMetadata{
+			ProvisionOnlyOnce: true,
+		},
+		ID: "a1",
+	}
+	bundleNotExist := internal.Bundle{
+		Metadata: internal.BundleMetadata{
+			ProvisionOnlyOnce: true,
+		},
+		ID: "a5",
+	}
+	bundleManyProvision := internal.Bundle{
+		Metadata: internal.BundleMetadata{
+			ProvisionOnlyOnce: false,
+		},
+		ID: "a1",
+	}
+
+	// WHEN/THEN
+	assert.False(t, bundleExist.IsProvisioningAllowed(namespace, collection))
+	assert.True(t, bundleExist.IsProvisioningAllowed("other-bundle-namespace", collection))
+	assert.True(t, bundleExist.IsProvisioningAllowed("other-ns", collection))
+	assert.True(t, bundleNotExist.IsProvisioningAllowed(namespace, collection))
+	assert.True(t, bundleManyProvision.IsProvisioningAllowed(namespace, collection))
+}

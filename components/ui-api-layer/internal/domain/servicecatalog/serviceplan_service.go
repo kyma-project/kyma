@@ -1,8 +1,9 @@
 package servicecatalog
 
 import (
-	"errors"
 	"fmt"
+
+	"github.com/pkg/errors"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"k8s.io/client-go/tools/cache"
@@ -12,8 +13,8 @@ type servicePlanService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newServicePlanService(informer cache.SharedIndexInformer) *servicePlanService {
-	informer.AddIndexers(cache.Indexers{
+func newServicePlanService(informer cache.SharedIndexInformer) (*servicePlanService, error) {
+	err := informer.AddIndexers(cache.Indexers{
 		"relatedServiceClassName": func(obj interface{}) ([]string, error) {
 			entity, ok := obj.(*v1beta1.ServicePlan)
 			if !ok {
@@ -32,14 +33,17 @@ func newServicePlanService(informer cache.SharedIndexInformer) *servicePlanServi
 			return []string{str}, nil
 		},
 	})
+	if err != nil {
+		return nil, errors.Wrap(err, "while adding indexers")
+	}
 
 	return &servicePlanService{
 		informer: informer,
-	}
+	}, nil
 }
 
-func (svc *servicePlanService) Find(name, environment string) (*v1beta1.ServicePlan, error) {
-	key := fmt.Sprintf("%s/%s", environment, name)
+func (svc *servicePlanService) Find(name, namespace string) (*v1beta1.ServicePlan, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
 	item, exists, err := svc.informer.GetStore().GetByKey(key)
 	if err != nil || !exists {
 		return nil, err
@@ -53,8 +57,8 @@ func (svc *servicePlanService) Find(name, environment string) (*v1beta1.ServiceP
 	return servicePlan, nil
 }
 
-func (svc *servicePlanService) FindByExternalName(planExternalName, className, environment string) (*v1beta1.ServicePlan, error) {
-	items, err := svc.informer.GetIndexer().ByIndex("classNameAndPlanExternalName", servicePlanIndexKey(environment, className, planExternalName))
+func (svc *servicePlanService) FindByExternalName(planExternalName, className, namespace string) (*v1beta1.ServicePlan, error) {
+	items, err := svc.informer.GetIndexer().ByIndex("classNameAndPlanExternalName", servicePlanIndexKey(namespace, className, planExternalName))
 	if err != nil {
 		return nil, err
 	}
@@ -76,8 +80,8 @@ func (svc *servicePlanService) FindByExternalName(planExternalName, className, e
 	return servicePlan, nil
 }
 
-func (svc *servicePlanService) ListForServiceClass(name string, environment string) ([]*v1beta1.ServicePlan, error) {
-	key := fmt.Sprintf("%s/%s", environment, name)
+func (svc *servicePlanService) ListForServiceClass(name string, namespace string) ([]*v1beta1.ServicePlan, error) {
+	key := fmt.Sprintf("%s/%s", namespace, name)
 	plans, err := svc.informer.GetIndexer().ByIndex("relatedServiceClassName", key)
 	if err != nil {
 		return nil, err
@@ -96,6 +100,6 @@ func (svc *servicePlanService) ListForServiceClass(name string, environment stri
 	return servicePlans, nil
 }
 
-func servicePlanIndexKey(environment, planExternalName, className string) string {
-	return fmt.Sprintf("%s/%s/%s", environment, className, planExternalName)
+func servicePlanIndexKey(namespace, planExternalName, className string) string {
+	return fmt.Sprintf("%s/%s/%s", namespace, className, planExternalName)
 }

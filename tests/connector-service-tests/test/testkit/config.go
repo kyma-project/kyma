@@ -13,6 +13,8 @@ const (
 	externalAPIUrlEnvName = "EXTERNAL_API_URL"
 	gatewayUrlEnvName     = "GATEWAY_URL"
 	skipVerifyEnvName     = "SKIP_SSL_VERIFY"
+	tenantEnvName         = "TENANT"
+	groupEnvName          = "GROUP"
 )
 
 type TestConfig struct {
@@ -20,6 +22,8 @@ type TestConfig struct {
 	ExternalAPIUrl string
 	GatewayUrl     string
 	SkipSslVerify  bool
+	Tenant         string
+	Group          string
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -44,11 +48,25 @@ func ReadConfig() (TestConfig, error) {
 		skipVerify, _ = strconv.ParseBool(sv)
 	}
 
+	tenant := ""
+	t, found := os.LookupEnv(tenantEnvName)
+	if found {
+		tenant = t
+	}
+
+	group := ""
+	g, found := os.LookupEnv(groupEnvName)
+	if found {
+		group = g
+	}
+
 	config := TestConfig{
 		InternalAPIUrl: internalAPIUrl,
 		ExternalAPIUrl: externalAPIUrl,
 		GatewayUrl:     gatewayUrl,
 		SkipSslVerify:  skipVerify,
+		Tenant:         tenant,
+		Group:          group,
 	}
 
 	log.Printf("Read configuration: %+v", config)

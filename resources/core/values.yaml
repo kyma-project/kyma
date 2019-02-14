@@ -5,8 +5,22 @@ dex:
 minio:
   service:
     type: NodePort
+  accessKey: "admin"
+  secretKey: "topSecretKey"
+  resources:
+    limits:
+      memory: 128Mi
+      cpu: 250m
+
+console:
+  cluster:
+    headerLogoUrl: "assets/logo.svg"
+    headerTitle: ""
+    faviconUrl: "favicon.ico"
 
 global:
+  isLocalEnv: false
+  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -17,47 +31,32 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: cc09a307
-  alpine_net:
-    dir: develop/
-    version: ed568f0f
+    version: e12b49fc
   api_controller:
     dir: develop/
-    version: 8c274255
+    version: bc120200
   api_controller_acceptance_tests:
     dir: develop/
-    version: 36d68d98
+    version: 736988df
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
     version: 6e0a7fe2
-  binding_usage_controller:
-    dir: develop/
-    version: d1930a3d
   configurations_generator:
     dir: develop/
     version: 4a23580f
   docs:
     dir: develop/
-    version: efb39f1f
+    version: 2a321562
   namespace_controller:
     dir: develop/
     version: 429bfbcc
   etcd_backup:
     dir: develop/
     version: 6e0a7fe2
-  event_bus:
-    dir: develop/
-    version: ab9c73dd
-  event_bus_tests:
-    dir: develop/
-    version: f01c8848
-  helm_broker:
-    dir: develop/
-    version: 6e4d78f1
   kubeless_integration_tests:
     dir: develop/
-    version: e11a469a
+    version: 78f999a7
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
@@ -69,10 +68,10 @@ global:
     version: e11a469a
   ui_api_layer:
     dir: develop/
-    version: 9431ea99
+    version: "0b5f866d"
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: 9431ea99
+    version: "0b5f866d"
 
 test:
   acceptance:

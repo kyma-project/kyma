@@ -44,6 +44,8 @@ models:
     fields:
       plans:
         resolver: true
+      instances:
+        resolver: true
       activated:
         resolver: true
       apiSpec:
@@ -57,6 +59,8 @@ models:
     fields:
       plans:
         resolver: true
+      instances:
+        resolver: true
       activated:
         resolver: true
       apiSpec:
@@ -68,7 +72,7 @@ models:
   Application:
     model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Application"
     fields:
-      enabledInEnvironments:
+      enabledInNamespaces:
         resolver: true
       status:
         resolver: true
@@ -92,8 +96,8 @@ models:
     fields:
       events:
         resolver: true
-  Environment:
-    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Environment"
+  Namespace:
+    model: "github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema.Namespace"
     fields:
       applications:
         resolver: true
