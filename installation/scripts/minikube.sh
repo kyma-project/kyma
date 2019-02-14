@@ -116,7 +116,7 @@ function checkIfMinikubeIsInitialized() {
 }
 
 function checkMinikubeVersion() {
-    local version=$(minikube version | awk '{print  $3}' | sed s/v// )
+    local version=$(minikube version | awk '{print  $3}' | grep -o '[0-9\.]\+' )
     local version_clean=$(echo $version | awk -F '.' '{print $1"."$2;}')
     local supported_version_min=$(echo ${MINIKUBE_VERSION} | awk -F '.' '{print $1"."--$2;}')
     local supported_version_max=$(echo ${MINIKUBE_VERSION} | awk -F '.' '{printf "%d.%d", $1, ++$2;}')
