@@ -355,6 +355,7 @@ func runtimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipV
 		assert.NotEmpty(t, infoResponse.CertUrl)
 		assert.NotEmpty(t, infoResponse.Api)
 		assert.NotEmpty(t, infoResponse.Certificate)
+		assert.Nil(t, infoResponse.Api.RuntimeURLs)
 	})
 }
 
@@ -467,7 +468,7 @@ func runtimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipV
 		require.Nil(t, errorResponse)
 
 		// then
-		assert.NotEmpty(t, mgmInfoResponse.URLs)
+		assert.Nil(t, mgmInfoResponse.URLs.RuntimeURLs)
 	})
 
 }

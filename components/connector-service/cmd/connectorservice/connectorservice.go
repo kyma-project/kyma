@@ -155,7 +155,7 @@ func newExternalHandler(tokenResolver tokens.Resolver, tokenManagerProvider toke
 	}
 
 	runtimeManagementInfoHandlerConfig := externalapi.Config{
-		ContextExtractor: clientcontext.ExtractStubApplicationContext,
+		ContextExtractor: clientcontext.EmptyClusterContext,
 	}
 
 	return externalapi.NewHandler(appHandlerConfig, runtimeHandlerConfig, appManagementInfoHandlerConfig, runtimeManagementInfoHandlerConfig, globalMiddlewares)

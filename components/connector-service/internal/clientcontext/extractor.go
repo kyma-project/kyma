@@ -57,11 +57,8 @@ func ExtractClusterContext(ctx context.Context) (ConnectorClientContext, apperro
 	return clusterCtx, nil
 }
 
-func ExtractStubApplicationContext(ctx context.Context) (ConnectorClientContext, apperrors.AppError) {
-	extendedCtx := &ExtendedApplicationContext{
-		RuntimeURLs: RuntimeURLs{},
-	}
-	return extendedCtx, nil
+func EmptyClusterContext(_ context.Context) (ConnectorClientContext, apperrors.AppError) {
+	return &ClusterContext{}, nil
 }
 
 func NewClusterContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
