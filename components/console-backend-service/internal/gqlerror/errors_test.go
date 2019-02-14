@@ -5,6 +5,8 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -35,6 +37,7 @@ func TestNew(t *testing.T) {
 		{"K8sAlreadyExists", someTestKind, k8serrors.NewAlreadyExists(schema.GroupResource{}, "test"), gqlerror.IsAlreadyExists},
 		{"K8sInvalid", someTestKind, k8serrors.NewInvalid(schema.GroupKind{}, "test", field.ErrorList{}), gqlerror.IsInvalid},
 		{"K8sOther", someTestKind, k8serrors.NewBadRequest("test"), gqlerror.IsInternal},
+		{"APIInvalid", someTestKind, apierror.NewInvalid(pretty.Pod, apierror.ErrorFieldAggregate{}), gqlerror.IsInvalid},
 		{"Nested", someTestKind, errors.Wrap(k8serrors.NewNotFound(schema.GroupResource{}, "while test"), "test"), gqlerror.IsNotFound},
 		{"DoubleNested", someTestKind, errors.Wrap(errors.Wrap(k8serrors.NewNotFound(schema.GroupResource{}, "while test"), "while more"), "test"), gqlerror.IsNotFound},
 		{"Generic", someTestKind, errors.New("test"), gqlerror.IsInternal},

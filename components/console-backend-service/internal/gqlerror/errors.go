@@ -4,8 +4,11 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
+
+	apierrors "github.com/kyma-project/kyma/components/ui-api-layer/internal/apierror"
 	"github.com/pkg/errors"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 type GQLError struct {
@@ -59,10 +62,12 @@ func New(err error, kind fmt.Stringer, opts ...Option) error {
 	err = errors.Cause(err)
 
 	switch {
-	case apierrors.IsNotFound(err):
-		return NewNotFound(kind, opts...)
-	case apierrors.IsAlreadyExists(err):
+	case k8serrors.IsNotFound(err):
+		return NewNotFoundFromError(err.Error(), opts...)
+	case k8serrors.IsAlreadyExists(err):
 		return NewAlreadyExists(kind, opts...)
+	case k8serrors.IsInvalid(err):
+		return NewInvalid(err.Error(), kind, opts...)
 	case apierrors.IsInvalid(err):
 		return NewInvalid(err.Error(), kind, opts...)
 	default:
@@ -96,6 +101,11 @@ func WithDetails(details string) Option {
 
 func NewInternal(opts ...Option) error {
 	return buildError(nil, Internal, opts...)
+}
+
+func NewNotFoundFromError(err string, opts ...Option) error {
+	opts = append(opts, WithDetails(err))
+	return buildError(pretty.Resource, NotFound, opts...)
 }
 
 func NewNotFound(kind fmt.Stringer, opts ...Option) error {

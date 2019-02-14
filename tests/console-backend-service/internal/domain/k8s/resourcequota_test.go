@@ -133,14 +133,6 @@ func fixListResourceQuotasResponse() resourceQuota {
 	}
 }
 
-func fixNamespace(name string) *v1.Namespace {
-	return &v1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
-		},
-	}
-}
-
 func fixResourceQuota() *v1.ResourceQuota {
 	return &v1.ResourceQuota{
 		ObjectMeta: metav1.ObjectMeta{

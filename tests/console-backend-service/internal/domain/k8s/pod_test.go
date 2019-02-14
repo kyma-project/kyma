@@ -86,8 +86,6 @@ const (
 	podStatusTypeUnknown   podStatusType = "UNKNOWN"
 )
 
-type json map[string]interface{}
-
 func TestPod(t *testing.T) {
 	dex.SkipTestIfSCIEnabled(t)
 
@@ -145,7 +143,8 @@ func TestPod(t *testing.T) {
 
 	t.Log("Updating...")
 	podRes.Pod.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update := stringifyJSON(podRes.Pod.JSON)
+	update, err := stringifyJSON(podRes.Pod.JSON)
+	require.NoError(t, err)
 	var updateRes updatePodMutationResponse
 	err = c.Do(fixUpdatePodMutation(update), &updateRes)
 	require.NoError(t, err)
@@ -340,9 +339,4 @@ func checkPodEvent(expected PodEvent, sub *graphql.Subscription) error {
 			return nil
 		}
 	}
-}
-
-func stringifyJSON(in json) string {
-	bytes, _ := jsonEncoder.Marshal(in)
-	return string(bytes)
 }

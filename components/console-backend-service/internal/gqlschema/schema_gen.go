@@ -277,6 +277,7 @@ type ComplexityRoot struct {
 	}
 
 	Mutation struct {
+		CreateResource            func(childComplexity int, namespace string, resource JSON) int
 		CreateServiceInstance     func(childComplexity int, params ServiceInstanceCreateInput) int
 		DeleteServiceInstance     func(childComplexity int, name string, namespace string) int
 		CreateServiceBinding      func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters *JSON) int
@@ -608,6 +609,7 @@ type EventActivationResolver interface {
 	Events(ctx context.Context, obj *EventActivation) ([]EventActivationEvent, error)
 }
 type MutationResolver interface {
+	CreateResource(ctx context.Context, namespace string, resource JSON) (*JSON, error)
 	CreateServiceInstance(ctx context.Context, params ServiceInstanceCreateInput) (*ServiceInstance, error)
 	DeleteServiceInstance(ctx context.Context, name string, namespace string) (*ServiceInstance, error)
 	CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName string, namespace string, parameters *JSON) (*CreateServiceBindingOutput, error)
@@ -736,6 +738,30 @@ func field_ClusterServiceClass_instances_args(rawArgs map[string]interface{}) (m
 		}
 	}
 	args["namespace"] = arg0
+	return args, nil
+
+}
+
+func field_Mutation_createResource_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 JSON
+	if tmp, ok := rawArgs["resource"]; ok {
+		var err error
+		err = (&arg1).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["resource"] = arg1
 	return args, nil
 
 }
@@ -3179,6 +3205,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.LocalObjectReference.Name(childComplexity), true
+
+	case "Mutation.createResource":
+		if e.complexity.Mutation.CreateResource == nil {
+			break
+		}
+
+		args, err := field_Mutation_createResource_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateResource(childComplexity, args["namespace"].(string), args["resource"].(JSON)), true
 
 	case "Mutation.createServiceInstance":
 		if e.complexity.Mutation.CreateServiceInstance == nil {
@@ -10222,6 +10260,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		switch field.Name {
 		case "__typename":
 			out.Values[i] = graphql.MarshalString("Mutation")
+		case "createResource":
+			out.Values[i] = ec._Mutation_createResource(ctx, field)
 		case "createServiceInstance":
 			out.Values[i] = ec._Mutation_createServiceInstance(ctx, field)
 		case "deleteServiceInstance":
@@ -10274,6 +10314,40 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 		return graphql.Null
 	}
 	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createResource(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createResource_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateResource(rctx, args["namespace"].(string), args["resource"].(JSON))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
 }
 
 // nolint: vetshadow
@@ -20627,19 +20701,45 @@ func UnmarshalResourceAttributes(v interface{}) (ResourceAttributes, error) {
 			}
 		case "apiGroup":
 			var err error
-			it.APIGroup, err = graphql.UnmarshalString(v)
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.APIGroup = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
 		case "apiVersion":
 			var err error
-			it.APIVersion, err = graphql.UnmarshalString(v)
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.APIVersion = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
 		case "resource":
 			var err error
-			it.Resource, err = graphql.UnmarshalString(v)
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.Resource = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "resourceArg":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.ResourceArg = &ptr1
+			}
+
 			if err != nil {
 				return it, err
 			}
@@ -20874,9 +20974,10 @@ directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
 input ResourceAttributes {
 	verb: String!
-	apiGroup: String!
-	apiVersion: String!
-	resource: String!
+	apiGroup: String
+	apiVersion: String
+	resource: String
+    resourceArg: String
 	subresource: String! = ""
 	nameArg: String
 	namespaceArg: String
@@ -21533,6 +21634,7 @@ type Query {
 # Mutations
 
 type Mutation {
+    createResource(namespace: String!, resource: JSON!): JSON @HasAccess(attributes: {verb: "create", resourceArg: "resource", namespaceArg: "namespace"})
     createServiceInstance(params: ServiceInstanceCreateInput!): ServiceInstance
     deleteServiceInstance(name: String!, namespace: String!): ServiceInstance
     createServiceBinding(serviceBindingName: String, serviceInstanceName: String!, namespace: String!, parameters: JSON): CreateServiceBindingOutput

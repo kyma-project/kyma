@@ -87,3 +87,12 @@ go test ./...
 ### Verify the code
 
 To check if the code is correct and you can push it, run the `before-commit.sh` script. It builds the application, runs tests, checks the status of the vendored libraries, runs the static code analysis, and ensures that the formatting of the code is correct.
+
+## Troubleshooting
+
+### Certificate signed by unknown authority
+```bash
+oidc.go:222] oidc authenticator: initializing plugin: Get https://dex.kyma.local/.well-known/openid-configuration: x509: certificate signed by unknown authority
+```
+This error might be related to issue with Go versions before 1.11.6 on macOS, discussed [here](https://github.com/golang/go/issues/24652).
+

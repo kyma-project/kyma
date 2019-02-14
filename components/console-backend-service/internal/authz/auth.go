@@ -2,9 +2,13 @@ package authz
 
 import (
 	"context"
-	"errors"
 	"reflect"
+	"strings"
 	"time"
+
+	extractor "github.com/kyma-project/kyma/components/ui-api-layer/internal/extractor"
+	"github.com/pkg/errors"
+	"k8s.io/client-go/discovery"
 
 	"github.com/99designs/gqlgen/graphql"
 
@@ -40,11 +44,31 @@ func NewAuthorizer(client authorizationclient.SubjectAccessReviewInterface, cach
 }
 
 // PrepareAttributes prepares attributes for authorization
-func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.ResourceAttributes, obj interface{}) (authorizer.Attributes, error) {
+func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.ResourceAttributes, obj interface{}, client discovery.DiscoveryInterface) (authorizer.Attributes, error) {
 	resolverCtx := graphql.GetResolverContext(ctx)
 
 	var name string
 	var namespace string
+	var resource string
+	var apiGroup string
+	var apiVersion string
+
+	// make sure resource information is taken either from directive or from field
+	if attributes.ResourceArg != nil {
+		if attributes.Resource != nil || attributes.APIVersion != nil || attributes.APIGroup != nil {
+			return nil, errors.New("resource information shouldn't be both passed directly and extracted from field at the same time")
+		}
+		if attributes.IsChildResolver {
+			return nil, errors.New("resource information can't be extracted from passed object")
+		}
+	} else {
+		if attributes.Resource == nil || attributes.APIVersion == nil || attributes.APIGroup == nil {
+			return nil, errors.New("resource information is missing, it should be either passed directly or extracted from field")
+		}
+		resource = *attributes.Resource
+		apiGroup = *attributes.APIGroup
+		apiVersion = *attributes.APIVersion
+	}
 
 	if attributes.IsChildResolver {
 		val := reflect.Indirect(reflect.ValueOf(obj))
@@ -71,6 +95,7 @@ func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.Re
 					namespace = val.Field(i).String()
 				}
 			}
+
 		}
 
 		if attributes.NameArg != nil && name == "" {
@@ -102,15 +127,41 @@ func PrepareAttributes(ctx context.Context, u user.Info, attributes gqlschema.Re
 				return nil, errors.New("namespace in arguments not found")
 			}
 		}
+
+		if attributes.ResourceArg != nil {
+			resourceJSON, ok := resolverCtx.Args[*attributes.ResourceArg].(gqlschema.JSON)
+			if !ok {
+				return nil, errors.New("resource in arguments found, but can't be converted to JSON")
+			}
+			resourceMeta, err := extractor.ExtractResourceMeta(resourceJSON)
+			if err != nil {
+				return nil, errors.New("resource in arguments found, but meta information can't be extracted")
+			}
+			split := strings.Split(resourceMeta.APIVersion, "/")
+			switch len(split) {
+			case 2:
+				apiGroup = split[0]
+				apiVersion = split[1]
+			case 1:
+				apiGroup = ""
+				apiVersion = split[0]
+			default:
+				return nil, errors.New("resource apiVersion format is invalid")
+			}
+			resource, err = extractor.GetPluralNameFromKind(resourceMeta.Kind, resourceMeta.APIVersion, client)
+			if err != nil {
+				return nil, errors.Wrap(err, "while getting resource's plural name")
+			}
+		}
 	}
 
 	return authorizer.AttributesRecord{
 		User:            u,
 		Verb:            attributes.Verb,
 		Namespace:       namespace,
-		APIGroup:        attributes.APIGroup,
-		APIVersion:      attributes.APIVersion,
-		Resource:        attributes.Resource,
+		APIGroup:        apiGroup,
+		APIVersion:      apiVersion,
+		Resource:        resource,
 		Subresource:     attributes.Subresource,
 		Name:            name,
 		ResourceRequest: true,
