@@ -5,8 +5,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 )
@@ -23,28 +24,10 @@ func NewAppContextFromSubjMiddleware() *appContextFromSubjMiddleware {
 
 func (cc *appContextFromSubjMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var contextExtender clientcontext.ContextExtender
-
-		app, group, tenant := parseContextFromSubject(r)
-		clusterContext := clientcontext.ClusterContext{
-			Group:  group,
-			Tenant: tenant,
-		}
-
-		contextExtender = clusterContext
-
-		if clusterContext.IsEmpty() {
-			if app == "" {
-				httphelpers.RespondWithError(w, apperrors.BadRequest("Invalid certificate subject"))
-				return
-			}
-		}
-
-		if app != "" {
-			contextExtender = clientcontext.ApplicationContext{
-				Application:    app,
-				ClusterContext: clusterContext,
-			}
+		contextExtender, err := prepareContextExtender(r)
+		if err != nil {
+			httphelpers.RespondWithError(w, apperrors.BadRequest("Invalid certificate subject"))
+			return
 		}
 
 		reqWithCtx := r.WithContext(contextExtender.ExtendContext(r.Context()))
@@ -53,9 +36,35 @@ func (cc *appContextFromSubjMiddleware) Middleware(handler http.Handler) http.Ha
 	})
 }
 
+func prepareContextExtender(r *http.Request) (clientcontext.ContextExtender, apperrors.AppError) {
+	var contextExtender clientcontext.ContextExtender
+
+	app, group, tenant := parseContextFromSubject(r)
+	clusterContext := clientcontext.ClusterContext{
+		Group:  group,
+		Tenant: tenant,
+	}
+
+	contextExtender = clusterContext
+
+	if clusterContext.IsEmpty() {
+		if app == "" {
+			return nil, apperrors.BadRequest("Invalid certificate subject")
+		}
+	}
+
+	if app != "" {
+		contextExtender = clientcontext.ApplicationContext{
+			Application:    app,
+			ClusterContext: clusterContext,
+		}
+	}
+
+	return contextExtender, nil
+}
+
 func parseContextFromSubject(r *http.Request) (application string, group string, tenant string) {
 	subject := r.Header.Get(clientcontext.SubjectHeader)
-
 	if subject == "" {
 		return "", "", ""
 	}

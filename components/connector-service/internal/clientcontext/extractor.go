@@ -54,8 +54,3 @@ func ExtractClusterContext(ctx context.Context) (ConnectorClientContext, apperro
 
 	return clusterCtx, nil
 }
-
-// Temporary stub - it will be removed when full CN flow will be implemented
-func EmptyClusterContext(_ context.Context) (ConnectorClientContext, apperrors.AppError) {
-	return &ClusterContext{}, nil
-}
