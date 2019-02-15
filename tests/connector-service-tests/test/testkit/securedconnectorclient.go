@@ -1,6 +1,7 @@
 package testkit
 
 import (
+	"bytes"
 	"crypto/rsa"
 	"crypto/tls"
 	"encoding/json"
@@ -12,6 +13,7 @@ import (
 
 type SecuredConnectorClient interface {
 	GetMgmInfo(t *testing.T, url string, headers map[string]string) (*ManagementInfoResponse, *Error)
+	RenewCertificate(t *testing.T, url string, csr string) (*CrtResponse, *Error)
 }
 
 type securedConnectorClient struct {
@@ -51,22 +53,34 @@ func NewTLSClientWithCert(skipVerify bool, key *rsa.PrivateKey, certificate ...[
 func (cc securedConnectorClient) GetMgmInfo(t *testing.T, url string, headers map[string]string) (*ManagementInfoResponse, *Error) {
 	request := getRequestWithHeaders(t, url, headers)
 
+	var mgmInfoResponse ManagementInfoResponse
+	errorResp := cc.secureConnectorRequest(t, request, &mgmInfoResponse, http.StatusOK)
+
+	return &mgmInfoResponse, errorResp
+}
+
+func (cc securedConnectorClient) RenewCertificate(t *testing.T, url string, csr string) (*CrtResponse, *Error) {
+	body, err := json.Marshal(CsrRequest{Csr: csr})
+	require.NoError(t, err)
+
+	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
+	require.NoError(t, err)
+
+	var certificateResponse CrtResponse
+	errorResp := cc.secureConnectorRequest(t, request, &certificateResponse, http.StatusCreated)
+
+	return &certificateResponse, errorResp
+}
+
+func (cc securedConnectorClient) secureConnectorRequest(t *testing.T, request *http.Request, data interface{}, expectedStatus int) *Error {
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
-	if response.StatusCode != http.StatusOK {
-		logResponse(t, response)
-
-		errorResponse := ErrorResponse{}
-		err = json.NewDecoder(response.Body).Decode(&errorResponse)
-		require.NoError(t, err)
-		return nil, &Error{response.StatusCode, errorResponse}
+	if response.StatusCode != expectedStatus {
+		return parseErrorResponse(t, response)
 	}
 
-	require.Equal(t, http.StatusOK, response.StatusCode)
-
-	mgmInfoResponse := &ManagementInfoResponse{}
-	err = json.NewDecoder(response.Body).Decode(&mgmInfoResponse)
+	err = json.NewDecoder(response.Body).Decode(&data)
 	require.NoError(t, err)
 
-	return mgmInfoResponse, nil
+	return nil
 }

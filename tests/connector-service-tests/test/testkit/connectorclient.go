@@ -68,12 +68,7 @@ func (cc connectorClient) GetInfo(t *testing.T, url string, headers map[string]s
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusOK {
-		logResponse(t, response)
-
-		errorResponse := ErrorResponse{}
-		err = json.NewDecoder(response.Body).Decode(&errorResponse)
-		require.NoError(t, err)
-		return nil, &Error{response.StatusCode, errorResponse}
+		return nil, parseErrorResponse(t, response)
 	}
 
 	require.Equal(t, http.StatusOK, response.StatusCode)
@@ -98,11 +93,7 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusCreated {
-		logResponse(t, response)
-		errorResponse := ErrorResponse{}
-		err = json.NewDecoder(response.Body).Decode(&errorResponse)
-		require.NoError(t, err)
-		return nil, &Error{response.StatusCode, errorResponse}
+		return nil, parseErrorResponse(t, response)
 	}
 
 	require.Equal(t, http.StatusCreated, response.StatusCode)
@@ -126,6 +117,14 @@ func getRequestWithHeaders(t *testing.T, url string, headers map[string]string) 
 	}
 
 	return request
+}
+
+func parseErrorResponse(t *testing.T, response *http.Response) *Error {
+	logResponse(t, response)
+	errorResponse := ErrorResponse{}
+	err := json.NewDecoder(response.Body).Decode(&errorResponse)
+	require.NoError(t, err)
+	return &Error{response.StatusCode, errorResponse}
 }
 
 func logResponse(t *testing.T, resp *http.Response) {

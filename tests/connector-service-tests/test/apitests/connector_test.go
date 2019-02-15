@@ -26,25 +26,20 @@ func TestConnector(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Run("Connector Service flow for Application", func(t *testing.T) {
-		appTokenRequest := createApplicationTokenRequest(t, config, "testCertGenApp")
+		appName := "test-app"
+		appTokenRequest := createApplicationTokenRequest(t, config, appName)
 		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
-
-		appTokenRequest = createApplicationTokenRequest(t, config, "testCSRInfoApp")
-		appCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, "testCSRInfoApp")
-
-		appTokenRequest = createApplicationTokenRequest(t, config, "testMgmInfoApp")
-		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, "testMgmInfoApp")
+		appCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
 	})
 
 	t.Run("Connector Service flow for Runtime", func(t *testing.T) {
 		runtimeTokenRequest := createRuntimeTokenRequest(t, config)
 		certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-
-		runtimeTokenRequest = createRuntimeTokenRequest(t, config)
 		runtimeCsrInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
-
-		runtimeTokenRequest = createRuntimeTokenRequest(t, config)
 		runtimeMgmInfoEndpointSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+		certificateRotationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 	})
 }
 
@@ -469,6 +464,49 @@ func runtimeMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipV
 
 		// then
 		assert.Nil(t, mgmInfoResponse.URLs.RuntimeURLs)
+	})
+
+}
+
+func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	clientKey := testkit.CreateKey(t)
+
+	t.Run("should renew client certificate", func(t *testing.T) {
+		// when
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
+
+		// then
+		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.GetInfoURL)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
+
+		// when
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.GetInfoURL, nil)
+
+		// then
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, mgmInfoResponse.URLs.RenewCertUrl)
+
+		// when
+		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
+		csrBase64 := testkit.EncodeBase64(csr)
+
+		certificateResponse, errorResponse := client.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
+
+		// then
+		require.Nil(t, errorResponse)
+
+		// when
+		certificates = testkit.DecodeAndParseCerts(t, certificateResponse)
+		clientWithRenewedCert := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
+
+		// then
+		mgmInfoResponse, errorResponse = clientWithRenewedCert.GetMgmInfo(t, infoResponse.Api.GetInfoURL, nil)
+		require.Nil(t, errorResponse)
 	})
 
 }
