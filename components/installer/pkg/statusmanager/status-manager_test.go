@@ -139,7 +139,7 @@ func TestStatusManager(t *testing.T) {
 			oldDescription := "kyma installed"
 			oldURL := "installedURL"
 			oldVersion := "0.0.1"
-			oldErrorLog := installationv1alpha1.ErrorLogEntry{Component: "some-component", Log: "some old error", Times: 3}
+			oldErrorLog := installationv1alpha1.ErrorLogEntry{Component: "some-component", Log: "some old error", Occurrences: 3}
 
 			testDescription := "updating kyma"
 			testState := installationv1alpha1.StateError
@@ -180,10 +180,10 @@ func TestStatusManager(t *testing.T) {
 			So(len(kymaInst.Status.ErrorLog), ShouldEqual, 2)
 			So(kymaInst.Status.ErrorLog[0].Component, ShouldEqual, oldErrorLog.Component)
 			So(kymaInst.Status.ErrorLog[0].Log, ShouldEqual, oldErrorLog.Log)
-			So(kymaInst.Status.ErrorLog[0].Times, ShouldEqual, oldErrorLog.Times)
+			So(kymaInst.Status.ErrorLog[0].Occurrences, ShouldEqual, oldErrorLog.Occurrences)
 			So(kymaInst.Status.ErrorLog[1].Component, ShouldEqual, testComponent)
 			So(kymaInst.Status.ErrorLog[1].Log, ShouldEqual, testLog)
-			So(kymaInst.Status.ErrorLog[1].Times, ShouldEqual, 1)
+			So(kymaInst.Status.ErrorLog[1].Occurrences, ShouldEqual, 1)
 		})
 
 		Convey("should increase the error counter if it appears again", func() {
@@ -191,7 +191,7 @@ func TestStatusManager(t *testing.T) {
 			oldDescription := "kyma installed"
 			oldURL := "installedURL"
 			oldVersion := "0.0.1"
-			oldErrorLog := installationv1alpha1.ErrorLogEntry{Component: "some-component", Log: "some old error", Times: 3}
+			oldErrorLog := installationv1alpha1.ErrorLogEntry{Component: "some-component", Log: "some old error", Occurrences: 3}
 
 			testDescription := "updating kyma"
 			testState := installationv1alpha1.StateError
@@ -232,7 +232,7 @@ func TestStatusManager(t *testing.T) {
 			So(len(kymaInst.Status.ErrorLog), ShouldEqual, 1)
 			So(kymaInst.Status.ErrorLog[0].Component, ShouldEqual, oldErrorLog.Component)
 			So(kymaInst.Status.ErrorLog[0].Log, ShouldEqual, oldErrorLog.Log)
-			So(kymaInst.Status.ErrorLog[0].Times, ShouldEqual, oldErrorLog.Times+1)
+			So(kymaInst.Status.ErrorLog[0].Occurrences, ShouldEqual, oldErrorLog.Occurrences+1)
 		})
 	})
 
