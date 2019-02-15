@@ -12,7 +12,7 @@ import (
 func (steps InstallationSteps) EnsureKymaSources(installationData *config.InstallationData) (kymasources.KymaPackage, error) {
 	const stepName string = "Get Kyma Sources"
 	steps.PrintStep(stepName)
-	steps.statusManager.InProgress(stepName)
+	_ = steps.statusManager.InProgress(stepName)
 
 	if steps.kymaPackages.HasInjectedSources() {
 		log.Println("Kyma sources available locally.")
@@ -24,16 +24,16 @@ func (steps InstallationSteps) EnsureKymaSources(installationData *config.Instal
 	log.Println("Kyma sources not available. Downloading...")
 
 	if installationData.KymaVersion == "" {
-		validationErr := errors.New("Set version for Kyma package")
+		validationErr := errors.New("set version for Kyma package")
 		steps.errorHandlers.LogError("Validation error: ", validationErr)
-		steps.statusManager.Error(stepName)
+		_ = steps.statusManager.Error("installer", stepName, validationErr)
 		return nil, validationErr
 	}
 
 	if installationData.URL == "" {
-		validationErr := errors.New("Set url to Kyma package")
+		validationErr := errors.New("set url to Kyma package")
 		steps.errorHandlers.LogError("Validation error: ", validationErr)
-		steps.statusManager.Error(stepName)
+		_ = steps.statusManager.Error("installer", stepName, validationErr)
 		return nil, validationErr
 	}
 
@@ -41,13 +41,13 @@ func (steps InstallationSteps) EnsureKymaSources(installationData *config.Instal
 
 	err := steps.kymaPackages.FetchPackage(installationData.URL, installationData.KymaVersion)
 	if steps.errorHandlers.CheckError("Fetch Kyma package error: ", err) {
-		steps.statusManager.Error(stepName)
+		_ = steps.statusManager.Error("installer", stepName, err)
 		return nil, err
 	}
 
 	kymaPackage, err := steps.kymaPackages.GetPackage(installationData.KymaVersion)
 	if steps.errorHandlers.CheckError("Get Kyma package error: ", err) {
-		steps.statusManager.Error(stepName)
+		_ = steps.statusManager.Error("installer", stepName, err)
 		return nil, err
 	}
 
