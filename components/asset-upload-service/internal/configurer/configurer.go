@@ -11,7 +11,7 @@ import (
 )
 
 type Config struct {
-	Name      string `envconfig:"asset-upload-service"`
+	Name      string `envconfig:"default=asset-upload-service"`
 	Namespace string `envconfig:"default=kyma-system"`
 	Enabled   bool   `envconfig:"default=true"`
 }

@@ -24,8 +24,8 @@ type RequestHandler struct {
 }
 
 type Response struct {
-	UploadedFiles []uploader.UploadResult `json:"uploadedFiles"`
-	Errors        []string                `json:"errors"`
+	UploadedFiles []uploader.UploadResult `json:"uploadedFiles,omitempty"`
+	Errors        []string                `json:"errors,omitempty"`
 }
 
 func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *RequestHandler {
