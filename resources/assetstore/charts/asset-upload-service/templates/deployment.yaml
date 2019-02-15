@@ -1,0 +1,84 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "name" . }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+      {{ if .Values.global.isLocalEnv }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{ end }}
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_upload_service.dir }}{{ .Values.image.name }}:{{ .Values.global.asset_upload_service.version }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: APP_VERBOSE
+            value: "true"
+          - name: APP_PORT
+            value: "{{ .Values.service.internalPort }}"
+          - name: APP_HOST
+            value: "0.0.0.0"
+          - name: APP_UPLOAD_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_ENDPOINT
+          - name: APP_UPLOAD_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_PORT
+          - name: APP_UPLOAD_ACCESS_KEY
+            valueFrom:
+              secretKeyRef:
+                name: assetstore-minio
+                key: accesskey
+          - name: APP_UPLOAD_SECRET_KEY
+            valueFrom:
+              secretKeyRef:
+                name: assetstore-minio
+                key: secretkey
+          - name: APP_UPLOAD_SECURE
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_SECURE
+          - name: APP_BUCKET_PRIVATE_PREFIX
+            value: temp-private
+          - name: APP_BUCKET_PUBLIC_PREFIX
+            value: temp-public
+          - name: APP_CONFIG_MAP_NAME
+            value: asset-upload-service
+          - name: APP_CONFIG_MAP_NAMESPACE
+            value: kyma-system
+        ports:
+          - containerPort: {{ .Values.service.internalPort }}
+        volumeMounts:
+          - name: ingress-tls-cert
+            mountPath: /etc/ingress-tls-cert/
+      volumes:
+        - name: ingress-tls-cert
+          secret:
+            secretName: ingress-tls-cert
