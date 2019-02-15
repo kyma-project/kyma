@@ -31,7 +31,7 @@ func TestConfigurer_LoadIfExists(t *testing.T) {
 		c := configurer.New(client.Core(), configurer.Config{
 			Name:      configMapName,
 			Namespace: configMapNamespace,
-			Enabled:true,
+			Enabled:   true,
 		})
 
 		// When
@@ -51,7 +51,7 @@ func TestConfigurer_LoadIfExists(t *testing.T) {
 		c := configurer.New(client.Core(), configurer.Config{
 			Name:      "test",
 			Namespace: "default",
-			Enabled:true,
+			Enabled:   true,
 		})
 
 		// When
@@ -72,7 +72,7 @@ func TestConfigurer_LoadIfExists(t *testing.T) {
 		c := configurer.New(client.Core(), configurer.Config{
 			Name:      "test",
 			Namespace: "default",
-			Enabled:true,
+			Enabled:   true,
 		})
 
 		// When
@@ -90,7 +90,7 @@ func TestConfigurer_LoadIfExists(t *testing.T) {
 		c := configurer.New(nil, configurer.Config{
 			Name:      configMapName,
 			Namespace: configMapNamespace,
-			Enabled: false,
+			Enabled:   false,
 		})
 
 		// When
@@ -121,7 +121,7 @@ func TestConfigurer_Save(t *testing.T) {
 		c := configurer.New(coreCli, configurer.Config{
 			Name:      configMapName,
 			Namespace: configMapNamespace,
-			Enabled:true,
+			Enabled:   true,
 		})
 
 		// When
@@ -150,7 +150,7 @@ func TestConfigurer_Save(t *testing.T) {
 		c := configurer.New(coreCli, configurer.Config{
 			Name:      configMapName,
 			Namespace: configMapNamespace,
-			Enabled:true,
+			Enabled:   true,
 		})
 
 		// When
@@ -171,7 +171,7 @@ func TestConfigurer_Save(t *testing.T) {
 		c := configurer.New(nil, configurer.Config{
 			Name:      configMapName,
 			Namespace: configMapNamespace,
-			Enabled: false,
+			Enabled:   false,
 		})
 
 		// When
