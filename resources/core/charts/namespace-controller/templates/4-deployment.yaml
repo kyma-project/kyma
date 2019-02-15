@@ -21,7 +21,6 @@ spec:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
         alertmem: "yes"
-        alertcpu: "yes"
     spec:
       serviceAccountName: {{ template "name" . }}-service-account
       containers:
