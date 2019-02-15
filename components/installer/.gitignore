@@ -21,7 +21,6 @@
 .glide/
 
 # Binary created by ./before-commit.sh script
-/deploy/installer/installer
 /installer
 /main
 

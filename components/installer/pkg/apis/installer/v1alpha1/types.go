@@ -27,11 +27,11 @@ func (i *Installation) ShouldInstall() bool {
 
 func (i *Installation) canInstall() bool {
 	//TODO: Now this function always returns true. Remove.
-	return i.Status.State == StateEmpty ||
+	return (i.Status.State == StateEmpty ||
 		i.Status.State == StateUninstalled ||
 		i.Status.State == StateInstalled ||
 		i.Status.State == StateError ||
-		i.Status.State == StateInProgress
+		i.Status.State == StateInProgress)
 }
 
 // ShouldUninstall returns true when user requested uninstall action
@@ -42,7 +42,7 @@ func (i *Installation) ShouldUninstall() bool {
 }
 
 func (i *Installation) canUninstall() bool {
-	return i.Status.State != StateInProgress && i.Status.State != StateEmpty
+	return (i.Status.State != StateInProgress && i.Status.State != StateEmpty)
 }
 
 func (i *Installation) hasCondition(condition InstallationConditionType) bool {
@@ -149,11 +149,6 @@ type InstallationCondition struct {
 	LastProbeTime      metav1.Time               `json:"lastProbeTime,omitempty"`
 }
 
-type ErrorLogEntry struct {
-	Component string `json:"component"`
-	Log       string `json:"log"`
-}
-
 // InstallationStatus .
 type InstallationStatus struct {
 	Conditions  []InstallationCondition `json:"conditions"`
@@ -161,7 +156,6 @@ type InstallationStatus struct {
 	Description string                  `json:"description"`
 	KymaVersion string                  `json:"version"`
 	URL         string                  `json:"url"`
-	ErrorLog    []ErrorLogEntry         `json:"errorLog"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

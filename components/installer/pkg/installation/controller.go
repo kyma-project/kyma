@@ -202,7 +202,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		err = c.kymaSteps.InstallKyma(installationData, overrideProvider)
 		if c.errorHandlers.CheckError("Error during install/update: ", err) {
-			_ = c.conditionManager.InstallError()
+			c.conditionManager.InstallError()
 			return err
 		}
 
@@ -221,7 +221,7 @@ func (c *Controller) syncHandler(key string) error {
 
 		err = c.kymaSteps.UninstallKyma(installationData)
 		if err != nil {
-			_ = c.conditionManager.UninstallError()
+			c.conditionManager.UninstallError()
 
 			return err
 		}

@@ -13,15 +13,13 @@ type StatusManager interface {
 	InProgress(description string) error
 	InstallDone(url, kymaVersion string) error
 	UninstallDone() error
-	Error(component, description string, err error) error
+	Error(description string) error
 }
 
 type statusManager struct {
 	lister listers.InstallationLister
 	client installationClientset.Interface
 }
-
-type statusUpdater func(*installationv1alpha1.InstallationStatus)
 
 // NewKymaStatusManager .
 func NewKymaStatusManager(installationClient installationClientset.Interface, installationLister listers.InstallationLister) StatusManager {
@@ -35,44 +33,36 @@ func NewKymaStatusManager(installationClient installationClientset.Interface, in
 
 //InProgress .
 func (sm *statusManager) InProgress(description string) error {
-	return sm.updateFunc(func(status *installationv1alpha1.InstallationStatus) {
-		status.State = installationv1alpha1.StateInProgress
-		status.Description = description
-	})
+	instObj, getErr := sm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
+	if getErr != nil {
+		return getErr
+	}
+
+	installationCopy := instObj.DeepCopy()
+
+	instStatus := getStatus(installationv1alpha1.StateInProgress, description, installationCopy.Status.URL, installationCopy.Status.KymaVersion)
+	return sm.update(instStatus)
 }
 
 //InstallDone .
 func (sm *statusManager) InstallDone(url, kymaVersion string) error {
-	return sm.updateFunc(func(status *installationv1alpha1.InstallationStatus) {
-		status.State = installationv1alpha1.StateInstalled
-		status.Description = "Kyma installed"
-		status.URL = url
-		status.KymaVersion = kymaVersion
-		status.ErrorLog = []installationv1alpha1.ErrorLogEntry{}
-	})
+	instStatus := getStatus(installationv1alpha1.StateInstalled, "Kyma installed", url, kymaVersion)
+	return sm.update(instStatus)
 }
 
 //UninstallDone .
 func (sm *statusManager) UninstallDone() error {
-	return sm.updateFunc(func(status *installationv1alpha1.InstallationStatus) {
-		status.State = installationv1alpha1.StateUninstalled
-		status.Description = "Kyma uninstalled"
-	})
+	instStatus := getStatus(installationv1alpha1.StateUninstalled, "Kyma uninstalled", "", "")
+	return sm.update(instStatus)
 }
 
 //Error .
-func (sm *statusManager) Error(component, description string, err error) error {
-	return sm.updateFunc(func(status *installationv1alpha1.InstallationStatus) {
-		status.State = installationv1alpha1.StateError
-		status.Description = description
-		status.URL = ""
-		status.KymaVersion = ""
-		logEntry := installationv1alpha1.ErrorLogEntry{Component: component, Log: err.Error()}
-		status.ErrorLog = append(status.ErrorLog, logEntry)
-	})
+func (sm *statusManager) Error(description string) error {
+	instStatus := getStatus(installationv1alpha1.StateError, description, "", "")
+	return sm.update(instStatus)
 }
 
-func (sm *statusManager) updateFunc(updater statusUpdater) error {
+func (sm *statusManager) update(installationStatus *installationv1alpha1.InstallationStatus) error {
 	retryErr := retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		instObj, getErr := sm.lister.Installations(consts.InstNamespace).Get(consts.InstResource)
 		if getErr != nil {
@@ -80,7 +70,9 @@ func (sm *statusManager) updateFunc(updater statusUpdater) error {
 		}
 
 		installationCopy := instObj.DeepCopy()
-		updater(&installationCopy.Status)
+		installationCopy.Status = *installationStatus
+
+		installationCopy.Status.Conditions = instObj.Status.Conditions
 
 		_, updateErr := sm.client.InstallerV1alpha1().Installations(consts.InstNamespace).Update(installationCopy)
 		return updateErr
@@ -91,4 +83,13 @@ func (sm *statusManager) updateFunc(updater statusUpdater) error {
 	}
 
 	return nil
+}
+
+func getStatus(state installationv1alpha1.StateEnum, description, url, version string) *installationv1alpha1.InstallationStatus {
+	return &installationv1alpha1.InstallationStatus{
+		State:       state,
+		Description: description,
+		URL:         url,
+		KymaVersion: version,
+	}
 }

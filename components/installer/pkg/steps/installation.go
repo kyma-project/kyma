@@ -59,10 +59,10 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	}
 	steps.currentPackage = currentPackage
 
-	_ = steps.statusManager.InProgress("Verify installed components")
+	steps.statusManager.InProgress("Verify installed components")
 	stepsFactory, factoryErr := kymainstallation.NewStepFactory(currentPackage, steps.helmClient, overrideData)
 	if factoryErr != nil {
-		_ = steps.statusManager.Error("installer", "Verify installed components", factoryErr)
+		steps.statusManager.Error("Verify installed components")
 		return factoryErr
 	}
 
@@ -71,14 +71,14 @@ func (steps *InstallationSteps) InstallKyma(installationData *config.Installatio
 	for _, component := range installationData.Components {
 
 		stepName := "Processing component " + component.GetReleaseName()
-		_ = steps.statusManager.InProgress(stepName)
+		steps.statusManager.InProgress(stepName)
 
 		step := stepsFactory.NewStep(component)
 		steps.PrintStep(stepName)
 
 		installErr := step.Run()
 		if steps.errorHandlers.CheckError("Step error: ", installErr) {
-			_ = steps.statusManager.Error(component.GetReleaseName(), stepName, installErr)
+			steps.statusManager.Error(stepName)
 			return installErr
 		}
 
