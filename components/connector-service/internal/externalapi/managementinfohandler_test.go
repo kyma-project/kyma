@@ -33,7 +33,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			},
 		}
 
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
 			return *extClientCtx, nil
 		}
 
@@ -65,14 +65,14 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 	t.Run("should successfully get management info urls for runtime", func(t *testing.T) {
 		//given
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		contextServiceProvider := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
 			return &clientcontext.ClusterContext{}, nil
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/runtimes/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(contextServiceProvider, protectedBaseURL)
 
 		rr := httptest.NewRecorder()
 
@@ -95,14 +95,14 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		//given
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		contextServiceProvider := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(contextServiceProvider, protectedBaseURL)
 
 		rr := httptest.NewRecorder()
 
