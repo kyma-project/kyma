@@ -32,8 +32,8 @@ import (
 const (
 	appCSRInfoFmt     = "https://%s/v1/applications/signingRequests/info"
 	runtimeCSRInfoFmt = "https://%s/v1/runtimes/signingRequests/info"
-	AppURLFormat      = "https://%s/v1/applications/"
-	RuntimeURLFormat  = "https://%s/v1/runtimes/"
+	AppURLFormat      = "https://%s/v1/applications"
+	RuntimeURLFormat  = "https://%s/v1/runtimes"
 )
 
 func main() {
@@ -117,27 +117,27 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), opts.caSecretName, subjectValues)
 
 	appTokenTTLMinutes := time.Duration(opts.appTokenExpirationMinutes) * time.Minute
-	baseAppURL := fmt.Sprintf(AppURLFormat, opts.connectorServiceHost)
 
 	appHandlerConfig := externalapi.Config{
-		TokenCreator:      tokenCreatorProvider.WithTTL(appTokenTTLMinutes),
-		ManagementInfoURL: opts.appsInfoURL,
-		BaseURL:           baseAppURL,
-		Subject:           subjectValues,
-		ContextExtractor:  clientcontext.ExtractApplicationContext,
-		CertService:       certificateService,
+		TokenCreator:                tokenCreatorProvider.WithTTL(appTokenTTLMinutes),
+		ManagementInfoURL:           opts.appsInfoURL,
+		ConnectorServiceBaseURL:     fmt.Sprintf(AppURLFormat, opts.connectorServiceHost),
+		CertificateProtectedBaseURL: fmt.Sprintf(AppURLFormat, opts.certificateProtectedHost),
+		Subject:                     subjectValues,
+		ContextExtractor:            clientcontext.ExtractApplicationContext,
+		CertService:                 certificateService,
 	}
 
 	runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
-	baseRuntimeURL := fmt.Sprintf(RuntimeURLFormat, opts.connectorServiceHost)
 
 	runtimeHandlerConfig := externalapi.Config{
-		TokenCreator:      tokenCreatorProvider.WithTTL(runtimeTokenTTLMinutes),
-		ManagementInfoURL: opts.runtimesInfoURL,
-		BaseURL:           baseRuntimeURL,
-		Subject:           subjectValues,
-		ContextExtractor:  clientcontext.ExtractClusterContext,
-		CertService:       certificateService,
+		TokenCreator:                tokenCreatorProvider.WithTTL(runtimeTokenTTLMinutes),
+		ManagementInfoURL:           opts.runtimesInfoURL,
+		ConnectorServiceBaseURL:     fmt.Sprintf(RuntimeURLFormat, opts.connectorServiceHost),
+		CertificateProtectedBaseURL: fmt.Sprintf(RuntimeURLFormat, opts.certificateProtectedHost),
+		Subject:                     subjectValues,
+		ContextExtractor:            clientcontext.ExtractClusterContext,
+		CertService:                 certificateService,
 	}
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)

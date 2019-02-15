@@ -1,6 +1,7 @@
 package externalapi
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
@@ -8,16 +9,18 @@ import (
 )
 
 const (
-	RenewCertEndpoint = "certificates/renewals"
+	RenewCertURLFormat = "%s/certificates/renewals"
 )
 
 type managementInfoHandler struct {
-	connectorClientExtractor clientcontext.ConnectorClientExtractor
+	connectorClientExtractor    clientcontext.ConnectorClientExtractor
+	certificateProtectedBaseURL string
 }
 
-func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor) *managementInfoHandler {
+func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, certProtectedBaseURL string) *managementInfoHandler {
 	return &managementInfoHandler{
-		connectorClientExtractor: connectorClientExtractor,
+		connectorClientExtractor:    connectorClientExtractor,
+		certificateProtectedBaseURL: certProtectedBaseURL,
 	}
 }
 
@@ -36,6 +39,6 @@ func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 func (ih *managementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
 	return mgmtURLs{
 		RuntimeURLs:  connectorClientContext.GetRuntimeUrls(),
-		RenewCertURL: "",
+		RenewCertURL: fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
 	}
 }

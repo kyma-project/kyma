@@ -56,7 +56,7 @@ func (dc dummyClientContextWithEmptyURLs) GetRuntimeUrls() *clientcontext.Runtim
 
 func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
-	baseURL := "https://connector-service.kyma.cx/v1/applications/"
+	baseURL := "https://connector-service.kyma.cx/v1/applications"
 	infoURL := "https://connector-service.test.cluster.kyma.cx/v1/applications/management/info"
 	newToken := "newToken"
 
@@ -75,7 +75,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		return dummyClientContext, nil
 	}
 
-	expectedSignUrl := fmt.Sprintf("%scertificates?token=%s", baseURL, newToken)
+	expectedSignUrl := fmt.Sprintf("%s/certificates?token=%s", baseURL, newToken)
 
 	expectedCertInfo := certInfo{
 		Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),

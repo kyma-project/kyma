@@ -10,53 +10,53 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	subject = "/C=DE/ST=Waldorf/L=Waldorf/O=Organization/OU=OrgUnit/CN=test-app"
-)
-
 func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
-	expectedCName := "test-app"
+	fullSubject := "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=tenant\\;group\\;test-app,OU=OrgUnit"
 
-	t.Run("should extract Common Name", func(t *testing.T) {
-		//given
-		req, err := http.NewRequest("GET", "/", nil)
-		require.NoError(t, err)
-		req.Header.Set(clientcontext.SubjectHeader, subject)
+	subjAppName := "test-app"
+	subjGroup := "group"
+	subjTenant := "tenant"
 
-		//when
-		commonName := extractApplicationFromSubject(req)
+	testCases := []struct {
+		subject string
+		app     string
+		group   string
+		tenant  string
+	}{
+		{subject: fullSubject, app: subjAppName, group: subjGroup, tenant: subjTenant},
+		{subject: "CN=tenant\\;group\\;test-app,C=DE,ST=Waldorf,L=Waldorf,O=Organization,OU=OrgUnit", app: subjAppName, group: subjGroup, tenant: subjTenant},
+		{subject: "C=DE,ST=Waldorf,L=Waldorf,O=Organization,OU=OrgUnit,CN=tenant\\;group\\;test-app", app: subjAppName, group: subjGroup, tenant: subjTenant},
+		{subject: "not matching", app: "", group: "", tenant: ""},
+		{subject: "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=test-app,OU=OrgUnit", app: subjAppName, group: "", tenant: ""},
+		{subject: "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=tenant\\;group,OU=OrgUnit", app: "", group: subjGroup, tenant: subjTenant},
+	}
 
-		//then
-		assert.Equal(t, expectedCName, commonName)
+	t.Run("should parse context data from fullSubject", func(t *testing.T) {
+		for _, test := range testCases {
+			req := prepareRequestWithSubject(t, test.subject)
+
+			app, group, tenant := parseContextFromSubject(req)
+
+			assert.Equal(t, test.app, app)
+			assert.Equal(t, test.group, group)
+			assert.Equal(t, test.tenant, tenant)
+		}
 	})
 
-	t.Run("should return empty string when no match", func(t *testing.T) {
-		//given
-		req, err := http.NewRequest("GET", "/", nil)
-		require.NoError(t, err)
-		req.Header.Set(clientcontext.SubjectHeader, "not matching subject")
-
-		//when
-		commonName := extractApplicationFromSubject(req)
-
-		//then
-		assert.Empty(t, commonName)
-	})
-
-	t.Run("should set context based on header", func(t *testing.T) {
+	t.Run("should create ApplicationContext", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			clusterCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			appCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
 			require.True(t, ok)
 
-			assert.Equal(t, expectedCName, clusterCtx.Application)
+			assert.Equal(t, subjAppName, appCtx.Application)
+			assert.Equal(t, subjGroup, appCtx.ClusterContext.Group)
+			assert.Equal(t, subjTenant, appCtx.ClusterContext.Tenant)
 			w.WriteHeader(http.StatusOK)
 		})
 
-		req, err := http.NewRequest("GET", "/", nil)
-		require.NoError(t, err)
-		req.Header.Set(clientcontext.SubjectHeader, subject)
+		req := prepareRequestWithSubject(t, fullSubject)
 
 		rr := httptest.NewRecorder()
 
@@ -68,6 +68,75 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusOK, rr.Code)
+	})
+
+	t.Run("should create ApplicationContext with empty ClusterContext if CN only with app", func(t *testing.T) {
+		// given
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			appCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			require.True(t, ok)
+
+			assert.Equal(t, subjAppName, appCtx.Application)
+			assert.Empty(t, appCtx.ClusterContext)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=test-app,OU=OrgUnit")
+		rr := httptest.NewRecorder()
+
+		middleware := NewAppContextFromSubjMiddleware()
+
+		// when
+		resultHandler := middleware.Middleware(handler)
+		resultHandler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
+
+	t.Run("should create ClusterContext when no app name in CN", func(t *testing.T) {
+		// given
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			clusterCtx, ok := ctx.Value(clientcontext.ClusterContextKey).(clientcontext.ClusterContext)
+			require.True(t, ok)
+
+			assert.Equal(t, subjGroup, clusterCtx.Group)
+			assert.Equal(t, subjTenant, clusterCtx.Tenant)
+			w.WriteHeader(http.StatusOK)
+		})
+
+		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=tenant\\;group,OU=OrgUnit")
+		rr := httptest.NewRecorder()
+
+		middleware := NewAppContextFromSubjMiddleware()
+
+		// when
+		resultHandler := middleware.Middleware(handler)
+		resultHandler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
+
+	t.Run("should return 400 when Common Name is empty", func(t *testing.T) {
+		// given
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=,OU=OrgUnit")
+		rr := httptest.NewRecorder()
+
+		middleware := NewAppContextFromSubjMiddleware()
+
+		// when
+		resultHandler := middleware.Middleware(handler)
+		resultHandler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
 
 	t.Run("should return 400 when no Subject header is passed", func(t *testing.T) {
@@ -90,4 +159,12 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
+}
+
+func prepareRequestWithSubject(t *testing.T, subject string) *http.Request {
+	req, err := http.NewRequest("GET", "/", nil)
+	require.NoError(t, err)
+	req.Header.Set(clientcontext.SubjectHeader, subject)
+
+	return req
 }

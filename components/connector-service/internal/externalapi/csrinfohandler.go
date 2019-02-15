@@ -13,7 +13,7 @@ import (
 
 const (
 	TokenFormat   = "?token=%s"
-	CertsEndpoint = "certificates"
+	CertsEndpoint = "/certificates"
 )
 
 type csrInfoHandler struct {
