@@ -4,6 +4,7 @@ metadata:
   name: ark-credentials-overrides
   namespace: kyma-installer
   labels:
+    kyma-project.io/installation: ""
     installer: overrides
 type: Opaque
 data:
