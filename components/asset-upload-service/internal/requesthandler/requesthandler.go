@@ -22,7 +22,7 @@ type RequestHandler struct {
 	uploadOrigin     string
 }
 
-type response struct {
+type Response struct {
 	UploadedFiles []uploader.UploadResult `json:"uploadedFiles"`
 	Errors        []string                `json:"errors"`
 }
@@ -38,12 +38,25 @@ func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadOr
 }
 
 func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
+	defer func() {
+		err := rq.Body.Close()
+		if err != nil {
+			glog.Error(errors.Wrap(err, "while closing request body"))
+		}
+	}()
+
 	err := rq.ParseMultipartForm(32 << 20)
 	if err != nil {
 		wrappedErr := errors.Wrap(err, "while parsing multipart request")
 		r.writeInternalError(w, wrappedErr)
 	}
-	defer rq.MultipartForm.RemoveAll()
+
+	defer func() {
+		err := rq.MultipartForm.RemoveAll()
+		if err != nil {
+			glog.Error(errors.Wrap(err, "while removing files loaded from multipart form"))
+		}
+	}()
 
 	directoryValues := rq.MultipartForm.Value["directory"]
 
@@ -58,6 +71,16 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	publicFiles := rq.MultipartForm.File["public"]
 	filesCount := len(publicFiles) + len(privateFiles)
 
+	if filesCount == 0 {
+
+		r.writeResponse(w, http.StatusBadRequest, Response{
+			Errors:        []string{
+				"No files specified to upload. Use `private` and `public` fields to upload them.",
+		},
+		})
+		return
+	}
+
 	u := uploader.New(r.client, r.uploadOrigin, r.uploadTimeout, r.maxUploadWorkers)
 	fileToUploadCh := r.populateFilesChannel(publicFiles, privateFiles, filesCount, directory)
 	uploadedFiles, errs := u.UploadFiles(context.Background(), fileToUploadCh, filesCount)
@@ -68,7 +91,7 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	for _, err := range errs {
 		errMessages = append(errMessages, err.Error())
 	}
-	r.writeResponse(w, response{
+	r.writeResponse(w, http.StatusCreated, Response{
 		UploadedFiles: uploadedFiles,
 		Errors:        errMessages,
 	})
@@ -103,7 +126,7 @@ func (r *RequestHandler) populateFilesChannel(publicFiles, privateFiles []*multi
 	return filesCh
 }
 
-func (r *RequestHandler) writeResponse(w http.ResponseWriter, resp response) {
+func (r *RequestHandler) writeResponse(w http.ResponseWriter, statusCode int, resp Response) {
 	jsonResponse, err := json.Marshal(resp)
 	if err != nil {
 		wrappedErr := errors.Wrapf(err, "while marshalling JSON response")
@@ -112,14 +135,7 @@ func (r *RequestHandler) writeResponse(w http.ResponseWriter, resp response) {
 
 	w.Header().Set("Content-Type", "application/json")
 
-	var status int
-	if len(resp.Errors) > 0 {
-		status = http.StatusInternalServerError
-	} else {
-		status = http.StatusCreated
-	}
-
-	w.WriteHeader(status)
+	w.WriteHeader(statusCode)
 	_, err = w.Write(jsonResponse)
 	if err != nil {
 		wrappedErr := errors.Wrapf(err, "while writing JSON response")

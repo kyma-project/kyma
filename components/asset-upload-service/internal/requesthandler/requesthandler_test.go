@@ -1,24 +1,271 @@
 package requesthandler_test
 
 import (
+	"bytes"
+	"context"
+	"encoding/json"
+	"fmt"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader/automock"
+	"github.com/minio/minio-go"
+	"github.com/onsi/gomega"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
+	"io"
+	"mime/multipart"
+	"net/http"
+	"net/http/httptest"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 )
 
 func TestRequestHandler_ServeHTTP(t *testing.T) {
-	client := &automock.MinioClient{}
-	buckets := bucket.SystemBucketNames{
-		Private:"private",
-		Public:"public",
+	anyReaderFn := func(reader io.Reader) bool { return true }
+	anySizeFn := func(size int64) bool { return true }
+	ctxArgFn := func(ctx context.Context) bool { return true }
+	randomDirFn := func(name string) func(string) bool {
+		return func(filename string) bool { return strings.HasSuffix(filename, name) }
 	}
 
-	handler := requesthandler.New(client, buckets, "https://example.com", 1*time.Second, 5)
+	t.Run("Success", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		client := &automock.MinioClient{}
+		client.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "public", mock.MatchedBy(randomDirFn("sample.yaml")), mock.MatchedBy(anyReaderFn), mock.MatchedBy(anySizeFn), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
+		client.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "private", mock.MatchedBy(randomDirFn("sample.txt")), mock.MatchedBy(anyReaderFn), mock.MatchedBy(anySizeFn), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
+		defer client.AssertExpectations(t)
 
-	//TODO: Write tests
-	//handler.ServeHTTP()
+		files := []RequestFile{
+			{
+				FieldName: "private",
+				Path:      "./testdata/sample.txt",
+			},
+			{
+				FieldName: "public",
+				Path:      "./testdata/sample.yaml",
+			},
+		}
 
+		expectedResult := []uploader.UploadResult{
+			{
+				FileName:   "sample.yaml",
+				RemotePath: "https://example.com/public/",
+				Bucket:     "public",
+				Size:       53,
+			},
+			{
+				FileName:   "sample.txt",
+				RemotePath: "https://example.com/private/",
+				Bucket:     "private",
+				Size:       16,
+			},
+		}
 
+		// When
+
+		httpResp, result := testServeHTTP(g, client, files, "")
+
+		// Then
+
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusCreated))
+
+		removeRemotePathFromFiles(&result)
+
+		g.Expect(result.Errors).To(gomega.BeEmpty())
+
+		for _, file := range expectedResult {
+			g.Expect(result.UploadedFiles).To(gomega.ContainElement(file))
+		}
+	})
+
+	t.Run("Custom Directory", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		client := &automock.MinioClient{}
+		client.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "public", mock.MatchedBy(randomDirFn("sample.yaml")), mock.MatchedBy(anyReaderFn), mock.MatchedBy(anySizeFn), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
+		client.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "private", mock.MatchedBy(randomDirFn("sample.txt")), mock.MatchedBy(anyReaderFn), mock.MatchedBy(anySizeFn), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
+		defer client.AssertExpectations(t)
+
+		files := []RequestFile{
+			{
+				FieldName: "private",
+				Path:      "./testdata/sample.txt",
+			},
+			{
+				FieldName: "public",
+				Path:      "./testdata/sample.yaml",
+			},
+		}
+		directoryName := "test"
+		expectedResult := []uploader.UploadResult{
+			{
+				FileName:   "sample.yaml",
+				RemotePath: "https://example.com/public/test/sample.yaml",
+				Bucket:     "public",
+				Size:       53,
+			},
+			{
+				FileName:   "sample.txt",
+				RemotePath: "https://example.com/private/test/sample.txt",
+				Bucket:     "private",
+				Size:       16,
+			},
+		}
+
+		// When
+		httpResp, result := testServeHTTP(g, client, files, directoryName)
+
+		// Then
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusCreated))
+
+		g.Expect(result.Errors).To(gomega.BeEmpty())
+
+		for _, file := range expectedResult {
+			g.Expect(result.UploadedFiles).To(gomega.ContainElement(file))
+		}
+	})
+
+	t.Run("No files to upload", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		client := &automock.MinioClient{}
+		var files []RequestFile
+
+		// When
+		httpResp, result := testServeHTTP(g, client, files, "")
+
+		// Then
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusBadRequest))
+		g.Expect(result.Errors).To(gomega.ContainElement(gomega.ContainSubstring("No files")))
+	})
+
+	t.Run("Errors", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		client := &automock.MinioClient{}
+
+		testErr1 := errors.New("Test err 1")
+		testErr2 := errors.New("Test err 2")
+		client.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "public", mock.MatchedBy(randomDirFn("sample.yaml")), mock.MatchedBy(anyReaderFn), mock.MatchedBy(anySizeFn), minio.PutObjectOptions{}).Return(int64(1), testErr1).Once()
+		client.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "private", mock.MatchedBy(randomDirFn("sample.txt")), mock.MatchedBy(anyReaderFn), mock.MatchedBy(anySizeFn), minio.PutObjectOptions{}).Return(int64(1), testErr2).Once()
+		defer client.AssertExpectations(t)
+
+		files := []RequestFile{
+			{
+				FieldName: "private",
+				Path:      "./testdata/sample.txt",
+			},
+			{
+				FieldName: "public",
+				Path:      "./testdata/sample.yaml",
+			},
+		}
+		directoryName := "test"
+		expectedResult := []string{testErr1.Error(), testErr2.Error()}
+
+		// When
+		httpResp, result := testServeHTTP(g, client, files, directoryName)
+
+		// Then
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusCreated))
+
+		g.Expect(result.UploadedFiles).To(gomega.BeEmpty())
+
+		for _, errMessage := range expectedResult {
+			g.Expect(result.Errors).To(gomega.ContainElement(gomega.ContainSubstring(errMessage)))
+		}
+	})
+}
+
+type RequestFile struct {
+	Path      string
+	FieldName string
+}
+
+func testServeHTTP(g *gomega.GomegaWithT, minioClient uploader.MinioClient, files []RequestFile, directoryName string) (*http.Response, requesthandler.Response) {
+	buckets := bucket.SystemBucketNames{
+		Private: "private",
+		Public:  "public",
+	}
+
+	handler := requesthandler.New(minioClient, buckets, "https://example.com", 10*time.Second, 5)
+
+	w := httptest.NewRecorder()
+	rq, err := fixRequest(files, directoryName)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	handler.ServeHTTP(w, rq)
+
+	resp := w.Result()
+	g.Expect(resp).NotTo(gomega.BeNil())
+	defer resp.Body.Close()
+
+	var result requesthandler.Response
+	err = json.NewDecoder(resp.Body).Decode(&result)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
+	return resp, result
+}
+
+func fixRequest(files []RequestFile, directoryName string) (*http.Request, error) {
+	body := &bytes.Buffer{}
+	writer := multipart.NewWriter(body)
+
+	for _, f := range files {
+		file, err := os.Open(f.Path)
+		if err != nil {
+			return nil, err
+		}
+
+		part, err := writer.CreateFormFile(f.FieldName, filepath.Base(file.Name()))
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = io.Copy(part, file)
+		if err != nil {
+			return nil, err
+		}
+
+		err = file.Close()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if directoryName != "" {
+		err := writer.WriteField("directory", directoryName)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	err := writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
+	rq, err := http.NewRequest("POST", "example.com", body)
+	if err != nil {
+		return nil, err
+	}
+
+	rq.Header.Add("Content-Type", writer.FormDataContentType())
+
+	return rq, nil
+}
+
+func removeRemotePathFromFiles(result *requesthandler.Response) {
+	var newFiles []uploader.UploadResult
+	for _, file := range result.UploadedFiles {
+		file.RemotePath = strings.SplitAfter(file.RemotePath, fmt.Sprintf("https://example.com/%s/", file.Bucket))[0]
+		newFiles = append(newFiles, file)
+	}
+
+	result.UploadedFiles = newFiles
 }

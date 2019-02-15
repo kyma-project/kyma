@@ -10,11 +10,11 @@ import (
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/pkg/signal"
-	restclient "k8s.io/client-go/rest"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"net/http"
 	"time"
@@ -22,11 +22,11 @@ import (
 
 // config contains configuration fields used for upload
 type config struct {
-	Host   string `envconfig:"default=127.0.0.1"`
-	Port   int    `envconfig:"default=3003"`
-	KubeconfigPath       string   `envconfig:"optional"`
-	ConfigMap configurer.Config
-	Upload struct {
+	Host           string `envconfig:"default=127.0.0.1"`
+	Port           int    `envconfig:"default=3003"`
+	KubeconfigPath string `envconfig:"optional"`
+	ConfigMap      configurer.Config
+	Upload         struct {
 		Endpoint  string `envconfig:"default=play.minio.io"`
 		Port      int    `envconfig:"default=9000"`
 		Secure    bool   `envconfig:"default=true"`
@@ -70,6 +70,9 @@ func main() {
 		handler := bucket.NewHandler(client, cfg.Bucket)
 		buckets, err = handler.CreateSystemBuckets()
 		exitOnError(err, "Error during creating system buckets")
+
+		err = c.Save(configurer.SharedAppConfig{SystemBuckets: buckets})
+		exitOnError(err, "Error during saving system bucket configuration")
 	} else {
 		buckets = sharedConfig.SystemBuckets
 	}

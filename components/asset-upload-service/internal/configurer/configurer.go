@@ -1,6 +1,7 @@
 package configurer
 
 import (
+	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
@@ -40,6 +41,7 @@ func (c *Configurer) LoadIfExists() (*SharedAppConfig, bool, error) {
 	}
 
 	sharedAppConfig := c.fromConfigMap(configMap)
+	glog.Infof("Config successfully loaded from ConfigMap %s in namespace %s", c.cfg.Name, c.cfg.Namespace)
 
 	return sharedAppConfig, true, nil
 }
@@ -49,6 +51,8 @@ func (c *Configurer) Save(config SharedAppConfig) error {
 	if err != nil {
 		return errors.Wrapf(err, "while creating ConfigMap %s in namespace %s", c.cfg.Name, c.cfg.Namespace)
 	}
+
+	glog.Infof("Config successfully saved to ConfigMap %s in namespace %s", c.cfg.Name, c.cfg.Namespace)
 
 	return nil
 }

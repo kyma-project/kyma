@@ -58,10 +58,6 @@ func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload
 	contextWithTimeout, cancel := context.WithTimeout(ctx, u.UploadTimeout)
 	defer cancel()
 
-	go func() {
-
-	}()
-
 	workersCount := u.countNeededWorkers(filesCount, u.MaxUploadWorkers)
 	glog.Infof("Creating %d concurrent upload worker(s)...", workersCount)
 	var waitGroup sync.WaitGroup
