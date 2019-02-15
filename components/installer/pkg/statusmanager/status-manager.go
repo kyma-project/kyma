@@ -77,12 +77,15 @@ func (sm *statusManager) Error(component, description string, err error) error {
 }
 
 func appendErrorLog(entries []installationv1alpha1.ErrorLogEntry, newEntry installationv1alpha1.ErrorLogEntry) []installationv1alpha1.ErrorLogEntry {
-	for i, entry := range entries {
-		if entry.Component == newEntry.Component && entry.Log == newEntry.Log {
-			entry.Occurrences += 1
-			entries[i] = entry
-			return entries
-		}
+	if len(entries) == 0 {
+		return []installationv1alpha1.ErrorLogEntry{newEntry}
+	}
+
+	lastEntry := entries[len(entries)-1]
+	if lastEntry.Component == newEntry.Component && lastEntry.Log == newEntry.Log {
+		lastEntry.Occurrences += 1
+		entries[len(entries)-1] = lastEntry
+		return entries
 	}
 
 	return append(entries, newEntry)
