@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/pkg/signal"
 	restclient "k8s.io/client-go/rest"
+	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
@@ -43,9 +44,6 @@ func main() {
 	parseFlags(cfg)
 	exitOnError(err, "Error while loading app config")
 
-	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
-	exitOnError(err, "Error while initializing REST client config")
-
 	stopCh := signal.SetupChannel()
 
 	ctx, cancel := context.WithCancel(context.Background())
@@ -57,7 +55,11 @@ func main() {
 	client, err := minio.New(uploadEndpoint, cfg.Upload.AccessKey, cfg.Upload.SecretKey, cfg.Upload.Secure)
 	exitOnError(err, "Error during upload client initialization")
 
-	c, err := configurer.New(k8sConfig, cfg.ConfigMap)
+	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
+	exitOnError(err, "Error while initializing REST client config")
+	k8sCoreCli, err := corev1.NewForConfig(k8sConfig)
+	exitOnError(err, "Error during K8s Core client initialization")
+	c := configurer.New(k8sCoreCli, cfg.ConfigMap)
 	exitOnError(err, "Error during configurer creation")
 
 	var buckets bucket.SystemBucketNames

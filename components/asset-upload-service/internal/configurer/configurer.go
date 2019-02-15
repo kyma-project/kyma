@@ -7,8 +7,6 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	typedcorev1 "k8s.io/client-go/kubernetes/typed/core/v1"
-	restclient "k8s.io/client-go/rest"
 )
 
 type Config struct {
@@ -25,18 +23,11 @@ type Configurer struct {
 	cfg    Config
 }
 
-//TODO: tests
-
-func New(restConfig *restclient.Config, cfg Config) (*Configurer, error) {
-	client, err := typedcorev1.NewForConfig(restConfig)
-	if err != nil {
-		return nil, errors.Wrap(err, "while creating K8S Client")
-	}
-
+func New(client corev1.CoreV1Interface, cfg Config) *Configurer {
 	return &Configurer{
 		client: client,
 		cfg:    cfg,
-	}, nil
+	}
 }
 
 func (c *Configurer) LoadIfExists() (*SharedAppConfig, bool, error) {
@@ -80,8 +71,8 @@ func (c *Configurer) convertToConfigMap(cfg SharedAppConfig) *v1.ConfigMap {
 func (c *Configurer) fromConfigMap(configMap *v1.ConfigMap) *SharedAppConfig {
 	appConfig := &SharedAppConfig{
 		SystemBuckets: bucket.SystemBucketNames{
-			Public:  configMap.Data["private"],
-			Private: configMap.Data["public"],
+			Public:  configMap.Data["public"],
+			Private: configMap.Data["private"],
 		},
 	}
 
