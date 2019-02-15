@@ -18,3 +18,6 @@ resourceQuota:
   requestsMemory: 2.8Gi
   # Sum of all container memory limits must not exceed this value.
   limitsMemory: 3Gi
+
+alertValues:
+  memoryRatio: 0.8
