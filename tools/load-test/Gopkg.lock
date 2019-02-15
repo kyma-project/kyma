@@ -67,6 +67,7 @@
     "github.com/go-logr/logr",
     "github.com/golang/lint/golint",
     "github.com/nlopes/slack",
+    "github.com/pkg/errors",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

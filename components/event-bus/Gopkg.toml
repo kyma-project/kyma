@@ -43,7 +43,7 @@ required = [
   name = "github.com/stretchr/testify"
   version = "1.2.1"
 
-[[constraint]]
+[[override]]
   name = "sigs.k8s.io/controller-runtime"
   # HEAD as of 2018-09-19
   revision = "5373e8e1f3188ff4266902a6fc86372bc14b3815"
