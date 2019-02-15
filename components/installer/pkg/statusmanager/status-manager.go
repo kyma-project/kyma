@@ -67,9 +67,25 @@ func (sm *statusManager) Error(component, description string, err error) error {
 		status.Description = description
 		status.URL = ""
 		status.KymaVersion = ""
-		logEntry := installationv1alpha1.ErrorLogEntry{Component: component, Log: err.Error()}
-		status.ErrorLog = append(status.ErrorLog, logEntry)
+		logEntry := installationv1alpha1.ErrorLogEntry{
+			Component: component,
+			Log: err.Error(),
+			Times: 1,
+		}
+		status.ErrorLog = appendErrorLog(status.ErrorLog, logEntry)
 	})
+}
+
+func appendErrorLog(entries []installationv1alpha1.ErrorLogEntry, newEntry installationv1alpha1.ErrorLogEntry) []installationv1alpha1.ErrorLogEntry {
+	for i, entry := range entries {
+		if entry.Component == newEntry.Component && entry.Log == newEntry.Log {
+			entry.Times += 1
+			entries[i] = entry
+			return entries
+		}
+	}
+
+	return append(entries, newEntry)
 }
 
 func (sm *statusManager) updateFunc(updater statusUpdater) error {

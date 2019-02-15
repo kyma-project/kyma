@@ -139,7 +139,7 @@ func TestStatusManager(t *testing.T) {
 			oldDescription := "kyma installed"
 			oldURL := "installedURL"
 			oldVersion := "0.0.1"
-			oldErrorLog := installationv1alpha1.ErrorLogEntry{Component: "some-component", Log: "some old error"}
+			oldErrorLog := installationv1alpha1.ErrorLogEntry{Component: "some-component", Log: "some old error", Times: 3}
 
 			testDescription := "updating kyma"
 			testState := installationv1alpha1.StateError
@@ -180,8 +180,59 @@ func TestStatusManager(t *testing.T) {
 			So(len(kymaInst.Status.ErrorLog), ShouldEqual, 2)
 			So(kymaInst.Status.ErrorLog[0].Component, ShouldEqual, oldErrorLog.Component)
 			So(kymaInst.Status.ErrorLog[0].Log, ShouldEqual, oldErrorLog.Log)
+			So(kymaInst.Status.ErrorLog[0].Times, ShouldEqual, oldErrorLog.Times)
 			So(kymaInst.Status.ErrorLog[1].Component, ShouldEqual, testComponent)
 			So(kymaInst.Status.ErrorLog[1].Log, ShouldEqual, testLog)
+			So(kymaInst.Status.ErrorLog[1].Times, ShouldEqual, 1)
+		})
+
+		Convey("should increase the error counter if it appears again", func() {
+			oldState := installationv1alpha1.StateInstalled
+			oldDescription := "kyma installed"
+			oldURL := "installedURL"
+			oldVersion := "0.0.1"
+			oldErrorLog := installationv1alpha1.ErrorLogEntry{Component: "some-component", Log: "some old error", Times: 3}
+
+			testDescription := "updating kyma"
+			testState := installationv1alpha1.StateError
+			testURL := "fakeURL"
+			testVersion := "0.0.2"
+			testComponent := oldErrorLog.Component
+			testLog := oldErrorLog.Log
+			testError := errors.New(testLog)
+
+			testInst := &installationv1alpha1.Installation{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      consts.InstResource,
+					Namespace: consts.InstNamespace,
+				},
+				Spec: installationv1alpha1.InstallationSpec{
+					URL:         testURL,
+					KymaVersion: testVersion,
+				},
+				Status: installationv1alpha1.InstallationStatus{
+					State:       oldState,
+					Description: oldDescription,
+					URL:         oldURL,
+					KymaVersion: oldVersion,
+					ErrorLog:    []installationv1alpha1.ErrorLogEntry{oldErrorLog},
+				},
+			}
+			testStatusManager := getTestSetup(testInst)
+
+			err := testStatusManager.Error(testComponent, testDescription, testError)
+
+			kymaInst, _ := testStatusManager.client.InstallerV1alpha1().Installations(consts.InstNamespace).Get(consts.InstResource, metav1.GetOptions{})
+
+			So(err, ShouldBeNil)
+			So(kymaInst.Status.State, ShouldEqual, testState)
+			So(kymaInst.Status.Description, ShouldEqual, testDescription)
+			So(kymaInst.Status.URL, ShouldEqual, "")
+			So(kymaInst.Status.KymaVersion, ShouldEqual, "")
+			So(len(kymaInst.Status.ErrorLog), ShouldEqual, 1)
+			So(kymaInst.Status.ErrorLog[0].Component, ShouldEqual, oldErrorLog.Component)
+			So(kymaInst.Status.ErrorLog[0].Log, ShouldEqual, oldErrorLog.Log)
+			So(kymaInst.Status.ErrorLog[0].Times, ShouldEqual, oldErrorLog.Times+1)
 		})
 	})
 

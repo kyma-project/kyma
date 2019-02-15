@@ -152,6 +152,7 @@ type InstallationCondition struct {
 type ErrorLogEntry struct {
 	Component string `json:"component"`
 	Log       string `json:"log"`
+	Times     int32  `json:"times"`
 }
 
 // InstallationStatus .
