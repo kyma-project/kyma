@@ -5,24 +5,24 @@ import (
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 
-	apps "k8s.io/api/apps/v1beta2"
+	apps "k8s.io/api/apps/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
-	appsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"k8s.io/client-go/tools/cache"
 )
 
 type replicaSetService struct {
-	client   appsv1beta2.AppsV1beta2Interface
+	client   appsv1.AppsV1Interface
 	informer cache.SharedIndexInformer
 }
 
-func newReplicaSetService(informer cache.SharedIndexInformer, client appsv1beta2.AppsV1beta2Interface) *replicaSetService {
+func newReplicaSetService(informer cache.SharedIndexInformer, client appsv1.AppsV1Interface) *replicaSetService {
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
 	return &replicaSetService{
@@ -43,7 +43,7 @@ func (svc *replicaSetService) Find(name, namespace string) (*apps.ReplicaSet, er
 		return nil, fmt.Errorf("Incorrect item type: %T, should be: *ReplicaSet", item)
 	}
 
-	// svc.ensureTypeMeta(replicaSet)
+	svc.ensureTypeMeta(replicaSet)
 
 	return replicaSet, nil
 }
@@ -58,7 +58,7 @@ func (svc *replicaSetService) List(namespace string, pagingParams pager.PagingPa
 	for _, item := range items {
 		replicaSet, ok := item.(*apps.ReplicaSet)
 		if !ok {
-			return nil, fmt.Errorf("Incorrect item type: %T, should be: *Pod", item)
+			return nil, fmt.Errorf("Incorrect item type: %T, should be: *ReplicaSet", item)
 		}
 
 		svc.ensureTypeMeta(replicaSet)
@@ -124,6 +124,6 @@ func (svc *replicaSetService) ensureTypeMeta(replicaSet *apps.ReplicaSet) {
 func (svc *replicaSetService) replicaSetTypeMeta() metav1.TypeMeta {
 	return metav1.TypeMeta{
 		Kind:       "ReplicaSet",
-		APIVersion: "extensions/v1beta1",
+		APIVersion: "apps/v1",
 	}
 }

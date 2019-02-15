@@ -51,7 +51,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
 	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 
-	replicaSetService := newReplicaSetService(informerFactory.Apps().V1beta2().ReplicaSets().Informer(), clientset.AppsV1beta2())
+	replicaSetService := newReplicaSetService(informerFactory.Apps().V1().ReplicaSets().Informer(), clientset.AppsV1())
 	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)

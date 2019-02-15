@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/pkg/errors"
-	api "k8s.io/api/apps/v1beta2"
+	api "k8s.io/api/apps/v1"
 )
 
 //go:generate mockery -name=replicaSetSvc -output=automock -outpkg=automock -case=underscore
