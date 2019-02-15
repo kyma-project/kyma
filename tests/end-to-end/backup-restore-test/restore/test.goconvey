@@ -1,0 +1,10 @@
+Test Backup And Restore Cluster
+	Setup
+		Create namespace
+			Create function
+	Backup Cluster
+		Check backup status
+			Delete resources from cluster
+
+	Restore Cluster
+		Test restored resources

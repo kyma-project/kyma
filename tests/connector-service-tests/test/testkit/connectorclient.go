@@ -19,7 +19,7 @@ const (
 
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
-	GetInfo(t *testing.T, url string) (*InfoResponse, *Error)
+	GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error)
 	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
 }
 
@@ -62,9 +62,8 @@ func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
 	return tokenResponse
 }
 
-func (cc connectorClient) GetInfo(t *testing.T, url string) (*InfoResponse, *Error) {
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
+func (cc connectorClient) GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error) {
+	request := getRequestWithHeaders(t, url, headers)
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
@@ -114,6 +113,19 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 	require.NoError(t, err)
 
 	return crtResponse, nil
+}
+
+func getRequestWithHeaders(t *testing.T, url string, headers map[string]string) *http.Request {
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	require.NoError(t, err)
+
+	if headers != nil {
+		for k, v := range headers {
+			request.Header.Set(k, v)
+		}
+	}
+
+	return request
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
