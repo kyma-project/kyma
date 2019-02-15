@@ -62,6 +62,85 @@ func TestApplicationContext_IsEmpty(t *testing.T) {
 	})
 }
 
+func TestApplicationContext_FillPlaceholders(t *testing.T) {
+
+	appCtx := ApplicationContext{
+		Application: "application",
+		ClusterContext: ClusterContext{
+			Tenant: "tenant",
+			Group: "group",
+		},
+	}
+
+	t.Run("should fill placeholders with values", func(t *testing.T) {
+		// given
+		expectedInfoURL := "https://test.cluster.cx/v1/tenant/" + appCtx.ClusterContext.Tenant +
+			"/group/" + appCtx.ClusterContext.Group +
+			"/application/" + appCtx.Application +
+			"/applications/management/info"
+
+		baseInfoURL := "https://test.cluster.cx/v1/tenant/" + TenantPlaceholder +
+			"/group/" + GroupPlaceholder +
+			"/application/" + ApplicationPlaceholder +
+			"/applications/management/info"
+
+		// when
+		filledInfoURL := appCtx.FillPlaceholders(baseInfoURL)
+
+		// then
+		assert.Equal(t, expectedInfoURL, filledInfoURL)
+	})
+
+	t.Run("should leave the format intact if there are no placeholders", func(t *testing.T) {
+		// given
+		expectedInfoURL := "https://test.cluster.cx/v1/applications/management/info"
+		baseInfoURL := expectedInfoURL
+
+		// when
+		filledInfoURL := appCtx.FillPlaceholders(baseInfoURL)
+
+		// then
+		assert.Equal(t, expectedInfoURL, filledInfoURL)
+	})
+}
+
+func TestClusterContext_FillPlaceholders(t *testing.T) {
+
+	clsCtx := ClusterContext{
+		Tenant: "tenant",
+		Group: "group",
+	}
+
+	t.Run("should fill placeholders with values", func(t *testing.T) {
+		// given
+		expectedInfoURL := "https://test.cluster.cx/v1/tenant/" + clsCtx.Tenant +
+			"/group/" + clsCtx.Group +
+			"/applications/management/info"
+
+		baseInfoURL := "https://test.cluster.cx/v1/tenant/" + TenantPlaceholder +
+			"/group/" + GroupPlaceholder +
+			"/applications/management/info"
+
+		// when
+		filledInfoURL := clsCtx.FillPlaceholders(baseInfoURL)
+
+		// then
+		assert.Equal(t, expectedInfoURL, filledInfoURL)
+	})
+
+	t.Run("should leave the format intact if there are no placeholders", func(t *testing.T) {
+		// given
+		expectedInfoURL := "https://test.cluster.cx/v1/applications/management/info"
+		baseInfoURL := expectedInfoURL
+
+		// when
+		filledInfoURL := clsCtx.FillPlaceholders(baseInfoURL)
+
+		// then
+		assert.Equal(t, expectedInfoURL, filledInfoURL)
+	})
+}
+
 func TestApplicationContext_ExtendContext(t *testing.T) {
 
 	t.Run("should extend context with application context", func(t *testing.T) {
