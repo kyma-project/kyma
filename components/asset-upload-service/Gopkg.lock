@@ -114,6 +114,17 @@
   version = "v1.1.5"
 
 [[projects]]
+  digest = "1:b472339040c571f1085e429ad08d94218bc3fc7a635c99fd95e3f80382413317"
+  name = "github.com/kisielk/errcheck"
+  packages = [
+    ".",
+    "internal/errcheck",
+  ]
+  pruneopts = "UT"
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:0a69a1c0db3591fcefb47f115b224592c8dfa4368b7ba9fae509d5e16cdc95c8"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
@@ -353,6 +364,28 @@
   packages = ["rate"]
   pruneopts = "UT"
   revision = "85acf8d2951cb2a3bde7632f9ff273ef0379bcbd"
+
+[[projects]]
+  branch = "master"
+  digest = "1:849e1ab274cc58121de7558d8cad12bf9dfe65d8315f3a081126c8442c66455e"
+  name = "golang.org/x/tools"
+  packages = [
+    "cmd/goimports",
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/cgo",
+    "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
+    "go/types/typeutil",
+    "imports",
+    "internal/fastwalk",
+    "internal/gopathwalk",
+    "internal/module",
+    "internal/semver",
+  ]
+  pruneopts = "UT"
+  revision = "8dcb7bc8c7fe0a895995c76c721cef79419ac98a"
 
 [[projects]]
   digest = "1:6f3bd49ddf2e104e52062774d797714371fac1b8bddfd8e124ce78e6b2264a10"
@@ -624,12 +657,14 @@
   analyzer-version = 1
   input-imports = [
     "github.com/golang/glog",
+    "github.com/kisielk/errcheck",
     "github.com/minio/minio-go",
     "github.com/minio/minio-go/pkg/policy",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/mock",
     "github.com/vrischmann/envconfig",
+    "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

@@ -3,10 +3,11 @@ package uploader
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
 	"io"
 	"sync"
 	"time"
+
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
 
 	"github.com/golang/glog"
 	"github.com/minio/minio-go"
@@ -110,7 +111,12 @@ func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) (*Uplo
 	if err != nil {
 		return nil, errors.Wrapf(err, "while opening file %s", file.Filename())
 	}
-	defer f.Close()
+	defer func() {
+		err := f.Close()
+		if err != nil {
+			glog.Error(errors.Wrapf(err, "while closing file %s", file.Filename()))
+		}
+	}()
 
 	fileName := file.Filename()
 	fileSize := file.Size()

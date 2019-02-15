@@ -3,11 +3,12 @@ package bucket
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/golang/glog"
-	"github.com/pkg/errors"
 	"strconv"
 	"time"
+
+	"github.com/golang/glog"
 	"github.com/minio/minio-go/pkg/policy"
+	"github.com/pkg/errors"
 )
 
 // creationRetries defines how many times every bucket should be tried to create

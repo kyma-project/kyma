@@ -22,9 +22,9 @@ if [ "$1" == "$CI_FLAG" ]; then
 	buildEnv="env CGO_ENABLED=0"
 fi
 
-${buildEnv} go build -o ui-api-layer
+${buildEnv} go build -o asset-upload-service
 goBuildResult=$?
-rm ui-api-layer
+rm asset-upload-service
 
 if [ ${goBuildResult} != 0 ]; then
 	echo -e "${RED}✗ go build${NC}\n$goBuildResult${NC}"

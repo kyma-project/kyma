@@ -5,14 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader/automock"
-	"github.com/minio/minio-go"
-	"github.com/onsi/gomega"
-	"github.com/pkg/errors"
-	"github.com/stretchr/testify/mock"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -22,6 +14,15 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
+	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader/automock"
+	"github.com/minio/minio-go"
+	"github.com/onsi/gomega"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestRequestHandler_ServeHTTP(t *testing.T) {
@@ -203,7 +204,11 @@ func testServeHTTP(g *gomega.GomegaWithT, minioClient uploader.MinioClient, file
 
 	resp := w.Result()
 	g.Expect(resp).NotTo(gomega.BeNil())
-	defer resp.Body.Close()
+
+	defer func() {
+		err := resp.Body.Close()
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+	}()
 
 	var result requesthandler.Response
 	err = json.NewDecoder(resp.Body).Decode(&result)

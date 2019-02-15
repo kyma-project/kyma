@@ -1,16 +1,17 @@
 package configurer_test
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/configurer"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
 	k8sTesting "k8s.io/client-go/testing"
-	"testing"
 )
 
 func TestConfigurer_LoadIfExists(t *testing.T) {

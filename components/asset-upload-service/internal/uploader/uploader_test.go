@@ -3,13 +3,14 @@ package uploader_test
 import (
 	"context"
 	"errors"
+	"testing"
+	"time"
+
 	fautomock "github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader/automock"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader/automock"
 	"github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
-	"testing"
-	"time"
 
 	"github.com/minio/minio-go"
 )
@@ -24,12 +25,12 @@ func TestUploader_UploadFiles(t *testing.T) {
 
 		mock1 := &fautomock.FileHeader{}
 		mock1.On("Filename").Return("test1.yaml")
-		mock1.On("Size", ).Return(int64(-1)).Once()
+		mock1.On("Size").Return(int64(-1)).Once()
 		mock1.On("Open").Return(file, nil).Once()
 
 		mock2 := &fautomock.FileHeader{}
 		mock2.On("Filename").Return("test2.yaml")
-		mock2.On("Size", ).Return(int64(-1)).Once()
+		mock2.On("Size").Return(int64(-1)).Once()
 		mock2.On("Open").Return(file, nil).Once()
 
 		files := []uploader.FileUpload{
@@ -47,16 +48,16 @@ func TestUploader_UploadFiles(t *testing.T) {
 
 		expectedResult := []uploader.UploadResult{
 			{
-				FileName: "test1.yaml",
+				FileName:   "test1.yaml",
 				RemotePath: "https://minio.example.com/test/testDir/test1.yaml",
-				Bucket: "test",
-				Size: -1,
+				Bucket:     "test",
+				Size:       -1,
 			},
 			{
-				FileName: "test2.yaml",
+				FileName:   "test2.yaml",
 				RemotePath: "https://minio.example.com/test2/testDir/test2.yaml",
-				Bucket: "test2",
-				Size: -1,
+				Bucket:     "test2",
+				Size:       -1,
 			},
 		}
 
@@ -90,12 +91,12 @@ func TestUploader_UploadFiles(t *testing.T) {
 
 		mock1 := &fautomock.FileHeader{}
 		mock1.On("Filename").Return("test1.yaml")
-		mock1.On("Size", ).Return(int64(-1)).Once()
+		mock1.On("Size").Return(int64(-1)).Once()
 		mock1.On("Open").Return(file, nil).Once()
 
 		mock2 := &fautomock.FileHeader{}
 		mock2.On("Filename").Return("test2.yaml")
-		mock2.On("Size", ).Return(int64(-1)).Once()
+		mock2.On("Size").Return(int64(-1)).Once()
 		mock2.On("Open").Return(file, nil).Once()
 
 		testErr := errors.New("Test error")

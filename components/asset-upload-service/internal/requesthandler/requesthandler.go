@@ -3,15 +3,16 @@ package requesthandler
 import (
 	"context"
 	"encoding/json"
+	"mime/multipart"
+	"net/http"
+	"strconv"
+	"time"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/pkg/errors"
-	"mime/multipart"
-	"net/http"
-	"strconv"
-	"time"
 )
 
 type RequestHandler struct {
@@ -74,9 +75,9 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	if filesCount == 0 {
 
 		r.writeResponse(w, http.StatusBadRequest, Response{
-			Errors:        []string{
+			Errors: []string{
 				"No files specified to upload. Use `private` and `public` fields to upload them.",
-		},
+			},
 		})
 		return
 	}

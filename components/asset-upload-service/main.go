@@ -4,6 +4,9 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/configurer"
@@ -16,22 +19,20 @@ import (
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"net/http"
-	"time"
 )
 
 // config contains configuration fields used for upload
 type config struct {
 	Host           string `envconfig:"default=127.0.0.1"`
-	Port           int    `envconfig:"default=3003"`
+	Port           int    `envconfig:"default=3000"`
 	KubeconfigPath string `envconfig:"optional"`
 	ConfigMap      configurer.Config
 	Upload         struct {
-		Endpoint  string `envconfig:"default=play.minio.io"`
-		Port      int    `envconfig:"default=9000"`
+		Endpoint  string `envconfig:"default=minio.kyma.local"`
+		Port      int    `envconfig:"default=443"`
 		Secure    bool   `envconfig:"default=true"`
-		AccessKey string `envconfig:"default=Q3AM3UQ867SPQQA43P2F"`
-		SecretKey string `envconfig:"default=zuf+tfteSlswRu7BJ86wekitnifILbZam1KYY3TG"`
+		AccessKey string
+		SecretKey string
 	}
 	Bucket           bucket.Config
 	MaxUploadWorkers int           `envconfig:"default=10"`

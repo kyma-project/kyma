@@ -2,13 +2,14 @@ package bucket_test
 
 import (
 	"fmt"
+	"strings"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket/automock"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
-	"strings"
-	"testing"
 )
 
 func TestHandler_CreateSystemBuckets(t *testing.T) {
