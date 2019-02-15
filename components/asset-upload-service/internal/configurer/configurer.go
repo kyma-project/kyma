@@ -4,7 +4,7 @@ import (
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -13,6 +13,7 @@ import (
 type Config struct {
 	Name      string `envconfig:"asset-upload-service"`
 	Namespace string `envconfig:"default=kyma-system"`
+	Enabled   bool   `envconfig:"default=true"`
 }
 
 type SharedAppConfig struct {
@@ -32,6 +33,10 @@ func New(client corev1.CoreV1Interface, cfg Config) *Configurer {
 }
 
 func (c *Configurer) LoadIfExists() (*SharedAppConfig, bool, error) {
+	if !c.cfg.Enabled {
+		return nil, false, nil
+	}
+
 	configMap, err := c.client.ConfigMaps(c.cfg.Namespace).Get(c.cfg.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
@@ -47,6 +52,10 @@ func (c *Configurer) LoadIfExists() (*SharedAppConfig, bool, error) {
 }
 
 func (c *Configurer) Save(config SharedAppConfig) error {
+	if !c.cfg.Enabled {
+		return nil
+	}
+
 	_, err := c.client.ConfigMaps(c.cfg.Namespace).Create(c.convertToConfigMap(config))
 	if err != nil {
 		return errors.Wrapf(err, "while creating ConfigMap %s in namespace %s", c.cfg.Name, c.cfg.Namespace)
