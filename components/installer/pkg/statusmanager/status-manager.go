@@ -69,8 +69,8 @@ func (sm *statusManager) Error(component, description string, err error) error {
 		status.KymaVersion = ""
 		logEntry := installationv1alpha1.ErrorLogEntry{
 			Component: component,
-			Log: err.Error(),
-			Times: 1,
+			Log:       err.Error(),
+			Times:     1,
 		}
 		status.ErrorLog = appendErrorLog(status.ErrorLog, logEntry)
 	})
