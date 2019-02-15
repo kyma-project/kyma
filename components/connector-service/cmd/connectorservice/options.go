@@ -45,7 +45,7 @@ func parseArgs() *options {
 	caSecretName := flag.String("caSecretName", "nginx-auth-ca", "Name of the secret which contains root CA.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
-	// Temporary solution as only gateway.domain,name host is secured with client certificate. We should decide if we want to expose whole Connector Service through it.
+	// Temporary solution as only gateway.domain,name host is secured with client certificate. We should decide if we want to expose whole Connector Service through Nginx.
 	applicationConnectorHost := flag.String("applicationConnectorHost", "gateway.wormhole.cluster.kyma.cx", "Host secured with client certificate, used for certificate renewal.")
 	appRegistryHost := flag.String("appRegistryHost", "", "Host at which this Application Registry is accessible.")
 	eventsHost := flag.String("eventsHost", "", "Host at which this Event Service is accessible.")
@@ -72,8 +72,8 @@ func parseArgs() *options {
 		tenant:          *tenant,
 		appRegistryHost: *appRegistryHost,
 		eventsHost:      *eventsHost,
-		appsInfoURL:                   *appsInfoURL,
-		runtimesInfoURL:               *runtimesInfoURL,
+		appsInfoURL:     *appsInfoURL,
+		runtimesInfoURL: *runtimesInfoURL,
 	}
 }
 

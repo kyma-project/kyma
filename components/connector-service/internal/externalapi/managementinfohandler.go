@@ -1,9 +1,10 @@
 package externalapi
 
 import (
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
-	"net/http"
 )
 
 const (
@@ -29,7 +30,7 @@ func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 
 	urls := ih.buildURLs(connectorClientContext)
 
-	httphelpers.RespondWithBody(w, 200, mgmtInfoReponse{URLs: urls})
+	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls})
 }
 
 func (ih *managementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {

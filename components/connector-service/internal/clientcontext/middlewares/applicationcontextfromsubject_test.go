@@ -1,12 +1,13 @@
 package middlewares
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 const (
@@ -23,10 +24,23 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req.Header.Set(clientcontext.SubjectHeader, subject)
 
 		//when
-		cname := extractApplicationFromSubject(req)
+		commonName := extractApplicationFromSubject(req)
 
 		//then
-		assert.Equal(t, expectedCName, cname)
+		assert.Equal(t, expectedCName, commonName)
+	})
+
+	t.Run("should return empty string when no match", func(t *testing.T) {
+		//given
+		req, err := http.NewRequest("GET", "/", nil)
+		require.NoError(t, err)
+		req.Header.Set(clientcontext.SubjectHeader, "not matching subject")
+
+		//when
+		commonName := extractApplicationFromSubject(req)
+
+		//then
+		assert.Empty(t, commonName)
 	})
 
 	t.Run("should set context based on header", func(t *testing.T) {

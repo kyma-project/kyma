@@ -1,11 +1,12 @@
 package middlewares
 
 import (
+	"net/http"
+	"regexp"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
-	"net/http"
-	"regexp"
 )
 
 type appContextFromSubjMiddleware struct{}
@@ -17,7 +18,8 @@ func NewAppContextFromSubjMiddleware() *appContextFromSubjMiddleware {
 func (cc *appContextFromSubjMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		appContext := clientcontext.ApplicationContext{
-			Application: extractApplicationFromSubject(r),
+			ClusterContext: clientcontext.ClusterContext{},
+			Application:    extractApplicationFromSubject(r),
 		}
 
 		if appContext.Application == "" {
@@ -40,6 +42,10 @@ func extractApplicationFromSubject(r *http.Request) string {
 
 	re := regexp.MustCompile("CN=([^,]+)")
 	matches := re.FindStringSubmatch(subject)
+
+	if matches == nil || len(matches) < 2 {
+		return ""
+	}
 
 	return matches[1]
 }

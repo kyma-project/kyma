@@ -116,49 +116,43 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), opts.caSecretName, subjectValues)
 
-	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
-	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.appRegistryHost, opts.eventsHost)
 	appTokenTTLMinutes := time.Duration(opts.appTokenExpirationMinutes) * time.Minute
-
 	baseAppURL := fmt.Sprintf(AppURLFormat, opts.connectorServiceHost)
 
 	appHandlerConfig := externalapi.Config{
-		TokenCreator:     tokenCreatorProvider.WithTTL(appTokenTTLMinutes),
+		TokenCreator:      tokenCreatorProvider.WithTTL(appTokenTTLMinutes),
 		ManagementInfoURL: opts.appsInfoURL,
 		BaseURL:           baseAppURL,
 		Subject:           subjectValues,
-		Middlewares:       []mux.MiddlewareFunc{appTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
 		ContextExtractor:  clientcontext.ExtractApplicationContext,
 		CertService:       certificateService,
 	}
 
-	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
 	runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
-
 	baseRuntimeURL := fmt.Sprintf(RuntimeURLFormat, opts.connectorServiceHost)
 
 	runtimeHandlerConfig := externalapi.Config{
-		TokenCreator:     tokenCreatorProvider.WithTTL(runtimeTokenTTLMinutes),
+		TokenCreator:      tokenCreatorProvider.WithTTL(runtimeTokenTTLMinutes),
 		ManagementInfoURL: opts.runtimesInfoURL,
 		BaseURL:           baseRuntimeURL,
 		Subject:           subjectValues,
-		Middlewares:       []mux.MiddlewareFunc{clusterTokenResolverMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
 		ContextExtractor:  clientcontext.ExtractClusterContext,
 		CertService:       certificateService,
 	}
 
+	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
+	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
+	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.appRegistryHost, opts.eventsHost)
 	appContextFromSubjMiddleware := clientcontextmiddlewares.NewAppContextFromSubjMiddleware()
 
-	appManagementInfoHandlerConfig := externalapi.Config{
-		Middlewares:      []mux.MiddlewareFunc{appContextFromSubjMiddleware.Middleware, runtimeURLsMiddleware.Middleware},
-		ContextExtractor: clientcontext.ExtractApplicationContext,
+	functionalMiddlewares := externalapi.FunctionalMiddlewares{
+		AppTokenResolverMiddleware:      appTokenResolverMiddleware.Middleware,
+		RuntimeTokenResolverMiddleware:  clusterTokenResolverMiddleware.Middleware,
+		RuntimeURLsMiddleware:           runtimeURLsMiddleware.Middleware,
+		AppContextFromSubjectMiddleware: appContextFromSubjMiddleware.Middleware,
 	}
 
-	runtimeManagementInfoHandlerConfig := externalapi.Config{
-		ContextExtractor: clientcontext.EmptyClusterContext,
-	}
-
-	return externalapi.NewHandler(appHandlerConfig, runtimeHandlerConfig, appManagementInfoHandlerConfig, runtimeManagementInfoHandlerConfig, globalMiddlewares)
+	return externalapi.NewHandler(appHandlerConfig, runtimeHandlerConfig, functionalMiddlewares, globalMiddlewares)
 }
 
 func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
