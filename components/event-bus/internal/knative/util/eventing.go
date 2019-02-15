@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"errors"
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -85,6 +86,9 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 		log.Printf("ERROR: GetChannel(): geting channel: %v", err)
 		return nil, err
 	} else {
+		if !channel.Status.IsReady() {
+			return nil, fmt.Errorf("ERROR: GetChannel():channel NotReady")
+		}
 		return channel, nil
 	}
 }
@@ -115,19 +119,57 @@ func ( k*KnativeLib) CreateChannel(provisioner string, name string, namespace st
 	}
 }
 
-// CreateSubscription creates a subscription for the specified channel
+// DeleteChannel deletes a Knative/Eventing channel
+func (k *KnativeLib) DeleteChannel(name string, namespace string) error {
+	if err := k.evClient.Channels(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
+		log.Printf("ERROR: DeleteChannel(): deleting channel: %v", err)
+		return err
+	}
+	return nil
+}
+
+// CreateSubscription creates a Knative/Eventing subscription for the specified channel
 func (k *KnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string) error {
 	sub := Subscription(name, namespace).ToChannel(channelName).ToUri(uri).EmptyReply().Build()
 	if sub, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil && !k8serrors.IsAlreadyExists(err) {
-		log.Printf("ERROR: CreateSubscription(): create subscription: %v", err)
+		log.Printf("ERROR: CreateSubscription(): creating subscription: %v", err)
 		return err
 	} else if err != nil && k8serrors.IsAlreadyExists(err) {
 		if sub, err = k.evClient.Subscriptions(namespace).Update(sub); err != nil {
-			log.Printf("ERROR: CreateSubscription(): update subscription: %v", err)
+			log.Printf("ERROR: CreateSubscription(): updating subscription: %v", err)
 			return err
 		}
 	}
 	return nil
+}
+
+// DeleteSubscription deletes a Kantive/Eventing subscription
+func (k *KnativeLib) DeleteSubscription(name string, namespace string) error {
+	if err := k.evClient.Subscriptions(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
+		log.Printf("ERROR: DeleteSubscription(): deleting subscription: %v", err)
+		return err
+	}
+	return nil
+}
+
+// GetSubscription gets a Knative/Eventing subscription
+func (k *KnativeLib) GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error) {
+	if sub, err := k.evClient.Subscriptions(namespace).Get(name, metav1.GetOptions{}); err != nil {
+		log.Printf("ERROR: GetSubscription(): geting subscription: %v", err)
+		return nil, err
+	} else {
+		return sub, nil
+	}
+}
+
+// UpdateSubscription updates an existing subscription
+func (k *KnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error) {
+	if usub, err := k.evClient.Subscriptions(sub.Namespace).Update(sub); err != nil {
+		log.Printf("ERROR: UpdateSubscription(): updating subscription: %v", err)
+		return nil, err
+	} else {
+		return usub, nil
+	}
 }
 
 // SendMessage sends a message to a channel
