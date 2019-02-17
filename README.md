@@ -6,6 +6,11 @@
 [![Slack](https://img.shields.io/badge/slack-@kyma--community-yellow.svg)](http://slack.kyma-project.io)
 [![Twitter](https://img.shields.io/badge/twitter-@kymaproject-blue.svg)](https://twitter.com/kymaproject)
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma?ref=badge_shield)
+[![Github release](https://img.shields.io/github/release/kyma-project/kyma/all.svg)](https://github.com/kyma-project/kyma/releases)
+[![Github release date](https://img.shields.io/github/release-date-pre/kyma-project/kyma.svg)](https://github.com/kyma-project/kyma/releases)
+[![Github last commit](https://img.shields.io/github/last-commit/kyma-project/kyma.svg)](https://github.com/kyma-project/kyma/commits/master)
+[![Licence](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](hhttps://opensource.org/licenses/Apache-2.0)
+
 
 
 ## Overview
