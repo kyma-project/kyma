@@ -21,8 +21,8 @@ The Connector Service:
 
 ## Application Registry
 
-The Application Registry stores all registered APIs and Event Catalog exposed by a connected external solution. The metadata of the external solution's APIs and Event catalogs is stored in the [Application](#custom-resource-application) custom resource.
-The system creates a new Kubernetes service for each registered API. Additionally, new ServiceClasses are registered in the Service Catalog.
+The Application Registry writes and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](#custom-resource-application) custom resource.
+The system creates a new Kubernetes service for each registered API.
 
 >**NOTE:** Using the Application Registry, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
 

@@ -53,6 +53,16 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.services.entries.oauthUrl** |    **NO**   | Specifies the URL used to authorize with a given API. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
 | **spec.services.entries.credentialsSecretName** |    **NO**   | Specifies the name of the Secret which allows you to call a given API. This field is required if **spec.services.entries.oauthUrl** is specified. Parameter provided by the Application Registry, do not edit. |
 
+## Related resources and components
+
+These components use this CR:
+
+| Component   |  Description |
+|:-----------:|:-------------|
+| Application Registry | Reads and writes the APIs and Event Catalog metadata of the connected external solution to this CR. |
+| Application Broker | Exposes the APIs and Event definitions stored in this CR as ServiceClasses to the Service Catalog. |
+| Application Operator | Provisions and de-provisions an instance of Application Proxy and Event Service for every created or deleted Application CR. |
+
 ## Additional information
 
 The Application Operator adds the **status** section which describes the status of the App installation to the created CR periodically. This table lists the fields of the **status** section.
