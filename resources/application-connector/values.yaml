@@ -19,10 +19,10 @@ global:
     dir: develop/
     version: 0c447819
   connector_service:
-    dir: PR/
+    dir: pr/
     version: PR-2764
   connector_service_tests:
-    dir: PR/
+    dir: pr/
     version: PR-2764
   connection_token_handler:
     dir: develop/
