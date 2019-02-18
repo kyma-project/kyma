@@ -93,7 +93,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
 	})
 
-	t.Run("should return 500 when failed to extract contrxr", func(t *testing.T) {
+	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		//given
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
 			return nil, apperrors.Internal("error")

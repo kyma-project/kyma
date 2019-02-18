@@ -27,7 +27,7 @@ func (params dummySerializable) ToJSON() ([]byte, error) {
 }
 
 func TestManager_Save(t *testing.T) {
-	t.Run("should trigger Put metod on token store", func(t *testing.T) {
+	t.Run("should trigger Put method on token store", func(t *testing.T) {
 
 		serializable := dummySerializable{
 			Value: []byte(payload),
@@ -38,9 +38,9 @@ func TestManager_Save(t *testing.T) {
 		tokenCache.On("Put", token, payload, tokenTTL)
 		tokenGenerator := func() (string, apperrors.AppError) { return token, nil }
 
-		tokenManager := NewTokenCreator(tokenTTL, tokenCache, tokenGenerator)
+		tokenCreator := NewTokenCreator(tokenTTL, tokenCache, tokenGenerator)
 
-		generatedToken, err := tokenManager.Save(serializable)
+		generatedToken, err := tokenCreator.Save(serializable)
 
 		require.NoError(t, err)
 		assert.Equal(t, token, generatedToken)
@@ -52,9 +52,9 @@ func TestManager_Save(t *testing.T) {
 			Value: nil,
 			Error: errors.New("error"),
 		}
-		tokenService := NewTokenCreator(tokenTTL, nil, nil)
+		tokenCreator := NewTokenCreator(tokenTTL, nil, nil)
 
-		_, err := tokenService.Save(serializable)
+		_, err := tokenCreator.Save(serializable)
 
 		require.Error(t, err)
 	})
@@ -67,9 +67,9 @@ func TestManager_Save(t *testing.T) {
 		}
 
 		tokenGenerator := func() (string, apperrors.AppError) { return "", apperrors.Internal("error") }
-		tokenService := NewTokenCreator(tokenTTL, nil, tokenGenerator)
+		tokenCreator := NewTokenCreator(tokenTTL, nil, tokenGenerator)
 
-		_, err := tokenService.Save(serializable)
+		_, err := tokenCreator.Save(serializable)
 
 		require.Error(t, err)
 	})

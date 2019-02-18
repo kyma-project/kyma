@@ -37,30 +37,24 @@ func (cc *appContextFromSubjMiddleware) Middleware(handler http.Handler) http.Ha
 }
 
 func prepareContextExtender(r *http.Request) (clientcontext.ContextExtender, apperrors.AppError) {
-	var contextExtender clientcontext.ContextExtender
-
 	app, group, tenant := parseContextFromSubject(r)
 	clusterContext := clientcontext.ClusterContext{
 		Group:  group,
 		Tenant: tenant,
 	}
 
-	contextExtender = clusterContext
-
-	if clusterContext.IsEmpty() {
-		if app == "" {
+	if app == "" {
+		if clusterContext.IsEmpty() {
 			return nil, apperrors.BadRequest("Invalid certificate subject")
 		}
+
+		return clusterContext, nil
 	}
 
-	if app != "" {
-		contextExtender = clientcontext.ApplicationContext{
-			Application:    app,
-			ClusterContext: clusterContext,
-		}
-	}
-
-	return contextExtender, nil
+	return clientcontext.ApplicationContext{
+		Application:    app,
+		ClusterContext: clusterContext,
+	}, nil
 }
 
 func parseContextFromSubject(r *http.Request) (application string, group string, tenant string) {
@@ -80,13 +74,13 @@ func parseContextFromSubject(r *http.Request) (application string, group string,
 
 	if strings.Contains(match, subjectSeparator) {
 		matchSplitted := strings.Split(match, subjectSeparator)
-		return getIndex(matchSplitted, 2), getIndex(matchSplitted, 1), getIndex(matchSplitted, 0)
+		return getAt(matchSplitted, 2), getAt(matchSplitted, 1), getAt(matchSplitted, 0)
 	}
 
 	return match, "", ""
 }
 
-func getIndex(slice []string, index int) string {
+func getAt(slice []string, index int) string {
 	if len(slice) <= index {
 		return ""
 	}
