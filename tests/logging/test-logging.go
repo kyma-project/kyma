@@ -102,7 +102,7 @@ func testPodsAreReady() {
 }
 
 func testLokiLabel() {
-	resp, err := http.Get("http://logging-loki-internal:3100/api/prom/label")
+	resp, err := http.Get("http://logging:3100/api/prom/label")
 
 	if err != nil {
 		log.Fatalf("Test Check Loki Label Failed: error is: %v and response is: %v", err, resp)
@@ -207,9 +207,9 @@ func testLogs() {
 		Timeout: 45 * time.Second,
 	}
 
-	res, err := c.Get("http://logging-loki-internal:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-")
+	res, err := c.Get("http://logging:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-")
 	if err != nil {
-		log.Fatalf("Error in HTTP GET to http://logging-loki-internal:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-: %v\n", err)
+		log.Fatalf("Error in HTTP GET to http://logging:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-: %v\n", err)
 	}
 	defer res.Body.Close()
 	log.Printf("Log request response status : %v", res.Status)
