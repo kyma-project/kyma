@@ -139,7 +139,7 @@ func deleteNamespace() {
 			cmd = exec.Command("kubectl", "get", "po,svc,deploy,function,rs,hpa", "-n", namespace, "-oyaml")
 			stdoutStderr, err := cmd.CombinedOutput()
 			if err != nil {
-				log.Fatalf("Unable to get ns: %v\n", string(stdoutStderr))
+				log.Fatalf("Unable to get resources in ns: %v\n", string(stdoutStderr))
 			}
 			log.Printf("Current state of the ns: %s is:\n %v", namespace, string(stdoutStderr))
 			log.Fatal("Timed out waiting for namespace: ", namespace, " to be deleted\n")
