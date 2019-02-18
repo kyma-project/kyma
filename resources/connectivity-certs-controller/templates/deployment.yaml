@@ -1,0 +1,41 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: certificate-manager
+        release: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: {{ .Chart.Name }}
+        image: {{ .Values.deployment.image.name }}
+        imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+        args:
+          - "/connectivitycertscontroller"
+          - "--appName={{ .Chart.Name }}"
+          - "--namespace={{ .Values.global.namespace }}"
+          - "--clusterCertificatesSecret={{ .Values.deployment.args.clusterCertificatesSecret }}"
+          - "--caCertificatesSecret={{ .Values.deployment.args.caCertificatesSecret }}"
+        resources:
+          limits:
+            cpu: 100m
+            memory: 40Mi
+          requests:
+            cpu: 100m
+            memory: 20Mi
+      terminationGracePeriodSeconds: 10
