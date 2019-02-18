@@ -16,7 +16,6 @@ import (
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/knative/pkg/configmap"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
@@ -24,7 +23,9 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
+	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
 )
 
 func main() {
@@ -57,11 +58,11 @@ func main() {
 	bLoader := bundle.NewLoader(cfg.TmpDir, log)
 	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), log)
 	brokerSyncer := broker.NewClusterServiceBrokerSyncer(csbInterface, log)
-	cfgMapInformer := configmap.NewInformedWatcher(clientset, cfg.Namespace)
 
-	repositoryWatcher := bundle.NewRepositoryWatcher(sFact.Bundle(), bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log)
-	err = repositoryWatcher.StartWatchMapData(cfg.ReposURLsName, cfg.ReposURLsKey, stopCh)
-	fatalOnError(err)
+	cfgMapInformer := v1.NewConfigMapInformer(clientset, cfg.Namespace, time.Minute, cache.Indexers{})
+	repositoryWatcher := bundle.NewRepositoryController(sFact.Bundle(), bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log)
+	go repositoryWatcher.Run(stopCh)
+	go cfgMapInformer.Run(stopCh)
 
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
