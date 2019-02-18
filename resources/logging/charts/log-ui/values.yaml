@@ -4,7 +4,8 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: poc
+  tag: PR-543
+  dir: pr
   pullPolicy: Always
 service:
   name: nginx
@@ -13,6 +14,3 @@ service:
   internalPort: 80
 resources: {}
 
-global:
-  containerRegistry:
-    path: docker.io/hbalik

@@ -139,13 +139,13 @@ global:
   uiapp:
     create: false
   containerRegistry:
-    path: docker.io/hbalik
+    path: eu.gcr.io/kyma-project
   test_logging:
-    dir: develop/
-    version: b17d67137
+    dir: pr/
+    version: PR-2514
   ## to enable auth and authz set value to true
   rbac:
     create: false
 test:
   image:
-    name: logging-test
+    name: test-logging
