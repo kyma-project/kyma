@@ -178,7 +178,10 @@ func makeHTTPRequest(respCh chan<- string) {
 
 func closingTest(start time.Time, premature bool) {
 	checkFunctionAutoscaled(premature)
-	reporter.Report(tResult.resultMessage, premature)
+	err := reporter.Report(tResult.resultMessage, premature)
+	if err != nil {
+		log.Fatalf("Reporting to slack failed: %v", err)
+	}
 	log.Printf("%.2fm elapsed\n", time.Since(start).Minutes())
 	cleanup()
 	if premature {
