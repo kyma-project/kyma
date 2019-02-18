@@ -9,6 +9,7 @@ WORKDIR ${BASE_APP_DIR}
 
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./internal/ ${BASE_APP_DIR}/internal/
+COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./main.go ${BASE_APP_DIR}/
 
 #
