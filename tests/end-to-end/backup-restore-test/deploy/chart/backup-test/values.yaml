@@ -1,5 +1,5 @@
 containerRegistry:
-  path: docker.io/k15r
+  path: eu.gcr.io/kyma-project
 
 image:
   tag: latest

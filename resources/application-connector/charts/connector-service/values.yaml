@@ -12,6 +12,7 @@ deployment:
     runtimesInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/runtimes/management/info
     group: "default"
     tenant: "default"
+    validityTime: "92d"
   envvars:
     country: DE
     organization: Organization
