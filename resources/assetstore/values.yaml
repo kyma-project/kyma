@@ -8,7 +8,7 @@ global:
     dir: develop/
     version: 2a321562
   asset_upload_service:
-    dir: PR/
+    dir: pr/
     version: PR-2759
 
 minio:

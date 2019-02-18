@@ -1,0 +1,27 @@
+{{- if .Values.api.enabled }}
+{{- $serviceName := include "fullname" . -}}
+{{- $servicePort := .Values.service.externalPort -}}
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  {{- if .Values.api.annotations }}
+  annotations:
+  {{ toYaml .Values.api.annotations | indent 4 }}
+  {{- end }}
+  name: {{ template "fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+  {{- if .Values.api.labels }}
+  {{ toYaml .Values.api.labels | indent 4 }}
+  {{- end }}
+spec:
+  authentication: []
+  hostname: '{{ .Values.api.host }}.{{ .Values.global.domainName }}'
+  service:
+    name: {{ $serviceName }}
+    port: {{ $servicePort }}
+{{- end }}
