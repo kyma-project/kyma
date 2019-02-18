@@ -63,7 +63,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg Config, funcMiddlwares Function
 	httphelpers.WithMiddlewares(csrApplicationRouter, funcMiddlwares.AppTokenResolverMiddleware, funcMiddlwares.RuntimeURLsMiddleware)
 
 	appRenewalRouter := router.Path("/v1/applications/certificates/renewals").Subrouter()
-	appRenewalRouter.HandleFunc("", applicationRenewalHandler.SignCSR)
+	appRenewalRouter.HandleFunc("", applicationRenewalHandler.SignCSR).Methods(http.MethodPost)
 	httphelpers.WithMiddlewares(appRenewalRouter, funcMiddlwares.AppContextFromSubjectMiddleware)
 
 	certApplicationRouter := router.PathPrefix("/v1/applications/certificates").Subrouter()
@@ -75,7 +75,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg Config, funcMiddlwares Function
 	httphelpers.WithMiddlewares(mngmtApplicationRouter, funcMiddlwares.RuntimeURLsMiddleware, funcMiddlwares.AppContextFromSubjectMiddleware)
 
 	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenCreator, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.Subject, runtimeHandlerCfg.ConnectorServiceBaseURL)
-	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor) // TODO
+	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL)
 
@@ -84,7 +84,7 @@ func NewHandler(appHandlerCfg, runtimeHandlerCfg Config, funcMiddlwares Function
 	httphelpers.WithMiddlewares(csrRuntimesRouter, funcMiddlwares.RuntimeTokenResolverMiddleware)
 
 	runtimeRenewalRouter := router.Path("/v1/runtimes/certificates/renewals").Subrouter()
-	runtimeRenewalRouter.HandleFunc("", runtimeRenewalHandler.SignCSR)
+	runtimeRenewalRouter.HandleFunc("", runtimeRenewalHandler.SignCSR).Methods(http.MethodPost)
 	httphelpers.WithMiddlewares(runtimeRenewalRouter, funcMiddlwares.AppContextFromSubjectMiddleware)
 
 	certRuntimesRouter := router.PathPrefix("/v1/runtimes/certificates").Subrouter()
