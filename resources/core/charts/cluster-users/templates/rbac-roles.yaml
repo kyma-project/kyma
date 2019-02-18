@@ -27,6 +27,7 @@ metadata:
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.k8s.io/aggregate-to-view: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
@@ -38,6 +39,7 @@ rules:
   verbs: ["create"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["get", "list"]
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -120,6 +122,79 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 {{- range .Values.bindings.kymaAdmin.groups }}
+- kind: Group
+  name: {{ . }}
+  apiGroup: rbac.authorization.k8s.io
+{{- end }}
+
+# kyma-edit = kubernetes edit + edit permissions on kyma resources
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-edit
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.k8s.io/aggregate-to-edit: "true"
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups: ["", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma-project.io", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma-project.io", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "networking.istio.io", "batch", "extensions", "autoscaling"]
+  resources: ["*"]
+  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["selfsubjectrulesreviews"]
+  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+- nonResourceURLs: ["*"] #give access to all non resource urls
+  verbs: ["*"]
+
+# Cluster developer role (inherited from edit role)
+# Kyma-developer = kyma-edit
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-developer
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-edit: "true"
+rules: []
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRoleBinding
+metadata:
+  name: kyma-developer-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "1"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-developer
+subjects:
+- kind: User
+  name: developer@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+{{ if .Values.users.developerGroup }}
+- kind: Group
+  name: {{ .Values.users.developerGroup }}
+  apiGroup: rbac.authorization.k8s.io
+{{ end }}
+{{- range .Values.bindings.kymaDeveloper.groups }}
 - kind: Group
   name: {{ . }}
   apiGroup: rbac.authorization.k8s.io
