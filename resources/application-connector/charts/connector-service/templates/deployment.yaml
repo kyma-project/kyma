@@ -44,6 +44,7 @@ spec:
           - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
           - "--group={{ .Values.deployment.args.group }}"
           - "--tenant={{ .Values.deployment.args.tenant }}"
+          - "--certificateValidityTime={{ .Values.deployment.args.validityTime }}"
         env:
           - name: COUNTRY
             value: "{{ .Values.deployment.envvars.country }}"
