@@ -1,10 +1,10 @@
 name: logging
 version: 0.0.1
-appVersion: 0.0.1
 description: "Helm Chart for Kyma Logging"
-home: https://grafana.com/loki
+apiVersion: v1
 keywords:
   - logging
-  - oklog
-  - logspout
+  - loki
+  - promtail
   - kyma
+  - grafana
