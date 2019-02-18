@@ -5,7 +5,7 @@ metadata:
   namespace: heptio-ark
 spec:
   includedNamespaces:
-  - '*'
+  - production
   excludedNamespaces:
   - default
   - kube-public

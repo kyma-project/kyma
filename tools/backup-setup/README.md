@@ -33,3 +33,7 @@ spec:
   labelSelector:
     matchLabels:
 ```
+
+### Apply backup.yaml
+
+`kondemandatx apply -f tools/backup-setup/config/backup.yaml`
