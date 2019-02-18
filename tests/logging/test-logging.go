@@ -33,7 +33,7 @@ func getNumberOfNodes() int {
 		log.Fatalf("Error while kubectl get nodes: %v", string(stdoutStderr))
 	}
 	linesToRemove := 1;
-	if strings.Contains(string(stdoutStderr), "master") {
+	if strings.Contains(string(stdoutStderr), "master") && !strings.Contains(string(stdoutStderr), "minikube"){
 		linesToRemove++
 	}
 	outputArr := strings.Split(string(stdoutStderr), "\n")
@@ -86,7 +86,7 @@ func testPodsAreReady() {
 						case strings.Contains(podName, "promtail"):
 							actualPromtail++
 
-						case strings.Contains(podName, "loki"):
+						case strings.Contains(podName, "logging") && !strings.Contains(podName, "promtail"):
 							actualLoki++
 						}
 					}
