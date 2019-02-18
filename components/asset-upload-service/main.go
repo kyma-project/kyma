@@ -11,7 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/bucket"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/configurer"
 	"github.com/kyma-project/kyma/components/asset-upload-service/internal/requesthandler"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
 	"github.com/kyma-project/kyma/components/asset-upload-service/pkg/signal"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
@@ -28,11 +27,12 @@ type config struct {
 	KubeconfigPath string `envconfig:"optional"`
 	ConfigMap      configurer.Config
 	Upload         struct {
-		Endpoint  string `envconfig:"default=minio.kyma.local"`
-		Port      int    `envconfig:"default=443"`
-		Secure    bool   `envconfig:"default=true"`
-		AccessKey string
-		SecretKey string
+		Endpoint         string `envconfig:"default=minio.kyma.local"`
+		ExternalEndpoint string `envconfig:"default=https://minio.kyma.local"`
+		Port             int    `envconfig:"default=443"`
+		Secure           bool   `envconfig:"default=true"`
+		AccessKey        string
+		SecretKey        string
 	}
 	Bucket           bucket.Config
 	MaxUploadWorkers int           `envconfig:"default=10"`
@@ -79,7 +79,7 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	mux.Handle("/upload", requesthandler.New(client, buckets, uploader.Origin(uploadEndpoint, cfg.Upload.Secure), cfg.UploadTimeout, cfg.MaxUploadWorkers))
+	mux.Handle("/upload", requesthandler.New(client, buckets, cfg.Upload.ExternalEndpoint, cfg.UploadTimeout, cfg.MaxUploadWorkers))
 
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: mux}

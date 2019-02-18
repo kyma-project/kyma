@@ -16,11 +16,11 @@ import (
 )
 
 type RequestHandler struct {
-	client           uploader.MinioClient
-	uploadTimeout    time.Duration
-	maxUploadWorkers int
-	buckets          bucket.SystemBucketNames
-	uploadOrigin     string
+	client               uploader.MinioClient
+	uploadTimeout        time.Duration
+	maxUploadWorkers     int
+	buckets              bucket.SystemBucketNames
+	externalUploadOrigin string
 }
 
 type Response struct {
@@ -28,13 +28,13 @@ type Response struct {
 	Errors        []string                `json:"errors,omitempty"`
 }
 
-func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, uploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *RequestHandler {
+func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, externalUploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *RequestHandler {
 	return &RequestHandler{
-		client:           client,
-		uploadTimeout:    uploadTimeout,
-		maxUploadWorkers: maxUploadWorkers,
-		buckets:          buckets,
-		uploadOrigin:     uploadOrigin,
+		client:               client,
+		uploadTimeout:        uploadTimeout,
+		maxUploadWorkers:     maxUploadWorkers,
+		buckets:              buckets,
+		externalUploadOrigin: externalUploadOrigin,
 	}
 }
 
@@ -82,7 +82,7 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 		return
 	}
 
-	u := uploader.New(r.client, r.uploadOrigin, r.uploadTimeout, r.maxUploadWorkers)
+	u := uploader.New(r.client, r.externalUploadOrigin, r.uploadTimeout, r.maxUploadWorkers)
 	fileToUploadCh := r.populateFilesChannel(publicFiles, privateFiles, filesCount, directory)
 	uploadedFiles, errs := u.UploadFiles(context.Background(), fileToUploadCh, filesCount)
 

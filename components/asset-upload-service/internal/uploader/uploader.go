@@ -35,19 +35,19 @@ type UploadResult struct {
 
 // Uploader is an abstraction layer for Minio client
 type Uploader struct {
-	client           MinioClient
-	uploadOrigin     string
-	UploadTimeout    time.Duration
-	MaxUploadWorkers int
+	client               MinioClient
+	externalUploadOrigin string
+	UploadTimeout        time.Duration
+	MaxUploadWorkers     int
 }
 
 // New returns a new instance of Uploader
 func New(client MinioClient, uploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *Uploader {
 	return &Uploader{
-		client:           client,
-		UploadTimeout:    uploadTimeout,
-		MaxUploadWorkers: maxUploadWorkers,
-		uploadOrigin:     uploadOrigin,
+		client:               client,
+		UploadTimeout:        uploadTimeout,
+		MaxUploadWorkers:     maxUploadWorkers,
+		externalUploadOrigin: uploadOrigin,
 	}
 }
 
@@ -135,7 +135,7 @@ func (u *Uploader) uploadFile(ctx context.Context, fileUpload FileUpload) (*Uplo
 		FileName:   fileName,
 		Size:       fileSize,
 		Bucket:     fileUpload.Bucket,
-		RemotePath: fmt.Sprintf("%s/%s/%s", u.uploadOrigin, fileUpload.Bucket, objectName),
+		RemotePath: fmt.Sprintf("%s/%s/%s", u.externalUploadOrigin, fileUpload.Bucket, objectName),
 	}
 
 	return result, nil

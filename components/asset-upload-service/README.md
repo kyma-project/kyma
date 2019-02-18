@@ -27,6 +27,16 @@ Replace values in curly braces with proper details, where:
 
 The service listens on port `3000`.
 
+### Access on cluster
+
+In order to use Asset Upload Service on cluster, run the command:
+
+```bash
+kubectl port-forward deployment/assetstore-asset-upload-service 3000:3000 -n kyma-system
+```
+
+The service will be exposed on `3000` port.
+
 ### Build a production version
 
 To build the production Docker image, run this command:
