@@ -99,9 +99,8 @@ After you receive the certificate, decode it and use it in your application. Reg
 
 Use the link you got in the configuration details to fetch the management information. Use certificate and key generated for the Application. Run:
 ```
-curl {INFO_URL} --cert {GENERATED_APP_CERT}.crt --key {GENERATED_APP_KEY}.key -k
+curl {INFO_URL} --cert {GENERATED_APP_CERT}.crt --key {GENERATED_APP_KEY}.key 
 ```
->**NOTE:** If Application Registry or Event Service runs on different Kyma you can specify their hosts using `MetadataHost` and `EventsHost` headers in the call.
 
 A successful call returns the following response:
 ```
