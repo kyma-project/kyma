@@ -97,11 +97,11 @@ After you receive the certificate, decode it and use it in your application. Reg
 
 ## Get the management information from Kyma
 
-Use the link you got in the configuration details to fetch the management information using certificate. Run:
+Use the link you got in the configuration details to fetch the management information. Use certificate and key generated for the Application. Run:
 ```
-curl {INFO_URL}
+curl {INFO_URL} --cert {GENERATED_APP_CERT}.crt --key {GENERATED_APP_KEY}.key -k
 ```
->**NOTE:** If Application Registry or Event Service runs on different Kyma you can specify their hosts using `Base-Metadata-Host` and `Base-Events-Host` headers in the call.
+>**NOTE:** If Application Registry or Event Service runs on different Kyma you can specify their hosts using `MetadataHost` and `EventsHost` headers in the call.
 
 A successful call returns the following response:
 ```
@@ -109,10 +109,11 @@ A successful call returns the following response:
   "urls": {
     "metadataUrl": "{BASE_METADATA_PATH}/{APP_NAME}/v1/metadata/services",
     "eventsUrl": "{BASE_EVENTS_PATH}/{APP_NAME}/v1/events",
-    "renewCertUrl": "{BASE_RENEWAL_PATH}/v1/applications/certificates/renewals"
+    "renewCertUrl": ""
   }
 }
 ```
+Keep in mind that `renewCertUrl` is not implemented yet.
 
 ## Call the Metadata and Event services on local deployment
 
