@@ -33,7 +33,7 @@ func getNumberOfNodes() int {
 		log.Fatalf("Error while kubectl get nodes: %v", string(stdoutStderr))
 	}
 	linesToRemove := 1;
-	if strings.Contains(string(stdoutStderr), "master") && !strings.Contains(string(stdoutStderr), "minikube"){
+	if strings.Contains(string(stdoutStderr), "master") && !strings.Contains(string(stdoutStderr), "minikube") {
 		linesToRemove++
 	}
 	outputArr := strings.Split(string(stdoutStderr), "\n")
@@ -143,7 +143,7 @@ func testPromtail() {
 		select {
 		case <-timeout:
 			for _, pod := range pods {
-				cmd := exec.Command("kubectl", "-n", namespace, "log", pod)
+				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "logging")
 				stdoutStderr, _ := cmd.CombinedOutput()
 				log.Printf("Logs for pod %s:\n%s", pod, string(stdoutStderr))
 			}
@@ -151,7 +151,7 @@ func testPromtail() {
 		case <-tick:
 			matchesCount := 0
 			for _, pod := range pods {
-				cmd := exec.Command("kubectl", "-n", namespace, "log", pod)
+				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "logging")
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
 					log.Fatalf("Unable to obtain log for pod[%s]:\n%s\n", pod, string(stdoutStderr))
