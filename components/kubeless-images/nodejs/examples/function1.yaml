@@ -1,0 +1,14 @@
+---
+apiVersion: kubeless.io/v1beta1
+kind: Function
+metadata:
+  name: hello
+spec:
+  handler: handler.foobar
+  runtime: nodejs8
+  function: |
+      module.exports = {
+        foobar: function (event, context) {
+          return(event.data)
+        }
+      }
