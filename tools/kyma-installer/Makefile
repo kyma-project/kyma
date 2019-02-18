@@ -15,20 +15,14 @@ build-image:
 push-image:
 	docker push $(IMG):$(TAG)
 
+.PHONY: ci-pr
+ci-pr: build-image push-image
+
+.PHONY: ci-master
+ci-master: build-image push-image
+
 .PHONY: ci-release
 ci-release: build-image push-image
-
-.PHONY: ci-create-ondemand-artifacts
-ci-create-ondemand-artifacts: build-image push-image
-	cd ./../..; \
-	docker run --rm --volume $(CURDIR)/../..:/kyma  \
-		--volume $(ARTIFACTS):$(ARTIFACTS) \
-		-e KYMA_INSTALLER_VERSION=$(TAG) \
-		-e KYMA_INSTALLER_PUSH_DIR=$(KYMA_INSTALLER_PUSH_DIR) \
-		-e ARTIFACTS_DIR=$(ARTIFACTS) \
-		--entrypoint /kyma/installation/scripts/release-generate-kyma-installer-artifacts.sh \
-		eu.gcr.io/kyma-project/acs-installer:0.0.4
-
 
 # Creates release artifacts. Artifacts are stored in $(ARTIFACTS) directory.
 # This variable is provided by Prow and files stored there are automatically uploaded to GCS.
