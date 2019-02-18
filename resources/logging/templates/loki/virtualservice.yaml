@@ -22,7 +22,7 @@ spec:
           number: {{ .Values.loki.service.port  }}
     corsPolicy:
       allowOrigin:
-      - "*"
+      - https://log-ui.{{ .Values.global.domainName }}
       allowHeaders:
       - access-control-allow-origin
       - authorization
