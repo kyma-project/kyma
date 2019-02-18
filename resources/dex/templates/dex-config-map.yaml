@@ -18,7 +18,7 @@ data:
       config:
         inCluster: true
     logger:
-      level: "debug"
+      level: "info"
       format: "text"
     web:
       http: 0.0.0.0:{{ .Values.containerPort }}
