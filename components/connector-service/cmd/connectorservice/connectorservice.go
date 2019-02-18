@@ -114,7 +114,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		Province:           env.province,
 	}
 
-	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(), opts.caSecretName, subjectValues)
+	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.certificateValidityTime), opts.caSecretName, subjectValues)
 
 	appTokenTTLMinutes := time.Duration(opts.appTokenExpirationMinutes) * time.Minute
 
