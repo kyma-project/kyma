@@ -307,6 +307,9 @@
 # Event Service Tests
 /tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
+# E2E Backup Tests
+/tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc
 

@@ -1,0 +1,5 @@
+containerRegistry:
+  path: docker.io/k15r
+
+image:
+  tag: latest

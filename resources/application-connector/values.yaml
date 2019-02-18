@@ -20,10 +20,10 @@ global:
     version: 0c447819
   connector_service:
     dir: develop/
-    version: fa0de1b9
+    version: 7f672b46
   connector_service_tests:
     dir: develop/
-    version: fa0de1b9
+    version: 7f672b46
   connection_token_handler:
     dir: develop/
     version: fa0de1b9
@@ -44,4 +44,4 @@ global:
     version: cb6a82cf
   application_broker:
     dir: develop/
-    version: f25caafe
+    version: f78529c4
