@@ -78,47 +78,47 @@ func (r *replicaSetResolver) ReplicaSetsQuery(ctx context.Context, namespace str
 	return converted, nil
 }
 
-// func (r *replicaSetResolver) UpdatePodMutation(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.ReplicaSet, error) {
-// 	pod, err := r.replicaSetConverter.GQLJSONToPod(update)
-// 	if err != nil {
-// 		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace `%s`", pretty.ReplicaSet, name, namespace))
-// 		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
-// 	}
+func (r *replicaSetResolver) UpdateReplicaSetMutation(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.ReplicaSet, error) {
+	replicaSet, err := r.replicaSetConverter.GQLJSONToReplicaSet(update)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace `%s`", pretty.ReplicaSet, name, namespace))
+		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
 
-// 	updated, err := r.replicaSetSvc.Update(name, namespace, pod)
-// 	if err != nil {
-// 		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace %s", pretty.ReplicaSet, name, namespace))
-// 		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
-// 	}
+	updated, err := r.replicaSetSvc.Update(name, namespace, replicaSet)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace %s", pretty.ReplicaSet, name, namespace))
+		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
 
-// 	updatedGql, err := r.replicaSetConverter.ToGQL(updated)
-// 	if err != nil {
-// 		glog.Error(errors.Wrapf(err, "while converting %s `%s` from namespace %s", pretty.ReplicaSet, name, namespace))
-// 		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
-// 	}
+	updatedGql, err := r.replicaSetConverter.ToGQL(updated)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s `%s` from namespace %s", pretty.ReplicaSet, name, namespace))
+		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
 
-// 	return updatedGql, nil
-// }
+	return updatedGql, nil
+}
 
-// func (r *replicaSetResolver) DeletePodMutation(ctx context.Context, name string, namespace string) (*gqlschema.ReplicaSet, error) {
-// 	pod, err := r.replicaSetSvc.Find(name, namespace)
-// 	if err != nil {
-// 		glog.Error(errors.Wrapf(err, "while finding %s `%s` in namespace `%s`", pretty.ReplicaSet, name, namespace))
-// 		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
-// 	}
+func (r *replicaSetResolver) DeleteReplicaSetMutation(ctx context.Context, name string, namespace string) (*gqlschema.ReplicaSet, error) {
+	replicaSet, err := r.replicaSetSvc.Find(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while finding %s `%s` in namespace `%s`", pretty.ReplicaSet, name, namespace))
+		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
 
-// 	podCopy := pod.DeepCopy()
-// 	deletedPod, err := r.replicaSetConverter.ToGQL(podCopy)
-// 	if err != nil {
-// 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ReplicaSet))
-// 		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
-// 	}
+	replicaSetCopy := replicaSet.DeepCopy()
+	deletedReplicaSet, err := r.replicaSetConverter.ToGQL(replicaSetCopy)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ReplicaSet))
+		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
 
-// 	err = r.replicaSetSvc.Delete(name, namespace)
-// 	if err != nil {
-// 		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.ReplicaSet, name, namespace))
-// 		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
-// 	}
+	err = r.replicaSetSvc.Delete(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.ReplicaSet, name, namespace))
+		return nil, gqlerror.New(err, pretty.ReplicaSet, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
 
-// 	return deletedPod, nil
-// }
+	return deletedReplicaSet, nil
+}

@@ -180,13 +180,11 @@ func (r *mutationResolver) DeletePod(ctx context.Context, name string, namespace
 }
 
 func (r *mutationResolver) UpdateReplicaSet(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.ReplicaSet, error) {
-	// return r.k8s.UpdatePodMutation(ctx, name, namespace, update)
-	return nil, nil
+	return r.k8s.UpdateReplicaSetMutation(ctx, name, namespace, update)
 }
 
 func (r *mutationResolver) DeleteReplicaSet(ctx context.Context, name string, namespace string) (*gqlschema.ReplicaSet, error) {
-	//return r.k8s.DeletePodMutation(ctx, name, namespace)
-	return nil, nil
+	return r.k8s.DeleteReplicaSetMutation(ctx, name, namespace)
 }
 
 func (r *mutationResolver) CreateServiceInstance(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {

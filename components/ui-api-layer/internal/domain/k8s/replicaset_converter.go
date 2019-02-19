@@ -6,13 +6,11 @@ import (
 	"fmt"
 
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/state"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
-
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/state"
-
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
 )
 
 type replicaSetConverter struct {
