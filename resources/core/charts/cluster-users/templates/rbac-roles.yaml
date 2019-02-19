@@ -34,7 +34,7 @@ rules:
   resources: ["*"]
   verbs: ["get", "list"]
 - apiGroups: ["authorization.k8s.io"]
-  resources: ["selfsubjectrulesreviews"]
+  resources: ["selfsubjectrulesreviews", "selfsubjectaccessreviews"]
   verbs: ["create"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["get", "list"]
@@ -89,7 +89,7 @@ rules:
   resources: ["customresourcedefinitions"]
   verbs: ["get", "list"]
 - apiGroups: ["authorization.k8s.io"]
-  resources: ["selfsubjectrulesreviews"]
+  resources: ["selfsubjectrulesreviews", "selfsubjectaccessreviews", "subjectaccessreviews"]
   verbs: ["create"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["*"]
@@ -146,7 +146,7 @@ rules:
   resources: ["customresourcedefinitions"]
   verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
 - apiGroups: ["authorization.k8s.io"]
-  resources: ["selfsubjectrulesreviews"]
+  resources: ["selfsubjectrulesreviews", "selfsubjectaccessreviews"]
   verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["*"]
