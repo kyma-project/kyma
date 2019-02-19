@@ -4,6 +4,10 @@ import (
 	"crypto/tls"
 	stdflag "flag"
 	"fmt"
+	"io"
+	"k8s.io/apimachinery/pkg/util/httpstream"
+	"k8s.io/apimachinery/pkg/util/httpstream/spdy"
+	client_spdy "k8s.io/client-go/transport/spdy"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -20,9 +24,7 @@ import (
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/proxy"
 	flag "github.com/spf13/pflag"
 	"golang.org/x/net/http2"
-	"k8s.io/apiserver/pkg/authentication/authenticator"
 	k8sapiflag "k8s.io/apiserver/pkg/util/flag"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	certutil "k8s.io/client-go/util/cert"
@@ -115,38 +117,38 @@ func main() {
 		glog.Fatalf("Failed to build parse upstream URL: %v", err)
 	}
 
-	kubeClient, err := kubernetes.NewForConfig(kcfg)
-	if err != nil {
-		glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
-	}
-
-	var authenticator authenticator.Request
-	// If OIDC configuration provided, use oidc authenticator
-	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
-		authenticator, err = authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
-		if err != nil {
-			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
-		}
-
-	} else {
-		//Use Delegating authenticator
-
-		tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
-		authenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
-		if err != nil {
-			glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
-		}
-
-	}
-
-	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
-	authorizer, err := authz.NewAuthorizer(sarClient)
-
-	if err != nil {
-		glog.Fatalf("Failed to create authorizer: %v", err)
-	}
-
-	authProxy, err := proxy.New(kubeClient, cfg.auth, authorizer, authenticator)
+	//kubeClient, err := kubernetes.NewForConfig(kcfg)
+	//if err != nil {
+	//	glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
+	//}
+	//
+	//var authenticator authenticator.Request
+	//If OIDC configuration provided, use oidc authenticator
+	//if cfg.auth.Authentication.OIDC.IssuerURL != "" {
+	//	authenticator, err = authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
+	//	if err != nil {
+	//		glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
+	//	}
+	//
+	//} else {
+	//	//Use Delegating authenticator
+	//
+	//	tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
+	//	authenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
+	//	if err != nil {
+	//		glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
+	//	}
+	//
+	//}
+	//
+	//sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
+	//authorizer, err := authz.NewAuthorizer(sarClient)
+	//
+	//if err != nil {
+	//	glog.Fatalf("Failed to create authorizer: %v", err)
+	//}
+	//
+	//authProxy, err := proxy.New(kubeClient, cfg.auth, authorizer, authenticator)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
@@ -166,12 +168,59 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		ok := authProxy.Handle(w, req)
-		if !ok {
-			return
-		}
+		//ok := authProxy.Handle(w, req)
+		//if !ok {
+		//	return
+		//}
 
-		rp.ServeHTTP(w, req)
+		glog.Info("REQUEST")
+		glog.Info(req)
+
+		if req.Header.Get("upgrade") == "SPDY/3.1" {
+
+			clientTransport, upgrader, err := client_spdy.RoundTripperFor(kcfg)
+			if err != nil {
+				panic(err)
+			}
+
+			client := &http.Client{Transport: clientTransport}
+
+			protocols := req.Header.Get("X-Stream-Protocol-Version")
+			clientUrl, _ := url.Parse(upstreamURL.String())
+			clientUrl.Path = req.URL.Path
+			clientUrl.RawQuery = req.URL.RawQuery
+			clientReq, err := http.NewRequest(req.Method, clientUrl.String(), req.Body)
+			if err != nil {
+				panic(err)
+			}
+
+			clientReq.Header.Set("upgrade", "SPDY/3.1")
+			clientReq.Header.Set("connection", "upgrade")
+
+			serverConnection, s, err := client_spdy.Negotiate(upgrader, client, clientReq, protocols)
+			if err != nil {
+				panic(err)
+			}
+			w.Header().Set(httpstream.HeaderProtocolVersion, s)
+			clientConnection := spdy.NewResponseUpgrader().UpgradeResponse(w, req, func(clientStream httpstream.Stream, replySent <-chan struct{}) error {
+				serverStream, err := serverConnection.CreateStream(clientStream.Headers())
+				if err != nil {
+					return err
+				}
+
+				go io.Copy(clientStream, serverStream)
+				go io.Copy(serverStream, clientStream)
+				return nil
+			})
+
+			go func() {
+				<-serverConnection.CloseChan()
+				clientConnection.Close()
+			}()
+
+		} else {
+			rp.ServeHTTP(w, req)
+		}
 	}))
 
 	if cfg.secureListenAddress != "" {
