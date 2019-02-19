@@ -11,7 +11,7 @@ Promtail is the agent responsible for collecting reliable metadata, consistent w
 The server-side components on the write path wii mirror the [Cortex](https://github.com/cortexproject/cortex) architecture.
 * Writes will first hit the Distributor, which is responsible for distributing and replacing the writes to the ingesters. Loki use the Cortex consistent hash ring and distribute writes based on a hash of the entire metadata.
 * Next writes will hit a 'log ingester' which batches up writes for the same stream in memory in to 'log chunks'. When chunks reach a predefined size or age, periodically flushed to the Cortex chunk store.
-* The Cortex chunk store will be updated to reduce copying of chunk data on the read and write path and add support for writing chunks of Grafana.
+* The Cortex chunk store will be updated to reduce copying of chunk data on the read and write path and add support for writing chunks of logs.
 
 #### Log Chunks
 A log chunk consists of all logs for a given metadata (e.g. labels), collected over a certain time period. Log chunks support append, seek, and stream operations on read requests.
