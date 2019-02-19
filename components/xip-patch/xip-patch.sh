@@ -42,12 +42,12 @@ function generateXipDomain() {
         exit 1
     fi
 
-    PUBLIC_DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
+    XIP_DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
 
-    PUBLIC_DOMAIN_YAML=$(cat << EOF
+    XIP_DOMAIN_YAML=$(cat << EOF
 ---
 data:
-  global.domainName: "${PUBLIC_DOMAIN}"
+  global.domainName: "${XIP_DOMAIN}"
 EOF
 )
 
