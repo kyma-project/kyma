@@ -1,6 +1,6 @@
 name: logging
 version: 0.0.1
-description: "Helm Chart for Kyma Logging"
+description: "Helm Chart for Kyma logging"
 apiVersion: v1
 keywords:
   - logging
