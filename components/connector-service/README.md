@@ -35,6 +35,8 @@ The Connector Service has the following parameters:
 - **getInfoURL** - URL at which the management information is available. If not provided, it bases on `connectorServiceHost`.
 - **group** - Group for which certificates are generated. If the chart does not provide the default value, you must specify it in the request header to the token endpoint.
 - **tenant** - Tenant for which certificates are generated. If the chart does not provide the default value, you must specify it in the request header to the token endpoint.
+- **certificateValidityTime** - Time after which certificates issued by Connector Service will expire. Allowed time units are: `d`, `h`, `m` for days, hours and minutes, only single time unit can be used. Default value is `92d`.
+
 
 Connector Service also uses following environmental variables for CSR - related information config:
 - **COUNTRY** (two-letter-long country code)
