@@ -29,8 +29,8 @@ type RuntimeURLs struct {
 
 type ApiInfo struct {
 	*RuntimeURLs
-	GetInfoURL      string `json:"infoUrl"`
-	CertificatesUrl string `json:"certificatesUrl"`
+	ManagementInfoURL string `json:"infoUrl"`
+	CertificatesUrl   string `json:"certificatesUrl"`
 }
 
 type CertInfo struct {

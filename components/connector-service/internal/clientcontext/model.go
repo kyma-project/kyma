@@ -3,6 +3,7 @@ package clientcontext
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 )
 
 const (
@@ -25,6 +26,14 @@ type ConnectorClientContext interface {
 
 type ContextExtender interface {
 	ExtendContext(ctx context.Context) context.Context
+}
+
+func NewClusterContextExtender() ContextExtender {
+	return &ClusterContext{}
+}
+
+func NewApplicationContextExtender() ContextExtender {
+	return &ApplicationContext{}
 }
 
 type ConnectorClientReader interface {
@@ -104,7 +113,7 @@ func (clsCtx ClusterContext) GetApplication() string {
 // GetCommonName returns expected Common Name value for the Cluster
 func (clsCtx ClusterContext) GetCommonName() string {
 	// TODO - adjust CN format after decision is made
-	return clsCtx.Group + clsCtx.Tenant
+	return fmt.Sprintf("%s;%s", clsCtx.Tenant, clsCtx.Group)
 }
 
 func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {

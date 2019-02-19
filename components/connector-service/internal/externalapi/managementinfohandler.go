@@ -1,26 +1,30 @@
 package externalapi
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
-	"net/http"
 )
 
 const (
-	RenewCertEndpoint = "certificates/renewals"
+	RenewCertURLFormat = "%s/certificates/renewals"
 )
 
-type ManagementInfoHandler struct {
-	connectorClientExtractor clientcontext.ConnectorClientExtractor
+type managementInfoHandler struct {
+	connectorClientExtractor    clientcontext.ConnectorClientExtractor
+	certificateProtectedBaseURL string
 }
 
-func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor) *ManagementInfoHandler {
-	return &ManagementInfoHandler{
-		connectorClientExtractor: connectorClientExtractor,
+func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, certProtectedBaseURL string) *managementInfoHandler {
+	return &managementInfoHandler{
+		connectorClientExtractor:    connectorClientExtractor,
+		certificateProtectedBaseURL: certProtectedBaseURL,
 	}
 }
 
-func (ih *ManagementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *http.Request) {
+func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *http.Request) {
 	connectorClientContext, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
@@ -29,12 +33,12 @@ func (ih *ManagementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 
 	urls := ih.buildURLs(connectorClientContext)
 
-	httphelpers.RespondWithBody(w, 200, mgmtInfoReponse{URLs: urls})
+	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls})
 }
 
-func (ih *ManagementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
+func (ih *managementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
 	return mgmtURLs{
 		RuntimeURLs:  connectorClientContext.GetRuntimeUrls(),
-		RenewCertURL: "",
+		RenewCertURL: fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
 	}
 }

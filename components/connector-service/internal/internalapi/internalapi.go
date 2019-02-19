@@ -13,7 +13,7 @@ import (
 
 type Config struct {
 	Middlewares      []mux.MiddlewareFunc
-	TokenManager     tokens.Manager
+	TokenManager     tokens.Creator
 	CSRInfoURL       string
 	ContextExtractor clientcontext.ConnectorClientExtractor
 }
@@ -24,18 +24,18 @@ type TokenHandler interface {
 
 func NewHandler(globalMiddlewares []mux.MiddlewareFunc, appCfg Config, runtimeCfg Config) http.Handler {
 	router := mux.NewRouter()
-	httphelpers.WithMiddlewares(globalMiddlewares, router)
+	httphelpers.WithMiddlewares(router, globalMiddlewares...)
 
 	appTokenHandler := NewTokenHandler(appCfg.TokenManager, appCfg.CSRInfoURL, appCfg.ContextExtractor)
 
 	applicationTokenRouter := router.PathPrefix("/v1/applications").Subrouter()
-	httphelpers.WithMiddlewares(appCfg.Middlewares, applicationTokenRouter)
+	httphelpers.WithMiddlewares(applicationTokenRouter, appCfg.Middlewares...)
 	applicationTokenRouter.HandleFunc("/tokens", appTokenHandler.CreateToken).Methods(http.MethodPost)
 
 	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenManager, runtimeCfg.CSRInfoURL, runtimeCfg.ContextExtractor)
 
 	clusterTokenRouter := router.PathPrefix("/v1/runtimes").Subrouter()
-	httphelpers.WithMiddlewares(runtimeCfg.Middlewares, clusterTokenRouter)
+	httphelpers.WithMiddlewares(clusterTokenRouter, runtimeCfg.Middlewares...)
 	clusterTokenRouter.HandleFunc("/tokens", runtimeTokenHandler.CreateToken).Methods(http.MethodPost)
 
 	router.NotFoundHandler = errorhandler.NewErrorHandler(404, "Requested resource could not be found.")
