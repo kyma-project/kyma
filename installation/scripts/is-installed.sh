@@ -91,6 +91,14 @@ do
       echo "to fetch the logs from the installer execute: kubectl logs -n kyma-installer $(kubectl get pods --all-namespaces -l name=kyma-installer --no-headers -o jsonpath='{.items[*].metadata.name}')"
     fi
     if [ "$TIMEOUT_SET" -ne 0 ] && [ "$ITERATIONS_LEFT" -le 0 ]; then
+      echo "Installation errors until timeout:"
+      echo "----------"
+      kubectl get installation  kyma-installation -o go-template --template='{{- range .status.errorLog }}
+{{.component}}:
+  {{.log}}
+{{- end}}
+'
+      echo "----------"
       echo "timeout reached on kyma installation error. Exiting"
       exit 1
     fi
