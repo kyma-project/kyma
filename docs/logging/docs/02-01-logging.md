@@ -8,10 +8,10 @@ This document provides an overview of the logging architecture in Kyma. It descr
 Promtail is the agent responsible for collecting reliable metadata, consistent with the time series, or metrics metadata. To achieve this, the agent uses the same service discovery and label relabelling libraries as Prometheus. The agent is wrapped in a daemon that discovers targets, produces metadata labels, and tails log files to produce a stream of logs buffered on the client side and then sent to the service.
 
 ## Life of a write request
-The server-side components on the write path wii mirror the [Cortex](https://github.com/cortexproject/cortex) architecture.
+The server-side components on the write path will mirror the [Cortex](https://github.com/cortexproject/cortex) architecture.
 * Writes will first hit the Distributor, which is responsible for distributing and replacing the writes to the ingesters. Loki use the Cortex consistent hash ring and distribute writes based on a hash of the entire metadata.
 * Next writes will hit a 'log ingester' which batches up writes for the same stream in memory in to 'log chunks'. When chunks reach a predefined size or age, periodically flushed to the Cortex chunk store.
-* The Cortex chunk store will be updated to reduce copying of chunk data on the read and write path and add support for writing chunks of logs.
+* The Cortex chunk store will be updated to reduce copying of chunk data on the read and write path and add support for writing chunks of google cloud storage.
 
 #### Log Chunks
 A log chunk consists of all logs for a given metadata (e.g. labels), collected over a certain time period. Log chunks support append, seek, and stream operations on read requests.
