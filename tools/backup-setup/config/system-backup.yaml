@@ -1,19 +1,20 @@
 apiVersion: ark.heptio.com/v1
 kind: Backup
 metadata:
-  name: kyma-backup
+  name: kyma-system-backup
   namespace: heptio-ark
 spec:
   includedNamespaces:
-  - production
-  excludedNamespaces:
+  - istio-system
+  - kyma-system
+  - kyma-integration
+  - kyma-installer
   - default
-  - kube-public
-  - kube-system
+  - natts
+  excludedNamespaces: null
   includedResources:
   - '*'
-  excludedResources:
-  - storageclasses.storage.k8s.io
+  excludedResources: null
   includeClusterResources: null
   labelSelector: null
   storageLocation: default

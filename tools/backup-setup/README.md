@@ -4,6 +4,8 @@
 
 Backup setup is used to configure the specifications,`spec:`  for ark server to execute the backup operation in Kyma.
 
+**See:** [Ark in Kyma](resources/ark/README.md) 
+
 Some of the configurations to apply are:
 
 * Include namespaces
@@ -11,10 +13,21 @@ Some of the configurations to apply are:
 * Include resources
 * Exclude resources
 
+Backup setup includes two yaml file for configuring backups:
+
+- [all-backup.yaml](tools/backup-setup/config/all-backup.yaml)
+
+It is meant to be the one for managing critical data backups such as **business** related namespaces as `production`. System namespaces are not included for in this backup.
+
+- [system-backup.yaml](tools/backup-setup/config/system-backup.yaml)
+
+It is intended for system backups such as `kyma-system` and other related namespaces. 
 
 ## Usage
 
-Developers and administrators can change [backup.yaml](config/backup.yaml) following the instructions below.
+Developers and administrators can change either [system-backup.yaml](tools/backup-setup/config/system-backup.yaml) or [system-backup.yaml](tools/backup-setup/config/system-backup.yaml) as it is needed.
+
+The `spec:` section is where the backup is configured. A short explanation can be see it below: 
 
 ```yaml
 spec:
@@ -39,10 +52,13 @@ spec:
     matchLabels:
 ```
 
+Here is the official description for the [Backup API](https://github.com/heptio/velero/blob/release-0.9/docs/api-types/backup.md) in [Velero project](https://github.com/heptio/velero)
+
 ### Executing a backup using backup.yaml
 
-In order to execute a backup execute:
+Backups can be easily automated by executing from a shell script or golang binary the kubectl instruction below: 
 
-`kubectl apply -f tools/backup-setup/config/backup.yaml`
+`kubectl apply -f tools/backup-setup/config/system-backup.yaml`
 
-Also it is possible to add labels and change the name of the backup.
+`kubectl apply -f tools/backup-setup/config/system-backup.yaml`
+
