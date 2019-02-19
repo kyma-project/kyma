@@ -18,7 +18,7 @@ A log chunk consists of all logs for a given metadata (e.g. labels), collected o
 
 #### Life of a Query Request
 As chunks are larger than Prometheus/Cortex chunks (Cortex chunks are max 1KB in size), it is not possible to load and decompress them in their entirety. 
-To solve this problem Loki support streaming and iterating over them, therefor only decompressing of the parts are necessary.
+To solve this problem Loki support streaming and iterating over them, therefor loki will decompress only necessary chunk parts.
 
 
 Further information consult the original [design doc](https://docs.google.com/document/d/11tjK_lvp1-SVsFZjgOTr1vV3-q6vBAsZYIQ5ZeYBkyM/view)
