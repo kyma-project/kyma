@@ -59,7 +59,7 @@ These components use this CR:
 
 | Component   |  Description |
 |:-----------:|:-------------|
-| Application Registry | Reads and writes the APIs and Event Catalog metadata of the connected external solution to this CR. |
+| Application Registry | Reads and saves the APIs and Event Catalog metadata of the connected external solution in this CR. |
 | Application Broker | Exposes the APIs and Event definitions stored in this CR as ServiceClasses to the Service Catalog. |
 | Application Operator | Provisions and de-provisions an instance of Application Proxy and Event Service for every created or deleted Application CR. |
 
