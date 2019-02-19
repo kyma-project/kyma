@@ -19,11 +19,11 @@ global:
     dir: develop/
     version: 0c447819
   connector_service:
-    dir: pr/
-    version: PR-2764
+    dir: develop/
+    version: 57f2ecea
   connector_service_tests:
-    dir: pr/
-    version: PR-2764
+    dir: develop/
+    version: 57f2ecea
   connection_token_handler:
     dir: develop/
     version: fa0de1b9
