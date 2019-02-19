@@ -14,7 +14,7 @@ The server-side components on the write path wii mirror the [Cortex](https://git
 * The Cortex chunk store will be updated to reduce copying of chunk data on the read and write path and add support for writing chunks of Grafana.
 
 #### Log Chunks
-A log chunk consists of all logs for a given metadata (e.g labels), collected over a certain time period. Log chunks support append, seek, and stream operations on read requests.
+A log chunk consists of all logs for a given metadata (e.g. labels), collected over a certain time period. Log chunks support append, seek, and stream operations on read requests.
 
 #### Life of a Query Request
 As chunks are larger than Prometheus/Cortex chunks (Cortex chunks are max 1KB in size), it is not possible to load and decompress them in their entirety. Loki support streaming and iterating over them, only decompressing the parts necessary 
