@@ -6,11 +6,14 @@ ADD lib/helper.js kubeless_rt/lib/
 ADD kubeless.js kubeless_rt/
 ADD package.json kubeless_rt/
 ADD kubeless-npm-install.sh /
+ADD start.sh /
 
 WORKDIR kubeless_rt/
 
 RUN npm install
 
+RUN chmod +x /start.sh
+
 USER 1000
 
-CMD ["node", "kubeless.js"]
+CMD ["/start.sh"]
