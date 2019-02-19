@@ -9,9 +9,9 @@ service:
   internalPort: 3000
   externalPort: 3000
   protocol: TCP
-api:
+virtualservice:
   enabled: false
-  host: asset-upload-service
   annotations: {}
+  name: asset-upload-service
 istio:
   namespace: istio-system
