@@ -55,13 +55,13 @@ The variables are:
 To upload files, send a Multipart form POST request to `/upload` endpoint. The endpoint recognizes the following field names:
 
 - `private` - array of files, which should be uploaded to private system bucket.  
-- `private` - array of files, which should be uploaded to public read-only system bucket.  
+- `public` - array of files, which should be uploaded to public read-only system bucket.  
 - `directory` - optional directory, where the uploaded files are put. If it is not specified, it will be randomized.
 
 To do the multipart request using `curl`, run the following command in this repository:
 
 ```bash
-curl -v -F directory='example' -F private=@main.go -F private=@Gopkg.toml -F public=@Dockerfile http://localhost:3000/upload
+curl -v -F directory='example' -F private=@main.go -F private=@Gopkg.toml -F public=@Dockerfile http://localhost:3000/v1/upload
 ```
 
 The result is:
@@ -90,6 +90,8 @@ The result is:
    ]
 }
 ```
+
+See the [Swagger specification](../../docs/asset-store/docs/assets/asset-upload-service-swagger.yaml) to read full API documentation. You can use the [Swagger Editor](https://editor.swagger.io) to preview and test the API service.
 
 ### Configure logger verbosity level
 

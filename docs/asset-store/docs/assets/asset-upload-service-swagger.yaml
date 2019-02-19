@@ -1,0 +1,122 @@
+openapi: 3.0.0
+info:
+  description: The purpose of this application is to provide an API to enable temporary
+    host files for Asset Store, without need to use external providers.
+  title: Asset Upload Service API
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+  version: 0.0.1
+paths:
+  /upload:
+    post:
+      description: Uploads files sent with form to Minio.
+      tags:
+        - upload
+      summary: Uploads files to Minio.
+      operationId: uploadReq
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                public:
+                  description: Files, which should be uploaded to public system bucket.
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                private:
+                  description: Files, which should be uploaded to private system bucket.
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                directoryName:
+                  description: Directory, where files will be put in bucket. If not specified, the directory name will be generated.
+                  type: string
+      responses:
+        "200":
+          $ref: "#/components/responses/uploadSuccess"
+        "207":
+          $ref: "#/components/responses/uploadMultiStatus"
+        "400":
+          $ref: "#/components/responses/badRequest"
+        "500":
+          $ref: "#/components/responses/internalServerError"
+servers:
+  - url: http://localhost:3000/v1
+components:
+  responses:
+    badRequest:
+      description: Bad request response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Array of error messages
+                type: array
+                items:
+                  type: string
+    internalServerError:
+      description: Internal server error response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Array of error messages
+                type: array
+                items:
+                  type: string
+    uploadMultiStatus:
+      description: Multi status response. Some files have been uploaded successfully, some didn't
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Array of error messages
+                type: array
+                items:
+                  type: string
+              uploadedFiles:
+                description: Files, that were uploaded successfully
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileUploadResult"
+    uploadSuccess:
+      description: Success response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              uploadedFiles:
+                description: Files, that were uploaded successfully
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileUploadResult"
+  schemas:
+    FileUploadResult:
+      description: "It represents a single successful file upload result"
+      type: object
+      properties:
+        bucket:
+          description: "Bucket name, where the uploaded file is located"
+          type: string
+        fileName:
+          description: "File name"
+          type: string
+        remotePath:
+          description: "Full remote path to the file. If the bucket is public, it can be accessed with simple GET request"
+          type: string
+        size:
+          description: "File size"
+          type: integer
+          format: int64
