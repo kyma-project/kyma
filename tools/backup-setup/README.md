@@ -2,14 +2,19 @@
 
 ## Overview
 
-Backup setup is used to configure the `spec:` values for ark server to execute the backup in Kyma.
+Backup setup is used to configure the specifications,`spec:`  for ark server to execute the backup operation in Kyma.
+
+Some of the configurations to apply are:
 
 * Include namespaces
 * Exclude namespaces
 * Include resources
 * Exclude resources
 
+
 ## Usage
+
+Developers and administrators can change [backup.yaml](config/backup.yaml) following the instructions below.
 
 ```yaml
 spec:
@@ -34,6 +39,10 @@ spec:
     matchLabels:
 ```
 
-### Apply backup.yaml
+### Executing a backup using backup.yaml
 
-`kondemandatx apply -f tools/backup-setup/config/backup.yaml`
+In order to execute a backup execute:
+
+`kubectl apply -f tools/backup-setup/config/backup.yaml`
+
+Also it is possible to add labels and change the name of the backup.
