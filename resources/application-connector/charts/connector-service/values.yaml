@@ -8,9 +8,11 @@ deployment:
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
     caSecretName: connector-service-app-ca
-    getInfoURL: ""
+    appsInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/applications/management/info
+    runtimesInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/runtimes/management/info
     group: "default"
     tenant: "default"
+    validityTime: "92d"
   envvars:
     country: DE
     organization: Organization
@@ -26,9 +28,16 @@ service:
     serviceType: ClusterIP
     port: *internalAPIPort
 
+ingress:
+  externalapi:
+    port: *externalAPIPort
+  authSecret: kyma-integration/nginx-auth-ca
+  tlsSecret: ingress-tls-cert
+
 tests:
   skipSslVerify: false
   group: ""
   tenant: ""
   image:
     pullPolicy: IfNotPresent
+
