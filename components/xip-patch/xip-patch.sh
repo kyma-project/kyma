@@ -51,7 +51,7 @@ data:
 EOF
 )
 
-    kubectl patch configmap installation-config-overrides --patch "${PUBLIC_DOMAIN_YAML}" -n kyma-installer
+    kubectl patch configmap installation-config-overrides --patch "${XIP_DOMAIN_YAML}" -n kyma-installer
 
 }
 
