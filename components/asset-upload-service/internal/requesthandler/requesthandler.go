@@ -92,7 +92,14 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	for _, err := range errs {
 		errMessages = append(errMessages, err.Error())
 	}
-	r.writeResponse(w, http.StatusCreated, Response{
+
+	var status int
+	if len(errMessages) == 0 {
+		status = http.StatusOK
+	} else {
+		status = http.StatusMultiStatus
+	}
+	r.writeResponse(w, status, Response{
 		UploadedFiles: uploadedFiles,
 		Errors:        errMessages,
 	})
@@ -145,5 +152,9 @@ func (r *RequestHandler) writeResponse(w http.ResponseWriter, statusCode int, re
 }
 
 func (r *RequestHandler) writeInternalError(w http.ResponseWriter, err error) {
-	http.Error(w, err.Error(), http.StatusInternalServerError)
+	r.writeResponse(w, http.StatusInternalServerError, Response{
+		Errors: []string{
+			err.Error(),
+		},
+	})
 }

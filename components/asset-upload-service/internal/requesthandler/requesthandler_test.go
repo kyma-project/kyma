@@ -73,7 +73,7 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 
 		// Then
 
-		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusCreated))
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusOK))
 
 		removeRemotePathFromFiles(&result)
 
@@ -122,7 +122,7 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 		httpResp, result := testServeHTTP(g, client, files, directoryName)
 
 		// Then
-		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusCreated))
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusOK))
 
 		g.Expect(result.Errors).To(gomega.BeEmpty())
 
@@ -173,7 +173,7 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 		httpResp, result := testServeHTTP(g, client, files, directoryName)
 
 		// Then
-		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusCreated))
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusMultiStatus))
 
 		g.Expect(result.UploadedFiles).To(gomega.BeEmpty())
 
