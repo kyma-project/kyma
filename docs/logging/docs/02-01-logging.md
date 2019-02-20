@@ -21,4 +21,4 @@ As chunks are larger than Prometheus/Cortex chunks (Cortex chunks are max 1KB in
 To solve this problem Loki support streaming and iterating over them, therefor loki will decompress only necessary chunk parts.
 
 
-Further information consult the original [design doc](https://docs.google.com/document/d/11tjK_lvp1-SVsFZjgOTr1vV3-q6vBAsZYIQ5ZeYBkyM/view)
+For further information, see the [design document](https://docs.google.com/document/d/11tjK_lvp1-SVsFZjgOTr1vV3-q6vBAsZYIQ5ZeYBkyM/view).
