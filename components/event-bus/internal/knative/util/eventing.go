@@ -143,7 +143,7 @@ func (k *KnativeLib) CreateSubscription(name string, namespace string, channelNa
 	return nil
 }
 
-// DeleteSubscription deletes a Kantive/Eventing subscription
+// DeleteSubscription deletes a Knative/Eventing subscription
 func (k *KnativeLib) DeleteSubscription(name string, namespace string) error {
 	if err := k.evClient.Subscriptions(namespace).Delete(name, &metav1.DeleteOptions{}); err != nil {
 		log.Printf("ERROR: DeleteSubscription(): deleting subscription: %v", err)
@@ -155,7 +155,7 @@ func (k *KnativeLib) DeleteSubscription(name string, namespace string) error {
 // GetSubscription gets a Knative/Eventing subscription
 func (k *KnativeLib) GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error) {
 	if sub, err := k.evClient.Subscriptions(namespace).Get(name, metav1.GetOptions{}); err != nil {
-		log.Printf("ERROR: GetSubscription(): geting subscription: %v", err)
+		log.Printf("ERROR: GetSubscription(): getting subscription: %v", err)
 		return nil, err
 	} else {
 		return sub, nil
@@ -275,7 +275,6 @@ func makeChannel(provisioner string, name string, namespace string) *evapisv1alp
 func makeHttpRequest(channel *evapisv1alpha1.Channel, message *string) (*http.Request, error) {
 	var jsonStr = []byte(`{"` + *message + `"}`)
 
-	//channelUri := "http://" + channel.GetName() + "-channel" + "." + channel.GetNamespace() + ".svc.cluster.local"
 	channelUri := "http://" + channel.Status.Address.Hostname
 	req, err := http.NewRequest(http.MethodPost, channelUri, bytes.NewBuffer(jsonStr))
 	if err != nil {
