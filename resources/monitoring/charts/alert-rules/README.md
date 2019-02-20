@@ -2,12 +2,31 @@
 
 ## Overview
 
-Kyma uses Prometheus alert rules for monitoring the health of its resources. This chart is the starting point for configuring alert rules.
+Kyma uses Prometheus alert rules to monitor the health of its resources. Use this chart to configure alert rules.
 
+## Alert rules
 
-### Creating Alert Rules in Kyma
+You can define the following alert rules:
 
-Prometheus uses the a label selector **spec.ruleSelector** to identify those ConfigMap that holding Prometheus rule files.
+- Pod is not running
+
+    The Alertmanager sends out alerts when one of the Pods is not running in `kyma-system`, `kyma-integration`, `istio-system`, `kube-public`, or `kube-system` Namespaces.
+
+- Monitor Persistent Volume Claims (PVC)
+
+    The Alertmanager triggers the rule when PVC exceeds 90% for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. To avoid this, increase the capacity of PVC.
+
+-  Monitor CPU Usage
+
+    The Alertmanager triggers the rule when CPU usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to add the `alertcpu: "yes"` label to Pods.
+
+- Monitor Memory usage
+
+    The Alertmanager triggers the rule when Memory usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to add the `alertmem: "yes"` to Pods.
+
+## Create alert rules
+
+Prometheus uses the  **spec.ruleSelector** label selector to identify ConfigMaps which include Prometheus rule files.
 
 ```yaml
 {{- if .Values.rulesSelector }}
@@ -20,10 +39,10 @@ Prometheus uses the a label selector **spec.ruleSelector** to identify those Con
       prometheus: {{ .Release.Name }}
 {{- end }}
 ```
+Follow the steps to create an alert rule:
 
-To define a new alert rule in Kyma, create a ConfigMap labelled with `role: alert-rules` as well as the name of the Prometheus object as `prometheus: {{ .Release.Name }}`.
+1. Use the [ConfigMap template](./templates/alert-rules-configmap.yaml) which contains the sample configuration for an alert rule.
 
-Kyma provides the file [alert-rules-configmap.yaml](./templates/alert-rules-configmap.yaml) which serves as a reference to define Rules as configmaps.
 
 ```yaml
 apiVersion: v1
@@ -49,26 +68,13 @@ data:
     {{- include "kyma-rules.yaml.tpl" . | indent 4}}
 {{ end }}
 ```
-The **data. alert.rules** parameter includes the configuration in the [kyma-rules.yaml](templates/kyma-rules.yaml) file, which creates rules in the following cases:
+
+2. Label the ConfigMap with `role: alert-rules`.
+3. Add the name of a Prometheus object in `prometheus: {{ .Release.Name }}`.
+3. Configure the **data. alert.rules** parameter in the[kyma-rules.yaml](templates/kyma-rules.yaml) file. 
 
 
-*  Alert when a Pod is not running
-
-    The Alertmanager sends out alerts when one of the Pods is not running in `kyma-system`, `kyma-integration`, `istio-system`, `kube-public`, or `kube-system` Namespaces.
-
-* Monitor Persistent Volume Claims (PVC)
-
-    The Alertmanager triggers the rule when PVC exceeds  90%  for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. In such a case, increase the capacity of PVC.
-
-* Monitor CPU Usage
-
-    The Alertmanager triggers the rule when CPU usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertcpu: "yes"` label to Pods.
-
-* Monitor Memory usage
-
-    The Alertmanager triggers the rule when Memory usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to pass the `alertmem: "yes"` to Pods.
-
-This is an example for alerting when a Pod is not running:
+The example shows a sample configuration for an alert rule. The rule activates the alarm when a Pod is not running.
 
 ```yaml
 {{ define "unhealthy-pods-rules.yaml.tpl" }}
@@ -85,28 +91,27 @@ groups:
       summary: "{{`{{$labels.pod}}`}} is not running"
 {{ end }}
 ```
-**A Quick explanation**
-* ```alert:``` represents the name of the alert. Must be a valid metric name.
-* ```expr:``` defines the PromQL expression to evaluate.
-    - [kube_pod_container_status_running](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md) is a [kube-state-metrics](https://github.com/kubernetes/kube-state-metrics) and in the expression above is evaluated if the pod, **pod="sample-metrics"** in the namespace, **namespace="default"** is running.
-    - [Several functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) are also provided by [Promethes](https://prometheus.io/docs/prometheus/latest/querying/basics/) to operate on data.
-* ```for:``` Alerts are considered to be firing once they have been returned for this defined period of time.
-* ```description:``` this annotation is used to enrich alert details.
-* ```summary:``` this annotation is used to enrich alert details.
+The rule definition includes the following parameters:
 
-#### Generic resource metrics for pods
+- **alert:** is the valid metric name name of the alert.
+- **expr:** defines the PromQL expression to evaluate. The expression uses the `kube_pod_container_status_running` Pod metric. In the example, it is used to check if the `sample-metrics` Pod is running in the `default` Namespace. Prometheus provides additional [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) you can use to operate on data.
+* **for:**  is a period of time within which alerts are returned.
+* **description:** is an annotation used to enrich alert details.
+* **summary:** is an annotation used to enrich alert details.
 
-Resource metrics such as **cpu and memory** are also served by kube-state-metrics. The two metrics below are the Generic resource metrics recommended to be used in the future.
+#### Generic resource metrics for Pods
+
+The **cpu and memory** metrics are generic resource metrics.
 
 | Metric name| Metric type | Labels/tags |
 | ---------- | ----------- | ----------- |
 | kube_pod_container_resource_requests | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
 | kube_pod_container_resource_limits | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
 
-[Here](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md) is the complete list of Pod Metrics
+[Here](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md) is the complete list of Pod Metrics.
 
 
-**Be aware that the metrics below will be removed in kube-state-metrics v2.0.0.**
+`kube-state-metrics` v2.0.0 does not include the following metrics:
 
 - kube_pod_container_resource_requests_cpu_cores
 - kube_pod_container_resource_limits_cpu_cores
@@ -119,4 +124,4 @@ Resource metrics such as **cpu and memory** are also served by kube-state-metric
 
 ### Configure Alertmanager
 
-In Kyma all the configuration related to the Alertmanager is in the chart [alertmanager](../alertmanager/README.md)
+You can configure the Alertmanager using the [alertmanager](../alertmanager/README.md) chart.
