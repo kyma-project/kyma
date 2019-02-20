@@ -3,7 +3,9 @@ package middlewares
 import (
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 )
 
 const (
@@ -13,32 +15,36 @@ const (
 )
 
 type runtimeURLsMiddleware struct {
-	defaultMetadataHost string
-	defaultEventsHost   string
+	gatewayHost string
+	required    clientcontext.CtxRequiredType
 }
 
-func NewRuntimeURLsMiddleware(defaultMetadataHost string, defaultEventsHost string) *runtimeURLsMiddleware {
+func NewRuntimeURLsMiddleware(gatewayHost string, required clientcontext.CtxRequiredType) *runtimeURLsMiddleware {
 	return &runtimeURLsMiddleware{
-		defaultMetadataHost: defaultMetadataHost,
-		defaultEventsHost:   defaultEventsHost,
+		gatewayHost: gatewayHost,
+		required:    required,
 	}
 }
 
 func (cc *runtimeURLsMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		runtimeURLs := &clientcontext.APIHosts{
-			MetadataHost: cc.defaultMetadataHost,
-			EventsHost:   cc.defaultEventsHost,
+			MetadataHost: cc.gatewayHost,
+			EventsHost:   cc.gatewayHost,
 		}
 
-		metadataHosts, found := r.Header[BaseMetadataHostHeader]
-		if found {
+		if metadataHosts, found := r.Header[BaseMetadataHostHeader]; found {
 			runtimeURLs.MetadataHost = metadataHosts[0]
+		} else if found == false && bool(cc.required) {
+			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified (%s).", BaseMetadataHostHeader))
+			return
 		}
 
-		eventsHost, found := r.Header[BaseEventsHostHeader]
-		if found {
-			runtimeURLs.EventsHost = eventsHost[0]
+		if eventsHosts, found := r.Header[BaseEventsHostHeader]; found {
+			runtimeURLs.EventsHost = eventsHosts[0]
+		} else if found == false && bool(cc.required) {
+			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified (%s).", BaseEventsHostHeader))
+			return
 		}
 
 		reqWithCtx := r.WithContext(runtimeURLs.ExtendContext(r.Context()))
