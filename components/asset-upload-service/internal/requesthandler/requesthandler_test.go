@@ -142,7 +142,57 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 
 		// Then
 		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusBadRequest))
-		g.Expect(result.Errors).To(gomega.ContainElement(gomega.ContainSubstring("No files")))
+		g.Expect(result.Errors).To(gomega.HaveLen(1))
+		g.Expect(result.Errors[0].Message).To(gomega.ContainSubstring("No files"))
+	})
+
+	t.Run("Partial Errors", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		client := &automock.MinioClient{}
+
+		testErr1 := errors.New("Test err 1")
+		client.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "public", mock.MatchedBy(randomDirFn("sample.yaml")), mock.MatchedBy(anyReaderFn), mock.MatchedBy(anySizeFn), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
+		client.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "private", mock.MatchedBy(randomDirFn("sample.txt")), mock.MatchedBy(anyReaderFn), mock.MatchedBy(anySizeFn), minio.PutObjectOptions{}).Return(int64(1), testErr1).Once()
+		defer client.AssertExpectations(t)
+
+		files := []RequestFile{
+			{
+				FieldName: "private",
+				Path:      "./testdata/sample.txt",
+			},
+			{
+				FieldName: "public",
+				Path:      "./testdata/sample.yaml",
+			},
+		}
+		directoryName := "test"
+		expectedErrors := []requesthandler.ResponseError{
+			{Message: "Error while uploading file `test/sample.txt` into `private`: Test err 1", FileName: "sample.txt"},
+		}
+		expectedResult := []uploader.UploadResult{
+			{
+				FileName:   "sample.yaml",
+				RemotePath: "https://example.com/public/",
+				Bucket:     "public",
+				Size:       53,
+			},
+		}
+
+		// When
+		httpResp, result := testServeHTTP(g, client, files, directoryName)
+
+		// Then
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusMultiStatus))
+
+		removeRemotePathFromFiles(&result)
+		for _, file := range expectedResult {
+			g.Expect(result.UploadedFiles).To(gomega.ContainElement(file))
+		}
+
+		for _, responseError := range expectedErrors {
+			g.Expect(result.Errors).To(gomega.ContainElement(responseError))
+		}
 	})
 
 	t.Run("Errors", func(t *testing.T) {
@@ -167,18 +217,21 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 			},
 		}
 		directoryName := "test"
-		expectedResult := []string{testErr1.Error(), testErr2.Error()}
+		expectedResult := []requesthandler.ResponseError{
+			{Message: "Error while uploading file `test/sample.yaml` into `public`: Test err 1", FileName: "sample.yaml"},
+			{Message: "Error while uploading file `test/sample.txt` into `private`: Test err 2", FileName: "sample.txt"},
+		}
 
 		// When
 		httpResp, result := testServeHTTP(g, client, files, directoryName)
 
 		// Then
-		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusMultiStatus))
+		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusBadGateway))
 
 		g.Expect(result.UploadedFiles).To(gomega.BeEmpty())
 
-		for _, errMessage := range expectedResult {
-			g.Expect(result.Errors).To(gomega.ContainElement(gomega.ContainSubstring(errMessage)))
+		for _, responseError := range expectedResult {
+			g.Expect(result.Errors).To(gomega.ContainElement(responseError))
 		}
 	})
 }

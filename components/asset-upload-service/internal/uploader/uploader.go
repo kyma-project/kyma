@@ -33,6 +33,11 @@ type UploadResult struct {
 	Size       int64  `json:"size"`
 }
 
+type UploadError struct {
+	FileName string
+	Error    error
+}
+
 // Uploader is an abstraction layer for Minio client
 type Uploader struct {
 	client               MinioClient
@@ -52,8 +57,8 @@ func New(client MinioClient, uploadOrigin string, uploadTimeout time.Duration, m
 }
 
 // UploadFiles uploads multiple files (Files struct) to particular bucket
-func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload, filesCount int) ([]UploadResult, []error) {
-	errorsCh := make(chan error, filesCount)
+func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload, filesCount int) ([]UploadResult, []UploadError) {
+	errorsCh := make(chan *UploadError, filesCount)
 	resultsCh := make(chan *UploadResult, filesCount)
 
 	contextWithTimeout, cancel := context.WithTimeout(ctx, u.UploadTimeout)
@@ -80,8 +85,16 @@ func (u *Uploader) UploadFiles(ctx context.Context, filesChannel chan FileUpload
 						return
 					}
 					res, err := u.uploadFile(contextWithTimeout, upload)
-					resultsCh <- res
-					errorsCh <- err
+					if err != nil {
+						errorsCh <- &UploadError{
+							Error:    err,
+							FileName: upload.File.Filename(),
+						}
+					}
+
+					if res != nil {
+						resultsCh <- res
+					}
 				default:
 				}
 			}
@@ -155,15 +168,17 @@ func (u *Uploader) populateResults(resultsCh chan *UploadResult) []UploadResult 
 }
 
 // consumeUploadErrors consolidates all error messages into one and returns it
-func (u *Uploader) populateErrors(errorsCh chan error) []error {
-	var messages []error
-	for err := range errorsCh {
-		if err != nil {
-			messages = append(messages, err)
+func (u *Uploader) populateErrors(errorsCh chan *UploadError) []UploadError {
+	var errs []UploadError
+	for uploadErr := range errorsCh {
+		if uploadErr == nil {
+			continue
 		}
+
+		errs = append(errs, *uploadErr)
 	}
 
-	return messages
+	return errs
 }
 
 func Origin(uploadEndpoint string, secure bool) string {

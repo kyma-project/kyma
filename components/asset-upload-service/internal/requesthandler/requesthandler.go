@@ -25,7 +25,12 @@ type RequestHandler struct {
 
 type Response struct {
 	UploadedFiles []uploader.UploadResult `json:"uploadedFiles,omitempty"`
-	Errors        []string                `json:"errors,omitempty"`
+	Errors        []ResponseError         `json:"errors,omitempty"`
+}
+
+type ResponseError struct {
+	Message  string `json:"message"`
+	FileName string `json:"omitempty,fileName"`
 }
 
 func New(client uploader.MinioClient, buckets bucket.SystemBucketNames, externalUploadOrigin string, uploadTimeout time.Duration, maxUploadWorkers int) *RequestHandler {
@@ -74,8 +79,10 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	if filesCount == 0 {
 		r.writeResponse(w, http.StatusBadRequest, Response{
-			Errors: []string{
-				"No files specified to upload. Use `private` and `public` fields to upload them.",
+			Errors: []ResponseError{
+				{
+					Message: "No files specified to upload. Use `private` and `public` fields to upload them.",
+				},
 			},
 		})
 		return
@@ -87,20 +94,27 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	glog.Infof("Finished processing request with uploading %d files.", filesCount)
 
-	var errMessages []string
+	var uploadErrors []ResponseError
 	for _, err := range errs {
-		errMessages = append(errMessages, err.Error())
+		uploadErrors = append(uploadErrors, ResponseError{
+			Message:  err.Error.Error(),
+			FileName: err.FileName,
+		})
 	}
 
 	var status int
-	if len(errMessages) == 0 {
+
+	if len(uploadErrors) == 0 {
 		status = http.StatusOK
+	} else if len(uploadedFiles) == 0 {
+		status = http.StatusBadGateway
 	} else {
 		status = http.StatusMultiStatus
 	}
+
 	r.writeResponse(w, status, Response{
 		UploadedFiles: uploadedFiles,
-		Errors:        errMessages,
+		Errors:        uploadErrors,
 	})
 }
 
@@ -152,8 +166,8 @@ func (r *RequestHandler) writeResponse(w http.ResponseWriter, statusCode int, re
 
 func (r *RequestHandler) writeInternalError(w http.ResponseWriter, err error) {
 	r.writeResponse(w, http.StatusInternalServerError, Response{
-		Errors: []string{
-			err.Error(),
+		Errors: []ResponseError{
+			{Message: err.Error()},
 		},
 	})
 }

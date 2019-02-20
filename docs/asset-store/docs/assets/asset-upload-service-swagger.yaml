@@ -45,6 +45,8 @@ paths:
           $ref: "#/components/responses/badRequest"
         "500":
           $ref: "#/components/responses/internalServerError"
+        "502":
+          $ref: "#/components/responses/badGateway"
 servers:
   - url: http://localhost:3000/v1
 components:
@@ -60,7 +62,19 @@ components:
                 description: Array of error messages
                 type: array
                 items:
-                  type: string
+                  $ref: "#/components/schemas/RequestError"
+    badGateway:
+      description: Bad gateway response
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              errors:
+                description: Array of error messages
+                type: array
+                items:
+                  $ref: "#/components/schemas/FileUploadError"
     internalServerError:
       description: Internal server error response
       content:
@@ -72,7 +86,7 @@ components:
                 description: Array of error messages
                 type: array
                 items:
-                  type: string
+                  $ref: "#/components/schemas/RequestError"
     uploadMultiStatus:
       description: Multi status response. Some files have been uploaded successfully, some didn't
       content:
@@ -84,7 +98,7 @@ components:
                 description: Array of error messages
                 type: array
                 items:
-                  type: string
+                  $ref: "#/components/schemas/FileUploadError"
               uploadedFiles:
                 description: Files, that were uploaded successfully
                 type: array
@@ -120,3 +134,20 @@ components:
           description: "File size"
           type: integer
           format: int64
+    FileUploadError:
+      description: "It represents a single failure of file upload"
+      type: object
+      properties:
+        fileName:
+          description: "Name of the file, which upload failed"
+          type: string
+        message:
+          description: "Error message"
+          type: string
+    RequestError:
+      description: "It represents a request failure"
+      type: object
+      properties:
+        message:
+          description: "Error message"
+          type: string

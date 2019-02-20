@@ -134,7 +134,7 @@ func TestUploader_UploadFiles(t *testing.T) {
 		g.Expect(errs).To(gomega.HaveLen(2))
 
 		for _, err := range errs {
-			g.Expect(err.Error()).To(gomega.ContainSubstring("while uploading file"))
+			g.Expect(err.Error.Error()).To(gomega.ContainSubstring("while uploading file"))
 		}
 		clientMock.AssertExpectations(t)
 	})
@@ -145,12 +145,18 @@ func TestUploader_PopulateErrors(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		elem1 := errors.New("Test 1")
-		elem2 := errors.New("Test 2")
+		elem1 := uploader.UploadError{
+			Error: errors.New("Test 1"),
+		}
+		elem2 := uploader.UploadError{
+			FileName: "test",
+			Error:    errors.New("Test 2"),
+		}
 
-		errCh := make(chan error, 2)
-		errCh <- elem1
-		errCh <- elem2
+		errCh := make(chan *uploader.UploadError, 3)
+		errCh <- &elem1
+		errCh <- &elem2
+		errCh <- nil
 		close(errCh)
 
 		u := uploader.Uploader{}
@@ -168,7 +174,7 @@ func TestUploader_PopulateErrors(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		errCh := make(chan error)
+		errCh := make(chan *uploader.UploadError)
 		close(errCh)
 
 		u := uploader.Uploader{}
