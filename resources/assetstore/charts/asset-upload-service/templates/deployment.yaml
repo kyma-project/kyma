@@ -64,9 +64,9 @@ spec:
                   name: assetstore-minio
                   key: secretkey
             - name: APP_BUCKET_PRIVATE_PREFIX
-              value: temp-private
+              value: system-private
             - name: APP_BUCKET_PUBLIC_PREFIX
-              value: temp-public
+              value: system-public
             - name: APP_BUCKET_REGION
               valueFrom:
                 configMapKeyRef:
