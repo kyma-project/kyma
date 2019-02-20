@@ -7,7 +7,7 @@ By default, the client certificate you generate when you connect an external sol
 
 >**NOTE:** You can only renew client certificates that are still valid. If your client certificate expired, you must generate a new one.
 
-1. To renew the client certificate, you must use the same certificate subject that matches the subject of your current certificate. To check the certificate subject, run:
+1. To renew the client certificate, use the same certificate subject that matches the subject of your current certificate. To check the certificate subject, run:
   ```
   openssl x509 -noout -subject -in {PATH_TO_OLD_CRT}
   ```
