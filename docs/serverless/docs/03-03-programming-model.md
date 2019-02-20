@@ -80,3 +80,5 @@ Logging is based on standard Node.js functionality. ```console.log("Hello")``` s
 ```sh
 $ kubectl logs -n {NAMESPACE} -l function=<function> -c {FUNCTION}
 ```
+
+The logs of lambda Pods will display the lambda code and package.json. In the code a `new line` is replaced by `\n`. `Carriage return` is replaced by `\r` and `\` is replaced by `\\`
