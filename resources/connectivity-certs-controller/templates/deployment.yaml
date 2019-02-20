@@ -23,7 +23,7 @@ spec:
     spec:
       containers:
       - name: {{ .Chart.Name }}
-        image: {{ .Values.deployment.image.name }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connectivity_certs_controller.dir }}connectivity-certs-controller:{{ .Values.global.connectivity_certs_controller.version }}
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/connectivitycertscontroller"

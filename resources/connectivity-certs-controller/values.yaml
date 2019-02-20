@@ -3,12 +3,11 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   connectivity_certs_controller:
-    dir: develop/
-    version: 803cd115
+    dir: pr/
+    version: PR-2799
 
 deployment:
   image:
-    name: szymongib/certificate-manager:0.0.12
     pullPolicy: IfNotPresent
   args:
     clusterCertificatesSecret: cluster-client-certificates
