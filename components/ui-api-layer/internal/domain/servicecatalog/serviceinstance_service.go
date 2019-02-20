@@ -12,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/pager"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/resource"
 	"github.com/pkg/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/tools/cache"
 )
@@ -42,20 +42,35 @@ func newServiceInstanceService(informer cache.SharedIndexInformer, client client
 			}
 			return []string{serviceInstance.Spec.PlanReference.ClusterServiceClassName}, nil
 		},
+		"ns/externalClusterServiceClassName": func(obj interface{}) ([]string, error) {
+			serviceInstance, ok := obj.(*v1beta1.ServiceInstance)
+			if !ok {
+				return nil, fmt.Errorf("Cannot convert item")
+			}
+
+			return []string{fmt.Sprintf("%s/%s", serviceInstance.Namespace, serviceInstance.Spec.PlanReference.ClusterServiceClassExternalName)}, nil
+		},
+		"ns/clusterServiceClassName": func(obj interface{}) ([]string, error) {
+			serviceInstance, ok := obj.(*v1beta1.ServiceInstance)
+			if !ok {
+				return nil, fmt.Errorf("Cannot convert item")
+			}
+			return []string{fmt.Sprintf("%s/%s", serviceInstance.Namespace, serviceInstance.Spec.PlanReference.ClusterServiceClassName)}, nil
+		},
 		"externalServiceClassName": func(obj interface{}) ([]string, error) {
 			serviceInstance, ok := obj.(*v1beta1.ServiceInstance)
 			if !ok {
 				return nil, fmt.Errorf("Cannot convert item")
 			}
 
-			return []string{serviceInstance.Spec.PlanReference.ServiceClassExternalName}, nil
+			return []string{fmt.Sprintf("%s/%s", serviceInstance.Namespace, serviceInstance.Spec.PlanReference.ServiceClassExternalName)}, nil
 		},
 		"serviceClassName": func(obj interface{}) ([]string, error) {
 			serviceInstance, ok := obj.(*v1beta1.ServiceInstance)
 			if !ok {
 				return nil, fmt.Errorf("Cannot convert item")
 			}
-			return []string{serviceInstance.Spec.PlanReference.ServiceClassName}, nil
+			return []string{fmt.Sprintf("%s/%s", serviceInstance.Namespace, serviceInstance.Spec.PlanReference.ServiceClassName)}, nil
 		},
 		"statusType": func(obj interface{}) ([]string, error) {
 			serviceInstance, ok := obj.(*v1beta1.ServiceInstance)
@@ -139,14 +154,30 @@ func (svc *serviceInstanceService) ListForStatus(namespace string, pagingParams 
 	return serviceInstances, nil
 }
 
-func (svc *serviceInstanceService) ListForClusterServiceClass(className, externalClassName string) ([]*v1beta1.ServiceInstance, error) {
+func (svc *serviceInstanceService) ListForClusterServiceClass(className, externalClassName string, namespace *string) ([]*v1beta1.ServiceInstance, error) {
+	indexName := func(indexName string) string {
+		if namespace == nil {
+			return indexName
+		}
+
+		return fmt.Sprintf("ns/%s", indexName)
+	}
+
+	indexValue := func(value string) string {
+		if namespace == nil {
+			return value
+		}
+
+		return fmt.Sprintf("%s/%s", *namespace, value)
+	}
+
 	indexer := svc.informer.GetIndexer()
-	itemsByClassName, err := indexer.ByIndex("clusterServiceClassName", className)
+	itemsByClassName, err := indexer.ByIndex(indexName("clusterServiceClassName"), indexValue(className))
 	if err != nil {
 		return nil, err
 	}
 
-	itemsByExternalClassName, err := indexer.ByIndex("externalClusterServiceClassName", externalClassName)
+	itemsByExternalClassName, err := indexer.ByIndex(indexName("externalClusterServiceClassName"), indexValue(externalClassName))
 	if err != nil {
 		return nil, err
 	}
@@ -167,12 +198,12 @@ func (svc *serviceInstanceService) ListForClusterServiceClass(className, externa
 
 func (svc *serviceInstanceService) ListForServiceClass(className, externalClassName string, namespace string) ([]*v1beta1.ServiceInstance, error) {
 	indexer := svc.informer.GetIndexer()
-	itemsByClassName, err := indexer.ByIndex("serviceClassName", className)
+	itemsByClassName, err := indexer.ByIndex("serviceClassName", fmt.Sprintf("%s/%s", namespace, className))
 	if err != nil {
 		return nil, err
 	}
 
-	itemsByExternalClassName, err := indexer.ByIndex("externalServiceClassName", externalClassName)
+	itemsByExternalClassName, err := indexer.ByIndex("externalServiceClassName",  fmt.Sprintf("%s/%s", namespace, externalClassName))
 	if err != nil {
 		return nil, err
 	}

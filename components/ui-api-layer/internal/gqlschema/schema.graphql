@@ -156,8 +156,8 @@ type ClusterServiceClass {
     tags: [String!]!
     labels: Labels!
     plans: [ClusterServicePlan!]!
-    activated: Boolean!
-    instances: [ServiceInstance!]!
+    activated(namespace: String): Boolean!
+    instances(namespace: String): [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
