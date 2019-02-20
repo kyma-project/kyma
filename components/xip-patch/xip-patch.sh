@@ -42,16 +42,16 @@ function generateXipDomain() {
         exit 1
     fi
 
-    XIP_DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
+    PUBLIC_DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
 
-    XIP_DOMAIN_YAML=$(cat << EOF
+    DOMAIN_YAML=$(cat << EOF
 ---
 data:
-  global.domainName: "${XIP_DOMAIN}"
+  global.domainName: "${PUBLIC_DOMAIN}"
 EOF
 )
 
-    kubectl patch configmap installation-config-overrides --patch "${XIP_DOMAIN_YAML}" -n kyma-installer
+    kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
 
 }
 
