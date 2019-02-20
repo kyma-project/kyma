@@ -15,7 +15,7 @@ groups:
     expr: count(kube_node_status_condition{condition="Ready",status="true"} == 0)
       > 1 and (count(kube_node_status_condition{condition="Ready",status="true"} ==
       0) / count(kube_node_status_condition{condition="Ready",status="true"})) > 0.2
-    for: 1m
+    for: 10m
     labels:
       severity: critical
     annotations:
