@@ -35,7 +35,7 @@ ingress:
   tlsSecret: ingress-tls-cert
 
 tests:
-  enabled: {{ not .Values.global.isLocalEnv }}
+  enabled: true
   skipSslVerify: false
   group: ""
   tenant: ""
