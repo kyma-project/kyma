@@ -28,7 +28,7 @@ spec:
     - name: TENANT
       value: "{{ .Values.tests.tenant }}"
     - name: CENTRAL
-      value: "{{ .Values.tests.central }}"
+      value: "{{ .Values.deployment.central }}"
 
   restartPolicy: Never
 {{ end }}
