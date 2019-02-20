@@ -38,9 +38,9 @@ func TestResourceQuotaResolver_ListSuccess(t *testing.T) {
 
 func TestResourceQuotaService_ListReplicaSets(t *testing.T) {
 	// GIVEN
-	rs1 := fixReplicaSet("rs1", "prod")
-	rs2 := fixReplicaSet("rs2", "prod")
-	rsQa := fixReplicaSet("rs", "qa")
+	rs1 := fixReplicaSet("rs1", "prod", nil)
+	rs2 := fixReplicaSet("rs2", "prod", nil)
+	rsQa := fixReplicaSet("rs", "qa", nil)
 	informer := fixInformer(rs1, rs2, rsQa).Apps().V1().ReplicaSets().Informer()
 
 	svc := k8s.NewResourceQuotaService(nil, informer, nil, nil)
@@ -106,15 +106,6 @@ func fixInformer(objects ...runtime.Object) informers.SharedInformerFactory {
 
 func fixResourceQuota(name, namespace string) *v1.ResourceQuota {
 	return &v1.ResourceQuota{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-		},
-	}
-}
-
-func fixReplicaSet(name, namespace string) *apps.ReplicaSet {
-	return &apps.ReplicaSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,

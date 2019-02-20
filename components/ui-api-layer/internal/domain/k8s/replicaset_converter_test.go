@@ -149,77 +149,15 @@ func TestReplicaSetConverter_ToGQLs(t *testing.T) {
 func TestReplicaSetConverter_ReplicaSetToGQLJSON(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		converter := replicaSetConverter{}
-		expectedMap := map[string]interface{}{
-			"kind": "exampleKind",
-			"metadata": map[string]interface{}{
-				"name":      "exampleName",
-				"namespace": "exampleNamespace",
-				"labels": map[string]interface{}{
-					"exampleKey":  "exampleValue",
-					"exampleKey2": "exampleValue2",
-				},
-				"creationTimestamp": nil,
-			},
-			"spec": map[string]interface{}{
-				"selector": interface{}(nil),
-				"template": map[string]interface{}{
-					"metadata": map[string]interface{}{
-						"creationTimestamp": interface{}(nil),
-					},
-					"spec": map[string]interface{}{
-						"containers": []interface{}{
-							map[string]interface{}{
-								"resources": map[string]interface{}{},
-								"name":      "",
-								"image":     "exampleImage_1",
-							},
-							map[string]interface{}{
-								"resources": map[string]interface{}{},
-								"name":      "",
-								"image":     "exampleImage_2",
-							},
-						},
-					},
-				},
-			},
-			"status": map[string]interface{}{
+		expectedMap := fixExampleReplicaSetMap("exampleKind", "exampleName", "exampleNamespace",
+			map[string]interface{}{
 				"replicas":      float64(2),
 				"readyReplicas": float64(1),
-			},
-		}
-		in := apps.ReplicaSet{
-			TypeMeta: metav1.TypeMeta{
-				Kind: "exampleKind",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "exampleName",
-				Namespace: "exampleNamespace",
-				Labels: map[string]string{
-					"exampleKey":  "exampleValue",
-					"exampleKey2": "exampleValue2",
-				},
-				CreationTimestamp: metav1.Time{},
-			},
-			Spec: apps.ReplicaSetSpec{
-				Template: v1.PodTemplateSpec{
-					Spec: v1.PodSpec{
-						Containers: []v1.Container{
-							{
-								Image: "exampleImage_1",
-							},
-							{
-								Image: "exampleImage_2",
-							},
-						},
-					},
-				},
-			},
-			Status: apps.ReplicaSetStatus{
-				Replicas:      2,
-				ReadyReplicas: 1,
-			},
-		}
-
+			})
+		in := fixExampleReplicaSet("exampleKind", "exampleName", "exampleNamespace", apps.ReplicaSetStatus{
+			Replicas:      2,
+			ReadyReplicas: 1,
+		})
 		expectedJSON := new(gqlschema.JSON)
 		err := expectedJSON.UnmarshalGQL(expectedMap)
 		require.NoError(t, err)
@@ -243,69 +181,15 @@ func TestReplicaSetConverter_ReplicaSetToGQLJSON(t *testing.T) {
 func TestReplicaSetConverter_GQLJSONToReplicaSet(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		converter := replicaSetConverter{}
-		inMap := map[string]interface{}{
-			"kind": "exampleKind",
-			"metadata": map[string]interface{}{
-				"name":      "exampleName",
-				"namespace": "exampleNamespace",
-				"labels": map[string]interface{}{
-					"exampleKey":  "exampleValue",
-					"exampleKey2": "exampleValue2",
-				},
-				"creationTimestamp": nil,
-			},
-			"spec": map[string]interface{}{
-				"template": map[string]interface{}{
-					"spec": map[string]interface{}{
-						"containers": []interface{}{
-							map[string]interface{}{
-								"image": "exampleImage_1",
-							},
-							map[string]interface{}{
-								"image": "exampleImage_2",
-							},
-						},
-					},
-				},
-			},
-			"status": map[string]interface{}{
+		inMap := fixExampleReplicaSetMap("exampleKind", "exampleName", "exampleNamespace",
+			map[string]interface{}{
 				"replicas":      2,
 				"readyReplicas": 1,
-			},
-		}
-		expected := apps.ReplicaSet{
-			TypeMeta: metav1.TypeMeta{
-				Kind: "exampleKind",
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      "exampleName",
-				Namespace: "exampleNamespace",
-				Labels: map[string]string{
-					"exampleKey":  "exampleValue",
-					"exampleKey2": "exampleValue2",
-				},
-				CreationTimestamp: metav1.Time{},
-			},
-			Spec: apps.ReplicaSetSpec{
-				Template: v1.PodTemplateSpec{
-					Spec: v1.PodSpec{
-						Containers: []v1.Container{
-							{
-								Image: "exampleImage_1",
-							},
-							{
-								Image: "exampleImage_2",
-							},
-						},
-					},
-				},
-			},
-			Status: apps.ReplicaSetStatus{
-				Replicas:      2,
-				ReadyReplicas: 1,
-			},
-		}
-
+			})
+		expected := fixExampleReplicaSet("exampleKind", "exampleName", "exampleNamespace", apps.ReplicaSetStatus{
+			Replicas:      2,
+			ReadyReplicas: 1,
+		})
 		inJSON := new(gqlschema.JSON)
 		err := inJSON.UnmarshalGQL(inMap)
 		require.NoError(t, err)
@@ -315,4 +199,74 @@ func TestReplicaSetConverter_GQLJSONToReplicaSet(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
 	})
+}
+
+func fixExampleReplicaSet(kind string, name string, namespcace string, status apps.ReplicaSetStatus) apps.ReplicaSet {
+	return apps.ReplicaSet{
+		TypeMeta: metav1.TypeMeta{
+			Kind: kind,
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespcace,
+			Labels: map[string]string{
+				"exampleKey":  "exampleValue",
+				"exampleKey2": "exampleValue2",
+			},
+			CreationTimestamp: metav1.Time{},
+		},
+		Spec: apps.ReplicaSetSpec{
+			Template: v1.PodTemplateSpec{
+				Spec: v1.PodSpec{
+					Containers: []v1.Container{
+						{
+							Image: "exampleImage_1",
+						},
+						{
+							Image: "exampleImage_2",
+						},
+					},
+				},
+			},
+		},
+		Status: status,
+	}
+}
+
+func fixExampleReplicaSetMap(kind string, name string, namespace string, status map[string]interface{}) map[string]interface{} {
+	return map[string]interface{}{
+		"kind": kind,
+		"metadata": map[string]interface{}{
+			"name":      name,
+			"namespace": namespace,
+			"labels": map[string]interface{}{
+				"exampleKey":  "exampleValue",
+				"exampleKey2": "exampleValue2",
+			},
+			"creationTimestamp": nil,
+		},
+		"spec": map[string]interface{}{
+			"selector": interface{}(nil),
+			"template": map[string]interface{}{
+				"metadata": map[string]interface{}{
+					"creationTimestamp": interface{}(nil),
+				},
+				"spec": map[string]interface{}{
+					"containers": []interface{}{
+						map[string]interface{}{
+							"resources": map[string]interface{}{},
+							"name":      "",
+							"image":     "exampleImage_1",
+						},
+						map[string]interface{}{
+							"resources": map[string]interface{}{},
+							"name":      "",
+							"image":     "exampleImage_2",
+						},
+					},
+				},
+			},
+		},
+		"status": status,
+	}
 }

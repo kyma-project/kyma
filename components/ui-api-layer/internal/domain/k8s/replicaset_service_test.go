@@ -24,7 +24,7 @@ func TestReplicaSetService_Find(t *testing.T) {
 		instanceName := "testExample"
 		namespace := "testNamespace"
 
-		replicaSet := fixReplicaSetWithLabels(instanceName, namespace, map[string]string{"test": "test"})
+		replicaSet := fixReplicaSet(instanceName, namespace, map[string]string{"test": "test"})
 		replicaSetInformer, _ := fixReplicaSetInformer(replicaSet)
 
 		svc := k8s.NewReplicaSetService(replicaSetInformer, nil)
@@ -52,7 +52,7 @@ func TestReplicaSetService_Find(t *testing.T) {
 		instanceName := "testExample"
 		namespace := "testNamespace"
 
-		expectedReplicaSet := fixReplicaSetWithLabels(instanceName, namespace, map[string]string{"test": "test"})
+		expectedReplicaSet := fixReplicaSet(instanceName, namespace, map[string]string{"test": "test"})
 		returnedReplicaSet := fixReplicaSetWithoutTypeMeta(instanceName, namespace, map[string]string{"test": "test"})
 		replicaSetInformer, _ := fixReplicaSetInformer(returnedReplicaSet)
 
@@ -69,9 +69,9 @@ func TestReplicaSetService_Find(t *testing.T) {
 func TestReplicaSetService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		namespace := "testNamespace"
-		replicaSet1 := fixReplicaSetWithLabels("replicaSet1", namespace, nil)
-		replicaSet2 := fixReplicaSetWithLabels("replicaSet2", namespace, nil)
-		replicaSet3 := fixReplicaSetWithLabels("replicaSet3", "differentNamespace", nil)
+		replicaSet1 := fixReplicaSet("replicaSet1", namespace, nil)
+		replicaSet2 := fixReplicaSet("replicaSet2", namespace, nil)
+		replicaSet3 := fixReplicaSet("replicaSet3", "differentNamespace", nil)
 
 		replicaSetInformer, _ := fixReplicaSetInformer(replicaSet1, replicaSet2, replicaSet3)
 
@@ -104,8 +104,8 @@ func TestReplicaSetService_List(t *testing.T) {
 		returnedReplicaSet1 := fixReplicaSetWithoutTypeMeta("replicaSet1", namespace, nil)
 		returnedReplicaSet2 := fixReplicaSetWithoutTypeMeta("replicaSet2", namespace, nil)
 		returnedReplicaSet3 := fixReplicaSetWithoutTypeMeta("replicaSet3", "differentNamespace", nil)
-		expectedReplicaSet1 := fixReplicaSetWithLabels("replicaSet1", namespace, nil)
-		expectedReplicaSet2 := fixReplicaSetWithLabels("replicaSet2", namespace, nil)
+		expectedReplicaSet1 := fixReplicaSet("replicaSet1", namespace, nil)
+		expectedReplicaSet2 := fixReplicaSet("replicaSet2", namespace, nil)
 
 		replicaSetInformer, _ := fixReplicaSetInformer(returnedReplicaSet1, returnedReplicaSet2, returnedReplicaSet3)
 
@@ -125,7 +125,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		exampleName := "exampleReplicaSet"
 		exampleNamespace := "exampleNamespace"
-		exampleReplicaSet := fixReplicaSetWithLabels(exampleName, exampleNamespace, map[string]string{"test": "test"})
+		exampleReplicaSet := fixReplicaSet(exampleName, exampleNamespace, map[string]string{"test": "test"})
 		replicaSetInformer, client := fixReplicaSetInformer(exampleReplicaSet)
 		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
 
@@ -146,7 +146,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		exampleName := "exampleReplicaSet"
 		exampleNamespace := "exampleNamespace"
-		exampleReplicaSet := fixReplicaSetWithLabels(exampleName, exampleNamespace, nil)
+		exampleReplicaSet := fixReplicaSet(exampleName, exampleNamespace, nil)
 		replicaSetInformer, client := fixReplicaSetInformer()
 		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
 
@@ -167,7 +167,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 	t.Run("NameMismatch", func(t *testing.T) {
 		exampleName := "exampleReplicaSet"
 		exampleNamespace := "exampleNamespace"
-		exampleReplicaSet := fixReplicaSetWithLabels(exampleName, exampleNamespace, nil)
+		exampleReplicaSet := fixReplicaSet(exampleName, exampleNamespace, nil)
 		replicaSetInformer, client := fixReplicaSetInformer(exampleReplicaSet)
 		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
 
@@ -190,7 +190,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 	t.Run("NamespaceMismatch", func(t *testing.T) {
 		exampleName := "exampleReplicaSet"
 		exampleNamespace := "exampleNamespace"
-		exampleReplicaSet := fixReplicaSetWithLabels(exampleName, exampleNamespace, nil)
+		exampleReplicaSet := fixReplicaSet(exampleName, exampleNamespace, nil)
 		replicaSetInformer, client := fixReplicaSetInformer(exampleReplicaSet)
 		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
 
@@ -213,7 +213,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 	t.Run("InvalidUpdate", func(t *testing.T) {
 		exampleName := "exampleReplicaSet"
 		exampleNamespace := "exampleNamespace"
-		exampleReplicaSet := fixReplicaSetWithLabels(exampleName, exampleNamespace, nil)
+		exampleReplicaSet := fixReplicaSet(exampleName, exampleNamespace, nil)
 		replicaSetInformer, client := fixFailingReplicaSetInformer(exampleReplicaSet)
 		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
 
@@ -234,7 +234,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 	t.Run("TypeMetaChanged", func(t *testing.T) {
 		exampleName := "exampleReplicaSet"
 		exampleNamespace := "exampleNamespace"
-		exampleReplicaSet := fixReplicaSetWithLabels(exampleName, exampleNamespace, nil)
+		exampleReplicaSet := fixReplicaSet(exampleName, exampleNamespace, nil)
 		replicaSetInformer, client := fixReplicaSetInformer(exampleReplicaSet)
 		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
 
@@ -261,7 +261,7 @@ func TestReplicaSetService_Update(t *testing.T) {
 		exampleName := "exampleReplicaSet"
 		exampleNamespace := "exampleNamespace"
 		returnedReplicaSet := fixReplicaSetWithoutTypeMeta(exampleName, exampleNamespace, nil)
-		expectedReplicaSet := fixReplicaSetWithLabels(exampleName, exampleNamespace, nil)
+		expectedReplicaSet := fixReplicaSet(exampleName, exampleNamespace, nil)
 		replicaSetInformer, client := fixReplicaSetInformer(returnedReplicaSet)
 		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
 
@@ -284,7 +284,7 @@ func TestReplicaSetService_Delete(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		exampleName := "exampleReplicaSet"
 		exampleNamespace := "exampleNamespace"
-		exampleReplicaSet := fixReplicaSetWithLabels(exampleName, exampleNamespace, nil)
+		exampleReplicaSet := fixReplicaSet(exampleName, exampleNamespace, nil)
 		replicaSetInformer, client := fixReplicaSetInformer(exampleReplicaSet)
 		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
 
@@ -309,7 +309,7 @@ func fixFailingReplicaSetInformer(objects ...runtime.Object) (cache.SharedIndexI
 	return informerFactory.Apps().V1().ReplicaSets().Informer(), client.AppsV1()
 }
 
-func fixReplicaSetWithLabels(name, namespace string, labels map[string]string) *apps.ReplicaSet {
+func fixReplicaSet(name, namespace string, labels map[string]string) *apps.ReplicaSet {
 	replicaSet := fixReplicaSetWithoutTypeMeta(name, namespace, labels)
 	replicaSet.TypeMeta = metav1.TypeMeta{
 		Kind:       "ReplicaSet",

@@ -100,7 +100,7 @@ func TestReplicaSetResolver_ReplicaSetsQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "Test"
 		namespace := "namespace"
-		resource := fixReplicaSetWithLabels(name, namespace, map[string]string{
+		resource := fixReplicaSet(name, namespace, map[string]string{
 			"test": "test",
 		})
 		resources := []*apps.ReplicaSet{
@@ -169,7 +169,7 @@ func TestReplicaSetResolver_ReplicaSetsQuery(t *testing.T) {
 	t.Run("ErrorConverting", func(t *testing.T) {
 		name := "Test"
 		namespace := "namespace"
-		resource := fixReplicaSetWithLabels(name, namespace, map[string]string{
+		resource := fixReplicaSet(name, namespace, map[string]string{
 			"test": "test",
 		})
 		resources := []*apps.ReplicaSet{
@@ -200,7 +200,7 @@ func TestReplicaSetResolver_UpdateReplicaSetMutation(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "exampleName"
 		namespace := "exampleNamespace"
-		updatedReplicaSetFix := fixReplicaSetWithLabels(name, namespace, map[string]string{
+		updatedReplicaSetFix := fixReplicaSet(name, namespace, map[string]string{
 			"test": "test",
 		})
 		updatedGQLReplicaSetFix := &gqlschema.ReplicaSet{
@@ -255,7 +255,7 @@ func TestReplicaSetResolver_UpdateReplicaSetMutation(t *testing.T) {
 	t.Run("ErrorUpdating", func(t *testing.T) {
 		name := "exampleName"
 		namespace := "exampleNamespace"
-		updatedReplicaSetFix := fixReplicaSetWithLabels(name, namespace, map[string]string{
+		updatedReplicaSetFix := fixReplicaSet(name, namespace, map[string]string{
 			"test": "test",
 		})
 		gqlJSONFix := gqlschema.JSON{}
@@ -281,7 +281,7 @@ func TestReplicaSetResolver_UpdateReplicaSetMutation(t *testing.T) {
 	t.Run("ErrorConvertingToGQL", func(t *testing.T) {
 		name := "exampleName"
 		namespace := "exampleNamespace"
-		updatedReplicaSetFix := fixReplicaSetWithLabels(name, namespace, map[string]string{
+		updatedReplicaSetFix := fixReplicaSet(name, namespace, map[string]string{
 			"test": "test",
 		})
 		gqlJSONFix := gqlschema.JSON{}
@@ -311,7 +311,7 @@ func TestReplicaSetResolver_DeleteReplicaSetMutation(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "exampleName"
 		namespace := "exampleNamespace"
-		resource := fixReplicaSetWithLabels(name, namespace, map[string]string{
+		resource := fixReplicaSet(name, namespace, map[string]string{
 			"test": "test",
 		})
 		expected := &gqlschema.ReplicaSet{
@@ -358,7 +358,7 @@ func TestReplicaSetResolver_DeleteReplicaSetMutation(t *testing.T) {
 	t.Run("ErrorDeleting", func(t *testing.T) {
 		name := "exampleName"
 		namespace := "exampleNamespace"
-		resource := fixReplicaSetWithLabels(name, namespace, map[string]string{
+		resource := fixReplicaSet(name, namespace, map[string]string{
 			"test": "test",
 		})
 		expected := errors.New("fix")
@@ -380,7 +380,7 @@ func TestReplicaSetResolver_DeleteReplicaSetMutation(t *testing.T) {
 	t.Run("ErrorConverting", func(t *testing.T) {
 		name := "exampleName"
 		namespace := "exampleNamespace"
-		resource := fixReplicaSetWithLabels(name, namespace, map[string]string{
+		resource := fixReplicaSet(name, namespace, map[string]string{
 			"test": "test",
 		})
 		error := errors.New("fix")
