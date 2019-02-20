@@ -1,5 +1,10 @@
 global:
   namespace: kyma-integration
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  connectivity_certs_controller:
+    dir: develop/
+    version: 803cd115
 
 deployment:
   image:
