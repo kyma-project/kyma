@@ -36,6 +36,8 @@ spec:
       namespace: "kyma-system"
     - name: "application-connector"
       namespace: "kyma-system"
+    - name: "connectivity-certs-controller"
+      namespace: "kyma-integration"
     - name: "ark"
       namespace: "heptio-ark"
     - name: "logging"
