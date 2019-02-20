@@ -4,10 +4,7 @@ import (
 	"crypto/tls"
 	stdflag "flag"
 	"fmt"
-	"io"
-	"k8s.io/apimachinery/pkg/util/httpstream"
-	"k8s.io/apimachinery/pkg/util/httpstream/spdy"
-	client_spdy "k8s.io/client-go/transport/spdy"
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -117,6 +114,8 @@ func main() {
 		glog.Fatalf("Failed to build parse upstream URL: %v", err)
 	}
 
+	spdyProxy := spdy.New(kcfg, upstreamURL)
+
 	//kubeClient, err := kubernetes.NewForConfig(kcfg)
 	//if err != nil {
 	//	glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
@@ -173,52 +172,11 @@ func main() {
 		//	return
 		//}
 
-		glog.Info("REQUEST")
-		glog.Info(req)
-
-		if req.Header.Get("upgrade") == "SPDY/3.1" {
-
-			clientTransport, upgrader, err := client_spdy.RoundTripperFor(kcfg)
-			if err != nil {
-				panic(err)
-			}
-
-			client := &http.Client{Transport: clientTransport}
-
-			protocols := req.Header.Get("X-Stream-Protocol-Version")
-			clientUrl, _ := url.Parse(upstreamURL.String())
-			clientUrl.Path = req.URL.Path
-			clientUrl.RawQuery = req.URL.RawQuery
-			clientReq, err := http.NewRequest(req.Method, clientUrl.String(), req.Body)
-			if err != nil {
-				panic(err)
-			}
-
-			clientReq.Header.Set("upgrade", "SPDY/3.1")
-			clientReq.Header.Set("connection", "upgrade")
-
-			serverConnection, s, err := client_spdy.Negotiate(upgrader, client, clientReq, protocols)
-			if err != nil {
-				panic(err)
-			}
-			w.Header().Set(httpstream.HeaderProtocolVersion, s)
-			clientConnection := spdy.NewResponseUpgrader().UpgradeResponse(w, req, func(clientStream httpstream.Stream, replySent <-chan struct{}) error {
-				serverStream, err := serverConnection.CreateStream(clientStream.Headers())
-				if err != nil {
-					return err
-				}
-
-				go io.Copy(clientStream, serverStream)
-				go io.Copy(serverStream, clientStream)
-				return nil
-			})
-
-			go func() {
-				<-serverConnection.CloseChan()
-				clientConnection.Close()
-			}()
-
+		if spdyProxy.IsSpdyRequest(req) {
+			glog.Infof("Handling SPDY")
+			spdyProxy.ServeHTTP(w, req)
 		} else {
+			glog.Infof("Handling HTTP")
 			rp.ServeHTTP(w, req)
 		}
 	}))
