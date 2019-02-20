@@ -21,7 +21,7 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 		baseHeadersEventHost := "gateway.headers.events"
 		baseHeadersMetadataHost := "gateway.headers.events"
 
-		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(baseGatewayHost, clientcontext.CtxRequired)
+		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(baseGatewayHost, clientcontext.HeadersRequired)
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -52,7 +52,7 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 		baseHeadersEventHost := ""
 		baseHeadersMetadataHost := ""
 
-		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(baseGatewayHost, clientcontext.CtxRequired)
+		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(baseGatewayHost, clientcontext.HeadersRequired)
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -80,7 +80,7 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 	t.Run("should use default values when headers are not present and not required", func(t *testing.T) {
 		//given
-		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(baseGatewayHost, clientcontext.CtxNotRequired)
+		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(baseGatewayHost, clientcontext.HeadersNotRequired)
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -105,7 +105,7 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 	t.Run("should fail when headers are not present but required", func(t *testing.T) {
 		//given
-		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(baseGatewayHost, clientcontext.CtxRequired)
+		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(baseGatewayHost, clientcontext.HeadersRequired)
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)

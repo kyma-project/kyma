@@ -11,8 +11,11 @@ import (
 
 type clientContextKey string
 
-// CtxRequired type defines if context is mandatory
+// CtxRequiredType type defines if context is mandatory
 type CtxRequiredType bool
+
+// HeadersRequiredType type defines if headers must be specified
+type HeadersRequiredType bool
 
 const (
 	// ApplicationHeader is key represeting Application in headers
@@ -53,6 +56,12 @@ const (
 
 	// CtxNotRequired represents value for not required context
 	CtxNotRequired CtxRequiredType = false
+
+	// HeadersRequired represents value for required headers
+	HeadersRequired HeadersRequiredType = true
+
+	// HeadersNotRequired represents value for not required headers
+	HeadersNotRequired HeadersRequiredType = false
 )
 
 type ClientContextService interface {

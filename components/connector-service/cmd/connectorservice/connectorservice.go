@@ -54,7 +54,6 @@ func main() {
 	tokenGenerator := tokens.NewTokenGenerator(options.tokenLength)
 	tokenManager := tokens.NewTokenManager(tokenCache)
 	tokenCreatorProvider := tokens.NewTokenCreatorProvider(tokenCache, tokenGenerator.NewToken)
-	ctxRequired := clientcontext.CtxRequiredType(options.central)
 
 	globalMiddlewares, appErr := monitoring.SetupMonitoringMiddleware()
 	if appErr != nil {
@@ -65,8 +64,8 @@ func main() {
 		globalMiddlewares = append(globalMiddlewares, logging.NewLoggingMiddleware().Middleware)
 	}
 
-	internalHandler := newInternalHandler(tokenCreatorProvider, options, globalMiddlewares, ctxRequired)
-	externalHandler := newExternalHandler(tokenManager, tokenCreatorProvider, options, env, globalMiddlewares, ctxRequired)
+	internalHandler := newInternalHandler(tokenCreatorProvider, options, globalMiddlewares)
+	externalHandler := newExternalHandler(tokenManager, tokenCreatorProvider, options, env, globalMiddlewares)
 
 	externalSrv := &http.Server{
 		Addr:    ":" + strconv.Itoa(options.externalAPIPort),
@@ -99,8 +98,9 @@ func main() {
 }
 
 func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider,
-	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, ctxRequired clientcontext.CtxRequiredType) http.Handler {
+	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
 
+	headersRequired := clientcontext.HeadersRequiredType(opts.central)
 	secretsRepository, appErr := newSecretsRepository(opts.namespace)
 	if appErr != nil {
 		log.Infof("Failed to create secrets repository. %s", appErr.Error())
@@ -119,7 +119,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
-	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayHost, ctxRequired)
+	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayHost, headersRequired)
 	appContextFromSubjMiddleware := clientcontextmiddlewares.NewAppContextFromSubjMiddleware()
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
@@ -164,9 +164,9 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	return handlerBuilder.GetHandler()
 }
 
-func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc,
-	ctxRequired clientcontext.CtxRequiredType) http.Handler {
+func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
 
+	ctxRequired := clientcontext.CtxRequiredType(opts.central)
 	handlerBuilder := internalapi.NewHandlerBuilder(globalMiddlewares)
 
 	clusterCtxMiddleware := clientcontextmiddlewares.NewClusterContextMiddleware(ctxRequired)

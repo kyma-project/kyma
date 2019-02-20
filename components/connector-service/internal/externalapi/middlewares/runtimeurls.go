@@ -15,14 +15,14 @@ const (
 )
 
 type runtimeURLsMiddleware struct {
-	gatewayHost string
-	required    clientcontext.CtxRequiredType
+	gatewayHost     string
+	headersRequired clientcontext.HeadersRequiredType
 }
 
-func NewRuntimeURLsMiddleware(gatewayHost string, required clientcontext.CtxRequiredType) *runtimeURLsMiddleware {
+func NewRuntimeURLsMiddleware(gatewayHost string, headersRequired clientcontext.HeadersRequiredType) *runtimeURLsMiddleware {
 	return &runtimeURLsMiddleware{
-		gatewayHost: gatewayHost,
-		required:    required,
+		gatewayHost:     gatewayHost,
+		headersRequired: headersRequired,
 	}
 }
 
@@ -35,14 +35,14 @@ func (cc *runtimeURLsMiddleware) Middleware(handler http.Handler) http.Handler {
 
 		if metadataHosts, found := r.Header[BaseMetadataHostHeader]; found {
 			runtimeURLs.MetadataHost = metadataHosts[0]
-		} else if found == false && bool(cc.required) {
+		} else if found == false && bool(cc.headersRequired) {
 			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified (%s).", BaseMetadataHostHeader))
 			return
 		}
 
 		if eventsHosts, found := r.Header[BaseEventsHostHeader]; found {
 			runtimeURLs.EventsHost = eventsHosts[0]
-		} else if found == false && bool(cc.required) {
+		} else if found == false && bool(cc.headersRequired) {
 			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified (%s).", BaseEventsHostHeader))
 			return
 		}
