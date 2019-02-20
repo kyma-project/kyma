@@ -226,6 +226,9 @@
 # Xip Patch Component
 /components/xip-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
+# Kubeless Images
+/components/kubeless-images @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+
 # Tests
 # acceptance tests
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
