@@ -1,19 +1,7 @@
-FROM node:8
+FROM kubeless/nodejs@sha256:5f1e999a1021dfb3d117106d80519a82110bd26a579f067f1ff7127025c90be5
 
-RUN apt-get update &&  apt-get install git
-
-ADD lib/helper.js kubeless_rt/lib/
-ADD kubeless.js kubeless_rt/
-ADD package.json kubeless_rt/
-ADD kubeless-npm-install.sh /
 ADD start.sh /
-
-WORKDIR kubeless_rt/
-
-RUN npm install
-
+USER root
 RUN chmod +x /start.sh
-
 USER 1000
-
-CMD ["/start.sh"]
+ENTRYPOINT ["/start.sh"]

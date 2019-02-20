@@ -8,7 +8,7 @@ build-image:
 	docker build -t $(APP_NAME)-node8:latest  -f Dockerfile.8 .
 
 push-image:
-	docker tag $(APP_NAME) $(IMG):$(TAG)
+	docker tag $(APP_NAME)-node6:latest $(IMG)-node6:latest:$(TAG)
 	docker push $(IMG):$(TAG)
 
 
