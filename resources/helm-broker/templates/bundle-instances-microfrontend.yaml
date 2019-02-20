@@ -1,0 +1,25 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: bundleinstancesmicrofrontend
+  labels:
+    app:  instancesmicrofrontend
+spec:
+  displayName: Instances
+  version: v1
+  category: Bundle Manager
+  placement: namespace
+  viewBaseUrl: 'https://instances.{{ js .Values.global.domainName }}'
+  navigationNodes:
+    - label: Instances
+      navigationPath: bundle-instances
+      viewUrl: '/bundle'
+      order: 2
+    - label: Instance Details
+      navigationPath: bundle-instances/details
+      viewUrl: '/bundle'
+      showInNavigation: false
+    - label: Instance Details
+      navigationPath: bundle-instances/details/:name
+      viewUrl: '/bundle/details/:name'
+      showInNavigation: false

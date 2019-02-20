@@ -1,0 +1,17 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: bundlerepositoriesmicrofrontend
+  labels:
+    app:  repositoriesmicrofrontend
+spec:
+  displayName: Repositories
+  version: v1
+  category: Bundle Manager
+  placement: namespace
+  viewBaseUrl: 'https://instances.{{ js .Values.global.domainName }}'
+  navigationNodes:
+    - label: Repositories
+      navigationPath: bundle-repositories
+      viewUrl: '/bundle'
+      order: 3

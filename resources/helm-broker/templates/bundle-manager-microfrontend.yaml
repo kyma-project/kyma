@@ -1,0 +1,25 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: bundleservicecatalogmicrofrontend
+  labels:
+    app:  servicecatalogmicrofrontend
+spec:
+  displayName: Bundle Manager
+  version: v1
+  category: Bundle Manager
+  placement: namespace
+  viewBaseUrl: 'https://catalog.{{ js .Values.global.domainName }}'
+  navigationNodes:
+    - label: Catalog
+      navigationPath: bundle-catalog
+      viewUrl: '/bundle'
+      order: 1
+    - label: Service Details
+      navigationPath: bundle-catalog/details
+      viewUrl: '/bundle'
+      showInNavigation: false
+    - label: Serive Details
+      navigationPath: bundle-catalog/details/:serviceId
+      viewUrl: '/bundle/details/:serviceId'
+      showInNavigation: false
