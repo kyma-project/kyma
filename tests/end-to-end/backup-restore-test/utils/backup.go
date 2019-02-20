@@ -126,7 +126,7 @@ func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time
 			if event.Type == "MODIFIED" {
 				restore, ok := event.Object.(*backupv1.Restore)
 				if !ok {
-					fmt.Errorf("%v", event)
+					return fmt.Errorf("%v", event)
 				}
 				if restore.Status.Phase == "Completed" {
 					return nil

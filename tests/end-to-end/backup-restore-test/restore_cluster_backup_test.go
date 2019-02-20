@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/restore/backupe2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/restore/utils"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
