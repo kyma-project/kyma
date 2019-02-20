@@ -89,7 +89,9 @@ curl -H "Content-Type: application/json" -d '{"csr":"BASE64_ENCODED_CSR_HERE"}' 
 The response contains a valid client certificate signed by the Kyma Certificate Authority.
 ```
 {
-    "crt":"BASE64_ENCODED_CRT"
+    "crt":"BASE64_ENCODED_CRT_CHAIN",
+    "clientCrt":"BASE64_ENCODED_CLIENT_CRT",
+    "caCrt":"BASE64_ENCODED_CA_CRT"
 }
 ```
 

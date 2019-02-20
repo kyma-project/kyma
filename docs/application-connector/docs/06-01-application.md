@@ -11,7 +11,7 @@ kubectl get crd applications.applicationconnector.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource that registers the `re-prod` App which offers one service.
+This is a sample resource that registers the `system_prod` App which offers one service.
 
 ```
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
