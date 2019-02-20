@@ -1,7 +1,11 @@
 package application
 
 import (
+	"fmt"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
+	"github.com/pkg/errors"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )
 
@@ -10,8 +14,7 @@ const (
 )
 
 type ReleaseManager interface {
-	GetOverridesDefaults() OverridesData
-	InstallChart(name, overrides string) (hapi_4.Status_Code, string, error)
+	InstallChart(application *v1alpha1.Application) (hapi_4.Status_Code, string, error)
 	DeleteReleaseIfExists(name string) error
 	CheckReleaseExistence(name string) (bool, error)
 	CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error)
@@ -31,17 +34,29 @@ func NewReleaseManager(helmClient kymahelm.HelmClient, overridesDefaults Overrid
 	}
 }
 
-func (r releaseManager) GetOverridesDefaults() OverridesData {
-	return r.overridesDefaults
-}
+func (r *releaseManager) InstallChart(application *v1alpha1.Application) (hapi_4.Status_Code, string, error) {
+	overrides, err := r.prepareOverrides(application)
+	if err != nil {
+		return hapi_4.Status_FAILED, "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
+	}
 
-func (r *releaseManager) InstallChart(name, overrides string) (hapi_4.Status_Code, string, error) {
-	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, r.namespace, name, overrides)
+	installResponse, err := r.helmClient.InstallReleaseFromChart(applicationChartDirectory, r.namespace, application.Name, overrides)
 	if err != nil {
 		return hapi_4.Status_FAILED, "", err
 	}
 
 	return installResponse.Release.Info.Status.Code, installResponse.Release.Info.Description, nil
+}
+
+func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
+	overridesData := r.overridesDefaults
+	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
+		overridesData.SubjectCN = fmt.Sprintf("%s;%s;%s", application.Spec.Tenant, application.Spec.Group, application.Name)
+	} else {
+		overridesData.SubjectCN = application.Name
+	}
+
+	return kymahelm.ParseOverrides(overridesData, overridesTemplate)
 }
 
 func (r *releaseManager) DeleteReleaseIfExists(name string) error {

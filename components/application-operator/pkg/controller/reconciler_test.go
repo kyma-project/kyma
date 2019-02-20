@@ -6,12 +6,11 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/controller/mocks"
-	appReleases "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application"
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/api/errors"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/types"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
@@ -51,13 +50,6 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		expectedDescription: statusDescription,
 	}
 
-	overrides := `global:
-    domainName: 
-    applicationProxyImage: 
-    eventServiceImage: 
-    eventServiceTestsImage: 
-    subjectCN: app-name`
-
 	t.Run("should install chart when new application is created", func(t *testing.T) {
 		// given
 		namespacedName := types.NamespacedName{
@@ -73,8 +65,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		releaseManager.On("InstallChart", applicationName, overrides).Return(releaseStatus, statusDescription, nil)
-		releaseManager.On("GetOverridesDefaults").Return(appReleases.OverridesData{})
+		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
 		applicationReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -145,8 +136,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		releaseManager.On("InstallChart", applicationName, overrides).Return(releaseStatus, statusDescription, nil)
-		releaseManager.On("GetOverridesDefaults").Return(appReleases.OverridesData{})
+		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -402,8 +392,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		releaseManager.On("InstallChart", applicationName, overrides).Return(hapi_4.Status_FAILED, "", errors.NewBadRequest("error"))
-		releaseManager.On("GetOverridesDefaults").Return(appReleases.OverridesData{})
+		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(hapi_4.Status_FAILED, "", errors.NewBadRequest("error"))
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
