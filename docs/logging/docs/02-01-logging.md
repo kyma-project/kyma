@@ -14,7 +14,7 @@ The server-side components on the write path will mirror the [Cortex](https://gi
 * The Cortex chunk store will be updated to reduce copying of chunk data on the read and write path and add support for writing chunks of google cloud storage.
 
 #### Log Chunks
-A log chunk consists of all logs for a given metadata (e.g. labels), collected over a certain time period. Log chunks support append, seek, and stream operations on read requests.
+A log chunk consists of all logs for metadata, such as labels, collected over a certain time period. Log chunks support append, seek, and stream operations on requests.
 
 #### Life of a Query Request
 As chunks are larger than Prometheus/Cortex chunks (Cortex chunks are max 1KB in size), it is not possible to load and decompress them in their entirety. 
