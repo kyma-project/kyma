@@ -61,7 +61,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		myBackupClient.CreateBackup(backupName, []string{}, excludedNamespaces, []string{}, excludedResources)
 
 		Convey("Check backup status", func() {
-			err := myBackupClient.WaitForBackupToBeCreated(backupName, 120*time.Second)
+			err := myBackupClient.WaitForBackupToBeCreated(backupName, 5*time.Minute)
 			So(err, ShouldBeNil)
 			for _, e2eTest := range e2eTests {
 				Convey("Delete resources from cluster", func() {
@@ -77,7 +77,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	Convey("Restore Cluster", t, func() {
 		err := myBackupClient.RestoreBackup(backupName)
 		So(err, ShouldBeNil)
-		err = myBackupClient.WaitForBackupToBeRestored(backupName, 120*time.Second)
+		err = myBackupClient.WaitForBackupToBeRestored(backupName, 5*time.Minute)
 		So(err, ShouldBeNil)
 		Convey("Test restored resources", func() {
 			for _, backupTest := range backupTests {
