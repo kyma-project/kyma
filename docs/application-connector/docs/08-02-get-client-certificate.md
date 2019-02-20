@@ -7,6 +7,8 @@ After you create an Application (App), connect it to an external solution to con
 
 This guide shows you how to get the client certificate.
 
+>**NOTE:** The client certificate is valid for 92 days. See [this](#tutorials-renew-the-client-certificate) tutorial to learn how to renew the client certificate. 
+
 ## Prerequisites
 
 - [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which fulfil high security standards.
