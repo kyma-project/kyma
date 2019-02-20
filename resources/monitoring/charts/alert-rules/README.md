@@ -71,7 +71,7 @@ data:
 
 2. Label the ConfigMap with `role: alert-rules`.
 3. Add the name of a Prometheus object in `prometheus: {{ .Release.Name }}`.
-3. Configure the **data. alert.rules** parameter in the[kyma-rules.yaml](templates/kyma-rules.yaml) file. 
+3. Configure the **data. alert.rules** parameter in the [kyma-rules.yaml](templates/kyma-rules.yaml) file. 
 
 
 The example shows a sample configuration for an alert rule. The rule activates the alarm when a Pod is not running.
@@ -94,34 +94,13 @@ groups:
 The rule definition includes the following parameters:
 
 - **alert:** is the valid metric name name of the alert.
-- **expr:** defines the PromQL expression to evaluate. The expression uses the `kube_pod_container_status_running` Pod metric. In the example, it is used to check if the `sample-metrics` Pod is running in the `default` Namespace. Prometheus provides additional [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) you can use to operate on data.
-* **for:**  is a period of time within which alerts are returned.
+- **expr:** defines the PromQL expression to evaluate, using Kubernetes [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md). In the example, the `kube_pod_container_status_running` Pod metric is used to check if the `sample-metrics` Pod is running in the `default` Namespace.
+* **for:**  is a period of time during which alerts are returned.
 * **description:** is an annotation used to enrich alert details.
 * **summary:** is an annotation used to enrich alert details.
 
-#### Generic resource metrics for Pods
 
-The **cpu and memory** metrics are generic resource metrics.
-
-| Metric name| Metric type | Labels/tags |
-| ---------- | ----------- | ----------- |
-| kube_pod_container_resource_requests | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
-| kube_pod_container_resource_limits | Gauge | `resource`=&lt;resource-name&gt; <br> `unit`=&lt;resource-unit&gt; <br> `container`=&lt;container-name&gt; <br> `pod`=&lt;pod-name&gt; <br> `namespace`=&lt;pod-namespace&gt; <br> `node`=&lt; node-name&gt; |
-
-[Here](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md) is the complete list of Pod Metrics.
-
-
-`kube-state-metrics` v2.0.0 does not include the following metrics:
-
-- kube_pod_container_resource_requests_cpu_cores
-- kube_pod_container_resource_limits_cpu_cores
-- kube_pod_container_resource_requests_memory_bytes
-- kube_pod_container_resource_limits_memory_bytes
-- kube_pod_container_resource_requests_nvidia_gpu_devices
-- kube_pod_container_resource_limits_nvidia_gpu_devices
-
-
-
-### Configure Alertmanager
+## Configure Alertmanager
 
 You can configure the Alertmanager using the [alertmanager](../alertmanager/README.md) chart.
+
