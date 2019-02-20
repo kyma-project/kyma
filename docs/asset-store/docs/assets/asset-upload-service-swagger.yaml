@@ -33,8 +33,8 @@ paths:
                   items:
                     type: string
                     format: binary
-                directoryName:
-                  description: Directory, where files will be put in bucket. If not specified, the directory name will be generated.
+                directory:
+                  description: Directory, where files will be put in bucket. If not specified, the directory name will be generated. If directory and files already exist, they will be overwritten.
                   type: string
       responses:
         "200":

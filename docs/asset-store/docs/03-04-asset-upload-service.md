@@ -5,15 +5,16 @@ type: Details
 
 Asset Upload Service is a HTTP server, that exposes file upload functionality for Minio. It contains a simple HTTP endpoint, which accepts multiple files as form. It can upload files for two system buckets: private and public one, with read-only policy set.
 
-The main purpose of the service is to provide upload capability for Application Connector. Some files, such as Async API spec, can be inaccessible from inside the cluster. To enable document upload with Asset Controller, they need to be uploaded in a temporary space.
-
-Asset Upload Service can be used for development purposes. You can use this service to temporary host files for Asset Store, without need to use external providers.
+The main purpose of the service is to provide static file host solution for components using Asset Store, such as Application Connector. 
+Asset Upload Service can be also used for development purposes. You can use this service to host files for Asset Store, without need to use external providers.
 
 ## System buckets 
 
 The Asset Upload Service creates two system buckets: `system-private-{generated-suffix}` and `system-public-{generated-suffix}`, where `{generated-suffix}` is Unix nano timestamp in 32-base number system. Public bucket has read-only policy specified.
  
 To enable scaling and to keep bucket configuration data between application restarts, the Asset Upload Service stores its configuration in `assetstore-asset-upload-service` ConfigMap.
+
+Files stored in system buckets are stored permanently. There is no policy to clean system buckets periodically.
 
 ## Usage outside Kyma cluster
 
@@ -32,7 +33,7 @@ To upload files, send a Multipart form POST request to `/upload` endpoint. The e
 
 - `private` - array of files, which should be uploaded to private system bucket.  
 - `private` - array of files, which should be uploaded to public read-only system bucket.  
-- `directory` - optional directory, where the uploaded files are put. If it is not specified, it will be randomized.
+- `directory` - optional directory, where the uploaded files are put. If it is not specified, it will be randomized. If directory and files already exist, they will be overwritten.
 
 To do the multipart request using `curl`, run the following command in this repository:
 
