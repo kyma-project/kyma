@@ -18,7 +18,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: certificate-manager
+        app: {{ .Chart.Name }}
         release: {{ .Chart.Name }}
     spec:
       containers:
