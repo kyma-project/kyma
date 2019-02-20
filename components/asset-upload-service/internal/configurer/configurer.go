@@ -32,23 +32,23 @@ func New(client corev1.CoreV1Interface, cfg Config) *Configurer {
 	}
 }
 
-func (c *Configurer) LoadIfExists() (*SharedAppConfig, bool, error) {
+func (c *Configurer) Load() (*SharedAppConfig, error) {
 	if !c.cfg.Enabled {
-		return nil, false, nil
+		return nil, nil
 	}
 
 	configMap, err := c.client.ConfigMaps(c.cfg.Namespace).Get(c.cfg.Name, metav1.GetOptions{})
 	if err != nil {
 		if apierrors.IsNotFound(err) {
-			return nil, false, nil
+			return nil, nil
 		}
-		return nil, false, errors.Wrapf(err, "while loading ConfigMap %s from %s", c.cfg.Name, c.cfg.Namespace)
+		return nil, errors.Wrapf(err, "while loading ConfigMap %s from %s", c.cfg.Name, c.cfg.Namespace)
 	}
 
 	sharedAppConfig := c.fromConfigMap(configMap)
 	glog.Infof("Config successfully loaded from ConfigMap %s in namespace %s", c.cfg.Name, c.cfg.Namespace)
 
-	return sharedAppConfig, true, nil
+	return sharedAppConfig, nil
 }
 
 func (c *Configurer) Save(config SharedAppConfig) error {

@@ -35,13 +35,12 @@ func TestConfigurer_LoadIfExists(t *testing.T) {
 		})
 
 		// When
-		conf, exists, err := c.LoadIfExists()
+		conf, err := c.Load()
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 		g.Expect(conf).NotTo(gomega.BeNil())
 		g.Expect(*conf).To(gomega.Equal(expectedConfig))
-		g.Expect(exists).To(gomega.BeTrue())
 	})
 
 	t.Run("Doesn't exist", func(t *testing.T) {
@@ -55,12 +54,11 @@ func TestConfigurer_LoadIfExists(t *testing.T) {
 		})
 
 		// When
-		conf, exists, err := c.LoadIfExists()
+		conf, err := c.Load()
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 		g.Expect(conf).To(gomega.BeNil())
-		g.Expect(exists).To(gomega.BeFalse())
 	})
 
 	t.Run("Error", func(t *testing.T) {
@@ -76,7 +74,7 @@ func TestConfigurer_LoadIfExists(t *testing.T) {
 		})
 
 		// When
-		_, _, err := c.LoadIfExists()
+		_, err := c.Load()
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -94,12 +92,11 @@ func TestConfigurer_LoadIfExists(t *testing.T) {
 		})
 
 		// When
-		conf, exists, err := c.LoadIfExists()
+		conf, err := c.Load()
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 		g.Expect(conf).To(gomega.BeNil())
-		g.Expect(exists).To(gomega.BeFalse())
 	})
 }
 

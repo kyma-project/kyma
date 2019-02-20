@@ -46,7 +46,7 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 		}
 	}()
 
-	err := rq.ParseMultipartForm(32 << 20)
+	err := rq.ParseMultipartForm(32 << 20) // 32MB
 	if err != nil {
 		wrappedErr := errors.Wrap(err, "while parsing multipart request")
 		r.writeInternalError(w, wrappedErr)
@@ -73,7 +73,6 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	filesCount := len(publicFiles) + len(privateFiles)
 
 	if filesCount == 0 {
-
 		r.writeResponse(w, http.StatusBadRequest, Response{
 			Errors: []string{
 				"No files specified to upload. Use `private` and `public` fields to upload them.",
@@ -114,6 +113,7 @@ func (r *RequestHandler) populateFilesChannel(publicFiles, privateFiles []*multi
 	filesCh := make(chan uploader.FileUpload, filesCount)
 
 	go func() {
+		defer close(filesCh)
 		for _, file := range publicFiles {
 			filesCh <- uploader.FileUpload{
 				Bucket:    r.buckets.Public,
@@ -128,7 +128,6 @@ func (r *RequestHandler) populateFilesChannel(publicFiles, privateFiles []*multi
 				Directory: directory,
 			}
 		}
-		close(filesCh)
 	}()
 
 	return filesCh

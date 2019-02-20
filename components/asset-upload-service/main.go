@@ -64,10 +64,10 @@ func main() {
 	exitOnError(err, "Error during configurer creation")
 
 	var buckets bucket.SystemBucketNames
-	sharedConfig, exists, err := c.LoadIfExists()
+	sharedConfig, err := c.Load()
 	exitOnError(err, "Error during loading configuration")
 
-	if !exists {
+	if sharedConfig == nil {
 		handler := bucket.NewHandler(client, cfg.Bucket)
 		buckets, err = handler.CreateSystemBuckets()
 		exitOnError(err, "Error during creating system buckets")
@@ -78,8 +78,15 @@ func main() {
 		buckets = sharedConfig.SystemBuckets
 	}
 
+	var uploadExternalEndpoint string
+	if cfg.Upload.ExternalEndpoint != "" {
+		uploadExternalEndpoint = cfg.Upload.ExternalEndpoint
+	} else {
+		uploadExternalEndpoint = cfg.Upload.Endpoint
+	}
+
 	mux := http.NewServeMux()
-	mux.Handle("/v1/upload", requesthandler.New(client, buckets, cfg.Upload.ExternalEndpoint, cfg.UploadTimeout, cfg.MaxUploadWorkers))
+	mux.Handle("/v1/upload", requesthandler.New(client, buckets, uploadExternalEndpoint, cfg.UploadTimeout, cfg.MaxUploadWorkers))
 
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 	srv := &http.Server{Addr: addr, Handler: mux}

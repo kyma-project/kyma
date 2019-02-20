@@ -93,6 +93,35 @@ The result is:
 
 See the [Swagger specification](../../docs/asset-store/docs/assets/asset-upload-service-swagger.yaml) to read full API documentation. You can use the [Swagger Editor](https://editor.swagger.io) to preview and test the API service.
 
+## Configuration
+
+This section describes how to configure the application.
+
+### Environmental Variables
+
+Use the following environment variables to configure the application:
+
+| Name | Required | Default | Description |
+|------|----------|---------|-------------|
+| APP_HOST | No | `127.0.0.1` | The host on which the HTTP server listens. |
+| APP_PORT | No | `3000` | The port on which the HTTP server listens. |
+| APP_KUBECONFIG_PATH | No |  | The path to the `kubeconfig` file, needed for running an application outside of the cluster. |
+| APP_VERBOSE | No | No | Show detailed logs in the application. |
+| APP_UPLOAD_TIMEOUT | No | `30m` | Timeout for uploading files. |
+| APP_MAX_UPLOAD_WORKERS | No | `10` | The maximum number of concurrent upload workers. |
+| APP_UPLOAD_ENDPOINT | No | `minio.kyma.local` | The address of the content storage server. |
+| APP_UPLOAD_PORT | No | `443` | The port on which the content storage server listens. |
+| APP_UPLOAD_ACCESS_KEY | Yes |  | The access key required to sign in to the content storage server. |
+| APP_UPLOAD_SECRET_KEY | Yes |  | The secret key required to sign in to the content storage server. |
+| APP_UPLOAD_SECURE | No | `true` | Use HTTPS for the connection with the content storage server. |
+| APP_UPLOAD_EXTERNAL_ENDPOINT | No | `https://minio.kyma.local` | The external address of the content storage server. If not set, the system uses the `APP_UPLOAD_ENDPOINT` variable. |
+| APP_BUCKET_PRIVATE_PREFIX | No | `private` | The prefix of the private system bucket. |
+| APP_BUCKET_PUBLIC_PREFIX | No | `public` | The prefix of the public system bucket. |
+| APP_BUCKET_PUBLIC_PREFIX | No | `us-east-1` | The region of the system buckets. |
+| APP_CONFIG_ENABLED | No | `true` | Toggle for config save and load using ConfigMap resource |
+| APP_CONFIG_NAME | No | `asset-upload-service` | ConfigMap resource name |
+| APP_CONFIG_NAMESPACE | No | `kyma-system` | ConfigMap resource namespace |
+
 ### Configure logger verbosity level
 
 This application uses `glog` to log messages. Pass command line arguments described in the [glog.go](https://github.com/golang/glog/blob/master/glog.go) document to customize the log, such as log level and output.
