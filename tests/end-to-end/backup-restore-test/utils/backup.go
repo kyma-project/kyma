@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"time"
 
@@ -13,6 +14,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 	api "k8s.io/kubernetes/pkg/apis/core"
+
+	"github.com/ghodss/yaml"
 )
 
 type backupClient struct {
@@ -21,7 +24,7 @@ type backupClient struct {
 }
 
 type BackupClient interface {
-	CreateBackup(backupName string, includedNamespaces, excludedNamespaces, includedResources, excludedResources []string) error
+	CreateBackup(backupName string) error
 	RestoreBackup(backupName string) error
 	GetBackupStatus(backupName string) string
 	CreateNamespace(name string) error
@@ -56,7 +59,18 @@ func NewBackupClient() (BackupClient, error) {
 
 }
 
-func (c *backupClient) CreateBackup(backupName string, includedNamespaces, excludedNamespaces, includedResources, excludedResources []string) error {
+func (c *backupClient) CreateBackup(backupName string) error {
+	var backupSpec backupv1.BackupSpec
+	fileBytes, err := ioutil.ReadFile("/backupSpec.yaml")
+	if err != nil {
+		return err
+	}
+
+	err = yaml.Unmarshal(fileBytes, &backupSpec)
+	if err != nil {
+		return err
+	}
+
 	backup := &backupv1.Backup{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Backup",
@@ -65,14 +79,9 @@ func (c *backupClient) CreateBackup(backupName string, includedNamespaces, exclu
 		ObjectMeta: metav1.ObjectMeta{
 			Name: backupName,
 		},
-		Spec: backupv1.BackupSpec{
-			IncludedNamespaces: includedNamespaces,
-			ExcludedNamespaces: excludedNamespaces,
-			IncludedResources:  includedResources,
-			ExcludedResources:  excludedResources,
-		},
+		Spec: backupSpec,
 	}
-	_, err := c.backupClient.ArkV1().Backups("heptio-ark").Create(backup)
+	_, err = c.backupClient.ArkV1().Backups("heptio-ark").Create(backup)
 	return err
 }
 
@@ -126,10 +135,12 @@ func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time
 			if event.Type == "MODIFIED" {
 				restore, ok := event.Object.(*backupv1.Restore)
 				if !ok {
-					return fmt.Errorf("%v", event)
+					return fmt.Errorf("%+v", event)
 				}
 				if restore.Status.Phase == "Completed" {
 					return nil
+				} else if restore.Status.Phase == "Failed" {
+					return fmt.Errorf("%+v", event)
 				}
 			}
 		}

@@ -16,5 +16,6 @@ RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY --from=builder /restore.test /restore.test
 
 COPY entrypoint.sh /entrypoint.sh
+COPY backupSpec.yaml /backupSpec.yaml
 
 ENTRYPOINT [ "/entrypoint.sh" ]
