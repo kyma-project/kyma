@@ -36,24 +36,24 @@ func NewCSRInfoHandler(tokenManager tokens.Creator, connectorClientExtractor cli
 }
 
 func (ih *csrInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
-	contextServiceProvider, err := ih.connectorClientExtractor(r.Context())
+	clientContextService, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
-	newToken, err := ih.tokenManager.Save(contextServiceProvider)
+	newToken, err := ih.tokenManager.Save(clientContextService)
 
 	if err != nil {
 		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
-	apiURLs := ih.makeApiURLs(contextServiceProvider)
+	apiURLs := ih.makeApiURLs(clientContextService)
 
 	csrURL := ih.makeCSRURLs(newToken)
 
-	certInfo := makeCertInfo(ih.csrSubject, contextServiceProvider.GetCommonName())
+	certInfo := makeCertInfo(ih.csrSubject, clientContextService.GetCommonName())
 
 	httphelpers.RespondWithBody(w, http.StatusOK, csrInfoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }
@@ -65,12 +65,12 @@ func (ih *csrInfoHandler) makeCSRURLs(newToken string) string {
 	return csrURL + tokenParam
 }
 
-func (ih *csrInfoHandler) makeApiURLs(contextServiceProvider clientcontext.ClientContextService) api {
+func (ih *csrInfoHandler) makeApiURLs(clientContextService clientcontext.ClientContextService) api {
 	infoURL := ih.getInfoURL
 	return api{
 		CertificatesURL: ih.baseURL + CertsEndpoint,
 		InfoURL:         infoURL,
-		RuntimeURLs:     contextServiceProvider.GetRuntimeUrls(),
+		RuntimeURLs:     clientContextService.GetRuntimeUrls(),
 	}
 }
 

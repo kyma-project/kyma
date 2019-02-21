@@ -14,7 +14,7 @@ const (
 
 type ConnectorClientExtractor func(ctx context.Context) (ClientContextService, apperrors.AppError)
 
-func CreateApplicationContextServiceProvider(ctx context.Context) (ClientContextService, apperrors.AppError) {
+func CreateApplicationClientContextService(ctx context.Context) (ClientContextService, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)
 	if !ok {
 		return nil, apperrors.Internal("Failed to create params when reading ApplicationContext")
@@ -46,7 +46,7 @@ func CreateApplicationContextServiceProvider(ctx context.Context) (ClientContext
 	return extendedCtx, nil
 }
 
-func CreateClusterContextServiceProvider(ctx context.Context) (ClientContextService, apperrors.AppError) {
+func CreateClusterClientContextService(ctx context.Context) (ClientContextService, apperrors.AppError) {
 	clusterCtx, ok := ctx.Value(ClusterContextKey).(ClusterContext)
 	if !ok {
 		return nil, apperrors.Internal("Failed to create params when reading ClusterContext")

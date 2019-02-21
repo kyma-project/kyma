@@ -124,7 +124,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		ConnectorServiceBaseURL:     fmt.Sprintf(AppURLFormat, opts.connectorServiceHost),
 		CertificateProtectedBaseURL: fmt.Sprintf(AppURLFormat, opts.certificateProtectedHost),
 		Subject:                     subjectValues,
-		ContextExtractor:            clientcontext.CreateApplicationContextServiceProvider,
+		ContextExtractor:            clientcontext.CreateApplicationClientContextService,
 		CertService:                 certificateService,
 	}
 
@@ -136,7 +136,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		ConnectorServiceBaseURL:     fmt.Sprintf(RuntimeURLFormat, opts.connectorServiceHost),
 		CertificateProtectedBaseURL: fmt.Sprintf(RuntimeURLFormat, opts.certificateProtectedHost),
 		Subject:                     subjectValues,
-		ContextExtractor:            clientcontext.CreateClusterContextServiceProvider,
+		ContextExtractor:            clientcontext.CreateClusterClientContextService,
 		CertService:                 certificateService,
 	}
 
@@ -166,7 +166,7 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 		Middlewares:      appHandlerMiddlewares,
 		TokenManager:     tokenManagerProvider.WithTTL(appTokenTTLMinutes),
 		CSRInfoURL:       fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor: clientcontext.CreateApplicationContextServiceProvider,
+		ContextExtractor: clientcontext.CreateApplicationClientContextService,
 	}
 
 	runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
@@ -175,7 +175,7 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 		Middlewares:      runtimeHandlerMiddlewares,
 		TokenManager:     tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
 		CSRInfoURL:       fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor: clientcontext.CreateClusterContextServiceProvider,
+		ContextExtractor: clientcontext.CreateClusterClientContextService,
 	}
 
 	return internalapi.NewHandler(globalMiddlewares, appHandlerConfig, runtimeHandlerConfig)

@@ -27,13 +27,13 @@ func NewSignatureHandler(certificateService certificates.Service, connectorClien
 }
 
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
-	contextServiceProvider, err := sh.connectorClientExtractor(r.Context())
+	clientContextService, err := sh.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
-	logger := contextServiceProvider.GetLogger()
+	logger := clientContextService.GetLogger()
 
 	logger.Info("Reading certificate signing request")
 	signingRequest, err := readCertRequest(r)
@@ -51,7 +51,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 	}
 
 	logger.Info("Signing certificate signing request")
-	encodedCertificatesChain, err := sh.certificateService.SignCSR(rawCSR, contextServiceProvider.GetCommonName())
+	encodedCertificatesChain, err := sh.certificateService.SignCSR(rawCSR, clientContextService.GetCommonName())
 	if err != nil {
 		logger.Error(err)
 		httphelpers.RespondWithError(w, err)
