@@ -16,6 +16,11 @@ RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY --from=builder /restore.test /restore.test
 
 COPY entrypoint.sh /entrypoint.sh
-COPY backupSpec.yaml /backupSpec.yaml
+
+# needs to be updated to use the yamls from the documentation PR #2830
+# COPY ../../../docs/backup/docs/assets/all-backup.yaml /all-backup.yaml
+# COPY ../../../docs/backup/docs/assets/system-backup.yaml /system-backup.yaml
+COPY all-backup.yaml /all-backup.yaml
+COPY system-backup.yaml /system-backup.yaml
 
 ENTRYPOINT [ "/entrypoint.sh" ]

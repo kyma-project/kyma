@@ -56,11 +56,19 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	})
 
 	Convey("Backup Cluster", t, func() {
-		err := myBackupClient.CreateBackup(backupName)
+		systemBackupSpecFile := "/system-backup.yaml"
+		allBackupSpecFile := "/all-backup.yaml"
+		allBackupName := "all-" + backupName
+		systemBackupName := "system-" + backupName
+		err := myBackupClient.CreateBackup(allBackupName, allBackupSpecFile)
+		So(err, ShouldBeNil)
+		err = myBackupClient.CreateBackup(systemBackupName, systemBackupSpecFile)
 		So(err, ShouldBeNil)
 
 		Convey("Check backup status", func() {
-			err := myBackupClient.WaitForBackupToBeCreated(backupName, 15*time.Minute)
+			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 15*time.Minute)
+			So(err, ShouldBeNil)
+			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 15*time.Minute)
 			So(err, ShouldBeNil)
 			for _, e2eTest := range e2eTests {
 				Convey("Delete resources from cluster", func() {
@@ -69,9 +77,13 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 					err = myBackupClient.WaitForNamespaceToBeDeleted(e2eTest.namespace, 2*time.Minute)
 					So(err, ShouldBeNil)
 					Convey("Restore Cluster", func() {
-						err := myBackupClient.RestoreBackup(backupName)
+						err := myBackupClient.RestoreBackup(allBackupName)
 						So(err, ShouldBeNil)
-						err = myBackupClient.WaitForBackupToBeRestored(backupName, 15*time.Minute)
+						err = myBackupClient.RestoreBackup(systemBackupName)
+						So(err, ShouldBeNil)
+						err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 15*time.Minute)
+						So(err, ShouldBeNil)
+						err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 15*time.Minute)
 						So(err, ShouldBeNil)
 						Convey("Test restored resources", func() {
 							for _, e2eTest := range e2eTests {

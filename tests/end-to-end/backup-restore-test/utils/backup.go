@@ -24,7 +24,7 @@ type backupClient struct {
 }
 
 type BackupClient interface {
-	CreateBackup(backupName string) error
+	CreateBackup(backupName, backupSpecPath string) error
 	RestoreBackup(backupName string) error
 	GetBackupStatus(backupName string) string
 	CreateNamespace(name string) error
@@ -59,9 +59,9 @@ func NewBackupClient() (BackupClient, error) {
 
 }
 
-func (c *backupClient) CreateBackup(backupName string) error {
+func (c *backupClient) CreateBackup(backupName, specPath string) error {
 	var backupSpec backupv1.BackupSpec
-	fileBytes, err := ioutil.ReadFile("/backupSpec.yaml")
+	fileBytes, err := ioutil.ReadFile(specPath)
 	if err != nil {
 		return err
 	}
@@ -97,7 +97,7 @@ func (c *backupClient) WaitForBackupToBeCreated(backupName string, waitmax time.
 	for {
 		select {
 		case <-timeout:
-			return fmt.Errorf("Backup could not be created within given time  %v", waitmax)
+			return fmt.Errorf("Backup %v could not be created within given time  %v", backupName, waitmax)
 		case event := <-backupWatch.ResultChan():
 			if event.Type == "ERROR" {
 				return fmt.Errorf("%+v", event)
@@ -109,6 +109,8 @@ func (c *backupClient) WaitForBackupToBeCreated(backupName string, waitmax time.
 				}
 				if backup.Status.Phase == "Completed" {
 					return nil
+				} else if backup.Status.Phase == "Failed" {
+					return fmt.Errorf("Backup %v Failed:\n%+v", backupName, backup)
 				}
 			}
 		}
@@ -127,7 +129,7 @@ func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time
 	for {
 		select {
 		case <-timeout:
-			return fmt.Errorf("Backup could not be restored within given time  %v", waitmax)
+			return fmt.Errorf("Backup %v could not be restored within given time  %v", backupName, waitmax)
 		case event := <-restoreWatch.ResultChan():
 			if event.Type == "ERROR" {
 				return fmt.Errorf("%+v", event)
@@ -140,7 +142,7 @@ func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time
 				if restore.Status.Phase == "Completed" {
 					return nil
 				} else if restore.Status.Phase == "Failed" {
-					return fmt.Errorf("Restore Failed:\n%+v", restore)
+					return fmt.Errorf("Restore %v Failed:\n%+v", backupName, restore)
 				}
 			}
 		}

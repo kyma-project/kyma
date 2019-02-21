@@ -8,9 +8,9 @@ excludedNamespaces:
 - kyma-installer
 - default
 - natts
-- guenther
 includedResources:
 - '*'
-excludedResources:
-includeClusterResources:
-labelSelector:
+excludedResources: null
+includeClusterResources: null
+labelSelector: null
+storageLocation: default
