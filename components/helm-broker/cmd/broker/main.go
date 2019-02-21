@@ -23,9 +23,15 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"
+)
+
+const (
+	mapLabelKey   = "helm-broker-repo"
+	mapLabelValue = "true"
 )
 
 func main() {
@@ -58,9 +64,11 @@ func main() {
 	bLoader := bundle.NewLoader(cfg.TmpDir, log)
 	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), log)
 	brokerSyncer := broker.NewClusterServiceBrokerSyncer(csbInterface, log)
+	cfgMapInformer := v1.NewFilteredConfigMapInformer(clientset, cfg.Namespace, 10*time.Minute, cache.Indexers{}, func(options *metav1.ListOptions) {
+		options.LabelSelector = fmt.Sprintf("%s=%s", mapLabelKey, mapLabelValue)
+	})
 
-	cfgMapInformer := v1.NewConfigMapInformer(clientset, cfg.Namespace, time.Minute, cache.Indexers{})
-	repositoryWatcher := bundle.NewRepositoryController(sFact.Bundle(), bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log)
+	repositoryWatcher := bundle.NewRepositoryController(bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log)
 	go repositoryWatcher.Run(stopCh)
 	go cfgMapInformer.Run(stopCh)
 
@@ -71,7 +79,7 @@ func main() {
 	helmClient := helm.NewClient(cfg.Helm, log)
 
 	srv := broker.New(sFact.Bundle(), sFact.Chart(), sFact.InstanceOperation(), sFact.Instance(), sFact.InstanceBindData(),
-		bind.NewRenderer(), bind.NewResolver(clientset.CoreV1()), helmClient, log)
+		bind.NewRenderer(), bind.NewResolver(clientset.CoreV1()), helmClient, bundleSyncer, log)
 	cancelOnInterrupt(ctx, cancelFunc)
 
 	startedCh := make(chan struct{})

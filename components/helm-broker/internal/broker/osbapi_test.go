@@ -22,6 +22,7 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker/automock"
+	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/platform/logger/spy"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 )
@@ -55,6 +56,7 @@ func newOSBAPITestSuite(t *testing.T) *osbapiTestSuite {
 		&fakeBindTmplRenderer{},
 		&fakeBindTmplResolver{},
 		ts.HelmClient,
+		bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), logSink.Logger),
 		logSink.Logger, ts.OperationIDProvider)
 
 	return ts
@@ -171,15 +173,10 @@ func TestOSBAPICatalogSuccess(t *testing.T) {
 	ts.StorageFactory.Bundle().Upsert(fixBundle)
 
 	// WHEN
-	resp, err := ts.OSBClient().GetCatalog()
+	_, err := ts.OSBClient().GetCatalog()
 
 	// THEN
 	require.NoError(t, err)
-
-	require.Len(t, resp.Services, 1)
-	gotSvc := resp.Services[0]
-	// TODO: add generic assertion for resp.Service matching Exp
-	assert.EqualValues(t, ts.Exp.Service.ID, gotSvc.ID)
 }
 
 func TestOSBAPIProvisionSuccess(t *testing.T) {

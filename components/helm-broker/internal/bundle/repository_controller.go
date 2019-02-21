@@ -3,30 +3,24 @@ package bundle
 import (
 	"strings"
 
-	"fmt"
-	"reflect"
 	"time"
+
+	"fmt"
 
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/util/wait"
-	listerv1 "k8s.io/client-go/listers/core/v1"
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 )
 
-//go:generate mockery -name=bundleRemover -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=bundleSyncer -output=automock -outpkg=automock -case=underscore
 //go:generate mockery -name=brokerSyncer -output=automock -outpkg=automock -case=underscore
 
 type (
-	bundleRemover interface {
-		RemoveAll() error
-	}
 	bundleSyncer interface {
-		Execute()
+		Execute() error
 		AddProvider(url string, p Provider)
 		CleanProviders()
 	}
@@ -36,19 +30,14 @@ type (
 )
 
 const (
-	mapLabelKey   = "repo"
-	mapLabelValue = "true"
-
-	defaultMaxRetries = 15
+	defaultMaxRetries = 5
 )
 
 // RepositoryController is responsible for updating repositories URL on configmap change
 type RepositoryController struct {
-	LastUrls       []string
 	brokerName     string
 	namespace      string
 	brokerSyncer   brokerSyncer
-	bundleRemover  bundleRemover
 	bundleSyncer   bundleSyncer
 	bundleLoader   bundleLoader
 	cfgMapInformer cache.SharedIndexInformer
@@ -62,9 +51,8 @@ type RepositoryController struct {
 }
 
 // NewRepositoryController returns new RepositoryController instance.
-func NewRepositoryController(bundleRemover bundleRemover, bundleSyncer bundleSyncer, bundleloader bundleLoader, brokerSyncer brokerSyncer, brokerName string, cfgMapInformer cache.SharedIndexInformer, log logrus.FieldLogger) *RepositoryController {
+func NewRepositoryController(bundleSyncer bundleSyncer, bundleloader bundleLoader, brokerSyncer brokerSyncer, brokerName string, cfgMapInformer cache.SharedIndexInformer, log logrus.FieldLogger) *RepositoryController {
 	c := &RepositoryController{
-		bundleRemover:  bundleRemover,
 		bundleSyncer:   bundleSyncer,
 		bundleLoader:   bundleloader,
 		brokerSyncer:   brokerSyncer,
@@ -160,7 +148,6 @@ func (c *RepositoryController) onUpdateCfgMap(old, new interface{}) {
 		c.log.Warnf("while handling update: cannot covert obj [%+v] of type %T to *ConfigMap", new, new)
 		return
 	}
-
 	if oldCfgMap.Data["URLs"] != newCfgMap.Data["URLs"] {
 		key, err := cache.MetaNamespaceKeyFunc(new)
 		if err != nil {
@@ -181,38 +168,30 @@ func (c *RepositoryController) onDeleteCfgMap(obj interface{}) {
 }
 
 func (c *RepositoryController) syncBundlesRepos(name string, namespace string) error {
-	set, err := labels.ConvertSelectorToLabelsMap(fmt.Sprintf("%s=%s", mapLabelKey, mapLabelValue))
-	if err != nil {
-		return errors.Wrapf(err, "while creating label selector %s=%s", mapLabelKey, mapLabelValue)
+	var configMaps []*v1.ConfigMap
+	for _, obj := range c.cfgMapInformer.GetIndexer().List() {
+		cfg, ok := obj.(*v1.ConfigMap)
+		if !ok {
+			return fmt.Errorf("incorrect item type: %T, should be: *ConfigMap", obj)
+		}
+		configMaps = append(configMaps, cfg)
 	}
 
-	cfgMapLister := listerv1.NewConfigMapLister(c.cfgMapInformer.GetIndexer())
-	cfgs, err := cfgMapLister.List(labels.SelectorFromSet(set))
-	if err != nil {
-		return errors.Wrapf(err, "while listing config maps with labelSelector %q", set)
+	var existingURLs []string
+	for _, cfg := range configMaps {
+		existingURLs = append(existingURLs, cfg.Data["URLs"])
 	}
-
-	var computedURLs []string
-	for _, cfg := range cfgs {
-		computedURLs = append(computedURLs, cfg.Data["URLs"])
-	}
-	if reflect.DeepEqual(c.LastUrls, computedURLs) {
-		return nil
-	}
-	if err := c.bundleRemover.RemoveAll(); err != nil {
-		return errors.Wrapf(err, "while removing all bundles")
-	}
-
-	c.LastUrls = computedURLs
-	repositories := c.lastURLToRepositories()
 
 	c.bundleSyncer.CleanProviders()
+	repositories := c.urlsToRepositories(existingURLs)
 	for _, repoCfg := range repositories {
 		repoProvider := NewProvider(NewHTTPRepository(repoCfg), c.bundleLoader, c.log.WithField("URLs", repoCfg.URL))
 		c.bundleSyncer.AddProvider(repoCfg.URL, repoProvider)
 	}
-	c.bundleSyncer.Execute()
 
+	if err := c.bundleSyncer.Execute(); err != nil {
+		return errors.Wrap(err, "while syncing bundles")
+	}
 	if err := c.brokerSyncer.Sync(c.brokerName, 5); err != nil {
 		return errors.Wrapf(err, "while syncing %s broker", c.brokerName)
 	}
@@ -220,13 +199,15 @@ func (c *RepositoryController) syncBundlesRepos(name string, namespace string) e
 	return nil
 }
 
-func (c *RepositoryController) lastURLToRepositories() []RepositoryConfig {
+func (c *RepositoryController) urlsToRepositories(urlsList []string) []RepositoryConfig {
 	var cfgs []RepositoryConfig
-	for _, urls := range c.LastUrls {
+	for _, urls := range urlsList {
 		for _, url := range strings.Split(urls, "\n") {
-			cfgs = append(cfgs, RepositoryConfig{
-				URL: url,
-			})
+			if len(url) > 0 {
+				cfgs = append(cfgs, RepositoryConfig{
+					URL: url,
+				})
+			}
 		}
 	}
 	return cfgs

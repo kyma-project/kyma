@@ -35,8 +35,6 @@ type Config struct {
 	Helm                     helm.Config      `valid:"required"`
 	ClusterServiceBrokerName string
 	HelmBrokerURL            string
-	ReposURLsName            string `envconfig:"APP_REPOS_URLS_NAME"`
-	ReposURLsKey             string `envconfig:"APP_REPOS_URLS_KEY"`
 }
 
 // Load method has following strategy:

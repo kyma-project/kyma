@@ -1,12 +1,14 @@
 package bundle
 
 import (
+	"sync"
+
 	"fmt"
 	"strings"
-	"sync"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
@@ -17,6 +19,7 @@ type bundleOperations interface {
 	FindAll() ([]*internal.Bundle, error)
 	RemoveByID(internal.BundleID) error
 	Upsert(*internal.Bundle) (replace bool, err error)
+	RemoveAll() error
 }
 
 // Provider contains method which provides CompleteBundle items.
@@ -48,39 +51,30 @@ func (s *Syncer) AddProvider(url string, provider Provider) {
 	s.repositories[url] = provider
 }
 
-// CleanProviders is executed only on repositories update to remove providers from previous URL.
+// CleanProviders remove all providers from the map.
 func (s *Syncer) CleanProviders() {
 	s.repositories = map[string]Provider{}
 }
 
 // Execute performs bundles storage with repositories synchronization.
-func (s *Syncer) Execute() {
+func (s *Syncer) Execute() error {
 	// Syncer must not be used in parallel
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
-	s.log.Infof("Loading bundles from repositories")
-	defer s.log.Infof("Loading bundles finished")
-
-	bundles, err := s.bundleStorage.FindAll()
-	if err != nil {
-		s.log.Errorf("Could not load existing bundles, error: %s", err)
-		return
-	}
-
-	bundlesByRepo, bundlesByID := s.prepareIndexes(bundles)
+	s.log.Info("Loading bundles from repositories")
+	defer s.log.Info("Loading bundles finished")
 
 	resultChan := make(chan bundlesChange)
 	for url, repo := range s.repositories {
-		go func(p Provider, b []*internal.Bundle, u string) {
+		go func(p Provider, u string) {
 			// gather bundles from external repos
-			change := s.generateBundlesChange(p, b, u)
+			change := s.generateBundlesChange(p, u)
 			resultChan <- change
-		}(repo, bundlesByRepo[url], url)
+		}(repo, url)
 	}
 
 	// collect results
-	var idsToRemove []internal.BundleID
 	var toUpsert []CompleteBundle
 	for range s.repositories {
 		change := <-resultChan
@@ -88,7 +82,6 @@ func (s *Syncer) Execute() {
 			continue
 		}
 
-		idsToRemove = append(idsToRemove, change.idsToRemove...)
 		toUpsert = append(toUpsert, change.items...)
 	}
 
@@ -100,25 +93,9 @@ func (s *Syncer) Execute() {
 		idUsage[item.ID()] = append(idUsage[item.ID()], item)
 	}
 
-	// Remove all bundles which must be removed, then upsert new ones
-
-	// Remove bundles which were deleted
-	for _, id := range idsToRemove {
-		s.removeBundle(id, bundlesByID[id])
-	}
-
-	// Remove bundles when there are more than one bundle with the same ID
+	// warn about bundles when there are more than one bundle with the same ID
 	for _, bundleWithCharts := range toUpsert {
 		if len(idUsage[bundleWithCharts.ID()]) > 1 {
-			// when loaded bundles contains more than one CompleteBundle with the same ID
-			// - such CompleteBundle must not exist after the sync.
-			// If such CompleteBundle was existing before - remove it.
-			for _, existingBundle := range bundles {
-				if existingBundle.ID == bundleWithCharts.ID() {
-					s.removeBundle(existingBundle.ID, existingBundle)
-				}
-			}
-
 			var msgs []string
 			for _, bundleWithCharts := range idUsage[bundleWithCharts.ID()] {
 				msgs = append(msgs, fmt.Sprintf("[url: %s, name: %s, version: %s]", bundleWithCharts.Bundle.Repository.URL, bundleWithCharts.Bundle.Name, bundleWithCharts.Bundle.Version.String()))
@@ -128,15 +105,24 @@ func (s *Syncer) Execute() {
 		}
 	}
 
-	// Upsert bundles
+	// remove bundles before upsert
+	if err := s.bundleStorage.RemoveAll(); err != nil {
+		return errors.Wrap(err, "while removing all bundles")
+	}
+
+	// upsert bundles
 	for _, bundleWithCharts := range toUpsert {
 		// do not upsert bundle if there are more than one bundle with the same ID
 		if len(idUsage[bundleWithCharts.ID()]) > 1 {
 			continue
 		}
-		s.upsert(bundleWithCharts)
+		if err := s.upsert(bundleWithCharts); err != nil {
+			return errors.Wrapf(err, "while upsering bundle %s:%s", bundleWithCharts.Bundle.Name, bundleWithCharts.Bundle.Version.String())
+		}
 		s.log.Infof("Bundle %s:%s saved.", bundleWithCharts.Bundle.Name, bundleWithCharts.Bundle.Version.String())
 	}
+
+	return nil
 }
 
 func (s *Syncer) prepareIndexes(bundles []*internal.Bundle) (map[string][]*internal.Bundle, map[internal.BundleID]*internal.Bundle) {
@@ -153,79 +139,39 @@ func (s *Syncer) prepareIndexes(bundles []*internal.Bundle) (map[string][]*inter
 	return bundlesByRepo, bundlesByID
 }
 
-func (s *Syncer) upsert(bundleWithCharts CompleteBundle) {
+func (s *Syncer) upsert(bundleWithCharts CompleteBundle) error {
 	_, err := s.bundleStorage.Upsert(bundleWithCharts.Bundle)
 	if err != nil {
-		s.log.Errorf("Could not upsert bundle %s (%s:%s): %s", bundleWithCharts.Bundle.ID, bundleWithCharts.Bundle.Name, bundleWithCharts.Bundle.Version, err.Error())
+		return errors.Wrapf(err, "could not upsert bundle %s (%s:%s)", bundleWithCharts.Bundle.ID, bundleWithCharts.Bundle.Name, bundleWithCharts.Bundle.Version.String())
 	}
 
 	for _, ch := range bundleWithCharts.Charts {
 		_, err := s.chartOperations.Upsert(ch)
 		if err != nil {
-			s.log.Errorf("Could not upsert chart %s:%s for bundle %s (%s:%s): %s")
+			return errors.Wrapf(err, "could not upsert chart %s:%s for bundle %s (%s:%s)", ch.Metadata.Name, ch.Metadata.Version, bundleWithCharts.Bundle.ID, bundleWithCharts.Bundle.Name, bundleWithCharts.Bundle.Version.String())
 		}
 	}
+	return nil
 }
 
-func (s *Syncer) removeBundle(id internal.BundleID, existingBundle *internal.Bundle) {
-	err := s.bundleStorage.RemoveByID(id)
-	if err != nil {
-		s.log.Warnf("Could not remove bundle %s from the storage: %s", id, err.Error())
-		// if the removal failed, do not remove its charts
-		return
-	}
-
-	if existingBundle != nil {
-		for _, plan := range existingBundle.Plans {
-			err := s.chartOperations.Remove(plan.ChartRef.Name, plan.ChartRef.Version)
-			if err != nil {
-				s.log.Warnf("Could not remove chart %s:%s used by bundle id: %s name: %s", plan.ChartRef.Name, plan.ChartRef.Version, id, existingBundle.Name)
-			}
-		}
-	}
-}
-
-func (s *Syncer) generateBundlesChange(repo Provider, existingBundles []*internal.Bundle, url string) bundlesChange {
+func (s *Syncer) generateBundlesChange(repo Provider, url string) bundlesChange {
 	items, err := repo.ProvideBundles()
 	if err != nil {
 		s.log.Errorf("Could not load bundles from the repository %s, error: %s", url, err.Error())
 		return newBundlesChangeForError(err)
 	}
-
-	// calculate removed
-	var idsToRemove []internal.BundleID
-
-	// find all bundle IDs to remove
-	for _, b := range existingBundles {
-		bundleRemoved := true
-
-		// if the bundle exists in the newBundles collection - bundle must not be removed
-		for _, bundleWithCharts := range items {
-			if b.ID == bundleWithCharts.ID() {
-				bundleRemoved = false
-				break
-			}
-		}
-		if bundleRemoved {
-			idsToRemove = append(idsToRemove, b.ID)
-		}
-	}
-
 	// update bundles with repository url
 	for _, item := range items {
 		item.Bundle.Repository.URL = url
 	}
-
 	return bundlesChange{
-		idsToRemove: idsToRemove,
-		items:       items,
+		items: items,
 	}
 }
 
 type bundlesChange struct {
-	idsToRemove []internal.BundleID
-	items       []CompleteBundle
-	err         error
+	items []CompleteBundle
+	err   error
 }
 
 // containsChange indicates the change must be processed, the simplest check returns true if there was no error.

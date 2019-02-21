@@ -6,9 +6,13 @@ import (
 	"context"
 	"time"
 
+	"errors"
+	"fmt"
+
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
+	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/mock"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -29,22 +33,19 @@ const (
 
 func TestNewRepositoryController_HappyPath(t *testing.T) {
 	// GIVEN
-	bundleRemover := &automock.BundleRemover{}
 	bundleSyncer := &automock.BundleSyncer{}
 	bundleLoader := &automock.BundleLoader{}
 	brokerSyncer := &automock.BrokerSyncer{}
 
 	defer func() {
 		bundleSyncer.AssertExpectations(t)
-		bundleRemover.AssertExpectations(t)
 		bundleLoader.AssertExpectations(t)
 		brokerSyncer.AssertExpectations(t)
 	}()
 
-	bundleRemover.On("RemoveAll").Return(nil).Once()
-	bundleSyncer.On("CleanProviders").Return(nil).Once()
 	bundleSyncer.On("AddProvider", mapTestData, mock.Anything).Return(nil).Once()
-	bundleSyncer.On("Execute").Once()
+	bundleSyncer.On("Execute").Return(nil).Once()
+	bundleSyncer.On("CleanProviders").Once()
 	brokerSyncer.On("Sync", brokerName, 5).Return(nil).Once()
 
 	logSink := spy.NewLogSink()
@@ -56,7 +57,7 @@ func TestNewRepositoryController_HappyPath(t *testing.T) {
 		asyncOpDone <- struct{}{}
 	}
 
-	controller := bundle.NewRepositoryController(bundleRemover, bundleSyncer, bundleLoader, brokerSyncer, brokerName, cfgMapInformer, logSink.Logger).
+	controller := bundle.NewRepositoryController(bundleSyncer, bundleLoader, brokerSyncer, brokerName, cfgMapInformer, logSink.Logger).
 		WithTestHookOnAsyncOpDone(hookAsyncOp)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
@@ -67,51 +68,95 @@ func TestNewRepositoryController_HappyPath(t *testing.T) {
 	go controller.Run(ctx.Done())
 
 	// THEN
-	awaitForChanAtMost(t, asyncOpDone, 5*time.Second)
+	awaitForChanAtMost(t, asyncOpDone, time.Second)
 }
 
-//func TestNewRepositoryController_HappyPath(t *testing.T) {
-//	// GIVEN
-//	bundleRemover := &automock.BundleRemover{}
-//	bundleSyncer := &automock.BundleSyncer{}
-//	bundleLoader := &automock.BundleLoader{}
-//	brokerSyncer := &automock.BrokerSyncer{}
-//
-//	defer func() {
-//		bundleSyncer.AssertExpectations(t)
-//		bundleRemover.AssertExpectations(t)
-//		bundleLoader.AssertExpectations(t)
-//		brokerSyncer.AssertExpectations(t)
-//	}()
-//
-//	bundleRemover.On("RemoveAll").Return(nil).Once()
-//	bundleSyncer.On("CleanProviders").Return(nil).Once()
-//	bundleSyncer.On("AddProvider", mapTestData, mock.Anything).Return(nil).Once()
-//	bundleSyncer.On("Execute").Once()
-//	brokerSyncer.On("Sync", brokerName, 5).Return(nil).Once()
-//
-//	logSink := spy.NewLogSink()
-//	client := fake.NewSimpleClientset(fixConfigMap())
-//	cfgMapInformer := corev1.NewConfigMapInformer(client, mapNamespace, time.Minute, cache.Indexers{})
-//
-//	asyncOpDone := make(chan struct{})
-//	hookAsyncOp := func() {
-//		asyncOpDone <- struct{}{}
-//	}
-//
-//	controller := bundle.NewRepositoryController(bundleRemover, bundleSyncer, bundleLoader, brokerSyncer, brokerName, cfgMapInformer, logSink.Logger).
-//		WithTestHookOnAsyncOpDone(hookAsyncOp)
-//
-//	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-//	defer cancel()
-//
-//	// WHEN
-//	go cfgMapInformer.Run(ctx.Done())
-//	go controller.Run(ctx.Done())
-//
-//	// THEN
-//	awaitForChanAtMost(t, asyncOpDone, 5*time.Second)
-//}
+func TestNewRepositoryController_ManyProviders(t *testing.T) {
+	// GIVEN
+	bundleSyncer := &automock.BundleSyncer{}
+	bundleLoader := &automock.BundleLoader{}
+	brokerSyncer := &automock.BrokerSyncer{}
+
+	defer func() {
+		bundleSyncer.AssertExpectations(t)
+		bundleLoader.AssertExpectations(t)
+		brokerSyncer.AssertExpectations(t)
+	}()
+
+	bundleSyncer.On("AddProvider", mapTestData, mock.Anything).Return(nil).Times(2)
+	bundleSyncer.On("CleanProviders").Once()
+	bundleSyncer.On("Execute").Return(nil).Once()
+	brokerSyncer.On("Sync", brokerName, 5).Return(nil).Once()
+
+	cfgMap := fixConfigMap()
+	cfgMap.Data = map[string]string{
+		"URLs": mapTestData + "\n" + mapTestData,
+	}
+
+	logSink := spy.NewLogSink()
+	client := fake.NewSimpleClientset(cfgMap)
+	cfgMapInformer := corev1.NewConfigMapInformer(client, mapNamespace, time.Minute, cache.Indexers{})
+
+	asyncOpDone := make(chan struct{})
+	hookAsyncOp := func() {
+		asyncOpDone <- struct{}{}
+	}
+
+	controller := bundle.NewRepositoryController(bundleSyncer, bundleLoader, brokerSyncer, brokerName, cfgMapInformer, logSink.Logger).
+		WithTestHookOnAsyncOpDone(hookAsyncOp)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// WHEN
+	go cfgMapInformer.Run(ctx.Done())
+	go controller.Run(ctx.Done())
+
+	// THEN
+	awaitForChanAtMost(t, asyncOpDone, time.Second)
+}
+
+func TestNewRepositoryController_OutOfRetries(t *testing.T) {
+	// GIVEN
+	bundleSyncer := &automock.BundleSyncer{}
+	bundleLoader := &automock.BundleLoader{}
+	brokerSyncer := &automock.BrokerSyncer{}
+
+	defer func() {
+		bundleSyncer.AssertExpectations(t)
+		bundleLoader.AssertExpectations(t)
+		brokerSyncer.AssertExpectations(t)
+	}()
+
+	fixErr := "fix"
+	bundleSyncer.On("AddProvider", mapTestData, mock.Anything).Return(nil).Once()
+	bundleSyncer.On("CleanProviders").Once()
+	bundleSyncer.On("Execute").Return(errors.New(fixErr)).Once()
+
+	logSink := spy.NewLogSink()
+	client := fake.NewSimpleClientset(fixConfigMap())
+	cfgMapInformer := corev1.NewConfigMapInformer(client, mapNamespace, time.Minute, cache.Indexers{})
+
+	asyncOpDone := make(chan struct{})
+	hookAsyncOp := func() {
+		asyncOpDone <- struct{}{}
+	}
+
+	controller := bundle.NewRepositoryController(bundleSyncer, bundleLoader, brokerSyncer, brokerName, cfgMapInformer, logSink.Logger).
+		WithTestHookOnAsyncOpDone(hookAsyncOp).
+		WithoutRetries()
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	// WHEN
+	go cfgMapInformer.Run(ctx.Done())
+	go controller.Run(ctx.Done())
+
+	// THEN
+	awaitForChanAtMost(t, asyncOpDone, time.Second)
+	logSink.AssertLogged(t, logrus.ErrorLevel, fmt.Sprintf("Error processing %q (giving up - to many retires): while syncing bundles: %v", mapName+"/"+mapNamespace, fixErr))
+}
 
 func fixConfigMap() *v1.ConfigMap {
 	return &v1.ConfigMap{
