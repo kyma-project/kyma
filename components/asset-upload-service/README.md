@@ -54,7 +54,7 @@ The variables are:
 
 For the full API documentation, including Swagger specification, see the [Asset Store docs](../../docs/asset-store/docs/03-04-asset-upload-service.md).
 
-### Environmental Variables
+### Environmental variables
 
 Use the following environment variables to configure the application:
 
