@@ -36,6 +36,29 @@ The variables are:
 * `{image_tag}` which is the tag of the output image. Use `latest` for the tag name.
 
 
+## Configuration
+
+This document describes configuration details of the application.
+
+### Environmental Variables
+
+Use the following environment variables to configure the application:
+
+| Name | Required | Default | Description |
+|------|----------|---------|-------------|
+| APP_CLUSTER_ASSET_RELIST_INTERVAL | No | `5m` | The period of time after which the controller refreshes the ClusterAsset statuses. |
+| APP_ASSET_RELIST_INTERVAL | No | `5m` | The period of time after which the controller refreshes the Asset statuses. |
+| APP_BUCKET_RELIST_INTERVAL | No | `5m` | The period of time after which the controller refreshes the Bucket statuses. |
+| APP_CLUSTER_BUCKET_RELIST_INTERVAL | No | `5m` | The period of time after which the controller refreshes the ClusterBucket statuses. |
+| APP_STORE_ENDPOINT | No | `minio.kyma.local` | The address of the content storage server. |
+| APP_STORE_EXTERNAL_ENDPOINT | No | `https://minio.kyma.local` | The external address of the content storage server. |
+| APP_STORE_ACCESS_KEY | Yes |  | The access key required to sign in to the content storage server. |
+| APP_STORE_SECRET_KEY | Yes |  | The secret key required to sign in to the content storage server. |
+| APP_STORE_USE_SSL | No | `true` | Use HTTPS for the connection with the content storage server. |
+| APP_WEBHOOK_MUTATION_TIMEOUT | No | `1m` | The period of time after which mutation will be canceled. |
+| APP_WEBHOOK_VALIDATION_TIMEOUT | No | `1m` | The period of time after which validation will be canceled. |
+| APP_LOADER_TEMPORARY_DIRECTORY | No | `/tmp` | The path directory used for temporary storing data. |
+
 ## Development
 
 ### Install dependencies
