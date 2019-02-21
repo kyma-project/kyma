@@ -38,14 +38,14 @@ func NewCSRInfoHandler(tokenManager tokens.Creator, connectorClientExtractor cli
 func (ih *csrInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 	contextServiceProvider, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
 	newToken, err := ih.tokenManager.Save(contextServiceProvider)
 
 	if err != nil {
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 

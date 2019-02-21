@@ -29,7 +29,7 @@ func NewSignatureHandler(certificateService certificates.Service, connectorClien
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 	contextServiceProvider, err := sh.connectorClientExtractor(r.Context())
 	if err != nil {
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 

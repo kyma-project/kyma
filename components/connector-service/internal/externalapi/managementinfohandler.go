@@ -27,7 +27,7 @@ func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorCl
 func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *http.Request) {
 	contextServiceProvider, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 

@@ -26,7 +26,7 @@ func NewTokenHandler(tokenManager tokens.Creator, csrInfoURL string, connectorCl
 func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 	contextServiceProvider, err := th.connectorClientExtractor(r.Context())
 	if err != nil {
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
