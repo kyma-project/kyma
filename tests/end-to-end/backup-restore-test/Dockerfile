@@ -3,7 +3,7 @@ FROM golang:1.10-alpine as builder
 ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test
 WORKDIR ${SRC_DIR}
 
-COPY restore ${SRC_DIR}/restore/
+COPY . ${SRC_DIR}/restore/
 
 RUN go test -c ./restore/ -o /restore.test
 RUN apk --no-cache upgrade && apk --no-cache add curl
@@ -19,7 +19,7 @@ RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY --from=builder /tmp/ark /usr/bin/ark
 COPY --from=builder /tmp/kubectl /usr/bin/kubectl
 COPY --from=builder /restore.test /restore.test
-COPY restore/function.yaml /function.yaml
+COPY function.yaml /function.yaml
 
 COPY entrypoint.sh /entrypoint.sh
 
