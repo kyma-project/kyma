@@ -20,10 +20,10 @@ global:
     version: 0c447819
   connector_service:
     dir: develop/
-    version: 777336a2
+    version: 57f2ecea
   connector_service_tests:
     dir: develop/
-    version: 7f672b46
+    version: 57f2ecea
   connection_token_handler:
     dir: develop/
     version: fa0de1b9
