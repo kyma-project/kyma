@@ -71,7 +71,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 	}
 
 	dummyContextServiceProvider := dummyContextServiceProvider{}
-	contextServiceProvider := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+	contextServiceProvider := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 		return dummyContextServiceProvider, nil
 	}
 
@@ -128,7 +128,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		}
 
 		dummyContextServiceProviderWithEmptyURLs := &dummyContextServiceProviderWithEmptyURLs{dummyContextServiceProvider: dummyContextServiceProvider}
-		contextServiceProvider := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		contextServiceProvider := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyContextServiceProviderWithEmptyURLs, nil
 		}
 
@@ -194,7 +194,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		// given
 		tokenCreator := &tokenMocks.Creator{}
 
-		errorExtractor := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
@@ -258,7 +258,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			},
 		}
 
-		contextServiceProvider := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		contextServiceProvider := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return *extendedCtx, nil
 		}
 

@@ -12,9 +12,9 @@ const (
 	EventsURLFormat   = "https://%s/%s/v1/events"
 )
 
-type ConnectorClientExtractor func(ctx context.Context) (ContextServiceProvider, apperrors.AppError)
+type ConnectorClientExtractor func(ctx context.Context) (ClientContextService, apperrors.AppError)
 
-func CreateApplicationContextServiceProvider(ctx context.Context) (ContextServiceProvider, apperrors.AppError) {
+func CreateApplicationContextServiceProvider(ctx context.Context) (ClientContextService, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)
 	if !ok {
 		return nil, apperrors.Internal("Failed to create params when reading ApplicationContext")
@@ -46,7 +46,7 @@ func CreateApplicationContextServiceProvider(ctx context.Context) (ContextServic
 	return extendedCtx, nil
 }
 
-func CreateClusterContextServiceProvider(ctx context.Context) (ContextServiceProvider, apperrors.AppError) {
+func CreateClusterContextServiceProvider(ctx context.Context) (ClientContextService, apperrors.AppError) {
 	clusterCtx, ok := ctx.Value(ClusterContextKey).(ClusterContext)
 	if !ok {
 		return nil, apperrors.Internal("Failed to create params when reading ClusterContext")

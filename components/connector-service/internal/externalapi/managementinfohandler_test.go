@@ -33,7 +33,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			},
 		}
 
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return *extClientCtx, nil
 		}
 
@@ -65,7 +65,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 	t.Run("should successfully get management info urls for runtime", func(t *testing.T) {
 		//given
-		contextServiceProvider := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		contextServiceProvider := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return &clientcontext.ClusterContext{}, nil
 		}
 
@@ -95,7 +95,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		//given
-		contextServiceProvider := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		contextServiceProvider := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 

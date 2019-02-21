@@ -36,7 +36,7 @@ func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls})
 }
 
-func (ih *managementInfoHandler) buildURLs(contextServiceProvider clientcontext.ContextServiceProvider) mgmtURLs {
+func (ih *managementInfoHandler) buildURLs(contextServiceProvider clientcontext.ClientContextService) mgmtURLs {
 	return mgmtURLs{
 		RuntimeURLs:  contextServiceProvider.GetRuntimeUrls(),
 		RenewCertURL: fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),

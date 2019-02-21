@@ -19,7 +19,7 @@ const (
 	GroupHeader       = "Group"
 )
 
-type ContextServiceProvider interface {
+type ClientContextService interface {
 	ToJSON() ([]byte, error)
 	GetCommonName() string
 	GetRuntimeUrls() *RuntimeURLs

@@ -60,7 +60,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certService.On("SignCSR", decodedCSR, commonName).Return(encodedChain, nil)
 
 		dummyClientContext := dummyContextServiceProvider{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -87,7 +87,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract client context", func(t *testing.T) {
 		// given
-		errorExtractor := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
@@ -110,7 +110,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 	t.Run("should return 500 when couldn't read request body", func(t *testing.T) {
 		// given
 		dummyClientContext := dummyContextServiceProvider{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -134,7 +134,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 	t.Run("should return 400 when failed to decode base64", func(t *testing.T) {
 		// given
 		dummyClientContext := dummyContextServiceProvider{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -161,7 +161,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certService.On("SignCSR", decodedCSR, commonName).Return(certificates.EncodedCertificateChain{}, apperrors.Internal("error"))
 
 		dummyClientContext := dummyContextServiceProvider{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ContextServiceProvider, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
