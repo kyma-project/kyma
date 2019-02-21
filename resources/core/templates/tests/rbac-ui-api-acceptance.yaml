@@ -27,7 +27,7 @@ rules:
     verbs: ["create"]
   - apiGroups: ["apps"]
     resources: ["replicasets"]
-    verbs: ["create", "delete", "get"]
+    verbs: ["create", "delete", "get", "update"]
   - apiGroups: [""]
     resources: ["namespaces", "pods"]
     verbs: ["create", "get", "delete"]
