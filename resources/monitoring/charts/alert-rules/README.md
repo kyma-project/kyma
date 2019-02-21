@@ -12,23 +12,23 @@ You can define the following alert rules:
 
 - Alert when a Pod is not running
 
-    The Alertmanager sends out alerts when one of the Pods is not running in `kyma-system`, `kyma-integration`, `istio-system`, `kube-public`, or `kube-system` Namespace.
+    The Alertmanager sends out alerts when one of the Pods is not running in the `kyma-system`, `kyma-integration`, `istio-system`, `kube-public`, or `kube-system` Namespace.
 
-- Monitor Persistent Volume Claims (PVC)
+- Monitor Persistent Volume Claims (PVCs)
 
-    The Alertmanager sends out alerts when the PVC exceeds 90% for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. To avoid this, increase the capacity of PVC.
+    The Alertmanager sends out alerts when the PVC exceeds 90% for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. To avoid this, increase the capacity of the PVC.
 
 -  Monitor CPU Usage
 
-    The Alertmanager sends out alers when the CPU usage exceeds 90% for Pods in the `kyma-system` Namespace. Add the `alertcpu: "yes"` label to Pods to make sure the rule activates.
+    The Alertmanager sends out alerts when the CPU usage exceeds 90% for Pods in the `kyma-system` Namespace. Add the `alertcpu: "yes"` label to Pods to make sure the rule activates.
 
-- Monitor Memory usage
+- Monitor memory usage
 
-    The Alertmanager triggers the rule when Memory usage exceeds 90% for Pods in the `kyma-system` Namespace. Add the `alertmem: "yes"` label to Pods to make sure the rule activates.
+    The Alertmanager triggers the rule when memory usage exceeds 90% for Pods in the `kyma-system` Namespace. Add the `alertmem: "yes"` label to Pods to make sure the rule activates.
 
 ### Create alert rules
 
-Prometheus uses the  **spec.ruleSelector** label selector to identify ConfigMaps, which include Prometheus rule definitions. 
+Prometheus uses the  **spec.ruleSelector** label selector to identify ConfigMaps which include Prometheus rule definitions. 
 
 ```yaml
 {{- if .Values.rulesSelector }}
@@ -95,7 +95,7 @@ groups:
 ```
 The rule definition includes the following parameters:
 
-- **alert:** is the valid metric name name of the alert.
+- **alert:** is the valid metric name of the alert.
 - **expr:** defines the PromQL expression to evaluate, using Kubernetes [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md). In the example, the `kube_pod_container_status_running` Pod metric is used to check if the `sample-metrics` Pod is running in the `default` Namespace.
 * **for:**  is a time period during which alerts are returned.
 * **description:** is an annotation used to enrich alert details.
