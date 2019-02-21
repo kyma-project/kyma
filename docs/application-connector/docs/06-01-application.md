@@ -11,15 +11,17 @@ kubectl get crd applications.applicationconnector.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource that registers the `re-prod` App which offers one service.
+This is a sample resource that registers the `system-prod` App which offers one service.
+
+>**NOTE:** The name of the App must consist of lower case alphanumeric characters, `-` or `.`, and start and end with an alphanumeric character.
 
 ```
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: Application
 metadata:
-  name: system_prod
+  name: system-prod
 spec:
-  description: This is the system_production Application.
+  description: This is the system-production Application.
   labels:
     region: us
     kind: production
@@ -52,6 +54,16 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.services.entries.targetUrl** |    **NO**   | Specifies the URL of a given API. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
 | **spec.services.entries.oauthUrl** |    **NO**   | Specifies the URL used to authorize with a given API. This field is required for the API entry type. Parameter provided by the Application Registry, do not edit. |
 | **spec.services.entries.credentialsSecretName** |    **NO**   | Specifies the name of the Secret which allows you to call a given API. This field is required if **spec.services.entries.oauthUrl** is specified. Parameter provided by the Application Registry, do not edit. |
+
+## Related resources and components
+
+These components use this CR:
+
+| Component   |  Description |
+|:-----------:|:-------------|
+| Application Registry | Reads and saves the APIs and Event Catalog metadata of the connected external solution in this CR. |
+| Application Broker | Exposes the APIs and Event definitions stored in this CR as ServiceClasses to the Service Catalog. |
+| Application Operator | Provisions and de-provisions an instance of Application Proxy and Event Service for every created or deleted Application CR. |
 
 ## Additional information
 

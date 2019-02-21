@@ -14,6 +14,7 @@ spec:
         sidecar.istio.io/inject: "false"
       labels:
         app: api-controller
+        alertmem: "yes"
     spec:
       serviceAccount: api-controller-account
       containers:

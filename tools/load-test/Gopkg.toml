@@ -23,3 +23,8 @@
 required = [
   "github.com/golang/lint/golint"
 ]
+
+[[constraint]]
+  name="github.com/nlopes/slack"
+  version="v0.4.0"
+  

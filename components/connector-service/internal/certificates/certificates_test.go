@@ -5,8 +5,8 @@ import (
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/pem"
-	"fmt"
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/stretchr/testify/assert"
@@ -160,6 +160,8 @@ fWXUGZObOGD246zwfHLHP3AwzFKU0bfIvqckcw23I+ZUMIbdajw9eg==
 	organization       = "company"
 	organizationalUnit = "section"
 	commonName         = "host.ex.com"
+
+	validityTime = time.Duration(10) * time.Minute
 )
 
 var (
@@ -173,7 +175,7 @@ func TestCertificateUtility_LoadCert(t *testing.T) {
 
 	t.Run("should load cert", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		crt, err := certificateUtility.LoadCert(encodedCert)
@@ -192,7 +194,7 @@ func TestCertificateUtility_LoadCert(t *testing.T) {
 
 	t.Run("should fail decoding cert", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		crt, err := certificateUtility.LoadCert([]byte("invalid data"))
@@ -205,7 +207,7 @@ func TestCertificateUtility_LoadCert(t *testing.T) {
 
 	t.Run("should fail parsing cert", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		crt, err := certificateUtility.LoadCert(encodedInvalidCert)
@@ -221,7 +223,7 @@ func TestCertificateUtility_LoadKey(t *testing.T) {
 
 	t.Run("should load key", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		key, err := certificateUtility.LoadKey(encodedKey)
@@ -233,7 +235,7 @@ func TestCertificateUtility_LoadKey(t *testing.T) {
 
 	t.Run("should fail decoding key", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		crt, err := certificateUtility.LoadKey([]byte("invalid data"))
@@ -246,7 +248,7 @@ func TestCertificateUtility_LoadKey(t *testing.T) {
 
 	t.Run("should fail parsing key", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		crt, err := certificateUtility.LoadKey(encodedInvalidKey)
@@ -262,7 +264,7 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 
 	t.Run("should load CSR", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		key, err := certificateUtility.LoadCSR([]byte(CSR))
@@ -274,7 +276,7 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 
 	t.Run("should fail decoding CSR", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		crt, err := certificateUtility.LoadCSR([]byte("aW52YWxpZCBkYXRh"))
@@ -287,7 +289,7 @@ func TestCertificateUtility_LoadCSR(t *testing.T) {
 
 	t.Run("should fail parsing CSR", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		crt, err := certificateUtility.LoadCSR([]byte(invalidCSR))
@@ -323,7 +325,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 			Province:           "province",
 		}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		err := certificateUtility.CheckCSRValues(csr, csrSubject)
@@ -344,7 +346,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 			},
 		}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		err := certificateUtility.CheckCSRValues(csr, csrSubject)
@@ -366,7 +368,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 			Province:           "province",
 		}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		err := certificateUtility.CheckCSRValues(csr, csrSubject)
@@ -388,7 +390,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 			Province:           "province",
 		}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		err := certificateUtility.CheckCSRValues(csr, csrSubject)
@@ -411,7 +413,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 			Province:           "province",
 		}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		err := certificateUtility.CheckCSRValues(csr, csrSubject)
@@ -433,7 +435,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 			Province:           "province",
 		}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		err := certificateUtility.CheckCSRValues(csr, csrSubject)
@@ -455,7 +457,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 			Province:           "province",
 		}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		err := certificateUtility.CheckCSRValues(csr, csrSubject)
@@ -477,7 +479,7 @@ func TestCertificateUtility_CheckCSRValues(t *testing.T) {
 			Province:           "invalidProvince",
 		}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		err := certificateUtility.CheckCSRValues(csr, csrSubject)
@@ -493,7 +495,7 @@ func TestCertificateUtility_SignCSR(t *testing.T) {
 
 	t.Run("should sign client certificate", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 		caCrt, csr, key := prepareCrtAndKey(certificateUtility)
 
 		// when
@@ -506,8 +508,8 @@ func TestCertificateUtility_SignCSR(t *testing.T) {
 		decodedCrt, err := x509.ParseCertificate(rawClientCRT)
 		require.NoError(t, err)
 
-		validityTime := calculateValidityTime(decodedCrt)
-		assert.Equal(t, CertificateValidityDays, validityTime)
+		certificateValidityTime := calculateValidityTime(decodedCrt)
+		assert.Equal(t, validityTime, certificateValidityTime)
 	})
 
 	t.Run("should return when failed to create certificate", func(t *testing.T) {
@@ -516,7 +518,7 @@ func TestCertificateUtility_SignCSR(t *testing.T) {
 		csr := &x509.CertificateRequest{}
 		key := &rsa.PrivateKey{}
 
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 
 		// when
 		rawClientCRT, err := certificateUtility.SignCSR(caCrt, csr, key)
@@ -533,7 +535,7 @@ func TestCertificateUtility_AddCertificateHeaderAndFooter(t *testing.T) {
 
 	t.Run("should add certificate header and footer", func(t *testing.T) {
 		// given
-		certificateUtility := NewCertificateUtility()
+		certificateUtility := NewCertificateUtility(validityTime)
 		certificate, apperr := certificateUtility.LoadCert([]byte(cert))
 		require.NoError(t, apperr)
 
@@ -554,18 +556,13 @@ func TestCertificateUtility_AddCertificateHeaderAndFooter(t *testing.T) {
 
 }
 
-func calculateValidityTime(certificate *x509.Certificate) int {
+func calculateValidityTime(certificate *x509.Certificate) time.Duration {
 	expirationDate := certificate.NotAfter
-	fmt.Print(expirationDate.String())
 	creationDate := certificate.NotBefore
-	fmt.Println(creationDate.String())
+
 	difference := expirationDate.Sub(creationDate)
 
-	const hoursInDay = 24
-
-	daysFloat := difference.Hours() / hoursInDay
-
-	return int(daysFloat)
+	return difference
 }
 
 func prepareCrtAndKey(certificateUtility CertificateUtility) (*x509.Certificate, *x509.CertificateRequest, *rsa.PrivateKey) {
@@ -573,18 +570,4 @@ func prepareCrtAndKey(certificateUtility CertificateUtility) (*x509.Certificate,
 	csr, _ := certificateUtility.LoadCSR([]byte(CSR))
 	key, _ := certificateUtility.LoadKey(encodedKey)
 	return caCrt, csr, key
-}
-
-func rawCrtTox509Certificates(rawCrt []byte) ([]*x509.Certificate, error) {
-	pemBlock, rest := pem.Decode(rawCrt)
-
-	if len(rest) == 0 {
-		return nil, x509.CertificateInvalidError{}
-	}
-
-	pemBlock2, _ := pem.Decode(rest)
-
-	pemBlocks := append(pemBlock.Bytes, pemBlock2.Bytes...)
-
-	return x509.ParseCertificates(pemBlocks)
 }

@@ -11,8 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
-const CertificateValidityDays = 365
-
 type CertificateUtility interface {
 	LoadCert(encodedData []byte) (*x509.Certificate, apperrors.AppError)
 	LoadKey(encodedData []byte) (*rsa.PrivateKey, apperrors.AppError)
@@ -23,10 +21,13 @@ type CertificateUtility interface {
 }
 
 type certificateUtility struct {
+	certificateValidityTime time.Duration
 }
 
-func NewCertificateUtility() CertificateUtility {
-	return &certificateUtility{}
+func NewCertificateUtility(certificateValidityTime time.Duration) CertificateUtility {
+	return &certificateUtility{
+		certificateValidityTime: certificateValidityTime,
+	}
 }
 
 func (cu *certificateUtility) LoadCert(encodedData []byte) (*x509.Certificate, apperrors.AppError) {
@@ -117,7 +118,7 @@ func (cu *certificateUtility) CheckCSRValues(csr *x509.CertificateRequest, subje
 }
 
 func (cu *certificateUtility) SignCSR(caCrt *x509.Certificate, csr *x509.CertificateRequest, caKey *rsa.PrivateKey) ([]byte, apperrors.AppError) {
-	clientCRTTemplate := prepareCRTTemplate(csr)
+	clientCRTTemplate := cu.prepareCRTTemplate(csr)
 
 	clientCrtRaw, err := x509.CreateCertificate(rand.Reader, &clientCRTTemplate, caCrt, csr.PublicKey, caKey)
 	if err != nil {
@@ -127,14 +128,14 @@ func (cu *certificateUtility) SignCSR(caCrt *x509.Certificate, csr *x509.Certifi
 	return clientCrtRaw, nil
 }
 
-func prepareCRTTemplate(csr *x509.CertificateRequest) x509.Certificate {
+func (cu *certificateUtility) prepareCRTTemplate(csr *x509.CertificateRequest) x509.Certificate {
 	return x509.Certificate{
 		SignatureAlgorithm: csr.SignatureAlgorithm,
 
 		SerialNumber: big.NewInt(2),
 		Subject:      csr.Subject,
 		NotBefore:    time.Now(),
-		NotAfter:     time.Now().Add(CertificateValidityDays * 24 * time.Hour),
+		NotAfter:     time.Now().Add(cu.certificateValidityTime),
 		KeyUsage:     x509.KeyUsageDigitalSignature,
 		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageClientAuth},
 	}
