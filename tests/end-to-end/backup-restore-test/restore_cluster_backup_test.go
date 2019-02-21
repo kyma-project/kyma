@@ -60,28 +60,28 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		Convey("Check backup status", func() {
-			err := myBackupClient.WaitForBackupToBeCreated(backupName, 5*time.Minute)
+			err := myBackupClient.WaitForBackupToBeCreated(backupName, 15*time.Minute)
 			So(err, ShouldBeNil)
 			for _, e2eTest := range e2eTests {
 				Convey("Delete resources from cluster", func() {
 					err := myBackupClient.DeleteNamespace(e2eTest.namespace)
 					So(err, ShouldBeNil)
-					err = myBackupClient.WaitForNamespaceToBeDeleted(e2eTest.namespace, 120*time.Second)
+					err = myBackupClient.WaitForNamespaceToBeDeleted(e2eTest.namespace, 2*time.Minute)
 					So(err, ShouldBeNil)
+					Convey("Restore Cluster", func() {
+						err := myBackupClient.RestoreBackup(backupName)
+						So(err, ShouldBeNil)
+						err = myBackupClient.WaitForBackupToBeRestored(backupName, 15*time.Minute)
+						So(err, ShouldBeNil)
+						Convey("Test restored resources", func() {
+							for _, e2eTest := range e2eTests {
+								e2eTest.backupTest.TestResources(e2eTest.namespace)
+							}
+						})
+					})
 				})
 			}
 		})
 	})
 
-	Convey("Restore Cluster", t, func() {
-		err := myBackupClient.RestoreBackup(backupName)
-		So(err, ShouldBeNil)
-		err = myBackupClient.WaitForBackupToBeRestored(backupName, 5*time.Minute)
-		So(err, ShouldBeNil)
-		Convey("Test restored resources", func() {
-			for _, e2eTest := range e2eTests {
-				e2eTest.backupTest.TestResources(e2eTest.namespace)
-			}
-		})
-	})
 }
