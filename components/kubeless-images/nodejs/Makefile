@@ -17,10 +17,10 @@ push-image:
 
 
 .PHONY: ci-pr
-ci-pr: resolve validate build build-image push-image
+ci-pr: build-image push-image
 
 .PHONY: ci-master
-ci-master: resolve validate build build-image push-image
+ci-master: build-image push-image
 
 .PHONY: ci-release
-ci-release: resolve validate build build-image push-image
+ci-release: build-image push-image
