@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	hookMock "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/automock"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine"
 	engineMock "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine/automock"
@@ -22,7 +22,7 @@ func TestMutationEngine_Mutate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		ctx := context.TODO()
-		services := []v1alpha1.AssetWebhookService{
+		services := []v1alpha2.AssetWebhookService{
 			{Name: "test", Namespace: "test-ns", Endpoint: "/test"},
 		}
 		files := []string{"test/a.txt", "test/b/c.txt"}
@@ -48,7 +48,7 @@ func TestMutationEngine_Mutate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		ctx := context.TODO()
-		services := make([]v1alpha1.AssetWebhookService, 0)
+		services := make([]v1alpha2.AssetWebhookService, 0)
 		files := []string{"test/a.txt", "test/b/c.txt"}
 
 		accessor := mockAccessor("test", "test-ns", 1)
@@ -71,7 +71,7 @@ func TestMutationEngine_Mutate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		ctx := context.TODO()
-		services := []v1alpha1.AssetWebhookService{
+		services := []v1alpha2.AssetWebhookService{
 			{Name: "test", Namespace: "test-ns", Endpoint: "/test"},
 		}
 		files := make([]string, 0)
@@ -97,7 +97,7 @@ func TestMutationEngine_Mutate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		ctx := context.TODO()
-		services := []v1alpha1.AssetWebhookService{
+		services := []v1alpha2.AssetWebhookService{
 			{Name: "test", Namespace: "test-ns", Endpoint: "/test"},
 		}
 		files := []string{"test/a.txt", "test/b/rError.txt"}
@@ -122,7 +122,7 @@ func TestMutationEngine_Mutate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		ctx := context.TODO()
-		services := []v1alpha1.AssetWebhookService{
+		services := []v1alpha2.AssetWebhookService{
 			{Name: "test", Namespace: "test-ns", Endpoint: "/test"},
 		}
 		files := []string{"test/a.txt", "test/b/nope.txt"}

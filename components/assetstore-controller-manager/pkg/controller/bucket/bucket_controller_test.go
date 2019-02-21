@@ -11,7 +11,7 @@ import (
 	"testing"
 	"time"
 
-	assetstorev1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/onsi/gomega"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 
@@ -65,13 +65,13 @@ func TestReconcileBucketCreationSuccess(t *testing.T) {
 	// Given
 	name := "bucket-creation-success"
 	exp := expectedFor(name, namespace)
-	regionName := string(assetstorev1alpha1.BucketRegionUSEast1)
+	regionName := string(assetstorev1alpha2.BucketRegionUSEast1)
 
-	instance := fixInitialBucket(name, namespace, regionName, assetstorev1alpha1.BucketPolicyReadOnly)
+	instance := fixInitialBucket(name, namespace, regionName, assetstorev1alpha2.BucketPolicyReadOnly)
 
 	store := new(automock.Store)
 	store.On("CreateBucket", namespace, name, regionName).Return(exp.BucketName, nil).Once()
-	store.On("SetBucketPolicy", exp.BucketName, assetstorev1alpha1.BucketPolicyReadOnly).Return(nil).Once()
+	store.On("SetBucketPolicy", exp.BucketName, assetstorev1alpha2.BucketPolicyReadOnly).Return(nil).Once()
 	store.On("DeleteBucket", mock.Anything, exp.BucketName).Return(nil).Once()
 	defer store.AssertExpectations(t)
 
@@ -89,11 +89,11 @@ func TestReconcileBucketCreationSuccess(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 
-	bucket := &assetstorev1alpha1.Bucket{}
+	bucket := &assetstorev1alpha2.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(bucket.Finalizers).To(gomega.ContainElement(deleteBucketFinalizerName))
-	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha1.BucketReady))
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketReady))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 }
 
@@ -102,7 +102,7 @@ func TestReconcileBucketCreationFailed(t *testing.T) {
 	name := "bucket-creation-failed"
 	exp := expectedFor(name, namespace)
 
-	instance := fixInitialBucket(name, namespace, "", assetstorev1alpha1.BucketPolicy(""))
+	instance := fixInitialBucket(name, namespace, "", assetstorev1alpha2.BucketPolicy(""))
 
 	store := new(automock.Store)
 	store.On("CreateBucket", namespace, name, "").Return(exp.BucketName, testErr).Once()
@@ -125,10 +125,10 @@ func TestReconcileBucketCreationFailed(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 
-	bucket := &assetstorev1alpha1.Bucket{}
+	bucket := &assetstorev1alpha2.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha1.BucketFailed))
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketFailed))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal("BucketCreationFailure"))
 	// Now creating bucket and setting policy will pass
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
@@ -172,15 +172,15 @@ func TestReconcileBucketPolicyUpdateSuccess(t *testing.T) {
 	name := "bucket-success-policy"
 	exp := expectedFor(name, namespace)
 
-	bucket := fixInitialBucket(name, namespace, "", assetstorev1alpha1.BucketPolicyReadOnly)
+	bucket := fixInitialBucket(name, namespace, "", assetstorev1alpha2.BucketPolicyReadOnly)
 	expectedRequest := reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}}
 
 	store := new(automock.Store)
 	store.On("CreateBucket", namespace, name, "").Return(exp.BucketName, nil).Once()
 	store.On("BucketExists", exp.BucketName).Return(true, nil).Once()
-	store.On("CompareBucketPolicy", exp.BucketName, assetstorev1alpha1.BucketPolicyWriteOnly).Return(false, nil).Once()
+	store.On("CompareBucketPolicy", exp.BucketName, assetstorev1alpha2.BucketPolicyWriteOnly).Return(false, nil).Once()
 	store.On("SetBucketPolicy", exp.BucketName, bucket.Spec.Policy).Return(nil).Once()
-	store.On("SetBucketPolicy", exp.BucketName, assetstorev1alpha1.BucketPolicyWriteOnly).Return(nil).Once()
+	store.On("SetBucketPolicy", exp.BucketName, assetstorev1alpha2.BucketPolicyWriteOnly).Return(nil).Once()
 	store.On("DeleteBucket", mock.Anything, exp.BucketName).Return(nil).Once()
 	defer store.AssertExpectations(t)
 
@@ -198,27 +198,27 @@ func TestReconcileBucketPolicyUpdateSuccess(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
-	bucket = &assetstorev1alpha1.Bucket{}
+	bucket = &assetstorev1alpha2.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha1.BucketReady))
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketReady))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 
 	// When
-	bucket = &assetstorev1alpha1.Bucket{}
+	bucket = &assetstorev1alpha2.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	bucket.Spec.Policy = assetstorev1alpha1.BucketPolicyWriteOnly
+	bucket.Spec.Policy = assetstorev1alpha2.BucketPolicyWriteOnly
 	err = c.Update(context.TODO(), bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	// Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	bucket = &assetstorev1alpha1.Bucket{}
+	bucket = &assetstorev1alpha2.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha1.BucketReady))
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketReady))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 }
 
@@ -227,7 +227,7 @@ func TestReconcileBucketUpdatePolicyFailed(t *testing.T) {
 	name := "bucket-failed-policy"
 	exp := expectedFor(name, namespace)
 
-	instance := fixInitialBucket(name, namespace, "", assetstorev1alpha1.BucketPolicyWriteOnly)
+	instance := fixInitialBucket(name, namespace, "", assetstorev1alpha2.BucketPolicyWriteOnly)
 	expectedRequest := reconcile.Request{NamespacedName: types.NamespacedName{Name: name, Namespace: namespace}}
 
 	store := new(automock.Store)
@@ -253,10 +253,10 @@ func TestReconcileBucketUpdatePolicyFailed(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
-	bucket := &assetstorev1alpha1.Bucket{}
+	bucket := &assetstorev1alpha2.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha1.BucketFailed))
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketFailed))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdateFailed.String()))
 
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
@@ -267,8 +267,8 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	name := "bucket-deleted-remotely"
 	exp := expectedFor(name, namespace)
 
-	regionName := string(assetstorev1alpha1.BucketRegionUSEast1)
-	bucket := fixInitialBucket(name, namespace, regionName, assetstorev1alpha1.BucketPolicyReadOnly)
+	regionName := string(assetstorev1alpha2.BucketRegionUSEast1)
+	bucket := fixInitialBucket(name, namespace, regionName, assetstorev1alpha2.BucketPolicyReadOnly)
 
 	store := new(automock.Store)
 	store.On("BucketExists", exp.BucketName).Return(false, nil).Once()
@@ -291,13 +291,13 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 
-	bucket = &assetstorev1alpha1.Bucket{}
+	bucket = &assetstorev1alpha2.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha1.BucketReady))
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketReady))
 
 	//When
-	bucket.Spec.Policy = assetstorev1alpha1.BucketPolicyWriteOnly
+	bucket.Spec.Policy = assetstorev1alpha2.BucketPolicyWriteOnly
 	err = c.Update(context.TODO(), bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
@@ -305,10 +305,10 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 
-	bucket = &assetstorev1alpha1.Bucket{}
+	bucket = &assetstorev1alpha2.Bucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha1.BucketFailed))
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketFailed))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal("BucketNotFound"))
 }
 
@@ -348,30 +348,30 @@ func TestReconcileBucketDeleteFailed(t *testing.T) {
 
 	//Then
 	g.Eventually(func() bool {
-		bucket := &assetstorev1alpha1.Bucket{}
+		bucket := &assetstorev1alpha2.Bucket{}
 		err := c.Get(context.TODO(), exp.Key, bucket)
 		return apierrors.IsNotFound(err)
 	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())
 }
 
-func fixInitialBucket(name, namespace, region string, policy assetstorev1alpha1.BucketPolicy) *assetstorev1alpha1.Bucket {
-	return &assetstorev1alpha1.Bucket{
+func fixInitialBucket(name, namespace, region string, policy assetstorev1alpha2.BucketPolicy) *assetstorev1alpha2.Bucket {
+	return &assetstorev1alpha2.Bucket{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
 		},
-		Spec: assetstorev1alpha1.BucketSpec{CommonBucketSpec: assetstorev1alpha1.CommonBucketSpec{
-			Region: assetstorev1alpha1.BucketRegion(region),
+		Spec: assetstorev1alpha2.BucketSpec{CommonBucketSpec: assetstorev1alpha2.CommonBucketSpec{
+			Region: assetstorev1alpha2.BucketRegion(region),
 			Policy: policy,
 		}},
-		Status: assetstorev1alpha1.BucketStatus{CommonBucketStatus: assetstorev1alpha1.CommonBucketStatus{
+		Status: assetstorev1alpha2.BucketStatus{CommonBucketStatus: assetstorev1alpha2.CommonBucketStatus{
 			LastHeartbeatTime: metav1.Now(),
 		}},
 	}
 }
 
-func fixReadyBucket(name, namespace string) *assetstorev1alpha1.Bucket {
-	return &assetstorev1alpha1.Bucket{
+func fixReadyBucket(name, namespace string) *assetstorev1alpha2.Bucket {
+	return &assetstorev1alpha2.Bucket{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -379,15 +379,15 @@ func fixReadyBucket(name, namespace string) *assetstorev1alpha1.Bucket {
 				deleteBucketFinalizerName,
 			},
 		},
-		Spec: assetstorev1alpha1.BucketSpec{CommonBucketSpec: assetstorev1alpha1.CommonBucketSpec{
+		Spec: assetstorev1alpha2.BucketSpec{CommonBucketSpec: assetstorev1alpha2.CommonBucketSpec{
 			Region: "",
 			Policy: "",
 		}},
-		Status: assetstorev1alpha1.BucketStatus{CommonBucketStatus: assetstorev1alpha1.CommonBucketStatus{
+		Status: assetstorev1alpha2.BucketStatus{CommonBucketStatus: assetstorev1alpha2.CommonBucketStatus{
 			RemoteName:         fmt.Sprintf("ns-%s-%s", namespace, name),
 			ObservedGeneration: int64(1),
 			LastHeartbeatTime:  metav1.NewTime(time.Now().Add(-61 * time.Hour)),
-			Phase:              assetstorev1alpha1.BucketReady,
+			Phase:              assetstorev1alpha2.BucketReady,
 			Reason:             "BucketCreated",
 			Message:            "Bucket has been successfully created",
 		}},
@@ -408,21 +408,21 @@ func expectedFor(name, namespace string) expected {
 	}
 }
 
-func deleteWithoutReconcile(cfg *testSuite, instance *assetstorev1alpha1.Bucket) {
+func deleteWithoutReconcile(cfg *testSuite, instance *assetstorev1alpha2.Bucket) {
 	g := cfg.g
 	c := cfg.c
 	err := c.Delete(context.TODO(), instance)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 }
 
-func deleteAndExpectSuccess(cfg *testSuite, exp expected, instance *assetstorev1alpha1.Bucket) {
+func deleteAndExpectSuccess(cfg *testSuite, exp expected, instance *assetstorev1alpha2.Bucket) {
 	g := cfg.g
 	c := cfg.c
 	err := c.Delete(context.TODO(), instance)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	g.Eventually(func() bool {
-		instance := &assetstorev1alpha1.Bucket{}
+		instance := &assetstorev1alpha2.Bucket{}
 		err := c.Get(context.TODO(), exp.Key, instance)
 		return apierrors.IsNotFound(err)
 	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())

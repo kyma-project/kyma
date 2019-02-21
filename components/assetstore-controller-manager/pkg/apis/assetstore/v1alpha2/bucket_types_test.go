@@ -1,4 +1,4 @@
-package v1alpha1
+package v1alpha2
 
 import (
 	"testing"
@@ -9,28 +9,21 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func TestStorageAsset(t *testing.T) {
+func TestStorageBucket(t *testing.T) {
 	key := types.NamespacedName{
 		Name:      "foo",
 		Namespace: "default",
 	}
-	created := &Asset{
+	created := &Bucket{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "foo",
 			Namespace: "default",
-		},
-		Spec: AssetSpec{
-			CommonAssetSpec: CommonAssetSpec{
-				Source: AssetSource{
-					Mode: AssetSingle,
-				},
-			},
 		},
 	}
 	g := gomega.NewGomegaWithT(t)
 
 	// Test Create
-	fetched := &Asset{}
+	fetched := &Bucket{}
 	g.Expect(c.Create(context.TODO(), created)).NotTo(gomega.HaveOccurred())
 
 	g.Expect(c.Get(context.TODO(), key, fetched)).NotTo(gomega.HaveOccurred())

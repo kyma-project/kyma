@@ -3,7 +3,7 @@ package asset_test
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine"
 	automock3 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine/automock"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/asset"
@@ -25,7 +25,7 @@ func TestAssetHandler_IsOnAddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := new(v1alpha1.Asset)
+		testData := new(v1alpha2.Asset)
 		testData.ObjectMeta.Generation = int64(1)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
@@ -39,7 +39,7 @@ func TestAssetHandler_IsOnAddOrUpdate(t *testing.T) {
 	t.Run("Updated", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
+		testData := new(v1alpha2.Asset)
 		testData.ObjectMeta.Generation = int64(10)
 		testData.Status.CommonAssetStatus.ObservedGeneration = int64(8)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
@@ -54,7 +54,7 @@ func TestAssetHandler_IsOnAddOrUpdate(t *testing.T) {
 	t.Run("NotChanged", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
+		testData := new(v1alpha2.Asset)
 		testData.ObjectMeta.Generation = int64(10)
 		testData.Status.CommonAssetStatus.ObservedGeneration = int64(10)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
@@ -71,7 +71,7 @@ func TestAssetHandler_IsOnDelete(t *testing.T) {
 	t.Run("True", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
+		testData := new(v1alpha2.Asset)
 		now := v1.Now()
 		testData.ObjectMeta.DeletionTimestamp = &now
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
@@ -86,7 +86,7 @@ func TestAssetHandler_IsOnDelete(t *testing.T) {
 	t.Run("False", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
+		testData := new(v1alpha2.Asset)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -101,7 +101,7 @@ func TestAssetHandler_IsOnFailed(t *testing.T) {
 	t.Run("New", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
+		testData := new(v1alpha2.Asset)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -114,8 +114,8 @@ func TestAssetHandler_IsOnFailed(t *testing.T) {
 	t.Run("Ready", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -128,8 +128,8 @@ func TestAssetHandler_IsOnFailed(t *testing.T) {
 	t.Run("True", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetFailed
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetFailed
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -144,7 +144,7 @@ func TestAssetHandler_IsOnPending(t *testing.T) {
 	t.Run("New", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
+		testData := new(v1alpha2.Asset)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -157,8 +157,8 @@ func TestAssetHandler_IsOnPending(t *testing.T) {
 	t.Run("Ready", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -171,8 +171,8 @@ func TestAssetHandler_IsOnPending(t *testing.T) {
 	t.Run("True", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetPending
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -187,7 +187,7 @@ func TestAssetHandler_IsOnReady(t *testing.T) {
 	t.Run("New", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
-		testData := new(v1alpha1.Asset)
+		testData := new(v1alpha2.Asset)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -200,8 +200,8 @@ func TestAssetHandler_IsOnReady(t *testing.T) {
 	t.Run("Pending", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetPending
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -215,8 +215,8 @@ func TestAssetHandler_IsOnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -254,7 +254,7 @@ func TestAssetHandler_OnAddOrUpdate(t *testing.T) {
 		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	})
 
 	t.Run("SuccessUpdate", func(t *testing.T) {
@@ -285,7 +285,7 @@ func TestAssetHandler_OnAddOrUpdate(t *testing.T) {
 		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	})
 
 	t.Run("CleanupError", func(t *testing.T) {
@@ -311,7 +311,7 @@ func TestAssetHandler_OnAddOrUpdate(t *testing.T) {
 		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.CleanupError.String()))
 	})
 }
@@ -320,8 +320,8 @@ func TestAssetHandler_OnDelete(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		ctx := context.TODO()
 
@@ -341,8 +341,8 @@ func TestAssetHandler_OnDelete(t *testing.T) {
 	t.Run("BucketNotReady", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		testData.Spec.CommonAssetSpec.BucketRef.Name = "notReady"
 		ctx := context.TODO()
@@ -362,8 +362,8 @@ func TestAssetHandler_OnDelete(t *testing.T) {
 	t.Run("BucketError", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		testData.Spec.CommonAssetSpec.BucketRef.Name = "error"
 		ctx := context.TODO()
@@ -383,8 +383,8 @@ func TestAssetHandler_OnDelete(t *testing.T) {
 	t.Run("DeleteError", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		ctx := context.TODO()
 
@@ -430,7 +430,7 @@ func TestAssetHandler_OnFailed(t *testing.T) {
 
 		// Then
 		g.Expect(err).ToNot(gomega.HaveOccurred())
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	})
 
 	t.Run("CleanupError", func(t *testing.T) {
@@ -463,7 +463,7 @@ func TestAssetHandler_OnFailed(t *testing.T) {
 
 		// Then
 		g.Expect(err).ToNot(gomega.HaveOccurred())
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	})
 
 	t.Run("StillFailingWithSameReason", func(t *testing.T) {
@@ -471,7 +471,7 @@ func TestAssetHandler_OnFailed(t *testing.T) {
 		// Given
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.Reason = pretty.CleanupError.String()
-		testData.Status.Phase = v1alpha1.AssetFailed
+		testData.Status.Phase = v1alpha2.AssetFailed
 		testData.Status.AssetRef.Assets = make([]string, 10)
 		ctx := context.TODO()
 
@@ -522,7 +522,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	})
 
 	t.Run("SuccessNoWebhooks", func(t *testing.T) {
@@ -551,7 +551,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	})
 
 	t.Run("LoadError", func(t *testing.T) {
@@ -577,7 +577,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.PullingFailed.String()))
 	})
 
@@ -605,7 +605,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.MutationFailed.String()))
 	})
 
@@ -634,7 +634,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.ValidationFailed.String()))
 	})
 
@@ -663,7 +663,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.ValidationError.String()))
 	})
 
@@ -693,7 +693,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.UploadFailed.String()))
 	})
 }
@@ -702,8 +702,8 @@ func TestAssetHandler_OnReady(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		ctx := context.TODO()
 
@@ -717,14 +717,14 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	})
 
 	t.Run("BucketNotReady", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		testData.Spec.CommonAssetSpec.BucketRef.Name = "notReady"
 		ctx := context.TODO()
@@ -738,15 +738,15 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetPending))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetPending))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketNotReady.String()))
 	})
 
 	t.Run("BucketError", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		testData.Spec.CommonAssetSpec.BucketRef.Name = "error"
 		ctx := context.TODO()
@@ -760,15 +760,15 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketError.String()))
 	})
 
 	t.Run("ContainsError", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		ctx := context.TODO()
 
@@ -782,15 +782,15 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.RemoteContentVerificationError.String()))
 	})
 
 	t.Run("Missing", func(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha1.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha1.AssetReady
+		testData := new(v1alpha2.Asset)
+		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
 		testData.ObjectMeta.Name = "test"
 		ctx := context.TODO()
 
@@ -804,7 +804,7 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.MissingContent.String()))
 	})
 }
@@ -873,7 +873,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha1.AssetReady
+		testData.Status.Phase = v1alpha2.AssetReady
 		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(-10 * relistInterval))
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
@@ -892,7 +892,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha1.AssetReady
+		testData.Status.Phase = v1alpha2.AssetReady
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
@@ -911,7 +911,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha1.AssetPending
+		testData.Status.Phase = v1alpha2.AssetPending
 		testData.Status.Reason = pretty.BucketNotReady.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(-10 * relistInterval))
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
@@ -931,7 +931,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha1.AssetPending
+		testData.Status.Phase = v1alpha2.AssetPending
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
 
 		// When
@@ -949,7 +949,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha1.AssetPending
+		testData.Status.Phase = v1alpha2.AssetPending
 		testData.Status.Reason = pretty.BucketNotReady.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
@@ -969,7 +969,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha1.AssetFailed
+		testData.Status.Phase = v1alpha2.AssetFailed
 		testData.Status.Reason = pretty.ValidationFailed.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
@@ -989,7 +989,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha1.AssetFailed
+		testData.Status.Phase = v1alpha2.AssetFailed
 		testData.Status.Reason = pretty.MutationFailed.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
@@ -1009,7 +1009,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha1.AssetFailed
+		testData.Status.Phase = v1alpha2.AssetFailed
 		testData.Status.Reason = pretty.BucketError.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
@@ -1022,15 +1022,15 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 	})
 }
 
-func bucketStatusFinder(ctx context.Context, namespace, name string) (*v1alpha1.CommonBucketStatus, bool, error) {
+func bucketStatusFinder(ctx context.Context, namespace, name string) (*v1alpha2.CommonBucketStatus, bool, error) {
 	switch {
 	case strings.Contains(name, "notReady"):
 		return nil, false, nil
 	case strings.Contains(name, "error"):
 		return nil, false, errors.New("test-error")
 	default:
-		return &v1alpha1.CommonBucketStatus{
-			Phase:      v1alpha1.BucketReady,
+		return &v1alpha2.CommonBucketStatus{
+			Phase:      v1alpha2.BucketReady,
 			Url:        "http://test-url.com/bucket-name",
 			RemoteName: "bucket-name",
 		}, true, nil
@@ -1041,20 +1041,20 @@ func fakeRecorder() record.EventRecorder {
 	return record.NewFakeRecorder(20)
 }
 
-func testData(assetName, bucketName, url string) *v1alpha1.Asset {
-	return &v1alpha1.Asset{
+func testData(assetName, bucketName, url string) *v1alpha2.Asset {
+	return &v1alpha2.Asset{
 		ObjectMeta: v1.ObjectMeta{
 			Name:       assetName,
 			Generation: int64(1),
 		},
-		Spec: v1alpha1.AssetSpec{
-			CommonAssetSpec: v1alpha1.CommonAssetSpec{
-				BucketRef: v1alpha1.AssetBucketRef{Name: bucketName},
-				Source: v1alpha1.AssetSource{
+		Spec: v1alpha2.AssetSpec{
+			CommonAssetSpec: v1alpha2.CommonAssetSpec{
+				BucketRef: v1alpha2.AssetBucketRef{Name: bucketName},
+				Source: v1alpha2.AssetSource{
 					Url:                      url,
-					Mode:                     v1alpha1.AssetSingle,
-					ValidationWebhookService: make([]v1alpha1.AssetWebhookService, 3),
-					MutationWebhookService:   make([]v1alpha1.AssetWebhookService, 3),
+					Mode:                     v1alpha2.AssetSingle,
+					ValidationWebhookService: make([]v1alpha2.AssetWebhookService, 3),
+					MutationWebhookService:   make([]v1alpha2.AssetWebhookService, 3),
 				},
 			},
 		},

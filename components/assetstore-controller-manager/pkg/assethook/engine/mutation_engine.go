@@ -2,7 +2,7 @@ package engine
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook"
 	assethookv1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -13,7 +13,7 @@ import (
 
 //go:generate mockery -name=Mutator -output=automock -outpkg=automock -case=underscore
 type Mutator interface {
-	Mutate(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha1.AssetWebhookService) error
+	Mutate(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha2.AssetWebhookService) error
 }
 
 type mutationEngine struct {
@@ -33,7 +33,7 @@ func NewMutator(webhook assethook.Webhook, timeout time.Duration) Mutator {
 	}
 }
 
-func (e *mutationEngine) Mutate(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha1.AssetWebhookService) error {
+func (e *mutationEngine) Mutate(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha2.AssetWebhookService) error {
 	assetName := object.GetName()
 	assetNamespace := object.GetNamespace()
 

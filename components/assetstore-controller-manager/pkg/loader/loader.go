@@ -9,7 +9,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 )
 
 type loader struct {
@@ -24,7 +24,7 @@ type loader struct {
 
 //go:generate mockery -name=Loader -output=automock -outpkg=automock -case=underscore
 type Loader interface {
-	Load(src, assetName string, mode v1alpha1.AssetMode, filter string) (string, []string, error)
+	Load(src, assetName string, mode v1alpha2.AssetMode, filter string) (string, []string, error)
 	Clean(path string) error
 }
 
@@ -42,11 +42,11 @@ func New(temporaryDir string) Loader {
 	}
 }
 
-func (l *loader) Load(src, assetName string, mode v1alpha1.AssetMode, filter string) (string, []string, error) {
+func (l *loader) Load(src, assetName string, mode v1alpha2.AssetMode, filter string) (string, []string, error) {
 	switch mode {
-	case v1alpha1.AssetSingle:
+	case v1alpha2.AssetSingle:
 		return l.loadSingle(src, assetName)
-	case v1alpha1.AssetPackage:
+	case v1alpha2.AssetPackage:
 		return l.loadPackage(src, assetName, filter)
 	}
 

@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/minio/minio-go"
 	"github.com/minio/minio-go/pkg/policy"
 	"github.com/pkg/errors"
@@ -40,8 +40,8 @@ type Store interface {
 	CreateBucket(namespace, crName, region string) (string, error)
 	BucketExists(name string) (bool, error)
 	DeleteBucket(ctx context.Context, name string) error
-	SetBucketPolicy(name string, policy v1alpha1.BucketPolicy) error
-	CompareBucketPolicy(name string, expected v1alpha1.BucketPolicy) (bool, error)
+	SetBucketPolicy(name string, policy v1alpha2.BucketPolicy) error
+	CompareBucketPolicy(name string, expected v1alpha2.BucketPolicy) (bool, error)
 	ContainsAllObjects(ctx context.Context, bucketName, assetName string, files []string) (bool, error)
 	PutObjects(ctx context.Context, bucketName, assetName, sourceBasePath string, files []string) error
 	DeleteObjects(ctx context.Context, bucketName, prefix string) error
@@ -104,7 +104,7 @@ func (s *store) DeleteBucket(ctx context.Context, name string) error {
 	return nil
 }
 
-func (s *store) SetBucketPolicy(name string, policy v1alpha1.BucketPolicy) error {
+func (s *store) SetBucketPolicy(name string, policy v1alpha2.BucketPolicy) error {
 	bucketPolicy := s.prepareBucketPolicy(name, policy)
 	marshaled, err := s.marshalBucketPolicy(bucketPolicy)
 	if err != nil {
@@ -119,7 +119,7 @@ func (s *store) SetBucketPolicy(name string, policy v1alpha1.BucketPolicy) error
 	return nil
 }
 
-func (s *store) CompareBucketPolicy(name string, expected v1alpha1.BucketPolicy) (bool, error) {
+func (s *store) CompareBucketPolicy(name string, expected v1alpha2.BucketPolicy) (bool, error) {
 	expectedPolicy := s.prepareBucketPolicy(name, expected)
 	currentPolicy, err := s.getBucketPolicy(name)
 	if err != nil {
@@ -270,14 +270,14 @@ func (s *store) generateBucketName(name, namespace string) string {
 	return fmt.Sprintf("%s-%s", name, suffix)
 }
 
-func (s *store) prepareBucketPolicy(bucketName string, bucketPolicy v1alpha1.BucketPolicy) policy.BucketAccessPolicy {
+func (s *store) prepareBucketPolicy(bucketName string, bucketPolicy v1alpha2.BucketPolicy) policy.BucketAccessPolicy {
 	statements := make([]policy.Statement, 0)
 	switch {
-	case bucketPolicy == v1alpha1.BucketPolicyReadOnly:
+	case bucketPolicy == v1alpha2.BucketPolicyReadOnly:
 		statements = policy.SetPolicy(statements, policy.BucketPolicyReadOnly, bucketName, "*")
-	case bucketPolicy == v1alpha1.BucketPolicyWriteOnly:
+	case bucketPolicy == v1alpha2.BucketPolicyWriteOnly:
 		statements = policy.SetPolicy(statements, policy.BucketPolicyWriteOnly, bucketName, "*")
-	case bucketPolicy == v1alpha1.BucketPolicyReadWrite:
+	case bucketPolicy == v1alpha2.BucketPolicyReadWrite:
 		statements = policy.SetPolicy(statements, policy.BucketPolicyReadWrite, bucketName, "*")
 	default:
 		statements = policy.SetPolicy(statements, policy.BucketPolicyNone, bucketName, "*")

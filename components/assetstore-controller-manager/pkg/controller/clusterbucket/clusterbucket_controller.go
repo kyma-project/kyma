@@ -2,7 +2,7 @@ package clusterbucket
 
 import (
 	"context"
-	assetstorev1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/bucket"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store"
@@ -61,7 +61,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to ClusterBucket
-	err = c.Watch(&source.Kind{Type: &assetstorev1alpha1.ClusterBucket{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &assetstorev1alpha2.ClusterBucket{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (r *ReconcileClusterBucket) Reconcile(request reconcile.Request) (reconcile
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
-	instance := &assetstorev1alpha1.ClusterBucket{}
+	instance := &assetstorev1alpha2.ClusterBucket{}
 	err := r.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -114,7 +114,7 @@ func (r *ReconcileClusterBucket) Reconcile(request reconcile.Request) (reconcile
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileClusterBucket) onFailed(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) onFailed(ctx context.Context, instance *assetstorev1alpha2.ClusterBucket) (reconcile.Result, error) {
 	status, err := r.handler.OnFailed(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -127,7 +127,7 @@ func (r *ReconcileClusterBucket) onFailed(ctx context.Context, instance *assetst
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileClusterBucket) onReady(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) onReady(ctx context.Context, instance *assetstorev1alpha2.ClusterBucket) (reconcile.Result, error) {
 	status := r.handler.OnReady(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
 
 	if err := r.updateStatus(ctx, instance, status); err != nil {
@@ -137,7 +137,7 @@ func (r *ReconcileClusterBucket) onReady(ctx context.Context, instance *assetsto
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileClusterBucket) onDelete(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) onDelete(ctx context.Context, instance *assetstorev1alpha2.ClusterBucket) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		return reconcile.Result{}, nil
 	}
@@ -156,7 +156,7 @@ func (r *ReconcileClusterBucket) onDelete(ctx context.Context, instance *assetst
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileClusterBucket) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket) (reconcile.Result, error) {
+func (r *ReconcileClusterBucket) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha2.ClusterBucket) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		r.finalizer.AddTo(instance)
 		return reconcile.Result{Requeue: true}, r.Update(ctx, instance)
@@ -171,7 +171,7 @@ func (r *ReconcileClusterBucket) onAddOrUpdate(ctx context.Context, instance *as
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileClusterBucket) updateStatus(ctx context.Context, instance *assetstorev1alpha1.ClusterBucket, commonStatus assetstorev1alpha1.CommonBucketStatus) error {
+func (r *ReconcileClusterBucket) updateStatus(ctx context.Context, instance *assetstorev1alpha2.ClusterBucket, commonStatus assetstorev1alpha2.CommonBucketStatus) error {
 	instance.Status.CommonBucketStatus = commonStatus
 
 	if err := r.Status().Update(ctx, instance); err != nil {

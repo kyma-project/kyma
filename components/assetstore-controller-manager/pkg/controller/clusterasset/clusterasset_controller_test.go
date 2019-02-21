@@ -3,7 +3,7 @@ package clusterasset
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine"
 	engineMock "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine/automock"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/asset/pretty"
@@ -102,11 +102,11 @@ func TestReconcileAssetCreationSuccess(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.ClusterAsset{}
+	asset := &v1alpha2.ClusterAsset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	g.Expect(asset.Status.AssetRef.BaseUrl).To(gomega.Equal(testData.assetUrl))
 	g.Expect(asset.Status.AssetRef.Assets).To(gomega.Equal(testData.files))
 	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteClusterAssetFinalizerName))
@@ -144,11 +144,11 @@ func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.ClusterAsset{}
+	asset := &v1alpha2.ClusterAsset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.MutationFailed.String()))
 }
 
@@ -185,11 +185,11 @@ func TestReconcileAssetCreationSuccessValidationFailed(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.ClusterAsset{}
+	asset := &v1alpha2.ClusterAsset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.ValidationFailed.String()))
 }
 
@@ -227,11 +227,11 @@ func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.ClusterAsset{}
+	asset := &v1alpha2.ClusterAsset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	g.Expect(asset.Status.AssetRef.BaseUrl).To(gomega.Equal(testData.assetUrl))
 	g.Expect(asset.Status.AssetRef.Assets).To(gomega.Equal(testData.files))
 	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteClusterAssetFinalizerName))
@@ -259,11 +259,11 @@ func TestReconcileAssetCreationNoBucket(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.ClusterAsset{}
+	asset := &v1alpha2.ClusterAsset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetPending))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetPending))
 	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.BucketNotReady.String()))
 }
 
@@ -292,11 +292,11 @@ func TestReconcileAssetReadyLostBucket(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.ClusterAsset{}
+	asset := &v1alpha2.ClusterAsset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetPending))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetPending))
 	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.BucketNotReady.String()))
 }
 
@@ -336,20 +336,20 @@ func TestReconcileAssetReadyLostFiles(t *testing.T) {
 	//Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.ClusterAsset{}
+	asset := &v1alpha2.ClusterAsset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.MissingContent.String()))
 
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset = &v1alpha1.ClusterAsset{}
+	asset = &v1alpha2.ClusterAsset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 }
 
 type mocks struct {
@@ -385,8 +385,8 @@ type testData struct {
 	tmpBaseDir string
 	files      []string
 
-	bucket *v1alpha1.ClusterBucket
-	asset  *v1alpha1.ClusterAsset
+	bucket *v1alpha2.ClusterBucket
+	asset  *v1alpha2.ClusterAsset
 
 	request reconcile.Request
 }
@@ -409,28 +409,28 @@ func newTestData(name string) *testData {
 		fmt.Sprintf("lvl/lvl/%s.md", name),
 	}
 
-	bucket := &v1alpha1.ClusterBucket{
+	bucket := &v1alpha2.ClusterBucket{
 		ObjectMeta: v1.ObjectMeta{
 			Name: bucketName,
 		},
-		Status: v1alpha1.ClusterBucketStatus{CommonBucketStatus: v1alpha1.CommonBucketStatus{
-			Phase:             v1alpha1.BucketReady,
+		Status: v1alpha2.ClusterBucketStatus{CommonBucketStatus: v1alpha2.CommonBucketStatus{
+			Phase:             v1alpha2.BucketReady,
 			RemoteName:        bucketName,
 			Url:               bucketUrl,
 			LastHeartbeatTime: v1.Now(),
 		}},
 	}
 
-	asset := &v1alpha1.ClusterAsset{
+	asset := &v1alpha2.ClusterAsset{
 		ObjectMeta: v1.ObjectMeta{
 			Name: assetName,
 		},
-		Spec: v1alpha1.ClusterAssetSpec{CommonAssetSpec: v1alpha1.CommonAssetSpec{
-			BucketRef: v1alpha1.AssetBucketRef{Name: bucketName},
-			Source: v1alpha1.AssetSource{
+		Spec: v1alpha2.ClusterAssetSpec{CommonAssetSpec: v1alpha2.CommonAssetSpec{
+			BucketRef: v1alpha2.AssetBucketRef{Name: bucketName},
+			Source: v1alpha2.AssetSource{
 				Url:  sourceUrl,
-				Mode: v1alpha1.AssetSingle,
-				ValidationWebhookService: []v1alpha1.AssetWebhookService{
+				Mode: v1alpha2.AssetSingle,
+				ValidationWebhookService: []v1alpha2.AssetWebhookService{
 					{
 						Namespace: "test",
 						Name:      "test",
@@ -442,7 +442,7 @@ func newTestData(name string) *testData {
 						Endpoint:  "/test",
 					},
 				},
-				MutationWebhookService: []v1alpha1.AssetWebhookService{
+				MutationWebhookService: []v1alpha2.AssetWebhookService{
 					{
 						Namespace: "test",
 						Name:      "test",
@@ -456,10 +456,10 @@ func newTestData(name string) *testData {
 				},
 			},
 		}},
-		Status: v1alpha1.ClusterAssetStatus{CommonAssetStatus: v1alpha1.CommonAssetStatus{
+		Status: v1alpha2.ClusterAssetStatus{CommonAssetStatus: v1alpha2.CommonAssetStatus{
 			ObservedGeneration: int64(1),
-			Phase:              v1alpha1.AssetReady,
-			AssetRef: v1alpha1.AssetStatusRef{
+			Phase:              v1alpha2.AssetReady,
+			AssetRef: v1alpha2.AssetStatusRef{
 				BaseUrl: assetUrl,
 				Assets:  files,
 			},
@@ -483,7 +483,7 @@ func newTestData(name string) *testData {
 	}
 }
 
-func deleteBucket(cfg *testSuite, bucket *v1alpha1.ClusterBucket) {
+func deleteBucket(cfg *testSuite, bucket *v1alpha2.ClusterBucket) {
 	g := cfg.g
 	c := cfg.c
 	err := c.Delete(context.TODO(), bucket)
@@ -497,7 +497,7 @@ func deleteAndExpectSuccess(cfg *testSuite, testData *testData) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(func() bool {
-		instance := &v1alpha1.ClusterAsset{}
+		instance := &v1alpha2.ClusterAsset{}
 		err := c.Get(context.TODO(), testData.key, instance)
 		return apierrors.IsNotFound(err)
 	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())

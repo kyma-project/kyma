@@ -3,7 +3,7 @@ package engine
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook"
 	webhookv1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/api/v1alpha1"
 	"github.com/pkg/errors"
@@ -13,7 +13,7 @@ import (
 
 //go:generate mockery -name=Validator -output=automock -outpkg=automock -case=underscore
 type Validator interface {
-	Validate(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha1.AssetWebhookService) (ValidationResult, error)
+	Validate(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha2.AssetWebhookService) (ValidationResult, error)
 }
 
 type validationEngine struct {
@@ -42,7 +42,7 @@ func NewValidator(webhook assethook.Webhook, timeout time.Duration) Validator {
 }
 
 // TODO: Validation should be executed in concurrency
-func (e *validationEngine) Validate(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha1.AssetWebhookService) (ValidationResult, error) {
+func (e *validationEngine) Validate(ctx context.Context, object Accessor, basePath string, files []string, services []v1alpha2.AssetWebhookService) (ValidationResult, error) {
 	assetName := object.GetName()
 	assetNamespace := object.GetNamespace()
 

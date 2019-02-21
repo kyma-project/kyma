@@ -3,7 +3,7 @@ package bucket_test
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/bucket"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/bucket/pretty"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store/automock"
@@ -20,7 +20,7 @@ func TestBucketHandler_IsOnAddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		bucketHandler := bucket.New(nil, nil, "")
 
 		// When
@@ -34,7 +34,7 @@ func TestBucketHandler_IsOnAddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.ObjectMeta.Generation = int64(2)
 		testData.Status.ObservedGeneration = int64(1)
 		bucketHandler := bucket.New(nil, nil, "")
@@ -50,7 +50,7 @@ func TestBucketHandler_IsOnAddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.ObjectMeta.Generation = int64(1)
 		testData.Status.ObservedGeneration = int64(1)
 		bucketHandler := bucket.New(nil, nil, "")
@@ -68,7 +68,7 @@ func TestBucketHandler_IsOnDelete(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		deletionTimestamp := v1.Now()
 		testData.ObjectMeta.DeletionTimestamp = &deletionTimestamp
 		bucketHandler := bucket.New(nil, nil, "")
@@ -84,7 +84,7 @@ func TestBucketHandler_IsOnDelete(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		bucketHandler := bucket.New(nil, nil, "")
 
 		// When
@@ -100,7 +100,7 @@ func TestBucketHandler_IsOnFailed(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		bucketHandler := bucket.New(nil, nil, "")
 
 		// When
@@ -114,8 +114,8 @@ func TestBucketHandler_IsOnFailed(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
-		testData.Status.Phase = v1alpha1.BucketReady
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
+		testData.Status.Phase = v1alpha2.BucketReady
 		bucketHandler := bucket.New(nil, nil, "")
 
 		// When
@@ -129,8 +129,8 @@ func TestBucketHandler_IsOnFailed(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
-		testData.Status.Phase = v1alpha1.BucketFailed
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
+		testData.Status.Phase = v1alpha2.BucketFailed
 		bucketHandler := bucket.New(nil, nil, "")
 
 		// When
@@ -146,7 +146,7 @@ func TestBucketHandler_IsOnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		bucketHandler := bucket.New(nil, nil, "")
 
 		// When
@@ -160,8 +160,8 @@ func TestBucketHandler_IsOnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
-		testData.Status.Phase = v1alpha1.BucketFailed
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
+		testData.Status.Phase = v1alpha2.BucketFailed
 		bucketHandler := bucket.New(nil, nil, "")
 
 		// When
@@ -175,8 +175,8 @@ func TestBucketHandler_IsOnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
-		testData.Status.Phase = v1alpha1.BucketReady
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
+		testData.Status.Phase = v1alpha2.BucketReady
 		bucketHandler := bucket.New(nil, nil, "")
 
 		// When
@@ -192,7 +192,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 
@@ -208,7 +208,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		status := bucketHandler.OnAddOrUpdate(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketReady))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 		g.Expect(status.RemoteName).To(gomega.Equal(remoteName))
 		g.Expect(status.Url).To(gomega.Equal(fmt.Sprintf("%s/%s", url, remoteName)))
@@ -218,7 +218,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
@@ -236,7 +236,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		status := bucketHandler.OnAddOrUpdate(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketReady))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 		g.Expect(status.RemoteName).To(gomega.Equal(remoteName))
 		g.Expect(status.Url).To(gomega.Equal(fmt.Sprintf("%s/%s", url, remoteName)))
@@ -246,7 +246,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 
@@ -262,7 +262,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		status := bucketHandler.OnAddOrUpdate(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketReady))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 		g.Expect(status.RemoteName).To(gomega.Equal(remoteName))
 		g.Expect(status.Url).To(gomega.Equal(fmt.Sprintf("%s/%s", url, remoteName)))
@@ -274,7 +274,7 @@ func TestBucketHandler_OnDelete(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.RemoteName = "buckecior-123"
 		ctx := context.TODO()
 
@@ -295,7 +295,7 @@ func TestBucketHandler_OnDelete(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		ctx := context.TODO()
 
 		store := new(automock.Store)
@@ -314,7 +314,7 @@ func TestBucketHandler_OnDelete(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.RemoteName = "buckecior-123"
 		ctx := context.TODO()
 
@@ -337,8 +337,8 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
-		testData.Status.Phase = v1alpha1.BucketFailed
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
+		testData.Status.Phase = v1alpha2.BucketFailed
 		testData.Status.Reason = pretty.BucketCreationFailure.String()
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
@@ -356,7 +356,7 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 
 		// Then
 		g.Expect(err).ToNot(gomega.HaveOccurred())
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketReady))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 		g.Expect(status.RemoteName).To(gomega.Equal(remoteName))
 		g.Expect(status.Url).To(gomega.Equal(fmt.Sprintf("%s/%s", url, remoteName)))
@@ -366,12 +366,12 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
 		testData.Status.Url = fmt.Sprintf("%s/%s", url, remoteName)
-		testData.Status.Phase = v1alpha1.BucketFailed
+		testData.Status.Phase = v1alpha2.BucketFailed
 		testData.Status.Reason = pretty.BucketVerificationFailure.String()
 
 		store := new(automock.Store)
@@ -387,7 +387,7 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 
 		// Then
 		g.Expect(err).ToNot(gomega.HaveOccurred())
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketReady))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 		g.Expect(status.RemoteName).To(gomega.Equal(remoteName))
 		g.Expect(status.Url).To(gomega.Equal(fmt.Sprintf("%s/%s", url, remoteName)))
@@ -397,12 +397,12 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
 		testData.Status.Url = fmt.Sprintf("%s/%s", url, remoteName)
-		testData.Status.Phase = v1alpha1.BucketFailed
+		testData.Status.Phase = v1alpha2.BucketFailed
 		testData.Status.Reason = pretty.BucketPolicyUpdateFailed.String()
 
 		store := new(automock.Store)
@@ -419,7 +419,7 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 
 		// Then
 		g.Expect(err).ToNot(gomega.HaveOccurred())
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketReady))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 		g.Expect(status.RemoteName).To(gomega.Equal(remoteName))
 		g.Expect(status.Url).To(gomega.Equal(fmt.Sprintf("%s/%s", url, remoteName)))
@@ -429,12 +429,12 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
 		testData.Status.Url = fmt.Sprintf("%s/%s", url, remoteName)
-		testData.Status.Phase = v1alpha1.BucketFailed
+		testData.Status.Phase = v1alpha2.BucketFailed
 		testData.Status.Reason = pretty.BucketVerificationFailure.String()
 
 		store := new(automock.Store)
@@ -457,7 +457,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
@@ -475,7 +475,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketReady))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 		g.Expect(status.RemoteName).To(gomega.Equal(remoteName))
 		g.Expect(status.Url).To(gomega.Equal(fmt.Sprintf("%s/%s", url, remoteName)))
@@ -485,7 +485,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
@@ -502,7 +502,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.NotFoundReason.String()))
 	})
 
@@ -510,7 +510,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
@@ -527,7 +527,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketVerificationFailure.String()))
 	})
 
@@ -535,7 +535,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
@@ -554,7 +554,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketReady))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketReady))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdated.String()))
 		g.Expect(status.RemoteName).To(gomega.Equal(remoteName))
 		g.Expect(status.Url).To(gomega.Equal(fmt.Sprintf("%s/%s", url, remoteName)))
@@ -564,7 +564,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		url := "http://trtrt.com"
 		remoteName := fmt.Sprintf("%s-123", testData.Name)
 		testData.Status.RemoteName = remoteName
@@ -583,7 +583,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha1.BucketFailed))
+		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.BucketFailed))
 		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdateFailed.String()))
 	})
 }
@@ -594,7 +594,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		now := time.Now()
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		relistInterval := time.Second
 
@@ -612,7 +612,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		now := time.Now()
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		testData.ObjectMeta.Generation = int64(2)
 		testData.Status.ObservedGeneration = int64(1)
@@ -632,7 +632,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		now := time.Now()
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		testData.ObjectMeta.Generation = int64(1)
 		testData.Status.ObservedGeneration = int64(1)
@@ -654,9 +654,9 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 
 		relistInterval := time.Second
 		now := time.Now()
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(-10 * relistInterval))
-		testData.Status.Phase = v1alpha1.BucketReady
+		testData.Status.Phase = v1alpha2.BucketReady
 		testData.ObjectMeta.Generation = int64(1)
 		testData.Status.ObservedGeneration = int64(1)
 
@@ -675,9 +675,9 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 
 		relistInterval := time.Second
 		now := time.Now()
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(relistInterval))
-		testData.Status.Phase = v1alpha1.BucketReady
+		testData.Status.Phase = v1alpha2.BucketReady
 		testData.ObjectMeta.Generation = int64(1)
 		testData.Status.ObservedGeneration = int64(1)
 
@@ -696,11 +696,11 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 
 		relistInterval := time.Second
 		now := time.Now()
-		testData := testData("new", v1alpha1.BucketPolicyReadOnly)
+		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(relistInterval))
 		testData.ObjectMeta.Generation = int64(1)
 		testData.Status.ObservedGeneration = int64(1)
-		testData.Status.Phase = v1alpha1.BucketFailed
+		testData.Status.Phase = v1alpha2.BucketFailed
 
 		bucketHandler := bucket.New(nil, nil, "")
 
@@ -716,15 +716,15 @@ func fakeRecorder() record.EventRecorder {
 	return record.NewFakeRecorder(20)
 }
 
-func testData(name string, policy v1alpha1.BucketPolicy) *v1alpha1.Bucket {
-	return &v1alpha1.Bucket{
+func testData(name string, policy v1alpha2.BucketPolicy) *v1alpha2.Bucket {
+	return &v1alpha2.Bucket{
 		ObjectMeta: v1.ObjectMeta{
 			Name:       name,
 			Namespace:  fmt.Sprintf("%s-ns", name),
 			Generation: int64(1),
 		},
-		Spec: v1alpha1.BucketSpec{
-			CommonBucketSpec: v1alpha1.CommonBucketSpec{
+		Spec: v1alpha2.BucketSpec{
+			CommonBucketSpec: v1alpha2.CommonBucketSpec{
 				Policy: policy,
 				Region: "asia",
 			},

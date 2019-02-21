@@ -1,4 +1,4 @@
-package v1alpha1
+package v1alpha2
 
 import (
 	"testing"
@@ -9,21 +9,19 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func TestStorageBucket(t *testing.T) {
+func TestStorageCLusterBucket(t *testing.T) {
 	key := types.NamespacedName{
-		Name:      "foo",
-		Namespace: "default",
+		Name: "foo",
 	}
-	created := &Bucket{
+	created := &ClusterBucket{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "foo",
-			Namespace: "default",
+			Name: "foo",
 		},
 	}
 	g := gomega.NewGomegaWithT(t)
 
 	// Test Create
-	fetched := &Bucket{}
+	fetched := &ClusterBucket{}
 	g.Expect(c.Create(context.TODO(), created)).NotTo(gomega.HaveOccurred())
 
 	g.Expect(c.Get(context.TODO(), key, fetched)).NotTo(gomega.HaveOccurred())

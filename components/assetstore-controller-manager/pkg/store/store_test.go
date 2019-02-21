@@ -3,7 +3,7 @@ package store_test
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store/automock"
 	"github.com/minio/minio-go"
@@ -78,7 +78,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyNone
+		expectedPolicy := v1alpha2.BucketPolicyNone
 		remotePolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
 
 		minio := new(automock.MinioClient)
@@ -99,7 +99,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyReadOnly
+		expectedPolicy := v1alpha2.BucketPolicyReadOnly
 		remotePolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:GetBucketLocation\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:ListBucket\"],\"Condition\":{\"StringEquals\":{\"s3:prefix\":[\"*\"]}},\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:GetObject\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket/**\"],\"Sid\":\"\"}]}"
 
 		minio := new(automock.MinioClient)
@@ -120,7 +120,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyWriteOnly
+		expectedPolicy := v1alpha2.BucketPolicyWriteOnly
 		remotePolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucketMultipartUploads\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:AbortMultipartUpload\",\"s3:DeleteObject\",\"s3:ListMultipartUploadParts\",\"s3:PutObject\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket/**\"],\"Sid\":\"\"}]}"
 
 		minio := new(automock.MinioClient)
@@ -141,7 +141,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyReadWrite
+		expectedPolicy := v1alpha2.BucketPolicyReadWrite
 		remotePolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucketMultipartUploads\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:ListBucket\"],\"Condition\":{\"StringEquals\":{\"s3:prefix\":[\"*\"]}},\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:AbortMultipartUpload\",\"s3:DeleteObject\",\"s3:GetObject\",\"s3:ListMultipartUploadParts\",\"s3:PutObject\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket/**\"],\"Sid\":\"\"}]}"
 
 		minio := new(automock.MinioClient)
@@ -162,7 +162,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyNone
+		expectedPolicy := v1alpha2.BucketPolicyNone
 
 		minio := new(automock.MinioClient)
 		minio.On("GetBucketPolicy", bucketName).Return("", nil).Once()
@@ -182,7 +182,7 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyNone
+		expectedPolicy := v1alpha2.BucketPolicyNone
 
 		minio := new(automock.MinioClient)
 		minio.On("GetBucketPolicy", bucketName).Return("", errors.New("test-error")).Once()
@@ -761,7 +761,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		policy := v1alpha1.BucketPolicyNone
+		policy := v1alpha2.BucketPolicyNone
 		marshaledPolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
 
 		minio := new(automock.MinioClient)
@@ -781,7 +781,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyReadOnly
+		expectedPolicy := v1alpha2.BucketPolicyReadOnly
 		marshaledPolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:GetBucketLocation\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:ListBucket\"],\"Condition\":{\"StringEquals\":{\"s3:prefix\":[\"*\"]}},\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:GetObject\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket/**\"],\"Sid\":\"\"}]}"
 
 		minio := new(automock.MinioClient)
@@ -801,7 +801,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyWriteOnly
+		expectedPolicy := v1alpha2.BucketPolicyWriteOnly
 		marshaledPolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucketMultipartUploads\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:AbortMultipartUpload\",\"s3:DeleteObject\",\"s3:ListMultipartUploadParts\",\"s3:PutObject\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket/**\"],\"Sid\":\"\"}]}"
 
 		minio := new(automock.MinioClient)
@@ -821,7 +821,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyReadWrite
+		expectedPolicy := v1alpha2.BucketPolicyReadWrite
 		marshaledPolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucketMultipartUploads\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:ListBucket\"],\"Condition\":{\"StringEquals\":{\"s3:prefix\":[\"*\"]}},\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\"],\"Sid\":\"\"},{\"Action\":[\"s3:AbortMultipartUpload\",\"s3:DeleteObject\",\"s3:GetObject\",\"s3:ListMultipartUploadParts\",\"s3:PutObject\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket/**\"],\"Sid\":\"\"}]}"
 
 		minio := new(automock.MinioClient)
@@ -841,7 +841,7 @@ func TestStore_SetBucketPolicy(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		bucketName := "test-bucket"
-		expectedPolicy := v1alpha1.BucketPolicyNone
+		expectedPolicy := v1alpha2.BucketPolicyNone
 		marshaledPolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[]}"
 
 		minio := new(automock.MinioClient)

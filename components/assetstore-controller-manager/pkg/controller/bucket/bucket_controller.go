@@ -2,7 +2,7 @@ package bucket
 
 import (
 	"context"
-	assetstorev1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/bucket"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store"
@@ -61,7 +61,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to Bucket
-	err = c.Watch(&source.Kind{Type: &assetstorev1alpha1.Bucket{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &assetstorev1alpha2.Bucket{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -88,7 +88,7 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
-	instance := &assetstorev1alpha1.Bucket{}
+	instance := &assetstorev1alpha2.Bucket{}
 	err := r.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -114,7 +114,7 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBucket) onFailed(ctx context.Context, instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+func (r *ReconcileBucket) onFailed(ctx context.Context, instance *assetstorev1alpha2.Bucket) (reconcile.Result, error) {
 	status, err := r.handler.OnFailed(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -127,7 +127,7 @@ func (r *ReconcileBucket) onFailed(ctx context.Context, instance *assetstorev1al
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileBucket) onReady(ctx context.Context, instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+func (r *ReconcileBucket) onReady(ctx context.Context, instance *assetstorev1alpha2.Bucket) (reconcile.Result, error) {
 	status := r.handler.OnReady(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
 
 	if err := r.updateStatus(ctx, instance, status); err != nil {
@@ -137,7 +137,7 @@ func (r *ReconcileBucket) onReady(ctx context.Context, instance *assetstorev1alp
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileBucket) onDelete(ctx context.Context, instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+func (r *ReconcileBucket) onDelete(ctx context.Context, instance *assetstorev1alpha2.Bucket) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		return reconcile.Result{}, nil
 	}
@@ -156,7 +156,7 @@ func (r *ReconcileBucket) onDelete(ctx context.Context, instance *assetstorev1al
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileBucket) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha1.Bucket) (reconcile.Result, error) {
+func (r *ReconcileBucket) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha2.Bucket) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		r.finalizer.AddTo(instance)
 		return reconcile.Result{Requeue: true}, r.Update(ctx, instance)
@@ -171,7 +171,7 @@ func (r *ReconcileBucket) onAddOrUpdate(ctx context.Context, instance *assetstor
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileBucket) updateStatus(ctx context.Context, instance *assetstorev1alpha1.Bucket, commonStatus assetstorev1alpha1.CommonBucketStatus) error {
+func (r *ReconcileBucket) updateStatus(ctx context.Context, instance *assetstorev1alpha2.Bucket, commonStatus assetstorev1alpha2.CommonBucketStatus) error {
 	toUpdate := instance.DeepCopy()
 	toUpdate.Status.CommonBucketStatus = commonStatus
 

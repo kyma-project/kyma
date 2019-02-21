@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"time"
 
-	assetstorev1alpha1 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -65,9 +65,9 @@ func Add(mgr manager.Manager) error {
 	return add(mgr, reconciler)
 }
 
-func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name string) (*assetstorev1alpha1.CommonBucketStatus, bool, error) {
-	return func(ctx context.Context, namespace, name string) (*assetstorev1alpha1.CommonBucketStatus, bool, error) {
-		instance := &assetstorev1alpha1.ClusterBucket{}
+func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name string) (*assetstorev1alpha2.CommonBucketStatus, bool, error) {
+	return func(ctx context.Context, namespace, name string) (*assetstorev1alpha2.CommonBucketStatus, bool, error) {
+		instance := &assetstorev1alpha2.ClusterBucket{}
 
 		namespacedName := types.NamespacedName{
 			Namespace: namespace,
@@ -79,7 +79,7 @@ func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name
 			return nil, false, err
 		}
 
-		if instance == nil || instance.Status.Phase != assetstorev1alpha1.BucketReady {
+		if instance == nil || instance.Status.Phase != assetstorev1alpha2.BucketReady {
 			return nil, false, nil
 		}
 
@@ -96,7 +96,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to ClusterAsset
-	err = c.Watch(&source.Kind{Type: &assetstorev1alpha1.ClusterAsset{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &assetstorev1alpha2.ClusterAsset{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -124,7 +124,7 @@ func (r *ReconcileClusterAsset) Reconcile(request reconcile.Request) (reconcile.
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
 
-	instance := &assetstorev1alpha1.ClusterAsset{}
+	instance := &assetstorev1alpha2.ClusterAsset{}
 	err := r.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
@@ -152,7 +152,7 @@ func (r *ReconcileClusterAsset) Reconcile(request reconcile.Request) (reconcile.
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileClusterAsset) onDelete(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onDelete(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		return reconcile.Result{}, nil
 	}
@@ -170,7 +170,7 @@ func (r *ReconcileClusterAsset) onDelete(ctx context.Context, instance *assetsto
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileClusterAsset) onPending(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onPending(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
 	status := r.handler.OnPending(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
 
 	if err := r.updateStatus(ctx, instance, status); err != nil {
@@ -180,7 +180,7 @@ func (r *ReconcileClusterAsset) onPending(ctx context.Context, instance *assetst
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileClusterAsset) onReady(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onReady(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
 	status := r.handler.OnReady(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
 
 	if err := r.updateStatus(ctx, instance, status); err != nil {
@@ -190,7 +190,7 @@ func (r *ReconcileClusterAsset) onReady(ctx context.Context, instance *assetstor
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileClusterAsset) onFailed(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onFailed(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
 	status, err := r.handler.OnFailed(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -203,7 +203,7 @@ func (r *ReconcileClusterAsset) onFailed(ctx context.Context, instance *assetsto
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileClusterAsset) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset) (reconcile.Result, error) {
+func (r *ReconcileClusterAsset) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
 	if !r.finalizer.IsDefinedIn(instance) {
 		r.finalizer.AddTo(instance)
 		return reconcile.Result{Requeue: true}, r.Update(ctx, instance)
@@ -217,7 +217,7 @@ func (r *ReconcileClusterAsset) onAddOrUpdate(ctx context.Context, instance *ass
 	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
 }
 
-func (r *ReconcileClusterAsset) updateStatus(ctx context.Context, instance *assetstorev1alpha1.ClusterAsset, commonStatus assetstorev1alpha1.CommonAssetStatus) error {
+func (r *ReconcileClusterAsset) updateStatus(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset, commonStatus assetstorev1alpha2.CommonAssetStatus) error {
 	toUpdate := instance.DeepCopy()
 	toUpdate.Status.CommonAssetStatus = commonStatus
 
