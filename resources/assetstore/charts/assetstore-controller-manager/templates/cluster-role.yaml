@@ -12,9 +12,13 @@ rules:
   - assetstore.kyma-project.io
   resources:
   - assets
+  - assets/status
   - buckets
+  - buckets/status
   - clusterassets
+  - clusterassets/status
   - clusterbuckets
+  - clusterbuckets/status
   verbs:
   - get
   - list
