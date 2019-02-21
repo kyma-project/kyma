@@ -82,3 +82,13 @@ $ kubectl logs -n {NAMESPACE} -l function=<function> -c {FUNCTION}
 ```
 
 The logs of lambda Pods will display the lambda code and package.json. In the code a `new line` is replaced by `\n`. `Carriage return` is replaced by `\r` and `\` is replaced by `\\`
+
+An example is below
+
+```sh
+Lambda Code
+module.exports = {\n main: function (event, context) {\n        console.log("Hello World")\n\n} }
+
+Lambda Code dependencies
+{\n        "end-of-stream": "^1.4.1",\n        "from2": "^2.3.0",\n        "lodash": "^4.17.5"\n}
+```
