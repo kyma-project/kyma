@@ -8,7 +8,7 @@ groups:
     labels:
       severity: critical
     annotations:
-      description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod_name }}`}} is not running"
+      description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
       summary: "{{`{{ $labels.pod }}`}} is not running"
 - name: cpu-90-percent-usage-rule-kyma-system
   rules:
