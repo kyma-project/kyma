@@ -12,7 +12,8 @@ spec:
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-api-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-api-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_api_layer_acceptance_tests.dir }}ui-api-layer-acceptance-tests:{{ .Values.global.ui_api_layer_acceptance_tests.version }}
+      # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_api_layer_acceptance_tests.dir }}ui-api-layer-acceptance-tests:{{ .Values.global.ui_api_layer_acceptance_tests.version }}
+      image: "eu.gcr.io/kyma-project/pr/ui-api-layer-acceptance-tests:PR-2732"
       env:
         - name: DOMAIN
           value: "{{ .Values.global.domainName }}"
