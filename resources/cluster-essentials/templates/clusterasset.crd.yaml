@@ -4,13 +4,13 @@ metadata:
   creationTimestamp: null
   labels:
     controller-tools.k8s.io: "1.0"
-  name: assets.assetstore.kyma-project.io
+  name: clusterassets.assetstore.kyma-project.io
 spec:
   group: assetstore.kyma-project.io
   names:
-    kind: Asset
-    plural: assets
-  scope: Namespaced
+    kind: ClusterAsset
+    plural: clusterassets
+  scope: Cluster
   subresources:
     status: {}
   validation:
