@@ -6,6 +6,8 @@ Kyma uses Prometheus alert rules to monitor the health of resources. Use this ch
 
 ## Details
 
+### Alert rules
+
 You can define the following alert rules:
 
 - Alert when a Pod is not running
