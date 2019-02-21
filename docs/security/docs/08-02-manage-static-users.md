@@ -43,7 +43,7 @@ A newly created static user has no access to any resources of the cluster as the
 By default, Kyma comes with the following ClusterRoles:
  
 - **kyma-admin**: allows to get full admin access to the entire cluster
-- **kyma-edit**: allows full access to kyma managed resources
+- **kyma-edit**: allows full access to all Kyma-managed resources
 - **kyma-developer**: **kyma-edit** + full access to base kubernetes resources
 - **kyma-view**: allows to view and list all of the resources of the cluster.
 
