@@ -13,6 +13,8 @@ rules:
   resources:
   - assets
   - buckets
+  - clusterassets
+  - clusterbuckets
   verbs:
   - get
   - list
