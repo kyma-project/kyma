@@ -44,7 +44,7 @@ By default, Kyma comes with the following ClusterRoles:
  
 - **kyma-admin**: allows full admin access to the entire cluster
 - **kyma-edit**: allows full access to all Kyma-managed resources
-- **kyma-developer**: **kyma-edit** + full access to base kubernetes resources
+- **kyma-developer**:  allows full access to Kyma-managed resources and basic Kubernetes resources
 - **kyma-view**: allows to view and list all of the resources of the cluster.
 
 To bind a newly created user to the **kyma-view** ClusterRole, run this command:
