@@ -12,9 +12,11 @@ import (
 )
 
 const (
-	ApplicationHeader = "Application"
-	GroupHeader       = "Group"
-	TenantHeader      = "Tenant"
+	ApplicationHeader  = "Application"
+	GroupHeader        = "Group"
+	TenantHeader       = "Tenant"
+	EventsHostHeader   = "EventsHost"
+	MetadataHostHeader = "MetadataHost"
 )
 
 type ConnectorClient interface {

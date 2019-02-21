@@ -15,9 +15,6 @@ import (
 const (
 	retryWaitTimeSeconds = 5 * time.Second
 	retryCount           = 20
-
-	eventsHostHeader   = "EventsHost"
-	metadataHostHeader = "MetadataHost"
 )
 
 func TestConnector(t *testing.T) {
@@ -29,8 +26,15 @@ func TestConnector(t *testing.T) {
 		appName := "test-app"
 		appTokenRequest := createApplicationTokenRequest(t, config, appName)
 		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
-		appCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
-		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+
+		if config.Central {
+			appCsrInfoEndpointForCentralSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+			appMgmInfoEndpointCentralSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+		} else {
+			appCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+			appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+		}
+
 		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
 	})
 
@@ -256,7 +260,7 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 }
 
-func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+func appCsrInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -284,6 +288,32 @@ func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
 	})
 
+	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
+		// given
+		expectedMetadataURL := ""
+		expectedEventsURL := ""
+
+		// when
+		tokenResponse := client.CreateToken(t)
+
+		// then
+		require.NotEmpty(t, tokenResponse.Token)
+		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
+
+		// when
+		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, createHostsHeaders("", ""))
+
+		// then
+		require.Nil(t, errorResponse)
+		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
+		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
+	})
+}
+
+func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
 	t.Run("should use default values to build CSR info response when headers are not given", func(t *testing.T) {
 		// given
 		expectedMetadataURL := defaultGatewayUrl
@@ -303,27 +333,6 @@ func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 
 		// when
 		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, nil)
-
-		// then
-		require.Nil(t, errorResponse)
-		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
-		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
-	})
-
-	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
-		// given
-		expectedMetadataURL := ""
-		expectedEventsURL := ""
-
-		// when
-		tokenResponse := client.CreateToken(t)
-
-		// then
-		require.NotEmpty(t, tokenResponse.Token)
-		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
-
-		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, createHostsHeaders("", ""))
 
 		// then
 		require.Nil(t, errorResponse)
@@ -356,8 +365,7 @@ func runtimeCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipV
 	})
 }
 
-func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
-
+func appMgmInfoEndpointCentralSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
 	clientKey := testkit.CreateKey(t)
@@ -389,6 +397,37 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
 	})
 
+	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
+		// given
+		expectedMetadataURL := ""
+		expectedEventsURL := ""
+
+		// when
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
+
+		// then
+		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
+
+		// when
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+		require.Nil(t, errorResponse)
+
+		// then
+		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
+		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
+	})
+}
+
+func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	clientKey := testkit.CreateKey(t)
+
 	t.Run("should use default values to build management info response when headers are not given", func(t *testing.T) {
 		// given
 		expectedMetadataURL := defaultGatewayUrl
@@ -411,30 +450,6 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 
 		// when
 		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, nil)
-		require.Nil(t, errorResponse)
-
-		// then
-		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
-		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
-	})
-
-	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
-		// given
-		expectedMetadataURL := ""
-		expectedEventsURL := ""
-
-		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey)
-
-		// then
-		require.NotEmpty(t, crtResponse.CRTChain)
-		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
-
-		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
-
-		// when
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
 		require.Nil(t, errorResponse)
 
 		// then
@@ -554,7 +569,7 @@ func replaceToken(originalUrl string, newToken string) string {
 
 func createHostsHeaders(metadataHost string, eventsHost string) map[string]string {
 	return map[string]string{
-		metadataHostHeader: metadataHost,
-		eventsHostHeader:   eventsHost,
+		testkit.MetadataHostHeader: metadataHost,
+		testkit.EventsHostHeader:   eventsHost,
 	}
 }
