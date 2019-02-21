@@ -15,27 +15,27 @@ Use the following tools to set up the project:
 
 ### Run a local version
 
-To run the application without building the binary, against local Kyma installation on Minikube, run this command:
+To run the application against the local Kyma installation on Minikube without building the binary, run this command:
 
 ```bash
 APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_VERBOSE=true APP_UPLOAD_ACCESS_KEY={accessKey} APP_UPLOAD_SECRET_KEY={secretKey} go run main.go
 ```
 
 Replace values in curly braces with proper details, where:
-- `{accessKey}` is the access key required to sign in to the content storage server
-- `{secretKey}` is the secret key required to sign in to the content storage server
+- `{accessKey}` is the access key required to sign in to the content storage server.
+- `{secretKey}` is the secret key required to sign in to the content storage server.
 
 The service listens on port `3000`.
 
-### Access on cluster
+### Access on a cluster
 
-In order to use Asset Upload Service on cluster, run the command:
+To use the Asset Upload Service on a cluster, run the command:
 
 ```bash
 kubectl port-forward deployment/assetstore-asset-upload-service 3000:3000 -n kyma-system
 ```
 
-The service will be exposed on `3000` port.
+You can access the service on port `3000`.
 
 ### Build a production version
 
@@ -47,8 +47,8 @@ docker build {image_name}:{image_tag}
 
 The variables are:
 
-- `{image_name}` - name of the output image (default: `asset-upload-service`)
-- `{image_tag}` - tag of the output image (default: `latest`)
+- `{image_name}` that is the name of the output image. The default name is `asset-upload-service`.
+- `{image_tag}` that is the tag of the output image. The default tag is `latest`.
 
 ### Upload files
 
@@ -106,7 +106,7 @@ Use the following environment variables to configure the application:
 | APP_HOST | No | `127.0.0.1` | The host on which the HTTP server listens. |
 | APP_PORT | No | `3000` | The port on which the HTTP server listens. |
 | APP_KUBECONFIG_PATH | No |  | The path to the `kubeconfig` file, needed for running an application outside of the cluster. |
-| APP_VERBOSE | No | No | Show detailed logs in the application. |
+| APP_VERBOSE | No | No | The parameter which shows detailed logs in the application. |
 | APP_UPLOAD_TIMEOUT | No | `30m` | Timeout for uploading files. |
 | APP_MAX_UPLOAD_WORKERS | No | `10` | The maximum number of concurrent upload workers. |
 | APP_UPLOAD_ENDPOINT | No | `minio.kyma.local` | The address of the content storage server. |
@@ -122,9 +122,9 @@ Use the following environment variables to configure the application:
 | APP_CONFIG_NAME | No | `asset-upload-service` | ConfigMap resource name |
 | APP_CONFIG_NAMESPACE | No | `kyma-system` | ConfigMap resource namespace |
 
-### Configure logger verbosity level
+### Configure the logger verbosity level
 
-This application uses `glog` to log messages. Pass command line arguments described in the [glog.go](https://github.com/golang/glog/blob/master/glog.go) document to customize the log, such as log level and output.
+This application uses `glog` to log messages. Pass command line arguments described in the [`glog.go`](https://github.com/golang/glog/blob/master/glog.go) file to customize the log parameters, such as the log level and output.
 
 For example:
 ```bash
@@ -150,4 +150,4 @@ go test ./...
 
 ### Verify the code
 
-To check if the code is correct and you can push it, run the `before-commit.sh` script. It builds the application, runs tests, checks the status of the vendored libraries, runs the static code analysis, and ensures that the formatting of the code is correct.
+To check if the code is correct and you can push it, run the `before-commit.sh` script. It builds the application, runs tests, and checks the status of the vendored libraries. It also runs the static code analysis and ensures that the formatting of the code is correct.
