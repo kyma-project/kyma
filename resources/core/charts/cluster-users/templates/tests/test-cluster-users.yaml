@@ -1,0 +1,33 @@
+{{ if .Values.global.isLocalEnv }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-cluster-users
+  annotations:
+    sidecar.istio.io/inject: "false"
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  containers:
+    - name: test-cluster-users
+      # ToDo: Get an image
+      image: demonsthere/kyma-sar:latest
+      # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_cluster_users.dir }}test-cluster-users:{{ .Values.global.test_cluster_users.version }}
+      env:
+        - name: USERNAME_FILE
+          value: /etc/credentials/email
+        - name: PASSWORD_FILE
+          value: /etc/credentials/password
+      volumeMounts:
+        - name: credentials
+          mountPath: /etc/credentials
+  volumes:
+    - name: credentials
+      secret:
+        secretName: admin-user
+  restartPolicy: Never
+{{ end }}
