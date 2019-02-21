@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/require"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestCertificateValidation(t *testing.T) {
@@ -73,7 +73,7 @@ func shouldRetry(response *http.Response, err error) bool {
 func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, skipVerify bool) *http.Client {
 	key := testkit.CreateKey(t)
 
-	crtResponse, _ := createCertificateChain(t, client, key)
+	crtResponse, _ := createCertificateChain(t, client, key, nil)
 	require.NotEmpty(t, crtResponse.CRTChain)
 	clientCertBytes := testkit.EncodedCertToPemBytes(t, crtResponse.ClientCRT)
 

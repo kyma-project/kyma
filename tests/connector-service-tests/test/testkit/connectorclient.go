@@ -17,6 +17,8 @@ const (
 	TenantHeader       = "Tenant"
 	EventsHostHeader   = "EventsHost"
 	MetadataHostHeader = "MetadataHost"
+	Tenant             = "testkit-tenant"
+	Group              = "testkit-group"
 )
 
 type ConnectorClient interface {
@@ -134,6 +136,6 @@ func logResponse(t *testing.T, resp *http.Response) {
 	if err != nil {
 		t.Logf("failed to dump response, %s", err)
 	} else {
-		t.Logf("\n--------------------------------\n%s\n--------------------------------", dump)
+		t.Logf("\n--------------------------------\n%s\n%s\n--------------------------------", resp.Request.URL.String(), dump)
 	}
 }

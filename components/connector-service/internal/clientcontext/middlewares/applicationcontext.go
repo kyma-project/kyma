@@ -30,7 +30,7 @@ func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {
 		}
 
 		if cc.isValidCtx(appContext) == false {
-			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Required headers not specified."))
+			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Required headers for ApplicationContext not specified."))
 			return
 		}
 
