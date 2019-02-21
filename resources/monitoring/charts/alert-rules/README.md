@@ -2,31 +2,31 @@
 
 ## Overview
 
-Kyma uses Prometheus alert rules to monitor the health of its resources. Use this chart to configure alert rules.
+Kyma uses Prometheus alert rules to monitor the health of resources. Use this chart to configure alert rules.
 
-## Alert rules
+## Details
 
 You can define the following alert rules:
 
-- Pod is not running
+- Alert when a Pod is not running
 
-    The Alertmanager sends out alerts when one of the Pods is not running in `kyma-system`, `kyma-integration`, `istio-system`, `kube-public`, or `kube-system` Namespaces.
+    The Alertmanager sends out alerts when one of the Pods is not running in `kyma-system`, `kyma-integration`, `istio-system`, `kube-public`, or `kube-system` Namespace.
 
 - Monitor Persistent Volume Claims (PVC)
 
-    The Alertmanager triggers the rule when PVC exceeds 90% for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. To avoid this, increase the capacity of PVC.
+    The Alertmanager sends out alerts when the PVC exceeds 90% for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. To avoid this, increase the capacity of PVC.
 
 -  Monitor CPU Usage
 
-    The Alertmanager triggers the rule when CPU usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to add the `alertcpu: "yes"` label to Pods.
+    The Alertmanager sends out alers when the CPU usage exceeds 90% for Pods in the `kyma-system` Namespace. Add the `alertcpu: "yes"` label to Pods to make sure the rule activates.
 
 - Monitor Memory usage
 
-    The Alertmanager triggers the rule when Memory usage exceeds 90% for Pods in the `kyma-system` Namespace. For the alert rule to activate, make sure to add the `alertmem: "yes"` to Pods.
+    The Alertmanager triggers the rule when Memory usage exceeds 90% for Pods in the `kyma-system` Namespace. Add the `alertmem: "yes"` label to Pods to make sure the rule activates.
 
-## Create alert rules
+### Create alert rules
 
-Prometheus uses the  **spec.ruleSelector** label selector to identify ConfigMaps which include Prometheus rule files.
+Prometheus uses the  **spec.ruleSelector** label selector to identify ConfigMaps, which include Prometheus rule definitions. 
 
 ```yaml
 {{- if .Values.rulesSelector }}
@@ -74,7 +74,7 @@ data:
 3. Configure the **data. alert.rules** parameter in the [kyma-rules.yaml](templates/kyma-rules.yaml) file. 
 
 
-The example shows a sample configuration for an alert rule. The rule activates the alarm when a Pod is not running.
+The example shows a sample configuration for an alert rule. This rule activates the alarm when a Pod is not running.
 
 ```yaml
 {{ define "unhealthy-pods-rules.yaml.tpl" }}
@@ -95,12 +95,12 @@ The rule definition includes the following parameters:
 
 - **alert:** is the valid metric name name of the alert.
 - **expr:** defines the PromQL expression to evaluate, using Kubernetes [functions](https://prometheus.io/docs/prometheus/latest/querying/functions/) and [metrics](https://github.com/kubernetes/kube-state-metrics/blob/master/Documentation/pod-metrics.md). In the example, the `kube_pod_container_status_running` Pod metric is used to check if the `sample-metrics` Pod is running in the `default` Namespace.
-* **for:**  is a period of time during which alerts are returned.
+* **for:**  is a time period during which alerts are returned.
 * **description:** is an annotation used to enrich alert details.
 * **summary:** is an annotation used to enrich alert details.
 
 
-## Configure Alertmanager
+### Configure Alertmanager
 
 You can configure the Alertmanager using the [alertmanager](../alertmanager/README.md) chart.
 
