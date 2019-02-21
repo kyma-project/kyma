@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
-  description: The purpose of this application is to provide an API to enable temporary
-    host files for Asset Store, without need to use external providers.
+  description: The purpose of this application is to provide an API to enable
+   files hosting service for the Asset Store, without the need to rely on external providers.
   title: Asset Upload Service API
   license:
     name: Apache 2.0
@@ -22,19 +22,19 @@ paths:
               type: object
               properties:
                 public:
-                  description: Files, which should be uploaded to public system bucket.
+                  description: Files to upload to a public system bucket.
                   type: array
                   items:
                     type: string
                     format: binary
                 private:
-                  description: Files, which should be uploaded to private system bucket.
+                  description: Files to upload to a private system bucket.
                   type: array
                   items:
                     type: string
                     format: binary
                 directory:
-                  description: Directory, where files will be put in bucket. If not specified, the directory name will be generated. If directory and files already exist, they will be overwritten.
+                  description: The directory for storing the uploaded files. If you do not specify it, the service creates a directory with a random name. If the directory and files already exist, the service overwrites them.
                   type: string
       responses:
         "200":
@@ -88,7 +88,7 @@ components:
                 items:
                   $ref: "#/components/schemas/RequestError"
     uploadMultiStatus:
-      description: Multi status response. Some files have been uploaded successfully, some didn't
+      description: A multi-status response. Only some files have been uploaded successfully.
       content:
         application/json:
           schema:
@@ -100,7 +100,7 @@ components:
                 items:
                   $ref: "#/components/schemas/FileUploadError"
               uploadedFiles:
-                description: Files, that were uploaded successfully
+                description: Files that were uploaded successfully.
                 type: array
                 items:
                   $ref: "#/components/schemas/FileUploadResult"
@@ -112,40 +112,40 @@ components:
             type: object
             properties:
               uploadedFiles:
-                description: Files, that were uploaded successfully
+                description: Files that were uploaded successfully.
                 type: array
                 items:
                   $ref: "#/components/schemas/FileUploadResult"
   schemas:
     FileUploadResult:
-      description: "It represents a single successful file upload result"
+      description: "It represents a single file successful upload result."
       type: object
       properties:
         bucket:
-          description: "Bucket name, where the uploaded file is located"
+          description: "The name of the bucket with the uploaded file."
           type: string
         fileName:
           description: "File name"
           type: string
         remotePath:
-          description: "Full remote path to the file. If the bucket is public, it can be accessed with simple GET request"
+          description: "A full remote path to the file. If the bucket is public, you can access it with a simple GET request."
           type: string
         size:
           description: "File size"
           type: integer
           format: int64
     FileUploadError:
-      description: "It represents a single failure of file upload"
+      description: "It represents a single file upload failure."
       type: object
       properties:
         fileName:
-          description: "Name of the file, which upload failed"
+          description: "The name of the file which the service failed to upload."
           type: string
         message:
           description: "Error message"
           type: string
     RequestError:
-      description: "It represents a request failure"
+      description: "It represents a request failure."
       type: object
       properties:
         message:
