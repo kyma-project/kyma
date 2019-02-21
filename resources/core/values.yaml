@@ -72,6 +72,13 @@ global:
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: "0b5f866d"
+  kubeless_images:
+    node6:
+      dir: develop/
+      version: "a5b27e5d"
+    node8:
+      dir: develop/
+      version: "a5b27e5d"
 
 test:
   acceptance:
