@@ -32,6 +32,14 @@ spec:
         backend:
           serviceName: {{ .Chart.Name }}-external-api
           servicePort: {{ .Values.ingress.externalapi.port }}
+      - path: /v1/applications/certificates/renewals
+        backend:
+          serviceName: {{ .Chart.Name }}-external-api
+          servicePort: {{ .Values.ingress.externalapi.port }}
+      - path: /v1/runtimes/certificates/renewals
+        backend:
+          serviceName: {{ .Chart.Name }}-external-api
+          servicePort: {{ .Values.ingress.externalapi.port }}
 
   tls:
   - hosts:

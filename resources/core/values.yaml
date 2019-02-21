@@ -44,10 +44,10 @@ global:
     version: 6e0a7fe2
   configurations_generator:
     dir: develop/
-    version: 4a23580f
+    version: 07db886f
   docs:
     dir: develop/
-    version: 2a321562
+    version: e4a36e7d
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -68,7 +68,7 @@ global:
     version: e11a469a
   ui_api_layer:
     dir: develop/
-    version: "0b5f866d"
+    version: "ff99660e"
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: "0b5f866d"

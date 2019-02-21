@@ -6,8 +6,6 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
@@ -17,28 +15,25 @@ import (
 )
 
 type signatureHandler struct {
-	tokenManager             tokens.Manager
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 	certificateService       certificates.Service
 }
 
-func NewSignatureHandler(tokenManager tokens.Manager, certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor) SignatureHandler {
+func NewSignatureHandler(certificateService certificates.Service, connectorClientExtractor clientcontext.ConnectorClientExtractor) SignatureHandler {
 	return &signatureHandler{
-		tokenManager:             tokenManager,
 		connectorClientExtractor: connectorClientExtractor,
 		certificateService:       certificateService,
 	}
 }
 
 func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
-	token := r.URL.Query().Get("token")
 	connectorClientContext, err := sh.connectorClientExtractor(r.Context())
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
 	}
 
-	signingRequest, err := sh.readCertRequest(r)
+	signingRequest, err := readCertRequest(r)
 	if err != nil {
 		httphelpers.RespondWithError(w, err)
 		return
@@ -56,12 +51,10 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	sh.tokenManager.Delete(token)
-
-	httphelpers.RespondWithBody(w, 201, toCertResponse(encodedCertificatesChain))
+	httphelpers.RespondWithBody(w, http.StatusCreated, toCertResponse(encodedCertificatesChain))
 }
 
-func (sh *signatureHandler) readCertRequest(r *http.Request) (*certRequest, apperrors.AppError) {
+func readCertRequest(r *http.Request) (*certRequest, apperrors.AppError) {
 	b, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		return nil, apperrors.Internal("Error while reading request body: %s", err)

@@ -4,8 +4,6 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
@@ -55,22 +53,4 @@ func ExtractClusterContext(ctx context.Context) (ConnectorClientContext, apperro
 	}
 
 	return clusterCtx, nil
-}
-
-func EmptyClusterContext(_ context.Context) (ConnectorClientContext, apperrors.AppError) {
-	return &ClusterContext{}, nil
-}
-
-func NewClusterContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
-	var clusterContext ClusterContext
-	err := tokenResolver.Resolve(token, &clusterContext)
-
-	return clusterContext, err
-}
-
-func NewApplicationContextExtender(token string, tokenResolver tokens.Resolver) (ContextExtender, apperrors.AppError) {
-	var appContext ApplicationContext
-	err := tokenResolver.Resolve(token, &appContext)
-
-	return appContext, err
 }

@@ -4,10 +4,11 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 const defaultCertificateValidityTime = 90 * 24 * time.Hour
@@ -23,6 +24,7 @@ type options struct {
 	caSecretName                  string
 	requestLogging                bool
 	connectorServiceHost          string
+	certificateProtectedHost      string
 	appRegistryHost               string
 	eventsHost                    string
 	appsInfoURL                   string
@@ -51,6 +53,7 @@ func parseArgs() *options {
 	caSecretName := flag.String("caSecretName", "nginx-auth-ca", "Name of the secret which contains root CA.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
+	certificateProtectedHost := flag.String("certificateProtectedHost", "gateway.wormhole.cluster.kyma.cx", "Host secured with client certificate, used for certificate renewal.")
 	appRegistryHost := flag.String("appRegistryHost", "", "Host at which this Application Registry is accessible.")
 	eventsHost := flag.String("eventsHost", "", "Host at which this Event Service is accessible.")
 	appsInfoURL := flag.String("appsInfoURL", "", "URL at which management information is available.")
@@ -77,24 +80,25 @@ func parseArgs() *options {
 		caSecretName:                  *caSecretName,
 		requestLogging:                *requestLogging,
 		connectorServiceHost:          *connectorServiceHost,
-		group:                         *group,
-		tenant:                        *tenant,
-		appRegistryHost:               *appRegistryHost,
-		eventsHost:                    *eventsHost,
-		appsInfoURL:                   *appsInfoURL,
-		runtimesInfoURL:               *runtimesInfoURL,
-		certificateValidityTime:       validityTime,
+		certificateProtectedHost:      *certificateProtectedHost,
+		group:                   *group,
+		tenant:                  *tenant,
+		appRegistryHost:         *appRegistryHost,
+		eventsHost:              *eventsHost,
+		appsInfoURL:             *appsInfoURL,
+		runtimesInfoURL:         *runtimesInfoURL,
+		certificateValidityTime: validityTime,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --requestLogging=%t "+
-		"--connectorServiceHost=%s --appRegistryHost=%s --eventsHost=%s "+
+		"--connectorServiceHost=%s --certificateProtectedHost=%s --appRegistryHost=%s --eventsHost=%s "+
 		"--appsInfoURL=%s --runtimesInfoURL=%s --group=%s --tenant=%s --certificateValidityTime=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.requestLogging,
-		o.connectorServiceHost, o.appRegistryHost, o.eventsHost,
+		o.connectorServiceHost, o.certificateProtectedHost, o.appRegistryHost, o.eventsHost,
 		o.appsInfoURL, o.runtimesInfoURL, o.group, o.tenant, o.certificateValidityTime)
 }
 
