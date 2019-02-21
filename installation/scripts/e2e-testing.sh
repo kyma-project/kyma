@@ -40,7 +40,7 @@ do
     fi
 
     helm install $testcase --name $release --namespace end-to-end
-    if helm test $release; then
+    if helm test $release --timeout 1000; then
         releasesToClean="$releasesToClean $release"
     fi
 done
