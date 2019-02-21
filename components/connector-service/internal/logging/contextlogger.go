@@ -12,9 +12,5 @@ func GetClusterLogger(tenant, group string) *log.Entry {
 }
 
 func GetApplicationLogger(application, tenant, group string) *log.Entry {
-	return log.WithFields(log.Fields{
-		"Application": application,
-		"Group":       group,
-		"Tenant":      tenant,
-	})
+	return GetClusterLogger(tenant, group).WithField("Application", application)
 }
