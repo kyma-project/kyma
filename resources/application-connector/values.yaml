@@ -1,4 +1,5 @@
 global:
+  applicationManagementDisabled: true
   isLocalEnv: false
   knative: false
   namespace: kyma-integration
