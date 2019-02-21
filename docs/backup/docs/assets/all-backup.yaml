@@ -1,15 +1,17 @@
-  includedNamespaces:
-  - '*'
-  excludedNamespaces:
-  - istio-system
-  - kyma-system
-  - kyma-integration
-  - kyma-installer
+includedNamespaces:
+- '*'
+excludedNamespaces:
+- istio-system
+- kyma-system
+- kyma-integration
+- kyma-installer
+- default
+- natts
+includedResources:
+- '*'
+excludedResources: null
+includeClusterResources: null
+labelSelector: null
+storageLocation: default
+volumeSnapshotLocations:
   - default
-  - natts
-  includedResources:
-  - '*'
-  excludedResources: null
-  includeClusterResources: null
-  labelSelector: null
-  storageLocation: default
