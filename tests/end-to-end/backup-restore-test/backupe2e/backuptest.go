@@ -2,5 +2,5 @@ package backupe2e
 
 type BackupTest interface {
 	CreateResources(namespace string)
-	TestResources()
+	TestResources(namespace string)
 }

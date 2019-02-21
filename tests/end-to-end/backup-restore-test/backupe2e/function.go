@@ -8,12 +8,10 @@ import (
 	"os"
 	"time"
 
+	"github.com/google/uuid"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-
-	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils"
 
 	. "github.com/smartystreets/goconvey/convey"
 
@@ -23,9 +21,9 @@ import (
 )
 
 type functionTest struct {
-	functionName, uuid, namespace string
-	kubelessClient                *kubeless.Clientset
-	coreClient                    *kubernetes.Clientset
+	functionName, uuid string
+	kubelessClient     *kubeless.Clientset
+	coreClient         *kubernetes.Clientset
 }
 
 func NewFunctionTest() (functionTest, error) {
@@ -49,63 +47,66 @@ func NewFunctionTest() (functionTest, error) {
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
 		functionName:   "hello",
+		uuid:           uuid.New().String(),
 	}, nil
 }
 
 func (f functionTest) CreateResources(namespace string) {
-	f.namespace = namespace
 	Convey("create resources for function test", func(c C) {
-		_, err := f.createFunction(namespace, f.functionName)
+		_, err := f.createFunction(namespace)
 
 		So(err, ShouldBeNil)
 	})
 }
 
-func (f functionTest) TestResources() {
-	So(func() string {
+func (f functionTest) TestResources(namespace string) {
+	err := f.getFunctionPodStatus(namespace, 2*time.Minute)
+	So(err, ShouldBeNil)
 
-		_, err := f.getFunctionPod(f.namespace, f.functionName)
-		if err != nil {
-			return ""
-		}
-
-		return "Running"
-	}, utils.ShouldReturnSubstringEventually, "Running", 60*time.Second, 1*time.Second)
-
-	So(func() string {
-		host := fmt.Sprintf("http://%s.%s:8080", f.functionName, f.namespace)
-		value, err := getFunctionOutput(host, f.namespace, f.functionName, f.uuid)
-		if err != nil {
-			return "Host not reachable. Retrying"
-		}
-		return value
-	}, utils.ShouldReturnSubstringEventually, f.uuid, 60*time.Second, 1*time.Second)
+	host := fmt.Sprintf("http://%s.%s:8080", f.functionName, namespace)
+	value, err := f.getFunctionOutput(host, 2*time.Minute)
+	So(err, ShouldBeNil)
+	So(value, ShouldContainSubstring, f.uuid)
 }
 
-func getFunctionOutput(host, namespace, name, testUUID string) (string, error) {
-	resp, err := http.Post(host, "text/plain", bytes.NewBufferString(testUUID))
-	if err != nil {
-		return "", err
-	}
-	if resp.StatusCode == http.StatusOK {
-		bodyBytes, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			return "Unable to get response: %v", err
+func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (string, error) {
+
+	tick := time.Tick(2 * time.Second)
+	timeout := time.After(waitmax)
+	messages := ""
+
+	for {
+		select {
+		case <-tick:
+			resp, err := http.Post(host, "text/plain", bytes.NewBufferString(f.uuid))
+			if err != nil {
+				messages += fmt.Sprintf("%+v\n", err)
+				break
+			}
+			if resp.StatusCode == http.StatusOK {
+				bodyBytes, err := ioutil.ReadAll(resp.Body)
+				if err != nil {
+					return "", err
+				}
+				return string(bodyBytes), nil
+			}
+			messages += fmt.Sprintf("%+v", err)
+
+		case <-timeout:
+			return "", fmt.Errorf("Could not get function output:\n %v", messages)
 		}
-		return string(bodyBytes), err
 	}
-	return "", err
 
 }
 
-func (f *functionTest) createFunction(namespace, functionName string) (*kubelessV1.Function, error) {
+func (f functionTest) createFunction(namespace string) (*kubelessV1.Function, error) {
 	function := &kubelessV1.Function{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Function",
 			APIVersion: kubelessV1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: functionName,
+			Name: f.functionName,
 		},
 		Spec: kubelessV1.FunctionSpec{
 			Handler: "handler.hello",
@@ -115,37 +116,36 @@ func (f *functionTest) createFunction(namespace, functionName string) (*kubeless
 				  return(event.data)
 				}
 			  }`,
-			ServiceSpec: v1.ServiceSpec{
-				Ports: []v1.ServicePort{v1.ServicePort{
-					Name:       "http-function-port",
-					Port:       8080,
-					Protocol:   "TCP",
-					TargetPort: intstr.FromInt(8080)},
-				},
-				Type: "ClusterIP",
-			},
 		},
 	}
 	return f.kubelessClient.KubelessV1beta1().Functions(namespace).Create(function)
 }
 
-func (f *functionTest) getFunctionPod(namespace, functionName string) (v1.Pod, error) {
-	pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + functionName})
+func (f functionTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
+	watch, err := f.coreClient.CoreV1().Pods(namespace).Watch(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 	if err != nil {
-		return v1.Pod{}, err
+		return err
 	}
+	timeout := time.After(waitmax)
 
-	for _, pod := range pods.Items {
-		isPodRunning := true
-		for _, containerStatus := range pod.Status.ContainerStatuses {
-			if !containerStatus.Ready {
-				isPodRunning = false
-				break
+	for {
+		select {
+		case <-timeout:
+			return fmt.Errorf("Pod did not start within given time  %v", waitmax)
+		case event := <-watch.ResultChan():
+			if event.Type == "ERROR" {
+				return fmt.Errorf("%+v", event)
+			}
+			if event.Type == "MODIFIED" {
+				pod, ok := event.Object.(*v1.Pod)
+				if !ok {
+					return fmt.Errorf("%v", event)
+				}
+				if pod.Status.Phase == "Running" {
+					return nil
+				}
 			}
 		}
-		if isPodRunning {
-			return pod, nil
-		}
 	}
-	return v1.Pod{}, fmt.Errorf("there is no pod ready")
+
 }

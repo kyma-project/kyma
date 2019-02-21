@@ -1,4 +1,4 @@
-package restore
+package backupAndRestore
 
 import (
 	"testing"
@@ -51,14 +51,13 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 			e2eTest.backupTest.CreateResources(e2eTest.namespace)
 		}
 		for _, e2eTest := range e2eTests {
-			e2eTest.backupTest.TestResources()
+			e2eTest.backupTest.TestResources(e2eTest.namespace)
 		}
 	})
 
 	Convey("Backup Cluster", t, func() {
-		excludedNamespaces := []string{"default", "kube-public", "kube-system", "heptio-ark", "kyma-system", "kyma-installer", "kyma-integration", "istio-system", "natts"}
-		excludedResources := []string{}
-		myBackupClient.CreateBackup(backupName, []string{}, excludedNamespaces, []string{}, excludedResources)
+		err := myBackupClient.CreateBackup(backupName)
+		So(err, ShouldBeNil)
 
 		Convey("Check backup status", func() {
 			err := myBackupClient.WaitForBackupToBeCreated(backupName, 5*time.Minute)
@@ -80,8 +79,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		err = myBackupClient.WaitForBackupToBeRestored(backupName, 5*time.Minute)
 		So(err, ShouldBeNil)
 		Convey("Test restored resources", func() {
-			for _, backupTest := range backupTests {
-				backupTest.TestResources()
+			for _, e2eTest := range e2eTests {
+				e2eTest.backupTest.TestResources(e2eTest.namespace)
 			}
 		})
 	})
