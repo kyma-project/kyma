@@ -141,8 +141,8 @@ type ComplexityRoot struct {
 		Tags                func(childComplexity int) int
 		Labels              func(childComplexity int) int
 		Plans               func(childComplexity int) int
-		Activated           func(childComplexity int) int
-		Instances           func(childComplexity int) int
+		Activated           func(childComplexity int, namespace *string) int
+		Instances           func(childComplexity int, namespace *string) int
 		ApiSpec             func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
@@ -575,8 +575,8 @@ type ApplicationResolver interface {
 }
 type ClusterServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ClusterServiceClass) ([]ClusterServicePlan, error)
-	Activated(ctx context.Context, obj *ClusterServiceClass) (bool, error)
-	Instances(ctx context.Context, obj *ClusterServiceClass) ([]ServiceInstance, error)
+	Activated(ctx context.Context, obj *ClusterServiceClass, namespace *string) (bool, error)
+	Instances(ctx context.Context, obj *ClusterServiceClass, namespace *string) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
@@ -672,6 +672,46 @@ type SubscriptionResolver interface {
 	ClusterServiceBrokerEvent(ctx context.Context) (<-chan ClusterServiceBrokerEvent, error)
 	ApplicationEvent(ctx context.Context) (<-chan ApplicationEvent, error)
 	PodEvent(ctx context.Context, namespace string) (<-chan PodEvent, error)
+}
+
+func field_ClusterServiceClass_activated_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
+func field_ClusterServiceClass_instances_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg0 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
 }
 
 func field_Mutation_createServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -2474,14 +2514,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			break
 		}
 
-		return e.complexity.ClusterServiceClass.Activated(childComplexity), true
+		args, err := field_ClusterServiceClass_activated_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.ClusterServiceClass.Activated(childComplexity, args["namespace"].(*string)), true
 
 	case "ClusterServiceClass.instances":
 		if e.complexity.ClusterServiceClass.Instances == nil {
 			break
 		}
 
-		return e.complexity.ClusterServiceClass.Instances(childComplexity), true
+		args, err := field_ClusterServiceClass_instances_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.ClusterServiceClass.Instances(childComplexity, args["namespace"].(*string)), true
 
 	case "ClusterServiceClass.apiSpec":
 		if e.complexity.ClusterServiceClass.ApiSpec == nil {
@@ -6874,16 +6924,22 @@ func (ec *executionContext) _ClusterServiceClass_plans(ctx context.Context, fiel
 func (ec *executionContext) _ClusterServiceClass_activated(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_ClusterServiceClass_activated_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
-		Args:   nil,
+		Args:   args,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ClusterServiceClass().Activated(rctx, obj)
+		return ec.resolvers.ClusterServiceClass().Activated(rctx, obj, args["namespace"].(*string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -6901,16 +6957,22 @@ func (ec *executionContext) _ClusterServiceClass_activated(ctx context.Context, 
 func (ec *executionContext) _ClusterServiceClass_instances(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_ClusterServiceClass_instances_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
 	rctx := &graphql.ResolverContext{
 		Object: "ClusterServiceClass",
-		Args:   nil,
+		Args:   args,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ClusterServiceClass().Instances(rctx, obj)
+		return ec.resolvers.ClusterServiceClass().Instances(rctx, obj, args["namespace"].(*string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -20097,8 +20159,8 @@ type ClusterServiceClass {
     tags: [String!]!
     labels: Labels!
     plans: [ClusterServicePlan!]!
-    activated: Boolean!
-    instances: [ServiceInstance!]!
+    activated(namespace: String): Boolean!
+    instances(namespace: String): [ServiceInstance!]!
     apiSpec: JSON
     asyncApiSpec: JSON
     content: JSON
