@@ -13,19 +13,3 @@ spec:
       viewUrl: /
       navigationPath: logs
 {{- end }}
----
-{{- if .Values.global.uiapp.create }}
-apiVersion: ui.kyma-project.io/v1alpha1
-kind: ClusterMicroFrontend
-metadata:
-  name: log-ui-namespace
-spec:
-  version: 0.0.1
-  category: Operation
-  placement: namespace
-  viewBaseUrl: https://log-ui.{{ .Values.global.domainName }}
-  navigationNodes:
-    - label: Logs
-      navigationPath: logs
-      viewUrl: /
-{{- end }}
