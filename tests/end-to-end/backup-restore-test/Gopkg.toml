@@ -29,6 +29,10 @@
   name = "github.com/smartystreets/goconvey"
   version = "1.6.3"
 
+[[constraint]]
+  name = "github.com/google/uuid"
+  version = "1.1.0"
+  
 [prune]
   go-tests = true
   unused-packages = true
