@@ -29,7 +29,7 @@ echo "- E2E Testing Kyma..."
 echo "----------------------------"
 
 
-for testcase in $(ls -d ../../tests/end-to-end/*/deploy/chart/*)
+for testcase in $(ls -d ${ROOT_PATH}/../../tests/end-to-end/*/deploy/chart/*)
 do
     release=$(basename $testcase)
     cleanupHelmE2ERelease $release
