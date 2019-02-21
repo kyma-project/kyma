@@ -8,8 +8,8 @@ global:
     dir: develop/
     version: 2a321562
   asset_upload_service:
-    dir: pr/
-    version: PR-2759
+    dir: develop/
+    version: 2b2c8c04
 
 minio:
   mode: standalone
