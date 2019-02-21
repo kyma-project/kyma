@@ -154,7 +154,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 			ConnectorServiceBaseURL:     fmt.Sprintf(RuntimeURLFormat, opts.connectorServiceHost),
 			CertificateProtectedBaseURL: fmt.Sprintf(RuntimeURLFormat, opts.certificateProtectedHost),
 			Subject:                     subjectValues,
-			ContextExtractor:            clientcontext.ExtractClusterContext,
+			ContextExtractor:            clientcontext.CreateApplicationClientContextService,
 			CertService:                 certificateService,
 		}
 
@@ -190,7 +190,7 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 			Middlewares:      runtimeHandlerMiddlewares,
 			TokenManager:     tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
 			CSRInfoURL:       fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
-			ContextExtractor: clientcontext.ExtractClusterContext,
+			ContextExtractor: clientcontext.CreateApplicationClientContextService,
 		}
 
 		handlerBuilder.WithRuntimes(runtimeHandlerConfig)
