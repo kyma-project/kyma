@@ -1,26 +1,26 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: "microfrontends.ui.kyma-project.io"
+  name: 'microfrontends.ui.kyma-project.io'
 spec:
   group: ui.kyma-project.io
   version: v1alpha1
   scope: Namespaced
   names:
-    plural: "microfrontends"
-    singular: "microfrontend"
+    plural: 'microfrontends'
+    singular: 'microfrontend'
     kind: MicroFrontend
     shortNames:
-      - "mf"
+      - 'mf'
   validation:
     openAPIV3Schema:
       required:
-      - "spec"
+        - 'spec'
       properties:
         spec:
           type: object
           required:
-          - "navigationNodes"
+            - 'navigationNodes'
           properties:
             appName:
               type: string
@@ -28,7 +28,7 @@ spec:
               type: string
             version:
               type: string
-              pattern: "[a-zA-Z0-9]+"
+              pattern: '[a-zA-Z0-9]+'
             category:
               type: string
             viewBaseUrl:
@@ -39,8 +39,8 @@ spec:
               items:
                 type: object
                 required:
-                - "label"
-                - "navigationPath"
+                  - 'label'
+                  - 'navigationPath'
                 properties:
                   label:
                     type: string
@@ -50,3 +50,8 @@ spec:
                     type: string
                   showInNavigation:
                     type: boolean
+                  settings:
+                    type: object
+                    properties:
+                      readOnly:
+                        type: boolean

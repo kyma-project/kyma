@@ -15,9 +15,13 @@ spec:
       navigationPath: apps
       viewUrl: '/home/settings/apps'
       order: 1
+      settings:
+        readOnly: {{ js .Values.global.applicationManagementDisabled }}
     - label: Application Details
       navigationPath: apps/details
       viewUrl: '/home/settings/apps'
     - label: Application Details
       navigationPath: apps/details/:name
       viewUrl: '/home/settings/apps/:name'
+      settings:
+        readOnly: {{ js .Values.global.applicationManagementDisabled }}
