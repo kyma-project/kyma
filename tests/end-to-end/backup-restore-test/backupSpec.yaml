@@ -1,0 +1,16 @@
+---
+includedNamespaces:
+- '*'
+excludedNamespaces:
+- istio-system
+- kyma-system
+- kyma-integration
+- kyma-installer
+- default
+- natts
+- guenther
+includedResources:
+- '*'
+excludedResources:
+includeClusterResources:
+labelSelector:
