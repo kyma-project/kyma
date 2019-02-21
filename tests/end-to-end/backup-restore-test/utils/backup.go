@@ -140,7 +140,7 @@ func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time
 				if restore.Status.Phase == "Completed" {
 					return nil
 				} else if restore.Status.Phase == "Failed" {
-					return fmt.Errorf("%+v", event)
+					return fmt.Errorf("Restore Failed:\n%+v", restore)
 				}
 			}
 		}
