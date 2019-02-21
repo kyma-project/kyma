@@ -1,0 +1,9 @@
+dependencies:
+- name: nginx-ingress
+- name: application-broker
+- name: application-operator
+- name: application-registry
+- name: connection-token-handler
+  condition: connector-service.enabled
+- name: connector-service
+  condition: connector-service.enabled
