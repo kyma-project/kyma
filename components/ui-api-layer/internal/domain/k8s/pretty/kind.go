@@ -11,6 +11,7 @@ const (
 	LimitRanges
 	Pod
 	Pods
+	ReplicaSet
 	ReplicaSets
 	StatefulSets
 	ResourceQuota
@@ -38,6 +39,8 @@ func (k Kind) String() string {
 		return "Pod"
 	case Pods:
 		return "Pods"
+	case ReplicaSet:
+		return "Replica Set"
 	case ReplicaSets:
 		return "Replica Sets"
 	case StatefulSets:

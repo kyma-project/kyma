@@ -1,5 +1,7 @@
 package v1alpha1
 
+import "strings"
+
 func (app *Application) SetInstallationStatus(status InstallationStatus) {
 	app.Status.InstallationStatus = status
 }
@@ -39,4 +41,14 @@ func (app *Application) finalizerIndex(finalizer string) int {
 	}
 
 	return -1
+}
+
+// HasTenant returns true if ApplicationSpec has a non-empty value for Tenant field set
+func (appSpec ApplicationSpec) HasTenant() bool {
+	return strings.TrimSpace(appSpec.Tenant) != ""
+}
+
+// HasGroup returns true if ApplicationSpec has a non-empty value for Group field set
+func (appSpec ApplicationSpec) HasGroup() bool {
+	return strings.TrimSpace(appSpec.Group) != ""
 }
