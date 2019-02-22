@@ -131,14 +131,9 @@ func (k *KnativeLib) DeleteChannel(name string, namespace string) error {
 // CreateSubscription creates a Knative/Eventing subscription for the specified channel
 func (k *KnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string) error {
 	sub := Subscription(name, namespace).ToChannel(channelName).ToUri(uri).EmptyReply().Build()
-	if sub, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil && !k8serrors.IsAlreadyExists(err) {
+	if _, err := k.evClient.Subscriptions(namespace).Create(sub); err != nil {
 		log.Printf("ERROR: CreateSubscription(): creating subscription: %v", err)
 		return err
-	} else if err != nil && k8serrors.IsAlreadyExists(err) {
-		if sub, err = k.evClient.Subscriptions(namespace).Update(sub); err != nil {
-			log.Printf("ERROR: CreateSubscription(): updating subscription: %v", err)
-			return err
-		}
 	}
 	return nil
 }
