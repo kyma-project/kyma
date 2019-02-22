@@ -21,6 +21,39 @@ paths:
       operationId: 'publishEvent'
       tags:
         - 'publish'
+      parameters:
+        - in: header
+          name: comSAPObjectID
+          schema:
+            type: string
+            example:
+              - "0000045431"
+          required: false
+        - in: header
+          name: comSAPObjectType
+          schema:
+            type: string
+            example:
+              - "BusinessPartner"
+          required: false
+        - in: header
+          name: 'comSAPRefObjectIDs'
+          explode: true
+          schema:
+            type: object
+            example:
+              Address: "0000010001"
+              SalesArea: "4711"
+            additionalProperties:
+              type: string
+          required: false
+        - in: header
+          name: SAP-PASSPORT
+          schema:
+            type: string
+            example:
+              - "2A54482A030130890A5341505F4532455F54415F5549354C494220202020202020202020202020202000005341505F4532455F54415F5573657220202020202020202020202020202020205341505F4532455F54415F526571756573742020202020202020202020202020202020202020202000055341505F4532455F54415F5549354C49422020202020202020202020202020203543433246454536383435383433463039353839433532384144314334303435202020000709F144214EEA474A9381EB769948CDB70000000000000000000000000000000000000000000200E22A54482A0100270000020003000200010400085800020002040008300002000302000B000000002A54482A01002301000100010002000103001700ABCDEFABCDEFABCDEFABCDEFABCDEF2A54482A"
+          required: false
       requestBody:
         description: 'The event to be published'
         required: true
