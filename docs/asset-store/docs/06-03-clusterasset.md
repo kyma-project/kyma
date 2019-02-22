@@ -63,6 +63,7 @@ status:
   reason: ValidationFailed
   message: "The file is not valid against the provided json schema"
   lastHeartbeatTime: "2018-01-03T07:38:24Z"
+  observedGeneration: 1
   assetRef:
     assets:
     - README.md
@@ -96,6 +97,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.reason** |    **Not applicable**   | Provides the reason why the Asset CR processing failed or is pending.  |
 | **status.message** |    **Not applicable**   | Describes a human-readable message on the CR processing progress, success, or failure. |
 | **status.lastheartbeattime** |    **Not applicable**   | Provides the last time when the Asset Controller processed the Asset CR. |
+| **status.observedGeneration** |    **Not applicable**   | The generation observed by the ClusterAsset Controller. |
 | **status.assetref** |    **Not applicable**   | Provides details on the location of the assets stored in the bucket.   |
 | **status.assetref.assets** |    **Not applicable**   | Provides the relative path to the given asset in the storage bucket. |
 | **status.assetref.baseurl** |    **Not applicable**   | Specifies the absolute path to the location of the assets in the storage bucket.   |

@@ -28,6 +28,7 @@ status:
   phase: Ready
   reason: BucketPolicyUpdated
   remoteName: ns-default-test-sample-1b19rnbuc6ir8
+  observedGeneration: 1
   url: https://minio.kyma.local/ns-default-test-sample-1b19rnbuc6ir8
 ```
 
@@ -48,6 +49,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.reason** |    **Not applicable**    | Provides information on the Bucket CR processing success or failure. |
 | **status.url** |    **Not applicable**   | Provides the address of the bucket storage under which the asset is available. |
 | **status.remoteName** |    **Not applicable**   | Provides the name of the bucket in storage. |
+| **status.observedGeneration** |    **Not applicable**   | The generation observed by the Bucket Controller. |
 
 > **NOTE:** The Bucket Controller automatically adds all parameters marked as **Not applicable** to the Bucket CR.
 
