@@ -14,6 +14,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+        traffic.sidecar.istio.io/excludeInboundPorts: "8443"
       labels:
         app: {{ template "name" . }}
         tlsSecret: ingress-tls-cert
@@ -24,7 +25,8 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       {{ end }}
       containers:
-      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
+#      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
+      - image: kfurgol/apiserver-proxy:latest
         name: auth-proxy
         {{ if not .Values.global.isLocalEnv }}
         resources:
@@ -36,6 +38,9 @@ spec:
         imagePullPolicy: IfNotPresent
         args:
         - "--insecure-listen-address=0.0.0.0:{{ .Values.containerPort}}"
+        - "--secure-listen-address=0.0.0.0:8443"
+        - "--tls-cert-file=/etc/ingress-tls-cert/tls.crt"
+        - "--tls-private-key-file=/etc/ingress-tls-cert/tls.key"
         - "--upstream=https://kubernetes.default"
         - "--logtostderr=true"
         - "--v=10"
