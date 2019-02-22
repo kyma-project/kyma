@@ -25,20 +25,20 @@ func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorCl
 }
 
 func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *http.Request) {
-	connectorClientContext, err := ih.connectorClientExtractor(r.Context())
+	clientContextService, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
-	urls := ih.buildURLs(connectorClientContext)
+	urls := ih.buildURLs(clientContextService)
 
 	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls})
 }
 
-func (ih *managementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
+func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.ClientContextService) mgmtURLs {
 	return mgmtURLs{
-		RuntimeURLs:  connectorClientContext.GetRuntimeUrls(),
+		RuntimeURLs:  clientContextService.GetRuntimeUrls(),
 		RenewCertURL: fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
 	}
 }
