@@ -1,10 +1,9 @@
-FROM debian:stretch-slim
-MAINTAINER jakub.blaszczyk@sap.com
+FROM alpine:latest
 LABEL source=git@github.com:kyma-project/kyma.git
 WORKDIR /root
 
-RUN apt-get update &&\
-	apt-get install -y curl &&\
+RUN apk update &&\
+	apk add curl bash grep &&\
 	curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl &&\
 	chmod +x kubectl &&\
 	mv kubectl /usr/local/bin/kubectl
