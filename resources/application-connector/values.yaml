@@ -27,6 +27,9 @@ global:
   connection_token_handler:
     dir: develop/
     version: fa0de1b9
+  connectivity_certs_controller:
+    dir: pr/
+    version: PR-2799
   event_service:
     dir: develop/
     version: 6e0a7fe2
