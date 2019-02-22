@@ -5,8 +5,8 @@ Ark provides two ways of backup. Periodically scheduled backups and manual backu
 
 Kyma is providing two validated sample `BackupSpec` files to backup system and user namespaces. The specs can be integrated into Scheduled backups as well as ad hoc backups. To have a full backup of a cluster, system and user namespaces needs to be backuped.
 
-<!-- TODO: Un comment asson as the resources are available. - [System Namespace Backup](assets/system-backup.yaml)
-- [User Namespace Backup](all-backup.yaml) -->
+<!-- TODO: Un comment asson as the resources are available. - [System Namespace Backup]assets/system-backup.yaml
+- [User Namespace Backup]all-backup.yaml -->
 
 Changing thees files will adjust the scope of the backup. Details about the file format can be found as part of the [Ark Documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md)
 
