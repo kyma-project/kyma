@@ -1,0 +1,6 @@
+name: kyma-integration-test
+version: 0.0.1
+description: Testing how to extract kyma-integration to another place
+keywords:
+  - kyma
+appVersion: v2.9.0
