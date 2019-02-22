@@ -73,7 +73,7 @@ func shouldRetry(response *http.Response, err error) bool {
 func createTLSClientWithCert(t *testing.T, client testkit.ConnectorClient, skipVerify bool) *http.Client {
 	key := testkit.CreateKey(t)
 
-	crtResponse, _ := createCertificateChain(t, client, key, nil)
+	crtResponse, _ := createCertificateChain(t, client, key, createHostsHeaders("", ""))
 	require.NotEmpty(t, crtResponse.CRTChain)
 	clientCertBytes := testkit.EncodedCertToPemBytes(t, crtResponse.ClientCRT)
 
