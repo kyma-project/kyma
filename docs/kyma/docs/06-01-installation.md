@@ -62,6 +62,8 @@ This table lists all the possible parameters of a given resource together with t
 
 This table contains description of information regarding installation progress set on Installation resource:
 
+| Field   |      Mandatory      |  Description |
+|:----------:|:-------------:|:------|
 | **status.state** | **YES** | State of the installation. For explanation of states see [the table below](#installation-states) |
 | **status.description** | **YES** | Description of the step installer is  performing now. |
 | **status.errorLog** | **YES** | List of errors that happened during installation so far. |
