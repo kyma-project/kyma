@@ -125,7 +125,7 @@ func (cp *csrProvider) createClusterKeySecret() (*rsa.PrivateKey, error) {
 		clusterKeySecretKey: pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)}),
 	}
 
-	err = cp.secretRepository.Override(cp.clusterCertSecretName, secretData)
+	err = cp.secretRepository.UpsertWithReplace(cp.clusterCertSecretName, secretData)
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to override cluster key secret")
 	}

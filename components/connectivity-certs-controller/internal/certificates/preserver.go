@@ -42,7 +42,7 @@ func (cp *certificatePreserver) saveClusterCertificate(certificateChain []byte) 
 		clusterCertificateSecretKey: certificateChain,
 	}
 
-	err := cp.secretsRepository.UpsertData(cp.clusterCertSecretName, clusterSecretData)
+	err := cp.secretsRepository.UpsertWithMerge(cp.clusterCertSecretName, clusterSecretData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to preserve client certificate in secret")
 	}
@@ -55,7 +55,7 @@ func (cp *certificatePreserver) saveCACertificate(caCertificate []byte) error {
 		caCertificateSecretKey: caCertificate,
 	}
 
-	err := cp.secretsRepository.UpsertData(cp.caCRTSecretName, caSecretData)
+	err := cp.secretsRepository.UpsertWithMerge(cp.caCRTSecretName, caSecretData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to preserve CA certificate in secret")
 	}

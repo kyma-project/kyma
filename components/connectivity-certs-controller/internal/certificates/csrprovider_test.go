@@ -81,7 +81,7 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		// given
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterSecretName).Return(nil, k8serrors.NewNotFound(schema.GroupResource{}, "error"))
-		secretRepository.On("Override", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(nil).
+		secretRepository.On("UpsertWithReplace", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(nil).
 			Run(func(args mock.Arguments) {
 				secretData, ok := args[1].(map[string][]byte)
 				require.True(t, ok)
@@ -108,7 +108,38 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		// given
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterSecretName).Return(map[string][]byte{}, nil)
-		secretRepository.On("Override", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(nil).
+		secretRepository.On("UpsertWithReplace", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(nil).
+			Run(func(args mock.Arguments) {
+				secretData, ok := args[1].(map[string][]byte)
+				require.True(t, ok)
+				assert.NotEmpty(t, secretData[clusterKeySecretKey])
+			})
+
+		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
+
+		// when
+		csr, err := csrProvider.CreateCSR(plainSubject)
+
+		// then
+		require.NoError(t, err)
+		require.NotEmpty(t, csr)
+
+		receivedCSR := decodeCSR(t, csr)
+
+		require.NotNil(t, receivedCSR)
+		assertSubject(t, receivedCSR)
+		secretRepository.AssertExpectations(t)
+	})
+
+	t.Run("should create CSR when invalid key in secret", func(t *testing.T) {
+		// given
+		secretWithInvalidKey := map[string][]byte{
+			clusterKeySecretKey: []byte("invalid key"),
+		}
+
+		secretRepository := &mocks.Repository{}
+		secretRepository.On("Get", clusterSecretName).Return(secretWithInvalidKey, nil)
+		secretRepository.On("UpsertWithReplace", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(nil).
 			Run(func(args mock.Arguments) {
 				secretData, ok := args[1].(map[string][]byte)
 				require.True(t, ok)
@@ -135,7 +166,7 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		// given
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterSecretName).Return(map[string][]byte{}, nil)
-		secretRepository.On("Override", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(errors.New("error"))
+		secretRepository.On("UpsertWithReplace", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(errors.New("error"))
 
 		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
 

@@ -78,7 +78,7 @@ func TestRepository_Override(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.Override(secretName, secretData)
+		err := repository.UpsertWithReplace(secretName, secretData)
 
 		// then
 		assert.NoError(t, err)
@@ -95,7 +95,7 @@ func TestRepository_Override(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.Override(secretName, secretData)
+		err := repository.UpsertWithReplace(secretName, secretData)
 
 		// then
 		require.Error(t, err)
@@ -114,7 +114,7 @@ func TestRepository_Override(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.Override(secretName, secretData)
+		err := repository.UpsertWithReplace(secretName, secretData)
 
 		// then
 		require.NoError(t, err)
@@ -132,7 +132,7 @@ func TestRepository_Override(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.Override(secretName, secretData)
+		err := repository.UpsertWithReplace(secretName, secretData)
 
 		// then
 		require.Error(t, err)
@@ -151,7 +151,7 @@ func TestRepository_Override(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.Override(secretName, secretData)
+		err := repository.UpsertWithReplace(secretName, secretData)
 
 		// then
 		require.Error(t, err)
@@ -183,7 +183,7 @@ func TestRepository_UpsertData(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.UpsertData(secretName, additionalSecretData)
+		err := repository.UpsertWithMerge(secretName, additionalSecretData)
 
 		// then
 		assert.NoError(t, err)
@@ -202,7 +202,7 @@ func TestRepository_UpsertData(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.UpsertData(secretName, secretData)
+		err := repository.UpsertWithMerge(secretName, secretData)
 
 		// then
 		assert.NoError(t, err)
@@ -217,7 +217,7 @@ func TestRepository_UpsertData(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.UpsertData(secretName, secretData)
+		err := repository.UpsertWithMerge(secretName, secretData)
 
 		// then
 		assert.Error(t, err)
@@ -235,7 +235,7 @@ func TestRepository_UpsertData(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.UpsertData(secretName, secretData)
+		err := repository.UpsertWithMerge(secretName, secretData)
 
 		// then
 		assert.Error(t, err)
@@ -254,7 +254,7 @@ func TestRepository_UpsertData(t *testing.T) {
 		repository := NewRepository(secretsManagerMock)
 
 		// when
-		err := repository.UpsertData(secretName, secretData)
+		err := repository.UpsertWithMerge(secretName, secretData)
 
 		// then
 		assert.Error(t, err)

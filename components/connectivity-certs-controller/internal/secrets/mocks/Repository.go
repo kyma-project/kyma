@@ -31,8 +31,8 @@ func (_m *Repository) Get(name string) (map[string][]byte, error) {
 	return r0, r1
 }
 
-// Override provides a mock function with given fields: name, data
-func (_m *Repository) Override(name string, data map[string][]byte) error {
+// UpsertWithMerge provides a mock function with given fields: name, data
+func (_m *Repository) UpsertWithMerge(name string, data map[string][]byte) error {
 	ret := _m.Called(name, data)
 
 	var r0 error
@@ -45,8 +45,8 @@ func (_m *Repository) Override(name string, data map[string][]byte) error {
 	return r0
 }
 
-// UpsertData provides a mock function with given fields: name, data
-func (_m *Repository) UpsertData(name string, data map[string][]byte) error {
+// UpsertWithReplace provides a mock function with given fields: name, data
+func (_m *Repository) UpsertWithReplace(name string, data map[string][]byte) error {
 	ret := _m.Called(name, data)
 
 	var r0 error

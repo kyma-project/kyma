@@ -20,8 +20,8 @@ type Manager interface {
 // Repository contains operations for managing client credentials
 type Repository interface {
 	Get(name string) (map[string][]byte, error)
-	Override(name string, data map[string][]byte) error
-	UpsertData(name string, data map[string][]byte) error
+	UpsertWithReplace(name string, data map[string][]byte) error
+	UpsertWithMerge(name string, data map[string][]byte) error
 }
 
 type repository struct {
@@ -36,8 +36,8 @@ func NewRepository(secretsManager Manager) Repository {
 	}
 }
 
-// Override creates a new Kubernetes secret, if secret with specified name already exists overrides it
-func (r *repository) Override(name string, data map[string][]byte) error {
+// UpsertWithReplace creates a new Kubernetes secret, if secret with specified name already exists overrides it
+func (r *repository) UpsertWithReplace(name string, data map[string][]byte) error {
 	secret := makeSecret(name, data)
 
 	_, err := r.secretsManager.Create(secret)
@@ -76,9 +76,9 @@ func (r *repository) Get(name string) (map[string][]byte, error) {
 	return secret.Data, nil
 }
 
-// UpsertData updates secrets data with the provided values. If provided value already exists it will be updated.
+// UpsertWithMerge updates secrets data with the provided values. If provided value already exists it will be updated.
 // If secret does not exist it will be created
-func (r *repository) UpsertData(name string, data map[string][]byte) error {
+func (r *repository) UpsertWithMerge(name string, data map[string][]byte) error {
 	existingData, err := r.Get(name)
 	if err != nil {
 		if !k8serrors.IsNotFound(err) {

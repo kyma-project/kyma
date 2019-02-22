@@ -31,8 +31,8 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		caSecretData := map[string][]byte{caCertificateSecretKey: caCRT}
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("UpsertData", clusterCertSecretName, clusterSecretData).Return(nil)
-		secretsRepository.On("UpsertData", caSecretName, caSecretData).Return(nil)
+		secretsRepository.On("UpsertWithMerge", clusterCertSecretName, clusterSecretData).Return(nil)
+		secretsRepository.On("UpsertWithMerge", caSecretName, caSecretData).Return(nil)
 
 		certificatePreserver := NewCertificatePreserver(clusterCertSecretName, caSecretName, secretsRepository)
 
@@ -49,7 +49,7 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		clusterSecretData := map[string][]byte{clusterCertificateSecretKey: crtChain}
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("UpsertData", clusterCertSecretName, clusterSecretData).Return(errors.New("error"))
+		secretsRepository.On("UpsertWithMerge", clusterCertSecretName, clusterSecretData).Return(errors.New("error"))
 
 		certificatePreserver := NewCertificatePreserver(clusterCertSecretName, caSecretName, secretsRepository)
 
@@ -67,8 +67,8 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		caSecretData := map[string][]byte{caCertificateSecretKey: caCRT}
 
 		secretsRepository := &mocks.Repository{}
-		secretsRepository.On("UpsertData", clusterCertSecretName, clusterSecretData).Return(nil)
-		secretsRepository.On("UpsertData", caSecretName, caSecretData).Return(errors.New("error"))
+		secretsRepository.On("UpsertWithMerge", clusterCertSecretName, clusterSecretData).Return(nil)
+		secretsRepository.On("UpsertWithMerge", caSecretName, caSecretData).Return(errors.New("error"))
 
 		certificatePreserver := NewCertificatePreserver(clusterCertSecretName, caSecretName, secretsRepository)
 

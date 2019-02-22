@@ -50,16 +50,17 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 			respond(t, w, http.StatusOK, infoResponse)
 		}))
 
-		crtResponse := CertificatesResponse{
-			CRTChain:  crtChainBase64,
-			ClientCRT: clientCRTBase64,
-			CaCRT:     caCRTBase64,
-		}
 		router.Handle(certificatePath, handler(func(w http.ResponseWriter, r *http.Request) {
 			var certRequest CertificateRequest
 			err := readResponseBody(r.Body, &certRequest)
 			require.NoError(t, err)
 			assert.Equal(t, encodedCSR, certRequest.CSR)
+
+			crtResponse := CertificatesResponse{
+				CRTChain:  crtChainBase64,
+				ClientCRT: clientCRTBase64,
+				CaCRT:     caCRTBase64,
+			}
 
 			respond(t, w, http.StatusCreated, crtResponse)
 		}))
@@ -118,7 +119,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("should return error when failed request certificate response", func(t *testing.T) {
+	t.Run("should return error when failed get certificate response", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
 		csrProvider.On("CreateCSR", plainSubject).Return(encodedCSR, nil)
@@ -143,7 +144,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("should return error when invalid CSR info request", func(t *testing.T) {
+	t.Run("should return error when CSR info url is incorrect", func(t *testing.T) {
 		// given
 		connectorURL := "https://some-invalid-url.kyma"
 
@@ -156,7 +157,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		require.Error(t, err)
 	})
 
-	t.Run("should return error when Certificate URL not responding", func(t *testing.T) {
+	t.Run("should return error when Certificate URL is incorrect", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
 		csrProvider.On("CreateCSR", plainSubject).Return(encodedCSR, nil)
