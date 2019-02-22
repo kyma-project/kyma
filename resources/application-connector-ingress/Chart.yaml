@@ -1,0 +1,7 @@
+name: application-connector-ingress
+version: 0.0.1
+description: nginx-ingress extracted from application-connector chart
+keywords:
+  - kyma
+  - application-connector
+appVersion: v2.9.0
