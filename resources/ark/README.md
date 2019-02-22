@@ -10,13 +10,13 @@ The Ark installation contains only the configuration of storage providers. The c
 
 ## Add Components to the Backup
 
-All kubernetes resources in the user namespaces are backuped by default. If there is something not covered by the backup or data which is stored in the system namespaces has to be added to the sample file in the backup documentation (`/docs/backup/docs/assets`). This sample files are used as a configuration for testing.
+All kubernetes resources in the user namespaces are backuped by default. If there is something not covered by the backup or data which is stored in the system namespaces it has to be added to the sample file in the backup documentation (`/docs/backup/docs/assets`). This sample files are used as a configuration for testing. Details of the configuration attributes are part of the [ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
 
 If arks functionality is not sufficient it can be extended using [plugins](https://heptio.github.io/velero/v0.10.0/plugins) and [hooks](https://heptio.github.io/velero/v0.10.0/hooks). Plugins are extending ark withouth being part of the binary. Ark Plugins in kyma are stored in the tools section (`tools/ark-plugins`). Hooks are commands executed inside containers and pods during backup. They are configured as part of the backup configuration.
 
 ## E2E Testing
 
-The E2E Test for Backup is running daily on prow and validating if all components can be restored like expected.
+The E2E Test for Backup (`tests/end-to-end/backup-restore-test`) is running daily on prow and validating if all components can be restored like expected.
 
 To add components to the backup pipeline it is required to implement a simple go interface.
 

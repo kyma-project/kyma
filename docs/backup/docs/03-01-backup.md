@@ -1,18 +1,18 @@
 ---
 title: How to Backup a Kyma Cluster
 ---
-Ark provides two ways of backup. A periodically scheduled backups and manual backups. Both backup types including a `BackupSpec` defining the resources to backup. 
+Ark provides two ways of backup. Periodically scheduled backups and manual backups. Both backup types including a `BackupSpec` defining which resources to backup.
 
 Kyma is providing two validated sample `BackupSpec` files to backup system and user namespaces. The specs can be integrated into Scheduled backups as well as ad hoc backups. To have a full backup of a cluster, system and user namespaces needs to be backuped.
 
-- [System Namespace Backup](assets/system-backup.yaml)
-- [User Namespace Backup](all-backup.yaml)
+<!-- TODO: Un comment asson as the resources are available. - [System Namespace Backup](assets/system-backup.yaml)
+- [User Namespace Backup](all-backup.yaml) -->
 
 Changing thees files will adjust the scope of the backup. Details about the file format can be found as part of the [Ark Documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md)
 
 ## Create Manual Backups
 
-In order to make use of the sample backup configurations it is not possible to use the ark commandline tool to create a backup. To instruct the Ark Server to create a cluster backup two `Backup` Resources has to be created in the `haptio-ark` namespace. Please asure the indentation is correct.
+In order to make use of the sample backup configurations it is not possible to use the ark commandline tool to create a backup. To instruct the Ark Server to create a backup two `Backup` Resources has to be created in the `heptio-ark` namespace. Please ensure the indentation is correct.
 
 Sample Backup Configuration:
 
@@ -41,7 +41,7 @@ The Backup will be created if the file is uploaded to kubernetes:
 
 ## Schedule Time Triggeres Backups
 
-In order to make use of the sample backup configurations it is not possible to use the ark commandline tool to schedule a backup. To instruct the Ark Server to schedule a cluster backup two `Schedule` Resources has to be created in the `haptio-ark` namespace. Please asure the indentation is correct.
+In order to make use of the sample backup configurations it is not possible to use the ark commandline tool to schedule a backup. To instruct the Ark Server to schedule a cluster backup two `Schedule` Resources has to be created in the `heptio-ark` namespace. Please ensure the indentation is correct.
 
 ```yaml
 ---
