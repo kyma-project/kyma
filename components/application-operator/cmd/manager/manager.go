@@ -43,7 +43,7 @@ func main() {
 	log.Printf("Registering Components:")
 
 	log.Printf("Setting up scheme.")
-	
+
 	scheme.AddToScheme(mgr.GetScheme())
 
 	log.Printf("Preparing Release Manager.")
@@ -65,20 +65,15 @@ func main() {
 }
 
 func newReleaseManager(options *options) (appRelease.ReleaseManager, error) {
-	overridesData := appRelease.OverridesData{
+	overridesDefaults := appRelease.OverridesData{
 		DomainName:             options.domainName,
 		ApplicationProxyImage:  options.applicationProxyImage,
 		EventServiceImage:      options.eventServiceImage,
 		EventServiceTestsImage: options.eventServiceTestsImage,
 	}
 
-	overrides, err := kymahelm.ParseOverrides(overridesData, appRelease.OverridesTemplate)
-	if err != nil {
-		return nil, err
-	}
-
 	helmClient := kymahelm.NewClient(options.tillerUrl, options.installationTimeout)
-	releaseManager := appRelease.NewReleaseManager(helmClient, overrides, options.namespace)
+	releaseManager := appRelease.NewReleaseManager(helmClient, overridesDefaults, options.namespace)
 
 	return releaseManager, nil
 }

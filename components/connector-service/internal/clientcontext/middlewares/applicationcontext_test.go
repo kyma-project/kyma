@@ -17,7 +17,9 @@ const (
 
 func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
-	emptyClusterContextMiddleware := &clusterContextMiddleware{}
+	emptyClusterContextMiddleware := &clusterContextMiddleware{
+		required: clientcontext.CtxRequired,
+	}
 
 	t.Run("should set context based on header", func(t *testing.T) {
 		// given
@@ -51,7 +53,7 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should return 400 if no application header provided", func(t *testing.T) {
+	t.Run("should return 400 if no application header provided and ctx is required", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
@@ -82,16 +84,13 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 			require.True(t, ok)
 
 			assert.Equal(t, testApplication, applicationCtx.Application)
-			assert.Equal(t, defaultTenant, applicationCtx.ClusterContext.Tenant)
-			assert.Equal(t, defaultGroup, applicationCtx.ClusterContext.Group)
+			assert.Equal(t, clientcontext.TenantEmpty, applicationCtx.ClusterContext.Tenant)
+			assert.Equal(t, clientcontext.GroupEmpty, applicationCtx.ClusterContext.Group)
 
 			w.WriteHeader(http.StatusOK)
 		})
 
-		clusterContextMiddleware := &clusterContextMiddleware{
-			defaultTenant: defaultTenant,
-			defaultGroup:  defaultGroup,
-		}
+		clusterContextMiddleware := &clusterContextMiddleware{}
 
 		req, err := http.NewRequest("GET", "/", nil)
 		require.NoError(t, err)
