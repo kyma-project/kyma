@@ -132,10 +132,17 @@ func parseErrorResponse(t *testing.T, response *http.Response) *Error {
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
-	dump, err := httputil.DumpResponse(resp, true)
+	respDump, err := httputil.DumpResponse(resp, true)
 	if err != nil {
 		t.Logf("failed to dump response, %s", err)
-	} else {
-		t.Logf("\n--------------------------------\n%s\n%s\n--------------------------------", resp.Request.URL.String(), dump)
+	}
+
+	reqDump, err := httputil.DumpRequest(resp.Request, true)
+	if err != nil {
+		t.Logf("failed to dump request, %s", err)
+	}
+
+	if err == nil {
+		t.Logf("\n--------------------------------\n%s\n--------------------------------\n%s\n--------------------------------", reqDump, respDump)
 	}
 }
