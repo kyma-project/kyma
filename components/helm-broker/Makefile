@@ -40,3 +40,6 @@ clean:
 	rm -f targz
 	rm -f indexbuilder
 
+.PHONY: version-path
+version-path:
+	@echo "resources/helm-broker"

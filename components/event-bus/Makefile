@@ -87,3 +87,7 @@ clean:
 	rm -rf ./cmd/event-bus-subscription-controller-knative/$(BINARY_SCK) ./cmd/event-bus-subscription-controller-knative/docker
 	rm -rf ./cmd/event-bus-sv/$(BINARY_SV) ./cmd/event-bus-sv/docker
 	rm -rf ./cmd/nats-streaming-init/$(BINARY_NI) ./cmd/nats-streaming-init/docker
+
+.PHONY: version-path
+version-path:
+	@echo "resources/event-bus"

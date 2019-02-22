@@ -16,4 +16,8 @@ build-image:
 	docker build -t $(IMG_NAME) .
 push-image:
 	docker tag $(IMG_NAME) $(IMG):$(TAG)
-	docker push $(IMG):$(TAG) 
+	docker push $(IMG):$(TAG)
+
+.PHONY: version-path
+version-path:
+	@echo "resources/core"

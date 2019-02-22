@@ -27,3 +27,7 @@ ci-release: build build-image push-image
 .PHONY: clean
 clean:
 	rm -rf bin
+
+.PHONY: version-path
+version-path:
+	@echo "resources/core"
