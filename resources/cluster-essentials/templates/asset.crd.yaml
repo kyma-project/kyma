@@ -7,6 +7,13 @@ metadata:
   name: assets.assetstore.kyma-project.io
 spec:
   group: assetstore.kyma-project.io
+  versions:
+    - name: v1alpha2
+      served: true
+      storage: true
+    - name: v1alpha1
+      served: true
+      storage: false
   names:
     kind: Asset
     plural: assets
