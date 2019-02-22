@@ -9,7 +9,7 @@ metadata:
 spec:
   version: "__VERSION__"
   url: "__URL__"
-  components: 
+  components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "istio"
@@ -36,6 +36,8 @@ spec:
       namespace: "kyma-system"
     - name: "event-bus"
       namespace: "kyma-system"
+    - name: "kyma-integration"
+      namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-system"
     - name: "ark"
