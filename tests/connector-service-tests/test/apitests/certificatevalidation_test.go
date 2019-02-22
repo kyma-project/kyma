@@ -20,7 +20,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
-	testApp, err := k8sResourcesClient.CreateDummyApplication("app-connector-test-1", "", false)
+	testApp, err := k8sResourcesClient.CreateDummyApplication("app-connector-test-1", "", false, config.Central)
 	require.NoError(t, err)
 	defer func() {
 		k8sResourcesClient.DeleteApplication(testApp.Name, &v1.DeleteOptions{})
