@@ -35,7 +35,7 @@ The Connector Service has the following parameters:
 - **appsInfoURL** - URL at which the management information for applications is available. If not provided, it bases on `connectorServiceHost`.
 - **runtimesInfoURL** - URL at which the management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
 - **certificateValidityTime** - Time until which the certificates that the service issues are valid. The default value is 90 days.
-- **central** - Determines whether connector works as the central.
+- **central** - Determines whether the Connector Service works in the central mode.
 
 Connector Service also uses following environmental variables for CSR - related information config:
 - **COUNTRY** (two-letter-long country code)
