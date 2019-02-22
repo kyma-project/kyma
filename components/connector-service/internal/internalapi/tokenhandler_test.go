@@ -40,7 +40,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		Application:    appName,
 	}
 
-	connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+	connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 		assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
 		return applicationContext, nil
 	}
@@ -55,10 +55,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 			Token: token,
 		}
 
-		tokenManager := &mocks.Manager{}
-		tokenManager.On("Save", applicationContext).Return(token, nil)
+		tokenCreator := &mocks.Creator{}
+		tokenCreator.On("Save", applicationContext).Return(token, nil)
 
-		tokenHandler := NewTokenHandler(tokenManager, csrURL, connectorClientExtractor)
+		tokenHandler := NewTokenHandler(tokenCreator, csrURL, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
@@ -78,12 +78,12 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 		assert.Equal(t, http.StatusCreated, rr.Code)
 		assert.EqualValues(t, expectedTokenResponse, tokenResponse)
-		tokenManager.AssertExpectations(t)
+		tokenCreator.AssertExpectations(t)
 	})
 
 	t.Run("should create token for cluster context", func(t *testing.T) {
 		// given
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
 			return clusterContext, nil
 		}
@@ -94,10 +94,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 			Token: token,
 		}
 
-		tokenManager := &mocks.Manager{}
-		tokenManager.On("Save", clusterContext).Return(token, nil)
+		tokenCreator := &mocks.Creator{}
+		tokenCreator.On("Save", clusterContext).Return(token, nil)
 
-		tokenHandler := NewTokenHandler(tokenManager, csrURL, connectorClientExtractor)
+		tokenHandler := NewTokenHandler(tokenCreator, csrURL, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
@@ -117,12 +117,12 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 		assert.Equal(t, http.StatusCreated, rr.Code)
 		assert.EqualValues(t, expectedTokenResponse, tokenResponse)
-		tokenManager.AssertExpectations(t)
+		tokenCreator.AssertExpectations(t)
 	})
 
 	t.Run("should return 500 when failed to parse context", func(t *testing.T) {
 		// given
-		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
@@ -150,10 +150,10 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should return 500 when failed to save", func(t *testing.T) {
 		// given
-		tokenManager := &mocks.Manager{}
-		tokenManager.On("Save", applicationContext).Return("", apperrors.Internal("error"))
+		tokenCreator := &mocks.Creator{}
+		tokenCreator.On("Save", applicationContext).Return("", apperrors.Internal("error"))
 
-		tokenHandler := NewTokenHandler(tokenManager, "", connectorClientExtractor)
+		tokenHandler := NewTokenHandler(tokenCreator, "", connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)

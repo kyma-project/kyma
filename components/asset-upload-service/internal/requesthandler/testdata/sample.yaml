@@ -1,0 +1,4 @@
+test: value
+properties:
+  foo: "Hello"
+  bar: "There"

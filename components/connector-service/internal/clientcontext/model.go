@@ -3,6 +3,9 @@ package clientcontext
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/kyma-project/kyma/components/connector-service/internal/logging"
+	"github.com/sirupsen/logrus"
 )
 
 const (
@@ -16,15 +19,23 @@ const (
 	GroupHeader       = "Group"
 )
 
-type ConnectorClientContext interface {
-	GetApplication() string
+type ClientContextService interface {
 	ToJSON() ([]byte, error)
 	GetCommonName() string
 	GetRuntimeUrls() *RuntimeURLs
+	GetLogger() *logrus.Entry
 }
 
 type ContextExtender interface {
 	ExtendContext(ctx context.Context) context.Context
+}
+
+func NewClusterContextExtender() ContextExtender {
+	return &ClusterContext{}
+}
+
+func NewApplicationContextExtender() ContextExtender {
+	return &ApplicationContext{}
 }
 
 type ConnectorClientReader interface {
@@ -72,6 +83,10 @@ func (appCtx ApplicationContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
 }
 
+func (appCtx ApplicationContext) GetLogger() *logrus.Entry {
+	return logging.GetApplicationLogger(appCtx.Application, appCtx.ClusterContext.Tenant, appCtx.ClusterContext.Group)
+}
+
 func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
 	return &extAppCtx.RuntimeURLs
 }
@@ -96,15 +111,15 @@ func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context 
 	return context.WithValue(ctx, ClusterContextKey, clsCtx)
 }
 
-// GetApplication returns empty string
-func (clsCtx ClusterContext) GetApplication() string {
-	return ""
-}
-
 // GetCommonName returns expected Common Name value for the Cluster
 func (clsCtx ClusterContext) GetCommonName() string {
 	// TODO - adjust CN format after decision is made
-	return clsCtx.Group + clsCtx.Tenant
+	return fmt.Sprintf("%s;%s", clsCtx.Tenant, clsCtx.Group)
+}
+
+func (clsCtx ClusterContext) GetLogger() *logrus.Entry {
+	return logging.GetClusterLogger(clsCtx.Tenant, clsCtx.Group)
+
 }
 
 func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {

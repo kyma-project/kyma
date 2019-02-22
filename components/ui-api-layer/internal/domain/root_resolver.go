@@ -524,12 +524,12 @@ type clusterServiceClassResolver struct {
 	sc *servicecatalog.PluggableContainer
 }
 
-func (r *clusterServiceClassResolver) Instances(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ServiceInstance, error) {
-	return r.sc.Resolver.ClusterServiceClassInstancesField(ctx, obj)
+func (r *clusterServiceClassResolver) Instances(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error) {
+	return r.sc.Resolver.ClusterServiceClassInstancesField(ctx, obj, namespace)
 }
 
-func (r *clusterServiceClassResolver) Activated(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error) {
-	return r.sc.Resolver.ClusterServiceClassActivatedField(ctx, obj)
+func (r *clusterServiceClassResolver) Activated(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) (bool, error) {
+	return r.sc.Resolver.ClusterServiceClassActivatedField(ctx, obj, namespace)
 }
 
 func (r *clusterServiceClassResolver) Plans(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error) {
