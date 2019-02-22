@@ -40,8 +40,11 @@ function runTests() {
 	echo "--> developer@kyma.cx should NOT be able to list ClusterRole in ${NAMESPACE}"
 	testPermissions "developer@kyma.cx" "list" "clusterrole" "${NAMESPACE}" "no"
 
-	echo "--> developer@kyma.cx should NOT be able to list Deployments in kyma-system"
-	testPermissions "developer@kyma.cx" "list" "clusterrole" "kyma-system" "no"
+	echo "--> developer@kyma.cx should NOT be able to list Deployments in production"
+	testPermissions "developer@kyma.cx" "list" "clusterrole" "production" "no"
+
+	echo "--> developer@kyma.cx should NOT be able to create Services in production"
+	testPermissions "developer@kyma.cx" "create" "service" "production" "no"
 
 	echo "--> admin@kyma.cx should be able to get ClusterRole"
 	testPermissions "admin@kyma.cx" "get" "clusterrole" "${NAMESPACE}" "yes"
