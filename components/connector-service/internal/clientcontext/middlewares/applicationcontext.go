@@ -28,7 +28,7 @@ func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {
 		}
 
 		if appContext.IsEmpty() {
-			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified."))
+			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Required headers not specified."))
 			return
 		}
 

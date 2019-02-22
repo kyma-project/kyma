@@ -27,6 +27,14 @@ Use the following environment variables to configure the application:
 | APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE | Yes |  | The namespace with gateway services. |
 | APP_APPLICATION_CONNECTOR_URL | Yes |  | The address of the connector service. |
 | APP_APPLICATION_CONNECTOR_CALL_HTTP_TIMEOUT | No | `500ms` | The timeout of the HTTP call. |
+| APP_OIDC_ISSUER_URL | Yes | | The URL of the OpenID issuer. Used to verify the OIDC JWT. |
+| APP_OIDC_CLIENT_ID | Yes | | The client ID for which the JWT must be issued for. |
+| APP_OIDC_CA_FILE | No | host's root CA set | One of the Certificate Authorities defined in this file is used to verify the OpenID server's certificate. |
+| APP_OIDC_USERNAME_CLAIM | No | `email` | The OpenID claim to use as the user name. |
+| APP_OIDC_USERNAME_PREFIX | No | | If provided, all usernames will be prefixed with this value. |
+| APP_OIDC_GROUPS_CLAIM | No | `groups` | The name of a custom OpenID Connect claim for specifying user groups. |
+| APP_OIDC_GROUPS_PREFIX | NO | | If provided, all groups will be prefixed with this value. |
+| APP_OIDC_SUPPORTED_SIGNING_ALGS | NO | `RS256` | Comma-separated list of the allowed JOSE asymmetric signing algorithms. Tokens with the 'alg' header value not in this list will be rejected. Values are defined by [RFC 7518](https://tools.ietf.org/html/rfc7518#section-3.1). |
 
 ## Configure logger verbosity level
 This application uses `glog` to log messages. Pass command line arguments described in the [glog.go](https://github.com/golang/glog/blob/master/glog.go) document to customize the log, such as log level and output.

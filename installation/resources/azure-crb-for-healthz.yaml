@@ -2,6 +2,8 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: healthz
+  labels:
+    kyma-project.io/installation: ""
 rules:
 - nonResourceURLs: ["/healthz", "/healthz/*"]
   verbs: ["get", "post"]
@@ -12,6 +14,8 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
   name: healthz
+  labels:
+    kyma-project.io/installation: ""
 subjects:
 - kind: Group
   name: system:unauthenticated

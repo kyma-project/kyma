@@ -132,7 +132,7 @@ func TestServiceInstanceService_ListForStatus(t *testing.T) {
 }
 
 func TestServiceInstanceService_ListForClusterServiceClass(t *testing.T) {
-	t.Run("ServiceInstancesQuery exist", func(t *testing.T) {
+	t.Run("Service Instance exist", func(t *testing.T) {
 		className := "exampleClassName"
 		externalClassName := "exampleExternalClassName"
 
@@ -150,12 +150,12 @@ func TestServiceInstanceService_ListForClusterServiceClass(t *testing.T) {
 			serviceInstance1, serviceInstance2, serviceInstance3,
 		}
 
-		instances, err := svc.ListForClusterServiceClass(className, externalClassName)
+		instances, err := svc.ListForClusterServiceClass(className, externalClassName, nil)
 		require.NoError(t, err)
 		assert.ElementsMatch(t, expected, instances)
 	})
 
-	t.Run("ServiceInstancesQuery don't exist", func(t *testing.T) {
+	t.Run("Service Instance don't exist", func(t *testing.T) {
 		className := "exampleClassName"
 		externalClassName := "exampleExternalClassName"
 
@@ -173,14 +173,61 @@ func TestServiceInstanceService_ListForClusterServiceClass(t *testing.T) {
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
 		var emptyArray []*v1beta1.ServiceInstance
-		instances, err := svc.ListForClusterServiceClass(testClassName, testExternalClassName)
+		instances, err := svc.ListForClusterServiceClass(testClassName, testExternalClassName, nil)
+		require.NoError(t, err)
+		assert.Equal(t, emptyArray, instances)
+	})
+
+	t.Run("Service Instance exist in namespace", func(t *testing.T) {
+		className := "exampleClassName"
+		externalClassName := "exampleExternalClassName"
+
+		namespace := "ns"
+		serviceInstance1 := fixServiceInstanceWithClusterPlanRef("1", namespace, className, "")
+		serviceInstance2 := fixServiceInstanceWithClusterPlanRef("2", namespace, "", externalClassName)
+		serviceInstance3 := fixServiceInstanceWithClusterPlanRef("3", "ns2", className, externalClassName)
+
+		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
+
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
+		expected := []*v1beta1.ServiceInstance{
+			serviceInstance1, serviceInstance2,
+		}
+
+		instances, err := svc.ListForClusterServiceClass(className, externalClassName, &namespace)
+		require.NoError(t, err)
+		assert.ElementsMatch(t, expected, instances)
+	})
+
+	t.Run("Service Instance don't exist in namespace", func(t *testing.T) {
+		className := "exampleClassName"
+		externalClassName := "exampleExternalClassName"
+
+		testClassName := "test"
+		testExternalClassName := "test"
+
+		namespace := "ns"
+		serviceInstance1 := fixServiceInstanceWithClusterPlanRef("1", namespace, className, "")
+		serviceInstance2 := fixServiceInstanceWithClusterPlanRef("2", "ns2", "", externalClassName)
+		serviceInstance3 := fixServiceInstanceWithClusterPlanRef("3", "ns3", className, externalClassName)
+
+		serviceInstanceInformer := fixInformer(serviceInstance1, serviceInstance2, serviceInstance3)
+
+		svc, err := servicecatalog.NewServiceInstanceService(serviceInstanceInformer, nil)
+		require.NoError(t, err)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
+
+		var emptyArray []*v1beta1.ServiceInstance
+		instances, err := svc.ListForClusterServiceClass(testClassName, testExternalClassName, &namespace)
 		require.NoError(t, err)
 		assert.Equal(t, emptyArray, instances)
 	})
 }
 
-func TestServiceInstanceService_ListForClass(t *testing.T) {
-	t.Run("ServiceInstancesQuery exist", func(t *testing.T) {
+func TestServiceInstanceService_ListForServiceClass(t *testing.T) {
+	t.Run("Service Instances exist", func(t *testing.T) {
 		className := "exampleClassName"
 		externalClassName := "exampleExternalClassName"
 
@@ -195,7 +242,7 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 		require.NoError(t, err)
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 		expected := []*v1beta1.ServiceInstance{
-			serviceInstance1, serviceInstance2, serviceInstance3,
+			serviceInstance1, serviceInstance2,
 		}
 
 		instances, err := svc.ListForServiceClass(className, externalClassName, namespace)
@@ -203,10 +250,11 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 		assert.ElementsMatch(t, expected, instances)
 	})
 
-	t.Run("ServiceInstancesQuery don't exist", func(t *testing.T) {
+	t.Run("Service Instances don't exist", func(t *testing.T) {
 		className := "exampleClassName"
 		externalClassName := "exampleExternalClassName"
 
+		namespace := "ns"
 		testClassName := "test"
 		testExternalClassName := "test"
 
@@ -221,7 +269,7 @@ func TestServiceInstanceService_ListForClass(t *testing.T) {
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInstanceInformer)
 
 		var emptyArray []*v1beta1.ServiceInstance
-		instances, err := svc.ListForClusterServiceClass(testClassName, testExternalClassName)
+		instances, err := svc.ListForServiceClass(testClassName, testExternalClassName, namespace)
 		require.NoError(t, err)
 		assert.Equal(t, emptyArray, instances)
 	})

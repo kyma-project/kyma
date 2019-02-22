@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
+	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -21,20 +21,14 @@ const (
 
 type dummyContextExtender struct{}
 
-func (dce dummyContextExtender) ExtendContext(ctx context.Context) context.Context {
+func (dce *dummyContextExtender) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, dummyKey, dummyValue)
 }
 
-func dummyExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
-	return dummyContextExtender{}, nil
-}
+var dummyExtenderObject = &dummyContextExtender{}
 
-func notFoundExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
-	return dummyContextExtender{}, apperrors.NotFound("Not found")
-}
-
-func internalErrorExtender(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError) {
-	return dummyContextExtender{}, apperrors.Internal("Error")
+func dummyExtender() clientcontext.ContextExtender {
+	return dummyExtenderObject
 }
 
 func TestTokenResolver_Middleware(t *testing.T) {
@@ -48,12 +42,17 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Resolve", token, dummyExtenderObject).
+			Return(nil)
+		tokenManager.On("Delete", token).Return(nil)
+
 		req, err := http.NewRequest("GET", "/?token="+token, nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(nil, dummyExtender)
+		middleware := NewTokenResolverMiddleware(tokenManager, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -61,6 +60,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusOK, rr.Code)
+		tokenManager.AssertExpectations(t)
 	})
 
 	t.Run("should return 403 when there is no token sent", func(t *testing.T) {
@@ -90,12 +90,16 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		req, err := http.NewRequest("GET", "/", nil)
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Resolve", token, dummyExtenderObject).
+			Return(apperrors.NotFound("error"))
+
+		req, err := http.NewRequest("GET", "/?token="+token, nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(nil, notFoundExtender)
+		middleware := NewTokenResolverMiddleware(tokenManager, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -103,6 +107,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusForbidden, rr.Code)
+		tokenManager.AssertExpectations(t)
 	})
 
 	t.Run("should return 500 when internal error occured", func(t *testing.T) {
@@ -111,12 +116,16 @@ func TestTokenResolver_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
+		tokenManager := &mocks.Manager{}
+		tokenManager.On("Resolve", token, dummyExtenderObject).
+			Return(apperrors.Internal("error"))
+
 		req, err := http.NewRequest("GET", "/?token="+token, nil)
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewTokenResolverMiddleware(nil, internalErrorExtender)
+		middleware := NewTokenResolverMiddleware(tokenManager, dummyExtender)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -124,5 +133,6 @@ func TestTokenResolver_Middleware(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+		tokenManager.AssertExpectations(t)
 	})
 }

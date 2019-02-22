@@ -39,7 +39,7 @@
 # The `configurations-generator` subchart
 /resources/core/charts/configurations-generator @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
-# The `assetstore` subchart
+# The `assetstore` chart
 /resources/assetstore/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
 # The `application-connector` chart
@@ -172,6 +172,9 @@
 # Asset Store Controller Manager Component
 /components/assetstore-controller-manager/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
+# Asset Upload Service
+/components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+
 # Binding usage controller Component
 /components/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
@@ -225,6 +228,9 @@
 
 # Xip Patch Component
 /components/xip-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
+
+# Kubeless Images
+/components/kubeless-images @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # Tests
 # acceptance tests
@@ -306,6 +312,9 @@
 
 # Event Service Tests
 /tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+
+# E2E Backup Tests
+/tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc

@@ -42,8 +42,8 @@ func (_m *Resolver) ClusterServiceBrokersQuery(ctx context.Context, first *int, 
 	return r0, r1
 }
 
-// ClusterServiceClassActivatedField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error) {
+// ClusterServiceClassActivatedField provides a failing mock function with given fields: ctx, obj, namespace
+func (_m *Resolver) ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) (bool, error) {
 	var r0 bool
 	var r1 error
 	r1 = _m.err
@@ -78,8 +78,8 @@ func (_m *Resolver) ClusterServiceClassContentField(ctx context.Context, obj *gq
 	return r0, r1
 }
 
-// ClusterServiceClassInstancesField provides a failing mock function with given fields: ctx, obj
-func (_m *Resolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ServiceInstance, error) {
+// ClusterServiceClassInstancesField provides a failing mock function with given fields: ctx, obj, namespace
+func (_m *Resolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error) {
 	var r0 []gqlschema.ServiceInstance
 	var r1 error
 	r1 = _m.err
