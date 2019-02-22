@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -138,7 +137,6 @@ func (f functionTest) getFunctionPodStatus(namespace string, waitmax time.Durati
 			if err != nil {
 				return err
 			}
-			log.Println(pods)
 			if len(pods.Items) == 0 {
 				break
 			}
