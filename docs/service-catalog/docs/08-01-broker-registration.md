@@ -19,24 +19,24 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
 
 2. Check out one of the official tags. For example:
 
-  ```
-  git fetch --all --tags --prune
-  git checkout tags/v0.1.38 -b v0.1.38
-  ```
+    ```
+    git fetch --all --tags --prune
+    git checkout tags/v0.1.41 -b v0.1.41
+    ```
 
 3.  Run this command to install the chart with the `ups-broker` name in the `stage` Namespace:
       ```
-     helm install service-catalog/charts/ups-broker --name ups-broker --namespace stage
+     helm install ./charts/ups-broker --name ups-broker --namespace stage
      ```
 
 4. Register a broker:
   * Run this command to register a ClusterServiceBroker:
      ```
-    kubectl create -f service-catalog/contrib/examples/walkthrough/ups-clusterservicebroker.yaml
+    kubectl create -f ./contrib/examples/walkthrough/ups-clusterservicebroker.yaml
     ```
   * To register the UPS Broker as a ServiceBroker in the `stage` Namespace, run:
     ```
-    kubectl create -f service-catalog/contrib/examples/walkthrough/ups-servicebroker.yaml -n stage
+    kubectl create -f ./contrib/examples/walkthrough/ups-servicebroker.yaml -n stage
     ```     
     After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
 
