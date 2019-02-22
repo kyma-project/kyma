@@ -39,17 +39,17 @@ This table lists all possible parameters of a given resource together with their
 
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR which is also used for generating the name of the bucket in the bucket storage. |
-| **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is available and is also used for generating the name of the bucket in the bucket storage. |
+| **metadata.name** |    **YES**   | Specifies the name of the CR which is also used to generate the name of the bucket in the bucket storage. |
+| **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is available. It is also used to generate the name of the bucket in the bucket storage. |
 | **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
-| **spec.policy** | **NO** | Specifies te access mode to the bucket. Us one of `none`, `readonly`, `writeonly`, `readwrite` |
+| **spec.policy** | **NO** | Specifies the type of bucket access. Use `none`, `readonly`, `writeonly`, or `readwrite`. |
 | **status.lastheartbeattime** |    **Not applicable**    | Provides the last time when the Bucket Controller processed the Bucket CR. |
 | **status.message** |    **Not applicable**    | Describes a human-readable message on the CR processing success or failure. |
 | **status.phase** |    **Not applicable**    | The Bucket Controller automatically adds it to the Bucket CR. It describes the status of processing the Bucket CR by the Bucket Controller. It can be `Ready` or `Failed`. |
 | **status.reason** |    **Not applicable**    | Provides information on the Bucket CR processing success or failure. |
 | **status.url** |    **Not applicable**   | Provides the address of the bucket storage under which the asset is available. |
-| **status.remoteName** |    **Not applicable**   | Provides the name of the bucket in storage. |
-| **status.observedGeneration** |    **Not applicable**   | The generation observed by the Bucket Controller. |
+| **status.remoteName** |    **Not applicable**   | Provides the name of the bucket in the storage. |
+| **status.observedGeneration** |    **Not applicable**   | Specifies the generation that the Bucket Controller observes. |
 
 > **NOTE:** The Bucket Controller automatically adds all parameters marked as **Not applicable** to the Bucket CR.
 

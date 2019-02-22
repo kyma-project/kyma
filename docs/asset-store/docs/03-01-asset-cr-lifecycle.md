@@ -27,7 +27,7 @@ Unfortunately, this causes duplication of data as the assets from the previous b
 
 ## Change the Asset CR specification
 
-When you modify an Asset CR specification the lifecycle starts again. The old asset content is removed and no longer available.
+When you modify the Asset CR specification, the lifecycle starts again. The previous asset content is removed and no longer available.
 
 ![](./assets/modify-asset.svg)
 

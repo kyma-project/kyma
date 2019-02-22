@@ -39,17 +39,17 @@ This table lists all possible parameters of a given resource together with their
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR which is also the prefix of the bucket name in the bucket storage. |
-| **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
-| **spec.policy** | **NO** | Specifies te access mode to the bucket. Us one of `none`, `readonly`, `writeonly`, `readwrite` |
-| **status.lastheartbeattime** |    **Not applicable**    | Provides the last time when the Bucket Controller processed the Bucket CR. |
+| **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the ClusterBucket Controller creates the bucket. If the field is empty, the ClusterBucket Controller creates the bucket under the default location. |
+| **spec.policy** | **NO** | Specifies the type of bucket access. Use `none`, `readonly`, `writeonly`, or `readwrite`. |
+| **status.lastheartbeattime** |    **Not applicable**    | Provides the last time when the ClusterBucket Controller processed the ClusterBucket CR. |
 | **status.message** |    **Not applicable**    | Describes a human-readable message on the CR processing success or failure. |
-| **status.phase** |    **Not applicable**    | The Bucket Controller automatically adds it to the Bucket CR. It describes the status of processing the Bucket CR by the Bucket Controller. It can be `Ready` or `Failed`. |
-| **status.reason** |    **Not applicable**    | Provides information on the Bucket CR processing success or failure. |
+| **status.phase** |    **Not applicable**    | The ClusterBucket Controller automatically adds it to the ClusterBucket CR. It describes the status of processing the ClusterBucket CR by the ClusterBucket Controller. It can be `Ready` or `Failed`. |
+| **status.reason** |    **Not applicable**    | Provides information on the ClusterBucket CR processing success or failure. |
 | **status.url** |    **Not applicable**   | Provides the address of the bucket storage under which the asset is available. |
 | **status.remoteName** |    **Not applicable**   | Provides the name of the bucket in storage. |
-| **status.observedGeneration** |    **Not applicable**   | The generation observed by the ClusterBucket Controller. |
+| **status.observedGeneration** |    **Not applicable**   | Specifies the most recent generation that the ClusterBucket Controller observes. |
 
-> **NOTE:** The ClusterBucket Controller automatically adds all parameters marked as **Not applicable** to the Bucket CR.
+> **NOTE:** The ClusterBucket Controller automatically adds all parameters marked as **Not applicable** to the ClusterBucket CR.
 
 ## Related resources and components
 
@@ -63,4 +63,4 @@ These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Asset Store |  Uses the Bucket CR for the storage bucket definition. |
+| Asset Store |  Uses the ClusterBucket CR for the storage bucket definition. |
