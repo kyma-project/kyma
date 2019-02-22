@@ -32,7 +32,7 @@ The Connector Service has the following parameters:
 - **connectorServiceHost** - Host under which this service is accessible. It is used for generating the URL. The default host is `cert-service.wormhole.cluster.kyma.cx`.
 - **gatewayHost** - Host at which the Gateway Service is accessible. The default value is `gateway.wormhole.cluster.kyma.cx`.
 - **certificateProtectedHost** - Host secured with client certificate, used for certificate renewal. The default host is `gateway.wormhole.cluster.kyma.cx`.
-- **appsInfoURL** - URL at which management information for applications is available. If not provided, it bases on `connectorServiceHost`.
+- **appsInfoURL** - URL at which the management information for applications is available. If not provided, it bases on `connectorServiceHost`.
 - **runtimesInfoURL** - URL at which management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
 - **certificateValidityTime** - Validity time of certificates issued by this service. The default value is 90 days.
 - **central** - Determines whether connector works as the central.
