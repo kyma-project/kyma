@@ -73,7 +73,7 @@ spec:
   serviceAccount: {{ template "backup-test.fullname" . }}
   containers:
   - name: backup-test
-    image: "eu.gcr.io/kyma-project/pr/backup-restore-test:PR-2831"
+    image: "eu.gcr.io/kyma-project/pr/backup-restore-test:PR-2802"
     imagePullPolicy: Always
     #command: ["sleep", "6000"]
   restartPolicy: Never
