@@ -45,7 +45,7 @@ data:
                 "env": {
                   "NODE_PATH": "$(KUBELESS_INSTALL_VOLUME)/node_modules"
                 },
-                "image": "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_images.runtimes.node6.dir }}kubeless-images-node6:{{ .Values.global.kubeless_images.runtimes.node6.version }}",
+                "image": "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_images.runtime.node6.dir }}kubeless-images-node6:{{ .Values.global.kubeless_images.runtime.node6.version }}",
                 "phase": "runtime"
               }
             ],
@@ -63,7 +63,7 @@ data:
                 "env": {
                   "NODE_PATH": "$(KUBELESS_INSTALL_VOLUME)/node_modules"
                 },
-                "image": "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_images.runtimes.node8.dir }}kubeless-images-node8:{{ .Values.global.kubeless_images.runtimes.node8.version }}",
+                "image": "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_images.runtime.node8.dir }}kubeless-images-node8:{{ .Values.global.kubeless_images.runtime.node8.version }}",
                 "phase": "runtime"
               }
             ],

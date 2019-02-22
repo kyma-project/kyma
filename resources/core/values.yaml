@@ -73,7 +73,7 @@ global:
     dir: develop/
     version: "0b5f866d"
   kubeless_images:
-    runtimes:
+    runtime:
       node6:
         dir: develop/
         version: "ddf6f99f"
