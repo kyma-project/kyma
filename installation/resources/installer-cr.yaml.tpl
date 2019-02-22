@@ -38,6 +38,8 @@ spec:
       namespace: "kyma-system"
     - name: "kyma-integration"
       namespace: "kyma-integration"
+    - name: "application-connector-ingress"
+      namespace: "kyma-system"
     - name: "application-connector"
       namespace: "kyma-system"
     #- name: "ark"
