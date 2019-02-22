@@ -11,9 +11,10 @@ function testPermissions() {
 	USER="$1"
 	OPERATION="$2"
 	RESOURCE="$3"
-	EXPECTED="$4"
+	TEST_NS="$4"
+	EXPECTED="$5"
 	set +e
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --as "${USER} -n ${NAMESPACE}")
+	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --as "${USER} -n ${TEST_NS}")
 	set -e
 	if [[ "${TEST}" == "${EXPECTED}" ]]; then
 		echo "----> PASSED"
@@ -24,42 +25,44 @@ function testPermissions() {
 }
 
 function runTests() {
-	echo "--> developer@kyma.cx should be able to get Deployments"
-	testPermissions "developer@kyma.cx" "get" "deploy" "yes"
+	echo "--> developer@kyma.cx should be able to get Deployments in ${NAMESPACE}"
+	testPermissions "developer@kyma.cx" "get" "deploy" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should be able to create Deployments"
-	testPermissions "developer@kyma.cx" "create" "deploy" "yes"
+	echo "--> developer@kyma.cx should be able to create Deployments in ${NAMESPACE}"
+	testPermissions "developer@kyma.cx" "create" "deploy" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should be able to get CRD"
-	testPermissions "developer@kyma.cx" "get" "crd" "yes"
+	echo "--> developer@kyma.cx should be able to get CRD in ${NAMESPACE}"
+	testPermissions "developer@kyma.cx" "get" "crd" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should be able to get specific CRD"
-	testPermissions "developer@kyma.cx" "get" "crd/installations.installer.kyma-project.io" "yes"
+	echo "--> developer@kyma.cx should be able to get specific CRD in ${NAMESPACE}"
+	testPermissions "developer@kyma.cx" "get" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should NOT be able to list ClusterRole"
-	testPermissions "developer@kyma.cx" "list" "clusterrole" "no"
+	echo "--> developer@kyma.cx should NOT be able to list ClusterRole in ${NAMESPACE}"
+	testPermissions "developer@kyma.cx" "list" "clusterrole" "${NAMESPACE}" "no"
 
+	echo "--> developer@kyma.cx should NOT be able to list Deployments in kyma-system"
+	testPermissions "developer@kyma.cx" "list" "clusterrole" "kyma-system" "no"
 
 	echo "--> admin@kyma.cx should be able to get ClusterRole"
-	testPermissions "admin@kyma.cx" "get" "clusterrole" "yes"
+	testPermissions "admin@kyma.cx" "get" "clusterrole" "${NAMESPACE}" "yes"
 
 	echo "--> admin@kyma.cx should be able to delete Deployments"
-	testPermissions "admin@kyma.cx" "delete" "deploy" "yes"
+	testPermissions "admin@kyma.cx" "delete" "deploy" "${NAMESPACE}" "yes"
 
 	echo "--> admin@kyma.cx should be able to delete ClusterRole"
-	testPermissions "admin@kyma.cx" "delete" "clusterrole" "yes"
+	testPermissions "admin@kyma.cx" "delete" "clusterrole" "${NAMESPACE}" "yes"
 
 	echo "--> admin@kyma.cx should be able to delete specific CRD"
-	testPermissions "admin@kyma.cx" "delete" "crd/installations.installer.kyma-project.io" "yes"
+	testPermissions "admin@kyma.cx" "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
 	echo "--> user@kyma.cx should NOT be able to get ClusterRole"
-	testPermissions "user@kyma.cx" "get" "clusterrole" "no"
+	testPermissions "user@kyma.cx" "get" "clusterrole" "${NAMESPACE}" "no"
 
 	echo "--> user@kyma.cx should NOT be able to list Deployments"
-	testPermissions "user@kyma.cx" "list" "deploy" "no"
+	testPermissions "user@kyma.cx" "list" "deploy" "${NAMESPACE}" "no"
 
 	echo "--> user@kyma.cx should NOT be able to create Namespace"
-	testPermissions "user@kyma.cx" "create" "ns" "no"
+	testPermissions "user@kyma.cx" "create" "ns" "${NAMESPACE}" "no"
 }
 
 function init() {
