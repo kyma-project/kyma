@@ -76,10 +76,10 @@ global:
     runtimes:
       node6:
         dir: develop/
-        version: "a5b27e5d"
+        version: "ddf6f99f"
       node8:
         dir: develop/
-        version: "a5b27e5d"
+        version: "ddf6f99f"
     installation:
       node6:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
