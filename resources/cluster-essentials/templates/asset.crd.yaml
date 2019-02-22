@@ -112,7 +112,7 @@ spec:
           - lastHeartbeatTime
           - observedGeneration
           type: object
-  version: v1alpha1
+  version: v1alpha2
 status:
   acceptedNames:
     kind: ""
