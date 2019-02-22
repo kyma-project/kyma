@@ -21,12 +21,16 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
 
     ```
     git fetch --all --tags --prune
-    git checkout tags/v0.1.41 -b v0.1.41
+    git checkout tags/v0.1.39 -b v0.1.39
+    ```
+2. Create the `ups-broker` Namespace:
+    ```
+    kubectl create namespace ups-broker
     ```
 
-3.  Run this command to install the chart with the `ups-broker` name in the `stage` Namespace:
+3. Run this command to install the chart with the `ups-broker` name in the `ups-broker` Namespace:
       ```
-     helm install ./charts/ups-broker --name ups-broker --namespace stage
+     helm install ./charts/ups-broker --name ups-broker --namespace ups-broker
      ```
 
 4. Register a broker:
@@ -34,9 +38,9 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
      ```
     kubectl create -f ./contrib/examples/walkthrough/ups-clusterservicebroker.yaml
     ```
-  * To register the UPS Broker as a ServiceBroker in the `stage` Namespace, run:
+  * To register the UPS Broker as a ServiceBroker in the `ups-broker` Namespace, run:
     ```
-    kubectl create -f ./contrib/examples/walkthrough/ups-servicebroker.yaml -n stage
+    kubectl create -f ./contrib/examples/walkthrough/ups-servicebroker.yaml -n ups-broker
     ```     
     After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
 
@@ -47,7 +51,7 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
     ```
   * To check the status of the ServiceBroker, run:
     ```
-    kubectl get servicebrokers ups-broker -n stage -o jsonpath="{.status.conditions}"
+    kubectl get servicebrokers ups-broker -n ups-broker -o jsonpath="{.status.conditions}"
     ```
 
     The output looks as follows:
@@ -68,7 +72,7 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
       ```
   * To check the ServiceClasses, run:
       ```
-      kubectl get serviceclasses -n stage
+      kubectl get serviceclasses -n ups-broker
       ```
 
       These are the UPS Broker Service Classes:
