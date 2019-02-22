@@ -147,7 +147,7 @@ rules:
   verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
 - apiGroups: ["authorization.k8s.io"]
   resources: ["selfsubjectrulesreviews", "selfsubjectaccessreviews"]
-  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+  verbs: ["create"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["*"]
 

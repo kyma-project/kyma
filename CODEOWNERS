@@ -310,6 +310,9 @@
 # E2E Backup Tests
 /tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
+# Cluster Users Test
+/tests/cluster-users-test @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
+
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc
 

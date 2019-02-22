@@ -19,7 +19,7 @@ spec:
       image: demonsthere/kyma-sar:latest
       # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_cluster_users.dir }}test-cluster-users:{{ .Values.global.test_cluster_users.version }}
       env:
-        - name: USERNAME_FILE
+        - name: EMAIL_FILE
           value: /etc/credentials/email
         - name: PASSWORD_FILE
           value: /etc/credentials/password

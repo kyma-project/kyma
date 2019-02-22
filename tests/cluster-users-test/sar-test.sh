@@ -3,7 +3,7 @@
 # Description: This script performs a SelfSubjectAccessReview test by asking the k8s apiserver what permissions does each user have
 # Tested users: admin@kyma.cx, developer@kyma.cx, user@kyma.cx
 # Required ENVS: 
-#  - USERNAME_FILE: path to a file with the username (email address)
+#  - EMAIL_FILE: path to a file with the email address of the user (used as username)
 #  - PASSWORD_FILE: path to a file with the password for the user
 
 function testPermissions() {
@@ -64,9 +64,9 @@ function runTests() {
 function init() {
 	readonly REGISTRATION_REQUEST=$(curl -s -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM")
 	readonly REQUEST_ID=$(echo ${REGISTRATION_REQUEST} | cut -d '"' -f 2 | cut -d '?' -f 2)
-	readonly USERNAME=$(cat ${USERNAME_FILE})
+	readonly EMAIL=$(cat ${EMAIL_FILE})
 	readonly PASSWORD=$(cat ${PASSWORD_FILE})
-	curl -X POST -F "login=${USERNAME}" -F "password=${PASSWORD}" "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth/local?${REQUEST_ID}"
+	curl -X POST -F "login=${EMAIL}" -F "password=${PASSWORD}" "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth/local?${REQUEST_ID}"
 	readonly RESPONSE=$(curl -X GET "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/approval?${REQUEST_ID}")
 	export AUTH_TOKEN=$(echo "${RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
 	curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" ${CONFIGURATIONS_GENERATOR_SERVICE_HOST}:${CONFIGURATIONS_GENERATOR_SERVICE_PORT_HTTP}/kube-config -o "${PWD}/kubeconfig"
@@ -76,7 +76,7 @@ function init() {
 
 discoverUnsetVar=false
 
-for var in USERNAME_FILE PASSWORD_FILE ; do
+for var in EMAIL_FILE PASSWORD_FILE ; do
     if [ -z "${!var}" ] ; then
         echo "ERROR: $var is not set"
         discoverUnsetVar=true
