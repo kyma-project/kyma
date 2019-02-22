@@ -3,6 +3,7 @@
 package k8s
 
 import (
+	"fmt"
 	"testing"
 	"time"
 
@@ -162,18 +163,23 @@ func fixReplicaSet(name, namespace string) *appsv1.ReplicaSet {
 	}
 }
 
+func getReplicaSetQueryAttributes() string {
+	return `name
+			namespace
+			creationTimestamp
+			labels
+			pods
+			images
+			json`
+}
+
 func fixReplicaSetQuery() *graphql.Request {
-	query := `query ($name: String!, $namespace: String!) {
+	queryAttributes := getReplicaSetQueryAttributes()
+	query := fmt.Sprintf(`query ($name: String!, $namespace: String!) {
 				replicaSet(name: $name, namespace: $namespace) {
-					name
-					namespace
-					creationTimestamp
-					labels
-					pods
-					images
-					json
+					%s
 				}
-			}`
+			}`, queryAttributes)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", replicaSetName)
 	req.SetVar("namespace", replicaSetNamespace)
@@ -182,17 +188,12 @@ func fixReplicaSetQuery() *graphql.Request {
 }
 
 func fixReplicaSetsQuery() *graphql.Request {
-	query := `query ($namespace: String!) {
+	queryAttributes := getReplicaSetQueryAttributes()
+	query := fmt.Sprintf(`query ($namespace: String!) {
 				replicaSets(namespace: $namespace) {
-					name
-					namespace
-					creationTimestamp
-					labels
-					pods
-					images
-					json
+					%s
 				}
-			}`
+			}`, queryAttributes)
 	req := graphql.NewRequest(query)
 	req.SetVar("namespace", replicaSetNamespace)
 

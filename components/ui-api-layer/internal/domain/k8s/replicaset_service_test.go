@@ -294,6 +294,19 @@ func TestReplicaSetService_Delete(t *testing.T) {
 		_, err = client.ReplicaSets(exampleNamespace).Get(exampleName, metav1.GetOptions{})
 		assert.True(t, errors.IsNotFound(err))
 	})
+
+	t.Run("Delete Error", func(t *testing.T) {
+		exampleName := "exampleReplicaSet"
+		exampleNamespace := "exampleNamespace"
+		exampleReplicaSet := fixReplicaSet(exampleName, exampleNamespace, nil)
+		replicaSetInformer, client := fixFailingReplicaSetInformer(exampleReplicaSet)
+		svc := k8s.NewReplicaSetService(replicaSetInformer, client)
+
+		err := svc.Delete(exampleName, exampleNamespace)
+
+		// then
+		require.Error(t, err)
+	})
 }
 
 func fixReplicaSetInformer(objects ...runtime.Object) (cache.SharedIndexInformer, appsv1.AppsV1Interface) {
@@ -305,6 +318,7 @@ func fixReplicaSetInformer(objects ...runtime.Object) (cache.SharedIndexInformer
 func fixFailingReplicaSetInformer(objects ...runtime.Object) (cache.SharedIndexInformer, appsv1.AppsV1Interface) {
 	client := fake.NewSimpleClientset(objects...)
 	client.PrependReactor("update", "replicasets", failingReactor)
+	client.PrependReactor("delete", "replicasets", failingReactor)
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
 	return informerFactory.Apps().V1().ReplicaSets().Informer(), client.AppsV1()
 }

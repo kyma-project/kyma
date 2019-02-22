@@ -15,35 +15,10 @@ import (
 func TestReplicaSetConverter_ToGQL(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		converter := &replicaSetConverter{}
-		in := apps.ReplicaSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:              "exampleName",
-				Namespace:         "exampleNamespace",
-				CreationTimestamp: metav1.Time{},
-				Labels: map[string]string{
-					"exampleKey":  "exampleValue",
-					"exampleKey2": "exampleValue2",
-				},
-			},
-			Spec: apps.ReplicaSetSpec{
-				Template: v1.PodTemplateSpec{
-					Spec: v1.PodSpec{
-						Containers: []v1.Container{
-							{
-								Image: "image_1",
-							},
-							{
-								Image: "image_2",
-							},
-						},
-					},
-				},
-			},
-			Status: apps.ReplicaSetStatus{
-				Replicas:      2,
-				ReadyReplicas: 1,
-			},
-		}
+		in := fixExampleReplicaSet("exampleKind", "exampleName", "exampleNamespace", apps.ReplicaSetStatus{
+			Replicas:      2,
+			ReadyReplicas: 1,
+		})
 		expectedJSON, err := converter.replicaSetToGQLJSON(&in)
 		require.NoError(t, err)
 		expected := gqlschema.ReplicaSet{
@@ -55,7 +30,7 @@ func TestReplicaSetConverter_ToGQL(t *testing.T) {
 				"exampleKey":  "exampleValue",
 				"exampleKey2": "exampleValue2",
 			},
-			Images: []string{"image_1", "image_2"},
+			Images: []string{"exampleImage_1", "exampleImage_2"},
 			JSON:   expectedJSON,
 		}
 

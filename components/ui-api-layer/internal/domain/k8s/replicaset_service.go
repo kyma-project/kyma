@@ -99,10 +99,10 @@ func (svc *replicaSetService) checkUpdatePreconditions(name string, namespace st
 	}
 	typeMeta := svc.replicaSetTypeMeta()
 	if update.Kind != typeMeta.Kind {
-		errorList = append(errorList, field.Invalid(field.NewPath("kind"), update.Kind, "replicaSet's kind should not be changed"))
+		errorList = append(errorList, field.Invalid(field.NewPath("kind"), update.Kind, "ReplicaSet's kind should not be changed"))
 	}
 	if update.APIVersion != typeMeta.APIVersion {
-		errorList = append(errorList, field.Invalid(field.NewPath("apiVersion"), update.APIVersion, "replicaSet's apiVersion should not be changed"))
+		errorList = append(errorList, field.Invalid(field.NewPath("apiVersion"), update.APIVersion, "ReplicaSet's apiVersion should not be changed"))
 	}
 
 	if len(errorList) > 0 {
