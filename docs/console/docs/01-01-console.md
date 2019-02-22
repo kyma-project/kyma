@@ -13,12 +13,3 @@ Use the following CRs to modify the Console UI:
 - The ClusterMicroFrontend custom resource allows you to plug in micro front-ends for the entire Cluster.
 - The BackendModule custom resource allows you to enable UI API Layer modules.
   
-
-# Security guidelines for MicroFrontend and ClusterMicroFrontend custom resources
-
-We highly recommend to include the following configuration to your `MicroFrontend` or `ClusterMicroFrontend` web server config file:
- - Make it only accessible through HTTPS.
- - Make the **Access-Control-Allow-Origin** HTTP header as restrictive as possible.
- - Set the  **X-Content-Type HTTP** header to `nosniff`.
- - Set the **X-Frame-Options** HTTP header to `sameorigin` or `allow-from ALLOWED_URL`.
- - Add Content Security Policies (CSPs).
