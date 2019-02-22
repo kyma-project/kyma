@@ -62,11 +62,12 @@ This table lists all the possible parameters of a given resource together with t
 
 This table contains description of information regarding installation progress set on Installation resource:
 
-| **status.state** | **YES** | State of the installation. For description of states see [the table below](#installation-states) |
-| **status.errorLog** | **YES** | List of errors that happened during installation so far |
-| **status.errorLog.component** | **YES** | Name of the component which installation caused the error |
-| **status.errorLog.log** | **YES** | Description of the error |
-| **status.errorLog.occurrences** | **YES** | Number of times the error has occurred ina row |
+| **status.state** | **YES** | State of the installation. For explanation of states see [the table below](#installation-states) |
+| **status.description** | **YES** | Description of the step installer is  performing now. |
+| **status.errorLog** | **YES** | List of errors that happened during installation so far. |
+| **status.errorLog.component** | **YES** | Name of the component which installation caused the error. |
+| **status.errorLog.log** | **YES** | Description of the error. |
+| **status.errorLog.occurrences** | **YES** | Number of times the error has occurred ina row. |
 
 ## Installation states
 
