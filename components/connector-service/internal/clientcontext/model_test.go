@@ -42,8 +42,8 @@ func TestApplicationContext_IsEmpty(t *testing.T) {
 	}{
 		{"tenant", "group", "app", false},
 		{"tenant", "group", "", true},
-		{"tenant", "", "application", true},
-		{"", "group", "application", true},
+		{"tenant", "", "application", false},
+		{"", "group", "application", false},
 		{"", "", "", true},
 	}
 

@@ -403,6 +403,16 @@ type Pod {
     json: JSON!
 }
 
+type ReplicaSet {
+    name: String!
+    pods: String!
+    namespace: String!
+    images: [String!]!
+    creationTimestamp: Timestamp!
+    labels: Labels!
+    json: JSON!
+}
+
 enum PodStatusType {
     PENDING
     RUNNING
@@ -633,6 +643,10 @@ type Query {
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]!
     pod(name: String!, namespace: String!): Pod
     pods(namespace: String!, first: Int, offset: Int): [Pod!]!
+
+    replicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "get", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+    replicaSets(namespace: String!, first: Int, offset: Int): [ReplicaSet!]! @HasAccess(attributes: {resource: "replicasets", verb: "list", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+
     resourceQuotas(namespace: String!): [ResourceQuota!]!
     resourceQuotasStatus(namespace: String!): ResourceQuotasStatus!
 
@@ -669,6 +683,9 @@ type Mutation {
 
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
+
+    updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+    deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
