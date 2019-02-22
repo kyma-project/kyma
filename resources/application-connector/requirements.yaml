@@ -7,3 +7,5 @@ dependencies:
   condition: connector-service.enabled
 - name: connector-service
   condition: connector-service.enabled
+- name: connectivity-certs-controller
+  condition: connectivity-certs-controller.enabled

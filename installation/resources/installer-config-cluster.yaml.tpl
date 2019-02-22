@@ -58,7 +58,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: connector-service-overrides
+  name: application-connector-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
@@ -66,6 +66,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
   connector-service.tests.skipSslVerify: "__SKIP_SSL_VERIFY__"
+  connectivity-certs-controller.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
