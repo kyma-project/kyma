@@ -38,7 +38,7 @@ data:
             "images": [
               {
                 "command": "/kubeless-npm-install.sh",
-                "image": "{{ .Values.global.kubeless_images.installation.node6.image}}",
+                "image": "{{ .Values.global.kubeless_images.installation.node6.image }}",
                 "phase": "installation"
               },
               {
@@ -56,7 +56,7 @@ data:
             "images": [
               {
                 "command": "/kubeless-npm-install.sh",
-                "image": "{{ .Values.global.kubeless_images.installation.node8.image}}",
+                "image": "{{ .Values.global.kubeless_images.installation.node8.image }}",
                 "phase": "installation"
               },
               {
