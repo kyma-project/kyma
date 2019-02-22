@@ -38,7 +38,7 @@ The variables are:
 
 ## Configuration
 
-This document describes configuration details of the application.
+This section describes configuration details of the application.
 
 ### Environmental Variables
 

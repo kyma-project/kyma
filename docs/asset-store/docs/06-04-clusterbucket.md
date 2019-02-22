@@ -27,7 +27,7 @@ status:
   phase: Ready
   reason: BucketPolicyUpdated
   remoteName: test-sample-1b19rnbuc6ir8
-  url: https://minio.kyma.local/ns-default-test-sample
+  url: https://minio.kyma.local/test-sample-1b19rnbuc6ir8
 ```
 
 ## Custom resource parameters
@@ -37,7 +37,7 @@ This table lists all possible parameters of a given resource together with their
 
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR which is also the name of the bucket storage. |
+| **metadata.name** |    **YES**   | Specifies the name of the CR which is also the prefix of the bucket name in the bucket storage. |
 | **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
 | **spec.policy** | **NO** | Specifies te access mode to the bucket. Us one of `none`, `readonly`, `writeonly`, `readwrite` |
 | **status.lastheartbeattime** |    **Not applicable**    | Provides the last time when the Bucket Controller processed the Bucket CR. |
