@@ -58,6 +58,26 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.components.namespace** | **YES** | Defines the Namespace in which you want the Installer to install, or update the component. |
 | **spec.components.release** | **NO** | Provides the name of the Helm release. The default parameter is the component name. |
 
+## Additional information
+
+This table contains description of information regarding installation progress set on Installation resource:
+
+| **status.state** | **YES** | State of the installation. For description of states see [the table below](#installation-states) |
+| **status.errorLog** | **YES** | List of errors that happened during installation so far |
+| **status.errorLog.component** | **YES** | Name of the component which installation caused the error |
+| **status.errorLog.log** | **YES** | Description of the error |
+| **status.errorLog.occurrences** | **YES** | Number of times the error has occurred ina row |
+
+## Installation states
+
+Installation resource may be in following states:
+
+| State   |  Description |
+|:----------:|:-------------:|
+| **Installed** | Installation is completed successfully. |
+| **Uninstalled** | Uninstallation is completed successfully. |
+| **InProgress** | Installer is still installing or uninstalling Kyma. There was no error yet. |
+| **Error** | An error occurred during processing Installation, but installer is still trying to process the resource. |
 
 ## Related resources and components
 
