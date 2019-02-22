@@ -12,7 +12,7 @@ spec:
       served: true
       storage: true
     - name: v1alpha1
-      served: false
+      served: true
       storage: false
   names:
     kind: Asset
