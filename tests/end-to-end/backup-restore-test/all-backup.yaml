@@ -7,7 +7,7 @@ excludedNamespaces:
 - kyma-integration
 - kyma-installer
 - default
-- natts
+- natss
 includedResources:
 - '*'
 excludedResources: null

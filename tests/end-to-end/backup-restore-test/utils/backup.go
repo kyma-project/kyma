@@ -86,64 +86,46 @@ func (c *backupClient) CreateBackup(backupName, specPath string) error {
 }
 
 func (c *backupClient) WaitForBackupToBeCreated(backupName string, waitmax time.Duration) error {
-	backupWatch, err := c.backupClient.ArkV1().Backups("heptio-ark").Watch(metav1.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector(api.ObjectNameField, backupName).String(),
-	})
-	if err != nil {
-		return err
-	}
 	timeout := time.After(waitmax)
+	tick := time.Tick(2 * time.Second)
 
 	for {
 		select {
 		case <-timeout:
 			return fmt.Errorf("Backup %v could not be created within given time  %v", backupName, waitmax)
-		case event := <-backupWatch.ResultChan():
-			if event.Type == "ERROR" {
-				return fmt.Errorf("%+v", event)
+		case <-tick:
+			backup, err := c.backupClient.ArkV1().Backups("heptio-ark").Get(backupName, metav1.GetOptions{})
+			if err != nil {
+				return err
 			}
-			if event.Type == "MODIFIED" {
-				backup, ok := event.Object.(*backupv1.Backup)
-				if !ok {
-					return fmt.Errorf("%v", event)
-				}
-				if backup.Status.Phase == "Completed" {
-					return nil
-				} else if backup.Status.Phase == "Failed" {
-					return fmt.Errorf("Backup %v Failed:\n%+v", backupName, backup)
-				}
+			if backup.Status.Phase == backupv1.BackupPhaseCompleted {
+				return nil
+			}
+			if backup.Status.Phase == backupv1.BackupPhaseFailed || backup.Status.Phase == backupv1.BackupPhaseFailedValidation {
+				return fmt.Errorf("Backup %v Failed with status %v :\n%+v", backupName, backup.Status.Phase, backup)
 			}
 		}
 	}
 }
 
 func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time.Duration) error {
-	restoreWatch, err := c.backupClient.ArkV1().Restores("heptio-ark").Watch(metav1.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector(api.ObjectNameField, backupName).String(),
-	})
-	if err != nil {
-		return err
-	}
 	timeout := time.After(waitmax)
+	tick := time.Tick(2 * time.Second)
 
 	for {
 		select {
 		case <-timeout:
-			return fmt.Errorf("Backup %v could not be restored within given time  %v", backupName, waitmax)
-		case event := <-restoreWatch.ResultChan():
-			if event.Type == "ERROR" {
-				return fmt.Errorf("%+v", event)
+			return fmt.Errorf("Backup %v could not be created within given time  %v", backupName, waitmax)
+		case <-tick:
+			restore, err := c.backupClient.ArkV1().Restores("heptio-ark").Get(backupName, metav1.GetOptions{})
+			if err != nil {
+				return err
 			}
-			if event.Type == "MODIFIED" {
-				restore, ok := event.Object.(*backupv1.Restore)
-				if !ok {
-					return fmt.Errorf("%+v", event)
-				}
-				if restore.Status.Phase == "Completed" {
-					return nil
-				} else if restore.Status.Phase == "Failed" {
-					return fmt.Errorf("Restore %v Failed:\n%+v", backupName, restore)
-				}
+			if restore.Status.Phase == backupv1.RestorePhaseCompleted {
+				return nil
+			}
+			if restore.Status.Phase == backupv1.RestorePhaseFailed || restore.Status.Phase == backupv1.RestorePhaseFailedValidation {
+				return fmt.Errorf("Restore %v Failed with status %v :\n%+v", backupName, restore.Status.Phase, restore)
 			}
 		}
 	}

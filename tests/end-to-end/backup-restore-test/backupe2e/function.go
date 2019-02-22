@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -122,30 +123,37 @@ func (f functionTest) createFunction(namespace string) (*kubelessV1.Function, er
 }
 
 func (f functionTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
-	watch, err := f.coreClient.CoreV1().Pods(namespace).Watch(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
-	if err != nil {
-		return err
-	}
 	timeout := time.After(waitmax)
-
+	tick := time.Tick(2 * time.Second)
 	for {
 		select {
 		case <-timeout:
-			return fmt.Errorf("Pod did not start within given time  %v", waitmax)
-		case event := <-watch.ResultChan():
-			if event.Type == "ERROR" {
-				return fmt.Errorf("%+v", event)
+			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
+			if err != nil {
+				return err
 			}
-			if event.Type == "MODIFIED" {
-				pod, ok := event.Object.(*v1.Pod)
-				if !ok {
-					return fmt.Errorf("%v", event)
-				}
-				if pod.Status.Phase == "Running" {
-					return nil
-				}
+			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pods)
+		case <-tick:
+			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
+			if err != nil {
+				return err
+			}
+			log.Println(pods)
+			if len(pods.Items) == 0 {
+				break
+			}
+
+			if len(pods.Items) > 1 {
+				return fmt.Errorf("Deployed 1 pod, got %v: %+v", len(pods.Items), pods)
+			}
+
+			pod := pods.Items[0]
+			if pod.Status.Phase == v1.PodRunning {
+				return nil
+			}
+			if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed || pod.Status.Phase == v1.PodUnknown {
+				return fmt.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
 			}
 		}
 	}
-
 }
