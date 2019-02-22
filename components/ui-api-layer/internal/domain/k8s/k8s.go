@@ -26,7 +26,7 @@ type Resolver struct {
 	*resourceQuotaStatusResolver
 	*limitRangeResolver
 	*podResolver
-
+	*replicaSetResolver
 	informerFactory informers.SharedInformerFactory
 }
 
@@ -38,7 +38,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	clientset, err := k8sClientset.NewForConfig(restConfig)
 	if err != nil {
-		return nil, errors.Wrap(err, "while creating K8S Client")
+		return nil, errors.Wrap(err, "while creating K8S Clientset")
 	}
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
@@ -51,6 +51,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
 	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 
+	replicaSetService := newReplicaSetService(informerFactory.Apps().V1().ReplicaSets().Informer(), clientset.AppsV1())
 	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
@@ -60,6 +61,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		secretResolver:              newSecretResolver(client),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),
+		replicaSetResolver:          newReplicaSetResolver(replicaSetService),
 		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
 		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
