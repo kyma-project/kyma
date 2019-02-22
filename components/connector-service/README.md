@@ -34,7 +34,7 @@ The Connector Service has the following parameters:
 - **certificateProtectedHost** - Host secured with client certificate, used for certificate renewal. The default host is `gateway.wormhole.cluster.kyma.cx`.
 - **appsInfoURL** - URL at which the management information for applications is available. If not provided, it bases on `connectorServiceHost`.
 - **runtimesInfoURL** - URL at which management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
-- **certificateValidityTime** - Validity time of certificates issued by this service. The default value is 90 days.
+- **certificateValidityTime** - Time until which the certificates that the service issues are valid. The default value is 90 days.
 - **central** - Determines whether connector works as the central.
 
 Connector Service also uses following environmental variables for CSR - related information config:
