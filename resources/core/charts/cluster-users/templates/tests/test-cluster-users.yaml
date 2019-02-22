@@ -1,5 +1,25 @@
 {{ if .Values.global.isLocalEnv }}
 ---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: kyma-developer-binding
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "0"
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kyma-developer
+subjects:
+- kind: User
+  name: developer@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+
+---
 apiVersion: v1
 kind: Pod
 metadata:
@@ -8,6 +28,7 @@ metadata:
   annotations:
     sidecar.istio.io/inject: "false"
     "helm.sh/hook": test-success
+    "helm.sh/hook-weight": "1"
   labels:
     "helm-chart-test": "true"
 spec:
@@ -23,6 +44,8 @@ spec:
           value: /etc/credentials/email
         - name: PASSWORD_FILE
           value: /etc/credentials/password
+        - name: NAMESPACE
+          value: {{ .Release.Namespace }}
       volumeMounts:
         - name: credentials
           mountPath: /etc/credentials

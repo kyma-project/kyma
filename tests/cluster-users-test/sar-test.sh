@@ -5,6 +5,7 @@
 # Required ENVS: 
 #  - EMAIL_FILE: path to a file with the email address of the user (used as username)
 #  - PASSWORD_FILE: path to a file with the password for the user
+#  - NAMESPACE: namespace in which we perform the tests
 
 function testPermissions() {
 	USER="$1"
@@ -12,7 +13,7 @@ function testPermissions() {
 	RESOURCE="$3"
 	EXPECTED="$4"
 	set +e
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --as "${USER}")
+	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --as "${USER} -n ${NAMESPACE}")
 	set -e
 	if [[ "${TEST}" == "${EXPECTED}" ]]; then
 		echo "----> PASSED"
@@ -76,7 +77,7 @@ function init() {
 
 discoverUnsetVar=false
 
-for var in EMAIL_FILE PASSWORD_FILE ; do
+for var in EMAIL_FILE PASSWORD_FILE NAMESPACE; do
     if [ -z "${!var}" ] ; then
         echo "ERROR: $var is not set"
         discoverUnsetVar=true
