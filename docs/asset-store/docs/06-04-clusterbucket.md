@@ -1,12 +1,12 @@
 ---
-title: Bucket
+title: ClusterBucket
 type: Custom Resource
 ---
 
-The `buckets.assetstore.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define the name of the cloud storage bucket for storing assets. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `clusterbuckets.assetstore.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define the name of the cloud storage bucket for storing assets. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
-kubectl get crd buckets.assetstore.kyma-project.io -o yaml
+kubectl get crd clusterbuckets.assetstore.kyma-project.io -o yaml
 ```
 
 ## Sample custom resource
@@ -15,10 +15,9 @@ This is a sample resource that defines the storage bucket configuration.
 
 ```
 apiVersion: assetstore.kyma-project.io/v1alpha2
-kind: Bucket
+kind: ClusterBucket
 metadata:
   name: test-sample
-  namespace: default
 spec:
   region: "us-east-1"
   policy: readonly
@@ -27,6 +26,7 @@ status:
   message: Bucket policy has been updated
   phase: Ready
   reason: BucketPolicyUpdated
+  remoteName: test-sample-1b19rnbuc6ir8
   url: https://minio.kyma.local/ns-default-test-sample
 ```
 
@@ -38,7 +38,6 @@ This table lists all possible parameters of a given resource together with their
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR which is also the name of the bucket storage. |
-| **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is available. |
 | **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
 | **spec.policy** | **NO** | Specifies te access mode to the bucket. Us one of `none`, `readonly`, `writeonly`, `readwrite` |
 | **status.lastheartbeattime** |    **Not applicable**    | Provides the last time when the Bucket Controller processed the Bucket CR. |
@@ -48,7 +47,7 @@ This table lists all possible parameters of a given resource together with their
 | **status.url** |    **Not applicable**   | Provides the address of the bucket storage under which the asset is available. |
 | **status.remoteName** |    **Not applicable**   | Provides the name of the bucket in storage. |
 
-> **NOTE:** The Bucket Controller automatically adds all parameters marked as **Not applicable** to the Bucket CR.
+> **NOTE:** The ClusterBucket Controller automatically adds all parameters marked as **Not applicable** to the Bucket CR.
 
 ## Related resources and components
 
@@ -56,7 +55,7 @@ These are the resources related to this CR:
 
 | Custom resource |   Description |
 |:----------:|:------|
-| Asset |  Provides the name of the storage bucket which the Asset CR refers to. |
+| ClusterAsset |  Provides the name of the storage bucket which the ClusterAsset CR refers to. |
 
 These components use this CR:
 
