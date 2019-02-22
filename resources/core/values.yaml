@@ -72,9 +72,9 @@ global:
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: "0b5f866d"
-  test_cluster_users:
+  cluster_users_test:
     dir: develop/
-    version: "ToBeAdded"
+    version: "PR-2782"
 
 test:
   acceptance:

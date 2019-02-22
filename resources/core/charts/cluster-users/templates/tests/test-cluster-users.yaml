@@ -8,8 +8,10 @@ metadata:
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    "helm-chart-test": "true"
   annotations:
     "helm.sh/hook-weight": "0"
+    "helm.sh/hook": test-success
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
@@ -23,7 +25,7 @@ subjects:
 apiVersion: v1
 kind: Pod
 metadata:
-  name: test-cluster-users
+  name: cluster-users-test
   namespace: {{ .Release.Namespace }}
   annotations:
     sidecar.istio.io/inject: "false"
@@ -36,9 +38,7 @@ spec:
   dnsPolicy: ClusterFirstWithHostNet
   containers:
     - name: test-cluster-users
-      # ToDo: Get an image
-      image: demonsthere/kyma-sar:latest
-      # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_cluster_users.dir }}test-cluster-users:{{ .Values.global.test_cluster_users.version }}
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_test.dir }}cluster-users-test:{{ .Values.global.cluster_users_test.version }}
       env:
         - name: EMAIL_FILE
           value: /etc/credentials/email
