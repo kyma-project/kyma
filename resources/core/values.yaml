@@ -91,5 +91,5 @@ test:
         memory: 300Mi
         cpu: 200m
       limits:
-        memory: 2Gi
+        memory: 1.5Gi
         cpu: 300m
