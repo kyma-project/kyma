@@ -14,11 +14,11 @@ import (
 )
 
 type Config struct {
-	Namespace string
-	BucketName string
-	AssetName string
-	ClusterBucketName string
-	ClusterAssetName string
+	Namespace string `envconfig:"default=test-asset-store"`
+	BucketName string `envconfig:"default=test-bucket"`
+	AssetName string `envconfig:"default=test-asset"`
+	ClusterBucketName string `envconfig:"default=test-cluster-bucket"`
+	ClusterAssetName string `envconfig:"default=test-cluster-asset"`
 }
 
 type TestSuite struct {
@@ -46,11 +46,22 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 	}, nil
 }
 
+func (t *TestSuite) Run() error {
+	// Upload test data with upload service
+
+	// Create Bucket CR
+	// Create asset CR (maybe more? single file and package)
+
+	// Check if assets have been uploaded
+
+	return nil
+}
+
 func (t *TestSuite) UploadTestData() error {
 	return nil
 }
 
-// TODO: Split
+// TODO: Split to different packages
 
 func (t *TestSuite) CreateNamespace() error {
 	_, err := t.coreCli.Namespaces().Create(&v1.Namespace{

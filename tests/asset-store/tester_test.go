@@ -3,6 +3,7 @@ package asset_store
 import (
 	"flag"
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/tests/asset-store/internal/testsuite"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/clientcmd"
 	restclient "k8s.io/client-go/rest"
@@ -13,6 +14,7 @@ import (
 type config struct {
 	KubeconfigPath string `envconfig:"optional"`
 	Verbose        bool   `envconfig:"default=false"`
+	TestSuite testsuite.Config
 }
 
 func main() {
@@ -23,14 +25,11 @@ func main() {
 	restConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	exitOnError(err, "Error while loading K8s REST config")
 
+	testSuite, err := testsuite.New(restConfig, cfg.TestSuite)
+	exitOnError(err, "Error while creating test suite")
 
-
-	// Upload test data with upload service
-
-	// Create Bucket CR
-	// Create asset CR (maybe more? single file and package)
-
-	// Check if assets have been uploaded
+	err := testSuite.Run()
+	exitOnError(err, "Error while running test suite")
 }
 
 func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
