@@ -29,18 +29,19 @@ echo "- E2E Testing Kyma..."
 echo "----------------------------"
 
 
-for testcase in ../../tests/end-to-end/*/deploy/chart/*
+for testcase in $(ls -d ../../tests/end-to-end/*/deploy/chart/*)
 do
-    cleanupHelmE2ERelease $testcase
+    release=$(basename $testcase)
+    cleanupHelmE2ERelease $release
 
     if [ ${cleanupE2EErr} -ne 0 ]
     then
         exit 1
     fi
 
-    helm install $testcase --name $(basename $testcase) --namespace end-to-end
-    if helm test $testcase; then
-        releasesToClean="$releasesToClean $testcase"
+    helm install $testcase --name $release --namespace end-to-end
+    if helm test $release; then
+        releasesToClean="$releasesToClean $release"
     fi
 done
 

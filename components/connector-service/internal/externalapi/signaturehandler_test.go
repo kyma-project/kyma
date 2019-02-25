@@ -59,8 +59,8 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certService := &certMock.Service{}
 		certService.On("SignCSR", decodedCSR, commonName).Return(encodedChain, nil)
 
-		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		dummyClientContext := dummyClientContextService{}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -87,7 +87,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract client context", func(t *testing.T) {
 		// given
-		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
@@ -109,8 +109,8 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't read request body", func(t *testing.T) {
 		// given
-		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		dummyClientContext := dummyClientContextService{}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -133,8 +133,8 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 400 when failed to decode base64", func(t *testing.T) {
 		// given
-		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		dummyClientContext := dummyClientContextService{}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
@@ -160,8 +160,8 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certService := &certMock.Service{}
 		certService.On("SignCSR", decodedCSR, commonName).Return(certificates.EncodedCertificateChain{}, apperrors.Internal("error"))
 
-		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		dummyClientContext := dummyClientContextService{}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 

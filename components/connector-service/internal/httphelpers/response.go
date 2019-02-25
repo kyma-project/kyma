@@ -11,9 +11,13 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 )
 
-func RespondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
+func RespondWithErrorAndLog(w http.ResponseWriter, apperr apperrors.AppError) {
 	log.Errorln(apperr.Error())
 
+	RespondWithError(w, apperr)
+}
+
+func RespondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
 	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
 
 	Respond(w, statusCode)

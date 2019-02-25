@@ -1,0 +1,15 @@
+---
+includedNamespaces:
+- istio-system
+- kyma-system
+- kyma-integration
+- kyma-installer
+- default
+- natss
+excludedNamespaces: null
+includedResources:
+- '*'
+excludedResources: null
+includeClusterResources: null
+labelSelector: null
+storageLocation: default

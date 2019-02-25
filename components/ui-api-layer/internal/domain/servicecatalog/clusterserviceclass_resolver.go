@@ -37,7 +37,7 @@ type clusterServicePlanLister interface {
 
 //go:generate mockery -name=instanceListerByClusterServiceClass -output=automock -outpkg=automock -case=underscore
 type instanceListerByClusterServiceClass interface {
-	ListForClusterServiceClass(className, externalClassName string) ([]*v1beta1.ServiceInstance, error)
+	ListForClusterServiceClass(className, externalClassName string, namespace *string) ([]*v1beta1.ServiceInstance, error)
 }
 
 type clusterServiceClassResolver struct {
@@ -122,13 +122,13 @@ func (r *clusterServiceClassResolver) ClusterServiceClassPlansField(ctx context.
 	return convertedPlans, nil
 }
 
-func (r *clusterServiceClassResolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ServiceInstance, error) {
+func (r *clusterServiceClassResolver) ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error) {
 	if obj == nil {
 		glog.Error(fmt.Errorf("%s cannot be empty in order to resolve activated field", pretty.ClusterServiceClass))
 		return nil, gqlerror.NewInternal()
 	}
 
-	items, err := r.instanceLister.ListForClusterServiceClass(obj.Name, obj.ExternalName)
+	items, err := r.instanceLister.ListForClusterServiceClass(obj.Name, obj.ExternalName, namespace)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while getting %s for %s %s", pretty.ServiceInstances, pretty.ClusterServiceClass, obj.Name))
 		return nil, gqlerror.New(err, pretty.ServiceInstances)
@@ -143,8 +143,8 @@ func (r *clusterServiceClassResolver) ClusterServiceClassInstancesField(ctx cont
 	return instances, nil
 }
 
-func (r *clusterServiceClassResolver) ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (bool, error) {
-	instances, err := r.ClusterServiceClassInstancesField(ctx, obj)
+func (r *clusterServiceClassResolver) ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) (bool, error) {
+	instances, err := r.ClusterServiceClassInstancesField(ctx, obj, namespace)
 	if err != nil {
 		return false, err
 	}

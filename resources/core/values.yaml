@@ -47,7 +47,7 @@ global:
     version: 07db886f
   docs:
     dir: develop/
-    version: e4a36e7d
+    version: 11d887b4
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -68,10 +68,23 @@ global:
     version: e11a469a
   ui_api_layer:
     dir: develop/
-    version: "0b5f866d"
+    version: "ff99660e"
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: "0b5f866d"
+  kubeless_images:
+    runtime:
+      node6:
+        dir: develop/
+        version: "ddf6f99f"
+      node8:
+        dir: develop/
+        version: "ddf6f99f"
+    installation:
+      node6:
+        image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
+      node8:
+        image: "kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7"
 
 test:
   acceptance:
@@ -91,5 +104,5 @@ test:
         memory: 300Mi
         cpu: 200m
       limits:
-        memory: 500Mi
+        memory: 1.5Gi
         cpu: 300m

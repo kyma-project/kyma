@@ -17,30 +17,41 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
     git clone https://github.com/kubernetes-incubator/service-catalog.git
     ```
 
-2.  Run this command to install the chart with the `ups-broker` name in the `stage` Namespace:
+2. Check out one of the official tags. For example:
+
+    ```
+    git fetch --all --tags --prune
+    git checkout tags/v0.1.39 -b v0.1.39
+    ```
+3. Create the `ups-broker` Namespace:
+    ```
+    kubectl create namespace ups-broker
+    ```
+
+4. Run this command to install the chart with the `ups-broker` name in the `ups-broker` Namespace:
       ```
-     helm install service-catalog/charts/ups-broker --name ups-broker --namespace stage
+     helm install ./charts/ups-broker --name ups-broker --namespace ups-broker
      ```
 
-3. Register a broker:
+5. Register a broker:
   * Run this command to register a ClusterServiceBroker:
      ```
-    kubectl create -f service-catalog/contrib/examples/walkthrough/ups-clusterservicebroker.yaml
+    kubectl create -f ./contrib/examples/walkthrough/ups-clusterservicebroker.yaml
     ```
-  * To register the UPS Broker as a ServiceBroker in the `stage` Namespace, run:
+  * To register the UPS Broker as a ServiceBroker in the `ups-broker` Namespace, run:
     ```
-    kubectl create -f service-catalog/contrib/examples/walkthrough/ups-servicebroker.yaml -n stage
+    kubectl create -f ./contrib/examples/walkthrough/ups-servicebroker.yaml -n ups-broker
     ```     
     After you successfully register your ServiceBroker or ClusterServiceBroker, the Service Catalog periodically fetches services from this broker and creates ServiceClasses or ClusterServiceClasses from them.
 
-4. Check the status of your broker:
+6. Check the status of your broker:
   * To check the status of your ClusterServiceBroker, run:
      ```
     kubectl get clusterservicebrokers ups-broker -o jsonpath="{.status.conditions}"
     ```
   * To check the status of the ServiceBroker, run:
     ```
-    kubectl get servicebrokers ups-broker -n stage -o jsonpath="{.status.conditions}"
+    kubectl get servicebrokers ups-broker -n ups-broker -o jsonpath="{.status.conditions}"
     ```
 
     The output looks as follows:
@@ -54,14 +65,14 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
     }
     ```
 
-5. View Service Classes that this broker provides:
+7. View Service Classes that this broker provides:
   * To check the ClusterServiceClasses, run:
       ```
      kubectl get clusterserviceclasses
       ```
   * To check the ServiceClasses, run:
       ```
-      kubectl get serviceclasses -n stage
+      kubectl get serviceclasses -n ups-broker
       ```
 
       These are the UPS Broker Service Classes:

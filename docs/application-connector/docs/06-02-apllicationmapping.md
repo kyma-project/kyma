@@ -25,19 +25,12 @@ metadata:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the App. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the App is enabled. |
 
 ## Related resources and components
-
-These are the resources related to this CR:
-
-| Custom resource   |   Description |
-|:----------:|:------|
-| ApplicationMapping |  Uses this CR to expose the services of an App in a given Namespace. |
 
 These components use this CR:
 
