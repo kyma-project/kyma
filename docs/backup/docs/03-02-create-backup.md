@@ -78,5 +78,6 @@ To schedule a backup, run the following command:
 
 To set the retention period of a backup, define the **ttl** parameter in the `BackupSpec` [definition](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md):
 
-```  # The amount of time before this backup is eligible for garbage collection.
-  ttl: 24h0m0s```
+```  The amount of time before this backup is eligible for garbage collection.
+  ttl: 24h0m0s 
+  ```

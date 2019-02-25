@@ -25,7 +25,7 @@ spec:
   provider: azure
 ```
 
-For a detailed description of all options, see the [Heptio Ark Documentation](https://github.com/heptio/velero/blob/master/docs/api-types/volumesnapshotlocation.md).
+For a detailed description of all options, see the [Heptio Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/volumesnapshotlocation.md).
 
 A sample `VolumeSnapshotLocation` configuration file looks as follows:
 
@@ -40,4 +40,4 @@ spec:
   provider: azure
 ```
 
-A detailed description of all options can be found in the [Heptio Ark Documentation](https://github.com/heptio/velero/blob/master/docs/api-types/volumesnapshotlocation.md).
+For a detailed description of all options, see the [Heptio Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/volumesnapshotlocation.md).

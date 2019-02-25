@@ -16,7 +16,7 @@ If Ark's functionality is not sufficient, you can extend it using [plugins](http
 
 ## E2E tests
 
-The [E2E test for backup](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test) runs daily on Prow and validates if the restore process works for all components as expected.
+The [E2E test for backup](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test) runs daily on Prow and validates if the restore process works for all components.
 
 To add components to the backup pipeline, implement the following go interface:
 
@@ -26,8 +26,10 @@ type BackupTest interface {
     TestResources(namespace string)
 }
 ```
+The functions work as follows:
 
-- The `CreateResources` function is called before the backup process starts, to install the required test data.
-- The `TestResources` function is called after the `CreateResources` function to validate if the test data is working like expected. After the pipeline did a backup and restore on the cluster the `TestResources` function is called again to validate the restore was working as expected.
+- The `TestResources` function validates if the test data is working as expected. 
+- The `CreateResources` function installs the required test data before the backup process starts.
+- After the pipeline executes backup and restore on the cluster, the `TestResources` function validates if the restore worked as expected.
 
 Register the test in the [E2E tests](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test).
