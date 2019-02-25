@@ -2,7 +2,7 @@
 title: Architecture
 ---
 
-This document provides an overview of the logging architecture in Kyma. It describes the information sources from which promtail extract logs to feed to Loki.
+This document provides an overview of the logging architecture in Kyma. It describes the information sources from which promtail extracts logs to feed to Loki.
 
 ## Agent (Promtail)
 Promtail is the agent responsible for collecting reliable metadata, consistent with the time series, or metrics metadata. To achieve this, the agent uses the same service discovery and label relabelling libraries as Prometheus. The agent is wrapped in a daemon that discovers targets, produces metadata labels, and tails log files to produce a stream of logs buffered on the client side and then sent to the service.
