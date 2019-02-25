@@ -40,8 +40,8 @@ global:
     dir: pr/
     version: PR-2854
   application_registry_tests:
-    dir: develop/
-    version: cb6a82cf
+    dir: pr/
+    version: PR-2854
   application_broker:
     dir: develop/
     version: f78529c4
