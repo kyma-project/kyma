@@ -4,8 +4,8 @@ type: Details
 ---
 Kyma provides two validated sample `BackupSpec` files:
 
-- [System Namespace Backup](/assets/system-backup.yaml)
-- [User Namespace Backup](/assets/all-backup.yaml)
+- [System Namespace Backup](./assets/system-backup.yaml)
+- [User Namespace Backup](./assets/all-backup.yaml)
 
 
 Integrate the these files with your scheduled or on-demand configurations to back up system and user Namespaces. 
