@@ -1,12 +1,12 @@
 ---
-title: Storage Configuration
+title: Storage configuration
 type: Details
 ---
 
-#### Storage
-By default, Loki installation comes with storage configuration [boltdb](https://github.com/boltdb/bolt) including label/index storage and the filesystem for the object store. Additionally, Loki supports other object stores, such as S3 or GCS.
+## Storage
+By default, Loki comes with [boltDB](https://github.com/boltdb/bolt) storage configuration. It includes label and index storage, and the filesystem for object storage. Additionally, Loki supports other object stores, such as S3 or GCS.
 
-The following configuration shows Loki configuration using boltdb and filesystem:
+This is an example of Loki configuration using boltDB and filesystem storage:
 ```yaml
 apiVersion: v1
 kind: ConfigMap
@@ -43,9 +43,9 @@ data:
 
 ``` 
 
-The Loki storage configuration consists of the **schema_config** and **storage_configs** sections. Use the **schema_config** to define your storage types and **storage_configs** to set specific configuration for the declared storage types.
+The Loki storage configuration consists of the **schema_config** and **storage_configs** definitions. Use the **schema_config** to define your storage types, and **storage_configs** to configure the already defined storage types.
 
-##### Example Configuration for GCS
+A sample configuration for GCS looks as follows:
 
 ```yaml
 apiVersion: v1
