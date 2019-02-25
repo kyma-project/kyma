@@ -78,7 +78,9 @@ function init() {
 	export AUTH_TOKEN=$(echo "${RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
 	curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" ${CONFIGURATIONS_GENERATOR_SERVICE_HOST}:${CONFIGURATIONS_GENERATOR_SERVICE_PORT_HTTP}/kube-config -o "${PWD}/kubeconfig"
 	export KUBECONFIG="${PWD}/kubeconfig"
-	kubectl version
+
+	echo "---> Create testing RoleBinding"
+	kubectl create -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
 }
 
 discoverUnsetVar=false
@@ -96,3 +98,4 @@ fi
 init
 runTests
 echo "ALL TESTS PASSED"
+kubectl delete -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
