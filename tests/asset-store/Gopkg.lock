@@ -69,6 +69,14 @@
   version = "v1.1.5"
 
 [[projects]]
+  branch = "master"
+  digest = "1:ebb6c5e98157f61d0e3b3e49fc70391bc1d7493108c8989b139039a74fcb73d8"
+  name = "github.com/kyma-project/kyma"
+  packages = ["components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"]
+  pruneopts = "UT"
+  revision = "5eb7d7b38fe826d1ad3dd6339653d2369f5f07c7"
+
+[[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
   name = "github.com/modern-go/concurrent"
   packages = ["."]
@@ -395,17 +403,28 @@
   revision = "d082d5923d3cc0bfbb066ee5fbdea3d0ca79acf8"
   version = "kubernetes-1.12.3"
 
+[[projects]]
+  digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
+  name = "sigs.k8s.io/controller-runtime"
+  packages = ["pkg/runtime/scheme"]
+  pruneopts = "UT"
+  revision = "f6f0bc9611363b43664d08fb097ab13243ef621d"
+  version = "v0.1.9"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
     "github.com/golang/glog",
+    "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/mock",
     "github.com/vrischmann/envconfig",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
+    "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes/typed/core/v1",
