@@ -54,6 +54,8 @@ spec:
       value: https://gateway.kyma.local:$NODE_PORT
     - name: SKIP_SSL_VERIFY
       value: "true"
+    - name: CENTRAL
+      value: "false"
   restartPolicy: Never
 EOF
 

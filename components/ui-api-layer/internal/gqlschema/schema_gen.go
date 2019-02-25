@@ -288,6 +288,8 @@ type ComplexityRoot struct {
 		DisableApplication        func(childComplexity int, application string, namespace string) int
 		UpdatePod                 func(childComplexity int, name string, namespace string, pod JSON) int
 		DeletePod                 func(childComplexity int, name string, namespace string) int
+		UpdateReplicaSet          func(childComplexity int, name string, namespace string, replicaSet JSON) int
+		DeleteReplicaSet          func(childComplexity int, name string, namespace string) int
 		CreateIdppreset           func(childComplexity int, name string, issuer string, jwksUri string) int
 		DeleteIdppreset           func(childComplexity int, name string) int
 	}
@@ -337,6 +339,8 @@ type ComplexityRoot struct {
 		Deployments           func(childComplexity int, namespace string, excludeFunctions *bool) int
 		Pod                   func(childComplexity int, name string, namespace string) int
 		Pods                  func(childComplexity int, namespace string, first *int, offset *int) int
+		ReplicaSet            func(childComplexity int, name string, namespace string) int
+		ReplicaSets           func(childComplexity int, namespace string, first *int, offset *int) int
 		ResourceQuotas        func(childComplexity int, namespace string) int
 		ResourceQuotasStatus  func(childComplexity int, namespace string) int
 		Functions             func(childComplexity int, namespace string, first *int, offset *int) int
@@ -347,6 +351,16 @@ type ComplexityRoot struct {
 		BackendModules        func(childComplexity int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
+	}
+
+	ReplicaSet struct {
+		Name              func(childComplexity int) int
+		Pods              func(childComplexity int) int
+		Namespace         func(childComplexity int) int
+		Images            func(childComplexity int) int
+		CreationTimestamp func(childComplexity int) int
+		Labels            func(childComplexity int) int
+		Json              func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -601,6 +615,8 @@ type MutationResolver interface {
 	DisableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
 	UpdatePod(ctx context.Context, name string, namespace string, pod JSON) (*Pod, error)
 	DeletePod(ctx context.Context, name string, namespace string) (*Pod, error)
+	UpdateReplicaSet(ctx context.Context, name string, namespace string, replicaSet JSON) (*ReplicaSet, error)
+	DeleteReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
 	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*IDPPreset, error)
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 }
@@ -630,6 +646,8 @@ type QueryResolver interface {
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
 	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
 	Pods(ctx context.Context, namespace string, first *int, offset *int) ([]Pod, error)
+	ReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
+	ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]ReplicaSet, error)
 	ResourceQuotas(ctx context.Context, namespace string) ([]ResourceQuota, error)
 	ResourceQuotasStatus(ctx context.Context, namespace string) (ResourceQuotasStatus, error)
 	Functions(ctx context.Context, namespace string, first *int, offset *int) ([]Function, error)
@@ -1056,6 +1074,63 @@ func field_Mutation_updatePod_args(rawArgs map[string]interface{}) (map[string]i
 }
 
 func field_Mutation_deletePod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_updateReplicaSet_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["replicaSet"]; ok {
+		var err error
+		err = (&arg2).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["replicaSet"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_deleteReplicaSet_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
@@ -1732,6 +1807,73 @@ func field_Query_pod_args(rawArgs map[string]interface{}) (map[string]interface{
 }
 
 func field_Query_pods_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg2
+	return args, nil
+
+}
+
+func field_Query_replicaSet_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Query_replicaSets_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
@@ -3172,6 +3314,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeletePod(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
+	case "Mutation.updateReplicaSet":
+		if e.complexity.Mutation.UpdateReplicaSet == nil {
+			break
+		}
+
+		args, err := field_Mutation_updateReplicaSet_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateReplicaSet(childComplexity, args["name"].(string), args["namespace"].(string), args["replicaSet"].(JSON)), true
+
+	case "Mutation.deleteReplicaSet":
+		if e.complexity.Mutation.DeleteReplicaSet == nil {
+			break
+		}
+
+		args, err := field_Mutation_deleteReplicaSet_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteReplicaSet(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
 	case "Mutation.createIDPPreset":
 		if e.complexity.Mutation.CreateIdppreset == nil {
 			break
@@ -3551,6 +3717,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Pods(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
+	case "Query.replicaSet":
+		if e.complexity.Query.ReplicaSet == nil {
+			break
+		}
+
+		args, err := field_Query_replicaSet_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ReplicaSet(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.replicaSets":
+		if e.complexity.Query.ReplicaSets == nil {
+			break
+		}
+
+		args, err := field_Query_replicaSets_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ReplicaSets(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
+
 	case "Query.resourceQuotas":
 		if e.complexity.Query.ResourceQuotas == nil {
 			break
@@ -3665,6 +3855,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Idppresets(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+
+	case "ReplicaSet.name":
+		if e.complexity.ReplicaSet.Name == nil {
+			break
+		}
+
+		return e.complexity.ReplicaSet.Name(childComplexity), true
+
+	case "ReplicaSet.pods":
+		if e.complexity.ReplicaSet.Pods == nil {
+			break
+		}
+
+		return e.complexity.ReplicaSet.Pods(childComplexity), true
+
+	case "ReplicaSet.namespace":
+		if e.complexity.ReplicaSet.Namespace == nil {
+			break
+		}
+
+		return e.complexity.ReplicaSet.Namespace(childComplexity), true
+
+	case "ReplicaSet.images":
+		if e.complexity.ReplicaSet.Images == nil {
+			break
+		}
+
+		return e.complexity.ReplicaSet.Images(childComplexity), true
+
+	case "ReplicaSet.creationTimestamp":
+		if e.complexity.ReplicaSet.CreationTimestamp == nil {
+			break
+		}
+
+		return e.complexity.ReplicaSet.CreationTimestamp(childComplexity), true
+
+	case "ReplicaSet.labels":
+		if e.complexity.ReplicaSet.Labels == nil {
+			break
+		}
+
+		return e.complexity.ReplicaSet.Labels(childComplexity), true
+
+	case "ReplicaSet.json":
+		if e.complexity.ReplicaSet.Json == nil {
+			break
+		}
+
+		return e.complexity.ReplicaSet.Json(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -9914,6 +10153,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updatePod(ctx, field)
 		case "deletePod":
 			out.Values[i] = ec._Mutation_deletePod(ctx, field)
+		case "updateReplicaSet":
+			out.Values[i] = ec._Mutation_updateReplicaSet(ctx, field)
+		case "deleteReplicaSet":
+			out.Values[i] = ec._Mutation_deleteReplicaSet(ctx, field)
 		case "createIDPPreset":
 			out.Values[i] = ec._Mutation_createIDPPreset(ctx, field)
 		case "deleteIDPPreset":
@@ -10379,6 +10622,76 @@ func (ec *executionContext) _Mutation_deletePod(ctx context.Context, field graph
 	}
 
 	return ec._Pod(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_updateReplicaSet(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_updateReplicaSet_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateReplicaSet(rctx, args["name"].(string), args["namespace"].(string), args["replicaSet"].(JSON))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ReplicaSet)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ReplicaSet(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deleteReplicaSet(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deleteReplicaSet_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteReplicaSet(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ReplicaSet)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ReplicaSet(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -11169,6 +11482,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_pods(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "replicaSet":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_replicaSet(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "replicaSets":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_replicaSets(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -12412,6 +12740,107 @@ func (ec *executionContext) _Query_pods(ctx context.Context, field graphql.Colle
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_replicaSet(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_replicaSet_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ReplicaSet(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ReplicaSet)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ReplicaSet(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_replicaSets(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_replicaSets_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ReplicaSets(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ReplicaSet)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ReplicaSet(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query_resourceQuotas(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -13029,6 +13458,264 @@ func (ec *executionContext) _Query___schema(ctx context.Context, field graphql.C
 	}
 
 	return ec.___Schema(ctx, field.Selections, res)
+}
+
+var replicaSetImplementors = []string{"ReplicaSet"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ReplicaSet(ctx context.Context, sel ast.SelectionSet, obj *ReplicaSet) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, replicaSetImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ReplicaSet")
+		case "name":
+			out.Values[i] = ec._ReplicaSet_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "pods":
+			out.Values[i] = ec._ReplicaSet_pods(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._ReplicaSet_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "images":
+			out.Values[i] = ec._ReplicaSet_images(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "creationTimestamp":
+			out.Values[i] = ec._ReplicaSet_creationTimestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "labels":
+			out.Values[i] = ec._ReplicaSet_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "json":
+			out.Values[i] = ec._ReplicaSet_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ReplicaSet_name(ctx context.Context, field graphql.CollectedField, obj *ReplicaSet) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ReplicaSet",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ReplicaSet_pods(ctx context.Context, field graphql.CollectedField, obj *ReplicaSet) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ReplicaSet",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Pods, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ReplicaSet_namespace(ctx context.Context, field graphql.CollectedField, obj *ReplicaSet) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ReplicaSet",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ReplicaSet_images(ctx context.Context, field graphql.CollectedField, obj *ReplicaSet) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ReplicaSet",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Images, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ReplicaSet_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *ReplicaSet) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ReplicaSet",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreationTimestamp, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return MarshalTimestamp(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ReplicaSet_labels(ctx context.Context, field graphql.CollectedField, obj *ReplicaSet) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ReplicaSet",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ReplicaSet_json(ctx context.Context, field graphql.CollectedField, obj *ReplicaSet) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ReplicaSet",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JSON, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var resourceQuotaImplementors = []string{"ResourceQuota"}
@@ -20406,6 +21093,16 @@ type Pod {
     json: JSON!
 }
 
+type ReplicaSet {
+    name: String!
+    pods: String!
+    namespace: String!
+    images: [String!]!
+    creationTimestamp: Timestamp!
+    labels: Labels!
+    json: JSON!
+}
+
 enum PodStatusType {
     PENDING
     RUNNING
@@ -20636,6 +21333,10 @@ type Query {
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]!
     pod(name: String!, namespace: String!): Pod
     pods(namespace: String!, first: Int, offset: Int): [Pod!]!
+
+    replicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "get", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+    replicaSets(namespace: String!, first: Int, offset: Int): [ReplicaSet!]! @HasAccess(attributes: {resource: "replicasets", verb: "list", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+
     resourceQuotas(namespace: String!): [ResourceQuota!]!
     resourceQuotasStatus(namespace: String!): ResourceQuotasStatus!
 
@@ -20672,6 +21373,9 @@ type Mutation {
 
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
+
+    updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+    deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})

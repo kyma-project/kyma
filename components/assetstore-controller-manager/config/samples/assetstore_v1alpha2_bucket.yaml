@@ -1,0 +1,11 @@
+apiVersion: assetstore.kyma-project.io/v1alpha2
+kind: Bucket
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: test-sample
+  namespace: default
+spec:
+  region: "us-east-1"
+  policy: writeonly
+
