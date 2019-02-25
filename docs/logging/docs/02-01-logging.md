@@ -17,7 +17,7 @@ The write request path resembles [Cortex](https://github.com/cortexproject/corte
 A log chunk consists of all logs for metadata, such as labels, collected over a certain time period. Log chunks support append, seek, and stream operations on requests.
 
 ## Life of a query request
-Log chunks are larger than Prometheus-Cortex chunks (Cortex chunks do not exceed 1KB). As a result, you cannot load and decompress them as a whole.
+Log chunks are larger than Prometheus Cortex chunks (Cortex chunks do not exceed 1KB). As a result, you cannot load and decompress them as a whole. 
 To solve this problem Loki supports streaming and iterating over the chunks. This means it can decompress only the necessary chunk parts.
 
 For further information, see the [design documentation](https://docs.google.com/document/d/11tjK_lvp1-SVsFZjgOTr1vV3-q6vBAsZYIQ5ZeYBkyM/view).
