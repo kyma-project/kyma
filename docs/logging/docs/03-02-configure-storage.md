@@ -4,7 +4,7 @@ type: Details
 ---
 
 ## Storage
-By default, Loki comes with [boltDB](https://github.com/boltdb/bolt) storage configuration. It includes label and index storage, and the filesystem for object storage. Additionally, Loki supports other object stores, such as S3 or GCS.
+By default, Loki comes with the [boltDB](https://github.com/boltdb/bolt) storage configuration. It includes label and index storage, and the filesystem for object storage. Additionally, Loki supports other object stores, such as S3 or GCS.
 
 This is an example of Loki configuration using boltDB and filesystem storage:
 ```yaml
