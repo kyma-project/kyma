@@ -48,7 +48,6 @@ do
         releasesToClean="$releasesToClean $release"
     else
         result=$testResult
-        echo $result
     fi
 done
 
