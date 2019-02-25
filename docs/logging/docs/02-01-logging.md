@@ -10,7 +10,7 @@ Promtail is the agent responsible for collecting reliable metadata, consistent w
 ## Life of a write request
 The write request path resembles [Cortex](https://github.com/cortexproject/cortex) architecture, using the same server-side components. It looks as follows:
 1. The write request reaches the distributor service, which is responsible for distributing and replicating the requests to ingesters. Loki uses the Cortex consistent hash ring and distributes requests based on the hash of the entire metadata set.
-2. The write request goes to the log ingester, which batches the requests for the same stream into the log chunks in memory. When log chunks reach a predefined size or age, they are flushed out to the Cortex chunk store.
+2. The write request goes to the log ingester which batches the requests for the same stream into the log chunks stored in memory. When the log chunks reach a predefined size or age, they are flushed out to the Cortex chunk store.
 3. The Cortex chunk store will be updated to reduce copying of chunk data on the read and write path and add support for writing chunks of google cloud storage.
 
 ## Log chunks
