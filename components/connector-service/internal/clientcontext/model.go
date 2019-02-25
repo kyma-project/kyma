@@ -7,6 +7,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/logging"
 	"github.com/sirupsen/logrus"
+	"strings"
 )
 
 type clientContextKey string
@@ -18,6 +19,10 @@ type CtxRequiredType bool
 type HeadersRequiredType bool
 
 const (
+	TenantPlaceholder      = "{TENANT}"
+	GroupPlaceholder       = "{GROUP}"
+	ApplicationPlaceholder = "{APPLICATION}"
+  
 	// ApplicationHeader is key represeting Application in headers
 	ApplicationHeader = "Application"
 
@@ -69,6 +74,7 @@ type ClientContextService interface {
 	GetCommonName() string
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
+	FillPlaceholders(format string) string
 }
 
 type ContextExtender interface {
@@ -136,6 +142,13 @@ func (appCtx ApplicationContext) GetLogger() *logrus.Entry {
 	return logging.GetApplicationLogger(appCtx.Application, appCtx.ClusterContext.Tenant, appCtx.ClusterContext.Group)
 }
 
+func (appCtx ApplicationContext) FillPlaceholders(format string) string {
+	filledFormat := strings.Replace(format, TenantPlaceholder, appCtx.ClusterContext.Tenant, 1)
+	filledFormat = strings.Replace(filledFormat, GroupPlaceholder, appCtx.ClusterContext.Group, 1)
+	filledFormat = strings.Replace(filledFormat, ApplicationPlaceholder, appCtx.Application, 1)
+	return filledFormat
+}
+
 func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
 	return &extAppCtx.RuntimeURLs
 }
@@ -172,7 +185,12 @@ func (clsCtx ClusterContext) GetCommonName() string {
 
 func (clsCtx ClusterContext) GetLogger() *logrus.Entry {
 	return logging.GetClusterLogger(clsCtx.Tenant, clsCtx.Group)
+}
 
+func (clsCtx ClusterContext) FillPlaceholders(format string) string {
+	filledFormat := strings.Replace(format, TenantPlaceholder, clsCtx.Tenant, 1)
+	filledFormat = strings.Replace(filledFormat, GroupPlaceholder, clsCtx.Group, 1)
+	return filledFormat
 }
 
 func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {
