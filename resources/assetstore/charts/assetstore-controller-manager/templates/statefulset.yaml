@@ -70,5 +70,4 @@ spec:
       terminationGracePeriodSeconds: 10
       volumes:
         - name: tmp-empty-dir
-          emptyDir:
-            medium: "Memory" # mount a tmpfs (RAM-backed filesystem). Default emptyDir volumes are stored on whatever medium is backing the node - that might be disk or SSD or network storage, depending on your environment.
+          emptyDir: {}

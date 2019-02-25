@@ -3,15 +3,17 @@ package middlewares
 import (
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-
-	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 )
 
 type appContextMiddleware struct {
 	*clusterContextMiddleware
+}
+
+func (cc appContextMiddleware) isValidCtx(appCtx clientcontext.ApplicationContext) bool {
+	return (appCtx.IsEmpty() || (appCtx.ClusterContext.IsEmpty() && bool(cc.clusterContextMiddleware.required))) == false
 }
 
 func NewApplicationContextMiddleware(clusterContextMiddleware *clusterContextMiddleware) *appContextMiddleware {
@@ -27,8 +29,8 @@ func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {
 			ClusterContext: cc.readClusterContextFromRequest(r),
 		}
 
-		if appContext.IsEmpty() {
-			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified."))
+		if cc.isValidCtx(appContext) == false {
+			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Required headers for ApplicationContext not specified."))
 			return
 		}
 

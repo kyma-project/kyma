@@ -23,6 +23,12 @@ When you modify an Asset CR by updating the bucket reference in the Asset CR to 
 
 Unfortunately, this causes duplication of data as the assets from the previous bucket storage are not cleaned up by default. Thus, to avoid multiplication of assets, first remove one Bucket CR and then modify the existing Asset CR with a new bucket reference.
 
+![](./assets/modify-bucket-ref-asset.svg)
+
+## Change the Asset CR specification
+
+When you modify the Asset CR specification, the lifecycle starts again. The previous asset content is removed and no longer available.
+
 ![](./assets/modify-asset.svg)
 
 ## Other changes

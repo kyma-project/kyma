@@ -27,7 +27,7 @@ func (cc *tokenResolverMiddleware) Middleware(handler http.Handler) http.Handler
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.URL.Query().Get("token")
 		if token == "" {
-			httphelpers.RespondWithError(w, apperrors.Forbidden("Token not provided."))
+			httphelpers.RespondWithErrorAndLog(w, apperrors.Forbidden("Token not provided."))
 			return
 		}
 
@@ -36,9 +36,9 @@ func (cc *tokenResolverMiddleware) Middleware(handler http.Handler) http.Handler
 		err := cc.tokenManager.Resolve(token, connectorClientContext)
 		if err != nil {
 			if err.Code() == apperrors.CodeNotFound {
-				httphelpers.RespondWithError(w, apperrors.Forbidden("Invalid token."))
+				httphelpers.RespondWithErrorAndLog(w, apperrors.Forbidden("Invalid token."))
 			} else {
-				httphelpers.RespondWithError(w, apperrors.Internal("Failed to resolve token."))
+				httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Failed to resolve token."))
 			}
 
 			return
