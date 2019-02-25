@@ -1,40 +1,44 @@
 package externalapi
 
 import (
+	"fmt"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
-	"net/http"
 )
 
 const (
-	RenewCertEndpoint = "certificates/renewals"
+	RenewCertURLFormat = "%s/certificates/renewals"
 )
 
-type ManagementInfoHandler struct {
-	connectorClientExtractor clientcontext.ConnectorClientExtractor
+type managementInfoHandler struct {
+	connectorClientExtractor    clientcontext.ConnectorClientExtractor
+	certificateProtectedBaseURL string
 }
 
-func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor) *ManagementInfoHandler {
-	return &ManagementInfoHandler{
-		connectorClientExtractor: connectorClientExtractor,
+func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, certProtectedBaseURL string) *managementInfoHandler {
+	return &managementInfoHandler{
+		connectorClientExtractor:    connectorClientExtractor,
+		certificateProtectedBaseURL: certProtectedBaseURL,
 	}
 }
 
-func (ih *ManagementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *http.Request) {
-	connectorClientContext, err := ih.connectorClientExtractor(r.Context())
+func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *http.Request) {
+	clientContextService, err := ih.connectorClientExtractor(r.Context())
 	if err != nil {
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
-	urls := ih.buildURLs(connectorClientContext)
+	urls := ih.buildURLs(clientContextService)
 
-	httphelpers.RespondWithBody(w, 200, mgmtInfoReponse{URLs: urls})
+	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls})
 }
 
-func (ih *ManagementInfoHandler) buildURLs(connectorClientContext clientcontext.ConnectorClientContext) mgmtURLs {
+func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.ClientContextService) mgmtURLs {
 	return mgmtURLs{
-		RuntimeURLs:  connectorClientContext.GetRuntimeUrls(),
-		RenewCertURL: "",
+		RuntimeURLs:  clientContextService.GetRuntimeUrls(),
+		RenewCertURL: fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
 	}
 }

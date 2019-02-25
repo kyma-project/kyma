@@ -1,0 +1,12 @@
+apiVersion: assetstore.kyma-project.io/v1alpha2
+kind: ClusterAsset
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: clusterasset-sample
+spec:
+  bucketRef:
+    name: clusterbucket-sample
+  source:
+    url: https://raw.githubusercontent.com/kyma-project/kyma/master/README.md
+    mode: single

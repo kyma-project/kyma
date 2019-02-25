@@ -3,15 +3,14 @@ package asset
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
-	automock2 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/cleaner/automock"
-	automock3 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/controller/asset/bucket/automock"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/controller/asset/webhook"
-	automock4 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/controller/asset/webhook/automock"
-	automock5 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/loader/automock"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/uploader/automock"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine"
+	engineMock "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine/automock"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/asset/pretty"
+	loaderMock "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/loader/automock"
+	storeMock "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store/automock"
 	"github.com/onsi/gomega"
+	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,7 +26,7 @@ import (
 
 var c client.Client
 
-const timeout = time.Hour * 5
+const timeout = time.Second * 10
 
 func TestAdd(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
@@ -71,19 +70,16 @@ func TestAdd(t *testing.T) {
 
 func TestReconcileAssetCreationSuccess(t *testing.T) {
 	//Given
-	name := "the-tesciak"
+	name := "the-tesciak-success"
 	testData := newTestData(name)
-	testData.asset.Status = v1alpha1.AssetStatus{LastHeartbeatTime: v1.Now()}
 
 	mocks := newMocks()
-	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(4)
 	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
-	mocks.validator.On("Validate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(webhook.ValidationResult{Success: true}, nil).Once()
-	mocks.mutator.On("Mutate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(nil).Once()
-	mocks.uploader.On("Upload", mock.Anything, testData.minioBucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
-	mocks.uploader.On("ContainsAll", testData.minioBucketName, testData.assetName, testData.files).Return(true, nil).Once()
-	mocks.cleaner.On("Clean", mock.Anything, testData.minioBucketName, fmt.Sprintf("%s/", testData.assetName)).Return(nil).Once()
+	mocks.validator.On("Validate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
+	mocks.mutator.On("Mutate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(nil).Once()
+	mocks.store.On("PutObjects", mock.Anything, testData.bucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
+	mocks.store.On("DeleteObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil).Once()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -91,21 +87,26 @@ func TestReconcileAssetCreationSuccess(t *testing.T) {
 	c := cfg.c
 	defer cfg.finishTest()
 
+	err := c.Create(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	defer deleteBucket(cfg, testData.bucket)
+	err = c.Status().Update(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	//When
-	err := c.Create(context.TODO(), testData.asset)
+	err = c.Create(context.TODO(), testData.asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	defer deleteAndExpectSuccess(cfg, testData)
 
 	//Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
-	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.Asset{}
+	asset := &v1alpha2.Asset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	g.Expect(asset.Status.AssetRef.BaseUrl).To(gomega.Equal(testData.assetUrl))
 	g.Expect(asset.Status.AssetRef.Assets).To(gomega.Equal(testData.files))
 	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteAssetFinalizerName))
@@ -113,16 +114,14 @@ func TestReconcileAssetCreationSuccess(t *testing.T) {
 
 func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 	//Given
-	name := "the-tesciak"
+	name := "the-tesciak-mutation-fail"
 	testData := newTestData(name)
-	testData.asset.Status = v1alpha1.AssetStatus{LastHeartbeatTime: v1.Now()}
 
 	mocks := newMocks()
-	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(3)
 	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
-	mocks.validator.On("Validate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(webhook.ValidationResult{Success: true}, nil).Once()
-	mocks.mutator.On("Mutate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(fmt.Errorf("surprise!")).Once()
+	mocks.mutator.On("Mutate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(errors.New("surprise!")).Once()
+	mocks.store.On("DeleteObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil).Once()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -130,8 +129,14 @@ func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 	c := cfg.c
 	defer cfg.finishTest()
 
+	err := c.Create(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	defer deleteBucket(cfg, testData.bucket)
+	err = c.Status().Update(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	//When
-	err := c.Create(context.TODO(), testData.asset)
+	err = c.Create(context.TODO(), testData.asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	defer deleteAndExpectSuccess(cfg, testData)
 
@@ -139,26 +144,25 @@ func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.Asset{}
+	asset := &v1alpha2.Asset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
-	g.Expect(asset.Status.Reason).To(gomega.Equal(string(ReasonMutationFailed)))
-	g.Expect(asset.Finalizers).NotTo(gomega.ContainElement(deleteAssetFinalizerName))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
+	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.MutationFailed.String()))
 }
 
 func TestReconcileAssetCreationSuccessValidationFailed(t *testing.T) {
 	//Given
-	name := "the-tesciak"
+	name := "the-tesciak-validation-fail"
 	testData := newTestData(name)
-	testData.asset.Status = v1alpha1.AssetStatus{LastHeartbeatTime: v1.Now()}
 
 	mocks := newMocks()
-	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(3)
 	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
-	mocks.validator.On("Validate", mock.Anything, testData.tmpBaseDir, testData.files, mock.Anything).Return(webhook.ValidationResult{Success: false}, nil).Once()
+	mocks.validator.On("Validate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, nil).Once()
+	mocks.mutator.On("Mutate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(nil).Once()
+	mocks.store.On("DeleteObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil).Once()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -166,8 +170,14 @@ func TestReconcileAssetCreationSuccessValidationFailed(t *testing.T) {
 	c := cfg.c
 	defer cfg.finishTest()
 
+	err := c.Create(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	defer deleteBucket(cfg, testData.bucket)
+	err = c.Status().Update(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	//When
-	err := c.Create(context.TODO(), testData.asset)
+	err = c.Create(context.TODO(), testData.asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	defer deleteAndExpectSuccess(cfg, testData)
 
@@ -175,30 +185,26 @@ func TestReconcileAssetCreationSuccessValidationFailed(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.Asset{}
+	asset := &v1alpha2.Asset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetFailed))
-	g.Expect(asset.Status.Reason).To(gomega.Equal(string(ReasonValidationFailed)))
-	g.Expect(asset.Finalizers).NotTo(gomega.ContainElement(deleteAssetFinalizerName))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
+	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.ValidationFailed.String()))
 }
 
 func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
 	//Given
-	name := "the-tesciak"
+	name := "the-tesciak-no-hooks"
 	testData := newTestData(name)
-	testData.asset.Status = v1alpha1.AssetStatus{LastHeartbeatTime: v1.Now()}
 	testData.asset.Spec.Source.MutationWebhookService = nil
 	testData.asset.Spec.Source.ValidationWebhookService = nil
 
 	mocks := newMocks()
-	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(4)
 	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
-	mocks.uploader.On("Upload", mock.Anything, testData.minioBucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
-	mocks.uploader.On("ContainsAll", testData.minioBucketName, testData.assetName, testData.files).Return(true, nil).Once()
-	mocks.cleaner.On("Clean", mock.Anything, testData.minioBucketName, fmt.Sprintf("%s/", testData.assetName)).Return(nil).Once()
+	mocks.store.On("PutObjects", mock.Anything, testData.bucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
+	mocks.store.On("DeleteObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil).Once()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -206,21 +212,26 @@ func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
 	c := cfg.c
 	defer cfg.finishTest()
 
+	err := c.Create(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	defer deleteBucket(cfg, testData.bucket)
+	err = c.Status().Update(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	//When
-	err := c.Create(context.TODO(), testData.asset)
+	err = c.Create(context.TODO(), testData.asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	defer deleteAndExpectSuccess(cfg, testData)
 
 	//Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
-	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.Asset{}
+	asset := &v1alpha2.Asset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 	g.Expect(asset.Status.AssetRef.BaseUrl).To(gomega.Equal(testData.assetUrl))
 	g.Expect(asset.Status.AssetRef.Assets).To(gomega.Equal(testData.files))
 	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteAssetFinalizerName))
@@ -228,12 +239,10 @@ func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
 
 func TestReconcileAssetCreationNoBucket(t *testing.T) {
 	//Given
-	name := "the-tesciak"
+	name := "the-tesciak-no-bucket"
 	testData := newTestData(name)
-	testData.asset.Status = v1alpha1.AssetStatus{LastHeartbeatTime: v1.Now()}
 
 	mocks := newMocks()
-	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(nil, nil).Times(3)
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -250,22 +259,21 @@ func TestReconcileAssetCreationNoBucket(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.Asset{}
+	asset := &v1alpha2.Asset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetPending))
-	g.Expect(asset.Status.Reason).To(gomega.Equal(string(ReasonBucketNotReady)))
-	g.Expect(asset.Finalizers).NotTo(gomega.ContainElement(deleteAssetFinalizerName))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetPending))
+	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.BucketNotReady.String()))
 }
 
 func TestReconcileAssetReadyLostBucket(t *testing.T) {
 	//Given
-	name := "the-tesciak"
+	name := "the-tesciak-lost-bucket"
 	testData := newTestData(name)
+	testData.asset.Status.LastHeartbeatTime = v1.NewTime(time.Now().Add(-365 * time.Hour))
 
 	mocks := newMocks()
-	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(nil, nil).Twice()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -277,35 +285,34 @@ func TestReconcileAssetReadyLostBucket(t *testing.T) {
 	err := c.Create(context.TODO(), testData.asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	defer deleteAndExpectSuccess(cfg, testData)
+	err = c.Status().Update(context.TODO(), testData.asset)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	//Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.Asset{}
+	asset := &v1alpha2.Asset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetPending))
-	g.Expect(asset.Status.Reason).To(gomega.Equal(string(ReasonBucketNotReady)))
-	g.Expect(asset.Finalizers).NotTo(gomega.ContainElement(deleteAssetFinalizerName))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetPending))
+	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.BucketNotReady.String()))
 }
 
 func TestReconcileAssetReadyLostFiles(t *testing.T) {
 	//Given
-	name := "the-tesciak"
+	name := "the-tesciak-lost-files"
 	testData := newTestData(name)
 	testData.asset.Spec.Source.MutationWebhookService = nil
 	testData.asset.Spec.Source.ValidationWebhookService = nil
+	testData.asset.Status.LastHeartbeatTime = v1.NewTime(time.Now().Add(-365 * time.Hour))
 
 	mocks := newMocks()
-	mocks.bucketLister.On("Get", testData.namespace, testData.bucketName).Return(testData.bucket, nil).Times(4)
 	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
-	mocks.uploader.On("Upload", mock.Anything, testData.minioBucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
-	mocks.uploader.On("ContainsAll", testData.minioBucketName, testData.assetName, testData.files).Return(false, nil).Once()
-	mocks.uploader.On("ContainsAll", testData.minioBucketName, testData.assetName, testData.files).Return(true, nil).Once()
-	mocks.cleaner.On("Clean", mock.Anything, testData.minioBucketName, fmt.Sprintf("%s/", testData.assetName)).Return(nil).Once()
-
+	mocks.store.On("PutObjects", mock.Anything, testData.bucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
+	mocks.store.On("ContainsAllObjects", mock.Anything, testData.bucketName, testData.assetName, testData.files).Return(false, nil).Once()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -313,75 +320,74 @@ func TestReconcileAssetReadyLostFiles(t *testing.T) {
 	c := cfg.c
 	defer cfg.finishTest()
 
+	err := c.Create(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	defer deleteBucket(cfg, testData.bucket)
+	err = c.Status().Update(context.TODO(), testData.bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+
 	//When
-	err := c.Create(context.TODO(), testData.asset)
+	err = c.Create(context.TODO(), testData.asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	defer deleteAndExpectSuccess(cfg, testData)
+	err = c.Status().Update(context.TODO(), testData.asset)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	//Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset := &v1alpha1.Asset{}
+	asset := &v1alpha2.Asset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetPending))
-	g.Expect(asset.Status.Reason).To(gomega.Equal(string(ReasonMissingFiles)))
-	g.Expect(asset.Finalizers).NotTo(gomega.ContainElement(deleteAssetFinalizerName))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
+	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.MissingContent.String()))
 
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 
-	asset = &v1alpha1.Asset{}
+	asset = &v1alpha2.Asset{}
 	err = c.Get(context.TODO(), testData.key, asset)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha1.AssetReady))
-	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteAssetFinalizerName))
+	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
 }
 
 type mocks struct {
-	uploader     *automock.Uploader
-	loader       *automock5.Loader
-	cleaner      *automock2.Cleaner
-	bucketLister *automock3.Lister
-	validator    *automock4.Validator
-	mutator      *automock4.Mutator
+	store     *storeMock.Store
+	loader    *loaderMock.Loader
+	validator *engineMock.Validator
+	mutator   *engineMock.Mutator
 }
 
 func newMocks() *mocks {
 	return &mocks{
-		uploader:     new(automock.Uploader),
-		loader:       new(automock5.Loader),
-		cleaner:      new(automock2.Cleaner),
-		bucketLister: new(automock3.Lister),
-		validator:    new(automock4.Validator),
-		mutator:      new(automock4.Mutator),
+		store:     new(storeMock.Store),
+		loader:    new(loaderMock.Loader),
+		validator: new(engineMock.Validator),
+		mutator:   new(engineMock.Mutator),
 	}
 }
 
 func (m *mocks) AssertExpetactions(t *testing.T) {
+	m.store.AssertExpectations(t)
 	m.validator.AssertExpectations(t)
-	m.bucketLister.AssertExpectations(t)
-	m.cleaner.AssertExpectations(t)
-	m.uploader.AssertExpectations(t)
 	m.loader.AssertExpectations(t)
 	m.mutator.AssertExpectations(t)
 }
 
 type testData struct {
-	namespace       string
-	assetName       string
-	assetUrl        string
-	bucketName      string
-	minioBucketName string
-	bucketUrl       string
-	key             types.NamespacedName
+	namespace  string
+	assetName  string
+	assetUrl   string
+	bucketName string
+	bucketUrl  string
+	key        types.NamespacedName
 
 	tmpBaseDir string
 	files      []string
 
-	bucket *v1alpha1.Bucket
-	asset  *v1alpha1.Asset
+	bucket *v1alpha2.Bucket
+	asset  *v1alpha2.Asset
 
 	request reconcile.Request
 }
@@ -390,7 +396,6 @@ func newTestData(name string) *testData {
 	namespace := fmt.Sprintf("%s-space", name)
 	assetName := fmt.Sprintf("%s-asset", name)
 	bucketName := fmt.Sprintf("%s-bucket", name)
-	minioBucketName := store.BucketName(namespace, bucketName)
 	bucketUrl := fmt.Sprintf("https://minio.%s.local/%s", name, bucketName)
 	assetUrl := fmt.Sprintf("%s/%s", bucketUrl, assetName)
 	sourceUrl := fmt.Sprintf("https://source.%s.local/file.zip", name)
@@ -406,29 +411,30 @@ func newTestData(name string) *testData {
 		fmt.Sprintf("lvl/lvl/%s.md", name),
 	}
 
-	bucket := &v1alpha1.Bucket{
+	bucket := &v1alpha2.Bucket{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      bucketName,
 			Namespace: namespace,
 		},
-		Status: v1alpha1.BucketStatus{
-			Phase: v1alpha1.BucketReady,
-			Url:   bucketUrl,
-		},
+		Status: v1alpha2.BucketStatus{CommonBucketStatus: v1alpha2.CommonBucketStatus{
+			Phase:             v1alpha2.BucketReady,
+			RemoteName:        bucketName,
+			Url:               bucketUrl,
+			LastHeartbeatTime: v1.Now(),
+		}},
 	}
 
-	asset := &v1alpha1.Asset{
+	asset := &v1alpha2.Asset{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      assetName,
 			Namespace: namespace,
 		},
-		Spec: v1alpha1.AssetSpec{
-			BucketRef: v1alpha1.AssetBucketRef{Name: bucketName},
-			Source: v1alpha1.AssetSource{
-				Url:    sourceUrl,
-				Mode:   v1alpha1.AssetSingle,
-				Filter: "",
-				ValidationWebhookService: []v1alpha1.AssetWebhookService{
+		Spec: v1alpha2.AssetSpec{CommonAssetSpec: v1alpha2.CommonAssetSpec{
+			BucketRef: v1alpha2.AssetBucketRef{Name: bucketName},
+			Source: v1alpha2.AssetSource{
+				Url:  sourceUrl,
+				Mode: v1alpha2.AssetSingle,
+				ValidationWebhookService: []v1alpha2.AssetWebhookService{
 					{
 						Namespace: "test",
 						Name:      "test",
@@ -440,7 +446,7 @@ func newTestData(name string) *testData {
 						Endpoint:  "/test",
 					},
 				},
-				MutationWebhookService: []v1alpha1.AssetWebhookService{
+				MutationWebhookService: []v1alpha2.AssetWebhookService{
 					{
 						Namespace: "test",
 						Name:      "test",
@@ -453,33 +459,40 @@ func newTestData(name string) *testData {
 					},
 				},
 			},
-		},
-		Status: v1alpha1.AssetStatus{
-			Phase: v1alpha1.AssetReady,
-			AssetRef: v1alpha1.AssetStatusRef{
+		}},
+		Status: v1alpha2.AssetStatus{CommonAssetStatus: v1alpha2.CommonAssetStatus{
+			ObservedGeneration: int64(1),
+			Phase:              v1alpha2.AssetReady,
+			AssetRef: v1alpha2.AssetStatusRef{
 				BaseUrl: assetUrl,
 				Assets:  files,
 			},
 			LastHeartbeatTime: v1.Now(),
-		},
+		}},
 	}
 
 	request := reconcile.Request{NamespacedName: types.NamespacedName{Name: assetName, Namespace: namespace}}
 
 	return &testData{
-		namespace:       namespace,
-		assetName:       assetName,
-		assetUrl:        assetUrl,
-		bucketName:      bucketName,
-		minioBucketName: minioBucketName,
-		bucketUrl:       bucketUrl,
-		tmpBaseDir:      tmpBaseDir,
-		files:           files,
-		key:             key,
-		bucket:          bucket,
-		asset:           asset,
-		request:         request,
+		namespace:  namespace,
+		assetName:  assetName,
+		assetUrl:   assetUrl,
+		bucketName: bucketName,
+		bucketUrl:  bucketUrl,
+		tmpBaseDir: tmpBaseDir,
+		files:      files,
+		key:        key,
+		bucket:     bucket,
+		asset:      asset,
+		request:    request,
 	}
+}
+
+func deleteBucket(cfg *testSuite, bucket *v1alpha2.Bucket) {
+	g := cfg.g
+	c := cfg.c
+	err := c.Delete(context.TODO(), bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
 }
 
 func deleteAndExpectSuccess(cfg *testSuite, testData *testData) {
@@ -489,7 +502,7 @@ func deleteAndExpectSuccess(cfg *testSuite, testData *testData) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 	g.Eventually(func() bool {
-		instance := &v1alpha1.Asset{}
+		instance := &v1alpha2.Asset{}
 		err := c.Get(context.TODO(), testData.key, instance)
 		return apierrors.IsNotFound(err)
 	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())

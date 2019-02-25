@@ -1,58 +1,39 @@
 package tokens
 
 import (
-	"time"
+	"encoding/json"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens/tokencache"
 )
 
-type Generator func() (string, apperrors.AppError)
-
-type Serializer interface {
-	ToJSON() ([]byte, error)
-}
-
 type Manager interface {
-	Save(serializableContext Serializer) (string, apperrors.AppError)
-	Replace(token string, serializableContext Serializer) (string, apperrors.AppError)
+	Resolve(token string, destination interface{}) apperrors.AppError
 	Delete(token string)
 }
 
 type tokenManager struct {
-	tokenTTL  time.Duration
-	store     tokencache.TokenCache
-	generator Generator
+	store tokencache.TokenCache
 }
 
-func NewTokenManager(tokenTTL time.Duration, store tokencache.TokenCache, generator Generator) *tokenManager {
+func NewTokenManager(store tokencache.TokenCache) *tokenManager {
 	return &tokenManager{
-		tokenTTL:  tokenTTL,
-		store:     store,
-		generator: generator,
+		store: store,
 	}
 }
 
-func (svc *tokenManager) Save(serializableContext Serializer) (string, apperrors.AppError) {
-	jsonData, err := serializableContext.ToJSON()
-	if err != nil {
-		return "", apperrors.Internal("Failed to serialize token params to JSON, %s", err.Error())
+func (svc *tokenManager) Resolve(token string, destination interface{}) apperrors.AppError {
+	encodedParams, found := svc.store.Get(token)
+	if !found {
+		return apperrors.NotFound("Token not found")
 	}
 
-	token, err := svc.generator()
+	err := json.Unmarshal([]byte(encodedParams), destination)
 	if err != nil {
-		return "", apperrors.Internal("Failed to generate token, %s", err.Error())
+		return apperrors.Internal("Failed to unmarshal token params, %s", err.Error())
 	}
 
-	svc.store.Put(token, string(jsonData), svc.tokenTTL)
-
-	return token, nil
-}
-
-func (svc *tokenManager) Replace(token string, serializableContext Serializer) (string, apperrors.AppError) {
-	svc.store.Delete(token)
-
-	return svc.Save(serializableContext)
+	return nil
 }
 
 func (svc *tokenManager) Delete(token string) {
