@@ -3,6 +3,7 @@ package bucket
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/bucket/pretty"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/store"
@@ -21,7 +22,7 @@ type Handler interface {
 	IsOnReady(status v1alpha2.CommonBucketStatus) bool
 	IsOnFailed(status v1alpha2.CommonBucketStatus) bool
 	OnAddOrUpdate(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus
-	OnDelete(ctx context.Context, status v1alpha2.CommonBucketStatus) error
+	OnDelete(ctx context.Context, object MetaAccessor, status v1alpha2.CommonBucketStatus) error
 	OnReady(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus
 	OnFailed(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error)
 }
@@ -43,13 +44,15 @@ type bucketHandler struct {
 	recorder         record.EventRecorder
 	store            store.Store
 	externalEndpoint string
+	log              logr.Logger
 }
 
-func New(recorder record.EventRecorder, store store.Store, externalEndpoint string) *bucketHandler {
+func New(recorder record.EventRecorder, store store.Store, externalEndpoint string, log logr.Logger) *bucketHandler {
 	return &bucketHandler{
 		recorder:         recorder,
 		store:            store,
 		externalEndpoint: externalEndpoint,
+		log:              log,
 	}
 }
 
@@ -127,8 +130,10 @@ func (h *bucketHandler) OnReady(object MetaAccessor, spec v1alpha2.CommonBucketS
 			return h.getStatus(object, status, v1alpha2.BucketFailed, withReasonStatus(pretty.BucketPolicyUpdateFailed, err.Error()), withBucketNameStatus(status.RemoteName), withUrlStatus(status.Url))
 		}
 		h.recordNormalEventf(object, pretty.BucketPolicyUpdated)
+		return h.getStatus(object, status, v1alpha2.BucketReady, withReasonStatus(pretty.BucketPolicyUpdated))
 	}
 
+	h.logInfof(object, "Bucket is up-to-date")
 	return h.getStatus(object, status, v1alpha2.BucketReady, withReasonStatus(pretty.BucketPolicyUpdated))
 }
 
@@ -155,14 +160,17 @@ func (h *bucketHandler) OnAddOrUpdate(object MetaAccessor, spec v1alpha2.CommonB
 	return h.getStatus(object, status, v1alpha2.BucketReady, withReasonStatus(pretty.BucketPolicyUpdated), withBucketNameStatus(bucketName), withUrlStatus(externalUrl))
 }
 
-func (h *bucketHandler) OnDelete(ctx context.Context, status v1alpha2.CommonBucketStatus) error {
+func (h *bucketHandler) OnDelete(ctx context.Context, object MetaAccessor, status v1alpha2.CommonBucketStatus) error {
+	h.logInfof(object, "Deleting Bucket")
 	if len(status.RemoteName) == 0 {
+		h.logInfof(object, "Nothing to delete, there is no remote bucket")
 		return nil
 	}
 
 	if err := h.store.DeleteBucket(ctx, status.RemoteName); err != nil {
 		return err
 	}
+	h.logInfof(object, "Remote bucket %s deleted", status.RemoteName)
 
 	return nil
 }
@@ -172,11 +180,18 @@ func (h *bucketHandler) getBucketUrl(name string) string {
 }
 
 func (h *bucketHandler) recordNormalEventf(object MetaAccessor, reason pretty.Reason, args ...interface{}) {
+	h.logInfof(object, reason.Message(), args...)
 	h.recordEventf(object, "Normal", reason, args...)
 }
 
 func (h *bucketHandler) recordWarningEventf(object MetaAccessor, reason pretty.Reason, args ...interface{}) {
+	h.logInfof(object, reason.Message(), args...)
 	h.recordEventf(object, "Warning", reason, args...)
+}
+
+//TODO: move logger values initialization to controller
+func (h *bucketHandler) logInfof(object MetaAccessor, message string, args ...interface{}) {
+	h.log.WithValues("kind", object.GetObjectKind().GroupVersionKind().Kind, "namespace", object.GetNamespace(), "name", object.GetName()).Info(fmt.Sprintf(message, args...))
 }
 
 func (h *bucketHandler) recordEventf(object MetaAccessor, eventType string, reason pretty.Reason, args ...interface{}) {

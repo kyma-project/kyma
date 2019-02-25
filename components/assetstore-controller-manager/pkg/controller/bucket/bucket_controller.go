@@ -39,7 +39,7 @@ func Add(mgr manager.Manager) error {
 
 	store := store.New(minioClient)
 	deletionFinalizer := finalizer.New(deleteBucketFinalizerName)
-	handler := bucket.New(mgr.GetRecorder("bucket-controller"), store, cfg.Store.ExternalEndpoint)
+	handler := bucket.New(mgr.GetRecorder("bucket-controller"), store, cfg.Store.ExternalEndpoint, log)
 
 	reconciler := &ReconcileBucket{
 		Client:         mgr.GetClient(),
@@ -83,6 +83,7 @@ type ReconcileBucket struct {
 
 // Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())
@@ -142,7 +143,7 @@ func (r *ReconcileBucket) onDelete(ctx context.Context, instance *assetstorev1al
 		return reconcile.Result{}, nil
 	}
 
-	err := r.handler.OnDelete(ctx, instance.Status.CommonBucketStatus)
+	err := r.handler.OnDelete(ctx, instance, instance.Status.CommonBucketStatus)
 	if err != nil {
 		return reconcile.Result{}, err
 	}

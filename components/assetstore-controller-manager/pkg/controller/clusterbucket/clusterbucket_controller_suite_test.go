@@ -81,7 +81,7 @@ func prepareReconcilerTest(t *testing.T, store store.Store) *testSuite {
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	handler := bucket.New(mgr.GetRecorder("clusterasset-controller"), store, "https://minio.kyma.local")
+	handler := bucket.New(mgr.GetRecorder("clusterasset-controller"), store, "https://minio.kyma.local", log)
 	reconciler := &ReconcileClusterBucket{
 		Client:         mgr.GetClient(),
 		scheme:         mgr.GetScheme(),

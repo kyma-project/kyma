@@ -19,11 +19,26 @@ rules:
 - apiGroups:
   - assetstore.kyma-project.io
   resources:
+  - assets/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
   - buckets
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - buckets/status
+  verbs:
+  - get
+  - list
 - apiGroups:
   - ""
   resources:
@@ -43,6 +58,14 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - buckets/status
+  verbs:
+  - get
+  - update
+  - patch
 - apiGroups:
   - ""
   resources:
@@ -65,11 +88,26 @@ rules:
 - apiGroups:
   - assetstore.kyma-project.io
   resources:
+  - clusterassets/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
   - clusterbuckets
   verbs:
   - get
   - list
   - watch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterbuckets/status
+  verbs:
+  - get
+  - list
 - apiGroups:
   - ""
   resources:
@@ -89,6 +127,14 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterbuckets/status
+  verbs:
+  - get
+  - update
+  - patch
 - apiGroups:
   - ""
   resources:

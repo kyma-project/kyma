@@ -15,10 +15,13 @@ import (
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"strings"
 	"testing"
 	"time"
 )
+
+var log = logf.Log.WithName("asset-test")
 
 func TestAssetHandler_IsOnAddOrUpdate(t *testing.T) {
 	t.Run("New", func(t *testing.T) {
@@ -27,7 +30,7 @@ func TestAssetHandler_IsOnAddOrUpdate(t *testing.T) {
 
 		testData := new(v1alpha2.Asset)
 		testData.ObjectMeta.Generation = int64(1)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnAddOrUpdate(testData, testData.Status.CommonAssetStatus)
@@ -42,7 +45,7 @@ func TestAssetHandler_IsOnAddOrUpdate(t *testing.T) {
 		testData := new(v1alpha2.Asset)
 		testData.ObjectMeta.Generation = int64(10)
 		testData.Status.CommonAssetStatus.ObservedGeneration = int64(8)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnAddOrUpdate(testData, testData.Status.CommonAssetStatus)
@@ -57,7 +60,7 @@ func TestAssetHandler_IsOnAddOrUpdate(t *testing.T) {
 		testData := new(v1alpha2.Asset)
 		testData.ObjectMeta.Generation = int64(10)
 		testData.Status.CommonAssetStatus.ObservedGeneration = int64(10)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnAddOrUpdate(testData, testData.Status.CommonAssetStatus)
@@ -74,7 +77,7 @@ func TestAssetHandler_IsOnDelete(t *testing.T) {
 		testData := new(v1alpha2.Asset)
 		now := v1.Now()
 		testData.ObjectMeta.DeletionTimestamp = &now
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnDelete(testData)
@@ -87,7 +90,7 @@ func TestAssetHandler_IsOnDelete(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
 		testData := new(v1alpha2.Asset)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnDelete(testData)
@@ -102,7 +105,7 @@ func TestAssetHandler_IsOnFailed(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
 		testData := new(v1alpha2.Asset)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnFailed(testData.Status.CommonAssetStatus)
@@ -116,7 +119,7 @@ func TestAssetHandler_IsOnFailed(t *testing.T) {
 		// Given
 		testData := new(v1alpha2.Asset)
 		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnFailed(testData.Status.CommonAssetStatus)
@@ -130,7 +133,7 @@ func TestAssetHandler_IsOnFailed(t *testing.T) {
 		// Given
 		testData := new(v1alpha2.Asset)
 		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetFailed
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnFailed(testData.Status.CommonAssetStatus)
@@ -145,7 +148,7 @@ func TestAssetHandler_IsOnPending(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		// Given
 		testData := new(v1alpha2.Asset)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnPending(testData.Status.CommonAssetStatus)
@@ -159,7 +162,7 @@ func TestAssetHandler_IsOnPending(t *testing.T) {
 		// Given
 		testData := new(v1alpha2.Asset)
 		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnPending(testData.Status.CommonAssetStatus)
@@ -173,7 +176,7 @@ func TestAssetHandler_IsOnPending(t *testing.T) {
 		// Given
 		testData := new(v1alpha2.Asset)
 		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnPending(testData.Status.CommonAssetStatus)
@@ -188,7 +191,7 @@ func TestAssetHandler_IsOnReady(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		testData := new(v1alpha2.Asset)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnReady(testData.Status.CommonAssetStatus)
@@ -202,7 +205,7 @@ func TestAssetHandler_IsOnReady(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		testData := new(v1alpha2.Asset)
 		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnReady(testData.Status.CommonAssetStatus)
@@ -217,7 +220,7 @@ func TestAssetHandler_IsOnReady(t *testing.T) {
 
 		testData := new(v1alpha2.Asset)
 		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.IsOnReady(testData.Status.CommonAssetStatus)
@@ -248,7 +251,7 @@ func TestAssetHandler_OnAddOrUpdate(t *testing.T) {
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
 		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -279,7 +282,7 @@ func TestAssetHandler_OnAddOrUpdate(t *testing.T) {
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
 		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -305,7 +308,7 @@ func TestAssetHandler_OnAddOrUpdate(t *testing.T) {
 		defer validator.AssertExpectations(t)
 
 		store.On("DeleteObjects", ctx, testData.Spec.BucketRef.Name, fmt.Sprintf("/%s", testData.Name)).Return(errors.New("test")).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -329,7 +332,7 @@ func TestAssetHandler_OnDelete(t *testing.T) {
 		store.On("DeleteObjects", ctx, "bucket-name", fmt.Sprintf("/%s", testData.Name)).Return(nil).Once()
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		err := assetHandler.OnDelete(ctx, testData, testData.Spec.CommonAssetSpec)
@@ -350,7 +353,7 @@ func TestAssetHandler_OnDelete(t *testing.T) {
 		store := new(automock.Store)
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		err := assetHandler.OnDelete(ctx, testData, testData.Spec.CommonAssetSpec)
@@ -371,7 +374,7 @@ func TestAssetHandler_OnDelete(t *testing.T) {
 		store := new(automock.Store)
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		err := assetHandler.OnDelete(ctx, testData, testData.Spec.CommonAssetSpec)
@@ -392,7 +395,7 @@ func TestAssetHandler_OnDelete(t *testing.T) {
 		store.On("DeleteObjects", ctx, "bucket-name", fmt.Sprintf("/%s", testData.Name)).Return(errors.New("test")).Once()
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		err := assetHandler.OnDelete(ctx, testData, testData.Spec.CommonAssetSpec)
@@ -423,7 +426,7 @@ func TestAssetHandler_OnFailed(t *testing.T) {
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
 		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status, err := assetHandler.OnFailed(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -456,7 +459,7 @@ func TestAssetHandler_OnFailed(t *testing.T) {
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
 		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status, err := assetHandler.OnFailed(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -485,7 +488,7 @@ func TestAssetHandler_OnFailed(t *testing.T) {
 		defer validator.AssertExpectations(t)
 
 		store.On("DeleteObjects", ctx, testData.Spec.BucketRef.Name, fmt.Sprintf("/%s", testData.Name)).Return(errors.New("test")).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		_, err := assetHandler.OnFailed(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -516,7 +519,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
 		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -545,7 +548,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		store.On("PutObjects", ctx, testData.Spec.BucketRef.Name, testData.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
 		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		loader.On("Clean", "/tmp").Return(nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -571,7 +574,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 
 		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, errors.New("err")).Once()
 		loader.On("Clean", "/tmp").Return(nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -599,7 +602,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(errors.New("err")).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -628,7 +631,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
 		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -657,7 +660,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
 		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, errors.New("test")).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -687,7 +690,7 @@ func TestAssetHandler_OnPending(t *testing.T) {
 		loader.On("Clean", "/tmp").Return(nil).Once()
 		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
 		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator)
+		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
 
 		// When
 		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -711,7 +714,7 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		store.On("ContainsAllObjects", ctx, "bucket-name", testData.Name, mock.AnythingOfType("[]string")).Return(true, nil).Once()
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -732,7 +735,7 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		store := new(automock.Store)
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -754,7 +757,7 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		store := new(automock.Store)
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -776,7 +779,7 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		store.On("ContainsAllObjects", ctx, "bucket-name", testData.Name, mock.AnythingOfType("[]string")).Return(false, errors.New("error")).Once()
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -798,7 +801,7 @@ func TestAssetHandler_OnReady(t *testing.T) {
 		store.On("ContainsAllObjects", ctx, "bucket-name", testData.Name, mock.AnythingOfType("[]string")).Return(false, nil).Once()
 		defer store.AssertExpectations(t)
 
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil)
+		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
 
 		// When
 		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
@@ -818,7 +821,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -837,7 +840,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData.ObjectMeta.Generation = int64(2)
 		testData.Status.ObservedGeneration = int64(1)
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -856,7 +859,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		deletion := v1.Now()
 		testData.ObjectMeta.DeletionTimestamp = &deletion
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -875,7 +878,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
 		testData.Status.Phase = v1alpha2.AssetReady
 		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(-10 * relistInterval))
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -894,7 +897,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
 		testData.Status.Phase = v1alpha2.AssetReady
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -914,7 +917,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.Phase = v1alpha2.AssetPending
 		testData.Status.Reason = pretty.BucketNotReady.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(-10 * relistInterval))
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -932,7 +935,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData := testData("test", "bucket-name", "https://test.com/file.txt")
 		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
 		testData.Status.Phase = v1alpha2.AssetPending
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -952,7 +955,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.Phase = v1alpha2.AssetPending
 		testData.Status.Reason = pretty.BucketNotReady.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -972,7 +975,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.Phase = v1alpha2.AssetFailed
 		testData.Status.Reason = pretty.ValidationFailed.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -992,7 +995,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.Phase = v1alpha2.AssetFailed
 		testData.Status.Reason = pretty.MutationFailed.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
@@ -1012,7 +1015,7 @@ func TestAssetHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.Phase = v1alpha2.AssetFailed
 		testData.Status.Reason = pretty.BucketError.String()
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil)
+		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
 
 		// When
 		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)

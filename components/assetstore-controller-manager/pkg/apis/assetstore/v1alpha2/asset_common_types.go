@@ -5,13 +5,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// AssetSpec defines the desired state of Asset
+// CommonAssetSpec defines the desired state of Asset
 type CommonAssetSpec struct {
 	Source    AssetSource    `json:"source"`
 	BucketRef AssetBucketRef `json:"bucketRef,omitempty"`
 }
 
-// AssetStatus defines the observed state of Asset
+// CommonAssetStatus defines the observed state of Asset
 type CommonAssetStatus struct {
 	Phase              AssetPhase     `json:"phase"`
 	Message            string         `json:"message,omitempty"`

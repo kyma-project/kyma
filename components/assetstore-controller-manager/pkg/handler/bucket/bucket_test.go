@@ -11,9 +11,12 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/record"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"testing"
 	"time"
 )
+
+var log = logf.Log.WithName("asset-test")
 
 func TestBucketHandler_IsOnAddOrUpdate(t *testing.T) {
 	t.Run("New", func(t *testing.T) {
@@ -21,7 +24,7 @@ func TestBucketHandler_IsOnAddOrUpdate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnAddOrUpdate(testData, testData.Status.CommonBucketStatus)
@@ -37,7 +40,7 @@ func TestBucketHandler_IsOnAddOrUpdate(t *testing.T) {
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.ObjectMeta.Generation = int64(2)
 		testData.Status.ObservedGeneration = int64(1)
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnAddOrUpdate(testData, testData.Status.CommonBucketStatus)
@@ -53,7 +56,7 @@ func TestBucketHandler_IsOnAddOrUpdate(t *testing.T) {
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.ObjectMeta.Generation = int64(1)
 		testData.Status.ObservedGeneration = int64(1)
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnAddOrUpdate(testData, testData.Status.CommonBucketStatus)
@@ -71,7 +74,7 @@ func TestBucketHandler_IsOnDelete(t *testing.T) {
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		deletionTimestamp := v1.Now()
 		testData.ObjectMeta.DeletionTimestamp = &deletionTimestamp
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnDelete(testData)
@@ -85,7 +88,7 @@ func TestBucketHandler_IsOnDelete(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnDelete(testData)
@@ -101,7 +104,7 @@ func TestBucketHandler_IsOnFailed(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnFailed(testData.Status.CommonBucketStatus)
@@ -116,7 +119,7 @@ func TestBucketHandler_IsOnFailed(t *testing.T) {
 
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.Phase = v1alpha2.BucketReady
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnFailed(testData.Status.CommonBucketStatus)
@@ -131,7 +134,7 @@ func TestBucketHandler_IsOnFailed(t *testing.T) {
 
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.Phase = v1alpha2.BucketFailed
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnFailed(testData.Status.CommonBucketStatus)
@@ -147,7 +150,7 @@ func TestBucketHandler_IsOnReady(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnReady(testData.Status.CommonBucketStatus)
@@ -162,7 +165,7 @@ func TestBucketHandler_IsOnReady(t *testing.T) {
 
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.Phase = v1alpha2.BucketFailed
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnReady(testData.Status.CommonBucketStatus)
@@ -177,7 +180,7 @@ func TestBucketHandler_IsOnReady(t *testing.T) {
 
 		testData := testData("new", v1alpha2.BucketPolicyReadOnly)
 		testData.Status.Phase = v1alpha2.BucketReady
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.IsOnReady(testData.Status.CommonBucketStatus)
@@ -202,7 +205,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		store.On("CreateBucket", testData.Namespace, testData.Name, string(testData.Spec.Region)).Return(remoteName, nil).Once()
 		store.On("SetBucketPolicy", remoteName, testData.Spec.Policy).Return(nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status := bucketHandler.OnAddOrUpdate(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -230,7 +233,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		store.On("BucketExists", remoteName).Return(true, nil).Once()
 		store.On("CompareBucketPolicy", remoteName, testData.Spec.Policy).Return(true, nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status := bucketHandler.OnAddOrUpdate(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -256,7 +259,7 @@ func TestBucketHandler_OnAddOrUpdate(t *testing.T) {
 		store.On("CreateBucket", testData.Namespace, testData.Name, string(testData.Spec.Region)).Return(remoteName, nil).Once()
 		store.On("SetBucketPolicy", remoteName, testData.Spec.Policy).Return(nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status := bucketHandler.OnAddOrUpdate(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -282,10 +285,10 @@ func TestBucketHandler_OnDelete(t *testing.T) {
 		store.On("DeleteBucket", ctx, testData.Status.RemoteName).Return(nil).Once()
 		defer store.AssertExpectations(t)
 
-		bucketHandler := bucket.New(fakeRecorder(), store, "")
+		bucketHandler := bucket.New(fakeRecorder(), store, "", log)
 
 		// When
-		err := bucketHandler.OnDelete(ctx, testData.Status.CommonBucketStatus)
+		err := bucketHandler.OnDelete(ctx, testData, testData.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(gomega.HaveOccurred())
@@ -301,10 +304,10 @@ func TestBucketHandler_OnDelete(t *testing.T) {
 		store := new(automock.Store)
 		defer store.AssertExpectations(t)
 
-		bucketHandler := bucket.New(fakeRecorder(), store, "")
+		bucketHandler := bucket.New(fakeRecorder(), store, "", log)
 
 		// When
-		err := bucketHandler.OnDelete(ctx, testData.Status.CommonBucketStatus)
+		err := bucketHandler.OnDelete(ctx, testData, testData.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(gomega.HaveOccurred())
@@ -322,10 +325,10 @@ func TestBucketHandler_OnDelete(t *testing.T) {
 		store.On("DeleteBucket", ctx, testData.Status.RemoteName).Return(errors.New("err")).Once()
 		defer store.AssertExpectations(t)
 
-		bucketHandler := bucket.New(fakeRecorder(), store, "")
+		bucketHandler := bucket.New(fakeRecorder(), store, "", log)
 
 		// When
-		err := bucketHandler.OnDelete(ctx, testData.Status.CommonBucketStatus)
+		err := bucketHandler.OnDelete(ctx, testData, testData.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -349,7 +352,7 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 		store.On("CreateBucket", testData.Namespace, testData.Name, string(testData.Spec.Region)).Return(remoteName, nil).Once()
 		store.On("SetBucketPolicy", remoteName, testData.Spec.Policy).Return(nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status, err := bucketHandler.OnFailed(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -380,7 +383,7 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 		store.On("BucketExists", remoteName).Return(true, nil).Once()
 		store.On("CompareBucketPolicy", remoteName, testData.Spec.Policy).Return(true, nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status, err := bucketHandler.OnFailed(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -412,7 +415,7 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 		store.On("CompareBucketPolicy", remoteName, testData.Spec.Policy).Return(false, nil).Once()
 		store.On("SetBucketPolicy", remoteName, testData.Spec.Policy).Return(nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status, err := bucketHandler.OnFailed(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -442,7 +445,7 @@ func TestBucketHandler_OnFailed(t *testing.T) {
 
 		store.On("BucketExists", remoteName).Return(false, errors.New("test-err")).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		_, err := bucketHandler.OnFailed(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -469,7 +472,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		store.On("BucketExists", remoteName).Return(true, nil).Once()
 		store.On("CompareBucketPolicy", remoteName, testData.Spec.Policy).Return(true, nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -496,7 +499,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 
 		store.On("BucketExists", remoteName).Return(false, nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -521,7 +524,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 
 		store.On("BucketExists", remoteName).Return(false, errors.New("test-message")).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -548,7 +551,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		store.On("CompareBucketPolicy", remoteName, testData.Spec.Policy).Return(false, nil).Once()
 		store.On("SetBucketPolicy", remoteName, testData.Spec.Policy).Return(nil).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -577,7 +580,7 @@ func TestBucketHandler_OnReady(t *testing.T) {
 		store.On("CompareBucketPolicy", remoteName, testData.Spec.Policy).Return(false, nil).Once()
 		store.On("SetBucketPolicy", remoteName, testData.Spec.Policy).Return(errors.New("test-err")).Once()
 
-		bucketHandler := bucket.New(fakeRecorder(), store, url)
+		bucketHandler := bucket.New(fakeRecorder(), store, url, log)
 
 		// When
 		status := bucketHandler.OnReady(testData, testData.Spec.CommonBucketSpec, testData.Status.CommonBucketStatus)
@@ -598,7 +601,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.LastHeartbeatTime = v1.NewTime(now)
 		relistInterval := time.Second
 
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.ShouldReconcile(testData, testData.Status.CommonBucketStatus, now, relistInterval)
@@ -618,7 +621,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.ObservedGeneration = int64(1)
 		relistInterval := time.Second
 
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.ShouldReconcile(testData, testData.Status.CommonBucketStatus, now, relistInterval)
@@ -639,7 +642,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		testData.ObjectMeta.DeletionTimestamp = &testData.Status.LastHeartbeatTime
 		relistInterval := time.Second
 
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.ShouldReconcile(testData, testData.Status.CommonBucketStatus, now, relistInterval)
@@ -660,7 +663,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		testData.ObjectMeta.Generation = int64(1)
 		testData.Status.ObservedGeneration = int64(1)
 
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.ShouldReconcile(testData, testData.Status.CommonBucketStatus, now, relistInterval)
@@ -681,7 +684,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		testData.ObjectMeta.Generation = int64(1)
 		testData.Status.ObservedGeneration = int64(1)
 
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.ShouldReconcile(testData, testData.Status.CommonBucketStatus, now, relistInterval)
@@ -702,7 +705,7 @@ func TestBucketHandler_ShouldReconcile(t *testing.T) {
 		testData.Status.ObservedGeneration = int64(1)
 		testData.Status.Phase = v1alpha2.BucketFailed
 
-		bucketHandler := bucket.New(nil, nil, "")
+		bucketHandler := bucket.New(nil, nil, "", log)
 
 		// When
 		result := bucketHandler.ShouldReconcile(testData, testData.Status.CommonBucketStatus, now, relistInterval)

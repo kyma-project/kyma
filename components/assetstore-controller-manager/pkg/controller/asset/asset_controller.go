@@ -52,7 +52,7 @@ func Add(mgr manager.Manager) error {
 	validator := engine.NewValidator(assethook, cfg.Webhook.ValidationTimeout)
 	mutator := engine.NewMutator(assethook, cfg.Webhook.MutationTimeout)
 
-	assetHandler := asset.New(mgr.GetRecorder("asset-controller"), store, loader, findBucketFnc, validator, mutator)
+	assetHandler := asset.New(mgr.GetRecorder("asset-controller"), store, loader, findBucketFnc, validator, mutator, log)
 
 	reconciler := &ReconcileAsset{
 		Client:         mgr.GetClient(),
@@ -118,7 +118,9 @@ type ReconcileAsset struct {
 
 // Reconcile reads that state of the cluster for a Asset object and makes changes based on the state read
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;list
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 func (r *ReconcileAsset) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())

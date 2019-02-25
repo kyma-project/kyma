@@ -3,6 +3,7 @@ package asset
 import (
 	"context"
 	"fmt"
+	"github.com/go-logr/logr"
 	"k8s.io/client-go/tools/record"
 	"time"
 
@@ -53,9 +54,10 @@ type assetHandler struct {
 	loader           loader.Loader
 	validator        engine.Validator
 	mutator          engine.Mutator
+	log              logr.Logger
 }
 
-func New(recorder record.EventRecorder, store store.Store, loader loader.Loader, findBucketFnc FindBucketStatus, validator engine.Validator, mutator engine.Mutator) *assetHandler {
+func New(recorder record.EventRecorder, store store.Store, loader loader.Loader, findBucketFnc FindBucketStatus, validator engine.Validator, mutator engine.Mutator, log logr.Logger) *assetHandler {
 	return &assetHandler{
 		recorder:         recorder,
 		store:            store,
@@ -63,6 +65,7 @@ func New(recorder record.EventRecorder, store store.Store, loader loader.Loader,
 		findBucketStatus: findBucketFnc,
 		validator:        validator,
 		mutator:          mutator,
+		log:              log,
 	}
 }
 
@@ -139,17 +142,21 @@ func (h *assetHandler) OnFailed(ctx context.Context, object MetaAccessor, spec v
 }
 
 func (h *assetHandler) OnDelete(ctx context.Context, object MetaAccessor, spec v1alpha2.CommonAssetSpec) error {
+	h.logInfof(object, "Deleting Asset")
 	bucketStatus, isReady, err := h.findBucketStatus(ctx, object.GetNamespace(), spec.BucketRef.Name)
 	if err != nil {
 		return errors.Wrap(err, "while reading bucket status")
 	}
 	if !isReady {
+		h.logInfof(object, "Nothing to delete, bucket %s is not ready", spec.BucketRef.Name)
 		return nil
 	}
 
 	if err := h.store.DeleteObjects(ctx, bucketStatus.RemoteName, fmt.Sprintf("/%s", object.GetName())); err != nil {
 		return errors.Wrap(err, "while deleting asset content")
 	}
+
+	h.logInfof(object, "Asset deleted")
 
 	return nil
 }
@@ -174,6 +181,8 @@ func (h *assetHandler) OnReady(ctx context.Context, object MetaAccessor, spec v1
 		h.recordWarningEventf(object, pretty.MissingContent)
 		return h.getStatus(object, status, v1alpha2.AssetFailed, withReasonStatus(pretty.MissingContent))
 	}
+
+	h.logInfof(object, "Asset is up-to-date")
 
 	return h.getStatus(object, status, v1alpha2.AssetReady)
 }
@@ -232,11 +241,18 @@ func (h *assetHandler) getBaseUrl(bucketUrl, assetName string) string {
 }
 
 func (h *assetHandler) recordNormalEventf(object MetaAccessor, reason pretty.Reason, args ...interface{}) {
+	h.logInfof(object, reason.Message(), args...)
 	h.recordEventf(object, "Normal", reason, args...)
 }
 
 func (h *assetHandler) recordWarningEventf(object MetaAccessor, reason pretty.Reason, args ...interface{}) {
+	h.logInfof(object, reason.Message(), args...)
 	h.recordEventf(object, "Warning", reason, args...)
+}
+
+//TODO: move logger values initialization to controller
+func (h *assetHandler) logInfof(object MetaAccessor, message string, args ...interface{}) {
+	h.log.WithValues("kind", object.GetObjectKind().GroupVersionKind().Kind, "namespace", object.GetNamespace(), "name", object.GetName()).Info(fmt.Sprintf(message, args...))
 }
 
 func (h *assetHandler) recordEventf(object MetaAccessor, eventType string, reason pretty.Reason, args ...interface{}) {

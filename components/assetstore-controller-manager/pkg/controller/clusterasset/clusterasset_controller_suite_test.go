@@ -80,7 +80,7 @@ func prepareReconcilerTest(t *testing.T, mocks *mocks) *testSuite {
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	handler := asset.New(mgr.GetRecorder("clusterasset-controller"), mocks.store, mocks.loader, bucketFinder(mgr), mocks.validator, mocks.mutator)
+	handler := asset.New(mgr.GetRecorder("clusterasset-controller"), mocks.store, mocks.loader, bucketFinder(mgr), mocks.validator, mocks.mutator, log)
 	reconciler := &ReconcileClusterAsset{
 		Client:         mgr.GetClient(),
 		scheme:         mgr.GetScheme(),
