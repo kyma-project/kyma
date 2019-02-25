@@ -12,10 +12,8 @@ groups:
         or has set itself to NotReady, for more than an hour
       summary: Node status is NotReady
   - alert: K8SManyNodesNotReady
-    expr: count(kube_node_status_condition{condition="Ready",status="true"} == 0)
-      > 1 and (count(kube_node_status_condition{condition="Ready",status="true"} ==
-      0) / count(kube_node_status_condition{condition="Ready",status="true"})) > 0.2
-    for: 1m
+    expr: count(sum by (node)(kube_node_status_condition{condition="Ready",status="true"})) / count(sum by(node)(kube_node_info)) * 100 < 100
+    for: 30m
     labels:
       severity: critical
     annotations:

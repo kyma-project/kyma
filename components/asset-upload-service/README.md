@@ -52,7 +52,7 @@ The variables are:
 
 ### Upload files
 
-For the full API documentation, including Swagger specification, see the [Asset Store docs](../../docs/asset-store/docs/03-04-asset-upload-service.md).
+For the full API documentation, including Swagger specification, see the [Asset Store docs](https://kyma-project.io/docs/master/components/asset-store#details-asset-upload-service).
 
 ### Environmental variables
 

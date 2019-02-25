@@ -47,7 +47,7 @@ fi
 ##
 # GO VET
 ##
-packagesToVet=("./restore/...")
+packagesToVet=("./...")
 
 for vPackage in "${packagesToVet[@]}"; do
 	vetResult=$(go vet ${vPackage})
