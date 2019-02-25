@@ -29,7 +29,7 @@ type BackupTest interface {
 }
 ```
 
-- The `CreateResources` Function is called before the backup to install all required test data. 
-- The `TestResources` Function is called after CreateResources to validate if the test data is working like expected. After the pipeline did a backup and restore on the cluster the `TestResources` function is called again to validate the restore was working as expected.
+- The `CreateResources` function is called before the backup to install all required test data.
+- The `TestResources` function is called after the `CreateResources` function to validate if the test data is working like expected. After the pipeline did a backup and restore on the cluster the `TestResources` function is called again to validate the restore was working as expected.
 
-Register the test in the central E2E tests.
+Register the test in the [E2E tests](../../../tests/end-to-end/backup-restore-test).

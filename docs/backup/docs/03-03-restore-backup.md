@@ -3,9 +3,9 @@ title: Restore a Kyma cluster
 type: Details
 ---
 
-Restoring a kyma cluster requieres a new / empty installation of kyma. As soon as the cluster is up and running ark can be instructed to start the restore. It is important to restore the system namespaces as well as the user namespaces at the same time, to make sure both are in sync.
+Restoring a Kyma cluster requires a new Kyma installation. As soon as the cluster is up and running, instruct Ark to start the restore process. It is important to restore the system and user Namespaces at the same time to make sure both are in sync.
 
-Use the following kubectl command to list available backups:
+Use the following command to list available backups:
 
 ```$ kubectl get backups -n heptio-ark```
 
@@ -36,7 +36,7 @@ spec:
     includeClusterResources: true
 ```
 
-To trigger the restore process, create the resource in Kubernetes:
+To trigger the restore process, run this command:
 
 ```$ kubectl apply -f <filename>```
 
@@ -44,4 +44,6 @@ To check the restore progress, run the following command:
 
 ```$ kubectl describe restore -n heptio-ark  <restore name>```
 
-To validate the result of the restore use `kubectl`. Even the restore is marked completed it may take some time, till all resources are available again.
+To validate the result of the restore use the `kubectl get` command.
+
+> **NOTE:** Even if the restore process is complete, it may take some time for the resources to become available again.
