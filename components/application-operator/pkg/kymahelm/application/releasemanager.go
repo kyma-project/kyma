@@ -51,7 +51,7 @@ func (r *releaseManager) InstallChart(application *v1alpha1.Application) (hapi_4
 func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
 	overridesData := r.overridesDefaults
 	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
-		overridesData.SubjectCN = fmt.Sprintf("%s;%s;%s", application.Spec.Tenant, application.Spec.Group, application.Name)
+		overridesData.SubjectCN = fmt.Sprintf("%s\\;%s\\;%s", application.Spec.Tenant, application.Spec.Group, application.Name)
 	} else {
 		overridesData.SubjectCN = application.Name
 	}
