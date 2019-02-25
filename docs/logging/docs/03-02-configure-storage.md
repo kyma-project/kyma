@@ -43,7 +43,7 @@ data:
 
 ``` 
 
-The Loki storage configuration consists of the **schema_config** and **storage_configs** sections. Use the **schema_config** to define your storage types and **storage_configs** to set specific configuration for the declared storage types.
+The Loki storage configuration consists of the **schema_config** and **storage_configs** definitions. Use the **schema_config** to define your storage types, and **storage_configs** to configure the already defined storage types.
 
 ##### Example Configuration for GCS
 
