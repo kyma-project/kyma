@@ -12,4 +12,4 @@ RUN curl -Lo /usr/bin/kubectl https://storage.googleapis.com/kubernetes-release/
 RUN mkdir -p /root/.kube && touch /root/.kube/config
 COPY bin/app /test-logging-monitoring
 
-CMD ["/test-logging-monitoring"]
+CMD ["/test-monitoring"]
