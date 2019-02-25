@@ -47,4 +47,4 @@ The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distribu
 
 ## Logging
 
-Logging in Kyma uses [Loki](https://github.com/grafana/loki).
+Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.
