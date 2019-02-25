@@ -28,6 +28,7 @@ echo "----------------------------"
 echo "- E2E Testing Kyma..."
 echo "----------------------------"
 
+result=0
 
 for testcase in $(ls -d ${ROOT_PATH}/../../tests/end-to-end/*/deploy/chart/*)
 do
@@ -40,21 +41,34 @@ do
     fi
 
     helm install $testcase --name $release --namespace end-to-end
-    if helm test $release --timeout 10000; then
+    helm test $release --timeout 1
+    testResult=$?
+    if [ $testResult -eq 0 ]
+    then
         releasesToClean="$releasesToClean $release"
+    else
+        result=$testResult
+        echo $result
     fi
 done
 
 checkAndCleanupTest end-to-end
-teste2e=$?
+cleanupResult=$?
+if [ $cleanupResult -ne 0 ]
+then
+    result=$cleanupResult
+fi
+
 
 for release in $releasesToClean; do
     cleanupHelmE2ERelease $release
 done
 
-if [ ${teste2e} -ne 0 ]
+if [ ${result} -ne 0 ]
 then
+    log FAIL red
     exit 1
 else
+    log SUCCESS green
     exit 0
 fi
