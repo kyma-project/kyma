@@ -6,21 +6,21 @@ Ark is a tool to back up and restore Kubernetes resources and persistent volumes
 
 ## Details
 
-The Ark installation contains only the configuration of storage providers. The configuration of backup content and scope is part of the Backup Resource. To respect the specific architecture of Ark, kyma is delivering  tested sample files as part of the documentation which can be used during the backup process. (See related kyma documentation <!-- TODO: add link to backup documentation -->) . It is important, that all components which are storing data are part of the sample file configuration to enable administrators to setup a proper backup process.
+The Ark installation contains only the configuration for storage providers. The configuration of backup content and scope is defined in the Backup resource. To comply with the specific architecture of Ark, Kyma delivers tested sample files you can use these to run the backup process. Include all components which store data in the sample file configuration to allow administrators to set up a proper backup process.
 
 
 
-## Add Components to the Backup
+## Add components to backup
 
-All kubernetes resources in the user namespaces are backuped by default. If there is something not covered by the backup or data which is stored in the system namespaces it has to be added to the sample file in the backup documentation (`/docs/backup/docs/assets`). This sample files are used as a configuration for testing. Details of the configuration attributes are part of the [ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
+All Kubernetes resources in the user Namespaces are backed up by default. However, you must add all data this backup does not cover, or data stored in the system Namespaces, to the configuration files. These files are used as testing configuration. For details on configuration attributes, see [ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
 
-If arks functionality is not sufficient it can be extended using [plugins](https://heptio.github.io/velero/v0.10.0/plugins) and [hooks](https://heptio.github.io/velero/v0.10.0/hooks). Plugins are extending ark withouth being part of the binary. Ark Plugins in kyma are stored in the tools section (`tools/ark-plugins`). Hooks are commands executed inside containers and pods during backup. They are configured as part of the backup configuration.
+If Ark's functionality is not sufficient, you can extend it using [plugins](https://heptio.github.io/velero/v0.10.0/plugins) and [hooks](https://heptio.github.io/velero/v0.10.0/hooks). Plugins extend Ark without being a part of the binary. Ark Plugins in Kyma are stored in [`tools`](tools/ark-plugins) directory. Hooks are commands executed inside containers and Pods during backup. You can define them in your backup configuration.
 
 ## E2E Testing
 
 The E2E Test for Backup (`tests/end-to-end/backup-restore-test`) is running daily on prow and validating if all components can be restored like expected.
 
-To add components to the backup pipeline it is required to implement a simple go interface.
+To add components to the backup pipeline, implement the following go interface:
 
 ```go
 type BackupTest interface {
@@ -29,6 +29,7 @@ type BackupTest interface {
 }
 ```
 
-The `CreateResources` Function is called before the backup to install all required test data. The `TestResources` Function is called after CreateResources to validate if the test data is working like expected. After the pipeline did a backup and restore on the cluster the `TestResources` function is called again to validate the restore was working as expected.
+- The `CreateResources` Function is called before the backup to install all required test data. 
+- The `TestResources` Function is called after CreateResources to validate if the test data is working like expected. After the pipeline did a backup and restore on the cluster the `TestResources` function is called again to validate the restore was working as expected.
 
-The test has to be registered in the central E2E test.
+Register the test in the central E2E tests.

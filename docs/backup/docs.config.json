@@ -2,7 +2,7 @@
   "spec": {
     "id": "backup",
     "displayName": "Backup",
-    "description": "Overal documentation for Backup",
+    "description": "Overall documentation for Backup",
     "type": "Components"
   }
 }
