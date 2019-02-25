@@ -15,14 +15,14 @@ You can access every exposed Application (App) through its gateway by using the 
 ## Connector Service
 
 The Connector Service:
-- Handles the exchange of client certificates for a given RE.
+- Handles the exchange of client certificates for a given App.
 - Provides the Application Registry and Event Service endpoints.
 - Signs client certificates using the server-side certificate stored in a Kubernetes Secret.
 
 ## Application Registry
 
-The Application Registry stores all registered APIs and Event Catalog exposed by a connected external solution. The metadata of the external solution's APIs and Event catalogs is stored in the [Application](#custom-resource-application) custom resource.
-The system creates a new Kubernetes service for each registered API. Additionally, new ServiceClasses are registered in the Service Catalog.
+The Application Registry saves and reads the APIs and Event Catalog metadata of the connected external solution in the [Application](#custom-resource-application) custom resource.
+The system creates a new Kubernetes service for each registered API.
 
 >**NOTE:** Using the Application Registry, you can register an API along with its OAuth or Basic Authentication credentials. The credentials are stored in a Kubernetes Secret.
 

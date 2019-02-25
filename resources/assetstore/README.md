@@ -31,4 +31,4 @@ To update the Asset Store deployment, run this command:
 helm upgrade assetstore resources/assetstore --namespace kyma-system --wait=true --reuse-values --set minio.persistence.enabled=false --set minio.gcsgateway.enabled=true --set minio.gcsgateway.replicas=1 --set minio.gcsgateway.gcsKeySecret=assetstore-gcs-credentials --set minio.gcsgateway.projectId={gcp-project} --set minio.defaultBucket.enabled=false
 ```
 
->**NOTE:** This is an alpha version of the Asset Store. In this version, the GCS `content` bucket is not available in the Minio Gateway mode. There is also no verification that checks if the bucket name is unique, which is a requirement in GCS.
+>**NOTE:** This is an alpha version of the Asset Store. In this version, the GCS `content` bucket is not available in the Minio Gateway mode.

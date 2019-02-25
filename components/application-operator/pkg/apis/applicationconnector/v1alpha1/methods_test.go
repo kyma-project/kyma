@@ -5,7 +5,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/stretchr/testify/assert"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func TestApplication_HasFinalizer(t *testing.T) {
@@ -68,7 +68,7 @@ func TestApplication_RemoveFinalizer(t *testing.T) {
 		},
 	}
 
-	t.Run("test has finalizer", func(t *testing.T) {
+	t.Run("test remove finalizer", func(t *testing.T) {
 		for _, test := range testCases {
 			app := v1alpha1.Application{
 				ObjectMeta: v1.ObjectMeta{
@@ -107,7 +107,7 @@ func TestApplication_SetFinalizer(t *testing.T) {
 		},
 	}
 
-	t.Run("test has finalizer", func(t *testing.T) {
+	t.Run("test set finalizer", func(t *testing.T) {
 		for _, test := range testCases {
 			app := v1alpha1.Application{
 				ObjectMeta: v1.ObjectMeta{
@@ -120,5 +120,83 @@ func TestApplication_SetFinalizer(t *testing.T) {
 
 			assert.Equal(t, test.result, app.Finalizers)
 		}
+	})
+}
+
+func TestApplication_HasTenant(t *testing.T) {
+	t.Run("HasTenant returns true when tenant is set to a non-empty string", func(t *testing.T) {
+		app := v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "test",
+			},
+			Spec: v1alpha1.ApplicationSpec{
+				Tenant: "tenant",
+			},
+		}
+
+		assert.True(t, app.Spec.HasTenant())
+	})
+
+	t.Run("HasTenant returns false when tenant is not set", func(t *testing.T) {
+		app := v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "test",
+			},
+			Spec: v1alpha1.ApplicationSpec{},
+		}
+
+		assert.False(t, app.Spec.HasTenant())
+	})
+
+	t.Run("HasTenant returns false when tenant is set to a empty string", func(t *testing.T) {
+		app := v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "",
+			},
+			Spec: v1alpha1.ApplicationSpec{
+				Tenant: "",
+			},
+		}
+
+		assert.False(t, app.Spec.HasTenant())
+	})
+}
+
+func TestApplication_HasGroup(t *testing.T) {
+	t.Run("HasGroup returns true when group is set to a non-empty string", func(t *testing.T) {
+		app := v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "test",
+			},
+			Spec: v1alpha1.ApplicationSpec{
+				Group: "group",
+			},
+		}
+
+		assert.True(t, app.Spec.HasGroup())
+	})
+
+	t.Run("HasGroup returns false when group is not set", func(t *testing.T) {
+		app := v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "test",
+			},
+			Spec: v1alpha1.ApplicationSpec{},
+		}
+
+		assert.False(t, app.Spec.HasGroup())
+	})
+
+	t.Run("HasGroup returns false when group is set to a empty string", func(t *testing.T) {
+		app := v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{
+				Name: "",
+			},
+			Spec: v1alpha1.ApplicationSpec{
+				Group: "",
+			},
+		}
+
+		assert.False(t, app.Spec.HasGroup())
 	})
 }

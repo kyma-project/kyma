@@ -9,16 +9,16 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 )
 
-type ExtenderConstructor func(token string, tokenResolver tokens.Resolver) (clientcontext.ContextExtender, apperrors.AppError)
+type ExtenderConstructor func() clientcontext.ContextExtender
 
 type tokenResolverMiddleware struct {
-	tokenResolver       tokens.Resolver
+	tokenManager        tokens.Manager
 	extenderConstructor ExtenderConstructor
 }
 
-func NewTokenResolverMiddleware(tokenResolver tokens.Resolver, extenderConstructor ExtenderConstructor) *tokenResolverMiddleware {
+func NewTokenResolverMiddleware(tokenManager tokens.Manager, extenderConstructor ExtenderConstructor) *tokenResolverMiddleware {
 	return &tokenResolverMiddleware{
-		tokenResolver:       tokenResolver,
+		tokenManager:        tokenManager,
 		extenderConstructor: extenderConstructor,
 	}
 }
@@ -27,23 +27,30 @@ func (cc *tokenResolverMiddleware) Middleware(handler http.Handler) http.Handler
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token := r.URL.Query().Get("token")
 		if token == "" {
-			httphelpers.RespondWithError(w, apperrors.Forbidden("Token not provided."))
+			httphelpers.RespondWithErrorAndLog(w, apperrors.Forbidden("Token not provided."))
 			return
 		}
 
-		ctxExtender, err := cc.extenderConstructor(token, cc.tokenResolver)
+		connectorClientContext := cc.extenderConstructor()
+
+		err := cc.tokenManager.Resolve(token, connectorClientContext)
 		if err != nil {
 			if err.Code() == apperrors.CodeNotFound {
-				httphelpers.RespondWithError(w, apperrors.Forbidden("Invalid token."))
+				httphelpers.RespondWithErrorAndLog(w, apperrors.Forbidden("Invalid token."))
 			} else {
-				httphelpers.RespondWithError(w, apperrors.Internal("Failed to resolve token."))
+				httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Failed to resolve token."))
 			}
 
 			return
 		}
 
-		reqWithCtx := r.WithContext(ctxExtender.ExtendContext(r.Context()))
+		reqWithCtx := r.WithContext(connectorClientContext.ExtendContext(r.Context()))
+		writerWithStatus := httphelpers.WriterWithStatus{ResponseWriter: w}
 
-		handler.ServeHTTP(w, reqWithCtx)
+		handler.ServeHTTP(&writerWithStatus, reqWithCtx)
+
+		if writerWithStatus.IsSuccessful() {
+			cc.tokenManager.Delete(token)
+		}
 	})
 }

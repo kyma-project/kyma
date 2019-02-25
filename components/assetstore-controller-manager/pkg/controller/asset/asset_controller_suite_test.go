@@ -2,6 +2,7 @@ package asset
 
 import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/asset"
 	stdlog "log"
 	"os"
 	"path/filepath"
@@ -79,19 +80,13 @@ func prepareReconcilerTest(t *testing.T, mocks *mocks) *testSuite {
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
+	handler := asset.New(mgr.GetRecorder("asset-controller"), mocks.store, mocks.loader, bucketFinder(mgr), mocks.validator, mocks.mutator, log)
 	reconciler := &ReconcileAsset{
-		Client:          mgr.GetClient(),
-		scheme:          mgr.GetScheme(),
-		recorder:        mgr.GetRecorder("asset-controller"),
-		requeueInterval: 60 * time.Hour,
-
-		uploader:        mocks.uploader,
-		loader:          mocks.loader,
-		bucketLister:    mocks.bucketLister,
-		cleaner:         mocks.cleaner,
-		deleteFinalizer: finalizer.New(deleteAssetFinalizerName),
-		validator:       mocks.validator,
-		mutator:         mocks.mutator,
+		Client:         mgr.GetClient(),
+		scheme:         mgr.GetScheme(),
+		handler:        handler,
+		relistInterval: 60 * time.Hour,
+		finalizer:      finalizer.New(deleteAssetFinalizerName),
 	}
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
