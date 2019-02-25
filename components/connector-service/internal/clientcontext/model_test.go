@@ -74,15 +74,15 @@ func TestApplicationContext_FillPlaceholders(t *testing.T) {
 
 	t.Run("should fill placeholders with values", func(t *testing.T) {
 		// given
-		expectedInfoURL := "https://test.cluster.cx/v1/tenant/" + appCtx.ClusterContext.Tenant +
+		expectedInfoURL := "https://test.cluster.cx/tenant/" + appCtx.ClusterContext.Tenant +
 			"/group/" + appCtx.ClusterContext.Group +
 			"/application/" + appCtx.Application +
-			"/applications/management/info"
+			"/v1/applications/management/info"
 
-		baseInfoURL := "https://test.cluster.cx/v1/tenant/" + TenantPlaceholder +
+		baseInfoURL := "https://test.cluster.cx/tenant/" + TenantPlaceholder +
 			"/group/" + GroupPlaceholder +
 			"/application/" + ApplicationPlaceholder +
-			"/applications/management/info"
+			"/v1/applications/management/info"
 
 		// when
 		filledInfoURL := appCtx.FillPlaceholders(baseInfoURL)
@@ -113,13 +113,13 @@ func TestClusterContext_FillPlaceholders(t *testing.T) {
 
 	t.Run("should fill placeholders with values", func(t *testing.T) {
 		// given
-		expectedInfoURL := "https://test.cluster.cx/v1/tenant/" + clsCtx.Tenant +
+		expectedInfoURL := "https://test.cluster.cx/tenant/" + clsCtx.Tenant +
 			"/group/" + clsCtx.Group +
-			"/runtimes/management/info"
+			"/v1/runtimes/management/info"
 
-		baseInfoURL := "https://test.cluster.cx/v1/tenant/" + TenantPlaceholder +
+		baseInfoURL := "https://test.cluster.cx/tenant/" + TenantPlaceholder +
 			"/group/" + GroupPlaceholder +
-			"/runtimes/management/info"
+			"/v1/runtimes/management/info"
 
 		// when
 		filledInfoURL := clsCtx.FillPlaceholders(baseInfoURL)
