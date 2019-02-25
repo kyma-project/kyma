@@ -4,7 +4,7 @@ title: Overview
 
 The backup in Kyma uses [Ark](https://github.com/heptio/velero/).
 
->**NOTE:** The Ark project is now called Velero, as it will be migrated when the new Velero version is available.
+>**NOTE:** The Ark project was renamed to Velero. The full migration is planned once the new Velero version is available.
 
 Ark backs up Kubernetes resources and stores them in Azure Blob storage. It triggers physical volume snapshots and includes the snapshot references in the backup. Ark can create scheduled or on-demand backups, filter objects to back up, and set time to live (TTL) for stored backups.
 

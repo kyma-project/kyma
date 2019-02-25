@@ -2,14 +2,14 @@
 title: Configuration
 ---
 
-The configuration of ark consist of two custom resources: 
+Ark configuration consists of two custom resources:
 
 - The VolumeSnapshotLocation CR defines the provider of physical volume snapshots.
 - The BackupStorageLocations CR defines a bucket or storage location for cluster resources.
 
-A kyma installation is delivered with a set of default snapshot and storage locations. If needed it is possible to add custom locations in the `heptio-ark` namespace.
+A Kyma installation provides a set of default snapshot and storage locations. If necessary, you can add custom locations in the `heptio-ark` Namespace.
 
-A sample YAML `BackupStorageLocation` configuration file looks as follows:
+A sample `BackupStorageLocation` configuration file looks as follows:
 
 ```apiVersion: ark.heptio.com/v1
 kind: BackupStorageLocation
@@ -25,7 +25,7 @@ spec:
   provider: azure
 ```
 
-For a detailed description of all options, see the [Heptio Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backupstoragelocation.md).
+For a detailed description of all options, see the [Heptio Ark Documentation](https://github.com/heptio/velero/blob/master/docs/api-types/volumesnapshotlocation.md).
 
 A sample `VolumeSnapshotLocation` configuration file looks as follows:
 

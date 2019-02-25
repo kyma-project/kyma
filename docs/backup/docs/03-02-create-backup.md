@@ -2,13 +2,13 @@
 title: Back up a Kyma cluster
 type: Details
 ---
-Kyma provides two validated sample `BackupSpec` files to back up the system and user Namespaces. You can integrate the specification to scheduled or on-demand backup configurations. To completely back up a cluster, you must back up the system and user Namespaces.
+Kyma provides two validated sample `BackupSpec` files to back up system and user Namespaces. You can integrate the specification to scheduled or on-demand backup configurations. To completely back up a cluster, you must back up the system and user Namespaces.
 
 Modifying these files allows you to adjust the backup scope. For details about the file format, see the [Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
 
 ## Create manual backups
 
-If you want to use sample backup configurations, you cannot use the Ark CLI to create backups. Instead, add the following two Backup custom resources in the `heptio-ark` Namespace to instruct the Ark server to create a backup. Make sure the indentation is correct.
+If you want to use sample backup configurations, you cannot use the Ark CLI. Instead, add the following two Backup custom resources in the `heptio-ark` Namespace to instruct the Ark server to create a backup. Make sure the indentation is correct.
 
 Sample backup configuration:
 
@@ -37,7 +37,7 @@ To create the backup, run the following command:
 
 ## Schedule periodic backups
 
-If you want to use sample backup configurations, you cannot use the Ark CLI to schedule backups. Instead, create two Schedule custom resources in the `heptio-ark` Namespace to instruct the Ark Server to schedule a cluster backup. Make sure the indentation is correct.
+If you want to use sample backup configurations, you cannot use the Ark CLI. Instead, create two Schedule custom resources in the `heptio-ark` Namespace to instruct the Ark Server to schedule a cluster backup. Make sure the indentation is correct.
 
 ```yaml
 ---
