@@ -16,14 +16,14 @@ global:
     dir: pr/
     version: PR-2757
   application_operator_tests:
-    dir: develop/
-    version: 0c447819
+    dir: pr/
+    version: PR-2854
   connector_service:
     dir: pr/
     version: PR-2757
   connector_service_tests:
     dir: pr/
-    version: PR-2757
+    version: PR-2854
   connection_token_handler:
     dir: develop/
     version: fa0de1b9
@@ -31,14 +31,14 @@ global:
     dir: develop/
     version: 6e0a7fe2
   application_proxy:
-    dir: develop/
-    version: 31c6fae3
+    dir: pr/
+    version: PR-2854
   gateway_tests:
     dir: develop/
     version: 8b074a71
   application_registry:
-    dir: develop/
-    version: cb6a82cf
+    dir: pr/
+    version: PR-2854
   application_registry_tests:
     dir: develop/
     version: cb6a82cf
