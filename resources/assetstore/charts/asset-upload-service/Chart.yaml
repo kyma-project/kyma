@@ -1,0 +1,3 @@
+name: asset-upload-service
+description: HTTP service for asset uploading
+version: 0.1.0

@@ -190,3 +190,14 @@ func Test_CreateDeleteSubscription(t *testing.T) {
 	err = k.DeleteSubscription(subscriptionName, testNS)
 	assert.Nil(t, err)
 }
+
+func Test_CreateSubscriptionAgain(t *testing.T) {
+	log.Print("Test_CreateSubscriptionAgain")
+	k := &KnativeLib {}
+	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
+	var uri = "dnsName: hello-00001-service.default"
+	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
+	assert.Nil(t, err)
+	err = k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
+	assert.True(t, k8serrors.IsAlreadyExists(err))
+}
