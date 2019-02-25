@@ -5,8 +5,8 @@ global:
     gateway:
       name: kyma-gateway
   assetstore_controller_manager:
-    dir: pr/
-    version: PR-2823
+    dir: develop/
+    version: 11d887b4
   asset_upload_service:
     dir: develop/
     version: 2b2c8c04
