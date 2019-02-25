@@ -1,0 +1,23 @@
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: DocsTopic
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: docstopic-sample
+spec:
+  displayName: "Docs Topic Sample"
+  description: "Docs Topic Description"
+  sources:
+    openapi:
+      mode: singles
+      url: https://github.com/kyma-project/kyma/blob/master/README.md
+    asyncapi:
+      mode: single
+      url: https://github.com/kyma-project/kyma/blob/master/README.md
+    markdown:
+      mode: single
+      url: https://github.com/kyma-project/kyma/blob/master/README.md
+    dita:
+      mode: single
+      url: https://github.com/kyma-project/kyma/blob/master/README.md
+
