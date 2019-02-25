@@ -62,6 +62,11 @@ fi
 
 for release in $releasesToClean; do
     cleanupHelmE2ERelease $release
+    cleanupResult=$?
+    if [ $cleanupResult -ne 0 ]
+    then
+        result=$cleanupResult
+    fi
 done
 
 if [ ${result} -ne 0 ]
