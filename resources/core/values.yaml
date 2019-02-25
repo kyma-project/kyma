@@ -73,7 +73,7 @@ global:
     dir: develop/
     version: "0b5f866d"
   cluster_users_test:
-    dir: develop/
+    dir: pr/
     version: "PR-2782"
 
 test:
