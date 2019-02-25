@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	helmmocks "github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/mocks"
 	"github.com/pkg/errors"
@@ -93,7 +93,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			Spec:       v1alpha1.ApplicationSpec{Tenant: "tenant", Group: "group"},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "tenant\;group\;default-app")
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "tenant\\;group\\;default-app")
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
