@@ -16,7 +16,7 @@ If Ark's functionality is not sufficient, you can extend it using [plugins](http
 
 ## E2E tests
 
-The [E2E test for backup]((https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test)) runs daily on Prow and validates if the restore process works for all components as expected.
+The [E2E test for backup](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test) runs daily on Prow and validates if the restore process works for all components as expected.
 
 To add components to the backup pipeline, implement the following go interface:
 
