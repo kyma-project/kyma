@@ -14,7 +14,7 @@ kubectl get crd assets.assetstore.kyma-project.io -o yaml
 This is a sample resource (CR) that provides details of the bucket for storing assets.
 
 ```
-apiVersion: assetstore.kyma-project.io/v1alpha1
+apiVersion: assetstore.kyma-project.io/v1alpha2
 kind: Asset
 metadata:
   name: my-package-assets
@@ -36,7 +36,7 @@ You can also define validation and mutation services:
 - **Mutation webhook** acts similarly to the validation service. The difference is that it mutates the asset instead of just validating it. For example, this can mean asset rewriting through the `regex` operation or `keyvalue`, or the modification in the JSON specification. The mutation webhook returns modified files instead of information on the status.
 
 ```
-apiVersion: assetstore.kyma-project.io/v1alpha1
+apiVersion: assetstore.kyma-project.io/v1alpha2
 kind: Asset
 metadata:
   name: my-package-assets
@@ -62,14 +62,15 @@ spec:
     name: my-bucket
 status:
   phase: Failed
-  reason: ValidationFailure
+  reason: ValidationFailed
   message: "The file is not valid against the provided json schema"
   lastHeartbeatTime: "2018-01-03T07:38:24Z"
+  observedGeneration: 1
   assetRef:
     assets:
     - README.md
     - directory/subdirectory/file.md
-    baseUrl: https://minio.kyma.local/ns-default-test-sample/asset-sample
+    baseUrl: https://minio.kyma.local/ns-default-test-sample-1b19rnbuc6ir8/asset-sample
 
 ```
 
@@ -99,9 +100,10 @@ This table lists all possible parameters of a given resource together with their
 | **status.reason** |    **Not applicable**   | Provides the reason why the Asset CR processing failed or is pending.  |
 | **status.message** |    **Not applicable**   | Describes a human-readable message on the CR processing progress, success, or failure. |
 | **status.lastheartbeattime** |    **Not applicable**   | Provides the last time when the Asset Controller processed the Asset CR. |
+| **status.observedGeneration** |    **Not applicable**   | Specifies the most recent generation that the Asset Controller observes. |
 | **status.assetref** |    **Not applicable**   | Provides details on the location of the assets stored in the bucket.   |
 | **status.assetref.assets** |    **Not applicable**   | Provides the relative path to the given asset in the storage bucket. |
-| **status.assetref.baseurl** |    **Not applicable**   | Specifies the absolute path to the location of the assets in the storage bucket.   |
+| **status.assetref.baseurl** |    **Not applicable**   | Specifies the absolute path to the location of the assets in the storage bucket. |
 
 
 > **NOTE:** The Asset Controller automatically adds all parameters marked as **Not applicable** to the Asset CR.
