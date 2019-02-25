@@ -28,8 +28,8 @@ type BackupTest interface {
 ```
 The functions work as follows:
 
-- The `TestResources` function validates if the test data is working as expected. 
+- The `TestResources` function validates if the test data works as expected. 
 - The `CreateResources` function installs the required test data before the backup process starts.
-- After the pipeline executes backup and restore on the cluster, the `TestResources` function validates if the restore worked as expected.
+- After the pipeline executes the backup and restore processes on the cluster, the `TestResources` function validates if the restore worked as expected.
 
-Register the test in the [E2E tests](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test).
+Add the test in the [E2E tests](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test).
