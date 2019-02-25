@@ -22,24 +22,38 @@ type TokenHandler interface {
 	CreateToken(w http.ResponseWriter, r *http.Request)
 }
 
-func NewHandler(globalMiddlewares []mux.MiddlewareFunc, appCfg Config, runtimeCfg Config) http.Handler {
+type handlerBuilder struct {
+	router *mux.Router
+}
+
+func NewHandlerBuilder(globalMiddlewares []mux.MiddlewareFunc) *handlerBuilder {
 	router := mux.NewRouter()
 	httphelpers.WithMiddlewares(router, globalMiddlewares...)
-
-	appTokenHandler := NewTokenHandler(appCfg.TokenManager, appCfg.CSRInfoURL, appCfg.ContextExtractor)
-
-	applicationTokenRouter := router.PathPrefix("/v1/applications").Subrouter()
-	httphelpers.WithMiddlewares(applicationTokenRouter, appCfg.Middlewares...)
-	applicationTokenRouter.HandleFunc("/tokens", appTokenHandler.CreateToken).Methods(http.MethodPost)
-
-	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenManager, runtimeCfg.CSRInfoURL, runtimeCfg.ContextExtractor)
-
-	clusterTokenRouter := router.PathPrefix("/v1/runtimes").Subrouter()
-	httphelpers.WithMiddlewares(clusterTokenRouter, runtimeCfg.Middlewares...)
-	clusterTokenRouter.HandleFunc("/tokens", runtimeTokenHandler.CreateToken).Methods(http.MethodPost)
 
 	router.NotFoundHandler = errorhandler.NewErrorHandler(404, "Requested resource could not be found.")
 	router.MethodNotAllowedHandler = errorhandler.NewErrorHandler(405, "Method not allowed.")
 
-	return router
+	return &handlerBuilder{
+		router: router,
+	}
+}
+
+func (hb *handlerBuilder) WithApps(appCfg Config) {
+	appTokenHandler := NewTokenHandler(appCfg.TokenManager, appCfg.CSRInfoURL, appCfg.ContextExtractor)
+
+	applicationTokenRouter := hb.router.PathPrefix("/v1/applications").Subrouter()
+	httphelpers.WithMiddlewares(applicationTokenRouter, appCfg.Middlewares...)
+	applicationTokenRouter.HandleFunc("/tokens", appTokenHandler.CreateToken).Methods(http.MethodPost)
+}
+
+func (hb *handlerBuilder) WithRuntimes(runtimeCfg Config) {
+	runtimeTokenHandler := NewTokenHandler(runtimeCfg.TokenManager, runtimeCfg.CSRInfoURL, runtimeCfg.ContextExtractor)
+
+	clusterTokenRouter := hb.router.PathPrefix("/v1/runtimes").Subrouter()
+	httphelpers.WithMiddlewares(clusterTokenRouter, runtimeCfg.Middlewares...)
+	clusterTokenRouter.HandleFunc("/tokens", runtimeTokenHandler.CreateToken).Methods(http.MethodPost)
+}
+
+func (hb *handlerBuilder) GetHandler() http.Handler {
+	return hb.router
 }
