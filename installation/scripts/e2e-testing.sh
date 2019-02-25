@@ -41,7 +41,7 @@ do
     fi
 
     helm install $testcase --name $release --namespace end-to-end
-    helm test $release --timeout 1
+    helm test $release --timeout 10000
     testResult=$?
     if [ $testResult -eq 0 ]
     then
