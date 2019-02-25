@@ -1,5 +1,5 @@
 ---
-title: Storage Configuration
+title: Storage configuration
 type: Details
 ---
 
