@@ -6,6 +6,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
+	"log"
 )
 
 type Config struct {
@@ -14,12 +15,14 @@ type Config struct {
 	AssetName string `envconfig:"default=test-asset"`
 	ClusterBucketName string `envconfig:"default=test-cluster-bucket"`
 	ClusterAssetName string `envconfig:"default=test-cluster-asset"`
+	UploadServiceUrl string `envconfig:"default=http://localhost:3000/v1/upload"`
 }
 
 type TestSuite struct {
 	namespace *namespace.Namespace
 	bucket *bucket
 	clusterBucket *clusterBucket
+	fileUpload *fileUpload
 
 	coreCli corev1.CoreV1Interface
 	dynamicCli dynamic.Interface
@@ -46,6 +49,7 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 		namespace:ns,
 		bucket:b,
 		clusterBucket:cb,
+		fileUpload:newFileUpload(cfg.UploadServiceUrl),
 
 		coreCli:coreCli,
 		dynamicCli:dynamicCli,
@@ -69,6 +73,12 @@ func (t *TestSuite) Run() error {
 		return err
 	}
 
+	files, err := t.fileUpload.Do()
+	if err != nil {
+		return err
+	}
+
+	log.Println(files)
 
 	// Upload test data with upload service
 
