@@ -91,7 +91,7 @@ func TestAllCases(t *testing.T) {
 	for _, tc := range testCases {
 		c := tc.GetClient()
 		r := &ReconcileEventActivation{
-			Client:   c,
+			client:   c,
 			recorder: recorder,
 		}
 		t.Logf("Running test %s", tc.Name)
@@ -102,17 +102,17 @@ func TestAllCases(t *testing.T) {
 func TestInjectClient(t *testing.T) {
 	println("TestInjectClient()")
 	r := &ReconcileEventActivation{}
-	orig := r.Client
+	orig := r.client
 	n := fake.NewFakeClient()
 	if orig == n {
 		t.Errorf("Original and new clients are identical: %v", orig)
 	}
-	err := r.InjectClient(&n)
+	err := r.InjectClient(n)
 	if err != nil {
 		t.Errorf("Unexpected error injecting the client: %v", err)
 	}
-	if n != r.Client {
-		t.Errorf("Unexpected client. Expected: '%v'. Actual: '%v'", n, r.Client)
+	if n != r.client {
+		t.Errorf("Unexpected client. Expected: '%v'. Actual: '%v'", n, r.client)
 	}
 }
 

@@ -66,13 +66,13 @@ var _ reconcile.Reconciler = &ReconcileEventActivation{}
 
 // ReconcileEventActivation reconciles a EventActivation object
 type ReconcileEventActivation struct {
-	client.Client
+	client client.Client
 	scheme *runtime.Scheme
 	recorder record.EventRecorder
 }
 
-func (r *ReconcileEventActivation) InjectClient(c *client.Client) error {
-	r.Client = *c
+func (r *ReconcileEventActivation) InjectClient(c client.Client) error {
+	r.client = c
 	return nil
 }
 
@@ -126,7 +126,7 @@ func (r *ReconcileEventActivation) Reconcile(request reconcile.Request) (reconci
 	// Fetch the EventActivation instance
 	log.Info("Reconcile started...Here we go!")
 	instance := &eventingv1alpha1.EventActivation{}
-	err := r.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.
@@ -150,7 +150,7 @@ func (r *ReconcileEventActivation) Reconcile(request reconcile.Request) (reconci
 			//Finalizer is not added, let's add it
 			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, TestEventActivationFinalizerName)
 			log.Info("Finalizer added", "Finalizer name", TestEventActivationFinalizerName)
-			if err := r.Update(context.Background(), instance); err != nil {
+			if err := r.client.Update(context.Background(), instance); err != nil {
 				return reconcile.Result{Requeue: true}, nil
 			}
 		}
@@ -168,7 +168,7 @@ func (r *ReconcileEventActivation) Reconcile(request reconcile.Request) (reconci
 			// remove the finalizer from the list
 			instance.ObjectMeta.Finalizers = removeString(&instance.ObjectMeta.Finalizers, TestEventActivationFinalizerName)
 			log.Info("Finalizer removed", "Finalizer name", TestEventActivationFinalizerName)
-			if err := r.Update(context.Background(), instance); err != nil {
+			if err := r.client.Update(context.Background(), instance); err != nil {
 				return reconcile.Result{}, err
 			}
 			return reconcile.Result{}, nil
