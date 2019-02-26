@@ -5,6 +5,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/api/core/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 type Namespace struct {
@@ -24,6 +25,10 @@ func (n *Namespace) Create() error {
 	})
 
 	if err != nil {
+		if apierrors.IsAlreadyExists(err) {
+			return nil
+		}
+
 		return errors.Wrapf(err, "while creating namespace %s", n.name)
 	}
 

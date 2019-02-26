@@ -1,7 +1,7 @@
 package testsuite
 
 import (
-	"github.com/kyma-project/kyma/tests/asset-store/internal/testsuite/namespace"
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
@@ -56,7 +56,7 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 func (t *TestSuite) Run() error {
 	err := t.namespace.Create()
 	if err != nil {
-		return errors.Wrapf(err, "while creating namespace")
+		return err
 	}
 
 	err = t.bucket.Create()
@@ -72,7 +72,6 @@ func (t *TestSuite) Run() error {
 
 	// Upload test data with upload service
 
-	// Create Bucket CR
 	// Create asset CR (maybe more? single file and package)
 
 	// Check if assets have been uploaded

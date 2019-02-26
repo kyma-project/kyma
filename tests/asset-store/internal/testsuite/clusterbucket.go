@@ -29,12 +29,16 @@ func newClusterBucket(dynamicCli dynamic.Interface, name string) *clusterBucket 
 }
 
 func (b *clusterBucket) Create() error {
-	clusterBucket := &v1alpha2.Bucket{
+	clusterBucket := &v1alpha2.ClusterBucket{
+		TypeMeta: metav1.TypeMeta{
+			Kind: "ClusterBucket",
+			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: b.name,
 			Namespace: b.namespace,
 		},
-		Spec:v1alpha2.BucketSpec{
+		Spec:v1alpha2.ClusterBucketSpec{
 			CommonBucketSpec: v1alpha2.CommonBucketSpec{
 				Policy:v1alpha2.BucketPolicyReadOnly,
 			},
@@ -55,4 +59,5 @@ func (b *clusterBucket) Delete() error {
 		return errors.Wrapf(err, "while deleting ClusterBucket %s in namespace %s", b.name, b.namespace)
 	}
 
+	return nil
 }

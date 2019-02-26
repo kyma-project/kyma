@@ -1,25 +1,25 @@
-package asset_store
+package main
 
 import (
 	"flag"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/tests/asset-store/internal/testsuite"
 	"github.com/pkg/errors"
-	"k8s.io/client-go/tools/clientcmd"
-	restclient "k8s.io/client-go/rest"
 	"github.com/vrischmann/envconfig"
+	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 // config contains configuration fields used for upload
 type config struct {
 	KubeconfigPath string `envconfig:"optional"`
-	Verbose        bool   `envconfig:"default=false"`
-	TestSuite testsuite.Config
+	TestSuite      testsuite.Config
 }
 
+// TODO: Transform to Go test
 func main() {
 	cfg, err := loadConfig("APP")
-	parseFlags(cfg)
+	parseFlags()
 	exitOnError(err, "Error while loading app config")
 
 	restConfig, err := newRestClientConfig(cfg.KubeconfigPath)
@@ -50,12 +50,10 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	return config, nil
 }
 
-func parseFlags(cfg config) {
-	if cfg.Verbose {
-		err := flag.Set("stderrthreshold", "INFO")
-		if err != nil {
-			glog.Error(errors.Wrap(err, "while parsing flags"))
-		}
+func parseFlags() {
+	err := flag.Set("stderrthreshold", "INFO")
+	if err != nil {
+		glog.Error(errors.Wrap(err, "while parsing flags"))
 	}
 	flag.Parse()
 }

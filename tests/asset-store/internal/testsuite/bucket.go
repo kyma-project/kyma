@@ -4,9 +4,9 @@ import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type bucket struct {
@@ -31,6 +31,10 @@ func newBucket(dynamicCli dynamic.Interface, name, namespace string) *bucket {
 
 func (b *bucket) Create() error {
 	bucket := &v1alpha2.Bucket{
+		TypeMeta: metav1.TypeMeta{
+			Kind: "Bucket",
+			APIVersion: v1alpha2.SchemeGroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: b.name,
 			Namespace: b.namespace,
@@ -56,4 +60,5 @@ func (b *bucket) Delete() error {
 		return errors.Wrapf(err, "while deleting bucket %s in namespace %s", b.name, b.namespace)
 	}
 
+	return nil
 }

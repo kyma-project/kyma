@@ -1,12 +1,14 @@
 package resource
 
 import (
+	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 type Resource struct {
@@ -18,7 +20,7 @@ type Resource struct {
 func New(dynamicCli dynamic.Interface, s schema.GroupVersionResource, namespace string) *Resource {
 	resCli := dynamicCli.Resource(s).Namespace(namespace)
 
-	return &Resource{resCli: resCli, namespace: namespace, kind: s.GroupResource().String()}
+	return &Resource{resCli: resCli, namespace: namespace, kind: s.String()}
 }
 
 func (r *Resource) Create(res interface{}) error {
@@ -27,13 +29,17 @@ func (r *Resource) Create(res interface{}) error {
 		return errors.Wrapf(err, "while converting resource %s to unstructured", r.kind, res)
 	}
 
-	unstructuredBucket := &unstructured.Unstructured{
+	unstructuredObj := &unstructured.Unstructured{
 		Object: u,
 	}
 
-	_, err = r.resCli.Create(unstructuredBucket, metav1.CreateOptions{})
+	_, err = r.resCli.Create(unstructuredObj, metav1.CreateOptions{})
 	if err != nil {
-		return errors.Wrapf(err, "while creating resource %s ", unstructuredBucket.GetKind())
+		if apierrors.IsAlreadyExists(err) {
+			glog.Infof("Resource %s with name '%s' already exist.", unstructuredObj.GetKind(), unstructuredObj.GetName())
+			return nil
+		}
+		return errors.Wrapf(err, "while creating resource %s ", unstructuredObj.GetKind())
 	}
 
 	return nil
@@ -42,7 +48,7 @@ func (r *Resource) Create(res interface{}) error {
 func (r *Resource) Delete(name string) error {
 	err := r.resCli.Delete(name, &metav1.DeleteOptions{})
 	if err != nil {
-	 	return errors.Wrapf(err, "while deleting resource %s %s", r.kind, name)
+	 	return errors.Wrapf(err, "while deleting resource %s '%s'", r.kind, name)
 	}
 
 	return nil
