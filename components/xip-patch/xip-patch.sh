@@ -14,7 +14,7 @@ set -o errexit
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $CURRENT_DIR/utils.sh
 
-function generateXipDomain() {
+generateXipDomain() {
 
     if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
 
@@ -49,7 +49,7 @@ EOF
 
 }
 
-function generateCerts() {
+generateCerts() {
 
     XIP_PATCH_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
     KEY_PATH="${XIP_PATCH_DIR}/key.pem"

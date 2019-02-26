@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-function getLoadBalancerIP() {
+getLoadBalancerIP() {
 
     if [ "$#" -ne 2 ]; then
         echo "usage: getLoadBalancerIP <service_name> <namespace>"
@@ -33,7 +33,7 @@ function getLoadBalancerIP() {
     echo "${LOAD_BALANCER_IP}"
 }
 
-function generateCertificatesForDomain() {
+generateCertificatesForDomain() {
 
     if [ "$#" -ne 3 ]; then
         echo "usage: generateCertificatesForDomain <domain> <key_output_file> <cert_output_file>"
