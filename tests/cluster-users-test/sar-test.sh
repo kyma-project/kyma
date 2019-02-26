@@ -14,13 +14,13 @@ function testPermissions() {
 	TEST_NS="$4"
 	EXPECTED="$5"
 	set +e
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --as "${USER} -n ${TEST_NS}")
+	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --as "${USER}" -n "${TEST_NS}")
 	set -e
 	if [[ "${TEST}" == "${EXPECTED}" ]]; then
 		echo "----> PASSED"
 		return 0
 	fi
-	echo "----> |FAIL| Expected result: ${EXPECTED} vs Actual result: ${TEST}"
+	echo "----> |FAIL| Expected: ${EXPECTED} got: ${TEST}"
 	return 1
 }
 
@@ -40,8 +40,8 @@ function runTests() {
 	echo "--> developer@kyma.cx should NOT be able to delete ClusterRole in ${NAMESPACE}"
 	testPermissions "developer@kyma.cx" "delete" "clusterrole" "${NAMESPACE}" "no"
 
-	echo "--> developer@kyma.cx should NOT be able to list Deployments in production"
-	testPermissions "developer@kyma.cx" "list" "clusterrole" "production" "no"
+	echo "--> developer@kyma.cx should be able to list Deployments in production"
+	testPermissions "developer@kyma.cx" "list" "clusterrole" "production" "yes"
 
 	echo "--> developer@kyma.cx should NOT be able to create Services in production"
 	testPermissions "developer@kyma.cx" "create" "service" "production" "no"
@@ -68,7 +68,7 @@ function runTests() {
 	testPermissions "user@kyma.cx" "create" "ns" "${NAMESPACE}" "no"
 }
 
-function init() {
+function getConfigFile() {
 	readonly REGISTRATION_REQUEST=$(curl -s -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM")
 	readonly REQUEST_ID=$(echo "${REGISTRATION_REQUEST}" | cut -d '"' -f 2 | cut -d '?' -f 2)
 	readonly EMAIL=$(cat "${EMAIL_FILE}")
@@ -109,10 +109,10 @@ fi
 trap cleanup EXIT
 ERROR_LOGGING_GUARD="true"
 
-init
+getConfigFile
 export KUBECONFIG="${PWD}/kubeconfig"
 echo "---> Create testing RoleBinding"
-kubectl create -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
+kubectl apply -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
 runTests
 
 echo "ALL TESTS PASSED"
