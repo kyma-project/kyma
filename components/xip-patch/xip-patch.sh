@@ -2,48 +2,21 @@
 
 set -o errexit
 
-if [ -z "${INGRESSGATEWAY_SERVICE_NAME}" ]; then
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+echo "Trying to get loadbalancer IP address"
+if [[ -z "${INGRESSGATEWAY_SERVICE_NAME}" ]]; then
   INGRESSGATEWAY_SERVICE_NAME=istio-ingressgateway
 fi
 
-if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
-
-  SECONDS=0
-  END_TIME=$((SECONDS+60))
-
-  while [ ${SECONDS} -lt ${END_TIME} ];do
-      echo "Trying to get loadbalancer IP address"
-
-      EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system ${INGRESSGATEWAY_SERVICE_NAME} -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-
-      if [ "${EXTERNAL_PUBLIC_IP}" ]; then
-          echo "External public IP address is ${EXTERNAL_PUBLIC_IP}"
-          break
-      fi
-      
-      sleep 10
-  done
+if [[ -z "${EXTERNAL_PUBLIC_IP}" ]]; then
+  EXTERNAL_PUBLIC_IP=$(SERVICE_NAME="$INGRESSGATEWAY_SERVICE_NAME" SERVICE_NAMESPACE="istio-system" get-service-ip.sh)
 fi
+echo "External public IP address is ${EXTERNAL_PUBLIC_IP}"
 
-if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
-    echo "External public IP not found"
-    exit 1
-fi
+DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
 
-XIP_PATCH_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-PUBLIC_DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
-
-CERT_PATH="${XIP_PATCH_DIR}/cert.pem"
-KEY_PATH="${XIP_PATCH_DIR}/key.pem"
-
-openssl req -x509 -nodes -days 5 -newkey rsa:4069 \
-                 -subj "/CN=${PUBLIC_DOMAIN}" \
-                 -reqexts SAN -extensions SAN \
-                 -config <(cat /etc/ssl/openssl.cnf \
-        <(printf "\\n[SAN]\\nsubjectAltName=DNS:*.%s" "${PUBLIC_DOMAIN}")) \
-                 -keyout "${KEY_PATH}" \
-                 -out "${CERT_PATH}"
+OUT_DIR=${DIR} ${DIR}/generate-cert.sh
 
 TLS_CERT=$(base64 "${CERT_PATH}" | tr -d '\n')
 TLS_KEY=$(base64 "${KEY_PATH}" | tr -d '\n')
