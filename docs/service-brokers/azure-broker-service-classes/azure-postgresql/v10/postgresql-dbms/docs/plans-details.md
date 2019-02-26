@@ -29,7 +29,11 @@ Provisions an Azure Database for PostgreSQL DBMS instance containing no database
 | **firewallRules[n].name** | `string` | Specifies the name of the generated firewall rule |Yes | |
 | **firewallRules[n].startIPAddress** | `string` | Specifies the start of the IP range allowed by this firewall rule | Yes | |
 | **firewallRules[n].endIPAddress** | `string` | Specifies the end of the IP range allowed by this firewall rule | Yes | |
+| **virtualNetworkRules**  | `array` | Specifies the firewall rules to apply to the server. Definition follows. | No | `[]` Left unspecified, Firewall will default to only Azure IPs. If rules are provided, they must have valid values. |
+| **virtualNetworkRules[n].name** | `string` | Specifies the name of the generated virtual network rule |Yes | |
+| **virtualNetworkRules[n].subnetId** | `string` | The full resource ID of a subnet in a virtual network to allow access from. Example format: /subscriptions/{sub}/resourceGroups/{rg}/providers/Microsoft.Network/virtualNetworks/{vn}/subnets/{sn} | Yes | |
 | **tags** | `map[string]string` | Tags to be applied to new resources, specified as key/value pairs. | No | Tags (even if none are specified) are automatically supplemented with `heritage: open-service-broker-azure`. |
+| **extensions** | `string[]` | Specifies a list of PostgreSQL extensions to install | No | |
 
 #### Provisioning Parameters: basic
 

@@ -28,6 +28,8 @@ spec:
       id: api-gateway
     - displayName: Logging
       id: logging
+    - displayName: Backup
+      id: backup
     - displayName: Console
       id: console
     - displayName: Asset Store

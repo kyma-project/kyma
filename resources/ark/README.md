@@ -6,69 +6,28 @@ Ark is a tool to back up and restore Kubernetes resources and persistent volumes
 
 ## Details
 
-By default, Ark comes with GCP as a backup storage provider and no bucket set. With that configuration, the Ark server deployment scales down to 0 replicas because Ark cannot start without the proper configuration for the backup storage bucket. You can change this by providing proper credentials in the heptio-ark/ark secret and changing the configuration in config/default.
+The Ark installation contains only the configuration for storage providers. The configuration of backup content and scope is defined in the Backup resource. To comply with the specific Ark architecture, Kyma delivers tested sample files you can use to run the backup process. Add all components which store data in this configuration to allow administrators to set up a proper backup process.
 
-## Usage
+### Add components to backup
 
-### Prerequisites
+All Kubernetes resources in the user Namespaces are backed up by default. However, you must add all data this backup does not cover, or data stored in the system Namespaces, to the configuration files. These serve as a testing configuration. For details on configuration attributes, see [Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
 
-- [Download](https://github.com/heptio/ark/releases) the ark binary and add it to the **$PATH** environment variable. 
-- Create a lambda function in the `production` Namespace.
+If Ark's functionality is not sufficient, you can extend it using [plugins](https://heptio.github.io/velero/v0.10.0/plugins) and [hooks](https://heptio.github.io/velero/v0.10.0/hooks). Ark plugins are stored in [`tools`](tools/ark-plugins) directory, and extend Ark without being a part of the binary. Hooks are commands executed inside containers and Pods during the backup process. You can define them in your backup configuration.
 
-### Steps
+## E2E tests
 
-1. List all the Namespaces in the Kyma cluster.
+The [E2E test for backup](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test) runs daily on Prow and validates if the restore process works for all components as expected.
 
-```
-kubectl --kubeconfig="path_to_kubeconfig" get namespaces
-``` 
+To add components to the backup pipeline, implement the following go interface:
 
-2. List all the objects present in the `production` Namespace.
-
-```
-kubectl --kubeconfig="path_to_kubeconfig" get all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation -n production
+```go
+type BackupTest interface {
+    CreateResources(namespace string)
+    TestResources(namespace string)
+}
 ```
 
-3. Run the `ark` command to become familiar with its usage and flags.
+- The `CreateResources` function is called before the backup to install all required test data.
+- The `TestResources` function is called after the `CreateResources` function to validate if the test data is working like expected. After the pipeline did a backup and restore on the cluster the `TestResources` function is called again to validate the restore was working as expected.
 
-4. Create a backup of the `production` Namespace.
-
-```
-ark --kubeconfig="path_to_kubeconfig" backup create production-backup --include-namespaces production
-```
-
-5. List all the backups.
-
-```
-ark --kubeconfig="path_to_kubeconfig" get backups
-```
-
-6. View the description of the `production-backup`.
-
-```
-ark --kubeconfig="path_to_kubeconfig" backup describe production-backup
-```
-
-7. Optionally, you can check **ark logs** for any warnings or errors resulting from running the command from the previous step. 
-
-```
-kubectl --kubeconfig="path_to_kubeconfig" -n heptio-ark logs deploy/ark
-``` 
-
-8. Restore the backup and check the result.
-
-```
-ark --kubeconfig="path_to_kubeconfig" create restore --from-backup production-backup
-```
-
-```
-ark --kubeconfig="path_to_kubeconfig" get restores
-```
-
-9. View all the restored resources.
-
-```
-kubectl --kubeconfig="path_to_kubeconfig" get all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation -n production
-```
-
-> **WARNING:** Currently, the service catalog instances are not correctly restored, causing a limitation. Implementing a plugin may provide a solution to this issue. 
+Register the test in the [E2E tests](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test).
