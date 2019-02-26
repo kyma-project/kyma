@@ -66,7 +66,7 @@ func (ih *csrInfoHandler) makeCSRURLs(newToken string) string {
 }
 
 func (ih *csrInfoHandler) makeApiURLs(clientContextService clientcontext.ClientContextService) api {
-	infoURL := ih.getInfoURL
+	infoURL := clientContextService.FillPlaceholders(ih.getInfoURL)
 	return api{
 		CertificatesURL: ih.baseURL + CertsEndpoint,
 		InfoURL:         infoURL,

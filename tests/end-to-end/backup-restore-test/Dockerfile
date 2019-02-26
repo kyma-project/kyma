@@ -17,10 +17,7 @@ COPY --from=builder /restore.test /restore.test
 
 COPY entrypoint.sh /entrypoint.sh
 
-# needs to be updated to use the yamls from the documentation PR #2830
-# COPY ../../../docs/backup/docs/assets/all-backup.yaml /all-backup.yaml
-# COPY ../../../docs/backup/docs/assets/system-backup.yaml /system-backup.yaml
-COPY all-backup.yaml /all-backup.yaml
-COPY system-backup.yaml /system-backup.yaml
+COPY build-temp/all-backup.yaml /all-backup.yaml
+COPY build-temp/system-backup.yaml /system-backup.yaml
 
 ENTRYPOINT [ "/entrypoint.sh" ]

@@ -1,4 +1,7 @@
 global:
+  console:
+    application_management:
+      enabled: true
   isLocalEnv: false
   knative: false
   namespace: kyma-integration
