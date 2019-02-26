@@ -41,7 +41,7 @@ This table lists all possible parameters of a given resource together with their
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR which is also used to generate the name of the bucket in the bucket storage. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is available. It is also used to generate the name of the bucket in the bucket storage. |
-| **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha1_bucket.yaml#L34) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
+| **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/assetstore-controller-manager/config/crds/assetstore_v1alpha2_bucket.yaml#L48) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
 | **spec.policy** | **NO** | Specifies the type of bucket access. Use `none`, `readonly`, `writeonly`, or `readwrite`. |
 | **status.lastheartbeattime** |    **Not applicable**    | Provides the last time when the Bucket Controller processed the Bucket CR. |
 | **status.message** |    **Not applicable**    | Describes a human-readable message on the CR processing success or failure. |
