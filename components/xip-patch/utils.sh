@@ -12,7 +12,7 @@ function getLoadBalancerIP() {
     LOAD_BALANCER_IP=""
 
     SECONDS=0
-    END_TIME=$((SECONDS+5))
+    END_TIME=$((SECONDS+60))
 
     while [ ${SECONDS} -lt ${END_TIME} ];do
 
