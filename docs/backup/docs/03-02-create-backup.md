@@ -2,9 +2,17 @@
 title: Back up a Kyma cluster
 type: Details
 ---
-Kyma provides two validated sample `BackupSpec` files to back up system and user Namespaces. You can integrate the specification to scheduled or on-demand backup configurations. To completely back up a cluster, you must back up the system and user Namespaces.
+Kyma provides two validated sample `BackupSpec` files:
 
-Modifying these files allows you to adjust the backup scope. For details about the file format, see the [Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
+- [System Namespace Backup](./assets/system-backup.yaml)
+- [User Namespace Backup](./assets/all-backup.yaml)
+
+
+Integrate the these files with your scheduled or on-demand configurations to back up system and user Namespaces. 
+
+>**NOTE:** To fully back up a cluster, you must back up both user and system Namespaces. 
+
+Modify the files to adjust the backup scope. For details about the file format, see the [Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
 
 ## Create manual backups
 
@@ -70,5 +78,6 @@ To schedule a backup, run the following command:
 
 To set the retention period of a backup, define the **ttl** parameter in the `BackupSpec` [definition](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md):
 
-```  # The amount of time before this backup is eligible for garbage collection.
-  ttl: 24h0m0s```
+```  The amount of time before this backup is eligible for garbage collection.
+  ttl: 24h0m0s 
+  ```
