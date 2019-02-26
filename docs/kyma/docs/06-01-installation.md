@@ -60,27 +60,25 @@ This table lists all the possible parameters of a given resource together with t
 
 ## Additional information
 
-This table contains description of information regarding installation progress set on Installation resource:
+The Kyma Installer adds the **status** section which describes the status of Kyma installation. This table lists the fields of the **status** section.
 
 | Field   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
-| **status.state** | **YES** | State of the installation. For explanation of states see [the table below](#installation-states) |
-| **status.description** | **YES** | Description of the step installer is  performing now. |
-| **status.errorLog** | **YES** | List of errors that happened during installation so far. |
-| **status.errorLog.component** | **YES** | Name of the component which installation caused the error. |
-| **status.errorLog.log** | **YES** | Description of the error. |
-| **status.errorLog.occurrences** | **YES** | Number of times the error has occurred ina row. |
+| **status.state** | **YES** | Describes the installation state. Takes one of four values. |
+| **status.description** | **YES** | Describes the installation step the installer performs at the moment. |
+| **status.errorLog** | **YES** | Lists all errors that happen during the installation. |
+| **status.errorLog.component** | **YES** | Specifies the name of the component that causes the error. |
+| **status.errorLog.log** | **YES** | Provides a description of the error. |
+| **status.errorLog.occurrences** | **YES** | Specifies the number of subsequent occurrences of the error. |
 
-## Installation states
+The **status.state** uses one of the following four values to describe the installation state:
 
-Installation resource may be in following states:
-
-| State   |  Description |
-|:----------:|:-------------:|
-| **Installed** | Installation is completed successfully. |
-| **Uninstalled** | Uninstallation is completed successfully. |
-| **InProgress** | Installer is still installing or uninstalling Kyma. There was no error yet. |
-| **Error** | An error occurred during processing Installation, but installer is still trying to process the resource. |
+|   State   |  Description |
+|:----------:|:-------------|
+| **Installed** | Installation successful. |
+| **Uninstalled** | Uninstallation successful. |
+| **InProgress** | The Installer is still installing or uninstalling Kyma. No errors logged. |
+| **Error** | The Installer encountered a problem but it continues to try to process the resource. |
 
 ## Related resources and components
 
