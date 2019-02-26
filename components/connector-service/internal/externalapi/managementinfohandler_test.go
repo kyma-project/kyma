@@ -72,7 +72,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		urls := infoResponse.URLs
-		receivedContext := infoResponse.Subject.(map[string]interface{})
+		receivedContext := infoResponse.ClientInfo.(map[string]interface{})
 
 		assert.Equal(t, expectedMetadataURL, urls.MetadataURL)
 		assert.Equal(t, expectedEventsURL, urls.EventsURL)
@@ -111,7 +111,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		urls := infoResponse.URLs
-		receivedContext := infoResponse.Subject.(map[string]interface{})
+		receivedContext := infoResponse.ClientInfo.(map[string]interface{})
 
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
 		assert.Equal(t, group, receivedContext[groupKey])

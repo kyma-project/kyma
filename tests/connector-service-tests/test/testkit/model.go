@@ -14,7 +14,18 @@ type InfoResponse struct {
 }
 
 type ManagementInfoResponse struct {
-	URLs ManagementInfoURLs `json:"urls"`
+	URLs       ManagementInfoURLs    `json:"urls"`
+	ClientInfo ApplicationClientInfo `json:"clientInfo"`
+}
+
+type ApplicationClientInfo struct {
+	Application string `json:"application,omitempty"`
+	ClusterClientInfo
+}
+
+type ClusterClientInfo struct {
+	Group  string `json:"group"`
+	Tenant string `json:"tenant"`
 }
 
 type ManagementInfoURLs struct {
