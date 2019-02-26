@@ -1,4 +1,4 @@
-package config
+package main
 
 import (
 	"fmt"
@@ -8,8 +8,6 @@ import (
 	"github.com/asaskevich/govalidator"
 	"github.com/ghodss/yaml"
 	"github.com/imdario/mergo"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	defaults "github.com/mcuadros/go-defaults"
 	"github.com/pkg/errors"
@@ -27,14 +25,7 @@ import (
 type Config struct {
 	Logger         logger.Config
 	KubeconfigPath string `envconfig:"optional"`
-	// TmpDir defines temporary directory path where bundles .tgz files will be extracted
-	TmpDir                   string
-	Namespace                string
-	Port                     int              `default:"8080"`
-	Storage                  []storage.Config `valid:"required"`
-	Helm                     helm.Config      `valid:"required"`
-	ClusterServiceBrokerName string
-	HelmBrokerURL            string
+	Namespace      string
 }
 
 // Load method has following strategy:
