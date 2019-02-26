@@ -28,8 +28,8 @@ global:
     dir: develop/
     version: fa0de1b9
   connectivity_certs_controller:
-    dir: pr/
-    version: PR-2799
+    dir: develop/
+    version: 2dc766a0
   event_service:
     dir: develop/
     version: 6e0a7fe2
