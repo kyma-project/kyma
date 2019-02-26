@@ -28,8 +28,11 @@ func main() {
 	testSuite, err := testsuite.New(restConfig, cfg.TestSuite)
 	exitOnError(err, "Error while creating test suite")
 
-	err := testSuite.Run()
+	err = testSuite.Run()
 	exitOnError(err, "Error while running test suite")
+
+	err = testSuite.Cleanup()
+	exitOnError(err, "Error while cleaning up after running test suite")
 }
 
 func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {

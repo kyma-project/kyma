@@ -1,13 +1,8 @@
 package testsuite
 
 import (
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/kyma-project/kyma/tests/asset-store/internal/testsuite/namespace"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -22,6 +17,10 @@ type Config struct {
 }
 
 type TestSuite struct {
+	namespace *namespace.Namespace
+	bucket *bucket
+	clusterBucket *clusterBucket
+
 	coreCli corev1.CoreV1Interface
 	dynamicCli dynamic.Interface
 
@@ -39,7 +38,15 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
 	}
 
+	ns := namespace.New(coreCli, cfg.Namespace)
+	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace)
+	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName)
+
 	return &TestSuite{
+		namespace:ns,
+		bucket:b,
+		clusterBucket:cb,
+
 		coreCli:coreCli,
 		dynamicCli:dynamicCli,
 		cfg: cfg,
@@ -47,6 +54,22 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 }
 
 func (t *TestSuite) Run() error {
+	err := t.namespace.Create()
+	if err != nil {
+		return errors.Wrapf(err, "while creating namespace")
+	}
+
+	err = t.bucket.Create()
+	if err != nil {
+		return err
+	}
+
+	err = t.clusterBucket.Create()
+	if err != nil {
+		return err
+	}
+
+
 	// Upload test data with upload service
 
 	// Create Bucket CR
@@ -54,115 +77,33 @@ func (t *TestSuite) Run() error {
 
 	// Check if assets have been uploaded
 
+	// Delete assets
+
+	// See if files are gone
+
 	return nil
 }
 
-func (t *TestSuite) UploadTestData() error {
-	return nil
-}
-
-// TODO: Split to different packages
-
-func (t *TestSuite) CreateNamespace() error {
-	_, err := t.coreCli.Namespaces().Create(&v1.Namespace{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:  t.cfg.Namespace,
-		},
-	})
-
+func (t *TestSuite) Cleanup() error {
+	err := t.bucket.Delete()
 	if err != nil {
-		return errors.Wrapf(err, "while creating namespace %s", t.cfg.Namespace)
+		return err
 	}
 
-	return nil
-}
-
-func (t *TestSuite) DeleteNamespace() error {
-	err := t.coreCli.Namespaces().Delete(t.cfg.Namespace, &metav1.DeleteOptions{})
+	err = t.clusterBucket.Delete()
 	if err != nil {
-		return errors.Wrapf(err, "while deleting namespace %s", t.cfg.Namespace)
+		return err
+	}
+
+	err = t.namespace.Delete()
+	if err != nil {
+		return err
 	}
 
 	return nil
 }
 
-func (t *TestSuite) CreateBucket() error {
-	bucket := &v1alpha2.Bucket{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: t.cfg.BucketName,
-			Namespace: t.cfg.Namespace,
-		},
-		Spec:v1alpha2.BucketSpec{
-			CommonBucketSpec: v1alpha2.CommonBucketSpec{
-				Policy:v1alpha2.BucketPolicyReadOnly,
-			},
-		},
-	}
-
-	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(bucket)
-	if err != nil {
-		return errors.Wrap(err, "while converting Bucket to unstructured")
-	}
-
-	unstructuredBucket := &unstructured.Unstructured{
-		Object:u,
-	}
-
-	_, err = t.dynamicCli.Resource(schema.GroupVersionResource{
-		Version: v1alpha2.SchemeGroupVersion.Version,
-		Group: v1alpha2.SchemeGroupVersion.Group,
-		Resource: "buckets",
-	}).Namespace(t.cfg.Namespace).Create(unstructuredBucket, metav1.CreateOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "while creating Bucket %s", bucket.Name)
-	}
-
-	return nil
-}
-
-func (t *TestSuite) CreateClusterBucket() error {
-	bucket := &v1alpha2.ClusterBucket{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: t.cfg.ClusterBucketName,
-		},
-		Spec:v1alpha2.ClusterBucketSpec{
-			CommonBucketSpec: v1alpha2.CommonBucketSpec{
-				Policy:v1alpha2.BucketPolicyReadOnly,
-			},
-		},
-	}
-
-	u, err := runtime.DefaultUnstructuredConverter.ToUnstructured(bucket)
-	if err != nil {
-		return errors.Wrap(err, "while converting ClusterBucket to unstructured")
-	}
-
-	unstructuredBucket := &unstructured.Unstructured{
-		Object:u,
-	}
-
-	_, err = t.dynamicCli.Resource(schema.GroupVersionResource{
-		Version: v1alpha2.SchemeGroupVersion.Version,
-		Group: v1alpha2.SchemeGroupVersion.Group,
-		Resource: "clusterbuckets",
-	}).Namespace(t.cfg.Namespace).Create(unstructuredBucket, metav1.CreateOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "while creating ClusterBucket %s", bucket.Name)
-	}
-
-	return nil
-}
-
-func (t *TestSuite) DeleteClusterBucket() error {
-	err := t.dynamicCli.Resource(schema.GroupVersionResource{
-		Version: v1alpha2.SchemeGroupVersion.Version,
-		Group: v1alpha2.SchemeGroupVersion.Group,
-		Resource: "clusterbuckets",
-	}).Namespace(t.cfg.Namespace).Delete(t.cfg.ClusterBucketName, &metav1.DeleteOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "while deleting ClusterBucket %s", t.cfg.ClusterBucketName)
-	}
-
+func (t *TestSuite) UploadTestData() error {
 	return nil
 }
 
