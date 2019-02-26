@@ -43,7 +43,7 @@ spec:
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
           - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
           - "--certificateValidityTime={{ .Values.deployment.args.validityTime }}"
-          - "--central={{ .Values.deployment.central }}"
+          - "--central={{ .Values.deployment.args.central }}"
         env:
           - name: COUNTRY
             value: "{{ .Values.deployment.envvars.country }}"

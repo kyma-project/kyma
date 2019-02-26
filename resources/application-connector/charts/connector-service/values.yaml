@@ -1,5 +1,4 @@
 deployment:
-  central: false
   image:
     pullPolicy: IfNotPresent
   args:
@@ -12,6 +11,7 @@ deployment:
     appsInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/applications/management/info
     runtimesInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/runtimes/management/info
     validityTime: "92d"
+    central: &central false
   envvars:
     country: DE
     organization: Organization
@@ -35,8 +35,7 @@ ingress:
 
 tests:
   skipSslVerify: false
-  group: ""
-  tenant: ""
+  central: *central
   image:
     pullPolicy: IfNotPresent
 
