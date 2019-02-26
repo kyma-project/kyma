@@ -1,4 +1,3 @@
----
 includedNamespaces:
 - '*'
 excludedNamespaces:
@@ -8,9 +7,12 @@ excludedNamespaces:
 - kyma-installer
 - default
 - natss
+- heptio-ark
 includedResources:
 - '*'
 excludedResources: null
 includeClusterResources: null
 labelSelector: null
 storageLocation: default
+volumeSnapshotLocations:
+  - default
