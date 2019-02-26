@@ -20,7 +20,7 @@ global:
     version: fd308559
   connector_service:
     dir: develop/
-    version: PR-2757
+    version: d2827e7b
   connector_service_tests:
     dir: develop/
     version: fd308559
