@@ -63,6 +63,9 @@
 # The `nginx-ingress` subchart
 /resources/application-connector/charts/nginx-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# The `connectivity-certs-controller` chart
+/resources/connectivity-certs-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # The `console` subchart
 /resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
 
@@ -205,8 +208,11 @@
 # Connector Service Component
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# Connector Service Token Request Component
+# Connection Token Handler Component
 /components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
+# Connectivity Certs Controller Component
+/components/connectivity-certs-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Registry Component
 /components/application-registry/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
