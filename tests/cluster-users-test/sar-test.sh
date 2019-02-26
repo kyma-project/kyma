@@ -37,8 +37,8 @@ function runTests() {
 	echo "--> developer@kyma.cx should be able to get specific CRD in ${NAMESPACE}"
 	testPermissions "developer@kyma.cx" "get" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should NOT be able to list ClusterRole in ${NAMESPACE}"
-	testPermissions "developer@kyma.cx" "list" "clusterrole" "${NAMESPACE}" "no"
+	echo "--> developer@kyma.cx should NOT be able to delete ClusterRole in ${NAMESPACE}"
+	testPermissions "developer@kyma.cx" "delete" "clusterrole" "${NAMESPACE}" "no"
 
 	echo "--> developer@kyma.cx should NOT be able to list Deployments in production"
 	testPermissions "developer@kyma.cx" "list" "clusterrole" "production" "no"
@@ -83,6 +83,20 @@ function init() {
 	kubectl create -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
 }
 
+function cleanup() {
+	EXIT_STATUS=$?
+
+    if [ "${ERROR_LOGGING_GUARD}" = "true" ]; then
+        echo "AN ERROR OCCURED! Take a look at preceding log entries."
+    fi
+    kubectl delete -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
+    MSG=""
+    if [[ ${EXIT_STATUS} -ne 0 ]]; then MSG="(exit status: ${EXIT_STATUS})"; fi
+    echo "Job is finished ${MSG}"
+    set -e
+    exit "${EXIT_STATUS}"
+}
+
 discoverUnsetVar=false
 
 for var in EMAIL_FILE PASSWORD_FILE NAMESPACE; do
@@ -95,7 +109,11 @@ if [ "${discoverUnsetVar}" = true ] ; then
     exit 1
 fi
 
+trap cleanup EXIT
+ERROR_LOGGING_GUARD="true"
+
 init
 runTests
+
 echo "ALL TESTS PASSED"
-kubectl delete -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
+ERROR_LOGGING_GUARD="false"
