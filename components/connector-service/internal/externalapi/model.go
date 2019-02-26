@@ -22,7 +22,8 @@ type csrInfoResponse struct {
 }
 
 type mgmtInfoReponse struct {
-	URLs mgmtURLs `json:"urls"`
+	Subject interface{} `json:"subject"`
+	URLs    mgmtURLs    `json:"urls"`
 }
 
 type mgmtURLs struct {

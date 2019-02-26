@@ -96,12 +96,12 @@ type ConnectorClientReader interface {
 
 type ExtendedApplicationContext struct {
 	ApplicationContext
-	RuntimeURLs
+	RuntimeURLs `json:"-"`
 }
 
 type ApplicationContext struct {
-	Application    string
-	ClusterContext ClusterContext
+	Application string `json:"application"`
+	ClusterContext
 }
 
 // IsEmpty returns false if Application is set
@@ -154,8 +154,8 @@ func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
 }
 
 type ClusterContext struct {
-	Group  string
-	Tenant string
+	Group  string `json:"group"`
+	Tenant string `json:"tenant"`
 }
 
 // IsEmpty returns false if both Group and Tenant are set

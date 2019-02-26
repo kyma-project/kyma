@@ -16,6 +16,11 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	tenant = "tenant"
+	group  = "group"
+)
+
 func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 	protectedBaseURL := "https://gateway.kyma.local/v1/applications"
 	expectedRenewalsURL := "https://gateway.kyma.local/v1/applications/certificates/renewals"
@@ -25,8 +30,16 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		expectedMetadataURL := "https://metadata.base.path/application/v1/metadata/services"
 		expectedEventsURL := "https://events.base.path/application/v1/events"
 
+		applicationContext := clientcontext.ApplicationContext{
+			Application: appName,
+			ClusterContext: clientcontext.ClusterContext{
+				Tenant: tenant,
+				Group:  group,
+			},
+		}
+
 		extClientCtx := &clientcontext.ExtendedApplicationContext{
-			ApplicationContext: clientcontext.ApplicationContext{},
+			ApplicationContext: applicationContext,
 			RuntimeURLs: clientcontext.RuntimeURLs{
 				MetadataURL: "https://metadata.base.path/application/v1/metadata/services",
 				EventsURL:   "https://events.base.path/application/v1/events",
@@ -57,10 +70,14 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		urls := infoResponse.URLs
+		receivedContext := infoResponse.Subject.(map[string]interface{})
 
 		assert.Equal(t, expectedMetadataURL, urls.MetadataURL)
 		assert.Equal(t, expectedEventsURL, urls.EventsURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
+		assert.Equal(t, appName, receivedContext["application"])
+		assert.Equal(t, group, receivedContext["group"])
+		assert.Equal(t, tenant, receivedContext["tenant"])
 	})
 
 	t.Run("should successfully get management info urls for runtime", func(t *testing.T) {
