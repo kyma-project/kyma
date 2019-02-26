@@ -1,12 +1,15 @@
 package testsuite
 
 import (
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	"log"
+	"os"
+	"strings"
 )
 
 type Config struct {
@@ -73,16 +76,18 @@ func (t *TestSuite) Run() error {
 		return err
 	}
 
-	files, err := t.fileUpload.Do()
+	// Upload test files with asset-upload-service
+	uploadResult, err := t.fileUpload.Do()
 	if err != nil {
 		return err
 	}
 
-	log.Println(files)
+	assetDetails := t.convertToAssetDetails(uploadResult)
 
-	// Upload test data with upload service
 
-	// Create asset CR (maybe more? single file and package)
+	// TODO: Validate no errros files.Errors
+
+	// Create clusterAsset CR (single file and package)
 
 	// Check if assets have been uploaded
 
@@ -112,8 +117,26 @@ func (t *TestSuite) Cleanup() error {
 	return nil
 }
 
-func (t *TestSuite) UploadTestData() error {
-	return nil
+func (t *TestSuite) convertToAssetDetails(response *upload.Response) []assetDetails {
+	var assets []assetDetails
+	for _, file := range response.UploadedFiles {
+		var mode v1alpha2.AssetMode
+		if strings.HasSuffix(file.FileName, ".tar.gz") {
+			mode = v1alpha2.AssetPackage
+		} else {
+			mode = v1alpha2.AssetSingle
+		}
+
+		asset := assetDetails{
+			Name: file.FileName,
+			URL: file.RemotePath,
+			Mode:mode,
+			Bucket:t.bucket.name,
+		}
+		assets = append(assets, asset)
+	}
+
+	return assets
 }
 
 func (t *TestSuite) CreateAsset() error {

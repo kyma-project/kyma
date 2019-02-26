@@ -3,7 +3,6 @@ package testsuite
 import (
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/pkg/errors"
-	"log"
 	"os"
 	"path/filepath"
 )
@@ -31,9 +30,6 @@ func (u *fileUpload) Do() (*upload.Response, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "while uploading files")
 	}
-
-
-	log.Println(resp)
 
 	return resp, nil
 }
