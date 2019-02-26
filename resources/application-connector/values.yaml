@@ -1,4 +1,7 @@
 global:
+  console:
+    application_management:
+      enabled: true
   isLocalEnv: false
   knative: false
   namespace: kyma-integration
@@ -20,7 +23,7 @@ global:
     version: 0c447819
   connector_service:
     dir: develop/
-    version: 57f2ecea
+    version: 25a78bbc
   connector_service_tests:
     dir: develop/
     version: 57f2ecea

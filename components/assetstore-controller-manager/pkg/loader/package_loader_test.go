@@ -1,7 +1,7 @@
 package loader
 
 import (
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/onsi/gomega"
 	"io/ioutil"
 	"net/http"
@@ -49,7 +49,7 @@ func TestLoader_Load_Package(t *testing.T) {
 			}
 
 			// When
-			basePath, files, err := loader.Load(testCase.path, "asset", v1alpha1.AssetPackage, "")
+			basePath, files, err := loader.Load(testCase.path, "asset", v1alpha2.AssetPackage, "")
 			defer loader.Clean(basePath)
 
 			// Then
@@ -120,7 +120,7 @@ func TestLoader_Load_WithFilter(t *testing.T) {
 			}
 
 			// When
-			basePath, files, err := loader.Load(testPath, "asset", v1alpha1.AssetPackage, testCase.filter)
+			basePath, files, err := loader.Load(testPath, "asset", v1alpha2.AssetPackage, testCase.filter)
 			defer loader.Clean(basePath)
 
 			// Then

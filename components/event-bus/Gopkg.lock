@@ -27,7 +27,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e95de5c830369d6592224de57a31cd87a2ba1cec2abaf050d06a63ee8f7babd8"
+  digest = "1:1b2208b11ad707c7fce6bb4d093b507dd3dfe378dfd88fdf5097cf26ad5beff4"
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
@@ -366,7 +366,7 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:a1eb7846f060666ffe72800721d8a40efbd207afb50fde6e0abf56facbeeb249"
+  digest = "1:b94865cd6801e1c289946a1e56d70e71787c007c8cde5c450abe3ef42c3e0aa0"
   name = "github.com/knative/eventing"
   packages = [
     "pkg/apis/duck/v1alpha1",
@@ -377,6 +377,7 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1/fake",
+    "pkg/controller/testing",
   ]
   pruneopts = "UT"
   revision = "604de5d66f1692af13f9c7fb7e25f554b2f5bba9"
@@ -986,12 +987,13 @@
   version = "kubernetes-1.11.3"
 
 [[projects]]
-  digest = "1:94e6ecedb8a243dc0c475d4c2a433da14f99cbf9f768b291a7b1482bfdf375ae"
+  digest = "1:b5239778f1e9ca8e5f488371c32a2851a95e28cc49f5d12ec377420d9b206c36"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
     "discovery/fake",
     "dynamic",
+    "dynamic/fake",
     "kubernetes",
     "kubernetes/scheme",
     "kubernetes/typed/admissionregistration/v1alpha1",
@@ -1124,7 +1126,7 @@
   revision = "9dfdf9be683f61f82cda12362c44c784e0778b56"
 
 [[projects]]
-  digest = "1:475d9f9dda03045018d36a0515c2f5ca91d2c87b31312ee0e0ddf5c48ed8b863"
+  digest = "1:b18104b0089c9483846dfcd124fd25a65361697004684b03d4de86546e9808d6"
   name = "sigs.k8s.io/controller-runtime"
   packages = [
     "pkg/cache",
@@ -1132,6 +1134,7 @@
     "pkg/client",
     "pkg/client/apiutil",
     "pkg/client/config",
+    "pkg/client/fake",
     "pkg/controller",
     "pkg/event",
     "pkg/handler",
@@ -1196,6 +1199,7 @@
     "github.com/knative/eventing/pkg/client/clientset/versioned",
     "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
     "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
+    "github.com/knative/eventing/pkg/controller/testing",
     "github.com/knative/pkg/apis",
     "github.com/knative/pkg/apis/duck/v1alpha1",
     "github.com/nats-io/go-nats",
@@ -1210,9 +1214,11 @@
     "github.com/satori/go.uuid",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
+    "go.uber.org/zap",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
+    "k8s.io/apimachinery/pkg/api/equality",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/labels",
@@ -1220,12 +1226,15 @@
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/runtime/serializer",
     "k8s.io/apimachinery/pkg/types",
+    "k8s.io/apimachinery/pkg/util/sets",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/client-go/discovery",
     "k8s.io/client-go/discovery/fake",
+    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
+    "k8s.io/client-go/tools/record",
     "k8s.io/client-go/util/flowcontrol",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/conversion-gen",
@@ -1237,6 +1246,7 @@
     "k8s.io/gengo/args",
     "sigs.k8s.io/controller-runtime/pkg/client",
     "sigs.k8s.io/controller-runtime/pkg/client/config",
+    "sigs.k8s.io/controller-runtime/pkg/client/fake",
     "sigs.k8s.io/controller-runtime/pkg/controller",
     "sigs.k8s.io/controller-runtime/pkg/handler",
     "sigs.k8s.io/controller-runtime/pkg/manager",

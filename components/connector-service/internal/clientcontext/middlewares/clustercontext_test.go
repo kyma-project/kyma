@@ -1,33 +1,32 @@
 package middlewares
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 const (
-	defaultTenant = "tenant"
-	defaultGroup  = "group"
-	testTenant    = "test-tenant"
-	testGroup     = "test-group"
+	testTenant = "test-tenant"
+	testGroup  = "test-group"
 )
 
 func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
-	t.Run("should use default values", func(t *testing.T) {
+	t.Run("should set empty ctx when no headers specified and ctx not required", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
 			clusterCtx, ok := ctx.Value(clientcontext.ClusterContextKey).(clientcontext.ClusterContext)
 			require.True(t, ok)
 
-			assert.Equal(t, defaultTenant, clusterCtx.Tenant)
-			assert.Equal(t, defaultGroup, clusterCtx.Group)
+			assert.Equal(t, clientcontext.TenantEmpty, clusterCtx.Tenant)
+			assert.Equal(t, clientcontext.GroupEmpty, clusterCtx.Group)
 			w.WriteHeader(http.StatusOK)
 		})
 
@@ -36,7 +35,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewClusterContextMiddleware(defaultTenant, defaultGroup)
+		middleware := NewClusterContextMiddleware(clientcontext.CtxNotRequired)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -46,7 +45,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should use header values if no defaults", func(t *testing.T) {
+	t.Run("should use header values", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -65,7 +64,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewClusterContextMiddleware("", "")
+		middleware := NewClusterContextMiddleware(clientcontext.CtxNotRequired)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -75,7 +74,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should return 400 if no default values and no header provided", func(t *testing.T) {
+	t.Run("should return 400 if no header provided and context is required", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
@@ -86,7 +85,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewClusterContextMiddleware("", "")
+		middleware := NewClusterContextMiddleware(clientcontext.CtxRequired)
 
 		// when
 		resultHandler := middleware.Middleware(handler)

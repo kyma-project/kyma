@@ -17,6 +17,18 @@ rules:
   - patch
   - delete
 - apiGroups:
+  - applicationconnector.kyma-project.io
+  resources:
+  - eventactivations
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
   - admissionregistration.k8s.io
   resources:
   - mutatingwebhookconfigurations
