@@ -94,7 +94,7 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
-		log.Infof("Request %s does not exist", request.Name)
+		log.Infof("Request %s has been deleted", request.Name)
 		return reconcile.Result{}, nil
 	}
 	log.Errorf("Error while getting instance, %s", err.Error())
