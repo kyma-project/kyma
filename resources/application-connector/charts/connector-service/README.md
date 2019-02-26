@@ -5,10 +5,10 @@ The Connector Service is responsible for generating and sending back client cert
 
 ## Configuration
 The Connector Service has the following parameters, that can be set through the chart:
-- **appName** - This is the name of the application used by k8s deployments and services. The default value is `connector-service`.
+- **appName** - This is the name of the application used by Kubernetes deployments and services. The default value is `connector-service`.
 - **externalAPIPort** - This port exposes the Connector Service API to an external solution. The default port is `8081`.
 - **internalAPIPort** - This port exposes the Connector Service within Kubernetes cluster. The default port is `8080`.
-- **namespace** - Namespace where Connector Service is deployed. The default namespace is `kyma-integration`.
+- **namespace** - Namespace where Connector Service is deployed. The default Namespace is `kyma-integration`.
 - **tokenLength** - Length of registration tokens. The default value is `64`.
 - **appTokenExpirationMinutes** - Time after which tokens for applications expire and are no longer valid. The default value is `5` minutes.
 - **runtimeTokenExpirationMinutes** - Time after which tokens for runtimes expire and are no longer valid. The default value is `10` minutes.
@@ -20,7 +20,7 @@ The Connector Service has the following parameters, that can be set through the 
 - **appsInfoURL** - URL at which management information for applications is available. If not provided, it bases on `connectorServiceHost`.
 - **runtimesInfoURL** - URL at which management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
 - **certificateValidityTime** - Validity time of certificates issued by this service. The default value is 90 days.
-- **central** - Determines whether connector works as the central.
+- **central** - Determines whether the Connector Service works in the central mode.
 
 The Connector Service also uses the following environmental variables for CSR-related information config:
 - **COUNTRY** (two-letter-long country code)
