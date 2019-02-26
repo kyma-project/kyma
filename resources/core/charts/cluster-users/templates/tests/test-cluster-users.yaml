@@ -22,7 +22,7 @@ spec:
         - name: PASSWORD_FILE
           value: /etc/credentials/password
         - name: NAMESPACE
-          value: {{ .Release.Namespace }}
+          value: {{ .Values.namespace }}
       volumeMounts:
         - name: credentials
           mountPath: /etc/credentials

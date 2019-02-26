@@ -89,6 +89,7 @@ function cleanup() {
     if [ "${ERROR_LOGGING_GUARD}" = "true" ]; then
         echo "AN ERROR OCCURED! Take a look at preceding log entries."
     fi
+    echo "---> Deleting bindings for tests"
     kubectl delete -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
     MSG=""
     if [[ ${EXIT_STATUS} -ne 0 ]]; then MSG="(exit status: ${EXIT_STATUS})"; fi
