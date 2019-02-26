@@ -9,37 +9,31 @@ set -o errexit
 # INGRESSGATEWAY_SERVICE_NAME   #
 # PUBLIC_DOMAIN                 #
 # TLS_CERT                      #
-# TLS_KEY                       #
 # # # # # # # # # # # # # # # # #
+
+CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+source $CURRENT_DIR/utils.sh
 
 function generateXipDomain() {
 
     if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
 
+        local namespace="istio-system"
+
         if [ -z "${INGRESSGATEWAY_SERVICE_NAME}" ]; then
             INGRESSGATEWAY_SERVICE_NAME=istio-ingressgateway
         fi
 
-        SECONDS=0
-        END_TIME=$((SECONDS+60))
+        echo "Trying to get loadbalancer IP address"
 
-        while [ ${SECONDS} -lt ${END_TIME} ];do
-            echo "Trying to get loadbalancer IP address"
+        EXTERNAL_PUBLIC_IP=$(getLoadBalancerIP "${INGRESSGATEWAY_SERVICE_NAME}" "${namespace}")
 
-            EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system ${INGRESSGATEWAY_SERVICE_NAME} -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+        if [[ "$?" != 0 ]]; then
+            echo "External public IP not found"
+            exit 1
+        fi
 
-            if [ -n "${EXTERNAL_PUBLIC_IP}" ]; then
-                echo "External public IP address is ${EXTERNAL_PUBLIC_IP}"
-                break
-            fi
-
-            sleep 10
-        done
-    fi
-
-    if [ -z "${EXTERNAL_PUBLIC_IP}" ]; then
-        echo "External public IP not found"
-        exit 1
+        echo "External public IP address is ${EXTERNAL_PUBLIC_IP}"
     fi
 
     PUBLIC_DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
@@ -58,24 +52,16 @@ EOF
 function generateCerts() {
 
     XIP_PATCH_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-
-    CERT_PATH="${XIP_PATCH_DIR}/cert.pem"
     KEY_PATH="${XIP_PATCH_DIR}/key.pem"
+    CERT_PATH="${XIP_PATCH_DIR}/cert.pem"
 
-    openssl req -x509 -nodes -days 5 -newkey rsa:4069 \
-                     -subj "/CN=${PUBLIC_DOMAIN}" \
-                     -reqexts SAN -extensions SAN \
-                     -config <(cat /etc/ssl/openssl.cnf \
-            <(printf "\\n[SAN]\\nsubjectAltName=DNS:*.%s" "${PUBLIC_DOMAIN}")) \
-                     -keyout "${KEY_PATH}" \
-                     -out "${CERT_PATH}"
+    generateCertificatesForDomain "${PUBLIC_DOMAIN}" "${KEY_PATH}" "${CERT_PATH}"
 
     TLS_CERT=$(base64 "${CERT_PATH}" | tr -d '\n')
     TLS_KEY=$(base64 "${KEY_PATH}" | tr -d '\n')
 
     rm "${CERT_PATH}"
     rm "${KEY_PATH}"
-
 
     TLS_CERT_YAML=$(cat << EOF
 ---
@@ -96,6 +82,7 @@ EOF
     kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system
 
 }
+
 
 if [ -z "${TLS_CERT}" ]; then
 
