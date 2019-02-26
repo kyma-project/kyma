@@ -11,7 +11,7 @@ import (
 )
 
 type K8sResourcesClient interface {
-	CreateDummyApplication(namePrefix string, accessLabel string, skipInstallation bool, central bool) (*v1alpha1.Application, error)
+	CreateDummyApplication(namePrefix string, spec v1alpha1.ApplicationSpec) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 }
 type k8sResourcesClient struct {
@@ -36,18 +36,7 @@ func initClient(k8sConfig *restclient.Config) (K8sResourcesClient, error) {
 	}, nil
 }
 
-func (c *k8sResourcesClient) CreateDummyApplication(namePrefix string, accessLabel string, skipInstallation bool, central bool) (*v1alpha1.Application, error) {
-	spec := v1alpha1.ApplicationSpec{
-		Services:         []v1alpha1.Service{},
-		AccessLabel:      accessLabel,
-		SkipInstallation: skipInstallation,
-	}
-
-	if central {
-		spec.Tenant = Tenant
-		spec.Group = Group
-	}
-
+func (c *k8sResourcesClient) CreateDummyApplication(namePrefix string, spec v1alpha1.ApplicationSpec) (*v1alpha1.Application, error) {
 	dummyAppName := addRandomPostfix(namePrefix)
 
 	dummyApp := &v1alpha1.Application{

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/tests/connector-service-tests/test/testkit"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,7 +21,8 @@ func TestCertificateValidation(t *testing.T) {
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient()
 	require.NoError(t, err)
-	testApp, err := k8sResourcesClient.CreateDummyApplication("app-connector-test-1", "", false, config.Central)
+	dummyApplicationSpec := getApplicationSpec(config.Central)
+	testApp, err := k8sResourcesClient.CreateDummyApplication("app-connector-test-1", dummyApplicationSpec)
 	require.NoError(t, err)
 	defer func() {
 		k8sResourcesClient.DeleteApplication(testApp.Name, &v1.DeleteOptions{})
@@ -54,6 +56,21 @@ func TestCertificateValidation(t *testing.T) {
 		require.Equal(t, http.StatusForbidden, response.StatusCode)
 	})
 
+}
+
+func getApplicationSpec(central bool) v1alpha1.ApplicationSpec {
+	spec := v1alpha1.ApplicationSpec{
+		Services:         []v1alpha1.Service{},
+		AccessLabel:      "",
+		SkipInstallation: false,
+	}
+
+	if central {
+		spec.Tenant = testkit.Tenant
+		spec.Group = testkit.Group
+	}
+
+	return spec
 }
 
 func repeatUntilIngressIsCreated(tlsClient *http.Client, gatewayUrlFormat string, appName string) (*http.Response, error) {
