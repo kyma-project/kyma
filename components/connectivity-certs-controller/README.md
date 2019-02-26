@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Connectivity Certs Controller fetches the client certificate and the root CA and saves them to Secrets from the central Connector Service.
+The Connectivity Certs Controller fetches the client certificate and the root CA from the central Connector Service and saves them to Secrets.
 
 ## Fetching certificates
 
