@@ -71,7 +71,7 @@ The Kyma Installer adds the **status** section which describes the status of Kym
 | **status.errorLog.log** | **YES** | Provides a description of the error. |
 | **status.errorLog.occurrences** | **YES** | Specifies the number of subsequent occurrences of the error. |
 
-The **status.state** uses one of the following four values to describe the installation state:
+The **status.state** field uses one of the following four values to describe the installation state:
 
 |   State   |  Description |
 |:----------:|:-------------|
