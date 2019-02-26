@@ -1,17 +1,14 @@
 # Connectivity Certs Controller
 
-
 ## Overview
 
-Connectivity Certs Controller is responsible for communicating with the Connector Service.
-It fetches both a client certificate and the root CA certificate and saves them to secrets.
-
+The Connectivity Certs Controller fetches the client certificate and the root CA and saves them to Secrets from the central Connector Service.
 
 ## Fetching certificates
 
-Certificates Manager is operator which reacts to `CertificateRequest` custom resource. 
-It requires `csrInfoUrl` field.
-To create it run:
+The Controller acts on to CertificateRequest custom resource (CR). It requires the `csrInfoUrl` field.
+
+To create the CR, run:
 ```
 cat <<EOF | kubectl apply -f -
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
@@ -23,13 +20,13 @@ spec:
 EOF
 ```
 
-After successful exchange the secrets will be created or modified and the `CertificateRequest` will be deleted.  
-
+After a successful exchange of certificates, the controller creates new Secrets or modifies the existing ones that correspond to the updated certificates. The CertificateRequest CR is deleted.
 
 ## Troubleshooting 
 
-If something went wrong while requesting certificates or saving them to secrets, the custom resource will not be deleted and it will have and `error` status with a detailed error message.
-To get the error message run: 
+If there's an error in the process of fetching the certificates or saving them to Secrets, the CertificateRequest CR is not deleted. Instead, the controller adds the **error** section that contains a detailed error message to the CR.
+
+To get the error message, run: 
 ```
 kubectl get certificaterequests.applicationconnector.kyma-project.io {CERT_REQUEST_NAME} -o jsonpath={.status.error}
 ```
