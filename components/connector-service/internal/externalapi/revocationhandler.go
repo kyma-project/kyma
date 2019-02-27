@@ -1,9 +1,8 @@
 package externalapi
 
 import (
-	"crypto/sha256"
-	"fmt"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 	"net/http"
@@ -49,7 +48,7 @@ func (handler revocationHandler) getCertificateHash(r *http.Request) (string, ap
 		return "", apperrors.Forbidden("Certificate not passed.")
 	}
 
-	hash := calculateHash(cert)
+	hash := certificates.CalculateHash(cert)
 
 	return hash, nil
 }
@@ -62,15 +61,4 @@ func (handler revocationHandler) addToRevocationList(hash string) apperrors.AppE
 	}
 
 	return nil
-}
-
-func calculateHash(cert string) string {
-	input := []byte(cert)
-	sha := sha256.Sum256(input)
-
-	hexified := ""
-	for _, data := range sha {
-		hexified += fmt.Sprintf("%02x", data)
-	}
-	return hexified
 }
