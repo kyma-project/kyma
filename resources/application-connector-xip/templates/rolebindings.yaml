@@ -2,12 +2,12 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-loadBalancerMigration-role-binding
+  name: {{ .Release.Name }}-loadbalancer-migration-role-binding
 subjects:
 - kind: ServiceAccount
-  name: {{ .Release.Name }}-loadBalancerMigration-service-account
+  name: {{ .Release.Name }}-loadbalancer-migration-service-account
   namespace: {{ .Release.Namespace }}
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-loadBalancerMigration
+  name: {{ .Release.Name }}-loadbalancer-migration
   apiGroup: rbac.authorization.k8s.io
