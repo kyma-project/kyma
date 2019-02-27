@@ -8,8 +8,8 @@ deployment:
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
     caSecretName: connector-service-app-ca
-    appsInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/applications/management/info
-    runtimesInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/runtimes/management/info
+    appsInfoURL: https://gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}/v1/applications/management/info
+    runtimesInfoURL: https://gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}/v1/runtimes/management/info
     validityTime: "92d"
     central: &central false
   envvars:
