@@ -4,6 +4,8 @@ import (
 	"crypto/tls"
 	stdflag "flag"
 	"fmt"
+	"github.com/gorilla/handlers"
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -12,8 +14,6 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
-
-	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 
 	"github.com/golang/glog"
 	"github.com/hkwi/h2c"
@@ -185,7 +185,7 @@ func main() {
 	}))
 
 	if cfg.secureListenAddress != "" {
-		srv := &http.Server{Handler: mux}
+		srv := &http.Server{Handler: handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(mux)}
 
 		if cfg.tls.certFile == "" && cfg.tls.keyFile == "" {
 			glog.Info("Generating self signed cert as no cert is provided")

@@ -52,6 +52,10 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.11.0"
 
+[[constraint]]
+  name = "github.com/gorilla/handlers"
+  version = "1.4.0"
+
 [prune]
   go-tests = true
   unused-packages = true
