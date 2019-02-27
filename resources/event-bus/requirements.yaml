@@ -1,11 +1,15 @@
 dependencies:
+  # Kyma event-bus
   - name: publish
     condition: global.kymaEventBus
   - name: push
     condition: global.kymaEventBus
   - name: sub-validator
     condition: global.kymaEventBus
+  # Knative eventing
   - name: natss-knative-provisioner
-    condition: global.knative    
+    condition: global.knative
   - name: publish-knative
+    condition: global.knative
+  - name: subscription-controller-knative
     condition: global.knative
