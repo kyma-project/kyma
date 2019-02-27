@@ -65,3 +65,16 @@ rules:
   - update
   - patch
   - delete
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - channels
+  - subscriptions
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete

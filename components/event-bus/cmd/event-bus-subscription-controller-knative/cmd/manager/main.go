@@ -1,23 +1,12 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
 import (
 	"fmt"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+
 	"github.com/go-logr/logr"
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
@@ -25,14 +14,10 @@ import (
 	subscriptionController "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
-	"net/http"
-	"os"
-	"os/signal"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
-	"syscall"
 )
 
 func main() {
@@ -72,7 +57,7 @@ func main() {
 
 	// Setup all Controllers
 	log.Info("Setting up subscription controller")
-	if err := subscriptionController.AddToManager(mgr); err != nil {
+	if err := subscriptionController.AddToManager(mgr, sckOpts); err != nil {
 		log.Error(err, "unable to register subscription controller to the manager")
 		os.Exit(1)
 	}

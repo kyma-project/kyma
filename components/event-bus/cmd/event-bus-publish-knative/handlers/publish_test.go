@@ -2,6 +2,8 @@ package handlers
 
 import (
 	"testing"
+
+	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 func Test_getChannelName(t *testing.T) {
@@ -94,7 +96,7 @@ func Test_getChannelName(t *testing.T) {
 	// run the test-cases
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := getChannelName(&testCase.sourceID, &testCase.eventType, &testCase.eventTypeVersion)
+			result := knative.GetChannelName(&testCase.sourceID, &testCase.eventType, &testCase.eventTypeVersion)
 
 			// check the channel naming correctness
 			if result != testCase.expected {

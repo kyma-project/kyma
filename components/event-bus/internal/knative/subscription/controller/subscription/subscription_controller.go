@@ -1,19 +1,3 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package subscription
 
 import (
@@ -21,6 +5,7 @@ import (
 	"log"
 
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -29,17 +14,19 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 // Add creates a new Subscription Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
-func Add(mgr manager.Manager) error {
-	return add(mgr, newReconciler(mgr))
+func Add(mgr manager.Manager, opts *opts.Options) error {
+	return add(mgr, newReconciler(mgr, opts))
 }
 
 // newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileSubscription{Client: mgr.GetClient(), scheme: mgr.GetScheme()}
+func newReconciler(mgr manager.Manager, opts *opts.Options) reconcile.Reconciler {
+	return &ReconcileSubscription{Client: mgr.GetClient(), scheme: mgr.GetScheme(), opts: opts}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
@@ -56,16 +43,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create
-	// Uncomment watch a Deployment created by Subscription - change this for objects you create
-	/* err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &eventingv1alpha1.Subscription{},
-	})
-	if err != nil {
-		return err
-	} */
-
 	return nil
 }
 
@@ -75,6 +52,7 @@ var _ reconcile.Reconciler = &ReconcileSubscription{}
 type ReconcileSubscription struct {
 	client.Client
 	scheme *runtime.Scheme
+	opts   *opts.Options
 }
 
 // Reconcile reads that state of the cluster for a Subscription object and makes changes based on the state read
@@ -90,110 +68,176 @@ func (r *ReconcileSubscription) Reconcile(request reconcile.Request) (reconcile.
 	err := r.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			log.Printf("Subscription is deleted!")
+			log.Printf("Kyma Subscription is deleted: %v", err)
 			// Object not found, return.  Created objects are automatically garbage collected.
 			// For additional cleanup logic use finalizers.
 			return reconcile.Result{}, nil
 		}
 		// Error reading the object - requeue the request.
+		log.Printf("Could not fetch Kyma Subscription: %v", err)
 		return reconcile.Result{}, err
 	}
-	log.Printf("Subscription is fetched!")
 
-	// TODO: Change this with a real finalizer
-	finalizerName := "storage.finalizers.kyma-project.io"
-	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
+	subscription := instance.DeepCopy()
+
+	requeue, err := r.reconcile(subscription)
+	if err != nil {
+		log.Printf("Error reconciling Subscription: %v", err)
+	} else {
+		log.Printf("Subscription reconciled")
+	}
+
+	return reconcile.Result{
+		Requeue: requeue,
+	}, err
+}
+
+func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscription) (bool, error) {
+	// init the knative lib
+	knativeLib, err := knative.GetKnativeLib()
+	if err != nil {
+		log.Fatalf("Failed to get knative library: %v", err)
+	}
+
+	knativeSubsName := subscription.Name
+	knativeSubsNamespace := subscription.Namespace
+	knativeSubsURI := subscription.Endpoint
+	knativeChannelName := knative.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
+	knativeChannelProvisioner := "natss"
+	timeout := r.opts.ChannelTimeout
+
+	// Finalizer for deleting Knative Subscriptions
+	finalizerName := "subscription.finalizers.kyma-project.io"
+	if subscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
 		// then lets add the finalizer and update the object.
-		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName)
-			if err := r.Update(context.Background(), instance); err != nil {
-				return reconcile.Result{Requeue: true}, nil
+		if !containsString(subscription.ObjectMeta.Finalizers, finalizerName) {
+			subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
+			if err := r.Update(context.Background(), subscription); err != nil {
+				return true, nil
 			}
 		}
 	} else {
 		// The object is being deleted
-		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
+		if containsString(subscription.ObjectMeta.Finalizers, finalizerName) {
 			// our finalizer is present, so lets handle our external dependency
-			if err := r.deleteExternalDependency(instance); err != nil {
+			if err := r.deleteExternalDependency(subscription, knativeLib, knativeChannelName); err != nil {
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried
-				return reconcile.Result{}, err
+				return false, err
 			}
 
 			// remove our finalizer from the list and update it.
-			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
-			if err := r.Update(context.Background(), instance); err != nil {
-				return reconcile.Result{Requeue: true}, nil
+			subscription.ObjectMeta.Finalizers = removeString(subscription.ObjectMeta.Finalizers, finalizerName)
+			if err := r.Update(context.Background(), subscription); err != nil {
+				return true, nil
 			}
 		}
 
 		// Our finalizer has finished, so the reconciler can do nothing.
-		return reconcile.Result{}, nil
+		return false, nil
 	}
 
-	// TODO(user): Change this to be the object type created by your controller
-	// Define the desired Deployment object
-	/* deploy := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Name + "-deployment",
-			Namespace: instance.Namespace,
-		},
-		Spec: appsv1.DeploymentSpec{
-			Selector: &metav1.LabelSelector{
-				MatchLabels: map[string]string{"deployment": instance.Name + "-deployment"},
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{Labels: map[string]string{"deployment": instance.Name + "-deployment"}},
-				Spec: corev1.PodSpec{
-					Containers: []corev1.Container{
-						{
-							Name:  "nginx",
-							Image: "nginx",
-						},
-					},
-				},
-			},
-		},
-	}
-	if err := controllerutil.SetControllerReference(instance, deploy, r.scheme); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// TODO(user): Change this for the object type created by your controller
-	// Check if the Deployment already exists
-	found := &appsv1.Deployment{}
-	err = r.Get(context.TODO(), types.NamespacedName{Name: deploy.Name, Namespace: deploy.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		log.Printf("Creating Deployment %s/%s\n", deploy.Namespace, deploy.Name)
-		err = r.Create(context.TODO(), deploy)
-		if err != nil {
-			return reconcile.Result{}, err
+	// Check if Kyma Subscription has events-activated condition.
+	if subscription.HasCondition(eventingv1alpha1.SubscriptionCondition{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue}) {
+		// Check if Knative Channel already exists, create if not.
+		_, err := knativeLib.GetChannel(knativeChannelName, knativeSubsNamespace)
+		if err != nil && !errors.IsNotFound(err) {
+			return false, err
+		} else if errors.IsNotFound(err) {
+			knativeChannel, err := knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName, knativeSubsNamespace, timeout)
+			if err != nil {
+				return false, err
+			}
+			log.Printf("Knative Channel is created: %v", knativeChannel)
 		}
-	} else if err != nil {
-		return reconcile.Result{}, err
-	} */
 
-	// TODO(user): Change this for the object type created by your controller
-	// Update the found object and write the result back if there are any changes
-	/* if !reflect.DeepEqual(deploy.Spec, found.Spec) {
-		found.Spec = deploy.Spec
-		log.Printf("Updating Deployment %s/%s\n", deploy.Namespace, deploy.Name)
-		err = r.Update(context.TODO(), found)
-		if err != nil {
-			return reconcile.Result{}, err
+		// Check if Knative Subsription already exists, if not create one.
+		sub, err := knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
+		if err != nil && !errors.IsNotFound(err) {
+			return false, err
+		} else if errors.IsNotFound(err) {
+			err = knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannelName, &knativeSubsURI)
+			if err != nil {
+				return false, err
+			}
+			log.Printf("Knative Subscription is created: %s", knativeSubsName)
+		} else {
+			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
+			if knativeChannelName != sub.Spec.Channel.Name || knativeSubsURI != *sub.Spec.Subscriber.DNSName {
+				err = knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
+				if err != nil {
+					return false, err
+				}
+				log.Printf("Knative Subscription is deleted: %s", knativeSubsName)
+				err = knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannelName, &knativeSubsURI)
+				if err != nil {
+					return false, err
+				}
+				log.Printf("Knative Subscription is re-created: %s", knativeSubsName)
+			}
 		}
-	} */
-	return reconcile.Result{}, nil
+	} else {
+		// In case Kyma Subscription does not have events-activated condition, delete Knative Subscription if exists.
+		knativeSubs, err := knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
+		if err != nil && !errors.IsNotFound(err) {
+			return false, err
+		} else if err == nil && knativeSubs != nil {
+			err = knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
+			if err != nil {
+				return false, err
+			}
+			log.Printf("Knative Subscription is deleted: %s", knativeSubsName)
+		}
+
+		// Check if Channel has any other Subscription, if not, delete it.
+		knativeChannel, err := knativeLib.GetChannel(knativeChannelName, knativeSubsNamespace)
+		if err != nil && !errors.IsNotFound(err) {
+			return false, err
+		} else if err == nil && knativeChannel != nil {
+			if knativeChannel.Spec.Subscribable == nil || len(knativeChannel.Spec.Subscribable.Subscribers) == 0 ||
+				(len(knativeChannel.Spec.Subscribable.Subscribers) == 1 && knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == subscription.Endpoint) {
+				err = knativeLib.DeleteChannel(knativeChannelName, knativeSubsNamespace)
+				if err != nil {
+					return false, err
+				}
+				log.Printf("Knative Channel is deleted: %v", knativeChannel)
+			}
+		}
+	}
+
+	return false, nil
 }
 
-func (r *ReconcileSubscription) deleteExternalDependency(instance *eventingv1alpha1.Subscription) error {
-	log.Printf("deleting the external dependencies")
-	//
-	// delete the external dependency here
-	//
-	// Ensure that delete implementation is idempotent and safe to invoke
-	// multiple types for same object.
+func (r *ReconcileSubscription) deleteExternalDependency(subscription *eventingv1alpha1.Subscription, knativeLib *knative.KnativeLib, channelName string) error {
+	log.Printf("Deleting the external dependencies")
+
+	// In case Knative Subscription exists, delete it.
+	knativeSubs, err := knativeLib.GetSubscription(subscription.Name, subscription.Namespace)
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	} else if err == nil && knativeSubs != nil {
+		err = knativeLib.DeleteSubscription(knativeSubs.Name, knativeSubs.Namespace)
+		if err != nil {
+			return err
+		}
+		log.Printf("Knative Subscription is deleted: %s", knativeSubs.Name)
+	}
+
+	// Check if Channel has any other Subscription, if not, delete it.
+	knativeChannel, err := knativeLib.GetChannel(channelName, subscription.Namespace)
+	if err != nil && !errors.IsNotFound(err) {
+		return err
+	} else if err == nil && knativeChannel != nil {
+		if knativeChannel.Spec.Subscribable == nil || (len(knativeChannel.Spec.Subscribable.Subscribers) == 1 &&
+			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == subscription.Endpoint) {
+			err = knativeLib.DeleteChannel(channelName, subscription.Namespace)
+			if err != nil {
+				return err
+			}
+			log.Printf("Knative Channel is deleted: %v", knativeChannel)
+		}
+	}
 	return nil
 }
 
