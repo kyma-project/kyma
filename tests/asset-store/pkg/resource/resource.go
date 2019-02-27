@@ -36,7 +36,7 @@ func (r *Resource) Create(res interface{}) error {
 	_, err = r.resCli.Create(unstructuredObj, metav1.CreateOptions{})
 	if err != nil {
 		if apierrors.IsAlreadyExists(err) {
-			glog.Warningf("Resource %s with name '%s' already exist.", unstructuredObj.GetKind(), unstructuredObj.GetName())
+			glog.Warningf("Cannot create. Resource %s with name '%s' already exist.", unstructuredObj.GetKind(), unstructuredObj.GetName())
 			return nil
 		}
 		return errors.Wrapf(err, "while creating resource %s ", unstructuredObj.GetKind())
@@ -48,6 +48,10 @@ func (r *Resource) Create(res interface{}) error {
 func (r *Resource) Delete(name string) error {
 	err := r.resCli.Delete(name, &metav1.DeleteOptions{})
 	if err != nil {
+		if apierrors.IsNotFound(err) {
+			glog.Warningf("Cannot delete. Resource %s with name '%s' is not found.", r.kind, name)
+			return nil
+		}
 	 	return errors.Wrapf(err, "while deleting resource %s '%s'", r.kind, name)
 	}
 

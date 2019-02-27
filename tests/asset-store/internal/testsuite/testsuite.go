@@ -79,13 +79,35 @@ func (t *TestSuite) Run() error {
 		return err
 	}
 
-
-
 	// Check if assets have been uploaded
 
-	// Delete assets
+	err = t.deleteAssets()
+	if err != nil {
+		return err
+	}
+
 
 	// See if files are gone
+
+	return nil
+}
+
+func (t *TestSuite) Cleanup() error {
+	err := t.deleteAssets()
+	if err != nil {
+		return err
+	}
+
+	err = t.deleteBuckets()
+	if err != nil {
+		return err
+	}
+
+	// Namespace
+	err = t.namespace.Delete()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -129,7 +151,7 @@ func (t *TestSuite) createAssets() error {
 	return nil
 }
 
-func (t *TestSuite) Cleanup() error {
+func (t *TestSuite) deleteAssets() error {
 	err := t.asset.Delete(t.assetDetails)
 	if err != nil {
 		return err
@@ -140,17 +162,17 @@ func (t *TestSuite) Cleanup() error {
 		return err
 	}
 
-	err = t.bucket.Delete()
+	return nil
+}
+
+func (t *TestSuite) deleteBuckets() error {
+	err := t.bucket.Delete()
 	if err != nil {
 		return err
 	}
+
 
 	err = t.clusterBucket.Delete()
-	if err != nil {
-		return err
-	}
-
-	err = t.namespace.Delete()
 	if err != nil {
 		return err
 	}
