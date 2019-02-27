@@ -2,7 +2,7 @@
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-loadBalancerMigration
+  name: {{ .Release.Name }}-loadbalancer-migration
 rules:
 - apiGroups: [""]
   resources: ["services"]
