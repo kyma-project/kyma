@@ -73,8 +73,8 @@ global:
     dir: develop/
     version: "4ad2e460"
   cluster_users_test:
-    dir: pr/
-    version: "PR-2782"
+    dir: develop/
+    version: "d4937a42"
   kubeless_images:
     runtime:
       node6:
