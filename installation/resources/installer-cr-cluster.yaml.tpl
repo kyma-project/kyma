@@ -40,7 +40,7 @@ spec:
       namespace: "kyma-system"
     - name: "application-connector-helper"
       namespace: "kyma-integration"
-    - name: "application-connector-ingress"
+    - name: "application-connector-xip"
       namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-integration"

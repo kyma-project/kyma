@@ -1,0 +1,18 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-loadBalancerMigration
+  annotations:
+    "helm.sh/hook": pre-install
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}-loadBalancerMigration
+    spec:
+      serviceAccountName: {{ .Release.Name }}-loadBalancerMigration-service-account
+      restartPolicy: OnFailure
+      containers:
+      - name: {{ .Release.Name }}-loadBalancerMigration
+        image: {{ .Values.containerRegistry.path }}/{{ .Values.xip_patch.dir }}xip-patch:{{ .Values.xip_patch.version }}
+        command: ["/app/delete-loadbalancer.sh"]
