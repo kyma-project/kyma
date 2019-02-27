@@ -185,7 +185,10 @@ func main() {
 	}))
 
 	if cfg.secureListenAddress != "" {
-		srv := &http.Server{Handler: handlers.CORS(handlers.AllowedOrigins([]string{"*"}))(mux)}
+		srv := &http.Server{Handler: handlers.CORS(
+			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
+			handlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
+		)(mux)}
 
 		if cfg.tls.certFile == "" && cfg.tls.keyFile == "" {
 			glog.Info("Generating self signed cert as no cert is provided")
