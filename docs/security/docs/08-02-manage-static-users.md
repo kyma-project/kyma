@@ -40,7 +40,13 @@ If you want to add a new static user after Dex is installed, restart the Dex Pod
 ## Bind a user to a Role or a ClusterRole
 
 A newly created static user has no access to any resources of the cluster as there is no Role or ClusterRole bound to it.  
-By default, Kyma comes with two ClusterRoles: **kyma-admin**, which allows to get full admin access to the entire cluster, and **kyma-view**, which allows to view and list all of the resources of the cluster.
+By default, Kyma comes with the following ClusterRoles:
+ 
+- **kyma-admin**: allows full admin access to the entire cluster
+- **kyma-edit**: allows full access to all Kyma-managed resources
+- **kyma-developer**:  allows full access to Kyma-managed resources and basic Kubernetes resources
+- **kyma-view**: allows to view and list all of the resources of the cluster
+- **kyma-essentials**: set of  minimal view access right to use the kyma console
 
 To bind a newly created user to the **kyma-view** ClusterRole, run this command:
 ```

@@ -72,6 +72,9 @@ global:
   ui_api_layer_acceptance_tests:
     dir: develop/
     version: "4ad2e460"
+  cluster_users_test:
+    dir: develop/
+    version: "d4937a42"
   kubeless_images:
     runtime:
       node6:

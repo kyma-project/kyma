@@ -12,7 +12,7 @@ spec:
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:c05b2111
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:dfe83285
       imagePullPolicy: IfNotPresent
       resources:
          requests:

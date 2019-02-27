@@ -202,6 +202,20 @@ func (s *Bundle) RemoveByID(id internal.BundleID) error {
 	return nil
 }
 
+// RemoveAll removes all bundles from storage.
+func (s *Bundle) RemoveAll() error {
+	bundles, err := s.FindAll()
+	if err != nil {
+		return errors.Wrap(err, "while getting bundles")
+	}
+	for _, bundle := range bundles {
+		if err := s.RemoveByID(bundle.ID); err != nil {
+			return errors.Wrapf(err, "while removing bundle with ID: %v", bundle.ID)
+		}
+	}
+	return nil
+}
+
 func (s *Bundle) handleDeleteResp(resp *clientv3.DeleteResponse) (*internal.Bundle, error) {
 	switch resp.Deleted {
 	case 1:
