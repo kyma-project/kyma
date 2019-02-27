@@ -66,7 +66,6 @@ const (
 )
 
 type ClientContextService interface {
-	ToJSON() ([]byte, error)
 	GetCommonName() string
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
@@ -77,16 +76,17 @@ type ContextExtender interface {
 	ExtendContext(ctx context.Context) context.Context
 }
 
-type APIHosts struct {
-	EventsHost   string
-	MetadataHost string
-}
-
 type RuntimeURLs struct {
 	EventsURL   string `json:"eventsUrl"`
 	MetadataURL string `json:"metadataUrl"`
 }
 
+type APIHosts struct {
+	EventsHost   string
+	MetadataHost string
+}
+
+// ExtendContext extends provided context with APIHosts
 func (r APIHosts) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, APIHostsKey, r)
 }

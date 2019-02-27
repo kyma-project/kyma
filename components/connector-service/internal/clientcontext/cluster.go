@@ -2,7 +2,6 @@ package clientcontext
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -15,7 +14,7 @@ type ClusterContext struct {
 	Tenant string `json:"tenant"`
 }
 
-// NewClusterContextExtender creates ClusterContext
+// NewClusterContextExtender creates empty ClusterContext
 func NewClusterContextExtender() ContextExtender {
 	return &ClusterContext{}
 }
@@ -25,19 +24,9 @@ func (clsCtx ClusterContext) IsEmpty() bool {
 	return clsCtx.Group == GroupEmpty || clsCtx.Tenant == TenantEmpty
 }
 
-// ToJSON parses ClusterContext to JSON
-func (clsCtx ClusterContext) ToJSON() ([]byte, error) {
-	return json.Marshal(clsCtx)
-}
-
 // ExtendContext extends provided context with ClusterContext
 func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, ClusterContextKey, clsCtx)
-}
-
-// GetApplication returns empty string
-func (clsCtx ClusterContext) GetApplication() string {
-	return ApplicationEmpty
 }
 
 // GetCommonName returns expected Common Name value for the Cluster
@@ -45,15 +34,17 @@ func (clsCtx ClusterContext) GetCommonName() string {
 	return fmt.Sprintf("%s%s%s", clsCtx.Tenant, SubjectCNSeparator, clsCtx.Group)
 }
 
+// GetLogger returns context logger with embedded context data (Group and Tenant)
 func (clsCtx ClusterContext) GetLogger() *logrus.Entry {
 	return logging.GetClusterLogger(clsCtx.Tenant, clsCtx.Group)
-
 }
 
+// GetRuntimeUrls nil as ApplicationContext does not contain RuntimeURLs
 func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
 }
 
+// FillPlaceholders replaces placeholders {TENANT}, {GROUP} with values from the context
 func (clsCtx ClusterContext) FillPlaceholders(format string) string {
 	filledFormat := strings.Replace(format, TenantPlaceholder, clsCtx.Tenant, 1)
 	filledFormat = strings.Replace(filledFormat, GroupPlaceholder, clsCtx.Group, 1)

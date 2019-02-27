@@ -12,7 +12,17 @@ import (
 
 type ExtendedApplicationContext struct {
 	ApplicationContext
-	RuntimeURLs `json:"-"`
+	RuntimeURLs
+}
+
+// MarshalJSON marshals ExtendedApplicationContext to JSON as ApplicationContext
+func (extAppCtx ExtendedApplicationContext) MarshalJSON() ([]byte, error) {
+	return json.Marshal(extAppCtx.ApplicationContext)
+}
+
+// GetRuntimeUrls returns pointer to RuntimeURLs
+func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
+	return &extAppCtx.RuntimeURLs
 }
 
 type ApplicationContext struct {
@@ -20,6 +30,7 @@ type ApplicationContext struct {
 	ClusterContext
 }
 
+// NewApplicationContextExtender returns empty ApplicationContext
 func NewApplicationContextExtender() ContextExtender {
 	return &ApplicationContext{}
 }
@@ -27,11 +38,6 @@ func NewApplicationContextExtender() ContextExtender {
 // IsEmpty returns false if Application is set
 func (appCtx ApplicationContext) IsEmpty() bool {
 	return appCtx.Application == ApplicationEmpty
-}
-
-// ToJSON parses ApplicationContext to JSON
-func (appCtx ApplicationContext) ToJSON() ([]byte, error) {
-	return json.Marshal(appCtx)
 }
 
 // ExtendContext extends provided context with ApplicationContext
@@ -54,21 +60,19 @@ func (appCtx ApplicationContext) GetCommonName() string {
 		appCtx.ClusterContext.Group, SubjectCNSeparator, appCtx.Application)
 }
 
+// GetRuntimeUrls nil as ApplicationContext does not contain RuntimeURLs
 func (appCtx ApplicationContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
 }
 
+// GetLogger returns context logger with embedded context data (Application, Group and Tenant)
 func (appCtx ApplicationContext) GetLogger() *logrus.Entry {
 	return logging.GetApplicationLogger(appCtx.Application, appCtx.ClusterContext.Tenant, appCtx.ClusterContext.Group)
 }
 
-func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
-	return &extAppCtx.RuntimeURLs
-}
-
+// FillPlaceholders replaces placeholders {TENANT}, {GROUP} and {APPLICATION} with values from the context
 func (appCtx ApplicationContext) FillPlaceholders(format string) string {
-	filledFormat := strings.Replace(format, TenantPlaceholder, appCtx.ClusterContext.Tenant, 1)
-	filledFormat = strings.Replace(filledFormat, GroupPlaceholder, appCtx.ClusterContext.Group, 1)
+	filledFormat := appCtx.ClusterContext.FillPlaceholders(format)
 	filledFormat = strings.Replace(filledFormat, ApplicationPlaceholder, appCtx.Application, 1)
 	return filledFormat
 }
