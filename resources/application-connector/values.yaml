@@ -53,4 +53,4 @@ global:
     version: f78529c4
 
 connectivity_certs_controller:
-  enabled: "false"
+  enabled: false
