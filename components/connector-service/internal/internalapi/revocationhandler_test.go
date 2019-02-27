@@ -46,7 +46,7 @@ func TestRevocationHandler(t *testing.T) {
 		revocationListRepository.AssertExpectations(t)
 	})
 
-	t.Run("should return http code 201 when certficate already revoked", func(t *testing.T) {
+	t.Run("should return http code 201 when certificate already revoked", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
 		revocationListRepository.On("Insert",  hashedTestCert).Return(nil)
@@ -127,7 +127,7 @@ func TestRevocationHandler(t *testing.T) {
 		revocationListRepository.AssertNotCalled(t, "Insert", mock.AnythingOfType("string"))
 	})
 
-	t.Run("should return http code 500 when certficate revocation not persisted", func(t *testing.T) {
+	t.Run("should return http code 500 when certificate revocation not persisted", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
 		revocationListRepository.On("Insert",  hashedTestCert).Return(errors.New("Error"))
