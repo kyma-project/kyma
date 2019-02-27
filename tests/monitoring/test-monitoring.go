@@ -79,7 +79,7 @@ func main() {
 	testGrafanaIsReady(grafanaURL)
 	checkLambdaUIDashboard()
 
-	log.Printf("Logging and monitoring tests are successful!")
+	log.Printf("Monitoring tests are successful!")
 }
 
 func testGrafanaIsReady(url string) {
