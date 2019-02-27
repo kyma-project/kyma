@@ -1,7 +1,10 @@
+connector_service:
+  enabled: &connectorServiceEnabled true
+
 global:
   console:
     application_management:
-      enabled: true
+      enabled: *connectorServiceEnabled
   isLocalEnv: false
   knative: false
   namespace: kyma-integration
