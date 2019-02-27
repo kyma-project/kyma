@@ -3,29 +3,32 @@ package testsuite
 import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	"time"
 )
 
 type bucket struct {
-	dynamicCli dynamic.Interface
-	res        *resource.Resource
+	resCli        *resource.Resource
 	name string
 	namespace string
+	waitTimeout       time.Duration
 }
 
-func newBucket(dynamicCli dynamic.Interface, name, namespace string) *bucket {
+func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration) *bucket {
 	return &bucket{
-		res: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "buckets",
 		}, namespace),
-		dynamicCli: dynamicCli,
 		name: name,
 		namespace:namespace,
+		waitTimeout:waitTimeout,
 	}
 }
 
@@ -46,7 +49,7 @@ func (b *bucket) Create() error {
 		},
 	}
 
-	err := b.res.Create(bucket)
+	err := b.resCli.Create(bucket)
 	if err != nil {
 		return errors.Wrapf(err, "while creating bucket %s in namespace %s", b.name, b.namespace)
 	}
@@ -54,8 +57,44 @@ func (b *bucket) Create() error {
 	return err
 }
 
+func (b *bucket) WaitForStatusReady() error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+
+			res, err := b.Get(b.name)
+			if err != nil {
+				return false, err
+			}
+
+			if res.Status.Phase != v1alpha2.BucketReady {
+				return false, err
+			}
+
+		return true, nil
+	}, b.waitTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ready Bucket resources")
+	}
+
+	return nil
+}
+
+func (b *bucket) Get(name string) (*v1alpha2.Bucket, error) {
+	u, err := b.resCli.Get(name)
+	if err != nil {
+		return nil, err
+	}
+
+	var res v1alpha2.Bucket
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting Bucket %s", name)
+	}
+
+	return &res, nil
+}
+
 func (b *bucket) Delete() error {
-	err := b.res.Delete(b.name)
+	err := b.resCli.Delete(b.name)
 	if err != nil {
 		return errors.Wrapf(err, "while deleting bucket %s in namespace %s", b.name, b.namespace)
 	}

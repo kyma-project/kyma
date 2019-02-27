@@ -3,27 +3,30 @@ package testsuite
 import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	"time"
 )
 
 type asset struct {
-	dynamicCli dynamic.Interface
-	res        *resource.Resource
+	resCli     *resource.Resource
 	BucketName string
-	Namespace string
+	Namespace  string
+	waitTimeout       time.Duration
 }
 
-func newAsset(dynamicCli dynamic.Interface, namespace string) *asset {
+func newAsset(dynamicCli dynamic.Interface, namespace string, waitTimeout time.Duration) *asset {
 	return &asset{
-		res: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "assets",
 		}, namespace),
-		dynamicCli: dynamicCli,
+		waitTimeout: waitTimeout,
 		Namespace:namespace,
 	}
 }
@@ -52,7 +55,7 @@ func (a *asset) Create(assets []assetData) error {
 			},
 		}
 
-		err := a.res.Create(asset)
+		err := a.resCli.Create(asset)
 		if err != nil {
 			return errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
@@ -61,9 +64,62 @@ func (a *asset) Create(assets []assetData) error {
 	return nil
 }
 
+func (a *asset) WaitForStatusReady(assets []assetData) error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+		for _, asset := range assets {
+			res, err := a.Get(asset.Name)
+			if err != nil {
+				return false, err
+			}
+
+			if res.Status.Phase != v1alpha2.AssetReady {
+				return false, err
+			}
+		}
+
+		return true, nil
+	}, a.waitTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ready Asset resources")
+	}
+
+	return nil
+}
+
+func (a *asset) VerifyUploadedAssets(assets []assetData, shouldExist bool) error {
+	for _, asset := range assets {
+		res, err := a.Get(asset.Name)
+		if err != nil {
+			return err
+		}
+
+		err = verifyUploadedAsset("Asset", asset.Name, res.Status.AssetRef, shouldExist)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (a *asset) Get(name string) (*v1alpha2.Asset, error) {
+	u, err := a.resCli.Get(name)
+	if err != nil {
+		return nil, err
+	}
+
+	var res v1alpha2.Asset
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting Asset %s", name)
+	}
+
+	return &res, nil
+}
+
 func (a *asset) Delete(assets []assetData) error {
 	for _, asset := range assets {
-		err := a.res.Delete(asset.Name)
+		err := a.resCli.Delete(asset.Name)
 		if err != nil {
 			return errors.Wrapf(err, "while deleting Asset %s in namespace %s", asset.Name, a.Namespace)
 		}

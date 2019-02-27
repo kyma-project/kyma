@@ -3,30 +3,33 @@ package testsuite
 import (
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
+	"time"
 )
 
 type clusterAsset struct {
-	dynamicCli dynamic.Interface
-	res        *resource.Resource
+	resCli            *resource.Resource
 	ClusterBucketName string
+	waitTimeout       time.Duration
 }
 
-func newClusterAsset(dynamicCli dynamic.Interface) *clusterAsset {
+func newClusterAsset(dynamicCli dynamic.Interface, waitTimeout time.Duration) *clusterAsset {
 	return &clusterAsset{
-		res: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "clusterassets",
 		}, ""),
-		dynamicCli: dynamicCli,
+		waitTimeout: waitTimeout,
 	}
 }
 
-func (a *clusterAsset) Create(assets []assetData) error {
+func (a *clusterAsset) CreateMany(assets []assetData) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
 			TypeMeta: metav1.TypeMeta{
@@ -49,7 +52,7 @@ func (a *clusterAsset) Create(assets []assetData) error {
 			},
 		}
 
-		err := a.res.Create(asset)
+		err := a.resCli.Create(asset)
 		if err != nil {
 			return errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
 		}
@@ -58,9 +61,63 @@ func (a *clusterAsset) Create(assets []assetData) error {
 	return nil
 }
 
-func (a *clusterAsset) Delete(assets []assetData) error {
+func (a *clusterAsset) WaitForStatusesReady(assets []assetData) error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+
+		for _, asset := range assets {
+			res, err := a.Get(asset.Name)
+			if err != nil {
+				return false, err
+			}
+
+			if res.Status.Phase != v1alpha2.AssetReady {
+				return false, err
+			}
+		}
+
+		return true, nil
+	}, a.waitTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ready ClusterAsset resources")
+	}
+
+	return nil
+}
+
+func (a *clusterAsset) VerifyUploadedAssets(assets []assetData, shouldExist bool) error {
 	for _, asset := range assets {
-		err := a.res.Delete(asset.Name)
+		res, err := a.Get(asset.Name)
+		if err != nil {
+			return err
+		}
+
+		err = verifyUploadedAsset("ClusterAsset", asset.Name, res.Status.AssetRef, shouldExist)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (a *clusterAsset) Get(name string) (*v1alpha2.ClusterAsset, error) {
+	u, err := a.resCli.Get(name)
+	if err != nil {
+		return nil, err
+	}
+
+	var ca v1alpha2.ClusterAsset
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &ca)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting ClusterAsset %s", name)
+	}
+
+	return &ca, nil
+}
+
+func (a *clusterAsset) DeleteMany(assets []assetData) error {
+	for _, asset := range assets {
+		err := a.resCli.Delete(asset.Name)
 		if err != nil {
 			return errors.Wrapf(err, "while deleting ClusterAsset %s", asset.Name)
 		}

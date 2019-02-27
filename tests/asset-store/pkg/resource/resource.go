@@ -45,6 +45,15 @@ func (r *Resource) Create(res interface{}) error {
 	return nil
 }
 
+func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
+	u, err := r.resCli.Get(name, metav1.GetOptions{})
+	if err != nil {
+		return nil, errors.Wrapf(err, "while getting resource %s '%s'", r.kind, name)
+	}
+
+	return u, nil
+}
+
 func (r *Resource) Delete(name string) error {
 	err := r.resCli.Delete(name, &metav1.DeleteOptions{})
 	if err != nil {

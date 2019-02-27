@@ -7,6 +7,7 @@ import (
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
+	"time"
 )
 
 type Config struct {
@@ -16,13 +17,14 @@ type Config struct {
 	ClusterBucketName string `envconfig:"default=test-cluster-bucket"`
 	ClusterAssetName string `envconfig:"default=test-cluster-asset"`
 	UploadServiceUrl string `envconfig:"default=http://localhost:3000/v1/upload"`
+	WaitTimeout  time.Duration `envconfig:"default=2m"` //TODO: Change that
 }
 
 type TestSuite struct {
 	namespace *namespace.Namespace
 	bucket *bucket
 	clusterBucket *clusterBucket
-	fileUpload *fileUpload
+	fileUpload *testData
 	asset *asset
 	clusterAsset *clusterAsset
 
@@ -44,19 +46,19 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 	}
 
 	ns := namespace.New(coreCli, cfg.Namespace)
-	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace)
-	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName)
 
-	a := newAsset(dynamicCli, cfg.Namespace)
-	ca := newClusterAsset(dynamicCli)
+	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace, cfg.WaitTimeout)
+	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout)
+	a := newAsset(dynamicCli, cfg.Namespace, cfg.WaitTimeout)
+	ca := newClusterAsset(dynamicCli, cfg.WaitTimeout)
 
 	return &TestSuite{
-		namespace:ns,
-		bucket:b,
-		clusterBucket:cb,
-		fileUpload:newFileUpload(cfg.UploadServiceUrl),
-		asset:a,
-		clusterAsset:ca,
+		namespace:     ns,
+		bucket:        b,
+		clusterBucket: cb,
+		fileUpload:    newTestData(cfg.UploadServiceUrl),
+		asset:         a,
+		clusterAsset:  ca,
 
 		dynamicCli:dynamicCli,
 		cfg: cfg,
@@ -74,20 +76,30 @@ func (t *TestSuite) Run() error {
 		return err
 	}
 
+	err = t.waitForBucketsReady()
+	if err != nil {
+		return err
+	}
+
 	err = t.createAssets()
 	if err != nil {
 		return err
 	}
 
-	// Check if assets have been uploaded
+	err = t.validateFiles(true)
+	if err != nil {
+		return err
+	}
 
 	err = t.deleteAssets()
 	if err != nil {
 		return err
 	}
 
-
-	// See if files are gone
+	err = t.validateFiles(false)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -103,7 +115,6 @@ func (t *TestSuite) Cleanup() error {
 		return err
 	}
 
-	// Namespace
 	err = t.namespace.Delete()
 	if err != nil {
 		return err
@@ -127,7 +138,7 @@ func (t *TestSuite) createBuckets() error {
 }
 
 func (t *TestSuite) createAssets() error {
-	uploadResult, err := t.fileUpload.Do()
+	uploadResult, err := t.fileUpload.Upload()
 	if err != nil {
 		return err
 	}
@@ -143,7 +154,49 @@ func (t *TestSuite) createAssets() error {
 		return err
 	}
 
-	err = t.clusterAsset.Create(t.assetDetails)
+	err = t.clusterAsset.CreateMany(t.assetDetails)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *TestSuite) waitForAssetsReady() error {
+	err := t.asset.WaitForStatusReady(t.assetDetails)
+	if err != nil {
+		return err
+	}
+
+	err = t.clusterAsset.WaitForStatusesReady(t.assetDetails)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *TestSuite) validateFiles(shouldExist bool) error {
+	err := t.asset.VerifyUploadedAssets(t.assetDetails, shouldExist)
+	if err != nil {
+		return err
+	}
+
+	err = t.clusterAsset.VerifyUploadedAssets(t.assetDetails, shouldExist)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *TestSuite) waitForBucketsReady() error {
+	err := t.bucket.WaitForStatusReady()
+	if err != nil {
+		return err
+	}
+
+	err = t.clusterBucket.WaitForStatusReady()
 	if err != nil {
 		return err
 	}
@@ -157,7 +210,7 @@ func (t *TestSuite) deleteAssets() error {
 		return err
 	}
 
-	err = t.clusterAsset.Delete(t.assetDetails)
+	err = t.clusterAsset.DeleteMany(t.assetDetails)
 	if err != nil {
 		return err
 	}
@@ -170,7 +223,6 @@ func (t *TestSuite) deleteBuckets() error {
 	if err != nil {
 		return err
 	}
-
 
 	err = t.clusterBucket.Delete()
 	if err != nil {
