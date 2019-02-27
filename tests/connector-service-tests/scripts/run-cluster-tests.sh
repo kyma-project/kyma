@@ -13,8 +13,10 @@ if [[ -z "${DOMAIN}" ]]; then
   exit 1
 fi
 
+echo "Current cluster context: $(kubectl config current-context)"
+
 echo "Image: $TEST_IMAGE"
-echo "Domain: $DOMAIN_NAME"
+echo "Domain: $DOMAIN"
 
 echo ""
 echo "------------------------"
@@ -71,10 +73,10 @@ EOF
 
 echo ""
 echo "------------------------"
-echo "Waiting 5 seconds for pod to start..."
+echo "Waiting 10 seconds for pod to start..."
 echo "------------------------"
 echo ""
 
-sleep 5
+sleep 10
 
 kubectl -n kyma-integration logs connector-service-tests -f -c connector-service-tests

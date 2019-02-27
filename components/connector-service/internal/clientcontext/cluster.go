@@ -10,8 +10,8 @@ import (
 )
 
 type ClusterContext struct {
-	Group  string `json:"group"`
-	Tenant string `json:"tenant"`
+	Group  string `json:"group,omitempty"`
+	Tenant string `json:"tenant,omitempty"`
 }
 
 // NewClusterContextExtender creates empty ClusterContext
