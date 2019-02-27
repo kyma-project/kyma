@@ -46,7 +46,7 @@ func (handler revocationHandler) getCertificateHash(r *http.Request) (string, ap
 	cert := r.Header.Get(CertificateHeader)
 
 	if cert == "" {
-		return "", apperrors.Forbidden("Certificate not passed")
+		return "", apperrors.Forbidden("Certificate not passed.")
 	}
 
 	hash := calculateHash(cert)
@@ -58,7 +58,7 @@ func (handler revocationHandler) addToRevocationList(hash string) apperrors.AppE
 	err := handler.revocationList.Insert(hash)
 
 	if err != nil {
-		return apperrors.Internal("Unable to mark certificate as revoked")
+		return apperrors.Internal("Unable to mark certificate as revoked: %s.", err)
 	}
 
 	return nil
