@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gofrs/uuid"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish/controllers"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
@@ -14,7 +15,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/satori/go.uuid"
 )
 
 // GetPublishHandler is a factory for publish events handler
@@ -181,7 +181,11 @@ func encodeSubject(r *api.PublishRequest) string {
 }
 
 func generateEventID() string {
-	return uuid.NewV4().String()
+	uid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalf("Error while generating Event ID: %v", err)
+	}
+	return uid.String()
 }
 
 func buildCloudEvent(publishRequest *api.PublishRequest, traceContext *api.TraceContext) api.CloudEvent {

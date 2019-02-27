@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 
+	"github.com/gofrs/uuid"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/validators"
@@ -13,7 +14,6 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/satori/go.uuid"
 )
 
 var (
@@ -131,7 +131,11 @@ func setSourceID(publishRequest *api.PublishRequest, header *http.Header) bool {
 }
 
 func generateEventID() string {
-	return uuid.NewV4().String()
+	uid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalf("Error while generating Event ID: %v", err)
+	}
+	return uid.String()
 }
 
 func buildCloudEvent(publishRequest *api.PublishRequest, traceContext *api.TraceContext) *api.CloudEvent {
