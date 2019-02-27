@@ -9,22 +9,8 @@ type RevocationListRepository struct {
 	mock.Mock
 }
 
-// Add provides a mock function with given fields: hash
-func (_m *RevocationListRepository) Add(hash string) error {
-	ret := _m.Called(hash)
-
-	var r0 error
-	if rf, ok := ret.Get(0).(func(string) error); ok {
-		r0 = rf(hash)
-	} else {
-		r0 = ret.Error(0)
-	}
-
-	return r0
-}
-
-// LookUp provides a mock function with given fields: hash
-func (_m *RevocationListRepository) LookUp(hash string) (bool, error) {
+// Contains provides a mock function with given fields: hash
+func (_m *RevocationListRepository) Contains(hash string) (bool, error) {
 	ret := _m.Called(hash)
 
 	var r0 bool
@@ -42,4 +28,18 @@ func (_m *RevocationListRepository) LookUp(hash string) (bool, error) {
 	}
 
 	return r0, r1
+}
+
+// Insert provides a mock function with given fields: hash
+func (_m *RevocationListRepository) Insert(hash string) error {
+	ret := _m.Called(hash)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string) error); ok {
+		r0 = rf(hash)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
 }
