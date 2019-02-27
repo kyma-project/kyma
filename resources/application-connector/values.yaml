@@ -1,6 +1,9 @@
 connector_service:
   enabled: &connectorServiceEnabled true
 
+connection_token_handler:
+  enabled: *connectorServiceEnabled
+
 global:
   console:
     application_management:
