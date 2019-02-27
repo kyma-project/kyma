@@ -51,3 +51,6 @@ global:
   application_broker:
     dir: develop/
     version: f78529c4
+
+connectivity-certs-controller:
+  enabled: "false"

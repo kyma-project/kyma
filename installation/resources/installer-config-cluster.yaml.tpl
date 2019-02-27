@@ -66,7 +66,6 @@ metadata:
     kyma-project.io/installation: ""
 data:
   connector-service.tests.skipSslVerify: "__SKIP_SSL_VERIFY__"
-  connectivity-certs-controller.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
