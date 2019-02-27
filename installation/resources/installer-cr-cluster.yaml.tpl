@@ -2,6 +2,8 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
+  labels:
+    kyma-project.io/installation: ""
   finalizers:
     - finalizer.installer.kyma-project.io
 spec:

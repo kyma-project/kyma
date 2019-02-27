@@ -13,6 +13,7 @@
 - name: logging
 - name: console
 - name: asset-store
+- name: backup
 
 # Azure Broker
 - name: azure-mysql-5.7-dbms-and-database

@@ -5,6 +5,7 @@ metadata:
   name: default-sa-cluster-admin
   labels:
     app: kyma
+    kyma-project.io/installation: ""
 subjects:
 - kind: ServiceAccount
   name: default

@@ -13,7 +13,6 @@ import (
 
 	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -24,6 +23,15 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/client-go/informers/core/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/cache"
+)
+
+const (
+	mapLabelKey   = "helm-broker-repo"
+	mapLabelValue = "true"
 )
 
 func main() {
@@ -42,8 +50,6 @@ func main() {
 
 	log := logger.New(&cfg.Logger)
 
-	bLoader := bundle.NewLoader(cfg.TmpDir, log)
-
 	storageConfig := storage.ConfigList(cfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	fatalOnError(err)
@@ -53,20 +59,27 @@ func main() {
 	fatalOnError(err)
 	csbInterface := scClientSet.ServicecatalogV1beta1().ClusterServiceBrokers()
 
-	brokerSyncer := broker.NewClusterServiceBrokerSyncer(csbInterface, log)
-
+	// broker sync
+	stopCh := make(chan struct{})
+	bLoader := bundle.NewLoader(cfg.TmpDir, log)
 	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), log)
-	for _, repoCfg := range cfg.RepositoryConfigs() {
-		repoProvider := bundle.NewProvider(bundle.NewHTTPRepository(repoCfg), bLoader, log.WithField("URL", repoCfg.URL))
-		bundleSyncer.AddProvider(repoCfg.URL, repoProvider)
-	}
+	brokerSyncer := broker.NewClusterServiceBrokerSyncer(csbInterface, log)
+	cfgMapInformer := v1.NewFilteredConfigMapInformer(clientset, cfg.Namespace, 10*time.Minute, cache.Indexers{}, func(options *metav1.ListOptions) {
+		options.LabelSelector = fmt.Sprintf("%s=%s", mapLabelKey, mapLabelValue)
+	})
+
+	repositoryWatcher := bundle.NewRepositoryController(bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log)
+	go repositoryWatcher.Run(stopCh)
+	go cfgMapInformer.Run(stopCh)
+
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+	cancelOnChanInterrupt(ctx, stopCh, cancelFunc)
 
 	helmClient := helm.NewClient(cfg.Helm, log)
 
 	srv := broker.New(sFact.Bundle(), sFact.Chart(), sFact.InstanceOperation(), sFact.Instance(), sFact.InstanceBindData(),
 		bind.NewRenderer(), bind.NewResolver(clientset.CoreV1()), helmClient, bundleSyncer, log)
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
 	cancelOnInterrupt(ctx, cancelFunc)
 
 	startedCh := make(chan struct{})
@@ -132,6 +145,21 @@ func cancelOnInterrupt(ctx context.Context, cancel context.CancelFunc) {
 		select {
 		case <-ctx.Done():
 		case <-c:
+			cancel()
+		}
+	}()
+}
+
+// cancelOnInterrupt closes given channel and also calls cancel func when os.Interrupt or SIGTERM is received
+func cancelOnChanInterrupt(ctx context.Context, ch chan<- struct{}, cancel context.CancelFunc) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	go func() {
+		select {
+		case <-ctx.Done():
+			close(ch)
+		case <-c:
+			close(ch)
 			cancel()
 		}
 	}()

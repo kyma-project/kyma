@@ -65,7 +65,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		releaseManager.On("InstallChart", applicationName).Return(releaseStatus, statusDescription, nil)
+		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
 		applicationReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -136,7 +136,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		releaseManager.On("InstallChart", applicationName).Return(releaseStatus, statusDescription, nil)
+		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -392,7 +392,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		releaseManager.On("InstallChart", applicationName).Return(hapi_4.Status_FAILED, "", errors.NewBadRequest("error"))
+		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(hapi_4.Status_FAILED, "", errors.NewBadRequest("error"))
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 

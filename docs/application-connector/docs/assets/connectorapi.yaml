@@ -97,6 +97,39 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
+  /v1/applications/management/info:
+    get:
+      parameters:
+      - in: header
+        name: EventsHost
+        description: 'Value of the URL to Event service which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      - in: header
+        name: MetadataHost
+        description: 'Value of the URL to Application Registry which must be returned to the caller'
+        schema:
+          type: string
+          format: url
+        required: false
+      tags:
+      - applications external API
+      summary: 'Returns information on available services.'
+      responses:
+        '200':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/applicationInfoResponse'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
   /v1/applications/certificates:
     post:
       parameters:
@@ -137,6 +170,37 @@ paths:
                 $ref: '#/components/schemas/appError'
         '404':
           description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/applications/certificates/renewals:
+    post:
+      tags:
+      - applications external API
+      summary: 'Renews certificate using CSR.'
+      requestBody:
+        description: 'The CSR to be signed'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/csrRequest'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrResponse'
+        '400':
+          description: 'Improper subject values, lack of values in CSR or Group header not specified.'
           content:
             application/json:
               schema:
@@ -208,6 +272,24 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
+  /v1/runtimes/management/info:
+    get:
+      tags:
+      - runtimes external API
+      summary: 'Returns information on available services.'
+      responses:
+        '200':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/runtimeInfoResponse'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
   /v1/runtimes/certificates:
     post:
       parameters:
@@ -248,6 +330,37 @@ paths:
                 $ref: '#/components/schemas/appError'
         '404':
           description: 'Not found'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
+  /v1/runtimes/certificates/renewals:
+    post:
+      tags:
+      - runtimes external API
+      summary: 'Renews certificate using CSR.'
+      requestBody:
+        description: 'The CSR to be signed'
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/csrRequest'
+      responses:
+        '201':
+          description: 'Successful operation.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/csrResponse'
+        '400':
+          description: 'Improper subject values or lack of values in CSR.'
           content:
             application/json:
               schema:

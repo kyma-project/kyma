@@ -19,7 +19,6 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	certMock "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
-	tokensMock "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -57,18 +56,15 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 			ClientCertificate: clientCertificate,
 		}
 
-		tokenManager := &tokensMock.Manager{}
-		tokenManager.On("Delete", token).Return()
-
 		certService := &certMock.Service{}
 		certService.On("SignCSR", decodedCSR, commonName).Return(encodedChain, nil)
 
-		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		dummyClientContext := dummyClientContextService{}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(tokenManager, certService, connectorClientExtractor)
+		signatureHandler := NewSignatureHandler(certService, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -87,16 +83,15 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 		assert.Equal(t, certChainBase64, certResponse.CRTChain)
 		assert.Equal(t, http.StatusCreated, rr.Code)
-		tokenManager.AssertExpectations(t)
 	})
 
 	t.Run("should return 500 when failed to extract client context", func(t *testing.T) {
 		// given
-		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
-		signatureHandler := NewSignatureHandler(nil, nil, errorExtractor)
+		signatureHandler := NewSignatureHandler(nil, errorExtractor)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -114,12 +109,12 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 500 when couldn't read request body", func(t *testing.T) {
 		// given
-		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		dummyClientContext := dummyClientContextService{}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(nil, nil, connectorClientExtractor)
+		signatureHandler := NewSignatureHandler(nil, connectorClientExtractor)
 
 		incorrectBody := []byte("incorrectBody")
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(incorrectBody))
@@ -138,12 +133,12 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 
 	t.Run("should return 400 when failed to decode base64", func(t *testing.T) {
 		// given
-		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		dummyClientContext := dummyClientContextService{}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(nil, nil, connectorClientExtractor)
+		signatureHandler := NewSignatureHandler(nil, connectorClientExtractor)
 
 		incorrectBase64Body := compact([]byte("{\"csr\":\"not base 64\"}"))
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(incorrectBase64Body))
@@ -165,12 +160,12 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		certService := &certMock.Service{}
 		certService.On("SignCSR", decodedCSR, commonName).Return(certificates.EncodedCertificateChain{}, apperrors.Internal("error"))
 
-		dummyClientContext := dummyClientContext{}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		dummyClientContext := dummyClientContextService{}
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return dummyClientContext, nil
 		}
 
-		signatureHandler := NewSignatureHandler(nil, certService, connectorClientExtractor)
+		signatureHandler := NewSignatureHandler(certService, connectorClientExtractor)
 
 		req, err := http.NewRequest(http.MethodPost, url, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)

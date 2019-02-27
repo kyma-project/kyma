@@ -234,6 +234,16 @@ type PodEvent struct {
 	Pod  Pod                   `json:"pod"`
 }
 
+type ReplicaSet struct {
+	Name              string    `json:"name"`
+	Pods              string    `json:"pods"`
+	Namespace         string    `json:"namespace"`
+	Images            []string  `json:"images"`
+	CreationTimestamp time.Time `json:"creationTimestamp"`
+	Labels            Labels    `json:"labels"`
+	JSON              JSON      `json:"json"`
+}
+
 type ResourceAttributes struct {
 	Verb            string  `json:"verb"`
 	APIGroup        string  `json:"apiGroup"`

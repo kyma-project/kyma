@@ -3,3 +3,4 @@ bindings:
     groups: []
   kymaView:
     groups: []
+namespace: default

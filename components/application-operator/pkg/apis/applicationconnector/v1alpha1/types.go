@@ -39,6 +39,8 @@ type ApplicationSpec struct {
 	// AccessLabel is not required, 'omitempty' is needed because of regexp validation
 	AccessLabel string            `json:"accessLabel,omitempty"`
 	Labels      map[string]string `json:"labels"`
+	Tenant      string            `json:"tenant,omitempty"`
+	Group       string            `json:"group,omitempty"`
 }
 
 // Entry defines, what is enabled by activating the service.
