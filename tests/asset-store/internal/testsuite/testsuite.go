@@ -8,7 +8,6 @@ import (
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	"os"
 	"strings"
 )
 
@@ -26,6 +25,8 @@ type TestSuite struct {
 	bucket *bucket
 	clusterBucket *clusterBucket
 	fileUpload *fileUpload
+	asset *asset
+	clusterAsset *clusterAsset
 
 	coreCli corev1.CoreV1Interface
 	dynamicCli dynamic.Interface
@@ -48,11 +49,16 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace)
 	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName)
 
+	a := newAsset(dynamicCli, cfg.Namespace)
+	ca := newClusterAsset(dynamicCli)
+
 	return &TestSuite{
 		namespace:ns,
 		bucket:b,
 		clusterBucket:cb,
 		fileUpload:newFileUpload(cfg.UploadServiceUrl),
+		asset:a,
+		clusterAsset:ca,
 
 		coreCli:coreCli,
 		dynamicCli:dynamicCli,
@@ -84,6 +90,15 @@ func (t *TestSuite) Run() error {
 
 	assetDetails := t.convertToAssetDetails(uploadResult)
 
+	err = t.asset.Create(assetDetails)
+	if err != nil {
+		return err
+	}
+
+	err = t.clusterAsset.Create(assetDetails)
+	if err != nil {
+		return err
+	}
 
 	// TODO: Validate no errros files.Errors
 
@@ -137,12 +152,4 @@ func (t *TestSuite) convertToAssetDetails(response *upload.Response) []assetDeta
 	}
 
 	return assets
-}
-
-func (t *TestSuite) CreateAsset() error {
-	return nil
-}
-
-func (t *TestSuite) ValidateAssetUpload() error {
-	return nil
 }

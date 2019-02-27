@@ -12,24 +12,21 @@ import (
 type clusterAsset struct {
 	dynamicCli dynamic.Interface
 	res        *resource.Resource
-	assets []assetDetails
-	Namespace string
 }
 
-func newClusterAsset(dynamicCli dynamic.Interface, assets []assetDetails, namespace string) *clusterAsset {
+func newClusterAsset(dynamicCli dynamic.Interface) *clusterAsset {
 	return &clusterAsset{
 		res: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
-			Resource: "assets",
-		}, namespace),
+			Resource: "clusterassets",
+		}, ""),
 		dynamicCli: dynamicCli,
-		Namespace:namespace,
 	}
 }
 
-func (a *clusterAsset) Create() error {
-	for _, asset := range a.assets {
+func (a *clusterAsset) Create(assets []assetDetails) error {
+	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
 			TypeMeta: metav1.TypeMeta{
 				Kind: "ClusterAsset",
@@ -37,7 +34,6 @@ func (a *clusterAsset) Create() error {
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      asset.Name,
-				Namespace: a.Namespace,
 			},
 			Spec:v1alpha2.ClusterAssetSpec{
 				CommonAssetSpec: v1alpha2.CommonAssetSpec{
@@ -51,18 +47,18 @@ func (a *clusterAsset) Create() error {
 
 		err := a.res.Create(asset)
 		if err != nil {
-			return errors.Wrapf(err, "while creating asset %s in namespace %s", asset.Name, a.Namespace)
+			return errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
 		}
 	}
 
 	return nil
 }
 
-func (a *clusterAsset) Delete() error {
-	for _, asset := range a.assets {
+func (a *clusterAsset) Delete(assets []assetDetails) error {
+	for _, asset := range assets {
 		err := a.res.Delete(asset.Name)
 		if err != nil {
-			return errors.Wrapf(err, "while deleting asset %s in namespace %s", asset.Name, a.Namespace)
+			return errors.Wrapf(err, "while deleting ClusterAsset %s", asset.Name)
 		}
 	}
 

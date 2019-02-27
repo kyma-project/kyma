@@ -19,11 +19,10 @@ type assetDetails struct {
 type asset struct {
 	dynamicCli dynamic.Interface
 	res        *resource.Resource
-	assets []assetDetails
 	Namespace string
 }
 
-func newAsset(dynamicCli dynamic.Interface, assets []assetDetails, namespace string) *asset {
+func newAsset(dynamicCli dynamic.Interface, namespace string) *asset {
 	return &asset{
 		res: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
@@ -35,8 +34,8 @@ func newAsset(dynamicCli dynamic.Interface, assets []assetDetails, namespace str
 	}
 }
 
-func (a *asset) Create() error {
-	for _, asset := range a.assets {
+func (a *asset) Create(assets []assetDetails) error {
+	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
 			TypeMeta: metav1.TypeMeta{
 				Kind: "Asset",
@@ -58,18 +57,18 @@ func (a *asset) Create() error {
 
 		err := a.res.Create(asset)
 		if err != nil {
-			return errors.Wrapf(err, "while creating asset %s in namespace %s", asset.Name, a.Namespace)
+			return errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
 	}
 
 	return nil
 }
 
-func (a *asset) Delete() error {
-	for _, asset := range a.assets {
+func (a *asset) Delete(assets []assetDetails) error {
+	for _, asset := range assets {
 		err := a.res.Delete(asset.Name)
 		if err != nil {
-			return errors.Wrapf(err, "while deleting asset %s in namespace %s", asset.Name, a.Namespace)
+			return errors.Wrapf(err, "while deleting Asset %s in namespace %s", asset.Name, a.Namespace)
 		}
 	}
 

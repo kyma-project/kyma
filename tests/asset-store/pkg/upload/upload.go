@@ -94,7 +94,7 @@ func Do(directory string, input UploadInput, url string) (*Response, error) {
 		return nil, errors.Wrap(err, "while doing upload request")
 	}
 
-	glog.Infof("Received response. Status code: %d", result.StatusCode)
+	glog.Infof("File Upload: Received response. Status code: %d", result.StatusCode)
 
 	defer result.Body.Close()
 
