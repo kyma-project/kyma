@@ -14,6 +14,5 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}-loadBalancerMigration
-        #image: {{ .Values.containerRegistry.path }}/{{ .Values.xip_patch.dir }}xip-patch:{{ .Values.xip_patch.version }}
         image: eu.gcr.io/kyma-project/pr/xip-patch:PR-2841
         command: ["/app/delete-loadbalancer.sh"]
