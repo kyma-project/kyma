@@ -52,5 +52,5 @@ global:
     dir: develop/
     version: f78529c4
 
-connectivity-certs-controller:
+connectivity_certs_controller:
   enabled: "false"
