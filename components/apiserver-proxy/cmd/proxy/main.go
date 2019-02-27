@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	stdflag "flag"
 	"fmt"
-	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -14,6 +13,8 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
+
 	"github.com/golang/glog"
 	"github.com/hkwi/h2c"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
@@ -21,7 +22,9 @@ import (
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/proxy"
 	flag "github.com/spf13/pflag"
 	"golang.org/x/net/http2"
+	"k8s.io/apiserver/pkg/authentication/authenticator"
 	k8sapiflag "k8s.io/apiserver/pkg/util/flag"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	certutil "k8s.io/client-go/util/cert"
@@ -116,38 +119,38 @@ func main() {
 
 	spdyProxy := spdy.New(kcfg, upstreamURL)
 
-	//kubeClient, err := kubernetes.NewForConfig(kcfg)
-	//if err != nil {
-	//	glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
-	//}
-	//
-	//var authenticator authenticator.Request
-	//If OIDC configuration provided, use oidc authenticator
-	//if cfg.auth.Authentication.OIDC.IssuerURL != "" {
-	//	authenticator, err = authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
-	//	if err != nil {
-	//		glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
-	//	}
-	//
-	//} else {
-	//	//Use Delegating authenticator
-	//
-	//	tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
-	//	authenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
-	//	if err != nil {
-	//		glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
-	//	}
-	//
-	//}
-	//
-	//sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
-	//authorizer, err := authz.NewAuthorizer(sarClient)
-	//
-	//if err != nil {
-	//	glog.Fatalf("Failed to create authorizer: %v", err)
-	//}
-	//
-	//authProxy, err := proxy.New(kubeClient, cfg.auth, authorizer, authenticator)
+	kubeClient, err := kubernetes.NewForConfig(kcfg)
+	if err != nil {
+		glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
+	}
+
+	var authenticator authenticator.Request
+	// If OIDC configuration provided, use oidc authenticator
+	if cfg.auth.Authentication.OIDC.IssuerURL != "" {
+		authenticator, err = authn.NewOIDCAuthenticator(cfg.auth.Authentication.OIDC)
+		if err != nil {
+			glog.Fatalf("Failed to instantiate OIDC authenticator: %v", err)
+		}
+
+	} else {
+		//Use Delegating authenticator
+
+		tokenClient := kubeClient.AuthenticationV1beta1().TokenReviews()
+		authenticator, err = authn.NewDelegatingAuthenticator(tokenClient, cfg.auth.Authentication)
+		if err != nil {
+			glog.Fatalf("Failed to instantiate delegating authenticator: %v", err)
+		}
+
+	}
+
+	sarClient := kubeClient.AuthorizationV1beta1().SubjectAccessReviews()
+	authorizer, err := authz.NewAuthorizer(sarClient)
+
+	if err != nil {
+		glog.Fatalf("Failed to create authorizer: %v", err)
+	}
+
+	authProxy := proxy.New(cfg.auth, authorizer, authenticator)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
@@ -167,10 +170,10 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.Handle("/", http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
-		//ok := authProxy.Handle(w, req)
-		//if !ok {
-		//	return
-		//}
+		ok := authProxy.Handle(w, req)
+		if !ok {
+			return
+		}
 
 		if spdyProxy.IsSpdyRequest(req) {
 			glog.Infof("Handling SPDY")
