@@ -17,6 +17,7 @@ import (
 
 const (
 	installationSkippedStatus = "INSTALLATION_SKIPPED"
+	upgradeSkippedStatus      = "UPGRADE_SKIPPED"
 	applicationFinalizer      = "finalizer.applicationconnector.kyma-project.io"
 )
 
@@ -120,9 +121,13 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 		}
 
 		return r.installApplication(application)
-	}
+	} else {
+		if shouldSkipInstallation(application) {
+			return upgradeSkippedStatus, "Upgrade will not be performed", nil
+		}
 
-	return r.checkApplicationStatus(application)
+		return r.upgradeApplication(application)
+	}
 }
 
 func shouldBeRemoved(application *v1alpha1.Application) bool {
@@ -140,18 +145,21 @@ func (r *applicationReconciler) installApplication(application *v1alpha1.Applica
 	if err != nil {
 		return "", "", errors.Wrapf(err, "Error installing release for %s Application", application.Name)
 	}
-	log.Infof("Release for %s Application, installed successfully", application.Name)
+	log.Infof("Release for %s Application installed successfully", application.Name)
 
 	return status.String(), description, nil
 }
 
-func (r *applicationReconciler) checkApplicationStatus(application *v1alpha1.Application) (string, string, error) {
-	status, description, err := r.releaseManager.CheckReleaseStatus(application.Name)
-	if err != nil {
-		return "", "", errors.Wrapf(err, "Error checking release status for %s Application", application.Name)
-	}
+func (r *applicationReconciler) upgradeApplication(application *v1alpha1.Application) (string, string, error) {
+	log.Infof("Upgrading release for %s Application...", application.Name)
 
-	return status.String(), description, err
+	status, description, err := r.releaseManager.UpgradeChart(application)
+	if err != nil {
+		return "", "", errors.Wrapf(err, "Error upgrading release for %s Application", application.Name)
+	}
+	log.Infof("Release for %s Application upgraded successfully", application.Name)
+
+	return status.String(), description, nil
 }
 
 func (r *applicationReconciler) updateApplication(application *v1alpha1.Application) error {

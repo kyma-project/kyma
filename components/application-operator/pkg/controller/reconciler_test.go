@@ -83,6 +83,39 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.AssertExpectations(t)
 	})
 
+	t.Run("should upgrade chart when new version is available", func(t *testing.T) {
+		// given
+		namespacedName := types.NamespacedName{
+			Name: applicationName,
+		}
+
+		managerClient := &mocks.ApplicationManagerClient{}
+		managerClient.On(
+			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
+			Run(setupAppInstance).Return(nil)
+		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
+			Run(statusChecker.checkStatus).Return(nil)
+
+		releaseManager := &helmmocks.ReleaseManager{}
+		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
+		releaseManager.On("UpgradeChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
+
+		applicationReconciler := NewReconciler(managerClient, releaseManager)
+
+		request := reconcile.Request{
+			NamespacedName: namespacedName,
+		}
+
+		// when
+		result, err := applicationReconciler.Reconcile(request)
+
+		// then
+		assert.NoError(t, err)
+		assert.NotNil(t, result)
+		managerClient.AssertExpectations(t)
+		releaseManager.AssertExpectations(t)
+	})
+
 	t.Run("should skip chart installation when skip-installation label set to true", func(t *testing.T) {
 		// given
 		skippedChecker := applicationChecker{
@@ -121,8 +154,14 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.AssertExpectations(t)
 	})
 
-	t.Run("should set access-label when new Application is created", func(t *testing.T) {
+	t.Run("should skip chart upgrade when skip-installation label set to true", func(t *testing.T) {
 		// given
+		skippedChecker := applicationChecker{
+			t:                   t,
+			expectedStatus:      upgradeSkippedStatus,
+			expectedDescription: "Upgrade will not be performed",
+		}
+
 		namespacedName := types.NamespacedName{
 			Name: applicationName,
 		}
@@ -130,13 +169,12 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
-			Run(setupAppWithoutAccessLabel).Return(nil)
+			Run(setupAppWhichIsNotInstalled).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
-			Run(statusChecker.checkAccessLabel).Return(nil)
+			Run(skippedChecker.checkStatus).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
-		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
-		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
+		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -154,7 +192,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		releaseManager.AssertExpectations(t)
 	})
 
-	t.Run("should check status if chart exist despite skip-installation label set to true", func(t *testing.T) {
+	t.Run("should set access-label when new Application is created", func(t *testing.T) {
 		// given
 		namespacedName := types.NamespacedName{
 			Name: applicationName,
@@ -163,13 +201,13 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 		managerClient := &mocks.ApplicationManagerClient{}
 		managerClient.On(
 			"Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.Application")).
-			Run(setupAppWhichIsNotInstalled).Return(nil)
+			Run(setupAppWithoutAccessLabel).Return(nil)
 		managerClient.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.Application")).
-			Run(statusChecker.checkStatus).Return(nil)
+			Run(statusChecker.checkAccessLabel).Return(nil)
 
 		releaseManager := &helmmocks.ReleaseManager{}
-		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
-		releaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		releaseManager.On("CheckReleaseExistence", applicationName).Return(false, nil)
+		releaseManager.On("InstallChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -269,7 +307,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
-		releaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		releaseManager.On("UpgradeChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -302,7 +340,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
-		releaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		releaseManager.On("UpgradeChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 
@@ -423,7 +461,7 @@ func TestApplicationReconciler_Reconcile(t *testing.T) {
 
 		releaseManager := &helmmocks.ReleaseManager{}
 		releaseManager.On("CheckReleaseExistence", applicationName).Return(true, nil)
-		releaseManager.On("CheckReleaseStatus", applicationName).Return(releaseStatus, statusDescription, nil)
+		releaseManager.On("UpgradeChart", mock.AnythingOfType("*v1alpha1.Application")).Return(releaseStatus, statusDescription, nil)
 
 		reReconciler := NewReconciler(managerClient, releaseManager)
 

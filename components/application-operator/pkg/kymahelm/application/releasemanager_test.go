@@ -126,6 +126,62 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 	})
 }
 
+func TestReleaseManager_UpgradeChart(t *testing.T) {
+	application := &v1alpha1.Application{
+		ObjectMeta: v1.ObjectMeta{Name: appName},
+	}
+
+	t.Run("should upgrade release if new version is available", func(t *testing.T) {
+		// given
+		updateResponse := &rls.UpdateReleaseResponse{
+			Release: &hapi_release5.Release{
+				Info: &hapi_release5.Info{
+					Status: &hapi_release5.Status{
+						Code: hapi_release5.Status_DEPLOYED,
+					},
+					Description: "Installed",
+				},
+			},
+		}
+
+		appWithGroupAndTenant := &v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{Name: appName},
+			Spec:       v1alpha1.ApplicationSpec{Tenant: "tenant", Group: "group"},
+		}
+
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "tenant\\\\\\;group\\\\\\;default-app")
+
+		helmClient := &helmmocks.HelmClient{}
+		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, appName, expectedOverrides).Return(updateResponse, nil)
+
+		releaseManager := NewReleaseManager(helmClient, OverridesData{}, namespace)
+
+		// when
+		status, description, err := releaseManager.UpgradeChart(appWithGroupAndTenant)
+
+		// then
+		assert.NoError(t, err)
+		assert.Equal(t, hapi_release5.Status_DEPLOYED, status)
+		assert.Equal(t, "Installed", description)
+		helmClient.AssertExpectations(t)
+	})
+
+	t.Run("should return error when failed to upgrade release", func(t *testing.T) {
+		// given
+		helmClient := &helmmocks.HelmClient{}
+		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, mock.AnythingOfType("string")).Return(nil, errors.New("Error"))
+
+		releaseManager := NewReleaseManager(helmClient, OverridesData{}, namespace)
+
+		// when
+		_, _, err := releaseManager.InstallChart(application)
+
+		// then
+		assert.Error(t, err)
+		helmClient.AssertExpectations(t)
+	})
+}
+
 func TestReleaseManager_DeleteReleaseIfExists(t *testing.T) {
 
 	t.Run("should delete release", func(t *testing.T) {
