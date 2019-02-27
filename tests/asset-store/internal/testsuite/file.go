@@ -17,7 +17,13 @@ func newFileUpload(url string) *fileUpload {
 
 // TODO: Test private bucket
 func (u *fileUpload) Do() (*upload.Response, error) {
-	publicFiles, err := u.loadFiles()
+	paths := []string{
+		"internal/testsuite/testdata/single/foo.yaml",
+		"internal/testsuite/testdata/single/bar.yaml",
+		"internal/testsuite/testdata/package/package.tar.gz",
+	}
+
+	publicFiles, err := u.loadFiles(paths)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while loading files to upload")
 	}
@@ -34,14 +40,8 @@ func (u *fileUpload) Do() (*upload.Response, error) {
 	return resp, nil
 }
 
-func (u *fileUpload) loadFiles() ([]*os.File, error){
+func (u *fileUpload) loadFiles(paths []string) ([]*os.File, error){
 	var files []*os.File
-
-	paths := []string{
-		"internal/testsuite/testdata/single/foo.yaml",
-		"internal/testsuite/testdata/single/bar.yaml",
-		"internal/testsuite/testdata/package/package.tar.gz",
-	}
 
 	for _, path := range paths {
 		absPath, err := filepath.Abs(path)
@@ -51,7 +51,7 @@ func (u *fileUpload) loadFiles() ([]*os.File, error){
 
 		file, err := os.Open(absPath)
 		if err != nil {
-			return nil, errors.Wrapf(err, "while loading file from path %s", path)
+			return nil, errors.Wrapf(err, "while loading fileUpload from path %s", path)
 		}
 
 		files = append(files, file)

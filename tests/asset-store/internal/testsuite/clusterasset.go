@@ -12,6 +12,7 @@ import (
 type clusterAsset struct {
 	dynamicCli dynamic.Interface
 	res        *resource.Resource
+	ClusterBucketName string
 }
 
 func newClusterAsset(dynamicCli dynamic.Interface) *clusterAsset {
@@ -25,7 +26,7 @@ func newClusterAsset(dynamicCli dynamic.Interface) *clusterAsset {
 	}
 }
 
-func (a *clusterAsset) Create(assets []assetDetails) error {
+func (a *clusterAsset) Create(assets []assetData) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
 			TypeMeta: metav1.TypeMeta{
@@ -37,6 +38,9 @@ func (a *clusterAsset) Create(assets []assetDetails) error {
 			},
 			Spec:v1alpha2.ClusterAssetSpec{
 				CommonAssetSpec: v1alpha2.CommonAssetSpec{
+					BucketRef: v1alpha2.AssetBucketRef{
+						Name: a.ClusterBucketName,
+					},
 					Source:v1alpha2.AssetSource{
 						Url: asset.URL,
 						Mode:asset.Mode,
@@ -54,7 +58,7 @@ func (a *clusterAsset) Create(assets []assetDetails) error {
 	return nil
 }
 
-func (a *clusterAsset) Delete(assets []assetDetails) error {
+func (a *clusterAsset) Delete(assets []assetData) error {
 	for _, asset := range assets {
 		err := a.res.Delete(asset.Name)
 		if err != nil {

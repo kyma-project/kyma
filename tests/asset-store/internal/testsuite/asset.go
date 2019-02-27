@@ -9,16 +9,10 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-type assetDetails struct {
-	Name string
-	URL string
-	Bucket string
-	Mode v1alpha2.AssetMode
-}
-
 type asset struct {
 	dynamicCli dynamic.Interface
 	res        *resource.Resource
+	BucketName string
 	Namespace string
 }
 
@@ -34,7 +28,7 @@ func newAsset(dynamicCli dynamic.Interface, namespace string) *asset {
 	}
 }
 
-func (a *asset) Create(assets []assetDetails) error {
+func (a *asset) Create(assets []assetData) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
 			TypeMeta: metav1.TypeMeta{
@@ -47,6 +41,9 @@ func (a *asset) Create(assets []assetDetails) error {
 			},
 			Spec:v1alpha2.AssetSpec{
 				CommonAssetSpec: v1alpha2.CommonAssetSpec{
+					BucketRef: v1alpha2.AssetBucketRef{
+						Name: a.BucketName,
+					},
 					Source:v1alpha2.AssetSource{
 						Url: asset.URL,
 						Mode:asset.Mode,
@@ -64,7 +61,7 @@ func (a *asset) Create(assets []assetDetails) error {
 	return nil
 }
 
-func (a *asset) Delete(assets []assetDetails) error {
+func (a *asset) Delete(assets []assetData) error {
 	for _, asset := range assets {
 		err := a.res.Delete(asset.Name)
 		if err != nil {
@@ -74,3 +71,4 @@ func (a *asset) Delete(assets []assetDetails) error {
 
 	return nil
 }
+

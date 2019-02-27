@@ -36,7 +36,7 @@ func (r *Resource) Create(res interface{}) error {
 	_, err = r.resCli.Create(unstructuredObj, metav1.CreateOptions{})
 	if err != nil {
 		if apierrors.IsAlreadyExists(err) {
-			glog.Infof("Resource %s with name '%s' already exist.", unstructuredObj.GetKind(), unstructuredObj.GetName())
+			glog.Warningf("Resource %s with name '%s' already exist.", unstructuredObj.GetKind(), unstructuredObj.GetName())
 			return nil
 		}
 		return errors.Wrapf(err, "while creating resource %s ", unstructuredObj.GetKind())

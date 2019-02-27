@@ -1,14 +1,12 @@
 package testsuite
 
 import (
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"fmt"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	"strings"
 )
 
 type Config struct {
@@ -28,7 +26,7 @@ type TestSuite struct {
 	asset *asset
 	clusterAsset *clusterAsset
 
-	coreCli corev1.CoreV1Interface
+	assetDetails []assetData
 	dynamicCli dynamic.Interface
 
 	cfg Config
@@ -60,7 +58,6 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 		asset:a,
 		clusterAsset:ca,
 
-		coreCli:coreCli,
 		dynamicCli:dynamicCli,
 		cfg: cfg,
 	}, nil
@@ -72,37 +69,17 @@ func (t *TestSuite) Run() error {
 		return err
 	}
 
-	err = t.bucket.Create()
+	err = t.createBuckets()
 	if err != nil {
 		return err
 	}
 
-	err = t.clusterBucket.Create()
+	err = t.createAssets()
 	if err != nil {
 		return err
 	}
 
-	// Upload test files with asset-upload-service
-	uploadResult, err := t.fileUpload.Do()
-	if err != nil {
-		return err
-	}
 
-	assetDetails := t.convertToAssetDetails(uploadResult)
-
-	err = t.asset.Create(assetDetails)
-	if err != nil {
-		return err
-	}
-
-	err = t.clusterAsset.Create(assetDetails)
-	if err != nil {
-		return err
-	}
-
-	// TODO: Validate no errros files.Errors
-
-	// Create clusterAsset CR (single file and package)
 
 	// Check if assets have been uploaded
 
@@ -113,8 +90,57 @@ func (t *TestSuite) Run() error {
 	return nil
 }
 
+func (t *TestSuite) createBuckets() error {
+	err := t.bucket.Create()
+	if err != nil {
+		return err
+	}
+
+	err = t.clusterBucket.Create()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *TestSuite) createAssets() error {
+	uploadResult, err := t.fileUpload.Do()
+	if err != nil {
+		return err
+	}
+
+	if len(uploadResult.Errors) > 0 {
+		return fmt.Errorf("during file upload: %+v", uploadResult.Errors)
+	}
+
+	t.assetDetails = convertToAssetDetails(uploadResult)
+
+	err = t.asset.Create(t.assetDetails)
+	if err != nil {
+		return err
+	}
+
+	err = t.clusterAsset.Create(t.assetDetails)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (t *TestSuite) Cleanup() error {
-	err := t.bucket.Delete()
+	err := t.asset.Delete(t.assetDetails)
+	if err != nil {
+		return err
+	}
+
+	err = t.clusterAsset.Delete(t.assetDetails)
+	if err != nil {
+		return err
+	}
+
+	err = t.bucket.Delete()
 	if err != nil {
 		return err
 	}
@@ -132,24 +158,3 @@ func (t *TestSuite) Cleanup() error {
 	return nil
 }
 
-func (t *TestSuite) convertToAssetDetails(response *upload.Response) []assetDetails {
-	var assets []assetDetails
-	for _, file := range response.UploadedFiles {
-		var mode v1alpha2.AssetMode
-		if strings.HasSuffix(file.FileName, ".tar.gz") {
-			mode = v1alpha2.AssetPackage
-		} else {
-			mode = v1alpha2.AssetSingle
-		}
-
-		asset := assetDetails{
-			Name: file.FileName,
-			URL: file.RemotePath,
-			Mode:mode,
-			Bucket:t.bucket.name,
-		}
-		assets = append(assets, asset)
-	}
-
-	return assets
-}
