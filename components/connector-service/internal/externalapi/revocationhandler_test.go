@@ -13,14 +13,14 @@ import (
 func TestRevocationHandler(t *testing.T) {
 
 	urlRevocation := "/v1/applications/certificates/revocation"
+	hashedTestCert := "f21139ef2b82d02ee73a56c5c73c053fbafa3480a0b35459cba276b0667c57fc"
 
 	t.Run("should revoke certificate and return http code 201", func(t *testing.T) {
 		//given
 		testCert := "testCert"
-		hashedTestCert := "f21139ef2b82d02ee73a56c5c73c053fbafa3480a0b35459cba276b0667c57fc"
 
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert",  hashedTestCert).Return(nil)
+		revocationListRepository.On("Insert", hashedTestCert).Return(nil)
 
 		handler := NewRevocationHandler(revocationListRepository)
 
@@ -40,10 +40,9 @@ func TestRevocationHandler(t *testing.T) {
 	t.Run("should return http code 201 when certficate already revoked", func(t *testing.T) {
 		//given
 		testCert := "testCert"
-		hashedTestCert := "f21139ef2b82d02ee73a56c5c73c053fbafa3480a0b35459cba276b0667c57fc"
 
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert",  hashedTestCert).Return(nil)
+		revocationListRepository.On("Insert", hashedTestCert).Return(nil)
 
 		handler := NewRevocationHandler(revocationListRepository)
 
@@ -91,10 +90,9 @@ func TestRevocationHandler(t *testing.T) {
 	t.Run("should return http code 500 when certficate revocation not persisted", func(t *testing.T) {
 		//given
 		testCert := "testCert"
-		hashedTestCert := "f21139ef2b82d02ee73a56c5c73c053fbafa3480a0b35459cba276b0667c57fc"
 
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert",  hashedTestCert).Return(errors.New("Error"))
+		revocationListRepository.On("Insert", hashedTestCert).Return(errors.New("Error"))
 
 		handler := NewRevocationHandler(revocationListRepository)
 
