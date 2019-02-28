@@ -2,12 +2,13 @@ package spdy
 
 import (
 	"io"
+	"net/http"
+	"net/url"
+
 	"k8s.io/apimachinery/pkg/util/httpstream"
 	"k8s.io/apimachinery/pkg/util/httpstream/spdy"
 	"k8s.io/client-go/rest"
 	client_spdy "k8s.io/client-go/transport/spdy"
-	"net/http"
-	"net/url"
 )
 
 type Proxy struct {

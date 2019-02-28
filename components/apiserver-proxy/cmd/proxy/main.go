@@ -4,8 +4,6 @@ import (
 	"crypto/tls"
 	stdflag "flag"
 	"fmt"
-	"github.com/gorilla/handlers"
-	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -14,6 +12,9 @@ import (
 	"os/signal"
 	"strings"
 	"syscall"
+
+	"github.com/gorilla/handlers"
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 
 	"github.com/golang/glog"
 	"github.com/hkwi/h2c"
