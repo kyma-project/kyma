@@ -3,7 +3,9 @@ package oauth
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -89,6 +91,7 @@ func (c *client) requestToken(clientID string, clientSecret string, authURL stri
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
 
+	addAuthorizationHeader(req, clientID, clientSecret)
 	req.Header.Add(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationURLEncoded)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.timeoutDuration)*time.Second)
@@ -118,4 +121,10 @@ func (c *client) requestToken(clientID string, clientSecret string, authURL stri
 	}
 
 	return tokenResponse, nil
+}
+
+func addAuthorizationHeader(req *http.Request, clientId, clientSecret string) {
+	basicAuth := fmt.Sprintf("Basic %s:%s", clientId, clientSecret)
+
+	req.Header.Set(httpconsts.HeaderAuthorization, base64.StdEncoding.EncodeToString([]byte(basicAuth)))
 }

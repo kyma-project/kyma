@@ -1,10 +1,14 @@
 package oauth
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/application-proxy/internal/httpconsts"
 
 	"github.com/kyma-project/kyma/components/application-proxy/internal/authorization/oauth/tokencache/mocks"
 	"github.com/stretchr/testify/assert"
@@ -37,6 +41,13 @@ func TestOauthClient_GetToken(t *testing.T) {
 			assert.Equal(t, "test", r.PostForm.Get("client_id"))
 			assert.Equal(t, "test", r.PostForm.Get("client_secret"))
 			assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
+
+			authHeader := r.Header.Get(httpconsts.HeaderAuthorization)
+			decoded, err := base64.StdEncoding.DecodeString(authHeader)
+			require.NoError(t, err)
+			credentials := strings.Split(strings.TrimPrefix(string(decoded), "Basic "), ":")
+			assert.Equal(t, "test", credentials[0])
+			assert.Equal(t, "test", credentials[1])
 
 			response := oauthResponse{AccessToken: "123456789", TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
 
