@@ -38,7 +38,7 @@ spec:
       namespace: "kyma-system"
     - name: "kyma-integration"
       namespace: "kyma-integration"
-    - name: "application-connector-xip"
+    - name: "application-connector-nginx"
       namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-integration"
