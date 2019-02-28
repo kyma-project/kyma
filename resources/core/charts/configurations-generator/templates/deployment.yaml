@@ -29,7 +29,7 @@ spec:
           "-kube-config-ca-file=/etc/ingress-tls-cert/tls.crt",
           "-oidc-issuer-url=https://dex.{{ .Values.global.domainName }}",
           "-oidc-client-id=kyma-client",
-          "-oidc-config-ca-file=/etc/ingress-tls-cert/tls.crt"
+          "-oidc-ca-file=/etc/ingress-tls-cert/tls.crt"
         ]
         ports:
           - name: http
