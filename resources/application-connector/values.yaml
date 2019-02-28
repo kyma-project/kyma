@@ -5,9 +5,6 @@ connection_token_handler:
   enabled: *connectorServiceEnabled
 
 global:
-  console:
-    application_management:
-      enabled: *connectorServiceEnabled
   isLocalEnv: false
   knative: false
   namespace: kyma-integration
