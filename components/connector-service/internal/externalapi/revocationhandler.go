@@ -45,7 +45,7 @@ func (handler revocationHandler) getCertificateHash(r *http.Request) (string, ap
 	cert := r.Header.Get(CertificateHeader)
 
 	if cert == "" {
-		return "", apperrors.Forbidden("Certificate not passed.")
+		return "", apperrors.Internal("Certificate not passed.")
 	}
 
 	hash, err := certificates.CalculateHash(cert)

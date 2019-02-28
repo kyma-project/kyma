@@ -66,7 +66,7 @@ func TestRevocationHandler(t *testing.T) {
 		revocationListRepository.AssertExpectations(t)
 	})
 
-	t.Run("should return http code 403 when certificate not passed", func(t *testing.T) {
+	t.Run("should return http code 500 when certificate not passed", func(t *testing.T) {
 		//given
 		testCert := ""
 
@@ -83,7 +83,7 @@ func TestRevocationHandler(t *testing.T) {
 		handler.Revoke(rr, req)
 
 		//then
-		assert.Equal(t, http.StatusForbidden, rr.Code)
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		revocationListRepository.AssertNotCalled(t, "Insert", mock.AnythingOfType("string"))
 	})
 
