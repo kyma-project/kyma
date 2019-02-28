@@ -10,12 +10,13 @@ import (
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authz"
 
-	"gopkg.in/yaml.v2"
+	yaml "gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 	apirequest "k8s.io/apiserver/pkg/endpoints/request"
+	clientset "k8s.io/client-go/kubernetes"
 )
 
 const KUBERNETES_SERVICE = "kubernetes.default"
@@ -38,9 +39,13 @@ type kubeRBACProxy struct {
 	Config Config
 }
 
-// New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
-func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request) *kubeRBACProxy {
+func new(authenticator authenticator.Request, authorizer authorizer.Authorizer, config Config) *kubeRBACProxy {
 	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config}
+}
+
+// New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
+func New(client clientset.Interface, config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request) (*kubeRBACProxy, error) {
+	return new(authenticator, authorizer, config), nil
 }
 
 // Handle authenticates the client and authorizes the request.

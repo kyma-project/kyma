@@ -4,8 +4,6 @@ import (
 	"crypto/tls"
 	stdflag "flag"
 	"fmt"
-	"github.com/gorilla/handlers"
-	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -117,8 +115,6 @@ func main() {
 		glog.Fatalf("Failed to build parse upstream URL: %v", err)
 	}
 
-	spdyProxy := spdy.New(kcfg, upstreamURL)
-
 	kubeClient, err := kubernetes.NewForConfig(kcfg)
 	if err != nil {
 		glog.Fatalf("Failed to instantiate Kubernetes client: %v", err)
@@ -150,7 +146,7 @@ func main() {
 		glog.Fatalf("Failed to create authorizer: %v", err)
 	}
 
-	authProxy := proxy.New(cfg.auth, authorizer, authenticator)
+	authProxy, err := proxy.New(kubeClient, cfg.auth, authorizer, authenticator)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
@@ -175,20 +171,11 @@ func main() {
 			return
 		}
 
-		if spdyProxy.IsSpdyRequest(req) {
-			glog.Infof("Handling SPDY")
-			spdyProxy.ServeHTTP(w, req)
-		} else {
-			glog.Infof("Handling HTTP")
-			rp.ServeHTTP(w, req)
-		}
+		rp.ServeHTTP(w, req)
 	}))
 
 	if cfg.secureListenAddress != "" {
-		srv := &http.Server{Handler: handlers.CORS(
-			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
-			handlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
-		)(mux)}
+		srv := &http.Server{Handler: mux}
 
 		if cfg.tls.certFile == "" && cfg.tls.keyFile == "" {
 			glog.Info("Generating self signed cert as no cert is provided")
