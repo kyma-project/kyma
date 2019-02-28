@@ -1,4 +1,4 @@
-#set -e
+#!/usr/bin/env bash
 
 CURRENT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
@@ -14,28 +14,18 @@ if [[ -z "${DOMAIN}" ]]; then
 fi
 
 echo "Current cluster context: $(kubectl config current-context)"
-
 echo "Image: $TEST_IMAGE"
 echo "Domain: $DOMAIN"
 
-echo ""
-echo "------------------------"
-echo "Removing test pod"
-echo "------------------------"
+source $CURRENT_DIR/test-runner.sh
 
+deleteTestPod
 
-kubectl -n kyma-integration delete po connector-service-tests --now
+buildImage $TEST_IMAGE
 
 echo ""
 echo "------------------------"
-echo "Building tests image"
-echo "------------------------"
-
-docker build $CURRENT_DIR/.. -t $TEST_IMAGE
-
-echo ""
-echo "------------------------"
-echo "Push tests image"
+echo "Pushing tests image"
 echo "------------------------"
 
 docker push $TEST_IMAGE
@@ -67,16 +57,8 @@ spec:
     - name: SKIP_SSL_VERIFY
       value: "true"
     - name: CENTRAL
-      value: "true"
+      value: "false"
   restartPolicy: Never
 EOF
 
-echo ""
-echo "------------------------"
-echo "Waiting 10 seconds for pod to start..."
-echo "------------------------"
-echo ""
-
-sleep 10
-
-kubectl -n kyma-integration logs connector-service-tests -f -c connector-service-tests
+waitForTestLogs 10

@@ -39,7 +39,7 @@ func (clsCtx ClusterContext) GetLogger() *logrus.Entry {
 	return logging.GetClusterLogger(clsCtx.Tenant, clsCtx.Group)
 }
 
-// GetRuntimeUrls nil as ApplicationContext does not contain RuntimeURLs
+// GetRuntimeUrls returns nil as ClusterContext does not contain RuntimeURLs
 func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
 }

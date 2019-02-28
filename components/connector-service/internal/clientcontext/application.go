@@ -60,7 +60,7 @@ func (appCtx ApplicationContext) GetCommonName() string {
 		appCtx.ClusterContext.Group, SubjectCNSeparator, appCtx.Application)
 }
 
-// GetRuntimeUrls nil as ApplicationContext does not contain RuntimeURLs
+// GetRuntimeUrls returns nil as ApplicationContext does not contain RuntimeURLs
 func (appCtx ApplicationContext) GetRuntimeUrls() *RuntimeURLs {
 	return nil
 }
