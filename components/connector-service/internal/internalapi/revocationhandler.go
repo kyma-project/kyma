@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 )
@@ -24,7 +25,7 @@ func NewRevocationHandler(revocationListRepository revocationlist.RevocationList
 }
 
 func (handler revocationHandler) Revoke(w http.ResponseWriter, request *http.Request) {
-	rb, appError := handler.readRevocationBody(request)
+	rb, appError := handler.readBody(request)
 
 	if appError != nil {
 		httphelpers.RespondWithErrorAndLog(w, appError)
@@ -41,7 +42,7 @@ func (handler revocationHandler) Revoke(w http.ResponseWriter, request *http.Req
 	httphelpers.Respond(w, http.StatusCreated)
 }
 
-func (handler revocationHandler) readRevocationBody(request *http.Request) (*revocationBody, apperrors.AppError){
+func (handler revocationHandler) readBody(request *http.Request) (*revocationBody, apperrors.AppError){
 	var rb revocationBody
 
 	b, err := ioutil.ReadAll(request.Body)
@@ -65,6 +66,7 @@ func (handler revocationHandler) readRevocationBody(request *http.Request) (*rev
 func (handler revocationHandler) addToRevocationList(hash string) apperrors.AppError {
 	err := handler.revocationList.Insert(hash)
 
+	logrus.Warning("Adding certificate with hash: %s to revocation list.", hash)
 	if err != nil {
 		return apperrors.Internal("Unable to mark certificate as revoked: %s.", err)
 	}

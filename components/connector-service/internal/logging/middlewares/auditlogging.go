@@ -8,9 +8,9 @@ import (
 )
 
 type AuditLogMessages struct {
-	startingOperationMsg string
-	operationSuccessfulMsg string
-	operationFailedMsg string
+	StartingOperationMsg   string
+	OperationSuccessfulMsg string
+	OperationFailedMsg     string
 }
 
 type auditlogggingmiddleware struct {
@@ -29,15 +29,15 @@ func (alm *auditlogggingmiddleware) Middleware(handler http.Handler) http.Handle
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		contextLogger := alm.getContextLogger(r)
 
-		contextLogger.Info(alm.auditLogMessages.startingOperationMsg)
+		contextLogger.Info(alm.auditLogMessages.StartingOperationMsg)
 		writerWithStatus := httphelpers.WriterWithStatus{ResponseWriter: w}
 
 		handler.ServeHTTP(&writerWithStatus, r)
 
 		if writerWithStatus.IsSuccessful() {
-			contextLogger.Info(alm.auditLogMessages.operationSuccessfulMsg)
+			contextLogger.Info(alm.auditLogMessages.OperationSuccessfulMsg)
 		} else {
-			contextLogger.Info(alm.auditLogMessages.operationFailedMsg)
+			contextLogger.Info(alm.auditLogMessages.OperationFailedMsg)
 		}
 	})
 }
