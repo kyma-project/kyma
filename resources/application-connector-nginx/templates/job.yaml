@@ -11,5 +11,18 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}-loadbalancer-migration
-        image: eu.gcr.io/kyma-project/pr/xip-patch:PR-2841
-        command: ["/app/delete-loadbalancer.sh"]
+        image: eu.gcr.io/kyma-project/develop/xip-patch:1103850e
+        command:
+          - bash
+          - -c
+          - |
+            set -e
+            SERVICE_TO_REMOVE="application-connector-nginx-ingress-controller"
+            NAMESPACE="kyma-integration"
+
+            SERVICE_EXISTS=$(kubectl get service "${SERVICE_TO_REMOVE}" -n "${NAMESPACE}")
+
+            if [ -z "${SERVICE_EXISTS}" ]; then
+              echo "Deleting service: ${NAMESPACE}/${SERVICE_TO_REMOVE}"
+              kubectl delete service "${SERVICE_TO_REMOVE}" -n "${NAMESPACE}"
+            fi
