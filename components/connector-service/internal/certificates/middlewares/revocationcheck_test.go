@@ -93,4 +93,29 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
+
+	t.Run("should return http code 500 when error occured during hash calculation", func(t *testing.T) {
+		// given
+		testCert := "testCert%WrongEscape%"
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		})
+
+		req, err := http.NewRequest("POST", "/", nil)
+		req.Header.Set(externalapi.CertificateHeader, testCert)
+		require.NoError(t, err)
+
+		rr := httptest.NewRecorder()
+
+		repository := &mocks.RevocationListRepository{}
+
+		middleware := NewRevocationCheckMiddleware(repository)
+
+		// when
+		resultHandler := middleware.Middleware(handler)
+		resultHandler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	})
 }

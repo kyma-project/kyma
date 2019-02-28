@@ -23,7 +23,12 @@ func (rcm revocationCheckMiddleware) Middleware(handler http.Handler) http.Handl
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		certificate := r.Header.Get(externalapi.CertificateHeader)
 
-		hash := certificates.CalculateHash(certificate)
+		hash, e := certificates.CalculateHash(certificate)
+
+		if e != nil {
+			httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Failed to calculate hash. Certificate could not be unescaped"))
+			return
+		}
 
 		contains, err := rcm.revocationList.Contains(hash)
 

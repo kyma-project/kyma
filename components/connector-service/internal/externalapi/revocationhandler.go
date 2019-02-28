@@ -48,7 +48,11 @@ func (handler revocationHandler) getCertificateHash(r *http.Request) (string, ap
 		return "", apperrors.Forbidden("Certificate not passed.")
 	}
 
-	hash := certificates.CalculateHash(cert)
+	hash, err := certificates.CalculateHash(cert)
+
+	if err != nil {
+		return "", apperrors.Internal("Failed to calculate hash. Certificate could not be unescaped")
+	}
 
 	return hash, nil
 }

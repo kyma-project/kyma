@@ -108,4 +108,24 @@ func TestRevocationHandler(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 		revocationListRepository.AssertExpectations(t)
 	})
+
+	t.Run("should return http code 500 when error occured during hash calculation", func(t *testing.T) {
+		//given
+		testCert := "testCert%WrongEscape%"
+
+		revocationListRepository := &mocks.RevocationListRepository{}
+
+		handler := NewRevocationHandler(revocationListRepository)
+
+		rr := httptest.NewRecorder()
+
+		req := httptest.NewRequest(http.MethodPost, urlRevocation, nil)
+		req.Header.Set(CertificateHeader, testCert)
+
+		//when
+		handler.Revoke(rr, req)
+
+		//then
+		assert.Equal(t, http.StatusInternalServerError, rr.Code)
+	})
 }
