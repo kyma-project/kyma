@@ -7,10 +7,11 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 // pre-upgrade kyma release 0.7 -> 0.8
@@ -65,7 +66,12 @@ func main() {
 
 	log.Infof("Found repositories: %s", newURLs)
 	_, err = clientset.CoreV1().ConfigMaps(cfg.Namespace).Create(migratePreviousBundlesRepos(newURLs))
-	fatalOnError(err)
+	switch {
+	case err == nil:
+	case apiErrors.IsNotFound(err):
+	default:
+		fatalOnError(err)
+	}
 }
 
 func fatalOnError(err error) {
