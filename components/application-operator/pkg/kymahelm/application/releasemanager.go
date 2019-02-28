@@ -18,7 +18,6 @@ type ReleaseManager interface {
 	UpgradeChart(application *v1alpha1.Application) (hapi_4.Status_Code, string, error)
 	DeleteReleaseIfExists(name string) error
 	CheckReleaseExistence(name string) (bool, error)
-	CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error)
 }
 
 type releaseManager struct {
@@ -109,13 +108,4 @@ func (r *releaseManager) checkExistence(name string) (bool, error) {
 	}
 
 	return false, nil
-}
-
-func (r *releaseManager) CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error) {
-	status, err := r.helmClient.ReleaseStatus(name)
-	if err != nil {
-		return hapi_4.Status_FAILED, "", err
-	}
-
-	return status.Info.Status.Code, status.Info.Description, nil
 }
