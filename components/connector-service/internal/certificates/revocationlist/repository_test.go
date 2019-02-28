@@ -58,4 +58,19 @@ func TestRevocationListRepository_Contains(t *testing.T) {
 		// then
 		assert.Equal(t, isPresent, false)
 	})
+
+	t.Run("should return true if value is present", func(t *testing.T) {
+		// given
+		repository := NewRepository()
+		someHash := "someHash"
+
+		repository.Insert(someHash)
+
+		// when
+		isPresent, err := repository.Contains(someHash)
+		require.NoError(t, err)
+
+		// then
+		assert.Equal(t, isPresent, true)
+	})
 }
