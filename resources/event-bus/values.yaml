@@ -34,6 +34,11 @@ global:
     resources:
       limits:
         memory: "32M"
+  subscriptionControllerKnative:
+    resyncPeriod: "10s"
+    resources:
+      limits:
+        memory: "32M"
   trace:
     apiURL: http://zipkin.kyma-system:9411/api/v1/spans
   eventBusVersion: "0.2.34"
