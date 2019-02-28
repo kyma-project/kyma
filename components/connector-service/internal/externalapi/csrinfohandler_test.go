@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -21,33 +22,36 @@ import (
 )
 
 const (
-	commonName  = "commonName"
-	application = "application"
+	commonName = "commonName"
 )
 
-type dummyClientContext struct{}
+type dummyClientContextService struct{}
 
-func (dc dummyClientContext) ToJSON() ([]byte, error) {
+func (dc dummyClientContextService) ToJSON() ([]byte, error) {
 	return []byte("test"), nil
 }
 
-func (dc dummyClientContext) GetApplication() string {
-	return application
-}
-
-func (dc dummyClientContext) GetCommonName() string {
+func (dc dummyClientContextService) GetCommonName() string {
 	return commonName
 }
 
-func (dc dummyClientContext) GetRuntimeUrls() *clientcontext.RuntimeURLs {
+func (dc dummyClientContextService) GetRuntimeUrls() *clientcontext.RuntimeURLs {
 	return nil
 }
 
-type dummyClientContextWithEmptyURLs struct {
-	dummyClientContext
+func (dc dummyClientContextService) GetLogger() *logrus.Entry {
+	return logrus.WithFields(logrus.Fields{})
 }
 
-func (dc dummyClientContextWithEmptyURLs) GetRuntimeUrls() *clientcontext.RuntimeURLs {
+func (dc dummyClientContextService) FillPlaceholders(format string) string {
+	return format
+}
+
+type dummyClientContextServiceWithEmptyURLs struct {
+	dummyClientContextService
+}
+
+func (dc dummyClientContextServiceWithEmptyURLs) GetRuntimeUrls() *clientcontext.RuntimeURLs {
 	return &clientcontext.RuntimeURLs{
 		MetadataURL: "",
 		EventsURL:   "",
@@ -56,7 +60,7 @@ func (dc dummyClientContextWithEmptyURLs) GetRuntimeUrls() *clientcontext.Runtim
 
 func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
-	baseURL := "https://connector-service.kyma.cx/v1/applications/"
+	baseURL := "https://connector-service.kyma.cx/v1/applications"
 	infoURL := "https://connector-service.test.cluster.kyma.cx/v1/applications/management/info"
 	newToken := "newToken"
 
@@ -70,12 +74,12 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		Province:           province,
 	}
 
-	dummyClientContext := dummyClientContext{}
-	connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
-		return dummyClientContext, nil
+	dummyClientContextService := dummyClientContextService{}
+	clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+		return dummyClientContextService, nil
 	}
 
-	expectedSignUrl := fmt.Sprintf("%scertificates?token=%s", baseURL, newToken)
+	expectedSignUrl := fmt.Sprintf("%s/certificates?token=%s", baseURL, newToken)
 
 	expectedCertInfo := certInfo{
 		Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),
@@ -90,10 +94,10 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			InfoURL:         infoURL,
 		}
 
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", dummyClientContextService).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -127,15 +131,15 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			},
 		}
 
-		dummyClientContextWithEmptyURLs := &dummyClientContextWithEmptyURLs{dummyClientContext: dummyClientContext}
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
-			return dummyClientContextWithEmptyURLs, nil
+		dummyClientContextServiceWithEmptyURLs := &dummyClientContextServiceWithEmptyURLs{dummyClientContextService: dummyClientContextService}
+		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+			return dummyClientContextServiceWithEmptyURLs, nil
 		}
 
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContextWithEmptyURLs).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", dummyClientContextServiceWithEmptyURLs).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -166,10 +170,10 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			InfoURL: predefinedGetInfoURL,
 		}
 
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContext).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", dummyClientContextService).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, predefinedGetInfoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, predefinedGetInfoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -192,13 +196,13 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		// given
-		tokenManager := &tokenMocks.Manager{}
+		tokenCreator := &tokenMocks.Creator{}
 
-		errorExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenManager, errorExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -219,12 +223,12 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 
-	t.Run("should return 500 when failed to replace token", func(t *testing.T) {
+	t.Run("should return 500 when failed to save token", func(t *testing.T) {
 		// given
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, dummyClientContext).Return("", apperrors.Internal("error"))
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", dummyClientContextService).Return("", apperrors.Internal("error"))
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, subjectValues, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -258,17 +262,17 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			},
 		}
 
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ConnectorClientContext, apperrors.AppError) {
+		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return *extendedCtx, nil
 		}
 
-		tokenManager := &tokenMocks.Manager{}
-		tokenManager.On("Replace", token, *extendedCtx).Return(newToken, nil)
+		tokenCreator := &tokenMocks.Creator{}
+		tokenCreator.On("Save", *extendedCtx).Return(newToken, nil)
 
 		req, err := http.NewRequest(http.MethodGet, urlApps, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewCSRInfoHandler(tokenManager, connectorClientExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, subjectValues, baseURL)
 
 		rr := httptest.NewRecorder()
 

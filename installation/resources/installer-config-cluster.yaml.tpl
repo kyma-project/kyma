@@ -5,6 +5,7 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
+    kyma-project.io/installation: ""
 type: Opaque
 data:
   global.applicationConnectorCa: "__REMOTE_ENV_CA__"
@@ -17,6 +18,7 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
+    kyma-project.io/installation: ""
 data:
   global.tlsCrt: "__TLS_CERT__"
   global.tlsKey: "__TLS_KEY__"
@@ -30,6 +32,7 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
+    kyma-project.io/installation: ""
 data:
   global.domainName: "__DOMAIN__"
   global.applicationConnectorDomainName: "__APPLICATION_CONNECTOR_DOMAIN__"
@@ -48,6 +51,7 @@ metadata:
   labels:
     installer: overrides
     component: monitoring
+    kyma-project.io/installation: ""
 data:
   global.alertTools.credentials.slack.apiurl: "__SLACK_API_URL_VALUE__"
   global.alertTools.credentials.slack.channel: "__SLACK_CHANNEL_VALUE__"
@@ -62,6 +66,7 @@ metadata:
   labels:
     installer: overrides
     component: application-connector
+    kyma-project.io/installation: ""
 data:
   connector-service.tests.skipSslVerify: "__SKIP_SSL_VERIFY__"
 ---
@@ -73,6 +78,7 @@ metadata:
   labels:
     installer: overrides
     component: istio
+    kyma-project.io/installation: ""
 data:
   gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.proxy.excludeIPRanges: "__PROXY_EXCLUDE_IP_RANGES__"
@@ -85,5 +91,6 @@ metadata:
   labels:
     installer: overrides
     component: knative
+    kyma-project.io/installation: ""
 data:
   knative.domainName: "__DOMAIN__"

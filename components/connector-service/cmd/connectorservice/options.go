@@ -1,13 +1,13 @@
 package main
 
 import (
-	"errors"
 	"flag"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
 const defaultCertificateValidityTime = 90 * 24 * time.Hour
@@ -23,13 +23,12 @@ type options struct {
 	caSecretName                  string
 	requestLogging                bool
 	connectorServiceHost          string
-	appRegistryHost               string
-	eventsHost                    string
+	gatewayHost                   string
+	certificateProtectedHost      string
 	appsInfoURL                   string
 	runtimesInfoURL               string
-	group                         string
-	tenant                        string
 	certificateValidityTime       time.Duration
+	central                       bool
 }
 
 type environment struct {
@@ -51,13 +50,12 @@ func parseArgs() *options {
 	caSecretName := flag.String("caSecretName", "nginx-auth-ca", "Name of the secret which contains root CA.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
-	appRegistryHost := flag.String("appRegistryHost", "", "Host at which this Application Registry is accessible.")
-	eventsHost := flag.String("eventsHost", "", "Host at which this Event Service is accessible.")
+	gatewayHost := flag.String("gatewayHost", "gateway.wormhole.cluster.kyma.cx", "Host at which gateway service is accessible.")
+	certificateProtectedHost := flag.String("certificateProtectedHost", "gateway.wormhole.cluster.kyma.cx", "Host secured with client certificate, used for certificate renewal.")
 	appsInfoURL := flag.String("appsInfoURL", "", "URL at which management information is available.")
 	runtimesInfoURL := flag.String("runtimesInfoURL", "", "URL at which management information is available.")
-	group := flag.String("group", "", "Default group")
-	tenant := flag.String("tenant", "", "Default tenant")
 	certificateValidityTime := flag.String("certificateValidityTime", "90d", "Validity time of certificates issued by this service.")
+	central := flag.Bool("central", false, "Determines whether connector works as the central")
 
 	flag.Parse()
 
@@ -77,10 +75,9 @@ func parseArgs() *options {
 		caSecretName:                  *caSecretName,
 		requestLogging:                *requestLogging,
 		connectorServiceHost:          *connectorServiceHost,
-		group:                         *group,
-		tenant:                        *tenant,
-		appRegistryHost:               *appRegistryHost,
-		eventsHost:                    *eventsHost,
+		gatewayHost:                   *gatewayHost,
+		certificateProtectedHost:      *certificateProtectedHost,
+		central:                       *central,
 		appsInfoURL:                   *appsInfoURL,
 		runtimesInfoURL:               *runtimesInfoURL,
 		certificateValidityTime:       validityTime,
@@ -90,12 +87,12 @@ func parseArgs() *options {
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --requestLogging=%t "+
-		"--connectorServiceHost=%s --appRegistryHost=%s --eventsHost=%s "+
-		"--appsInfoURL=%s --runtimesInfoURL=%s --group=%s --tenant=%s --certificateValidityTime=%s",
+		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayHost=%s "+
+		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --certificateValidityTime=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.requestLogging,
-		o.connectorServiceHost, o.appRegistryHost, o.eventsHost,
-		o.appsInfoURL, o.runtimesInfoURL, o.group, o.tenant, o.certificateValidityTime)
+		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayHost,
+		o.appsInfoURL, o.runtimesInfoURL, o.central, o.certificateValidityTime)
 }
 
 func parseEnv() *environment {
@@ -119,7 +116,7 @@ func parseDuration(durationString string) (time.Duration, error) {
 	timeUnit := durationString[len(durationString)-1:]
 	_, ok := unitsMap[timeUnit]
 	if !ok {
-		return defaultCertificateValidityTime, errors.New(fmt.Sprintf("unrecognized time unit provided: %s", timeUnit))
+		return defaultCertificateValidityTime, fmt.Errorf("unrecognized time unit provided: %s", timeUnit)
 	}
 
 	timeLength, err := strconv.Atoi(durationString[:len(durationString)-1])

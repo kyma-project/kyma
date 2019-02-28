@@ -14,16 +14,18 @@ spec:
         app: {{ template "name" . }}
         tlsSecret: ingress-tls-cert
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-      annotations:
-        sidecar.istio.io/inject: "true"
     spec:
+      {{ if .Values.global.isLocalEnv }}
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      {{ end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.configurations_generator.dir }}configurations-generator:{{ .Values.global.configurations_generator.version }}
         name: {{ template "name" . }}
         command:
           - sh
           - -c
-          - /app -kube-config-cluster-name=$DOMAIN -kube-config-url=https://apiserver.$DOMAIN -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt
+          - /app -kube-config-cluster-name=$DOMAIN -kube-config-url=https://apiserver.$DOMAIN -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.domainName }} -oidc-client-id=kyma-client
         envFrom:
         - configMapRef:
             name: apiserver-proxy

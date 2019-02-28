@@ -15,9 +15,14 @@ build-image:
 push-image:
 	docker push $(IMG):$(TAG)
 
+.PHONY: ci-pr
+ci-pr: build-image push-image
+
+.PHONY: ci-master
+ci-master: build-image push-image
+
 .PHONY: ci-release
 ci-release: build-image push-image
-
 
 # Creates release artifacts. Artifacts are stored in $(ARTIFACTS) directory.
 # This variable is provided by Prow and files stored there are automatically uploaded to GCS.

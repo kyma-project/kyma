@@ -6,4 +6,4 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 
 image:
-  tag: 3b990070
+  tag: c181e951

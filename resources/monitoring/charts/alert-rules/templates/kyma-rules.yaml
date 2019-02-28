@@ -8,7 +8,7 @@ groups:
     labels:
       severity: critical
     annotations:
-      description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod_name }}`}} is not running"
+      description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
       summary: "{{`{{ $labels.pod }}`}} is not running"
 - name: cpu-90-percent-usage-rule-kyma-system
   rules:
@@ -33,7 +33,7 @@ groups:
 - name: pvc-90-percent-full-rule
   rules:
   - alert: PVC90PercentFull
-    expr: kubelet_volume_stats_used_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark" } / kubelet_volume_stats_available_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark"} * 100 > 90
+    expr: kubelet_volume_stats_used_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark" } / kubelet_volume_stats_capacity_bytes{namespace="kube-system",exported_namespace=~"kyma-.*|kube-.*|istio-.*|heptio-ark"} * 100 > 90
     for: 10m
     labels:
       severity: critical

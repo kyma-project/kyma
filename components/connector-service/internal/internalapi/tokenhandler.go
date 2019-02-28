@@ -14,24 +14,28 @@ import (
 const TokenURLFormat = "%s?token=%s"
 
 type tokenHandler struct {
-	tokenManager             tokens.Manager
+	tokenManager             tokens.Creator
 	csrInfoURL               string
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
 }
 
-func NewTokenHandler(tokenManager tokens.Manager, csrInfoURL string, connectorClientExtractor clientcontext.ConnectorClientExtractor) TokenHandler {
+func NewTokenHandler(tokenManager tokens.Creator, csrInfoURL string, connectorClientExtractor clientcontext.ConnectorClientExtractor) TokenHandler {
 	return &tokenHandler{tokenManager: tokenManager, csrInfoURL: csrInfoURL, connectorClientExtractor: connectorClientExtractor}
 }
 
 func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	connectorClientContext, err := th.connectorClientExtractor(r.Context())
+	clientContextService, err := th.connectorClientExtractor(r.Context())
 	if err != nil {
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
-	token, err := th.tokenManager.Save(connectorClientContext)
+	logger := clientContextService.GetLogger()
+
+	logger.Info("Generating token")
+	token, err := th.tokenManager.Save(clientContextService)
 	if err != nil {
+		logger.Error(err)
 		httphelpers.RespondWithError(w, err)
 		return
 	}

@@ -3,16 +3,15 @@ title: Configure Helm Broker
 type: Configuration
 ---
 
-The Helm Broker fetches bundle definitions from an HTTP server defined in the `values.yaml` file. The **config.repository.URL** attribute defines the HTTP server URL.
+The Helm Broker fetches bundle definitions from HTTP servers defined in the `helm-repos-urls` ConfigMap.
 
-### Configuring the Helm Broker externally
+### Add a new bundle repository
 
-Follow these steps to change the configuration and make the Helm Broker fetch bundles from a custom HTTP server:
+Follow these steps to change the configuration and make the Helm Broker fetch bundles from a custom HTTP servers:
 
-1. Create a remote bundles repository. Your remote bundle repository must include the following resources:
-    - A `yaml` file which defines available bundles, for example `bundles.yaml`.
+1. Create a remote repository with the definition of your bundles. Your remote bundle repository must include the following resources:
+    - A `yaml` file which defines available bundles, for example `index.yaml`.
       This file must have the following structure:
-
       ```text
       apiVersion: v1
       entries:
@@ -30,39 +29,33 @@ Follow these steps to change the configuration and make the Helm Broker fetch bu
             description: Redis service
             version: 0.0.1
       ```
-
     - A `{bundle_name}-{bundle_version}.tgz` file for each bundle version defined in the `yaml` file. The `.tgz` file is an archive of your bundle's directory.
 
-2. In the `values.yaml` provide your server's URLs in the **repository.URLs** attribute as a list of URLs separated by a semicolon:
+2. Install Kyma on Minikube. See [this](/root/kyma#installation-install-kyma-locally-from-the-release) document to learn how.
 
-  ```yaml
-    repository:
-      URLs: "http://custom.bundles-repository/bundles.yaml;http://another.bundles-repository/bundles.yaml"
-  ```
-  > **NOTE:** You can skip the `yaml` filename in the URL if the name of the file is `index.yaml`. In that case, your URL should be equal to `http://custom.bundles-repository/`.
-
-3. Install Kyma on Minikube. See [this](/root/kyma#installation-install-kyma-locally-from-the-release) document to learn how.
-
-### Configure repository URLs in the runtime
-
-Follow these steps to add the repository URL:
-
-1. Add a new bundle repository URL:
-
+3. Create a ConfigMap which contains an URL to the repository:
  ```bash
- URLS=$(kubectl get -n kyma-system deployment/helm-broker --output=jsonpath='{.spec.template.spec.containers[0].env[?(@.name=="APP_REPOSITORY_URLS")].value}')
- 
- kubectl set env -n kyma-system deployment/helm-broker -e APP_REPOSITORY_URLS="$URLS;http://custom.bundles-repository/bundles.yaml"
- 
- # At the moment, there is a bug in Minikube. As a result, for the local installation you need to manually edit the broker and bump the relistRequests attribute.
- 
- kubectl edit clusterservicebrokers helm-broker
+kubectl create configmap my-helm-repos-urls -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/latest/index-testing.yaml
  ```
+>**NOTE:** If you want to fetch bundles from many HTTP servers, use `\n` to separate the URLs.
 
-2. Wait for the Helm Broker to run using the following command:
-
+4. Label the newly created ConfigMap:
  ```bash
- kubectl get pod -n kyma-system -l app=helm-broker
+kubectl label configmap my-helm-repos-urls -n kyma-system helm-broker-repo=true
  ```
+ 
+Helm Broker triggers the Service Catalog synchronization automatically. New ClusterServiceClasses appear after a few seconds.
 
-Running the Helm Broker triggers the Service Catalog synchronization automatically. New ClusterServiceClasses appear after a half-minute.
+Use the following example to create a valid ConfigMap with many URLs from the `yaml` file:
+```yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-repos-configs
+  labels:
+    helm-broker-repo: "true"
+data:
+  URLs: |-
+    https://github.com/kyma-project/bundles/releases/download/0.3.0/index-testing.yaml
+    https://github.com/kyma-project/bundles/releases/download/0.3.0/
+```
