@@ -66,7 +66,7 @@ func (handler revocationHandler) readBody(request *http.Request) (*revocationBod
 func (handler revocationHandler) addToRevocationList(hash string) apperrors.AppError {
 	err := handler.revocationList.Insert(hash)
 
-	logrus.Warning("Adding certificate with hash: %s to revocation list.", hash)
+	logrus.Warningf("Adding certificate with hash: %s to revocation list.", hash)
 	if err != nil {
 		return apperrors.Internal("Unable to mark certificate as revoked: %s.", err)
 	}
