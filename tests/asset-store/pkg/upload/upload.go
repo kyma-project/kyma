@@ -3,7 +3,7 @@ package upload
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/golang/glog"
+	"fmt"
 	"github.com/pkg/errors"
 	"io"
 	"mime/multipart"
@@ -94,9 +94,11 @@ func Do(directory string, input UploadInput, url string) (*Response, error) {
 		return nil, errors.Wrap(err, "while doing upload request")
 	}
 
-	glog.Infof("File Upload: Received response. Status code: %d", result.StatusCode)
-
 	defer result.Body.Close()
+
+	if result.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Upload status code: %d. Expected %d", result.StatusCode, http.StatusOK)
+	}
 
 	var response Response
 	err = json.NewDecoder(result.Body).Decode(&response)

@@ -1,13 +1,12 @@
 package main
 
 import (
-	"flag"
-	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/tests/asset-store/internal/testsuite"
-	"github.com/pkg/errors"
+	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"testing"
 )
 
 // config contains configuration fields used for upload
@@ -16,23 +15,21 @@ type config struct {
 	TestSuite      testsuite.Config
 }
 
-// TODO: Transform to Go test
-func main() {
+func TestAssetStore(t *testing.T) {
+	g := gomega.NewGomegaWithT(t)
+
 	cfg, err := loadConfig("APP")
-	parseFlags()
-	exitOnError(err, "Error while loading app config")
+	failOnError(g, err)
 
 	restConfig, err := newRestClientConfig(cfg.KubeconfigPath)
-	exitOnError(err, "Error while loading K8s REST config")
+	failOnError(g, err)
 
-	testSuite, err := testsuite.New(restConfig, cfg.TestSuite)
-	exitOnError(err, "Error while creating test suite")
+	testSuite, err := testsuite.New(restConfig, cfg.TestSuite, t, g)
+	failOnError(g, err)
 
-	err = testSuite.Run()
-	exitOnError(err, "Error while running test suite")
+	testSuite.Run()
 
-	err = testSuite.Cleanup()
-	exitOnError(err, "Error while cleaning up after running test suite")
+	testSuite.Cleanup()
 }
 
 func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
@@ -50,23 +47,12 @@ func newRestClientConfig(kubeconfigPath string) (*restclient.Config, error) {
 	return config, nil
 }
 
-func parseFlags() {
-	err := flag.Set("stderrthreshold", "INFO")
-	if err != nil {
-		glog.Error(errors.Wrap(err, "while parsing flags"))
-	}
-	flag.Parse()
-}
-
 func loadConfig(prefix string) (config, error) {
 	cfg := config{}
 	err := envconfig.InitWithPrefix(&cfg, prefix)
 	return cfg, err
 }
 
-func exitOnError(err error, context string) {
-	if err != nil {
-		wrappedError := errors.Wrap(err, context)
-		glog.Fatal(wrappedError)
-	}
+func failOnError(g *gomega.GomegaWithT, err error) {
+	g.Expect(err).NotTo(gomega.HaveOccurred())
 }

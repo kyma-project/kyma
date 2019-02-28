@@ -2,7 +2,6 @@ package testsuite
 
 import (
 	"fmt"
-	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/file"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
@@ -73,8 +72,6 @@ func verifyUploadedAsset(files []uploadedFile, shouldExist bool) error {
 			if err != nil {
 				return errors.Wrapf(err, "while checking if remote file from URL %s exist", f.URL)
 			}
-
-			glog.Infof("exists %t %s", exists, f.URL)
 
 			if exists {
 				return fmt.Errorf("File %s defined in %s %s should not exist", f.URL, f.Owner.Kind, f.Owner.Name)

@@ -1,7 +1,6 @@
 package testsuite
 
 import (
-	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
@@ -21,13 +20,13 @@ type asset struct {
 	waitTimeout       time.Duration
 }
 
-func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string, waitTimeout time.Duration) *asset {
+func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *asset {
 	return &asset{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "assets",
-		}, namespace),
+		}, namespace, logFn),
 		waitTimeout: waitTimeout,
 		BucketName:bucketName,
 		Namespace:namespace,
@@ -93,11 +92,7 @@ func (a *asset) WaitForDeletedResources(assets []assetData) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 
 		for _, asset := range assets {
-			res, err := a.Get(asset.Name)
-
-			glog.Infof("res %+v", res)
-			glog.Infof("err %+v, %t", err, apierrors.IsNotFound(err))
-
+			_, err := a.Get(asset.Name)
 			if err == nil {
 				return false, nil
 			}

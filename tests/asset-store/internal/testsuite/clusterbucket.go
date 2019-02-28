@@ -19,13 +19,13 @@ type clusterBucket struct {
 	waitTimeout       time.Duration
 }
 
-func newClusterBucket(dynamicCli dynamic.Interface, name string, waitTimeout time.Duration) *clusterBucket {
+func newClusterBucket(dynamicCli dynamic.Interface, name string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *clusterBucket {
 	return &clusterBucket{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "clusterbuckets",
-		}, ""),
+		}, "", logFn),
 		name: name,
 		waitTimeout:waitTimeout,
 	}

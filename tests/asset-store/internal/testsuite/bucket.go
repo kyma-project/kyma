@@ -19,13 +19,13 @@ type bucket struct {
 	waitTimeout       time.Duration
 }
 
-func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration) *bucket {
+func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *bucket {
 	return &bucket{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "buckets",
-		}, namespace),
+		}, namespace, logFn),
 		name: name,
 		namespace:namespace,
 		waitTimeout:waitTimeout,

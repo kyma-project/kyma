@@ -2,12 +2,13 @@ package testsuite
 
 import (
 	"fmt"
-	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
+	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
+	"testing"
 	"time"
 )
 
@@ -29,13 +30,15 @@ type TestSuite struct {
 	asset *asset
 	clusterAsset *clusterAsset
 
+	t *testing.T
+	g *gomega.GomegaWithT
+
 	assetDetails []assetData
-	dynamicCli dynamic.Interface
 
 	cfg Config
 }
 
-func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
+func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
 	coreCli, err := corev1.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8s Core client")
@@ -48,10 +51,10 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 
 	ns := namespace.New(coreCli, cfg.Namespace)
 
-	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace, cfg.WaitTimeout)
-	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout)
-	a := newAsset(dynamicCli, cfg.Namespace, cfg.BucketName,  cfg.WaitTimeout)
-	ca := newClusterAsset(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout)
+	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
+	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
+	a := newAsset(dynamicCli, cfg.Namespace, cfg.BucketName,  cfg.WaitTimeout, t.Logf)
+	ca := newClusterAsset(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
 
 	return &TestSuite{
 		namespace:     ns,
@@ -60,92 +63,63 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 		fileUpload:    newTestData(cfg.UploadServiceUrl),
 		asset:         a,
 		clusterAsset:  ca,
+		t: t,
+		g: g,
 
-		dynamicCli:dynamicCli,
 		cfg: cfg,
 	}, nil
 }
 
-func (t *TestSuite) Run() error {
+func (t *TestSuite) Run() {
 	err := t.namespace.Create()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
-	glog.Info("Creating buckets...")
+	t.t.Log("Creating buckets...")
 	err = t.createBuckets()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
-	glog.Info("Waiting for ready buckets...")
+	t.t.Log("Waiting for ready buckets...")
 	err = t.waitForBucketsReady()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
-	glog.Info("Creating assets...")
+	t.t.Log("Creating assets...")
 	err = t.createAssets()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
-	glog.Info("Waiting for ready assets...")
+	t.t.Log("Waiting for ready assets...")
 	err = t.waitForAssetsReady()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
 	files, err := t.populateUploadedFiles()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
-	glog.Info("Verifying uploaded files...")
+	t.t.Log("Verifying uploaded files...")
 	err = t.verifyUploadedFiles(files, true)
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
-	glog.Info("Deleting assets...")
+	t.t.Log("Deleting assets...")
 	err = t.deleteAssets()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
-	glog.Info("Waiting for deleted assets...")
+	t.t.Log("Waiting for deleted assets...")
 	err = t.waitForAssetsDeleted()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
-	glog.Info("Verifying if files have been deleted...")
+	t.t.Log("Verifying if files have been deleted...")
 	err = t.verifyUploadedFiles(files, false)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	failOnError(t.g, err)
 }
 
-func (t *TestSuite) Cleanup() error {
-	glog.Info("Cleaning up...")
+func (t *TestSuite) Cleanup() {
+	t.t.Log("Cleaning up...")
 	err := t.deleteAssets()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
 	err = t.deleteBuckets()
-	if err != nil {
-		return err
-	}
+	failOnError(t.g, err)
 
 	err = t.namespace.Delete()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	failOnError(t.g, err)
 }
 
 func (t *TestSuite) createBuckets() error {
@@ -286,3 +260,7 @@ func (t *TestSuite) deleteBuckets() error {
 	return nil
 }
 
+
+func failOnError(g *gomega.GomegaWithT, err error) {
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+}
