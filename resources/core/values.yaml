@@ -43,8 +43,8 @@ global:
     dir: develop/
     version: 6e0a7fe2
   configurations_generator:
-    dir: develop/
-    version: 07db886f
+    dir: pr/
+    version: PR=2904
   docs:
     dir: develop/
     version: ce4d1ae7
