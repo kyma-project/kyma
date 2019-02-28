@@ -24,11 +24,11 @@ fi
 
 if [[ -z "${DOMAIN}" ]]; then
 	echo "---> DOMAIN not SET. Creating..."
-	# INGRESS_IP=$(getLoadBalancerIP "${LB_SERVICE_NAME}" "${LB_SERVICE_NS}")
-	# DOMAIN="${INGRESS_IP}.xip.io"
+	INGRESS_IP=$(getLoadBalancerIP "${LB_SERVICE_NAME}" "${LB_SERVICE_NS}")
+	DOMAIN="${INGRESS_IP}.xip.io"
 fi
 
 if [[ ! -z "${TLS_CERT}" ]] && [[ ! -z "${TLS_KEY}" ]]; then
 	echo "---> Generating Certs for ${DOMAIN}"
-	# generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
+	generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
 fi
