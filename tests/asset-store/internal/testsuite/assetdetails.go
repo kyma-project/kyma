@@ -12,7 +12,7 @@ type assetData struct {
 	Mode v1alpha2.AssetMode
 }
 
-func convertToAssetDetails(response *upload.Response) []assetData {
+func convertToAssetResourceDetails(response *upload.Response) []assetData {
 	var assets []assetData
 	for _, file := range response.UploadedFiles {
 		var mode v1alpha2.AssetMode
@@ -22,9 +22,12 @@ func convertToAssetDetails(response *upload.Response) []assetData {
 			mode = v1alpha2.AssetSingle
 		}
 
+		//TODO: Remove workaround
+		url := strings.Replace(file.RemotePath, "https://minio.kyma.local", "http://assetstore-minio.kyma-system.svc.cluster.local:9000", -1)
+
 		asset := assetData{
 			Name: file.FileName,
-			URL: file.RemotePath,
+			URL: url,
 			Mode:mode,
 		}
 		assets = append(assets, asset)

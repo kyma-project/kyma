@@ -48,6 +48,10 @@ func (r *Resource) Create(res interface{}) error {
 func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 	u, err := r.resCli.Get(name, metav1.GetOptions{})
 	if err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil, err
+		}
+
 		return nil, errors.Wrapf(err, "while getting resource %s '%s'", r.kind, name)
 	}
 

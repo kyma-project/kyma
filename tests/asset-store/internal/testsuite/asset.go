@@ -1,10 +1,12 @@
 package testsuite
 
 import (
+	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -19,7 +21,7 @@ type asset struct {
 	waitTimeout       time.Duration
 }
 
-func newAsset(dynamicCli dynamic.Interface, namespace string, waitTimeout time.Duration) *asset {
+func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string, waitTimeout time.Duration) *asset {
 	return &asset{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
@@ -27,11 +29,12 @@ func newAsset(dynamicCli dynamic.Interface, namespace string, waitTimeout time.D
 			Resource: "assets",
 		}, namespace),
 		waitTimeout: waitTimeout,
+		BucketName:bucketName,
 		Namespace:namespace,
 	}
 }
 
-func (a *asset) Create(assets []assetData) error {
+func (a *asset) CreateMany(assets []assetData) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
 			TypeMeta: metav1.TypeMeta{
@@ -64,7 +67,7 @@ func (a *asset) Create(assets []assetData) error {
 	return nil
 }
 
-func (a *asset) WaitForStatusReady(assets []assetData) error {
+func (a *asset) WaitForStatusesReady(assets []assetData) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		for _, asset := range assets {
 			res, err := a.Get(asset.Name)
@@ -73,7 +76,7 @@ func (a *asset) WaitForStatusReady(assets []assetData) error {
 			}
 
 			if res.Status.Phase != v1alpha2.AssetReady {
-				return false, err
+				return false, nil
 			}
 		}
 
@@ -86,20 +89,59 @@ func (a *asset) WaitForStatusReady(assets []assetData) error {
 	return nil
 }
 
-func (a *asset) VerifyUploadedAssets(assets []assetData, shouldExist bool) error {
-	for _, asset := range assets {
-		res, err := a.Get(asset.Name)
-		if err != nil {
-			return err
+func (a *asset) WaitForDeletedResources(assets []assetData) error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+
+		for _, asset := range assets {
+			res, err := a.Get(asset.Name)
+
+			glog.Infof("res %+v", res)
+			glog.Infof("err %+v, %t", err, apierrors.IsNotFound(err))
+
+			if err == nil {
+				return false, nil
+			}
+
+			if !apierrors.IsNotFound(err) {
+				return false, nil
+			}
 		}
 
-		err = verifyUploadedAsset("Asset", asset.Name, res.Status.AssetRef, shouldExist)
-		if err != nil {
-			return err
-		}
+		return true, nil
+	}, a.waitTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ready ClusterAsset resources")
 	}
 
 	return nil
+}
+
+func (a *asset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, error) {
+	var files []uploadedFile
+
+	for _, asset := range assets {
+		err := waiter.WaitAtMost(func() (bool, error) {
+			_, err := a.Get(asset.Name)
+			if err != nil {
+				return false, err
+			}
+
+			return true, nil
+		}, a.waitTimeout)
+		if err != nil {
+			return nil, err
+		}
+
+		res, err := a.Get(asset.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		assetFiles := uploadedFiles(res.Status.CommonAssetStatus.AssetRef, res.Name, "Asset")
+		files = append(files, assetFiles...)
+	}
+
+	return files, nil
 }
 
 func (a *asset) Get(name string) (*v1alpha2.Asset, error) {
@@ -111,13 +153,17 @@ func (a *asset) Get(name string) (*v1alpha2.Asset, error) {
 	var res v1alpha2.Asset
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
 	if err != nil {
+		if apierrors.IsNotFound(err) {
+			return nil, err
+		}
+
 		return nil, errors.Wrapf(err, "while converting Asset %s", name)
 	}
 
 	return &res, nil
 }
 
-func (a *asset) Delete(assets []assetData) error {
+func (a *asset) DeleteMany(assets []assetData) error {
 	for _, asset := range assets {
 		err := a.resCli.Delete(asset.Name)
 		if err != nil {

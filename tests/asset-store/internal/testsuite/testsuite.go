@@ -2,6 +2,7 @@ package testsuite
 
 import (
 	"fmt"
+	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
@@ -17,7 +18,7 @@ type Config struct {
 	ClusterBucketName string `envconfig:"default=test-cluster-bucket"`
 	ClusterAssetName string `envconfig:"default=test-cluster-asset"`
 	UploadServiceUrl string `envconfig:"default=http://localhost:3000/v1/upload"`
-	WaitTimeout  time.Duration `envconfig:"default=2m"` //TODO: Change that
+	WaitTimeout  time.Duration `envconfig:"default=3m"`
 }
 
 type TestSuite struct {
@@ -49,8 +50,8 @@ func New(restConfig *rest.Config, cfg Config) (*TestSuite, error) {
 
 	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace, cfg.WaitTimeout)
 	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout)
-	a := newAsset(dynamicCli, cfg.Namespace, cfg.WaitTimeout)
-	ca := newClusterAsset(dynamicCli, cfg.WaitTimeout)
+	a := newAsset(dynamicCli, cfg.Namespace, cfg.BucketName,  cfg.WaitTimeout)
+	ca := newClusterAsset(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout)
 
 	return &TestSuite{
 		namespace:     ns,
@@ -71,32 +72,55 @@ func (t *TestSuite) Run() error {
 		return err
 	}
 
+	glog.Info("Creating buckets...")
 	err = t.createBuckets()
 	if err != nil {
 		return err
 	}
 
+	glog.Info("Waiting for ready buckets...")
 	err = t.waitForBucketsReady()
 	if err != nil {
 		return err
 	}
 
+	glog.Info("Creating assets...")
 	err = t.createAssets()
 	if err != nil {
 		return err
 	}
 
-	err = t.validateFiles(true)
+	glog.Info("Waiting for ready assets...")
+	err = t.waitForAssetsReady()
 	if err != nil {
 		return err
 	}
 
+	files, err := t.populateUploadedFiles()
+	if err != nil {
+		return err
+	}
+
+	glog.Info("Verifying uploaded files...")
+	err = t.verifyUploadedFiles(files, true)
+	if err != nil {
+		return err
+	}
+
+	glog.Info("Deleting assets...")
 	err = t.deleteAssets()
 	if err != nil {
 		return err
 	}
 
-	err = t.validateFiles(false)
+	glog.Info("Waiting for deleted assets...")
+	err = t.waitForAssetsDeleted()
+	if err != nil {
+		return err
+	}
+
+	glog.Info("Verifying if files have been deleted...")
+	err = t.verifyUploadedFiles(files, false)
 	if err != nil {
 		return err
 	}
@@ -105,6 +129,7 @@ func (t *TestSuite) Run() error {
 }
 
 func (t *TestSuite) Cleanup() error {
+	glog.Info("Cleaning up...")
 	err := t.deleteAssets()
 	if err != nil {
 		return err
@@ -147,9 +172,9 @@ func (t *TestSuite) createAssets() error {
 		return fmt.Errorf("during file upload: %+v", uploadResult.Errors)
 	}
 
-	t.assetDetails = convertToAssetDetails(uploadResult)
+	t.assetDetails = convertToAssetResourceDetails(uploadResult)
 
-	err = t.asset.Create(t.assetDetails)
+	err = t.asset.CreateMany(t.assetDetails)
 	if err != nil {
 		return err
 	}
@@ -163,7 +188,7 @@ func (t *TestSuite) createAssets() error {
 }
 
 func (t *TestSuite) waitForAssetsReady() error {
-	err := t.asset.WaitForStatusReady(t.assetDetails)
+	err := t.asset.WaitForStatusesReady(t.assetDetails)
 	if err != nil {
 		return err
 	}
@@ -176,15 +201,44 @@ func (t *TestSuite) waitForAssetsReady() error {
 	return nil
 }
 
-func (t *TestSuite) validateFiles(shouldExist bool) error {
-	err := t.asset.VerifyUploadedAssets(t.assetDetails, shouldExist)
+func (t *TestSuite) waitForAssetsDeleted() error {
+	err := t.asset.WaitForDeletedResources(t.assetDetails)
 	if err != nil {
 		return err
 	}
 
-	err = t.clusterAsset.VerifyUploadedAssets(t.assetDetails, shouldExist)
+	err = t.clusterAsset.WaitForDeletedResources(t.assetDetails)
 	if err != nil {
 		return err
+	}
+
+	return nil
+}
+
+
+func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
+	var allFiles []uploadedFile
+	assetFiles, err := t.asset.PopulateUploadFiles(t.assetDetails)
+	if err != nil {
+		return nil, err
+	}
+
+	allFiles = append(allFiles, assetFiles...)
+
+	clusterAssetFiles, err := t.clusterAsset.PopulateUploadFiles(t.assetDetails)
+	if err != nil {
+		return nil, err
+	}
+
+	allFiles = append(allFiles, clusterAssetFiles...)
+
+	return allFiles, nil
+}
+
+func (t *TestSuite) verifyUploadedFiles(files []uploadedFile, shouldExist bool) error {
+	err := verifyUploadedAsset(files, shouldExist)
+	if err != nil {
+		return errors.Wrap(err, "while verifying uploaded files")
 	}
 
 	return nil
@@ -205,7 +259,7 @@ func (t *TestSuite) waitForBucketsReady() error {
 }
 
 func (t *TestSuite) deleteAssets() error {
-	err := t.asset.Delete(t.assetDetails)
+	err := t.asset.DeleteMany(t.assetDetails)
 	if err != nil {
 		return err
 	}

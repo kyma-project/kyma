@@ -5,10 +5,10 @@ import (
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"time"
 )
 
@@ -65,7 +65,7 @@ func (b *clusterBucket) WaitForStatusReady() error {
 		}
 
 		if res.Status.Phase != v1alpha2.BucketReady {
-			return false, err
+			return false, nil
 		}
 
 		return true, nil

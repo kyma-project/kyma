@@ -1,10 +1,12 @@
 package testsuite
 
 import (
+	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
 	"github.com/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -18,14 +20,15 @@ type clusterAsset struct {
 	waitTimeout       time.Duration
 }
 
-func newClusterAsset(dynamicCli dynamic.Interface, waitTimeout time.Duration) *clusterAsset {
+func newClusterAsset(dynamicCli dynamic.Interface, clusterBucketName string, waitTimeout time.Duration) *clusterAsset {
 	return &clusterAsset{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "clusterassets",
 		}, ""),
-		waitTimeout: waitTimeout,
+		waitTimeout:       waitTimeout,
+		ClusterBucketName: clusterBucketName,
 	}
 }
 
@@ -33,20 +36,20 @@ func (a *clusterAsset) CreateMany(assets []assetData) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.ClusterAsset{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "ClusterAsset",
+				Kind:       "ClusterAsset",
 				APIVersion: v1alpha2.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      asset.Name,
+				Name: asset.Name,
 			},
-			Spec:v1alpha2.ClusterAssetSpec{
+			Spec: v1alpha2.ClusterAssetSpec{
 				CommonAssetSpec: v1alpha2.CommonAssetSpec{
 					BucketRef: v1alpha2.AssetBucketRef{
 						Name: a.ClusterBucketName,
 					},
-					Source:v1alpha2.AssetSource{
-						Url: asset.URL,
-						Mode:asset.Mode,
+					Source: v1alpha2.AssetSource{
+						Url:  asset.URL,
+						Mode: asset.Mode,
 					},
 				},
 			},
@@ -71,7 +74,7 @@ func (a *clusterAsset) WaitForStatusesReady(assets []assetData) error {
 			}
 
 			if res.Status.Phase != v1alpha2.AssetReady {
-				return false, err
+				return false, nil
 			}
 		}
 
@@ -84,20 +87,59 @@ func (a *clusterAsset) WaitForStatusesReady(assets []assetData) error {
 	return nil
 }
 
-func (a *clusterAsset) VerifyUploadedAssets(assets []assetData, shouldExist bool) error {
-	for _, asset := range assets {
-		res, err := a.Get(asset.Name)
-		if err != nil {
-			return err
+func (a *clusterAsset) WaitForDeletedResources(assets []assetData) error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+
+		for _, asset := range assets {
+			res, err := a.Get(asset.Name)
+
+			glog.Infof("res %+v", res)
+			glog.Infof("err %+v, %t", err, apierrors.IsNotFound(err))
+
+			if err == nil {
+				return false, nil
+			}
+
+			if !apierrors.IsNotFound(err) {
+				return false, nil
+			}
 		}
 
-		err = verifyUploadedAsset("ClusterAsset", asset.Name, res.Status.AssetRef, shouldExist)
-		if err != nil {
-			return err
-		}
+		return true, nil
+	}, a.waitTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ready ClusterAsset resources")
 	}
 
 	return nil
+}
+
+func (a *clusterAsset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, error) {
+	var files []uploadedFile
+
+	for _, asset := range assets {
+		err := waiter.WaitAtMost(func() (bool, error) {
+			_, err := a.Get(asset.Name)
+			if err != nil {
+				return false, err
+			}
+
+			return true, nil
+		}, a.waitTimeout)
+		if err != nil {
+			return nil, err
+		}
+
+		res, err := a.Get(asset.Name)
+		if err != nil {
+			return nil, err
+		}
+
+		assetFiles := uploadedFiles(res.Status.CommonAssetStatus.AssetRef, res.Name, "ClusterAsset")
+		files = append(files, assetFiles...)
+	}
+
+	return files, nil
 }
 
 func (a *clusterAsset) Get(name string) (*v1alpha2.ClusterAsset, error) {

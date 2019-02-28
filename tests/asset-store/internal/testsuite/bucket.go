@@ -66,7 +66,7 @@ func (b *bucket) WaitForStatusReady() error {
 			}
 
 			if res.Status.Phase != v1alpha2.BucketReady {
-				return false, err
+				return false, nil
 			}
 
 		return true, nil
