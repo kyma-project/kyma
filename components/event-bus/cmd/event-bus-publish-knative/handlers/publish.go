@@ -77,7 +77,13 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 
 	// generate event-id if there is none
 	if len(publishRequest.EventID) == 0 {
-		publishRequest.EventID = generateEventID()
+		eventID, errEventID := generateEventID()
+		if errEventID != nil {
+			err = api.ErrorResponseInternalServer()
+			log.Printf("EventID generation failed: %v", err)
+			publish.SendJSONError(w, err)
+		}
+		publishRequest.EventID = eventID
 	}
 
 	// build the cloud-event from the publish-request and the trace-context
@@ -130,12 +136,9 @@ func setSourceID(publishRequest *api.PublishRequest, header *http.Header) bool {
 	return false
 }
 
-func generateEventID() string {
+func generateEventID() (string, error) {
 	uid, err := uuid.NewV4()
-	if err != nil {
-		log.Fatalf("Error while generating Event ID: %v", err)
-	}
-	return uid.String()
+	return uid.String(), err
 }
 
 func buildCloudEvent(publishRequest *api.PublishRequest, traceContext *api.TraceContext) *api.CloudEvent {

@@ -111,7 +111,12 @@ func handlePublishRequest(w http.ResponseWriter, r *http.Request, publisher *con
 	}
 	if len(publishRequest.EventID) == 0 {
 		log.Println("PublishHandler :: handlePublishRequest :: Generating event id.")
-		publishRequest.EventID = generateEventID()
+		eventID, err := generateEventID()
+		if err != nil {
+			log.Printf("PublishHandler :: handlePublishRequest :: EventID validation failed. :: Error: %v", err)
+			publish.SendJSONError(w, api.ErrorResponseInternalServer())
+		}
+		publishRequest.EventID = eventID
 	}
 
 	cloudEvent := buildCloudEvent(publishRequest, traceContext)
@@ -180,12 +185,9 @@ func encodeSubject(r *api.PublishRequest) string {
 	return common.FromPublishRequest(r).Encode()
 }
 
-func generateEventID() string {
+func generateEventID() (string, error) {
 	uid, err := uuid.NewV4()
-	if err != nil {
-		log.Fatalf("Error while generating Event ID: %v", err)
-	}
-	return uid.String()
+	return uid.String(), err
 }
 
 func buildCloudEvent(publishRequest *api.PublishRequest, traceContext *api.TraceContext) api.CloudEvent {
