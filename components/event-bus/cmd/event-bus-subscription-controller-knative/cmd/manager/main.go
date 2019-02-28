@@ -18,18 +18,20 @@ package main
 
 import (
 	"fmt"
+	"github.com/go-logr/logr"
+	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/common"
+	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
+	subscriptionController "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"net/http"
 	"os"
-
-	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/internal/common"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
+	"os/signal"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/runtime/signals"
+	"syscall"
 )
 
 func main() {
@@ -58,19 +60,23 @@ func main() {
 
 	// Setup Scheme for all resources
 	log.Info("setting up scheme")
-	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "unable add APIs to scheme")
+	if err := pushv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add push APIs to scheme")
+		os.Exit(1)
+	}
+	if err := eav1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add event activation APIs to scheme")
 		os.Exit(1)
 	}
 
 	// Setup all Controllers
-	log.Info("Setting up controller")
-	if err := controller.AddToManager(mgr); err != nil {
-		log.Error(err, "unable to register controllers to the manager")
+	log.Info("Setting up subscription controller")
+	if err := subscriptionController.AddToManager(mgr); err != nil {
+		log.Error(err, "unable to register subscription controller to the manager")
 		os.Exit(1)
 	}
 
-	// Set up healtcheck handlers
+	// Set up healthcheck handlers
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/v1/status/live", statusLiveHandler(&mgr, log))
 	serveMux.Handle("/v1/status/ready", statusReadyHandler(&mgr, log))
@@ -83,12 +89,37 @@ func main() {
 		}
 	}()
 
+	signalChannel := make(chan os.Signal, 2)
+	signal.Notify(signalChannel, os.Interrupt,
+		syscall.SIGTERM, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT)
+	go func() {
+		sig := <-signalChannel
+		switch sig {
+		case os.Interrupt:
+			println("Subscription controller manager signaled with: os.Interrupt")
+			println("Signal: ", sig)
+		case syscall.SIGTERM:
+			println("Subscription controller manager signaled with: SIGTERM")
+			println("Signal: ", sig)
+		case syscall.SIGHUP:
+			println("Subscription controller manager signaled with: SIGHUP")
+			println("Signal: ", sig)
+		case syscall.SIGINT:
+			println("Subscription controller manager signaled with: SIGINT")
+			println("Signal: ", sig)
+		case syscall.SIGQUIT:
+			println("Subscription controller manager signaled with: SIGQUIT")
+			println("Signal: ", sig)
+		}
+	}()
+
 	// Start the Cmd
 	log.Info("Starting the Cmd.")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
 		log.Error(err, "unable to run the manager")
 		os.Exit(1)
 	}
+
 }
 
 var statusLive, statusReady common.StatusReady

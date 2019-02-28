@@ -15,6 +15,7 @@ type Bundle interface {
 	GetByID(internal.BundleID) (*internal.Bundle, error)
 	Remove(internal.BundleName, semver.Version) error
 	RemoveByID(internal.BundleID) error
+	RemoveAll() error
 	FindAll() ([]*internal.Bundle, error)
 }
 

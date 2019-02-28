@@ -1,11 +1,12 @@
 package application
 
 const (
-	OverridesTemplate = `global:
-  domainName: {{ .DomainName }}
-  applicationProxyImage: {{ .ApplicationProxyImage }}
-  eventServiceImage: {{ .EventServiceImage }}
-  eventServiceTestsImage: {{ .EventServiceTestsImage }}`
+	overridesTemplate = `global:
+    domainName: {{ .DomainName }}
+    applicationProxyImage: {{ .ApplicationProxyImage }}
+    eventServiceImage: {{ .EventServiceImage }}
+    eventServiceTestsImage: {{ .EventServiceTestsImage }}
+    subjectCN: {{ .SubjectCN }}`
 )
 
 type OverridesData struct {
@@ -13,4 +14,5 @@ type OverridesData struct {
 	ApplicationProxyImage  string
 	EventServiceImage      string
 	EventServiceTestsImage string
+	SubjectCN              string
 }

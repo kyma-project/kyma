@@ -43,7 +43,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: connector-service-overrides
+  name: application-connector-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
