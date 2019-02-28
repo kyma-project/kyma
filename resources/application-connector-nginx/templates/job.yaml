@@ -18,7 +18,7 @@ spec:
           - |
             set -e
             SERVICE_TO_REMOVE="application-connector-nginx-ingress-controller"
-            NAMESPACE="kyma-integration"
+            NAMESPACE="kyma-system"
 
             SERVICE_EXISTS=$(kubectl get service "${SERVICE_TO_REMOVE}" -n "${NAMESPACE}")
 
