@@ -177,10 +177,8 @@ func main() {
 		}
 
 		if spdyProxy.IsSpdyRequest(req) {
-			glog.Infof("Handling SPDY")
 			spdyProxy.ServeHTTP(w, req)
 		} else {
-			glog.Infof("Handling HTTP")
 			rp.ServeHTTP(w, req)
 		}
 	}))
