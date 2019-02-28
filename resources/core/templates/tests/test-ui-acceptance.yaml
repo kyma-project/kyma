@@ -21,6 +21,7 @@ spec:
       - "docs.{{ .Values.global.domainName }}"
       - "lambdas-ui.{{ .Values.global.domainName }}"
       - "ui-api.{{ .Values.global.domainName }}"
+      - "minio.{{ .Values.global.domainName }}"
   {{ end }}
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
   containers:
