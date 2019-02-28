@@ -1,0 +1,45 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "subscription-controller-knative.fullname" . }}
+  labels:
+{{ include "subscription-controller-knative.labels.standard" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: "event-bus-subscription-controller-knative" #This is changed because of tracing UI.
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-subscription-controller-knative:{{ .Values.global.event_bus.version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            - --port={{ .Values.port }}
+            - --resyncPeriod={{ .Values.global.subscriptionControllerKnative.resyncPeriod }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+          livenessProbe:
+            httpGet:
+              path: /v1/status/live
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /v1/status/ready
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 5
+          resources:
+{{ toYaml .Values.global.subscriptionControllerKnative.resources | indent 12 }}
+      serviceAccount:  {{ .Release.Name }}-subscription-controller-knative-sa
