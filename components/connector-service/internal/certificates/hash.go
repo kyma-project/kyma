@@ -2,16 +2,12 @@ package certificates
 
 import (
 	"crypto/sha256"
-	"fmt"
+	"encoding/hex"
 )
 
 func CalculateHash(cert string) string {
 	input := []byte(cert)
 	sha := sha256.Sum256(input)
 
-	hexified := ""
-	for _, data := range sha {
-		hexified += fmt.Sprintf("%02x", data)
-	}
-	return hexified
+	return hex.EncodeToString(sha[:])
 }
