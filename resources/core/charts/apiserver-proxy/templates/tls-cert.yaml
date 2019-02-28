@@ -1,10 +1,10 @@
-{{ if .Values.tlsKey }}
+{{ if eq .Values.global.domainName .Values.domainName }}
 apiVersion: v1
 kind: Secret
 type: kubernetes.io/tls
 metadata:
   name: apiserver-proxy-tls-cert
 data:
-  "tls.crt": {{ .Values.tlsCrt }}
-  "tls.key": {{ .Values.tlsKey }}
-{{ end }}
+  "tls.crt": {{ .Values.global.tlsCrt }}
+  "tls.key": {{ .Values.global.tlsKey }}
+{{ elif  }}

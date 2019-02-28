@@ -25,21 +25,23 @@ spec:
       dnsPolicy: ClusterFirstWithHostNet
       {{ end }}
       initContainers:
-      - image: sjanota/xip-patch:latest
+      - image: eu.gcr.io/kyma-project/develop/xip-patch:1103850e
         name: get-service-ip
         envFrom:
         - configMapRef:
             name: apiserver-proxy
+            optional: true
         command:
           - bash
           - -c
           - |
             set -e
             if [ "$DOMAIN" = "" ]; then
-              INGRESS_IP=$(SERVICE_NAME=apiserver-proxy-ssl SERVICE_NAMESPACE={{ .Release.Namespace }} /app/get-service-ip.sh)
+              source /app/utils.sh
+              INGRESS_IP=$(getLoadBalancerIP apiserver-proxy-ssl kyma-system)
               kubectl create configmap apiserver-proxy --from-literal DOMAIN=$INGRESS_IP.xip.io
             fi
-      - image: sjanota/xip-patch:latest
+      - image: eu.gcr.io/kyma-project/develop/xip-patch:1103850e
         name: generate-cert
         envFrom:
         - configMapRef:
@@ -53,7 +55,8 @@ spec:
           - |
             set -e
             if [ "$(cat /etc/tls-cert/tls.key)" = "" ]; then
-              OUT_DIR=. /app/generate-cert.sh
+              source /app/utils.sh
+              generateCertificatesForDomain $DOMAIN ./key.pem ./cert.pem
               kubectl create secret tls apiserver-proxy-tls-cert --key ./key.pem --cert ./cert.pem
             fi
       containers:
@@ -93,4 +96,5 @@ spec:
       - name: tls-cert
         secret:
           secretName: apiserver-proxy-tls-cert
+          optional: true
             
