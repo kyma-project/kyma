@@ -7,14 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/logging"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	clientcontextmiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/clientcontext/middlewares"
+	loggingMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/logging/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares"
@@ -61,7 +60,7 @@ func main() {
 	}
 
 	if options.requestLogging {
-		globalMiddlewares = append(globalMiddlewares, logging.NewLoggingMiddleware().Middleware)
+		globalMiddlewares = append(globalMiddlewares, loggingMiddlewares.NewRequestLoggingMiddleware().Middleware)
 	}
 
 	internalHandler := newInternalHandler(tokenCreatorProvider, options, globalMiddlewares)
