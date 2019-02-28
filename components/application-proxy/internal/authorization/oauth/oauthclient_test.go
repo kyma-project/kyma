@@ -36,18 +36,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		// given
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			r.ParseForm()
-
-			assert.Equal(t, "test", r.PostForm.Get("client_id"))
-			assert.Equal(t, "test", r.PostForm.Get("client_secret"))
-			assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
-
-			authHeader := r.Header.Get(httpconsts.HeaderAuthorization)
-			decoded, err := base64.StdEncoding.DecodeString(authHeader)
-			require.NoError(t, err)
-			credentials := strings.Split(strings.TrimPrefix(string(decoded), "Basic "), ":")
-			assert.Equal(t, "test", credentials[0])
-			assert.Equal(t, "test", credentials[1])
+			checkAccessTokenRequest(t, r)
 
 			response := oauthResponse{AccessToken: "123456789", TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
 
@@ -75,12 +64,6 @@ func TestOauthClient_GetToken(t *testing.T) {
 		// given
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			r.ParseForm()
-
-			assert.Equal(t, "test", r.PostForm.Get("client_id"))
-			assert.Equal(t, "test", r.PostForm.Get("client_secret"))
-			assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
-
 			w.WriteHeader(http.StatusInternalServerError)
 		}))
 		defer ts.Close()
@@ -103,11 +86,7 @@ func TestOauthClient_GetToken(t *testing.T) {
 		// given
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			r.ParseForm()
-
-			assert.Equal(t, "test", r.PostForm.Get("client_id"))
-			assert.Equal(t, "test", r.PostForm.Get("client_secret"))
-			assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
+			checkAccessTokenRequest(t, r)
 
 			w.WriteHeader(http.StatusOK)
 		}))
@@ -149,11 +128,7 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 		// given
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			r.ParseForm()
-
-			assert.Equal(t, "test", r.PostForm.Get("client_id"))
-			assert.Equal(t, "test", r.PostForm.Get("client_secret"))
-			assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
+			checkAccessTokenRequest(t, r)
 
 			response := oauthResponse{AccessToken: "123456789", TokenType: "bearer", ExpiresIn: 3600, Scope: "basic"}
 
@@ -181,11 +156,7 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 		// given
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			r.ParseForm()
-
-			assert.Equal(t, "test", r.PostForm.Get("client_id"))
-			assert.Equal(t, "test", r.PostForm.Get("client_secret"))
-			assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
+			checkAccessTokenRequest(t, r)
 
 			w.WriteHeader(http.StatusInternalServerError)
 		}))
@@ -209,11 +180,7 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 		// given
 		ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-			r.ParseForm()
-
-			assert.Equal(t, "test", r.PostForm.Get("client_id"))
-			assert.Equal(t, "test", r.PostForm.Get("client_secret"))
-			assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
+			checkAccessTokenRequest(t, r)
 
 			w.WriteHeader(http.StatusOK)
 		}))
@@ -248,4 +215,19 @@ func TestOauthClient_InvalidateAndRetry(t *testing.T) {
 		assert.Equal(t, "", token)
 		tokenCache.AssertExpectations(t)
 	})
+}
+
+func checkAccessTokenRequest(t *testing.T, r *http.Request) {
+	r.ParseForm()
+
+	assert.Equal(t, "test", r.PostForm.Get("client_id"))
+	assert.Equal(t, "test", r.PostForm.Get("client_secret"))
+	assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
+
+	authHeader := r.Header.Get(httpconsts.HeaderAuthorization)
+	decoded, err := base64.StdEncoding.DecodeString(authHeader)
+	require.NoError(t, err)
+	credentials := strings.Split(strings.TrimPrefix(string(decoded), "Basic "), ":")
+	assert.Equal(t, "test", credentials[0])
+	assert.Equal(t, "test", credentials[1])
 }
