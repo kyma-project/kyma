@@ -8,7 +8,9 @@ metadata:
   labels:
     "helm-chart-test": "true"
 spec:
+  {{ if .Values.global.isLocalEnv }}
   hostNetwork: true
+  {{ end }}
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
