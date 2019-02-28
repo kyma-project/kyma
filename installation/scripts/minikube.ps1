@@ -31,8 +31,10 @@ function CheckIfMinikubeIsInitialized() {
 function InitializeMinikubeConfig () {
     $cmd = "minikube config unset ingress"
     Invoke-Expression -Command $cmd
+}
 
-    $cmd = "minikube addons enable heapster"
+function ConfigureMinikubeAddons () {
+    $cmd = "minikube addons enable metrics-server"
     Invoke-Expression -Command $cmd
 }
 
@@ -109,5 +111,6 @@ CheckIfMinikubeIsInitialized
 InitializeMinikubeConfig
 StartMinikube
 WaitForMinikubeToBeUp
+ConfigureMinikubeAddons
 AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
 IncreaseFsInotifyMaxUserInstances
