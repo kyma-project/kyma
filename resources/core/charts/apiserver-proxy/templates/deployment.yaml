@@ -24,9 +24,41 @@ spec:
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
       {{ end }}
+      initContainers:
+      - image: sjanota/xip-patch:latest
+        name: get-service-ip
+        envFrom:
+        - configMapRef:
+            name: apiserver-proxy
+        command:
+          - bash
+          - -c
+          - |
+            set -e
+            if [ "$DOMAIN" = "" ]; then
+              INGRESS_IP=$(SERVICE_NAME=apiserver-proxy-ssl SERVICE_NAMESPACE={{ .Release.Namespace }} /app/get-service-ip.sh)
+              kubectl create configmap apiserver-proxy --from-literal DOMAIN=$INGRESS_IP.xip.io
+            fi
+      - image: sjanota/xip-patch:latest
+        name: generate-cert
+        envFrom:
+        - configMapRef:
+            name: apiserver-proxy
+        volumeMounts:
+        - name: tls-cert
+          mountPath: /etc/tls-cert/
+        command:
+          - bash
+          - -c
+          - |
+            set -e
+            if [ "$(cat /etc/tls-cert/tls.key)" = "" ]; then
+              OUT_DIR=. /app/generate-cert.sh
+              kubectl create secret tls apiserver-proxy-tls-cert --key ./key.pem --cert ./cert.pem
+            fi
       containers:
 #      - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
-      - image: kfurgol/apiserver-proxy:latest
+      - image: sjanota/apiserver-proxy:latest
         name: auth-proxy
         {{ if not .Values.global.isLocalEnv }}
         resources:
@@ -39,21 +71,26 @@ spec:
         args:
         - "--insecure-listen-address=0.0.0.0:{{ .Values.containerPort}}"
         - "--secure-listen-address=0.0.0.0:8443"
-        - "--tls-cert-file=/etc/ingress-tls-cert/tls.crt"
-        - "--tls-private-key-file=/etc/ingress-tls-cert/tls.key"
+        - "--tls-cert-file=/etc/tls-cert/tls.crt"
+        - "--tls-private-key-file=/etc/tls-cert/tls.key"
         - "--upstream=https://kubernetes.default"
         - "--logtostderr=true"
         - "--v=10"
         - "--oidc-issuer=https://dex.{{ .Values.global.domainName }}"
         - "--oidc-clientID=kyma-client"
-        - "--oidc-ca-file=/etc/ingress-tls-cert/tls.crt"
+        - "--oidc-ca-file=/etc/dex-tls-cert/tls.crt"
         ports:
         - containerPort: {{ .Values.containerPort}}
         volumeMounts:
-          - name: ingress-tls-cert
-            mountPath: /etc/ingress-tls-cert/
+        - name: tls-cert
+          mountPath: /etc/tls-cert/
+        - name: dex-tls-cert
+          mountPath: /etc/dex-tls-cert/
       volumes:
-        - name: ingress-tls-cert
-          secret:
-            secretName: ingress-tls-cert
+      - name: dex-tls-cert
+        secret:
+          secretName: ingress-tls-cert
+      - name: tls-cert
+        secret:
+          secretName: apiserver-proxy-tls-cert
             

@@ -1,0 +1,8 @@
+{{ if .Values.domainName }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: apiserver-proxy
+data:
+  DOMAIN: {{ .Values.global.domainName }}
+{{ end }}

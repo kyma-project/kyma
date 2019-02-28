@@ -1,0 +1,10 @@
+{{ if .Values.tlsKey }}
+apiVersion: v1
+kind: Secret
+type: kubernetes.io/tls
+metadata:
+  name: apiserver-proxy-tls-cert
+data:
+  "tls.crt": {{ .Values.tlsCrt }}
+  "tls.key": {{ .Values.tlsKey }}
+{{ end }}

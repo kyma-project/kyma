@@ -20,6 +20,8 @@ metadata:
 data:
   global.tlsCrt: "__TLS_CERT__"
   global.tlsKey: "__TLS_KEY__"
+  apiserver-proxy.tlsCrt: "__TLS_CERT__"
+  apiserver-proxy.tlsKey: "__TLS_KEY__"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -36,6 +38,7 @@ data:
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
+  apiserver-proxy.domainName: "__DOMAIN__"
 ---
 apiVersion: v1
 kind: ConfigMap

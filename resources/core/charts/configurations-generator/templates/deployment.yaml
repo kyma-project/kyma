@@ -20,20 +20,21 @@ spec:
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.configurations_generator.dir }}configurations-generator:{{ .Values.global.configurations_generator.version }}
         name: {{ template "name" . }}
-        command: [
-          "/app",
-          "-kube-config-cluster-name={{ .Values.global.domainName }}",
-          "-kube-config-url=https://apiserver.{{ .Values.global.domainName }}",
-          "-kube-config-ca-file=/etc/ingress-tls-cert/tls.crt"
-        ]
+        command:
+          - sh
+          - -c
+          - /app -kube-config-cluster-name=$DOMAIN -kube-config-url=https://apiserver.$DOMAIN -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt
+        envFrom:
+        - configMapRef:
+            name: apiserver-proxy
         ports:
           - name: http
             containerPort: 8000
         volumeMounts:
-        - name: ingress-tls-cert
-          mountPath: "/etc/ingress-tls-cert"
+        - name: apiserver-proxy-tls-cert
+          mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
       volumes:
-      - name: ingress-tls-cert
+      - name: apiserver-proxy-tls-cert
         secret:
-          secretName: ingress-tls-cert
+          secretName: apiserver-proxy-tls-cert
