@@ -16,9 +16,12 @@ getConfigFile() {
 test(){
   UUID=$(cat /proc/sys/kernel/random/uuid)
   echo ${UUID} > "${PWD}/uuid"
+  
+  set +e
   NEW_UUID=$(kubectl exec test-proxy cat ${PWD}/uuid)
+  set -e
 
-  if [ ${UUID} != ${NEW_UUID} ]; then
+  if [[ ${UUID} != ${NEW_UUID} ]]; then
     echo "TEST FAILED"
     exit 1
   fi
