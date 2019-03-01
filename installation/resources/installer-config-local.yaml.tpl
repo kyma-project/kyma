@@ -111,7 +111,7 @@ metadata:
 data:
   minio.resources.requests.memory: 64Mi
   minio.resources.limits.cpu: 100m
-  minikubeIP: ""
+  assetstore-controller-manager.minikubeIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap

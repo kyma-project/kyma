@@ -91,7 +91,7 @@ if [ ${ADMIN_PASSWORD} ]; then
     COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
 fi
 
-if [ $LOCAL ]; then
+if [ ${LOCAL} ]; then
     MINIKUBE_IP=$(minikube ip)
     COMBO_YAML=$(sed 's/minikubeIP: .*/minikubeIP: '"${MINIKUBE_IP}"'/g' <<<"$COMBO_YAML")
 fi
