@@ -82,6 +82,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 			err = api.ErrorResponseInternalServer()
 			log.Printf("EventID generation failed: %v", err)
 			publish.SendJSONError(w, err)
+			return nil, nil, nil, err
 		}
 		publishRequest.EventID = eventID
 	}

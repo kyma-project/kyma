@@ -110,11 +110,12 @@ func handlePublishRequest(w http.ResponseWriter, r *http.Request, publisher *con
 		return
 	}
 	if len(publishRequest.EventID) == 0 {
-		log.Println("PublishHandler :: handlePublishRequest :: Generating event id.")
+		log.Println("PublishHandler :: handlePublishRequest :: Generating event ID.")
 		eventID, err := generateEventID()
 		if err != nil {
-			log.Printf("PublishHandler :: handlePublishRequest :: EventID generation failed. :: Error: %v", err)
+			log.Printf("PublishHandler :: handlePublishRequest :: Event ID generation failed. :: Error: %v", err)
 			publish.SendJSONError(w, api.ErrorResponseInternalServer())
+			return
 		}
 		publishRequest.EventID = eventID
 	}
