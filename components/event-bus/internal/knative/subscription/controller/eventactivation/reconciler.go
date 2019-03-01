@@ -59,11 +59,11 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	// updates regardless of whether the reconcile error out.
 	requeue, reconcileErr := r.reconcile(ctx, ea)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "Error reconciling EventActivation")
+		log.Error(reconcileErr, "Reconciling EventActivation")
 	}
 
 	if updateStatusErr := util.UpdateEventActivation(ctx, r.client, ea); updateStatusErr != nil {
-		log.Error(updateStatusErr, "Error updating EventActivation status")
+		log.Error(updateStatusErr, "Updating EventActivation status")
 		return reconcile.Result{}, updateStatusErr
 	}
 

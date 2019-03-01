@@ -20,7 +20,6 @@ const (
 	// Name of the corev1.Events emitted from the reconciliation process
 	subReconciled         = "SubscriptionReconciled"
 	subReconcileFailed    = "SubscriptionReconcileFailed"
-	subUpdateStatusFailed = "SubscriptionUpdateStatusFailed"
 
 	// Finalizer for deleting Knative Subscriptions
 	finalizerName = "subscription.finalizers.kyma-project.io"
@@ -29,6 +28,7 @@ const (
 type reconciler struct {
 	client   client.Client
 	recorder record.EventRecorder
+	knativeLib *knative.KnativeLib
 	opts	 *opts.Options
 }
 
@@ -67,7 +67,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 	requeue, reconcileErr := r.reconcile(ctx, subscription)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "Error reconciling Subscription")
+		log.Error(reconcileErr, "Reconciling Subscription")
 		r.recorder.Eventf(subscription, corev1.EventTypeWarning, subReconcileFailed, "Subscription reconciliation failed: %v", err)
 	} else {
 		log.Info("Subscription reconciled")
@@ -86,12 +86,6 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 }
 
 func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alpha1.Subscription) (bool, error) {
-	// init the knative lib
-	knativeLib, err := knative.GetKnativeLib()
-	if err != nil {
-		log.Error(err, "Failed to get Knative library")
-		return false, err
-	}
 
 	knativeSubsName := subscription.Name
 	knativeSubsNamespace := subscription.Namespace
@@ -113,7 +107,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		// The object is being deleted
 		if containsString(subscription.ObjectMeta.Finalizers, finalizerName) {
 			// our finalizer is present, so lets handle our external dependency
-			if err := r.deleteExternalDependency(ctx, subscription, knativeLib, knativeChannelName); err != nil {
+			if err := r.deleteExternalDependency(ctx, subscription, knativeChannelName); err != nil {
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried
 				return false, err
@@ -133,11 +127,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	// Check if Kyma Subscription has events-activated condition.
 	if subscription.HasCondition(eventingv1alpha1.SubscriptionCondition{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue}) {
 		// Check if Knative Channel already exists, create if not.
-		_, err := knativeLib.GetChannel(knativeChannelName, knativeSubsNamespace)
+		_, err := r.knativeLib.GetChannel(knativeChannelName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if errors.IsNotFound(err) {
-			knativeChannel, err := knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName, knativeSubsNamespace, timeout)
+			knativeChannel, err := r.knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName, knativeSubsNamespace, timeout)
 			if err != nil {
 				return false, err
 			}
@@ -145,11 +139,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		}
 
 		// Check if Knative Subsription already exists, if not create one.
-		sub, err := knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
+		sub, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if errors.IsNotFound(err) {
-			err = knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannelName, &knativeSubsURI)
+			err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannelName, &knativeSubsURI)
 			if err != nil {
 				return false, err
 			}
@@ -157,12 +151,12 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		} else {
 			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
 			if knativeChannelName != sub.Spec.Channel.Name || knativeSubsURI != *sub.Spec.Subscriber.DNSName {
-				err = knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
+				err = r.knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
 				if err != nil {
 					return false, err
 				}
 				log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
-				err = knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannelName, &knativeSubsURI)
+				err = r.knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannelName, &knativeSubsURI)
 				if err != nil {
 					return false, err
 				}
@@ -171,11 +165,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		}
 	} else {
 		// In case Kyma Subscription does not have events-activated condition, delete Knative Subscription if exists.
-		knativeSubs, err := knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
+		knativeSubs, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if err == nil && knativeSubs != nil {
-			err = knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
+			err = r.knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
 			if err != nil {
 				return false, err
 			}
@@ -183,13 +177,13 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		}
 
 		// Check if Channel has any other Subscription, if not, delete it.
-		knativeChannel, err := knativeLib.GetChannel(knativeChannelName, knativeSubsNamespace)
+		knativeChannel, err := r.knativeLib.GetChannel(knativeChannelName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if err == nil && knativeChannel != nil {
 			if knativeChannel.Spec.Subscribable == nil || len(knativeChannel.Spec.Subscribable.Subscribers) == 0 ||
 				(len(knativeChannel.Spec.Subscribable.Subscribers) == 1 && knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == subscription.Endpoint) {
-				err = knativeLib.DeleteChannel(knativeChannelName, knativeSubsNamespace)
+				err = r.knativeLib.DeleteChannel(knativeChannelName, knativeSubsNamespace)
 				if err != nil {
 					return false, err
 				}
@@ -201,15 +195,15 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	return false, nil
 }
 
-func (r *reconciler) deleteExternalDependency(ctx context.Context, subscription *eventingv1alpha1.Subscription, knativeLib *knative.KnativeLib, channelName string) error {
+func (r *reconciler) deleteExternalDependency(ctx context.Context, subscription *eventingv1alpha1.Subscription, channelName string) error {
 	log.Info("Deleting the external dependencies")
 
 	// In case Knative Subscription exists, delete it.
-	knativeSubs, err := knativeLib.GetSubscription(subscription.Name, subscription.Namespace)
+	knativeSubs, err := r.knativeLib.GetSubscription(subscription.Name, subscription.Namespace)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil && knativeSubs != nil {
-		err = knativeLib.DeleteSubscription(knativeSubs.Name, knativeSubs.Namespace)
+		err = r.knativeLib.DeleteSubscription(knativeSubs.Name, knativeSubs.Namespace)
 		if err != nil {
 			return err
 		}
@@ -217,13 +211,13 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, subscription 
 	}
 
 	// Check if Channel has any other Subscription, if not, delete it.
-	knativeChannel, err := knativeLib.GetChannel(channelName, subscription.Namespace)
+	knativeChannel, err := r.knativeLib.GetChannel(channelName, subscription.Namespace)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil && knativeChannel != nil {
 		if knativeChannel.Spec.Subscribable == nil || (len(knativeChannel.Spec.Subscribable.Subscribers) == 1 &&
 			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == subscription.Endpoint) {
-			err = knativeLib.DeleteChannel(channelName, subscription.Namespace)
+			err = r.knativeLib.DeleteChannel(channelName, subscription.Namespace)
 			if err != nil {
 				return err
 			}

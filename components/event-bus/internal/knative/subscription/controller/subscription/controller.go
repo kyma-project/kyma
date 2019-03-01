@@ -9,6 +9,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 var log = logf.Log.WithName("subscription-controller")
@@ -23,10 +25,18 @@ const (
 // reconciles only the Kyma Subscription.
 func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Controller, error) {
 
+	// init the knative lib
+	knativeLib, err := knative.GetKnativeLib()
+	if err != nil {
+		log.Error(err, "Failed to get Knative library")
+		return nil, err
+	}
+
 	// Setup a new controller to Reconcile Kyma Subscription.
 	r := &reconciler{
 		recorder: mgr.GetRecorder(controllerAgentName),
 		opts: opts,
+		knativeLib: knativeLib,
 	}
 	c, err := controller.New(controllerAgentName, mgr, controller.Options{
 		Reconciler: r,
