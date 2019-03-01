@@ -1,6 +1,6 @@
 containerRegistry:
-  path: docker.io
+  path: eu.gcr.io/kyma-project
 
 image:
-  dir: pr/
-  tag: PR-3049
+  dir: develop/
+  tag: 655d0bd2
