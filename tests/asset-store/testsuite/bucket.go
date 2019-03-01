@@ -60,7 +60,6 @@ func (b *bucket) Create() error {
 
 func (b *bucket) WaitForStatusReady() error {
 	err := waiter.WaitAtMost(func() (bool, error) {
-
 		res, err := b.Get(b.name)
 		if err != nil {
 			return false, err
