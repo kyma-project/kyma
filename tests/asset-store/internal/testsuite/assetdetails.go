@@ -23,12 +23,9 @@ func convertToAssetResourceDetails(response *upload.Response) []assetData {
 			mode = v1alpha2.AssetSingle
 		}
 
-		//TODO: Remove workaround
-		url := strings.Replace(file.RemotePath, "https://minio.kyma.local", "http://assetstore-minio.kyma-system.svc.cluster.local:9000", -1)
-
 		asset := assetData{
 			Name: file.FileName,
-			URL:  url,
+			URL:  file.RemotePath,
 			Mode: mode,
 		}
 		assets = append(assets, asset)
