@@ -20,6 +20,7 @@ type Credentials struct {
 	Oauth          *Oauth
 	Basic          *Basic
 	CertificateGen *CertificateGen
+	CSRFToken      *CSRFToken
 }
 
 // Oauth contains details of OAuth configuration.
@@ -38,6 +39,12 @@ type Basic struct {
 	Username string
 	// Password to use for authentication.
 	Password string
+}
+
+// CSRFToken contains details of CSRF token configuration
+type CSRFToken struct {
+	// AuthEndpoint to use fetching token
+	AuthEndpoint string
 }
 
 // CertificateGen contains common name of the certificate to generate

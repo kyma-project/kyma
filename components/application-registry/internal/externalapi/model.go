@@ -44,6 +44,7 @@ type Credentials struct {
 	Oauth          *Oauth          `json:"oauth,omitempty"`
 	Basic          *BasicAuth      `json:"basic,omitempty"`
 	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
+	CSRFToken      *CSRFToken      `json:"csrfToken, omitempty"`
 }
 
 type Oauth struct {
@@ -55,6 +56,10 @@ type Oauth struct {
 type BasicAuth struct {
 	Username string `json:"username" valid:"required~basic auth username field cannot be empty"`
 	Password string `json:"password" valid:"required~basic auth password field cannot be empty"`
+}
+
+type CSRFToken struct {
+	AuthEndpoint string `json:"authEndpoint" valid:"required~csrfToken authEndpoint field cannot be empty"`
 }
 
 type CertificateGen struct {
@@ -163,6 +168,14 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 		}
 	}
 
+	if credentials.CSRFToken != nil {
+		return &Credentials{
+			CSRFToken: &CSRFToken{
+				AuthEndpoint: credentials.CSRFToken.AuthEndpoint,
+			},
+		}
+	}
+
 	return nil
 }
 
@@ -234,6 +247,14 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 		return &model.Credentials{
 			CertificateGen: &model.CertificateGen{
 				CommonName: credentials.CertificateGen.CommonName,
+			},
+		}
+	}
+
+	if credentials.CSRFToken != nil {
+		return &model.Credentials{
+			CSRFToken: &model.CSRFToken{
+				AuthEndpoint: credentials.CSRFToken.AuthEndpoint,
 			},
 		}
 	}
