@@ -12,10 +12,10 @@ spec:
   serviceAccountName:  "test-{{ template "fullname" . }}-integration"
   containers:
     - name: "test-{{ template "fullname" . }}-integration"
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_test.dir }}ui-api-layer-acceptance-tests:{{ .Values.global.asset_store_test.version }}
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_test.dir }}asset-store-test:{{ .Values.global.asset_store_test.version }}
       env:
         - name: APP_TEST_UPLOAD_SERVICE_URL
-          value: "http://assetstore-minio.svc.cluster.local/v1/upload"
+          value: "http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000/v1/upload"
         - name: APP_TEST_WAIT_TIMEOUT
           value: "3m"
         - name: APP_TEST_NAMESPACE
