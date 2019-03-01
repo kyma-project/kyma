@@ -101,7 +101,6 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	httphelpers.WithMiddlewares(
 		certApplicationRouter,
 		hb.funcMiddlwares.AppTokenResolverMiddleware,
-		signingAuditLoggingMiddleware,
 		signingAuditLoggingMiddleware)
 
 	mngmtApplicationRouter := hb.router.PathPrefix("/v1/applications/management").Subrouter()
