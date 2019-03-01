@@ -2,6 +2,7 @@ package clusterasset
 
 import (
 	"context"
+	"crypto/tls"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
@@ -41,6 +42,14 @@ func Add(mgr manager.Manager) error {
 	minioClient, err := minio.New(cfg.Store.Endpoint, cfg.Store.AccessKey, cfg.Store.SecretKey, cfg.Store.UseSSL)
 	if err != nil {
 		return errors.Wrapf(err, "while initializing Store client")
+	}
+
+	if !cfg.Store.VerifySSL {
+		transCfg := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore invalid SSL certificates
+		}
+
+		minioClient.SetCustomTransport(transCfg)
 	}
 
 	store := store.New(minioClient)

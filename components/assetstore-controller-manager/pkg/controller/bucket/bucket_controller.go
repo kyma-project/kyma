@@ -2,6 +2,7 @@ package bucket
 
 import (
 	"context"
+	"crypto/tls"
 	assetstorev1alpha2 "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/handler/bucket"
@@ -10,6 +11,7 @@ import (
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"net/http"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -35,6 +37,14 @@ func Add(mgr manager.Manager) error {
 	minioClient, err := minio.New(cfg.Store.Endpoint, cfg.Store.AccessKey, cfg.Store.SecretKey, cfg.Store.UseSSL)
 	if err != nil {
 		return errors.Wrap(err, "while initializing Store client")
+	}
+
+	if !cfg.Store.VerifySSL {
+		transCfg := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore invalid SSL certificates
+		}
+
+		minioClient.SetCustomTransport(transCfg)
 	}
 
 	store := store.New(minioClient)
