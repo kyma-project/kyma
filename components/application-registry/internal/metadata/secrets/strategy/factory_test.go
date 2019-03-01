@@ -29,6 +29,10 @@ func TestFactory_NewSecretModificationStrategy(t *testing.T) {
 			credentials: certGenCredentials,
 			strategy:    &certificateGen{},
 		},
+		{
+			credentials: csrfTokenCredentails,
+			strategy:    &csrfToken{},
+		},
 	}
 
 	t.Run("should create new modification strategy", func(t *testing.T) {
@@ -75,6 +79,10 @@ func TestFactory_NewSecretAccessStrategy(t *testing.T) {
 		{
 			credentials: &applications.Credentials{Type: applications.CredentialsCertificateGenType},
 			strategy:    &certificateGen{},
+		},
+		{
+			credentials: &applications.Credentials{Type: applications.CredentialsCSRFTokenType},
+			strategy:    &csrfToken{},
 		},
 	}
 

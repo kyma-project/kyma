@@ -54,6 +54,10 @@ func (s *factory) NewSecretModificationStrategy(credentials *model.Credentials) 
 		}, nil
 	}
 
+	if credentials.CSRFToken !=nil {
+		return &csrfToken{}, nil
+	}
+
 	return nil, apperrors.WrongInput("Invalid credential type provided")
 }
 
@@ -72,6 +76,10 @@ func credentialsValid(credentials *model.Credentials) bool {
 		credentialsCount++
 	}
 
+	if credentials.CSRFToken != nil {
+		credentialsCount++
+	}
+
 	return credentialsCount == 1
 }
 
@@ -85,6 +93,8 @@ func (s *factory) NewSecretAccessStrategy(credentials *applications.Credentials)
 		return &certificateGen{
 			certificateGenerator: s.certificateGenerator,
 		}, nil
+	case applications.CredentialsCSRFTokenType:
+		return &csrfToken{}, nil
 	default:
 		return nil, apperrors.Internal("Failed to initialize secret access strategy")
 	}
