@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # EXPECTED ENVS
 # - DOMAIN (optional) - Static domain for which to generate certs
-# - TLS_CERT (optinal) - Current TLS certificate
-# - TLS_KEY (optional) - Current TLS cert key
+# - TLS_CERT (optinal) - Path to current TLS certificate
+# - TLS_KEY (optional) - Path to current TLS cert key
 # - LB_SERVICE_NAME (required) - Name of LoadBalancer Service
 # - LB_SERVICE_NS (required) - Namespace of LoadBalancer Service
 
@@ -30,7 +30,7 @@ if [[ -z "${DOMAIN}" ]]; then
 	DOMAIN="${INGRESS_IP}.xip.io"
 fi
 
-if [[ ! -z "${TLS_CERT}" ]] && [[ ! -z "${TLS_KEY}" ]]; then
+if [[ -z "$(cat $TLS_CERT)" ]] && [[ -z "$(cat $TLS_CERT)" ]]; then
 	echo "---> Generating Certs for ${DOMAIN}"
-	generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
+	generateCertificatesForDomain "${DOMAIN}" "${TLS_CERT}" "${TLS_CERT}"
 fi
