@@ -8,8 +8,11 @@ global:
     dir: develop/
     version: 11d887b4
   asset_upload_service:
-    dir: develop/
-    version: 2b2c8c04
+    dir: pr/ #TODO: Replace before merge
+    version: PR-2928 #TODO: Replace before merge
+  asset_store_test:
+    dir: pr/ #TODO: Replace before merge
+    version: PR-2928 #TODO: Replace before merge
 
 minio:
   mode: standalone

@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "test-{{ template "fullname" . }}-asset-store"
+  annotations:
+    sidecar.istio.io/inject: "false"
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  hostNetwork: true
+  serviceAccountName:  "test-{{ template "fullname" . }}-asset-store"
+  containers:
+    - name: "test-{{ template "fullname" . }}-asset-store"
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_test.dir }}ui-api-layer-acceptance-tests:{{ .Values.global.asset_store_test.version }}
+      env:
+        - name: APP_TEST_UPLOAD_SERVICE_URL
+          value: "http://assetstore-minio.svc.cluster.local/v1/upload"
+        - name: APP_TEST_WAIT_TIMEOUT
+          value: "3m"
+        - name: APP_TEST_NAMESPACE
+          value: "test-asset-store"
+      resources:
+        limits:
+          memory: 128Mi
