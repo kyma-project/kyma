@@ -91,29 +91,18 @@ if [ ${ADMIN_PASSWORD} ]; then
     COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
 fi
 
+if [ $LOCAL ]; then
+    MINIKUBE_IP=$(minikube ip)
+    COMBO_YAML=$(sed 's/test\.acceptance\.ui\.minikubeIP: .*/test\.acceptance\.ui\.minikubeIP: '"${MINIKUBE_IP}"'/g' <<<"$COMBO_YAML")
+fi
+
 kubectl apply -f - <<<"$COMBO_YAML"
 
 if [ $KNATIVE ]; then
     kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
 fi
 
-if [ $LOCAL ]; then
 
-MINIKUBE_IP=$(minikube ip)
-cat <<EOF | kubectl -n kyma-installer apply -f -
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: core-test-ui-acceptance-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: core
-    kyma-project.io/installation: ""
-data:
-  test.acceptance.ui.minikubeIP: "$MINIKUBE_IP"
-EOF
-fi
 
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh
