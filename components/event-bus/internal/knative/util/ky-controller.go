@@ -5,8 +5,8 @@ import (
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/equality"
-	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 	"time"
 )
 
@@ -52,7 +52,7 @@ func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClien
 	eaSourceID := ea.EventActivationSpec.SourceID
 
 	sl := &subApis.SubscriptionList{}
-	lo := &runtimeClient.ListOptions{ Namespace: eaNamespace}  // query using SourceID too?
+	lo := &runtimeClient.ListOptions{Namespace: eaNamespace} // query using SourceID too?
 	if err := client.List(ctx, lo, sl); err != nil {
 		return nil, err
 	}
@@ -66,7 +66,7 @@ func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClien
 	return subs, nil
 }
 
-type SubscriptionWithError struct{
+type SubscriptionWithError struct {
 	Sub *subApis.Subscription
 	Err error
 }
@@ -75,7 +75,7 @@ func WriteSubscriptions(ctx context.Context, client runtimeClient.Client, subs [
 	var errorSubs []SubscriptionWithError
 	for _, u := range subs {
 		if err := WriteSubscription(ctx, client, u); err != nil {
-			errorSubs = append(errorSubs, SubscriptionWithError{Sub: u, Err: err })
+			errorSubs = append(errorSubs, SubscriptionWithError{Sub: u, Err: err})
 		}
 	}
 	return errorSubs
@@ -117,7 +117,7 @@ func UpdateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, condi
 	return updatedSubs
 }
 
-func UpdateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string)  *subApis.Subscription {
+func UpdateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string) *subApis.Subscription {
 	t := metav1.NewTime(time.Now())
 	var newCondition subApis.SubscriptionCondition
 	if conditionStatus == subApis.ConditionTrue {

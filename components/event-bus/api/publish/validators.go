@@ -36,7 +36,7 @@ func ValidatePublish(r *PublishRequest) *Error {
 	}
 
 	// validate the fully-qualified topic name components
-	if !isValidSourceId(r.SourceID){
+	if !isValidSourceId(r.SourceID) {
 		return ErrorResponseWrongSourceId(r.SourceIdFromHeader)
 	}
 	if !isValidEventType(r.EventType) {

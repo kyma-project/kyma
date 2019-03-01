@@ -4,12 +4,12 @@ import (
 	"context"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 const (
@@ -17,18 +17,18 @@ const (
 	Name = "subscription"
 
 	// Name of the corev1.Events emitted from the reconciliation process
-	subReconciled         = "SubscriptionReconciled"
-	subReconcileFailed    = "SubscriptionReconcileFailed"
+	subReconciled      = "SubscriptionReconciled"
+	subReconcileFailed = "SubscriptionReconcileFailed"
 
 	// Finalizer for deleting Knative Subscriptions
 	finalizerName = "subscription.finalizers.kyma-project.io"
 )
 
 type reconciler struct {
-	client   client.Client
-	recorder record.EventRecorder
+	client     client.Client
+	recorder   record.EventRecorder
 	knativeLib *util.KnativeLib
-	opts	 *opts.Options
+	opts       *opts.Options
 }
 
 // Verify the struct implements reconcile.Reconciler
@@ -56,7 +56,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 	// Any other error should be retried in another reconciliation.
 	if err != nil {
-		log.Error(err,"Unable to Get Subscription object")
+		log.Error(err, "Unable to Get Subscription object")
 		return reconcile.Result{}, err
 	}
 
@@ -137,7 +137,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			log.Info("Knative Channel is created", "Channel", knativeChannel)
 		}
 
-		// Check if Knative Subsription already exists, if not create one.
+		// Check if Knative Subscription already exists, if not create one.
 		sub, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err

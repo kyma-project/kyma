@@ -1,8 +1,7 @@
 package util
 
 import (
-"testing"
-
+	"testing"
 )
 
 func Test_getChannelName(t *testing.T) {

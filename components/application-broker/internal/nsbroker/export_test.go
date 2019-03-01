@@ -13,7 +13,7 @@ func (f *Facade) WithServiceChecker(serviceChecker serviceChecker) *Facade {
 
 func NewHTTPChecker(afterFunc func(d time.Duration) <-chan time.Time) *httpChecker {
 	return &httpChecker{
-		log: spy.NewLogDummy().Logger,
+		log:       spy.NewLogDummy().Logger,
 		afterFunc: afterFunc,
 		sleepTime: time.Millisecond,
 	}

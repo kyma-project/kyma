@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-
 func TestBasicAuthStrategy(t *testing.T) {
 
 	t.Run("should add Authorization header", func(t *testing.T) {

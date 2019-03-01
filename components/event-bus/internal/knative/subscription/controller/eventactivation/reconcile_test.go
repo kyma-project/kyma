@@ -44,7 +44,7 @@ var testCases = []controllertesting.TestCase{
 			addEventActivationFinalizer(
 				makeNewEventActivation("default", "my-event-activation"), finalizerName),
 		},
-		Scheme: scheme.Scheme,
+		Scheme:      scheme.Scheme,
 		IgnoreTimes: true,
 	},
 	{

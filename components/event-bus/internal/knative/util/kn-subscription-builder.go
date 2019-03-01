@@ -20,7 +20,7 @@ func (s *SubscriptionBuilder) Build() *eventingv1alpha1.Subscription {
 	return s.Subscription
 }
 
-func (s *SubscriptionBuilder) ToChannel(name  string) *SubscriptionBuilder {
+func (s *SubscriptionBuilder) ToChannel(name string) *SubscriptionBuilder {
 	s.Spec.Channel = corev1.ObjectReference{
 		Name:       name,
 		Kind:       "Channel",

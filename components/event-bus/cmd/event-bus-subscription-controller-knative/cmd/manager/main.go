@@ -59,14 +59,14 @@ func main() {
 	log.Info("Setting up Subscription Controller")
 	_, err = subscription.ProvideController(mgr, sckOpts)
 	if err != nil {
-		log.Error(err,"Unable to create Subscription controller")
+		log.Error(err, "Unable to create Subscription controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Event Activation Controller")
 	_, err = eventactivation.ProvideController(mgr)
 	if err != nil {
-		log.Error(err,"Unable to create Event Activation controller")
+		log.Error(err, "Unable to create Event Activation controller")
 		os.Exit(1)
 	}
 

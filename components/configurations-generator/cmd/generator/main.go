@@ -20,7 +20,7 @@ const (
 	clusterNameFlag   = "kube-config-cluster-name"
 	apiserverURLFlag  = "kube-config-url"
 	clusterCAFileFlag = "kube-config-ca-file"
-	oidcCAFileFlag = "oidc-ca-file"
+	oidcCAFileFlag    = "oidc-ca-file"
 )
 
 func main() {

@@ -1,8 +1,8 @@
 package automock
 
 import (
-	"github.com/stretchr/testify/mock"
 	"github.com/kyma-project/kyma/tools/etcd-backup/internal/backup"
+	"github.com/stretchr/testify/mock"
 	"k8s.io/api/core/v1"
 )
 

@@ -11,10 +11,10 @@ import (
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type ServiceBindingUsage struct {
-	metav1.TypeMeta                  `json:",inline"`
-	metav1.ObjectMeta                `json:"metadata"`
-	Spec   ServiceBindingUsageSpec   `json:"spec"`
-	Status ServiceBindingUsageStatus `json:"status"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata"`
+	Spec              ServiceBindingUsageSpec   `json:"spec"`
+	Status            ServiceBindingUsageStatus `json:"status"`
 }
 
 func (pw *ServiceBindingUsage) GetObjectKind() schema.ObjectKind {
@@ -119,9 +119,9 @@ type ServiceBindingUsageList struct {
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 type UsageKind struct {
-	metav1.TypeMeta    `json:",inline"`
-	metav1.ObjectMeta  `json:"metadata"`
-	Spec UsageKindSpec `json:"spec"`
+	metav1.TypeMeta   `json:",inline"`
+	metav1.ObjectMeta `json:"metadata"`
+	Spec              UsageKindSpec `json:"spec"`
 }
 
 // UsageKindSpec represents a description of the ServiceBindingTarget

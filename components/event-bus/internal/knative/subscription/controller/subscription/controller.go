@@ -4,10 +4,10 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -34,8 +34,8 @@ func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Cont
 
 	// Setup a new controller to Reconcile Kyma Subscription.
 	r := &reconciler{
-		recorder: mgr.GetRecorder(controllerAgentName),
-		opts: opts,
+		recorder:   mgr.GetRecorder(controllerAgentName),
+		opts:       opts,
 		knativeLib: knativeLib,
 	}
 	c, err := controller.New(controllerAgentName, mgr, controller.Options{

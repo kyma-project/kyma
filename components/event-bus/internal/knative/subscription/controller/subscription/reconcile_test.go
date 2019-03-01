@@ -56,19 +56,18 @@ func TestInjectClient(t *testing.T) {
 	}
 }
 
-var	testCases = []controllertesting.TestCase{
-		{
-			Name: "Subscription not found",
+var testCases = []controllertesting.TestCase{
+	{
+		Name: "Subscription not found",
+	},
+	{
+		Name: "Error getting Subscription",
+		Mocks: controllertesting.Mocks{
+			MockGets: errorGettingSubscription(),
 		},
-		{
-			Name: "Error getting Subscription",
-			Mocks: controllertesting.Mocks{
-				MockGets: errorGettingSubscription(),
-			},
-			WantErrMsg: testErrorMessage,
-		},
+		WantErrMsg: testErrorMessage,
+	},
 }
-
 
 func TestAllCases(t *testing.T) {
 	recorder := record.NewBroadcaster().NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})

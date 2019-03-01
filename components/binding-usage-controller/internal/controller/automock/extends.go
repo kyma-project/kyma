@@ -4,8 +4,8 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
 	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/stretchr/testify/mock"
 	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
+	"github.com/stretchr/testify/mock"
 )
 
 func (_m *KubernetesResourceSupervisor) ExpectOnEnsureLabelsCreated(ns string, resourceName string, usageName string, labels map[string]string) *mock.Call {

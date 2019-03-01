@@ -22,7 +22,7 @@ const (
 	TenantPlaceholder      = "{TENANT}"
 	GroupPlaceholder       = "{GROUP}"
 	ApplicationPlaceholder = "{APPLICATION}"
-  
+
 	// ApplicationHeader is key represeting Application in headers
 	ApplicationHeader = "Application"
 

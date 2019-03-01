@@ -13,11 +13,11 @@ import (
 )
 
 const (
-	namespaceEnv                                   = "NAMESPACE"
-	domainNameEnv                                  = "DOMAIN_NAME"
-	testIDLength                                   = 8
-	apiSecurityDisabled                APISecurity = false
-	apiSecurityEnabled                 APISecurity = true
+	namespaceEnv                    = "NAMESPACE"
+	domainNameEnv                   = "DOMAIN_NAME"
+	testIDLength                    = 8
+	apiSecurityDisabled APISecurity = false
+	apiSecurityEnabled  APISecurity = true
 )
 
 //APISecurity Enable/disable security in API
