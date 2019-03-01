@@ -1,14 +1,14 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: "test-{{ template "fullname" . }}-asset-store"
+  name: "test-{{ template "fullname" . }}-integration"
   labels:
     app: {{ template "name" . }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: "test-{{ template "fullname" . }}-asset-store"
+  name: "test-{{ template "fullname" . }}-integration"
   labels:
     app: {{ template "name" . }}
 rules:
@@ -24,12 +24,12 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: "test-{{ template "fullname" . }}-asset-store"
+  name: "test-{{ template "fullname" . }}-integration"
 subjects:
   - kind: ServiceAccount
-    name: "test-{{ template "fullname" . }}-asset-store"
+    name: "test-{{ template "fullname" . }}-integration"
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: "test-{{ template "fullname" . }}-asset-store"
+  name: "test-{{ template "fullname" . }}-integration"
