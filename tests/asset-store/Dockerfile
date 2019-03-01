@@ -7,7 +7,7 @@ WORKDIR ${BASE_APP_DIR}
 # Copy files
 #
 
-COPY ./internal/ ${BASE_APP_DIR}/internal/
+COPY ./testsuite/ ${BASE_APP_DIR}/testsuite/
 COPY ./testdata/ ${BASE_APP_DIR}/testdata/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
