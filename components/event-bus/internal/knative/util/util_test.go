@@ -112,4 +112,3 @@ func Test_getChannelName(t *testing.T) {
 		})
 	}
 }
-

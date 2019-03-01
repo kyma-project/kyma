@@ -9,8 +9,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-
-	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 const (
@@ -28,7 +27,7 @@ const (
 type reconciler struct {
 	client   client.Client
 	recorder record.EventRecorder
-	knativeLib *knative.KnativeLib
+	knativeLib *util.KnativeLib
 	opts	 *opts.Options
 }
 
@@ -90,14 +89,14 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	knativeSubsName := subscription.Name
 	knativeSubsNamespace := subscription.Namespace
 	knativeSubsURI := subscription.Endpoint
-	knativeChannelName := knative.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
+	knativeChannelName := util.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
 	knativeChannelProvisioner := "natss"
 	timeout := r.opts.ChannelTimeout
 
 	if subscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
 		// then lets add the finalizer and update the object.
-		if !containsString(subscription.ObjectMeta.Finalizers, finalizerName) {
+		if !util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
 			if err := r.client.Update(context.Background(), subscription); err != nil {
 				return true, nil
@@ -105,7 +104,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		}
 	} else {
 		// The object is being deleted
-		if containsString(subscription.ObjectMeta.Finalizers, finalizerName) {
+		if util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			// our finalizer is present, so lets handle our external dependency
 			if err := r.deleteExternalDependency(ctx, subscription, knativeChannelName); err != nil {
 				// if fail to delete the external dependency here, return with error
@@ -114,7 +113,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			}
 
 			// remove our finalizer from the list and update it.
-			subscription.ObjectMeta.Finalizers = removeString(subscription.ObjectMeta.Finalizers, finalizerName)
+			subscription.ObjectMeta.Finalizers = util.RemoveString(&subscription.ObjectMeta.Finalizers, finalizerName)
 			if err := r.client.Update(context.Background(), subscription); err != nil {
 				return true, nil
 			}
@@ -225,26 +224,4 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, subscription 
 		}
 	}
 	return nil
-}
-
-//
-// Helper functions to check and remove string from a slice of strings.
-//
-func containsString(slice []string, s string) bool {
-	for _, item := range slice {
-		if item == s {
-			return true
-		}
-	}
-	return false
-}
-
-func removeString(slice []string, s string) (result []string) {
-	for _, item := range slice {
-		if item == s {
-			continue
-		}
-		result = append(result, item)
-	}
-	return
 }

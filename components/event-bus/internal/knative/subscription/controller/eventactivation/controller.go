@@ -45,4 +45,3 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 
 	return c, nil
 }
-
