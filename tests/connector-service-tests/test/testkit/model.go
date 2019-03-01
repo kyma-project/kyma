@@ -31,6 +31,7 @@ type ClusterClientIdentity struct {
 type ManagementInfoURLs struct {
 	*RuntimeURLs
 	RenewCertUrl string `json:"renewCertUrl"`
+	RevocationCertURL string `json:"revocationCertUrl"`
 }
 
 type RuntimeURLs struct {

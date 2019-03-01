@@ -38,6 +38,7 @@ func TestConnector(t *testing.T) {
 		}
 
 		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
+		certificateRevocationSuite(t, appTokenRequest, config.SkipSslVerify)
 	})
 
 	if config.Central {
@@ -46,6 +47,7 @@ func TestConnector(t *testing.T) {
 			certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 			runtimeCsrInfoEndpointForCentralSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 			runtimeMgmInfoEndpointForCentralSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+			certificateRevocationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 		})
 	}
 }
@@ -534,6 +536,44 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 		// then
 		mgmInfoResponse, errorResponse = clientWithRenewedCert.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
 		require.Nil(t, errorResponse)
+	})
+
+}
+
+func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	clientKey := testkit.CreateKey(t)
+
+	t.Run("should revoke client certificate", func(t *testing.T) {
+		// given
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
+
+		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
+
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
+
+		// when
+		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
+		csrBase64 := testkit.EncodeBase64(csr)
+
+		response := client.RevokeCertificate(t, mgmInfoResponse.URLs.RevocationCertURL, csrBase64)
+
+		require.NotNil(t, response)
+		require.Equal(t, http.StatusCreated, response.StatusCode)
+
+		// then
+		mgmInfoResponse, errorResponse = client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+
+		require.NotNil(t, errorResponse)
+		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
 	})
 
 }

@@ -126,8 +126,13 @@ func getRequestWithHeaders(t *testing.T, url string, headers map[string]string) 
 func parseErrorResponse(t *testing.T, response *http.Response) *Error {
 	logResponse(t, response)
 	errorResponse := ErrorResponse{}
-	err := json.NewDecoder(response.Body).Decode(&errorResponse)
-	require.NoError(t, err)
+	decoder := json.NewDecoder(response.Body)
+
+	if decoder.More() {
+		err := decoder.Decode(&errorResponse)
+		require.NoError(t, err)
+	}
+
 	return &Error{response.StatusCode, errorResponse}
 }
 
