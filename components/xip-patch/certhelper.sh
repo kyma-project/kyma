@@ -1,10 +1,12 @@
-#!/usr/bin/env bash -e
+#!/usr/bin/env bash
 # EXPECTED ENVS
 # - DOMAIN (optional) - Static domain for which to generate certs
 # - TLS_CERT (optinal) - Current TLS certificate
 # - TLS_KEY (optional) - Current TLS cert key
 # - LB_SERVICE_NAME (required) - Name of LoadBalancer Service
 # - LB_SERVICE_NS (required) - Namespace of LoadBalancer Service
+
+set -e
 
 readonly CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 source $CURRENT_DIR/utils.sh
