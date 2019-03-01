@@ -1,0 +1,35 @@
+kind: ServiceAccount
+apiVersion: v1
+metadata:
+  name: "test-{{ template "fullname" . }}-asset-store"
+  labels:
+    app: {{ template "name" . }}
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: "test-{{ template "fullname" . }}-asset-store"
+  labels:
+    app: {{ template "name" . }}
+rules:
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["create", "get", "delete"]
+    nonResourceURLs: []
+  - apiGroups: ["assetstore.kyma-project.io"]
+    resources: ["buckets", "clusterbuckets", "assets", "clusterassets"]
+    verbs: ["create", "get", "delete"]
+
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: "test-{{ template "fullname" . }}-asset-store"
+subjects:
+  - kind: ServiceAccount
+    name: "test-{{ template "fullname" . }}-asset-store"
+    namespace: {{ .Release.Namespace }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: "test-{{ template "fullname" . }}-asset-store"
