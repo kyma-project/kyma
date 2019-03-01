@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	CertificateHeader = "Certificateheader"
+	CertificateHeader = "Certificate-Header"
 )
 
 type revocationHandler struct {

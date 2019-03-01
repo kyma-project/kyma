@@ -7,11 +7,11 @@ import (
 )
 
 func CalculateHash(cert string) (string, error) {
-	unescapedCert, err := url.PathUnescape(cert)
+	uc, err := url.PathUnescape(cert)
 	if err != nil {
 		return "", err
 	}
-	input := []byte(unescapedCert)
+	input := []byte(uc)
 	sha := sha256.Sum256(input)
 
 	return hex.EncodeToString(sha[:]), nil
