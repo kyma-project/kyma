@@ -66,9 +66,10 @@ func localPath(fileName string) string {
 	return fmt.Sprintf("%s/%s", basePath, fileName)
 }
 
-func verifyUploadedAsset(files []uploadedFile, shouldExist bool) error {
+func verifyUploadedAsset(files []uploadedFile, shouldExist bool, logFn func(format string, args ...interface{})) error {
 	for _, f := range files {
 		if !shouldExist {
+			logFn("Checking if file %s exists...", f.URL)
 			exists, err := file.Exists(f.URL)
 			if err != nil {
 				return errors.Wrapf(err, "while checking if remote file from URL %s exist", f.URL)
@@ -79,6 +80,7 @@ func verifyUploadedAsset(files []uploadedFile, shouldExist bool) error {
 			}
 		} else {
 			path := localPath(f.AssetPath)
+			logFn("Comparing file from URL %s and local file from path %s...", f.URL, f.AssetPath)
 			equal, err := file.CompareLocalAndRemote(path, f.URL)
 			if err != nil {
 				return errors.Wrapf(err, "while comparing files %s and remote file from URL %s, defined in %s %s", path, f.URL, f.Owner.Kind, f.Owner.Name)
