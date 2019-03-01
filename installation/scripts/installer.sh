@@ -102,8 +102,6 @@ if [ $KNATIVE ]; then
     kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
 fi
 
-
-
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh
 
