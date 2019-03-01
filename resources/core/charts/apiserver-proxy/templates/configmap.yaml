@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: apiserver-proxy
+  name: {{ template "name" . }}
 data:
-  DOMAIN: {{ .Values.global.domainName }}
+  DOMAIN: {{ .Values.domainName }}
 {{ end }}

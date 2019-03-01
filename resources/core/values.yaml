@@ -75,6 +75,9 @@ global:
   cluster_users_test:
     dir: develop/
     version: "d4937a42"
+  xip_patch:
+    dir: pr/
+    version: PR-2917
   kubeless_images:
     runtime:
       node6:

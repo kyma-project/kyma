@@ -15,16 +15,7 @@ spec:
     route:
     - destination:
         port:
-          number: {{.Values.containerPort}}
+          number: {{ .Values.port.insecure }}
         host: {{ template "name" . }}
     corsPolicy:
-      allowOrigin:
-      - "*"
-      allowHeaders:
-      - "authorization"
-      - "content-type"
-      allowMethods:
-      - "GET"
-      - "POST"
-      - "PUT"
-      - "DELETE"
+{{ toYaml .Values.corsPolicy | indent 6 }}
