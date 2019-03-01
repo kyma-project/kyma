@@ -10,7 +10,7 @@ metadata:
 spec:
   {{ if .Values.global.isLocalEnv }}
   hostAliases:
-   - ip: {{ .Values.test.acceptance.ui.minikubeIP }}
+   - ip: {{ .Values.minikubeIP }}
      hostnames:
       - "apiserver.{{ .Values.global.domainName }}"
       - "console.{{ .Values.global.domainName }}"

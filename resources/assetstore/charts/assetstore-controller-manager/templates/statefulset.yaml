@@ -21,6 +21,12 @@ spec:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
     spec:
+     {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+       - ip: {{ .Values.minikubeIP }}
+         hostnames:
+          - "minio.{{ .Values.global.domainName }}"
+      {{ end }}
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - command:
