@@ -1,6 +1,7 @@
 package externalapi
 
 import (
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
 	loggingMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/logging/middlewares"
 	"net/http"
 
@@ -16,13 +17,15 @@ import (
 )
 
 type Config struct {
-	TokenCreator                tokens.Creator
-	ContextExtractor            clientcontext.ConnectorClientExtractor
-	ManagementInfoURL           string
-	ConnectorServiceBaseURL     string
-	CertificateProtectedBaseURL string
-	Subject                     certificates.CSRSubject
-	CertService                 certificates.Service
+	TokenCreator                       tokens.Creator
+	ContextExtractor                   clientcontext.ConnectorClientExtractor
+	ManagementInfoURL                  string
+	ConnectorServiceBaseURL            string
+	CertificateProtectedBaseURL        string
+	Subject                            certificates.CSRSubject
+	CertService                        certificates.Service
+	RevokedApplicationCertsRepo revocationlist.RevocationListRepository
+	RevokedRuntimeCertsRepo     revocationlist.RevocationListRepository
 }
 
 type FunctionalMiddlewares struct {
@@ -30,7 +33,7 @@ type FunctionalMiddlewares struct {
 	RuntimeTokenResolverMiddleware  mux.MiddlewareFunc
 	RuntimeURLsMiddleware           mux.MiddlewareFunc
 	AppContextFromSubjectMiddleware mux.MiddlewareFunc
-	AuditLoggingMiddlewareFactory func(loggingMiddlewares.AuditLogMessages) mux.MiddlewareFunc
+	CheckForRevokedCertMiddleware mux.MiddlewareFunc
 }
 
 type SignatureHandler interface {
@@ -74,26 +77,45 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	applicationRenewalHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 	applicationManagementInfoHandler := NewManagementInfoHandler(appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateProtectedBaseURL)
+	applicationRevocationHandler := NewRevocationHandler(appHandlerCfg.RevokedApplicationCertsRepo)
 
 	csrApplicationRouter := hb.router.PathPrefix("/v1/applications/signingRequests").Subrouter()
 	csrApplicationRouter.HandleFunc("/info", applicationInfoHandler.GetCSRInfo).Methods(http.MethodGet)
-	httphelpers.WithMiddlewares(csrApplicationRouter,
+	httphelpers.WithMiddlewares(
+		csrApplicationRouter,
 		hb.funcMiddlwares.AppTokenResolverMiddleware,
 		hb.funcMiddlwares.RuntimeURLsMiddleware)
 
 	appRenewalRouter := hb.router.Path("/v1/applications/certificates/renewals").Subrouter()
 	appRenewalRouter.HandleFunc("", applicationRenewalHandler.SignCSR).Methods(http.MethodPost)
 	renewalAuditLoggingMiddleware := hb.createRenewalAuditLogMiddleware(appHandlerCfg.ContextExtractor)
-	httphelpers.WithMiddlewares(appRenewalRouter, hb.funcMiddlwares.AppContextFromSubjectMiddleware, renewalAuditLoggingMiddleware)
+	httphelpers.WithMiddlewares(
+		appRenewalRouter,
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
+		renewalAuditLoggingMiddleware,
+		hb.funcMiddlwares.CheckForRevokedCertMiddleware)
 
 	certApplicationRouter := hb.router.PathPrefix("/v1/applications/certificates").Subrouter()
 	signingAuditLoggingMiddleware := hb.createCertificateGenerationAuditLogMiddleware(appHandlerCfg.ContextExtractor)
 	certApplicationRouter.HandleFunc("", applicationSignatureHandler.SignCSR).Methods(http.MethodPost)
-	httphelpers.WithMiddlewares(certApplicationRouter, hb.funcMiddlwares.AppTokenResolverMiddleware, signingAuditLoggingMiddleware, signingAuditLoggingMiddleware)
+	httphelpers.WithMiddlewares(
+		certApplicationRouter,
+		hb.funcMiddlwares.AppTokenResolverMiddleware,
+		signingAuditLoggingMiddleware,
+		signingAuditLoggingMiddleware)
 
 	mngmtApplicationRouter := hb.router.PathPrefix("/v1/applications/management").Subrouter()
 	mngmtApplicationRouter.HandleFunc("/info", applicationManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)
-	httphelpers.WithMiddlewares(mngmtApplicationRouter, hb.funcMiddlwares.RuntimeURLsMiddleware, hb.funcMiddlwares.AppContextFromSubjectMiddleware)
+	httphelpers.WithMiddlewares(
+		mngmtApplicationRouter,
+		hb.funcMiddlwares.RuntimeURLsMiddleware,
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
+
+	appRevocationRouter := hb.router.Path("/v1/applications/certificates/revocations").Subrouter()
+	appRevocationRouter.HandleFunc("", applicationRevocationHandler.Revoke).Methods(http.MethodPost)
+	httphelpers.WithMiddlewares(
+		appRevocationRouter,
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
 }
 
 func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
@@ -101,42 +123,59 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL)
+	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedApplicationCertsRepo)
 
 	csrRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()
 	csrRuntimesRouter.HandleFunc("/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)
-	httphelpers.WithMiddlewares(csrRuntimesRouter, hb.funcMiddlwares.RuntimeTokenResolverMiddleware)
+	httphelpers.WithMiddlewares(
+		csrRuntimesRouter,
+		hb.funcMiddlwares.RuntimeTokenResolverMiddleware)
 
 	runtimeRenewalRouter := hb.router.Path("/v1/runtimes/certificates/renewals").Subrouter()
 	runtimeRenewalRouter.HandleFunc("", runtimeRenewalHandler.SignCSR).Methods(http.MethodPost)
 	renewalAuditLoggingMiddleware := hb.createRenewalAuditLogMiddleware(runtimeHandlerCfg.ContextExtractor)
-	httphelpers.WithMiddlewares(runtimeRenewalRouter, hb.funcMiddlwares.AppContextFromSubjectMiddleware, renewalAuditLoggingMiddleware)
+	httphelpers.WithMiddlewares(
+		runtimeRenewalRouter,
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
+		renewalAuditLoggingMiddleware,
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
 
 	certRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/certificates").Subrouter()
 	certRuntimesRouter.HandleFunc("", runtimeSignatureHandler.SignCSR).Methods(http.MethodPost)
 	signingAuditLoggingMiddleware := hb.createCertificateGenerationAuditLogMiddleware(runtimeHandlerCfg.ContextExtractor)
-	httphelpers.WithMiddlewares(certRuntimesRouter, hb.funcMiddlwares.RuntimeTokenResolverMiddleware, signingAuditLoggingMiddleware)
+	httphelpers.WithMiddlewares(
+		certRuntimesRouter,
+		hb.funcMiddlwares.RuntimeTokenResolverMiddleware,
+		signingAuditLoggingMiddleware)
 
 	mngmtRuntimeRouter := hb.router.PathPrefix("/v1/runtimes/management").Subrouter()
 	mngmtRuntimeRouter.HandleFunc("/info", runtimeManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)
-	httphelpers.WithMiddlewares(mngmtRuntimeRouter, hb.funcMiddlwares.AppContextFromSubjectMiddleware)
+	httphelpers.WithMiddlewares(
+		mngmtRuntimeRouter,
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
+
+	runtimeRevocationRouter := hb.router.Path("/v1/applications/certificates/revocations").Subrouter()
+	runtimeRevocationRouter.HandleFunc("", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
+	httphelpers.WithMiddlewares(
+		runtimeRevocationRouter,
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
 }
 
-func (hb *handlerBuilder) createRenewalAuditLogMiddleware(contextExtractor clientcontext.ConnectorClientExtractor) mux.MiddlewareFunc{
+func (hb *handlerBuilder) createRenewalAuditLogMiddleware(contextExtractor clientcontext.ConnectorClientExtractor) mux.MiddlewareFunc {
 	return loggingMiddlewares.NewAuditLoggingMiddleware(contextExtractor, loggingMiddlewares.AuditLogMessages{
-		StartingOperationMsg: "Starting certificate renewal.",
+		StartingOperationMsg:   "Starting certificate renewal.",
 		OperationSuccessfulMsg: "Certificate renewed successfully.",
-		OperationFailedMsg: "Certificate renewal failed.",
+		OperationFailedMsg:     "Certificate renewal failed.",
 	}).Middleware
 }
 
-func (hb *handlerBuilder) createCertificateGenerationAuditLogMiddleware(contextExtractor clientcontext.ConnectorClientExtractor) mux.MiddlewareFunc{
+func (hb *handlerBuilder) createCertificateGenerationAuditLogMiddleware(contextExtractor clientcontext.ConnectorClientExtractor) mux.MiddlewareFunc {
 	return loggingMiddlewares.NewAuditLoggingMiddleware(contextExtractor, loggingMiddlewares.AuditLogMessages{
-		StartingOperationMsg: "Starting certificate generation.",
+		StartingOperationMsg:   "Starting certificate generation.",
 		OperationSuccessfulMsg: "Certificate generated successfully.",
-		OperationFailedMsg: "Certificate generation failed.",
+		OperationFailedMsg:     "Certificate generation failed.",
 	}).Middleware
 }
-
 
 func (hb *handlerBuilder) GetHandler() http.Handler {
 	return hb.router

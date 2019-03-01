@@ -166,27 +166,27 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc) http.Handler {
 
 	ctxRequired := clientcontext.CtxRequiredType(opts.central)
-	handlerBuilder := internalapi.NewHandlerBuilder(globalMiddlewares)
 
 	clusterCtxMiddleware := clientcontextmiddlewares.NewClusterContextMiddleware(ctxRequired)
 	applicationCtxMiddleware := clientcontextmiddlewares.NewApplicationContextMiddleware(clusterCtxMiddleware)
 
 	appTokenTTLMinutes := time.Duration(opts.appTokenExpirationMinutes) * time.Minute
-	appHandlerMiddlewares := []mux.MiddlewareFunc{applicationCtxMiddleware.Middleware}
 	appHandlerConfig := internalapi.Config{
-		Middlewares:      appHandlerMiddlewares,
 		TokenManager:     tokenManagerProvider.WithTTL(appTokenTTLMinutes),
 		CSRInfoURL:       fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
 		ContextExtractor: clientcontext.CreateApplicationClientContextService,
 	}
 
+	handlerBuilder := internalapi.NewHandlerBuilder(internalapi.FunctionalMiddlewares{
+		ApplicationCtxMiddleware: applicationCtxMiddleware.Middleware,
+		RuntimeCtxMiddleware: clusterCtxMiddleware.Middleware,
+	}, globalMiddlewares)
+
 	handlerBuilder.WithApps(appHandlerConfig)
 
 	if opts.central {
 		runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
-		runtimeHandlerMiddlewares := []mux.MiddlewareFunc{clusterCtxMiddleware.Middleware}
 		runtimeHandlerConfig := internalapi.Config{
-			Middlewares:      runtimeHandlerMiddlewares,
 			TokenManager:     tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
 			CSRInfoURL:       fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
 			ContextExtractor: clientcontext.CreateClusterClientContextService,
