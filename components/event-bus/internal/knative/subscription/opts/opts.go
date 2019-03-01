@@ -11,13 +11,15 @@ import (
 var version = os.Getenv("APP_VERSION")
 
 const (
-	defaultPort         = 8080
-	defaultResyncPeriod = 10 * time.Second
+	defaultPort           = 8080
+	defaultResyncPeriod   = 10 * time.Second
+	defaultChannelTimeout = 10 * time.Second
 )
 
 type Options struct {
-	Port         int
-	ResyncPeriod time.Duration
+	Port           int
+	ResyncPeriod   time.Duration
+	ChannelTimeout time.Duration
 }
 
 var (
@@ -50,6 +52,7 @@ func configureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 
 	fs.IntVar(&opts.Port, "port", defaultPort, "The subscription controller knative healtcheck listen port")
 	fs.DurationVar(&opts.ResyncPeriod, "resyncPeriod", defaultResyncPeriod, "The resync period for the used informers")
+	fs.DurationVar(&opts.ChannelTimeout, "channelTimeout", defaultChannelTimeout, "The timeout for Knative Channel creation")
 	if err := fs.Parse(args); err != nil {
 		return nil, err
 	}
@@ -63,7 +66,8 @@ func configureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 
 func DefaultOptions() *Options {
 	return &Options{
-		Port:         defaultPort,
-		ResyncPeriod: defaultResyncPeriod,
+		Port:           defaultPort,
+		ResyncPeriod:   defaultResyncPeriod,
+		ChannelTimeout: defaultChannelTimeout,
 	}
 }
