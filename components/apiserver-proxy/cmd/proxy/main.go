@@ -39,6 +39,7 @@ type config struct {
 	auth                  proxy.Config
 	tls                   tlsConfig
 	kubeconfigLocation    string
+	cors                  corsConfig
 }
 
 type tlsConfig struct {
@@ -46,6 +47,12 @@ type tlsConfig struct {
 	keyFile      string
 	minVersion   string
 	cipherSuites []string
+}
+
+type corsConfig struct {
+	allowHeaders []string
+	allowOrigin  []string
+	allowMethods []string
 }
 
 var versions = map[string]uint16{
@@ -72,6 +79,7 @@ func main() {
 			},
 			Authorization: &authz.Config{},
 		},
+		cors: corsConfig{},
 	}
 	flagset := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
@@ -110,6 +118,10 @@ func main() {
 	//Kubeconfig flag
 	flagset.StringVar(&cfg.kubeconfigLocation, "kubeconfig", "", "Path to a kubeconfig file, specifying how to connect to the API server. If unset, in-cluster configuration will be used")
 
+	// CORS flags
+	flagset.StringSliceVar(&cfg.cors.allowOrigin, "cors-allow-origin", []string{"*"}, "List of CORS allowed origins")
+	flagset.StringSliceVar(&cfg.cors.allowMethods, "cors-allow-methods", []string{"GET", "POST", "PUT", "DELETE"}, "List of CORS allowed methods")
+	flagset.StringSliceVar(&cfg.cors.allowHeaders, "cors-allow-headers", []string{"Authorization", "Content-Type"}, "List of CORS allowed headers")
 	flagset.Parse(os.Args[1:])
 	kcfg := initKubeConfig(cfg.kubeconfigLocation)
 
@@ -185,8 +197,9 @@ func main() {
 
 	if cfg.secureListenAddress != "" {
 		srv := &http.Server{Handler: handlers.CORS(
-			handlers.AllowedMethods([]string{"GET", "POST", "PUT", "DELETE"}),
-			handlers.AllowedHeaders([]string{"Authorization", "Content-Type"}),
+			handlers.AllowedOrigins(cfg.cors.allowOrigin),
+			handlers.AllowedMethods(cfg.cors.allowMethods),
+			handlers.AllowedHeaders(cfg.cors.allowHeaders),
 		)(mux)}
 
 		if cfg.tls.certFile == "" && cfg.tls.keyFile == "" {
