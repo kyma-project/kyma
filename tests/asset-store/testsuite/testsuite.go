@@ -19,7 +19,7 @@ type Config struct {
 	ClusterBucketName string        `envconfig:"default=test-cluster-bucket"`
 	CommonAssetPrefix string        `envconfig:"default=test"`
 	UploadServiceUrl  string        `envconfig:"default=http://localhost:3000/v1/upload"`
-	WaitTimeout       time.Duration `envconfig:"default=3m"`
+	WaitTimeout       time.Duration `envconfig:"default=2m"`
 }
 
 type TestSuite struct {
@@ -196,12 +196,16 @@ func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
 		return nil, err
 	}
 
+	t.g.Expect(assetFiles).NotTo(gomega.HaveLen(0))
+
 	allFiles = append(allFiles, assetFiles...)
 
 	clusterAssetFiles, err := t.clusterAsset.PopulateUploadFiles(t.assetDetails)
 	if err != nil {
 		return nil, err
 	}
+
+	t.g.Expect(clusterAssetFiles).NotTo(gomega.HaveLen(0))
 
 	allFiles = append(allFiles, clusterAssetFiles...)
 

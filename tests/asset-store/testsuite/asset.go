@@ -116,18 +116,6 @@ func (a *asset) PopulateUploadFiles(assets []assetData) ([]uploadedFile, error) 
 	var files []uploadedFile
 
 	for _, asset := range assets {
-		err := waiter.WaitAtMost(func() (bool, error) {
-			_, err := a.Get(asset.Name)
-			if err != nil {
-				return false, err
-			}
-
-			return true, nil
-		}, a.waitTimeout)
-		if err != nil {
-			return nil, err
-		}
-
 		res, err := a.Get(asset.Name)
 		if err != nil {
 			return nil, err

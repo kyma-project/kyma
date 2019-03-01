@@ -36,8 +36,8 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 #
 
 RUN mkdir -p /app/tests
-COPY --from=builder ${TEST_DIR}/main.test /app/tests/
-COPY --from=builder ${TEST_DIR}/testdata/ /app/tests/testdata/
+COPY --from=builder ${TEST_DIR}/main.test /app/
+COPY --from=builder ${TEST_DIR}/testdata/ /app/testdata/
 
 #
 # Run tests
