@@ -11,6 +11,8 @@ spec:
     metadata:
       name: {{ .Release.Name }}-loadbalancer-migration
       namespace: kyma-system
+      annotations:
+        sidecar.istio.io/inject: “false”
     spec:
       serviceAccountName: {{ .Release.Name }}-loadbalancer-migration-service-account
       restartPolicy: OnFailure
