@@ -22,7 +22,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 	buildEnv="env CGO_ENABLED=0"
 fi
 
-${buildEnv} go test ./tester_test.go -c
+${buildEnv} go test ./main_test.go -c
 goBuildResult=$?
 rm main.test
 
