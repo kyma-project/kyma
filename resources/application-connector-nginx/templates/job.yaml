@@ -2,10 +2,12 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ .Release.Name }}-loadbalancer-migration
+  namespace: kyma-system
 spec:
   template:
     metadata:
       name: {{ .Release.Name }}-loadbalancer-migration
+      namespace: kyma-system
     spec:
       serviceAccountName: {{ .Release.Name }}-loadbalancer-migration-service-account
       restartPolicy: OnFailure
