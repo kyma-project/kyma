@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env bash -e
 # EXPECTED ENVS
 # - DOMAIN (optional) - Static domain for which to generate certs
 # - TLS_CERT (optinal) - Current TLS certificate
