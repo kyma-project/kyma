@@ -17,6 +17,7 @@ const (
 	CredentialsOAuthType          = "OAuth"
 	CredentialsBasicType          = "Basic"
 	CredentialsCertificateGenType = "CertificateGen"
+	CredentialsCSRFTokenType      = "CSRFToken"
 )
 
 // Manager contains operations for managing Application CRD
@@ -40,9 +41,8 @@ type ServiceAPI struct {
 }
 
 type Credentials struct {
-	Type              string
-	SecretName        string
-	AuthenticationUrl string
+	Type       string
+	SecretName string
 }
 
 // Service represents a service stored in Application RE
