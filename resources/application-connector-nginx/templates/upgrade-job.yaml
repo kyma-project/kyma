@@ -1,6 +1,6 @@
-#Job that allows upgrade from 0.7 to 0.8
-#In 0.8 nginx service is extracted to _this_ chart, but binds to the same IP Address, this creates a conflict.
-#This job deletes existing nginx service (installed by 0.7) so that the new one can be provisioned.
+#Job that allows upgrade of Kyma from version 0.7 to 0.8
+#In 0.8 nginx LoadBalancer is extracted to _this_ chart, but still binds to the same IP Address. This creates a conflict.
+#This job deletes existing nginx LoadBalancer (installed by 0.7) so that the new one can be provisioned.
 apiVersion: batch/v1
 kind: Job
 metadata:
