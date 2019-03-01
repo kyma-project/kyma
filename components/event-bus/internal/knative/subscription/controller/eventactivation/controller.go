@@ -20,7 +20,7 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 
 	var err error
 
-	// Setup a new controller to Reconcile CEventActivation.
+	// Setup a new controller to Reconcile EventActivation.
 	r := &reconciler{
 		recorder: mgr.GetRecorder(controllerAgentName),
 	}
@@ -32,7 +32,7 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 		return nil, err
 	}
 
-	// Watch ClusterChannelProvisioners.
+	// Watch EventActivations.
 	err = c.Watch(&source.Kind{
 		Type: &eventactivationv1alpha1.EventActivation{},
 	}, &handler.EnqueueRequestForObject{})

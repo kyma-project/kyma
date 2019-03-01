@@ -57,6 +57,7 @@ rules:
   - ""
   resources:
   - services
+  - events
   verbs:
   - get
   - list

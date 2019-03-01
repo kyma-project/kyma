@@ -50,7 +50,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, err
 	}
 
-	log.Info("Event Activation instance found", "UID", string(ea.ObjectMeta.UID))
+	log.Info("Reconciling Event Activation", "UID", string(ea.ObjectMeta.UID))
 
 	// Modify a copy, not the original.
 	ea = ea.DeepCopy()
@@ -59,11 +59,11 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	// updates regardless of whether the reconcile error out.
 	requeue, reconcileErr := r.reconcile(ctx, ea)
 	if reconcileErr != nil {
-		log.Error(reconcileErr, "Reconciling EventActivation")
+		log.Error(reconcileErr, "Error reconciling EventActivation")
 	}
 
 	if updateStatusErr := util.UpdateEventActivation(ctx, r.client, ea); updateStatusErr != nil {
-		log.Error(updateStatusErr, "Updating EventActivation status")
+		log.Error(updateStatusErr, "Error updating EventActivation status")
 		return reconcile.Result{}, updateStatusErr
 	}
 

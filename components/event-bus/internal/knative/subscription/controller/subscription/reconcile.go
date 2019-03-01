@@ -2,101 +2,95 @@ package subscription
 
 import (
 	"context"
-	"log"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
-// Add creates a new Subscription Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
-// and Start it when the Manager is Started.
-func Add(mgr manager.Manager, opts *opts.Options) error {
-	return add(mgr, newReconciler(mgr, opts))
+const (
+	// Name is the name of the Kyma Subscription.
+	Name = "subscription"
+
+	// Name of the corev1.Events emitted from the reconciliation process
+	subReconciled         = "SubscriptionReconciled"
+	subReconcileFailed    = "SubscriptionReconcileFailed"
+	subUpdateStatusFailed = "SubscriptionUpdateStatusFailed"
+
+	// Finalizer for deleting Knative Subscriptions
+	finalizerName = "subscription.finalizers.kyma-project.io"
+)
+
+type reconciler struct {
+	client   client.Client
+	recorder record.EventRecorder
+	opts	 *opts.Options
 }
 
-// newReconciler returns a new reconcile.Reconciler
-func newReconciler(mgr manager.Manager, opts *opts.Options) reconcile.Reconciler {
-	return &ReconcileSubscription{Client: mgr.GetClient(), scheme: mgr.GetScheme(), opts: opts}
-}
+// Verify the struct implements reconcile.Reconciler
+var _ reconcile.Reconciler = &reconciler{}
 
-// add adds a new Controller to mgr with r as the reconcile.Reconciler
-func add(mgr manager.Manager, r reconcile.Reconciler) error {
-	// Create a new controller
-	c, err := controller.New("subscription-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to Subscription
-	err = c.Watch(&source.Kind{Type: &eventingv1alpha1.Subscription{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		return err
-	}
-
+func (r *reconciler) InjectClient(c client.Client) error {
+	r.client = c
 	return nil
 }
 
-var _ reconcile.Reconciler = &ReconcileSubscription{}
+func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	log.Info("Reconcile: ", "request", request)
 
-// ReconcileSubscription reconciles a Subscription object
-type ReconcileSubscription struct {
-	client.Client
-	scheme *runtime.Scheme
-	opts   *opts.Options
-}
-
-// Reconcile reads that state of the cluster for a Subscription object and makes changes based on the state read
-// and what is in the Subscription.Spec
-// TODO(user): Modify this Reconcile function to implement your Controller logic.  The scaffolding writes
-// a Deployment as an example
-// Automatically generate RBAC rules to allow the Controller to read and write Deployments
-// +kubebuilder:rbac:groups=apps,resources=deployments,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=eventing.kyma-project.io,resources=subscriptions,verbs=get;list;watch;create;update;patch;delete
-func (r *ReconcileSubscription) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+	ctx := context.TODO()
 	// Fetch the Subscription instance
-	instance := &eventingv1alpha1.Subscription{}
-	err := r.Get(context.TODO(), request.NamespacedName, instance)
+	subscription := &eventingv1alpha1.Subscription{}
+	err := r.client.Get(ctx, request.NamespacedName, subscription)
+
+	// The Subscription may have been deleted since it was added to the workqueue. If
+	// so, there is nothing to be done.
+	if errors.IsNotFound(err) {
+		log.Info("Could not find Subscription: ", "err", err)
+		return reconcile.Result{}, nil
+	}
+
+	// Any other error should be retried in another reconciliation.
 	if err != nil {
-		if errors.IsNotFound(err) {
-			log.Printf("Kyma Subscription is deleted: %v", err)
-			// Object not found, return.  Created objects are automatically garbage collected.
-			// For additional cleanup logic use finalizers.
-			return reconcile.Result{}, nil
-		}
-		// Error reading the object - requeue the request.
-		log.Printf("Could not fetch Kyma Subscription: %v", err)
+		log.Error(err,"Unable to Get Subscription object")
 		return reconcile.Result{}, err
 	}
 
-	subscription := instance.DeepCopy()
+	log.Info("Reconciling Subscription", "UID", string(subscription.ObjectMeta.UID))
 
-	requeue, err := r.reconcile(subscription)
-	if err != nil {
-		log.Printf("Error reconciling Subscription: %v", err)
+	subscription = subscription.DeepCopy()
+
+	requeue, reconcileErr := r.reconcile(ctx, subscription)
+	if reconcileErr != nil {
+		log.Error(reconcileErr, "Error reconciling Subscription")
+		r.recorder.Eventf(subscription, corev1.EventTypeWarning, subReconcileFailed, "Subscription reconciliation failed: %v", err)
 	} else {
-		log.Printf("Subscription reconciled")
+		log.Info("Subscription reconciled")
+		r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled, "Subscription reconciled: %q", subscription.Name)
 	}
+
+	/*if err = util.UpdateSubscriptionStatus(ctx, r.client, subscription); err != nil {
+		logging.FromContext(ctx).Info("Error updating Subscription Status", zap.Error(err))
+		r.recorder.Eventf(ccp, corev1.EventTypeWarning, subUpdateStatusFailed, "Failed to update Subscription's status: %v", err)
+		return reconcile.Result{}, err
+	}*/
 
 	return reconcile.Result{
 		Requeue: requeue,
-	}, err
+	}, reconcileErr
 }
 
-func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscription) (bool, error) {
+func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alpha1.Subscription) (bool, error) {
 	// init the knative lib
 	knativeLib, err := knative.GetKnativeLib()
 	if err != nil {
-		log.Fatalf("Failed to get knative library: %v", err)
+		log.Error(err, "Failed to get Knative library")
+		return false, err
 	}
 
 	knativeSubsName := subscription.Name
@@ -106,14 +100,12 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 	knativeChannelProvisioner := "natss"
 	timeout := r.opts.ChannelTimeout
 
-	// Finalizer for deleting Knative Subscriptions
-	finalizerName := "subscription.finalizers.kyma-project.io"
 	if subscription.ObjectMeta.DeletionTimestamp.IsZero() {
 		// The object is not being deleted, so if it does not have our finalizer,
 		// then lets add the finalizer and update the object.
 		if !containsString(subscription.ObjectMeta.Finalizers, finalizerName) {
 			subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
-			if err := r.Update(context.Background(), subscription); err != nil {
+			if err := r.client.Update(context.Background(), subscription); err != nil {
 				return true, nil
 			}
 		}
@@ -121,7 +113,7 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 		// The object is being deleted
 		if containsString(subscription.ObjectMeta.Finalizers, finalizerName) {
 			// our finalizer is present, so lets handle our external dependency
-			if err := r.deleteExternalDependency(subscription, knativeLib, knativeChannelName); err != nil {
+			if err := r.deleteExternalDependency(ctx, subscription, knativeLib, knativeChannelName); err != nil {
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried
 				return false, err
@@ -129,7 +121,7 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 
 			// remove our finalizer from the list and update it.
 			subscription.ObjectMeta.Finalizers = removeString(subscription.ObjectMeta.Finalizers, finalizerName)
-			if err := r.Update(context.Background(), subscription); err != nil {
+			if err := r.client.Update(context.Background(), subscription); err != nil {
 				return true, nil
 			}
 		}
@@ -149,7 +141,7 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 			if err != nil {
 				return false, err
 			}
-			log.Printf("Knative Channel is created: %v", knativeChannel)
+			log.Info("Knative Channel is created", "Channel", knativeChannel)
 		}
 
 		// Check if Knative Subsription already exists, if not create one.
@@ -161,7 +153,7 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 			if err != nil {
 				return false, err
 			}
-			log.Printf("Knative Subscription is created: %s", knativeSubsName)
+			log.Info("Knative Subscription is created", "Subscription", knativeSubsName)
 		} else {
 			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
 			if knativeChannelName != sub.Spec.Channel.Name || knativeSubsURI != *sub.Spec.Subscriber.DNSName {
@@ -169,12 +161,12 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 				if err != nil {
 					return false, err
 				}
-				log.Printf("Knative Subscription is deleted: %s", knativeSubsName)
+				log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
 				err = knativeLib.CreateSubscription(knativeSubsName, knativeSubsNamespace, knativeChannelName, &knativeSubsURI)
 				if err != nil {
 					return false, err
 				}
-				log.Printf("Knative Subscription is re-created: %s", knativeSubsName)
+				log.Info("Knative Subscription is re-created", "Subscription", knativeSubsName)
 			}
 		}
 	} else {
@@ -187,7 +179,7 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 			if err != nil {
 				return false, err
 			}
-			log.Printf("Knative Subscription is deleted: %s", knativeSubsName)
+			log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
 		}
 
 		// Check if Channel has any other Subscription, if not, delete it.
@@ -201,7 +193,7 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 				if err != nil {
 					return false, err
 				}
-				log.Printf("Knative Channel is deleted: %v", knativeChannel)
+				log.Info("Knative Channel is deleted", "Channel", knativeChannel)
 			}
 		}
 	}
@@ -209,8 +201,8 @@ func (r *ReconcileSubscription) reconcile(subscription *eventingv1alpha1.Subscri
 	return false, nil
 }
 
-func (r *ReconcileSubscription) deleteExternalDependency(subscription *eventingv1alpha1.Subscription, knativeLib *knative.KnativeLib, channelName string) error {
-	log.Printf("Deleting the external dependencies")
+func (r *reconciler) deleteExternalDependency(ctx context.Context, subscription *eventingv1alpha1.Subscription, knativeLib *knative.KnativeLib, channelName string) error {
+	log.Info("Deleting the external dependencies")
 
 	// In case Knative Subscription exists, delete it.
 	knativeSubs, err := knativeLib.GetSubscription(subscription.Name, subscription.Namespace)
@@ -221,7 +213,7 @@ func (r *ReconcileSubscription) deleteExternalDependency(subscription *eventingv
 		if err != nil {
 			return err
 		}
-		log.Printf("Knative Subscription is deleted: %s", knativeSubs.Name)
+		log.Info("Knative Subscription is deleted", "Subscription", knativeSubs.Name)
 	}
 
 	// Check if Channel has any other Subscription, if not, delete it.
@@ -235,7 +227,7 @@ func (r *ReconcileSubscription) deleteExternalDependency(subscription *eventingv
 			if err != nil {
 				return err
 			}
-			log.Printf("Knative Channel is deleted: %v", knativeChannel)
+			log.Info("Knative Channel is deleted", "Channel", knativeChannel)
 		}
 	}
 	return nil
