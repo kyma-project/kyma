@@ -19,6 +19,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/configuration-snippet: |
       proxy_set_header Client-Certificate-Subject $ssl_client_s_dn;
+      proxy_set_header Certificate-Header $ssl_client_escaped_cert;
 spec:
   rules:
   - host: gateway.{{ .Values.global.domainName }}
@@ -37,6 +38,14 @@ spec:
           serviceName: {{ .Chart.Name }}-external-api
           servicePort: {{ .Values.ingress.externalapi.port }}
       - path: /v1/runtimes/certificates/renewals
+        backend:
+          serviceName: {{ .Chart.Name }}-external-api
+          servicePort: {{ .Values.ingress.externalapi.port }}
+      - path: /v1/applications/certificates/revocation
+        backend:
+          serviceName: {{ .Chart.Name }}-external-api
+          servicePort: {{ .Values.ingress.externalapi.port }}
+      - path: /v1/runtimes/certificates/revocation
         backend:
           serviceName: {{ .Chart.Name }}-external-api
           servicePort: {{ .Values.ingress.externalapi.port }}
