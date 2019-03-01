@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	"fmt"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
@@ -13,7 +14,7 @@ type assetData struct {
 	Mode v1alpha2.AssetMode
 }
 
-func convertToAssetResourceDetails(response *upload.Response) []assetData {
+func convertToAssetResourceDetails(response *upload.Response, prefix string) []assetData {
 	var assets []assetData
 	for _, file := range response.UploadedFiles {
 		var mode v1alpha2.AssetMode
@@ -24,7 +25,7 @@ func convertToAssetResourceDetails(response *upload.Response) []assetData {
 		}
 
 		asset := assetData{
-			Name: file.FileName,
+			Name: fmt.Sprintf("%s-%s", prefix, file.FileName),
 			URL:  file.RemotePath,
 			Mode: mode,
 		}

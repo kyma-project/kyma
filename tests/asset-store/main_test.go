@@ -13,7 +13,7 @@ import (
 // config contains configuration fields used for upload
 type config struct {
 	KubeconfigPath string `envconfig:"optional"`
-	TestSuite      testsuite.Config
+	Test           testsuite.Config
 }
 
 func TestAssetStore(t *testing.T) {
@@ -25,7 +25,7 @@ func TestAssetStore(t *testing.T) {
 	restConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	failOnError(g, err)
 
-	testSuite, err := testsuite.New(restConfig, cfg.TestSuite, t, g)
+	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
 	failOnError(g, err)
 
 	testSuite.Run()

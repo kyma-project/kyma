@@ -10,13 +10,13 @@ WORKDIR ${BASE_APP_DIR}
 COPY ./internal/ ${BASE_APP_DIR}/internal/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
-COPY ./tester_test.go ${BASE_APP_DIR}
+COPY ./main_test.go ${BASE_APP_DIR}
 
 #
 # Build tests
 #
 
-RUN CGO_ENABLED=0 go test tester_test.go -c
+RUN CGO_ENABLED=0 go test main_test.go -c
 
 FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git

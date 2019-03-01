@@ -16,9 +16,8 @@ import (
 type Config struct {
 	Namespace         string        `envconfig:"default=test-asset-store"`
 	BucketName        string        `envconfig:"default=test-bucket"`
-	AssetName         string        `envconfig:"default=test-asset"`
 	ClusterBucketName string        `envconfig:"default=test-cluster-bucket"`
-	ClusterAssetName  string        `envconfig:"default=test-cluster-asset"`
+	CommonAssetPrefix string        `envconfig:"default=test"`
 	UploadServiceUrl  string        `envconfig:"default=http://localhost:3000/v1/upload"`
 	WaitTimeout       time.Duration `envconfig:"default=3m"`
 }
@@ -147,7 +146,7 @@ func (t *TestSuite) createAssets() error {
 		return fmt.Errorf("during file upload: %+v", uploadResult.Errors)
 	}
 
-	t.assetDetails = convertToAssetResourceDetails(uploadResult)
+	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
 	err = t.asset.CreateMany(t.assetDetails)
 	if err != nil {
