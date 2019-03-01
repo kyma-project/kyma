@@ -39,7 +39,7 @@ spec:
     - name: "kyma-integration"
       namespace: "kyma-integration"
     - name: "application-connector-nginx"
-      namespace: "kyma-integration"
+      namespace: "kyma-system"
     - name: "application-connector"
       namespace: "kyma-integration"
     - name: "ark"
