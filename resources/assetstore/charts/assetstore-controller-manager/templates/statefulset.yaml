@@ -64,6 +64,8 @@ spec:
               secretKeyRef:
                 name: assetstore-minio
                 key: secretkey
+          - name: APP_STORE_VERIFY_SSL
+            value: false
           - name: APP_TEMPORARY_DIRECTORY
             value: /tmp
         resources:
