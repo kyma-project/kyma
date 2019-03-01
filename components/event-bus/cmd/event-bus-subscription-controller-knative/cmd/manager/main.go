@@ -23,6 +23,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	subscriptionController "github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"net/http"
 	"os"
@@ -73,6 +74,12 @@ func main() {
 	log.Info("Setting up subscription controller")
 	if err := subscriptionController.AddToManager(mgr); err != nil {
 		log.Error(err, "unable to register subscription controller to the manager")
+		os.Exit(1)
+	}
+
+	_, err = eventactivation.ProvideController(mgr)
+	if err != nil {
+		log.Error(err,"Unable to create Event Activation controller")
 		os.Exit(1)
 	}
 
