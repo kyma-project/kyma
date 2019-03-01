@@ -10,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-const basePath = "internal/testsuite/testdata"
+const basePath = "testdata"
 
 type testData struct {
 	url string

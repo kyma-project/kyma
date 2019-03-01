@@ -8,6 +8,7 @@ WORKDIR ${BASE_APP_DIR}
 #
 
 COPY ./internal/ ${BASE_APP_DIR}/internal/
+COPY ./testdata/ ${BASE_APP_DIR}/testdata/
 COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./main_test.go ${BASE_APP_DIR}
@@ -22,7 +23,7 @@ FROM alpine:3.8
 LABEL source = git@github.com:kyma-project/kyma.git
 WORKDIR /app
 
-ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/asset-store/main.test
+ENV TEST_DIR /go/src/github.com/kyma-project/kyma/tests/asset-store
 
 #
 # Install certificates
@@ -35,7 +36,8 @@ RUN apk update && apk add ca-certificates && rm -rf /var/cache/apk/*
 #
 
 RUN mkdir -p /app/tests
-COPY --from=builder ${TEST_DIR} /app/tests/
+COPY --from=builder ${TEST_DIR}/main.test /app/tests/
+COPY --from=builder ${TEST_DIR}/testdata/ /app/tests/testdata/
 
 #
 # Run tests
