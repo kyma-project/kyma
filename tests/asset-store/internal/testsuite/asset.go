@@ -1,6 +1,8 @@
 package testsuite
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
@@ -10,14 +12,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"time"
 )
 
 type asset struct {
-	resCli     *resource.Resource
-	BucketName string
-	Namespace  string
-	waitTimeout       time.Duration
+	resCli      *resource.Resource
+	BucketName  string
+	Namespace   string
+	waitTimeout time.Duration
 }
 
 func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *asset {
@@ -28,8 +29,8 @@ func newAsset(dynamicCli dynamic.Interface, namespace string, bucketName string,
 			Resource: "assets",
 		}, namespace, logFn),
 		waitTimeout: waitTimeout,
-		BucketName:bucketName,
-		Namespace:namespace,
+		BucketName:  bucketName,
+		Namespace:   namespace,
 	}
 }
 
@@ -37,21 +38,21 @@ func (a *asset) CreateMany(assets []assetData) error {
 	for _, asset := range assets {
 		asset := &v1alpha2.Asset{
 			TypeMeta: metav1.TypeMeta{
-				Kind: "Asset",
+				Kind:       "Asset",
 				APIVersion: v1alpha2.SchemeGroupVersion.String(),
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      asset.Name,
 				Namespace: a.Namespace,
 			},
-			Spec:v1alpha2.AssetSpec{
+			Spec: v1alpha2.AssetSpec{
 				CommonAssetSpec: v1alpha2.CommonAssetSpec{
 					BucketRef: v1alpha2.AssetBucketRef{
 						Name: a.BucketName,
 					},
-					Source:v1alpha2.AssetSource{
-						Url: asset.URL,
-						Mode:asset.Mode,
+					Source: v1alpha2.AssetSource{
+						Url:  asset.URL,
+						Mode: asset.Mode,
 					},
 				},
 			},
@@ -168,4 +169,3 @@ func (a *asset) DeleteMany(assets []assetData) error {
 
 	return nil
 }
-

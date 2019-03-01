@@ -1,6 +1,8 @@
 package testsuite
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
@@ -10,7 +12,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"time"
 )
 
 type clusterAsset struct {
@@ -19,7 +20,7 @@ type clusterAsset struct {
 	waitTimeout       time.Duration
 }
 
-func newClusterAsset(dynamicCli dynamic.Interface, clusterBucketName string, waitTimeout time.Duration,  logFn func(format string, args ...interface{})) *clusterAsset {
+func newClusterAsset(dynamicCli dynamic.Interface, clusterBucketName string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *clusterAsset {
 	return &clusterAsset{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,

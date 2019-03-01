@@ -2,33 +2,34 @@ package testsuite
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/dynamic"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
-	"testing"
-	"time"
 )
 
 type Config struct {
-	Namespace string `envconfig:"default=test-asset-store"`
-	BucketName string `envconfig:"default=test-bucket"`
-	AssetName string `envconfig:"default=test-asset"`
-	ClusterBucketName string `envconfig:"default=test-cluster-bucket"`
-	ClusterAssetName string `envconfig:"default=test-cluster-asset"`
-	UploadServiceUrl string `envconfig:"default=http://localhost:3000/v1/upload"`
-	WaitTimeout  time.Duration `envconfig:"default=3m"`
+	Namespace         string        `envconfig:"default=test-asset-store"`
+	BucketName        string        `envconfig:"default=test-bucket"`
+	AssetName         string        `envconfig:"default=test-asset"`
+	ClusterBucketName string        `envconfig:"default=test-cluster-bucket"`
+	ClusterAssetName  string        `envconfig:"default=test-cluster-asset"`
+	UploadServiceUrl  string        `envconfig:"default=http://localhost:3000/v1/upload"`
+	WaitTimeout       time.Duration `envconfig:"default=3m"`
 }
 
 type TestSuite struct {
-	namespace *namespace.Namespace
-	bucket *bucket
+	namespace     *namespace.Namespace
+	bucket        *bucket
 	clusterBucket *clusterBucket
-	fileUpload *testData
-	asset *asset
-	clusterAsset *clusterAsset
+	fileUpload    *testData
+	asset         *asset
+	clusterAsset  *clusterAsset
 
 	t *testing.T
 	g *gomega.GomegaWithT
@@ -53,7 +54,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 
 	b := newBucket(dynamicCli, cfg.BucketName, cfg.Namespace, cfg.WaitTimeout, t.Logf)
 	cb := newClusterBucket(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
-	a := newAsset(dynamicCli, cfg.Namespace, cfg.BucketName,  cfg.WaitTimeout, t.Logf)
+	a := newAsset(dynamicCli, cfg.Namespace, cfg.BucketName, cfg.WaitTimeout, t.Logf)
 	ca := newClusterAsset(dynamicCli, cfg.ClusterBucketName, cfg.WaitTimeout, t.Logf)
 
 	return &TestSuite{
@@ -63,8 +64,8 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		fileUpload:    newTestData(cfg.UploadServiceUrl),
 		asset:         a,
 		clusterAsset:  ca,
-		t: t,
-		g: g,
+		t:             t,
+		g:             g,
 
 		cfg: cfg,
 	}, nil
@@ -189,7 +190,6 @@ func (t *TestSuite) waitForAssetsDeleted() error {
 	return nil
 }
 
-
 func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
 	var allFiles []uploadedFile
 	assetFiles, err := t.asset.PopulateUploadFiles(t.assetDetails)
@@ -259,7 +259,6 @@ func (t *TestSuite) deleteBuckets() error {
 
 	return nil
 }
-
 
 func failOnError(g *gomega.GomegaWithT, err error) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())

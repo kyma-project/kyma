@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"io"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"os"
@@ -94,7 +95,12 @@ func Do(directory string, input UploadInput, url string) (*Response, error) {
 		return nil, errors.Wrap(err, "while doing upload request")
 	}
 
-	defer result.Body.Close()
+	defer func() {
+		err := result.Body.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
 
 	if result.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("Upload status code: %d. Expected %d", result.StatusCode, http.StatusOK)

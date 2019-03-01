@@ -1,6 +1,8 @@
 package testsuite
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
@@ -9,14 +11,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"time"
 )
 
 type bucket struct {
-	resCli        *resource.Resource
-	name string
-	namespace string
-	waitTimeout       time.Duration
+	resCli      *resource.Resource
+	name        string
+	namespace   string
+	waitTimeout time.Duration
 }
 
 func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *bucket {
@@ -26,25 +27,25 @@ func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "buckets",
 		}, namespace, logFn),
-		name: name,
-		namespace:namespace,
-		waitTimeout:waitTimeout,
+		name:        name,
+		namespace:   namespace,
+		waitTimeout: waitTimeout,
 	}
 }
 
 func (b *bucket) Create() error {
 	bucket := &v1alpha2.Bucket{
 		TypeMeta: metav1.TypeMeta{
-			Kind: "Bucket",
+			Kind:       "Bucket",
 			APIVersion: v1alpha2.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: b.name,
+			Name:      b.name,
 			Namespace: b.namespace,
 		},
-		Spec:v1alpha2.BucketSpec{
+		Spec: v1alpha2.BucketSpec{
 			CommonBucketSpec: v1alpha2.CommonBucketSpec{
-				Policy:v1alpha2.BucketPolicyReadOnly,
+				Policy: v1alpha2.BucketPolicyReadOnly,
 			},
 		},
 	}
@@ -60,14 +61,14 @@ func (b *bucket) Create() error {
 func (b *bucket) WaitForStatusReady() error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 
-			res, err := b.Get(b.name)
-			if err != nil {
-				return false, err
-			}
+		res, err := b.Get(b.name)
+		if err != nil {
+			return false, err
+		}
 
-			if res.Status.Phase != v1alpha2.BucketReady {
-				return false, nil
-			}
+		if res.Status.Phase != v1alpha2.BucketReady {
+			return false, nil
+		}
 
 		return true, nil
 	}, b.waitTimeout)

@@ -1,6 +1,8 @@
 package testsuite
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
@@ -9,14 +11,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
-	"time"
 )
 
 type clusterBucket struct {
-	resCli        *resource.Resource
-	name string
-	namespace string
-	waitTimeout       time.Duration
+	resCli      *resource.Resource
+	name        string
+	namespace   string
+	waitTimeout time.Duration
 }
 
 func newClusterBucket(dynamicCli dynamic.Interface, name string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *clusterBucket {
@@ -26,24 +27,24 @@ func newClusterBucket(dynamicCli dynamic.Interface, name string, waitTimeout tim
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "clusterbuckets",
 		}, "", logFn),
-		name: name,
-		waitTimeout:waitTimeout,
+		name:        name,
+		waitTimeout: waitTimeout,
 	}
 }
 
 func (b *clusterBucket) Create() error {
 	clusterBucket := &v1alpha2.ClusterBucket{
 		TypeMeta: metav1.TypeMeta{
-			Kind: "ClusterBucket",
+			Kind:       "ClusterBucket",
 			APIVersion: v1alpha2.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: b.name,
+			Name:      b.name,
 			Namespace: b.namespace,
 		},
-		Spec:v1alpha2.ClusterBucketSpec{
+		Spec: v1alpha2.ClusterBucketSpec{
 			CommonBucketSpec: v1alpha2.CommonBucketSpec{
-				Policy:v1alpha2.BucketPolicyReadOnly,
+				Policy: v1alpha2.BucketPolicyReadOnly,
 			},
 		},
 	}

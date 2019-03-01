@@ -2,11 +2,12 @@ package testsuite
 
 import (
 	"fmt"
+	"os"
+
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/file"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/pkg/errors"
-	"os"
 )
 
 const basePath = "internal/testsuite/testdata"
@@ -28,8 +29,8 @@ func (u *testData) Upload() (*upload.Response, error) {
 
 	resp, err := upload.Do("", upload.UploadInput{
 		PrivateFiles: nil,
-		PublicFiles: publicFiles,
-		Directory: "",
+		PublicFiles:  publicFiles,
+		Directory:    "",
 	}, u.url)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while uploading files")
@@ -38,7 +39,7 @@ func (u *testData) Upload() (*upload.Response, error) {
 	return resp, nil
 }
 
-func (u *testData) loadFiles(paths []string) ([]*os.File, error){
+func (u *testData) loadFiles(paths []string) ([]*os.File, error) {
 	var files []*os.File
 
 	for _, path := range paths {
@@ -99,8 +100,8 @@ type uploadedFileOwner struct {
 
 type uploadedFile struct {
 	AssetPath string
-	URL string
-	Owner uploadedFileOwner
+	URL       string
+	Owner     uploadedFileOwner
 }
 
 func uploadedFiles(ref v1alpha2.AssetStatusRef, ownerName, ownerKind string) []uploadedFile {
@@ -110,7 +111,7 @@ func uploadedFiles(ref v1alpha2.AssetStatusRef, ownerName, ownerKind string) []u
 		url := fmt.Sprintf("%s/%s", ref.BaseUrl, singleAsset)
 		files = append(files, uploadedFile{
 			AssetPath: singleAsset,
-			URL: url,
+			URL:       url,
 			Owner: uploadedFileOwner{
 				Name: ownerName,
 				Kind: ownerKind,

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -29,7 +30,12 @@ func Exists(url string) (bool, error) {
 	if err != nil {
 		return false, errors.Wrapf(err, "while requesting file from URL %s", url)
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Print(err)
+		}
+	}()
 
 	return res.StatusCode == http.StatusOK, nil
 }
@@ -53,7 +59,12 @@ func download(url string) ([]byte, error) {
 	if err != nil {
 		return nil, errors.Wrapf(err, "while requesting file from URL %s", url)
 	}
-	defer res.Body.Close()
+	defer func() {
+		err := res.Body.Close()
+		if err != nil {
+			log.Print(err)
+		}
+	}()
 
 	if res.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("Invalid status code while downloading file from URL %s: %d. Expected: %d", url, res.StatusCode, http.StatusOK)

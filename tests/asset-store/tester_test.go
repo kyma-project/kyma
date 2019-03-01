@@ -1,12 +1,13 @@
 package main
 
 import (
+	"testing"
+
 	"github.com/kyma-project/kyma/tests/asset-store/internal/testsuite"
 	"github.com/onsi/gomega"
 	"github.com/vrischmann/envconfig"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"testing"
 )
 
 // config contains configuration fields used for upload

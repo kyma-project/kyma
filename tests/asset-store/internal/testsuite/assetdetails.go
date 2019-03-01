@@ -1,14 +1,15 @@
 package testsuite
 
 import (
+	"strings"
+
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
-	"strings"
 )
 
 type assetData struct {
 	Name string
-	URL string
+	URL  string
 	Mode v1alpha2.AssetMode
 }
 
@@ -27,8 +28,8 @@ func convertToAssetResourceDetails(response *upload.Response) []assetData {
 
 		asset := assetData{
 			Name: file.FileName,
-			URL: url,
-			Mode:mode,
+			URL:  url,
+			Mode: mode,
 		}
 		assets = append(assets, asset)
 	}
