@@ -37,6 +37,16 @@ global:
     channel:
       maxInactivity: "48h"
     clusterID: "kyma-nats-streaming"
+    users:
+      stan:
+        user: "stan"
+        pass: ""
+      eventbus:
+        user: "eventbus"
+        pass: ""
+      knative:
+        user: "knative" 
+        pass: ""
   isLocalEnv: false
   knative: false
 # Custom configuration files used to override default NATS and NATS Streaming settings
@@ -45,5 +55,6 @@ global:
 configurationFiles:
   gnatsd.conf: |
     # configuration file used to override default NATS server settings
+    # authorization {} it handled via init container+secrets. don't extend here
   stan.conf: |
     # content of configuration file used to override default NATS Streaming server settings

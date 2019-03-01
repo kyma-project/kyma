@@ -21,6 +21,47 @@ spec:
         app: {{ .Values.global.natsStreaming.fullname }}
         release: {{ .Release.Name }}
     spec:
+      initContainers:
+      - name: prepare-config
+        image: pavelpavlov46/kyma:nats-init
+        volumeMounts:
+        {{- if .Values.configurationFiles }}
+        - name: config-volume-cm
+          mountPath: /mnt/cfg-cm
+        - name: config-volume
+          mountPath: /mnt/cfg-vol
+        {{- end }}
+        env:
+        - name: STAN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-stan
+              key: username
+        - name: STAN_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-stan
+              key: password
+        - name: EB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-eventbus
+              key: username
+        - name: EB_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-eventbus
+              key: password
+        - name: KN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-knative
+              key: username
+        - name: KN_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-knative
+              key: password              
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -55,11 +96,23 @@ spec:
         - --stan_config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/stan.conf
         {{- end }}
         - --max_inactivity={{ .Values.global.natsStreaming.channel.maxInactivity }}
+        - --user=$(STAN_USERNAME)
+        - --pass=$(STAN_PASSWD)
         env:
         - name: POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        - name: STAN_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-stan
+              key: username
+        - name: STAN_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: nats-user-stan
+              key: password              
         ports:
         {{- range $key, $value := .Values.global.natsStreaming.ports }}
         - name: {{ $key }}
@@ -85,6 +138,8 @@ spec:
       {{- if .Values.configurationFiles }}
       volumes:
       - name: config-volume
+        emptyDir: {}
+      - name: config-volume-cm
         configMap:
           name: {{ .Values.global.natsStreaming.fullname }}
       {{- end }}
