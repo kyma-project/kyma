@@ -1,5 +1,5 @@
 containerRegistry:
-  path: eu.gcr.io/kyma-project
+  path: docker.io
 
 image:
   dir: pr/
