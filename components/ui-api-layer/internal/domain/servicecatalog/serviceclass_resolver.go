@@ -235,15 +235,8 @@ func (r *serviceClassResolver) ServiceClassODataSpecField(ctx context.Context, o
 		return nil, nil
 	}
 
-	//var result gqlschema.JSON
-	//err = result.UnmarshalGQL(odataSpec.Raw)
-	//if err != nil {
-	//	glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.ApiSpec, pretty.ServiceClass, obj.ExternalName))
-	//	return nil, gqlerror.New(err, contentPretty.ApiSpec)
-	//}
-	//
-	//return &result, nil
-	return nil, nil
+	result := odataSpec.Raw
+	return &result, nil
 }
 
 func (r *serviceClassResolver) ServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {

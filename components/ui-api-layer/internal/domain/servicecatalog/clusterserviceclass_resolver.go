@@ -232,15 +232,8 @@ func (r *clusterServiceClassResolver) ClusterServiceClassODataSpecField(ctx cont
 		return nil, nil
 	}
 
-	//var result gqlschema.JSON
-	//err = result.UnmarshalGQL(odataSpec.Raw)
-	//if err != nil {
-	//	glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.OpenApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
-	//	return nil, gqlerror.New(err, contentPretty.OpenApiSpec)
-	//}
-
-	//return &odataSpec, nil
-	return nil, nil
+	result := odataSpec.Raw
+	return &result, nil
 }
 
 func (r *clusterServiceClassResolver) ClusterServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
