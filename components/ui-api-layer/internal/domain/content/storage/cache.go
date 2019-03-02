@@ -41,8 +41,6 @@ func newCache(store storeGetter, cacheClient Cache) *cache {
 	}
 
 	swc.registerHandler("apiSpec.json", swc.apiSpecHandler)
-	swc.registerHandler("apiSpec.json", swc.openApiSpecHandler)
-	swc.registerHandler("apiSpec.json", swc.odataSpecHandler)
 	swc.registerHandler("asyncApiSpec.json", swc.asyncApiSpecHandler)
 	swc.registerHandler("content.json", swc.contentHandler)
 
@@ -214,14 +212,6 @@ func (swc *cache) fromCache(parent, filename string) ([]byte, bool, error) {
 
 func (swc *cache) apiSpecHandler(id string) (interface{}, bool, error) {
 	return swc.store.ApiSpec(id)
-}
-
-func (swc *cache) openApiSpecHandler(id string) (interface{}, bool, error) {
-	return swc.store.OpenApiSpec(id)
-}
-
-func (swc *cache) odataSpecHandler(id string) (interface{}, bool, error) {
-	return swc.store.ODataSpec(id)
 }
 
 func (swc *cache) asyncApiSpecHandler(id string) (interface{}, bool, error) {

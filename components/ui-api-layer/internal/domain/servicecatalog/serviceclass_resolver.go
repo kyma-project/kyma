@@ -183,6 +183,69 @@ func (r *serviceClassResolver) ServiceClassApiSpecField(ctx context.Context, obj
 	return &result, nil
 }
 
+func (r *serviceClassResolver) ServiceClassOpenApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
+	if obj == nil {
+		glog.Error(errors.New("%s cannot be empty in order to resolve openApiSpec field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
+	}
+
+	//TODO: Fix getting docs for local ServiceClasses
+	openApiSpec, err := r.contentRetriever.OpenApiSpec().Find("service-class", obj.Name)
+	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.OpenApiSpec, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.OpenApiSpec)
+	}
+
+	if openApiSpec == nil {
+		return nil, nil
+	}
+
+	var result gqlschema.JSON
+	err = result.UnmarshalGQL(openApiSpec.Raw)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.OpenApiSpec, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.OpenApiSpec)
+	}
+
+	return &result, nil
+}
+
+func (r *serviceClassResolver) ServiceClassODataSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*string, error) {
+	if obj == nil {
+		glog.Error(errors.New("%s cannot be empty in order to resolve odataSpec field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
+	}
+
+	//TODO: Fix getting docs for local ServiceClasses
+	odataSpec, err := r.contentRetriever.ODataSpec().Find("service-class", obj.Name)
+	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.ODataSpec, pretty.ServiceClass, obj.ExternalName))
+		return nil, gqlerror.New(err, contentPretty.ODataSpec)
+	}
+
+	if odataSpec == nil {
+		return nil, nil
+	}
+
+	//var result gqlschema.JSON
+	//err = result.UnmarshalGQL(odataSpec.Raw)
+	//if err != nil {
+	//	glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.ApiSpec, pretty.ServiceClass, obj.ExternalName))
+	//	return nil, gqlerror.New(err, contentPretty.ApiSpec)
+	//}
+	//
+	//return &result, nil
+	return nil, nil
+}
+
 func (r *serviceClassResolver) ServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
 	if obj == nil {
 		glog.Error(errors.New("%s cannot be empty in order to resolve asyncApiSpec field"), pretty.ServiceClass)

@@ -139,7 +139,7 @@ type ServiceClass {
     instances: [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
     apiSpec: JSON @deprecated(reason: "No longer supported")
     openApiSpec: JSON
-    odataSpec: JSON
+    odataSpec: String
     asyncApiSpec: JSON
     content: JSON
 }
@@ -162,7 +162,7 @@ type ClusterServiceClass {
     instances(namespace: String): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", isChildResolver: true})
     apiSpec: JSON @deprecated(reason: "No longer supported")
     openApiSpec: JSON
-    odataSpec: JSON
+    odataSpec: String
     asyncApiSpec: JSON
     content: JSON
 }

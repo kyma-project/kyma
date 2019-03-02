@@ -597,7 +597,7 @@ type ClusterServiceClassResolver interface {
 	Instances(ctx context.Context, obj *ClusterServiceClass, namespace *string) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	OpenAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
-	OdataSpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
+	OdataSpec(ctx context.Context, obj *ClusterServiceClass) (*string, error)
 	AsyncAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 }
@@ -677,7 +677,7 @@ type ServiceClassResolver interface {
 	Instances(ctx context.Context, obj *ServiceClass) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	OpenAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
-	OdataSpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
+	OdataSpec(ctx context.Context, obj *ServiceClass) (*string, error)
 	AsyncAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ServiceClass) (*JSON, error)
 }
@@ -7380,14 +7380,14 @@ func (ec *executionContext) _ClusterServiceClass_odataSpec(ctx context.Context, 
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*JSON)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
 	}
-	return *res
+	return graphql.MarshalString(*res)
 }
 
 // nolint: vetshadow
@@ -17001,14 +17001,14 @@ func (ec *executionContext) _ServiceClass_odataSpec(ctx context.Context, field g
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.(*JSON)
+	res := resTmp.(*string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	if res == nil {
 		return graphql.Null
 	}
-	return *res
+	return graphql.MarshalString(*res)
 }
 
 // nolint: vetshadow
@@ -21001,7 +21001,7 @@ type ServiceClass {
     instances: [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
     apiSpec: JSON @deprecated(reason: "No longer supported")
     openApiSpec: JSON
-    odataSpec: JSON
+    odataSpec: String
     asyncApiSpec: JSON
     content: JSON
 }
@@ -21024,7 +21024,7 @@ type ClusterServiceClass {
     instances(namespace: String): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", isChildResolver: true})
     apiSpec: JSON @deprecated(reason: "No longer supported")
     openApiSpec: JSON
-    odataSpec: JSON
+    odataSpec: String
     asyncApiSpec: JSON
     content: JSON
 }
