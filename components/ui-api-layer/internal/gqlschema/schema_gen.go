@@ -144,6 +144,8 @@ type ComplexityRoot struct {
 		Activated           func(childComplexity int, namespace *string) int
 		Instances           func(childComplexity int, namespace *string) int
 		ApiSpec             func(childComplexity int) int
+		OpenApiSpec         func(childComplexity int) int
+		OdataSpec           func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
 	}
@@ -497,6 +499,8 @@ type ComplexityRoot struct {
 		Activated           func(childComplexity int) int
 		Instances           func(childComplexity int) int
 		ApiSpec             func(childComplexity int) int
+		OpenApiSpec         func(childComplexity int) int
+		OdataSpec           func(childComplexity int) int
 		AsyncApiSpec        func(childComplexity int) int
 		Content             func(childComplexity int) int
 	}
@@ -592,6 +596,8 @@ type ClusterServiceClassResolver interface {
 	Activated(ctx context.Context, obj *ClusterServiceClass, namespace *string) (bool, error)
 	Instances(ctx context.Context, obj *ClusterServiceClass, namespace *string) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
+	OpenAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
+	OdataSpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 }
@@ -670,6 +676,8 @@ type ServiceClassResolver interface {
 	Activated(ctx context.Context, obj *ServiceClass) (bool, error)
 	Instances(ctx context.Context, obj *ServiceClass) ([]ServiceInstance, error)
 	APISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
+	OpenAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
+	OdataSpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	AsyncAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	Content(ctx context.Context, obj *ServiceClass) (*JSON, error)
 }
@@ -2682,6 +2690,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterServiceClass.ApiSpec(childComplexity), true
 
+	case "ClusterServiceClass.openApiSpec":
+		if e.complexity.ClusterServiceClass.OpenApiSpec == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.OpenApiSpec(childComplexity), true
+
+	case "ClusterServiceClass.odataSpec":
+		if e.complexity.ClusterServiceClass.OdataSpec == nil {
+			break
+		}
+
+		return e.complexity.ClusterServiceClass.OdataSpec(childComplexity), true
+
 	case "ClusterServiceClass.asyncApiSpec":
 		if e.complexity.ClusterServiceClass.AsyncApiSpec == nil {
 			break
@@ -4436,6 +4458,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServiceClass.ApiSpec(childComplexity), true
+
+	case "ServiceClass.openApiSpec":
+		if e.complexity.ServiceClass.OpenApiSpec == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.OpenApiSpec(childComplexity), true
+
+	case "ServiceClass.odataSpec":
+		if e.complexity.ServiceClass.OdataSpec == nil {
+			break
+		}
+
+		return e.complexity.ServiceClass.OdataSpec(childComplexity), true
 
 	case "ServiceClass.asyncApiSpec":
 		if e.complexity.ServiceClass.AsyncApiSpec == nil {
@@ -6737,6 +6773,18 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 				out.Values[i] = ec._ClusterServiceClass_apiSpec(ctx, field, obj)
 				wg.Done()
 			}(i, field)
+		case "openApiSpec":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_openApiSpec(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		case "odataSpec":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ClusterServiceClass_odataSpec(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		case "asyncApiSpec":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -7272,6 +7320,62 @@ func (ec *executionContext) _ClusterServiceClass_apiSpec(ctx context.Context, fi
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ClusterServiceClass().APISpec(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_openApiSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ClusterServiceClass().OpenAPISpec(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ClusterServiceClass_odataSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ClusterServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ClusterServiceClass().OdataSpec(rctx, obj)
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -16275,6 +16379,18 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 				out.Values[i] = ec._ServiceClass_apiSpec(ctx, field, obj)
 				wg.Done()
 			}(i, field)
+		case "openApiSpec":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceClass_openApiSpec(ctx, field, obj)
+				wg.Done()
+			}(i, field)
+		case "odataSpec":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._ServiceClass_odataSpec(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		case "asyncApiSpec":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -16825,6 +16941,62 @@ func (ec *executionContext) _ServiceClass_apiSpec(ctx context.Context, field gra
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return ec.resolvers.ServiceClass().APISpec(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceClass_openApiSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServiceClass().OpenAPISpec(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return *res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceClass_odataSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceClass",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.ServiceClass().OdataSpec(rctx, obj)
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -20825,9 +20997,11 @@ type ServiceClass {
     tags: [String!]!
     labels: Labels!
     plans: [ServicePlan!]!
-    activated: Boolean!
-    instances: [ServiceInstance!]!
-    apiSpec: JSON
+    activated: Boolean! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
+    instances: [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
+    apiSpec: JSON @deprecated(reason: "No longer supported")
+    openApiSpec: JSON
+    odataSpec: JSON
     asyncApiSpec: JSON
     content: JSON
 }
@@ -20846,9 +21020,11 @@ type ClusterServiceClass {
     tags: [String!]!
     labels: Labels!
     plans: [ClusterServicePlan!]!
-    activated(namespace: String): Boolean!
-    instances(namespace: String): [ServiceInstance!]!
-    apiSpec: JSON
+    activated(namespace: String): Boolean! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", isChildResolver: true})
+    instances(namespace: String): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", isChildResolver: true})
+    apiSpec: JSON @deprecated(reason: "No longer supported")
+    openApiSpec: JSON
+    odataSpec: JSON
     asyncApiSpec: JSON
     content: JSON
 }

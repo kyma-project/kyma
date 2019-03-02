@@ -55,6 +55,20 @@ func (s *store) ApiSpec(id string) (*ApiSpec, bool, error) {
 	return apiSpec, exists, err
 }
 
+func (s *store) OpenApiSpec(id string) (*OpenApiSpec, bool, error) {
+	openApiSpec := new(OpenApiSpec)
+	exists, err := s.object(id, "apiSpec.json", openApiSpec)
+
+	return openApiSpec, exists, err
+}
+
+func (s *store) ODataSpec(id string) (*ODataSpec, bool, error) {
+	odataSpec := new(ODataSpec)
+	exists, err := s.object(id, "apiSpec.json", odataSpec)
+
+	return odataSpec, exists, err
+}
+
 func (s *store) AsyncApiSpec(id string) (*AsyncApiSpec, bool, error) {
 	asyncApiSpec := new(AsyncApiSpec)
 	exists, err := s.object(id, "asyncApiSpec.json", asyncApiSpec)

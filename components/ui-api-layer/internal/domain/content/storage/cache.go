@@ -14,6 +14,8 @@ import (
 //go:generate mockery -name=storeGetter -inpkg -case=underscore
 type storeGetter interface {
 	ApiSpec(id string) (*ApiSpec, bool, error)
+	OpenApiSpec(id string) (*OpenApiSpec, bool, error)
+	ODataSpec(id string) (*ODataSpec, bool, error)
 	AsyncApiSpec(id string) (*AsyncApiSpec, bool, error)
 	Content(id string) (*Content, bool, error)
 	NotificationChannel(stop <-chan struct{}) <-chan notification
@@ -39,6 +41,8 @@ func newCache(store storeGetter, cacheClient Cache) *cache {
 	}
 
 	swc.registerHandler("apiSpec.json", swc.apiSpecHandler)
+	swc.registerHandler("apiSpec.json", swc.openApiSpecHandler)
+	swc.registerHandler("apiSpec.json", swc.odataSpecHandler)
 	swc.registerHandler("asyncApiSpec.json", swc.asyncApiSpecHandler)
 	swc.registerHandler("content.json", swc.contentHandler)
 
@@ -97,6 +101,20 @@ func (swc *cache) ApiSpec(id string) (*ApiSpec, bool, error) {
 	exists, err := swc.object(id, "apiSpec.json", apiSpec)
 
 	return apiSpec, exists, err
+}
+
+func (swc *cache) OpenApiSpec(id string) (*OpenApiSpec, bool, error) {
+	openApiSpec := new(OpenApiSpec)
+	exists, err := swc.object(id, "apiSpec.json", openApiSpec)
+
+	return openApiSpec, exists, err
+}
+
+func (swc *cache) ODataSpec(id string) (*ODataSpec, bool, error) {
+	odataSpec := new(ODataSpec)
+	exists, err := swc.object(id, "apiSpec.json", odataSpec)
+
+	return odataSpec, exists, err
 }
 
 func (swc *cache) AsyncApiSpec(id string) (*AsyncApiSpec, bool, error) {
@@ -196,6 +214,14 @@ func (swc *cache) fromCache(parent, filename string) ([]byte, bool, error) {
 
 func (swc *cache) apiSpecHandler(id string) (interface{}, bool, error) {
 	return swc.store.ApiSpec(id)
+}
+
+func (swc *cache) openApiSpecHandler(id string) (interface{}, bool, error) {
+	return swc.store.OpenApiSpec(id)
+}
+
+func (swc *cache) odataSpecHandler(id string) (interface{}, bool, error) {
+	return swc.store.ODataSpec(id)
 }
 
 func (swc *cache) asyncApiSpecHandler(id string) (interface{}, bool, error) {

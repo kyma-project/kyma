@@ -60,6 +60,26 @@ func (o *ApiSpec) UnmarshalJSON(jsonData []byte) error {
 	return nil
 }
 
+type OpenApiSpec struct {
+	Raw map[string]interface{}
+}
+
+func (o *OpenApiSpec) UnmarshalJSON(jsonData []byte) error {
+	var raw map[string]interface{}
+	err := json.Unmarshal(jsonData, &raw)
+	if err != nil {
+		return err
+	}
+
+	o.Raw = raw
+
+	return nil
+}
+
+type ODataSpec struct {
+	Raw string
+}
+
 type AsyncApiSpec struct {
 	Raw  map[string]interface{}
 	Data AsyncApiSpecData
