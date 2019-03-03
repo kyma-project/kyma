@@ -36,6 +36,8 @@ func TestStore_ApiSpec(t *testing.T) {
 			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
+		client.On("IsInvalidBeginningCharacterError", mock.Anything).
+			Return(false)
 
 		_, exists, err := service.ApiSpec("invalid")
 
@@ -75,6 +77,71 @@ func TestStore_ApiSpec(t *testing.T) {
 	})
 }
 
+func TestStore_OpenApiSpec(t *testing.T) {
+	t.Run("Not existing object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "not-existing/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
+		client.On("IsNotExistsError", mock.Anything).
+			Return(true)
+
+		_, exists, err := service.OpenApiSpec("not-existing")
+
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Invalid object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "invalid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
+		client.On("IsNotExistsError", mock.Anything).
+			Return(false)
+		client.On("IsInvalidBeginningCharacterError", mock.Anything).
+			Return(false)
+
+		_, exists, err := service.OpenApiSpec("invalid")
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Client error", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "client-error/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), errors.New("Random error"))
+
+		_, exists, err := service.OpenApiSpec("client-error")
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Valid object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		expected := &storage.OpenApiSpec{
+			Raw: map[string]interface{}{},
+		}
+
+		client.On("Object", "test", "valid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("{}"))), nil)
+
+		openApiSpec, exists, err := service.OpenApiSpec("valid")
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, openApiSpec)
+	})
+}
+
 func TestStore_AsyncApiSpec(t *testing.T) {
 	t.Run("Not existing object", func(t *testing.T) {
 		client := storage.NewMockClient()
@@ -98,6 +165,8 @@ func TestStore_AsyncApiSpec(t *testing.T) {
 		client.On("Object", "test", "invalid/asyncApiSpec.json").
 			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
+			Return(false)
+		client.On("IsInvalidBeginningCharacterError", mock.Anything).
 			Return(false)
 
 		_, exists, err := service.AsyncApiSpec("invalid")
@@ -165,6 +234,8 @@ func TestStore_Content(t *testing.T) {
 		client.On("Object", "test", "invalid/content.json").
 			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
+			Return(false)
+		client.On("IsInvalidBeginningCharacterError", mock.Anything).
 			Return(false)
 
 		_, exists, err := service.Content("invalid")

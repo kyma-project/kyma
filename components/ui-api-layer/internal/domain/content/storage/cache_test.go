@@ -65,10 +65,11 @@ func TestCache_Initialize(t *testing.T) {
 
 func TestCache_ApiSpec_Initialized(t *testing.T) {
 	filename := "apiSpec.json"
+	fieldName := "apiSpec"
 	function := "ApiSpec"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.ApiSpec)
 	expectedBytes, err := convertToCache(&expected)
@@ -274,10 +275,11 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 
 func TestCache_ApiSpec_NotInitialized(t *testing.T) {
 	filename := "apiSpec.json"
+	fieldName := "apiSpec"
 	function := "ApiSpec"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.ApiSpec)
 	expectedBytes, err := convertToCache(&expected)
@@ -368,10 +370,11 @@ func TestCache_ApiSpec_NotInitialized(t *testing.T) {
 
 func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 	filename := "asyncApiSpec.json"
+	fieldName := "asyncApiSpec"
 	function := "AsyncApiSpec"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.AsyncApiSpec)
 	expectedBytes, err := convertToCache(&expected)
@@ -577,10 +580,11 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 
 func TestCache_AsyncApiSpec_NotInitialized(t *testing.T) {
 	filename := "asyncApiSpec.json"
+	fieldName := "asyncApiSpec"
 	function := "AsyncApiSpec"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.AsyncApiSpec)
 	expectedBytes, err := convertToCache(&expected)
@@ -671,10 +675,11 @@ func TestCache_AsyncApiSpec_NotInitialized(t *testing.T) {
 
 func TestCache_Content_Initialized(t *testing.T) {
 	filename := "content.json"
+	fieldName := "content"
 	function := "Content"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.Content)
 	expectedBytes, err := convertToCache(&expected)
@@ -880,10 +885,11 @@ func TestCache_Content_Initialized(t *testing.T) {
 
 func TestCache_Content_NotInitialized(t *testing.T) {
 	filename := "content.json"
+	fieldName := "content"
 	function := "Content"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.Content)
 	expectedBytes, err := convertToCache(&expected)
