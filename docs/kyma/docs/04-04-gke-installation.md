@@ -21,10 +21,10 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 1. Export the domain name, project name, and DNS zone name as environment variables. Run the commands listed below:
 
     ```
-    export DOMAIN={YOUR_SUBDOMAIN}
-    export DNS_NAME={YOUR_DOMAIN}.
+    export DOMAIN={YOUR_SUBDOMAIN} # e.g. export DOMAIN=mycluster.example.com
+    export DNS_NAME={YOUR_DOMAIN}. # e.g. export DNS_NAME=exampple.com.
     export PROJECT={YOUR_GOOGLE_PROJECT}
-    export DNS_ZONE={YOUR_DNS_ZONE}
+    export DNS_ZONE={YOUR_DNS_ZONE} # e.g. export DNS_ZONE=examplecom-zone
     ```
 
 2. Create a DNS-managed zone in your Google project. Run:
