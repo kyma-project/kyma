@@ -3,7 +3,7 @@ package storage
 import (
 	"io"
 
-	minio "github.com/minio/minio-go"
+	"github.com/minio/minio-go"
 )
 
 //go:generate mockery -name=Cache -output=automock -outpkg=automock -case=underscore
@@ -26,4 +26,9 @@ type client interface {
 	NotificationChannel(bucketName string, stop <-chan struct{}) <-chan notification
 	IsNotExistsError(err error) bool
 	IsInvalidBeginningCharacterError(err error) bool
+}
+
+//go:generate mockery -name=specification -inpkg -case=underscore
+type Specification interface {
+	Decode(data []byte) error
 }

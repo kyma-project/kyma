@@ -9,7 +9,7 @@ import (
 	"github.com/golang/glog"
 
 	"github.com/pkg/errors"
-	"encoding/json"
+	"io/ioutil"
 )
 
 type notification struct {
@@ -80,7 +80,7 @@ func (s *store) NotificationChannel(stop <-chan struct{}) <-chan notification {
 	return s.client.NotificationChannel(s.bucketName, stop)
 }
 
-func (s *store) object(id, filename string, value interface{}) (bool, error) {
+func (s *store) object(id, filename string, value Specification) (bool, error) {
 	objectName := fmt.Sprintf("%s/%s", id, filename)
 	reader, err := s.client.Object(s.bucketName, objectName)
 	defer func() {
@@ -152,32 +152,56 @@ func (s *store) replaceAssetsAddress(in interface{}, id string) interface{} {
 	return result
 }
 
-func (s *store) decode(reader io.Reader, value interface{}) (bool, error) {
-	err := json.NewDecoder(reader).Decode(value)
+func (s *store) decode(reader io.Reader, value Specification) (bool, error) {
+	data, err := s.readData(reader)
+	if err != nil {
+		return false, err
+	}
 
+	err = value.Decode(data)
 	if err != nil {
 		if ok := s.client.IsNotExistsError(err); ok {
 			return false, nil
 		}
-		if ok := s.client.IsInvalidBeginningCharacterError(err); ok {
-			return s.decodeOData(reader, value)
-		}
-
 		return false, err
 	}
 	return true, nil
 }
 
-func (s *store) decodeOData(reader io.Reader, value interface{}) (bool, error) {
-	odata, ok := value.(*ODataSpec)
-	if !ok {
-		return false, nil
-	}
-
-	err := odata.UnmarshalXML(reader)
+func (s *store) readData(reader io.Reader) ([]byte, error) {
+	data, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return false, err
+		return nil, err
 	}
-
-	return true, nil
+	return data, nil
 }
+
+//func (s *store) decode(reader io.Reader, value interface{}) (bool, error) {
+//	err := json.NewDecoder(reader).Decode(value)
+//
+//	if err != nil {
+//		if ok := s.client.IsNotExistsError(err); ok {
+//			return false, nil
+//		}
+//		if ok := s.client.IsInvalidBeginningCharacterError(err); ok {
+//			return s.decodeOData(reader, value)
+//		}
+//
+//		return false, err
+//	}
+//	return true, nil
+//}
+//
+//func (s *store) decodeOData(reader io.Reader, value interface{}) (bool, error) {
+//	odata, ok := value.(*ODataSpec)
+//	if !ok {
+//		return false, nil
+//	}
+//
+//	err := odata.UnmarshalXML(reader)
+//	if err != nil {
+//		return false, err
+//	}
+//
+//	return true, nil
+//}

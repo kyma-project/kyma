@@ -2,8 +2,6 @@ package storage
 
 import (
 	"encoding/json"
-	"io"
-	"io/ioutil"
 )
 
 type Content struct {
@@ -27,32 +25,51 @@ type Document struct {
 	Internal bool   `json:"internal,omitempty"`
 }
 
-func (o *Content) UnmarshalJSON(jsonData []byte) error {
+func (o *Content) Decode(data []byte) error {
 	var raw map[string]interface{}
-	err := json.Unmarshal(jsonData, &raw)
+	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
 
-	var data ContentData
-	err = json.Unmarshal(jsonData, &data)
+	var contentData ContentData
+	err = json.Unmarshal(data, &contentData)
 	if err != nil {
 		return err
 	}
 
 	o.Raw = raw
-	o.Data = data
+	o.Data = contentData
 
 	return nil
 }
+
+//func (o *Content) UnmarshalJSON(jsonData []byte) error {
+//	var raw map[string]interface{}
+//	err := json.Unmarshal(jsonData, &raw)
+//	if err != nil {
+//		return err
+//	}
+//
+//	var data ContentData
+//	err = json.Unmarshal(jsonData, &data)
+//	if err != nil {
+//		return err
+//	}
+//
+//	o.Raw = raw
+//	o.Data = data
+//
+//	return nil
+//}
 
 type ApiSpec struct {
 	Raw map[string]interface{}
 }
 
-func (o *ApiSpec) UnmarshalJSON(jsonData []byte) error {
+func (o *ApiSpec) Decode(data []byte) error {
 	var raw map[string]interface{}
-	err := json.Unmarshal(jsonData, &raw)
+	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
@@ -61,14 +78,26 @@ func (o *ApiSpec) UnmarshalJSON(jsonData []byte) error {
 
 	return nil
 }
+
+//func (o *ApiSpec) UnmarshalJSON(jsonData []byte) error {
+//	var raw map[string]interface{}
+//	err := json.Unmarshal(jsonData, &raw)
+//	if err != nil {
+//		return err
+//	}
+//
+//	o.Raw = raw
+//
+//	return nil
+//}
 
 type OpenApiSpec struct {
 	Raw map[string]interface{}
 }
 
-func (o *OpenApiSpec) UnmarshalJSON(jsonData []byte) error {
+func (o *OpenApiSpec) Decode(data []byte) error {
 	var raw map[string]interface{}
-	err := json.Unmarshal(jsonData, &raw)
+	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
@@ -78,36 +107,63 @@ func (o *OpenApiSpec) UnmarshalJSON(jsonData []byte) error {
 	return nil
 }
 
+//func (o *OpenApiSpec) UnmarshalJSON(jsonData []byte) error {
+//	var raw map[string]interface{}
+//	err := json.Unmarshal(jsonData, &raw)
+//	if err != nil {
+//		return err
+//	}
+//
+//	o.Raw = raw
+//
+//	return nil
+//}
+
 type ODataSpec struct {
 	Raw *string
 }
 
-func (o *ODataSpec) UnmarshalJSON(jsonData []byte) error {
-	var raw map[string]interface{}
-	err := json.Unmarshal(jsonData, &raw)
-	if err != nil {
-		return err
-	}
-
-	if err != nil {
-		str := string(jsonData)
-		o.Raw = &str
-	}
+func (o *ODataSpec) Decode(data []byte) error {
+	raw := string(data)
+	o.Raw = &raw
 
 	return nil
 }
 
-func (o *ODataSpec) UnmarshalXML(reader io.Reader) error {
-	data, err := ioutil.ReadAll(reader)
-	if err != nil {
-		return err
-	}
-
-	str := string(data)
-	o.Raw = &str
-
+func (o *ODataSpec) unmarshalJSON(data []byte) error {
 	return nil
 }
+
+func (o *ODataSpec) unmarshalXML(data []byte) error {
+	return nil
+}
+
+//func (o *ODataSpec) UnmarshalJSON(jsonData []byte) error {
+//	var raw map[string]interface{}
+//	err := json.Unmarshal(jsonData, &raw)
+//	if err != nil {
+//		return err
+//	}
+//
+//	if err != nil {
+//		str := string(jsonData)
+//		o.Raw = &str
+//	}
+//
+//	return nil
+//}
+//
+//func (o *ODataSpec) UnmarshalXML(reader io.Reader) error {
+//	data, err := ioutil.ReadAll(reader)
+//	if err != nil {
+//		return err
+//	}
+//
+//	str := string(data)
+//	o.Raw = &str
+//
+//	return nil
+//}
 
 type AsyncApiSpec struct {
 	Raw  map[string]interface{}
@@ -119,21 +175,40 @@ type AsyncApiSpecData struct {
 	Topics   map[string]interface{}
 }
 
-func (o *AsyncApiSpec) UnmarshalJSON(jsonData []byte) error {
+func (o *AsyncApiSpec) Decode(data []byte) error {
 	var raw map[string]interface{}
-	err := json.Unmarshal(jsonData, &raw)
+	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
 
-	var data AsyncApiSpecData
-	err = json.Unmarshal(jsonData, &data)
+	var specData AsyncApiSpecData
+	err = json.Unmarshal(data, &specData)
 	if err != nil {
 		return err
 	}
 
 	o.Raw = raw
-	o.Data = data
+	o.Data = specData
 
 	return nil
 }
+
+//func (o *AsyncApiSpec) UnmarshalJSON(jsonData []byte) error {
+//	var raw map[string]interface{}
+//	err := json.Unmarshal(jsonData, &raw)
+//	if err != nil {
+//		return err
+//	}
+//
+//	var data AsyncApiSpecData
+//	err = json.Unmarshal(jsonData, &data)
+//	if err != nil {
+//		return err
+//	}
+//
+//	o.Raw = raw
+//	o.Data = data
+//
+//	return nil
+//}
