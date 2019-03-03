@@ -2,6 +2,8 @@ package storage
 
 import (
 	"encoding/json"
+	"io"
+	"io/ioutil"
 )
 
 type Content struct {
@@ -77,7 +79,34 @@ func (o *OpenApiSpec) UnmarshalJSON(jsonData []byte) error {
 }
 
 type ODataSpec struct {
-	Raw string
+	Raw *string
+}
+
+func (o *ODataSpec) UnmarshalJSON(jsonData []byte) error {
+	var raw map[string]interface{}
+	err := json.Unmarshal(jsonData, &raw)
+	if err != nil {
+		return err
+	}
+
+	if err != nil {
+		str := string(jsonData)
+		o.Raw = &str
+	}
+
+	return nil
+}
+
+func (o *ODataSpec) UnmarshalXML(reader io.Reader) error {
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return err
+	}
+
+	str := string(data)
+	o.Raw = &str
+
+	return nil
 }
 
 type AsyncApiSpec struct {

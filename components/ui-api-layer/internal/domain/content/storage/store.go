@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"regexp"
@@ -10,6 +9,7 @@ import (
 	"github.com/golang/glog"
 
 	"github.com/pkg/errors"
+	"encoding/json"
 )
 
 type notification struct {
@@ -154,12 +154,28 @@ func (s *store) replaceAssetsAddress(in interface{}, id string) interface{} {
 
 func (s *store) decode(reader io.Reader, value interface{}) (bool, error) {
 	err := json.NewDecoder(reader).Decode(value)
+
 	if err != nil {
-		ok := s.client.IsNotExistsError(err)
-		if ok {
+		if ok := s.client.IsNotExistsError(err); ok {
 			return false, nil
 		}
+		if ok := s.client.IsInvalidBeginningCharacterError(err); ok {
+			return s.decodeOData(reader, value)
+		}
 
+		return false, err
+	}
+	return true, nil
+}
+
+func (s *store) decodeOData(reader io.Reader, value interface{}) (bool, error) {
+	odata, ok := value.(*ODataSpec)
+	if !ok {
+		return false, nil
+	}
+
+	err := odata.UnmarshalXML(reader)
+	if err != nil {
 		return false, err
 	}
 

@@ -25,4 +25,5 @@ type client interface {
 	Object(bucketName, objectName string) (io.ReadCloser, error)
 	NotificationChannel(bucketName string, stop <-chan struct{}) <-chan notification
 	IsNotExistsError(err error) bool
+	IsInvalidBeginningCharacterError(err error) bool
 }
