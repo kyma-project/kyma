@@ -155,53 +155,21 @@ func (s *store) replaceAssetsAddress(in interface{}, id string) interface{} {
 func (s *store) decode(reader io.Reader, value Specification) (bool, error) {
 	data, err := s.readData(reader)
 	if err != nil {
-		return false, err
-	}
-
-	err = value.Decode(data)
-	if err != nil {
 		if ok := s.client.IsNotExistsError(err); ok {
 			return false, nil
 		}
 		return false, err
 	}
-	return true, nil
+
+	err = value.Decode(data)
+	return err == nil, err
 }
 
 func (s *store) readData(reader io.Reader) ([]byte, error) {
 	data, err := ioutil.ReadAll(reader)
+	fmt.Println(data, err, reader)
 	if err != nil {
 		return nil, err
 	}
 	return data, nil
 }
-
-//func (s *store) decode(reader io.Reader, value interface{}) (bool, error) {
-//	err := json.NewDecoder(reader).Decode(value)
-//
-//	if err != nil {
-//		if ok := s.client.IsNotExistsError(err); ok {
-//			return false, nil
-//		}
-//		if ok := s.client.IsInvalidBeginningCharacterError(err); ok {
-//			return s.decodeOData(reader, value)
-//		}
-//
-//		return false, err
-//	}
-//	return true, nil
-//}
-//
-//func (s *store) decodeOData(reader io.Reader, value interface{}) (bool, error) {
-//	odata, ok := value.(*ODataSpec)
-//	if !ok {
-//		return false, nil
-//	}
-//
-//	err := odata.UnmarshalXML(reader)
-//	if err != nil {
-//		return false, err
-//	}
-//
-//	return true, nil
-//}

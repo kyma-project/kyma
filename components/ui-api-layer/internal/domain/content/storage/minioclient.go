@@ -8,7 +8,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
-	"encoding/json"
 )
 
 type minioClient struct {
@@ -29,15 +28,6 @@ func (mc *minioClient) IsNotExistsError(err error) bool {
 	switch err := err.(type) {
 	case minio.ErrorResponse:
 		return err.Code == "NoSuchKey"
-	default:
-		return false
-	}
-}
-
-func (mc *minioClient) IsInvalidBeginningCharacterError(err error) bool {
-	switch err := err.(type) {
-	case *json.SyntaxError:
-		return err.Offset == 1 && err.Error() == "invalid character '<' looking for beginning of value"
 	default:
 		return false
 	}

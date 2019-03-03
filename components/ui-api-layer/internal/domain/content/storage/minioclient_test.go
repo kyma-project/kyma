@@ -10,7 +10,6 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	"encoding/json"
 )
 
 func TestMinioClient_IsNotExistsError(t *testing.T) {
@@ -34,35 +33,6 @@ func TestMinioClient_IsNotExistsError(t *testing.T) {
 
 	t.Run("Different code", func(t *testing.T) {
 		ok := client.IsNotExistsError(minio2.ErrorResponse{Code: "Different Code"})
-		assert.False(t, ok)
-	})
-}
-
-func TestMinioClient_IsInvalidBeginningCharacterError(t *testing.T) {
-	minio := new(automock.Minio)
-	client := storage.NewMinioClient(minio)
-
-	t.Run("Other error", func(t *testing.T) {
-		ok := client.IsInvalidBeginningCharacterError(errors.New("other error"))
-		assert.False(t, ok)
-	})
-
-	t.Run("Nil error", func(t *testing.T) {
-		ok := client.IsInvalidBeginningCharacterError(nil)
-		assert.False(t, ok)
-	})
-
-	t.Run("Not exists error", func(t *testing.T) {
-		str := "<xml>something</xml>"
-		var raw map[string]interface{}
-		err := json.Unmarshal([]byte(str), &raw)
-
-		ok := client.IsInvalidBeginningCharacterError(err)
-		assert.True(t, ok)
-	})
-
-	t.Run("Different Offset", func(t *testing.T) {
-		ok := client.IsInvalidBeginningCharacterError(&json.SyntaxError{ Offset: 2 })
 		assert.False(t, ok)
 	})
 }

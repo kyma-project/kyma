@@ -36,8 +36,6 @@ func TestStore_ApiSpec(t *testing.T) {
 			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
-		client.On("IsInvalidBeginningCharacterError", mock.Anything).
-			Return(false)
 
 		_, exists, err := service.ApiSpec("invalid")
 
@@ -101,8 +99,6 @@ func TestStore_OpenApiSpec(t *testing.T) {
 			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
-		client.On("IsInvalidBeginningCharacterError", mock.Anything).
-			Return(false)
 
 		_, exists, err := service.OpenApiSpec("invalid")
 
@@ -165,8 +161,6 @@ func TestStore_AsyncApiSpec(t *testing.T) {
 		client.On("Object", "test", "invalid/asyncApiSpec.json").
 			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
-			Return(false)
-		client.On("IsInvalidBeginningCharacterError", mock.Anything).
 			Return(false)
 
 		_, exists, err := service.AsyncApiSpec("invalid")
@@ -234,8 +228,6 @@ func TestStore_Content(t *testing.T) {
 		client.On("Object", "test", "invalid/content.json").
 			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
 		client.On("IsNotExistsError", mock.Anything).
-			Return(false)
-		client.On("IsInvalidBeginningCharacterError", mock.Anything).
 			Return(false)
 
 		_, exists, err := service.Content("invalid")

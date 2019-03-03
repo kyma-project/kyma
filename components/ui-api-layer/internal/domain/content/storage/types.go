@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"encoding/xml"
 )
 
 type Content struct {
@@ -44,25 +45,6 @@ func (o *Content) Decode(data []byte) error {
 	return nil
 }
 
-//func (o *Content) UnmarshalJSON(jsonData []byte) error {
-//	var raw map[string]interface{}
-//	err := json.Unmarshal(jsonData, &raw)
-//	if err != nil {
-//		return err
-//	}
-//
-//	var data ContentData
-//	err = json.Unmarshal(jsonData, &data)
-//	if err != nil {
-//		return err
-//	}
-//
-//	o.Raw = raw
-//	o.Data = data
-//
-//	return nil
-//}
-
 type ApiSpec struct {
 	Raw map[string]interface{}
 }
@@ -71,6 +53,9 @@ func (o *ApiSpec) Decode(data []byte) error {
 	var raw map[string]interface{}
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
+		if isInvalidBeginningCharacterError(err) {
+			return nil
+		}
 		return err
 	}
 
@@ -78,18 +63,6 @@ func (o *ApiSpec) Decode(data []byte) error {
 
 	return nil
 }
-
-//func (o *ApiSpec) UnmarshalJSON(jsonData []byte) error {
-//	var raw map[string]interface{}
-//	err := json.Unmarshal(jsonData, &raw)
-//	if err != nil {
-//		return err
-//	}
-//
-//	o.Raw = raw
-//
-//	return nil
-//}
 
 type OpenApiSpec struct {
 	Raw map[string]interface{}
@@ -99,6 +72,9 @@ func (o *OpenApiSpec) Decode(data []byte) error {
 	var raw map[string]interface{}
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
+		if isInvalidBeginningCharacterError(err) {
+			return nil
+		}
 		return err
 	}
 
@@ -107,63 +83,46 @@ func (o *OpenApiSpec) Decode(data []byte) error {
 	return nil
 }
 
-//func (o *OpenApiSpec) UnmarshalJSON(jsonData []byte) error {
-//	var raw map[string]interface{}
-//	err := json.Unmarshal(jsonData, &raw)
-//	if err != nil {
-//		return err
-//	}
-//
-//	o.Raw = raw
-//
-//	return nil
-//}
-
 type ODataSpec struct {
 	Raw *string
 }
 
 func (o *ODataSpec) Decode(data []byte) error {
-	raw := string(data)
-	o.Raw = &raw
+	err := o.unmarshalJSON(data)
+	if err == nil {
+		return nil
+	} else if err != nil && !isInvalidBeginningCharacterError(err) {
+		return err
+	}
 
-	return nil
+	return o.unmarshalXML(data)
 }
 
 func (o *ODataSpec) unmarshalJSON(data []byte) error {
+	var raw map[string]interface{}
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	str := string(data)
+	o.Raw = &str
+
 	return nil
 }
 
 func (o *ODataSpec) unmarshalXML(data []byte) error {
+	var raw interface{}
+	err := xml.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	str := string(data)
+	o.Raw = &str
+
 	return nil
 }
-
-//func (o *ODataSpec) UnmarshalJSON(jsonData []byte) error {
-//	var raw map[string]interface{}
-//	err := json.Unmarshal(jsonData, &raw)
-//	if err != nil {
-//		return err
-//	}
-//
-//	if err != nil {
-//		str := string(jsonData)
-//		o.Raw = &str
-//	}
-//
-//	return nil
-//}
-//
-//func (o *ODataSpec) UnmarshalXML(reader io.Reader) error {
-//	data, err := ioutil.ReadAll(reader)
-//	if err != nil {
-//		return err
-//	}
-//
-//	str := string(data)
-//	o.Raw = &str
-//
-//	return nil
-//}
 
 type AsyncApiSpec struct {
 	Raw  map[string]interface{}
@@ -194,21 +153,11 @@ func (o *AsyncApiSpec) Decode(data []byte) error {
 	return nil
 }
 
-//func (o *AsyncApiSpec) UnmarshalJSON(jsonData []byte) error {
-//	var raw map[string]interface{}
-//	err := json.Unmarshal(jsonData, &raw)
-//	if err != nil {
-//		return err
-//	}
-//
-//	var data AsyncApiSpecData
-//	err = json.Unmarshal(jsonData, &data)
-//	if err != nil {
-//		return err
-//	}
-//
-//	o.Raw = raw
-//	o.Data = data
-//
-//	return nil
-//}
+func isInvalidBeginningCharacterError(err error) bool {
+	switch err := err.(type) {
+	case *json.SyntaxError:
+		return err.Offset == 1 && err.Error() == "invalid character '<' looking for beginning of value"
+	default:
+		return false
+	}
+}
