@@ -9,7 +9,7 @@ The Application Gateway sends the requests from Lambda functions and services in
 
 The following diagram illustrates how the Application Gateway interacts with other components and external APIs secured with OAuth.
 
-![Application Gateway Diagram](assets/003-architecture-proxy-service.svg)
+![Application Gateway Diagram](./assets/003-architecture-proxy-service.svg)
 
 1. A lambda function calls the Access Service. The name of every Access Service follows this format: `app-{application-name}-{service-id}`
 2. The Access Service exposes the Application Gateway.
