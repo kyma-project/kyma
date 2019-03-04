@@ -8,6 +8,12 @@ metadata:
   labels:
     "helm-chart-test": "true"
 spec:
+  {{ if .Values.global.isLocalEnv }}
+  hostAliases:
+   - ip: {{ .Values.test.integration.minikubeIP }}
+     hostnames:
+      - "minio.{{ .Values.global.domainName }}"
+  {{ end }}
   serviceAccountName:  "test-{{ template "fullname" . }}-integration"
   containers:
     - name: "test-{{ template "fullname" . }}-integration"
