@@ -13,19 +13,19 @@ type AuditLogMessages struct {
 	OperationFailedMsg     string
 }
 
-type auditlogggingmiddleware struct {
+type auditloggingmiddleware struct {
 	connectorClientExtractor clientcontext.ConnectorClientExtractor
-	auditLogMessages AuditLogMessages
+	auditLogMessages         AuditLogMessages
 }
 
-func NewAuditLoggingMiddleware(connectorClientExtractor clientcontext.ConnectorClientExtractor, auditLogMessages AuditLogMessages) *auditlogggingmiddleware {
-	return &auditlogggingmiddleware{
+func NewAuditLoggingMiddleware(connectorClientExtractor clientcontext.ConnectorClientExtractor, auditLogMessages AuditLogMessages) *auditloggingmiddleware {
+	return &auditloggingmiddleware{
 		connectorClientExtractor: connectorClientExtractor,
-		auditLogMessages: auditLogMessages,
+		auditLogMessages:         auditLogMessages,
 	}
 }
 
-func (alm *auditlogggingmiddleware) Middleware(handler http.Handler) http.Handler {
+func (alm *auditloggingmiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		contextLogger := alm.getContextLogger(r)
 
@@ -42,7 +42,7 @@ func (alm *auditlogggingmiddleware) Middleware(handler http.Handler) http.Handle
 	})
 }
 
-func (alm *auditlogggingmiddleware) getContextLogger(r *http.Request) *logrus.Entry {
+func (alm *auditloggingmiddleware) getContextLogger(r *http.Request) *logrus.Entry {
 	contextService, err := alm.connectorClientExtractor(r.Context())
 
 	if err == nil {
@@ -51,5 +51,3 @@ func (alm *auditlogggingmiddleware) getContextLogger(r *http.Request) *logrus.En
 
 	return logrus.NewEntry(logrus.StandardLogger())
 }
-
-
