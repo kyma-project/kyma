@@ -2,7 +2,6 @@ package clusterasset
 
 import (
 	"context"
-	"crypto/tls"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/assethook/engine"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/finalizer"
@@ -44,16 +43,8 @@ func Add(mgr manager.Manager) error {
 		return errors.Wrapf(err, "while initializing Store client")
 	}
 
-	if !cfg.Store.VerifySSL {
-		transCfg := &http.Transport{
-			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore invalid SSL certificates
-		}
-
-		minioClient.SetCustomTransport(transCfg)
-	}
-
 	store := store.New(minioClient)
-	loader := loader.New(cfg.Loader.TemporaryDirectory)
+	loader := loader.New(cfg.Loader.TemporaryDirectory, cfg.Loader.VerifySSL)
 	findBucketFnc := bucketFinder(mgr)
 	deleteFinalizer := finalizer.New(deleteClusterAssetFinalizerName)
 

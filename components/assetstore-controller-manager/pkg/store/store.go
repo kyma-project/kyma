@@ -21,7 +21,6 @@ type Config struct {
 	AccessKey        string `envconfig:""`
 	SecretKey        string `envconfig:""`
 	UseSSL           bool   `envconfig:"default=true"`
-	VerifySSL        bool   `envconfig:"default=true"`
 }
 
 //go:generate mockery -name=MinioClient -output=automock -outpkg=automock -case=underscore
