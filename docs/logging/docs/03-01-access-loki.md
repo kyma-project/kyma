@@ -15,4 +15,4 @@ kubectl port-forward -n kyma-system svc/logging-loki 3100:3100
 curl -X GET 'http://localhost:3100/api/prom/query' -d 'query={namespace="kyma-system"}' -d 'regexp=Error' -d 'limit=1000'
 ```
 
-For further information, see the [Loki API documentation]('https://github.com/grafana/loki/blob/master/docs/api.md')
+For further information, see the [Loki API documentation](https://github.com/grafana/loki/blob/master/docs/api.md).
