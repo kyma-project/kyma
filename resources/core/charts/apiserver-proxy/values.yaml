@@ -1,7 +1,7 @@
 configmapName: oidc-ca
 
 port:
-  secure: 8443
+  secure: 9443
   insecure: 8444
 
 image: 

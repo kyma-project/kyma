@@ -5,7 +5,11 @@ metadata:
   name: {{ template "name" . }}-ssl
   namespace: {{ .Release.Namespace }}
 spec:
+  {{ if .Values.global.isLocalEnv }}
+  type: NodePort
+  {{ else }}
   type: LoadBalancer
+  {{ end }}
   ports:
   - name: https
     port: 443
