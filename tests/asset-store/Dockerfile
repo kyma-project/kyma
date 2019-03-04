@@ -43,4 +43,4 @@ COPY --from=builder ${TEST_DIR}/testdata/ /app/testdata/
 # Run tests
 #
 
-CMD /app/tests/main.test
+CMD /app/main.test
