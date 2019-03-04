@@ -10,7 +10,7 @@ subjects:
   namespace: kyma-integration
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-role
+  name: {{ .Release.Name }}-integration-role
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: RoleBinding
@@ -24,7 +24,7 @@ subjects:
   namespace: kyma-integration
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-role
+  name: {{ .Release.Name }}-installer-role
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: Role
