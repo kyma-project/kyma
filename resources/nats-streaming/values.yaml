@@ -16,9 +16,9 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: develop/
-    version: 7e6b2c9b
-  kymaEventBus: false
+    dir: pr/
+    version: PR-2963
+  kymaEventBus: true
   namespace: natss
   natsStreaming:
     fullname: nats-streaming
