@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # EXPECTED ENVS
 # - DOMAIN (optional) - Static domain for which to generate certs
-# - TLS_CERT (optinal) - Current TLS certificate
+# - TLS_CRT (optinal) - Current TLS certificate
 # - TLS_KEY (optional) - Current TLS cert key
 # - LB_LABEL (required) - Selector label for the LoadBalancer service
 
@@ -36,7 +36,7 @@ EOF
 	kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
 fi
 
-if [[ -z "${TLS_CERT}" ]] && [[ -z "${TLS_CERT}" ]]; then
+if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
 	echo "---> Generating Certs for ${DOMAIN}"
 	generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
 	kubectl create secret tls application-connector-ingress-tls-cert --cert=/root/cert.pem --key=/root/key.pem --namespace=kyma-integration
