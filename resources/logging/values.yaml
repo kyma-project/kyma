@@ -148,3 +148,4 @@ global:
 test:
   image:
     name: test-logging
+    
