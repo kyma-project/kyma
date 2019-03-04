@@ -10,6 +10,7 @@ echo -e "Start building docker image..."
 
 mkdir -p ./cmd/nats-streaming-init/docker/image/
 
+cp ./cmd/nats-streaming-init/Dockerfile ./cmd/nats-streaming-init/docker/image/
 cp -R ./cmd/nats-streaming-init/scripts/prepare-config.sh ./cmd/nats-streaming-init/docker/image/
 
 tagName="${NAME}:${VERSION}"
