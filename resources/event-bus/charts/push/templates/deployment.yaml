@@ -55,7 +55,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --client_id=$(POD_NAME)
+            {{ if .Values.global.kymaEventBus }}
             - --nats_url=nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
+            {{ else }}
+            - --nats_url=nats://{{ .Values.global.natsStreaming.url }}
+            {{ end }}
             - --cluster_id={{ .Values.global.natsStreaming.clusterID }}
             - --tls_skip_verify={{ .Values.http.tlsSkipVerify }}
             - --subscription_name_header={{ .Values.global.push.http.subscriptionNameHeader }}
@@ -76,6 +80,7 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          {{ if .Values.global.kymaEventBus }}
           - name: EB_USER
             valueFrom:
               secretKeyRef:
@@ -86,6 +91,7 @@ spec:
               secretKeyRef:
                 name: nats-user-eventbus
                 key: password
+          {{ end }}
           resources:
 {{ toYaml .Values.global.push.resources | indent 12 }}
       serviceAccount:  {{ .Release.Name }}-push-sa

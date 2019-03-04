@@ -23,7 +23,7 @@ spec:
     spec:
       initContainers:
       - name: prepare-config
-        image: pavelpavlov46/kyma:nats-init
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-nats-init:{{ .Values.global.event_bus.version }}"
         volumeMounts:
         {{- if .Values.configurationFiles }}
         - name: config-volume-cm
@@ -32,6 +32,8 @@ spec:
           mountPath: /mnt/cfg-vol
         {{- end }}
         env:
+        - name: ENABLE_BA
+          value: "{{ .Values.global.kymaEventBus }}"
         - name: STAN_USERNAME
           valueFrom:
             secretKeyRef:
@@ -61,7 +63,7 @@ spec:
           valueFrom:
             secretKeyRef:
               name: nats-user-knative
-              key: password              
+              key: password
       containers:
       - name: {{ .Chart.Name }}
         image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -96,13 +98,16 @@ spec:
         - --stan_config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/stan.conf
         {{- end }}
         - --max_inactivity={{ .Values.global.natsStreaming.channel.maxInactivity }}
+        {{ if .Values.global.kymaEventBus }}
         - --user=$(STAN_USERNAME)
         - --pass=$(STAN_PASSWD)
+        {{ end }}
         env:
         - name: POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
+        {{ if .Values.global.kymaEventBus }}
         - name: STAN_USERNAME
           valueFrom:
             secretKeyRef:
@@ -112,7 +117,8 @@ spec:
           valueFrom:
             secretKeyRef:
               name: nats-user-stan
-              key: password              
+              key: password
+        {{ end }}
         ports:
         {{- range $key, $value := .Values.global.natsStreaming.ports }}
         - name: {{ $key }}
