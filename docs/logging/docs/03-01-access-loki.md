@@ -1,5 +1,5 @@
 ---
-title: Access Logs
+title: Access logs
 type: Details
 ---
 
