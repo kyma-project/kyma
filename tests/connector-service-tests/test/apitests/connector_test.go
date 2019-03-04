@@ -570,7 +570,7 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.Equal(t, http.StatusCreated, response.StatusCode)
 
 		// then
-		mgmInfoResponse, errorResponse = client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+		_, errorResponse = client.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
 
 		require.NotNil(t, errorResponse)
 		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
