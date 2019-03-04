@@ -76,3 +76,7 @@ type DecodedCrtResponse struct {
 	ClientCRT *x509.Certificate
 	CaCRT     *x509.Certificate
 }
+
+type RevocationBody struct {
+	Hash string
+}
