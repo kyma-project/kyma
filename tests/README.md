@@ -3,8 +3,8 @@
 ## Overview
 
 The `tests` folder contains the sources for all Kyma tests.
-A Kyma test is Pod/container/image referenced in a Kyma module/chart test section to provide the module's test functionality. 
-A Kyma test gets executed against a running Kyma cluster to assure integrity and functional correctness of the cluster with all modules installed. These are acceptance tests.
+A Kyma test is Pod, container, or image referenced in a Kyma module or chart test section. It provides the module's test functionality. 
+A Kyma test runs against a running Kyma cluster. It ensures the integrity and functional correctness of the cluster with all installed modules. 
 Each subdirectory in the tests directory defines sources for one test suite, usually focusing on one component. The resulting docker images are then referenced by the related Kyma modules or charts.
 
 ## Details
