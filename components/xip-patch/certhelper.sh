@@ -13,7 +13,7 @@ source $CURRENT_DIR/utils.sh
 
 discoverUnsetVar=false
 
-for var in LB_SERVICE_NAME LB_SERVICE_NS; do
+for var in LB_LABEL; do
     if [ -z "${!var}" ] ; then
         echo "ERROR: $var is not set"
         discoverUnsetVar=true
@@ -26,8 +26,15 @@ fi
 
 if [[ -z "${DOMAIN}" ]]; then
 	echo "---> DOMAIN not SET. Creating..."
-	INGRESS_IP=$(getLoadBalancerIP "${LB_SERVICE_NAME}" "${LB_SERVICE_NS}")
+	INGRESS_IP=$(getLoadBalancerIPFromLabel "${LB_LABEL}")
 	DOMAIN="${INGRESS_IP}.xip.io"
+	DOMAIN_YAML=$(cat << EOF
+---
+data:
+  global.applicationConnectorDomainName: "${DOMAIN}"
+EOF
+)
+	kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
 fi
 
 if [[ -z "$(cat $TLS_CERT)" ]] && [[ -z "$(cat $TLS_CERT)" ]]; then
