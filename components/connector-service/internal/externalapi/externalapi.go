@@ -112,9 +112,11 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 
 	appRevocationRouter := hb.router.Path("/v1/applications/certificates/revocations").Subrouter()
 	appRevocationRouter.HandleFunc("", applicationRevocationHandler.Revoke).Methods(http.MethodPost)
+	revocationAuditLoggingMiddleware := hb.createCertificateRevocationAuditLogMiddleware(appHandlerCfg.ContextExtractor)
 	httphelpers.WithMiddlewares(
 		appRevocationRouter,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
+		revocationAuditLoggingMiddleware)
 }
 
 func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
@@ -173,6 +175,14 @@ func (hb *handlerBuilder) createCertificateGenerationAuditLogMiddleware(contextE
 		StartingOperationMsg:   "Starting certificate generation.",
 		OperationSuccessfulMsg: "Certificate generated successfully.",
 		OperationFailedMsg:     "Certificate generation failed.",
+	}).Middleware
+}
+
+func (hb *handlerBuilder) createCertificateRevocationAuditLogMiddleware(contextExtractor clientcontext.ConnectorClientExtractor) mux.MiddlewareFunc {
+	return loggingMiddlewares.NewAuditLoggingMiddleware(contextExtractor, loggingMiddlewares.AuditLogMessages{
+		StartingOperationMsg:   "Starting certificate revocation.",
+		OperationSuccessfulMsg: "Certificate revoked successfully.",
+		OperationFailedMsg:     "Certificate revocation failed.",
 	}).Middleware
 }
 
