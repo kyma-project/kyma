@@ -14,11 +14,18 @@ getConfigFile() {
 }
 
 test(){
+
+  if [[ -z "${POD_NAME}" ]]; then
+    echo "POD_NAME not provided"
+    echo "TEST FAILED"
+    exit 1
+  fi
+
   UUID=$(cat /proc/sys/kernel/random/uuid)
   echo ${UUID} > "${PWD}/uuid"
   
   set +e
-  NEW_UUID=$(kubectl exec test-proxy cat ${PWD}/uuid)
+  NEW_UUID=$(kubectl exec ${POD_NAME} cat ${PWD}/uuid)
   set -e
 
   if [[ ${UUID} != ${NEW_UUID} ]]; then
