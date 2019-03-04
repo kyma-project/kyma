@@ -2,6 +2,7 @@ package file
 
 import (
 	"bytes"
+	"crypto/tls"
 	"fmt"
 	"github.com/pkg/errors"
 	"io/ioutil"
@@ -10,6 +11,14 @@ import (
 	"os"
 	"path/filepath"
 )
+
+func init() {
+	http.DefaultClient.Transport = &http.Transport{
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: true,
+		},
+	}
+}
 
 func CompareLocalAndRemote(localFilePath string, remoteFilePath string) (bool, error) {
 	remoteBytes, err := download(remoteFilePath)
