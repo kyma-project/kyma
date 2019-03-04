@@ -8,9 +8,9 @@ Each subdirectory in the `components` directory defines one component.
 
 ## Details
 
-Every Kyma component resides in a dedicated folder, which contains its sources and a `README.md` file. This file provides instructions on how to build and develop the component.
+Every Kyma component resides in a dedicated folder which contains its sources and a `README.md` file. This file provides instructions on how to build and develop the component.
 
-The component's name consists of a term describing the component, followed by a **component type**. The first part of the name may differ depending on the component's purpose. 
+The component's name consists of a term describing the component, followed by the **component type**. The first part of the name may differ depending on the component's purpose. 
 This table lists the available types:
 
 | type|description|example|
