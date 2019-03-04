@@ -74,7 +74,7 @@ global:
     version: "4ad2e460"
   cluster_users_test:
     dir: develop/
-    version: "d4937a42"
+    version: "30b8aafd"
   kubeless_images:
     runtime:
       node6:
