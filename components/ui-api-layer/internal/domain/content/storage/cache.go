@@ -22,11 +22,11 @@ type storeGetter interface {
 }
 
 const (
-	ApiSpecField = "apiSpec"
-	OpenApiSpecField = "openApiSpec"
-	ODataSpecField = "odataSpec"
+	ApiSpecField      = "apiSpec"
+	OpenApiSpecField  = "openApiSpec"
+	ODataSpecField    = "odataSpec"
 	AsyncApiSpecField = "asyncApiSpec"
-	ContentField = "content"
+	ContentField      = "content"
 )
 
 type handler func(name string) (interface{}, bool, error)

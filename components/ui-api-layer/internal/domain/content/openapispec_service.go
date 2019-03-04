@@ -1,8 +1,9 @@
 package content
 
 import (
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"fmt"
+
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 )
 
 type openApiSpecService struct {

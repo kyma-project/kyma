@@ -1,13 +1,14 @@
 package content_test
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/automock"
-	"github.com/stretchr/testify/assert"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
+
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/automock"
+	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/content/storage"
 	"github.com/pkg/errors"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOpenApiSpecService_Find(t *testing.T) {

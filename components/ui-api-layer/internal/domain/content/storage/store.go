@@ -8,8 +8,9 @@ import (
 
 	"github.com/golang/glog"
 
-	"github.com/pkg/errors"
 	"io/ioutil"
+
+	"github.com/pkg/errors"
 )
 
 type notification struct {
