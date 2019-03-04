@@ -26,6 +26,8 @@ spec:
           volumeMounts:
           - name: config
             mountPath: /usr/share/nginx/html/assets/config
+          - name: nginx
+            mountPath: /usr/share/nginx-extended/
       volumes:
       - name: config
         configMap:
@@ -33,4 +35,9 @@ spec:
           items:
           - key: config.js
             path: config.js
-
+      - name: nginx
+        configMap:
+          name: {{ .Chart.Name }}-config
+          items:
+          - key: nginx-extended.conf
+            path: nginx-extended.conf

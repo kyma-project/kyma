@@ -8,10 +8,6 @@ service:
   externalPort: 80
   internalPort: 8080
 
-repository:
-  # semicolon separated repository URLs
-  URLs: "https://github.com/kyma-project/bundles/releases/download/0.3.0/"
-
 config:
   storage:
     - driver: etcd
@@ -33,7 +29,7 @@ global:
     path: eu.gcr.io/kyma-project
   helm_broker:
     dir: develop/
-    version: 0bcb073d
+    version: d375742b
   alpine_net:
     dir: develop/
     version: ed568f0f

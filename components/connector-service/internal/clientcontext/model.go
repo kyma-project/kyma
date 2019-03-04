@@ -2,133 +2,78 @@ package clientcontext
 
 import (
 	"context"
-	"encoding/json"
-	"fmt"
-	"github.com/kyma-project/kyma/components/connector-service/internal/logging"
+
 	"github.com/sirupsen/logrus"
 )
 
-const (
-	ApplicationHeader     = "Application"
-	ApplicationContextKey = "ApplicationContext"
-	SubjectHeader         = "Client-Certificate-Subject"
-	APIHostsKey           = "APIHosts"
+type clientContextKey string
 
-	ClusterContextKey = "ClusterContext"
-	TenantHeader      = "Tenant"
-	GroupHeader       = "Group"
+// CtxRequiredType type defines if context is mandatory
+type CtxRequiredType bool
+
+// HeadersRequiredType type defines if headers must be specified
+type HeadersRequiredType bool
+
+const (
+	TenantPlaceholder      = "{TENANT}"
+	GroupPlaceholder       = "{GROUP}"
+	ApplicationPlaceholder = "{APPLICATION}"
+
+	// ApplicationHeader is key representing Application in headers
+	ApplicationHeader = "Application"
+
+	// ApplicationContextKey is the key value for storing Application in context
+	ApplicationContextKey clientContextKey = "ApplicationContext"
+
+	// SubjectHeader is key representing client certificate subject set in headers
+	SubjectHeader = "Client-Certificate-Subject"
+
+	// APIHostsKey is the key value for storing API hosts in context
+	APIHostsKey clientContextKey = "APIHosts"
+
+	// ClusterContextKey is the key value for storing cluster data in context
+	ClusterContextKey clientContextKey = "ClusterContext"
+
+	// TenantHeader is key representing Tenant in headers
+	TenantHeader = "Tenant"
+
+	// GroupHeader is key representing Group in headers
+	GroupHeader = "Group"
+
+	// SubjectCNSeparator holds separator for values packed in CN of Subject
+	SubjectCNSeparator = ";"
+
+	// GroupEmpty represents empty value for Group
+	GroupEmpty = ""
+
+	// TenantEmpty represents empty value for Tenant
+	TenantEmpty = ""
+
+	// ApplicationEmpty represents empty value for Application
+	ApplicationEmpty = ""
+
+	// CtxRequired represents value for required context
+	CtxRequired CtxRequiredType = true
+
+	// CtxNotRequired represents value for not required context
+	CtxNotRequired CtxRequiredType = false
+
+	// HeadersRequired represents value for required headers
+	HeadersRequired HeadersRequiredType = true
+
+	// HeadersNotRequired represents value for not required headers
+	HeadersNotRequired HeadersRequiredType = false
 )
 
 type ClientContextService interface {
-	ToJSON() ([]byte, error)
 	GetCommonName() string
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
+	FillPlaceholders(format string) string
 }
 
 type ContextExtender interface {
 	ExtendContext(ctx context.Context) context.Context
-}
-
-func NewClusterContextExtender() ContextExtender {
-	return &ClusterContext{}
-}
-
-func NewApplicationContextExtender() ContextExtender {
-	return &ApplicationContext{}
-}
-
-type ConnectorClientReader interface {
-	GetApplication() string
-	GetCommonName() string
-}
-
-type ExtendedApplicationContext struct {
-	ApplicationContext
-	RuntimeURLs
-}
-
-type ApplicationContext struct {
-	Application    string
-	ClusterContext ClusterContext
-}
-
-// IsEmpty returns false if Application is set
-func (appCtx ApplicationContext) IsEmpty() bool {
-	return appCtx.Application == "" || appCtx.ClusterContext.IsEmpty()
-}
-
-// ToJSON parses ApplicationContext to JSON
-func (appCtx ApplicationContext) ToJSON() ([]byte, error) {
-	return json.Marshal(appCtx)
-}
-
-// ExtendContext extends provided context with ApplicationContext
-func (appCtx ApplicationContext) ExtendContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, ApplicationContextKey, appCtx)
-}
-
-// GetApplication returns Application identifier
-func (appCtx ApplicationContext) GetApplication() string {
-	return appCtx.Application
-}
-
-// GetCommonName returns expected Common Name value for the Application
-func (appCtx ApplicationContext) GetCommonName() string {
-	// TODO - adjust CN format after decision is made
-	return appCtx.Application
-}
-
-func (appCtx ApplicationContext) GetRuntimeUrls() *RuntimeURLs {
-	return nil
-}
-
-func (appCtx ApplicationContext) GetLogger() *logrus.Entry {
-	return logging.GetApplicationLogger(appCtx.Application, appCtx.ClusterContext.Tenant, appCtx.ClusterContext.Group)
-}
-
-func (extAppCtx ExtendedApplicationContext) GetRuntimeUrls() *RuntimeURLs {
-	return &extAppCtx.RuntimeURLs
-}
-
-type ClusterContext struct {
-	Group  string
-	Tenant string
-}
-
-// IsEmpty returns false if both Group and Tenant are set
-func (clsCtx ClusterContext) IsEmpty() bool {
-	return clsCtx.Group == "" || clsCtx.Tenant == ""
-}
-
-// ToJSON parses ClusterContext to JSON
-func (clsCtx ClusterContext) ToJSON() ([]byte, error) {
-	return json.Marshal(clsCtx)
-}
-
-// ExtendContext extends provided context with ClusterContext
-func (clsCtx ClusterContext) ExtendContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, ClusterContextKey, clsCtx)
-}
-
-// GetCommonName returns expected Common Name value for the Cluster
-func (clsCtx ClusterContext) GetCommonName() string {
-	// TODO - adjust CN format after decision is made
-	return fmt.Sprintf("%s;%s", clsCtx.Tenant, clsCtx.Group)
-}
-
-func (clsCtx ClusterContext) GetLogger() *logrus.Entry {
-	return logging.GetClusterLogger(clsCtx.Tenant, clsCtx.Group)
-
-}
-
-func (clsCtx ClusterContext) GetRuntimeUrls() *RuntimeURLs {
-	return nil
-}
-
-type APIHosts struct {
-	EventsHost   string
-	MetadataHost string
 }
 
 type RuntimeURLs struct {
@@ -136,6 +81,12 @@ type RuntimeURLs struct {
 	MetadataURL string `json:"metadataUrl"`
 }
 
+type APIHosts struct {
+	EventsHost   string
+	MetadataHost string
+}
+
+// ExtendContext extends provided context with APIHosts
 func (r APIHosts) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, APIHostsKey, r)
 }

@@ -2,10 +2,11 @@ FROM golang:1.10 as builder
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/
 COPY vendor           ./vendor
-COPY api/publish      ./api/publish
+COPY api ./api
 COPY internal/trace   ./internal/trace
 COPY internal/knative ./internal/knative
 COPY internal/publish ./internal/publish
+COPY internal/ea ./internal/ea
 
 WORKDIR /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/
 COPY main.go     .

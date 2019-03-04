@@ -120,9 +120,9 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 		}
 
 		return r.installApplication(application)
-	} else {
-		return r.checkApplicationStatus(application)
 	}
+
+	return r.checkApplicationStatus(application)
 }
 
 func shouldBeRemoved(application *v1alpha1.Application) bool {
@@ -135,7 +135,8 @@ func shouldSkipInstallation(application *v1alpha1.Application) bool {
 
 func (r *applicationReconciler) installApplication(application *v1alpha1.Application) (string, string, error) {
 	log.Infof("Installing release for %s Application...", application.Name)
-	status, description, err := r.releaseManager.InstallChart(application.Name)
+
+	status, description, err := r.releaseManager.InstallChart(application)
 	if err != nil {
 		return "", "", errors.Wrapf(err, "Error installing release for %s Application", application.Name)
 	}

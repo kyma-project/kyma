@@ -61,7 +61,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     ```
 2. Create a new service account and assign it to the `dns.admin` role. Run these commands:
     ```
-    gcloud iam service-accounts create dnsmanager --display-name "dnsmanager"
+    gcloud iam service-accounts create dnsmanager --display-name "dnsmanager" --project "$PROJECT"
     ```
     ```
     gcloud projects add-iam-policy-binding $PROJECT \

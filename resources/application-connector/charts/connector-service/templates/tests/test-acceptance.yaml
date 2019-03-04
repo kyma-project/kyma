@@ -23,10 +23,8 @@ spec:
       value: https://gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}
     - name: SKIP_SSL_VERIFY
       value: "{{ .Values.tests.skipSslVerify }}"
-    - name: GROUP
-      value: "{{ .Values.tests.group }}"
-    - name: TENANT
-      value: "{{ .Values.tests.tenant }}"
+    - name: CENTRAL
+      value: "{{ .Values.tests.central }}"
 
   restartPolicy: Never
 {{ end }}

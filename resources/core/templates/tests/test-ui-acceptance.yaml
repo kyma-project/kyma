@@ -8,11 +8,25 @@ metadata:
   labels:
     "helm-chart-test": "true"
 spec:
-  hostNetwork: true
+  {{ if .Values.global.isLocalEnv }}
+  hostAliases:
+   - ip: {{ .Values.test.acceptance.ui.minikubeIP }}
+     hostnames:
+      - "apiserver.{{ .Values.global.domainName }}"
+      - "console.{{ .Values.global.domainName }}"
+      - "catalog.{{ .Values.global.domainName }}"
+      - "instances.{{ .Values.global.domainName }}"
+      - "brokers.{{ .Values.global.domainName }}"
+      - "dex.{{ .Values.global.domainName }}"
+      - "docs.{{ .Values.global.domainName }}"
+      - "lambdas-ui.{{ .Values.global.domainName }}"
+      - "ui-api.{{ .Values.global.domainName }}"
+      - "minio.{{ .Values.global.domainName }}"
+  {{ end }}
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:c1c23e81
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:dfe83285
       imagePullPolicy: IfNotPresent
       resources:
          requests:

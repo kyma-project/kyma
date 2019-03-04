@@ -1,7 +1,7 @@
 package loader
 
 import (
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha1"
+	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/onsi/gomega"
 	"io/ioutil"
 	"os"
@@ -21,7 +21,7 @@ func TestLoader_Load_Single(t *testing.T) {
 		}
 
 		// When
-		_, files, err := loader.Load("test", "asset", v1alpha1.AssetSingle, "")
+		_, files, err := loader.Load("test", "asset", v1alpha2.AssetSingle, "")
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -40,7 +40,7 @@ func TestLoader_Load_Single(t *testing.T) {
 		}
 
 		// When
-		_, files, err := loader.Load("https://ala.ma/", "asset", v1alpha1.AssetSingle, "")
+		_, files, err := loader.Load("https://ala.ma/", "asset", v1alpha2.AssetSingle, "")
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -59,7 +59,7 @@ func TestLoader_Load_Single(t *testing.T) {
 		}
 
 		// When
-		_, _, err := loader.Load("test", "asset", v1alpha1.AssetSingle, "")
+		_, _, err := loader.Load("test", "asset", v1alpha2.AssetSingle, "")
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -77,7 +77,7 @@ func TestLoader_Load_Single(t *testing.T) {
 		}
 
 		// When
-		_, _, err := loader.Load("test", "asset", v1alpha1.AssetSingle, "")
+		_, _, err := loader.Load("test", "asset", v1alpha2.AssetSingle, "")
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -95,7 +95,7 @@ func TestLoader_Load_Single(t *testing.T) {
 		}
 
 		// When
-		_, _, err := loader.Load("error3", "asset", v1alpha1.AssetSingle, "")
+		_, _, err := loader.Load("error3", "asset", v1alpha2.AssetSingle, "")
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())

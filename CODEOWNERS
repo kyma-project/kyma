@@ -63,6 +63,9 @@
 # The `nginx-ingress` subchart
 /resources/application-connector/charts/nginx-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
+# The `connectivity-certs-controller` chart
+/resources/connectivity-certs-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
 # The `console` subchart
 /resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
 
@@ -205,8 +208,11 @@
 # Connector Service Component
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# Connector Service Token Request Component
+# Connection Token Handler Component
 /components/connection-token-handler/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
+# Connectivity Certs Controller Component
+/components/connectivity-certs-controller/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Registry Component
 /components/application-registry/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -240,8 +246,8 @@
 # test-namespace-controller
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
-# test-logging-monitoring tests
-/tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+# monitoring tests
+/tests/monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # test-logging tests
 /tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
@@ -315,6 +321,9 @@
 
 # E2E Backup Tests
 /tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+
+# Cluster Users Test
+/tests/cluster-users-test @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc

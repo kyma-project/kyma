@@ -43,6 +43,10 @@ func (dc dummyClientContextService) GetLogger() *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{})
 }
 
+func (dc dummyClientContextService) FillPlaceholders(format string) string {
+	return format
+}
+
 type dummyClientContextServiceWithEmptyURLs struct {
 	dummyClientContextService
 }

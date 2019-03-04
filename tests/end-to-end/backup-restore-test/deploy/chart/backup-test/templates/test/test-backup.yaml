@@ -11,19 +11,19 @@ rules:
   verbs: ["get"]
 - apiGroups: [""]
   resources: ["pods"]
-  verbs: ["delete", "get", "list"]
+  verbs: ["*"]
 - apiGroups: [""]
   resources: ["namespaces"]
-  verbs: ["create", "delete", "get", "list", "patch"]
+  verbs: ["*"]
 - apiGroups: [""]
   resources: ["services", "services/proxy", "configmaps", "pods/log", "replicationcontrollers"]
   verbs: ["get", "list"]
 - apiGroups: ["ark.heptio.com"]
-  resources: ["backups","restores"]
-  verbs: ["create", "delete", "get", "list", "patch"]
+  resources: ["*"]
+  verbs: ["*"]
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]
-  verbs: ["create", "delete", "get", "list"]
+  verbs: ["*"]
 - apiGroups: ["apps"]
   resources: ["daemonsets", "deployments", "replicasets", "statefulsets"]
   verbs: ["get", "list"]
@@ -73,7 +73,7 @@ spec:
   serviceAccount: {{ template "backup-test.fullname" . }}
   containers:
   - name: backup-test
-    image: "{{ .Values.containerRegistry.path }}/backup-restore-test:{{ .Values.image.tag }}"
+    image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}backup-restore-test:{{ .Values.image.tag }}"
     imagePullPolicy: Always
     #command: ["sleep", "6000"]
   restartPolicy: Never

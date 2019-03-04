@@ -1,0 +1,6 @@
+deployment:
+  image:
+    pullPolicy: IfNotPresent
+  args:
+    clusterCertificatesSecret: cluster-client-certificates
+    caCertificatesSecret: nginx-auth-ca
