@@ -1,5 +1,4 @@
 configmapName: oidc-ca
-containerPort: 8444
 
 port:
   secure: 8443
