@@ -40,8 +40,8 @@ global:
     version: 736988df
     testNamespace: api-controller-tests
   apiserver_proxy:
-    dir: develop/
-    version: 6e0a7fe2
+    dir: pr/
+    version: PR-2905
   configurations_generator:
     dir: develop/
     version: aabedc33
@@ -76,8 +76,8 @@ global:
     dir: develop/
     version: "d4937a42"
   xip_patch:
-    dir: pr/
-    version: PR-2917
+    dir: develop/
+    version: 1103850e
   kubeless_images:
     runtime:
       node6:
