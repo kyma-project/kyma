@@ -1,6 +1,5 @@
 ---
-title: Helm Broker architecture
-type: Architecture
+title: Architecture
 ---
 
 The Helm Broker workflow starts with the registration process, during which the Helm Broker fetches bundles from the Kyma `bundles` directory, or from a remote HTTP server.
