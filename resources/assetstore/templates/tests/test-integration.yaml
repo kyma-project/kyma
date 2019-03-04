@@ -15,6 +15,7 @@ spec:
       - "minio.{{ .Values.global.domainName }}"
   {{ end }}
   serviceAccountName:  "test-{{ template "fullname" . }}-integration"
+  restartPolicy: Never
   containers:
     - name: "test-{{ template "fullname" . }}-integration"
       image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_test.dir }}asset-store-test:{{ .Values.global.asset_store_test.version }}
