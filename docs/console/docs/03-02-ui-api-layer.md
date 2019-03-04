@@ -15,8 +15,6 @@ For GraphQL queries, the UI API Layer uses caching which is based on Informers f
 
 The UI API Layer consists of the Kubernetes resource logic and cache for different domains, such as the Service Catalog, Application, or Kubeless. The UI API Layer introduces modularization changes which are based on toggling modules while the server is running. The enabled module synchronizes cache for its resource and enables the module's logic for all server requests. If you disable a given module, every GraphQL query, mutation, and subscription related to this module returns an error.
 
-The UI API Layer module pluggability is hidden behind a feature toggle. It is not enabled by default because the Console UI still requires resiliency improvements to ensure no errors occur when a certain Kyma component is not installed.
-
 To enable this functionality, run this command:
 
 ```bash
@@ -24,12 +22,12 @@ kubectl set env deployment/core-ui-api MODULE_PLUGGABILITY=true -n kyma-system
 ```
 
 These are the available UI API Layer pluggable modules which contain the GraphQL resolver logic, where:
-- `apicontroller` is related to the API Controller
-- `authentication` is related IDP Presets
-- `application` is related the Application Connector
-- `content` is related to documentation
-- `kubeless` is related to Serverless
-- `servicecatalog` is related to the Service Catalog, including Service Classes, Service Instances, and Service Bindings
-- `servicecatalogaddons` is related to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds
+- `apicontroller` relates to the API Controller
+- `authentication` relates IDP Presets
+- `application` relates the Application Connector
+- `content` relates to documentation
+- `kubeless` relates to Serverless
+- `servicecatalog` relates to the Service Catalog, including Service Classes, Service Instances, and Service Bindings
+- `servicecatalogaddons` relates to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds
 
 To enable a given module, install the corresponding Kyma component. It includes the BackendModule custom resource with the same name as the name of a given module.
