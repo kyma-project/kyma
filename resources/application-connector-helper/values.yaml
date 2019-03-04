@@ -1,0 +1,6 @@
+containerRegistry:
+  path: eu.gcr.io/kyma-project
+xip_patch:
+  dir: pr/
+  version: "PR-2917"
+labelSelector: "application-connector-lb=true"
