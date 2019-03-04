@@ -1,5 +1,5 @@
 ---
-title: How to create a bundle
+title: Create a bundle
 type: Configuration
 ---
 
@@ -54,7 +54,7 @@ The `meta.yaml` file is mandatory as it contains information about the bundle. S
 |       **requires**      |   false  |     The **requires** field defines a list of permissions the user must grant to the instances of this service.          |
 | **provisionOnlyOnce**   |   false  |     Defines that the bundle can be provisioned only once in a given Namespace. The default value is `false` |
 
-> **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`. 
+> **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`.
 
 ### The chart directory
 
