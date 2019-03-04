@@ -17,6 +17,18 @@ rules:
   - patch
   - delete
 - apiGroups:
+  - applicationconnector.kyma-project.io
+  resources:
+  - eventactivations
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
   - admissionregistration.k8s.io
   resources:
   - mutatingwebhookconfigurations
@@ -45,6 +57,20 @@ rules:
   - ""
   resources:
   - services
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - channels
+  - subscriptions
   verbs:
   - get
   - list

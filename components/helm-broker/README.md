@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Helm Broker is an implementation of a service broker which runs on the Kyma cluster and deploys applications into the Kubernetes cluster using Kyma bundles, and the [Helm](https://github.com/kubernetes/helm) client. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. For example, a bundle can provide plan definitions or binding details. The Helm Broker fetches bundle definitions from an HTTP server. By default, the Helm Broker contains an embedded HTTP server which serves bundles from the Kyma bundles directory.
+The Helm Broker is an implementation of a service broker which runs on the Kyma cluster and deploys applications into the Kubernetes cluster using Kyma bundles, and the [Helm](https://github.com/kubernetes/helm) client. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. For example, a bundle can provide plan definitions or binding details. The Helm Broker fetches bundles definitions from an HTTP servers. A list of HTTP bundles repositories is defined in the config map and can be changed in the runtime.
 
 For the details about Helm Broker configuration, see [this](../../docs/helm-broker/docs/05-01-helm-broker.md) document. See [How to create a bundle](../../docs/helm-broker/docs/05-02-helm-broker-bundles.md) and [Binding bundles](../../docs/helm-broker/docs/05-03-helm-broker-bundles-binding.md) to learn more about the bundles.
 The Helm Broker implements the Service Broker API. For more information about the Service Brokers, see the [Service Brokers](../../docs/service-catalog/docs/13-01-service-brokers.md) overview document.
@@ -24,7 +24,7 @@ Before each commit, use the `before-commit.sh` script, which tests your changes.
 To run the application without building a binary file, run this command:
 
 ```bash
-APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_CONFIG_FILE_NAME=contrib/minimal-config.yaml APP_REPOSITORY_URLS=https://github.com/kyma-project/bundles/releases/download/0.1.0/ APP_CLUSTER_SERVICE_BROKER_NAME=helm-broker APP_HELM_BROKER_URL=http://localhost:8080 go run cmd/broker/main.go
+APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_CONFIG_FILE_NAME=contrib/minimal-config.yaml  APP_CLUSTER_SERVICE_BROKER_NAME=helm-broker APP_HELM_BROKER_URL=http://localhost:8080 APP_NAMESPACE=kyma-system go run cmd/broker/main.go
 ```
 
 >**NOTE:**  Not all features are available when you run the Helm Broker locally. All features which perform actions with Tiller do not work.

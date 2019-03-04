@@ -3,12 +3,13 @@ package broker
 import (
 	"context"
 
+	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
 
 //go:generate mockery -name=syncer -output=automock -outpkg=automock -case=underscore
 type syncer interface {
-	Execute()
+	Execute() error
 }
 
 type catalogSyncerService struct {
@@ -28,6 +29,8 @@ func (cs *catalogSyncerService) GetCatalog(ctx context.Context, osbCtx OsbContex
 	// Trigger sync with bundle repositories
 	// If the sync is too long, the Service Catalog call timeout is exceeded and the Service Catalog
 	// will try again
-	cs.syncer.Execute()
+	if err := cs.syncer.Execute(); err != nil {
+		return nil, errors.Wrap(err, "while executing bundles sync")
+	}
 	return cs.underlying.GetCatalog(ctx, osbCtx)
 }

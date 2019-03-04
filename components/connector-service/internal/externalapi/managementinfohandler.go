@@ -33,7 +33,7 @@ func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 
 	urls := ih.buildURLs(clientContextService)
 
-	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls})
+	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls, ClientIdentity: clientContextService})
 }
 
 func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.ClientContextService) mgmtURLs {
