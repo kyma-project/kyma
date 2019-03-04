@@ -8,7 +8,6 @@ metadata:
   labels:
     "helm-chart-test": "true"
 spec:
-  hostNetwork: true
   serviceAccountName:  "test-{{ template "fullname" . }}-integration"
   containers:
     - name: "test-{{ template "fullname" . }}-integration"

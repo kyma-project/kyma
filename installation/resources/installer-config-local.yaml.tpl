@@ -123,4 +123,4 @@ metadata:
     component: core
     kyma-project.io/installation: ""
 data:
-  minikubeIP: ""
+  test.acceptance.ui.minikubeIP: ""
