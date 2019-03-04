@@ -2,22 +2,38 @@
 
 CURRENT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
+
+if [[ -z "${TEST_IMAGE}" ]]; then
+  echo "TEST_IMAGE env is not set. It should be set to full path of and image including tag, ex: mydockerhub/connector-service-tests:0.0.1"
+  exit 1
+fi
+
+if [[ -z "${DOMAIN}" ]]; then
+  echo "DOMAIN_NAME env is not set. It should be set to cluster domain name, ex: nightly.cluster.kyma.cx"
+  exit 1
+fi
+
+echo "Current cluster context: $(kubectl config current-context)"
+echo "Image: $TEST_IMAGE"
+echo "Domain: $DOMAIN"
+
 source $CURRENT_DIR/test-runner.sh
 
 deleteTestPod
 
-eval $(minikube docker-env)
+buildImage $TEST_IMAGE
 
-buildImage connector-service-tests
+echo ""
+echo "------------------------"
+echo "Pushing tests image"
+echo "------------------------"
 
-NODE_PORT=$(kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}')
+docker push $TEST_IMAGE
 
 echo ""
 echo "------------------------"
 echo "Creating test pod"
 echo "------------------------"
-
-MINIKUBE_IP=$(minikube ip)
 
 cat <<EOF | kubectl -n kyma-integration apply -f -
 apiVersion: v1
@@ -27,22 +43,17 @@ metadata:
   annotations:
     sidecar.istio.io/inject: "false"
 spec:
-  hostAliases:
-  - ip: "$MINIKUBE_IP"
-    hostnames:
-    - "connector-service.kyma.local"
-    - "gateway.kyma.local"
   containers:
   - name: connector-service-tests
-    image: connector-service-tests
-    imagePullPolicy: Never
+    image: $TEST_IMAGE
+    imagePullPolicy: Always
     env:
     - name: INTERNAL_API_URL
       value: http://connector-service-internal-api:8080
     - name: EXTERNAL_API_URL
       value: http://connector-service-external-api:8081
     - name: GATEWAY_URL
-      value: https://gateway.kyma.local:$NODE_PORT
+      value: https://gateway.$DOMAIN
     - name: SKIP_SSL_VERIFY
       value: "true"
     - name: CENTRAL
@@ -50,4 +61,4 @@ spec:
   restartPolicy: Never
 EOF
 
-waitForTestLogs 5
+waitForTestLogs 10
