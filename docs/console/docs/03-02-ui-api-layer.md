@@ -9,7 +9,7 @@ The UI API Layer is a backend service which provides an API for all views of the
 
 ## Cache
 
-For GraphQL queries, the UI API Layer uses caching which is based on Informers from the Kubernetes Go client. There are separate cache stores for every Kubernetes resource. The stores are synchronized when the service starts. After cache synchronization, a single connection with the Kubernetes API server is established and any event related to one of the observed resources updates the given cache store. This logic ensures that cache stores are always up-to-date without sending multiple requests to the Kubernetes API server.
+For GraphQL queries, the UI API Layer uses caching which is based on Informers from the Kubernetes Go client. There are separate cache stores for every Kubernetes resource. The stores are synchronized when the service starts. After cache synchronization, a single connection with the Kubernetes API server is established and any event related to one of the observed resources updates the corresponding cache store. This logic ensures that cache stores are always up-to-date without sending multiple requests to the Kubernetes API server.
 
 ## Modularization
 
@@ -17,19 +17,19 @@ The UI API Layer consists of the Kubernetes resource logic and cache for differe
 
 The UI API Layer module pluggability is hidden behind a feature toggle. It is not enabled by default because the Console UI still requires resiliency improvements to ensure no errors occur when a certain Kyma component is not installed.
 
-To enable this functionality, run the following command:
+To enable this functionality, run this command:
 
 ```bash
 kubectl set env deployment/core-ui-api MODULE_PLUGGABILITY=true -n kyma-system
 ```
 
 These are the available UI API Layer pluggable modules which contain the GraphQL resolver logic, where:
-- `apicontroller` relates to the API Controller.
-- `authentication` relates to IDP Presets.
-- `application` relates to the Application Connector.
-- `content` relates to the documentation.
-- `kubeless` relates to serverless.
-- `servicecatalog` relates to the Service Catalog, including Service Classes, Service Instances, and Service Bindings.
-- `servicecatalogaddons` relates to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds.
+- `apicontroller` is related to the API Controller
+- `authentication` is related IDP Presets
+- `application` is related the Application Connector
+- `content` is related to documentation
+- `kubeless` is related to Serverless
+- `servicecatalog` is related to the Service Catalog, including Service Classes, Service Instances, and Service Bindings
+- `servicecatalogaddons` is related to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds
 
-To enable a given module, install a proper Kyma component. It includes the BackendModule custom resource definition with the same name as the name of a given module.
+To enable a given module, install the corresponding Kyma component. It includes the BackendModule custom resource with the same name as the name of a given module.
