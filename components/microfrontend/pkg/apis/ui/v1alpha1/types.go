@@ -42,11 +42,8 @@ type MicroFrontendSpec struct {
 }
 
 type ClusterMicroFrontendSpec struct {
-	Version         string           `json:"version"`
-	Category        string           `json:"category"`
-	ViewBaseUrl     string           `json:"viewBaseUrl"`
-	Placement       string           `json:"placement"`
-	NavigationNodes []NavigationNode `json:"navigationNodes"`
+	Placement         string `json:"placement"`
+	MicroFrontendSpec `json:",inline"`
 }
 
 type NavigationNode struct {
