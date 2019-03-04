@@ -136,12 +136,12 @@ promtail:
 global:
   ## to deploy console ui app
   uiapp:
-    create: true
+    create: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
-    dir: pr
-    version: PR-2514
+    dir: develop
+    version: 3e1c541d
   ## to enable auth and authz set value to true
   rbac:
     create: false
