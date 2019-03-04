@@ -36,8 +36,8 @@ required = [
   version = "0.3.4"
 
 [[constraint]]
-  name = "github.com/satori/go.uuid"
-  version = "1.2.0"
+  name = "github.com/gofrs/uuid"
+  version = "3.2.0"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
