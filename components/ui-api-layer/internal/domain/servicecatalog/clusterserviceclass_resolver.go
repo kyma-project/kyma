@@ -232,7 +232,7 @@ func (r *clusterServiceClassResolver) ClusterServiceClassODataSpecField(ctx cont
 		return nil, nil
 	}
 
-	return odataSpec.Raw, nil
+	return &odataSpec.Raw, nil
 }
 
 func (r *clusterServiceClassResolver) ClusterServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {

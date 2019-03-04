@@ -235,7 +235,7 @@ func (r *serviceClassResolver) ServiceClassODataSpecField(ctx context.Context, o
 		return nil, nil
 	}
 
-	return odataSpec.Raw, nil
+	return &odataSpec.Raw, nil
 }
 
 func (r *serviceClassResolver) ServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {

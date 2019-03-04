@@ -84,7 +84,7 @@ func (o *OpenApiSpec) Decode(data []byte) error {
 }
 
 type ODataSpec struct {
-	Raw *string
+	Raw string
 }
 
 func (o *ODataSpec) Decode(data []byte) error {
@@ -105,8 +105,7 @@ func (o *ODataSpec) unmarshalJSON(data []byte) error {
 		return err
 	}
 
-	str := string(data)
-	o.Raw = &str
+	o.Raw = string(data)
 
 	return nil
 }
@@ -118,8 +117,7 @@ func (o *ODataSpec) unmarshalXML(data []byte) error {
 		return err
 	}
 
-	str := string(data)
-	o.Raw = &str
+	o.Raw = string(data)
 
 	return nil
 }
@@ -156,7 +154,7 @@ func (o *AsyncApiSpec) Decode(data []byte) error {
 func isInvalidBeginningCharacterError(err error) bool {
 	switch err := err.(type) {
 	case *json.SyntaxError:
-		return err.Offset == 1 && err.Error() == "invalid character '<' looking for beginning of value"
+		return err.Error() == "invalid character '<' looking for beginning of value"
 	default:
 		return false
 	}

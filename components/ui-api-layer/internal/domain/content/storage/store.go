@@ -155,10 +155,10 @@ func (s *store) replaceAssetsAddress(in interface{}, id string) interface{} {
 func (s *store) decode(reader io.Reader, value Specification) (bool, error) {
 	data, err := s.readData(reader)
 	if err != nil {
-		if ok := s.client.IsNotExistsError(err); ok {
-			return false, nil
-		}
 		return false, err
+	}
+	if len(data) == 0 {
+		return false, nil
 	}
 
 	err = value.Decode(data)
@@ -167,9 +167,12 @@ func (s *store) decode(reader io.Reader, value Specification) (bool, error) {
 
 func (s *store) readData(reader io.Reader) ([]byte, error) {
 	data, err := ioutil.ReadAll(reader)
-	fmt.Println(data, err, reader)
 	if err != nil {
-		return nil, err
+		if ok := s.client.IsNotExistsError(err); ok {
+			return data, nil
+		}
+		return data, err
 	}
+
 	return data, nil
 }
