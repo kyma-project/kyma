@@ -40,6 +40,8 @@ spec:
       namespace: "kyma-system"
     - name: "application-connector-nginx"
       namespace: "kyma-system"
+    - name: "application-connector-helper"
+      namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-integration"
     - name: "ark"
