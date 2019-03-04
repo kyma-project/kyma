@@ -50,7 +50,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, err
 	}
 
-	log.Info("Event Activation instance found", "UID", string(ea.ObjectMeta.UID))
+	log.Info("Reconciling Event Activation", "UID", string(ea.ObjectMeta.UID))
 
 	// Modify a copy, not the original.
 	ea = ea.DeepCopy()

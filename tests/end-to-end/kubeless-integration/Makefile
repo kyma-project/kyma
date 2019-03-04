@@ -1,5 +1,5 @@
-APP_NAME = kubeless-integration-tests
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
+APP_NAME = kubeless-integration
+IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/tests/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
 

@@ -2,20 +2,20 @@ package util
 
 import (
 	"bytes"
-	"errors"
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
 	"time"
 
-	corev1 "k8s.io/api/core/v1"
-	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
+	evclientset "github.com/knative/eventing/pkg/client/clientset/versioned"
 	eventingv1alpha1 "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
@@ -55,9 +55,8 @@ if err := k.CreateSubscription("my-sub", namespace, channelName, &uri); err != n
 return
 */
 
-
 type KnativeLib struct {
-	evClient  eventingv1alpha1.EventingV1alpha1Interface
+	evClient eventingv1alpha1.EventingV1alpha1Interface
 }
 
 // GetKnativeLib returns the Knative/Eventing access layer
@@ -72,7 +71,7 @@ func GetKnativeLib() (*KnativeLib, error) {
 		log.Printf("ERROR: GetChannel(): creating eventing client: %v", err)
 		return nil, err
 	}
-	k := &KnativeLib {
+	k := &KnativeLib{
 		evClient: evClient.EventingV1alpha1(),
 	}
 	return k, nil
@@ -83,7 +82,7 @@ func GetKnativeLib() (*KnativeLib, error) {
 // standard K8S function: "k8serrors.IsNotFound(err) "
 func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
 	if channel, err := k.evClient.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
-		log.Printf("ERROR: GetChannel(): geting channel: %v", err)
+		log.Printf("ERROR: GetChannel(): getting channel: %v", err)
 		return nil, err
 	} else {
 		if !channel.Status.IsReady() {
@@ -94,7 +93,7 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
-func ( k*KnativeLib) CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
+func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
 	c := makeChannel(provisioner, name, namespace)
 	if channel, err := k.evClient.Channels(namespace).Create(c); err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
@@ -103,7 +102,7 @@ func ( k*KnativeLib) CreateChannel(provisioner string, name string, namespace st
 		isReady := channel.Status.IsReady()
 		tout := time.After(timeout)
 		tick := time.Tick(100 * time.Millisecond)
-		for ; !isReady; {
+		for !isReady {
 			select {
 			case <-tout:
 				return nil, errors.New("timed out")
@@ -204,7 +203,7 @@ func (r *KnativeLib) InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) 
 	return nil
 }
 
-func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, message *string)  error {
+func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, message *string) error {
 	timeout := time.After(10 * time.Second)
 	tick := time.Tick(200 * time.Millisecond)
 	req, err := makeHttpRequest(channel, message)
@@ -220,7 +219,7 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, mes
 	defer res.Body.Close()
 	//dumpResponse(res)
 	sc := res.StatusCode
-	for ; sc == http.StatusNotFound; {
+	for sc == http.StatusNotFound {
 		select {
 		case <-timeout:
 			log.Printf("ERROR: resendMessage(): timed out")
