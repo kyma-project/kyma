@@ -22,12 +22,12 @@ kubectl set env deployment/core-ui-api MODULE_PLUGGABILITY=true -n kyma-system
 ```
 
 These are the available UI API Layer pluggable modules which contain the GraphQL resolver logic, where:
-- `apicontroller` relates to the API Controller
-- `authentication` relates to IDP Presets
-- `application` relates to the Application Connector
-- `content` relates to documentation
-- `kubeless` relates to Serverless
-- `servicecatalog` relates to the Service Catalog, including Service Classes, Service Instances, and Service Bindings
-- `servicecatalogaddons` relates to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds
+- `apicontroller` relates to the API Controller.
+- `authentication` relates to IDP Presets.
+- `application` relates to the Application Connector.
+- `content` relates to documentation.
+- `kubeless` relates to Serverless.
+- `servicecatalog` relates to the Service Catalog, including Service Classes, Service Instances, and Service Bindings.
+- `servicecatalogaddons` relates to the Service Catalog add-ons, such as ServiceBindingUsage, and UsageKinds.
 
 To enable a given module, install the corresponding Kyma component. It includes the BackendModule custom resource with the same name as the name of a given module.
