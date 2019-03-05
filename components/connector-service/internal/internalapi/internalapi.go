@@ -55,8 +55,8 @@ func (hb *handlerBuilder) WithApps(appCfg Config) {
 	httphelpers.WithMiddlewares(applicationTokenRouter, hb.functionalMiddlewares.ApplicationCtxMiddleware)
 	applicationTokenRouter.HandleFunc("/tokens", appTokenHandler.CreateToken).Methods(http.MethodPost)
 
-	applicationRevocationRouter := hb.router.PathPrefix("/v1/applications").Subrouter()
-	applicationRevocationRouter.HandleFunc("/revocations", appRevocationHandler.Revoke).Methods(http.MethodPost)
+	applicationRevocationRouter := hb.router.PathPrefix("/v1/applications/certificates/revocations").Subrouter()
+	applicationRevocationRouter.HandleFunc("", appRevocationHandler.Revoke).Methods(http.MethodPost)
 }
 
 func (hb *handlerBuilder) WithRuntimes(runtimeCfg Config) {
@@ -67,8 +67,8 @@ func (hb *handlerBuilder) WithRuntimes(runtimeCfg Config) {
 	httphelpers.WithMiddlewares(clusterTokenRouter, hb.functionalMiddlewares.RuntimeCtxMiddleware)
 	clusterTokenRouter.HandleFunc("/tokens", runtimeTokenHandler.CreateToken).Methods(http.MethodPost)
 
-	runtimeRevocationRouter := hb.router.PathPrefix("/v1/runtimes").Subrouter()
-	runtimeRevocationRouter.HandleFunc("/revocations", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
+	runtimeRevocationRouter := hb.router.PathPrefix("/v1/runtimes/certificates/revocations").Subrouter()
+	runtimeRevocationRouter.HandleFunc("", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
 }
 
 func (hb *handlerBuilder) GetHandler() http.Handler {
