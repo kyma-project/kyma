@@ -64,11 +64,11 @@ global:
     dir: develop/
     version: 429bfbcc
   ui_api_layer:
-    dir: develop/
-    version: "4ad2e460"
+    dir: pr/
+    version: "PR-2962"
   ui_api_layer_acceptance_tests:
-    dir: develop/
-    version: "4ad2e460"
+    dir: pr/
+    version: "PR-2962"
   cluster_users_test:
     dir: develop/
     version: "30b8aafd"
