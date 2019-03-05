@@ -67,8 +67,8 @@ func (hb *handlerBuilder) WithRuntimes(runtimeCfg Config) {
 	httphelpers.WithMiddlewares(clusterTokenRouter, hb.functionalMiddlewares.RuntimeCtxMiddleware)
 	clusterTokenRouter.HandleFunc("/tokens", runtimeTokenHandler.CreateToken).Methods(http.MethodPost)
 
-	applicationRevocationRouter := hb.router.PathPrefix("/v1/applications").Subrouter()
-	applicationRevocationRouter.HandleFunc("/revocations", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
+	runtimeRevocationRouter := hb.router.PathPrefix("/v1/runtimes").Subrouter()
+	runtimeRevocationRouter.HandleFunc("/revocations", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
 }
 
 func (hb *handlerBuilder) GetHandler() http.Handler {
