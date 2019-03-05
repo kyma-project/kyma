@@ -37,7 +37,7 @@ data:
 EOF
 ```
 
-### Install without Connector Service
+### Install Application Connector without the Connector Service
 
 You can install the Application Connector (AC) without the Connector Service. Use this approach when preparing an environment for working with a Connector Service deployed as a standalone component. 
 To install the AC without the Connector Service, you must override several values of the Kyma Installer. Run:
