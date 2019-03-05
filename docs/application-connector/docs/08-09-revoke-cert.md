@@ -11,7 +11,7 @@ This guide will show you how to revoke certificates. Please, follow this steps:
 
     ```curl -k https://gateway.{CLUSTER_DOMAIN}/v1/applications/management/info```
     
-    Successfull call will return response with revokeCertUrl.
+    Successful call will return response with revokeCertUrl.
     
     ```json
     {
@@ -32,4 +32,4 @@ This guide will show you how to revoke certificates. Please, follow this steps:
 3. To revoke certificate send request to revokeCertUrl.
     ```curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations --cert {CERT_TO_REVOKE} --key {CERT_TO_REVOKE_KEY} -k```
     
-4. To verify that certificate has been revoked, you can try to renew it by reproducing steps in tutorial ``Renew the client certificate``
+    After successful call, the certificate is revoked and cannot be renewed.
