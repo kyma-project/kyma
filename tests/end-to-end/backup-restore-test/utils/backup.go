@@ -72,10 +72,6 @@ func (c *backupClient) CreateBackup(backupName, specPath string) error {
 	}
 
 	backup := &backupv1.Backup{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Backup",
-			APIVersion: backupv1.SchemeGroupVersion.String(),
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: backupName,
 		},
@@ -141,10 +137,6 @@ func (c *backupClient) GetBackupStatus(backupName string) string {
 
 func (c *backupClient) RestoreBackup(backupName string) error {
 	restore := &backupv1.Restore{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Restore",
-			APIVersion: backupv1.SchemeGroupVersion.String(),
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: backupName,
 		},
@@ -158,10 +150,6 @@ func (c *backupClient) RestoreBackup(backupName string) error {
 
 func (c *backupClient) CreateNamespace(name string) error {
 	namespace := &corev1.Namespace{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Namepspace",
-			APIVersion: corev1.SchemeGroupVersion.String(),
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
