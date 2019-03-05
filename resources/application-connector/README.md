@@ -39,7 +39,9 @@ EOF
 
 ### Install without Connector Service
 
-You can install Application Connector without Connector Service. For example in preparing an environment for working with central Connector Service. Installation without Connector Service will also disable the possibility to create Application from the UI. To perform the installation without Connector Service you must override values as presented in the following example:
+You can install the Application Connector (AC) without the Connector Service. Use this approach when preparing an environment for working with a Connector Service deployed as a standalone component. 
+To install the AC without the Connector Service, you must override several values of the Kyma Installer. Run:
+>**NOTE:** Installing AC without the Connector Service disables creating new Applications through the Console UI.
 
 ```
 cat <<EOF | kubectl apply -f -
