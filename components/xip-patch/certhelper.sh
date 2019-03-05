@@ -4,6 +4,7 @@
 # - TLS_CRT (optinal) - Current TLS certificate
 # - TLS_KEY (optional) - Current TLS cert key
 # - LB_LABEL (required) - Selector label for the LoadBalancer service
+# - LB_NAMESPACE (required) - Namespace for the LoadBalancer service
 
 set -e
 
@@ -12,7 +13,7 @@ source $CURRENT_DIR/utils.sh
 
 discoverUnsetVar=false
 
-for var in LB_LABEL; do
+for var in LB_LABEL LB_NAMESPACE; do
     if [ -z "${!var}" ] ; then
         echo "ERROR: $var is not set"
         discoverUnsetVar=true
@@ -25,7 +26,7 @@ fi
 
 if [[ -z "${DOMAIN}" ]]; then
 	echo "---> DOMAIN not SET. Creating..."
-	INGRESS_IP=$(getLoadBalancerIPFromLabel "${LB_LABEL}")
+	INGRESS_IP=$(getLoadBalancerIPFromLabel "${LB_LABEL}" "${LB_NAMESPACE}")
 	DOMAIN="${INGRESS_IP}.xip.io"
 	DOMAIN_YAML=$(cat << EOF
 ---

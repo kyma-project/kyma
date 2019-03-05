@@ -1,4 +1,4 @@
-{{ if ! .Values.global.isLocalEnv }}
+{{ if not .Values.global.isLocalEnv }}
 ---
 apiVersion: batch/v1
 kind: Job
@@ -32,4 +32,6 @@ spec:
           value: {{ .Values.global.tlsKey }}
         - name: LB_LABEL
           value: {{ .Values.labelSelector }}
+        - name: LB_NAMESPACE
+          value: {{ .Values.labelNamespace }}
 {{ end }}

@@ -4,3 +4,4 @@ xip_patch:
   dir: pr/
   version: "PR-2917"
 labelSelector: "application-connector-lb=true"
+labelNamespace: kyma-system
