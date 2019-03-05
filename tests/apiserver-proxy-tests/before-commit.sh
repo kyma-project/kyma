@@ -33,7 +33,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 	buildEnv="env CGO_ENABLED=0 GOOS=linux"
 fi
 
-${buildEnv} go build -o ./apiserver-proxy/bin/app ./apiserver-proxy
+${buildEnv} go build -o ./fetch-token/bin/app ./fetch-token
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then
@@ -45,7 +45,7 @@ fi
 ##
 # GO VET
 ##
-packagesToVet=($(go list ./... | grep -v /vendor/ | grep -v api-controller/pkg/clients ))
+packagesToVet=($(go list ./... | grep -v /vendor/))
 
 for vPackage in "${packagesToVet[@]}"; do
 	vetResult=$(go vet ${vPackage})

@@ -8,6 +8,6 @@ RUN apk update &&\
 	chmod +x kubectl &&\
 	mv kubectl /usr/local/bin/kubectl
 
-ADD ./apiserver-proxy/bin/app ./app
+ADD ./fetch-token/bin/app ./app
 ADD ./test.sh ./test.sh
 ENTRYPOINT ["/bin/bash", "-c", "/root/test.sh"]
