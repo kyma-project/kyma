@@ -15,9 +15,9 @@ You can disable the SSL certificate verification in the communication between Ky
 
 Follow these steps to disable SSL certificate verification for communication between Kyma and an existing App:
 
-  1. Edit the `{APPLICATION}-application-proxy` Deployment in the `kyma-integration` Namespace. Run:
+  1. Edit the `{APPLICATION}-application-gateway` Deployment in the `kyma-integration` Namespace. Run:
     ```
-    kubectl -n kyma-integration edit deployment {APPLICATION}-application-proxy
+    kubectl -n kyma-integration edit deployment {APPLICATION}-application-gateway
     ```
   2. Edit the Deployment in Vim. Select `i` to start editing.
   3. Find the **skipVerify** parameter and change its value to `true`.
@@ -31,9 +31,9 @@ The Application Registry allows you to register APIs:
 - Secured with client certificates
 - Not secured
 
-The Application Proxy calls the registered APIs accordingly, basing on the security type specified in the API registration process.
+The Application Gateway calls the registered APIs accordingly, basing on the security type specified in the API registration process.
 
-The Application Proxy overrides the registered APIs security type if it gets a request which contains the **Access-Token** header. In such a case, the Application Proxy rewrites the token from the **Access-Token** header into an OAuth-compliant **Authorization** header and forwards it to the target API.
+The Application Gateway overrides the registered APIs security type if it gets a request which contains the **Access-Token** header. In such a case, the Application Gateway rewrites the token from the **Access-Token** header into an OAuth-compliant **Authorization** header and forwards it to the target API.
 
 This mechanism is suited for implementations in which an external application handles user authentication.
 
