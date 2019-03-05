@@ -5,14 +5,18 @@ type: Details
 
 To access the logs, follow these steps:
 
-1. Run the following command to configure port forwarding:
+1. Run the following command to get current pod name:
 ```bash
-kubectl port-forward -n kyma-system svc/logging-loki 3100:3100
+kubectl get pods -l app=loki -n kyma-system
+```
+2. Run the following command to configure port forwarding, replace <pod_name> with output of previous command:
+```bash
+kubectl port-forward -n kyma-system <pod_name> 3100:3100
 ```
 
-2. To get first 1000 lines of error logs for components in the 'kyma-system' Namespace, run the following command:
+3. To get first 1000 lines of error logs for components in the 'kyma-system' Namespace, run the following command:
 ```bash
-curl -X GET 'http://localhost:3100/api/prom/query' -d 'query={namespace="kyma-system"}' -d 'regexp=Error' -d 'limit=1000'
+curl -X GET -G 'http://localhost:3100/api/prom/query' --data-urlencode 'query={namespace="kyma-system"}' --data-urlencode 'limit=1000' --data-urlencode 'regexp=error'
 ```
 
 For further information, see the [Loki API documentation](https://github.com/grafana/loki/blob/master/docs/api.md).
