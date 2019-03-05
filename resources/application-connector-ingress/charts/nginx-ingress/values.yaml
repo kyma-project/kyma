@@ -164,7 +164,9 @@ controller:
 
   service:
     annotations: {}
-    labels: {}
+    labels: {
+      application-connector-lb: "true"
+    }
     clusterIP: ""
 
     ## List of IP addresses at which the controller services are available

@@ -36,7 +36,7 @@ spec:
       namespace: "kyma-system"
     - name: "event-bus"
       namespace: "kyma-system"
-    - name: "application-connector-nginx"
+    - name: "application-connector-ingress"
       namespace: "kyma-system"
     - name: "application-connector"
       namespace: "kyma-integration"
