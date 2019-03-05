@@ -33,7 +33,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.domainName: "__DOMAIN__"
-  global.applicationConnectorDomainName: "__APPLICATION_CONNECTOR_DOMAIN__"
+  global.applicationConnectorDomainName: "__DOMAIN__"
   global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
