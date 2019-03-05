@@ -231,7 +231,7 @@ func (r *serviceClassResolver) ServiceClassODataSpecField(ctx context.Context, o
 		return nil, gqlerror.New(err, contentPretty.ODataSpec)
 	}
 
-	if odataSpec == nil {
+	if odataSpec == nil || odataSpec.Raw == "" {
 		return nil, nil
 	}
 

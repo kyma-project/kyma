@@ -78,7 +78,9 @@ func (o *OpenApiSpec) Decode(data []byte) error {
 		return err
 	}
 
-	o.Raw = raw
+	if _, found := raw["$Version"]; !found {
+		o.Raw = raw
+	}
 
 	return nil
 }
@@ -105,7 +107,11 @@ func (o *ODataSpec) unmarshalJSON(data []byte) error {
 		return err
 	}
 
-	o.Raw = string(data)
+	if version, found := raw["$Version"]; found {
+		if version == "4.0" || version == "4.01" {
+			o.Raw = string(data)
+		}
+	}
 
 	return nil
 }

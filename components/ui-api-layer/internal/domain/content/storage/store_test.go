@@ -182,16 +182,35 @@ func TestStore_ODataApiSpec(t *testing.T) {
 		assert.False(t, exists)
 	})
 
-	t.Run("Valid json object", func(t *testing.T) {
+	t.Run("Invalid json object", func(t *testing.T) {
 		client := storage.NewMockClient()
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		expected := &storage.ODataSpec{
-			Raw: "{}",
+			Raw: "",
+		}
+
+		client.On("Object", "test", "invalid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("{}"))), nil)
+
+		odataSpec, exists, err := service.ODataSpec("invalid")
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, odataSpec)
+	})
+
+	t.Run("Valid json object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		jsonExample := fixODataJSONV4()
+		expected := &storage.ODataSpec{
+			Raw: jsonExample,
 		}
 
 		client.On("Object", "test", "valid/apiSpec.json").
-			Return(ioutil.NopCloser(bytes.NewReader([]byte("{}"))), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte(jsonExample))), nil)
 
 		odataSpec, exists, err := service.ODataSpec("valid")
 
@@ -362,6 +381,15 @@ func TestStore_Content(t *testing.T) {
 		assert.True(t, exists)
 		assert.Equal(t, expected, apiSpec)
 	})
+}
+
+func fixODataJSONV4() string {
+	return `
+{
+  "$Version": "4.01",
+  "$EntityContainer": "ODataDemo.DemoService"
+}
+`
 }
 
 func fixODataXML() string {
