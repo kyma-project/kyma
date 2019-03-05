@@ -124,7 +124,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL)
-	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedApplicationCertsRepo)
+	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedRuntimeCertsRepo)
 
 	csrRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()
 	csrRuntimesRouter.HandleFunc("/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)
@@ -155,7 +155,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 		mngmtRuntimeRouter,
 		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
 
-	runtimeRevocationRouter := hb.router.Path("/v1/runtimes/certificates/revocations").Subrouter()
+	runtimeRevocationRouter := hb.router.PathPrefix("/v1/runtimes/certificates/revocations").Subrouter()
 	runtimeRevocationRouter.HandleFunc("", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
 	httphelpers.WithMiddlewares(
 		runtimeRevocationRouter,
