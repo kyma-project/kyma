@@ -13,7 +13,7 @@ This guide will show you how to revoke certificates. Please, follow this steps:
     
     Successfull call will return response with revokeCertUrl.
     
-    ```
+    ```json
     {
          "clientIdentity": {
            "application": "example-application",
