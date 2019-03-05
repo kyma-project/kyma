@@ -27,7 +27,7 @@ Set the following environment variables:
   ```
   export KYMA_RELEASE_VERSION={KYMA_RELEASE_VERSION}
   ```
-  >**NOTE:** Installation from release is supported since version 0.7.0. 
+  >**NOTE:** Installation from release is supported since version 0.7.0.
   If you want to install Kyma from sources, do not export `KYMA_RELEASE_VERSION`.
 
 * If you use a custom domain, set also these variables:
@@ -41,7 +41,7 @@ Create a resource group that will contain all your resources:
 az group create --name $RS_GROUP --location $REGION
 ```
 
->**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the [document](#installation-install-kyma-on-an-aks-cluster-with-wildcard-dns) which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io. 
+>**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see the [document](#installation-install-kyma-on-an-aks-cluster-with-wildcard-dns) which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io.
 
 ## DNS setup
 
@@ -100,19 +100,19 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
         -d "*.$SUB_DOMAIN.$DNS_DOMAIN"
     ```
     You will see the following message:
-    
+
     ```
     Please deploy a DNS TXT record under the name
     _acme-challenge.rc2-test.kyma.online with the following value:
 
     # TXT_VALUE
-    
+
     Before continuing, verify the record is deployed.
     ```
-    Copy the `TXT_VALUE`. 
-    
+    Copy the `TXT_VALUE`.
+
 3. Open a new console and set the environment variables from the [Environment variables](#installation-install-kyma-on-an-aks-cluster-environment-variables) section. Export the `TXT_VALUE`.
-    
+
     ```
     export TXT_VALUE={YOUR_TXT_VALUE}
     ```
@@ -121,8 +121,8 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     az network dns record-set txt delete -n "_acme-challenge.$SUB_DOMAIN" -g $RS_GROUP -z $DNS_DOMAIN --yes
     az network dns record-set txt create -n "_acme-challenge.$SUB_DOMAIN" -g $RS_GROUP -z $DNS_DOMAIN --ttl 60 > /dev/null
     az network dns record-set txt add-record -n "_acme-challenge.$SUB_DOMAIN" -g $RS_GROUP -z $DNS_DOMAIN --value $TXT_VALUE
-    ``` 
-4. Go back to the first console, wait 2 minutes and press enter. 
+    ```
+4. Go back to the first console, wait 2 minutes and press enter.
 
 5. Export the certificate and key as environment variables. Run these commands:
 
@@ -218,7 +218,7 @@ Delegate the management of your domain to Azure DNS. Follow these steps:
     kubectl apply -f my-kyma.yaml
     ```
     >**NOTE:** In case you receive the `Error from server (MethodNotAllowed)` error, run the command again before going to step 2.
-    
+
 2. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
     kubectl get pods --all-namespaces
@@ -250,7 +250,7 @@ Run these commands:
 ```
 export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
 az network dns record-set a create -g $RS_GROUP -z $DNS_DOMAIN -n \*.$SUB_DOMAIN --ttl 60
 az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n \*.$SUB_DOMAIN -a $EXTERNAL_PUBLIC_IP

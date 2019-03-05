@@ -7,7 +7,7 @@ After you create an Application (App), connect it to an external solution to con
 
 This guide shows you how to get the client certificate.
 
->**NOTE:** The client certificate is valid for 92 days. See [this](#tutorials-renew-the-client-certificate) tutorial to learn how to renew the client certificate. 
+>**NOTE:** The client certificate is valid for 92 days. See [this](#tutorials-renew-the-client-certificate) tutorial to learn how to renew the client certificate.
 
 ## Prerequisites
 
@@ -101,11 +101,11 @@ After you receive the certificate, decode it and use it in your application. Reg
 
 ## Call the Metadata and Event services on local deployment
 
-When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-nginx-ingress-controller` to successfully call the Metadata Service and the Event Service.
+When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-ingress-nginx-ingress-controller` to successfully call the Metadata Service and the Event Service.
 
 - To get the NodePort, run:
   ```
-  kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
+  kubectl -n kyma-system get svc application-connector-ingress-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
   ```
 - When you send requests to the Metadata Service and the Event Service, pass the NodePort along with the generated certificate and key. For example:
   ```
