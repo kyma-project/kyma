@@ -26,7 +26,6 @@ import (
 	"errors"
 	"github.com/google/uuid"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -62,7 +61,6 @@ type dataResult struct {
 type prometheusTest struct {
 	metricName, uuid string
 	beforeBackup     queryResponse
-	afterRestore     queryResponse
 	expectedResult   string
 	finalResult      string
 	apiQuery
@@ -120,8 +118,6 @@ func (qresp *queryResponse) connectToPrometheusApi(domain, port, api, query, poi
 		Timeout: 15 * time.Second,
 	}
 	url := uri + values.Encode()
-	log.Println("Encoded url:")
-	log.Println(url)
 
 	resp, err := client.Get(url)
 	if err != nil {
@@ -201,7 +197,6 @@ func (pt *prometheusTest) TestResources(namespace string) {
 	qresp := &queryResponse{}
 	err := qresp.connectToPrometheusApi(pt.domain, pt.port, pt.api, pt.metricQuery, pt.pointInTime.formmattedValue)
 	So(err, ShouldBeNil)
-	pt.afterRestore = *qresp
 
 	if len(qresp.Data.Result) > 0 && len(qresp.Data.Result[0].Value) == 2 {
 
