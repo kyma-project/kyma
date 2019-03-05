@@ -55,7 +55,7 @@ func parseArgs() *options {
 	appsInfoURL := flag.String("appsInfoURL", "", "URL at which management information is available.")
 	runtimesInfoURL := flag.String("runtimesInfoURL", "", "URL at which management information is available.")
 	certificateValidityTime := flag.String("certificateValidityTime", "90d", "Validity time of certificates issued by this service.")
-	central := flag.Bool("central", true, "Determines whether connector works as the central")
+	central := flag.Bool("central", false, "Determines whether connector works as the central")
 
 	flag.Parse()
 
