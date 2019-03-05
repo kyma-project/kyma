@@ -15,7 +15,7 @@ The Application Connector Helm chart contains all the global components:
 
 ## Connector Service
 
-The Connector Service is responsible for generating and sending back client certificates based on Certificate Signing Request (CSR). It supports two modes: standalone and central. In standalone mode, the Connector Service works on and for the cluster in which it is deployed. In the central mode, Connector Service supports multiple clusters. By default, the installation of the Connector Service installation is set to standalone.
+The Connector Service is responsible for generating and sending back client certificates based on a Certificate Signing Request (CSR). It supports two modes: standalone and central. In the standalone mode, the Connector Service works on and for the cluster in which it is deployed. In the central mode, Connector Service supports multiple clusters. By default, the Connector Service installs as a standalone component.
 
 ### Install Connector Service as central
 
