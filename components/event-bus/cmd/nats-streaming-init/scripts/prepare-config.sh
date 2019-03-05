@@ -13,7 +13,7 @@ fi
 if [ -d ${out_path} ]; then
     cd ${out_path}
     cp -Lv ${configmap_path}/*.conf .
-    if [ ${ENABLE_BA} eq "true" ]; then
+    if [ "${ENABLE_BA}" = "true" ]; then
         GCFG="gnatsd.conf"
         echo "authorization {" >> ${GCFG}
         echo "  users = [" >> ${GCFG}
