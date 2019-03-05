@@ -17,6 +17,13 @@ import (
 )
 
 func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
+	applicationKey := "application"
+	tenantKey := "tenant"
+	groupKey := "group"
+
+	tenant := "test-tenant"
+	group := "test-group"
+
 	protectedBaseURL := "https://gateway.kyma.local/v1/applications"
 	expectedRenewalsURL := "https://gateway.kyma.local/v1/applications/certificates/renewals"
 
@@ -25,8 +32,16 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		expectedMetadataURL := "https://metadata.base.path/application/v1/metadata/services"
 		expectedEventsURL := "https://events.base.path/application/v1/events"
 
-		extClientCtx := &clientcontext.ExtendedApplicationContext{
-			ApplicationContext: clientcontext.ApplicationContext{},
+		applicationContext := clientcontext.ApplicationContext{
+			Application: appName,
+			ClusterContext: clientcontext.ClusterContext{
+				Tenant: tenant,
+				Group:  group,
+			},
+		}
+
+		extApplicationCtx := &clientcontext.ExtendedApplicationContext{
+			ApplicationContext: applicationContext,
 			RuntimeURLs: clientcontext.RuntimeURLs{
 				MetadataURL: "https://metadata.base.path/application/v1/metadata/services",
 				EventsURL:   "https://events.base.path/application/v1/events",
@@ -34,7 +49,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		}
 
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return *extClientCtx, nil
+			return *extApplicationCtx, nil
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
@@ -57,16 +72,23 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		urls := infoResponse.URLs
+		receivedContext := infoResponse.ClientIdentity.(map[string]interface{})
 
 		assert.Equal(t, expectedMetadataURL, urls.MetadataURL)
 		assert.Equal(t, expectedEventsURL, urls.EventsURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
+		assert.Equal(t, appName, receivedContext[applicationKey])
+		assert.Equal(t, group, receivedContext[groupKey])
+		assert.Equal(t, tenant, receivedContext[tenantKey])
 	})
 
 	t.Run("should successfully get management info urls for runtime", func(t *testing.T) {
 		//given
 		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return &clientcontext.ClusterContext{}, nil
+			return &clientcontext.ClusterContext{
+				Tenant: tenant,
+				Group:  group,
+			}, nil
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/runtimes/management/info", nil)
@@ -89,8 +111,11 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 
 		urls := infoResponse.URLs
+		receivedContext := infoResponse.ClientIdentity.(map[string]interface{})
 
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
+		assert.Equal(t, group, receivedContext[groupKey])
+		assert.Equal(t, tenant, receivedContext[tenantKey])
 	})
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {

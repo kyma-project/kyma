@@ -246,8 +246,8 @@
 # test-namespace-controller
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
-# test-logging-monitoring tests
-/tests/test-logging-monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+# monitoring tests
+/tests/monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # test-logging tests
 /tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
@@ -321,6 +321,9 @@
 
 # E2E Backup Tests
 /tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+
+# Cluster Users Test
+/tests/cluster-users-test @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # All .md files
 *.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc

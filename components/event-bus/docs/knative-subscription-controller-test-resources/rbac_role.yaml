@@ -57,6 +57,20 @@ rules:
   - ""
   resources:
   - services
+  - events
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - eventing.knative.dev
+  resources:
+  - channels
+  - subscriptions
   verbs:
   - get
   - list

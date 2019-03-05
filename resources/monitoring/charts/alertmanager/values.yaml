@@ -169,3 +169,14 @@ webhookConfig:
     bearerToken: ''
     bearerTokenFile: ''
     proxyUrl: ""
+
+# disable slack and victorops alerting by default
+global:
+  alertTools:
+    credentials:
+      slack:
+        apiurl: ""
+        channel: ""
+      victorOps:
+        routingkey: ""
+        apikey: ""

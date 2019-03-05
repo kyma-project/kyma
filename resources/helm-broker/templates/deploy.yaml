@@ -39,14 +39,14 @@ spec:
         env:
           - name: APP_TMP_DIR
             value: /tmp
+          - name: APP_NAMESPACE
+            value: {{ .Release.Namespace }}
           - name: APP_PORT
             value: "{{ .Values.service.internalPort }}"
           - name: APP_CONFIG_FILE_NAME
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
-          - name: APP_REPOSITORY_URLS
-            value: {{ .Values.repository.URLs }}
           - name: APP_CLUSTER_SERVICE_BROKER_NAME
             value: {{ template "fullname" . }}
           - name: APP_HELM_BROKER_URL
