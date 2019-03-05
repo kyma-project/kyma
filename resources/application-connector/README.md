@@ -52,6 +52,6 @@ metadata:
     installer: overrides
     kyma-project.io/installation: ""
 data:
-  connector-service.enabled: "false"
+  connector_service.enabled: "false"
 EOF
 ```
