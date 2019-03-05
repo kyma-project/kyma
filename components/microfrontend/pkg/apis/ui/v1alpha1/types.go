@@ -34,22 +34,26 @@ func (rem *ClusterMicroFrontend) GetObjectKind() schema.ObjectKind {
 	return &ClusterMicroFrontend{}
 }
 
-type MicroFrontendSpec struct {
+type CommonMicroFrontendSpec struct {
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`
-	ViewBaseUrl     string           `json:"viewBaseUrl"`
+	ViewBaseURL     string           `json:"viewBaseUrl"`
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
+type MicroFrontendSpec struct {
+	CommonMicroFrontendSpec `json:",inline"`
+}
+
 type ClusterMicroFrontendSpec struct {
-	Placement         string `json:"placement"`
-	MicroFrontendSpec `json:",inline"`
+	Placement               string `json:"placement"`
+	CommonMicroFrontendSpec `json:",inline"`
 }
 
 type NavigationNode struct {
 	Label            string `json:"label"`
 	NavigationPath   string `json:"navigationPath"`
-	ViewUrl          string `json:"viewUrl"`
+	ViewURL          string `json:"viewUrl"`
 	ShowInNavigation bool   `json:"showInNavigation"`
 }
 
