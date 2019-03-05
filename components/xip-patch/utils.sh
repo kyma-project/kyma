@@ -51,7 +51,7 @@ getLoadBalancerIPFromLabel() {
 
     while [ ${SECONDS} -lt ${END_TIME} ];do
 
-        LOAD_BALANCER_IP=$(kubectl get service -l "${LABEL}" -o jsonpath="{.status.loadBalancer.ingress[0].ip}" -n "${NAMESPACE}")
+        LOAD_BALANCER_IP=$(kubectl get service -l "${LABEL}" -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}' -n "${NAMESPACE}")
 
         if [ -n "${LOAD_BALANCER_IP}" ]; then
             break
@@ -63,7 +63,7 @@ getLoadBalancerIPFromLabel() {
 
     if [ -z "${LOAD_BALANCER_IP}" ]; then
         echo "---> Could not retrive the IP address. Verify if any service has the label ${LABEL} in the namespace ${NAMESPACE}" >&2
-        echo "---> Command executed: kubectl get service -l ${LABEL} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' -n ${NAMESPACE}" >&2
+        echo "---> Command executed: kubectl get service -l ${LABEL} -o jsonpath='{.items[0].status.loadBalancer.ingress[0].ip}' -n ${NAMESPACE}" >&2
         exit 1
     fi
 
