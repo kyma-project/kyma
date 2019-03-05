@@ -104,3 +104,4 @@ fabric.properties
 /broker
 /helm-broker
 /vendor
+/preupgrade

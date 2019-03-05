@@ -1,30 +1,18 @@
-/*
-Copyright 2019 The Kyma Authors.
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
-
 package main
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/go-logr/logr"
-	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller"
+	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -58,19 +46,31 @@ func main() {
 
 	// Setup Scheme for all resources
 	log.Info("setting up scheme")
-	if err := v1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "unable add APIs to scheme")
+	if err := pushv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add push APIs to scheme")
+		os.Exit(1)
+	}
+	if err := eav1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "unable to add event activation APIs to scheme")
 		os.Exit(1)
 	}
 
 	// Setup all Controllers
-	log.Info("Setting up controller")
-	if err := controller.AddToManager(mgr); err != nil {
-		log.Error(err, "unable to register controllers to the manager")
+	log.Info("Setting up Subscription Controller")
+	_, err = subscription.ProvideController(mgr, sckOpts)
+	if err != nil {
+		log.Error(err,"Unable to create Subscription controller")
 		os.Exit(1)
 	}
 
-	// Set up healtcheck handlers
+	log.Info("Setting up Event Activation Controller")
+	_, err = eventactivation.ProvideController(mgr)
+	if err != nil {
+		log.Error(err,"Unable to create Event Activation controller")
+		os.Exit(1)
+	}
+
+	// Set up healthcheck handlers
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/v1/status/live", statusLiveHandler(&mgr, log))
 	serveMux.Handle("/v1/status/ready", statusReadyHandler(&mgr, log))
@@ -83,12 +83,37 @@ func main() {
 		}
 	}()
 
+	signalChannel := make(chan os.Signal, 2)
+	signal.Notify(signalChannel, os.Interrupt,
+		syscall.SIGTERM, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT)
+	go func() {
+		sig := <-signalChannel
+		switch sig {
+		case os.Interrupt:
+			println("Subscription controller manager signaled with: os.Interrupt")
+			println("Signal: ", sig)
+		case syscall.SIGTERM:
+			println("Subscription controller manager signaled with: SIGTERM")
+			println("Signal: ", sig)
+		case syscall.SIGHUP:
+			println("Subscription controller manager signaled with: SIGHUP")
+			println("Signal: ", sig)
+		case syscall.SIGINT:
+			println("Subscription controller manager signaled with: SIGINT")
+			println("Signal: ", sig)
+		case syscall.SIGQUIT:
+			println("Subscription controller manager signaled with: SIGQUIT")
+			println("Signal: ", sig)
+		}
+	}()
+
 	// Start the Cmd
 	log.Info("Starting the Cmd.")
 	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
 		log.Error(err, "unable to run the manager")
 		os.Exit(1)
 	}
+
 }
 
 var statusLive, statusReady common.StatusReady

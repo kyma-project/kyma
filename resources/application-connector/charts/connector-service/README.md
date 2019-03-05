@@ -19,11 +19,12 @@ The Connector Service has the following parameters, that can be set through the 
 - **connectorServiceHost** - Host under which this service is accessible. It is used for generating the URL. The default host is `cert-service.wormhole.cluster.kyma.cx`.
 - **appRegistryHost** - Host under which the Application Registry is accessible. The default value is an empty string.
 - **eventsHost** - Host under which the Event Service is accessible. The default value is an empty string.
-- **getInfoURL** - URL at which the management information is available. If not provided, it bases on `connectorServiceHost`.
+- **appsInfoURL** - URL at which management information for applications is available. If not provided, it bases on `connectorServiceHost`.
+- **runtimesInfoURL** - URL at which management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
 - **group** - Group for which certificates are generated. If the chart does not provide the default value, you must specify it in the request header to the token endpoint.
 - **tenant** - Tenant for which certificates are generated. If the chart does not provide the default value, you must specify it in the request header to the token endpoint.
 - **certificateValidityTime** - Time after which certificates issued by Connector Service will expire. Allowed time units are: `d`, `h`, `m` for days, hours and minutes, only single time unit can be used. Default value is `92d`.
-
+- **central** - Determines whether the Connector Service works in the central mode.
 
 The Connector Service also uses the following environmental variables for CSR-related information config:
 - **COUNTRY** (two-letter-long country code)

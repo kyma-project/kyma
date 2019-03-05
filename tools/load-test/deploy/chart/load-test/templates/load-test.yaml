@@ -57,6 +57,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: {{ template "load-test.fullname" . }}
+  annotations:
+    sidecar.istio.io/inject: "false"
   labels:
     helm-chart-test: "true"
     app: {{ template "load-test.name" . }}
@@ -78,8 +80,8 @@ spec:
       value: {{ .Values.slackClientToken | quote }}
     - name: LOAD_TEST_SLACK_CHANNEL
       value: {{ .Values.slackClientChannelId | quote }}
-    - name: LOAD_TEST_SLACK_ENDPOINT
-      value: {{ .Values.slackEndpoint }}
+    - name: LOAD_TEST_TOTAL_REQS_PER_ROUTINE
+      value: {{ .Values.reqsPerRoutine | quote }}
     - name: LOAD_TEST_EXECUTION_TIMEOUT
       value:  {{ .Values.loadTestExecutionTimeout | quote }}
   restartPolicy: Never

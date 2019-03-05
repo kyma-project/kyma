@@ -13,13 +13,10 @@ metadata:
     app: {{ template "name" . }}
 rules:
   - apiGroups: [""]
-    resources: ["namespaces"]
+    resources: ["namespaces", "configmaps"]
     verbs: ["create", "get", "delete"]
-  - apiGroups: ["extensions", "apps"]
-    resources: ["deployments"]
-    verbs: ["get", "list", "watch", "update"]
   - apiGroups: ["servicecatalog.k8s.io"]
-    resources: ["clusterserviceclasses"]
+    resources: ["clusterserviceclasses", "clusterserviceplans"]
     verbs: ["watch", "list", "get"]
   - apiGroups: ["ui.kyma-project.io"]
     resources: ["backendmodules"]

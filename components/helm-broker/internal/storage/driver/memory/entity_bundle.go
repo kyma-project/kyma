@@ -119,6 +119,20 @@ func (s *Bundle) RemoveByID(id internal.BundleID) error {
 	return s.removeByID(id)
 }
 
+// RemoveAll removes all bundles from storage.
+func (s *Bundle) RemoveAll() error {
+	bundles, err := s.FindAll()
+	if err != nil {
+		return errors.Wrap(err, "while getting bundles")
+	}
+	for _, bundle := range bundles {
+		if err := s.RemoveByID(bundle.ID); err != nil {
+			return errors.Wrapf(err, "while removing bundle with ID: %v", bundle.ID)
+		}
+	}
+	return nil
+}
+
 func (s *Bundle) removeByID(id internal.BundleID) error {
 	if _, found := s.storage[id]; !found {
 		return notFoundError{}

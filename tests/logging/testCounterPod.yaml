@@ -15,4 +15,4 @@ spec:
       limits:
         memory: 10Mi
     args: [sh, -c,
-           'for i in `seq 10` ; do echo "$i: oklogTest-$(date)"; sleep 2; done']
+           'for i in `seq 10` ; do echo "$i: logTest-$(date)"; sleep 2; done']

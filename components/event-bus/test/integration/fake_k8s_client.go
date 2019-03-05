@@ -2,12 +2,13 @@ package integration
 
 import (
 	"context"
+	"log"
 	"time"
 
+	"github.com/gofrs/uuid"
 	subApi "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/event-bus/generated/push/informers/externalversions"
-	"github.com/satori/go.uuid"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/tools/cache"
@@ -36,14 +37,20 @@ func newFakeInformer(ctx context.Context) cache.SharedIndexInformer {
 
 func createNewSubscription(name string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
 	sourceID string) (*subApi.Subscription, error) {
-	uid := uuid.NewV4().String()
-	return client.EventingV1alpha1().Subscriptions(namespace).Create(getSubscriptionResource(name, namespace, uid, subscriberEventEndpointURL, sourceID, eventType, eventTypeVersion))
+	uid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalf("Error while generating UID: %v", err)
+	}
+	return client.EventingV1alpha1().Subscriptions(namespace).Create(getSubscriptionResource(name, namespace, uid.String(), subscriberEventEndpointURL, sourceID, eventType, eventTypeVersion))
 }
 
 func updateSubscription(name string, namespace string, subscriberEventEndpointURL string, eventType string, eventTypeVersion string,
 	sourceID string) (*subApi.Subscription, error) {
-	uid := uuid.NewV4().String()
-	return client.EventingV1alpha1().Subscriptions(namespace).Update(getSubscriptionResource(name, namespace, uid, subscriberEventEndpointURL, sourceID, eventType, eventTypeVersion))
+	uid, err := uuid.NewV4()
+	if err != nil {
+		log.Fatalf("Error while generating UID: %v", err)
+	}
+	return client.EventingV1alpha1().Subscriptions(namespace).Update(getSubscriptionResource(name, namespace, uid.String(), subscriberEventEndpointURL, sourceID, eventType, eventTypeVersion))
 }
 
 func getSubscriptionResource(name string, namespace string, uid string, subscriberEventEndpointURL string, sourceID string, eventType string, eventTypeVersion string) *subApi.Subscription {
