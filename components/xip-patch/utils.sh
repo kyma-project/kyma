@@ -38,7 +38,7 @@ getLoadBalancerIP() {
 getLoadBalancerIPFromLabel() {
 
     if [ "$#" -ne 1 ]; then
-        echo "usage: getLoadBalancerIP <label>"
+        echo "usage: getLoadBalancerIP <label> <namespace>"
         exit 1
     fi
 
