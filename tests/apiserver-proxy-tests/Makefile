@@ -2,6 +2,10 @@ APP_NAME = apiserver-proxy-test
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
+.PHONY: build
+build:
+	./before-commit.sh
+
 .PHONY: build-image
 build-image:
 	docker build -t $(APP_NAME):latest .
