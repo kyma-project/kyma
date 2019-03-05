@@ -35,6 +35,9 @@ func (r *revocationListRepository) Insert(hash string) error {
 	}
 
 	revokedCerts := configMap.Data
+	if revokedCerts == nil {
+		revokedCerts = map[string]string{}
+	}
 	revokedCerts[hash] = hash
 
 	updatedConfigMap := &v1.ConfigMap{
@@ -55,7 +58,10 @@ func (r *revocationListRepository) Contains(hash string) (bool, error) {
 		return false, err
 	}
 
-	_, found := configMap.Data[hash]
+	found := false
+	if configMap.Data != nil {
+		_, found = configMap.Data[hash]
+	}
 
 	return found, nil
 }

@@ -22,7 +22,7 @@ func TestRevocationListRepository(t *testing.T) {
 
 		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
 			&v1.ConfigMap{
-				Data: map[string]string {},
+				Data: nil,
 			}, nil)
 
 		repository := NewRepository(configListManagerMock, configMapName)
@@ -33,6 +33,7 @@ func TestRevocationListRepository(t *testing.T) {
 
 		// then
 		assert.Equal(t, isPresent, false)
+		configListManagerMock.AssertExpectations(t)
 	})
 
 	t.Run("should insert value to the list", func(t *testing.T) {
@@ -42,7 +43,7 @@ func TestRevocationListRepository(t *testing.T) {
 
 		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
 			&v1.ConfigMap{
-				Data: map[string]string {},
+				Data: nil,
 		}, nil)
 
 		configListManagerMock.On("Update", &v1.ConfigMap{
@@ -58,46 +59,7 @@ func TestRevocationListRepository(t *testing.T) {
 		// when
 		err := repository.Insert(someHash)
 		require.NoError(t, err)
-
-		isPresent, err := repository.Contains(someHash)
-		require.NoError(t, err)
-
-		// then
-		assert.Equal(t, isPresent, true)
-	})
-
-	t.Run("should be idempotent", func(t *testing.T) {
-		// given
-		someHash := "someHash"
-		configListManagerMock := &k8sclientMocks.Manager{}
-
-		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
-			&v1.ConfigMap{
-				Data: map[string]string {},
-			}, nil)
-
-		configListManagerMock.On("Update", &v1.ConfigMap{
-			Data: map[string]string {
-				someHash:someHash,
-			}}).Return(&v1.ConfigMap{
-			Data: map[string]string {
-				someHash:someHash,
-			}}, nil)
-
-		repository := NewRepository(configListManagerMock, configMapName)
-
-		// when
-		err := repository.Insert(someHash)
-		require.NoError(t, err)
-
-		err = repository.Insert(someHash)
-		require.NoError(t, err)
-
-		isPresent, err := repository.Contains(someHash)
-		require.NoError(t, err)
-
-		// then
-		assert.Equal(t, isPresent, true)
+		configListManagerMock.AssertExpectations(t)
 	})
 
 	t.Run("should return error when failed to get config map", func(t *testing.T) {
@@ -115,6 +77,7 @@ func TestRevocationListRepository(t *testing.T) {
 
 		_, err = repository.Contains(someHash)
 		require.Error(t, err)
+		configListManagerMock.AssertExpectations(t)
 	})
 
 
@@ -125,7 +88,7 @@ func TestRevocationListRepository(t *testing.T) {
 
 		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
 			&v1.ConfigMap{
-				Data: map[string]string {},
+				Data: nil,
 			}, nil)
 
 		configListManagerMock.On("Update", &v1.ConfigMap{
@@ -138,6 +101,7 @@ func TestRevocationListRepository(t *testing.T) {
 		// when
 		err := repository.Insert(someHash)
 		require.Error(t, err)
+		configListManagerMock.AssertExpectations(t)
 	})
 }
 
