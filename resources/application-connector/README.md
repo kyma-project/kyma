@@ -19,7 +19,7 @@ The Connector Service is responsible for generating and sending back client cert
 
 ### Install Connector Service as central
 
-To install Connector Service configured in the central mode you must override values as presented in the following example:
+To install the Connector Service configured in the central mode, you must override several values of the Kyma Installer. Run: 
 
 ```
 cat <<EOF | kubectl apply -f -
