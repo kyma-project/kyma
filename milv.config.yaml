@@ -41,4 +41,4 @@ files:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
   - path: "./kyma/docs/application-connector/docs/08-09-revoke-cert.md"
     config:
-      white-list-external: ["https://gateway.{WILDCARD_DNS}/v1/applications/certificates/revocations"]
+      white-list-external: ["https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"]
