@@ -4,7 +4,7 @@ metadata:
   name: {{ template "fullname" . }}-preupgrade
   annotations:
     helm.sh/hook: pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
   labels:
     app: {{ template "fullname" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -38,6 +38,7 @@ metadata:
   name: {{ template "fullname" . }}-pre-upgrade
   annotations:
     "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": "before-hook-creation"
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "name" . }}
@@ -54,6 +55,7 @@ metadata:
   name: {{ template "fullname" . }}-pre-upgrade
   annotations:
     "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": "before-hook-creation"
   labels:
     app: {{ template "name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
@@ -65,7 +67,7 @@ rules:
   verbs: ["list"]
 - apiGroups: [""]
   resources: ["configmaps"]
-  verbs: ["create"]
+  verbs: ["create","get","update"]
 
 ---
 
@@ -75,6 +77,7 @@ metadata:
   name: {{ template "fullname" . }}-pre-upgrade
   annotations:
     "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": "before-hook-creation"
   labels:
     app: {{ template "name" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
