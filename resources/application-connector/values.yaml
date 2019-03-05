@@ -5,8 +5,6 @@ global:
   isLocalEnv: false
   knative: false
   namespace: kyma-integration
-  nginx:
-    namespace: kyma-system
   istio:
     tls:
       secretName: istio-ingress-certs
@@ -17,7 +15,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: fd308559
+    version: f4acb615
   application_operator_tests:
     dir: develop/
     version: fd308559
