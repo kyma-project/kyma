@@ -111,3 +111,15 @@ metadata:
 data:
   minio.resources.requests.memory: 64Mi
   minio.resources.limits.cpu: 100m
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-test-ui-acceptance-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+    kyma-project.io/installation: ""
+data:
+  test.acceptance.ui.minikubeIP: ""

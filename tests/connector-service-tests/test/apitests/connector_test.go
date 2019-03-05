@@ -31,7 +31,7 @@ func TestConnector(t *testing.T) {
 
 		if config.Central {
 			appCsrInfoEndpointForCentralSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
-			appMgmInfoEndpointForCentralSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+			appMgmInfoEndpointForCentralSuite(t, appTokenRequest, config.SkipSslVerify, appName)
 		} else {
 			appCsrInfoEndpointForStandaloneSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
 			appMgmInfoEndpointForStandaloneSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
@@ -364,7 +364,7 @@ func runtimeCsrInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 	})
 }
 
-func appMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+func appMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, appName string) {
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
 	clientKey := testkit.CreateKey(t)
@@ -394,6 +394,9 @@ func appMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request,
 		// then
 		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
+		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
+		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
+		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
 	})
 
 	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
@@ -418,6 +421,9 @@ func appMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request,
 		// then
 		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
+		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
+		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
+		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
 	})
 }
 
@@ -454,6 +460,9 @@ func appMgmInfoEndpointForStandaloneSuite(t *testing.T, tokenRequest *http.Reque
 		// then
 		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
+		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
+		assert.Empty(t, mgmInfoResponse.ClientIdentity.Group)
+		assert.Empty(t, mgmInfoResponse.ClientIdentity.Tenant)
 	})
 }
 
@@ -480,6 +489,8 @@ func runtimeMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 
 		// then
 		assert.Nil(t, mgmInfoResponse.URLs.RuntimeURLs)
+		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
+		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
 	})
 
 }

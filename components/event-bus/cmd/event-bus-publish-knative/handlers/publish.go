@@ -2,11 +2,10 @@ package handlers
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"net/http"
-	"strings"
 
+	"github.com/gofrs/uuid"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/validators"
@@ -15,12 +14,10 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
-	"github.com/satori/go.uuid"
 )
 
 var (
 	defaultChannelNamespace = "kyma-system"
-	replacer                = strings.NewReplacer("-", "--", ".", "-dot-")
 )
 
 func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer) http.HandlerFunc {
@@ -80,7 +77,14 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 
 	// generate event-id if there is none
 	if len(publishRequest.EventID) == 0 {
-		publishRequest.EventID = generateEventID()
+		eventID, errEventID := generateEventID()
+		if errEventID != nil {
+			err = api.ErrorResponseInternalServer()
+			log.Printf("EventID generation failed: %v", err)
+			publish.SendJSONError(w, err)
+			return nil, nil, nil, err
+		}
+		publishRequest.EventID = eventID
 	}
 
 	// build the cloud-event from the publish-request and the trace-context
@@ -96,7 +100,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	}
 
 	// publish cloud-event
-	channelName := getChannelName(&publishRequest.SourceID, &publishRequest.EventType, &publishRequest.EventTypeVersion)
+	channelName := knative.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType, &publishRequest.EventTypeVersion)
 	err = (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &cloudEventPayload)
 	if err != nil {
 		log.Printf("publish cloud-event failed: %v", err)
@@ -133,8 +137,9 @@ func setSourceID(publishRequest *api.PublishRequest, header *http.Header) bool {
 	return false
 }
 
-func generateEventID() string {
-	return uuid.NewV4().String()
+func generateEventID() (string, error) {
+	uid, err := uuid.NewV4()
+	return uid.String(), err
 }
 
 func buildCloudEvent(publishRequest *api.PublishRequest, traceContext *api.TraceContext) *api.CloudEvent {
@@ -145,19 +150,6 @@ func buildCloudEvent(publishRequest *api.PublishRequest, traceContext *api.Trace
 		cloudEvent.Extensions[api.FieldTraceContext] = *traceContext
 	}
 	return cloudEvent
-}
-
-func escapeHyphensAndPeriods(str *string) string {
-	return replacer.Replace(*str)
-}
-
-// The getChannelName function joins the sourceID, eventType and eventTypeVersion respectively with a '-' as a delimiter.
-// The function applies the following rules in order:
-//  * In case there was a '-' or more in any of the argument values, each occurrence of the '-' will be escaped by '--'.
-//  * In case there was a '.' or more in any of the argument values, each occurrence of the '.' will be replaced by the '-dot-' character sequence, because of a limitation
-//    in the current knative version, if the channel name has a '.', the corresponding istio-virtualservice will not be created.
-func getChannelName(sourceID, eventType, eventTypeVersion *string) string {
-	return fmt.Sprintf("%s-%s-%s", escapeHyphensAndPeriods(sourceID), escapeHyphensAndPeriods(eventType), escapeHyphensAndPeriods(eventTypeVersion))
 }
 
 func addSpanTagsForCloudEvent(publishSpan *opentracing.Span, cloudEvent *api.CloudEvent) {

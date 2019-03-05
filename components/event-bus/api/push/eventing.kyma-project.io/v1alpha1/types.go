@@ -51,6 +51,7 @@ type SubscriptionConditionType string
 
 const (
 	EventsActivated SubscriptionConditionType = "events-activated"
+	Ready SubscriptionConditionType = "is-ready"
 )
 
 type ConditionStatus string

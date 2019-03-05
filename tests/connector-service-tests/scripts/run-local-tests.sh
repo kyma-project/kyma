@@ -2,22 +2,13 @@
 
 CURRENT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
+source $CURRENT_DIR/test-runner.sh
+
+deleteTestPod
+
 eval $(minikube docker-env)
 
-echo ""
-echo "------------------------"
-echo "Removing test pod"
-echo "------------------------"
-
-
-kubectl -n kyma-integration delete po connector-service-tests --now
-
-echo ""
-echo "------------------------"
-echo "Building tests image"
-echo "------------------------"
-
-docker build $CURRENT_DIR/.. -t connector-service-tests
+buildImage connector-service-tests
 
 NODE_PORT=$(kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}')
 
@@ -59,12 +50,4 @@ spec:
   restartPolicy: Never
 EOF
 
-echo ""
-echo "------------------------"
-echo "Waiting 5 seconds for pod to start..."
-echo "------------------------"
-echo ""
-
-sleep 5
-
-kubectl -n kyma-integration logs connector-service-tests -f -c connector-service-tests
+waitForTestLogs 5

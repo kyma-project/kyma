@@ -1,5 +1,5 @@
 ---
-title: Service Brokers
+title: Overview
 type: Service Brokers
 ---
 
@@ -7,7 +7,7 @@ A Service Broker is a server compatible with the [Open Service Broker API](https
 
 The Service Catalog lists all services that the Service Brokers offer. Use the Service Brokers to:
 * Provision and de-provision an instance of a service.
-* Create and delete a service binding to link a service instance to an application. 
+* Create and delete a service binding to link a service instance to an application.
 
 Each of the Service Brokers available in Kyma performs these operations in a different way. See the documentation of a given Service Broker to learn how it operates.
 

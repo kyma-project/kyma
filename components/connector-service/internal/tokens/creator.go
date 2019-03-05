@@ -1,6 +1,7 @@
 package tokens
 
 import (
+	"encoding/json"
 	"time"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -14,7 +15,7 @@ type Serializer interface {
 }
 
 type Creator interface {
-	Save(serializableContext Serializer) (string, apperrors.AppError)
+	Save(interface{}) (string, apperrors.AppError)
 }
 
 type tokenCreator struct {
@@ -31,8 +32,8 @@ func NewTokenCreator(tokenTTL time.Duration, store tokencache.TokenCache, genera
 	}
 }
 
-func (svc *tokenCreator) Save(serializableContext Serializer) (string, apperrors.AppError) {
-	jsonData, err := serializableContext.ToJSON()
+func (svc *tokenCreator) Save(tokenData interface{}) (string, apperrors.AppError) {
+	jsonData, err := json.Marshal(tokenData)
 	if err != nil {
 		return "", apperrors.Internal("Failed to serialize token params to JSON, %s", err.Error())
 	}

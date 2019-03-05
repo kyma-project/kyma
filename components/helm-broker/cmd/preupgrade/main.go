@@ -5,12 +5,18 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+)
+
+const (
+	cfgMapName = "migrated-bundles-repos"
 )
 
 // pre-upgrade kyma release 0.7 -> 0.8
@@ -58,14 +64,30 @@ func main() {
 		newURLs += repo + "\n"
 	}
 
-	if len(newURLs) < 0 {
+	if len(newURLs) < 1 {
 		log.Info("Not found any repositories")
 		return
 	}
 
 	log.Infof("Found repositories: %s", newURLs)
-	_, err = clientset.CoreV1().ConfigMaps(cfg.Namespace).Create(migratePreviousBundlesRepos(newURLs))
-	fatalOnError(err)
+	migratedRepos := migratePreviousBundlesRepos(newURLs)
+	configMaps := clientset.CoreV1().ConfigMaps(cfg.Namespace)
+
+	_, err = configMaps.Create(migratedRepos)
+	switch {
+	case err == nil:
+	case apiErrors.IsAlreadyExists(err):
+		cfgMap, err := configMaps.Get(cfgMapName, v1.GetOptions{})
+		fatalOnError(err)
+
+		cfgMap.Data["URLs"] = newURLs
+		_, err = configMaps.Update(cfgMap)
+		fatalOnError(err)
+
+		log.Infof("Updated migrated bundles config map with following URLs: %s", newURLs)
+	default:
+		logrus.Fatal(errors.Wrap(err, "while creating ConfigMap with migrated bundles repos"))
+	}
 }
 
 func fatalOnError(err error) {
@@ -89,7 +111,7 @@ func migratePreviousBundlesRepos(urls string) *corev1.ConfigMap {
 			Kind:       "ConfigMap",
 		},
 		ObjectMeta: v1.ObjectMeta{
-			Name: "migrated-bundles-repos",
+			Name: cfgMapName,
 			Labels: map[string]string{
 				"helm-broker-repo": "true",
 			},
