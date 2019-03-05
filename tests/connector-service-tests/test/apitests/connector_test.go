@@ -86,11 +86,11 @@ func createTokenRequest(t *testing.T, tokenURL string, config testkit.TestConfig
 }
 
 func createApplicationRevocationUrl(config testkit.TestConfig) string {
-	return config.InternalAPIUrl + "/v1/applications/revocations"
+	return config.InternalAPIUrl + "/v1/applications/certificates/revocations"
 }
 
 func createRuntimeRevocationUrl(config testkit.TestConfig) string {
-	return config.InternalAPIUrl + "/v1/runtimes/revocations"
+	return config.InternalAPIUrl + "/v1/runtimes/certificates/revocations"
 }
 
 func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {

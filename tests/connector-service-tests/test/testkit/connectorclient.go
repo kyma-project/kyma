@@ -71,13 +71,13 @@ func (cc connectorClient) RevokeCertificate(t *testing.T, revocationUrl, csr str
 	revocationBody := RevocationBody{
 		Hash: csr,
 	}
-	var buffer bytes.Buffer
-	err := json.NewEncoder(&buffer).Encode(revocationBody)
+	body := new(bytes.Buffer)
+	err := json.NewEncoder(body).Encode(revocationBody)
 	require.NoError(t, err)
-	body := bytes.NewReader(buffer.Bytes())
 
 	request, err := http.NewRequest(http.MethodPost, revocationUrl, body)
 	require.NoError(t, err)
+	request.Header.Add("Content-Type", "application/json")
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
