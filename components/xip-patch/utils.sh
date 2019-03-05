@@ -41,6 +41,7 @@ getLoadBalancerIPFromLabel() {
     fi
 
     LABEL="$1"
+    NAMESPACE="$2"
     LOAD_BALANCER_IP=""
 
     SECONDS=0
@@ -48,7 +49,7 @@ getLoadBalancerIPFromLabel() {
 
     while [ ${SECONDS} -lt ${END_TIME} ];do
 
-        LOAD_BALANCER_IP=$(kubectl get service -l "${LABEL}" -o jsonpath="{.status.loadBalancer.ingress[0].ip}" --all-namespaces)
+        LOAD_BALANCER_IP=$(kubectl get service -l "${LABEL}" -o jsonpath="{.status.loadBalancer.ingress[0].ip}" -n "${NAMESPACE}")
 
         if [ -n "${LOAD_BALANCER_IP}" ]; then
             break
