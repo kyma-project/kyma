@@ -155,7 +155,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 		mngmtRuntimeRouter,
 		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
 
-	runtimeRevocationRouter := hb.router.Path("/v1/applications/certificates/revocations").Subrouter()
+	runtimeRevocationRouter := hb.router.Path("/v1/runtimes/certificates/revocations").Subrouter()
 	runtimeRevocationRouter.HandleFunc("", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
 	httphelpers.WithMiddlewares(
 		runtimeRevocationRouter,
