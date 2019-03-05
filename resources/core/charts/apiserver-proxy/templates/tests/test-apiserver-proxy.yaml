@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: {{ .Release.Name }}-apiserver-proxy-test
+  name: test-{{ .Release.Name }}-apiserver-proxy
   namespace: kyma-system
   annotations:
     sidecar.istio.io/inject: "false"
@@ -10,24 +10,27 @@ metadata:
   labels:
     "helm-chart-test": "true"
 spec:
+{{- if .Values.global.isLocalEnv }} 
   hostNetwork: true
   dnsPolicy: ClusterFirstWithHostNet
+{{- end }}
   containers:
-    - name: {{ .Release.Name }}-apiserver-proxy-test
+    - name: test-{{ .Release.Name }}-apiserver-proxy
       image: eu.gcr.io/kyma-project/pr/apiserver-proxy-test:PR-2916
       imagePullPolicy: Always
       env:
-        - name: POD_NAME
-          value: {{ .Release.Name }}-apiserver-proxy-test
-        - name: EMAIL_FILE
-          value: /etc/credentials/email
-        - name: PASSWORD_FILE
-          value: /etc/credentials/password
-      volumeMounts:
-        - name: credentials
-          mountPath: /etc/credentials
-  volumes:
-    - name: credentials
-      secret:
-        secretName: admin-user
+      - name: POD_NAME
+        value: test-{{ .Release.Name }}-apiserver-proxy
+      - name: DOMAIN
+        value: kf-test.kyma.pro
+      - name: USER_EMAIL
+        valueFrom:
+          secretKeyRef:
+            name: admin-user
+            key: email
+      - name: USER_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: admin-user
+            key: password
   restartPolicy: Never
