@@ -5,7 +5,7 @@ type: Details
 
 To access the logs, follow these steps:
 
-1. Run the following command to get current pod name:
+1. Run the following command to get the current Pod name:
 ```bash
 kubectl get pods -l app=loki -n kyma-system
 ```
