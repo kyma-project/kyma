@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # EXPECTED ENVS
 # - DOMAIN (optional) - Static domain for which to generate certs
-# - TLS_CERT (optinal) - Path to current TLS certificate
-# - TLS_KEY (optional) - Path to current TLS cert key
-# - LB_SERVICE_NAME (required) - Name of LoadBalancer Service
-# - LB_SERVICE_NS (required) - Namespace of LoadBalancer Service
+# - TLS_CRT (optinal) - Current TLS certificate
+# - TLS_KEY (optional) - Current TLS cert key
+# - LB_LABEL (required) - Selector label for the LoadBalancer service
+# - LB_NAMESPACE (required) - Namespace for the LoadBalancer service
 
 set -e
 
@@ -13,7 +13,7 @@ source $CURRENT_DIR/utils.sh
 
 discoverUnsetVar=false
 
-for var in LB_LABEL; do
+for var in LB_LABEL LB_NAMESPACE; do
     if [ -z "${!var}" ] ; then
         echo "ERROR: $var is not set"
         discoverUnsetVar=true
@@ -26,7 +26,7 @@ fi
 
 if [[ -z "${DOMAIN}" ]]; then
 	echo "---> DOMAIN not SET. Creating..."
-	INGRESS_IP=$(getLoadBalancerIPFromLabel "${LB_LABEL}")
+	INGRESS_IP=$(getLoadBalancerIPFromLabel "${LB_LABEL}" "${LB_NAMESPACE}")
 	DOMAIN="${INGRESS_IP}.xip.io"
 	DOMAIN_YAML=$(cat << EOF
 ---
@@ -37,7 +37,8 @@ EOF
 	kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
 fi
 
-if [[ -z "$(cat $TLS_CERT)" ]] && [[ -z "$(cat $TLS_CERT)" ]]; then
+if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
 	echo "---> Generating Certs for ${DOMAIN}"
-	generateCertificatesForDomain "${DOMAIN}" "${TLS_CERT}" "${TLS_CERT}"
+	generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
+	kubectl create secret tls application-connector-ingress-tls-cert --cert=/root/cert.pem --key=/root/key.pem --namespace=kyma-integration
 fi
