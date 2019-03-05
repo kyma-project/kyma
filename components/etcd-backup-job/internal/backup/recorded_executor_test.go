@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/backup"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/backup/automock"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/backup"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/backup/automock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	coreTypes "k8s.io/api/core/v1"

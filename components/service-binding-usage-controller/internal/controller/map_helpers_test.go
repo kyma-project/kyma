@@ -3,7 +3,7 @@ package controller_test
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
 	"github.com/stretchr/testify/assert"
 )
 

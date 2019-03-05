@@ -8,10 +8,10 @@ import (
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/usagekind"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/usagekind"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
 )
 
 type testCase struct {

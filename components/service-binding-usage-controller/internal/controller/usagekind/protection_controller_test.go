@@ -9,11 +9,11 @@ import (
 	"github.com/stretchr/testify/require"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/usagekind"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/platform/logger/spy"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
-	informers "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/usagekind"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
+	informers "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions"
 )
 
 func TestProtectionControllerAddsFinalizer(t *testing.T) {

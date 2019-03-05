@@ -3,7 +3,7 @@ package controller
 import (
 	"fmt"
 
-	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	sbuTypes "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 )
 
 type bindingUsageStatus struct {

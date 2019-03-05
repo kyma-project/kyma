@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/platform/logger/spy"
-	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/platform/logger/spy"
+	sbuTypes "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	svcatSettings "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/settings/v1alpha1"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	coreV1 "k8s.io/api/core/v1"

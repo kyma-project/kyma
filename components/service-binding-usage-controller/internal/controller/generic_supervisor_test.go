@@ -3,9 +3,9 @@ package controller_test
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/automock"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/automock"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

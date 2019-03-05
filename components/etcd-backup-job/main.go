@@ -3,11 +3,11 @@ package main
 import (
 	"time"
 
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/azure"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/backup"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/cleaner"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/platform/logger"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/platform/signal"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/azure"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/backup"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/cleaner"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/platform/logger"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/platform/signal"
 
 	etcdOperatorClientset "github.com/coreos/etcd-operator/pkg/generated/clientset/versioned"
 	etcdOperatorInformers "github.com/coreos/etcd-operator/pkg/generated/informers/externalversions"

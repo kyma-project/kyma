@@ -6,7 +6,7 @@ import (
 
 	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scListers "github.com/kubernetes-incubator/service-catalog/pkg/client/listers_generated/servicecatalog/v1beta1"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/pretty"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/pretty"
 	"github.com/pkg/errors"
 )
 

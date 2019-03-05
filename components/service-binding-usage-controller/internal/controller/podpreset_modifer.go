@@ -1,9 +1,9 @@
 package controller
 
 import (
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller/pretty"
-	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
-	settingsv1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/pretty"
+	svcatSettings "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/settings/v1alpha1"
+	settingsv1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"

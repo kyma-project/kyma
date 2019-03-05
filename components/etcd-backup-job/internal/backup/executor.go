@@ -7,7 +7,7 @@ import (
 	etcdTypes "github.com/coreos/etcd-operator/pkg/apis/etcd/v1beta2"
 	etcdOpClient "github.com/coreos/etcd-operator/pkg/generated/clientset/versioned/typed/etcd/v1beta2"
 	etcdOpLister "github.com/coreos/etcd-operator/pkg/generated/listers/etcd/v1beta2"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/platform/idprovider"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/platform/idprovider"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"

@@ -3,8 +3,8 @@
 package settings
 
 import (
-	internalinterfaces "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/settings/v1alpha1"
+	internalinterfaces "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/settings/v1alpha1"
 )
 
 // Interface provides access to each of this group's versions.

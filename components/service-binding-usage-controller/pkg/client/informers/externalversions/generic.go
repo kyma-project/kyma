@@ -5,8 +5,8 @@ package externalversions
 import (
 	"fmt"
 
-	v1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	settings_v1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
+	v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	settings_v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/settings/v1alpha1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	cache "k8s.io/client-go/tools/cache"
 )

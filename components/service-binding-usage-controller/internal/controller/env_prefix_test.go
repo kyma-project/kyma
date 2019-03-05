@@ -3,7 +3,7 @@ package controller
 import (
 	"testing"
 
-	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	sbuTypes "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	etcdTypes "github.com/coreos/etcd-operator/pkg/apis/etcd/v1beta2"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/platform/logger/spy"
 	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apimachinery/pkg/runtime"

@@ -8,7 +8,7 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake"
 	serviceCatalogInformers "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"

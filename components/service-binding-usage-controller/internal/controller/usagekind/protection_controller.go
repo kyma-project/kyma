@@ -11,12 +11,12 @@ import (
 	"k8s.io/client-go/tools/cache"
 	"k8s.io/client-go/util/workqueue"
 
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	ukClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
-	sbuInformer "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1"
-	ukInformer "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1"
-	ukLister "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	ukClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+	sbuInformer "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1"
+	ukInformer "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1"
+	ukLister "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1"
 )
 
 const (

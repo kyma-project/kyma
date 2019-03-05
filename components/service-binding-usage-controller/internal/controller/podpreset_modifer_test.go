@@ -3,9 +3,9 @@ package controller_test
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
-	svcatSettings "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
+	svcatSettings "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/settings/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"

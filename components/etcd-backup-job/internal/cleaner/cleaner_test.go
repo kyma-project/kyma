@@ -1,4 +1,4 @@
-package cleaner_test
+package cleaner
 
 import (
 	"context"
@@ -7,9 +7,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/cleaner"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/cleaner/automock"
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/platform/logger/spy"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/cleaner/automock"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/platform/logger/spy"
 
 	"github.com/Azure/azure-storage-blob-go/2018-03-28/azblob"
 	"github.com/stretchr/testify/assert"
@@ -97,11 +96,11 @@ func TestAzureCleanerCleanSuccess(t *testing.T) {
 					Return(&azblob.BlobDeleteResponse{}, nil).Once()
 			}
 
-			cfg := cleaner.Config{
+			cfg := Config{
 				ExpirationBlobTime:        tc.given.expirationBlobTime,
 				LeaveMinNewestBackupBlobs: tc.given.leaveMinNewestBackupBlobs,
 			}
-			sut := cleaner.NewAzure(cfg, azBlobCliMock, spy.NewLogDummy()).WithTimeProvider(timeNow)
+			sut := NewAzure(cfg, azBlobCliMock, spy.NewLogDummy()).WithTimeProvider(timeNow)
 
 			ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 			defer cancel()
@@ -131,7 +130,7 @@ func TestAzureCleanerCleanIterateIndefinitely(t *testing.T) {
 			NextMarker: azBlobNotDoneMarker(),
 		}, nil)
 
-	sut := cleaner.NewAzure(cleaner.Config{}, azBlobCliMock, spy.NewLogDummy())
+	sut := NewAzure(Config{}, azBlobCliMock, spy.NewLogDummy())
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
@@ -161,7 +160,7 @@ func TestAzureCleanerCleanFailures(t *testing.T) {
 		azBlobCliMock.On("ListBlobsFlatSegment", mock.MatchedBy(anyContext(t)), azblob.Marker{}, opt).
 			Return(nil, fixErr).Once()
 
-		sut := cleaner.NewAzure(cleaner.Config{}, azBlobCliMock, spy.NewLogDummy())
+		sut := NewAzure(Config{}, azBlobCliMock, spy.NewLogDummy())
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()
@@ -197,10 +196,10 @@ func TestAzureCleanerCleanFailures(t *testing.T) {
 		azBlobCliMock.On("DeleteBlockBlob", mock.MatchedBy(anyContext(t)), "test-1", azblob.DeleteSnapshotsOptionInclude, azblob.BlobAccessConditions{}).
 			Return(nil, fixErr).Once()
 
-		cfg := cleaner.Config{
+		cfg := Config{
 			ExpirationBlobTime: time.Second,
 		}
-		sut := cleaner.NewAzure(cfg, azBlobCliMock, spy.NewLogDummy()).WithTimeProvider(timeNow)
+		sut := NewAzure(cfg, azBlobCliMock, spy.NewLogDummy()).WithTimeProvider(timeNow)
 
 		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 		defer cancel()

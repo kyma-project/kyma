@@ -1,7 +1,7 @@
 package status
 
 import (
-	sbuTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	sbuTypes "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

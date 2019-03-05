@@ -5,10 +5,10 @@ package v1alpha1
 import (
 	time "time"
 
-	settings_v1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/settings/v1alpha1"
-	versioned "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
-	internalinterfaces "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/listers/settings/v1alpha1"
+	settings_v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/settings/v1alpha1"
+	versioned "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	internalinterfaces "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/internalinterfaces"
+	v1alpha1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/listers/settings/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"

@@ -5,7 +5,7 @@ import (
 	"sort"
 	"time"
 
-	pTime "github.com/kyma-project/kyma/tools/etcd-backup/internal/platform/time"
+	pTime "github.com/kyma-project/kyma/components/etcd-backup-job/internal/platform/time"
 
 	"github.com/Azure/azure-storage-blob-go/2018-03-28/azblob"
 	"github.com/pkg/errors"

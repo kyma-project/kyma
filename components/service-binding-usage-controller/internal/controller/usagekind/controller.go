@@ -1,15 +1,15 @@
 package usagekind
 
 import (
-	ukInformer "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1"
-	ukLister "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1"
+	ukInformer "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions/servicecatalog/v1alpha1"
+	ukLister "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/listers/servicecatalog/v1alpha1"
 
 	"time"
 
 	"strings"
 
-	"github.com/kyma-project/kyma/components/binding-usage-controller/internal/controller"
-	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
+	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"

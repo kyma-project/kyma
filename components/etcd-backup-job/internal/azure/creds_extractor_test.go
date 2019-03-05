@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kyma-project/kyma/tools/etcd-backup/internal/azure"
+	"github.com/kyma-project/kyma/components/etcd-backup-job/internal/azure"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
