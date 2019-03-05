@@ -139,7 +139,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 		runtimeRenewalRouter,
 		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
 		renewalAuditLoggingMiddleware,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
+		hb.funcMiddlwares.CheckForRevokedCertMiddleware)
 
 	runtimeRevocationRouter := hb.router.Path("/v1/runtimes/certificates/revocations").Subrouter()
 	runtimeRevocationRouter.HandleFunc("", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
