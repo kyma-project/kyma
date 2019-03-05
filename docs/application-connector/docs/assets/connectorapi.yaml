@@ -490,6 +490,9 @@ components:
         renewCertUrl:
           type: 'string'
           example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewal'
+        revokeCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
     applicationInfoResponse:
       type: 'object'
       properties:
@@ -512,6 +515,9 @@ components:
         renewCertUrl:
           type: 'string'
           example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewal'
+        revokeCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
     runtimeInfoResponse:
       type: 'object'
       properties:
