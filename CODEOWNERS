@@ -220,8 +220,8 @@
 # Application Operator Component
 /components/application-operator/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
-# Application Proxy Component
-/components/application-proxy/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+# Application Gateway Component
+/components/application-gateway/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
 /components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91

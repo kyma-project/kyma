@@ -29,4 +29,4 @@ This is a sample URL for the Example API:
 re-ec-default-01a702b8-e302-4e62-b678-8d361b627e49.kyma-integration/orders
 ```
 
-When you call this URL, the Application Proxy passes all requests to the `https://www.orders.com/v1/orders` address, which is the `targetUrl` registered for the Example API. You do not have to get an OAuth token and manually include it in the call as the Application Proxy does it for you automatically.
+When you call this URL, the Application Gateway passes all requests to the `https://www.orders.com/v1/orders` address, which is the `targetUrl` registered for the Example API. You do not have to get an OAuth token and manually include it in the call as the Application Gateway does it for you automatically.
