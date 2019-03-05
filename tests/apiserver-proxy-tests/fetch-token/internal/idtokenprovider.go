@@ -72,6 +72,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 			return nil, fmt.Errorf("login - Redirected with error: '%s'", loginEndpoint)
 		}
 	}
+	defer closeRespBody(authorizeResp)
 
 	if _, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + loginEndpoint); err != nil {
 		return nil, errors.Wrap(err, "while performing HTTP GET on login endpoint")
@@ -87,6 +88,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	if loginResp.StatusCode < 300 || loginResp.StatusCode > 399 {
 		return nil, fmt.Errorf("login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp))
 	}
+	defer closeRespBody(loginResp)
 
 	approvalEndpoint := loginResp.Header.Get("location")
 	if strings.Contains(approvalEndpoint, "#.*error") {
@@ -104,6 +106,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	if strings.Contains(clientEndpoint, "#.*error") {
 		return nil, fmt.Errorf("client - Redirected with error: '%s'", clientEndpoint)
 	}
+	defer closeRespBody(approvalResp)
 
 	parsedUrl, parseErr := url.Parse(clientEndpoint)
 	if parseErr != nil {
@@ -121,18 +124,19 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 }
 
 func readRespBody(resp *http.Response) string {
-	defer func() {
-		err := resp.Body.Close()
-		if err != nil {
-			log.Printf("WARNING: Unable to close response body. Cause: %v", err)
-		}
-	}()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("WARNING: Unable to read response body (status: '%s'). Root cause: %v", resp.Status, err)
 		return "<<Error reading response body>>"
 	}
 	return string(b)
+}
+
+func closeRespBody(resp *http.Response) {
+	err := resp.Body.Close()
+	if err != nil {
+		log.Printf("WARNING: Unable to close response body. Cause: %v", err)
+	}
 }
 
 func getLocalAuthEndpoint(body io.Reader) (string, error) {
