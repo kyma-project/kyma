@@ -22,6 +22,8 @@ metadata:
 data:
   global.tlsCrt: "__TLS_CERT__"
   global.tlsKey: "__TLS_KEY__"
+  global.applicationConnector.tlsCrt: "__TLS_CERT__"
+  global.applicationConnector.tlsKey: "__TLS_KEY__"
 ---
 apiVersion: v1
 kind: ConfigMap
