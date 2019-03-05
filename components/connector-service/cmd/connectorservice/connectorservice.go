@@ -40,20 +40,16 @@ func main() {
 		globalMiddlewares = append(globalMiddlewares, loggingMiddlewares.NewRequestLoggingMiddleware().Middleware)
 	}
 
-	revokedAppCertsRepo := newRevokedAppCertsRepo()
-	revokedRuntimeCertsRepo := newRevokedRuntimeCertsRepo()
-
-	internalHandler := newInternalHandler(tokenCreatorProvider, options, globalMiddlewares, revokedAppCertsRepo, revokedRuntimeCertsRepo)
-	externalHandler := newExternalHandler(tokenManager, tokenCreatorProvider, options, env, globalMiddlewares, revokedAppCertsRepo, revokedRuntimeCertsRepo)
+	handlers := createAPIHandlers(tokenManager, tokenCreatorProvider, options, env, globalMiddlewares)
 
 	externalSrv := &http.Server{
 		Addr:    ":" + strconv.Itoa(options.externalAPIPort),
-		Handler: externalHandler,
+		Handler: handlers.externalAPI,
 	}
 
 	internalSrv := &http.Server{
 		Addr:    ":" + strconv.Itoa(options.internalAPIPort),
-		Handler: internalHandler,
+		Handler: handlers.internalAPI,
 	}
 
 	wg := &sync.WaitGroup{}

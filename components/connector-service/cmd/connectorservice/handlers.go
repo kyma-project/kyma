@@ -29,15 +29,36 @@ const (
 	RuntimeURLFormat  = "https://%s/v1/runtimes"
 )
 
+type Handlers struct {
+	internalAPI http.Handler
+	externalAPI http.Handler
+}
+
+func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider, opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc) Handlers {
+
+	coreClientSet, appErr := newCoreClientSet()
+	if appErr != nil {
+		log.Infof("Failed to initialize Kubernetes client. %s", appErr.Error())
+		errorHandler := errorhandler.NewErrorHandler(500, fmt.Sprintf("Failed to initialize Kubernetes client: %s", appErr.Error()))
+		return Handlers{
+			internalAPI: errorHandler,
+			externalAPI: errorHandler,
+		}
+	}
+
+	revokedCertsRepo := newRevokedCertsRepository(coreClientSet, opts.namespace, opts.revocationConfigMapName)
+	secretsRepository := newSecretsRepository(coreClientSet, opts.namespace)
+
+	return Handlers{
+		internalAPI: newInternalHandler(tokenCreatorProvider, opts, globalMiddlewares, revokedCertsRepo),
+		externalAPI: newExternalHandler(tokenManager, tokenCreatorProvider, opts, env, globalMiddlewares, secretsRepository, revokedCertsRepo),
+	}
+}
+
 func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider,
-	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, revokedAppCertsRepo, revokedRuntimeCertsRepo revocationlist.RevocationListRepository) http.Handler {
+	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, secretsRepository secrets.Repository, revocationListRepository revocationlist.RevocationListRepository) http.Handler {
 
 	headersRequired := clientcontext.HeadersRequiredType(opts.central)
-	secretsRepository, appErr := newSecretsRepository(opts.namespace)
-	if appErr != nil {
-		log.Infof("Failed to create secrets repository. %s", appErr.Error())
-		return errorhandler.NewErrorHandler(500, fmt.Sprintf("Failed to create secrets repository: %s", appErr.Error()))
-	}
 
 	subjectValues := certificates.CSRSubject{
 		Country:            env.country,
@@ -53,7 +74,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
 	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayHost, headersRequired)
 	appContextFromSubjMiddleware := clientcontextmiddlewares.NewAppContextFromSubjMiddleware()
-	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revokedAppCertsRepo)
+	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
 		AppTokenResolverMiddleware:      appTokenResolverMiddleware.Middleware,
@@ -75,7 +96,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		Subject:                     subjectValues,
 		ContextExtractor:            clientcontext.CreateApplicationClientContextService,
 		CertService:                 certificateService,
-		RevokedApplicationCertsRepo: revokedAppCertsRepo,
+		RevokedCertsRepo:            revocationListRepository,
 	}
 
 	handlerBuilder.WithApps(appHandlerConfig)
@@ -91,7 +112,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 			Subject:                     subjectValues,
 			ContextExtractor:            clientcontext.CreateClusterClientContextService,
 			CertService:                 certificateService,
-			RevokedRuntimeCertsRepo:     revokedRuntimeCertsRepo,
+			RevokedCertsRepo:            revocationListRepository,
 		}
 
 		handlerBuilder.WithRuntimes(runtimeHandlerConfig)
@@ -100,7 +121,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	return handlerBuilder.GetHandler()
 }
 
-func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc, revokedAppCertsRepo, revokedRuntimeCertsRepo revocationlist.RevocationListRepository) http.Handler {
+func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc, revocationListRepository revocationlist.RevocationListRepository) http.Handler {
 
 	ctxRequired := clientcontext.CtxRequiredType(opts.central)
 
@@ -112,7 +133,7 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 		TokenManager:                tokenManagerProvider.WithTTL(appTokenTTLMinutes),
 		CSRInfoURL:                  fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
 		ContextExtractor:            clientcontext.CreateApplicationClientContextService,
-		RevokedApplicationCertsRepo: revokedAppCertsRepo,
+		RevokedApplicationCertsRepo: revocationListRepository,
 	}
 
 	handlerBuilder := internalapi.NewHandlerBuilder(internalapi.FunctionalMiddlewares{
@@ -128,7 +149,7 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 			TokenManager:            tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
 			CSRInfoURL:              fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
 			ContextExtractor:        clientcontext.CreateClusterClientContextService,
-			RevokedRuntimeCertsRepo: revokedRuntimeCertsRepo,
+			RevokedRuntimeCertsRepo: revocationListRepository,
 		}
 
 		handlerBuilder.WithRuntimes(runtimeHandlerConfig)
@@ -137,7 +158,19 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 	return handlerBuilder.GetHandler()
 }
 
-func newSecretsRepository(namespace string) (secrets.Repository, apperrors.AppError) {
+func newSecretsRepository(coreClientSet *kubernetes.Clientset, namespace string) secrets.Repository {
+	sei := coreClientSet.CoreV1().Secrets(namespace)
+
+	return secrets.NewRepository(sei)
+}
+
+func newRevokedCertsRepository(coreClientSet *kubernetes.Clientset, namespace, revocationSecretName string) revocationlist.RevocationListRepository {
+	cmi := coreClientSet.CoreV1().ConfigMaps(namespace)
+
+	return revocationlist.NewRepository(cmi, revocationSecretName)
+}
+
+func newCoreClientSet() (*kubernetes.Clientset, apperrors.AppError) {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		return nil, apperrors.Internal("failed to read k8s in-cluster configuration, %s", err)
@@ -148,15 +181,5 @@ func newSecretsRepository(namespace string) (secrets.Repository, apperrors.AppEr
 		return nil, apperrors.Internal("failed to create k8s core client, %s", err)
 	}
 
-	sei := coreClientset.CoreV1().Secrets(namespace)
-
-	return secrets.NewRepository(sei), nil
-}
-
-func newRevokedAppCertsRepo() revocationlist.RevocationListRepository {
-	return revocationlist.NewRepository()
-}
-
-func newRevokedRuntimeCertsRepo() revocationlist.RevocationListRepository {
-	return revocationlist.NewRepository()
+	return coreClientset, nil
 }

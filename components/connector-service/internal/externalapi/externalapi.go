@@ -24,8 +24,7 @@ type Config struct {
 	CertificateProtectedBaseURL        string
 	Subject                            certificates.CSRSubject
 	CertService                        certificates.Service
-	RevokedApplicationCertsRepo revocationlist.RevocationListRepository
-	RevokedRuntimeCertsRepo     revocationlist.RevocationListRepository
+	RevokedCertsRepo revocationlist.RevocationListRepository
 }
 
 type FunctionalMiddlewares struct {
@@ -77,7 +76,7 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	applicationRenewalHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 	applicationManagementInfoHandler := NewManagementInfoHandler(appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateProtectedBaseURL)
-	applicationRevocationHandler := NewRevocationHandler(appHandlerCfg.RevokedApplicationCertsRepo)
+	applicationRevocationHandler := NewRevocationHandler(appHandlerCfg.RevokedCertsRepo)
 
 	csrApplicationRouter := hb.router.PathPrefix("/v1/applications/signingRequests").Subrouter()
 	csrApplicationRouter.HandleFunc("/info", applicationInfoHandler.GetCSRInfo).Methods(http.MethodGet)
@@ -124,7 +123,7 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL)
-	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedRuntimeCertsRepo)
+	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedCertsRepo)
 
 	csrRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()
 	csrRuntimesRouter.HandleFunc("/info", runtimeInfoHandler.GetCSRInfo).Methods(http.MethodGet)

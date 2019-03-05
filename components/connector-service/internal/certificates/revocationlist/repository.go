@@ -1,6 +1,15 @@
 package revocationlist
 
-import "sync"
+import (
+	"k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
+)
+
+type Manager interface {
+	Get(name string, options metav1.GetOptions) (*v1.ConfigMap, error)
+	Update(configmap *v1.ConfigMap) (*v1.ConfigMap, error)
+}
 
 type RevocationListRepository interface {
 	Insert(hash string) error
@@ -8,29 +17,45 @@ type RevocationListRepository interface {
 }
 
 type revocationListRepository struct {
-	revocationList map[string]string
-	mutex sync.RWMutex
+	configListManager Manager
+	configMapName string
 }
 
-func NewRepository() RevocationListRepository {
+func NewRepository(configListManager Manager, configMapName string) RevocationListRepository {
 	return &revocationListRepository{
-		make(map[string]string),
-		sync.RWMutex{},
+		configListManager: configListManager,
+		configMapName: configMapName,
 	}
 }
 
 func (r *revocationListRepository) Insert(hash string) error {
-	r.mutex.Lock()
-	defer r.mutex.Unlock()
+	configMap, err := r.configListManager.Get(r.configMapName, metav1.GetOptions{})
+	if err != nil{
+		return err
+	}
 
-	r.revocationList[hash] = hash
-	return nil
+	revokedCerts := configMap.Data
+	revokedCerts[hash] = hash
+
+	updatedConfigMap := &v1.ConfigMap{
+		Data: revokedCerts,
+	}
+
+	err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		_, err  = r.configListManager.Update(updatedConfigMap)
+		return err
+	})
+
+	return err
 }
 
 func (r *revocationListRepository) Contains(hash string) (bool, error) {
-	r.mutex.RLock()
-	defer r.mutex.RUnlock()
+	configMap, err := r.configListManager.Get(r.configMapName, metav1.GetOptions{})
+	if err != nil{
+		return false, err
+	}
 
-	_, ok := r.revocationList[hash]
-	return ok, nil
+	_, found := configMap.Data[hash]
+
+	return found, nil
 }
