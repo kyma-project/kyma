@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/application"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/httpserver"
@@ -10,6 +11,10 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
+)
+
+const (
+	shutdownTimeout = time.Minute
 )
 
 func main() {
@@ -42,8 +47,10 @@ func main() {
 
 	// start the HTTP server
 	server := httpserver.NewHttpServer(&options.Port, &handler)
-	defer httpserver.Close(server)
-	log.Print(server.ListenAndServe())
+	go server.Start()
+
+	// shutdown the HTTP server gracefully
+	server.Shutdown(shutdownTimeout)
 }
 
 func limit(serveMux *http.ServeMux, maxRequests *int) (http.Handler, chan bool) {
