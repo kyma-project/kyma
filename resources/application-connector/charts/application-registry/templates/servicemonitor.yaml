@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: application-registry-metrics
-  namespace: {{ .Values.global.namespace }}
+  namespace: kyma-system
   labels:
     prometheus: monitoring
     app: {{ .Chart.Name }}

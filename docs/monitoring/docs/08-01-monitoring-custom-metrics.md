@@ -98,7 +98,7 @@ Use either the `cpu_temperature_celsius` or `hd_errors_total` in the [**expressi
 
 Prometheus can reach the service using ServiceMonitor. ServiceMonitor is a specific CRD used by the Prometheus operator to monitor services.
 
-In Kyma, the Prometheus server discovers all ServiceMonitors through the **serviceMonitorSelector** matching the `prometheus: core` label.
+In Kyma, the Prometheus server discovers all ServiceMonitors through the **serviceMonitorSelector** matching the `prometheus: monitoring` label.
 
 ```yaml
   serviceMonitorSelector:
