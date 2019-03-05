@@ -41,11 +41,11 @@ spec:
         backend:
           serviceName: {{ .Chart.Name }}-external-api
           servicePort: {{ .Values.ingress.externalapi.port }}
-      - path: /v1/applications/certificates/revocation
+      - path: /v1/applications/certificates/revocations
         backend:
           serviceName: {{ .Chart.Name }}-external-api
           servicePort: {{ .Values.ingress.externalapi.port }}
-      - path: /v1/runtimes/certificates/revocation
+      - path: /v1/runtimes/certificates/revocations
         backend:
           serviceName: {{ .Chart.Name }}-external-api
           servicePort: {{ .Values.ingress.externalapi.port }}
