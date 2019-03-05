@@ -20,6 +20,7 @@ const (
 	clusterNameFlag   = "kube-config-cluster-name"
 	apiserverURLFlag  = "kube-config-url"
 	clusterCAFileFlag = "kube-config-ca-file"
+	oidcCAFileFlag = "oidc-ca-file"
 )
 
 func main() {
@@ -58,6 +59,7 @@ func readAppConfig() *appConfig {
 	oidcGroupsClaimArg := flag.String("oidc-groups-claim", "groups", "OIDC: Identifier of groups in JWT claim")
 	oidcUsernamePrefixArg := flag.String("oidc-username-prefix", "", "OIDC: If provided, all users will be prefixed with this value to prevent conflicts with other authentication strategies")
 	oidcGroupsPrefixArg := flag.String("oidc-groups-prefix", "", "OIDC: If provided, all groups will be prefixed with this value to prevent conflicts with other authentication strategies")
+	oidcCAFileArg := flag.String(oidcCAFileFlag, "", "File with Certificate Authority of the Kubernetes cluster, also used for OIDC authentication")
 
 	var oidcSupportedSigningAlgsArg multiValFlag = []string{}
 	flag.Var(&oidcSupportedSigningAlgsArg, "oidc-supported-signing-algs", "OIDC supported signing algorithms")
@@ -111,7 +113,7 @@ func readAppConfig() *appConfig {
 		oidc: authn.OIDCConfig{
 			IssuerURL:            *oidcIssuerURLArg,
 			ClientID:             *oidcClientIDArg,
-			CAFile:               *clusterCAFileArg,
+			CAFile:               *oidcCAFileArg,
 			UsernameClaim:        *oidcUsernameClaimArg,
 			UsernamePrefix:       *oidcUsernamePrefixArg,
 			GroupsClaim:          *oidcGroupsClaimArg,

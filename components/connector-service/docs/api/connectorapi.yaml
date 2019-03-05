@@ -427,6 +427,59 @@ components:
           $ref: '#/components/schemas/csrAplicationApiURLs'
         certificate:
           $ref: '#/components/schemas/cert'
+    applicationClientIdentity:
+      type: 'object'
+      properties:
+        application:
+          type: 'string'
+          example: 'example-application'
+        group:
+          type: 'string'
+          example: 'example-group'
+        tenant:
+          type: 'string'
+          example: 'example-tenant'
+    applicationInfoResponseUrls:
+      type: 'object'
+      properties:
+        metadataUrl:
+          type: 'string'
+          example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/metadata/services'
+        eventsUrl:
+          type: 'string'
+          example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/events'
+        renewCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewal'
+    applicationInfoResponse:
+      type: 'object'
+      properties:
+        clientIdentity:
+          $ref: '#/components/schemas/applicationClientIdentity'
+        urls:
+          $ref: '#/components/schemas/applicationInfoResponseUrls'
+    runtimeClientIdentity:
+      type: 'object'
+      properties:
+        group:
+          type: 'string'
+          example: 'example-group'
+        tenant:
+          type: 'string'
+          example: 'example-tenant'
+    runtimeInfoResponseUrls:
+      type: 'object'
+      properties:
+        renewCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewal'
+    runtimeInfoResponse:
+      type: 'object'
+      properties:
+        clientIdentity:
+          $ref: '#/components/schemas/runtimeClientIdentity'
+        urls:
+          $ref: '#/components/schemas/runtimeInfoResponseUrls'
     csrRuntimeApiURLs:
       type: 'object'
       properties:

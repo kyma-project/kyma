@@ -17,7 +17,7 @@ service:
 ingress:
   enabled: true
   authSecret: kyma-integration/nginx-auth-ca
-  tlsSecret: ingress-tls-cert
+  tlsSecret: application-connector-ingress-tls-cert
 
 acceptanceTest:
   image:

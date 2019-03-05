@@ -8,7 +8,7 @@ This section describes the Kyma components.
 
 ## Service Catalog
 
-The Service Catalog lists all of the services available to Kyma users through the registered Service Brokers. Use the Service Catalog to provision new services in the
+The Service Catalog lists all of the services available to Kyma users through the registered [Service Brokers](/components/service-catalog/#service-brokers-service-brokers). Use the Service Catalog to provision new services in the
 Kyma [Kubernetes](https://kubernetes.io/) cluster and create bindings between the provisioned service and an application.
 
 
@@ -47,4 +47,4 @@ The tracing in Kyma uses the [Jaeger](https://github.com/jaegertracing) distribu
 
 ## Logging
 
-Logging in Kyma uses [Logspout](https://github.com/gliderlabs/logspout) and [OK Log](https://github.com/oklog/oklog). Use a plaintext or a regular expression to fetch logs from Pods using the OK Log UI.
+Logging in Kyma uses [Loki](https://github.com/grafana/loki), a Prometheus-like log management system.

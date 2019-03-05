@@ -38,7 +38,7 @@ Follow the `kubectl` syntax, `kubectl {command} {type} {name} {flags}`, where:
 ### Examples
 The following examples show how to create a ServiceInstance, how to get a list of ClusterServiceClasses and a list of ClusterServiceClasses with human-readable names, a list of ClusterServicePlans, and a list of all ServiceInstances.
 
-* Create a ServiceInstance using the example of the Redis ServiceInstance for the 0.1.38 version of the Service Catalog:
+* Create a ServiceInstance using the example of the Redis ServiceInstance for the 0.1.41 version of the Service Catalog:
 
 ```
 cat <<EOF | kubectl create -f -
