@@ -57,9 +57,10 @@ type Entry struct {
 
 // Credentials defines type of authentication and where the credentials are stored
 type Credentials struct {
-	Type              string `json:"type"`
-	SecretName        string `json:"secretName"`
-	AuthenticationUrl string `json:"authenticationUrl,omitempty"`
+	Type                 string `json:"type"`
+	SecretName           string `json:"secretName"`
+	AuthenticationUrl    string `json:"authenticationUrl,omitempty"`
+	CSRFAuthorizationURL string `json:"csrfAuthorizationURL,omitempty"`
 }
 
 // Service represents part of the remote environment, which is mapped 1 to 1 to service class in the service-catalog

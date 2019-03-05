@@ -81,6 +81,8 @@ spec:
                               type: string
                             authenticationUrl:
                               type: string
+                            csrfAuthorizationURL:
+                              type: string
                   tags:
                     type: array
                     items:
