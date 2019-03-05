@@ -54,7 +54,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 		name := string("")
 		if t := reflect.TypeOf(backupTest); t.Kind() == reflect.Ptr {
-			name = "*" + t.Elem().Name()
+			name = t.Elem().Name()
 		} else {
 			name = t.Name()
 		}
