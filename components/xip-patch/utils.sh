@@ -27,8 +27,8 @@ getLoadBalancerIP() {
     done
 
     if [ -z "${LOAD_BALANCER_IP}" ]; then
-        echo "---> Could not retrive the IP address. Verify if service ${SERVICE_NAME} exists in the namespace ${NAMESPACE}"
-        echo "---> Command executed: kubectl get service -n ${NAMESPACE} ${SERVICE_NAME} -o jsonpath='{.status.loadBalancer.ingress[0].ip}'"
+        echo "---> Could not retrive the IP address. Verify if service ${SERVICE_NAME} exists in the namespace ${NAMESPACE}" >&2
+        echo "---> Command executed: kubectl get service -n ${NAMESPACE} ${SERVICE_NAME} -o jsonpath='{.status.loadBalancer.ingress[0].ip}'" >&2
         exit 1
     fi
 
@@ -62,8 +62,8 @@ getLoadBalancerIPFromLabel() {
     done
 
     if [ -z "${LOAD_BALANCER_IP}" ]; then
-        echo "---> Could not retrive the IP address. Verify if any service has the label ${LABEL} in the namespace ${NAMESPACE}"
-        echo "---> Command executed: kubectl get service -l ${LABEL} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' -n ${NAMESPACE}"
+        echo "---> Could not retrive the IP address. Verify if any service has the label ${LABEL} in the namespace ${NAMESPACE}" >&2
+        echo "---> Command executed: kubectl get service -l ${LABEL} -o jsonpath='{.status.loadBalancer.ingress[0].ip}' -n ${NAMESPACE}" >&2
         exit 1
     fi
 
