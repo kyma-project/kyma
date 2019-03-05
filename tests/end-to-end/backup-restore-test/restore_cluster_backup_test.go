@@ -51,9 +51,17 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 	for idx, backupTest := range backupTests {
 		testUUID := uuid.New()
+
+		name := string("")
+		if t := reflect.TypeOf(backupTest); t.Kind() == reflect.Ptr {
+			name = "*" + t.Elem().Name()
+		} else {
+			name = t.Name()
+		}
+
 		e2eTests[idx] = e2eTest{
 			backupTest: backupTest,
-			namespace:  strings.ToLower(reflect.TypeOf(backupTest).Name()) + "-" + testUUID.String(),
+			namespace:  strings.ToLower(name) + "-" + testUUID.String(),
 			testUUID:   testUUID.String(),
 		}
 	}
