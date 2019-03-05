@@ -14,7 +14,6 @@ type envConfig struct {
 }
 
 type Config struct {
-	GraphQLEndpoint  string
 	IdProviderConfig idProviderConfig
 	EnvConfig        envConfig
 }
