@@ -4,7 +4,7 @@ TAG = $(DOCKER_TAG)
 
 .PHONY: build
 build:
-	./before-commit.sh
+	./before-commit.sh ci
 
 .PHONY: build-image
 build-image:
@@ -16,10 +16,10 @@ push-image:
 	docker push $(IMG):$(TAG)
 
 .PHONY: ci-pr
-ci-pr: build-image push-image
+ci-pr: build build-image push-image
 
 .PHONY: ci-master
-ci-master: build-image push-image
+ci-master: build build-image push-image
 
 .PHONY: ci-release
-ci-release: build-image push-image
+ci-release: build build-image push-image
