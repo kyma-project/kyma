@@ -225,9 +225,10 @@ func checkAccessTokenRequest(t *testing.T, r *http.Request) {
 	assert.Equal(t, "client_credentials", r.PostForm.Get("grant_type"))
 
 	authHeader := r.Header.Get(httpconsts.HeaderAuthorization)
-	decoded, err := base64.StdEncoding.DecodeString(authHeader)
+	encodedCredentials := strings.TrimPrefix(string(authHeader), "Basic ")
+	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
 	require.NoError(t, err)
-	credentials := strings.Split(strings.TrimPrefix(string(decoded), "Basic "), ":")
+	credentials := strings.Split(string(decoded), ":")
 	assert.Equal(t, "test", credentials[0])
 	assert.Equal(t, "test", credentials[1])
 }
