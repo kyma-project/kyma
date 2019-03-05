@@ -1,10 +1,13 @@
 package proxy
 
 import (
+	"net/http"
 	"net/http/httputil"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf"
 	gocache "github.com/patrickmn/go-cache"
 )
 
@@ -12,14 +15,33 @@ const cleanupInterval = 60
 
 type CacheEntry struct {
 	Proxy                 *httputil.ReverseProxy
-	AuthorizationStrategy authorization.Strategy
+	AuthorizationStrategy *authorizationStrategyWrapper
+	CSRFTokenStrategy     csrf.TokenStrategy
+}
+
+type authorizationStrategyWrapper struct {
+	actualStrategy authorization.Strategy
+	proxy          *httputil.ReverseProxy
+}
+
+func (ce *authorizationStrategyWrapper) AddAuthorization(r *http.Request) apperrors.AppError {
+
+	ts := func(transport *http.Transport) {
+		ce.proxy.Transport = transport
+	}
+
+	return ce.actualStrategy.AddAuthorization(r, ts)
+}
+
+func (ce *authorizationStrategyWrapper) Invalidate() {
+	ce.actualStrategy.Invalidate()
 }
 
 type Cache interface {
 	// Get returns entry from the cache
 	Get(id string) (*CacheEntry, bool)
 	// Put adds entry to the cache
-	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy) *CacheEntry
+	Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry
 }
 
 type cache struct {
@@ -42,8 +64,9 @@ func (p *cache) Get(id string) (*CacheEntry, bool) {
 	return proxy.(*CacheEntry), found
 }
 
-func (p *cache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy) *CacheEntry {
-	proxy := &CacheEntry{Proxy: reverseProxy, AuthorizationStrategy: authorizationStrategy}
+func (p *cache) Put(id string, reverseProxy *httputil.ReverseProxy, authorizationStrategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) *CacheEntry {
+
+	proxy := &CacheEntry{Proxy: reverseProxy, AuthorizationStrategy: &authorizationStrategyWrapper{authorizationStrategy, reverseProxy}, CSRFTokenStrategy: csrfTokenStrategy}
 	p.proxyCache.Set(id, proxy, gocache.DefaultExpiration)
 
 	return proxy

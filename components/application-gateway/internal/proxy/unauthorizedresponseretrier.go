@@ -79,8 +79,14 @@ func (rr *retrier) prepareRequest() (*http.Request, context.CancelFunc) {
 func (rr *retrier) addAuthorization(r *http.Request, cacheEntry *CacheEntry) error {
 	authorizationStrategy := cacheEntry.AuthorizationStrategy
 	authorizationStrategy.Invalidate()
+	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r)
+	if err != nil {
+		return err
+	}
 
-	return authorizationStrategy.AddAuthorization(r, cacheEntry.Proxy)
+	csrfTokenStrategy := cacheEntry.CSRFTokenStrategy
+	csrfTokenStrategy.Invalidate()
+	return csrfTokenStrategy.AddCSRFToken(r)
 }
 
 func (rr *retrier) performRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Response, error) {

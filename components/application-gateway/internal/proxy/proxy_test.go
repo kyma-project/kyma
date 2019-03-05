@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
+	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf/mocks"
 	authMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
 	metadataMock "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/mocks"
@@ -35,18 +36,27 @@ func TestProxy(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(nil).Twice()
 
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Return(nil)
+
+		credentials := &metadatamodel.Credentials{}
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
-		authStrategyFactoryMock.On("Create", (*metadatamodel.Credentials)(nil)).Return(authStrategyMock).Once()
+		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
+		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, credentials.CSRFTokenURL).Return(csrfTokenStrategyMock).Once()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
-			TargetUrl: ts.URL,
+			TargetUrl:   ts.URL,
+			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -92,13 +102,20 @@ func TestProxy(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil)
+
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
 			Return(nil)
 
 		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", tsOAuth.URL+"/token")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
+
+		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
+		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Once()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -112,7 +129,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -138,13 +155,20 @@ func TestProxy(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil)
+
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
 			Return(nil)
 
 		credentialsMatcher := createBasicCredentialsMatcher("username", "password")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
+
+		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
+		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Once()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -157,7 +181,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -183,13 +207,20 @@ func TestProxy(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(apperrors.UpstreamServerCallFailed("failed"))
+
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Return(nil)
 
 		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", "www.example.com/token")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
+
+		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
+		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Once()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -203,7 +234,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -224,7 +255,7 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.On("GetAPI", "uuid-1").
 			Return(&metadatamodel.API{}, apperrors.Internal("Failed to read services"))
 
-		handler := New(serviceDefServiceMock, nil, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, nil, nil, createProxyConfig(proxyTimeout))
 
 		// when
 		handler.ServeHTTP(rr, req)
@@ -252,19 +283,28 @@ func TestProxy(t *testing.T) {
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
-			TargetUrl: tsf.URL,
+			TargetUrl:   tsf.URL,
+			Credentials: &metadatamodel.Credentials{},
 		}, nil).Twice()
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.Anything, mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.Anything, mock.AnythingOfType("TransportSetter")).
 			Return(nil).Twice()
 		authStrategyMock.On("Invalidate").Return().Once()
+
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Return(nil)
+		csrfTokenStrategyMock.On("Invalidate").Return()
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock).Twice()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
+		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock)
+
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when

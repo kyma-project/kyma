@@ -68,6 +68,7 @@ func TestCertificateGenStrategy(t *testing.T) {
 		// given
 		proxy := &httputil.ReverseProxy{}
 
+
 		expectedProxy := &httputil.ReverseProxy{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
@@ -87,7 +88,9 @@ func TestCertificateGenStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = certGenStrategy.AddAuthorization(request, proxy)
+		err = certGenStrategy.AddAuthorization(request, func(transport *http.Transport){
+			proxy.Transport = transport
+		})
 
 		// then
 		require.NoError(t, err)
@@ -96,15 +99,13 @@ func TestCertificateGenStrategy(t *testing.T) {
 
 	t.Run("should return error when key is invalid", func(t *testing.T) {
 		// given
-		proxy := &httputil.ReverseProxy{}
-
 		certGenStrategy := newCertificateGenStrategy(certificate, []byte("invalid key"))
 
 		request, err := http.NewRequest("GET", "www.example.com", nil)
 		require.NoError(t, err)
 
 		// when
-		err = certGenStrategy.AddAuthorization(request, proxy)
+		err = certGenStrategy.AddAuthorization(request, nil)
 
 		// then
 		require.Error(t, err)
@@ -112,7 +113,6 @@ func TestCertificateGenStrategy(t *testing.T) {
 
 	t.Run("should return error when certificate is invalid", func(t *testing.T) {
 		// given
-		proxy := &httputil.ReverseProxy{}
 
 		certGenStrategy := newCertificateGenStrategy([]byte("invalid cert"), privateKey)
 
@@ -120,7 +120,7 @@ func TestCertificateGenStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = certGenStrategy.AddAuthorization(request, proxy)
+		err = certGenStrategy.AddAuthorization(request, nil)
 
 		// then
 		require.Error(t, err)

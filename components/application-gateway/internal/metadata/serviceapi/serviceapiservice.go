@@ -46,6 +46,10 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 		credentialsSecretName := applicationAPI.Credentials.SecretName
 		credentialsType := applicationAPI.Credentials.Type
 
+		if applicationAPI.Credentials.CSRFUrl != "" {
+			api.Credentials.CSRFTokenURL = applicationAPI.Credentials.CSRFUrl
+		}
+
 		secret, err := sas.secretsRepository.Get(credentialsSecretName)
 
 		if err != nil {

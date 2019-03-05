@@ -27,9 +27,10 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 					SpecificationUrl: entry.SpecificationUrl,
 					ApiType:          entry.ApiType,
 					Credentials: Credentials{
-						AuthenticationUrl: entry.Credentials.AuthenticationUrl,
-						SecretName:        entry.Credentials.SecretName,
-						Type:              entry.Credentials.Type,
+						AuthenticationUrl:    entry.Credentials.AuthenticationUrl,
+						CSRFAuthorizationURL: entry.Credentials.CSRFAuthorizationURL,
+						SecretName:           entry.Credentials.SecretName,
+						Type:                 entry.Credentials.Type,
 					},
 				}
 			} else if entry.Type == specEventsType {
@@ -67,9 +68,10 @@ func convertToK8sType(service Service) v1alpha1.Service {
 			SpecificationUrl: service.API.SpecificationUrl,
 			ApiType:          service.API.ApiType,
 			Credentials: v1alpha1.Credentials{
-				AuthenticationUrl: service.API.Credentials.AuthenticationUrl,
-				SecretName:        service.API.Credentials.SecretName,
-				Type:              service.API.Credentials.Type,
+				AuthenticationUrl:    service.API.Credentials.AuthenticationUrl,
+				CSRFAuthorizationURL: service.API.Credentials.CSRFAuthorizationURL,
+				SecretName:           service.API.Credentials.SecretName,
+				Type:                 service.API.Credentials.Type,
 			},
 		}
 		serviceEntries = append(serviceEntries, apiEntry)

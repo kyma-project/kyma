@@ -40,9 +40,10 @@ type ServiceAPI struct {
 }
 
 type Credentials struct {
-	Type              string
-	SecretName        string
-	AuthenticationUrl string
+	Type                 string
+	SecretName           string
+	AuthenticationUrl    string
+	CSRFAuthorizationURL string
 }
 
 // Service represents a service stored in Application RE

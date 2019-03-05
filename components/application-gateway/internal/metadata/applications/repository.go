@@ -30,6 +30,7 @@ type Credentials struct {
 	Type       string
 	SecretName string
 	Url        string
+	CSRFUrl    string
 }
 
 // ServiceAPI stores information needed to call an API
@@ -147,5 +148,6 @@ func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credential
 		Type:       credentials.Type,
 		SecretName: credentials.SecretName,
 		Url:        credentials.AuthenticationUrl,
+		CSRFUrl:    credentials.CSRFAuthorizationURL,
 	}
 }
