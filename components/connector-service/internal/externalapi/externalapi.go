@@ -141,10 +141,12 @@ func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
 		hb.funcMiddlwares.CheckForRevokedCertMiddleware)
 
 	runtimeRevocationRouter := hb.router.Path("/v1/runtimes/certificates/revocations").Subrouter()
+	revocationAuditLoggingMiddleware := hb.createCertificateRevocationAuditLogMiddleware(runtimeHandlerCfg.ContextExtractor)
 	runtimeRevocationRouter.HandleFunc("", runtimeRevocationHandler.Revoke).Methods(http.MethodPost)
 	httphelpers.WithMiddlewares(
 		runtimeRevocationRouter,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
+		revocationAuditLoggingMiddleware)
 
 	certRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/certificates").Subrouter()
 	certRuntimesRouter.HandleFunc("", runtimeSignatureHandler.SignCSR).Methods(http.MethodPost)
