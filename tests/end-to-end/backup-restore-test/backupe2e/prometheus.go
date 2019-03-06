@@ -146,14 +146,65 @@ func whatIsThisThing(something interface{}) (float64, string, error) {
 }
 
 func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
+	var f interface{}
 
-	err := json.Unmarshal(data, &qresp)
+	err := json.Unmarshal(data, &f)
 	if err != nil {
 		return fmt.Errorf("http response can't be Unmarshal: %v", err)
 	}
 
+	m := f.(map[string]interface{})
+
+	for key1, _ := range m {
+		switch key1 {
+		case "status":
+			status := m[key1].(string)
+			qresp.Status = status
+		case "data":
+			data := m[key1]
+			respData := &responseData{}
+			for key2, d := range data.(map[string]interface{}) {
+				switch key2 {
+				case "resultType":
+					respData.ResultType = d.(string)
+				case "result":
+					reslt := d
+					result := make([]dataResult, 2)
+					for idx, r := range  reslt.([]interface {})  {
+						datResult := &dataResult{}
+						for o,v  := range r.(map[string]interface{}) {
+							switch o {
+							case "metric":
+								datResult.Metric = v.(map[string]interface{})
+							case "value":
+								datResult.Value = v.([]interface {})
+							}
+							fmt.Println("o: ", o)
+							fmt.Println("v: ", v)
+						}
+						result[idx] = *datResult
+					}
+					respData.Result = result
+				}
+			}
+			qresp.Data = *respData
+		default:
+			return fmt.Errorf("%s is not part of the expected query response: ", key1)
+		}
+	}
+
 	return nil
 }
+
+//func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
+//
+//	err := json.Unmarshal(data, &qresp)
+//	if err != nil {
+//		return fmt.Errorf("http response can't be Unmarshal: %v", err)
+//	}
+//
+//	return nil
+//}
 
 func (pt *prometheusTest) CreateResources(namespace string) {
 	qresp := &queryResponse{}
