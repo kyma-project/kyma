@@ -8,9 +8,9 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/informers/externalversions"
+	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared/automock"
 	testingUtils "github.com/kyma-project/kyma/components/ui-api-layer/internal/testing"
 	"github.com/pkg/errors"
