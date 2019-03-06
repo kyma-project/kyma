@@ -179,8 +179,6 @@ func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
 							case "value":
 								datResult.Value = v.([]interface {})
 							}
-							fmt.Println("o: ", o)
-							fmt.Println("v: ", v)
 						}
 						result[idx] = *datResult
 					}
