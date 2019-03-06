@@ -52,6 +52,8 @@ func TestConnector(t *testing.T) {
 			runtimeCsrInfoEndpointForCentralSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 			runtimeMgmInfoEndpointForCentralSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 
+			certificateRotationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+
 			internalRevocationUrl := createRuntimeRevocationUrl(config)
 			certificateRevocationSuite(t, runtimeTokenRequest, config.SkipSslVerify, internalRevocationUrl)
 		})
