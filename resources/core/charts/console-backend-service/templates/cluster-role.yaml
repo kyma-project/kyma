@@ -5,9 +5,6 @@ metadata:
   labels:
     app: {{ template "name" . }}
 rules:
-  - apiGroups: ["*"]
-    resources: ["*"]
-    verbs: ["create"]
   - apiGroups: ["authorization.k8s.io"]
     resources: ["subjectaccessreviews"]
     verbs: ["get", "list", "watch", "create", "delete"]
@@ -50,3 +47,6 @@ rules:
   - apiGroups: ["ui.kyma-project.io"]
     resources: ["backendmodules"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["create"]
