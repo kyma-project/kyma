@@ -34,6 +34,7 @@ ingress:
   tlsSecret: application-connector-ingress-tls-cert
 
 tests:
+  enabled: true
   skipSslVerify: false
   central: *central
   image:
