@@ -4,6 +4,6 @@ data:
   "tls.key": {{ .Values.global.applicationConnector.tlsKey }}
 kind: Secret
 metadata:
-  name: ingress-tls-cert
+  name: application-connector-ingress-tls-cert
   namespace: kyma-integration
 type: kubernetes.io/tls

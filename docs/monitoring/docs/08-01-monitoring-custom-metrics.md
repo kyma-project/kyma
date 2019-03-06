@@ -63,10 +63,7 @@ This is a basic example where `Gauge` and `Counter` metrics are exported using t
     ```bash
     kubectl get pods
     NAME                             READY     STATUS    RESTARTS   AGE
-    sample-metrics-c9f998959-jd2fz   2/2       Running   0          2m
-    sample-metrics-c9f998959-kfbp8   2/2       Running   0          2m
-    sample-metrics-c9f998959-nnp2n   2/2       Running   0          2m
-    sample-metrics-c9f998959-vdnkn   2/2       Running   0          2m
+    sample-metrics-67c6885d8c-smt62   2/2       Running   0          2m
     ```
 
 2. Run the `port-forward` command on the `sample-metrics-8081` service for the`8081` port to check the metrics.
@@ -101,7 +98,7 @@ Use either the `cpu_temperature_celsius` or `hd_errors_total` in the [**expressi
 
 Prometheus can reach the service using ServiceMonitor. ServiceMonitor is a specific CRD used by the Prometheus operator to monitor services.
 
-In Kyma, the Prometheus server discovers all ServiceMonitors through the **serviceMonitorSelector** matching the `prometheus: core` label.
+In Kyma, the Prometheus server discovers all ServiceMonitors through the **serviceMonitorSelector** matching the `prometheus: monitoring` label.
 
 ```yaml
   serviceMonitorSelector:

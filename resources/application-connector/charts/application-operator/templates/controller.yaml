@@ -28,7 +28,7 @@ spec:
         - "--domainName={{ .Values.global.applicationConnectorDomainName }}"
         - "--namespace={{ .Values.global.namespace }}"
         - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"
-        - "--applicationProxyImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_proxy.dir }}application-proxy:{{ .Values.global.application_proxy.version }}"
+        - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway.dir }}application-gateway:{{ .Values.global.application_gateway.version }}"
         - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
         - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway_tests.dir }}gateway-acceptance-tests:{{ .Values.global.gateway_tests.version }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
