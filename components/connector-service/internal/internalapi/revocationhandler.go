@@ -26,14 +26,12 @@ func NewRevocationHandler(revocationListRepository revocation.RevocationListRepo
 
 func (handler revocationHandler) Revoke(w http.ResponseWriter, request *http.Request) {
 	rb, appError := handler.readBody(request)
-
 	if appError != nil {
 		httphelpers.RespondWithErrorAndLog(w, appError)
 		return
 	}
 
 	appError = handler.addToRevocationList(rb.Hash)
-
 	if appError != nil {
 		httphelpers.RespondWithErrorAndLog(w, appError)
 		return

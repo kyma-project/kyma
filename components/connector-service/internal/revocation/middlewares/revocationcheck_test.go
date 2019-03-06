@@ -22,8 +22,8 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		})
 
 		req, err := http.NewRequest("POST", "/", nil)
-		req.Header.Set(externalapi.CertificateHeader, testCert)
 		require.NoError(t, err)
+		req.Header.Set(externalapi.CertificateHeader, testCert)
 
 		rr := httptest.NewRecorder()
 
@@ -49,8 +49,8 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		})
 
 		req, err := http.NewRequest("POST", "/", nil)
-		req.Header.Set(externalapi.CertificateHeader, testCert)
 		require.NoError(t, err)
+		req.Header.Set(externalapi.CertificateHeader, testCert)
 
 		rr := httptest.NewRecorder()
 
@@ -76,8 +76,8 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		})
 
 		req, err := http.NewRequest("POST", "/", nil)
-		req.Header.Set(externalapi.CertificateHeader, testCert)
 		require.NoError(t, err)
+		req.Header.Set(externalapi.CertificateHeader, testCert)
 
 		rr := httptest.NewRecorder()
 
@@ -94,7 +94,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, rr.Code)
 	})
 
-	t.Run("should return http code 500 when error occured during hash calculation", func(t *testing.T) {
+	t.Run("should return http code 500 when error occurred during hash calculation", func(t *testing.T) {
 		// given
 		testCert := "testCert%WrongEscape%"
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -102,8 +102,8 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		})
 
 		req, err := http.NewRequest("POST", "/", nil)
-		req.Header.Set(externalapi.CertificateHeader, testCert)
 		require.NoError(t, err)
+		req.Header.Set(externalapi.CertificateHeader, testCert)
 
 		rr := httptest.NewRecorder()
 

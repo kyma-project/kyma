@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	CertificateHeader = "Certificate-Header"
+	CertificateHeader = "Client-Certificate"
 )
 
 type revocationHandler struct {
@@ -25,14 +25,12 @@ func NewRevocationHandler(revocationList revocation.RevocationListRepository) *r
 func (handler revocationHandler) Revoke(w http.ResponseWriter, r *http.Request) {
 
 	hash, appError := handler.getCertificateHash(r)
-
 	if appError != nil {
 		httphelpers.RespondWithErrorAndLog(w, appError)
 		return
 	}
 
 	appError = handler.addToRevocationList(hash)
-
 	if appError != nil {
 		httphelpers.RespondWithErrorAndLog(w, appError)
 		return
@@ -49,7 +47,6 @@ func (handler revocationHandler) getCertificateHash(r *http.Request) (string, ap
 	}
 
 	hash, err := certificates.CalculateHash(cert)
-
 	if err != nil {
 		return "", apperrors.Internal("Failed to calculate certificate hash.")
 	}
@@ -59,7 +56,6 @@ func (handler revocationHandler) getCertificateHash(r *http.Request) (string, ap
 
 func (handler revocationHandler) addToRevocationList(hash string) apperrors.AppError {
 	err := handler.revocationList.Insert(hash)
-
 	if err != nil {
 		return apperrors.Internal("Unable to mark certificate as revoked: %s.", err)
 	}
