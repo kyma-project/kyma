@@ -10,7 +10,7 @@ eval $(minikube docker-env)
 
 buildImage connector-service-tests
 
-NODE_PORT=$(kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}')
+NODE_PORT=$(kubectl -n kyma-system get svc application-connector-ingress-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}')
 
 echo ""
 echo "------------------------"
