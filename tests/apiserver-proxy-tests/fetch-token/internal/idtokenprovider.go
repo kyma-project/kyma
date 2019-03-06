@@ -53,8 +53,8 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	authorizeRespBody := readRespBody(authorizeResp)
 	defer closeRespBody(authorizeResp)
+	authorizeRespBody := readRespBody(authorizeResp)
 
 	switch authorizeResp.StatusCode {
 	case http.StatusFound:
@@ -87,8 +87,8 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	if err != nil {
 		return nil, errors.Wrap(err, "while performing HTTP POST on login endpoint")
 	}
-	loginRespBody := readRespBody(loginResp)
 	defer closeRespBody(loginResp)
+	loginRespBody := readRespBody(loginResp)
 
 	if loginResp.StatusCode < 300 || loginResp.StatusCode > 399 {
 		return nil, fmt.Errorf("login - response error: '%s' - %s", loginResp.Status, loginRespBody)
@@ -102,8 +102,8 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	approvalRespBody := readRespBody(approvalResp)
 	defer closeRespBody(approvalResp)
+	approvalRespBody := readRespBody(approvalResp)
 
 	if approvalResp.StatusCode < 300 || approvalResp.StatusCode > 399 {
 		return nil, errors.New(fmt.Sprintf("Approval - response error: '%s' - %s", approvalResp.Status, approvalRespBody))
