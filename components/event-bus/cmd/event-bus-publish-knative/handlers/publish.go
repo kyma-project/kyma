@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	defaultChannelNamespace = "kyma-system"
+	DefaultChannelNamespace = "kyma-system"
 )
 
 func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer) http.HandlerFunc {
@@ -101,14 +101,14 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 
 	// publish cloud-event
 	channelName := knative.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType, &publishRequest.EventTypeVersion)
-	err = (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &cloudEventPayload)
+	err = (*knativePublisher).Publish(knativeLib, &channelName, &DefaultChannelNamespace, &cloudEventPayload)
 	if err != nil {
 		log.Printf("publish cloud-event failed: %v", err)
 		_ = publish.SendJSONError(w, err)
 		return nil, nil, nil, err
 	}
 
-	return cloudEvent, &channelName, &defaultChannelNamespace, nil
+	return cloudEvent, &channelName, &DefaultChannelNamespace, nil
 }
 
 func initTrace(r *http.Request, tracer *trace.Tracer) (span *opentracing.Span, context *api.TraceContext) {

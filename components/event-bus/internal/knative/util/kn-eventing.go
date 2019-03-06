@@ -82,7 +82,7 @@ func GetKnativeLib() (*KnativeLib, error) {
 // standard K8S function: "k8serrors.IsNotFound(err) "
 func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
 	if channel, err := k.evClient.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
-		log.Printf("ERROR: GetChannel(): getting channel: %v", err)
+		//log.Printf("ERROR: GetChannel(): getting channel: %v", err)
 		return nil, err
 	} else {
 		if !channel.Status.IsReady() {
