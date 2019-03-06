@@ -4,4 +4,4 @@
 - Contains the `Dockerfile` for the image used in Kyma apiserver-proxy tests.
 - Contains the `fetch-token` application used for fetching authentication token from dex
 - Contains the `test.sh` script that runs tests for a chart.
-- 
+ 
