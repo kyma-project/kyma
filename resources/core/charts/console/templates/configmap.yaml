@@ -20,4 +20,7 @@ data:
       faviconUrl: '{{ js .Values.cluster.faviconUrl }}',
       gateway_kyma_cx_api_version: 'v1alpha2'
     };
+
+  nginx-extended.conf: |
+    set $kymadomain {{ js .Values.global.domainName }};
     

@@ -22,7 +22,7 @@ const (
 	namespace               = "integration"
 	expectedOverridesFormat = `global:
     domainName: 
-    applicationProxyImage: 
+    applicationGatewayImage: 
     eventServiceImage: 
     eventServiceTestsImage: 
     subjectCN: %s`

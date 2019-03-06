@@ -17,8 +17,11 @@ function testPermissions() {
 	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --as "${USER}" -n "${TEST_NS}")
 	set -e
 	if [[ "${TEST}" == "${EXPECTED}" ]]; then
-		echo "----> PASSED"
-		return 0
+	    echo "----> PASSED"
+	    return 0
+	elif [[ ${TEST} == ${EXPECTED}* ]]; then
+	    echo "----> PASSED"
+	    return 0
 	fi
 	echo "----> |FAIL| Expected: ${EXPECTED} got: ${TEST}"
 	return 1

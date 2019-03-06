@@ -14,6 +14,11 @@ spec:
     - label: Lambdas
       navigationPath: lambdas
       viewUrl: '#/lambdas'
+      requiredBackendModules:
+        - kubeless
+        - apicontroller
+        - servicecatalog
+        - servicecatalogaddons
     - label: Create Lambda
       navigationPath: lambdas/create
       viewUrl: '#/create'

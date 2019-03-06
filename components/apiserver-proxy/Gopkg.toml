@@ -42,11 +42,19 @@ required = [
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.10.0"
+  version = "kubernetes-1.11.0"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.11.0"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "6.0.0"
+  version = "kubernetes-1.11.0"
+
+[[constraint]]
+  name = "github.com/gorilla/handlers"
+  version = "1.4.0"
 
 [prune]
   go-tests = true

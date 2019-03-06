@@ -4,6 +4,8 @@ dependencies:
 - name: application-operator
 - name: application-registry
 - name: connection-token-handler
-  condition: connector-service.enabled
+  condition: connection_token_handler.enabled
 - name: connector-service
-  condition: connector-service.enabled
+  condition: connector_service.enabled
+- name: connectivity-certs-controller
+  condition: connectivity_certs_controller.enabled

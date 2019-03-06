@@ -1,7 +1,10 @@
+connector_service:
+  enabled: &connectorServiceEnabled true
+
+connection_token_handler:
+  enabled: *connectorServiceEnabled
+
 global:
-  console:
-    application_management:
-      enabled: true
   isLocalEnv: false
   knative: false
   namespace: kyma-integration
@@ -23,13 +26,16 @@ global:
     version: fd308559
   connector_service:
     dir: develop/
-    version: d2827e7b
+    version: e72eec6e
   connector_service_tests:
     dir: develop/
-    version: fd308559
+    version: e72eec6e
   connection_token_handler:
     dir: develop/
     version: fa0de1b9
+  connectivity_certs_controller:
+    dir: develop/
+    version: 2dc766a0
   event_service:
     dir: develop/
     version: 6e0a7fe2
@@ -48,3 +54,6 @@ global:
   application_broker:
     dir: develop/
     version: f78529c4
+
+connectivity_certs_controller:
+  enabled: false

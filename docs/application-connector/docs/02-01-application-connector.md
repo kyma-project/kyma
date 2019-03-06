@@ -45,20 +45,20 @@ The AB implements the [Open Service Broker API](https://www.openservicebrokerapi
 
 ## Application Operator
 
-The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of Application Proxy and Event Service for every custom resource.         
+The operator listens for creating or deleting the Application custom resources and acts accordingly, either provisioning or de-provisioning an instance of Application Gateway and Event Service for every custom resource.         
 
 >**NOTE:** Every Application custom resource corresponds to a single App to which you can connect an external solution.
 
-## Application Proxy
+## Application Gateway
 
-The Application Proxy is an intermediary component between a lambda function or a service and an external API registered with the Application Registry. It can call services secured with:
+The Application Gateway is an intermediary component between a lambda function or a service and an external API registered with the Application Registry. It can call services secured with:
 - [Basic Authentication](https://tools.ietf.org/html/rfc7617) mechanism,
 - OAuth
 - Client certificates
 
 ## Access Service
 
-The Access Service exposes the Application Proxy and manages the access from the Lambda functions and services deployed in Kyma to the external APIs over the Application Proxy.
+The Access Service exposes the Application Gateway and manages the access from the Lambda functions and services deployed in Kyma to the external APIs over the Application Gateway.
 
 ## Minio bucket
 
