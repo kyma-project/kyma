@@ -59,6 +59,8 @@ func TestRevocationListRepository(t *testing.T) {
 		// when
 		err := repository.Insert(someHash)
 		require.NoError(t, err)
+
+		// then
 		configListManagerMock.AssertExpectations(t)
 	})
 
@@ -77,6 +79,8 @@ func TestRevocationListRepository(t *testing.T) {
 
 		_, err = repository.Contains(someHash)
 		require.Error(t, err)
+
+		// then
 		configListManagerMock.AssertExpectations(t)
 	})
 
@@ -101,6 +105,8 @@ func TestRevocationListRepository(t *testing.T) {
 		// when
 		err := repository.Insert(someHash)
 		require.Error(t, err)
+
+		// then
 		configListManagerMock.AssertExpectations(t)
 	})
 }

@@ -40,9 +40,8 @@ func (r *revocationListRepository) Insert(hash string) error {
 	}
 	revokedCerts[hash] = hash
 
-	updatedConfigMap := &v1.ConfigMap{
-		Data: revokedCerts,
-	}
+	updatedConfigMap := configMap
+	updatedConfigMap.Data = revokedCerts
 
 	err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		_, err  = r.configListManager.Update(updatedConfigMap)
