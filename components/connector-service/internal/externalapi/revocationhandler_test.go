@@ -136,7 +136,7 @@ func TestRevocationHandler(t *testing.T) {
 		revocationListRepository.AssertExpectations(t)
 	})
 
-	t.Run("should return http code 500 when error occured during hash calculation", func(t *testing.T) {
+	t.Run("should return http code 500 when error occurred during hash calculation", func(t *testing.T) {
 		//given
 		testCertIncorrect := "-----BEGIN%20CERTIFICATE-----%0" +
 			"MIIFfjCCA2agAwIBAgIBAjANBgkqhkiG9w0BAQsFADBqMQswCQYDVQQGEwJQTDEK%0" +

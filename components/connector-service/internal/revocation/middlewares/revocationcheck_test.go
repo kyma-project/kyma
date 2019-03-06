@@ -67,7 +67,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should return http code 500 when error occured on contains method call", func(t *testing.T) {
+	t.Run("should return http code 500 when error occurred on contains method call", func(t *testing.T) {
 		// given
 		testCert := "testCert"
 		hashedTestCert := "f21139ef2b82d02ee73a56c5c73c053fbafa3480a0b35459cba276b0667c57fc"

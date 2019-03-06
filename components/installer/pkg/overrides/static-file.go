@@ -62,7 +62,7 @@ func (clusterStaticFile *ClusterStaticFile) GetOverrides() (Map, error) {
 
 	if err != nil {
 		log.Printf(
-			"An error occured while reading file with additional overrides from path %s",
+			"An error occurred while reading file with additional overrides from path %s",
 			clusterStaticFile.getFilePath())
 
 		return nil, err
