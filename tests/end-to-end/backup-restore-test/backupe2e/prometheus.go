@@ -130,10 +130,6 @@ func (qresp *queryResponse) connectToPrometheusApi(domain, port, api, query, poi
 		return fmt.Errorf("Unable to get a reponse from the api. \n http response was '%s' (%d) and not OK (200). Body:\n%s\n", resp.Status, resp.StatusCode, string(body))
 	}
 
-	if err != nil {
-		fmt.Errorf("Unable to get a reponse from the api. \n http response was '%s' (%d) and not OK (200). Error:\n%s\n", resp.Status, resp.StatusCode, err)
-	}
-
 	return qresp.UnmarshalJSON(body)
 
 }
