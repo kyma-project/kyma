@@ -66,10 +66,10 @@ func main() {
 
 func newReleaseManager(options *options) (appRelease.ReleaseManager, error) {
 	overridesDefaults := appRelease.OverridesData{
-		DomainName:             options.domainName,
-		ApplicationProxyImage:  options.applicationProxyImage,
-		EventServiceImage:      options.eventServiceImage,
-		EventServiceTestsImage: options.eventServiceTestsImage,
+		DomainName:              options.domainName,
+		ApplicationGatewayImage: options.applicationGatewayImage,
+		EventServiceImage:       options.eventServiceImage,
+		EventServiceTestsImage:  options.eventServiceTestsImage,
 	}
 
 	helmClient := kymahelm.NewClient(options.tillerUrl, options.installationTimeout)

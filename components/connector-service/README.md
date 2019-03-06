@@ -20,10 +20,10 @@ To start the Connector Service, run this command:
 ```
 
 The Connector Service has the following parameters:
-- **appName** - This is the name of the application used by k8s deployments and services. The default value is `connector-service`.
+- **appName** - This is the name of the application used by Kubernetes deployments and services. The default value is `connector-service`.
 - **externalAPIPort** - This port exposes the Connector Service API to an external solution. The default port is `8081`.
 - **internalAPIPort** - This port exposes the Connector Service within Kubernetes cluster. The default port is `8080`.
-- **namespace** - Namespace where Connector Service is deployed. The default namespace is `kyma-integration`.
+- **namespace** - Namespace where Connector Service is deployed. The default Namespace is `kyma-integration`.
 - **tokenLength** - Length of registration tokens. The default value is `64`.
 - **appTokenExpirationMinutes** - Time after which tokens for applications expire and are no longer valid. The default value is `5` minutes.
 - **runtimeTokenExpirationMinutes** - Time after which tokens for runtimes expire and are no longer valid. The default value is `10` minutes.
