@@ -17,7 +17,6 @@ import (
 
 const (
 	installationSkippedStatus = "INSTALLATION_SKIPPED"
-	upgradeSkippedStatus      = "UPGRADE_SKIPPED"
 	applicationFinalizer      = "finalizer.applicationconnector.kyma-project.io"
 )
 
@@ -55,7 +54,7 @@ func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.
 		return reconcile.Result{}, err
 	}
 
-	err = r.updateApplication(instance)
+	err = r.updateApplicationCR(instance)
 	if err != nil {
 		return reconcile.Result{}, logAndError(err, "Error while updating Application %s", instance.Name)
 	}
@@ -121,13 +120,9 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 		}
 
 		return r.installApplication(application)
-	} else {
-		if shouldSkipInstallation(application) {
-			return upgradeSkippedStatus, "Upgrade will not be performed", nil
-		}
-
-		return r.upgradeApplication(application)
 	}
+
+	return r.checkApplicationStatus(application)
 }
 
 func shouldBeRemoved(application *v1alpha1.Application) bool {
@@ -150,19 +145,16 @@ func (r *applicationReconciler) installApplication(application *v1alpha1.Applica
 	return status.String(), description, nil
 }
 
-func (r *applicationReconciler) upgradeApplication(application *v1alpha1.Application) (string, string, error) {
-	log.Infof("Upgrading release for %s Application...", application.Name)
-
-	status, description, err := r.releaseManager.UpgradeChart(application)
+func (r *applicationReconciler) checkApplicationStatus(application *v1alpha1.Application) (string, string, error) {
+	status, description, err := r.releaseManager.CheckReleaseStatus(application.Name)
 	if err != nil {
-		return "", "", errors.Wrapf(err, "Error upgrading release for %s Application", application.Name)
+		return "", "", errors.Wrapf(err, "Error checking release status for %s Application", application.Name)
 	}
-	log.Infof("Release for %s Application upgraded successfully", application.Name)
 
-	return status.String(), description, nil
+	return status.String(), description, err
 }
 
-func (r *applicationReconciler) updateApplication(application *v1alpha1.Application) error {
+func (r *applicationReconciler) updateApplicationCR(application *v1alpha1.Application) error {
 	if application.Spec.Services == nil {
 		application.Spec.Services = []v1alpha1.Service{}
 	}

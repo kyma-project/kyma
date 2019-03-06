@@ -2,10 +2,10 @@ package application
 
 import (
 	"fmt"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )
 
@@ -13,22 +13,30 @@ const (
 	applicationChartDirectory = "application"
 )
 
+type ApplicationClient interface {
+	List(opts v1.ListOptions) (*v1alpha1.ApplicationList, error)
+	Update(*v1alpha1.Application) (*v1alpha1.Application, error)
+}
+
 type ReleaseManager interface {
 	InstallChart(application *v1alpha1.Application) (hapi_4.Status_Code, string, error)
-	UpgradeChart(application *v1alpha1.Application) (hapi_4.Status_Code, string, error)
 	DeleteReleaseIfExists(name string) error
 	CheckReleaseExistence(name string) (bool, error)
+	CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error)
+	UpgradeReleases() error
 }
 
 type releaseManager struct {
 	helmClient        kymahelm.HelmClient
+	appClient         ApplicationClient
 	overridesDefaults OverridesData
 	namespace         string
 }
 
-func NewReleaseManager(helmClient kymahelm.HelmClient, overridesDefaults OverridesData, namespace string) ReleaseManager {
+func NewReleaseManager(helmClient kymahelm.HelmClient, appClient ApplicationClient, overridesDefaults OverridesData, namespace string) ReleaseManager {
 	return &releaseManager{
 		helmClient:        helmClient,
+		appClient:         appClient,
 		overridesDefaults: overridesDefaults,
 		namespace:         namespace,
 	}
@@ -48,7 +56,24 @@ func (r *releaseManager) InstallChart(application *v1alpha1.Application) (hapi_4
 	return installResponse.Release.Info.Status.Code, installResponse.Release.Info.Description, nil
 }
 
-func (r *releaseManager) UpgradeChart(application *v1alpha1.Application) (hapi_4.Status_Code, string, error) {
+func (r *releaseManager) UpgradeReleases() error {
+	appList, err := r.appClient.List(v1.ListOptions{})
+	if err != nil {
+		return errors.Wrapf(err, "Error fetching application list")
+	}
+
+	for _, app := range appList.Items {
+		status, description, err := r.upgradeChart(&app)
+		if err != nil {
+			setCurrentStatus(&app, status.String(), description)
+			r.appClient.Update(&app)
+		}
+	}
+
+	return nil
+}
+
+func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4.Status_Code, string, error) {
 	overrides, err := r.prepareOverrides(application)
 	if err != nil {
 		return hapi_4.Status_FAILED, "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
@@ -108,4 +133,22 @@ func (r *releaseManager) checkExistence(name string) (bool, error) {
 	}
 
 	return false, nil
+}
+
+func (r *releaseManager) CheckReleaseStatus(name string) (hapi_4.Status_Code, string, error) {
+	status, err := r.helmClient.ReleaseStatus(name)
+	if err != nil {
+		return hapi_4.Status_FAILED, "", err
+	}
+
+	return status.Info.Status.Code, status.Info.Description, nil
+}
+
+func setCurrentStatus(application *v1alpha1.Application, status string, description string) {
+	installationStatus := v1alpha1.InstallationStatus{
+		Status:      status,
+		Description: description,
+	}
+
+	application.SetInstallationStatus(installationStatus)
 }
