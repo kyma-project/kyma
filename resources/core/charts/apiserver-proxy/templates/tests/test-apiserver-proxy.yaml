@@ -22,7 +22,7 @@ spec:
       - name: POD_NAME
         value: test-{{ .Release.Name }}-apiserver-proxy
       - name: DOMAIN
-        value: kf-test.kyma.pro
+        value: {{ .Values.global.domainName }}
       - name: USER_EMAIL
         valueFrom:
           secretKeyRef:
