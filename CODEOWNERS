@@ -271,17 +271,11 @@
 /tests/application-operator-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Tools
-# Stability Checker Component
-/tools/stability-checker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
-
 # Etcd backup Component
 /tools/etcd-backup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The alpine-net directory
 /tools/alpine-net/ @suleymanakbas91 @clebs @a-thaler @lilitgh
-
-# The watch-pods directory
-/tools/watch-pods/ @suleymanakbas91 @clebs @a-thaler @lilitgh
 
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
