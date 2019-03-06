@@ -3,14 +3,13 @@ package subscription
 import (
 	"context"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/handlers"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 const (
@@ -88,7 +87,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alpha1.Subscription) (bool, error) {
 
 	knativeSubsName := util.GetSubscriptionName(&subscription.Name, &subscription.Namespace)
-	knativeSubsNamespace := handlers.DefaultChannelNamespace
+	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
 	knativeChannelName := util.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
 	knativeChannelProvisioner := "natss"

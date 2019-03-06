@@ -5,6 +5,10 @@ import (
 	"strings"
 )
 
+const (
+	defaultChannelNamespace = "kyma-system"
+)
+
 var (
 	replacer = strings.NewReplacer("-", "--", ".", "-dot-")
 )
@@ -25,4 +29,9 @@ func GetChannelName(sourceID, eventType, eventTypeVersion *string) string {
 // GetSubscriptionName joins the kySubscriptionName and kySubscriptionNamespace
 func GetSubscriptionName(kySubscriptionName, kySubscriptionNamespace *string) string {
 	return fmt.Sprintf("%s-%s", *kySubscriptionName, escapeHyphensAndPeriods(kySubscriptionNamespace))
+}
+
+// GetDefaultChannelNamespace() returns the default namespace of Knative/Eventing channels and subscriptions
+func GetDefaultChannelNamespace() string {
+	return defaultChannelNamespace
 }
