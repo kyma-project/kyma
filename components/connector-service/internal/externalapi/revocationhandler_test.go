@@ -2,7 +2,7 @@ package externalapi
 
 import (
 	"errors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist/mocks"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 
 func TestRevocationHandler(t *testing.T) {
 
-	urlRevocation := "/v1/applications/certificates/revocation"
+	urlRevocation := "/v1/applications/certificates/revocations"
 	hashedTestCert := "297cc9e776803ffc0aef2e95e1d8544ad6ca92ac567e117990a6ed920520fdf9"
 
 	testCert := "-----BEGIN%20CERTIFICATE-----%0A" +

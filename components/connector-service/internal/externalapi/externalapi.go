@@ -1,8 +1,8 @@
 package externalapi
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
 	loggingMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/logging/middlewares"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
@@ -17,14 +17,14 @@ import (
 )
 
 type Config struct {
-	TokenCreator                       tokens.Creator
-	ContextExtractor                   clientcontext.ConnectorClientExtractor
-	ManagementInfoURL                  string
-	ConnectorServiceBaseURL            string
-	CertificateProtectedBaseURL        string
-	Subject                            certificates.CSRSubject
-	CertService                        certificates.Service
-	RevokedCertsRepo revocationlist.RevocationListRepository
+	TokenCreator                tokens.Creator
+	ContextExtractor            clientcontext.ConnectorClientExtractor
+	ManagementInfoURL           string
+	ConnectorServiceBaseURL     string
+	CertificateProtectedBaseURL string
+	Subject                     certificates.CSRSubject
+	CertService                 certificates.Service
+	RevokedCertsRepo            revocation.RevocationListRepository
 }
 
 type FunctionalMiddlewares struct {
@@ -32,7 +32,7 @@ type FunctionalMiddlewares struct {
 	RuntimeTokenResolverMiddleware  mux.MiddlewareFunc
 	RuntimeURLsMiddleware           mux.MiddlewareFunc
 	AppContextFromSubjectMiddleware mux.MiddlewareFunc
-	CheckForRevokedCertMiddleware mux.MiddlewareFunc
+	CheckForRevokedCertMiddleware   mux.MiddlewareFunc
 }
 
 type SignatureHandler interface {

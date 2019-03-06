@@ -1,8 +1,8 @@
-package revocationlist
+package revocation
 
 import (
 	"errors"
-	k8sclientMocks "github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist/mocks"
+	k8sclientMocks "github.com/kyma-project/kyma/components/connector-service/internal/revocation/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

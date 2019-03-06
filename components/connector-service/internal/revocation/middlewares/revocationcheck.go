@@ -3,17 +3,17 @@ package middlewares
 import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 	"net/http"
 )
 
 type revocationCheckMiddleware struct {
-	revocationList revocationlist.RevocationListRepository
+	revocationList revocation.RevocationListRepository
 }
 
-func NewRevocationCheckMiddleware(revocationList revocationlist.RevocationListRepository) *revocationCheckMiddleware {
+func NewRevocationCheckMiddleware(revocationList revocation.RevocationListRepository) *revocationCheckMiddleware {
 	return &revocationCheckMiddleware{
 		revocationList: revocationList,
 	}

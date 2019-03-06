@@ -1,7 +1,7 @@
 package internalapi
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
@@ -16,8 +16,8 @@ type Config struct {
 	TokenManager            tokens.Creator
 	CSRInfoURL              string
 	ContextExtractor        clientcontext.ConnectorClientExtractor
-	RevokedCertsRepo        revocationlist.RevocationListRepository
-	RevokedRuntimeCertsRepo revocationlist.RevocationListRepository
+	RevokedCertsRepo        revocation.RevocationListRepository
+	RevokedRuntimeCertsRepo revocation.RevocationListRepository
 }
 
 type FunctionalMiddlewares struct {

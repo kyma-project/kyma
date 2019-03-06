@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"errors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist/mocks"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"

@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist/mocks"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -16,7 +16,7 @@ import (
 
 func TestRevocationHandler(t *testing.T) {
 
-	urlRevocation := "/v1/applications/certificates/revocation"
+	urlRevocation := "/v1/applications/certificates/revocations"
 	hashedTestCert := "f21139ef2b82d02ee73a56c5c73c053fbafa3480a0b35459cba276b0667c57fc"
 
 	t.Run("should revoke certificate and return http code 201", func(t *testing.T) {

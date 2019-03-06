@@ -3,8 +3,8 @@ package internalapi
 import (
 	"encoding/json"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
@@ -15,10 +15,10 @@ type revocationBody struct {
 }
 
 type revocationHandler struct {
-	revocationList revocationlist.RevocationListRepository
+	revocationList revocation.RevocationListRepository
 }
 
-func NewRevocationHandler(revocationListRepository revocationlist.RevocationListRepository) *revocationHandler {
+func NewRevocationHandler(revocationListRepository revocation.RevocationListRepository) *revocationHandler {
 	return &revocationHandler{
 		revocationList: revocationListRepository,
 	}

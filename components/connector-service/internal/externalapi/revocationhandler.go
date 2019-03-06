@@ -3,8 +3,8 @@ package externalapi
 import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
 	"net/http"
 )
 
@@ -13,10 +13,10 @@ const (
 )
 
 type revocationHandler struct {
-	revocationList revocationlist.RevocationListRepository
+	revocationList revocation.RevocationListRepository
 }
 
-func NewRevocationHandler(revocationList revocationlist.RevocationListRepository) *revocationHandler {
+func NewRevocationHandler(revocationList revocation.RevocationListRepository) *revocationHandler {
 	return &revocationHandler{
 		revocationList: revocationList,
 	}

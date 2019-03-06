@@ -5,14 +5,14 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
-	certificateMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/certificates/middlewares"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/revocationlist"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	clientcontextmiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/clientcontext/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/errorhandler"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/internalapi"
+	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
+	certificateMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/revocation/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/secrets"
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 	log "github.com/sirupsen/logrus"
@@ -56,7 +56,7 @@ func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.
 }
 
 func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider,
-	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, secretsRepository secrets.Repository, revocationListRepository revocationlist.RevocationListRepository) http.Handler {
+	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository) http.Handler {
 
 	headersRequired := clientcontext.HeadersRequiredType(opts.central)
 
@@ -121,7 +121,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	return handlerBuilder.GetHandler()
 }
 
-func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc, revocationListRepository revocationlist.RevocationListRepository) http.Handler {
+func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc, revocationListRepository revocation.RevocationListRepository) http.Handler {
 
 	ctxRequired := clientcontext.CtxRequiredType(opts.central)
 
@@ -164,10 +164,10 @@ func newSecretsRepository(coreClientSet *kubernetes.Clientset, namespace string)
 	return secrets.NewRepository(sei)
 }
 
-func newRevokedCertsRepository(coreClientSet *kubernetes.Clientset, namespace, revocationSecretName string) revocationlist.RevocationListRepository {
+func newRevokedCertsRepository(coreClientSet *kubernetes.Clientset, namespace, revocationSecretName string) revocation.RevocationListRepository {
 	cmi := coreClientSet.CoreV1().ConfigMaps(namespace)
 
-	return revocationlist.NewRepository(cmi, revocationSecretName)
+	return revocation.NewRepository(cmi, revocationSecretName)
 }
 
 func newCoreClientSet() (*kubernetes.Clientset, apperrors.AppError) {
