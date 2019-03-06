@@ -206,7 +206,7 @@
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
 
 # Microfrontend Component
-/components/microfrontend/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+/components/microfrontend-client/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
 
 # Connector Service Component
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
