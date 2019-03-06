@@ -145,10 +145,6 @@ func whatIsThisThing(something interface{}) (float64, string, error) {
 	}
 }
 
-type Unmarshaler interface {
-	UnmarshalJSON([]byte) error
-}
-
 func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
 
 	err := json.Unmarshal(data, &qresp)
