@@ -130,10 +130,10 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 
 	appTokenTTLMinutes := time.Duration(opts.appTokenExpirationMinutes) * time.Minute
 	appHandlerConfig := internalapi.Config{
-		TokenManager:                tokenManagerProvider.WithTTL(appTokenTTLMinutes),
-		CSRInfoURL:                  fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor:            clientcontext.CreateApplicationClientContextService,
-		RevokedApplicationCertsRepo: revocationListRepository,
+		TokenManager:     tokenManagerProvider.WithTTL(appTokenTTLMinutes),
+		CSRInfoURL:       fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
+		ContextExtractor: clientcontext.CreateApplicationClientContextService,
+		RevokedCertsRepo: revocationListRepository,
 	}
 
 	handlerBuilder := internalapi.NewHandlerBuilder(internalapi.FunctionalMiddlewares{

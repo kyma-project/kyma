@@ -13,11 +13,11 @@ import (
 )
 
 type Config struct {
-	TokenManager     tokens.Creator
-	CSRInfoURL       string
-	ContextExtractor clientcontext.ConnectorClientExtractor
-	RevokedApplicationCertsRepo revocationlist.RevocationListRepository
-	RevokedRuntimeCertsRepo     revocationlist.RevocationListRepository
+	TokenManager            tokens.Creator
+	CSRInfoURL              string
+	ContextExtractor        clientcontext.ConnectorClientExtractor
+	RevokedCertsRepo        revocationlist.RevocationListRepository
+	RevokedRuntimeCertsRepo revocationlist.RevocationListRepository
 }
 
 type FunctionalMiddlewares struct {
@@ -30,11 +30,11 @@ type TokenHandler interface {
 }
 
 type handlerBuilder struct {
-	router *mux.Router
+	router                *mux.Router
 	functionalMiddlewares FunctionalMiddlewares
 }
 
-func NewHandlerBuilder(functionalMiddlewares FunctionalMiddlewares ,globalMiddlewares []mux.MiddlewareFunc) *handlerBuilder {
+func NewHandlerBuilder(functionalMiddlewares FunctionalMiddlewares, globalMiddlewares []mux.MiddlewareFunc) *handlerBuilder {
 	router := mux.NewRouter()
 	httphelpers.WithMiddlewares(router, globalMiddlewares...)
 
@@ -42,14 +42,14 @@ func NewHandlerBuilder(functionalMiddlewares FunctionalMiddlewares ,globalMiddle
 	router.MethodNotAllowedHandler = errorhandler.NewErrorHandler(405, "Method not allowed.")
 
 	return &handlerBuilder{
-		router: router,
+		router:                router,
 		functionalMiddlewares: functionalMiddlewares,
 	}
 }
 
 func (hb *handlerBuilder) WithApps(appCfg Config) {
 	appTokenHandler := NewTokenHandler(appCfg.TokenManager, appCfg.CSRInfoURL, appCfg.ContextExtractor)
- 	appRevocationHandler := NewRevocationHandler(appCfg.RevokedApplicationCertsRepo)
+	appRevocationHandler := NewRevocationHandler(appCfg.RevokedCertsRepo)
 
 	applicationTokenRouter := hb.router.PathPrefix("/v1/applications").Subrouter()
 	httphelpers.WithMiddlewares(applicationTokenRouter, hb.functionalMiddlewares.ApplicationCtxMiddleware)

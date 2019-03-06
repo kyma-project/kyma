@@ -1,6 +1,5 @@
 package internalapi
 
-
 import (
 	"bytes"
 	"encoding/json"
@@ -23,7 +22,7 @@ func TestRevocationHandler(t *testing.T) {
 	t.Run("should revoke certificate and return http code 201", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert",  hashedTestCert).Return(nil)
+		revocationListRepository.On("Insert", hashedTestCert).Return(nil)
 
 		handler := NewRevocationHandler(revocationListRepository)
 
@@ -49,7 +48,7 @@ func TestRevocationHandler(t *testing.T) {
 	t.Run("should return http code 201 when certificate already revoked", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert",  hashedTestCert).Return(nil)
+		revocationListRepository.On("Insert", hashedTestCert).Return(nil)
 
 		handler := NewRevocationHandler(revocationListRepository)
 
@@ -110,13 +109,13 @@ func TestRevocationHandler(t *testing.T) {
 
 		testPayload := struct {
 			Key string
-		} {
+		}{
 			Key: "key",
 		}
 
 		body, err := marshall(testPayload)
 		require.NoError(t, err)
-		
+
 		req := httptest.NewRequest(http.MethodPost, urlRevocation, body)
 
 		//when
@@ -130,7 +129,7 @@ func TestRevocationHandler(t *testing.T) {
 	t.Run("should return http code 500 when certificate revocation not persisted", func(t *testing.T) {
 		//given
 		revocationListRepository := &mocks.RevocationListRepository{}
-		revocationListRepository.On("Insert",  hashedTestCert).Return(errors.New("Error"))
+		revocationListRepository.On("Insert", hashedTestCert).Return(errors.New("Error"))
 
 		handler := NewRevocationHandler(revocationListRepository)
 
@@ -152,7 +151,7 @@ func TestRevocationHandler(t *testing.T) {
 	})
 }
 
-func marshall(body interface{}) (io.Reader, error){
+func marshall(body interface{}) (io.Reader, error) {
 	var b bytes.Buffer
 
 	err := json.NewEncoder(&b).Encode(body)
@@ -162,4 +161,3 @@ func marshall(body interface{}) (io.Reader, error){
 
 	return bytes.NewReader(b.Bytes()), nil
 }
-
