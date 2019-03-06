@@ -2,6 +2,8 @@ package apitests
 
 import (
 	"crypto/rsa"
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 	"net/url"
 	"testing"
@@ -573,15 +575,14 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
 
 		// when
+		errorResponse = client.RevokeCertificate(t, mgmInfoResponse.URLs.RevocationCertURL)
+
+		require.Nil(t, errorResponse)
+
+		// then
 		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
 		csrBase64 := testkit.EncodeBase64(csr)
 
-		response := client.RevokeCertificate(t, mgmInfoResponse.URLs.RevocationCertURL, csrBase64)
-
-		require.NotNil(t, response)
-		require.Equal(t, http.StatusCreated, response.StatusCode)
-
-		// then
 		_, errorResponse = client.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
 
 		require.NotNil(t, errorResponse)
@@ -604,15 +605,18 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
 
 		// when
+		input := []byte(certificates.ClientCRT.Raw)
+		sha := sha256.Sum256(input)
+		hash := hex.EncodeToString(sha[:])
+
+		errorResponse = client.RevokeCertificate(t, internalRevocationUrl, hash)
+
+		require.Nil(t, errorResponse)
+
+		// then
 		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
 		csrBase64 := testkit.EncodeBase64(csr)
 
-		response := client.RevokeCertificate(t, internalRevocationUrl, csrBase64)
-
-		require.NotNil(t, response)
-		require.Equal(t, http.StatusCreated, response.StatusCode)
-
-		// then
 		_, errorResponse = securedClient.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
 
 		require.NotNil(t, errorResponse)

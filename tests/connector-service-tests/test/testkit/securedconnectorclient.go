@@ -14,7 +14,7 @@ import (
 type SecuredConnectorClient interface {
 	GetMgmInfo(t *testing.T, url string, headers map[string]string) (*ManagementInfoResponse, *Error)
 	RenewCertificate(t *testing.T, url string, csr string) (*CrtResponse, *Error)
-	RevokeCertificate(t *testing.T, url string, csr string) *http.Response
+	RevokeCertificate(t *testing.T, url string) *Error
 }
 
 type securedConnectorClient struct {
@@ -73,15 +73,13 @@ func (cc securedConnectorClient) RenewCertificate(t *testing.T, url string, csr 
 	return &certificateResponse, errorResp
 }
 
-func (cc securedConnectorClient) RevokeCertificate(t *testing.T, url string, csr string) *http.Response {
+func (cc securedConnectorClient) RevokeCertificate(t *testing.T, url string) *Error {
 	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	require.NoError(t, err)
-	request.Header.Add("Certificate-Header", csr)
 
-	response, err := cc.httpClient.Do(request)
-	require.NoError(t, err)
+	errorResponse := cc.secureConnectorRequest(t, request, nil, http.StatusCreated)
 
-	return response
+	return errorResponse
 }
 
 func (cc securedConnectorClient) secureConnectorRequest(t *testing.T, request *http.Request, data interface{}, expectedStatus int) *Error {
@@ -91,8 +89,11 @@ func (cc securedConnectorClient) secureConnectorRequest(t *testing.T, request *h
 		return parseErrorResponse(t, response)
 	}
 
-	err = json.NewDecoder(response.Body).Decode(&data)
-	require.NoError(t, err)
+	if data != nil {
+		err = json.NewDecoder(response.Body).Decode(&data)
+		require.NoError(t, err)
+	}
 
 	return nil
 }
+

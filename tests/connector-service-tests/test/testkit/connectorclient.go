@@ -24,7 +24,7 @@ const (
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
 	GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error)
-	RevokeCertificate(t *testing.T, revocationUrl, csr string) *http.Response
+	RevokeCertificate(t *testing.T, revocationUrl, csr string) *Error
 	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
 }
 
@@ -67,23 +67,23 @@ func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
 	return tokenResponse
 }
 
-func (cc connectorClient) RevokeCertificate(t *testing.T, revocationUrl, csr string) *http.Response {
-	revocationBody := RevocationBody{
-		Hash: csr,
-	}
-	body := new(bytes.Buffer)
-	err := json.NewEncoder(body).Encode(revocationBody)
+func (cc connectorClient) RevokeCertificate(t *testing.T, revocationUrl, hash string) *Error {
+	body, err := json.Marshal(RevocationBody{Hash: hash})
 	require.NoError(t, err)
 
-	request, err := http.NewRequest(http.MethodPost, revocationUrl, body)
+	request, err := http.NewRequest(http.MethodPost, revocationUrl, bytes.NewBuffer(body))
 	require.NoError(t, err)
 	request.Header.Add("Content-Type", "application/json")
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
+	if response.StatusCode != http.StatusCreated {
+		return parseErrorResponse(t, response)
+	}
+
 	require.Equal(t, http.StatusCreated, response.StatusCode)
 
-	return response
+	return nil
 }
 
 func (cc connectorClient) GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error) {
