@@ -16,7 +16,7 @@ spec:
 {{- end }}
   containers:
     - name: test-{{ .Release.Name }}-apiserver-proxy
-      image: eu.gcr.io/kyma-project/pr/apiserver-proxy-test:PR-2916
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_apiserver-proxy.dir }}apiserver-proxy-test:{{ .Values.global.test_apiserver-proxy.version }}
       imagePullPolicy: Always
       env:
       - name: POD_NAME
