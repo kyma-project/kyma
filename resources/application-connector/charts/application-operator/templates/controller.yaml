@@ -17,6 +17,9 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
+        app: {{ .Chart.Name }}
+        kyma-grafana: enabled
+        kyma-alerts: enabled
         control-plane: {{ .Chart.Name }}
         controller-tools.k8s.io: "1.0"
     spec:
