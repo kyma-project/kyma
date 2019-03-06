@@ -5,5 +5,5 @@ data:
   zipkin-collector-host: zipkin.kyma-system
 kind: ConfigMap
 metadata:
-  name: nginx-configuration
+  name: application-connector-nginx-configuration
   namespace: {{ .Values.global.nginx.namespace }}
