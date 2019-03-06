@@ -171,7 +171,7 @@ func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
 				case "result":
 
 					reslt := val2.([]interface{})
-					result := make([]dataResult, 2)
+					result := make([]dataResult, 1)
 					for idx, r := range reslt {
 
 						datResult := &dataResult{}
