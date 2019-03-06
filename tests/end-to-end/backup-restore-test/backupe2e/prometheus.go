@@ -197,20 +197,9 @@ func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
 			return fmt.Errorf("%s is not part of the expected query response: ", key1)
 		}
 	}
-	fmt.Println("qresp: ", qresp)
 
 	return nil
 }
-
-//func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
-//
-//	err := json.Unmarshal(data, &qresp)
-//	if err != nil {
-//		return fmt.Errorf("http response can't be Unmarshal: %v", err)
-//	}
-//
-//	return nil
-//}
 
 func (pt *prometheusTest) CreateResources(namespace string) {
 	qresp := &queryResponse{}
