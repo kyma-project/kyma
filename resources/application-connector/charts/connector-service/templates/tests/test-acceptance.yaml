@@ -1,4 +1,4 @@
-{{ if not .Values.global.isLocalEnv }}
+{{ if and ( .Values.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
 apiVersion: v1
 kind: Pod
 metadata:
