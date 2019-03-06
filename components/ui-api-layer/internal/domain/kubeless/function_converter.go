@@ -17,7 +17,7 @@ func (c *functionConverter) ToGQL(in *v1beta1.Function) *gqlschema.Function {
 		Trigger:           in.Spec.Type,
 		CreationTimestamp: in.CreationTimestamp.Time,
 		Labels:            in.Labels,
-		Environment:       in.Namespace,
+		Namespace:         in.Namespace,
 	}
 }
 

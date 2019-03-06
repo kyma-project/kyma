@@ -2,9 +2,11 @@ package client
 
 import (
 	scClientset "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	gatewayClientset "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	uiClientset "github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
@@ -63,4 +65,32 @@ func NewUIClientWithConfig() (*uiClientset.Clientset, *rest.Config, error) {
 	}
 
 	return uiCli, k8sConfig, nil
+}
+
+func NewGatewayClientWithConfig() (*gatewayClientset.Clientset, *rest.Config, error) {
+	k8sConfig, err := NewRestClientConfigFromEnv()
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "while creating new client with config")
+	}
+
+	uiCli, err := gatewayClientset.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "while creating new client with config")
+	}
+
+	return uiCli, k8sConfig, nil
+}
+
+func NewAppsClientWithConfig() (*appsv1.AppsV1Client, *rest.Config, error) {
+	k8sConfig, err := NewRestClientConfigFromEnv()
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "while creating new client with config")
+	}
+
+	appsCli, err := appsv1.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "while creating new client with config")
+	}
+
+	return appsCli, k8sConfig, nil
 }

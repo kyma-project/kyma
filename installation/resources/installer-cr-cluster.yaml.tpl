@@ -2,12 +2,14 @@ apiVersion: "installer.kyma-project.io/v1alpha1"
 kind: Installation
 metadata:
   name: kyma-installation
+  labels:
+    kyma-project.io/installation: ""
   finalizers:
     - finalizer.installer.kyma-project.io
 spec:
   version: "__VERSION__"
   url: "__URL__"
-  components: 
+  components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "istio"
@@ -22,10 +24,22 @@ spec:
       namespace: "kyma-system"
     - name: "service-catalog"
       namespace: "kyma-system"
+    - name: "service-catalog-addons"
+      namespace: "kyma-system"
+    - name: "helm-broker"
+      namespace: "kyma-system"
+    - name: "nats-streaming"
+      namespace: "natss"
+    - name: "assetstore"
+      namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
-    - name: "application-connector"
+    - name: "event-bus"
       namespace: "kyma-system"
+    - name: "application-connector-ingress"
+      namespace: "kyma-system"
+    - name: "application-connector"
+      namespace: "kyma-integration"
     - name: "ark"
       namespace: "heptio-ark"
     - name: "logging"

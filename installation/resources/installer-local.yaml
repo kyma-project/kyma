@@ -3,12 +3,17 @@ apiVersion: v1
 kind: Namespace
 metadata:
   name: kyma-installer
+  labels:
+    istio-injection: disabled
+    kyma-project.io/installation: ""
 ---
 apiVersion: v1
 kind: LimitRange
 metadata:
   name: kyma-default
   namespace: kyma-installer
+  labels:
+    kyma-project.io/installation: ""
 spec:
   limits:
   - max:
@@ -24,23 +29,12 @@ spec:
       memory: 32Mi
     type: Container
 ---
-apiVersion: v1
-kind: ResourceQuota
-metadata:
-  name: kyma-default
-  namespace: kyma-installer
-spec:
-  hard:
-    # The sum of all pod memory requests must not exceed this value.
-    requests.memory: 384Mi
-
-    # The sum of all pod memory limit must not exceed this value.
-    limits.memory: 512Mi
----
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
     name: installations.installer.kyma-project.io
+    labels:
+      kyma-project.io/installation: ""
 spec:
   group: installer.kyma-project.io
   version: v1alpha1
@@ -55,6 +49,8 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
     name: releases.release.kyma-project.io
+    labels:
+      kyma-project.io/installation: ""
 spec:
   group: release.kyma-project.io
   version: v1alpha1
@@ -70,12 +66,16 @@ kind: ServiceAccount
 metadata:
   name: kyma-installer
   namespace: kyma-installer
+  labels:
+    kyma-project.io/installation: ""
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   name: kyma-installer
   namespace: kyma-installer
+  labels:
+    kyma-project.io/installation: ""
 spec:
   template:
     metadata:
@@ -92,6 +92,8 @@ kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: kyma-installer-reader
+  labels:
+    kyma-project.io/installation: ""
 rules:
 - apiGroups: ["*"]
   resources: ["*"]
@@ -101,6 +103,8 @@ kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
   name: kyma-installer
+  labels:
+    kyma-project.io/installation: ""
 subjects:
 - kind: ServiceAccount
   name: kyma-installer

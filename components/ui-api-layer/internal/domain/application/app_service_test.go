@@ -8,6 +8,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/glog"
+
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingFakeCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/fake"
 	mappingInformer "github.com/kyma-project/kyma/components/application-broker/pkg/client/informers/externalversions"
@@ -159,14 +161,14 @@ func TestServiceListAllApplicationsSuccess(t *testing.T) {
 	assert.Contains(t, nsList, fixAppA)
 }
 
-func TestServiceListApplicationsInEnvironmentSuccess(t *testing.T) {
+func TestServiceListApplicationsInNamespaceSuccess(t *testing.T) {
 	// given
-	const fixEnvironment = "prod"
+	const fixNamespace = "prod"
 
 	fixAppA := fixApplicationCR("app-name-a")
 	fixAppB := fixApplicationCR("app-name-b")
-	fixMappingAppA := fixApplicationMappingCR("app-name-a", fixEnvironment)
-	fixMappingAppB := fixApplicationMappingCR("app-name-b", fixEnvironment)
+	fixMappingAppA := fixApplicationMappingCR("app-name-a", fixNamespace)
+	fixMappingAppB := fixApplicationMappingCR("app-name-b", fixNamespace)
 
 	// Mapping
 	mCli := mappingFakeCli.NewSimpleClientset(&fixMappingAppA, &fixMappingAppB)
@@ -188,7 +190,7 @@ func TestServiceListApplicationsInEnvironmentSuccess(t *testing.T) {
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, aInformer)
 
 	// when
-	nsList, err := svc.ListInEnvironment(fixEnvironment)
+	nsList, err := svc.ListInNamespace(fixNamespace)
 
 	// then
 	require.NoError(t, err)
@@ -500,7 +502,10 @@ func newDummyInformer() cache.SharedIndexInformer {
 func newTestServer(data string, statusCode int) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(statusCode)
-		fmt.Fprintln(w, data)
+		_, err := fmt.Fprintln(w, data)
+		if err != nil {
+			glog.Errorf("Unable to write response body. Cause: %v", err)
+		}
 	}))
 }
 

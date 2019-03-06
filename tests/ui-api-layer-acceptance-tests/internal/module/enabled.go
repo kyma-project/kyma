@@ -2,7 +2,6 @@ package module
 
 import (
 	"log"
-	"os"
 
 	"github.com/kyma-project/kyma/tests/ui-api-layer-acceptance-tests/internal/graphql"
 )
@@ -16,12 +15,7 @@ type backendModuleQueryResponse struct {
 }
 
 func IsEnabled(moduleName string, c *graphql.Client) (bool, error) {
-	env := os.Getenv("MODULE_PLUGGABILITY")
-	if env == "" || env == "false" {
-		return true, nil
-	}
-
-	log.Println("Module pluggability enabled. Querying BackendModule custom resources...")
+	log.Println("Querying BackendModule custom resources...")
 	response, err := queryBackendModules(c)
 	if err != nil {
 		return false, err

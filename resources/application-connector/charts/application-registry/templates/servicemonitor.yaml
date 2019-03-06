@@ -4,12 +4,13 @@ metadata:
   name: application-registry-metrics
   namespace: kyma-system
   labels:
-    prometheus: core
-    example: monitoring-custom-metrics
+    prometheus: monitoring
+    app: {{ .Chart.Name }}
+    release: {{ .Chart.Name }}
 spec:
   selector:
     matchLabels:
-      k8s-app: metrics
+      k8s-app: {{ .Chart.Name}}-metrics
   targetLabels:
     - k8s-app
   endpoints:

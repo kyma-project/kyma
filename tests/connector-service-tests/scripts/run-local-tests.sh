@@ -2,24 +2,15 @@
 
 CURRENT_DIR="$( cd "$(dirname "$0")" ; pwd -P )"
 
+source $CURRENT_DIR/test-runner.sh
+
+deleteTestPod
+
 eval $(minikube docker-env)
 
-echo ""
-echo "------------------------"
-echo "Removing test pod"
-echo "------------------------"
+buildImage connector-service-tests
 
-
-kubectl -n kyma-integration delete po connector-service-tests --now
-
-echo ""
-echo "------------------------"
-echo "Building tests image"
-echo "------------------------"
-
-docker build $CURRENT_DIR/.. -t connector-service-tests
-
-NODE_PORT=$(kubectl -n kyma-system get svc application-connector-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}')
+NODE_PORT=$(kubectl -n kyma-system get svc application-connector-ingress-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}')
 
 echo ""
 echo "------------------------"
@@ -33,6 +24,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: connector-service-tests
+  annotations:
+    sidecar.istio.io/inject: "false"
 spec:
   hostAliases:
   - ip: "$MINIKUBE_IP"
@@ -52,15 +45,9 @@ spec:
       value: https://gateway.kyma.local:$NODE_PORT
     - name: SKIP_SSL_VERIFY
       value: "true"
+    - name: CENTRAL
+      value: "false"
   restartPolicy: Never
 EOF
 
-echo ""
-echo "------------------------"
-echo "Waiting 5 seconds for pod to start..."
-echo "------------------------"
-echo ""
-
-sleep 5
-
-kubectl -n kyma-integration logs connector-service-tests -f
+waitForTestLogs 5

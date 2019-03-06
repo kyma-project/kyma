@@ -143,6 +143,25 @@ type Bundle struct {
 	PlanUpdatable       *bool
 }
 
+// IsProvisioningAllowed determines bundle can be provision on indicated namespace
+// if bundle has provisionOnlyOnce flag on true then check if bundle already exist in this namespace
+func (b Bundle) IsProvisioningAllowed(namespace Namespace, collection []*Instance) bool {
+	if !b.Metadata.ProvisionOnlyOnce {
+		return true
+	}
+
+	for _, instance := range collection {
+		if namespace != instance.Namespace {
+			continue
+		}
+		if string(b.ID) == string(instance.ServiceID) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // Labels are key-value pairs which add metadata information for bundle.
 type Labels map[string]string
 
@@ -153,6 +172,7 @@ type BundleMetadata struct {
 	LongDescription     string
 	DocumentationURL    string
 	SupportURL          string
+	ProvisionOnlyOnce   bool
 	// ImageURL is graphical representation of the bundle.
 	// Currently SVG is required.
 	ImageURL string
@@ -167,6 +187,7 @@ func (b BundleMetadata) ToMap() map[string]interface{} {
 		LongDescription     string `structs:"longDescription"`
 		DocumentationURL    string `structs:"documentationUrl"`
 		SupportURL          string `structs:"supportUrl"`
+		ProvisionOnlyOnce   bool   `structs:"provisionOnlyOnce"`
 		ImageURL            string `structs:"imageUrl"`
 		Labels              Labels `structs:"labels"`
 	}

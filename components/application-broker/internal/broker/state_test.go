@@ -121,36 +121,20 @@ func TestInstanceStateServiceIsProvisioned(t *testing.T) {
 
 func TestInstanceStateServiceIsDeprovisioned(t *testing.T) {
 	for sym, tc := range map[string]struct {
-		genOps func(ts *instanceStateServiceTestSuite) []*internal.InstanceOperation
+		genOps func(ts *instanceStateServiceTestSuite) *internal.InstanceOperation
 		exp    bool
 	}{
-		"true/singleRemoveSucceeded": {
-			genOps: func(ts *instanceStateServiceTestSuite) (out []*internal.InstanceOperation) {
-				return append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateSucceeded))
+		"true/RemoveSucceeded": {
+			genOps: func(ts *instanceStateServiceTestSuite) (out *internal.InstanceOperation) {
+				return ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateSucceeded)
 			},
 			exp: true,
 		},
-		"true/CreateSucceededThanRemoveInProgress": {
-			genOps: func(ts *instanceStateServiceTestSuite) (out []*internal.InstanceOperation) {
-				out = append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded))
-				out = append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateInProgress))
-				return out
+		"false/RemoveInProgress": {
+			genOps: func(ts *instanceStateServiceTestSuite) (out *internal.InstanceOperation) {
+				return ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateInProgress)
 			},
 			exp: false,
-		},
-		"false/singleRemoveInProgress": {
-			genOps: func(ts *instanceStateServiceTestSuite) (out []*internal.InstanceOperation) {
-				return append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateInProgress))
-			},
-			exp: false,
-		},
-		"false/CreateSucceededThanRemoveSucceeded": {
-			genOps: func(ts *instanceStateServiceTestSuite) (out []*internal.InstanceOperation) {
-				out = append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded))
-				out = append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateSucceeded))
-				return out
-			},
-			exp: true,
 		},
 	} {
 		t.Run(fmt.Sprintf("Success/%s", sym), func(t *testing.T) {
@@ -160,7 +144,7 @@ func TestInstanceStateServiceIsDeprovisioned(t *testing.T) {
 
 			ocgMock := &automock.OperationStorage{}
 			defer ocgMock.AssertExpectations(t)
-			ocgMock.On("GetAll", ts.Exp.InstanceID).Return(tc.genOps(ts), nil).Once()
+			ocgMock.On("GetLast", ts.Exp.InstanceID).Return(tc.genOps(ts), nil).Once()
 
 			svc := broker.NewInstanceStateService(ocgMock)
 
@@ -180,7 +164,7 @@ func TestInstanceStateServiceIsDeprovisioned(t *testing.T) {
 
 		ocgMock := &automock.OperationStorage{}
 		defer ocgMock.AssertExpectations(t)
-		ocgMock.On("GetAll", ts.Exp.InstanceID).Return(nil, notFoundError{}).Once()
+		ocgMock.On("GetLast", ts.Exp.InstanceID).Return(nil, notFoundError{}).Once()
 
 		svc := broker.NewInstanceStateService(ocgMock)
 
@@ -200,7 +184,7 @@ func TestInstanceStateServiceIsDeprovisioned(t *testing.T) {
 		ocgMock := &automock.OperationStorage{}
 		defer ocgMock.AssertExpectations(t)
 		fixErr := errors.New("fix-storage-error")
-		ocgMock.On("GetAll", ts.Exp.InstanceID).Return(nil, fixErr).Once()
+		ocgMock.On("GetLast", ts.Exp.InstanceID).Return(nil, fixErr).Once()
 
 		svc := broker.NewInstanceStateService(ocgMock)
 
@@ -215,34 +199,20 @@ func TestInstanceStateServiceIsDeprovisioned(t *testing.T) {
 
 func TestInstanceStateServiceIsDeprovisioningInProgress(t *testing.T) {
 	for sym, tc := range map[string]struct {
-		genOps func(ts *instanceStateServiceTestSuite) []*internal.InstanceOperation
+		genOps func(ts *instanceStateServiceTestSuite) *internal.InstanceOperation
 		exp    bool
 	}{
-		"false/singleRemoveSucceeded": {
-			genOps: func(ts *instanceStateServiceTestSuite) (out []*internal.InstanceOperation) {
-				return append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateSucceeded))
+		"false/RemoveSucceeded": {
+			genOps: func(ts *instanceStateServiceTestSuite) (out *internal.InstanceOperation) {
+				return ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateSucceeded)
 			},
 			exp: false,
 		},
-		"true/CreateSucceededThanRemoveInProgress": {
-			genOps: func(ts *instanceStateServiceTestSuite) (out []*internal.InstanceOperation) {
-				out = append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded))
-				out = append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateInProgress))
-				return out
+		"true/RemoveInProgress": {
+			genOps: func(ts *instanceStateServiceTestSuite) (out *internal.InstanceOperation) {
+				return ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateInProgress)
 			},
 			exp: true,
-		},
-		"false/NoOp": {
-			genOps: func(ts *instanceStateServiceTestSuite) (out []*internal.InstanceOperation) { return out },
-			exp:    false,
-		},
-		"false/CreateSucceededThanRemoveSucceeded": {
-			genOps: func(ts *instanceStateServiceTestSuite) (out []*internal.InstanceOperation) {
-				out = append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded))
-				out = append(out, ts.Exp.NewInstanceOperation(internal.OperationTypeRemove, internal.OperationStateSucceeded))
-				return out
-			},
-			exp: false,
 		},
 	} {
 		t.Run(fmt.Sprintf("Success/%s", sym), func(t *testing.T) {
@@ -252,7 +222,8 @@ func TestInstanceStateServiceIsDeprovisioningInProgress(t *testing.T) {
 
 			ocgMock := &automock.OperationStorage{}
 			defer ocgMock.AssertExpectations(t)
-			ocgMock.On("GetAll", ts.Exp.InstanceID).Return(tc.genOps(ts), nil).Once()
+
+			ocgMock.On("GetLast", ts.Exp.InstanceID).Return(tc.genOps(ts), nil).Once()
 
 			svc := broker.NewInstanceStateService(ocgMock)
 
@@ -275,7 +246,7 @@ func TestInstanceStateServiceIsDeprovisioningInProgress(t *testing.T) {
 
 		ocgMock := &automock.OperationStorage{}
 		defer ocgMock.AssertExpectations(t)
-		ocgMock.On("GetAll", ts.Exp.InstanceID).Return(nil, notFoundError{}).Once()
+		ocgMock.On("GetLast", ts.Exp.InstanceID).Return(nil, notFoundError{}).Once()
 
 		svc := broker.NewInstanceStateService(ocgMock)
 
@@ -296,7 +267,7 @@ func TestInstanceStateServiceIsDeprovisioningInProgress(t *testing.T) {
 		ocgMock := &automock.OperationStorage{}
 		defer ocgMock.AssertExpectations(t)
 		fixErr := errors.New("fix-storage-error")
-		ocgMock.On("GetAll", ts.Exp.InstanceID).Return(nil, fixErr).Once()
+		ocgMock.On("GetLast", ts.Exp.InstanceID).Return(nil, fixErr).Once()
 
 		svc := broker.NewInstanceStateService(ocgMock)
 

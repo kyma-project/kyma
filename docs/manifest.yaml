@@ -10,8 +10,8 @@ spec:
       id: security
     - displayName: Service Catalog
       id: service-catalog
-    - displayName: Service Brokers
-      id: service-brokers
+    - displayName: Helm Broker
+      id: helm-broker
     - displayName: Application Connector
       id: application-connector
     - displayName: Event Bus
@@ -28,5 +28,9 @@ spec:
       id: api-gateway
     - displayName: Logging
       id: logging
+    - displayName: Backup
+      id: backup
     - displayName: Console
       id: console
+    - displayName: Asset Store
+      id: asset-store

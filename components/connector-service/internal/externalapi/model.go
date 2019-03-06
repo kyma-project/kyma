@@ -1,23 +1,40 @@
 package externalapi
 
+import (
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+)
+
 type certRequest struct {
 	CSR string `json:"csr"`
 }
 
 type certResponse struct {
-	CRT string `json:"crt"`
+	CRTChain  string `json:"crt"`
+	ClientCRT string `json:"clientCrt"`
+	CaCRT     string `json:"caCrt"`
 }
 
-type infoResponse struct {
-	SignUrl         string   `json:"csrUrl"`
-	Api             api      `json:"api"`
+type csrInfoResponse struct {
+	CsrURL          string   `json:"csrUrl"`
+	API             api      `json:"api"`
 	CertificateInfo certInfo `json:"certificate"`
 }
 
+type mgmtInfoReponse struct {
+	ClientIdentity interface{} `json:"clientIdentity"`
+	URLs           mgmtURLs    `json:"urls"`
+}
+
+type mgmtURLs struct {
+	*clientcontext.RuntimeURLs
+	RenewCertURL string `json:"renewCertUrl"`
+}
+
 type api struct {
-	MetadataURL     string `json:"metadataUrl"`
-	EventsURL       string `json:"eventsUrl"`
-	CertificatesUrl string `json:"certificatesUrl"`
+	*clientcontext.RuntimeURLs
+	InfoURL         string `json:"infoUrl"`
+	CertificatesURL string `json:"certificatesUrl"`
 }
 
 type certInfo struct {
@@ -26,10 +43,10 @@ type certInfo struct {
 	KeyAlgorithm string `json:"key-algorithm"`
 }
 
-type csrInfo struct {
-	Country            string `json:"country"`
-	Organization       string `json:"organization"`
-	OrganizationalUnit string `json:"organizationalUnit"`
-	Locality           string `json:"locality"`
-	Province           string `json:"province"`
+func toCertResponse(encodedChain certificates.EncodedCertificateChain) certResponse {
+	return certResponse{
+		CRTChain:  encodedChain.CertificateChain,
+		ClientCRT: encodedChain.ClientCertificate,
+		CaCRT:     encodedChain.CaCertificate,
+	}
 }

@@ -20,6 +20,7 @@ spec:
       labels:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
+        alertmem: "yes"
     spec:
       serviceAccountName: {{ template "name" . }}-service-account
       containers:

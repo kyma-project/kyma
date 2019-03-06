@@ -2,14 +2,17 @@ package graphql
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"regexp"
 	"strings"
 
 	"log"
 
 	"github.com/pkg/errors"
+	"golang.org/x/net/html"
 )
 
 type idTokenProvider interface {
@@ -40,50 +43,60 @@ func (p *dexIdTokenProvider) fetchIdToken() (string, error) {
 
 func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
-	authorizeResp, err1 := p.httpClient.PostForm(p.config.DexConfig.AuthorizeEndpoint, url.Values{
+	authorizeResp, err := p.httpClient.PostForm(p.config.DexConfig.AuthorizeEndpoint, url.Values{
 		"response_type": {"id_token token"},
 		"client_id":     {p.config.ClientConfig.ID},
 		"redirect_uri":  {p.config.ClientConfig.RedirectUri},
 		"scope":         {"openid profile email groups"},
 		"nonce":         {"vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM"},
 	})
-	if err1 != nil {
-		return nil, err1
+	if err != nil {
+		return nil, err
 	}
-	if authorizeResp.StatusCode < 300 || authorizeResp.StatusCode > 399 {
-		return nil, errors.New(fmt.Sprintf("Authorize - response error: '%s' - %s", authorizeResp.Status, readRespBody(authorizeResp)))
+	switch authorizeResp.StatusCode {
+	case http.StatusFound:
+	case http.StatusOK:
+	default:
+		return nil, fmt.Errorf("got unexpected response on authorize: %d - %s", authorizeResp.StatusCode, readRespBody(authorizeResp))
 	}
 
 	// /auth/local?req=qruhpy2cqjvv4hcrbuu44mf4v
-	loginEndpoint := authorizeResp.Header.Get("location")
-	if strings.Contains(loginEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Login - Redirected with error: '%s'", loginEndpoint))
+	var loginEndpoint string
+	if authorizeResp.StatusCode == http.StatusOK {
+		loginEndpoint, err = getLocalAuthEndpoint(authorizeResp.Body)
+		if err != nil {
+			return nil, errors.Wrapf(err, "while fetching link to static authentication")
+		}
+	} else {
+		loginEndpoint = authorizeResp.Header.Get("location")
+		if strings.Contains(loginEndpoint, "#.*error") {
+			return nil, fmt.Errorf("login - Redirected with error: '%s'", loginEndpoint)
+		}
 	}
 
-	_, err2 := p.httpClient.Get(p.config.DexConfig.BaseUrl + loginEndpoint)
-	if err2 != nil {
-		return nil, err2
+	if _, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + loginEndpoint); err != nil {
+		return nil, errors.Wrap(err, "while performing HTTP GET on login endpoint")
 	}
 
-	loginResp, err3 := p.httpClient.PostForm(p.config.DexConfig.BaseUrl+loginEndpoint, url.Values{
+	loginResp, err := p.httpClient.PostForm(p.config.DexConfig.BaseUrl+loginEndpoint, url.Values{
 		"login":    {p.config.UserCredentials.Username},
 		"password": {p.config.UserCredentials.Password},
 	})
-	if err3 != nil {
-		return nil, err3
+	if err != nil {
+		return nil, errors.Wrap(err, "while performing HTTP POST on login endpoint")
 	}
 	if loginResp.StatusCode < 300 || loginResp.StatusCode > 399 {
-		return nil, errors.New(fmt.Sprintf("Login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp)))
+		return nil, fmt.Errorf("login - response error: '%s' - %s", loginResp.Status, readRespBody(loginResp))
 	}
 
 	// /approval?req=qruhpy2cqjvv4hcrbuu44mf4v
 	approvalEndpoint := loginResp.Header.Get("location")
 	if strings.Contains(approvalEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Approval - Redirected with error: '%s'", approvalEndpoint))
+		return nil, fmt.Errorf("approval - Redirected with error: '%s'", approvalEndpoint)
 	}
-	approvalResp, err4 := p.httpClient.Get(p.config.DexConfig.BaseUrl + approvalEndpoint)
-	if err4 != nil {
-		return nil, err4
+	approvalResp, err := p.httpClient.Get(p.config.DexConfig.BaseUrl + approvalEndpoint)
+	if err != nil {
+		return nil, err
 	}
 	if approvalResp.StatusCode < 300 || approvalResp.StatusCode > 399 {
 		return nil, errors.New(fmt.Sprintf("Approval - response error: '%s' - %s", approvalResp.Status, readRespBody(approvalResp)))
@@ -91,7 +104,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
 	clientEndpoint := approvalResp.Header.Get("location")
 	if strings.Contains(clientEndpoint, "#.*error") {
-		return nil, errors.New(fmt.Sprintf("Client - Redirected with error: '%s'", clientEndpoint))
+		return nil, fmt.Errorf("client - Redirected with error: '%s'", clientEndpoint)
 	}
 
 	parsedUrl, parseErr := url.Parse(clientEndpoint)
@@ -99,7 +112,7 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 		return nil, parseErr
 	}
 
-	var result map[string]string = make(map[string]string)
+	result := make(map[string]string)
 	fragmentParams := strings.Split(parsedUrl.Fragment, "&")
 	for _, param := range fragmentParams {
 		keyAndValue := strings.Split(param, "=")
@@ -110,11 +123,44 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 }
 
 func readRespBody(resp *http.Response) string {
-	defer resp.Body.Close()
+	defer func() {
+		err := resp.Body.Close()
+		if err != nil {
+			log.Printf("WARNING: Unable to close response body. Cause: %v", err)
+		}
+	}()
 	b, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		log.Printf("WARNING: Unable to read response body (status: '%s'). Root cause: %v", resp.Status, err)
 		return "<<Error reading response body>>"
 	}
 	return string(b)
+}
+
+func getLocalAuthEndpoint(body io.Reader) (string, error) {
+	z := html.NewTokenizer(body)
+	for {
+		nt := z.Next()
+		if nt == html.ErrorToken {
+			return "", errors.New("got HTML error token")
+		}
+
+		token := z.Token()
+		if "a" != token.Data {
+			continue
+		}
+		for _, attr := range token.Attr {
+			if attr.Key != "href" {
+				continue
+			}
+			match, err := regexp.MatchString("/auth/local.*", attr.Val)
+			if err != nil {
+				log.Printf("WARNING: Unable to match string. Cause: %v", err)
+				return "", err
+			}
+			if match {
+				return attr.Val, nil
+			}
+		}
+	}
 }

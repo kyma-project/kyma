@@ -15,6 +15,7 @@ type Bundle interface {
 	GetByID(internal.BundleID) (*internal.Bundle, error)
 	Remove(internal.BundleName, semver.Version) error
 	RemoveByID(internal.BundleID) error
+	RemoveAll() error
 	FindAll() ([]*internal.Bundle, error)
 }
 
@@ -29,6 +30,7 @@ type Chart interface {
 type Instance interface {
 	Insert(*internal.Instance) error
 	Get(id internal.InstanceID) (*internal.Instance, error)
+	GetAll() ([]*internal.Instance, error)
 	Remove(id internal.InstanceID) error
 }
 

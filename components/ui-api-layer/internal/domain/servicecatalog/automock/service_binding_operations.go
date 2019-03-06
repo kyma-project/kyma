@@ -12,13 +12,13 @@ type serviceBindingOperations struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: env, sb
-func (_m *serviceBindingOperations) Create(env string, sb *v1beta1.ServiceBinding) (*v1beta1.ServiceBinding, error) {
-	ret := _m.Called(env, sb)
+// Create provides a mock function with given fields: namespace, sb
+func (_m *serviceBindingOperations) Create(namespace string, sb *v1beta1.ServiceBinding) (*v1beta1.ServiceBinding, error) {
+	ret := _m.Called(namespace, sb)
 
 	var r0 *v1beta1.ServiceBinding
 	if rf, ok := ret.Get(0).(func(string, *v1beta1.ServiceBinding) *v1beta1.ServiceBinding); ok {
-		r0 = rf(env, sb)
+		r0 = rf(namespace, sb)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1beta1.ServiceBinding)
@@ -27,7 +27,7 @@ func (_m *serviceBindingOperations) Create(env string, sb *v1beta1.ServiceBindin
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, *v1beta1.ServiceBinding) error); ok {
-		r1 = rf(env, sb)
+		r1 = rf(namespace, sb)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -35,13 +35,13 @@ func (_m *serviceBindingOperations) Create(env string, sb *v1beta1.ServiceBindin
 	return r0, r1
 }
 
-// Delete provides a mock function with given fields: env, name
-func (_m *serviceBindingOperations) Delete(env string, name string) error {
-	ret := _m.Called(env, name)
+// Delete provides a mock function with given fields: namespace, name
+func (_m *serviceBindingOperations) Delete(namespace string, name string) error {
+	ret := _m.Called(namespace, name)
 
 	var r0 error
 	if rf, ok := ret.Get(0).(func(string, string) error); ok {
-		r0 = rf(env, name)
+		r0 = rf(namespace, name)
 	} else {
 		r0 = ret.Error(0)
 	}
@@ -49,13 +49,13 @@ func (_m *serviceBindingOperations) Delete(env string, name string) error {
 	return r0
 }
 
-// Find provides a mock function with given fields: env, name
-func (_m *serviceBindingOperations) Find(env string, name string) (*v1beta1.ServiceBinding, error) {
-	ret := _m.Called(env, name)
+// Find provides a mock function with given fields: namespace, name
+func (_m *serviceBindingOperations) Find(namespace string, name string) (*v1beta1.ServiceBinding, error) {
+	ret := _m.Called(namespace, name)
 
 	var r0 *v1beta1.ServiceBinding
 	if rf, ok := ret.Get(0).(func(string, string) *v1beta1.ServiceBinding); ok {
-		r0 = rf(env, name)
+		r0 = rf(namespace, name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1beta1.ServiceBinding)
@@ -64,7 +64,7 @@ func (_m *serviceBindingOperations) Find(env string, name string) (*v1beta1.Serv
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(env, name)
+		r1 = rf(namespace, name)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -72,13 +72,13 @@ func (_m *serviceBindingOperations) Find(env string, name string) (*v1beta1.Serv
 	return r0, r1
 }
 
-// ListForServiceInstance provides a mock function with given fields: env, instanceName
-func (_m *serviceBindingOperations) ListForServiceInstance(env string, instanceName string) ([]*v1beta1.ServiceBinding, error) {
-	ret := _m.Called(env, instanceName)
+// ListForServiceInstance provides a mock function with given fields: namespace, instanceName
+func (_m *serviceBindingOperations) ListForServiceInstance(namespace string, instanceName string) ([]*v1beta1.ServiceBinding, error) {
+	ret := _m.Called(namespace, instanceName)
 
 	var r0 []*v1beta1.ServiceBinding
 	if rf, ok := ret.Get(0).(func(string, string) []*v1beta1.ServiceBinding); ok {
-		r0 = rf(env, instanceName)
+		r0 = rf(namespace, instanceName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1beta1.ServiceBinding)
@@ -87,7 +87,7 @@ func (_m *serviceBindingOperations) ListForServiceInstance(env string, instanceN
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string, string) error); ok {
-		r1 = rf(env, instanceName)
+		r1 = rf(namespace, instanceName)
 	} else {
 		r1 = ret.Error(1)
 	}

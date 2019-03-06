@@ -13,6 +13,9 @@ import (
 	"strings"
 	"syscall"
 
+	"github.com/gorilla/handlers"
+	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/spdy"
+
 	"github.com/golang/glog"
 	"github.com/hkwi/h2c"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
@@ -36,6 +39,7 @@ type config struct {
 	auth                  proxy.Config
 	tls                   tlsConfig
 	kubeconfigLocation    string
+	cors                  corsConfig
 }
 
 type tlsConfig struct {
@@ -43,6 +47,12 @@ type tlsConfig struct {
 	keyFile      string
 	minVersion   string
 	cipherSuites []string
+}
+
+type corsConfig struct {
+	allowHeaders []string
+	allowOrigin  []string
+	allowMethods []string
 }
 
 var versions = map[string]uint16{
@@ -69,6 +79,7 @@ func main() {
 			},
 			Authorization: &authz.Config{},
 		},
+		cors: corsConfig{},
 	}
 	flagset := flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
@@ -107,6 +118,10 @@ func main() {
 	//Kubeconfig flag
 	flagset.StringVar(&cfg.kubeconfigLocation, "kubeconfig", "", "Path to a kubeconfig file, specifying how to connect to the API server. If unset, in-cluster configuration will be used")
 
+	// CORS flags
+	flagset.StringSliceVar(&cfg.cors.allowOrigin, "cors-allow-origin", []string{"*"}, "List of CORS allowed origins")
+	flagset.StringSliceVar(&cfg.cors.allowMethods, "cors-allow-methods", []string{"GET", "POST", "PUT", "DELETE"}, "List of CORS allowed methods")
+	flagset.StringSliceVar(&cfg.cors.allowHeaders, "cors-allow-headers", []string{"Authorization", "Content-Type"}, "List of CORS allowed headers")
 	flagset.Parse(os.Args[1:])
 	kcfg := initKubeConfig(cfg.kubeconfigLocation)
 
@@ -114,6 +129,8 @@ func main() {
 	if err != nil {
 		glog.Fatalf("Failed to build parse upstream URL: %v", err)
 	}
+
+	spdyProxy := spdy.New(kcfg, upstreamURL)
 
 	kubeClient, err := kubernetes.NewForConfig(kcfg)
 	if err != nil {
@@ -146,7 +163,7 @@ func main() {
 		glog.Fatalf("Failed to create authorizer: %v", err)
 	}
 
-	authProxy, err := proxy.New(kubeClient, cfg.auth, authorizer, authenticator)
+	authProxy := proxy.New(cfg.auth, authorizer, authenticator)
 
 	if err != nil {
 		glog.Fatalf("Failed to create rbac-proxy: %v", err)
@@ -171,11 +188,19 @@ func main() {
 			return
 		}
 
-		rp.ServeHTTP(w, req)
+		if spdyProxy.IsSpdyRequest(req) {
+			spdyProxy.ServeHTTP(w, req)
+		} else {
+			rp.ServeHTTP(w, req)
+		}
 	}))
 
 	if cfg.secureListenAddress != "" {
-		srv := &http.Server{Handler: mux}
+		srv := &http.Server{Handler: handlers.CORS(
+			handlers.AllowedOrigins(cfg.cors.allowOrigin),
+			handlers.AllowedMethods(cfg.cors.allowMethods),
+			handlers.AllowedHeaders(cfg.cors.allowHeaders),
+		)(mux)}
 
 		if cfg.tls.certFile == "" && cfg.tls.keyFile == "" {
 			glog.Info("Generating self signed cert as no cert is provided")

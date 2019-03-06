@@ -2,7 +2,7 @@ package shared
 
 type ServiceBindingUsage struct {
 	Name           string
-	Environment    string
+	Namespace      string
 	ServiceBinding ServiceBinding
 	UsedBy         LocalObjectReference
 	Status         ServiceBindingUsageStatus

@@ -13,6 +13,19 @@ set -o errexit # exit immediately if a command exits with a non-zero status.
 readonly CURRENT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 readonly GCP_SECRET_NAME="gcp-broker-data"
 
+trap cleanup EXIT SIGINT SIGTERM
+
+function cleanup() {
+    printf  "\n- Cleaning up...\n"
+    echo "Ensure gcloud credentials are removed"
+    if [ ! -z "${GOOGLE_APPLICATION_CREDENTIALS}" ]
+    then
+        rm -f "${GOOGLE_APPLICATION_CREDENTIALS}"
+    fi
+    echo "OK"
+}
+
+
 function discoveredUnsetVar() {
     local discoveredUnsetVar=false
     for e in WORKING_NAMESPACE; do

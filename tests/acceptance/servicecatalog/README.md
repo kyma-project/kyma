@@ -38,7 +38,7 @@ spec:
     http:
       paths:
       - backend:
-          serviceName: core-helm-broker
+          serviceName: helm-broker
           servicePort: 80
         path: /.*
    tls:
@@ -54,7 +54,7 @@ spec:
 
   You can copy the content of the file in any Pod. For example:
 ```bash
-kc exec -it core-helm-broker-6cd7cc8697-c8wks -n kyma-system -- cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+kc exec -it helm-broker-6cd7cc8697-c8wks -n kyma-system -- cat /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 ```
 
 6. Create a secret local file:

@@ -1,0 +1,34 @@
+{{ if .Values.global.isLocalEnv }}
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: cluster-users-test
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    sidecar.istio.io/inject: "false"
+    "helm.sh/hook": test-success
+  labels:
+    "helm-chart-test": "true"
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirstWithHostNet
+  containers:
+    - name: test-cluster-users
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_test.dir }}cluster-users-test:{{ .Values.global.cluster_users_test.version }}
+      env:
+        - name: EMAIL_FILE
+          value: /etc/credentials/email
+        - name: PASSWORD_FILE
+          value: /etc/credentials/password
+        - name: NAMESPACE
+          value: {{ .Values.namespace }}
+      volumeMounts:
+        - name: credentials
+          mountPath: /etc/credentials
+  volumes:
+    - name: credentials
+      secret:
+        secretName: admin-user
+  restartPolicy: Never
+{{ end }}

@@ -6,6 +6,7 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
+    kyma-project.io/installation: ""
 type: Opaque
 data:
   etcd-operator.backupOperator.abs.storageAccount: "__ETCD_BACKUP_ABS_ACCOUNT__"

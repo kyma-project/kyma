@@ -104,11 +104,7 @@ done
 # INFO.JSON
 ##
 author=$(git show -s --pretty=%an)
-# the branch calcualtion looks as follow, because the git checkout process works differently on jenkins and our local machine
-branch=${GIT_BRANCH}
-if [$branch == ""]; then
-	branch=$(git rev-parse --abbrev-ref HEAD)
-fi
+branch=$(git rev-parse --abbrev-ref HEAD)
 commit=$(git rev-parse --verify HEAD)
 commitMsg=$(git show -s --pretty=%s)
 commitDate=$(git log -1 --format=%cd)

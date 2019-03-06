@@ -14,19 +14,19 @@ import (
 )
 
 type ApplicationLister interface {
-	ListInEnvironment(environment string) ([]*v1alpha1.Application, error)
+	ListInNamespace(namespace string) ([]*v1alpha1.Application, error)
 	ListNamespacesFor(reName string) ([]string, error)
 }
 
 type Resolver struct {
-	*environmentResolver
+	*namespaceResolver
 	*secretResolver
 	*deploymentResolver
 	*resourceQuotaResolver
 	*resourceQuotaStatusResolver
 	*limitRangeResolver
 	*podResolver
-
+	*replicaSetResolver
 	informerFactory informers.SharedInformerFactory
 }
 
@@ -38,25 +38,30 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 
 	clientset, err := k8sClientset.NewForConfig(restConfig)
 	if err != nil {
-		return nil, errors.Wrap(err, "while creating K8S Client")
+		return nil, errors.Wrap(err, "while creating K8S Clientset")
 	}
 
 	informerFactory := informers.NewSharedInformerFactory(clientset, informerResyncPeriod)
 
-	environmentService := newEnvironmentService(client.Namespaces())
-	deploymentService := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
+	namespaceService := newNamespaceService(client.Namespaces())
+	deploymentService, err := newDeploymentService(informerFactory.Apps().V1beta2().Deployments().Informer())
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating deployment service")
+	}
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
-	podService := newPodService(informerFactory.Core().V1().Pods().Informer())
+	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 
+	replicaSetService := newReplicaSetService(informerFactory.Apps().V1().ReplicaSets().Informer(), clientset.AppsV1())
 	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
 
 	return &Resolver{
-		environmentResolver:         newEnvironmentResolver(environmentService, applicationRetriever),
+		namespaceResolver:           newNamespaceResolver(namespaceService, applicationRetriever),
 		secretResolver:              newSecretResolver(client),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),
+		replicaSetResolver:          newReplicaSetResolver(replicaSetService),
 		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
 		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),

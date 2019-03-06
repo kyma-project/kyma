@@ -3,6 +3,8 @@ package v1alpha2
 import (
 	"fmt"
 
+	"k8s.io/apimachinery/pkg/labels"
+
 	log "github.com/sirupsen/logrus"
 
 	"time"
@@ -204,20 +206,54 @@ func (c *Controller) onCreate(api *kymaApi.Api) error {
 	}
 	defer apiStatusHelper.Update()
 
-	metaDto := toMetaDto(api)
-
-	createVirtualServiceStatus := c.createVirtualService(metaDto, api, apiStatusHelper)
-
-	if createVirtualServiceStatus.IsError() {
+	if validateAPIStatus := c.validateAPI(api, apiStatusHelper); validateAPIStatus.IsError() || validateAPIStatus.IsTargetServiceOccupied() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 	}
 
-	createAuthenticationStatus := c.createAuthentication(metaDto, api, apiStatusHelper)
+	metaDto := toMetaDto(api)
 
-	if createAuthenticationStatus.IsError() {
+	if createVirtualServiceStatus := c.createVirtualService(metaDto, api, apiStatusHelper); createVirtualServiceStatus.IsError() {
+		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
+	}
+
+	if createAuthenticationStatus := c.createAuthentication(metaDto, api, apiStatusHelper); createAuthenticationStatus.IsError() {
 		return fmt.Errorf("error while processing create: %s/%s ver: %s", api.Namespace, api.Name, api.ResourceVersion)
 	}
 	return nil
+}
+
+func (c *Controller) validateAPI(newAPI *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
+
+	setStatus := func(status kymaMeta.StatusCode) kymaMeta.StatusCode {
+
+		if status.IsSuccessful() {
+			apiStatusHelper.SetValidationStatus(status)
+			return status
+		}
+
+		apiStatusHelper.SetAuthenticationStatusCode(kymaMeta.Error)
+		apiStatusHelper.SetVirtualServiceStatusCode(kymaMeta.Error)
+		apiStatusHelper.SetValidationStatus(status)
+
+		return status
+	}
+
+	targetServiceName := newAPI.Spec.Service.Name
+
+	existingAPIs, err := c.apisLister.Apis(newAPI.GetNamespace()).List(labels.Everything())
+	if err != nil {
+		log.Errorf("Error while listing APIs %s/%s ver: %s. Root cause: %s", newAPI.Namespace, newAPI.Name, newAPI.ResourceVersion, err)
+		return setStatus(kymaMeta.Error)
+	}
+
+	for _, a := range existingAPIs {
+		if a.Spec.Service.Name == targetServiceName && a.GetName() != newAPI.GetName() {
+			log.Errorf("An API has already been created for service %s/%s", newAPI.Namespace, newAPI.Spec.Service.Name)
+			return setStatus(kymaMeta.TargetServiceOccupied)
+		}
+	}
+
+	return setStatus(kymaMeta.Successful)
 }
 
 func (c *Controller) createVirtualService(metaDto meta.Dto, api *kymaApi.Api, apiStatusHelper *ApiStatusHelper) kymaMeta.StatusCode {
@@ -251,9 +287,9 @@ func (c *Controller) tmplCreateResource(
 	resourceCreator func(api *kymaApi.Api) (*kymaMeta.GatewayResource, error),
 	statusSetter func(status *kymaMeta.GatewayResourceStatus)) kymaMeta.StatusCode {
 
-	if resourceStatus.IsDone() {
+	if resourceStatus.IsSuccessful() {
 		log.Debugf("%s has been already created for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
-		return kymaMeta.Done
+		return kymaMeta.Successful
 	}
 
 	log.Debugf("Creating %s for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
@@ -288,7 +324,7 @@ func (c *Controller) tmplCreateResource(
 	log.Infof("%s creation finished for: %s/%s ver: %s", resourceName, api.Namespace, api.Name, api.ResourceVersion)
 
 	status := &kymaMeta.GatewayResourceStatus{
-		Code: kymaMeta.Done,
+		Code: kymaMeta.Successful,
 	}
 	if createdResource != nil {
 		status.Resource = *createdResource
@@ -297,7 +333,7 @@ func (c *Controller) tmplCreateResource(
 	// if there was no error: create new resource status without an error
 	statusSetter(status)
 
-	return kymaMeta.Done
+	return kymaMeta.Successful
 }
 
 func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
@@ -315,10 +351,14 @@ func (c *Controller) onUpdate(oldApi, newApi *kymaApi.Api) error {
 	}
 
 	apiStatusHelper := c.apiStatusHelperFor(newApi)
-	if newApi.Status.IsDone() {
+	if newApi.Status.IsSuccessful() {
 		newApi.Status.SetInProgress()
 	}
 	defer apiStatusHelper.Update()
+
+	if validateAPIStatus := c.validateAPI(newApi, apiStatusHelper); validateAPIStatus.IsError() || validateAPIStatus.IsTargetServiceOccupied() {
+		return fmt.Errorf("error while processing create: %s/%s ver: %s", newApi.Namespace, newApi.Name, newApi.ResourceVersion)
+	}
 
 	oldMetaDto := toMetaDto(oldApi)
 	newMetaDto := toMetaDto(newApi)
@@ -371,9 +411,9 @@ func (c *Controller) tmplUpdateResource(oldApi *kymaApi.Api, newApi *kymaApi.Api
 	resourceUpdater func(oldApi, newApi *kymaApi.Api) (*kymaMeta.GatewayResource, error),
 	statusSetter func(status *kymaMeta.GatewayResourceStatus)) kymaMeta.StatusCode {
 
-	if resourceStatus.IsDone() {
+	if resourceStatus.IsSuccessful() {
 		log.Debugf("%s has been already updated for: %s/%s ver: %s", resourceName, newApi.Namespace, newApi.Name, newApi.ResourceVersion)
-		return kymaMeta.Done
+		return kymaMeta.Successful
 	}
 
 	log.Debugf("Updating %s for: %s/%s ver: %s", resourceName, newApi.Namespace, newApi.Name, newApi.ResourceVersion)
@@ -413,13 +453,13 @@ func (c *Controller) tmplUpdateResource(oldApi *kymaApi.Api, newApi *kymaApi.Api
 	log.Infof("%s updated for: %s/%s ver: %s", resourceName, newApi.Namespace, newApi.Name, newApi.ResourceVersion)
 
 	status := &kymaMeta.GatewayResourceStatus{
-		Code: kymaMeta.Done,
+		Code: kymaMeta.Successful,
 	}
 	if updatedResource != nil {
 		status.Resource = *updatedResource
 	}
 	statusSetter(status)
-	return kymaMeta.Done
+	return kymaMeta.Successful
 }
 
 func (c *Controller) onDelete(api *kymaApi.Api) error {

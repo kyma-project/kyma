@@ -39,7 +39,8 @@ func TestPodConverter_ToGQL(t *testing.T) {
 				},
 			},
 		}
-		expectedJSON, _ := converter.podToGQLJSON(&in)
+		expectedJSON, err := converter.podToGQLJSON(&in)
+		require.NoError(t, err)
 		expected := gqlschema.Pod{
 			Name:              "exampleName",
 			NodeName:          "exampleNodeName",
@@ -66,7 +67,8 @@ func TestPodConverter_ToGQL(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		converter := &podConverter{}
-		emptyPodJSON, _ := converter.podToGQLJSON(&v1.Pod{})
+		emptyPodJSON, err := converter.podToGQLJSON(&v1.Pod{})
+		require.NoError(t, err)
 		expected := &gqlschema.Pod{
 			Status:          gqlschema.PodStatusTypeUnknown,
 			ContainerStates: []gqlschema.ContainerState{},
@@ -288,6 +290,144 @@ func TestPodConverter_PodToGQLJSON(t *testing.T) {
 
 		require.Nil(t, result)
 		require.NoError(t, err)
+	})
+}
+
+func TestPodConverter_GQLJSONToPod(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		converter := podConverter{}
+		exampleContainerStateWaiting := v1.ContainerStateWaiting{
+			Reason:  "exampleReason",
+			Message: "exampleMessage",
+		}
+		inMap := map[string]interface{}{
+			"kind": "exampleKind",
+			"metadata": map[string]interface{}{
+				"name": "exampleName",
+				"labels": map[string]interface{}{
+					"exampleKey":  "exampleValue",
+					"exampleKey2": "exampleValue2",
+				},
+				"creationTimestamp": nil,
+				"ownerReferences": []interface{}{
+					map[string]interface{}{
+						"apiVersion": "exampleApiVersion",
+						"kind":       "exampleKind",
+						"name":       "exampleName",
+						"uid":        "exampleUID",
+					},
+				},
+			},
+			"spec": map[string]interface{}{
+				"nodeName":   "exampleNodeName",
+				"containers": nil,
+			},
+			"status": map[string]interface{}{
+				"phase": "examplePhase",
+				"conditions": []interface{}{
+					map[string]interface{}{
+						"reason":             "exampleReason",
+						"type":               "exampleType",
+						"status":             "exampleStatus",
+						"message":            "exampleMessage",
+						"lastProbeTime":      nil,
+						"lastTransitionTime": nil,
+					},
+					map[string]interface{}{
+						"reason":             "exampleReason",
+						"type":               "exampleType",
+						"status":             "exampleStatus",
+						"message":            "exampleMessage",
+						"lastProbeTime":      nil,
+						"lastTransitionTime": nil,
+					},
+				},
+				"containerStatuses": []interface{}{
+					map[string]interface{}{
+						"name":         "exampleName",
+						"restartCount": float64(5),
+						"ready":        true,
+						"state": map[string]interface{}{
+							"waiting": map[string]interface{}{
+								"reason":  "exampleReason",
+								"message": "exampleMessage",
+							},
+						},
+						"image":     "",
+						"imageID":   "",
+						"lastState": map[string]interface{}{},
+					},
+				},
+			},
+		}
+		expected := v1.Pod{
+			TypeMeta: metav1.TypeMeta{
+				Kind: "exampleKind",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "exampleName",
+				Labels: map[string]string{
+					"exampleKey":  "exampleValue",
+					"exampleKey2": "exampleValue2",
+				},
+				CreationTimestamp: metav1.Time{},
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						APIVersion: "exampleApiVersion",
+						Name:       "exampleName",
+						UID:        "exampleUID",
+						Kind:       "exampleKind",
+					},
+				},
+			},
+			Spec: v1.PodSpec{
+				NodeName: "exampleNodeName",
+			},
+			Status: v1.PodStatus{
+				Phase: "examplePhase",
+				Conditions: []v1.PodCondition{
+					{
+						Type:               "exampleType",
+						Status:             "exampleStatus",
+						LastProbeTime:      metav1.Time{},
+						LastTransitionTime: metav1.Time{},
+						Reason:             "exampleReason",
+						Message:            "exampleMessage",
+					},
+					{
+						Type:               "exampleType",
+						Status:             "exampleStatus",
+						LastProbeTime:      metav1.Time{},
+						LastTransitionTime: metav1.Time{},
+						Reason:             "exampleReason",
+						Message:            "exampleMessage",
+					},
+				},
+				ContainerStatuses: []v1.ContainerStatus{
+					{
+						Name: "exampleName",
+						State: v1.ContainerState{
+							Waiting: &exampleContainerStateWaiting,
+						},
+						LastTerminationState: v1.ContainerState{},
+						Ready:                true,
+						RestartCount:         5,
+						Image:                "",
+						ImageID:              "",
+						ContainerID:          "",
+					},
+				},
+			},
+		}
+
+		inJSON := new(gqlschema.JSON)
+		err := inJSON.UnmarshalGQL(inMap)
+		require.NoError(t, err)
+
+		result, err := converter.GQLJSONToPod(*inJSON)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
 	})
 }
 

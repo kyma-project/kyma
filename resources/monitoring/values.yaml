@@ -2,13 +2,14 @@
 
 test:
   image:
-    name: test-logging-monitoring
+    name: monitoring
+    dir: develop/tests/
+    version: 4ac6dd65
 global:
+  isLocalEnv: false
+  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
-  test_logging_monitoring:
-    dir: develop/
-    version: a568ffb2
   istio:
     tls:
       secretName: istio-ingress-certs

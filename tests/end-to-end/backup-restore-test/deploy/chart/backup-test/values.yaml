@@ -1,0 +1,6 @@
+containerRegistry:
+  path: eu.gcr.io/kyma-project
+
+image:
+  dir: pr/
+  tag: PR-2921

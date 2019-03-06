@@ -20,14 +20,22 @@ To start the Connector Service, run this command:
 ```
 
 The Connector Service has the following parameters:
-- **appName** - This is the name of the application used by k8s deployments and services. The default value is `connector-service`.
+- **appName** - This is the name of the application used by Kubernetes deployments and services. The default value is `connector-service`.
 - **externalAPIPort** - This port exposes the Connector Service API to an external solution. The default port is `8081`.
 - **internalAPIPort** - This port exposes the Connector Service within Kubernetes cluster. The default port is `8080`.
-- **namespace** - Namespace where Connector Service is deployed. The default namespace is `kyma-integration`.
+- **namespace** - Namespace where Connector Service is deployed. The default Namespace is `kyma-integration`.
 - **tokenLength** - Length of registration tokens. The default value is `64`.
-- **tokenExpirationMinutes** - Time after which tokens expire and are no longer valid. The default value is `5` minutes.
-- **domainName** - Domain name of the cluster, used for URL generating. Default domain name is `.wormhole.cluster.kyma.cx`.
-- **certificateServiceHost** - Host at which this service is accessible, used for URL generating. Default host is `cert-service.wormhole.cluster.kyma.cx`.
+- **appTokenExpirationMinutes** - Time after which tokens for applications expire and are no longer valid. The default value is `5` minutes.
+- **runtimeTokenExpirationMinutes** - Time after which tokens for runtimes expire and are no longer valid. The default value is `10` minutes.
+- **caSecretName** - Name of the secret which contains the root Certificate Authority (CA). The default value is `nginx-auth-ca`.
+- **requestLogging** - Flag for logging incoming requests. It is set to `False` by default.
+- **connectorServiceHost** - Host under which this service is accessible. It is used for generating the URL. The default host is `cert-service.wormhole.cluster.kyma.cx`.
+- **gatewayHost** - Host at which the Gateway Service is accessible. The default value is `gateway.wormhole.cluster.kyma.cx`.
+- **certificateProtectedHost** - Host secured with the client certificate, used for the certificate renewal. The default host is `gateway.wormhole.cluster.kyma.cx`.
+- **appsInfoURL** - URL at which the management information for applications is available. If not provided, it bases on `connectorServiceHost`.
+- **runtimesInfoURL** - URL at which the management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
+- **certificateValidityTime** - Time until which the certificates that the service issues are valid. The default value is 90 days.
+- **central** - Determines whether the Connector Service works in the central mode.
 
 Connector Service also uses following environmental variables for CSR - related information config:
 - **COUNTRY** (two-letter-long country code)

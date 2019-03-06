@@ -1,7 +1,13 @@
 etcd-stateful:
-  replicaCount: 1
+  replicaCount: 3
+  etcd:
+    resources:
+      limits:
+        memory: 512Mi
 
 global:
+  isLocalEnv: false
+  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -10,6 +16,6 @@ global:
   etcdBackup:
     enabled: false
     secretName: etcd-backup-abs-credentials
-  etcd_backup:
+  etcd_backup_job:
     dir: develop/
     version: 6e0a7fe2

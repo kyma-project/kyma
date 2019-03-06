@@ -4,3 +4,12 @@ containerPort: 8444
 image: 
   name: kube-rbac-proxy
   tag: 0.3.1
+
+hpa:
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+  - type: Resource
+    resource:
+      name: memory
+      targetAverageUtilization: 50

@@ -6,9 +6,10 @@ CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCES_DIR="${CURRENT_DIR}/../resources"
 
 MINIKUBE_DOMAIN=""
-MINIKUBE_VERSION=0.28.2
-KUBERNETES_VERSION=1.10.0
-KUBECTL_CLI_VERSION=1.10.0
+# Supported Minikube Versions: MINIKUBE_VERSION_MIN (inclusive) up to MINIKUBE_VERSION_MAX (exclusive)
+MINIKUBE_VERSION=0.33.0
+KUBERNETES_VERSION=1.12.5
+KUBECTL_CLI_VERSION=1.12.0
 VM_DRIVER=hyperkit
 DISK_SIZE=20g
 MEMORY=8192
@@ -67,8 +68,11 @@ echo "
 function initializeMinikubeConfig() {
     # Disable default nginx ingress controller
     minikube config unset ingress
-    # Enable heapster addon
-    minikube addons enable heapster
+}
+
+function configureMinikubeAddons() {
+    # Enable metrics-server addon for kubectl top
+    minikube addons enable metrics-server
 }
 
 #TODO refactor to use minikube status!
@@ -87,9 +91,9 @@ function waitForMinikubeToBeUp() {
       sleep 1
     done
 
-    # In case apiserver is not available get localkube logs
+    # In case apiserver is not available get minikube logs
     if [[ -z "$STATUS" ]] && [[ "$VM_DRIVER" = "none" ]]; then
-      cat /var/lib/localkube/localkube.err
+      cat /var/lib/minikube/minikube.err
     fi
 
     set -o errexit
@@ -104,7 +108,7 @@ function fixDindMinikubeIssue() {
 }
 
 function checkIfMinikubeIsInitialized() {
-    local status=$(minikube status --format "{{.MinikubeStatus}}")
+    local status=$(minikube status --format "{{.Host}}")
     if [ -n "${status}" ]; then
         log "Minikube is already initialized" red
         read -p "Do you want to remove previous minikube cluster [y/N]: " deleteMinikube
@@ -115,11 +119,17 @@ function checkIfMinikubeIsInitialized() {
 }
 
 function checkMinikubeVersion() {
-    local version=$(minikube version | awk '{print  $3}')
+    local version=$(minikube version | awk '{print  $3}' | grep -o '[0-9\.]\+' )
+    local version_clean=$(echo $version | awk -F '.' '{print $1"."$2;}')
+    local supported_version_min=$(echo ${MINIKUBE_VERSION} | awk -F '.' '{print $1"."--$2;}')
+    local supported_version_max=$(echo ${MINIKUBE_VERSION} | awk -F '.' '{printf "%d.%d", $1, ++$2;}')
 
-    if [[ "${version}" != *"${MINIKUBE_VERSION}"* ]]; then
-        echo "Your minikube is in ${version}. v${MINIKUBE_VERSION} is supported version of minikube. Install supported version!"
-        exit -1
+    if [[ "$(printf "${version_clean}\n${supported_version_min}" | sort -V | head -n1)" == "${version_clean}" ]]; then
+        log "Your minikube is in ${version}. Your version is older than the supported version of minikube (v$MINIKUBE_VERSION)" yellow
+    fi
+
+    if [[ "$(printf "${version_clean}\n${supported_version_max}" | sort -V | head -n1)" == "${supported_version_max}" ]]; then
+        log "Your minikube is in ${version}. Your version is newer than the supported version of minikube (v$MINIKUBE_VERSION)" yellow
     fi
 }
 
@@ -147,7 +157,7 @@ function addDevDomainsToEtcHosts() {
     log "Minikube IP address: ${minikubeIP}" green
 
     if [[ "$VM_DRIVER" != "none" ]]; then
-        log "Adding ${hostnames} to /etc/hosts on Minikube" yellow
+        log "Adding ${hostnames} to /etc/hosts on Minikube" yellow 
         minikube ssh "echo \"127.0.0.1 ${hostnames}\" | sudo tee -a /etc/hosts"
 
         # Delete old host alias
@@ -198,21 +208,20 @@ function start() {
     minikube start \
     --memory $MEMORY \
     --cpus 4 \
-    --extra-config=apiserver.Authorization.Mode=RBAC \
-    --extra-config=apiserver.GenericServerRunOptions.CorsAllowedOriginList=".*" \
-    --extra-config=controller-manager.ClusterSigningCertFile="/var/lib/localkube/certs/ca.crt" \
-    --extra-config=controller-manager.ClusterSigningKeyFile="/var/lib/localkube/certs/ca.key" \
-    --extra-config=apiserver.admission-control="LimitRanger,ServiceAccount,DefaultStorageClass,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota" \
+    --extra-config=apiserver.authorization-mode=RBAC \
+    --extra-config=apiserver.cors-allowed-origins="http://*" \
+    --extra-config=apiserver.enable-admission-plugins="DefaultStorageClass,LimitRanger,MutatingAdmissionWebhook,NamespaceExists,NamespaceLifecycle,ResourceQuota,ServiceAccount,ValidatingAdmissionWebhook" \
     --kubernetes-version=v$KUBERNETES_VERSION \
     --vm-driver=$VM_DRIVER \
     --disk-size=$DISK_SIZE \
-    --feature-gates="MountPropagation=false" \
-    -b=localkube
+    --bootstrapper=kubeadm
 
     waitForMinikubeToBeUp
 
+    configureMinikubeAddons
+
     # Adding domains to /etc/hosts files
-    addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} ui-api.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN}  configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
+    addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} ui-api.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN} log-ui.${MINIKUBE_DOMAIN} loki.${MINIKUBE_DOMAIN} configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
 
     increaseFsInotifyMaxUserInstances
 

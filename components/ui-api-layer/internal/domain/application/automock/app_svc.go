@@ -155,13 +155,13 @@ func (_m *appSvc) List(params pager.PagingParams) ([]*v1alpha1.Application, erro
 	return r0, r1
 }
 
-// ListInEnvironment provides a mock function with given fields: environment
-func (_m *appSvc) ListInEnvironment(environment string) ([]*v1alpha1.Application, error) {
-	ret := _m.Called(environment)
+// ListInNamespace provides a mock function with given fields: namespace
+func (_m *appSvc) ListInNamespace(namespace string) ([]*v1alpha1.Application, error) {
+	ret := _m.Called(namespace)
 
 	var r0 []*v1alpha1.Application
 	if rf, ok := ret.Get(0).(func(string) []*v1alpha1.Application); ok {
-		r0 = rf(environment)
+		r0 = rf(namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]*v1alpha1.Application)
@@ -170,7 +170,7 @@ func (_m *appSvc) ListInEnvironment(environment string) ([]*v1alpha1.Application
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(environment)
+		r1 = rf(namespace)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -178,13 +178,13 @@ func (_m *appSvc) ListInEnvironment(environment string) ([]*v1alpha1.Application
 	return r0, r1
 }
 
-// ListNamespacesFor provides a mock function with given fields: reName
-func (_m *appSvc) ListNamespacesFor(reName string) ([]string, error) {
-	ret := _m.Called(reName)
+// ListNamespacesFor provides a mock function with given fields: appName
+func (_m *appSvc) ListNamespacesFor(appName string) ([]string, error) {
+	ret := _m.Called(appName)
 
 	var r0 []string
 	if rf, ok := ret.Get(0).(func(string) []string); ok {
-		r0 = rf(reName)
+		r0 = rf(appName)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]string)
@@ -193,7 +193,7 @@ func (_m *appSvc) ListNamespacesFor(reName string) ([]string, error) {
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(reName)
+		r1 = rf(appName)
 	} else {
 		r1 = ret.Error(1)
 	}

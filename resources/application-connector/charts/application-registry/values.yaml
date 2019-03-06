@@ -4,7 +4,7 @@ deployment:
   args:
     proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
-    minioURL: core-minio.kyma-system.svc.cluster.local:9000
+    minioURL: assetstore-minio.kyma-system.svc.cluster.local:9000
     requestTimeout: 10
     requestLogging: false
 

@@ -13,8 +13,9 @@
 
 set -o errexit
 
-MINIKUBE_VERSION=v0.28.2
-KUBECTL_CLI_VERSION=v1.10.0
+MINIKUBE_VERSION=v0.33.0
+KUBECTL_CLI_VERSION=v1.12.0
+CRICTL_VERSION=v1.12.0
 HELM_VERSION=v2.8.2
 DOCKER_VERSION=18.06.1~ce~3-0~debian
 
@@ -53,3 +54,8 @@ curl -O https://storage.googleapis.com/kubernetes-helm/helm-${HELM_VERSION}-linu
 curl -Lo /tmp/minikube https://storage.googleapis.com/minikube/releases/${MINIKUBE_VERSION}/minikube-linux-amd64 && \
  chmod +x /tmp/minikube && \
  sudo mv /tmp/minikube /usr/local/bin/minikube
+
+# install circtl
+wget https://github.com/kubernetes-sigs/cri-tools/releases/download/${CRICTL_VERSION}/crictl-${CRICTL_VERSION}-linux-amd64.tar.gz
+sudo tar zxvf crictl-${CRICTL_VERSION}-linux-amd64.tar.gz -C /usr/local/bin
+rm -f crictl-${CRICTL_VERSION}-linux-amd64.tar.gz

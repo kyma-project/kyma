@@ -10,13 +10,13 @@ type bindableResourceLister struct {
 	mock.Mock
 }
 
-// ListResources provides a mock function with given fields: environment
-func (_m *bindableResourceLister) ListResources(environment string) ([]gqlschema.BindableResourcesOutputItem, error) {
-	ret := _m.Called(environment)
+// ListResources provides a mock function with given fields: namespace
+func (_m *bindableResourceLister) ListResources(namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
+	ret := _m.Called(namespace)
 
 	var r0 []gqlschema.BindableResourcesOutputItem
 	if rf, ok := ret.Get(0).(func(string) []gqlschema.BindableResourcesOutputItem); ok {
-		r0 = rf(environment)
+		r0 = rf(namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]gqlschema.BindableResourcesOutputItem)
@@ -25,7 +25,7 @@ func (_m *bindableResourceLister) ListResources(environment string) ([]gqlschema
 
 	var r1 error
 	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(environment)
+		r1 = rf(namespace)
 	} else {
 		r1 = ret.Error(1)
 	}

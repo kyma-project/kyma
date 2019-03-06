@@ -22,10 +22,11 @@ type Client struct {
 	token     string
 	endpoint  string
 	logs      []string
+	Config    config
 }
 
 func New() (*Client, error) {
-	config, err := loadConfig()
+	config, err := loadConfig(AdminUser) // by default create client capable of performing all operations on all resources
 	if err != nil {
 		return nil, errors.Wrap(err, "while loading config")
 	}
@@ -43,10 +44,13 @@ func New() (*Client, error) {
 		token:     token,
 		endpoint:  config.GraphQLEndpoint,
 		logs:      []string{},
+		Config:    config,
 	}
+
 	client.gqlClient.Log = client.addLog
 
 	return client, nil
+
 }
 
 func (c *Client) DoQuery(q string, res interface{}) error {
@@ -99,6 +103,35 @@ func (c *Client) Subscribe(req *Request) *Subscription {
 	}
 
 	return newSubscription(connection)
+}
+
+func (c *Client) ChangeUser(user User) error {
+
+	var token string
+
+	config, err := loadConfig(user)
+	if err != nil {
+		return errors.Wrap(err, "while loading config")
+	}
+
+	if user != NoUser {
+		token, err = authenticate(config.IdProviderConfig)
+		if err != nil {
+			return err
+		}
+	} else {
+		token = ""
+	}
+
+	httpClient := newAuthorizedClient(token)
+	gqlClient := graphql.NewClient(config.GraphQLEndpoint, graphql.WithHTTPClient(httpClient))
+
+	c.token = token
+	c.gqlClient = gqlClient
+
+	c.gqlClient.Log = c.addLog
+
+	return nil
 }
 
 func (c *Client) addLog(log string) {

@@ -3,7 +3,7 @@ title: BackendModule
 type: Custom Resource
 ---
 
-The `backendmodule.ui.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to enable UI API Layer modules.
+The `backendmodules.ui.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to enable UI API Layer modules.
 
 To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 

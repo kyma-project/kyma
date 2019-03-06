@@ -1,0 +1,91 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ template "fullname" . }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: {{ template "fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+    spec:
+      serviceAccountName: {{ template "fullname" . }}
+
+      initContainers:
+      - name: "init-{{ .Chart.Name }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.alpine_net.dir }}alpine-net:{{ .Values.global.alpine_net.version }}"
+        imagePullPolicy: {{ .Values.initImage.pullPolicy }}
+        command: ['sh', '-c', 'until $(curl --output /dev/null --silent --fail http://helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local:2379/health); do echo waiting for etcd service; sleep 2; done;']
+
+      containers:
+      - name: {{ .Chart.Name }}
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        env:
+          - name: APP_TMP_DIR
+            value: /tmp
+          - name: APP_NAMESPACE
+            value: {{ .Release.Namespace }}
+          - name: APP_PORT
+            value: "{{ .Values.service.internalPort }}"
+          - name: APP_CONFIG_FILE_NAME
+            value: /etc/config/helm-broker/config.yaml
+          - name: APP_HELM_TILLER_HOST
+            value: "tiller-deploy.kube-system.svc.cluster.local:44134"
+          - name: APP_CLUSTER_SERVICE_BROKER_NAME
+            value: {{ template "fullname" . }}
+          - name: APP_HELM_BROKER_URL
+            value: http://{{ template "fullname" . }}
+
+        volumeMounts:
+        - mountPath: /tmp
+          name: tmp-empty-dir
+
+        - mountPath: /etc/config/helm-broker
+          name: config-volume
+
+        ports:
+        - containerPort: {{ .Values.service.internalPort }}
+        # Temporary solution for readiness probe
+        # Ref: https://github.com/istio/istio/issues/2628
+        readinessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.service.internalPort }}/statusz
+          failureThreshold: 3
+          initialDelaySeconds: 10
+          periodSeconds: 3
+          successThreshold: 1
+          timeoutSeconds: 2
+        livenessProbe:
+          exec:
+            command:
+              - curl
+              - localhost:{{ .Values.service.internalPort }}/statusz
+          periodSeconds: 10
+          timeoutSeconds: 2
+          successThreshold: 1
+
+      volumes:
+      - name: tmp-empty-dir
+        emptyDir:
+          medium: "Memory" # mount a tmpfs (RAM-backed filesystem). Default emptyDir volumes are stored on whatever medium is backing the node - that might be disk or SSD or network storage, depending on your environment.
+      - name: config-volume
+        configMap:
+          name: helm-config-map

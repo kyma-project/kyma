@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Binding Usage Controller
+name: service-binding-usage-controller
+version: 0.1.0

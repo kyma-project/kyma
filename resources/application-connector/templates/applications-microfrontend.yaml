@@ -1,0 +1,27 @@
+apiVersion: "ui.kyma-project.io/v1alpha1"
+kind: ClusterMicroFrontend
+metadata:
+  name: applicationsmicrofrontend
+  labels:
+    app:  applicationsmicrofrontend
+spec:
+  displayName: Applications
+  version: v1
+  category: Integration
+  placement: cluster
+  viewBaseUrl: 'https://console.{{ js .Values.global.domainName }}/consoleapp.html#'
+  navigationNodes:
+    - label: Applications
+      navigationPath: apps
+      viewUrl: '/home/settings/apps'
+      order: 1
+      settings:
+        readOnly: {{ not .Values.connector_service.enabled }}
+    - label: Application Details
+      navigationPath: apps/details
+      viewUrl: '/home/settings/apps'
+    - label: Application Details
+      navigationPath: apps/details/:name
+      viewUrl: '/home/settings/apps/:name'
+      settings:
+        readOnly: {{ not .Values.connector_service.enabled }}

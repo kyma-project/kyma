@@ -11,23 +11,9 @@ import (
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/clientset/versioned/fake"
 	"github.com/kyma-project/kyma/components/ui-api-layer/pkg/client/informers/externalversions"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/tools/cache"
 )
 
-func TestMakePluggableFunc_PluggabilityDisabled(t *testing.T) {
-	informer := fixInformer()
-	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-
-	moduleMock := new(automock.PluggableModule)
-	moduleMock.On("Enable").Return(nil).Once()
-	defer moduleMock.AssertExpectations(t)
-
-	makePluggable := module.MakePluggableFunc(informer, false)
-	makePluggable(moduleMock)
-}
-
-func TestMakePluggableFunc_PluggabilityEnabled(t *testing.T) {
+func TestMakePluggableFunc_Pluggability(t *testing.T) {
 	foo := "foo"
 	bar := "bar"
 	obj := fixBackendModuleCR(foo)
@@ -36,7 +22,7 @@ func TestMakePluggableFunc_PluggabilityEnabled(t *testing.T) {
 	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
 	informer := informerFactory.Ui().V1alpha1().BackendModules().Informer()
 
-	makePluggable := module.MakePluggableFunc(informer, true)
+	makePluggable := module.MakePluggableFunc(informer)
 
 	fooModule := new(automock.PluggableModule)
 	fooModule.On("Name").Return(foo)
@@ -51,14 +37,6 @@ func TestMakePluggableFunc_PluggabilityEnabled(t *testing.T) {
 	makePluggable(barModule)
 
 	testingUtils.WaitForInformerStartAtMost(t, time.Second, informer)
-}
-
-func fixInformer(objects ...runtime.Object) cache.SharedIndexInformer {
-	client := fake.NewSimpleClientset(objects...)
-	informerFactory := externalversions.NewSharedInformerFactory(client, 0)
-	informer := informerFactory.Ui().V1alpha1().BackendModules().Informer()
-
-	return informer
 }
 
 func fixBackendModuleCR(name string) *v1alpha1.BackendModule {

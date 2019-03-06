@@ -11,27 +11,33 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	ApplicationHeader  = "Application"
+	GroupHeader        = "Group"
+	TenantHeader       = "Tenant"
+	EventsHostHeader   = "EventsHost"
+	MetadataHostHeader = "MetadataHost"
+	Tenant             = "testkit-tenant"
+	Group              = "testkit-group"
+)
+
 type ConnectorClient interface {
 	CreateToken(t *testing.T) TokenResponse
-	GetInfo(t *testing.T, url string) (*InfoResponse, *Error)
+	GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error)
 	CreateCertChain(t *testing.T, csr, url string) (*CrtResponse, *Error)
 }
 
 type connectorClient struct {
-	application    string
-	internalAPIUrl string
-	externalAPIUrl string
-	httpClient     *http.Client
+	httpClient   *http.Client
+	tokenRequest *http.Request
 }
 
-func NewConnectorClient(application, internalAPIUrl, externalAPIUrl string, skipVerify bool) ConnectorClient {
+func NewConnectorClient(tokenRequest *http.Request, skipVerify bool) ConnectorClient {
 	client := NewHttpClient(skipVerify)
 
 	return connectorClient{
-		application:    application,
-		internalAPIUrl: internalAPIUrl,
-		externalAPIUrl: externalAPIUrl,
-		httpClient:     client,
+		httpClient:   client,
+		tokenRequest: tokenRequest,
 	}
 }
 
@@ -44,12 +50,7 @@ func NewHttpClient(skipVerify bool) *http.Client {
 }
 
 func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
-	url := cc.internalAPIUrl + "/v1/applications/" + cc.application + "/tokens"
-
-	request, err := http.NewRequest(http.MethodPost, url, nil)
-	require.NoError(t, err)
-
-	response, err := cc.httpClient.Do(request)
+	response, err := cc.httpClient.Do(cc.tokenRequest)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusCreated {
 		logResponse(t, response)
@@ -65,19 +66,13 @@ func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
 	return tokenResponse
 }
 
-func (cc connectorClient) GetInfo(t *testing.T, url string) (*InfoResponse, *Error) {
-	request, err := http.NewRequest(http.MethodGet, url, nil)
-	require.NoError(t, err)
+func (cc connectorClient) GetInfo(t *testing.T, url string, headers map[string]string) (*InfoResponse, *Error) {
+	request := getRequestWithHeaders(t, url, headers)
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusOK {
-		logResponse(t, response)
-
-		errorResponse := ErrorResponse{}
-		err = json.NewDecoder(response.Body).Decode(&errorResponse)
-		require.NoError(t, err)
-		return nil, &Error{response.StatusCode, errorResponse}
+		return nil, parseErrorResponse(t, response)
 	}
 
 	require.Equal(t, http.StatusOK, response.StatusCode)
@@ -102,11 +97,7 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
 	if response.StatusCode != http.StatusCreated {
-		logResponse(t, response)
-		errorResponse := ErrorResponse{}
-		err = json.NewDecoder(response.Body).Decode(&errorResponse)
-		require.NoError(t, err)
-		return nil, &Error{response.StatusCode, errorResponse}
+		return nil, parseErrorResponse(t, response)
 	}
 
 	require.Equal(t, http.StatusCreated, response.StatusCode)
@@ -119,11 +110,39 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 	return crtResponse, nil
 }
 
+func getRequestWithHeaders(t *testing.T, url string, headers map[string]string) *http.Request {
+	request, err := http.NewRequest(http.MethodGet, url, nil)
+	require.NoError(t, err)
+
+	if headers != nil {
+		for k, v := range headers {
+			request.Header.Set(k, v)
+		}
+	}
+
+	return request
+}
+
+func parseErrorResponse(t *testing.T, response *http.Response) *Error {
+	logResponse(t, response)
+	errorResponse := ErrorResponse{}
+	err := json.NewDecoder(response.Body).Decode(&errorResponse)
+	require.NoError(t, err)
+	return &Error{response.StatusCode, errorResponse}
+}
+
 func logResponse(t *testing.T, resp *http.Response) {
-	dump, err := httputil.DumpResponse(resp, true)
+	respDump, err := httputil.DumpResponse(resp, true)
 	if err != nil {
 		t.Logf("failed to dump response, %s", err)
-	} else {
-		t.Logf("\n--------------------------------\n%s\n--------------------------------", dump)
+	}
+
+	reqDump, err := httputil.DumpRequest(resp.Request, true)
+	if err != nil {
+		t.Logf("failed to dump request, %s", err)
+	}
+
+	if err == nil {
+		t.Logf("\n--------------------------------\n%s\n--------------------------------\n%s\n--------------------------------", reqDump, respDump)
 	}
 }

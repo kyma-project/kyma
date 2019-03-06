@@ -1,0 +1,8 @@
+{
+  "spec": {
+    "id": "backup",
+    "displayName": "Backup",
+    "description": "Overall documentation for Backup",
+    "type": "Components"
+  }
+}

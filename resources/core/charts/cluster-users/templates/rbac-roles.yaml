@@ -33,8 +33,12 @@ rules:
 - apiGroups: ["", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma-project.io", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma-project.io", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "networking.istio.io"]
   resources: ["*"]
   verbs: ["get", "list"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["selfsubjectrulesreviews", "selfsubjectaccessreviews"]
+  verbs: ["create"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["get", "list"]
+
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
@@ -56,6 +60,9 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 - kind: User
   name: user2@kyma.cx
+  apiGroup: rbac.authorization.k8s.io
+- kind: User
+  name: read-only-user@kyma.cx
   apiGroup: rbac.authorization.k8s.io
 {{- range .Values.bindings.kymaView.groups }}
 - kind: Group
@@ -80,7 +87,10 @@ rules:
   verbs: ["*"]
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
-  verbs: ["get", "list"]
+  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["selfsubjectrulesreviews", "selfsubjectaccessreviews", "subjectaccessreviews"]
+  verbs: ["create"]
 - nonResourceURLs: ["*"] #give access to all non resource urls
   verbs: ["*"]
 ---
@@ -115,3 +125,81 @@ subjects:
   name: {{ . }}
   apiGroup: rbac.authorization.k8s.io
 {{- end }}
+
+# kyma-edit = edit permissions on kyma resources
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-edit
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups: ["authentication.kyma-project.io", "gateway.kyma-project.io", "kubeless.io", "applicationconnector.kyma-project.io", "servicecatalog.kyma-project.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "ui.kyma.cx", "ui.kyma-project.io", "networking.istio.io"]
+  resources: ["*"]
+  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: ["selfsubjectrulesreviews", "selfsubjectaccessreviews"]
+  verbs: ["create"]
+- nonResourceURLs: ["*"] #give access to all non resource urls
+  verbs: ["*"]
+
+# Cluster developer role
+# Kyma-developer = kyma-edit + k8s-edit
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kyma-developer
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+  annotations:
+    "helm.sh/hook-weight": "0"
+aggregationRule:
+  clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.k8s.io/aggregate-to-edit: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
+rules: []
+
+# Minimal cluster view role
+# kyma-essentials
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-essentials
+rules:
+- apiGroups:
+    - ui.kyma-project.io
+    - servicecatalog.k8s.io
+    - authentication.kyma-project.io
+    - rbac.authorization.k8s.io
+    - gateway.kyma-project.io
+  resources: ["*"]
+  verbs: ["list"]
+- apiGroups: [""]
+  resources: 
+    - namespaces
+  verbs: ["list"]
+- apiGroups: ["apiextensions.k8s.io"]
+  resources: ["customresourcedefinitions"]
+  verbs: ["list"]
+- apiGroups: ["authorization.k8s.io"]
+  resources: 
+    - selfsubjectrulesreviews
+    - selfsubjectaccessreviews
+    - subjectaccessreviews
+  verbs: ["create"]
+- nonResourceURLs: ["*"] #give access to all non resource urls
+  verbs: ["list"]

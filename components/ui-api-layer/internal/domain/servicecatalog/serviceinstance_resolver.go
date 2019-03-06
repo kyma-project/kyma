@@ -22,8 +22,8 @@ type clusterServicePlanGetter interface {
 
 //go:generate mockery -name=servicePlanGetter -output=automock -outpkg=automock -case=underscore
 type servicePlanGetter interface {
-	Find(name, environment string) (*v1beta1.ServicePlan, error)
-	FindByExternalName(planExternalName, className, environment string) (*v1beta1.ServicePlan, error)
+	Find(name, namespace string) (*v1beta1.ServicePlan, error)
+	FindByExternalName(planExternalName, className, namespace string) (*v1beta1.ServicePlan, error)
 }
 
 type serviceInstanceResolver struct {
@@ -58,8 +58,8 @@ func (r *serviceInstanceResolver) CreateServiceInstanceMutation(ctx context.Cont
 	parameters := r.instanceConverter.GQLCreateInputToInstanceCreateParameters(&params)
 	item, err := r.instanceSvc.Create(*parameters)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s `%s` in environment `%s`", pretty.ServiceInstance, params.Name, params.Environment))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithEnvironment(params.Environment))
+		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.ServiceInstance, params.Name, params.Namespace))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithNamespace(params.Namespace))
 	}
 
 	// ServicePlan and ServiceClass references are empty just after the resource has been created
@@ -140,45 +140,45 @@ func (r *serviceInstanceResolver) CreateServiceInstanceMutation(ctx context.Cont
 	instance, err := r.instanceConverter.ToGQL(instanceCopy)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithEnvironment(params.Environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithNamespace(params.Namespace))
 	}
 
 	return instance, nil
 }
 
-func (r *serviceInstanceResolver) DeleteServiceInstanceMutation(ctx context.Context, name, environment string) (*gqlschema.ServiceInstance, error) {
-	instance, err := r.instanceSvc.Find(name, environment)
+func (r *serviceInstanceResolver) DeleteServiceInstanceMutation(ctx context.Context, name, namespace string) (*gqlschema.ServiceInstance, error) {
+	instance, err := r.instanceSvc.Find(name, namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while finding %s `%s` in environment `%s`", pretty.ServiceInstance, name, environment))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while finding %s `%s` in namespace `%s`", pretty.ServiceInstance, name, namespace))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	if instance == nil {
-		glog.Error(fmt.Errorf("cannot find %s `%s` in environment `%s`", pretty.ServiceInstance, name, environment))
-		return nil, gqlerror.NewNotFound(pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+		glog.Error(fmt.Errorf("cannot find %s `%s` in namespace `%s`", pretty.ServiceInstance, name, namespace))
+		return nil, gqlerror.NewNotFound(pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	instanceCopy := instance.DeepCopy()
-	err = r.instanceSvc.Delete(name, environment)
+	err = r.instanceSvc.Delete(name, namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from environment `%s`", pretty.ServiceInstance, name, environment))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.ServiceInstance, name, namespace))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	deletedInstance, err := r.instanceConverter.ToGQL(instanceCopy)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return deletedInstance, nil
 }
 
-func (r *serviceInstanceResolver) ServiceInstanceQuery(ctx context.Context, name string, environment string) (*gqlschema.ServiceInstance, error) {
-	serviceInstance, err := r.instanceSvc.Find(name, environment)
+func (r *serviceInstanceResolver) ServiceInstanceQuery(ctx context.Context, name string, namespace string) (*gqlschema.ServiceInstance, error) {
+	serviceInstance, err := r.instanceSvc.Find(name, namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s `%s` from environment `%s`", pretty.ServiceInstance, name, environment))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while getting %s `%s` from namespace `%s`", pretty.ServiceInstance, name, namespace))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 	if serviceInstance == nil {
 		return nil, nil
@@ -187,47 +187,47 @@ func (r *serviceInstanceResolver) ServiceInstanceQuery(ctx context.Context, name
 	result, err := r.instanceConverter.ToGQL(serviceInstance)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
 	return result, nil
 }
 
-func (r *serviceInstanceResolver) ServiceInstancesQuery(ctx context.Context, environment string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
+func (r *serviceInstanceResolver) ServiceInstancesQuery(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
 	var items []*v1beta1.ServiceInstance
 	var err error
 
 	if status != nil {
 		statusType := r.instanceConverter.GQLStatusTypeToServiceStatusType(*status)
-		items, err = r.instanceSvc.ListForStatus(environment, pager.PagingParams{
+		items, err = r.instanceSvc.ListForStatus(namespace, pager.PagingParams{
 			First:  first,
 			Offset: offset,
 		}, &statusType)
 	} else {
-		items, err = r.instanceSvc.List(environment, pager.PagingParams{
+		items, err = r.instanceSvc.List(namespace, pager.PagingParams{
 			First:  first,
 			Offset: offset,
 		})
 	}
 
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while listing %s for environment %s", pretty.ServiceInstances, environment))
-		return nil, gqlerror.New(err, pretty.ServiceInstances, gqlerror.WithEnvironment(environment))
+		glog.Error(errors.Wrapf(err, "while listing %s for namespace %s", pretty.ServiceInstances, namespace))
+		return nil, gqlerror.New(err, pretty.ServiceInstances, gqlerror.WithNamespace(namespace))
 	}
 
 	serviceInstances, err := r.instanceConverter.ToGQLs(items)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstances))
-		return nil, gqlerror.New(err, pretty.ServiceInstances, gqlerror.WithEnvironment(environment))
+		return nil, gqlerror.New(err, pretty.ServiceInstances, gqlerror.WithNamespace(namespace))
 	}
 
 	return serviceInstances, nil
 }
 
-func (r *serviceInstanceResolver) ServiceInstanceEventSubscription(ctx context.Context, environment string) (<-chan gqlschema.ServiceInstanceEvent, error) {
+func (r *serviceInstanceResolver) ServiceInstanceEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceInstanceEvent, error) {
 	channel := make(chan gqlschema.ServiceInstanceEvent, 1)
 	filter := func(instance *v1beta1.ServiceInstance) bool {
-		return instance != nil && instance.Namespace == environment
+		return instance != nil && instance.Namespace == namespace
 	}
 
 	instanceListener := listener.NewInstance(channel, filter, r.instanceConverter)
@@ -259,7 +259,7 @@ func (r *serviceInstanceResolver) ServiceInstanceClusterServicePlanField(ctx con
 
 	item, err := r.clusterServicePlanGetter.Find(obj.PlanReference.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s for %s `%s` in environment `%s`", pretty.ClusterServicePlan, pretty.ServiceInstance, obj.Name, obj.Environment))
+		glog.Error(errors.Wrapf(err, "while getting %s for %s `%s` in namespace `%s`", pretty.ClusterServicePlan, pretty.ServiceInstance, obj.Name, obj.Namespace))
 		return nil, gqlerror.New(err, pretty.ClusterServicePlan, gqlerror.WithName(obj.PlanReference.Name))
 	}
 	if item == nil {
@@ -292,7 +292,7 @@ func (r *serviceInstanceResolver) ServiceInstanceClusterServiceClassField(ctx co
 
 	serviceClass, err := r.clusterServiceClassGetter.Find(obj.ClassReference.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s for %s %s in environment `%s`", pretty.ClusterServiceClass, pretty.ServiceInstance, obj.Name, obj.Environment))
+		glog.Error(errors.Wrapf(err, "while getting %s for %s %s in namespace `%s`", pretty.ClusterServiceClass, pretty.ServiceInstance, obj.Name, obj.Namespace))
 		return nil, gqlerror.New(err, pretty.ClusterServiceClass, gqlerror.WithName(obj.ClassReference.Name))
 	}
 	if serviceClass == nil {
@@ -323,9 +323,9 @@ func (r *serviceInstanceResolver) ServiceInstanceServicePlanField(ctx context.Co
 		return nil, nil
 	}
 
-	item, err := r.servicePlanGetter.Find(obj.PlanReference.Name, obj.Environment)
+	item, err := r.servicePlanGetter.Find(obj.PlanReference.Name, obj.Namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s for %s `%s` in environment `%s`", pretty.ServicePlan, pretty.ServiceInstance, obj.Name, obj.Environment))
+		glog.Error(errors.Wrapf(err, "while getting %s for %s `%s` in namespace `%s`", pretty.ServicePlan, pretty.ServiceInstance, obj.Name, obj.Namespace))
 		return nil, gqlerror.New(err, pretty.ServicePlan, gqlerror.WithName(obj.PlanReference.Name))
 	}
 	if item == nil {
@@ -356,9 +356,9 @@ func (r *serviceInstanceResolver) ServiceInstanceServiceClassField(ctx context.C
 		return nil, nil
 	}
 
-	serviceClass, err := r.serviceClassGetter.Find(obj.ClassReference.Name, obj.Environment)
+	serviceClass, err := r.serviceClassGetter.Find(obj.ClassReference.Name, obj.Namespace)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s for %s %s in environment `%s`", pretty.ServiceClass, pretty.ServiceInstance, obj.Name, obj.Environment))
+		glog.Error(errors.Wrapf(err, "while getting %s for %s %s in namespace `%s`", pretty.ServiceClass, pretty.ServiceInstance, obj.Name, obj.Namespace))
 		return nil, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(obj.ClassReference.Name))
 	}
 	if serviceClass == nil {
@@ -391,15 +391,15 @@ func (r *serviceInstanceResolver) ServiceInstanceBindableField(ctx context.Conte
 	}
 
 	if !obj.ClassReference.ClusterWide {
-		serviceClass, err := r.serviceClassGetter.Find(obj.ClassReference.Name, obj.Environment)
+		serviceClass, err := r.serviceClassGetter.Find(obj.ClassReference.Name, obj.Namespace)
 		if err != nil {
-			glog.Error(errors.Wrapf(err, "while getting %s for instance %s in environment `%s` in order to resolve `bindable` field", pretty.ServiceClass, obj.Name, obj.Environment))
+			glog.Error(errors.Wrapf(err, "while getting %s for instance %s in namespace `%s` in order to resolve `bindable` field", pretty.ServiceClass, obj.Name, obj.Namespace))
 			return false, gqlerror.New(err, pretty.ServiceClass, gqlerror.WithName(obj.ClassReference.Name))
 		}
 
-		servicePlan, err := r.servicePlanGetter.Find(obj.PlanReference.Name, obj.Environment)
+		servicePlan, err := r.servicePlanGetter.Find(obj.PlanReference.Name, obj.Namespace)
 		if err != nil {
-			glog.Error(errors.Wrapf(err, "while getting %s for instance %s in environment `%s` in order to resolve `bindable` field", pretty.ServicePlan, obj.Name, obj.Environment))
+			glog.Error(errors.Wrapf(err, "while getting %s for instance %s in namespace `%s` in order to resolve `bindable` field", pretty.ServicePlan, obj.Name, obj.Namespace))
 			return false, gqlerror.New(err, pretty.ServicePlan, gqlerror.WithName(obj.PlanReference.Name))
 		}
 
@@ -408,13 +408,13 @@ func (r *serviceInstanceResolver) ServiceInstanceBindableField(ctx context.Conte
 
 	serviceClass, err := r.clusterServiceClassGetter.Find(obj.ClassReference.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s for instance %s in environment `%s` in order to resolve `bindable` field", pretty.ClusterServiceClass, obj.Name, obj.Environment))
+		glog.Error(errors.Wrapf(err, "while getting %s for instance %s in namespace `%s` in order to resolve `bindable` field", pretty.ClusterServiceClass, obj.Name, obj.Namespace))
 		return false, gqlerror.New(err, pretty.ClusterServiceClass, gqlerror.WithName(obj.ClassReference.Name))
 	}
 
 	servicePlan, err := r.clusterServicePlanGetter.Find(obj.PlanReference.Name)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while getting %s for instance %s in environment `%s` in order to resolve `bindable` field", pretty.ClusterServicePlan, obj.Name, obj.Environment))
+		glog.Error(errors.Wrapf(err, "while getting %s for instance %s in namespace `%s` in order to resolve `bindable` field", pretty.ClusterServicePlan, obj.Name, obj.Namespace))
 		return false, gqlerror.New(err, pretty.ClusterServicePlan, gqlerror.WithName(obj.PlanReference.Name))
 	}
 

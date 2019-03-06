@@ -1,57 +1,49 @@
 package internalapi
 
 import (
-	"encoding/json"
 	"fmt"
 	"net/http"
 
-	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/tokens"
 )
 
-const TokenURL = "https://%s/v1/applications/%s/info?token=%s"
+const TokenURLFormat = "%s?token=%s"
 
 type tokenHandler struct {
-	tokenGenerator tokens.TokenGenerator
-	host           string
+	tokenManager             tokens.Creator
+	csrInfoURL               string
+	connectorClientExtractor clientcontext.ConnectorClientExtractor
 }
 
-func NewTokenHandler(tokenGenerator tokens.TokenGenerator, host string) TokenHandler {
-	return &tokenHandler{tokenGenerator: tokenGenerator, host: host}
+func NewTokenHandler(tokenManager tokens.Creator, csrInfoURL string, connectorClientExtractor clientcontext.ConnectorClientExtractor) TokenHandler {
+	return &tokenHandler{tokenManager: tokenManager, csrInfoURL: csrInfoURL, connectorClientExtractor: connectorClientExtractor}
 }
 
-func (tg *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
-	appName := mux.Vars(r)["appName"]
-	token, err := tg.tokenGenerator.NewToken(appName)
+func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
+	clientContextService, err := th.connectorClientExtractor(r.Context())
 	if err != nil {
-		respondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
-	url := fmt.Sprintf(TokenURL, tg.host, appName, token)
+	logger := clientContextService.GetLogger()
+
+	logger.Info("Generating token")
+	token, err := th.tokenManager.Save(clientContextService)
+	if err != nil {
+		logger.Error(err)
+		httphelpers.RespondWithError(w, err)
+		return
+	}
+
+	url := fmt.Sprintf(TokenURLFormat, th.csrInfoURL, token)
 	res := tokenResponse{URL: url, Token: token}
 
-	respondWithBody(w, 201, res)
-}
-
-func respondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
-	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
-
-	respond(w, statusCode)
-	json.NewEncoder(w).Encode(responseBody)
-}
-
-func respond(w http.ResponseWriter, statusCode int) {
-	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
-	w.WriteHeader(statusCode)
-}
-
-func respondWithBody(w http.ResponseWriter, statusCode int, responseBody interface{}) {
-	respond(w, statusCode)
-	json.NewEncoder(w).Encode(responseBody)
+	httphelpers.RespondWithBody(w, 201, res)
 }
 
 type tokenResponse struct {

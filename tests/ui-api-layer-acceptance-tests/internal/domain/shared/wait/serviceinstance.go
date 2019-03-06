@@ -8,9 +8,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func ForServiceInstanceReady(instanceName, environment string, svcatCli *clientset.Clientset) error {
+func ForServiceInstanceReady(instanceName, namespace string, svcatCli *clientset.Clientset) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		instance, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(environment).Get(instanceName, metav1.GetOptions{})
+		instance, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(namespace).Get(instanceName, metav1.GetOptions{})
 		if err != nil || instance == nil {
 			return false, err
 		}
@@ -26,9 +26,9 @@ func ForServiceInstanceReady(instanceName, environment string, svcatCli *clients
 	}, readyTimeout)
 }
 
-func ForServiceInstanceDeletion(instanceName, environment string, svcatCli *clientset.Clientset) error {
+func ForServiceInstanceDeletion(instanceName, namespace string, svcatCli *clientset.Clientset) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		_, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(environment).Get(instanceName, metav1.GetOptions{})
+		_, err := svcatCli.ServicecatalogV1beta1().ServiceInstances(namespace).Get(instanceName, metav1.GetOptions{})
 
 		if errors.IsNotFound(err) {
 			return true, nil

@@ -1,0 +1,44 @@
+{{- if .Values.global.rbac.create }}
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "loki.fullname" . }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  origins:
+  - jwt:
+      issuer: https://dex.{{ .Values.global.domainName }}
+      jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+  principalBinding: USE_ORIGIN
+  targets:
+  - name: {{ template "loki.fullname" . }}
+    ports:
+    - name: http
+    - number: 3100
+  originIsOptional: true
+  peers:
+  - mtls:
+      allowTls: true
+      mode: PERMISSIVE
+  peerIsOptional: true
+
+{{- end }}
+---
+{{- if .Values.global.rbac.create }}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "loki.fullname" . }}
+  labels:
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
+spec:
+  host: logging-loki
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL
+{{- end }}

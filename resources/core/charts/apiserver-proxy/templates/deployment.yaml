@@ -4,14 +4,12 @@ metadata:
   name: {{ template "name" . }}
   namespace: {{ .Release.Namespace }}
 spec:
-  {{ if not .Values.global.isLocalEnv }}
-  replicas: 2
+  replicas: 1
   strategy:
     type: RollingUpdate
     rollingUpdate:
       maxUnavailable: 1  
       maxSurge: 1
-  {{ end }}
   template:
     metadata:
       annotations:

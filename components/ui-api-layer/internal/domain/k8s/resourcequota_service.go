@@ -28,8 +28,8 @@ func newResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer ca
 	}
 }
 
-func (svc *resourceQuotaService) ListResourceQuotas(environment string) ([]*v1.ResourceQuota, error) {
-	items, err := svc.rqInformer.GetIndexer().ByIndex(cache.NamespaceIndex, environment)
+func (svc *resourceQuotaService) ListResourceQuotas(namespace string) ([]*v1.ResourceQuota, error) {
+	items, err := svc.rqInformer.GetIndexer().ByIndex(cache.NamespaceIndex, namespace)
 	if err != nil {
 		return []*v1.ResourceQuota{}, err
 	}
@@ -46,8 +46,8 @@ func (svc *resourceQuotaService) ListResourceQuotas(environment string) ([]*v1.R
 	return result, nil
 }
 
-func (svc *resourceQuotaService) ListReplicaSets(environment string) ([]*apps.ReplicaSet, error) {
-	items, err := svc.rsInformer.GetIndexer().ByIndex(cache.NamespaceIndex, environment)
+func (svc *resourceQuotaService) ListReplicaSets(namespace string) ([]*apps.ReplicaSet, error) {
+	items, err := svc.rsInformer.GetIndexer().ByIndex(cache.NamespaceIndex, namespace)
 	if err != nil {
 		return []*apps.ReplicaSet{}, err
 	}
@@ -64,8 +64,8 @@ func (svc *resourceQuotaService) ListReplicaSets(environment string) ([]*apps.Re
 	return result, nil
 }
 
-func (svc *resourceQuotaService) ListStatefulSets(environment string) ([]*apps.StatefulSet, error) {
-	items, err := svc.ssInformer.GetIndexer().ByIndex(cache.NamespaceIndex, environment)
+func (svc *resourceQuotaService) ListStatefulSets(namespace string) ([]*apps.StatefulSet, error) {
+	items, err := svc.ssInformer.GetIndexer().ByIndex(cache.NamespaceIndex, namespace)
 	if err != nil {
 		return []*apps.StatefulSet{}, err
 	}
@@ -82,7 +82,7 @@ func (svc *resourceQuotaService) ListStatefulSets(environment string) ([]*apps.S
 	return result, nil
 }
 
-func (svc *resourceQuotaService) ListPods(environment string, labelSelector map[string]string) ([]v1.Pod, error) {
+func (svc *resourceQuotaService) ListPods(namespace string, labelSelector map[string]string) ([]v1.Pod, error) {
 	selectors := make([]string, 0)
 	for key, value := range labelSelector {
 		selectors = append(selectors, fmt.Sprintf("%s=%s", key, value))
@@ -90,11 +90,11 @@ func (svc *resourceQuotaService) ListPods(environment string, labelSelector map[
 
 	selector := strings.Join(selectors, ",")
 
-	pods, err := svc.podClient.Pods(environment).List(metaV1.ListOptions{
+	pods, err := svc.podClient.Pods(namespace).List(metaV1.ListOptions{
 		LabelSelector: selector,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing Pods in environment: %selector, with labelSelector: %selector", environment, labelSelector)
+		return nil, errors.Wrapf(err, "while listing Pods in namespace: %selector, with labelSelector: %selector", namespace, labelSelector)
 	}
 
 	return pods.Items, err

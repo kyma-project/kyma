@@ -11,7 +11,14 @@ oidc:
   jaegerClientId: jaeger
   jaegerClientName: 'Jaeger UI'
 
+dex:
+  expiry:
+    signingKeys: "720h"
+    idTokens: "8h"
+
 global:
+  isLocalEnv: false
+  knative: false
   gateway:
     name: kyma-gateway
   static_users_generator:

@@ -1,5 +1,7 @@
 package testkit
 
+import "crypto/x509"
+
 type TokenResponse struct {
 	URL   string `json:"url"`
 	Token string `json:"token"`
@@ -11,10 +13,35 @@ type InfoResponse struct {
 	Certificate CertInfo `json:"certificate"`
 }
 
+type ManagementInfoResponse struct {
+	URLs           ManagementInfoURLs        `json:"urls"`
+	ClientIdentity ApplicationClientIdentity `json:"clientIdentity"`
+}
+
+type ApplicationClientIdentity struct {
+	Application string `json:"application,omitempty"`
+	ClusterClientIdentity
+}
+
+type ClusterClientIdentity struct {
+	Group  string `json:"group"`
+	Tenant string `json:"tenant"`
+}
+
+type ManagementInfoURLs struct {
+	*RuntimeURLs
+	RenewCertUrl string `json:"renewCertUrl"`
+}
+
+type RuntimeURLs struct {
+	MetadataUrl string `json:"metadataUrl"`
+	EventsUrl   string `json:"eventsUrl"`
+}
+
 type ApiInfo struct {
-	MetadataURL     string `json:"metadataUrl"`
-	EventsURL       string `json:"eventsUrl"`
-	CertificatesUrl string `json:"certificatesUrl"`
+	*RuntimeURLs
+	ManagementInfoURL string `json:"infoUrl"`
+	CertificatesUrl   string `json:"certificatesUrl"`
 }
 
 type CertInfo struct {
@@ -28,7 +55,9 @@ type CsrRequest struct {
 }
 
 type CrtResponse struct {
-	Crt string `json:"crt"`
+	CRTChain  string `json:"crt"`
+	ClientCRT string `json:"clientCrt"`
+	CaCRT     string `json:"caCrt"`
 }
 
 type ErrorResponse struct {
@@ -39,4 +68,10 @@ type ErrorResponse struct {
 type Error struct {
 	StatusCode    int
 	ErrorResponse ErrorResponse
+}
+
+type DecodedCrtResponse struct {
+	CRTChain  []*x509.Certificate
+	ClientCRT *x509.Certificate
+	CaCRT     *x509.Certificate
 }

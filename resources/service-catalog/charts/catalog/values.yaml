@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: quay.io/kubernetes-service-catalog/service-catalog:v0.1.38
+image: quay.io/kubernetes-service-catalog/service-catalog:v0.1.41
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
@@ -144,6 +144,8 @@ controllerManager:
   # Whether or not the controller supports a --broker-relist-interval flag. If this is 
   # set to true, brokerRelistInterval will be used as the value for that flag
   brokerRelistIntervalActivated: true
+  # The maximum amount of time to back-off while polling an OSB API operation; format is a duration (`20m`, `1h`, etc)
+  operationPollingMaximumBackoffDuration: 20m
   # enables profiling via web interface host:port/debug/pprof/
   profiling:
     # Disable profiling via web interface host:port/debug/pprof/
