@@ -155,41 +155,47 @@ func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
 
 	m := f.(map[string]interface{})
 
-	for key1, _ := range m {
+	for key1, val1 := range m {
 		switch key1 {
 		case "status":
-			status := m[key1].(string)
-			qresp.Status = status
+			qresp.Status = val1.(string)
 		case "data":
-			data := m[key1]
+
+			data := val1.(map[string]interface{})
 			respData := &responseData{}
-			for key2, d := range data.(map[string]interface{}) {
+			for key2, val2 := range data {
+
 				switch key2 {
 				case "resultType":
-					respData.ResultType = d.(string)
+					respData.ResultType = val2.(string)
 				case "result":
-					reslt := d
+
+					reslt := val2.([]interface{})
 					result := make([]dataResult, 2)
-					for idx, r := range  reslt.([]interface {})  {
+					for idx, r := range reslt {
 						datResult := &dataResult{}
-						for o,v  := range r.(map[string]interface{}) {
+						for o, v := range r.(map[string]interface{}) {
 							switch o {
 							case "metric":
 								datResult.Metric = v.(map[string]interface{})
 							case "value":
-								datResult.Value = v.([]interface {})
+								datResult.Value = v.([]interface{})
 							}
 						}
 						result[idx] = *datResult
 					}
 					respData.Result = result
+
 				}
 			}
+
 			qresp.Data = *respData
+
 		default:
 			return fmt.Errorf("%s is not part of the expected query response: ", key1)
 		}
 	}
+	fmt.Println("qresp: ",qresp)
 
 	return nil
 }
