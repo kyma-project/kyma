@@ -40,19 +40,6 @@ var (
 	emptyListReleaseResponse = &rls.ListReleasesResponse{}
 )
 
-type applicationChecker struct {
-	t                   *testing.T
-	expectedStatus      string
-	expectedDescription string
-}
-
-func (checker applicationChecker) checkStatus(args mock.Arguments) {
-	appInstance := args.Get(0).(*v1alpha1.Application)
-
-	assert.Equal(checker.t, checker.expectedStatus, appInstance.Status.InstallationStatus.Status)
-	assert.Equal(checker.t, checker.expectedDescription, appInstance.Status.InstallationStatus.Description)
-}
-
 func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 
 	application := &v1alpha1.Application{
@@ -305,14 +292,6 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 
 	t.Run("should set a proper status if upgrade failed", func(t *testing.T) {
 		// given
-		releaseStatus := hapi_release5.Status_FAILED
-		statusDescription := "Failed"
-
-		statusChecker := applicationChecker{
-			t:                   t,
-			expectedStatus:      releaseStatus.String(),
-			expectedDescription: statusDescription,
-		}
 
 		updateResponse := &rls.UpdateReleaseResponse{
 			Release: &hapi_release5.Release{
@@ -336,10 +315,19 @@ func TestReleaseManager_UpgradeReleases(t *testing.T) {
 			},
 		}
 
+		updatedApplication := &v1alpha1.Application{
+			ObjectMeta: v1.ObjectMeta{Name: "app-1"},
+			Status: v1alpha1.ApplicationStatus{
+				InstallationStatus: v1alpha1.InstallationStatus{
+					Status:      "FAILED",
+					Description: "",
+				},
+			},
+		}
+
 		appClient := &mocks.ApplicationClient{}
 		appClient.On("List", mock.AnythingOfType("ListOptions")).Return(applicationList, nil)
-		appClient.On("Update", mock.AnythingOfType("*v1alpha1.Application")).Run(statusChecker.checkStatus).
-			Return(&applicationList.Items[0], nil)
+		appClient.On("Update", updatedApplication).Return(&applicationList.Items[0], nil)
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("UpdateReleaseFromChart", applicationChartDirectory, "app-1", mock.AnythingOfType("string")).Return(updateResponse, errors.New("Error"))
