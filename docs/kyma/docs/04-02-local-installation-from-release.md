@@ -7,7 +7,7 @@ This Installation guide shows developers how to quickly deploy Kyma locally on a
 
 ## Prerequisites
 
-To run Kyma locally, clone this Git repository to your machine and check out the latest release.
+To run Kyma locally, clone [this](https://github.com/kyma-project/kyma) Git repository to your machine and check out the latest release.
 
 Additionally, download these tools:
 
