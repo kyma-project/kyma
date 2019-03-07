@@ -25,6 +25,7 @@ spec:
           args:
             - --port={{ .Values.port }}
             - --resyncPeriod={{ .Values.global.subscriptionControllerKnative.resyncPeriod }}
+            - --channelTimeout={{ .Values.global.subscriptionControllerKnative.channelTimeout }}
           ports:
             - name: http
               containerPort: {{ .Values.port }}

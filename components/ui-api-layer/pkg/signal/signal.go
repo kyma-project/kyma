@@ -1,4 +1,4 @@
-// Copied from github.com/kyma-project/kyma/components/binding-usage-controller/pkg/signal/signal.go
+// Copied from github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/signal/signal.go
 
 package signal
 
