@@ -1,11 +1,11 @@
 FROM golang:1.10-alpine as builder
 
+RUN apk add -U --no-cache ca-certificates
+
 ARG DOCK_PKG_DIR=/go/src/github.com/kyma-project/kyma/components/application-registry
 
 WORKDIR $DOCK_PKG_DIR
 COPY . $DOCK_PKG_DIR
-
-RUN apk update && apk add --no-cache git ca-certificates && update-ca-certificates
 
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o applicationregistry ./cmd/applicationregistry
 
