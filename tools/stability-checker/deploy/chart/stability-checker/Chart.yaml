@@ -1,5 +1,0 @@
-apiVersion: v1
-appVersion: "b4384a6e"
-description: A Helm chart for running stability tests
-name: stability-checker
-version: 0.1.0
