@@ -197,6 +197,7 @@ Follow these steps:
     ```
     kubectl apply -f my-kyma.yaml
     ```
+
 3. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
     kubectl get pods --all-namespaces
