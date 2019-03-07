@@ -6,7 +6,7 @@ type: Installation
 This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
 
 ## Prerequisites
-- A domain for your AKS cluster
+- A domain for your AKS cluster (optional)
 - [Microsoft Azure](https://azure.microsoft.com)
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
