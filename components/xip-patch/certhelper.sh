@@ -24,8 +24,7 @@ if [ "${discoverUnsetVar}" = true ] ; then
     exit 1
 fi
 
-if [[ -z "${DOMAIN}" ]]; then
-  echo "---> DOMAIN not SET. Creating..."
+function generateXipDomain() {
   INGRESS_IP=$(getLoadBalancerIPFromLabel "${LB_LABEL}" "${LB_NAMESPACE}")
   DOMAIN="${INGRESS_IP}.xip.io"
   DOMAIN_YAML=$(cat << EOF
@@ -36,9 +35,9 @@ EOF
 )
   echo "---> DOMAIN created: ${DOMAIN}, patching configmap"
   kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
-fi
+}
 
-if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
+function generateCerts() {
   echo "---> Generating Certs for ${DOMAIN}"
   generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
   TLS_CERT=$(base64 /root/cert.pem | tr -d '\n')
@@ -52,5 +51,17 @@ data:
 EOF
 )
   echo "---> Certs have been created, patching configmap"
-  kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
+  kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer 
+}
+
+if [ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
+    if [[ -z "${DOMAIN}" ]]; then
+        generateXipDomain
+    fi
+    generateCerts
+    exit 0
+fi
+if [ -z "${DOMAIN}" ]; then
+    echo "Invalid setup - no domain for provided certs"
+    exit 1
 fi
