@@ -54,14 +54,14 @@ EOF
   kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer 
 }
 
-if [ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
+if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
     if [[ -z "${DOMAIN}" ]]; then
         generateXipDomain
     fi
     generateCerts
     exit 0
 fi
-if [ -z "${DOMAIN}" ]; then
+if [[ -z "${DOMAIN}" ]]; then
     echo "Invalid setup - no domain for provided certs"
     exit 1
 fi
