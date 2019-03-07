@@ -70,6 +70,10 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, updateStatusErr
 	}
 
+	if !requeue && reconcileErr == nil {
+		log.Info("EventActivation reconciled")
+		r.recorder.Eventf(ea, corev1.EventTypeNormal, "EventactivationReconciled", "EventActivation reconciled, name: %q; namespace: %q", ea.Name, ea.Namespace)
+	}
 	return reconcile.Result{
 		Requeue: requeue,
 	}, reconcileErr

@@ -70,7 +70,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 		r.recorder.Eventf(subscription, corev1.EventTypeWarning, subReconcileFailed, "Subscription reconciliation failed: %v", err)
 	} else {
 		log.Info("Subscription reconciled")
-		r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled, "Subscription reconciled: %q", subscription.Name)
+		r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled, "Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
 	}
 
 	/*if err = util.UpdateSubscriptionStatus(ctx, r.client, subscription); err != nil {
