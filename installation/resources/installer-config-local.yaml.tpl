@@ -46,18 +46,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: application-connector-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: application-connector
-    kyma-project.io/installation: ""
-data:
-  connector-service.tests.skipSslVerify: "true"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
