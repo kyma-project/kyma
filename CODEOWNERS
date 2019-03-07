@@ -9,6 +9,9 @@
 
 /common/ @mszostok @aszecowka @piotrmiskiewicz @sjanota @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
+# Microfrontend k8s client
+/common/microfrontend-client/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @sjanota @kubadz @Demonsthere @kfurgol
 
@@ -204,9 +207,6 @@
 
 # IDPPreset Component
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
-
-# Microfrontend Component
-/components/microfrontend-client/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
 
 # Connector Service Component
 /components/connector-service/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
