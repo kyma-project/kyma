@@ -17,7 +17,7 @@ import (
 )
 
 var (
-	defaultChannelNamespace = "kyma-system"
+	defaultChannelNamespace = knative.GetDefaultChannelNamespace()
 )
 
 func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer) http.HandlerFunc {

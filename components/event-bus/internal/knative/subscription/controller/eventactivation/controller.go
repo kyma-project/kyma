@@ -9,10 +9,10 @@ import (
 	eventactivationv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 )
 
-var log = logf.Log.WithName("ea-controller")
+var log = logf.Log.WithName("eventactivation-controller")
 
 const (
-	controllerAgentName = "ea-controller"
+	controllerAgentName = "eventactivation-controller"
 )
 
 // ProvideController returns an EventActivation controller.
@@ -40,8 +40,6 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 		log.Error(err, "Unable to watch EventActivation")
 		return nil, err
 	}
-
-
 
 	return c, nil
 }
