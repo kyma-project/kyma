@@ -45,7 +45,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
-	backupTests := []BackupTest{myFunctionTest, myDeploymentTest, myStatefulSetTest, myPrometheusTest}
+	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest}
 
 	e2eTests := make([]e2eTest, len(backupTests))
 
