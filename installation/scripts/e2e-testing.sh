@@ -43,6 +43,7 @@ do
 
     helm install $testcase --name $release --namespace end-to-end
     helm test $release --timeout 10000
+    false
     testResult=$?
     if [ $testResult -eq 0 ]
     then
