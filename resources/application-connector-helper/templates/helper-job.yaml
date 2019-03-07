@@ -27,9 +27,9 @@ spec:
         - name: DOMAIN
           value: {{ .Values.global.applicationConnectorDomainName }}
         - name: TLS_CRT
-          value: {{ .Values.global.tlsCrt }}
+          value: {{ .Values.global.applicationConnector.tlsCrt }}
         - name: TLS_KEY
-          value: {{ .Values.global.tlsKey }}
+          value: {{ .Values.global.applicationConnector.tlsKey }}
         - name: LB_LABEL
           value: {{ .Values.labelSelector }}
         - name: LB_NAMESPACE
