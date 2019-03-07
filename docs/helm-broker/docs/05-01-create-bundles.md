@@ -21,17 +21,18 @@ sample-bundle/
        ├── example-enterprise               # A directory of files for a specific plan
        │   ├── meta.yaml                    # A file which contains metadata information about this plan
        │   ├── bind.yaml                    # A file which contains information required to bind a given plan
-       │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a ServiceInstance
-       │   ├── bind-instance-schema.json    # The JSON Schema definitions for binding a ServiceInstance
-       │   ├── update-instance-schema.json  # The JSON Schema definitions for updating a ServiceInstance
-       │   └── values.yaml                  # The default configuration values in this plan for a chart defined in the `chart` directory
+       │   ├── create-instance-schema.json  # JSON schema definitions for creating a ServiceInstance
+       │   ├── bind-instance-schema.json    # JSON schema definitions for binding a ServiceInstance
+       │   ├── update-instance-schema.json  # JSON schema definitions for updating a ServiceInstance
+       │   └── values.yaml                  # Default configuration values in this plan for a chart defined in the `chart` directory
        └── ....
 ```
 
 > **NOTE:** All file names in the bundle repository are case-sensitive.
 
+required: meta.yaml, `chart` directory, `plans` directory
 
-### The bundle meta.yaml file
+## meta.yaml file
 
 The `meta.yaml` file is mandatory as it contains information about the bundle. Set the following fields to create service objects which comply with the [Open Service Broker API][service-objects].
 
@@ -57,7 +58,7 @@ The `meta.yaml` file is mandatory as it contains information about the bundle. S
 
 > **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`.
 
-### The chart directory
+## Chart directory
 
 In the mandatory `chart` directory, create a folder with the same name as your chart. Put all the files related to your chart in this folder. The system supports chart version 2.6.
 
@@ -65,7 +66,7 @@ If you are not familiar with the chart definitions, see the [Charts](https://git
 
 > **NOTE:** Helm Broker uses the [helm wait](https://github.com/kubernetes/helm/blob/release-2.6/docs/using_helm.md#helpful-options-for-installupgraderollback) option to ensure that all the resources that a chart creates are available. If you set your Deployment **replicas** to `1`, you must set **maxUnavailable** to `0` as a part of the rolling update strategy.
 
-### The plans directory
+## Plans directory
 
 The mandatory `plans` directory must contain at least one plan.
 A directory for a specific plan must contain the `meta.yaml` file. Other files, such as `create-instance-schema.json`, `bind.yaml` and `values.yaml` are not mandatory.
