@@ -39,15 +39,29 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
-	backupTests := []BackupTest{myFunctionTest, myDeploymentTest, myStatefulSetTest}
+	myPrometheusTest, err := NewPrometheusTest()
+
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest}
 
 	e2eTests := make([]e2eTest, len(backupTests))
 
 	for idx, backupTest := range backupTests {
 		testUUID := uuid.New()
+
+		name := string("")
+		if t := reflect.TypeOf(backupTest); t.Kind() == reflect.Ptr {
+			name = t.Elem().Name()
+		} else {
+			name = t.Name()
+		}
+
 		e2eTests[idx] = e2eTest{
 			backupTest: backupTest,
-			namespace:  strings.ToLower(reflect.TypeOf(backupTest).Name()) + "-" + testUUID.String(),
+			namespace:  strings.ToLower(name) + "-" + testUUID.String(),
 			testUUID:   testUUID.String(),
 		}
 	}
