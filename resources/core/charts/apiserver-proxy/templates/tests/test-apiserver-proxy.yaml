@@ -16,7 +16,7 @@ spec:
 {{- end }}
   containers:
     - name: test-{{ .Release.Name }}-apiserver-proxy
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_apiserver_proxy.dir }}apiserver-proxy-test:{{ .Values.global.test_apiserver-proxy.version }}
+      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_apiserver_proxy.dir }}apiserver-proxy-test:{{ .Values.global.test_apiserver_proxy.version }}
       imagePullPolicy: Always
       env:
       - name: POD_NAME
