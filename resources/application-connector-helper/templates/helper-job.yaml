@@ -25,8 +25,6 @@ spec:
           - -c
           - |
             ./app/certhelper.sh
-            echo "---> Propagate changes, wait 60s"
-            sleep 60s
         env:
         - name: DOMAIN
           value: {{ .Values.global.applicationConnectorDomainName }}
