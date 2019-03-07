@@ -59,6 +59,7 @@ func paths() []string {
 		localPath("foo.yaml"),
 		localPath("bar.yaml"),
 		localPath("package.tar.gz"),
+		localPath("package.zip"),
 	}
 }
 
@@ -66,29 +67,33 @@ func localPath(fileName string) string {
 	return fmt.Sprintf("%s/%s", basePath, fileName)
 }
 
-func verifyUploadedAsset(files []uploadedFile, shouldExist bool, logFn func(format string, args ...interface{})) error {
+func verifyUploadedAssets(files []uploadedFile, logFn func(format string, args ...interface{})) error {
 	for _, f := range files {
-		if !shouldExist {
-			logFn("Checking if file %s exists...", f.URL)
-			exists, err := file.Exists(f.URL)
-			if err != nil {
-				return errors.Wrapf(err, "while checking if remote file from URL %s exist", f.URL)
-			}
+		path := localPath(f.AssetPath)
+		logFn("Comparing file from URL %s and local file from path %s...", f.URL, f.AssetPath)
+		equal, err := file.CompareLocalAndRemote(path, f.URL)
+		if err != nil {
+			return errors.Wrapf(err, "while comparing files %s and remote file from URL %s, defined in %s %s", path, f.URL, f.Owner.Kind, f.Owner.Name)
+		}
 
-			if exists {
-				return fmt.Errorf("File %s defined in %s %s should not exist", f.URL, f.Owner.Kind, f.Owner.Name)
-			}
-		} else {
-			path := localPath(f.AssetPath)
-			logFn("Comparing file from URL %s and local file from path %s...", f.URL, f.AssetPath)
-			equal, err := file.CompareLocalAndRemote(path, f.URL)
-			if err != nil {
-				return errors.Wrapf(err, "while comparing files %s and remote file from URL %s, defined in %s %s", path, f.URL, f.Owner.Kind, f.Owner.Name)
-			}
+		if !equal {
+			return fmt.Errorf("Files from %s and %s are not equal, defined in %s %s", path, f.URL, f.Owner.Kind, f.Owner.Name)
+		}
+	}
 
-			if !equal {
-				return fmt.Errorf("Files from %s and %s are not equal, defined in %s %s", path, f.URL, f.Owner.Kind, f.Owner.Name)
-			}
+	return nil
+}
+
+func verifyDeletedAssets(files []uploadedFile, logFn func(format string, args ...interface{})) error {
+	for _, f := range files {
+		logFn("Checking if file %s exists...", f.URL)
+		exists, err := file.Exists(f.URL)
+		if err != nil {
+			return errors.Wrapf(err, "while checking if remote file from URL %s exist", f.URL)
+		}
+
+		if exists {
+			return fmt.Errorf("File %s defined in %s %s should not exist", f.URL, f.Owner.Kind, f.Owner.Name)
 		}
 	}
 

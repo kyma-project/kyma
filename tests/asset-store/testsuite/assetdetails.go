@@ -18,7 +18,7 @@ func convertToAssetResourceDetails(response *upload.Response, prefix string) []a
 	var assets []assetData
 	for _, file := range response.UploadedFiles {
 		var mode v1alpha2.AssetMode
-		if strings.HasSuffix(file.FileName, ".tar.gz") {
+		if strings.HasSuffix(file.FileName, ".tar.gz") || strings.HasSuffix(file.FileName, ".zip") {
 			mode = v1alpha2.AssetPackage
 		} else {
 			mode = v1alpha2.AssetSingle

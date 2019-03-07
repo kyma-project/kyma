@@ -213,9 +213,18 @@ func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
 }
 
 func (t *TestSuite) verifyUploadedFiles(files []uploadedFile, shouldExist bool) error {
-	err := verifyUploadedAsset(files, shouldExist, t.t.Logf)
+	err := verifyUploadedAssets(files, t.t.Logf)
 	if err != nil {
 		return errors.Wrap(err, "while verifying uploaded files")
+	}
+
+	return nil
+}
+
+func (t *TestSuite) verifyDeletedFiles(files []uploadedFile) error {
+	err := verifyDeletedAssets(files, t.t.Logf)
+	if err != nil {
+		return errors.Wrap(err, "while verifying deleted files")
 	}
 
 	return nil

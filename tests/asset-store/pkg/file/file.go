@@ -84,10 +84,6 @@ func download(url string) ([]byte, error) {
 		return nil, errors.Wrapf(err, "while reading response body while downloading file from URL %s", url)
 	}
 
-	if len(bytes) == 0 {
-		return nil, fmt.Errorf("Empty body while downloading file from URL %s", url)
-	}
-
 	return bytes, nil
 }
 
