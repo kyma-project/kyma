@@ -1,8 +1,8 @@
-# Asset Store integration tests
+# Asset Store Integration Tests
 
 ## Overview
 
-The project is a test suite for all Asset Store subcomponents, such as controllers and upload service.
+The project is a test scenario for all Asset Store subcomponents, such as controllers and the Asset Upload Service.
 
 ## Prerequisites
 
@@ -15,7 +15,7 @@ Use the following tools to set up the project:
 
 ### Run a local version
 
-To run the application against the local Kyma installation on Minikube without building the binary, expose Asset Upload Service from Kyma installation or run a local version, outside the Minikube cluster. Read the [Asset Upload Service Readme](../../components/asset-upload-service/README.md#usage) to learn, how to do that.
+To run the application against the local Kyma installation on Minikube without building the binary, expose the Asset Upload Service to make it available outside the Kyma installation, or run it in a local version outside the Minikube cluster. For more details, read the [`README.md`](../../components/asset-upload-service/README.md#usage) document for the Asset Upload Service. 
 
 To run integration tests, use the following command:
 
@@ -43,12 +43,12 @@ Use the following environment variables to configure the application:
 | Name | Required | Default | Description |
 |------|----------|---------|-------------|
 | **APP_KUBECONFIG_PATH** | No |  | The path to the `kubeconfig` file, needed for running an application outside of the cluster |
-| **APP_TEST_UPLOAD_SERVICE_URL** | No | `http://localhost:3000/v1/upload` | The URL of the Asset Upload Service |
+| **APP_TEST_UPLOAD_SERVICE_URL** | No | `http://localhost:3000/v1/upload` | The address of the Asset Upload Service |
 | **APP_TEST_WAIT_TIMEOUT** | No | `3m` | The timeout of waiting for resources |
-| **APP_TEST_NAMESPACE** | No | `test-asset-store` | The namespace name, created and deleted during integration tests |
+| **APP_TEST_NAMESPACE** | No | `test-asset-store` | The name of the Namespace created and deleted during integration tests |
 | **APP_TEST_CLUSTER_BUCKET_NAME** | No | `test-cluster-bucket` | The ClusterBucket resource name |
 | **APP_TEST_BUCKET_NAME** | No | `test-bucket` | The Bucket resource name |
-| **APP_TEST_COMMON_ASSET_PREFIX** | No | `test` | The name prefix for Asset and ClusterAsset resources |
+| **APP_TEST_COMMON_ASSET_PREFIX** | No | `test` | The name of the prefix for the Asset and ClusterAsset resources |
 
 ## Development
 
