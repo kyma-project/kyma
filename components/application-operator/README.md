@@ -23,7 +23,7 @@ Application Operator performs different operations as a result of the following 
  - **tillerUrl** - Tiller release server URL. The default is `tiller-deploy.kube-system.svc.cluster.local:44134`.
  - **syncPeriod** - Time period between resyncing existing resources. The default value is `30` seconds.
  - **installationTimeout** - Time after the release installation will time out. The default value is `240` seconds.
- - **applicationProxyImage** - Application Proxy image version to be used in the Application chart.
+ - **applicationGatewayImage** - Application Gateway image version to be used in the Application chart.
  - **eventServiceImage** - Event Service image version to be used in the Application chart.
  - **eventServiceTestsImage** - Event Service Tests image version to be used in the Application chart.
 

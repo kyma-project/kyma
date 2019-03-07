@@ -8,10 +8,10 @@ import (
 
 const (
 	ingressNameFormat                 = "%s-application"
-	applicationProxyDeploymentFormat  = "%s-application-proxy"
-	applicationProxyRoleFormat        = "%s-application-proxy-role"
-	applicationProxyRoleBindingFormat = "%s-application-proxy-rolebinding"
-	applicationProxySvcFormat         = "%s-application-proxy-external-api"
+	applicationProxyDeploymentFormat  = "%s-application-gateway"
+	applicationProxyRoleFormat        = "%s-application-gateway-role"
+	applicationProxyRoleBindingFormat = "%s-application-gateway-rolebinding"
+	applicationProxySvcFormat         = "%s-application-gateway-external-api"
 	eventServiceDeploymentFormat      = "%s-event-service"
 	eventServiceSvcFormat             = "%s-event-service-external-api"
 )

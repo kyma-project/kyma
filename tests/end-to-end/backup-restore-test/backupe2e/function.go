@@ -9,7 +9,8 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	v1 "k8s.io/api/core/v1"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
@@ -17,7 +18,6 @@ import (
 
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type functionTest struct {
@@ -52,11 +52,8 @@ func NewFunctionTest() (functionTest, error) {
 }
 
 func (f functionTest) CreateResources(namespace string) {
-	Convey("create resources for function test", func(c C) {
-		_, err := f.createFunction(namespace)
-
-		So(err, ShouldBeNil)
-	})
+	_, err := f.createFunction(namespace)
+	So(err, ShouldBeNil)
 }
 
 func (f functionTest) TestResources(namespace string) {
@@ -101,10 +98,6 @@ func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (st
 
 func (f functionTest) createFunction(namespace string) (*kubelessV1.Function, error) {
 	function := &kubelessV1.Function{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Function",
-			APIVersion: kubelessV1.SchemeGroupVersion.String(),
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: f.functionName,
 		},
@@ -146,10 +139,10 @@ func (f functionTest) getFunctionPodStatus(namespace string, waitmax time.Durati
 			}
 
 			pod := pods.Items[0]
-			if pod.Status.Phase == v1.PodRunning {
+			if pod.Status.Phase == corev1.PodRunning {
 				return nil
 			}
-			if pod.Status.Phase == v1.PodSucceeded || pod.Status.Phase == v1.PodFailed || pod.Status.Phase == v1.PodUnknown {
+			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
 				return fmt.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
 			}
 		}

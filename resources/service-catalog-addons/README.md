@@ -25,7 +25,7 @@ The Binding Usage Controller allows you to inject Secrets to a given application
 
 The Binding Usage Controller chart provides two default UsageKinds to Kyma:
 
-* [Function](charts/binding-usage-controller/templates/function-usage-kind.yaml)
-* [Deployment](charts/binding-usage-controller/templates/deployment-usage-kind.yaml)
+* [Function](charts/service-binding-usage-controller/templates/function-usage-kind.yaml)
+* [Deployment](charts/service-binding-usage-controller/templates/deployment-usage-kind.yaml)
 
 For more detailed information, go to the [Binding Usage Controller](https://github.com/kyma-project/kyma/tree/master/components/binding-usage-controller/docs) directory.
