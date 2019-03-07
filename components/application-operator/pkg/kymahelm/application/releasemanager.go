@@ -65,7 +65,6 @@ func (r *releaseManager) UpgradeReleases() error {
 	}
 
 	for _, app := range appList.Items {
-		log.Infof("Upgrading release %s", app.Name)
 
 		status, description, err := r.upgradeChart(&app)
 		if err != nil {
@@ -89,6 +88,7 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 		return hapi_4.Status_FAILED, "", errors.Wrapf(err, "Error parsing overrides for %s Application", application.Name)
 	}
 
+	log.Infof("Upgrading release %s", application.Name)
 	upgradeResponse, err := r.helmClient.UpdateReleaseFromChart(applicationChartDirectory, application.Name, overrides)
 	if err != nil {
 		return hapi_4.Status_FAILED, "", err
