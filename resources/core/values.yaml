@@ -106,3 +106,4 @@ test:
       limits:
         memory: 1.5Gi
         cpu: 300m
+
