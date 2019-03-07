@@ -5,6 +5,8 @@ kind: Job
 metadata:
   name: {{ .Release.Name }}-job
   namespace: kyma-integration
+  annotations:
+    "helm.sh/hook": post-install
 spec:
   template:
     metadata:
@@ -23,6 +25,8 @@ spec:
           - -c
           - |
             ./app/certhelper.sh
+            echo "---> Propagate changes, wait 60s"
+            sleep 60s
         env:
         - name: DOMAIN
           value: {{ .Values.global.applicationConnectorDomainName }}

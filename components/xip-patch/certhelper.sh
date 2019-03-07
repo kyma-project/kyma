@@ -36,8 +36,6 @@ EOF
 )
   echo "---> DOMAIN created: ${DOMAIN}, patching configmap"
   kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
-  echo "---> Waiting for 10s. Let the changes propagate"
-  sleep 10s
 fi
 
 if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
@@ -55,6 +53,4 @@ EOF
 )
   echo "---> Certs have been created, patching configmap"
   kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
-  echo "---> Waiting for 10s. Let the changes propagate"
-  sleep 10s
 fi
