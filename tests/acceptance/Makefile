@@ -30,3 +30,6 @@ clean:
 	rm -f env-tester.bin
 	rm -f client.bin
 
+#.PHONY: version-path
+#version-path:
+#	@echo "resources/core"

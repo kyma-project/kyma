@@ -39,3 +39,7 @@ clean:
 	rm -rf ./e2e-subscriber/docker/
 	rm -rf  ./e2e-tester/bin/
 	rm -rf ./e2e-tester/docker/
+
+#.PHONY: version-path
+#version-path:
+#	@echo "resources/event-bus"

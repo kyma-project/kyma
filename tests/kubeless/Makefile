@@ -31,3 +31,6 @@ ci-master: resolve validate build build-image push-image
 .PHONY: ci-release
 ci-release: resolve validate build build-image push-image
 
+#.PHONY: version-path
+#version-path:
+#	@echo "resources/core"

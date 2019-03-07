@@ -27,3 +27,6 @@ ci-master: resolve validate build-image push-image
 .PHONY: ci-release
 ci-release: resolve validate build-image push-image
 
+.PHONY: version-path
+version-path:
+	@echo "resources/application-connector"

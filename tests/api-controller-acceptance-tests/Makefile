@@ -23,3 +23,7 @@ ci-master: build build-image push-image
 
 .PHONY: ci-release
 ci-release: build build-image push-image
+
+.PHONY: version-path
+version-path:
+	@echo "resources/core"
