@@ -145,10 +145,10 @@ func whatIsThisThing(something interface{}) (float64, string, error) {
 	}
 }
 
-func (qresp *queryResponse) UnmarshalJSON(data []byte) error {
+func (qresp *queryResponse) UnmarshalJSON(jresponse []byte) error {
 	var f interface{}
 
-	err := json.Unmarshal(data, &f)
+	err := json.Unmarshal(jresponse, &f)
 	if err != nil {
 		return fmt.Errorf("http response can't be Unmarshal: %v", err)
 	}
@@ -207,12 +207,10 @@ func (pt *prometheusTest) CreateResources(namespace string) {
 	So(err, ShouldBeNil)
 
 	pt.beforeBackup = *qresp
-
 	point := pointInTime{}
-
-	if len(qresp.Data.Result) > 0 && len(qresp.Data.Result[0].Value) == 2 {
-
-		for _, something := range qresp.Data.Result[0].Value {
+	if len(qresp.Data.Result) > 0 && len(qresp.Data.Result[0].Value) > 0 {
+		values := qresp.Data.Result[0].Value
+		for _, something := range values {
 
 			f, s, err := whatIsThisThing(something)
 			So(err, ShouldBeNil)
@@ -236,9 +234,9 @@ func (pt *prometheusTest) TestResources(namespace string) {
 	err := qresp.connectToPrometheusApi(pt.domain, pt.port, pt.api, pt.metricQuery, pt.pointInTime.formmattedValue)
 	So(err, ShouldBeNil)
 
-	if len(qresp.Data.Result) > 0 && len(qresp.Data.Result[0].Value) == 2 {
-
-		for _, something := range qresp.Data.Result[0].Value {
+	if len(qresp.Data.Result) > 0 && len(qresp.Data.Result[0].Value) > 0 {
+		values := qresp.Data.Result[0].Value
+		for _, something := range values {
 
 			_, s, err := whatIsThisThing(something)
 			So(err, ShouldBeNil)
