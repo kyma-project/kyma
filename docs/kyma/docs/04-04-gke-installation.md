@@ -167,8 +167,8 @@ Follow these steps:
 
 3. Push the image to your Docker Hub:
     ```
-    docker tag kyma-installer:latest [YOUR_DOCKER_LOGIN]/kyma-installer:latest
-    docker push [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+    docker tag kyma-installer:latest {YOUR_DOCKER_LOGIN}/kyma-installer:latest
+    docker push {YOUR_DOCKER_LOGIN}/kyma-installer:latest
     ```
 
 4. Prepare the deployment file:
@@ -184,7 +184,6 @@ Follow these steps:
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ([YOUR_DOCKER_LOGIN]/kyma-installer:latest). Use the modified file to deploy Kyma on your GKE cluster.
-
 
 ## Deploy Kyma
 

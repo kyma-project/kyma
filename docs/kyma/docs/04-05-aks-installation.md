@@ -6,14 +6,13 @@ type: Installation
 This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
 
 ## Prerequisites
-- A domain for your AKS cluster (optional)
 - [Microsoft Azure](https://azure.microsoft.com)
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/pl-pl/cli/azure/install-azure-cli)
-- set the environment variables
+- A domain for your AKS cluster (optional)
 
-### Environment variables
+## Prepare the GKE cluster
 
 Set the following environment variables:
 1. Select a name for your cluster. Set the cluster name, the resource group and region as environment variables. Run:
@@ -57,7 +56,7 @@ Set the following environment variables:
 
 ## DNS setup and TLS certificate generation
 
->**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section. 
+>**NOTE:** By default, Kyma installs on a cluster using a wildcard DNS provided by `xip.io`. If you don't own a domain which you can use or you don't want to assign your domain to a cluster, skip this section.
 
 ### Delegate the management of your domain to Azure DNS
 
@@ -203,7 +202,7 @@ Follow these steps:
     docker push {YOUR_DOCKER_LOGIN}/kyma-installer:latest
     ```
 
-4. Prepare the deployment file.
+4. Prepare the deployment file:
 
     - Run this command if you use the `xip.io` default domain:
     ```
