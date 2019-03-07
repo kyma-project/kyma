@@ -607,7 +607,7 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
 
 		// when
-		input := []byte(certificates.ClientCRT.Raw)
+		input := testkit.EncodeCertToPem(t, certificates.ClientCRT)
 		sha := sha256.Sum256(input)
 		hash := hex.EncodeToString(sha[:])
 
