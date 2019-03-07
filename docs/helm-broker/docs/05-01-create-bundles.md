@@ -8,18 +8,19 @@ type: Configuration
 [service-metadata]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata "OSB Spec Service Metadata"
 [plan-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object "OSB Spec Plan Objects"
 
-To create your own bundle, you must create a directory with the following structure:
+Bundles which the Helm Broker uses must have a specific structure.
+These are the files that you must include in your bundle:
 
 ```
 sample-bundle/
-  ├── meta.yaml                             # A file which contains the metadata information about this bundle
+  ├── meta.yaml                             # A file which contains metadata information about this bundle
   ├── chart/                                # A directory which contains a Helm chart that installs your Kubernetes resources
-  │    └── <chart-name>/                    # A Helm chart directory
+  │    └── {chart-name}/                    # A Helm chart directory
   │         └── ....                        # Helm chart files
   └── plans/                                # A directory which contains the possible plans for an installed chart
        ├── example-enterprise               # A directory of files for a specific plan
-       │   ├── meta.yaml                    # A file which contains the metadata information about this plan
-       │   ├── bind.yaml                    # A file which contains information about the values that the Helm Broker returns when it receives the bind request
+       │   ├── meta.yaml                    # A file which contains metadata information about this plan
+       │   ├── bind.yaml                    # A file which contains information required to bind a given plan
        │   ├── create-instance-schema.json  # The JSON Schema definitions for creating a ServiceInstance
        │   ├── bind-instance-schema.json    # The JSON Schema definitions for binding a ServiceInstance
        │   ├── update-instance-schema.json  # The JSON Schema definitions for updating a ServiceInstance
@@ -27,7 +28,7 @@ sample-bundle/
        └── ....
 ```
 
-> **NOTE:** All the file names in the bundle directory are case-sensitive.
+> **NOTE:** All file names in the bundle repository are case-sensitive.
 
 
 ### The bundle meta.yaml file
@@ -112,7 +113,7 @@ The `bind-instance-schema.json` file contains a schema used to define the parame
 This file is not required.
 For more information about the content of the `bind-instance-schema.json` file, see the [Schemas](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
 
-### Troubleshooting
+## Troubleshooting
 
 Use the dry-run mode to check the generated manifests of the chart without installing it.
 The **--debug** option prints the generated manifests.
