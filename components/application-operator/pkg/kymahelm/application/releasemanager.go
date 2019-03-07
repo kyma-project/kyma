@@ -5,7 +5,9 @@ import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/util/retry"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )
 
@@ -63,10 +65,18 @@ func (r *releaseManager) UpgradeReleases() error {
 	}
 
 	for _, app := range appList.Items {
+		log.Infof("Upgrading release %s", app.Name)
+
 		status, description, err := r.upgradeChart(&app)
 		if err != nil {
+			log.Errorf("Failed to upgrade release %s: %s", app.Name, err.Error())
+
 			setCurrentStatus(&app, status.String(), description)
-			r.appClient.Update(&app)
+
+			err = r.updateApplication(&app)
+			if err != nil {
+				log.Errorf("Failed to upgrade %s CR: %s", app.Name, err.Error())
+			}
 		}
 	}
 
@@ -142,6 +152,13 @@ func (r *releaseManager) CheckReleaseStatus(name string) (hapi_4.Status_Code, st
 	}
 
 	return status.Info.Status.Code, status.Info.Description, nil
+}
+
+func (r *releaseManager) updateApplication(application *v1alpha1.Application) error {
+	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		_, err := r.appClient.Update(application)
+		return err
+	})
 }
 
 func setCurrentStatus(application *v1alpha1.Application, status string, description string) {
