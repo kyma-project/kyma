@@ -246,7 +246,7 @@ func (pt *prometheusTest) TestResources(namespace string) {
 
 		}
 
-		So(strings.TrimSpace(pt.finalResult), ShouldEqual, strings.TrimSpace(pt.expectedResult))
-
 	}
+
+	So(strings.TrimSpace(pt.finalResult), ShouldEqual, strings.TrimSpace(pt.expectedResult))
 }
