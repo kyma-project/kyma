@@ -3,6 +3,7 @@ package testsuite
 import (
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/minio/minio-go"
 
@@ -109,13 +110,13 @@ func verifyDeletedAssets(files []uploadedFile, logFn func(format string, args ..
 	return nil
 }
 
-func deleteFiles(minioCli *minio.Client, bucketName string) error {
-	filePaths := paths()
-
-	for _, path := range filePaths {
-		err := minioCli.RemoveObject(bucketName, path)
+func deleteFiles(minioCli *minio.Client, uploadResult *upload.Response, logFn func(format string, args ...interface{})) error {
+	for _, res := range uploadResult.UploadedFiles {
+		path := strings.SplitAfter(res.RemotePath, res.Bucket)[1]
+		logFn("Deleting '%s' from bucket '%s'...", path, res.Bucket)
+		err := minioCli.RemoveObject(res.Bucket, path)
 		if err != nil {
-			return errors.Wrapf(err, "while deleting file %s from bucket %s", path, bucketName)
+			return errors.Wrapf(err, "while deleting file '%s' from bucket '%s'", path, res.Bucket)
 		}
 	}
 

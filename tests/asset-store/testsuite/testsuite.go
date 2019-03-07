@@ -38,6 +38,7 @@ type TestSuite struct {
 	g *gomega.GomegaWithT
 
 	assetDetails []assetData
+	uploadResult *upload.Response
 
 	systemBucketName string
 	minioCli         *minio.Client
@@ -98,6 +99,8 @@ func (t *TestSuite) Run() {
 	uploadResult, err := t.uploadTestFiles()
 	failOnError(t.g, err)
 
+	t.uploadResult = uploadResult
+
 	t.systemBucketName = t.systemBucketNameFromUploadResult(uploadResult)
 
 	t.t.Log("Creating assets...")
@@ -112,7 +115,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Verifying uploaded files...")
-	err = t.verifyUploadedFiles(files, true)
+	err = t.verifyUploadedFiles(files)
 	failOnError(t.g, err)
 
 	t.t.Log("Deleting assets...")
@@ -124,7 +127,7 @@ func (t *TestSuite) Run() {
 	failOnError(t.g, err)
 
 	t.t.Log("Verifying if files have been deleted...")
-	err = t.verifyUploadedFiles(files, false)
+	err = t.verifyDeletedFiles(files)
 	failOnError(t.g, err)
 }
 
@@ -139,7 +142,7 @@ func (t *TestSuite) Cleanup() {
 	err = t.namespace.Delete()
 	failOnError(t.g, err)
 
-	err = deleteFiles(t.minioCli, t.systemBucketName)
+	err = deleteFiles(t.minioCli, t.uploadResult, t.t.Logf)
 	failOnError(t.g, err)
 }
 
@@ -241,7 +244,7 @@ func (t *TestSuite) populateUploadedFiles() ([]uploadedFile, error) {
 	return allFiles, nil
 }
 
-func (t *TestSuite) verifyUploadedFiles(files []uploadedFile, shouldExist bool) error {
+func (t *TestSuite) verifyUploadedFiles(files []uploadedFile) error {
 	err := verifyUploadedAssets(files, t.t.Logf)
 	if err != nil {
 		return errors.Wrap(err, "while verifying uploaded files")
