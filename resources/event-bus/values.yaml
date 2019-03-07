@@ -36,6 +36,7 @@ global:
         memory: "32M"
   subscriptionControllerKnative:
     resyncPeriod: "10s"
+    channelTimeout: "10s"
     resources:
       limits:
         memory: "32M"
