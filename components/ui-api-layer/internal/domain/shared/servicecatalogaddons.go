@@ -1,7 +1,7 @@
 package shared
 
 import (
-	usageApi "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	usageApi "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 )
 
 //go:generate mockery -name=ServiceCatalogAddonsRetriever -output=automock -outpkg=automock -case=underscore
