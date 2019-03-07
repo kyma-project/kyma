@@ -24,7 +24,7 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
     ```
     gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.11.5" --machine-type "n1-standard-2" \
+    --cluster-version "1.12.5" --machine-type "n1-standard-2" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 
@@ -38,13 +38,13 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
     ```
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
-    
+
 ## DNS setup and TLS certificate generation
 
 >**NOTE:** By default, Kyma installs on a cluster using a wildcard DNS provided by `xip.io`. If you don't own a domain which you can use or you don't want to assign your domain to a cluster, skip this section.
 
 ### Delegate the management of your domain to Google Cloud DNS
- 
+
 Follow these steps:
 
 1. Export the domain name, project name, and DNS zone name as environment variables. Run the commands listed below:
@@ -121,27 +121,6 @@ Follow these steps:
     export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64 | sed 's/ /\\ /g')
     ```
 
-## Prepare the GKE cluster
-
-1. Select a name for your cluster and set it as an environment variable. Run:
-    ```
-    export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
-    ```
-
-2. Create a cluster in the `europe-west1` region. Run:
-    ```
-    gcloud container --project "$PROJECT" clusters \
-    create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.12.5" --machine-type "n1-standard-2" \
-    --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
-    ```
-
-3. Install Tiller on your GKE cluster. Run:
-
-    ```
-    kubectl apply -f installation/resources/tiller.yaml
-    ```
-
 ## Prepare the installation configuration file
 
 ### Using the latest GitHub release
@@ -167,12 +146,12 @@ Follow these steps:
     ```
     cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
-    
+
     - Run this command if you use your own domain:
     ```
     cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
-    
+
 5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
 
 
@@ -198,7 +177,7 @@ Follow these steps:
     ```
     (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
-    
+
     - Run this command if you use your own domain:
     ```
     (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
@@ -213,7 +192,7 @@ Follow these steps:
     ```
     gcloud container clusters get-credentials $CLUSTER_NAME --zone europe-west1-b --project $PROJECT
     ```
-    
+
 2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
     ```
     kubectl apply -f my-kyma.yaml
@@ -264,15 +243,15 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
 2. To add DNS entries, run these commands:
     ```
     export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-    
-    export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-    
+
+    export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+
     gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
-    
+
     gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
-    
+
     gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
-    
+
     gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
     ```
 
