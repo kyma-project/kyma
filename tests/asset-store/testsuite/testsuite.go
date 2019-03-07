@@ -5,6 +5,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
+	"github.com/minio/minio-go"
+
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/namespace"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
@@ -20,6 +23,7 @@ type Config struct {
 	CommonAssetPrefix string        `envconfig:"default=test"`
 	UploadServiceUrl  string        `envconfig:"default=http://localhost:3000/v1/upload"`
 	WaitTimeout       time.Duration `envconfig:"default=2m"`
+	Minio             MinioConfig
 }
 
 type TestSuite struct {
@@ -35,7 +39,9 @@ type TestSuite struct {
 
 	assetDetails []assetData
 
-	cfg Config
+	systemBucketName string
+	minioCli         *minio.Client
+	cfg              Config
 }
 
 func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWithT) (*TestSuite, error) {
@@ -47,6 +53,11 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	dynamicCli, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8s Dynamic client")
+	}
+
+	minioCli, err := minio.New(cfg.Minio.Endpoint, cfg.Minio.AccessKey, cfg.Minio.SecretKey, cfg.Minio.UseSSL)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating Minio client")
 	}
 
 	ns := namespace.New(coreCli, cfg.Namespace)
@@ -65,6 +76,7 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 		clusterAsset:  ca,
 		t:             t,
 		g:             g,
+		minioCli:      minioCli,
 
 		cfg: cfg,
 	}, nil
@@ -82,8 +94,14 @@ func (t *TestSuite) Run() {
 	err = t.waitForBucketsReady()
 	failOnError(t.g, err)
 
+	t.t.Log("Uploading test files...")
+	uploadResult, err := t.uploadTestFiles()
+	failOnError(t.g, err)
+
+	t.systemBucketName = t.systemBucketNameFromUploadResult(uploadResult)
+
 	t.t.Log("Creating assets...")
-	err = t.createAssets()
+	err = t.createAssets(uploadResult)
 	failOnError(t.g, err)
 
 	t.t.Log("Waiting for ready assets...")
@@ -120,6 +138,9 @@ func (t *TestSuite) Cleanup() {
 
 	err = t.namespace.Delete()
 	failOnError(t.g, err)
+
+	err = deleteFiles(t.minioCli, t.systemBucketName)
+	failOnError(t.g, err)
 }
 
 func (t *TestSuite) createBuckets() error {
@@ -136,19 +157,27 @@ func (t *TestSuite) createBuckets() error {
 	return nil
 }
 
-func (t *TestSuite) createAssets() error {
+func (t *TestSuite) systemBucketNameFromUploadResult(result *upload.Response) string {
+	return result.UploadedFiles[0].Bucket
+}
+
+func (t *TestSuite) uploadTestFiles() (*upload.Response, error) {
 	uploadResult, err := t.fileUpload.Upload()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if len(uploadResult.Errors) > 0 {
-		return fmt.Errorf("during file upload: %+v", uploadResult.Errors)
+		return nil, fmt.Errorf("during file upload: %+v", uploadResult.Errors)
 	}
 
+	return uploadResult, nil
+}
+
+func (t *TestSuite) createAssets(uploadResult *upload.Response) error {
 	t.assetDetails = convertToAssetResourceDetails(uploadResult, t.cfg.CommonAssetPrefix)
 
-	err = t.asset.CreateMany(t.assetDetails)
+	err := t.asset.CreateMany(t.assetDetails)
 	if err != nil {
 		return err
 	}

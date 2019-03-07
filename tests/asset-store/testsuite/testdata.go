@@ -4,11 +4,20 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/minio/minio-go"
+
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/file"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/upload"
 	"github.com/pkg/errors"
 )
+
+type MinioConfig struct {
+	Endpoint  string `envconfig:"default=minio.kyma.local"`
+	AccessKey string `envconfig:""`
+	SecretKey string `envconfig:""`
+	UseSSL    bool   `envconfig:"default=true"`
+}
 
 const basePath = "testdata"
 
@@ -94,6 +103,19 @@ func verifyDeletedAssets(files []uploadedFile, logFn func(format string, args ..
 
 		if exists {
 			return fmt.Errorf("File %s defined in %s %s should not exist", f.URL, f.Owner.Kind, f.Owner.Name)
+		}
+	}
+
+	return nil
+}
+
+func deleteFiles(minioCli *minio.Client, bucketName string) error {
+	filePaths := paths()
+
+	for _, path := range filePaths {
+		err := minioCli.RemoveObject(bucketName, path)
+		if err != nil {
+			return errors.Wrapf(err, "while deleting file %s from bucket %s", path, bucketName)
 		}
 	}
 

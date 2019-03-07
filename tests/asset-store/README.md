@@ -49,6 +49,10 @@ Use the following environment variables to configure the application:
 | **APP_TEST_CLUSTER_BUCKET_NAME** | No | `test-cluster-bucket` | The ClusterBucket resource name |
 | **APP_TEST_BUCKET_NAME** | No | `test-bucket` | The Bucket resource name |
 | **APP_TEST_COMMON_ASSET_PREFIX** | No | `test` | The name of the prefix for the Asset and ClusterAsset resources |
+| **APP_MINIO_ENDPOINT** | No | `minio.kyma.local` | The address of the content storage server |
+| **APP_MINIO_ACCESS_KEY** | Yes |  | The access key required to sign in to the content storage server |
+| **APP_MINIO_SECRET_KEY** | Yes |  | The secret key required to sign in to the content storage server |
+| **APP_MINIO_USE_SSL** | No | `true` | The variable that enforces the use of HTTPS for the connection with the content storage server |
 
 ## Development
 
