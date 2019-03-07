@@ -10,6 +10,7 @@ import (
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils"
 	. "github.com/smartystreets/goconvey/convey"
+	"fmt"
 )
 
 var testUUID = uuid.New()
@@ -77,6 +78,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 			err := myBackupClient.CreateNamespace(e2eTest.namespace)
 			So(err, ShouldBeNil)
 			e2eTest.backupTest.CreateResources(e2eTest.namespace)
+			fmt.Printf("e2eTest.namespace: %s", e2eTest.namespace)
 		}
 		for _, e2eTest := range e2eTests {
 			e2eTest.backupTest.TestResources(e2eTest.namespace)

@@ -32,6 +32,7 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"fmt"
 	"strings"
+	"log"
 )
 
 const (
@@ -146,60 +147,71 @@ func whatIsThisThing(something interface{}) (float64, string, error) {
 }
 
 func (qresp *queryResponse) UnmarshalJSON(jresponse []byte) error {
-	var f interface{}
 
-	err := json.Unmarshal(jresponse, &f)
+	err := json.Unmarshal(jresponse, &qresp)
 	if err != nil {
 		return fmt.Errorf("http response can't be Unmarshal: %v", err)
 	}
 
-	m := f.(map[string]interface{})
-
-	for key1, val1 := range m {
-		switch key1 {
-		case "status":
-			qresp.Status = val1.(string)
-		case "data":
-
-			data := val1.(map[string]interface{})
-			respData := &responseData{}
-			for key2, val2 := range data {
-
-				switch key2 {
-				case "resultType":
-					respData.ResultType = val2.(string)
-				case "result":
-
-					reslt := val2.([]interface{})
-					result := make([]dataResult, 1)
-					for idx, r := range reslt {
-
-						datResult := &dataResult{}
-						for key3, val3 := range r.(map[string]interface{}) {
-							switch key3 {
-							case "metric":
-								datResult.Metric = val3.(map[string]interface{})
-							case "value":
-								datResult.Value = val3.([]interface{})
-							}
-						}
-						result[idx] = *datResult
-
-					}
-					respData.Result = result
-
-				}
-			}
-
-			qresp.Data = *respData
-
-		default:
-			return fmt.Errorf("%s is not part of the expected query response: ", key1)
-		}
-	}
-
+	log.Println("qresp %v", qresp)
 	return nil
 }
+
+//func (qresp *queryResponse) UnmarshalJSON(jresponse []byte) error {
+//	var f interface{}
+//
+//	err := json.Unmarshal(jresponse, &f)
+//	if err != nil {
+//		return fmt.Errorf("http response can't be Unmarshal: %v", err)
+//	}
+//
+//	m := f.(map[string]interface{})
+//
+//	for key1, val1 := range m {
+//		switch key1 {
+//		case "status":
+//			qresp.Status = val1.(string)
+//		case "data":
+//
+//			data := val1.(map[string]interface{})
+//			respData := &responseData{}
+//			for key2, val2 := range data {
+//
+//				switch key2 {
+//				case "resultType":
+//					respData.ResultType = val2.(string)
+//				case "result":
+//
+//					reslt := val2.([]interface{})
+//					result := make([]dataResult, 1)
+//					for idx, r := range reslt {
+//
+//						datResult := &dataResult{}
+//						for key3, val3 := range r.(map[string]interface{}) {
+//							switch key3 {
+//							case "metric":
+//								datResult.Metric = val3.(map[string]interface{})
+//							case "value":
+//								datResult.Value = val3.([]interface{})
+//							}
+//						}
+//						result[idx] = *datResult
+//
+//					}
+//					respData.Result = result
+//
+//				}
+//			}
+//
+//			qresp.Data = *respData
+//
+//		default:
+//			return fmt.Errorf("%s is not part of the expected query response: ", key1)
+//		}
+//	}
+//
+//	return nil
+//}
 
 func (pt *prometheusTest) CreateResources(namespace string) {
 	qresp := &queryResponse{}
@@ -249,4 +261,5 @@ func (pt *prometheusTest) TestResources(namespace string) {
 	}
 
 	So(strings.TrimSpace(pt.finalResult), ShouldEqual, strings.TrimSpace(pt.expectedResult))
+	fmt.Printf("finalResult%s==expectedResult%s", strings.TrimSpace(pt.finalResult), strings.TrimSpace(pt.expectedResult))
 }
