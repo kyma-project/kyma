@@ -25,26 +25,28 @@ if [ "${discoverUnsetVar}" = true ] ; then
 fi
 
 if [[ -z "${DOMAIN}" ]]; then
-	echo "---> DOMAIN not SET. Creating..."
-	INGRESS_IP=$(getLoadBalancerIPFromLabel "${LB_LABEL}" "${LB_NAMESPACE}")
-	DOMAIN="${INGRESS_IP}.xip.io"
-	DOMAIN_YAML=$(cat << EOF
+  echo "---> DOMAIN not SET. Creating..."
+  INGRESS_IP=$(getLoadBalancerIPFromLabel "${LB_LABEL}" "${LB_NAMESPACE}")
+  DOMAIN="${INGRESS_IP}.xip.io"
+  DOMAIN_YAML=$(cat << EOF
 ---
 data:
   global.applicationConnectorDomainName: "${DOMAIN}"
 EOF
 )
   echo "---> DOMAIN created: ${DOMAIN}, patching configmap"
-	kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
+  kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
+  echo "---> Waiting for 10s. Let the changes propagate"
+  sleep 10s
 fi
 
 if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
-	echo "---> Generating Certs for ${DOMAIN}"
-	generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
-	TLS_CERT=$(base64 /root/cert.pem | tr -d '\n')
+  echo "---> Generating Certs for ${DOMAIN}"
+  generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
+  TLS_CERT=$(base64 /root/cert.pem | tr -d '\n')
   TLS_KEY=$(base64 /root/key.pem | tr -d '\n')
 
-	TLS_CERT_AND_KEY_YAML=$(cat << EOF
+  TLS_CERT_AND_KEY_YAML=$(cat << EOF
 ---
 data:
   global.applicationConnector.tlsCrt: "${TLS_CERT}"
@@ -53,4 +55,6 @@ EOF
 )
   echo "---> Certs have been created, patching configmap"
   kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
+  echo "---> Waiting for 10s. Let the changes propagate"
+  sleep 10s
 fi
