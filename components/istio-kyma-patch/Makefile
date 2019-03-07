@@ -22,4 +22,4 @@ ci-release: build-image push-image
 
 .PHONY: version-path
 version-path:
-	@echo "resources/kyma-istio-patch"
+	@echo "resources/istio-kyma-patch"
