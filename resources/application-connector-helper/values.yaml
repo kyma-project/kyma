@@ -2,6 +2,6 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 xip_patch:
   dir: pr/
-  version: "PR-2917"
+  version: "PR-3036"
 labelSelector: "application-connector-lb=true"
 labelNamespace: kyma-system
