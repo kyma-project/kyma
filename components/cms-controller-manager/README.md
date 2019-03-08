@@ -1,8 +1,8 @@
-# CMS Controller Manager
+# Content Management System (CMS) Controller Manager
 
 ## Overview
 
-CMS is a Kubernetes-native solution for storing managing content. It is build on top of Asset Store and it consists of the DocsTopic Controller and the ClusterDocsTopic Controller.
+CMS is a Kubernetes-native solution for managing content. It is built on top of the Asset Store and consists of the DocsTopic Controller and the ClusterDocsTopic Controller.
 
 ## Prerequisites
 
@@ -35,16 +35,16 @@ The variables are:
 * `{image_name}` which is the name of the output image. Use `assetstore-controller-manager` for the image name.
 * `{image_tag}` which is the tag of the output image. Use `latest` for the tag name.
 
-### Environmental Variables
+### Environment Variables
 
 Use the following environment variables to configure the application:
 
 | Name | Required | Default | Description |
 |------|----------|---------|-------------|
-| **APP_CLUSTER_DOCS_TOPIC_RELIST_INTERVALL** | No | `5m` | The period of time after which the controller refreshes the status of a ClusterDocsTopic CR |
-| **APP_CLUSTER_BUCKET_REGION** | No |  | Specifies the location of the region under which the controller creates the cluster bucket. If the field is empty, the controller creates the cluster bucket under the default location. |
+| **APP_CLUSTER_DOCS_TOPIC_RELIST_INTERVALL** | No | `5m` | The period of time after which the controller refreshes the status of a ClusterDocsTopic CR. |
+| **APP_CLUSTER_BUCKET_REGION** | No |  | Specifies the location of the region in which the controller creates a ClusterBucket CR. If the field is empty, the controller creates the bucket under the default location. |
 | **APP_DOCS_TOPIC_RELIST_INTERVALL** | No | `5m` | The period of time after which the controller refreshes the status of a DocsTopic CR |
-| **APP_BUCKET_REGION** | No |  | Specifies the location of the region under which the controller creates the bucket. If the field is empty, the controller creates the bucket under the default location. |
+| **APP_BUCKET_REGION** | No |  | Specifies the location of the region in which the controller creates a Bucket CR. If the field is empty, the controller creates the bucket under the default location. |
 
 ## Development
 
