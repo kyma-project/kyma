@@ -1,5 +1,5 @@
 ---
-title: Revoke the certificate
+title: Revoke the client certificate
 type: Tutorials
 ---
 
