@@ -40,6 +40,8 @@ func checkExportedFields(t *testing.T, resolver *content.PluggableContainer, ena
 	assert.NotNil(t, resolver.Resolver)
 	require.NotNil(t, resolver.ContentRetriever)
 	assert.NotNil(t, resolver.ContentRetriever.ApiSpec())
+	assert.NotNil(t, resolver.ContentRetriever.OpenApiSpec())
+	assert.NotNil(t, resolver.ContentRetriever.ODataSpec())
 	assert.NotNil(t, resolver.ContentRetriever.AsyncApiSpec())
 	assert.NotNil(t, resolver.ContentRetriever.Content())
 

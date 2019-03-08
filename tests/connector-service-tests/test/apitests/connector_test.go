@@ -2,6 +2,8 @@ package apitests
 
 import (
 	"crypto/rsa"
+	"crypto/sha256"
+	"encoding/hex"
 	"net/http"
 	"net/url"
 	"testing"
@@ -38,6 +40,9 @@ func TestConnector(t *testing.T) {
 		}
 
 		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
+
+		internalRevocationUrl := createApplicationRevocationUrl(config)
+		certificateRevocationSuite(t, appTokenRequest, config.SkipSslVerify, internalRevocationUrl)
 	})
 
 	if config.Central {
@@ -46,6 +51,11 @@ func TestConnector(t *testing.T) {
 			certificateGenerationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 			runtimeCsrInfoEndpointForCentralSuite(t, runtimeTokenRequest, config.SkipSslVerify)
 			runtimeMgmInfoEndpointForCentralSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+
+			certificateRotationSuite(t, runtimeTokenRequest, config.SkipSslVerify)
+
+			internalRevocationUrl := createRuntimeRevocationUrl(config)
+			certificateRevocationSuite(t, runtimeTokenRequest, config.SkipSslVerify, internalRevocationUrl)
 		})
 	}
 }
@@ -77,6 +87,14 @@ func createTokenRequest(t *testing.T, tokenURL string, config testkit.TestConfig
 	}
 
 	return request
+}
+
+func createApplicationRevocationUrl(config testkit.TestConfig) string {
+	return config.InternalAPIUrl + "/v1/applications/certificates/revocations"
+}
+
+func createRuntimeRevocationUrl(config testkit.TestConfig) string {
+	return config.InternalAPIUrl + "/v1/runtimes/certificates/revocations"
 }
 
 func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool) {
@@ -534,6 +552,77 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 		// then
 		mgmInfoResponse, errorResponse = clientWithRenewedCert.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
 		require.Nil(t, errorResponse)
+	})
+
+}
+
+func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, internalRevocationUrl string) {
+	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
+
+	clientKey := testkit.CreateKey(t)
+
+	t.Run("should revoke client certificate with external API", func(t *testing.T) {
+		// given
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
+
+		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
+
+		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
+
+		// when
+		errorResponse = client.RevokeCertificate(t, mgmInfoResponse.URLs.RevocationCertURL)
+
+		require.Nil(t, errorResponse)
+
+		// then
+		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
+		csrBase64 := testkit.EncodeBase64(csr)
+
+		_, errorResponse = client.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
+
+		require.NotNil(t, errorResponse)
+		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
+	})
+
+	t.Run("should revoke client certificate with internal API", func(t *testing.T) {
+		// given
+		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
+
+		require.NotEmpty(t, crtResponse.CRTChain)
+		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
+
+		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
+		securedClient := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
+
+		mgmInfoResponse, errorResponse := securedClient.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
+
+		require.Nil(t, errorResponse)
+		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
+
+		// when
+		input := testkit.EncodeCertToPem(t, certificates.ClientCRT)
+		sha := sha256.Sum256(input)
+		hash := hex.EncodeToString(sha[:])
+
+		errorResponse = client.RevokeCertificate(t, internalRevocationUrl, hash)
+
+		require.Nil(t, errorResponse)
+
+		// then
+		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
+		csrBase64 := testkit.EncodeBase64(csr)
+
+		_, errorResponse = securedClient.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
+
+		require.NotNil(t, errorResponse)
+		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
 	})
 
 }
