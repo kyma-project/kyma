@@ -34,7 +34,6 @@ metadata:
 data:
   global.isLocalEnv: "true"
   global.domainName: "kyma.local"
-  apiserver-proxy.domainName: "kyma.local"
   global.etcdBackup.containerName: ""
   global.etcdBackup.enabled: "false"
   global.adminPassword: ""

@@ -1,8 +1,0 @@
-{{ if .Values.domainName }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ template "name" . }}
-data:
-  DOMAIN: {{ .Values.domainName }}
-{{ end }}

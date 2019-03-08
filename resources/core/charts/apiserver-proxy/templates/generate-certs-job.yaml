@@ -30,14 +30,23 @@ spec:
         - |
           set -e
           if [ "$DOMAIN" = "" ]; then
+          {{ if .Values.global.domainName }}
+            DOMAIN={{ .Values.global.domainName }}
+          {{ else }}
             source /app/utils.sh
             INGRESS_IP=$(getLoadBalancerIP {{ template "name" . }}-ssl {{ .Release.Namespace }})
             DOMAIN="$INGRESS_IP.xip.io"
+          {{ end }}
             kubectl create configmap {{ template "name" . }} --from-literal DOMAIN="$DOMAIN"
           fi
           if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
+          {{ if .Values.global.tlsKey }}
+            echo "{{ .Values.global.tlsKey }}" > ./key.pem
+            echo "{{ .Values.global.tlsCrt }}" > ./cert.pem
+          {{ else }}
             source /app/utils.sh
             generateCertificatesForDomain "$DOMAIN" ./key.pem ./cert.pem
+          {{ end }}
             kubectl create secret tls {{ template "name" . }}-tls-cert  --key ./key.pem --cert ./cert.pem
           fi
         volumeMounts:
