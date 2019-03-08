@@ -33,28 +33,21 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	logger := clientContextService.GetLogger()
-
-	logger.Info("Reading certificate signing request")
 	signingRequest, err := readCertRequest(r)
 	if err != nil {
-		logger.Error(err)
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
 	rawCSR, err := decodeStringFromBase64(signingRequest.CSR)
 	if err != nil {
-		logger.Error(err)
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 
-	logger.Info("Signing certificate signing request")
 	encodedCertificatesChain, err := sh.certificateService.SignCSR(rawCSR, clientContextService.GetCommonName())
 	if err != nil {
-		logger.Error(err)
-		httphelpers.RespondWithError(w, err)
+		httphelpers.RespondWithErrorAndLog(w, err)
 		return
 	}
 

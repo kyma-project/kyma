@@ -1,4 +1,4 @@
-package logging
+package middlewares
 
 import (
 	"net/http"
@@ -10,7 +10,7 @@ import (
 type middleware struct {
 }
 
-func NewLoggingMiddleware() *middleware {
+func NewRequestLoggingMiddleware() *middleware {
 	return &middleware{}
 }
 
