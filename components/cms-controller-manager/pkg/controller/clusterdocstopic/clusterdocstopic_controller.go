@@ -109,10 +109,14 @@ func (r *ReconcileClusterDocsTopic) Reconcile(request reconcile.Request) (reconc
 	docsTopicLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName())
 	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc)
 	commonStatus, err := commonHandler.Handle(ctx, instance, instance.Spec.CommonDocsTopicSpec, instance.Status.CommonDocsTopicStatus)
-	if err != nil {
-		return reconcile.Result{}, err
+	if updateErr := r.updateStatus(ctx, instance, commonStatus); updateErr != nil {
+		finalErr := updateErr
+		if err != nil {
+			finalErr = errors.Wrapf(err, "along with update error %s", updateErr.Error())
+		}
+		return reconcile.Result{}, finalErr
 	}
-	if err := r.updateStatus(ctx, instance, commonStatus); err != nil {
+	if err != nil {
 		return reconcile.Result{}, err
 	}
 

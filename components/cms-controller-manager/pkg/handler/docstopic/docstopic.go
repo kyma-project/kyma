@@ -105,7 +105,7 @@ func (h *docstopicHandler) ensureBucketExits(ctx context.Context, namespace stri
 
 	bucketCount := len(names)
 	if bucketCount > 1 {
-		return "", fmt.Errorf("to many buckets with labels: %+v", labels)
+		return "", fmt.Errorf("too many buckets with labels: %+v", labels)
 	}
 	if bucketCount == 1 {
 		h.logInfof("Bucket %s already exits", names[0])
