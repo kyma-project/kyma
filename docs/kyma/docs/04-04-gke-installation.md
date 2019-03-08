@@ -9,6 +9,7 @@ By default, Kyma installs on a GKE cluster using a wildcard DNS provided by [xip
 ## Prerequisites
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
 - [Kubernetes](https://kubernetes.io/) 1.12
+- Tiller 2.10.0 or higher
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
