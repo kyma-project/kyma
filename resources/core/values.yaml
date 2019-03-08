@@ -73,8 +73,8 @@ global:
     dir: develop/
     version: "4ad2e460"
   cluster_users_test:
-    dir: develop/
-    version: "30b8aafd"
+    dir: pre/
+    version: "PR-3055"
   xip_patch:
     dir: develop/
     version: 1103850e

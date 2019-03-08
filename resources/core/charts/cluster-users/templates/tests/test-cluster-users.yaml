@@ -17,18 +17,37 @@ spec:
     - name: test-cluster-users
       image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_test.dir }}cluster-users-test:{{ .Values.global.cluster_users_test.version }}
       env:
-        - name: EMAIL_FILE
-          value: /etc/credentials/email
-        - name: PASSWORD_FILE
-          value: /etc/credentials/password
-        - name: NAMESPACE
-          value: {{ .Values.namespace }}
-      volumeMounts:
-        - name: credentials
-          mountPath: /etc/credentials
-  volumes:
-    - name: credentials
-      secret:
-        secretName: admin-user
+      - name: ADMIN_EMAIL
+        valueFrom:
+          secretKeyRef:
+            name: admin-user
+            key: email
+      - name: ADMIN_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: admin-user
+            key: password
+      - name: DEVELOPER_EMAIL
+        valueFrom:
+          secretKeyRef:
+            name: developer-user
+            key: email
+      - name: DEVELOPER_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: developer-user
+            key: password
+      - name: VIEW_EMAIL
+        valueFrom:
+          secretKeyRef:
+            name: read-only-user
+            key: email
+      - name: VIEW_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: read-only-user
+            key: password
+      - name: NAMESPACE
+        value: {{ .Values.namespace }}
   restartPolicy: Never
 {{ end }}
