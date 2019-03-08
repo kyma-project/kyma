@@ -40,10 +40,10 @@ function runTests() {
     EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
     export KUBECONFIG="${PWD}/kubeconfig"
 	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${NAMESPACE}"
-	testPermissions "get" "deploy" "${NAMESPACE}" "yes"
+	testPermissions "get" "deployment" "${NAMESPACE}" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to create Deployments in ${NAMESPACE}"
-	testPermissions "create" "deploy" "${NAMESPACE}" "yes"
+	testPermissions "create" "deployment" "${NAMESPACE}" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to get CRD in ${NAMESPACE}"
 	testPermissions "get" "crd" "${NAMESPACE}" "yes"
@@ -55,18 +55,17 @@ function runTests() {
 	testPermissions "delete" "clusterrole" "${NAMESPACE}" "no"
 
 	echo "--> ${DEVELOPER_EMAIL} should be able to list Deployments in production"
-	testPermissions "list" "deploy" "production" "yes"
+	testPermissions "list" "deployment" "production" "yes"
 
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create Services in production"
 	testPermissions "create" "service" "production" "no"
 
-    EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
-    export KUBECONFIG="${PWD}/kubeconfig"
+	EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
 	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole"
 	testPermissions "get" "clusterrole" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete Deployments"
-	testPermissions "delete" "deploy" "${NAMESPACE}" "yes"
+	testPermissions "delete" "deployment" "${NAMESPACE}" "yes"
 
 	echo "--> ${ADMIN_EMAIL} should be able to delete ClusterRole"
 	testPermissions "delete" "clusterrole" "${NAMESPACE}" "yes"
@@ -74,13 +73,12 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
 	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
-    EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
-    export KUBECONFIG="${PWD}/kubeconfig"
+	EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
 	echo "--> ${VIEW_EMAIL} should NOT be able to get ClusterRole"
 	testPermissions "get" "clusterrole" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to list Deployments"
-	testPermissions "list" "deploy" "${NAMESPACE}" "no"
+	testPermissions "list" "deployment" "${NAMESPACE}" "no"
 
 	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace"
 	testPermissions "create" "ns" "${NAMESPACE}" "no"
