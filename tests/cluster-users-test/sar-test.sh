@@ -12,18 +12,14 @@
 #  - NAMESPACE: namespace in which we perform the tests
 
 function testPermissions() {
-	USER="$1"
-	OPERATION="$2"
-	RESOURCE="$3"
-	TEST_NS="$4"
-	EXPECTED="$5"
+	OPERATION="$1"
+	RESOURCE="$2"
+	TEST_NS="$3"
+	EXPECTED="$4"
 	set +e
 	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" -n "${TEST_NS}")
 	set -e
-	if [[ "${TEST}" == "${EXPECTED}" ]]; then
-	    echo "----> PASSED"
-	    return 0
-	elif [[ ${TEST} == ${EXPECTED}* ]]; then
+	if [[ ${TEST} == ${EXPECTED}* ]]; then
 	    echo "----> PASSED"
 	    return 0
 	fi
@@ -43,51 +39,51 @@ function getConfigFile() {
 function runTests() {
     EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getCofigFile
     export KUBECONFIG="${PWD}/kubeconfig"
-	echo "--> developer@kyma.cx should be able to get Deployments in ${NAMESPACE}"
-	testPermissions "developer@kyma.cx" "get" "deploy" "${NAMESPACE}" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${NAMESPACE}"
+	testPermissions "get" "deploy" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should be able to create Deployments in ${NAMESPACE}"
-	testPermissions "developer@kyma.cx" "create" "deploy" "${NAMESPACE}" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to create Deployments in ${NAMESPACE}"
+	testPermissions "create" "deploy" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should be able to get CRD in ${NAMESPACE}"
-	testPermissions "developer@kyma.cx" "get" "crd" "${NAMESPACE}" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to get CRD in ${NAMESPACE}"
+	testPermissions "get" "crd" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should be able to get specific CRD in ${NAMESPACE}"
-	testPermissions "developer@kyma.cx" "get" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to get specific CRD in ${NAMESPACE}"
+	testPermissions "get" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
-	echo "--> developer@kyma.cx should NOT be able to delete ClusterRole in ${NAMESPACE}"
-	testPermissions "developer@kyma.cx" "delete" "clusterrole" "${NAMESPACE}" "no"
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to delete ClusterRole in ${NAMESPACE}"
+	testPermissions "delete" "clusterrole" "${NAMESPACE}" "no"
 
-	echo "--> developer@kyma.cx should be able to list Deployments in production"
-	testPermissions "developer@kyma.cx" "list" "clusterrole" "production" "yes"
+	echo "--> ${DEVELOPER_EMAIL} should be able to list Deployments in production"
+	testPermissions "list" "clusterrole" "production" "yes"
 
-	echo "--> developer@kyma.cx should NOT be able to create Services in production"
-	testPermissions "developer@kyma.cx" "create" "service" "production" "no"
+	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create Services in production"
+	testPermissions "create" "service" "production" "no"
 
     EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getCofigFile
     export KUBECONFIG="${PWD}/kubeconfig"
-	echo "--> admin@kyma.cx should be able to get ClusterRole"
-	testPermissions "admin@kyma.cx" "get" "clusterrole" "${NAMESPACE}" "yes"
+	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole"
+	testPermissions "get" "clusterrole" "${NAMESPACE}" "yes"
 
-	echo "--> admin@kyma.cx should be able to delete Deployments"
-	testPermissions "admin@kyma.cx" "delete" "deploy" "${NAMESPACE}" "yes"
+	echo "--> ${ADMIN_EMAIL} should be able to delete Deployments"
+	testPermissions "delete" "deploy" "${NAMESPACE}" "yes"
 
-	echo "--> admin@kyma.cx should be able to delete ClusterRole"
-	testPermissions "admin@kyma.cx" "delete" "clusterrole" "${NAMESPACE}" "yes"
+	echo "--> ${ADMIN_EMAIL} should be able to delete ClusterRole"
+	testPermissions "delete" "clusterrole" "${NAMESPACE}" "yes"
 
-	echo "--> admin@kyma.cx should be able to delete specific CRD"
-	testPermissions "admin@kyma.cx" "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
+	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
+	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
     EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getCofigFile
     export KUBECONFIG="${PWD}/kubeconfig"
-	echo "--> user@kyma.cx should NOT be able to get ClusterRole"
-	testPermissions "user@kyma.cx" "get" "clusterrole" "${NAMESPACE}" "no"
+	echo "--> ${VIEW_EMAIL} should NOT be able to get ClusterRole"
+	testPermissions "get" "clusterrole" "${NAMESPACE}" "no"
 
-	echo "--> user@kyma.cx should NOT be able to list Deployments"
-	testPermissions "user@kyma.cx" "list" "deploy" "${NAMESPACE}" "no"
+	echo "--> ${VIEW_EMAIL} should NOT be able to list Deployments"
+	testPermissions "list" "deploy" "${NAMESPACE}" "no"
 
-	echo "--> user@kyma.cx should NOT be able to create Namespace"
-	testPermissions "user@kyma.cx" "create" "ns" "${NAMESPACE}" "no"
+	echo "--> ${VIEW_EMAIL} should NOT be able to create Namespace"
+	testPermissions "create" "ns" "${NAMESPACE}" "no"
 }
 
 function cleanup() {
