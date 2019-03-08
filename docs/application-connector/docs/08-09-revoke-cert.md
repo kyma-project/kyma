@@ -3,7 +3,7 @@ title: Revoke the certificate
 type: Tutorials
 ---
 
-This tutorial will show you how to revoke certificate, making it unable to be renewed.
+You can revoke a client certificate generated for your Application. Revocation prevents a certificate from being renewed. A revoked certificate, however, continues to be valid until it expires.
 
 To revoke certificate make a call to ``certificates/revocations`` endpoint:
     
