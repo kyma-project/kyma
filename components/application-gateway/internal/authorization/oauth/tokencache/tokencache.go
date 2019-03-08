@@ -1,8 +1,9 @@
 package tokencache
 
 import (
-	"github.com/patrickmn/go-cache"
 	"time"
+
+	cache "github.com/patrickmn/go-cache"
 )
 
 type TokenCache interface {
