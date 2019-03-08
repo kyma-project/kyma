@@ -87,6 +87,7 @@ function runTests() {
 }
 
 function cleanup() {
+    unset KUBECONFIG
 	EXIT_STATUS=$?
 
     if [ "${ERROR_LOGGING_GUARD}" = "true" ]; then
