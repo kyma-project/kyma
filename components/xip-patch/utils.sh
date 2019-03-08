@@ -81,7 +81,7 @@ generateCertificatesForDomain() {
     KEY_PATH="$2"
     CERT_PATH="$3"
 
-    openssl req -x509 -nodes -days 5 -newkey rsa:4069 \
+    openssl req -x509 -nodes -days 30 -newkey rsa:4069 \
                  -subj "/CN=${DOMAIN}" \
                  -reqexts SAN -extensions SAN \
                  -config <(cat /etc/ssl/openssl.cnf \
