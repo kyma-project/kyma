@@ -10,8 +10,6 @@ To revoke a client certificate, send a request to the `certificates/revocations`
 ```bash
 curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations --cert {CERT_TO_REVOKE} --key {CERT_TO_REVOKE_KEY} -k 
 ```
-    
-After successful call, the certificate is revoked and cannot be renewed.
 
 If you have access to the Kyma cluster, you can also revoke a certificate by sending the SHA256 sum of the certificate to the internal `certificates/revocations` endpoint. Run:
 
