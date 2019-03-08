@@ -1,7 +1,9 @@
 package testsuite
 
 import (
+	"crypto/tls"
 	"fmt"
+	"net/http"
 	"testing"
 	"time"
 
@@ -60,6 +62,11 @@ func New(restConfig *rest.Config, cfg Config, t *testing.T, g *gomega.GomegaWith
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating Minio client")
 	}
+
+	transCfg := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	minioCli.SetCustomTransport(transCfg)
 
 	ns := namespace.New(coreCli, cfg.Namespace)
 
