@@ -140,10 +140,8 @@ func (t *TestSuite) Run() {
 
 func (t *TestSuite) Cleanup() {
 	t.t.Log("Cleaning up...")
-	err := t.deleteAssets()
-	failOnError(t.g, err)
 
-	err = t.deleteBuckets()
+	err := t.deleteBuckets()
 	failOnError(t.g, err)
 
 	err = t.namespace.Delete()
