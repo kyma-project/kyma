@@ -531,6 +531,154 @@ func TestClassResolver_ServiceClassApiSpecField(t *testing.T) {
 	})
 }
 
+func TestClassResolver_ServiceClassOpenApiSpecField(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "name"
+		resource := &storage.OpenApiSpec{
+			Raw: map[string]interface{}{
+				"test": "data",
+			},
+		}
+		expected := new(gqlschema.JSON)
+		err := expected.UnmarshalGQL(resource.Raw)
+		require.NoError(t, err)
+
+		resourceGetter := new(contentMock.OpenApiSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("OpenApiSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ServiceClassOpenApiSpecField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		name := "name"
+		resourceGetter := new(contentMock.OpenApiSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("OpenApiSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ServiceClassOpenApiSpecField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		expectedErr := errors.New("Test")
+		name := "name"
+		resourceGetter := new(contentMock.OpenApiSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("OpenApiSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ServiceClassOpenApiSpecField(nil, &parentObj)
+
+		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+}
+
+func TestClassResolver_ServiceClassODataSpecField(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "name"
+		expected := "{}"
+		resource := &storage.ODataSpec{
+			Raw: expected,
+		}
+
+		resourceGetter := new(contentMock.ODataSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("ODataSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ServiceClassODataSpecField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Equal(t, &expected, result)
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		name := "name"
+		resourceGetter := new(contentMock.ODataSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("ODataSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ServiceClassODataSpecField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		expectedErr := errors.New("Test")
+		name := "name"
+		resourceGetter := new(contentMock.ODataSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("ODataSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ServiceClassODataSpecField(nil, &parentObj)
+
+		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+}
+
 func TestClassResolver_ServiceClassAsyncApiSpecField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "name"

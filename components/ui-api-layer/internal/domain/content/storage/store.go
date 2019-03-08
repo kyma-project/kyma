@@ -1,13 +1,14 @@
 package storage
 
 import (
-	"encoding/json"
 	"fmt"
 	"io"
 	"regexp"
 	"strings"
 
 	"github.com/golang/glog"
+
+	"io/ioutil"
 
 	"github.com/pkg/errors"
 )
@@ -55,6 +56,20 @@ func (s *store) ApiSpec(id string) (*ApiSpec, bool, error) {
 	return apiSpec, exists, err
 }
 
+func (s *store) OpenApiSpec(id string) (*OpenApiSpec, bool, error) {
+	openApiSpec := new(OpenApiSpec)
+	exists, err := s.object(id, "apiSpec.json", openApiSpec)
+
+	return openApiSpec, exists, err
+}
+
+func (s *store) ODataSpec(id string) (*ODataSpec, bool, error) {
+	odataSpec := new(ODataSpec)
+	exists, err := s.object(id, "apiSpec.json", odataSpec)
+
+	return odataSpec, exists, err
+}
+
 func (s *store) AsyncApiSpec(id string) (*AsyncApiSpec, bool, error) {
 	asyncApiSpec := new(AsyncApiSpec)
 	exists, err := s.object(id, "asyncApiSpec.json", asyncApiSpec)
@@ -66,7 +81,7 @@ func (s *store) NotificationChannel(stop <-chan struct{}) <-chan notification {
 	return s.client.NotificationChannel(s.bucketName, stop)
 }
 
-func (s *store) object(id, filename string, value interface{}) (bool, error) {
+func (s *store) object(id, filename string, value Specification) (bool, error) {
 	objectName := fmt.Sprintf("%s/%s", id, filename)
 	reader, err := s.client.Object(s.bucketName, objectName)
 	defer func() {
@@ -138,16 +153,27 @@ func (s *store) replaceAssetsAddress(in interface{}, id string) interface{} {
 	return result
 }
 
-func (s *store) decode(reader io.Reader, value interface{}) (bool, error) {
-	err := json.NewDecoder(reader).Decode(value)
+func (s *store) decode(reader io.Reader, value Specification) (bool, error) {
+	data, err := s.readData(reader)
 	if err != nil {
-		ok := s.client.IsNotExistsError(err)
-		if ok {
-			return false, nil
-		}
-
 		return false, err
 	}
+	if len(data) == 0 {
+		return false, nil
+	}
 
-	return true, nil
+	err = value.Decode(data)
+	return err == nil, err
+}
+
+func (s *store) readData(reader io.Reader) ([]byte, error) {
+	data, err := ioutil.ReadAll(reader)
+	if err != nil {
+		if ok := s.client.IsNotExistsError(err); ok {
+			return data, nil
+		}
+		return data, err
+	}
+
+	return data, nil
 }

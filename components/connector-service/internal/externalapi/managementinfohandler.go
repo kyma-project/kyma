@@ -10,6 +10,7 @@ import (
 
 const (
 	RenewCertURLFormat = "%s/certificates/renewals"
+	RevocationCertURLFormat = "%s/certificates/revocations"
 )
 
 type managementInfoHandler struct {
@@ -40,5 +41,6 @@ func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.Cl
 	return mgmtURLs{
 		RuntimeURLs:  clientContextService.GetRuntimeUrls(),
 		RenewCertURL: fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
+		RevocationCertURL: fmt.Sprintf(RevocationCertURLFormat, ih.certificateProtectedBaseURL),
 	}
 }

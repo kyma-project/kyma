@@ -110,7 +110,7 @@ func TestTokenResolver_Middleware(t *testing.T) {
 		tokenManager.AssertExpectations(t)
 	})
 
-	t.Run("should return 500 when internal error occured", func(t *testing.T) {
+	t.Run("should return 500 when internal error occurred", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)

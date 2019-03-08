@@ -55,8 +55,8 @@ global:
     dir: develop/
     version: 6e0a7fe2
   kubeless_integration_tests:
-    dir: develop/
-    version: 78f999a7
+    dir: develop/tests/
+    version: 7ee6af96
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
@@ -68,10 +68,10 @@ global:
     version: 429bfbcc
   ui_api_layer:
     dir: develop/
-    version: "4ad2e460"
+    version: b426d54d
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: "4ad2e460"
+    version: b426d54d
   cluster_users_test:
     dir: pre/
     version: "PR-3055"
@@ -112,3 +112,4 @@ test:
       limits:
         memory: 1.5Gi
         cpu: 300m
+

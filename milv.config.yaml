@@ -39,3 +39,6 @@ files:
   - path: "./kyma/docs/kyma/docs/04-06-gke-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
+  - path: "./kyma/docs/application-connector/docs/08-09-revoke-cert.md"
+    config:
+      white-list-external: ["https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"]

@@ -6,7 +6,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: develop/
-    version: 1f7d5b64
+    version: 7881829b
   event_bus_tests:
     dir: develop/
     version: 0c471dd3
@@ -36,6 +36,7 @@ global:
         memory: "32M"
   subscriptionControllerKnative:
     resyncPeriod: "10s"
+    channelTimeout: "10s"
     resources:
       limits:
         memory: "32M"

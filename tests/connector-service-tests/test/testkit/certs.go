@@ -79,6 +79,15 @@ func EncodedCertToPemBytes(t *testing.T, encodedCert string) []byte {
 	return certificate.Bytes
 }
 
+func EncodeCertToPem(t *testing.T, certificate *x509.Certificate) []byte {
+	pemBlock := &pem.Block{Type: "CERTIFICATE", Bytes: certificate.Raw}
+	
+	encodedPem := pem.EncodeToMemory(pemBlock)
+	require.NotNil(t, encodedPem)
+
+	return encodedPem
+}
+
 // DecodeAndParseCerts decodes base64 encoded certificates chain and parses it
 func DecodeAndParseCerts(t *testing.T, crtResponse *CrtResponse) DecodedCrtResponse {
 	certChainBytes := EncodedCertChainToPemBytes(t, crtResponse.CRTChain)

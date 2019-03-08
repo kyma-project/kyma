@@ -15,6 +15,8 @@ type ClusterServiceClass struct {
 	Activated           bool
 	Plans               []ClusterServicePlan
 	apiSpec             map[string]interface{}
+	openApiSpec         map[string]interface{}
+	odataSpec           string
 	asyncApiSpec        map[string]interface{}
 	content             map[string]interface{}
 }

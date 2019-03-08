@@ -2,6 +2,7 @@ package storage
 
 import (
 	"encoding/json"
+	"encoding/xml"
 )
 
 type Content struct {
@@ -25,21 +26,21 @@ type Document struct {
 	Internal bool   `json:"internal,omitempty"`
 }
 
-func (o *Content) UnmarshalJSON(jsonData []byte) error {
+func (o *Content) Decode(data []byte) error {
 	var raw map[string]interface{}
-	err := json.Unmarshal(jsonData, &raw)
+	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
 
-	var data ContentData
-	err = json.Unmarshal(jsonData, &data)
+	var contentData ContentData
+	err = json.Unmarshal(data, &contentData)
 	if err != nil {
 		return err
 	}
 
 	o.Raw = raw
-	o.Data = data
+	o.Data = contentData
 
 	return nil
 }
@@ -48,14 +49,81 @@ type ApiSpec struct {
 	Raw map[string]interface{}
 }
 
-func (o *ApiSpec) UnmarshalJSON(jsonData []byte) error {
+func (o *ApiSpec) Decode(data []byte) error {
 	var raw map[string]interface{}
-	err := json.Unmarshal(jsonData, &raw)
+	err := json.Unmarshal(data, &raw)
 	if err != nil {
+		if isInvalidBeginningCharacterError(err) {
+			return nil
+		}
 		return err
 	}
 
 	o.Raw = raw
+
+	return nil
+}
+
+type OpenApiSpec struct {
+	Raw map[string]interface{}
+}
+
+func (o *OpenApiSpec) Decode(data []byte) error {
+	var raw map[string]interface{}
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		if isInvalidBeginningCharacterError(err) {
+			return nil
+		}
+		return err
+	}
+
+	if _, found := raw["$Version"]; !found {
+		o.Raw = raw
+	}
+
+	return nil
+}
+
+type ODataSpec struct {
+	Raw string
+}
+
+func (o *ODataSpec) Decode(data []byte) error {
+	err := o.unmarshalJSON(data)
+	if err == nil {
+		return nil
+	} else if err != nil && !isInvalidBeginningCharacterError(err) {
+		return err
+	}
+
+	return o.unmarshalXML(data)
+}
+
+func (o *ODataSpec) unmarshalJSON(data []byte) error {
+	var raw map[string]interface{}
+	err := json.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	if version, found := raw["$Version"]; found {
+		if version == "4.0" || version == "4.01" {
+			o.Raw = string(data)
+		}
+	}
+
+	return nil
+}
+
+func (o *ODataSpec) unmarshalXML(data []byte) error {
+	var raw interface{}
+	err := xml.Unmarshal(data, &raw)
+	if err != nil {
+		return err
+	}
+
+	o.Raw = string(data)
 
 	return nil
 }
@@ -70,21 +138,30 @@ type AsyncApiSpecData struct {
 	Topics   map[string]interface{}
 }
 
-func (o *AsyncApiSpec) UnmarshalJSON(jsonData []byte) error {
+func (o *AsyncApiSpec) Decode(data []byte) error {
 	var raw map[string]interface{}
-	err := json.Unmarshal(jsonData, &raw)
+	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
 
-	var data AsyncApiSpecData
-	err = json.Unmarshal(jsonData, &data)
+	var specData AsyncApiSpecData
+	err = json.Unmarshal(data, &specData)
 	if err != nil {
 		return err
 	}
 
 	o.Raw = raw
-	o.Data = data
+	o.Data = specData
 
 	return nil
+}
+
+func isInvalidBeginningCharacterError(err error) bool {
+	switch err := err.(type) {
+	case *json.SyntaxError:
+		return err.Error() == "invalid character '<' looking for beginning of value"
+	default:
+		return false
+	}
 }
