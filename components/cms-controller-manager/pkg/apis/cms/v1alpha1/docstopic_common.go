@@ -31,7 +31,7 @@ type DocsTopicPhase string
 const (
 	DocsTopicPending DocsTopicPhase = "Pending"
 	DocsTopicReady   DocsTopicPhase = "Ready"
-	DocsTopicError   DocsTopicPhase = "Error"
+	DocsTopicFailed  DocsTopicPhase = "Failed"
 )
 
 type CommonDocsTopicStatus struct {

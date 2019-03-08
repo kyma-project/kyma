@@ -23,20 +23,23 @@ func newBucketService(client client.Client, scheme *runtime.Scheme, region strin
 	}
 }
 
-func (s *bucketService) List(ctx context.Context, labels map[string]string) ([]types.NamespacedName, error) {
+func (s *bucketService) List(ctx context.Context, namespace string, labels map[string]string) ([]string, error) {
 	instances := &v1alpha2.BucketList{}
 	err := s.client.List(ctx, client.MatchingLabels(labels), instances)
 	if err != nil {
 		return nil, err
 	}
 
-	namespacedNames := make([]types.NamespacedName, 0, len(instances.Items))
+	names := make([]string, 0, len(instances.Items))
 	for _, instance := range instances.Items {
-		namespacedName := types.NamespacedName{Name: instance.GetName(), Namespace: instance.GetNamespace()}
-		namespacedNames = append(namespacedNames, namespacedName)
+		if instance.Namespace != namespace {
+			continue
+		}
+		namespacedName := instance.GetName()
+		names = append(names, namespacedName)
 	}
 
-	return namespacedNames, nil
+	return names, nil
 }
 
 func (s *bucketService) Create(ctx context.Context, namespacedName types.NamespacedName, private bool, labels map[string]string) error {

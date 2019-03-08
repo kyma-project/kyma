@@ -25,22 +25,22 @@ func (_m *BucketService) Create(ctx context.Context, namespacedName types.Namesp
 	return r0
 }
 
-// List provides a mock function with given fields: ctx, labels
-func (_m *BucketService) List(ctx context.Context, labels map[string]string) ([]types.NamespacedName, error) {
-	ret := _m.Called(ctx, labels)
+// List provides a mock function with given fields: ctx, namespace, labels
+func (_m *BucketService) List(ctx context.Context, namespace string, labels map[string]string) ([]string, error) {
+	ret := _m.Called(ctx, namespace, labels)
 
-	var r0 []types.NamespacedName
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]string) []types.NamespacedName); ok {
-		r0 = rf(ctx, labels)
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(context.Context, string, map[string]string) []string); ok {
+		r0 = rf(ctx, namespace, labels)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]types.NamespacedName)
+			r0 = ret.Get(0).([]string)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, map[string]string) error); ok {
-		r1 = rf(ctx, labels)
+	if rf, ok := ret.Get(1).(func(context.Context, string, map[string]string) error); ok {
+		r1 = rf(ctx, namespace, labels)
 	} else {
 		r1 = ret.Error(1)
 	}

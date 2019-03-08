@@ -39,13 +39,13 @@ func (_m *AssetService) Delete(ctx context.Context, commonAsset docstopic.Common
 	return r0
 }
 
-// List provides a mock function with given fields: ctx, labels
-func (_m *AssetService) List(ctx context.Context, labels map[string]string) ([]docstopic.CommonAsset, error) {
-	ret := _m.Called(ctx, labels)
+// List provides a mock function with given fields: ctx, namespace, labels
+func (_m *AssetService) List(ctx context.Context, namespace string, labels map[string]string) ([]docstopic.CommonAsset, error) {
+	ret := _m.Called(ctx, namespace, labels)
 
 	var r0 []docstopic.CommonAsset
-	if rf, ok := ret.Get(0).(func(context.Context, map[string]string) []docstopic.CommonAsset); ok {
-		r0 = rf(ctx, labels)
+	if rf, ok := ret.Get(0).(func(context.Context, string, map[string]string) []docstopic.CommonAsset); ok {
+		r0 = rf(ctx, namespace, labels)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]docstopic.CommonAsset)
@@ -53,8 +53,8 @@ func (_m *AssetService) List(ctx context.Context, labels map[string]string) ([]d
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, map[string]string) error); ok {
-		r1 = rf(ctx, labels)
+	if rf, ok := ret.Get(1).(func(context.Context, string, map[string]string) error); ok {
+		r1 = rf(ctx, namespace, labels)
 	} else {
 		r1 = ret.Error(1)
 	}

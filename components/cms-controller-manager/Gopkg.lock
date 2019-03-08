@@ -335,6 +335,14 @@
   version = "v0.8.1"
 
 [[projects]]
+  digest = "1:22aa691fe0213cb5c07d103f9effebcb7ad04bee45a0ce5fe5369d0ca2ec3a1f"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "T"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:3b5729e3fc486abc6fc16ce026331c3d196e788c3b973081ecf5d28ae3e1050d"
   name = "github.com/prometheus/client_golang"
   packages = [
@@ -418,6 +426,27 @@
   pruneopts = "T"
   revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
   version = "v1.0.3"
+
+[[projects]]
+  digest = "1:8d58d88a7b2a7440509bee60f3e865773e8f79e622817ddb63ba3cda9efba25a"
+  name = "github.com/stretchr/objx"
+  packages = ["."]
+  pruneopts = "T"
+  revision = "477a77ecc69700c7cdeb1fa9e129548e1c1c393c"
+  version = "v0.1.1"
+
+[[projects]]
+  digest = "1:17c4ccf5cdb1627aaaeb5c1725cb13aec97b63ea2033d4a6824dcaedf94223dc"
+  name = "github.com/stretchr/testify"
+  packages = [
+    ".",
+    "assert",
+    "http",
+    "mock",
+  ]
+  pruneopts = "T"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
 
 [[projects]]
   digest = "1:1b8282c02f3cbf27de019d739246eaf8231f5dbcaaf9d0d7c7524184ee7b2d24"
@@ -956,10 +985,10 @@
     "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
+    "github.com/pkg/errors",
+    "github.com/stretchr/testify",
+    "github.com/stretchr/testify/mock",
     "github.com/vrischmann/envconfig",
-    "golang.org/x/net/context",
-    "k8s.io/api/apps/v1",
-    "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
@@ -969,6 +998,7 @@
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/plugin/pkg/client/auth/gcp",
     "k8s.io/client-go/rest",
+    "k8s.io/client-go/tools/record",
     "k8s.io/code-generator/cmd/client-gen",
     "k8s.io/code-generator/cmd/deepcopy-gen",
     "sigs.k8s.io/controller-runtime/pkg/client",

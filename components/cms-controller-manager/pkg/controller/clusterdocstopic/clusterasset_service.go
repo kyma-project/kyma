@@ -23,7 +23,7 @@ func newClusterAssetService(client client.Client, scheme *runtime.Scheme) *asset
 	}
 }
 
-func (s *assetService) List(ctx context.Context, labels map[string]string) ([]docstopic.CommonAsset, error) {
+func (s *assetService) List(ctx context.Context, namespace string, labels map[string]string) ([]docstopic.CommonAsset, error) {
 	instances := &v1alpha2.ClusterAssetList{}
 	err := s.client.List(ctx, client.MatchingLabels(labels), instances)
 	if err != nil {

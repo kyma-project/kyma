@@ -23,7 +23,7 @@ func newAssetService(client client.Client, scheme *runtime.Scheme) *assetService
 	}
 }
 
-func (s *assetService) List(ctx context.Context, labels map[string]string) ([]docstopic.CommonAsset, error) {
+func (s *assetService) List(ctx context.Context, namespace string, labels map[string]string) ([]docstopic.CommonAsset, error) {
 	instances := &v1alpha2.AssetList{}
 	err := s.client.List(ctx, client.MatchingLabels(labels), instances)
 	if err != nil {
@@ -32,6 +32,9 @@ func (s *assetService) List(ctx context.Context, labels map[string]string) ([]do
 
 	commons := make([]docstopic.CommonAsset, 0, len(instances.Items))
 	for _, instance := range instances.Items {
+		if instance.Namespace != namespace {
+			continue
+		}
 		common := s.assetToCommon(instance)
 		commons = append(commons, common)
 	}

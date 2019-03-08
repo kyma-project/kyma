@@ -32,7 +32,7 @@ const (
 
 //go:generate mockery -name=AssetService -output=automock -outpkg=automock -case=underscore
 type AssetService interface {
-	List(ctx context.Context, labels map[string]string) ([]CommonAsset, error)
+	List(ctx context.Context, namespace string, labels map[string]string) ([]CommonAsset, error)
 	Create(ctx context.Context, docsTopic v1.Object, commonAsset CommonAsset) error
 	Update(ctx context.Context, commonAsset CommonAsset) error
 	Delete(ctx context.Context, commonAsset CommonAsset) error
@@ -40,7 +40,7 @@ type AssetService interface {
 
 //go:generate mockery -name=BucketService -output=automock -outpkg=automock -case=underscore
 type BucketService interface {
-	List(ctx context.Context, labels map[string]string) ([]types.NamespacedName, error)
+	List(ctx context.Context, namespace string, labels map[string]string) ([]string, error)
 	Create(ctx context.Context, namespacedName types.NamespacedName, private bool, labels map[string]string) error
 }
 
@@ -76,12 +76,12 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 
 	bucketName, err := h.ensureBucketExits(ctx, instance.GetNamespace())
 	if err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicError, pretty.BucketError), err
+		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.BucketError), err
 	}
 
-	commonAssets, err := h.assetSvc.List(ctx, h.buildLabel(instance.GetName(), ""))
+	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabel(instance.GetName(), ""))
 	if err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicError, pretty.AssetsListingFailed), err
+		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed), err
 	}
 	commonAssetsMap := h.convertToAssetMap(commonAssets)
 
@@ -98,7 +98,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 func (h *docstopicHandler) ensureBucketExits(ctx context.Context, namespace string) (string, error) {
 	h.logInfof("Listing buckets")
 	labels := map[string]string{accessLabel: "public"}
-	names, err := h.bucketSvc.List(ctx, labels)
+	names, err := h.bucketSvc.List(ctx, namespace, labels)
 	if err != nil {
 		return "", err
 	}
@@ -108,8 +108,8 @@ func (h *docstopicHandler) ensureBucketExits(ctx context.Context, namespace stri
 		return "", fmt.Errorf("to many buckets with labels: %+v", labels)
 	}
 	if bucketCount == 1 {
-		h.logInfof("Bucket %s already exits", names[0].Name)
-		return names[0].Name, nil
+		h.logInfof("Bucket %s already exits", names[0])
+		return names[0], nil
 	}
 
 	name := h.generateBucketName(false)
@@ -179,15 +179,15 @@ func (h *docstopicHandler) onPhaseChange(status v1alpha1.CommonDocsTopicStatus, 
 
 func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAccessor, spec v1alpha1.CommonDocsTopicSpec, status v1alpha1.CommonDocsTopicStatus, existing map[string]CommonAsset, bucketName string) (*v1alpha1.CommonDocsTopicStatus, error) {
 	if err := h.createMissingAssets(ctx, instance, existing, spec, bucketName); err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicError, pretty.AssetsCreationFailed, err.Error()), err
+		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsCreationFailed, err.Error()), err
 	}
 
 	if err := h.updateOutdatedAssets(ctx, instance, existing, spec, bucketName); err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicError, pretty.AssetsUpdateFailed, err.Error()), err
+		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsUpdateFailed, err.Error()), err
 	}
 
 	if err := h.deleteNotExisting(ctx, instance, existing, spec); err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicError, pretty.AssetsDeletionFailed, err.Error()), err
+		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsDeletionFailed, err.Error()), err
 	}
 
 	return h.buildStatus(v1alpha1.DocsTopicPending, pretty.WaitingForAssets), nil
