@@ -4,9 +4,11 @@ type: Installation
 ---
 
 This Installation guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
+By default, Kyma installs on a GKE cluster using a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster. 
 
 ## Prerequisites
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
+- [Kubernetes](https://kubernetes.io/) 1.12
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
@@ -41,7 +43,7 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
 
 ## DNS setup and TLS certificate generation
 
->**NOTE:** By default, Kyma installs on a cluster using a wildcard DNS provided by `xip.io`. If you don't own a domain which you can use or you don't want to assign your domain to a cluster, skip this section.
+>**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section. 
 
 ### Delegate the management of your domain to Google Cloud DNS
 
