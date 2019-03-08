@@ -12,6 +12,7 @@ spec:
     spec:
       serviceAccountName: {{ template "name" . }}-certs-job
       restartPolicy: OnFailure
+      ttlSecondsAfterFinished: 600
       volumes:
         - name: {{ template "name" . }}-tls-cert
           secret:
@@ -41,8 +42,8 @@ spec:
           fi
           if [ "$(cat /etc/apiserver-proxy-tls-cert/tls.key)" = "" ]; then
           {{ if .Values.global.tlsKey }}
-            echo "{{ .Values.global.tlsKey }}" > ./key.pem
-            echo "{{ .Values.global.tlsCrt }}" > ./cert.pem
+            echo "{{ .Values.global.tlsKey | b64dec }}" > ./key.pem
+            echo "{{ .Values.global.tlsCrt | b64dec }}" > ./cert.pem
           {{ else }}
             source /app/utils.sh
             generateCertificatesForDomain "$DOMAIN" ./key.pem ./cert.pem
