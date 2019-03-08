@@ -5,7 +5,7 @@ type: Tutorials
 
 By default, the client certificate you generate when you connect an external solution to Kyma is valid for 92 days. Follow this tutorial to renew the client certificate.
 
->**NOTE:** You can only renew client certificates that are still valid. If your client certificate expired, you must generate a new one.
+>**NOTE:** You can only renew client certificates that are still valid. If your client certificate is expired or has been revoked, you must generate a new one.
 
 1. To renew the client certificate, use the same certificate subject that matches the subject of your current certificate. To check the certificate subject, run:
   ```
