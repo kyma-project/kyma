@@ -65,10 +65,10 @@ global:
     version: 429bfbcc
   ui_api_layer:
     dir: develop/
-    version: "4ad2e460"
+    version: b426d54d
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: "4ad2e460"
+    version: b426d54d
   cluster_users_test:
     dir: develop/
     version: "30b8aafd"
@@ -106,3 +106,4 @@ test:
       limits:
         memory: 1.5Gi
         cpu: 300m
+
