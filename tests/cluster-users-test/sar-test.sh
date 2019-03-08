@@ -3,8 +3,12 @@
 # Description: This script performs a SelfSubjectAccessReview test by asking the k8s apiserver what permissions does each user have
 # Tested users: admin@kyma.cx, developer@kyma.cx, user@kyma.cx
 # Required ENVS: 
-#  - EMAIL_FILE: path to a file with the email address of the user (used as username)
-#  - PASSWORD_FILE: path to a file with the password for the user
+#  - ADMIN_EMAIL: email address of the admin user (used as username)
+#  - ADMIN_PASSWORD: password for the admin user
+#  - DEVELOPER_EMAIL: email address of the developer user (used as username)
+#  - DEVELOPER_PASSWORD: password for the developer user
+#  - VIEW_EMAIL: email address of the view user (used as username)
+#  - VIEW_PASSWORD: password for the view user
 #  - NAMESPACE: namespace in which we perform the tests
 
 function testPermissions() {
@@ -14,7 +18,7 @@ function testPermissions() {
 	TEST_NS="$4"
 	EXPECTED="$5"
 	set +e
-	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" --as "${USER}" -n "${TEST_NS}")
+	TEST=$(kubectl auth can-i "${OPERATION}" "${RESOURCE}" -n "${TEST_NS}")
 	set -e
 	if [[ "${TEST}" == "${EXPECTED}" ]]; then
 	    echo "----> PASSED"
@@ -27,7 +31,18 @@ function testPermissions() {
 	return 1
 }
 
+function getConfigFile() {
+	readonly REGISTRATION_REQUEST=$(curl -s -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM")
+	readonly REQUEST_ID=$(echo "${REGISTRATION_REQUEST}" | cut -d '"' -f 2 | cut -d '?' -f 2)
+	curl -X POST -F "login=${EMAIL}" -F "password=${PASSWORD}" "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth/local?${REQUEST_ID}"
+	readonly RESPONSE=$(curl -X GET "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/approval?${REQUEST_ID}")
+	readonly AUTH_TOKEN=$(echo "${RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
+	curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" "${CONFIGURATIONS_GENERATOR_SERVICE_HOST}:${CONFIGURATIONS_GENERATOR_SERVICE_PORT_HTTP}/kube-config" -o "${PWD}/kubeconfig"
+}
+
 function runTests() {
+    EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getCofigFile
+    export KUBECONFIG="${PWD}/kubeconfig"
 	echo "--> developer@kyma.cx should be able to get Deployments in ${NAMESPACE}"
 	testPermissions "developer@kyma.cx" "get" "deploy" "${NAMESPACE}" "yes"
 
@@ -49,6 +64,8 @@ function runTests() {
 	echo "--> developer@kyma.cx should NOT be able to create Services in production"
 	testPermissions "developer@kyma.cx" "create" "service" "production" "no"
 
+    EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getCofigFile
+    export KUBECONFIG="${PWD}/kubeconfig"
 	echo "--> admin@kyma.cx should be able to get ClusterRole"
 	testPermissions "admin@kyma.cx" "get" "clusterrole" "${NAMESPACE}" "yes"
 
@@ -61,6 +78,8 @@ function runTests() {
 	echo "--> admin@kyma.cx should be able to delete specific CRD"
 	testPermissions "admin@kyma.cx" "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
+    EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getCofigFile
+    export KUBECONFIG="${PWD}/kubeconfig"
 	echo "--> user@kyma.cx should NOT be able to get ClusterRole"
 	testPermissions "user@kyma.cx" "get" "clusterrole" "${NAMESPACE}" "no"
 
@@ -69,17 +88,6 @@ function runTests() {
 
 	echo "--> user@kyma.cx should NOT be able to create Namespace"
 	testPermissions "user@kyma.cx" "create" "ns" "${NAMESPACE}" "no"
-}
-
-function getConfigFile() {
-	readonly REGISTRATION_REQUEST=$(curl -s -X GET -H 'Content-Type: application/x-www-form-urlencoded' "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth?response_type=id_token%20token&client_id=kyma-client&redirect_uri=http://127.0.0.1:5555/callback&scope=openid%20profile%20email%20groups&nonce=vF7FAQlqq41CObeUFYY0ggv1qEELvfHaXQ0ER4XM")
-	readonly REQUEST_ID=$(echo "${REGISTRATION_REQUEST}" | cut -d '"' -f 2 | cut -d '?' -f 2)
-	readonly EMAIL=$(cat "${EMAIL_FILE}")
-	readonly PASSWORD=$(cat "${PASSWORD_FILE}")
-	curl -X POST -F "login=${EMAIL}" -F "password=${PASSWORD}" "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/auth/local?${REQUEST_ID}"
-	readonly RESPONSE=$(curl -X GET "${DEX_SERVICE_SERVICE_HOST}:${DEX_SERVICE_SERVICE_PORT_HTTP}/approval?${REQUEST_ID}")
-	readonly AUTH_TOKEN=$(echo "${RESPONSE}" | grep -o -P '(?<=id_token=).*(?=&amp;state)')
-	curl -s -H "Authorization: Bearer ${AUTH_TOKEN}" "${CONFIGURATIONS_GENERATOR_SERVICE_HOST}:${CONFIGURATIONS_GENERATOR_SERVICE_PORT_HTTP}/kube-config" -o "${PWD}/kubeconfig"
 }
 
 function cleanup() {
@@ -112,8 +120,6 @@ fi
 trap cleanup EXIT
 ERROR_LOGGING_GUARD="true"
 
-getConfigFile
-export KUBECONFIG="${PWD}/kubeconfig"
 echo "---> Create testing RoleBinding"
 kubectl apply -f ./kyma-developer-binding.yaml -n "${NAMESPACE}"
 runTests
