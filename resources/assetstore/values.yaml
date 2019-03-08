@@ -5,14 +5,14 @@ global:
     gateway:
       name: kyma-gateway
   assetstore_controller_manager:
-    dir: pr/ #TODO: Replace before merge
-    version: PR-2928 #TODO: Replace before merge
+    dir: develop/
+    version: a63544bb
   asset_upload_service:
-    dir: pr/ #TODO: Replace before merge
-    version: PR-2928 #TODO: Replace before merge
+    dir: develop/
+    version: a63544bb
   asset_store_test:
-    dir: pr/ #TODO: Replace before merge
-    version: PR-2928 #TODO: Replace before merge
+    dir: develop/
+    version: a63544bb
 
 minio:
   mode: standalone
