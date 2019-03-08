@@ -37,7 +37,7 @@ function getConfigFile() {
 }
 
 function runTests() {
-    EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getCofigFile
+    EMAIL=${DEVELOPER_EMAIL} PASSWORD=${DEVELOPER_PASSWORD} getConfigFile
     export KUBECONFIG="${PWD}/kubeconfig"
 	echo "--> ${DEVELOPER_EMAIL} should be able to get Deployments in ${NAMESPACE}"
 	testPermissions "get" "deploy" "${NAMESPACE}" "yes"
