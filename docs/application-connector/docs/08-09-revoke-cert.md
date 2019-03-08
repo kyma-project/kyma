@@ -13,7 +13,7 @@ curl -X POST https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revoc
     
 After successful call, the certificate is revoked and cannot be renewed.
 
-If you have access to Kyma cluster, you can also revoke a certificate by making a call with certificates sha256 sum to internal ``certificates/revocations`` endpoint:
+If you have access to the Kyma cluster, you can also revoke a certificate by sending the SHA256 sum of the certificate to the internal `certificates/revocations` endpoint. Run:
 
 ```bash
 curl -X POST http://connector-service-internal-api:8080/v1/applications/certificates/revocations -d '{hash: {CERT_TO_REVOKE_SHA256}}'
