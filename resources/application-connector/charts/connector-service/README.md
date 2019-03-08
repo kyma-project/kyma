@@ -21,6 +21,7 @@ The Connector Service has the following parameters, that can be set through the 
 - **runtimesInfoURL** - URL at which management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
 - **certificateValidityTime** - Validity time of certificates issued by this service. The default value is 90 days.
 - **central** - Determines whether the Connector Service works in the central mode.
+- **revocationConfigMapName** - Name of the config map containing revoked certificates list.
 
 The Connector Service also uses the following environmental variables for CSR-related information config:
 - **COUNTRY** (two-letter-long country code)
