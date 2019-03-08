@@ -40,6 +40,6 @@ clean:
 	rm -f targz
 	rm -f indexbuilder
 
-.PHONY: version-path
-version-path:
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
 	@echo "resources/helm-broker"

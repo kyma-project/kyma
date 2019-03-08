@@ -88,6 +88,6 @@ clean:
 	rm -rf ./cmd/event-bus-sv/$(BINARY_SV) ./cmd/event-bus-sv/docker
 	rm -rf ./cmd/nats-streaming-init/$(BINARY_NI) ./cmd/nats-streaming-init/docker
 
-.PHONY: version-path
-version-path:
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
 	@echo "resources/event-bus"

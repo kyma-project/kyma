@@ -24,6 +24,6 @@ ci-master: prepare build-image push-image
 .PHONY: ci-release
 ci-release: prepare build-image push-image
 
-.PHONY: version-path
-version-path:
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
 	@echo "resources/core"

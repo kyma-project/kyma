@@ -40,6 +40,6 @@ clean:
 	rm -rf  ./e2e-tester/bin/
 	rm -rf ./e2e-tester/docker/
 
-#.PHONY: version-path
-#version-path:
+#.PHONY: path-to-referenced-charts
+#path-to-referenced-charts:
 #	@echo "resources/event-bus"

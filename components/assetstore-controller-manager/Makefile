@@ -64,6 +64,6 @@ ci-pr: setup docker-build docker-push
 ci-master: setup docker-build docker-push
 ci-release: setup docker-build docker-push
 
-.PHONY: version-path
-version-path:
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
 	@echo "resources/assetstore"

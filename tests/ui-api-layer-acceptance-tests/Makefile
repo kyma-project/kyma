@@ -18,6 +18,6 @@ push-image:
 	docker tag $(IMG_NAME) $(IMG):$(TAG)
 	docker push $(IMG):$(TAG)
 
-.PHONY: version-path
-version-path:
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
 	@echo "resources/core"

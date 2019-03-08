@@ -28,6 +28,6 @@ ci-release: build build-image push-image
 clean:
 	rm -rf bin
 
-.PHONY: version-path
-version-path:
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
 	@echo "resources/core"
