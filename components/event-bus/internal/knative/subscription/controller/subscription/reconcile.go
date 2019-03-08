@@ -107,7 +107,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		// The object is being deleted
 		if util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			// our finalizer is present, so lets handle our external dependency
-			if err := r.deleteExternalDependency(ctx, subscription, knativeChannelName); err != nil {
+			if err := r.deleteExternalDependency(ctx, subscription, knativeChannelName, knativeSubsNamespace); err != nil {
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried
 				return false, err
@@ -205,7 +205,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	return false, nil
 }
 
-func (r *reconciler) deleteExternalDependency(ctx context.Context, subscription *eventingv1alpha1.Subscription, channelName string) error {
+func (r *reconciler) deleteExternalDependency(ctx context.Context, subscription *eventingv1alpha1.Subscription, channelName string, channelNamespace string) error {
 	log.Info("Deleting the external dependencies")
 
 	// In case Knative Subscription exists, delete it.
