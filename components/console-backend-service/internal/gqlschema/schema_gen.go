@@ -58,6 +58,11 @@ type ComplexityRoot struct {
 		AuthenticationPolicies func(childComplexity int) int
 	}
 
+	ApiService struct {
+		Name func(childComplexity int) int
+		Port func(childComplexity int) int
+	}
+
 	Application struct {
 		Name                func(childComplexity int) int
 		Description         func(childComplexity int) int
@@ -271,6 +276,15 @@ type ComplexityRoot struct {
 		DefaultRequest func(childComplexity int) int
 	}
 
+	LoadBalancerIngress struct {
+		Ip       func(childComplexity int) int
+		HostName func(childComplexity int) int
+	}
+
+	LoadBalancerStatus struct {
+		Ingress func(childComplexity int) int
+	}
+
 	LocalObjectReference struct {
 		Kind func(childComplexity int) int
 		Name func(childComplexity int) int
@@ -342,6 +356,8 @@ type ComplexityRoot struct {
 		Deployments           func(childComplexity int, namespace string, excludeFunctions *bool) int
 		Pod                   func(childComplexity int, name string, namespace string) int
 		Pods                  func(childComplexity int, namespace string, first *int, offset *int) int
+		Service               func(childComplexity int, name string, namespace string) int
+		Services              func(childComplexity int, namespace string, first *int, offset *int) int
 		ReplicaSet            func(childComplexity int, name string, namespace string) int
 		ReplicaSets           func(childComplexity int, namespace string, first *int, offset *int) int
 		ResourceQuotas        func(childComplexity int, namespace string) int
@@ -402,8 +418,12 @@ type ComplexityRoot struct {
 	}
 
 	Service struct {
-		Name func(childComplexity int) int
-		Port func(childComplexity int) int
+		Name              func(childComplexity int) int
+		ClusterIp         func(childComplexity int) int
+		CreationTimestamp func(childComplexity int) int
+		Labels            func(childComplexity int) int
+		Ports             func(childComplexity int) int
+		Status            func(childComplexity int) int
 	}
 
 	ServiceBinding struct {
@@ -506,6 +526,11 @@ type ComplexityRoot struct {
 		Content             func(childComplexity int) int
 	}
 
+	ServiceEvent struct {
+		Type    func(childComplexity int) int
+		Service func(childComplexity int) int
+	}
+
 	ServiceInstance struct {
 		Name                 func(childComplexity int) int
 		Namespace            func(childComplexity int) int
@@ -552,6 +577,18 @@ type ComplexityRoot struct {
 		BindingCreateParameterSchema  func(childComplexity int) int
 	}
 
+	ServicePort struct {
+		Name            func(childComplexity int) int
+		ServiceProtocol func(childComplexity int) int
+		Port            func(childComplexity int) int
+		NodePort        func(childComplexity int) int
+		TargetPort      func(childComplexity int) int
+	}
+
+	ServiceStatus struct {
+		LoadBalancer func(childComplexity int) int
+	}
+
 	Subscription struct {
 		ServiceInstanceEvent      func(childComplexity int, namespace string) int
 		ServiceBindingEvent       func(childComplexity int, namespace string) int
@@ -560,6 +597,7 @@ type ComplexityRoot struct {
 		ClusterServiceBrokerEvent func(childComplexity int) int
 		ApplicationEvent          func(childComplexity int) int
 		PodEvent                  func(childComplexity int, namespace string) int
+		ServiceEvent              func(childComplexity int, namespace string) int
 	}
 
 	Title struct {
@@ -654,6 +692,8 @@ type QueryResolver interface {
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
 	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
 	Pods(ctx context.Context, namespace string, first *int, offset *int) ([]Pod, error)
+	Service(ctx context.Context, name string, namespace string) (*Service, error)
+	Services(ctx context.Context, namespace string, first *int, offset *int) ([]Service, error)
 	ReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
 	ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]ReplicaSet, error)
 	ResourceQuotas(ctx context.Context, namespace string) ([]ResourceQuota, error)
@@ -700,6 +740,7 @@ type SubscriptionResolver interface {
 	ClusterServiceBrokerEvent(ctx context.Context) (<-chan ClusterServiceBrokerEvent, error)
 	ApplicationEvent(ctx context.Context) (<-chan ApplicationEvent, error)
 	PodEvent(ctx context.Context, namespace string) (<-chan PodEvent, error)
+	ServiceEvent(ctx context.Context, namespace string) (<-chan ServiceEvent, error)
 }
 
 func field_ClusterServiceClass_activated_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -1883,6 +1924,73 @@ func field_Query_pods_args(rawArgs map[string]interface{}) (map[string]interface
 
 }
 
+func field_Query_service_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Query_services_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg2
+	return args, nil
+
+}
+
 func field_Query_replicaSet_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -2256,6 +2364,21 @@ func field_Subscription_podEvent_args(rawArgs map[string]interface{}) (map[strin
 
 }
 
+func field_Subscription_serviceEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
 func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 bool
@@ -2341,6 +2464,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Api.AuthenticationPolicies(childComplexity), true
+
+	case "ApiService.name":
+		if e.complexity.ApiService.Name == nil {
+			break
+		}
+
+		return e.complexity.ApiService.Name(childComplexity), true
+
+	case "ApiService.port":
+		if e.complexity.ApiService.Port == nil {
+			break
+		}
+
+		return e.complexity.ApiService.Port(childComplexity), true
 
 	case "Application.name":
 		if e.complexity.Application.Name == nil {
@@ -3192,6 +3329,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LimitRangeItem.DefaultRequest(childComplexity), true
 
+	case "LoadBalancerIngress.ip":
+		if e.complexity.LoadBalancerIngress.Ip == nil {
+			break
+		}
+
+		return e.complexity.LoadBalancerIngress.Ip(childComplexity), true
+
+	case "LoadBalancerIngress.hostName":
+		if e.complexity.LoadBalancerIngress.HostName == nil {
+			break
+		}
+
+		return e.complexity.LoadBalancerIngress.HostName(childComplexity), true
+
+	case "LoadBalancerStatus.ingress":
+		if e.complexity.LoadBalancerStatus.Ingress == nil {
+			break
+		}
+
+		return e.complexity.LoadBalancerStatus.Ingress(childComplexity), true
+
 	case "LocalObjectReference.kind":
 		if e.complexity.LocalObjectReference.Kind == nil {
 			break
@@ -3777,6 +3935,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Pods(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
+	case "Query.service":
+		if e.complexity.Query.Service == nil {
+			break
+		}
+
+		args, err := field_Query_service_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Service(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.services":
+		if e.complexity.Query.Services == nil {
+			break
+		}
+
+		args, err := field_Query_services_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Services(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
+
 	case "Query.replicaSet":
 		if e.complexity.Query.ReplicaSet == nil {
 			break
@@ -4091,12 +4273,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Service.Name(childComplexity), true
 
-	case "Service.port":
-		if e.complexity.Service.Port == nil {
+	case "Service.clusterIP":
+		if e.complexity.Service.ClusterIp == nil {
 			break
 		}
 
-		return e.complexity.Service.Port(childComplexity), true
+		return e.complexity.Service.ClusterIp(childComplexity), true
+
+	case "Service.creationTimestamp":
+		if e.complexity.Service.CreationTimestamp == nil {
+			break
+		}
+
+		return e.complexity.Service.CreationTimestamp(childComplexity), true
+
+	case "Service.labels":
+		if e.complexity.Service.Labels == nil {
+			break
+		}
+
+		return e.complexity.Service.Labels(childComplexity), true
+
+	case "Service.ports":
+		if e.complexity.Service.Ports == nil {
+			break
+		}
+
+		return e.complexity.Service.Ports(childComplexity), true
+
+	case "Service.status":
+		if e.complexity.Service.Status == nil {
+			break
+		}
+
+		return e.complexity.Service.Status(childComplexity), true
 
 	case "ServiceBinding.name":
 		if e.complexity.ServiceBinding.Name == nil {
@@ -4525,6 +4735,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceClass.Content(childComplexity), true
 
+	case "ServiceEvent.type":
+		if e.complexity.ServiceEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.ServiceEvent.Type(childComplexity), true
+
+	case "ServiceEvent.service":
+		if e.complexity.ServiceEvent.Service == nil {
+			break
+		}
+
+		return e.complexity.ServiceEvent.Service(childComplexity), true
+
 	case "ServiceInstance.name":
 		if e.complexity.ServiceInstance.Name == nil {
 			break
@@ -4742,6 +4966,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServicePlan.BindingCreateParameterSchema(childComplexity), true
 
+	case "ServicePort.name":
+		if e.complexity.ServicePort.Name == nil {
+			break
+		}
+
+		return e.complexity.ServicePort.Name(childComplexity), true
+
+	case "ServicePort.serviceProtocol":
+		if e.complexity.ServicePort.ServiceProtocol == nil {
+			break
+		}
+
+		return e.complexity.ServicePort.ServiceProtocol(childComplexity), true
+
+	case "ServicePort.port":
+		if e.complexity.ServicePort.Port == nil {
+			break
+		}
+
+		return e.complexity.ServicePort.Port(childComplexity), true
+
+	case "ServicePort.nodePort":
+		if e.complexity.ServicePort.NodePort == nil {
+			break
+		}
+
+		return e.complexity.ServicePort.NodePort(childComplexity), true
+
+	case "ServicePort.targetPort":
+		if e.complexity.ServicePort.TargetPort == nil {
+			break
+		}
+
+		return e.complexity.ServicePort.TargetPort(childComplexity), true
+
+	case "ServiceStatus.loadBalancer":
+		if e.complexity.ServiceStatus.LoadBalancer == nil {
+			break
+		}
+
+		return e.complexity.ServiceStatus.LoadBalancer(childComplexity), true
+
 	case "Subscription.serviceInstanceEvent":
 		if e.complexity.Subscription.ServiceInstanceEvent == nil {
 			break
@@ -4815,6 +5081,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.PodEvent(childComplexity, args["namespace"].(string)), true
+
+	case "Subscription.serviceEvent":
+		if e.complexity.Subscription.ServiceEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_serviceEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.ServiceEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Title.name":
 		if e.complexity.Title.Name == nil {
@@ -5102,11 +5380,11 @@ func (ec *executionContext) _API_service(ctx context.Context, field graphql.Coll
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Service)
+	res := resTmp.(ApiService)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	return ec._Service(ctx, field.Selections, &res)
+	return ec._ApiService(ctx, field.Selections, &res)
 }
 
 // nolint: vetshadow
@@ -5167,6 +5445,95 @@ func (ec *executionContext) _API_authenticationPolicies(ctx context.Context, fie
 	}
 	wg.Wait()
 	return arr1
+}
+
+var apiServiceImplementors = []string{"ApiService"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ApiService(ctx context.Context, sel ast.SelectionSet, obj *ApiService) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, apiServiceImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ApiService")
+		case "name":
+			out.Values[i] = ec._ApiService_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "port":
+			out.Values[i] = ec._ApiService_port(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ApiService_name(ctx context.Context, field graphql.CollectedField, obj *ApiService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ApiService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ApiService_port(ctx context.Context, field graphql.CollectedField, obj *ApiService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ApiService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Port, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
 }
 
 var applicationImplementors = []string{"Application"}
@@ -10153,6 +10520,185 @@ func (ec *executionContext) _LimitRangeItem_defaultRequest(ctx context.Context, 
 	return ec._ResourceType(ctx, field.Selections, &res)
 }
 
+var loadBalancerIngressImplementors = []string{"LoadBalancerIngress"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _LoadBalancerIngress(ctx context.Context, sel ast.SelectionSet, obj *LoadBalancerIngress) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, loadBalancerIngressImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LoadBalancerIngress")
+		case "ip":
+			out.Values[i] = ec._LoadBalancerIngress_ip(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "hostName":
+			out.Values[i] = ec._LoadBalancerIngress_hostName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _LoadBalancerIngress_ip(ctx context.Context, field graphql.CollectedField, obj *LoadBalancerIngress) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "LoadBalancerIngress",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IP, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _LoadBalancerIngress_hostName(ctx context.Context, field graphql.CollectedField, obj *LoadBalancerIngress) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "LoadBalancerIngress",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.HostName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+var loadBalancerStatusImplementors = []string{"LoadBalancerStatus"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _LoadBalancerStatus(ctx context.Context, sel ast.SelectionSet, obj *LoadBalancerStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, loadBalancerStatusImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("LoadBalancerStatus")
+		case "ingress":
+			out.Values[i] = ec._LoadBalancerStatus_ingress(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _LoadBalancerStatus_ingress(ctx context.Context, field graphql.CollectedField, obj *LoadBalancerStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "LoadBalancerStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ingress, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]LoadBalancerIngress)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._LoadBalancerIngress(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
 var localObjectReferenceImplementors = []string{"LocalObjectReference"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -11665,6 +12211,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "service":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_service(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "services":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_services(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "replicaSet":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -12904,6 +13465,107 @@ func (ec *executionContext) _Query_pods(ctx context.Context, field graphql.Colle
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._Pod(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_service(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_service_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Service(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Service)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Service(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_services(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_services_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Services(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Service)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Service(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -14667,8 +15329,28 @@ func (ec *executionContext) _Service(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "port":
-			out.Values[i] = ec._Service_port(ctx, field, obj)
+		case "clusterIP":
+			out.Values[i] = ec._Service_clusterIP(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "creationTimestamp":
+			out.Values[i] = ec._Service_creationTimestamp(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "labels":
+			out.Values[i] = ec._Service_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "ports":
+			out.Values[i] = ec._Service_ports(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "status":
+			out.Values[i] = ec._Service_status(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -14711,7 +15393,7 @@ func (ec *executionContext) _Service_name(ctx context.Context, field graphql.Col
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Service_port(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
+func (ec *executionContext) _Service_clusterIP(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -14723,7 +15405,7 @@ func (ec *executionContext) _Service_port(ctx context.Context, field graphql.Col
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Port, nil
+		return obj.ClusterIP, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -14731,10 +15413,152 @@ func (ec *executionContext) _Service_port(ctx context.Context, field graphql.Col
 		}
 		return graphql.Null
 	}
-	res := resTmp.(int)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalInt(res)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Service_creationTimestamp(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Service",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreationTimestamp, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return MarshalTimestamp(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Service_labels(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Service",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Service_ports(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Service",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Ports, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ServicePort)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ServicePort(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Service_status(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Service",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Status, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ServiceStatus)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._ServiceStatus(ctx, field.Selections, &res)
 }
 
 var serviceBindingImplementors = []string{"ServiceBinding"}
@@ -17141,6 +17965,96 @@ func (ec *executionContext) _ServiceClass_content(ctx context.Context, field gra
 	return *res
 }
 
+var serviceEventImplementors = []string{"ServiceEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceEvent(ctx context.Context, sel ast.SelectionSet, obj *ServiceEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, serviceEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceEvent")
+		case "type":
+			out.Values[i] = ec._ServiceEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "service":
+			out.Values[i] = ec._ServiceEvent_service(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceEvent_type(ctx context.Context, field graphql.CollectedField, obj *ServiceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceEvent_service(ctx context.Context, field graphql.CollectedField, obj *ServiceEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Service, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Service)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Service(ctx, field.Selections, &res)
+}
+
 var serviceInstanceImplementors = []string{"ServiceInstance"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -18310,6 +19224,249 @@ func (ec *executionContext) _ServicePlan_bindingCreateParameterSchema(ctx contex
 	return *res
 }
 
+var servicePortImplementors = []string{"ServicePort"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServicePort(ctx context.Context, sel ast.SelectionSet, obj *ServicePort) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, servicePortImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServicePort")
+		case "name":
+			out.Values[i] = ec._ServicePort_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "serviceProtocol":
+			out.Values[i] = ec._ServicePort_serviceProtocol(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "port":
+			out.Values[i] = ec._ServicePort_port(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "nodePort":
+			out.Values[i] = ec._ServicePort_nodePort(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "targetPort":
+			out.Values[i] = ec._ServicePort_targetPort(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePort_name(ctx context.Context, field graphql.CollectedField, obj *ServicePort) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePort",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePort_serviceProtocol(ctx context.Context, field graphql.CollectedField, obj *ServicePort) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePort",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ServiceProtocol, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ServiceProtocol)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePort_port(ctx context.Context, field graphql.CollectedField, obj *ServicePort) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePort",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Port, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePort_nodePort(ctx context.Context, field graphql.CollectedField, obj *ServicePort) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePort",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NodePort, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServicePort_targetPort(ctx context.Context, field graphql.CollectedField, obj *ServicePort) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServicePort",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.TargetPort, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalInt(res)
+}
+
+var serviceStatusImplementors = []string{"ServiceStatus"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ServiceStatus(ctx context.Context, sel ast.SelectionSet, obj *ServiceStatus) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, serviceStatusImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ServiceStatus")
+		case "loadBalancer":
+			out.Values[i] = ec._ServiceStatus_loadBalancer(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ServiceStatus_loadBalancer(ctx context.Context, field graphql.CollectedField, obj *ServiceStatus) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ServiceStatus",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.LoadBalancer, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(LoadBalancerStatus)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._LoadBalancerStatus(ctx, field.Selections, &res)
+}
+
 var subscriptionImplementors = []string{"Subscription"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -18338,6 +19495,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_applicationEvent(ctx, fields[0])
 	case "podEvent":
 		return ec._Subscription_podEvent(ctx, fields[0])
+	case "serviceEvent":
+		return ec._Subscription_serviceEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -18543,6 +19702,37 @@ func (ec *executionContext) _Subscription_podEvent(ctx context.Context, field gr
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._PodEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_serviceEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_serviceEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().ServiceEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._ServiceEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -21358,6 +22548,42 @@ type Deployment {
     boundServiceInstanceNames: [String!]
 }
 
+enum ServiceProtocol {
+    TCP
+    UDP
+    UNKNOWN
+}
+
+type ServicePort {
+    name: String!
+    serviceProtocol: ServiceProtocol!
+    port: Int!
+    nodePort: Int!
+    targetPort: Int!
+}
+
+type LoadBalancerIngress {
+    ip: String!
+    hostName: String!
+}
+
+type LoadBalancerStatus {
+    ingress: [LoadBalancerIngress!]!
+}
+
+type ServiceStatus {
+    loadBalancer: LoadBalancerStatus!
+}
+
+type Service {
+    name: String!
+    clusterIP: String!
+    creationTimestamp: Timestamp!
+    labels: Labels!
+    ports: [ServicePort!]!
+    status: ServiceStatus!
+}
+
 type Pod {
     name: String!
     nodeName: String!
@@ -21391,6 +22617,11 @@ enum PodStatusType {
 type PodEvent {
     type: SubscriptionEventType!
     pod: Pod!
+}
+
+type ServiceEvent {
+    type: SubscriptionEventType!
+    service: Service!
 }
 
 type ContainerState {
@@ -21548,7 +22779,7 @@ input InputTopic {
 
 # API controller
 
-type Service {
+type ApiService {
     name: String!
     port: Int!
 }
@@ -21566,7 +22797,7 @@ type AuthenticationPolicy  {
 type API {
     name: String!
     hostname: String!
-    service: Service!
+    service: ApiService!
     authenticationPolicies: [AuthenticationPolicy!]!
 }
 
@@ -21610,6 +22841,9 @@ type Query {
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]!
     pod(name: String!, namespace: String!): Pod
     pods(namespace: String!, first: Int, offset: Int): [Pod!]!
+
+    service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1", isChildResolver: false})
+    services(namespace: String!, first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1", isChildResolver: false})
 
     replicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "get", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
     replicaSets(namespace: String!, first: Int, offset: Int): [ReplicaSet!]! @HasAccess(attributes: {resource: "replicasets", verb: "list", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
@@ -21669,6 +22903,7 @@ type Subscription {
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
+    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
 # Schema

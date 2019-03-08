@@ -12,8 +12,13 @@ import (
 type API struct {
 	Name                   string                 `json:"name"`
 	Hostname               string                 `json:"hostname"`
-	Service                Service                `json:"service"`
+	Service                ApiService             `json:"service"`
 	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
+}
+
+type ApiService struct {
+	Name string `json:"name"`
+	Port int    `json:"port"`
 }
 
 type ApplicationEntry struct {
@@ -207,6 +212,15 @@ type LimitRangeItem struct {
 	DefaultRequest ResourceType `json:"defaultRequest"`
 }
 
+type LoadBalancerIngress struct {
+	IP       string `json:"ip"`
+	HostName string `json:"hostName"`
+}
+
+type LoadBalancerStatus struct {
+	Ingress []LoadBalancerIngress `json:"ingress"`
+}
+
 type LocalObjectReference struct {
 	Kind string `json:"kind"`
 	Name string `json:"name"`
@@ -285,8 +299,12 @@ type Secret struct {
 }
 
 type Service struct {
-	Name string `json:"name"`
-	Port int    `json:"port"`
+	Name              string        `json:"name"`
+	ClusterIP         string        `json:"clusterIP"`
+	CreationTimestamp time.Time     `json:"creationTimestamp"`
+	Labels            Labels        `json:"labels"`
+	Ports             []ServicePort `json:"ports"`
+	Status            ServiceStatus `json:"status"`
 }
 
 type ServiceBindingEvent struct {
@@ -355,6 +373,11 @@ type ServiceBrokerStatus struct {
 	Message string `json:"message"`
 }
 
+type ServiceEvent struct {
+	Type    SubscriptionEventType `json:"type"`
+	Service Service               `json:"service"`
+}
+
 type ServiceInstanceCreateInput struct {
 	Name            string                                `json:"name"`
 	Namespace       string                                `json:"namespace"`
@@ -395,6 +418,18 @@ type ServicePlan struct {
 	RelatedServiceClassName       string  `json:"relatedServiceClassName"`
 	InstanceCreateParameterSchema *JSON   `json:"instanceCreateParameterSchema"`
 	BindingCreateParameterSchema  *JSON   `json:"bindingCreateParameterSchema"`
+}
+
+type ServicePort struct {
+	Name            string          `json:"name"`
+	ServiceProtocol ServiceProtocol `json:"serviceProtocol"`
+	Port            int             `json:"port"`
+	NodePort        int             `json:"nodePort"`
+	TargetPort      int             `json:"targetPort"`
+}
+
+type ServiceStatus struct {
+	LoadBalancer LoadBalancerStatus `json:"loadBalancer"`
 }
 
 type UsageKind struct {
@@ -706,6 +741,43 @@ func (e *ServiceBindingUsageStatusType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ServiceBindingUsageStatusType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type ServiceProtocol string
+
+const (
+	ServiceProtocolTcp     ServiceProtocol = "TCP"
+	ServiceProtocolUdp     ServiceProtocol = "UDP"
+	ServiceProtocolUnknown ServiceProtocol = "UNKNOWN"
+)
+
+func (e ServiceProtocol) IsValid() bool {
+	switch e {
+	case ServiceProtocolTcp, ServiceProtocolUdp, ServiceProtocolUnknown:
+		return true
+	}
+	return false
+}
+
+func (e ServiceProtocol) String() string {
+	return string(e)
+}
+
+func (e *ServiceProtocol) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = ServiceProtocol(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid ServiceProtocol", str)
+	}
+	return nil
+}
+
+func (e ServiceProtocol) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
