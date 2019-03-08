@@ -2,12 +2,15 @@ package util
 
 import (
 	"context"
+	"fmt"
+	"time"
+
+	"github.com/go-logr/logr"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/equality"
-	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
+	runtimeClient "sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Helper functions to check and remove string from a slice of strings.
@@ -46,13 +49,31 @@ func UpdateEventActivation(ctx context.Context, client runtimeClient.Client, u *
 	return nil
 }
 
+// CheckIfEventActivationExistForSubscription
+func CheckIfEventActivationExistForSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription) bool {
+	subNamespace := sub.GetNamespace()
+	subSourceID := sub.SourceID
+
+	eal := &eventingv1alpha1.EventActivationList{}
+	lo := &runtimeClient.ListOptions{Namespace: subNamespace}
+	if err := client.List(ctx, lo, eal); err != nil {
+		return false
+	}
+	for _, ea := range eal.Items {
+		if subSourceID == ea.SourceID {
+			return true
+		}
+	}
+	return false
+}
+
 // GetSubscriptionsForEventActivation() gets all the subscriptions having the same "namespace" and the same "Source" as the "ea" object
 func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClient.Client, ea *eventingv1alpha1.EventActivation) ([]*subApis.Subscription, error) {
 	eaNamespace := ea.GetNamespace()
 	eaSourceID := ea.EventActivationSpec.SourceID
 
 	sl := &subApis.SubscriptionList{}
-	lo := &runtimeClient.ListOptions{ Namespace: eaNamespace}  // query using SourceID too?
+	lo := &runtimeClient.ListOptions{Namespace: eaNamespace} // query using SourceID too?
 	if err := client.List(ctx, lo, sl); err != nil {
 		return nil, err
 	}
@@ -66,7 +87,7 @@ func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClien
 	return subs, nil
 }
 
-type SubscriptionWithError struct{
+type SubscriptionWithError struct {
 	Sub *subApis.Subscription
 	Err error
 }
@@ -75,7 +96,7 @@ func WriteSubscriptions(ctx context.Context, client runtimeClient.Client, subs [
 	var errorSubs []SubscriptionWithError
 	for _, u := range subs {
 		if err := WriteSubscription(ctx, client, u); err != nil {
-			errorSubs = append(errorSubs, SubscriptionWithError{Sub: u, Err: err })
+			errorSubs = append(errorSubs, SubscriptionWithError{Sub: u, Err: err})
 		}
 	}
 	return errorSubs
@@ -117,7 +138,7 @@ func UpdateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, condi
 	return updatedSubs
 }
 
-func UpdateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string)  *subApis.Subscription {
+func UpdateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string) *subApis.Subscription {
 	t := metav1.NewTime(time.Now())
 	var newCondition subApis.SubscriptionCondition
 	if conditionStatus == subApis.ConditionTrue {
@@ -138,4 +159,29 @@ func UpdateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus su
 		}
 	}
 	return sub
+}
+
+func ActivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger) error {
+	updatedSubs := UpdateSubscriptionsEventActivatedStatus(subs, subApis.ConditionTrue)
+	return updateSubscriptions(ctx, client, updatedSubs, log)
+}
+
+func DeactivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger) error {
+	updatedSubs := UpdateSubscriptionsEventActivatedStatus(subs, subApis.ConditionFalse)
+	return updateSubscriptions(ctx, client, updatedSubs, log)
+}
+
+func updateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger) error {
+	if subsWithErrors := WriteSubscriptions(ctx, client, subs); len(subsWithErrors) != 0 {
+		// try to set the "Ready" status to false
+		for _, es := range subsWithErrors {
+			log.Error(es.Err, "WriteSubscription() failed for this subscription:", "subscription", es.Sub)
+			us := UpdateSubscriptionReadyStatus(es.Sub, subApis.ConditionFalse, es.Err.Error())
+			if err := WriteSubscription(ctx, client, us); err != nil {
+				log.Error(err, "Update Ready status failed")
+			}
+		}
+		return fmt.Errorf("WriteSubscriptions() failed, see the Ready status of each subscription")
+	}
+	return nil
 }

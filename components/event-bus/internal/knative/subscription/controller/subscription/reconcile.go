@@ -2,6 +2,7 @@ package subscription
 
 import (
 	"context"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -17,18 +18,18 @@ const (
 	Name = "subscription"
 
 	// Name of the corev1.Events emitted from the reconciliation process
-	subReconciled         = "SubscriptionReconciled"
-	subReconcileFailed    = "SubscriptionReconcileFailed"
+	subReconciled      = "SubscriptionReconciled"
+	subReconcileFailed = "SubscriptionReconcileFailed"
 
 	// Finalizer for deleting Knative Subscriptions
 	finalizerName = "subscription.finalizers.kyma-project.io"
 )
 
 type reconciler struct {
-	client   client.Client
-	recorder record.EventRecorder
+	client     client.Client
+	recorder   record.EventRecorder
 	knativeLib *util.KnativeLib
-	opts	 *opts.Options
+	opts       *opts.Options
 }
 
 // Verify the struct implements reconcile.Reconciler
@@ -56,7 +57,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 	// Any other error should be retried in another reconciliation.
 	if err != nil {
-		log.Error(err,"Unable to Get Subscription object")
+		log.Error(err, "Unable to Get Subscription object")
 		return reconcile.Result{}, err
 	}
 
@@ -137,7 +138,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			log.Info("Knative Channel is created", "Channel", knativeChannel)
 		}
 
-		// Check if Knative Subsription already exists, if not create one.
+		// Check if Knative Subscription already exists, if not create one.
 		sub, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
@@ -162,8 +163,18 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 				log.Info("Knative Subscription is re-created", "Subscription", knativeSubsName)
 			}
 		}
+	} else if util.CheckIfEventActivationExistForSubscription(ctx, r.client, subscription) {
+		// In case Kyma Subscription does not have events-activated condition, but there is an EventActivation for it.
+		// Activate subscription
+		if err := util.ActivateSubscriptions(ctx, r.client, []*eventingv1alpha1.Subscription{subscription}, log); err != nil {
+			log.Error(err, "ActivateSubscriptions() failed")
+			return false, err
+		}
+		log.Info("Kyma Subscription is activated", "Subscription", knativeSubsName)
+
+		return true, nil
 	} else {
-		// In case Kyma Subscription does not have events-activated condition, delete Knative Subscription if exists.
+		// In case Kyma Subscription does not have events-activated condition and there is no EventActivation, delete Knative Subscription & Channel if exist.
 		knativeSubs, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
