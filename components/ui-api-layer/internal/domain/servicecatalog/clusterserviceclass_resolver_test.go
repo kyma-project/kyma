@@ -576,6 +576,154 @@ func TestClusterServiceClassResolver_ClusterServiceClassApiSpecField(t *testing.
 	})
 }
 
+func TestClusterServiceClassResolver_ClusterServiceClassOpenApiSpecField(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "name"
+		resource := &storage.OpenApiSpec{
+			Raw: map[string]interface{}{
+				"test": "data",
+			},
+		}
+		expected := new(gqlschema.JSON)
+		err := expected.UnmarshalGQL(resource.Raw)
+		require.NoError(t, err)
+
+		resourceGetter := new(contentMock.OpenApiSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("OpenApiSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ClusterServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ClusterServiceClassOpenApiSpecField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		name := "name"
+		resourceGetter := new(contentMock.OpenApiSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("OpenApiSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ClusterServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ClusterServiceClassOpenApiSpecField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		expectedErr := errors.New("Test")
+		name := "name"
+		resourceGetter := new(contentMock.OpenApiSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("OpenApiSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ClusterServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ClusterServiceClassOpenApiSpecField(nil, &parentObj)
+
+		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+}
+
+func TestClusterServiceClassResolver_ClusterServiceClassODataSpecField(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "name"
+		expected := "{}"
+		resource := &storage.ODataSpec{
+			Raw: expected,
+		}
+
+		resourceGetter := new(contentMock.ODataSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("ODataSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ClusterServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ClusterServiceClassODataSpecField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Equal(t, &expected, result)
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		name := "name"
+		resourceGetter := new(contentMock.ODataSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("ODataSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ClusterServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ClusterServiceClassODataSpecField(nil, &parentObj)
+
+		require.NoError(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		expectedErr := errors.New("Test")
+		name := "name"
+		resourceGetter := new(contentMock.ODataSpecGetter)
+		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		retriever := new(contentMock.ContentRetriever)
+		retriever.On("ODataSpec").Return(resourceGetter)
+
+		parentObj := gqlschema.ClusterServiceClass{
+			Name: name,
+		}
+
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
+
+		result, err := resolver.ClusterServiceClassODataSpecField(nil, &parentObj)
+
+		assert.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+}
+
 func TestClusterServiceClassResolver_ClusterServiceClassAsyncApiSpecField(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "name"

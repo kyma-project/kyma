@@ -168,7 +168,7 @@ spec:
   serviceAccount: "test-{{ template "fullname" . }}-int"
   containers:
   - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration-tests:{{ .Values.global.kubeless_integration_tests.version }}
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration:{{ .Values.global.kubeless_integration_tests.version }}
     volumeMounts:
     - name: k8syaml
       mountPath: /k8syaml

@@ -54,7 +54,7 @@ func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.
 		return reconcile.Result{}, err
 	}
 
-	err = r.updateApplication(instance)
+	err = r.updateApplicationCR(instance)
 	if err != nil {
 		return reconcile.Result{}, logAndError(err, "Error while updating Application %s", instance.Name)
 	}
@@ -140,7 +140,7 @@ func (r *applicationReconciler) installApplication(application *v1alpha1.Applica
 	if err != nil {
 		return "", "", errors.Wrapf(err, "Error installing release for %s Application", application.Name)
 	}
-	log.Infof("Release for %s Application, installed successfully", application.Name)
+	log.Infof("Release for %s Application installed successfully", application.Name)
 
 	return status.String(), description, nil
 }
@@ -154,7 +154,7 @@ func (r *applicationReconciler) checkApplicationStatus(application *v1alpha1.App
 	return status.String(), description, err
 }
 
-func (r *applicationReconciler) updateApplication(application *v1alpha1.Application) error {
+func (r *applicationReconciler) updateApplicationCR(application *v1alpha1.Application) error {
 	if application.Spec.Services == nil {
 		application.Spec.Services = []v1alpha1.Service{}
 	}

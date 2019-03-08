@@ -50,6 +50,10 @@ models:
         resolver: true
       apiSpec:
         resolver: true
+      openApiSpec:
+        resolver: true
+      odataSpec:
+        resolver: true
       asyncApiSpec:
         resolver: true
       content:
@@ -64,6 +68,10 @@ models:
       activated:
         resolver: true
       apiSpec:
+        resolver: true
+      openApiSpec:
+        resolver: true
+      odataSpec:
         resolver: true
       asyncApiSpec:
         resolver: true
