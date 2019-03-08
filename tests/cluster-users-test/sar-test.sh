@@ -103,7 +103,7 @@ function cleanup() {
 
 discoverUnsetVar=false
 
-for var in EMAIL_FILE PASSWORD_FILE NAMESPACE; do
+for var in ADMIN_EMAIL ADMIN_PASSWORD DEVELOPER_EMAIL DEVELOPER_PASSWORD VIEW_EMAIL VIEW_PASSWORD NAMESPACE; do
     if [ -z "${!var}" ] ; then
         echo "ERROR: $var is not set"
         discoverUnsetVar=true
