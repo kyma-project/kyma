@@ -15,7 +15,7 @@ By default, Kyma installs on an AKS cluster using a wildcard DNS provided by [xi
 - [az](https://docs.microsoft.com/pl-pl/cli/azure/install-azure-cli)
 - A domain for your AKS cluster (optional)
 
-## Prepare the GKE cluster
+## Prepare the AKS cluster
 
 Set the following environment variables:
 1. Select a name for your cluster. Set the cluster name, the resource group and region as environment variables. Run:
