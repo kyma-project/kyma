@@ -73,6 +73,8 @@ spec:
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Release.Name }}-event-service
+        kyma-grafana: {{ .Values.eventService.deployment.labels.grafana }}
+        kyma-alerts: {{ .Values.eventService.deployment.labels.alerts }}
         release: {{ .Release.Name }}-event-service
     spec:
       containers:
