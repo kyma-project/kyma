@@ -73,7 +73,7 @@ global:
     dir: develop/
     version: b426d54d
   cluster_users_test:
-    dir: pre/
+    dir: pr/
     version: "PR-3055"
   xip_patch:
     dir: develop/
