@@ -10,6 +10,7 @@ By default, Kyma installs on an AKS cluster using a wildcard DNS provided by [xi
 ## Prerequisites
 - [Microsoft Azure](https://azure.microsoft.com)
 - [Kubernetes](https://kubernetes.io/) 1.12
+- Tiller 2.10.0 or higher
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/pl-pl/cli/azure/install-azure-cli)
