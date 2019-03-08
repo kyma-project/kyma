@@ -25,7 +25,7 @@ metadata:
   name: {{ .Chart.Name}}-metrics
   namespace: {{ .Values.global.namespace }}
   labels:
-    k8s-app: metrics
+    k8s-app: {{ .Chart.Name}}-metrics
 spec:
   selector:
     app: {{ .Chart.Name }}

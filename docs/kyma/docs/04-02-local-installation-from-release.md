@@ -7,12 +7,12 @@ This Installation guide shows developers how to quickly deploy Kyma locally on a
 
 ## Prerequisites
 
-To run Kyma locally, clone this Git repository to your machine and check out the latest release.
+To run Kyma locally, clone [this](https://github.com/kyma-project/kyma) Git repository to your machine and check out the latest release.
 
 Additionally, download these tools:
 
 - [Minikube](https://github.com/kubernetes/minikube) 0.33.0
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.11.0
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
 - [Helm](https://github.com/kubernetes/helm) 2.10.0
 - [jq](https://stedolan.github.io/jq/)
 

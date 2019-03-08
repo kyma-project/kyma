@@ -103,7 +103,7 @@ Delegate the management of your domain to Google Cloud DNS. Follow these steps:
     ```
     gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.11.5" --machine-type "n1-standard-2" \
+    --cluster-version "1.12.5" --machine-type "n1-standard-2" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 
@@ -210,7 +210,7 @@ Run these commands:
 ```
 export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
 gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
 

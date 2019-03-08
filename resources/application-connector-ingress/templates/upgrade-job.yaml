@@ -1,0 +1,35 @@
+#Job that allows upgrade of Kyma from version 0.7 to 0.8
+#In 0.8 nginx LoadBalancer is extracted to _this_ chart, but still binds to the same IP Address. This creates a conflict.
+#This job deletes existing nginx LoadBalancer (installed by 0.7) so that the new one can be provisioned.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-loadbalancer-migration
+  namespace: kyma-system
+spec:
+  template:
+    metadata:
+      name: {{ .Release.Name }}-loadbalancer-migration
+      namespace: kyma-system
+      annotations:
+        sidecar.istio.io/inject: “false”
+    spec:
+      serviceAccountName: {{ .Release.Name }}-loadbalancer-migration-service-account
+      restartPolicy: OnFailure
+      containers:
+      - name: {{ .Release.Name }}-loadbalancer-migration
+        image: eu.gcr.io/kyma-project/develop/xip-patch:1103850e
+        command:
+          - bash
+          - -c
+          - |
+            set -e
+            SERVICE_TO_REMOVE="application-connector-nginx-ingress-controller"
+            NAMESPACE="kyma-system"
+            set +e
+            SERVICE_EXISTS=$(kubectl get service "${SERVICE_TO_REMOVE}" -n "${NAMESPACE}")
+            set -e
+            if [ -n "${SERVICE_EXISTS}" ]; then
+            echo "Deleting service: ${NAMESPACE}/${SERVICE_TO_REMOVE}"
+            kubectl delete service "${SERVICE_TO_REMOVE}" -n "${NAMESPACE}"
+            fi

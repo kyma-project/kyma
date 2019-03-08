@@ -18,6 +18,7 @@ By default, the client certificate you generate when you connect an external sol
   ```
 
 3. To renew a certificate, send a request to RenewCertURL obtained from management/info endpoint. Example call:
+
   ```
   curl -X POST https://gateway.{DOMAIN}/v1/applications/certificates/renewals -d '{"csr":"BASE64_ENCODED_CSR"}' -k --cert {PATH_TO_OLD_CRT} --key {PATH_TO_KEY}
   ```

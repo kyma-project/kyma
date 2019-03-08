@@ -4,6 +4,6 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  binding_usage_controller:
+  service_binding_usage_controller:
     dir: develop/
     version: d1930a3d

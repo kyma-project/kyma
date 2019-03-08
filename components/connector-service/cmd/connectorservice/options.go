@@ -29,6 +29,7 @@ type options struct {
 	runtimesInfoURL               string
 	certificateValidityTime       time.Duration
 	central                       bool
+	revocationConfigMapName       string
 }
 
 type environment struct {
@@ -56,6 +57,7 @@ func parseArgs() *options {
 	runtimesInfoURL := flag.String("runtimesInfoURL", "", "URL at which management information is available.")
 	certificateValidityTime := flag.String("certificateValidityTime", "90d", "Validity time of certificates issued by this service.")
 	central := flag.Bool("central", false, "Determines whether connector works as the central")
+	revocationConfigMapName := flag.String("revocationConfigMapName", "revocations-config", "Name of the config map containing revoked certificates")
 
 	flag.Parse()
 
@@ -81,6 +83,7 @@ func parseArgs() *options {
 		appsInfoURL:                   *appsInfoURL,
 		runtimesInfoURL:               *runtimesInfoURL,
 		certificateValidityTime:       validityTime,
+		revocationConfigMapName:       *revocationConfigMapName,
 	}
 }
 
@@ -88,11 +91,11 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --requestLogging=%t "+
 		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayHost=%s "+
-		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --certificateValidityTime=%s",
+		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --certificateValidityTime=%s --revocationConfigMapName=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.requestLogging,
 		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayHost,
-		o.appsInfoURL, o.runtimesInfoURL, o.central, o.certificateValidityTime)
+		o.appsInfoURL, o.runtimesInfoURL, o.central, o.certificateValidityTime, o.revocationConfigMapName)
 }
 
 func parseEnv() *environment {

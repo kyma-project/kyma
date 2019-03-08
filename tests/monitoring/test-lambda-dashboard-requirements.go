@@ -43,41 +43,50 @@ func checkMetricsAndlabels(metric string, labels ...string) error {
 }
 
 func checkLambdaUIDashboard() {
+	log.Println("Starting the check lambdaUI dashboard test")
 	err := checkMetricsAndlabels("istio_requests_total", "destination_service", "response_code", "source_workload")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to check istio_requests_total: %v \n", err)
 	}
+	log.Println("istio_requests_total: Success")
 	err = checkMetricsAndlabels("istio_request_duration_seconds_bucket", "destination_service")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to check istio_request_duration_seconds_bucket: %v \n", err)
 	}
+	log.Println("istio_request_duration_seconds_bucket: Success")
 	err = checkMetricsAndlabels("container_memory_usage_bytes", "pod_name", "container_name")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to check container_memory_usage_bytes: %v \n", err)
 	}
 	err = checkMetricsAndlabels("kube_pod_container_resource_limits_memory_bytes", "pod", "container")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to check kube_pod_container_resource_limits_memory_bytes: %v \n", err)
 	}
+	log.Println("kube_pod_container_resource_limits_memory_bytes: Success")
+
 	err = checkMetricsAndlabels("container_cpu_usage_seconds_total", "container_name", "pod_name", "namespace")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to check container_cpu_usage_seconds_total: %v \n", err)
 	}
-	err = checkMetricsAndlabels("istio_request_duration_seconds_bucket", "destination_service")
-	if err != nil {
-		log.Fatalln(err)
-	}
+	log.Println("container_cpu_usage_seconds_total: Success")
+
 	err = checkMetricsAndlabels("kube_deployment_status_replicas_available", "deployment", "namespace")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to check kube_deployment_status_replicas_available: %v \n", err)
 	}
+	log.Println("kube_deployment_status_replicas_available: Success")
+
 	err = checkMetricsAndlabels("kube_namespace_labels", "label_env")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to check kube_namespace_labels: %v \n", err)
 	}
+	log.Println("kube_namespace_labels: Success")
+
 	err = checkMetricsAndlabels("kube_service_labels", "namespace")
 	if err != nil {
-		log.Fatalln(err)
+		log.Fatalf("Unable to check kube_service_labels: %v \n", err)
 	}
+	log.Println("kube_service_labels: Success")
+
 	log.Printf("Test lambda dashboards: Success")
 }

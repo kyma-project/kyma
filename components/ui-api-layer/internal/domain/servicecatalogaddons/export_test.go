@@ -1,8 +1,8 @@
 package servicecatalogaddons
 
 import (
-	fakeSbu "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/fake"
-	"github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+	fakeSbu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/fake"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/shared"
 	fakeDynamic "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/tools/cache"
