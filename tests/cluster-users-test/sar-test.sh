@@ -60,7 +60,7 @@ function runTests() {
 	echo "--> ${DEVELOPER_EMAIL} should NOT be able to create Services in production"
 	testPermissions "create" "service" "production" "no"
 
-    EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getCofigFile
+    EMAIL=${ADMIN_EMAIL} PASSWORD=${ADMIN_PASSWORD} getConfigFile
     export KUBECONFIG="${PWD}/kubeconfig"
 	echo "--> ${ADMIN_EMAIL} should be able to get ClusterRole"
 	testPermissions "get" "clusterrole" "${NAMESPACE}" "yes"
@@ -74,7 +74,7 @@ function runTests() {
 	echo "--> ${ADMIN_EMAIL} should be able to delete specific CRD"
 	testPermissions "delete" "crd/installations.installer.kyma-project.io" "${NAMESPACE}" "yes"
 
-    EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getCofigFile
+    EMAIL=${VIEW_EMAIL} PASSWORD=${VIEW_PASSWORD} getConfigFile
     export KUBECONFIG="${PWD}/kubeconfig"
 	echo "--> ${VIEW_EMAIL} should NOT be able to get ClusterRole"
 	testPermissions "get" "clusterrole" "${NAMESPACE}" "no"
