@@ -3,7 +3,6 @@ package installer
 import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"fmt"
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -57,6 +56,6 @@ func (t *BrokerInstaller) WaitForBrokerRunning(svcatCli *clientset.Clientset) er
 			}
 		}
 
-		return false, fmt.Errorf("Waiting for ServiceBroker running... Conditions: %v", broker.Status.Conditions)
+		return false, nil
 	}, brokerReadyTimeout)
 }
