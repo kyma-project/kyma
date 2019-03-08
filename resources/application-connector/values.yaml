@@ -22,11 +22,11 @@ global:
     dir: develop/
     version: fd308559
   connector_service:
-    dir: pr/
-    version: PR-2899
+    dir: develop/
+    version: 07b5422e
   connector_service_tests:
-    dir: pr/
-    version: PR-2899
+    dir: develop/
+    version: 07b5422e
   connection_token_handler:
     dir: develop/
     version: fa0de1b9
