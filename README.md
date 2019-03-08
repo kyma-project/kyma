@@ -77,5 +77,6 @@ The repository has the following structure:
   └── tools                       # Source code of utilities used, for example, for the installation and testing
   ```
 
+
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma?ref=badge_large)
