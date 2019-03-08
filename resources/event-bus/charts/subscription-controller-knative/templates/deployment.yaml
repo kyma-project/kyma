@@ -15,7 +15,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ template "subscription-controller-knative.fullname" . }} #This is changed because of tracing UI.
+        app: {{ template "subscription-controller-knative.fullname" . }}
         release: {{ .Release.Name }}
         kyma-grafana: {{ .Values.monitoring.grafana}}
         kyma-alerts: {{ .Values.monitoring.alerts}}
