@@ -77,7 +77,7 @@ kubectl delete pod service-catalog-etcd-stateful-0 service-catalog-etcd-stateful
 [etcd-backup-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/backup-deployment.yaml
 [core-chart-values]:https://github.com/kyma-project/kyma/blob/master/resources/core/values.yaml
 
-[etcd-backup-app-readme]:https://github.com/kyma-project/kyma/blob/master/tools/etcd-backup/README.md
-[etcd-backup-app]:https://github.com/kyma-project/kyma/blob/master/tools/etcd-backup
+[etcd-backup-app-readme]:https://github.com/kyma-project/kyma/blob/master/components/etcd-backup-job/README.md
+[etcd-backup-app]:https://github.com/kyma-project/kyma/tree/master/components/etcd-backup-job
 
 [abs-creds]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/etcd-backup-abs-storage-secret.yaml

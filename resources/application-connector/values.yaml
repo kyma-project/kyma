@@ -45,7 +45,7 @@ global:
     version: 8b074a71
   application_registry:
     dir: develop/
-    version: 6cb16c1c
+    version: 07fabb90
   application_registry_tests:
     dir: develop/
     version: fd308559

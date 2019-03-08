@@ -7,7 +7,8 @@ After you create an Application (App), connect it to an external solution to con
 
 This guide shows you how to get the client certificate.
 
->**NOTE:** The client certificate is valid for 92 days. See [this](#tutorials-renew-the-client-certificate) tutorial to learn how to renew the client certificate.
+>**NOTE:** The client certificate is valid for 92 days. See [this](#tutorials-renew-the-client-certificate) tutorial to learn how to renew the client certificate. 
+You can also revoke the client certificate, which prevents it from being renewed. See [this](#tutorials-revoke-the-client-certificate) tutorial to learn how to do this.
 
 ## Prerequisites
 

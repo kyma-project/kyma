@@ -21,6 +21,16 @@ type minioApiSpecGetter interface {
 	ApiSpec(id string) (*storage.ApiSpec, bool, error)
 }
 
+//go:generate mockery -name=minioOpenApiSpecGetter -output=automock -outpkg=automock -case=underscore
+type minioOpenApiSpecGetter interface {
+	OpenApiSpec(id string) (*storage.OpenApiSpec, bool, error)
+}
+
+//go:generate mockery -name=minioODataSpecGetter -output=automock -outpkg=automock -case=underscore
+type minioODataSpecGetter interface {
+	ODataSpec(id string) (*storage.ODataSpec, bool, error)
+}
+
 //go:generate mockery -name=minioContentGetter -output=automock -outpkg=automock -case=underscore
 type minioContentGetter interface {
 	Content(id string) (*storage.Content, bool, error)

@@ -137,7 +137,9 @@ type ServiceClass {
     plans: [ServicePlan!]!
     activated: Boolean! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
     instances: [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
-    apiSpec: JSON
+    apiSpec: JSON @deprecated(reason: "No longer supported")
+    openApiSpec: JSON
+    odataSpec: String
     asyncApiSpec: JSON
     content: JSON
 }
@@ -158,7 +160,9 @@ type ClusterServiceClass {
     plans: [ClusterServicePlan!]!
     activated(namespace: String): Boolean! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", isChildResolver: true})
     instances(namespace: String): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", isChildResolver: true})
-    apiSpec: JSON
+    apiSpec: JSON @deprecated(reason: "No longer supported")
+    openApiSpec: JSON
+    odataSpec: String
     asyncApiSpec: JSON
     content: JSON
 }

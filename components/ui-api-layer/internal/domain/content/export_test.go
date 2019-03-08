@@ -16,6 +16,14 @@ func NewApiSpecService(storage minioApiSpecGetter) *apiSpecService {
 	return newApiSpecService(storage)
 }
 
+func NewOpenApiSpecService(storage minioOpenApiSpecGetter) *openApiSpecService {
+	return newOpenApiSpecService(storage)
+}
+
+func NewODataSpecService(storage minioODataSpecGetter) *odataSpecService {
+	return newODataSpecService(storage)
+}
+
 func NewAsyncApiSpecService(storage minioAsyncApiSpecGetter) *asyncApiSpecService {
 	return newAsyncApiSpecService(storage)
 }
