@@ -60,7 +60,7 @@ func CheckIfEventActivationExistForSubscription(ctx context.Context, client runt
 		return false
 	}
 	for _, ea := range eal.Items {
-		if subSourceID == ea.SourceID {
+		if subSourceID == ea.SourceID && ea.DeletionTimestamp.IsZero()  {
 			return true
 		}
 	}
