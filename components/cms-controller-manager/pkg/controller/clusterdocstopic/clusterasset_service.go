@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -27,7 +28,7 @@ func (s *assetService) List(ctx context.Context, namespace string, labels map[st
 	instances := &v1alpha2.ClusterAssetList{}
 	err := s.client.List(ctx, client.MatchingLabels(labels), instances)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while listing ClusterAssets")
 	}
 
 	commons := make([]docstopic.CommonAsset, 0, len(instances.Items))
@@ -48,7 +49,7 @@ func (s *assetService) Create(ctx context.Context, docsTopic v1.Object, commonAs
 	}
 
 	if err := controllerutil.SetControllerReference(docsTopic, instance, s.scheme); err != nil {
-		return err
+		return errors.Wrapf(err, "while creating ClusterAsset %s", commonAsset.Name)
 	}
 
 	return s.client.Create(ctx, instance)
@@ -58,7 +59,7 @@ func (s *assetService) Update(ctx context.Context, commonAsset docstopic.CommonA
 	instance := &v1alpha2.ClusterAsset{}
 	err := s.client.Get(ctx, types.NamespacedName{Name: commonAsset.Name, Namespace: commonAsset.Namespace}, instance)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while updating ClusterAsset %s", commonAsset.Name)
 	}
 
 	updated := instance.DeepCopy()
@@ -71,7 +72,7 @@ func (s *assetService) Delete(ctx context.Context, commonAsset docstopic.CommonA
 	instance := &v1alpha2.ClusterAsset{}
 	err := s.client.Get(ctx, types.NamespacedName{Name: commonAsset.Name, Namespace: commonAsset.Namespace}, instance)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "while deleting ClusterAsset %s", commonAsset.Name)
 	}
 
 	return s.client.Delete(ctx, instance)

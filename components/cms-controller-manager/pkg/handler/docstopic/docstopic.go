@@ -76,12 +76,12 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 
 	bucketName, err := h.ensureBucketExits(ctx, instance.GetNamespace())
 	if err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.BucketError), err
+		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.BucketError, err.Error()), err
 	}
 
 	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabel(instance.GetName(), ""))
 	if err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed), err
+		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed, err.Error()), err
 	}
 	commonAssetsMap := h.convertToAssetMap(commonAssets)
 
@@ -244,7 +244,7 @@ func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance Ob
 
 		existingAsset.Spec = expected
 		if err := h.assetSvc.Update(ctx, existingAsset); err != nil {
-			h.recordWarningEventf(instance, pretty.AssetCreationFailed, existingAsset.Name, err.Error())
+			h.recordWarningEventf(instance, pretty.AssetUpdateFailed, existingAsset.Name, err.Error())
 			return err
 		}
 		h.logInfof("Asset %s updated", existingAsset.Name)
@@ -262,7 +262,7 @@ func (h *docstopicHandler) deleteNotExisting(ctx context.Context, instance Objec
 
 		h.logInfof("Deleting asset %s", commonAsset.Name)
 		if err := h.assetSvc.Delete(ctx, commonAsset); err != nil {
-			h.recordWarningEventf(instance, pretty.AssetCreationFailed, commonAsset.Name, err.Error())
+			h.recordWarningEventf(instance, pretty.AssetDeletionFailed, commonAsset.Name, err.Error())
 			return err
 		}
 		h.logInfof("Asset %s deleted", commonAsset.Name)

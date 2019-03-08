@@ -3,6 +3,7 @@ package clusterdocstopic
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
@@ -27,7 +28,7 @@ func (s *bucketService) List(ctx context.Context, namespace string, labels map[s
 	instances := &v1alpha2.ClusterBucketList{}
 	err := s.client.List(ctx, client.MatchingLabels(labels), instances)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrapf(err, "while listing ClusterBuckets")
 	}
 
 	names := make([]string, 0, len(instances.Items))
@@ -58,5 +59,9 @@ func (s *bucketService) Create(ctx context.Context, namespacedName types.Namespa
 		},
 	}
 
-	return s.client.Create(ctx, instance)
+	if err := s.client.Create(ctx, instance); err != nil {
+		return errors.Wrapf(err, "while creating ClusterBucket %s", namespacedName.Name)
+	}
+
+	return nil
 }
