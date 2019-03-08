@@ -64,8 +64,10 @@ spec:
               secretKeyRef:
                 name: assetstore-minio
                 key: secretkey
+          {{ if .Values.global.isLocalEnv }}
           - name: APP_LOADER_VERIFY_SSL
             value: 'false'
+          {{ end }}
           - name: APP_TEMPORARY_DIRECTORY
             value: /tmp
         resources:
