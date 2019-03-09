@@ -76,12 +76,14 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 
 	bucketName, err := h.ensureBucketExits(ctx, instance.GetNamespace())
 	if err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.BucketError, err.Error()), err
+		h.recordWarningEventf(instance, pretty.BucketError, err.Error())
+		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.BucketError, err.Error()), status), err
 	}
 
 	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabel(instance.GetName(), ""))
 	if err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed, err.Error()), err
+		h.recordWarningEventf(instance, pretty.AssetsListingFailed, err.Error())
+		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed, err.Error()), status), err
 	}
 	commonAssetsMap := h.convertToAssetMap(commonAssets)
 
@@ -89,8 +91,9 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 	case h.isOnChange(commonAssetsMap, spec, bucketName):
 		return h.onChange(ctx, instance, spec, status, commonAssetsMap, bucketName)
 	case h.isOnPhaseChange(commonAssetsMap, status):
-		return h.onPhaseChange(status, commonAssetsMap)
+		return h.onPhaseChange(instance, status, commonAssetsMap)
 	default:
+		h.logInfof("Instance is up-to-date, action not taken")
 		return nil, nil
 	}
 }
@@ -166,30 +169,33 @@ func (h *docstopicHandler) shouldDeleteAssets(existing map[string]CommonAsset, s
 	return false
 }
 
-func (h *docstopicHandler) onPhaseChange(status v1alpha1.CommonDocsTopicStatus, existing map[string]CommonAsset) (*v1alpha1.CommonDocsTopicStatus, error) {
+func (h *docstopicHandler) onPhaseChange(instance ObjectMetaAccessor, status v1alpha1.CommonDocsTopicStatus, existing map[string]CommonAsset) (*v1alpha1.CommonDocsTopicStatus, error) {
 	phase := h.calculateAssetPhase(existing)
 	h.logInfof("Updating phase to %s", phase)
 
 	if phase == v1alpha1.DocsTopicPending {
+		h.recordNormalEventf(instance, pretty.WaitingForAssets)
 		return h.buildStatus(phase, pretty.WaitingForAssets), nil
 	}
 
+	h.recordNormalEventf(instance, pretty.AssetsReady)
 	return h.buildStatus(phase, pretty.AssetsReady), nil
 }
 
 func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAccessor, spec v1alpha1.CommonDocsTopicSpec, status v1alpha1.CommonDocsTopicStatus, existing map[string]CommonAsset, bucketName string) (*v1alpha1.CommonDocsTopicStatus, error) {
 	if err := h.createMissingAssets(ctx, instance, existing, spec, bucketName); err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsCreationFailed, err.Error()), err
+		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsCreationFailed, err.Error()), status), err
 	}
 
 	if err := h.updateOutdatedAssets(ctx, instance, existing, spec, bucketName); err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsUpdateFailed, err.Error()), err
+		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsUpdateFailed, err.Error()), status), err
 	}
 
 	if err := h.deleteNotExisting(ctx, instance, existing, spec); err != nil {
-		return h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsDeletionFailed, err.Error()), err
+		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsDeletionFailed, err.Error()), status), err
 	}
 
+	h.recordNormalEventf(instance, pretty.WaitingForAssets)
 	return h.buildStatus(v1alpha1.DocsTopicPending, pretty.WaitingForAssets), nil
 }
 
@@ -335,6 +341,14 @@ func (h *docstopicHandler) buildStatus(phase v1alpha1.DocsTopicPhase, reason pre
 		Message:           fmt.Sprintf(reason.Message(), args...),
 		LastHeartbeatTime: v1.Now(),
 	}
+}
+
+func (h *docstopicHandler) onFailedStatus(newStatus *v1alpha1.CommonDocsTopicStatus, oldStatus v1alpha1.CommonDocsTopicStatus) *v1alpha1.CommonDocsTopicStatus {
+	if newStatus.Phase == oldStatus.Phase && newStatus.Reason == oldStatus.Reason {
+		return nil
+	}
+
+	return newStatus
 }
 
 func (h *docstopicHandler) logInfof(message string, args ...interface{}) {
