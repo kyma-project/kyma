@@ -9,7 +9,19 @@ service:
 resources:
   limits:
     cpu: 100m
-    memory: 128Mi
+    memory: 30Mi
   requests:
     cpu: 100m
-    memory: 64Mi
+    memory: 20Mi
+
+clusterDocsTopic:
+  relistInterval: 5m
+
+docsTopic:
+  relistInterval: 5m
+
+clusterBucket:
+  region: us-east-1
+
+bucket:
+  region: us-east-1
