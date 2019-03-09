@@ -85,7 +85,7 @@ type ReconcileDocsTopic struct {
 }
 
 // Reconcile reads that state of the cluster for a DocsTopic object and makes changes based on the state read
-// Automatically generate RBAC rules to allow the Controller to read and write Deployments
+// Automatically generate RBAC rules to allow the Controller to read and write DocsTopics, Assets, and Buckets
 // +kubebuilder:rbac:groups=cms.kyma-project.io,resources=docstopics,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=cms.kyma-project.io,resources=docstopics/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets,verbs=get;list;watch;create;update;patch;delete

@@ -5,5 +5,18 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: clusterdocstopic-sample
 spec:
-  # Add fields here
-  foo: bar
+  displayName: "Cluster Docs Topic Sample"
+  description: "Cluster Docs Topic Description"
+  sources:
+    bundles:
+      mode: package
+      url: https://github.com/kyma-project/bundles/releases/download/latest/testing-0.0.1.tgz
+    asyncapi:
+      mode: single
+      url: https://github.com/kyma-project/kyma/blob/master/README.md
+    markdown:
+      mode: single
+      url: https://github.com/kyma-project/kyma/blob/master/README.md
+    dita:
+      mode: single
+      url: https://github.com/kyma-project/kyma/blob/master/README.md

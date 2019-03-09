@@ -57,7 +57,7 @@ spec:
               enum:
               - Pending
               - Ready
-              - Error
+              - Failed
               type: string
             reason:
               type: string

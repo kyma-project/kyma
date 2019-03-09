@@ -20,7 +20,7 @@ const (
 )
 
 type Source struct {
-	Url string `json:"url"`
+	URL string `json:"url"`
 	// +kubebuilder:validation:Enum=single,package,index
 	Mode   DocsTopicMode `json:"mode"`
 	Filter string        `json:"filter,omitempty"`
@@ -35,7 +35,7 @@ const (
 )
 
 type CommonDocsTopicStatus struct {
-	// +kubebuilder:validation:Enum=Pending,Ready,Error
+	// +kubebuilder:validation:Enum=Pending,Ready,Failed
 	Phase             DocsTopicPhase `json:"phase"`
 	Reason            string         `json:"reason,omitempty"`
 	Message           string         `json:"message,omitempty"`

@@ -129,17 +129,17 @@ func fixDocsTopic() *v1alpha1.DocsTopic {
 				Sources: map[string]v1alpha1.Source{
 					"openapi": v1alpha1.Source{
 						Mode: v1alpha1.DocsTopicSingle,
-						Url:  "https://dummy.url/single",
+						URL:  "https://dummy.url/single",
 					},
 					"markdown": v1alpha1.Source{
 						Filter: "xyz",
 						Mode:   v1alpha1.DocsTopicPackage,
-						Url:    "https://dummy.url/package",
+						URL:    "https://dummy.url/package",
 					},
 					"dita": v1alpha1.Source{
 						Filter: "xyz",
 						Mode:   v1alpha1.DocsTopicIndex,
-						Url:    "https://dummy.url/index",
+						URL:    "https://dummy.url/index",
 					},
 				},
 			},

@@ -8,9 +8,9 @@ spec:
   displayName: "Docs Topic Sample"
   description: "Docs Topic Description"
   sources:
-    openapi:
-      mode: singles
-      url: https://github.com/kyma-project/kyma/blob/master/README.md
+    bundles:
+      mode: package
+      url: https://github.com/kyma-project/bundles/releases/download/latest/testing-0.0.1.tgz
     asyncapi:
       mode: single
       url: https://github.com/kyma-project/kyma/blob/master/README.md

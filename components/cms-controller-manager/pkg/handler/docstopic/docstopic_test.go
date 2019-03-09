@@ -420,7 +420,7 @@ func fakeRecorder() record.EventRecorder {
 
 func testSource(url string, mode v1alpha1.DocsTopicMode) v1alpha1.Source {
 	return v1alpha1.Source{
-		Url:  url,
+		URL:  url,
 		Mode: mode,
 	}
 }
@@ -453,7 +453,7 @@ func commonAsset(name, docsName, bucketName string, source v1alpha1.Source, phas
 		},
 		Spec: v1alpha2.CommonAssetSpec{
 			Source: v1alpha2.AssetSource{
-				Url:    source.Url,
+				Url:    source.URL,
 				Mode:   v1alpha2.AssetMode(source.Mode),
 				Filter: source.Filter,
 			},

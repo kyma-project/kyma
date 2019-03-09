@@ -21,7 +21,7 @@ func TestStorageClusterDocsTopic(t *testing.T) {
 				Sources: map[string]Source{
 					"swag": {
 						Mode: DocsTopicSingle,
-						Url:  "dummy",
+						URL:  "dummy",
 					},
 				},
 			},
