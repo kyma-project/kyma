@@ -58,9 +58,9 @@ generateCerts() {
 createOverridesConfigMap() {
     if [ -z "$(kubectl get configmap -n kyma-installer net-global-overrides --ignore-not-found)" ]; then
         kubectl create configmap net-global-overrides \
-            --from-literal global.ingress.domainName="$PUBLIC_DOMAIN" \
-            --from-literal global.ingress.tlsCrt="$TLS_CERT" \
-            --from-literal global.ingress.tlsKey="$TLS_KEY" \
+            --from-literal global.ingress.domainName="$INGRESS_DOMAIN" \
+            --from-literal global.ingress.tlsCrt="$INGRESS_TLS_CERT" \
+            --from-literal global.ingress.tlsKey="$INGRESS_TLS_KEY" \
             -n kyma-installer
     fi
     kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
@@ -71,7 +71,7 @@ patchTlsCrtSecret() {
     TLS_CERT_YAML=$(cat << EOF
 ---
 data:
-  tls.crt: "${TLS_CERT}"
+  tls.crt: "${INGRESS_TLS_CERT}"
 EOF
     )
     kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system
