@@ -67,17 +67,17 @@ func (s *service) Put(id string, documentation []byte, apiSpec []byte, eventsSpe
 }
 
 func (s *service) Get(id string) ([]byte, []byte, []byte, apperrors.AppError) {
-	documentation, apperr := tryGetWithDifferentExtensions(s.repository.Get, id, documentationFileName)
+	documentation, apperr := s.tryGetWithDifferentExtensions(id, documentationFileName)
 	if apperr != nil {
 		return nil, nil, nil, apperr
 	}
 
-	apiSpec, apperr := tryGetWithDifferentExtensions(s.repository.Get, id, apiSpecFileName)
+	apiSpec, apperr := s.tryGetWithDifferentExtensions(id, apiSpecFileName)
 	if apperr != nil {
 		return nil, nil, nil, apperr
 	}
 
-	eventsSpec, apperr := tryGetWithDifferentExtensions(s.repository.Get, id, eventsSpecFileName)
+	eventsSpec, apperr := s.tryGetWithDifferentExtensions(id, eventsSpecFileName)
 	if apperr != nil {
 		return nil, nil, nil, apperr
 	}
@@ -86,17 +86,17 @@ func (s *service) Get(id string) ([]byte, []byte, []byte, apperrors.AppError) {
 }
 
 func (s *service) Remove(id string) apperrors.AppError {
-	apperr := tryRemoveWithDifferentExtensions(s.repository.Remove, id, documentationFileName)
+	apperr := s.tryRemoveWithDifferentExtensions(id, documentationFileName)
 	if apperr != nil {
 		return apperr
 	}
 
-	apperr = tryRemoveWithDifferentExtensions(s.repository.Remove, id, apiSpecFileName)
+	apperr = s.tryRemoveWithDifferentExtensions(id, apiSpecFileName)
 	if apperr != nil {
 		return apperr
 	}
 
-	apperr = tryRemoveWithDifferentExtensions(s.repository.Remove, id, eventsSpecFileName)
+	apperr = s.tryRemoveWithDifferentExtensions(id, eventsSpecFileName)
 	if apperr != nil {
 		return apperr
 	}
@@ -104,6 +104,37 @@ func (s *service) Remove(id string) apperrors.AppError {
 	return nil
 }
 
+func (s *service) tryGetWithDifferentExtensions(id, fileName string) ([]byte, apperrors.AppError) {
+	var apperr apperrors.AppError
+	for _, ext := range extensions {
+		data, apperror := s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", fileName, ext)))
+		if apperror == nil {
+			return data, nil
+		}
+		if apperr != nil {
+			apperr.Append(apperror.Error(), apperr)
+		} else {
+			apperr = apperror
+		}
+	}
+	return nil, apperr
+}
+
+func (s *service) tryRemoveWithDifferentExtensions(id, fileName string) apperrors.AppError {
+	var apperr apperrors.AppError
+	for _, ext := range extensions {
+		apperror := s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", fileName, ext)))
+		if apperror == nil {
+			return nil
+		}
+		if apperr != nil {
+			apperr.Append(apperror.Error(), apperr)
+		} else {
+			apperr = apperror
+		}
+	}
+	return apperr
+}
 func (s *service) create(id, fileName string, content []byte) apperrors.AppError {
 	if content != nil {
 		path := makeFilePath(id, fileName)
@@ -124,35 +155,4 @@ func makeFileFullName(data []byte, fileName string) string {
 	return fmt.Sprintf("%s%s", fileName, jsonExtension)
 }
 
-func tryGetWithDifferentExtensions(f func(string, string) ([]byte, apperrors.AppError), id, fileName string) ([]byte, apperrors.AppError) {
-	var apperr apperrors.AppError
-	for _, ext := range extensions {
-		data, apperror := f(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", fileName, ext)))
-		if apperror == nil {
-			return data, nil
-		}
-		if apperr != nil {
-			apperr.Append(apperror.Error(), apperr)
-		} else {
-			apperr = apperror
-		}
-	}
-	return nil, apperr
-}
-
-func tryRemoveWithDifferentExtensions(f func(string, string) apperrors.AppError, id, fileName string) apperrors.AppError {
-	var apperr apperrors.AppError
-	for _, ext := range extensions {
-		apperror := f(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", fileName, ext)))
-		if apperror == nil {
-			return nil
-		}
-		if apperr != nil {
-			apperr.Append(apperror.Error(), apperr)
-		} else {
-			apperr = apperror
-		}
-	}
-	return apperr
-}
 
