@@ -20,9 +20,12 @@ const (
 	bucketName = "content"
 	typeName   = "service-class"
 
-	documentationFileName = "content.json"
-	apiSpecFileName       = "apiSpec.json"
-	eventsSpecFileName    = "asyncApiSpec.json"
+	documentationFileName = "content"
+	apiSpecFileName       = "apiSpec"
+	eventsSpecFileName    = "asyncApiSpec"
+
+	jsonExtension  = ".json"
+	odataExtension = ".xml"
 )
 
 func NewService(repository Repository) Service {
@@ -37,17 +40,20 @@ func (s *service) Put(id string, documentation []byte, apiSpec []byte, eventsSpe
 		return apperr
 	}
 
-	apperr = s.create(id, documentationFileName, documentation)
+	documentationFileFullName := makeFileFullName(documentation, documentationFileName)
+	apperr = s.create(id, documentationFileFullName, documentation)
 	if apperr != nil {
 		return apperr
 	}
 
-	apperr = s.create(id, apiSpecFileName, apiSpec)
+	apiSpecFileFullName := makeFileFullName(apiSpec, apiSpecFileName)
+	apperr = s.create(id, apiSpecFileFullName, apiSpec)
 	if apperr != nil {
 		return apperr
 	}
 
-	apperr = s.create(id, eventsSpecFileName, eventsSpec)
+	eventsSpecFileFullName := makeFileFullName(eventsSpec, eventsSpecFileName)
+	apperr = s.create(id, eventsSpecFileFullName, eventsSpec)
 	if apperr != nil {
 		return apperr
 	}
@@ -56,38 +62,56 @@ func (s *service) Put(id string, documentation []byte, apiSpec []byte, eventsSpe
 }
 
 func (s *service) Get(id string) ([]byte, []byte, []byte, apperrors.AppError) {
-	documentation, apperr := s.repository.Get(bucketName, makeFilePath(id, documentationFileName))
+	documentation, apperr := s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", documentationFileName, jsonExtension)))
 	if apperr != nil {
-		return nil, nil, nil, apperr
+		documentation, apperr = s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", documentationFileName, odataExtension)))
+		if apperr != nil {
+			return nil, nil, nil, apperr
+		}
 	}
 
-	apiSpec, apperr := s.repository.Get(bucketName, makeFilePath(id, apiSpecFileName))
+	apiSpec, apperr := s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", apiSpecFileName, jsonExtension)))
 	if apperr != nil {
-		return nil, nil, nil, apperr
+		apiSpec, apperr = s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", apiSpecFileName, odataExtension)))
+		if apperr != nil {
+			return nil, nil, nil, apperr
+		}
 	}
 
-	eventsSpec, apperr := s.repository.Get(bucketName, makeFilePath(id, eventsSpecFileName))
+	eventsSpec, apperr := s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", eventsSpecFileName, jsonExtension)))
 	if apperr != nil {
-		return nil, nil, nil, apperr
+		eventsSpec, apperr = s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", eventsSpecFileName, odataExtension)))
+		if apperr != nil {
+			return nil, nil, nil, apperr
+		}
 	}
 
 	return documentation, apiSpec, eventsSpec, nil
 }
 
 func (s *service) Remove(id string) apperrors.AppError {
-	apperr := s.repository.Remove(bucketName, makeFilePath(id, documentationFileName))
+	apperr := s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", documentationFileName, jsonExtension)))
 	if apperr != nil {
-		return apperr
+		apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", documentationFileName, odataExtension)))
+		if apperr != nil {
+			return apperr
+		}
 	}
 
-	apperr = s.repository.Remove(bucketName, makeFilePath(id, apiSpecFileName))
+	apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", apiSpecFileName, jsonExtension)))
 	if apperr != nil {
-		return apperr
+		apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", apiSpecFileName, odataExtension)))
+		if apperr != nil {
+			return apperr
+		}
 	}
 
-	apperr = s.repository.Remove(bucketName, makeFilePath(id, eventsSpecFileName))
+	apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", eventsSpecFileName, jsonExtension)))
 	if apperr != nil {
-		return apperr
+		apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", eventsSpecFileName, odataExtension)))
+		if apperr != nil {
+			return apperr
+		}
 	}
 
 	return nil
@@ -104,4 +128,11 @@ func (s *service) create(id, fileName string, content []byte) apperrors.AppError
 
 func makeFilePath(id, fileName string) string {
 	return fmt.Sprintf("%s/%s/%s", typeName, id, fileName)
+}
+
+func makeFileFullName(data []byte, fileName string) string {
+	if len(data) > 0 && string([]rune(string(data))[0]) == "<" {
+		return fmt.Sprintf("%s%s", fileName, odataExtension)
+	}
+	return fmt.Sprintf("%s%s", fileName, jsonExtension)
 }
