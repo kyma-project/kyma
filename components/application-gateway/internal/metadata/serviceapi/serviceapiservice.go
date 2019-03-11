@@ -46,10 +46,6 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 		credentialsSecretName := applicationAPI.Credentials.SecretName
 		credentialsType := applicationAPI.Credentials.Type
 
-		if applicationAPI.Credentials.CSRFUrl != "" {
-			api.Credentials.CSRFTokenURL = applicationAPI.Credentials.CSRFUrl
-		}
-
 		secret, err := sas.secretsRepository.Get(credentialsSecretName)
 
 		if err != nil {
@@ -60,14 +56,17 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 			api.Credentials = &model.Credentials{
 				OAuth: getOAuthCredentials(secret, applicationAPI.Credentials.Url),
 			}
+			api.Credentials.CSRFTokenURL = applicationAPI.Credentials.CSRFUrl
 		} else if credentialsType == TypeBasic {
 			api.Credentials = &model.Credentials{
 				BasicAuth: getBasicAuthCredentials(secret),
 			}
+			api.Credentials.CSRFTokenURL = applicationAPI.Credentials.CSRFUrl
 		} else if credentialsType == TypeCertificateGen {
 			api.Credentials = &model.Credentials{
 				CertificateGen: getCertificateGenCredentials(secret),
 			}
+			api.Credentials.CSRFTokenURL = applicationAPI.Credentials.CSRFUrl
 		} else {
 			api.Credentials = nil
 		}

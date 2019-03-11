@@ -103,6 +103,7 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 	}
 
 	authorizationStrategy := p.newAuthorizationStrategy(serviceApi.Credentials)
+	//TODO: Rethink getting CSRFTokenEndpointURL from some other struct because serviceApi.Credentials can be nil!
 	csrfTokenStrategy := p.csrfTokenStrategyFactory.Create(authorizationStrategy, serviceApi.Credentials.CSRFTokenURL)
 
 	return p.cache.Put(id, proxy, authorizationStrategy, csrfTokenStrategy), nil
