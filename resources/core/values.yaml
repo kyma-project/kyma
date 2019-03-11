@@ -62,7 +62,7 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: 24337d95
+    version: "24337d95"
   test_namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -77,7 +77,7 @@ global:
     version: 3d94e9d8
   xip_patch:
     dir: develop/
-    version: 1103850e
+    version: "1103850e"
   kubeless_images:
     runtime:
       node6:
