@@ -31,13 +31,13 @@ if ($CR_PATH -ne "") {
     $cmd = "kubectl.exe apply -f ${CR_PATH}"
     Invoke-Expression -Command $cmd
 
-    $cmd = "kubectl.exe label installation/kyma-installation action=install"
-    Invoke-Expression -Command $cmd
-}
-
-if ($KNATIVE -eq $true) {
-	$cmd = @"
+    if ($KNATIVE -eq $true) {
+	    $cmd = @"
 kubectl -n kyma-installer patch configmap installation-config-overrides -p '{\"data\": {\"global.knative\": \"true\", \"global.kymaEventBus\": \"false\", \"global.natsStreaming.clusterID\": \"knative-nats-streaming\"}}'
 "@
-	Invoke-Expression -Command $cmd
+	    Invoke-Expression -Command $cmd
+    }
+
+    $cmd = "kubectl.exe label installation/kyma-installation action=install"
+    Invoke-Expression -Command $cmd
 }
