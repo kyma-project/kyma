@@ -20,4 +20,4 @@ Bundle the real e2e scenarios, such as **kubeless-integration** into one end-to-
 
 ## Development
 
-Follow [this](https://github.com/kyma-project/kyma/blob/master/resources/README.md) development guide when you add a new component to the `kyma` repository.
+Follow [this](https://github.com/kyma-project/kyma/blob/master/resources/README.md) development guide when you add a new test to the `kyma` repository.

@@ -12,7 +12,7 @@ Resources currently include, but are not limited to, the following:
 
 ## Development
 
-Every component, test, or tool in the `kyma` repository contains a Makefile. A Makefile is used to build an image of a given component and to push it to the external repository. Every time you create a new component, ensure that its Makefile contains a path to the `values.yaml` file which informs about the actual component image version used in Kyma.
+Every component, test, or tool in the `kyma` repository contains a Makefile. A Makefile is used to build an image of a given component and to push it to the external repository. Every time you create a new component, test, or tool, ensure that its Makefile contains a path to the `values.yaml` file which informs about the actual image version used in Kyma.
 To do so, add this entry to the Makefile:
 
 ```

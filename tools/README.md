@@ -1,6 +1,6 @@
 ## Overview
 
-The `tools` directory contains the sources for all Kyma tools, small scripts containing functionality supporting the Kyma.
+The `tools` directory contains sources for all tools that provide supporting functionalities for Kyma.
 
 ## Development
 
