@@ -86,14 +86,14 @@ if [ -n "${INGRESS_TLS_CERT}" ] && [ -z "${INGRESS_DOMAIN}" ]; then
     exit 1
 fi
 
+if [ -z "${INGRESS_DOMAIN}" ] ; then
+    INGRESS_DOMAIN=$(generateXipDomain)
+fi
+
 if [ -z "${INGRESS_TLS_CERT}" ] ; then
     generateCerts
     INGRESS_TLS_CERT=${TLS_CERT}
     INGRESS_TLS_KEY=${TLS_KEY}
-fi
-
-if [ -z "${INGRESS_DOMAIN}" ] ; then
-    INGRESS_DOMAIN=$(generateXipDomain)
 fi
 
 createOverridesConfigMap
