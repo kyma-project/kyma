@@ -14,11 +14,12 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+        traffic.sidecar.istio.io/excludeInboundPorts: "8443"
       labels:
         app: {{ template "name" . }}
         tlsSecret: ingress-tls-cert
     spec:
-      serviceAccountName: kube-rbac-proxy
+      serviceAccountName: {{ template "name" . }}
       {{ if .Values.global.isLocalEnv }}
       hostNetwork: true
       dnsPolicy: ClusterFirstWithHostNet
@@ -35,20 +36,31 @@ spec:
         {{ end }}
         imagePullPolicy: IfNotPresent
         args:
-        - "--insecure-listen-address=0.0.0.0:{{ .Values.containerPort}}"
-        - "--upstream=https://kubernetes.default"
-        - "--logtostderr=true"
-        - "--v=10"
-        - "--oidc-issuer=https://dex.{{ .Values.global.domainName }}"
-        - "--oidc-clientID=kyma-client"
-        - "--oidc-ca-file=/etc/ingress-tls-cert/tls.crt"
+        - --insecure-listen-address=0.0.0.0:{{ .Values.port.insecure }}
+        - --secure-listen-address=0.0.0.0:{{ .Values.port.secure }}
+        - --tls-cert-file=/etc/tls-cert/tls.crt
+        - --tls-private-key-file=/etc/tls-cert/tls.key
+        - --upstream=https://kubernetes.default
+        - --logtostderr=true
+        - --v=10
+        - --oidc-issuer=https://dex.{{ .Values.global.domainName }}
+        - --oidc-clientID=kyma-client
+        - --oidc-ca-file=/etc/dex-tls-cert/tls.crt
+        - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}
+        - --cors-allow-headers={{ .Values.corsPolicy.allowHeaders | join "," }}
+        - --cors-allow-methods={{ .Values.corsPolicy.allowMethods | join "," }}
         ports:
-        - containerPort: {{ .Values.containerPort}}
+        - containerPort: {{ .Values.port.insecure }}
+        - containerPort: {{ .Values.port.secure }}
         volumeMounts:
-          - name: ingress-tls-cert
-            mountPath: /etc/ingress-tls-cert/
+        - name: tls-cert
+          mountPath: /etc/tls-cert/
+        - name: dex-tls-cert
+          mountPath: /etc/dex-tls-cert/
       volumes:
-        - name: ingress-tls-cert
-          secret:
-            secretName: ingress-tls-cert
-            
+      - name: dex-tls-cert
+        secret:
+          secretName: ingress-tls-cert
+      - name: tls-cert
+        secret:
+          secretName: {{ template "name" . }}-tls-cert
