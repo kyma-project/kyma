@@ -14,7 +14,7 @@ import (
 
 type Response struct {
 	csrfToken string
-	cookie    string
+	cookies   []*http.Cookie
 }
 
 type Client struct {
@@ -87,7 +87,7 @@ func (c *Client) requestToken(csrfEndpointURL string, strategy authorization.Str
 
 	tokenRes := &Response{
 		csrfToken: resp.Header.Get(httpconsts.HeaderCSRFToken),
-		cookie:    resp.Header.Get(httpconsts.HeaderSetCookie),
+		cookies:   resp.Cookies(),
 	}
 
 	//TODO: DEBUG

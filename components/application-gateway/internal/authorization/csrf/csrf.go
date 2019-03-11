@@ -47,14 +47,16 @@ func (tsf *strategyFactory) Create(authorizationStrategy authorization.Strategy,
 
 func (s *strategy) AddCSRFToken(apiRequest *http.Request) apperrors.AppError {
 
-	resp, err := s.csrfClient.GetTokenEndpointResponse(s.csrfTokenURL, s.authorizationStrategy)
+	tokenResponse, err := s.csrfClient.GetTokenEndpointResponse(s.csrfTokenURL, s.authorizationStrategy)
 	if err != nil {
 		log.Errorf("failed to get CSRF token : '%s'", err)
 		return err
 	}
 
-	apiRequest.Header.Set(httpconsts.HeaderCSRFToken, resp.csrfToken)
-	apiRequest.Header.Set(httpconsts.HeaderCookie, resp.cookie)
+	apiRequest.Header.Set(httpconsts.HeaderCSRFToken, tokenResponse.csrfToken)
+	for _, cookie := range tokenResponse.cookies {
+		apiRequest.AddCookie(cookie)
+	}
 
 	return nil
 }

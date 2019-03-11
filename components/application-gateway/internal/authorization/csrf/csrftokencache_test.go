@@ -1,22 +1,25 @@
 package csrf
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 const (
-	itemId       = "someEndpointURL"
-	cachedToken  = "someToken"
-	cachedCookie = "someCookie"
+	itemId           = "someEndpointURL"
+	cachedToken      = "someToken"
+	cachedCookieName = "someCookie"
 )
 
 func TestTokenCache(t *testing.T) {
 
+	testCookie := http.Cookie{Name: cachedCookieName}
+
 	resp := &Response{
 		csrfToken: cachedToken,
-		cookie:    cachedCookie,
+		cookies:   []*http.Cookie{&testCookie},
 	}
 
 	t.Run("should add and retrieve the response from the cache", func(t *testing.T) {
@@ -30,7 +33,7 @@ func TestTokenCache(t *testing.T) {
 		// then
 		assert.Equal(t, true, found)
 		assert.Equal(t, cachedToken, response.csrfToken)
-		assert.Equal(t, cachedCookie, response.cookie)
+		assert.Equal(t, cachedCookieName, response.cookies[0].Name)
 	})
 
 	t.Run("should return false if the response was not found", func(t *testing.T) {
