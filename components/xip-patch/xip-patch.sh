@@ -56,14 +56,15 @@ generateCerts() {
 }
 
 createOverridesConfigMap() {
-    if [ $(kubectl get configmap -n kyma-installer net-global-overrides --ignore-not-found) == "" ]; then
+    if [ -z "$(kubectl get configmap -n kyma-installer net-global-overrides --ignore-not-found)" ]; then
         kubectl create configmap net-global-overrides \
             --form-literal global.ingress.domainName="$PUBLIC_DOMAIN" \
             --from-literal global.ingress.tlsCrt="$TLS_CERT" \
             --from-literal global.ingress.tlsKey="$TLS_KEY" \
             -n kyma-installer
     fi
-    kubectl label configmap net-global-overrides --overwrite installer=overrides
+    kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
+    kubectl label configmap net-global-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
 }
 
 patchTlsCrtSecret() {
