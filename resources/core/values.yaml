@@ -40,8 +40,8 @@ global:
     version: 736988df
     testNamespace: api-controller-tests
   apiserver_proxy:
-    dir: pr/
-    version: PR-3042
+    dir: develop/
+    version: 2f5d18c2
   configurations_generator:
     dir: develop/
     version: aabedc33
@@ -73,8 +73,8 @@ global:
     dir: develop/
     version: b426d54d
   cluster_users_test:
-    dir: pr/
-    version: "PR-3055"
+    dir: develop/
+    version: 3d94e9d8
   xip_patch:
     dir: develop/
     version: 1103850e
