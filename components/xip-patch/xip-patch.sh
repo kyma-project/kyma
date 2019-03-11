@@ -63,7 +63,8 @@ createOverridesConfigMap() {
             --from-literal global.ingress.tlsKey="$TLS_KEY" \
             -n kyma-installer
     fi
-    kubectl label configmap net-global-overrides --overwrite installer=overrides
+    kubectl label configmap net-global-overrides --overwrite installer=overrides -n kyma-installer
+    kubectl label configmap net-global-overrides --overwrite kyma-project.io/installation="" -n kyma-installer
 }
 
 patchTlsCrtSecret() {
