@@ -19,7 +19,7 @@ func TestErrorNoContent(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewEventsHandler()
+	handler := NewEventsHandler(maxRequestSize)
 	handler.ServeHTTP(recorder, req)
 	if status := recorder.Code; status != http.StatusBadRequest {
 		t.Errorf("Wrong status code: got %v want %v", status, http.StatusBadRequest)
@@ -110,7 +110,7 @@ func sendAndReceiveError(t *testing.T, s *string) (result *api.Error, err error)
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewEventsHandler()
+	handler := NewEventsHandler(maxRequestSize)
 	handler.ServeHTTP(recorder, req)
 	if status := recorder.Code; status != http.StatusBadRequest {
 		t.Errorf("Wrong status code: got %v want %v", status, http.StatusBadRequest)

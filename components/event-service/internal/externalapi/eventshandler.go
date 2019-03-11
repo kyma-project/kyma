@@ -13,15 +13,29 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	requestBodyTooLargeErrorMessage = "http: request body too large"
+)
+
 var (
 	isValidEventTypeVersion = regexp.MustCompile(shared.AllowedEventTypeVersionChars).MatchString
 	isValidEventID          = regexp.MustCompile(shared.AllowedEventIDChars).MatchString
 	traceHeaderKeys         = []string{"x-request-id", "x-b3-traceid", "x-b3-spanid", "x-b3-parentspanid", "x-b3-sampled", "x-b3-flags", "x-ot-span-context"}
 )
 
+type maxBytesHandler struct {
+	next  http.Handler
+	limit int64
+}
+
+func (h *maxBytesHandler) ServeHTTP(rw http.ResponseWriter, r *http.Request) {
+	r.Body = http.MaxBytesReader(rw, r.Body, h.limit)
+	h.next.ServeHTTP(rw, r)
+}
+
 // NewEventsHandler creates an http.Handler to handle the events endpoint
-func NewEventsHandler() http.Handler {
-	return http.HandlerFunc(handleEvents)
+func NewEventsHandler(maxRequestSize int64) http.Handler {
+	return &maxBytesHandler{next: http.HandlerFunc(handleEvents), limit: maxRequestSize}
 }
 
 // handleEvents handles "/v1/events" requests
@@ -36,7 +50,12 @@ func handleEvents(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	err = decoder.Decode(&parameters.Publishrequest)
 	if err != nil {
-		resp := shared.ErrorResponseBadRequest(err.Error())
+		var resp *api.PublishEventResponses
+		if err.Error() == requestBodyTooLargeErrorMessage {
+			resp = shared.ErrorResponseRequestBodyTooLarge(err.Error())
+		} else {
+			resp = shared.ErrorResponseBadRequest(err.Error())
+		}
 		writeJSONResponse(w, resp)
 		return
 	}
