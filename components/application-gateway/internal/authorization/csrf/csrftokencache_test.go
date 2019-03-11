@@ -15,8 +15,8 @@ const (
 func TestTokenCache(t *testing.T) {
 
 	resp := &Response{
-		csrfTokenEndpointUrl: cachedToken,
-		cookie:               cachedCookie,
+		csrfToken: cachedToken,
+		cookie:    cachedCookie,
 	}
 
 	t.Run("should add and retrieve the response from the cache", func(t *testing.T) {
@@ -29,7 +29,7 @@ func TestTokenCache(t *testing.T) {
 
 		// then
 		assert.Equal(t, true, found)
-		assert.Equal(t, cachedToken, response.csrfTokenEndpointUrl)
+		assert.Equal(t, cachedToken, response.csrfToken)
 		assert.Equal(t, cachedCookie, response.cookie)
 	})
 

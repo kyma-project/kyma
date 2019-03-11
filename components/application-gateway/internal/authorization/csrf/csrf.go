@@ -53,8 +53,8 @@ func (s *strategy) AddCSRFToken(apiRequest *http.Request) apperrors.AppError {
 		return err
 	}
 
-	apiRequest.Header.Set(httpconsts.HeaderCSRFToken, resp.csrfTokenEndpointUrl)
-	apiRequest.Header.Set(httpconsts.HeaderSetCookie, resp.cookie)
+	apiRequest.Header.Set(httpconsts.HeaderCSRFToken, resp.csrfToken)
+	apiRequest.Header.Set(httpconsts.HeaderCookie, resp.cookie)
 
 	return nil
 }
