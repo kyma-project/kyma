@@ -24,7 +24,7 @@ spec:
           - bash
           - -c
           - |
-            
+            ./app/certhelper.sh
         env:
         - name: DOMAIN
           value: {{ .Values.global.domainName }}

@@ -7,6 +7,9 @@ spec:
   template:
     metadata:
       name: {{ .Release.Name }}
+      annotations:  
+        "helm.sh/hook": post-install  
+        "helm.sh/hook-delete-policy": hook-succeeded
     spec:
       serviceAccountName: {{ .Release.Name }}-service-account
       restartPolicy: Never
