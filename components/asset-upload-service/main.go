@@ -28,7 +28,7 @@ type config struct {
 	ConfigMap      configurer.Config
 	Upload         struct {
 		Endpoint         string `envconfig:"default=minio.kyma.local"`
-		ExternalEndpoint string `envconfig:"default=https://minio.kyma.local"`
+		ExternalEndpoint string `envconfig:"optional"`
 		Port             int    `envconfig:"default=443"`
 		Secure           bool   `envconfig:"default=true"`
 		AccessKey        string
