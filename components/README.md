@@ -25,3 +25,5 @@ This table lists the available types:
 |configurer| A one-time task which usually runs as an [Init Container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) in order to configure the application.|ark-plugins-configurer (not migrated yet)|
 
 ## Development
+
+Follow [this](https://github.com/kyma-project/kyma/blob/master/resources/README.md#development) development guide when you add a new test to the `kyma` repository.

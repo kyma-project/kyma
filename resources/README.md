@@ -12,32 +12,14 @@ Resources currently include, but are not limited to, the following:
 
 ## Development
 
-Each component, test or tool from Kyma repository whose image is used in Kyma contains Makefile. 
-Makefile is used to build image component and push it to the external repository. 
-Makefile has to also contains command which return path to `values.yaml` file localization with version of the actual image is used in Kyma.
-Here is example of command in Makefile for `service-binding-usage-controller`
+Every component, test, or tool in the `kyma` repository contains a Makefile. A Makefile is used to build an image of a given component and to push it to the external repository. Every time you create a new component, ensure that its Makefile contains a path to the `values.yaml` file which informs about the actual component image version used in Kyma.
+To do so, add this entry to the Makefile:
 
 ```
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-    @echo "resources/service-catalog-addons"
+    @echo "{path to the referenced charts}"
 ```
 
-The command shows path to `values.yaml` file where version of component used in Kyma is set:
-Here is example of file `resources/service-catalog-addons/`
-
-```
-global:
-  containerRegistry:
-    path: eu.gcr.io/kyma-project
-  istio:
-    gateway:
-      name: kyma-gateway
-  service_binding_usage_controller:
-    dir: develop/
-    version: d1930a3d
-```
-
-Version is localized under the key `global.<name_of_component>.version`. 
-`name_of_component` is the directory name of component where dashes are replace by undercourses. 
-For exmaple component directory `service-binding-usage-controller` is changed to `service_binding_usage_controller`
+The version of the actual component image is located under the **global.{name_of_component}.version** property.
+**{name_of_component}** is a directory name of the component where dashes are replaced by underscores.

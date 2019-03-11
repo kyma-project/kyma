@@ -19,3 +19,5 @@ Example: The Event Bus component has its acceptance tests in the `tests/event-bu
 Bundle the real e2e scenarios, such as **kubeless-integration** into one end-to-end subfolder. This folder contains one test project which executes all end-to-end tests divided into different packages by scenarios.
 
 ## Development
+
+Follow [this](https://github.com/kyma-project/kyma/blob/master/resources/README.md#development) development guide when you add a new component to the `kyma` repository.
