@@ -79,7 +79,9 @@ func TestUploader_UploadFiles(t *testing.T) {
 
 		// Then
 		g.Expect(errs).To(gomega.BeEmpty())
-		g.Expect(res).To(gomega.Equal(expectedResult))
+		for _, r := range expectedResult {
+			g.Expect(res).To(gomega.ContainElement(r))
+		}
 	})
 
 	t.Run("Error", func(t *testing.T) {

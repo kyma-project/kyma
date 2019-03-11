@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+
+set -x
+
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source ${ROOT_PATH}/utils.sh
 source ${ROOT_PATH}/testing-common.sh

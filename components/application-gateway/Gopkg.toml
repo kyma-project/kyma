@@ -4,7 +4,9 @@ required = [
   "k8s.io/code-generator/cmd/client-gen",
   "k8s.io/code-generator/cmd/lister-gen",
   "k8s.io/code-generator/cmd/informer-gen",
-  "k8s.io/apimachinery/pkg/apimachinery/registered"
+  "k8s.io/apimachinery/pkg/apimachinery/registered",
+
+  "golang.org/x/tools/cmd/goimports",
 ]
 
 [prune]
