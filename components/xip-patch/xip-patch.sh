@@ -58,7 +58,7 @@ generateCerts() {
 createOverridesConfigMap() {
     if [ -z "$(kubectl get configmap -n kyma-installer net-global-overrides --ignore-not-found)" ]; then
         kubectl create configmap net-global-overrides \
-            --form-literal global.ingress.domainName="$PUBLIC_DOMAIN" \
+            --from-literal global.ingress.domainName="$PUBLIC_DOMAIN" \
             --from-literal global.ingress.tlsCrt="$TLS_CERT" \
             --from-literal global.ingress.tlsKey="$TLS_KEY" \
             -n kyma-installer
@@ -77,26 +77,23 @@ EOF
     kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system
 }
 
-if [ -z "${INGRESS_TLS_CERT}" ]; then
-    INGRESS_TLS_CERT="${GLOBAL_TLS_CERT}"
-    INGRESS_TLS_KEY="${GLOBAL_TLS_KEY}"
+INGRESS_TLS_CERT="${INGRESS_TLS_CERT:-$GLOBAL_TLS_CERT}"
+INGRESS_TLS_KEY="${INGRESS_TLS_KEY:-$GLOBAL_TLS_KEY}"
+INGRESS_DOMAIN="${INGRESS_DOMAIN:-$GLOBAL_DOMAIN}"
 
-    if [ -z "${INGRESS_TLS_CERT}" ] ; then
-        generateCerts
-        INGRESS_TLS_CERT=${TLS_CERT}
-        INGRESS_TLS_KEY=${TLS_KEY}
-    fi
-elif [ -z "${INGRESS_DOMAIN}" ]; then
+if [ -n "${INGRESS_TLS_CERT}" ] && [ -z "${INGRESS_DOMAIN}" ]; then
     echo "Certificate provided, but domain is missing!"
     exit 1
 fi
 
-if [ -z "${INGRESS_DOMAIN}" ]; then
-    INGRESS_DOMAIN="${GLOBAL_DOMAIN}"
+if [ -z "${INGRESS_DOMAIN}" ] ; then
+    INGRESS_DOMAIN=$(generateXipDomain)
+fi
 
-    if [ -z "${INGRESS_DOMAIN}" ] ; then
-        INGRESS_DOMAIN=$(generateXipDomain)
-    fi
+if [ -z "${INGRESS_TLS_CERT}" ] ; then
+    generateCerts
+    INGRESS_TLS_CERT=${TLS_CERT}
+    INGRESS_TLS_KEY=${TLS_KEY}
 fi
 
 createOverridesConfigMap

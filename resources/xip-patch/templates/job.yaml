@@ -21,7 +21,21 @@ spec:
           value: {{ .Values.global.loadBalancerIP }}
         - name: INGRESSGATEWAY_SERVICE_NAME
           value: {{ $serviceName }}
-        - name: PUBLIC_DOMAIN
+        - name: GLOBAL_DOMAIN
           value: {{ .Values.global.domainName }}
-        - name: TLS_CERT
+        - name: GLOBAL_TLS_CERT
           value: {{ .Values.global.tlsCrt }}
+        - name: GLOBAL_TLS_CERT
+          value: {{ .Values.global.tlsCrt }}
+        - name: INGRESS_DOMAIN
+          configMapKeyRef:
+            name: net-global-overrides
+            key: global.ingress.domainName
+        - name: INGRESS_TLS_CERT
+          configMapKeyRef:
+            name: net-global-overrides
+            key: global.ingress.tlsCrt
+        - name: INGRESS_TLS_KEY
+          configMapKeyRef:
+            name: net-global-overrides
+            key: global.ingress.tlsKey
