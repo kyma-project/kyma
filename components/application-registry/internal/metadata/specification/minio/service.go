@@ -28,6 +28,11 @@ const (
 	odataExtension = ".xml"
 )
 
+var extensions = [...]string{
+	jsonExtension,
+	odataExtension,
+}
+
 func NewService(repository Repository) Service {
 	return &service{
 		repository: repository,
@@ -62,56 +67,38 @@ func (s *service) Put(id string, documentation []byte, apiSpec []byte, eventsSpe
 }
 
 func (s *service) Get(id string) ([]byte, []byte, []byte, apperrors.AppError) {
-	documentation, apperr := s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", documentationFileName, jsonExtension)))
+	documentation, apperr := tryGetWithDifferentExtensions(s.repository.Get, id, documentationFileName)
 	if apperr != nil {
-		documentation, apperr = s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", documentationFileName, odataExtension)))
-		if apperr != nil {
-			return nil, nil, nil, apperr
-		}
+		return nil, nil, nil, apperr
 	}
 
-	apiSpec, apperr := s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", apiSpecFileName, jsonExtension)))
+	apiSpec, apperr := tryGetWithDifferentExtensions(s.repository.Get, id, apiSpecFileName)
 	if apperr != nil {
-		apiSpec, apperr = s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", apiSpecFileName, odataExtension)))
-		if apperr != nil {
-			return nil, nil, nil, apperr
-		}
+		return nil, nil, nil, apperr
 	}
 
-	eventsSpec, apperr := s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", eventsSpecFileName, jsonExtension)))
+	eventsSpec, apperr := tryGetWithDifferentExtensions(s.repository.Get, id, eventsSpecFileName)
 	if apperr != nil {
-		eventsSpec, apperr = s.repository.Get(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", eventsSpecFileName, odataExtension)))
-		if apperr != nil {
-			return nil, nil, nil, apperr
-		}
+		return nil, nil, nil, apperr
 	}
 
 	return documentation, apiSpec, eventsSpec, nil
 }
 
 func (s *service) Remove(id string) apperrors.AppError {
-	apperr := s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", documentationFileName, jsonExtension)))
+	apperr := tryRemoveWithDifferentExtensions(s.repository.Remove, id, documentationFileName)
 	if apperr != nil {
-		apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", documentationFileName, odataExtension)))
-		if apperr != nil {
-			return apperr
-		}
+		return apperr
 	}
 
-	apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", apiSpecFileName, jsonExtension)))
+	apperr = tryRemoveWithDifferentExtensions(s.repository.Remove, id, apiSpecFileName)
 	if apperr != nil {
-		apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", apiSpecFileName, odataExtension)))
-		if apperr != nil {
-			return apperr
-		}
+		return apperr
 	}
 
-	apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", eventsSpecFileName, jsonExtension)))
+	apperr = tryRemoveWithDifferentExtensions(s.repository.Remove, id, eventsSpecFileName)
 	if apperr != nil {
-		apperr = s.repository.Remove(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", eventsSpecFileName, odataExtension)))
-		if apperr != nil {
-			return apperr
-		}
+		return apperr
 	}
 
 	return nil
@@ -136,3 +123,36 @@ func makeFileFullName(data []byte, fileName string) string {
 	}
 	return fmt.Sprintf("%s%s", fileName, jsonExtension)
 }
+
+func tryGetWithDifferentExtensions(f func(string, string) ([]byte, apperrors.AppError), id, fileName string) ([]byte, apperrors.AppError) {
+	var apperr apperrors.AppError
+	for _, ext := range extensions {
+		data, apperror := f(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", fileName, ext)))
+		if apperror == nil {
+			return data, nil
+		}
+		if apperr != nil {
+			apperr.Append(apperror.Error(), apperr)
+		} else {
+			apperr = apperror
+		}
+	}
+	return nil, apperr
+}
+
+func tryRemoveWithDifferentExtensions(f func(string, string) apperrors.AppError, id, fileName string) apperrors.AppError {
+	var apperr apperrors.AppError
+	for _, ext := range extensions {
+		apperror := f(bucketName, makeFilePath(id, fmt.Sprintf("%s%s", fileName, ext)))
+		if apperror == nil {
+			return nil
+		}
+		if apperr != nil {
+			apperr.Append(apperror.Error(), apperr)
+		} else {
+			apperr = apperror
+		}
+	}
+	return apperr
+}
+
