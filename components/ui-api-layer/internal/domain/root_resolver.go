@@ -526,6 +526,14 @@ func (r *serviceClassResolver) APISpec(ctx context.Context, obj *gqlschema.Servi
 	return r.sc.Resolver.ServiceClassApiSpecField(ctx, obj)
 }
 
+func (r *serviceClassResolver) OpenAPISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
+	return r.sc.Resolver.ServiceClassOpenApiSpecField(ctx, obj)
+}
+
+func (r *serviceClassResolver) OdataSpec(ctx context.Context, obj *gqlschema.ServiceClass) (*string, error) {
+	return r.sc.Resolver.ServiceClassODataSpecField(ctx, obj)
+}
+
 func (r *serviceClassResolver) AsyncAPISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
 	return r.sc.Resolver.ServiceClassAsyncApiSpecField(ctx, obj)
 }
@@ -554,6 +562,14 @@ func (r *clusterServiceClassResolver) Plans(ctx context.Context, obj *gqlschema.
 
 func (r *clusterServiceClassResolver) APISpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
 	return r.sc.Resolver.ClusterServiceClassApiSpecField(ctx, obj)
+}
+
+func (r *clusterServiceClassResolver) OpenAPISpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
+	return r.sc.Resolver.ClusterServiceClassOpenApiSpecField(ctx, obj)
+}
+
+func (r *clusterServiceClassResolver) OdataSpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*string, error) {
+	return r.sc.Resolver.ClusterServiceClassODataSpecField(ctx, obj)
 }
 
 func (r *clusterServiceClassResolver) AsyncAPISpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {

@@ -9,6 +9,7 @@ import (
 type HelmClient interface {
 	ListReleases() (*rls.ListReleasesResponse, error)
 	InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
+	UpdateReleaseFromChart(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
 	ReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error)
 }
@@ -49,6 +50,15 @@ func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrid
 		helm.ValueOverrides([]byte(overrides)), //Without it default "values.yaml" file is ignored!
 		helm.InstallWait(true),
 		helm.InstallTimeout(hc.installationTimeout),
+	)
+}
+
+func (hc *helmClient) UpdateReleaseFromChart(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error) {
+	return hc.helm.UpdateRelease(
+		releaseName,
+		chartDir,
+		helm.UpgradeTimeout(hc.installationTimeout),
+		helm.UpdateValueOverrides([]byte(overrides)),
 	)
 }
 

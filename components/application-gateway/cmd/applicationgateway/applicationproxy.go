@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/externalapi"
@@ -16,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/secrets"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/serviceapi"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/proxy"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"

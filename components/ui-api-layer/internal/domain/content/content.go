@@ -22,15 +22,27 @@ import (
 type contentRetriever struct {
 	ContentGetter      shared.ContentGetter
 	ApiSpecGetter      shared.ApiSpecGetter
+	OpenApiSpecGetter  shared.OpenApiSpecGetter
+	ODataSpecGetter    shared.ODataSpecGetter
 	AsyncApiSpecGetter shared.AsyncApiSpecGetter
 }
 
 func (r *contentRetriever) Content() shared.ContentGetter {
 	return r.ContentGetter
 }
+
 func (r *contentRetriever) ApiSpec() shared.ApiSpecGetter {
 	return r.ApiSpecGetter
 }
+
+func (r *contentRetriever) OpenApiSpec() shared.OpenApiSpecGetter {
+	return r.OpenApiSpecGetter
+}
+
+func (r *contentRetriever) ODataSpec() shared.ODataSpecGetter {
+	return r.ODataSpecGetter
+}
+
 func (r *contentRetriever) AsyncApiSpec() shared.AsyncApiSpecGetter {
 	return r.AsyncApiSpecGetter
 }
@@ -111,6 +123,8 @@ func (r *PluggableContainer) Enable() error {
 	r.storageSvc = storage.New(minioClient, cache, cfg.Bucket, cfg.ExternalAddress, cfg.AssetsFolder)
 	asyncApiSpecSvc := newAsyncApiSpecService(r.storageSvc)
 	apiSpecSvc := newApiSpecService(r.storageSvc)
+	openApiSpecSvc := newOpenApiSpecService(r.storageSvc)
+	odataSpecSvc := newODataSpecService(r.storageSvc)
 	contentSvc := newContentService(r.storageSvc)
 
 	r.Pluggable.EnableAndSyncCache(func(stopCh chan struct{}) {
@@ -121,6 +135,8 @@ func (r *PluggableContainer) Enable() error {
 			topicsResolver:  newTopicsResolver(contentSvc),
 		}
 		r.ContentRetriever.ApiSpecGetter = apiSpecSvc
+		r.ContentRetriever.OpenApiSpecGetter = openApiSpecSvc
+		r.ContentRetriever.ODataSpecGetter = odataSpecSvc
 		r.ContentRetriever.AsyncApiSpecGetter = asyncApiSpecSvc
 		r.ContentRetriever.ContentGetter = contentSvc
 	})
@@ -133,6 +149,8 @@ func (r *PluggableContainer) Disable() error {
 		r.Resolver = disabled.NewResolver(disabledErr)
 		r.ContentRetriever.AsyncApiSpecGetter = disabled.NewAsyncApiSpecGetter(disabledErr)
 		r.ContentRetriever.ApiSpecGetter = disabled.NewApiSpecGetter(disabledErr)
+		r.ContentRetriever.OpenApiSpecGetter = disabled.NewOpenApiSpecGetter(disabledErr)
+		r.ContentRetriever.ODataSpecGetter = disabled.NewOdataSpecGetter(disabledErr)
 		r.ContentRetriever.ContentGetter = disabled.NewContentGetter(disabledErr)
 		r.storageSvc = nil
 	})
@@ -160,6 +178,16 @@ type asyncApiSpecGetter interface {
 //go:generate failery -name=apiSpecGetter -case=underscore -output disabled -outpkg disabled
 type apiSpecGetter interface {
 	Find(kind, id string) (*storage.ApiSpec, error)
+}
+
+//go:generate failery -name=openApiSpecGetter -case=underscore -output disabled -outpkg disabled
+type openApiSpecGetter interface {
+	Find(kind, id string) (*storage.OpenApiSpec, error)
+}
+
+//go:generate failery -name=odataSpecGetter -case=underscore -output disabled -outpkg disabled
+type odataSpecGetter interface {
+	Find(kind, id string) (*storage.ODataSpec, error)
 }
 
 //go:generate failery -name=contentGetter -case=underscore -output disabled -outpkg disabled

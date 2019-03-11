@@ -14,12 +14,22 @@ import (
 //go:generate mockery -name=storeGetter -inpkg -case=underscore
 type storeGetter interface {
 	ApiSpec(id string) (*ApiSpec, bool, error)
+	OpenApiSpec(id string) (*OpenApiSpec, bool, error)
+	ODataSpec(id string) (*ODataSpec, bool, error)
 	AsyncApiSpec(id string) (*AsyncApiSpec, bool, error)
 	Content(id string) (*Content, bool, error)
 	NotificationChannel(stop <-chan struct{}) <-chan notification
 }
 
-type handler func(filename string) (interface{}, bool, error)
+const (
+	ApiSpecField      = "apiSpec"
+	OpenApiSpecField  = "openApiSpec"
+	ODataSpecField    = "odataSpec"
+	AsyncApiSpecField = "asyncApiSpec"
+	ContentField      = "content"
+)
+
+type handler func(name string) (interface{}, bool, error)
 
 type cache struct {
 	store          storeGetter
@@ -38,9 +48,11 @@ func newCache(store storeGetter, cacheClient Cache) *cache {
 		handlers:       make(map[string]handler),
 	}
 
-	swc.registerHandler("apiSpec.json", swc.apiSpecHandler)
-	swc.registerHandler("asyncApiSpec.json", swc.asyncApiSpecHandler)
-	swc.registerHandler("content.json", swc.contentHandler)
+	swc.registerHandler("apiSpec.json", ApiSpecField, swc.apiSpecHandler)
+	swc.registerHandler("apiSpec.json", OpenApiSpecField, swc.openApiSpecHandler)
+	swc.registerHandler("apiSpec.json", ODataSpecField, swc.odataSpecHandler)
+	swc.registerHandler("asyncApiSpec.json", AsyncApiSpecField, swc.asyncApiSpecHandler)
+	swc.registerHandler("content.json", ContentField, swc.contentHandler)
 
 	gob.Register(map[string]interface{}{})
 	gob.Register([]interface{}{})
@@ -94,38 +106,54 @@ func (swc *cache) IsSynced() bool {
 
 func (swc *cache) ApiSpec(id string) (*ApiSpec, bool, error) {
 	apiSpec := new(ApiSpec)
-	exists, err := swc.object(id, "apiSpec.json", apiSpec)
+	exists, err := swc.object(id, "apiSpec.json", ApiSpecField, apiSpec)
 
 	return apiSpec, exists, err
 }
 
+func (swc *cache) OpenApiSpec(id string) (*OpenApiSpec, bool, error) {
+	openApiSpec := new(OpenApiSpec)
+	exists, err := swc.object(id, "apiSpec.json", OpenApiSpecField, openApiSpec)
+
+	return openApiSpec, exists, err
+}
+
+func (swc *cache) ODataSpec(id string) (*ODataSpec, bool, error) {
+	odataSpec := new(ODataSpec)
+	exists, err := swc.object(id, "apiSpec.json", ODataSpecField, odataSpec)
+
+	return odataSpec, exists, err
+}
+
 func (swc *cache) AsyncApiSpec(id string) (*AsyncApiSpec, bool, error) {
 	asyncApiSpec := new(AsyncApiSpec)
-	exists, err := swc.object(id, "asyncApiSpec.json", asyncApiSpec)
+	exists, err := swc.object(id, "asyncApiSpec.json", AsyncApiSpecField, asyncApiSpec)
 
 	return asyncApiSpec, exists, err
 }
 
 func (swc *cache) Content(id string) (*Content, bool, error) {
 	content := new(Content)
-	exists, err := swc.object(id, "content.json", content)
+	exists, err := swc.object(id, "content.json", ContentField, content)
 
 	return content, exists, err
 }
 
-func (swc *cache) object(parent, filename string, value interface{}) (bool, error) {
-	data, isCached, err := swc.fromCache(parent, filename)
+func (swc *cache) object(parent, filename, fieldName string, value interface{}) (bool, error) {
+	name := swc.registerHandlerName(filename, fieldName)
+
+	data, isCached, err := swc.fromCache(parent, name)
 	if err != nil {
 		return false, err
 	}
 
 	if !isCached || !swc.isCacheEnabled {
-		err = swc.updateCache(parent, filename)
+		err = swc.updateCache(parent, name)
 		if err != nil {
-			return false, errors.Wrapf(err, "while updating cache for `%s/%s`", parent, filename)
+			return false, errors.Wrapf(err, "while updating cache for `%s/%s`", parent, name)
 		}
 
-		data, isCached, err = swc.fromCache(parent, filename)
+		data, isCached, err = swc.fromCache(parent, name)
 		if err != nil || !isCached {
 			return false, err
 		}
@@ -133,59 +161,59 @@ func (swc *cache) object(parent, filename string, value interface{}) (bool, erro
 
 	err = swc.convertFromCache(data, value)
 	if err != nil {
-		return false, errors.Wrapf(err, "while decoding `%s/%s` from cache", parent, filename)
+		return false, errors.Wrapf(err, "while decoding `%s/%s` from cache", parent, name)
 	}
 
 	return true, nil
 }
 
-func (swc *cache) updateCache(parent, filename string) error {
-	handle, ok := swc.handlers[filename]
+func (swc *cache) updateCache(parent, name string) error {
+	handle, ok := swc.handlers[name]
 	if !ok {
-		return fmt.Errorf("unknown handler for `%s/%s`", parent, filename)
+		return fmt.Errorf("unknown handler for `%s/%s`", parent, name)
 	}
 
 	object, exists, err := handle(parent)
 	if err != nil {
-		return errors.Wrapf(err, "while handling `%s/%s`", parent, filename)
+		return errors.Wrapf(err, "while handling `%s/%s`", parent, name)
 	}
 
 	if exists {
-		return swc.storeInCache(parent, filename, object)
+		return swc.storeInCache(parent, name, object)
 	}
 
-	return swc.removeFromCache(parent, filename)
+	return swc.removeFromCache(parent, name)
 }
 
-func (swc *cache) storeInCache(parent, filename string, object interface{}) error {
+func (swc *cache) storeInCache(parent, name string, object interface{}) error {
 	data, err := swc.convertToCache(object)
 	if err != nil {
-		return errors.Wrapf(err, "while converting `%s/%s` to cache format", parent, filename)
+		return errors.Wrapf(err, "while converting `%s/%s` to cache format", parent, name)
 	}
 
-	err = swc.cache.Set(swc.cacheId(parent, filename), data)
+	err = swc.cache.Set(swc.cacheId(parent, name), data)
 	if err != nil {
-		return errors.Wrapf(err, "while storing `%s/%s` in cache", parent, filename)
+		return errors.Wrapf(err, "while storing `%s/%s` in cache", parent, name)
 	}
 
 	return nil
 }
 
-func (swc *cache) removeFromCache(parent, filename string) error {
-	err := swc.cache.Delete(swc.cacheId(parent, filename))
+func (swc *cache) removeFromCache(parent, name string) error {
+	err := swc.cache.Delete(swc.cacheId(parent, name))
 	if err != nil && !swc.isEntryNotFound(err) {
-		return errors.Wrapf(err, "while removing `%s/%s` from cache", parent, filename)
+		return errors.Wrapf(err, "while removing `%s/%s` from cache", parent, name)
 	}
 
 	return nil
 }
 
-func (swc *cache) fromCache(parent, filename string) ([]byte, bool, error) {
+func (swc *cache) fromCache(parent, name string) ([]byte, bool, error) {
 	inCache := true
-	data, err := swc.cache.Get(swc.cacheId(parent, filename))
+	data, err := swc.cache.Get(swc.cacheId(parent, name))
 	if err != nil {
 		if !swc.isEntryNotFound(err) {
-			return nil, false, errors.Wrapf(err, "while gathering from cache `%s/%s`", parent, filename)
+			return nil, false, errors.Wrapf(err, "while gathering from cache `%s/%s`", parent, name)
 		}
 
 		inCache = false
@@ -198,6 +226,14 @@ func (swc *cache) apiSpecHandler(id string) (interface{}, bool, error) {
 	return swc.store.ApiSpec(id)
 }
 
+func (swc *cache) openApiSpecHandler(id string) (interface{}, bool, error) {
+	return swc.store.OpenApiSpec(id)
+}
+
+func (swc *cache) odataSpecHandler(id string) (interface{}, bool, error) {
+	return swc.store.ODataSpec(id)
+}
+
 func (swc *cache) asyncApiSpecHandler(id string) (interface{}, bool, error) {
 	return swc.store.AsyncApiSpec(id)
 }
@@ -206,16 +242,22 @@ func (swc *cache) contentHandler(id string) (interface{}, bool, error) {
 	return swc.store.Content(id)
 }
 
-func (swc *cache) registerHandler(filename string, handler func(string) (interface{}, bool, error)) {
-	_, registered := swc.handlers[filename]
+func (swc *cache) registerHandler(filename, fieldName string, handler func(string) (interface{}, bool, error)) {
+	name := swc.registerHandlerName(filename, fieldName)
+
+	_, registered := swc.handlers[name]
 	if registered {
-		glog.Warningf("handler: `%s` already registered", filename)
+		glog.Warningf("handler: `%s` already registered", name)
 	}
-	swc.handlers[filename] = handler
+	swc.handlers[name] = handler
 }
 
-func (swc *cache) cacheId(parent, filename string) string {
-	return fmt.Sprintf("%s/%s", parent, filename)
+func (swc *cache) registerHandlerName(filename, fieldName string) string {
+	return fmt.Sprintf("%s/%s", filename, fieldName)
+}
+
+func (swc *cache) cacheId(parent, name string) string {
+	return fmt.Sprintf("%s/%s", parent, name)
 }
 
 func (swc *cache) isEntryNotFound(err error) bool {

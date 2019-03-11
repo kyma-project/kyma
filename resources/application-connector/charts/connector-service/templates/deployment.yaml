@@ -44,6 +44,7 @@ spec:
           - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
           - "--certificateValidityTime={{ .Values.deployment.args.validityTime }}"
           - "--central={{ .Values.deployment.args.central }}"
+          - "--revocationConfigMapName={{ .Values.deployment.args.revocationConfigMapName }}"
         env:
           - name: COUNTRY
             value: "{{ .Values.deployment.envvars.country }}"

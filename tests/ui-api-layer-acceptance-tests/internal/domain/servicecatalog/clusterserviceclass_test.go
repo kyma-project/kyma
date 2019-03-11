@@ -52,6 +52,11 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 			relatedClusterServiceClassName
 			instanceCreateParameterSchema
 		}
+		apiSpec
+		openApiSpec
+		odataSpec
+		asyncApiSpec
+		content
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {

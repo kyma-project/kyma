@@ -14,7 +14,7 @@ Each of the Service Brokers available in Kyma performs these operations in a dif
 The Kyma Service Catalog is currently integrated with the following Service Brokers:
 
 * [Application Broker](/components/application-connector#architecture-application-connector-components-application-broker)
-* [Helm Broker](/components/helm-broker#overview-helm-broker)
+* [Helm Broker](/components/helm-broker/#overview-overview)
 
 You can also install these brokers using the Helm Broker's bundles:
 
