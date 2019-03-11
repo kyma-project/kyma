@@ -80,7 +80,7 @@ EOF
     msg=$(kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system 2>&1)
     status=$?
     set -e
-    if [[ $status -ne 0 ]] && [[ ! $"msg" = *"not patched"* ]]; then
+    if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
         echo "$msg"
         exit $status
     fi
