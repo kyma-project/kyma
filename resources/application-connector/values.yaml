@@ -39,7 +39,7 @@ global:
     version: e7189274
   application_gateway:
     dir: develop/
-    version: 6cb16c1c
+    version: 6afb8179
   gateway_tests:
     dir: develop/
     version: 8b074a71
