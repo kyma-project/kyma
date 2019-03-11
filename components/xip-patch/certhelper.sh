@@ -57,6 +57,7 @@ EOF
 function createOverrideCM() {
   set +e
   kubectl get cm application-connector-overrides -n kyma-installer
+  set -e
   CM_EXISTS="$?"
   if [[ ${CM_EXISTS} -ne 0 ]]; then
     echo "---> ConfigMap application-connector-overrides not found! Creating."
