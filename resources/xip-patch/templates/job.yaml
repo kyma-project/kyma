@@ -25,8 +25,8 @@ spec:
           value: {{ .Values.global.domainName }}
         - name: GLOBAL_TLS_CERT
           value: {{ .Values.global.tlsCrt }}
-        - name: GLOBAL_TLS_CERT
-          value: {{ .Values.global.tlsCrt }}
+        - name: GLOBAL_TLS_KEY
+          value: {{ .Values.global.tlsKey }}
         - name: INGRESS_DOMAIN
           valueFrom:
             configMapKeyRef:
