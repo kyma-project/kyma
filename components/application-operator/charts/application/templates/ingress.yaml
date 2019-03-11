@@ -24,7 +24,7 @@ metadata:
       }
 spec:
   rules:
-  - host: gateway.{{ .Values.global.domainName }}
+  - host: gateway.{{ .Values.global.applicationConnector.domainName }}
     http:
       paths:
       - path: /{{ .Release.Name }}/v1/events
@@ -38,5 +38,5 @@ spec:
 
   tls:
   - hosts:
-    - gateway.{{ .Values.global.domainName }}
+    - gateway.{{ .Values.global.applicationConnector.domainName }}
     secretName: {{ .Values.ingress.tlsSecret }}
