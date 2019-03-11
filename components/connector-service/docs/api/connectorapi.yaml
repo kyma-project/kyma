@@ -52,6 +52,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
+  /v1/applications/certificates/revocations:
+    post:
+      tags:
+      - applications external API
+      summary: 'Marks certificate as revoked.'
+      responses:
+        '201':
+          description: 'Successful operation.'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
   /v1/applications/signingRequests/info:
     get:
       parameters:
@@ -241,6 +255,20 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/appError'
+  /v1/runtimes/certificates/revocations:
+    post:
+      tags:
+      - runtimes external API
+      summary: 'Marks certificate as revoked.'
+      responses:
+        '201':
+          description: 'Successful operation.'
+        '500':
+          description: 'Server error.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/appError'
   /v1/runtimes/signingRequests/info:
     get:
       parameters:
@@ -402,6 +430,17 @@ components:
         key-algorithm:
           type: 'string'
           example: 'rsa2048'
+    runtimeCert:
+      type: 'object'
+      properties:
+        subject:
+          type: 'string'
+          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={TENANT}{GROUP}'
+        extensions:
+          type: 'string'
+        key-algorithm:
+          type: 'string'
+          example: 'rsa2048'
     csrAplicationApiURLs:
       type: 'object'
       properties:
@@ -451,6 +490,9 @@ components:
         renewCertUrl:
           type: 'string'
           example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewal'
+        revokeCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
     applicationInfoResponse:
       type: 'object'
       properties:
@@ -473,6 +515,9 @@ components:
         renewCertUrl:
           type: 'string'
           example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewal'
+        revokeCertUrl:
+          type: 'string'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
     runtimeInfoResponse:
       type: 'object'
       properties:
@@ -492,24 +537,13 @@ components:
     csrRuntimeInfoResponse:
       type: 'object'
       properties:
-        signUrl:
+        csrUrl:
           type: 'string'
           example: 'https://connector-service.test.cluster.kyma.cx/v1/runtimes/certificates?token=1edfc34g'
         api:
           $ref: '#/components/schemas/csrRuntimeApiURLs'
         certificate:
           $ref: '#/components/schemas/runtimeCert'
-    runtimeCert:
-      type: 'object'
-      properties:
-        subject:
-          type: 'string'
-          example: 'OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={TENANT}{GROUP}'
-        extensions:
-          type: 'string'
-        key-algorithm:
-          type: 'string'
-          example: 'rsa2048'
     appError:
       type: 'object'
       properties:

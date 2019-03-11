@@ -12,6 +12,7 @@ deployment:
     runtimesInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/runtimes/management/info
     validityTime: "92d"
     central: &central false
+    revocationConfigMapName: "revocations-config"
   envvars:
     country: DE
     organization: Organization

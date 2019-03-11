@@ -87,6 +87,24 @@ func (_m *Resolver) ClusterServiceClassInstancesField(ctx context.Context, obj *
 	return r0, r1
 }
 
+// ClusterServiceClassODataSpecField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ClusterServiceClassODataSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*string, error) {
+	var r0 *string
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ClusterServiceClassOpenApiSpecField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ClusterServiceClassOpenApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
+	var r0 *gqlschema.JSON
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ClusterServiceClassPlansField provides a failing mock function with given fields: ctx, obj
 func (_m *Resolver) ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error) {
 	var r0 []gqlschema.ClusterServicePlan
@@ -243,6 +261,24 @@ func (_m *Resolver) ServiceClassContentField(ctx context.Context, obj *gqlschema
 // ServiceClassInstancesField provides a failing mock function with given fields: ctx, obj
 func (_m *Resolver) ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error) {
 	var r0 []gqlschema.ServiceInstance
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ServiceClassODataSpecField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServiceClassODataSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*string, error) {
+	var r0 *string
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ServiceClassOpenApiSpecField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServiceClassOpenApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
+	var r0 *gqlschema.JSON
 	var r1 error
 	r1 = _m.err
 

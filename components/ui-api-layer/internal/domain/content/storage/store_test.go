@@ -33,7 +33,7 @@ func TestStore_ApiSpec(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "invalid/apiSpec.json").
-			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("?<"))), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
 
@@ -75,6 +75,170 @@ func TestStore_ApiSpec(t *testing.T) {
 	})
 }
 
+func TestStore_OpenApiSpec(t *testing.T) {
+	t.Run("Not existing object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "not-existing/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
+		client.On("IsNotExistsError", mock.Anything).
+			Return(true)
+
+		_, exists, err := service.OpenApiSpec("not-existing")
+
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Invalid object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "invalid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("?<"))), nil)
+		client.On("IsNotExistsError", mock.Anything).
+			Return(false)
+
+		_, exists, err := service.OpenApiSpec("invalid")
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Client error", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "client-error/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), errors.New("Random error"))
+
+		_, exists, err := service.OpenApiSpec("client-error")
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Valid object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		expected := &storage.OpenApiSpec{
+			Raw: map[string]interface{}{},
+		}
+
+		client.On("Object", "test", "valid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("{}"))), nil)
+
+		openApiSpec, exists, err := service.OpenApiSpec("valid")
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, openApiSpec)
+	})
+}
+
+func TestStore_ODataApiSpec(t *testing.T) {
+	t.Run("Not existing object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "not-existing/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
+		client.On("IsNotExistsError", mock.Anything).
+			Return(true)
+
+		_, exists, err := service.ODataSpec("not-existing")
+
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Invalid object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "invalid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("?<"))), nil)
+		client.On("IsNotExistsError", mock.Anything).
+			Return(false)
+
+		_, exists, err := service.ODataSpec("invalid")
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Client error", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		client.On("Object", "test", "client-error/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), errors.New("Random error"))
+
+		_, exists, err := service.ODataSpec("client-error")
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Invalid json object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		expected := &storage.ODataSpec{
+			Raw: "",
+		}
+
+		client.On("Object", "test", "invalid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("{}"))), nil)
+
+		odataSpec, exists, err := service.ODataSpec("invalid")
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, odataSpec)
+	})
+
+	t.Run("Valid json object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		jsonExample := fixODataJSONV4()
+		expected := &storage.ODataSpec{
+			Raw: jsonExample,
+		}
+
+		client.On("Object", "test", "valid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte(jsonExample))), nil)
+
+		odataSpec, exists, err := service.ODataSpec("valid")
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, odataSpec)
+	})
+
+	t.Run("Valid xml object", func(t *testing.T) {
+		client := storage.NewMockClient()
+		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
+
+		xmlExample := fixODataXML()
+		expected := &storage.ODataSpec{
+			Raw: xmlExample,
+		}
+
+		client.On("Object", "test", "valid/apiSpec.json").
+			Return(ioutil.NopCloser(bytes.NewReader([]byte(xmlExample))), nil)
+
+		odataSpec, exists, err := service.ODataSpec("valid")
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, odataSpec)
+	})
+}
+
 func TestStore_AsyncApiSpec(t *testing.T) {
 	t.Run("Not existing object", func(t *testing.T) {
 		client := storage.NewMockClient()
@@ -96,7 +260,7 @@ func TestStore_AsyncApiSpec(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "invalid/asyncApiSpec.json").
-			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("<>"))), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
 
@@ -163,7 +327,7 @@ func TestStore_Content(t *testing.T) {
 		service := storage.NewStore(client, "test", "https://test.ninja", "assets")
 
 		client.On("Object", "test", "invalid/content.json").
-			Return(ioutil.NopCloser(bytes.NewReader([]byte{})), nil)
+			Return(ioutil.NopCloser(bytes.NewReader([]byte("<>"))), nil)
 		client.On("IsNotExistsError", mock.Anything).
 			Return(false)
 
@@ -217,6 +381,26 @@ func TestStore_Content(t *testing.T) {
 		assert.True(t, exists)
 		assert.Equal(t, expected, apiSpec)
 	})
+}
+
+func fixODataJSONV4() string {
+	return `
+{
+  "$Version": "4.01",
+  "$EntityContainer": "ODataDemo.DemoService"
+}
+`
+}
+
+func fixODataXML() string {
+	return `
+<?xml version="1.0" encoding="UTF-8"?>
+<edmx:Edmx Version="4.0" xmlns:edmx="http://docs.oasis-open.org/odata/ns/edmx">
+  <edmx:Reference Uri="http://tinyurl.com/Org-OData-Core">
+    <edmx:Include Namespace="Org.OData.Core.V1" Alias="Core" />
+  </edmx:Reference>
+</edmx:Edmx>
+`
 }
 
 func fixContentWithLinksJSON() string {
