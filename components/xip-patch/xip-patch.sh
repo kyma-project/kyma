@@ -46,7 +46,7 @@ generateCerts() {
     KEY_PATH="${XIP_PATCH_DIR}/key.pem"
     CERT_PATH="${XIP_PATCH_DIR}/cert.pem"
 
-    generateCertificatesForDomain "${PUBLIC_DOMAIN}" "${KEY_PATH}" "${CERT_PATH}"
+    generateCertificatesForDomain "${INGRESS_DOMAIN}" "${KEY_PATH}" "${CERT_PATH}"
 
     TLS_CERT=$(base64 "${CERT_PATH}" | tr -d '\n')
     TLS_KEY=$(base64 "${KEY_PATH}" | tr -d '\n')
