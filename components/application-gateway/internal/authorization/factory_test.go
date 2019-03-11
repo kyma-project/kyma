@@ -183,7 +183,7 @@ func TestStrategyFactory(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = strategy.AddAuthorization(request, func(transport *http.Transport){
+		err = strategy.AddAuthorization(request, func(transport *http.Transport) {
 			proxy.Transport = transport
 		})
 

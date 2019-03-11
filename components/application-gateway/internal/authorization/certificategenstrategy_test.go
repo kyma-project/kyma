@@ -68,7 +68,6 @@ func TestCertificateGenStrategy(t *testing.T) {
 		// given
 		proxy := &httputil.ReverseProxy{}
 
-
 		expectedProxy := &httputil.ReverseProxy{
 			Transport: &http.Transport{
 				TLSClientConfig: &tls.Config{
@@ -88,7 +87,7 @@ func TestCertificateGenStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = certGenStrategy.AddAuthorization(request, func(transport *http.Transport){
+		err = certGenStrategy.AddAuthorization(request, func(transport *http.Transport) {
 			proxy.Transport = transport
 		})
 

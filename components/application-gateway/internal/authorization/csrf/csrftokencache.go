@@ -3,7 +3,7 @@ package csrf
 import (
 	"time"
 
-	"github.com/patrickmn/go-cache"
+	cache "github.com/patrickmn/go-cache"
 )
 
 type TokenCache interface {
