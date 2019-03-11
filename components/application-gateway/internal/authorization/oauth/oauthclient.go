@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/util"
+
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/oauth/tokencache"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
@@ -89,6 +91,7 @@ func (c *client) requestToken(clientID string, clientSecret string, authURL stri
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
 
+	util.AddBasicAuthHeader(req, clientID, clientSecret)
 	req.Header.Add(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationURLEncoded)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.timeoutDuration)*time.Second)

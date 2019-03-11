@@ -25,6 +25,9 @@ acceptanceTest:
 
 eventService:
   deployment:
+    labels:
+      grafana: "enabled"
+      alerts: "enabled"
     image:
       pullPolicy: IfNotPresent
     args:

@@ -1,0 +1,3 @@
+dependencies:
+- name: cms-controller-manager
+  condition: cms-controller-manager.enabled

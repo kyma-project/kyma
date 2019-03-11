@@ -6,6 +6,8 @@ import "github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/con
 type ContentRetriever interface {
 	Content() ContentGetter
 	ApiSpec() ApiSpecGetter
+	OpenApiSpec() OpenApiSpecGetter
+	ODataSpec() ODataSpecGetter
 	AsyncApiSpec() AsyncApiSpecGetter
 }
 
@@ -17,6 +19,16 @@ type AsyncApiSpecGetter interface {
 //go:generate mockery -name=ApiSpecGetter -output=automock -outpkg=automock -case=underscore
 type ApiSpecGetter interface {
 	Find(kind, id string) (*storage.ApiSpec, error)
+}
+
+//go:generate mockery -name=OpenApiSpecGetter -output=automock -outpkg=automock -case=underscore
+type OpenApiSpecGetter interface {
+	Find(kind, id string) (*storage.OpenApiSpec, error)
+}
+
+//go:generate mockery -name=ODataSpecGetter -output=automock -outpkg=automock -case=underscore
+type ODataSpecGetter interface {
+	Find(kind, id string) (*storage.ODataSpec, error)
 }
 
 //go:generate mockery -name=ContentGetter -output=automock -outpkg=automock -case=underscore

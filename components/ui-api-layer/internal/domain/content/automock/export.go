@@ -16,6 +16,14 @@ func NewMinioApiSpecGetter() *minioApiSpecGetter {
 	return new(minioApiSpecGetter)
 }
 
+func NewMinioOpenApiSpecGetter() *minioOpenApiSpecGetter {
+	return new(minioOpenApiSpecGetter)
+}
+
+func NewMinioODataSpecGetter() *minioODataSpecGetter {
+	return new(minioODataSpecGetter)
+}
+
 func NewMockTopicsConverter() *topicsConverterInterface {
 	return new(topicsConverterInterface)
 }

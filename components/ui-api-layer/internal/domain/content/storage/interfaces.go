@@ -20,6 +20,11 @@ type Minio interface {
 	ListenBucketNotification(bucketName, prefix, suffix string, events []string, doneCh <-chan struct{}) <-chan minio.NotificationInfo
 }
 
+//go:generate mockery -name=Specification -output=automock -outpkg=automock -case=underscore
+type Specification interface {
+	Decode(data []byte) error
+}
+
 //go:generate mockery -name=client -inpkg -case=underscore
 type client interface {
 	Object(bucketName, objectName string) (io.ReadCloser, error)

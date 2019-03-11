@@ -4,7 +4,7 @@ import (
 	"errors"
 	"testing"
 
-	api "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	api "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/servicecatalogaddons/automock"
 	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlerror"

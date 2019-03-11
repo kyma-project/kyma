@@ -42,6 +42,9 @@
 # The `assetstore` chart
 /resources/assetstore/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
+# The `cms` chart
+/resources/cms/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+
 # The `application-connector` chart
 /resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
@@ -178,6 +181,9 @@
 # Asset Upload Service
 /components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
+# CMS Controller Manager Component
+/components/cms-controller-manager/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+
 # Binding usage controller Component
 /components/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
@@ -255,8 +261,14 @@
 # api-controller acceptance tests
 /tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
+# apiserver-proxy tests
+/tests/apiserver-proxy-tests/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
+
 # UI API Layer acceptance tests
 /tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+
+# Asset Store tests
+/tests/asset-store/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -268,17 +280,11 @@
 /tests/application-operator-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Tools
-# Stability Checker Component
-/tools/stability-checker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
-
 # Etcd backup Component
 /tools/etcd-backup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The alpine-net directory
 /tools/alpine-net/ @suleymanakbas91 @clebs @a-thaler @lilitgh
-
-# The watch-pods directory
-/tools/watch-pods/ @suleymanakbas91 @clebs @a-thaler @lilitgh
 
 # The etcd-tls-setup directory
 /tools/etcd-tls-setup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach

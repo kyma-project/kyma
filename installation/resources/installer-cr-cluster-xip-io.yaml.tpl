@@ -32,6 +32,8 @@ spec:
       namespace: "natss"
     - name: "assetstore"
       namespace: "kyma-system"
+    - name: "cms"
+      namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
     - name: "event-bus"

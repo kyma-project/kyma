@@ -1,6 +1,7 @@
 package loader
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/pkg/errors"
 	"io"
@@ -28,9 +29,18 @@ type Loader interface {
 	Clean(path string) error
 }
 
-func New(temporaryDir string) Loader {
+func New(temporaryDir string, verifySSL bool) Loader {
 	if len(temporaryDir) == 0 {
 		temporaryDir = os.TempDir()
+	}
+
+	if !verifySSL {
+		cfg := &tls.Config{
+			InsecureSkipVerify: true,
+		}
+		http.DefaultClient.Transport = &http.Transport{
+			TLSClientConfig: cfg,
+		}
 	}
 
 	return &loader{

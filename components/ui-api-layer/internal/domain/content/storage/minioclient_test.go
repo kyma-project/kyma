@@ -36,6 +36,7 @@ func TestMinioClient_IsNotExistsError(t *testing.T) {
 		assert.False(t, ok)
 	})
 }
+
 func TestMinioClient_Object(t *testing.T) {
 	t.Run("Valid", func(t *testing.T) {
 		minio := new(automock.Minio)

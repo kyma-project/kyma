@@ -9,7 +9,7 @@ metadata:
 spec:
   version: "__VERSION__"
   url: "__URL__"
-  components: 
+  components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "istio"
@@ -32,12 +32,16 @@ spec:
       namespace: "natss"
     - name: "assetstore"
       namespace: "kyma-system"
+    - name: "cms"
+      namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
     - name: "event-bus"
       namespace: "kyma-system"
-    - name: "application-connector"
+    - name: "application-connector-ingress"
       namespace: "kyma-system"
+    - name: "application-connector"
+      namespace: "kyma-integration"
     #- name: "ark"
     #  namespace: "heptio-ark"
     #- name: "logging"
