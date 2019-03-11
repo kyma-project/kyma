@@ -3,13 +3,14 @@ title: Install Kyma on an AKS cluster
 type: Installation
 ---
 
-This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
+This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster. Kyma is installed on a cluster using a proprietary installer based on a Kubernetes operator.
 
-By default, Kyma installs on an AKS cluster using a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster. 
+By default, Kyma is installed on an AKS cluster with a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster. 
 
 ## Prerequisites
 - [Microsoft Azure](https://azure.microsoft.com)
 - [Kubernetes](https://kubernetes.io/) 1.12
+- Tiller 2.10.0 or higher
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
 - [az](https://docs.microsoft.com/pl-pl/cli/azure/install-azure-cli)
