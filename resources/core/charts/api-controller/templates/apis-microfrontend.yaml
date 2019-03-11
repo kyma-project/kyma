@@ -9,7 +9,7 @@ spec:
   version: v1
   category: Configuration
   placement: namespace
-  viewBaseUrl: 'https://console.{{ js .Values.global.domainName }}/consoleapp.html#'
+  viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
     - label: APIs
       navigationPath: apis
@@ -39,7 +39,7 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: 'https://console.{{ js .Values.global.domainName }}/consoleapp.html#'
+  viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
     - label: IDP Presets
       navigationPath: idp-presets

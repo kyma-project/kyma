@@ -22,9 +22,9 @@ spec:
         name: api-controller
         env:
         - name: DOMAIN_NAME
-          value: {{ .Values.global.domainName }}
+          value: {{ .Values.global.ingress.domainName }}
         - name: DEFAULT_ISSUER
-          value: https://dex.{{ .Values.global.domainName }}
+          value: https://dex.{{ .Values.global.ingress.domainName }}
         - name: DEFAULT_JWKS_URI
           value: http://dex-service.kyma-system.svc.cluster.local:5556/keys
         - name: GATEWAY_FQDN

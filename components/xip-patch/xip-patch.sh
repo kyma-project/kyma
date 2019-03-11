@@ -7,8 +7,12 @@ set -o errexit
 #                               #
 # EXTERNAL_PUBLIC_IP            #
 # INGRESSGATEWAY_SERVICE_NAME   #
-# PUBLIC_DOMAIN                 #
-# TLS_CERT                      #
+# GLOBAL_DOMAIN                 #
+# GLOBAL_TLS_CERT               #
+# GLOBAL_TLS_KEY                #
+# INGRESS_DOMAIN                #
+# INGRESS_TLS_CERT              #
+# INGRESS_TLS_KEY               #
 # # # # # # # # # # # # # # # # #
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -24,28 +28,15 @@ generateXipDomain() {
             INGRESSGATEWAY_SERVICE_NAME=istio-ingressgateway
         fi
 
-        echo "Trying to get loadbalancer IP address"
-
         EXTERNAL_PUBLIC_IP=$(getLoadBalancerIP "${INGRESSGATEWAY_SERVICE_NAME}" "${namespace}")
 
         if [[ "$?" != 0 ]]; then
             echo "External public IP not found"
             exit 1
         fi
-
-        echo "External public IP address is ${EXTERNAL_PUBLIC_IP}"
     fi
 
-    PUBLIC_DOMAIN="${EXTERNAL_PUBLIC_IP}.xip.io"
-
-    DOMAIN_YAML=$(cat << EOF
----
-data:
-  global.domainName: "${PUBLIC_DOMAIN}"
-EOF
-)
-
-    kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
+    echo "${EXTERNAL_PUBLIC_IP}.xip.io"
 
 }
 
@@ -62,39 +53,51 @@ generateCerts() {
 
     rm "${CERT_PATH}"
     rm "${KEY_PATH}"
+}
 
+createOverridesConfigMap() {
+    if [ $(kubectl get configmap -n kyma-installer net-global-overrides --ignore-not-found) == "" ]; then
+        kubectl create configmap net-global-overrides \
+            --form-literal global.ingress.domainName="$PUBLIC_DOMAIN" \
+            --from-literal global.ingress.tlsCrt="$TLS_CERT" \
+            --from-literal global.ingress.tlsKey="$TLS_KEY" \
+            -n kyma-installer
+    fi
+    kubectl label configmap net-global-overrides --overwrite installer=overrides
+}
+
+patchTlsCrtSecret() {
     TLS_CERT_YAML=$(cat << EOF
 ---
 data:
   tls.crt: "${TLS_CERT}"
 EOF
-)
-
-    TLS_CERT_AND_KEY_YAML=$(cat << EOF
----
-data:
-  global.tlsCrt: "${TLS_CERT}"
-  global.tlsKey: "${TLS_KEY}"
-EOF
-)
-
-    kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
+    )
     kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system
-
 }
 
+if [ -z "${INGRESS_TLS_CERT}" ]; then
+    INGRESS_TLS_CERT="${GLOBAL_TLS_CERT}"
+    INGRESS_TLS_KEY="${GLOBAL_TLS_KEY}"
 
-if [ -z "${TLS_CERT}" ]; then
-
-    if [ -z "${PUBLIC_DOMAIN}" ] ; then
-        generateXipDomain
+    if [ -z "${INGRESS_TLS_CERT}" ] ; then
+        generateCerts
+        INGRESS_TLS_CERT=${TLS_CERT}
+        INGRESS_TLS_KEY=${TLS_KEY}
     fi
-
-    generateCerts
-    exit 0
-fi
-
-if [ -z "${PUBLIC_DOMAIN}" ]; then
-    echo "Invalid setup - no domain for provided certs"
+elif [ -z "${INGRESS_DOMAIN}" ]; then
+    echo "Certificate provided, but domain is missing!"
     exit 1
 fi
+
+if [ -z "${INGRESS_DOMAIN}" ]; then
+    INGRESS_DOMAIN="${GLOBAL_DOMAIN}"
+
+    if [ -z "${INGRESS_DOMAIN}" ] ; then
+        INGRESS_DOMAIN=$(generateXipDomain)
+    fi
+fi
+
+createOverridesConfigMap
+
+patchTlsCrtSecret

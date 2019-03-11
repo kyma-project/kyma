@@ -16,7 +16,7 @@ spec:
     image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller_acceptance_tests.dir }}api-controller-acceptance-tests:{{ .Values.global.api_controller_acceptance_tests.version }}
     env:
     - name: DOMAIN_NAME
-      value: {{ .Values.global.domainName }}
+      value: {{ .Values.global.ingress.domainName }}
     - name: INGRESSGATEWAY_ADDRESS
       value: {{ $serviceName }}.istio-system.svc.cluster.local
     - name: NAMESPACE
