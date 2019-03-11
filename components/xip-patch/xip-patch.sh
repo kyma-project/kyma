@@ -74,7 +74,16 @@ data:
   tls.crt: "${INGRESS_TLS_CERT}"
 EOF
     )
-    kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system
+    set +e
+    local msg
+    local status
+    msg=$(kubectl patch secret ingress-tls-cert --patch "${TLS_CERT_YAML}" -n kyma-system 2>&1)
+    status=$?
+    set -e
+    if [[ $status -ne 0 ]] && [[ ! $"msg" = *"not patched"* ]]; then
+        echo "$msg"
+        exit $status
+    fi
 }
 
 INGRESS_TLS_CERT="${INGRESS_TLS_CERT:-$GLOBAL_TLS_CERT}"
