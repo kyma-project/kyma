@@ -64,12 +64,12 @@ spec:
       template:
         metadata:
           labels:
-            re-{APP_NAME}-{SERVICE_ID}: "true"
+            app-{APP_NAME}-{SERVICE_ID}: "true"
         spec:
           containers:
           - env:
             - name: GATEWAY_URL
-              value: re-{APP_NAME}-{SERVICE_ID}.kyma-integration
+              value: app-{APP_NAME}-{SERVICE_ID}.kyma-integration
   deps: |-
     {
         "name": "example-1",

@@ -153,7 +153,7 @@ EOF
 5. Create a Subscription to allow events to trigger the lambda function.
 ```
 cat <<EOF | kubectl apply -f -
-apiVersion: eventing.kyma.cx/v1alpha1
+apiVersion: eventing.kyma-project.io/v1alpha1
 kind: Subscription
 metadata:
   labels:
