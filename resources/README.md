@@ -9,3 +9,4 @@ Resources currently include, but are not limited to, the following:
 - Elements which are essential for the installation of `core` components in Kyma, such as certificates, users, and permissions
 - Examples of the use of specific components
 - Scripts for the installation of Helm, Istio deployment, as well as scripts for validating Pods, starting Kyma, and testing
+
