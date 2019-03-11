@@ -1,0 +1,20 @@
+required = [
+  "github.com/golang/lint/golint",
+  "golang.org/x/tools/cmd/goimports",
+]
+
+[[constraint]]
+  name = "github.com/satori/go.uuid"
+  version = "1.2.0"
+
+[[constraint]]
+  name = "github.com/sirupsen/logrus"
+  version = "1.4.0"
+
+[[constraint]]
+  name = "github.com/vrischmann/envconfig"
+  version = "1.1.0"
+
+[prune]
+  go-tests = true
+  unused-packages = true
