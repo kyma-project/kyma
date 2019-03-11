@@ -1,6 +1,6 @@
 ---
 title: Create a bundle repository
-type: Configuration
+type: Details
 ---
 
 The repository in which you create your own bundles must have a specific format so that the Helm Broker can fetch bundles from it. Your remote bundle repository must include the following resources:

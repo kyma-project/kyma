@@ -1,6 +1,6 @@
 ---
 title: Binding bundles
-type: Configuration
+type: Details
 ---
 
 
