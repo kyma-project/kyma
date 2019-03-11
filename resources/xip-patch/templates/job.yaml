@@ -31,11 +31,14 @@ spec:
           configMapKeyRef:
             name: net-global-overrides
             key: global.ingress.domainName
+            optional: true
         - name: INGRESS_TLS_CERT
           configMapKeyRef:
             name: net-global-overrides
             key: global.ingress.tlsCrt
+            optional: true
         - name: INGRESS_TLS_KEY
           configMapKeyRef:
             name: net-global-overrides
             key: global.ingress.tlsKey
+            optional: true
