@@ -30,38 +30,81 @@ function generateXipDomain() {
   DOMAIN_YAML=$(cat << EOF
 ---
 data:
-  global.applicationConnectorDomainName: "${DOMAIN}"
+  global.applicationConnector.domainName: "${DOMAIN}"
 EOF
 )
   echo "---> DOMAIN created: ${DOMAIN}, patching configmap"
-  kubectl patch configmap installation-config-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
+  kubectl patch configmap application-connector-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
 }
 
 function generateCerts() {
   echo "---> Generating Certs for ${DOMAIN}"
   generateCertificatesForDomain "${DOMAIN}" /root/key.pem /root/cert.pem
-  TLS_CERT=$(base64 /root/cert.pem | tr -d '\n')
-  TLS_KEY=$(base64 /root/key.pem | tr -d '\n')
-
+  CERT=$(base64 /root/cert.pem | tr -d '\n')
+  KEY=$(base64 /root/key.pem | tr -d '\n')
+  rm /root/key.pem /root/cert.pem
   TLS_CERT_AND_KEY_YAML=$(cat << EOF
 ---
 data:
-  global.applicationConnector.tlsCrt: "${TLS_CERT}"
+  global.applicationConnector.tlsCrt: "${CERT}"
+  global.applicationConnector.tlsKey: "${KEY}"
+EOF
+)
+  echo "---> Certs have been created, creating patching configmap"
+  kubectl patch configmap application-connector-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
+}
+
+function createOverrideCM() {
+  set +e
+  kubectl get cm application-connector-overrides -n kyma-installer
+  CM_EXISTS="$?"
+  if [[ ${CM_EXISTS} -ne 0 ]]; then
+    echo "---> ConfigMap application-connector-overrides not found! Creating."
+    kubectl create cm application-connector-overrides -n kyma-installer --from-literal="foo=bar"
+  fi
+
+}
+
+function rewriteDomain() {
+  DOMAIN_YAML=$(cat << EOF
+---
+data:
+  global.applicationConnector.domainName: "${DOMAIN}"
+EOF
+)
+  echo "---> DOMAIN used: ${DOMAIN}, patching configmap"
+  kubectl patch configmap application-connector-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
+}
+
+function rewriteCerts() {
+  echo "---> Certs have been given, patching configmap"
+  TLS_CERT_AND_KEY_YAML=$(cat << EOF
+---
+data:
+  global.applicationConnector.tlsCrt: "${TLS_CRT}"
   global.applicationConnector.tlsKey: "${TLS_KEY}"
 EOF
 )
-  echo "---> Certs have been created, patching configmap"
-  kubectl patch configmap cluster-certificate-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer 
+  echo "---> Certs have been created, creating patching configmap"
+  kubectl patch configmap application-connector-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
 }
 
+createOverrideCM
+# Certs are not given, create
 if [[ -z "${TLS_CRT}" ]] && [[ -z "${TLS_KEY}" ]]; then
     if [[ -z "${DOMAIN}" ]]; then
-        generateXipDomain
+      generateXipDomain
+    else
+      rewriteDomain
     fi
     generateCerts
     exit 0
 fi
+# Certa are given, rewrite
 if [[ -z "${DOMAIN}" ]]; then
-    echo "Invalid setup - no domain for provided certs"
-    exit 1
+  echo "Invalid setup - no domain for provided certs"
+  exit 1
+else
+  rewriteDomain
+  rewriteCerts
 fi
