@@ -115,7 +115,7 @@ func (p *proxy) newAuthorizationStrategy(credentials *metadatamodel.Credentials)
 func (p *proxy) newCSRFTokenStrategy(authorizationStrategy authorization.Strategy, credentials *metadatamodel.Credentials) csrf.TokenStrategy {
 	csrfTokenEndpointURL := ""
 	if credentials != nil {
-		csrfTokenEndpointURL = credentials.CSRFTokenURL
+		csrfTokenEndpointURL = credentials.CSRFTokenEndpointURL
 	}
 	return p.csrfTokenStrategyFactory.Create(authorizationStrategy, csrfTokenEndpointURL)
 }

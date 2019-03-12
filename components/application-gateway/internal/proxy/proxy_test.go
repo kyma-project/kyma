@@ -48,7 +48,7 @@ func TestProxy(t *testing.T) {
 		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
 		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
-		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, credentials.CSRFTokenURL).Return(csrfTokenStrategyMock).Once()
+		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, credentials.CSRFTokenEndpointURL).Return(csrfTokenStrategyMock).Once()
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
