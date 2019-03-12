@@ -41,7 +41,7 @@ global:
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
-    version: 6e0a7fe2
+    version: 2f5d18c2
   configurations_generator:
     dir: develop/
     version: aabedc33
@@ -60,6 +60,9 @@ global:
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
+  test_apiserver_proxy:
+    dir: develop/
+    version: "24337d95"
   test_namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -71,7 +74,10 @@ global:
     version: a63544bb
   cluster_users_test:
     dir: develop/
-    version: "30b8aafd"
+    version: 3d94e9d8
+  xip_patch:
+    dir: develop/
+    version: "1103850e"
   kubeless_images:
     runtime:
       node6:

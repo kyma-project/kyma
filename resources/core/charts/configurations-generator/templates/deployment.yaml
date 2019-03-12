@@ -1,3 +1,5 @@
+{{- $apiserverUrl := .Values.global.isLocalEnv | ternary "https://apiserver.$DOMAIN:9443" "https://apiserver.$DOMAIN" -}}
+
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
@@ -22,23 +24,26 @@ spec:
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.configurations_generator.dir }}configurations-generator:{{ .Values.global.configurations_generator.version }}
         name: {{ template "name" . }}
-        command: [
-          "/app",
-          "-kube-config-cluster-name={{ .Values.global.ingress.domainName }}",
-          "-kube-config-url=https://apiserver.{{ .Values.global.ingress.domainName }}",
-          "-kube-config-ca-file=/etc/ingress-tls-cert/tls.crt",
-          "-oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }}",
-          "-oidc-client-id=kyma-client",
-          "-oidc-ca-file=/etc/ingress-tls-cert/tls.crt"
-        ]
+        command:
+          - sh
+          - -c
+          - /app -kube-config-cluster-name=$DOMAIN -kube-config-url={{ $apiserverUrl }} -kube-config-ca-file=/etc/apiserver-proxy-tls-cert/tls.crt -oidc-issuer-url=https://dex.{{ .Values.global.ingress.domainName }} -oidc-client-id=kyma-client -oidc-ca-file=/etc/dex-tls-cert/tls.crt
+        envFrom:
+        - configMapRef:
+            name: apiserver-proxy
         ports:
           - name: http
             containerPort: 8000
         volumeMounts:
-        - name: ingress-tls-cert
-          mountPath: "/etc/ingress-tls-cert"
+        - name: apiserver-proxy-tls-cert
+          mountPath: "/etc/apiserver-proxy-tls-cert"
           readOnly: true
+        - name: dex-tls-cert
+          mountPath: /etc/dex-tls-cert/
       volumes:
-      - name: ingress-tls-cert
+      - name: apiserver-proxy-tls-cert
+        secret:
+          secretName: apiserver-proxy-tls-cert
+      - name: dex-tls-cert
         secret:
           secretName: ingress-tls-cert
