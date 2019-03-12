@@ -53,11 +53,11 @@ The `meta.yaml` file contains information about the bundle. Set the following fi
 |         **tags**        |   NO  |   Keywords describing the provided service, separated by commas.     |
 |       **bindable**      |   NO  |   A field that specifies whether you can bind a given bundle. |
 |     **displayName**     |   YES   | A display name of the bundle.    |
-| **providerDisplayName** |   NO  |                                          |
-|   **longDescription**   |   NO  |                   |
-|   **documentationURL**  |   NO  |          |
-|      **supportURL**     |   NO  |       |
-|       **imageURL**      |   NO  |     You must provide the image as an SVG.          |
+| **providerDisplayName** |   NO  |  A name of the upstream entity providing the actual service.  |
+|   **longDescription**   |   NO  |  Long description.     |
+|   **documentationURL**  |   NO  |  Link to documentation page for the service.        |
+|      **supportURL**     |   NO  |  Link to support page for the service.     |
+|       **imageURL**      |   NO  |  The URL to an image. You must provide the image as an SVG.          |
 |       **labels**        |   NO  |  Key/value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
 | **bindingsRetrievable** |   NO  | A field that specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
 |   **planUpdatable**     |   NO  |  A field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
