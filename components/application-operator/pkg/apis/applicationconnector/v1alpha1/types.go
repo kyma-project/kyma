@@ -56,15 +56,15 @@ type Entry struct {
 }
 
 type CSRFInfo struct {
-	TokenEndpointURL string `json:TokenEndpointURL`
+	TokenEndpointURL string `json:"tokenEndpointURL"`
 }
 
 // Credentials defines type of authentication and where the credentials are stored
 type Credentials struct {
-	Type              string   `json:"type"`
-	SecretName        string   `json:"secretName"`
-	AuthenticationUrl string   `json:"authenticationUrl,omitempty"`
-	CSRFInfo          CSRFInfo `json:"csrfInfo,omitempty"`
+	Type              string    `json:"type"`
+	SecretName        string    `json:"secretName"`
+	AuthenticationUrl string    `json:"authenticationUrl,omitempty"`
+	CSRFInfo          *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 // Service represents part of the remote environment, which is mapped 1 to 1 to service class in the service-catalog
