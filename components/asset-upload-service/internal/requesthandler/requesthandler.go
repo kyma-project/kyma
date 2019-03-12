@@ -55,6 +55,18 @@ func (r *RequestHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	if err != nil {
 		wrappedErr := errors.Wrap(err, "while parsing multipart request")
 		r.writeInternalError(w, wrappedErr)
+		return
+	}
+
+	if rq.MultipartForm == nil {
+		r.writeResponse(w, http.StatusBadRequest, Response{
+			Errors: []ResponseError{
+				{
+					Message: "No multipart/form-data form received.",
+				},
+			},
+		})
+		return
 	}
 
 	defer func() {
@@ -160,7 +172,7 @@ func (r *RequestHandler) writeResponse(w http.ResponseWriter, statusCode int, re
 	_, err = w.Write(jsonResponse)
 	if err != nil {
 		wrappedErr := errors.Wrapf(err, "while writing JSON response")
-		r.writeInternalError(w, wrappedErr)
+		glog.Error(wrappedErr)
 	}
 }
 

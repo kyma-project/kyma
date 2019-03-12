@@ -5,3 +5,6 @@ port: 8080
 replicaCount: 1 # the subscription controller is deployed as one replica instance
 image:
   pullPolicy: IfNotPresent
+monitoring:
+  grafana: enabled
+  alerts: enabled

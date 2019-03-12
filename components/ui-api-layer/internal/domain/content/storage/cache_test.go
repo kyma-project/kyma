@@ -65,10 +65,11 @@ func TestCache_Initialize(t *testing.T) {
 
 func TestCache_ApiSpec_Initialized(t *testing.T) {
 	filename := "apiSpec.json"
+	fieldName := "apiSpec"
 	function := "ApiSpec"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.ApiSpec)
 	expectedBytes, err := convertToCache(&expected)
@@ -274,10 +275,11 @@ func TestCache_ApiSpec_Initialized(t *testing.T) {
 
 func TestCache_ApiSpec_NotInitialized(t *testing.T) {
 	filename := "apiSpec.json"
+	fieldName := "apiSpec"
 	function := "ApiSpec"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.ApiSpec)
 	expectedBytes, err := convertToCache(&expected)
@@ -366,12 +368,621 @@ func TestCache_ApiSpec_NotInitialized(t *testing.T) {
 	})
 }
 
+func TestCache_OpenApiSpec_Initialized(t *testing.T) {
+	filename := "apiSpec.json"
+	fieldName := "openApiSpec"
+	function := "OpenApiSpec"
+
+	id := "some-object"
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
+
+	expected := new(storage.OpenApiSpec)
+	expectedBytes, err := convertToCache(&expected)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Run("Not existing object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(nil, false, nil).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Twice()
+		cacheClient.On("Delete", cacheId).Return(nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.OpenApiSpec(id)
+
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Existing not cached object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(expectedBytes, nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		openApiSpec, exists, err := cache.OpenApiSpec(id)
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, openApiSpec)
+	})
+
+	t.Run("Existing cached object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(expectedBytes, nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		openApiSpec, exists, err := cache.OpenApiSpec(id)
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, openApiSpec)
+	})
+
+	t.Run("store error", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(nil, false, errors.New(id))
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.OpenApiSpec(id)
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Cache error", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, errors.New(id)).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.OpenApiSpec(id)
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Cache error after update", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, errors.New(id)).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.OpenApiSpec(id)
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Error while storing in cache", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(errors.New(id)).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.OpenApiSpec(id)
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+}
+
+func TestCache_OpenApiSpec_NotInitialized(t *testing.T) {
+	filename := "apiSpec.json"
+	fieldName := "openApiSpec"
+	function := "OpenApiSpec"
+
+	id := "some-object"
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
+
+	expected := new(storage.OpenApiSpec)
+	expectedBytes, err := convertToCache(&expected)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Run("Not existing object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On(function, id).Return(nil, false, nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Twice()
+		cacheClient.On("Delete", cacheId).Return(nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		_, exists, err := cache.OpenApiSpec(id)
+
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Existing not cached object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(expectedBytes, nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		openApiSpec, exists, err := cache.OpenApiSpec(id)
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, openApiSpec)
+	})
+
+	t.Run("Existing cached object", func(t *testing.T) {
+		notExpected := storage.OpenApiSpec{
+			Raw: map[string]interface{}{
+				"test": nil,
+			},
+		}
+		notExpectedBytes, err := convertToCache(notExpected)
+		if err != nil {
+			t.Error(err)
+		}
+
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Get", cacheId).Return(notExpectedBytes, nil).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(expectedBytes, nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		openApiSpec, exists, err := cache.OpenApiSpec(id)
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, openApiSpec)
+	})
+}
+
+func TestCache_ODataSpec_Initialized(t *testing.T) {
+	filename := "apiSpec.json"
+	fieldName := "odataSpec"
+	function := "ODataSpec"
+
+	id := "some-object"
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
+
+	expected := new(storage.ODataSpec)
+	expectedBytes, err := convertToCache(&expected)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Run("Not existing object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(nil, false, nil).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Twice()
+		cacheClient.On("Delete", cacheId).Return(nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.ODataSpec(id)
+
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Existing not cached object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(expectedBytes, nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		odataSpec, exists, err := cache.ODataSpec(id)
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, odataSpec)
+	})
+
+	t.Run("Existing cached object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(expectedBytes, nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		odataSpec, exists, err := cache.ODataSpec(id)
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, odataSpec)
+	})
+
+	t.Run("store error", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(nil, false, errors.New(id))
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.ODataSpec(id)
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Cache error", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, errors.New(id)).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.ODataSpec(id)
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Cache error after update", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, errors.New(id)).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.ODataSpec(id)
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Error while storing in cache", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On("NotificationChannel", mock.Anything).Return(storage.GetDirectNotificationChan(notifications)).Once()
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Reset").Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(errors.New(id)).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		cache.Initialize(stop)
+		err := waitAtMost(cache.IsSynced, synchronizationTimeout)
+		require.NoError(t, err)
+
+		_, exists, err := cache.ODataSpec(id)
+
+		require.Error(t, err)
+		assert.False(t, exists)
+	})
+}
+
+func TestCache_ODataSpec_NotInitialized(t *testing.T) {
+	filename := "apiSpec.json"
+	fieldName := "odataSpec"
+	function := "ODataSpec"
+
+	id := "some-object"
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
+
+	expected := new(storage.ODataSpec)
+	expectedBytes, err := convertToCache(&expected)
+	if err != nil {
+		t.Error(err)
+	}
+
+	t.Run("Not existing object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On(function, id).Return(nil, false, nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Twice()
+		cacheClient.On("Delete", cacheId).Return(nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		_, exists, err := cache.ODataSpec(id)
+
+		require.NoError(t, err)
+		assert.False(t, exists)
+	})
+
+	t.Run("Existing not cached object", func(t *testing.T) {
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Get", cacheId).Return(nil, &bigcache.EntryNotFoundError{}).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(expectedBytes, nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		odataSpec, exists, err := cache.ODataSpec(id)
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, odataSpec)
+	})
+
+	t.Run("Existing cached object", func(t *testing.T) {
+		notExpected := storage.ODataSpec{
+			Raw: "example",
+		}
+		notExpectedBytes, err := convertToCache(notExpected)
+		if err != nil {
+			t.Error(err)
+		}
+
+		storeGetter := storage.NewStoreGetter()
+		cacheClient := new(automock.Cache)
+
+		cache := storage.NewCache(storeGetter, cacheClient)
+		stop := make(chan struct{})
+		defer close(stop)
+		notifications := storage.NewNotificationChan()
+		defer close(notifications)
+
+		storeGetter.On(function, id).Return(expected, true, nil).Once()
+		cacheClient.On("Get", cacheId).Return(notExpectedBytes, nil).Once()
+		cacheClient.On("Set", cacheId, expectedBytes).Return(nil).Once()
+		cacheClient.On("Get", cacheId).Return(expectedBytes, nil).Once()
+		defer cacheClient.AssertExpectations(t)
+		defer storeGetter.AssertExpectations(t)
+
+		odataSpec, exists, err := cache.ODataSpec(id)
+
+		require.NoError(t, err)
+		assert.True(t, exists)
+		assert.Equal(t, expected, odataSpec)
+	})
+}
+
 func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 	filename := "asyncApiSpec.json"
+	fieldName := "asyncApiSpec"
 	function := "AsyncApiSpec"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.AsyncApiSpec)
 	expectedBytes, err := convertToCache(&expected)
@@ -577,10 +1188,11 @@ func TestCache_AsyncApiSpec_Initialized(t *testing.T) {
 
 func TestCache_AsyncApiSpec_NotInitialized(t *testing.T) {
 	filename := "asyncApiSpec.json"
+	fieldName := "asyncApiSpec"
 	function := "AsyncApiSpec"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.AsyncApiSpec)
 	expectedBytes, err := convertToCache(&expected)
@@ -671,10 +1283,11 @@ func TestCache_AsyncApiSpec_NotInitialized(t *testing.T) {
 
 func TestCache_Content_Initialized(t *testing.T) {
 	filename := "content.json"
+	fieldName := "content"
 	function := "Content"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.Content)
 	expectedBytes, err := convertToCache(&expected)
@@ -880,10 +1493,11 @@ func TestCache_Content_Initialized(t *testing.T) {
 
 func TestCache_Content_NotInitialized(t *testing.T) {
 	filename := "content.json"
+	fieldName := "content"
 	function := "Content"
 
 	id := "some-object"
-	cacheId := fmt.Sprintf("%s/%s", id, filename)
+	cacheId := fmt.Sprintf("%s/%s/%s", id, filename, fieldName)
 
 	expected := new(storage.Content)
 	expectedBytes, err := convertToCache(&expected)

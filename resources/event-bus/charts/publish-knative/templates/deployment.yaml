@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "publish-knative.fullname" . }}
+  name: {{ template "publish-knative.name" . }}
   labels:
 {{ include "publish-knative.labels.standard" . | indent 4 }}
 spec:
@@ -21,6 +21,8 @@ spec:
       labels:
         app: {{ template "publish-knative.name" . }}
         release: {{ .Release.Name }}
+        kyma-grafana: {{ .Values.monitoring.grafana}}
+        kyma-alerts: {{ .Values.monitoring.alerts}}
     spec:
       containers:
         - name: {{ .Chart.Name }}
@@ -45,4 +47,4 @@ spec:
             timeoutSeconds: 10
           resources:
 {{ toYaml .Values.global.publishKnative.resources | indent 12 }}
-      serviceAccount:  {{ .Release.Name }}-publish-knative-sa
+      serviceAccount:  {{ .Release.Name }}-publish

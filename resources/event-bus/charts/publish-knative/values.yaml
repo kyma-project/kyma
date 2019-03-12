@@ -10,3 +10,6 @@ service:
 trace:
   serviceName: event-publish-knative-service
   operationName: publish-the-event
+monitoring:
+  grafana: enabled
+  alerts: enabled

@@ -26,6 +26,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 	protectedBaseURL := "https://gateway.kyma.local/v1/applications"
 	expectedRenewalsURL := "https://gateway.kyma.local/v1/applications/certificates/renewals"
+	expectedRevocationURL := "https://gateway.kyma.local/v1/applications/certificates/revocations"
 
 	t.Run("should successfully get management info urls for application", func(t *testing.T) {
 		//given
@@ -80,6 +81,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, appName, receivedContext[applicationKey])
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])
+		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
 	})
 
 	t.Run("should successfully get management info urls for runtime", func(t *testing.T) {
@@ -116,6 +118,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])
+		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
 	})
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
