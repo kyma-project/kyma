@@ -13,9 +13,9 @@ By default, the Helm Broker fetches bundles from the newest release of the [`bun
   kubectl create configmap my-helm-repos-urls -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/latest/index-testing.yaml
   ```
 
-  >**NOTE:** If you want to fetch bundles from many HTTP servers, use `\n` to separate the URLs.
+    >**NOTE:** If you want to fetch bundles from many HTTP servers, use `\n` to separate the URLs.
 
-  If you use this method, you must label your ConfigMap with `helm-broker-repo=true`. To add the label to your ConfigMap, run:
+    If you use this method, you must label your ConfigMap with `helm-broker-repo=true`. To add the label to your ConfigMap, run:
 
     ```bash
     kubectl label configmap my-helm-repos-urls -n kyma-system helm-broker-repo=true
