@@ -149,7 +149,10 @@ func (r *TestRunner) executeTask(task taskFn, stopCh <-chan struct{}, header, ta
 // https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#names
 func (r *TestRunner) sanitizedNamespaceName(nameToSanitize string) string {
 	nsName := r.sanitizeRegex.ReplaceAllString(nameToSanitize, "-")
-	return nsName[:253]
+	if len(nsName) > 253 {
+		return nsName[:253]
+	}
+	return nsName
 }
 
 func (r *TestRunner) ensureNamespaceExists(name string) error {
