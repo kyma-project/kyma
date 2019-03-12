@@ -36,13 +36,13 @@ sample-bundle/
        └── ....
 ```
 
-> **NOTE:** All file names in the bundle repository are case-sensitive.
+> **NOTE:** All file names in a bundle repository are case-sensitive.
 
 For details about the particular files, read the following sections.
 
 ## meta.yaml file
 
-The `meta.yaml` file contains information about the bundle. Set the following fields to create a file which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
+The `meta.yaml` file contains information about the bundle. Set the following fields to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
 
 |      Field Name     | Required |                                                                  Description                                                                           |
 |:-------------------:|:--------:|:------------------------------------------------------------------------------------------------------------------------------------------------------:|
@@ -52,7 +52,7 @@ The `meta.yaml` file contains information about the bundle. Set the following fi
 |     **description**     |   YES   | A short description of the service. |
 |         **tags**        |   NO  |   Keywords describing the provided service, separated by commas.     |
 |       **bindable**      |   NO  |   A field that specifies whether you can bind a given bundle. |
-|     **displayName**     |   YES   |                                        |
+|     **displayName**     |   YES   | A display name of the bundle.    |
 | **providerDisplayName** |   NO  |                                          |
 |   **longDescription**   |   NO  |                   |
 |   **documentationURL**  |   NO  |          |
@@ -76,7 +76,7 @@ In the `chart` directory, create a folder with the same name as your chart. Put 
 
 The `plans` directory must contain at least one plan. Each plan must contain the `meta.yaml` file. Other files are not mandatory.
 
-* `meta.yaml` file - contains information about a given plan. Set the following fields to create the plan objects, which comply with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object).
+* `meta.yaml` file - contains information about a given plan. Set the following fields to create a plan object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object).
 
 |  Field Name | Required |                                             Description                                                    |
 |:-----------:|:--------:|:----------------------------------------------------------------------------------------------------------:|
