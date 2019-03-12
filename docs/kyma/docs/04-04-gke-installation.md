@@ -247,6 +247,8 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
     ```
     export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
+    export APISERVER_PUBLIC_IP=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+    
     export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
     gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
@@ -254,6 +256,8 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
     gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
     gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
+    
+    gcloud dns --project=$PROJECT record-sets transaction add APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
     gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
     ```
