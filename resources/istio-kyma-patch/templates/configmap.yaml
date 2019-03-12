@@ -28,20 +28,20 @@ data:
       {{ end }}
     ]
 
-  istio-egressgateway.deployment.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/15",
-        "value": "zipkin.kyma-system:9411"
-      }
-    ]
+#  istio-egressgateway.deployment.patch.json: |
+#    [
+#      {
+#        "op": "replace",
+#        "path": "/spec/template/spec/containers/0/args/15",
+#        "value": "zipkin.kyma-system:9411"
+#      }
+#    ]
 
   istio-policy.deployment.patch.json: |
     [
       {
         "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/4",
+        "path": "/spec/template/spec/containers/0/args/6",
         "value": "--trace_zipkin_url=http://zipkin.kyma-system:9411/api/v1/spans"
       }
     ]
@@ -50,7 +50,7 @@ data:
     [
       {
         "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/4",
+        "path": "/spec/template/spec/containers/0/args/6",
         "value": "--trace_zipkin_url=http://zipkin.kyma-system:9411/api/v1/spans"
       }
     ]

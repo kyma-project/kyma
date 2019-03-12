@@ -27,8 +27,8 @@ function require_istio_system() {
 }
 
 function require_mtls_disabled() {
-    local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers}' --ignore-not-found=true | grep "mtls")
-    if [[ ${mTLS} != "" ]]; then
+    local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers[0].mtls.mode}' --ignore-not-found=true )
+    if [[ ${mTLS} != "PERMISSIVE" ]]; then
         echo "mTLS must be disabled"
         exit 1
     fi
