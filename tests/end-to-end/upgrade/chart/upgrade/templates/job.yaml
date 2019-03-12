@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: test-{{ template "fullname" . }}
+  labels:
+    app: {{ template "name" . }}
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  backoffLimit: 1
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: test-{{ template "fullname" . }}
+      restartPolicy: Never
+      containers:
+      - name: runner
+        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
+        command: ["e2e-upgrade-test"]
+        args: ["--action", "prepareData"]
