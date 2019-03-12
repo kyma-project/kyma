@@ -7,7 +7,7 @@ image:
 kubectl:
   image:
     repository: eu.gcr.io/kyma-project/etcd-tls-setup
-    tag: 0.3.367
+    tag: 0.8.0-rc1
     pullPolicy: IfNotPresent
 
 # Only kube2iam: change the AWS_ACCOUNT_ID and HEPTIO_ARK_ROLE_NAME
@@ -71,5 +71,5 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ark_plugin:
-    dir: develop/
-    version: "52070221"
+    dir:
+    version: 0.8.0-rc1

@@ -5,14 +5,14 @@ global:
     gateway:
       name: kyma-gateway
   assetstore_controller_manager:
-    dir: develop/
-    version: a63544bb
+    dir:
+    version: 0.8.0-rc1
   asset_upload_service:
-    dir: develop/
-    version: a63544bb
+    dir:
+    version: 0.8.0-rc1
   asset_store_test:
-    dir: develop/
-    version: a63544bb
+    dir:
+    version: 0.8.0-rc1
 
 minio:
   mode: standalone

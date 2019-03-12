@@ -18,7 +18,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: {{ .Release.Name }}-loadbalancer-migration
-        image: eu.gcr.io/kyma-project/develop/xip-patch:1103850e
+        image: eu.gcr.io/kyma-project/xip-patch:0.8.0-rc1
         command:
           - bash
           - -c

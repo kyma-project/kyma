@@ -1,8 +1,8 @@
 containerRegistry:
   path: eu.gcr.io/kyma-project
 xip_patch:
-  dir: develop/
-  version: 1103850e
+  dir:
+  version: 0.8.0-rc1
 
 global:
   isLocalEnv: false
