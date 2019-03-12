@@ -1,21 +1,12 @@
 ---
-title: Binding bundles
+title: Bind bundles
 type: Details
 ---
 
-
-[bind]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.12/spec.md#binding  "OSB Spec Binding"
-
 If you defined in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file.
-The `bind.yaml` file supports the [Service Catalog](https://github.com/kubernetes-incubator/service-catalog) binding concept. The `bind.yaml` file contains information the system uses in the [binding process][bind].
-The `bind.yaml` file is mandatory for all bindable plans. Currently, Kyma supports only the [credentials](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#types-of-binding)-type binding.   
-
+The `bind.yaml` file supports the [Service Catalog](https://github.com/kubernetes-incubator/service-catalog) binding concept. It is mandatory for all bindable plans as it contains information needed in the binding process. Currently, Kyma supports only the [credentials](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#types-of-binding)-type binding.   
 
 >**NOTE:** Resolving the values from the `bind.yaml` file is a post-provision action. If this operation ends with an error, the provisioning also fails.
-
-## Details
-
-This section provides an example of the `bind.yaml` file. It further describes the templating, the policy concerning credential name conflicts, and the detailed `bind.yaml` file specification.
 
 ### Example usage
 
