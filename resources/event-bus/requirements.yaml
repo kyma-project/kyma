@@ -7,8 +7,6 @@ dependencies:
   - name: sub-validator
     condition: global.kymaEventBus
   # Knative eventing
-  - name: natss-knative-provisioner
-    condition: global.knative
   - name: publish-knative
     condition: global.knative
   - name: subscription-controller-knative

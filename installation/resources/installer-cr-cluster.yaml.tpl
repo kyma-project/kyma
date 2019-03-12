@@ -38,6 +38,8 @@ spec:
       namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
+    - name: "natss-knative-provisioner"
+      namespace: "knative-eventing"
     - name: "event-bus"
       namespace: "kyma-system"
     - name: "application-connector-ingress"

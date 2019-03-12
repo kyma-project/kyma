@@ -88,8 +88,8 @@ spec:
       serviceAccountName: natss-controller
       containers:
         - name: controller
-          image: {{ .Values.controller.image.location }}
-          imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          image: {{ .Values.global.controller.image.location }}
+          imagePullPolicy: {{ .Values.global.controller.image.pullPolicy }}
           env:
           - name: SYSTEM_NAMESPACE
             valueFrom:
@@ -166,8 +166,8 @@ spec:
       serviceAccountName: natss-dispatcher
       containers:
         - name: dispatcher
-          image: {{ .Values.dispatcher.image.location }}
-          imagePullPolicy: {{ .Values.dispatcher.image.pullPolicy }}
+          image: {{ .Values.global.dispatcher.image.location }}
+          imagePullPolicy: {{ .Values.global.dispatcher.image.pullPolicy }}
           env:
           - name: SYSTEM_NAMESPACE
             valueFrom:
