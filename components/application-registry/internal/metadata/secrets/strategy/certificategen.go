@@ -69,5 +69,9 @@ func (svc *certificateGen) makeCertificateGenMap(commonName string, key, certifi
 }
 
 func (svc *certificateGen) readCertificateGenMap(data map[string][]byte) (commonName, certificate string) {
-	return string(data[CertificateGenCNKey]), base64.StdEncoding.EncodeToString(data[CertificateGenCertKey])
+	return string(data[CertificateGenCNKey]), encodeCertificateToString(data[CertificateGenCertKey])
+}
+
+func encodeCertificateToString(cert []byte) string {
+	return base64.StdEncoding.EncodeToString(cert)
 }
