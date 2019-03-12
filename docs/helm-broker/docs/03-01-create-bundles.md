@@ -3,11 +3,6 @@ title: Create a bundle
 type: Details
 ---
 
-[bind]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#binding  "OSB Spec Binding"
-[service-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object "OSB Spec Service Objects"
-[service-metadata]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/profile.md#service-metadata "OSB Spec Service Metadata"
-[plan-objects]: https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object "OSB Spec Plan Objects"
-
 Bundles which the Helm Broker uses must have a specific structure. These are the obligatory files that you must include in your bundle:
 
 ```
@@ -47,73 +42,62 @@ For details about the particular files, read the following sections.
 
 ## meta.yaml file
 
-The `meta.yaml` file contains information about the bundle. Set the following fields to create service objects which comply with the [Open Service Broker API][service-objects].
+The `meta.yaml` file contains information about the bundle. Set the following fields to create a file which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
 
 |      Field Name     | Required |                                                                  Description                                                                           |
 |:-------------------:|:--------:|:------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|         **name**        |   YES   |                           The bundle name.                         |
-|       **version**       |   YES   | The bundle version. It is a broker service identifier.  |
-|          **id**         |   YES   |            A broker service identifier.           |
-|     **description**     |   YES   |                  A short description of the service.                  |
-|         **tags**        |   NO  |                                    The keywords describing the provided service, separated by commas.                                                          |
-|       **bindable**      |   NO  |                                    The bindable field described in the [Open Service Broker API][service-metadata].                                          |
-|     **displayName**     |   YES   |                                    The **displayName** field described in the [Open Service Broker API][service-metadata].                                       |
-| **providerDisplayName** |   NO  |                                The **providerDisplayName** field described in the [Open Service Broker API][service-metadata].                                   |
-|   **longDescription**   |   NO  |                                  The **longDescription** field described in the [Open Service Broker API][service-metadata].                                     |
-|   **documentationURL**  |   NO  |                                  The **documentationURL** field described in the [Open Service Broker API][service-metadata].                                    |
-|      **supportURL**     |   NO  |                                     The **supportURL** field described in the [Open Service Broker API][service-metadata].                                       |
-|       **imageURL**      |   NO  |     The **imageURL** field described in the [Open Service Broker API][service-metadata]. You must provide the image as an SVG.          |
-|       **labels**        |   NO  |     To organize your project, add arbitrary labels as key/value pairs. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
-| **bindingsRetrievable** |   NO  |     The **bindingRetrievable** field specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
-|   **planUpdatable**     |   NO  |     The **planUpdatable** field specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
-|       **requires**      |   NO  |     The **requires** field defines a list of permissions the user must grant to the instances of this service.          |
-| **provisionOnlyOnce**   |   NO  |     Defines that the bundle can be provisioned only once in a given Namespace. The default value is `false` |
+|         **name**        |   YES   | A name of the bundle.  |
+|       **version**       |   YES   | A version of the bundle. It is a broker service identifier.  |
+|          **id**         |   YES   | A broker service identifier.  |
+|     **description**     |   YES   | A short description of the service. |
+|         **tags**        |   NO  |   Keywords describing the provided service, separated by commas.     |
+|       **bindable**      |   NO  |   A field that specifies whether you can bind a given bundle. |
+|     **displayName**     |   YES   |                                        |
+| **providerDisplayName** |   NO  |                                          |
+|   **longDescription**   |   NO  |                   |
+|   **documentationURL**  |   NO  |          |
+|      **supportURL**     |   NO  |       |
+|       **imageURL**      |   NO  |     You must provide the image as an SVG.          |
+|       **labels**        |   NO  |  Key/value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
+| **bindingsRetrievable** |   NO  | A field that specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
+|   **planUpdatable**     |   NO  |  A field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
+|       **requires**      |   NO  |  A list of permissions the user must grant to the instances of this service. |
+| **provisionOnlyOnce**   |   NO  | A field that specifies whether the bundle can be provisioned only once in a given Namespace. The default value is `false`. |
 
 > **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`.
 
-## Chart directory
+## chart directory
 
-In the mandatory `chart` directory, create a folder with the same name as your chart. Put all the files related to your chart in this folder. The system supports chart version 2.6.
-
-If you are not familiar with the chart definitions, see the [Charts](https://github.com/kubernetes/helm/blob/release-2.6/docs/charts.md) specification.
+In the `chart` directory, create a folder with the same name as your chart. Put all the files related to your chart in this folder. The system supports chart version 2.6.
 
 > **NOTE:** Helm Broker uses the [helm wait](https://github.com/kubernetes/helm/blob/release-2.6/docs/using_helm.md#helpful-options-for-installupgraderollback) option to ensure that all the resources that a chart creates are available. If you set your Deployment **replicas** to `1`, you must set **maxUnavailable** to `0` as a part of the rolling update strategy.
 
-## Plans directory
+## plans directory
 
-The `plans` directory must contain at least one plan.
-A directory for a specific plan must contain the `meta.yaml` file. Other files are not mandatory.
+The `plans` directory must contain at least one plan. Each plan must contain the `meta.yaml` file. Other files are not mandatory.
 
-* The meta.yaml file - The `meta.yaml` file contains information about a bundle plan. Set the following fields to create the plan objects, which comply with the [Open Service Broker API][plan-objects].
+* `meta.yaml` file - contains information about a given plan. Set the following fields to create the plan objects, which comply with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object).
 
 |  Field Name | Required |                                             Description                                                    |
 |:-----------:|:--------:|:----------------------------------------------------------------------------------------------------------:|
-|     **name**    |   true   |     The plan name. It has the same restrictions as defined in the [Open Service Broker API][plan-objects].    |
-|      **id**     |   true   |      The plan ID. It has the same restrictions as defined in the [Open Service Broker API][plan-objects].     |
-| **description** |   true   | The plan description. It has the same restrictions as defined in the [Open Service Broker API][plan-objects]. |
-| **displayName** |   true   | The plan display name. It has the same restrictions as defined in the [Open Service Broker API][plan-objects]. |
-|  **bindable**   |   false  | The plan bindable attribute. It has the same restrictions as defined in the [Open Service Broker API][plan-objects].    |
-|     **free**    |   false  | The attribute which specifies whether the instance is free or not. The default value is `false`.    |
+|     **name**    |   YES   |     A name of the plan.   |
+|      **id**     |   YES   |     An ID of the plan. |
+| **description** |   YES   | A description of the plan. |
+| **displayName** |   YES   | A display name of the plan. |
+|  **bindable**   |   NO  | A field that specifies whether you can bind an instance of the plan.  |
+|     **free**    |   NO  | An attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
-* The bind.yaml file - The `bind.yaml` file contains the information required for the [binding action][bind] in a specific plan.
-If you defined in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file.
-For more information about the content of the `bind.yaml` file, see the [Binding bundles](#configuration-binding-bundles) document.
+* `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-bundles) document.
 
-* The values.yaml file - The `values.yaml` file provides the default configuration values in a concrete plan for the chart definition located in the `chart` directory.
-This file is not required.
-For more information about the content of the `values.yaml` file, see the [Values Files](https://github.com/kubernetes/helm/blob/release-2.6/docs/chart_template_guide/values_files.md) specification.
+* `values.yaml` file - provides the default configuration values in a given plan for the chart definition located in the `chart` directory. For more information, see the [values files](https://github.com/kubernetes/helm/blob/release-2.6/docs/chart_template_guide/values_files.md) specification.
 
-* The create-instance-schema.json file - The `create-instance-schema.json` file contains a schema used to define the parameters for a provision operation of the ServiceInstance. Each input parameter is expressed as a property within a JSON object.
-This file is not required.
-For more information about the content of the `create-instance-schema.json` file, see the [Schemas](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
+* `create-instance-schema.json` file - contains a schema that defines parameters for a provision operation of a ServiceInstance. Each input parameter is expressed as a property within a JSON object.
 
-* The update-instance-schema.json file - The `update-instance-schema.json` file contains a schema used to define the parameters for an update operation of the ServiceInstance. Each input parameter is expressed as a property within a JSON object.
-This file is not required.
-For more information about the content of the `update-instance-schema.json` file, see the [Schemas](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
+* `update-instance-schema.json` file - contains a schema that defines parameters for an update operation of a ServiceInstance. Each input parameter is expressed as a property within a JSON object.
 
-* The bind-instance-schema.json file - The `bind-instance-schema.json` file contains a schema used to define the parameters for a bind operation. Each input parameter is expressed as a property within a JSON object.
-This file is not required.
-For more information about the content of the `bind-instance-schema.json` file, see the [Schemas](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
+* `bind-instance-schema.json` file - contains a schema that defines parameters for a bind operation. Each input parameter is expressed as a property within a JSON object.
+
+>**NOTE:** For more information about schemas, see [this](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
 
 ## Troubleshooting
 
