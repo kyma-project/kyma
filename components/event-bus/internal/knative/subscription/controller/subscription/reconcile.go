@@ -206,7 +206,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 	knativeSubs, err := r.knativeLib.GetSubscription(knativeSubsName, namespace)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
-	} else if err == nil && knativeSubs != nil {
+	} else if err == nil {
 		err = r.knativeLib.DeleteSubscription(knativeSubs.Name, knativeSubs.Namespace)
 		if err != nil {
 			return err
@@ -218,7 +218,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 	knativeChannel, err := r.knativeLib.GetChannel(channelName, namespace)
 	if err != nil && !errors.IsNotFound(err) {
 		return err
-	} else if err == nil && knativeChannel != nil {
+	} else if err == nil {
 		if knativeChannel.Spec.Subscribable == nil || (len(knativeChannel.Spec.Subscribable.Subscribers) == 1 && knativeSubs != nil &&
 			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == *knativeSubs.Spec.Subscriber.DNSName) {
 			err = r.knativeLib.DeleteChannel(channelName, namespace)
