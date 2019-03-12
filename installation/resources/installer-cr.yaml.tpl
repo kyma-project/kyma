@@ -16,6 +16,8 @@ spec:
       namespace: "istio-system"
     - name: "knative"
       namespace: "istio-system" # KNative comes with namespaces hardcoded so this one is only for installer
+    - name: "xip-patch"
+      namespace: "kyma-installer"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     # - name: "prometheus-operator"
@@ -40,6 +42,8 @@ spec:
       namespace: "kyma-system"
     - name: "application-connector-ingress"
       namespace: "kyma-system"
+    - name: "application-connector-helper"
+      namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-integration"
     #- name: "ark"

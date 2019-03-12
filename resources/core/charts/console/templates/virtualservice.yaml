@@ -12,7 +12,7 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   hosts:
-  - console.{{ .Values.global.domainName }}
+  - console.{{ .Values.global.ingress.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:

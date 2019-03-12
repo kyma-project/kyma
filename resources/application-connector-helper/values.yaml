@@ -3,7 +3,5 @@ containerRegistry:
 xip_patch:
   dir: develop/
   version: "d20b1c29"
-
-global:
-  isLocalEnv: false
-  knative: false
+labelSelector: "application-connector-lb=true"
+labelNamespace: kyma-system
