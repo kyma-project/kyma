@@ -23,7 +23,8 @@ The Connector Service has the following parameters, that can be set through the 
 - **runtimesInfoURL** - URL at which management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
 - **group** - Group for which certificates are generated. If the chart does not provide a default value, you must specify it in the request header of the request sent to the token endpoint.
 - **tenant** - Tenant for which certificates are generated. If the chart does not provide the default value, you must specify it in the header of the request sent to the token endpoint.
-- **certificateValidityTime** - Time after which the certificates issued by the Connector Service expire. Allowed time units are: `d`, `h`, `m` for days, hours and minutes. You can use only one unit at a time. The default value is `92d`.
+- **appCertificateValidityTime** - Time until which the certificates that the service issues for applications are valid. The default value is 90 days.
+- **runtimeCertificateValidityTime** - Time until which the certificates that the service issues for runtimes are valid. The default value is 90 days.
 - **central** - Determines whether the Connector Service works in the central mode.
 - **revocationConfigMapName** - Name of the ConfigMap containing the revoked certificates list.
 
