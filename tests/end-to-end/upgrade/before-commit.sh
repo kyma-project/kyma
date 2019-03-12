@@ -43,7 +43,7 @@ if [[ "$1" == "$CI_FLAG" ]]; then
 	# build binary statically
 	buildEnv="env CGO_ENABLED=0"
 fi
-${buildEnv} go build -o upgrade ./main.go
+${buildEnv} go build -o e2e-upgrade-test ./main.go
 goBuildResult=$?
 if [[ ${goBuildResult} != 0 ]]; then
     echo -e "${RED}✗ go build ${NC}\n $goBuildResult${NC}"

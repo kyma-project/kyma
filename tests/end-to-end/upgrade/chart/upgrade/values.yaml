@@ -1,0 +1,6 @@
+containerRegistry:
+  path: eu.gcr.io/kyma-project
+
+image:
+  dir: develop/
+  tag: tbd

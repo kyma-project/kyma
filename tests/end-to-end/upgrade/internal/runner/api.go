@@ -7,6 +7,5 @@ type (
 	UpgradeTest interface {
 		CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error
 		TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error
-		Name() string
 	}
 )

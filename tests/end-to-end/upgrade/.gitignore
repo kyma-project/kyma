@@ -100,5 +100,5 @@ fabric.properties
 .glide/
 
 *.iml
-upgrade
+e2e-upgrade-test
 /vendor
