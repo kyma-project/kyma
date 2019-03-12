@@ -21,23 +21,23 @@ import (
 const (
 	gracefulTimeout = time.Second * 10
 	runnerLabelName = "upgrade.tester.kyma-project.io"
-	regexSanitize   = "[^a-z0-9]([^-a-z0-9]*[^a-z0-9])?"
+	// negative value for regex used for name validation in k8s:
+	// https://github.com/kubernetes/apimachinery/blob/98853ca904e81a25e2000cae7f077dc30f81b85f/pkg/util/validation/validation.go#L110
+	regexSanitize = "[^a-z0-9]([^-a-z0-9]*[^a-z0-9])?"
 )
 
-// NamespaceCreator has methods requried to create ns.
+// NamespaceCreator has methods required to create k8s ns.
 type NamespaceCreator interface {
 	Create(*v1.Namespace) (*v1.Namespace, error)
 }
 
 // TestRunner executes registered tests
 type TestRunner struct {
-	log       *logrus.Entry
-	nsCreator NamespaceCreator
-
+	log                 *logrus.Entry
+	nsCreator           NamespaceCreator
 	tests               map[string]UpgradeTest
 	maxConcurrencyLevel int
-
-	sanitizeRegex *regexp.Regexp
+	sanitizeRegex       *regexp.Regexp
 }
 
 // NewTestRunner is a constructor for TestRunner
@@ -162,6 +162,7 @@ func (r *TestRunner) executeTask(task taskFn, stopCh <-chan struct{}, header, ta
 	sink.Reset() // if task succeeded then do not print data logged internally in that test
 	taskLog.Infof("%s End with success [start time: %v, duration: %v]", fullHeader, startTime.Format(time.RFC1123), time.Since(startTime))
 	fmt.Fprint(originalOutput, sink.String())
+
 	return false
 }
 
@@ -193,6 +194,7 @@ func (r *TestRunner) ensureNamespaceExists(name string) error {
 	if err != nil && !apierrors.IsAlreadyExists(err) {
 		return err
 	}
+
 	return nil
 }
 
@@ -221,7 +223,7 @@ func (r *TestRunner) wgWait(stopCh <-chan struct{}, wg *sync.WaitGroup) {
 	case <-done:
 		r.log.Debug("All task finished.")
 	case <-stopCh:
-		r.log.Infof("Stop channel called. Waiting %v for task to finish their job", gracefulTimeout)
+		r.log.Infof("Stop channel called. Waiting %v for task to finish their job.", gracefulTimeout)
 		select {
 		case <-done:
 		case <-time.After(gracefulTimeout):

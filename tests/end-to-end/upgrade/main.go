@@ -61,7 +61,7 @@ func main() {
 		"HelloWorldBackupTest": helloworld.NewTest(k8sCli.AppsV1()),
 	}
 
-	// Execute action
+	// Execute requested action
 	testRunner, err := runner.NewTestRunner(log, k8sCli.CoreV1().Namespaces(), tests, cfg.MaxConcurrencyLevel)
 	fatalOnError(err, "while creating test runner")
 
