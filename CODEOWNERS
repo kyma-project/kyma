@@ -328,6 +328,9 @@
 # E2E Backup Tests
 /tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
+# E2E Upgrade Tests
+/tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+
 # Cluster Users Test
 /tests/cluster-users-test @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
