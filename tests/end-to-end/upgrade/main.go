@@ -39,8 +39,7 @@ func main() {
 	err := envconfig.InitWithPrefix(&cfg, "APP")
 	fatalOnError(err, "while reading configuration from environment variables")
 
-	log := logrus.New()
-	log.SetLevel(logrus.Level(cfg.Logger.Level))
+	log := logger.New(&cfg.Logger)
 
 	// Set up signals so we can handle the first shutdown signal gracefully
 	stopCh := signal.SetupChannel()
@@ -80,7 +79,7 @@ func main() {
 
 func fatalOnError(err error, context string) {
 	if err != nil {
-		logrus.Fatal(fmt.Sprintf("%s: %v", err, context))
+		logrus.Fatal(fmt.Sprintf("%s: %v", context, err))
 	}
 }
 

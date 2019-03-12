@@ -12,11 +12,12 @@ spec:
   containers:
   - name: runner
     image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
+    imagePullPolicy: "{{ .Values.image.pullPolicy}}"
     command: ["e2e-upgrade-test"]
     args: ["--action", "executeTests"]
     env:
     - name: APP_MAX_CONCURRENCY_LEVEL
       value: "1"
-    - name: APP_Logger_LEVEL
+    - name: APP_LOGGER_LEVEL
       value: "info"
   restartPolicy: Never

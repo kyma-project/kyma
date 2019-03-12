@@ -21,6 +21,9 @@ metadata:
     heritage: "{{ .Release.Service }}"
 rules:
 - apiGroups: [""]
+  resources: ["", "namespaces"]
+  verbs: ["create"]
+- apiGroups: ["apps"]
   resources: ["deployments", "namespaces"]
   verbs: ["create", "get"]
 ---

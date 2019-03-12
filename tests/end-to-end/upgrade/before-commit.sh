@@ -43,6 +43,7 @@ if [[ "$1" == "$CI_FLAG" ]]; then
 	# build binary statically
 	buildEnv="env CGO_ENABLED=0"
 fi
+echo "? go build"
 ${buildEnv} go build -o e2e-upgrade-test ./main.go
 goBuildResult=$?
 if [[ ${goBuildResult} != 0 ]]; then
@@ -86,6 +87,7 @@ if [[ ${buildLintResult} != 0 ]]; then
 	exit 1
 fi
 
+echo "? golint"
 golintResult=$(echo "${goFilesToCheck}" | xargs -L1 ./golint-vendored)
 rm golint-vendored
 
@@ -105,6 +107,7 @@ if [[ ${buildGoImportResult} != 0 ]]; then
 	exit 1
 fi
 
+echo "? goimports"
 goImportsResult=$(echo "${goFilesToCheck}" | xargs -L1 ./goimports-vendored -w -l)
 rm goimports-vendored
 
@@ -117,8 +120,9 @@ fi
 ##
 # GO VET
 ##
-packagesToVet=("./internal/..." "./pkg/...")
 
+echo "? go build vet"
+packagesToVet=("./internal/..." "./pkg/...")
 for vPackage in "${packagesToVet[@]}"; do
 	vetResult=$(go vet ${vPackage})
 	if [[ $(echo ${#vetResult}) != 0 ]]; then

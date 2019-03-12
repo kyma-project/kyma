@@ -4,3 +4,4 @@ containerRegistry:
 image:
   dir: pr/tests/
   version: PR-3110
+  pullPolicy: "IfNotPresent"
