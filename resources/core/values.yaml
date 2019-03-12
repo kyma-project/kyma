@@ -55,7 +55,7 @@ global:
     dir:
     version: 0.8.0-rc1
   kubeless_integration_tests:
-    dir:
+    dir: tests/
     version: 0.8.0-rc1
   kubeless_tests:
     dir: 
