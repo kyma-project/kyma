@@ -101,7 +101,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		// The object is being deleted
 		if util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			// our finalizer is present, so lets handle our external dependency
-			if err := r.deleteExternalDependency(ctx, knativeSubsName, knativeSubsURI, knativeChannelName, knativeSubsNamespace); err != nil {
+			if err := r.deleteExternalDependency(ctx, knativeSubsName, knativeChannelName, knativeSubsNamespace); err != nil {
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried
 				return false, err
@@ -199,7 +199,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	return false, nil
 }
 
-func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsName string, knativeSubsURI string, channelName string, namespace string) error {
+func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsName string, channelName string, namespace string) error {
 	log.Info("Deleting the external dependencies")
 
 	// In case Knative Subscription exists, delete it.
@@ -219,8 +219,8 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 	if err != nil && !errors.IsNotFound(err) {
 		return err
 	} else if err == nil && knativeChannel != nil {
-		if knativeChannel.Spec.Subscribable == nil || (len(knativeChannel.Spec.Subscribable.Subscribers) == 1 &&
-			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == knativeSubsURI) {
+		if knativeChannel.Spec.Subscribable == nil || (len(knativeChannel.Spec.Subscribable.Subscribers) == 1 && knativeSubs != nil &&
+			knativeChannel.Spec.Subscribable.Subscribers[0].SubscriberURI == *knativeSubs.Spec.Subscriber.DNSName) {
 			err = r.knativeLib.DeleteChannel(channelName, namespace)
 			if err != nil {
 				return err
