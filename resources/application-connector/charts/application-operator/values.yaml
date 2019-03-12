@@ -7,6 +7,7 @@ controller:
     syncPeriod: 30
     installationTimeout: 240
 
+
 tests:
   enabled: true
   image:
