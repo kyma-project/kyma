@@ -11,7 +11,7 @@ sample-bundle-repository
   ├── index.yaml                   # A file which defines available bundles
 ```
 
-This `index.yaml` file must have the following structure:
+Follow the `{bundle_name}-{bundle_version}` convention to name your bundles. In the `index.yaml` file, provide an entry for every single bundle. The `index.yaml` file must have the following structure:
 
 ```
 apiVersion: v1
@@ -21,21 +21,3 @@ entries:
       description: {bundle_description}
       version: {bundle_version}
 ```
-
-See the example `index.yaml` file for the Redis bundle:
-
-```
-apiVersion: v1
-entries:
-  redis:
-    - name: redis
-      description: Redis service
-      version: 0.0.1
-```
-
-
-
-A `{bundle_name}-{bundle_version}.tgz` file for each bundle version defined in the `yaml` file. The `.tgz` file is an archive of your bundle's directory.
-
-
-The Helm Broker fetches bundle definitions from HTTP servers defined in the `helm-repos-urls` ConfigMap.

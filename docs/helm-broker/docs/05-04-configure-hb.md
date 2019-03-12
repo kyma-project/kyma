@@ -2,7 +2,7 @@
 title: Configuration
 ---
 
-By default, the Helm Broker fetches bundles from the newest release of the [`bundles`](https://github.com/kyma-project/bundles/releases) repository. You can also configure the Helm Broker to fetch bundle definitions from any remote HTTP server. Follow these steps:
+By default, the Helm Broker fetches bundles from the newest release of the [`bundles`](https://github.com/kyma-project/bundles/releases) repository. You can also configure the Helm Broker to fetch bundle definitions from HTTP servers defined in the `helm-repos-urls` ConfigMap. Follow these steps:
 
 1. Create a remote repository with your bundles definitions.
 2. Install Kyma on Minikube. See [this](/root/kyma#installation-install-kyma-locally-from-the-release) document to learn how.
