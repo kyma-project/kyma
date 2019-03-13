@@ -20,14 +20,14 @@ global:
     dir: develop/
     version: b1ef90ef
   application_operator_tests:
-    dir: develop/
-    version: 6cb16c1c
+    dir: pr/
+    version: PR-3139
   connector_service:
     dir: develop/
     version: 07b5422e
   connector_service_tests:
-    dir: develop/
-    version: 07b5422e
+    dir: pr/
+    version: PR-3139
   connection_token_handler:
     dir: develop/
     version: fa0de1b9
@@ -47,8 +47,8 @@ global:
     dir: develop/
     version: 07fabb90
   application_registry_tests:
-    dir: develop/
-    version: fd308559
+    dir: pr/
+    version: PR-3139
   application_broker:
     dir: develop/
     version: f78529c4
