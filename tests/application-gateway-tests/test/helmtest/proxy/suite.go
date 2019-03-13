@@ -189,11 +189,8 @@ func (ts *TestSuite) GetTestRunnerLogs(t *testing.T) {
 func (ts *TestSuite) DeleteTestRunnerPod(t *testing.T) {
 	err := ts.podClient.Delete(ts.testRunnerName, &metav1.DeleteOptions{})
 	if err != nil {
-		t.Log(err)
-
 		if !errors.IsNotFound(err) {
-			// TODO some retry?
-			t.Log("Failed to delete test runner")
+			t.Logf("Failed to delete test runner: %s", err.Error())
 			t.FailNow()
 		}
 	}

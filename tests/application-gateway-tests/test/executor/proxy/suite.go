@@ -16,11 +16,9 @@ import (
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
 
-	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -41,7 +39,6 @@ type TestSuite struct {
 	k8sClient         *kubernetes.Clientset
 	podClient         corev1.PodInterface
 	serviceClient     corev1.ServiceInterface
-	applicationClient *versioned.Clientset
 	config            executor.TestConfig
 	appMockServer     *mock.AppMockServer
 	mockServiceName   string

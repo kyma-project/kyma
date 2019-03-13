@@ -20,35 +20,33 @@ const (
 )
 
 type AppRegistryClient struct {
-	t          *testing.T
 	httpClient *http.Client
 
 	appRegistryURL string
 	application    string
 }
 
-func NewAppRegistryClient(t *testing.T, registryURL, application string) *AppRegistryClient {
+func NewAppRegistryClient(registryURL, application string) *AppRegistryClient {
 	return &AppRegistryClient{
-		t:              t,
 		appRegistryURL: registryURL,
 		application:    application,
 		httpClient:     &http.Client{},
 	}
 }
 
-func (arc *AppRegistryClient) CreateNotSecuredAPI(targetURL string) string {
-	return arc.createAPI(arc.baseAPI(targetURL))
+func (arc *AppRegistryClient) CreateNotSecuredAPI(t *testing.T, targetURL string) string {
+	return arc.createAPI(t, arc.baseAPI(targetURL))
 }
 
-func (arc *AppRegistryClient) CreateBasicAuthSecuredAPI(targetURL, username, password string) string {
+func (arc *AppRegistryClient) CreateBasicAuthSecuredAPI(t *testing.T, targetURL, username, password string) string {
 	api := arc.baseAPI(targetURL).WithBasicAuth(username, password)
-	return arc.createAPI(api)
+	return arc.createAPI(t, api)
 }
 
-func (arc *AppRegistryClient) CreateOAuthSecuredAPI(targetURL, authURL, clientID, clientSecret string) string {
+func (arc *AppRegistryClient) CreateOAuthSecuredAPI(t *testing.T, targetURL, authURL, clientID, clientSecret string) string {
 	api := arc.baseAPI(targetURL).WithOAuth(authURL, clientID, clientSecret)
 
-	return arc.createAPI(api)
+	return arc.createAPI(t, api)
 }
 
 func (arc *AppRegistryClient) baseAPI(targetURL string) *API {
@@ -66,31 +64,31 @@ func (arc *AppRegistryClient) createServiceDetails(api *API) ServiceDetails {
 	}
 }
 
-func (arc *AppRegistryClient) createAPI(api *API) string {
+func (arc *AppRegistryClient) createAPI(t *testing.T, api *API) string {
 	serviceDetails := arc.createServiceDetails(api)
 
 	data, err := json.Marshal(serviceDetails)
-	require.NoError(arc.t, err)
+	require.NoError(t, err)
 
 	req, err := http.NewRequest(http.MethodPost, fmt.Sprintf(urlFormat, arc.appRegistryURL, arc.application), bytes.NewBuffer(data))
-	require.NoError(arc.t, err)
+	require.NoError(t, err)
 
 	response, err := arc.httpClient.Do(req)
-	require.NoError(arc.t, err)
-	util.RequireStatus(arc.t, http.StatusOK, response)
+	require.NoError(t, err)
+	util.RequireStatus(t, http.StatusOK, response)
 
 	var idResponse PostServiceResponse
 	err = json.NewDecoder(response.Body).Decode(&idResponse)
-	require.NoError(arc.t, err)
+	require.NoError(t, err)
 
 	return idResponse.ID
 }
 
-func (arc *AppRegistryClient) CleanupService(serviceId string) {
+func (arc *AppRegistryClient) CleanupService(t *testing.T, serviceId string) {
 	req, err := http.NewRequest(http.MethodDelete, fmt.Sprintf(deleteURLFormat, arc.appRegistryURL, arc.application, serviceId), nil)
-	require.NoError(arc.t, err)
+	require.NoError(t, err)
 
 	response, err := arc.httpClient.Do(req)
-	require.NoError(arc.t, err)
-	util.RequireStatus(arc.t, http.StatusNoContent, response)
+	require.NoError(t, err)
+	util.RequireStatus(t, http.StatusNoContent, response)
 }

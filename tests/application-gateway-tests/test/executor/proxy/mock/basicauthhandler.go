@@ -10,6 +10,10 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	AuthorizationHeader = "Authorization"
+)
+
 type basicAuthHandler struct {
 	logger *log.Entry
 }
@@ -33,7 +37,7 @@ func (bah *basicAuthHandler) BasicAuth(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authorizationHeader := r.Header.Get("Authorization")
+	authorizationHeader := r.Header.Get(AuthorizationHeader)
 
 	encodedCredentials := strings.TrimPrefix(authorizationHeader, "Basic ")
 	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)

@@ -19,13 +19,14 @@ func TestProxyService(t *testing.T) {
 	defer testSuit.Cleanup(t)
 	testSuit.Setup(t)
 
-	client := registry.NewAppRegistryClient(t, "http://application-registry-external-api:8081", testSuit.ApplicationName())
+	client := registry.NewAppRegistryClient("http://application-registry-external-api:8081", testSuit.ApplicationName())
 
 	t.Run("no-auth api test", func(t *testing.T) {
-		apiId := client.CreateNotSecuredAPI(testSuit.GetMockServiceURL())
+		apiId := client.CreateNotSecuredAPI(t, testSuit.GetMockServiceURL())
 		log.Infoln("Created service with apiId: ", apiId)
 		defer func() {
-			client.CleanupService(apiId)
+			log.Infof("Cleaning up service %s", apiId)
+			client.CleanupService(t, apiId)
 		}()
 
 		log.Infoln("Labeling tests pod with denier label")
@@ -42,11 +43,11 @@ func TestProxyService(t *testing.T) {
 		userName := "myUser"
 		password := "mySecret"
 
-		apiId := client.CreateBasicAuthSecuredAPI(testSuit.GetMockServiceURL()+"auth/basic/", userName, password)
+		apiId := client.CreateBasicAuthSecuredAPI(t, testSuit.GetMockServiceURL()+"auth/basic/", userName, password)
 		log.Infof("Created service with apiId: %s", apiId)
 		defer func() {
 			log.Infof("Cleaning up service %s", apiId)
-			client.CleanupService(apiId)
+			client.CleanupService(t, apiId)
 		}()
 
 		log.Infoln("Labeling tests pod with denier label")
