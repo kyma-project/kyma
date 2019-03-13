@@ -50,8 +50,8 @@ global:
     dir: pr/
     version: PR-3139
   application_broker:
-    dir: develop/
-    version: f78529c4
+    dir: pr/
+    version: PR-3139
 
 connectivity_certs_controller:
   enabled: false
