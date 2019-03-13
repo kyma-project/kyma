@@ -3,7 +3,7 @@ title: ClusterMicroFrontend
 type: Custom Resource
 ---
 
-The `clustermicrofrontends.ui.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to extend the Kyma Console. It allows you to extend the Console for the entire Cluster. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `clustermicrofrontends.ui.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to extend the Kyma Console. It allows you to extend the Console for the entire Cluster. ClusterMicroFrontends get added to console automatically based on the yaml. In order to avoid naming colissions with the core system, the root node gets prefixed with `cmf-` in the URL. Additionally `navigationContext` and `viewGroup` [Node configuration](https://github.com/kyma-project/luigi/blob/master/docs/navigation-parameters-reference.md#node-parameters) options are set, to allow simple navigation.To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
 kubectl get crd clustermicrofrontends.ui.kyma-project.io -o yaml
