@@ -31,9 +31,8 @@ const (
 	mockSelectorKey    = "app"
 	mockSelectorFormat = "%s-mock-service"
 
-	defaultCheckInterval   = 2 * time.Second
-	apiServerAccessTimeout = 60 * time.Second
-	testRunnerTimeout      = 300 * time.Second
+	defaultCheckInterval = 2 * time.Second
+	testRunnerTimeout    = 300 * time.Second
 
 	applicationEnv     = "APPLICATION"
 	namespaceEnv       = "NAMESPACE"
@@ -44,7 +43,6 @@ const (
 
 type TestSuite struct {
 	httpClient *http.Client
-	k8sClient  *kubernetes.Clientset
 	podClient  corev1.PodInterface
 	config     helmtest.TestConfig
 
@@ -64,7 +62,6 @@ func NewTestSuite(t *testing.T) *TestSuite {
 
 	return &TestSuite{
 		httpClient:        &http.Client{},
-		k8sClient:         coreClientset,
 		podClient:         coreClientset.CoreV1().Pods(config.Namespace),
 		config:            config,
 		testRunnerName:    fmt.Sprintf("%s-tests-test-runner", config.Application),
@@ -73,8 +70,6 @@ func NewTestSuite(t *testing.T) *TestSuite {
 }
 
 func (ts *TestSuite) Setup(t *testing.T) {
-	ts.WaitForAccessToAPIServer(t)
-
 	log.Infoln("Creating Test Runner pod.")
 	ts.CreateTestRunnerPod(t)
 }
@@ -82,22 +77,6 @@ func (ts *TestSuite) Setup(t *testing.T) {
 func (ts *TestSuite) Cleanup(t *testing.T) {
 	log.Infoln("Cleaning up...")
 	ts.DeleteTestRunnerPod(t)
-}
-
-// WaitForAccessToAPIServer waits for access to API Server which might be delayed by initialization of Istio sidecar
-func (ts *TestSuite) WaitForAccessToAPIServer(t *testing.T) {
-	err := tools.WaitForFunction(defaultCheckInterval, apiServerAccessTimeout, func() bool {
-		log.Infoln("Trying to access API Server...")
-		_, err := ts.k8sClient.ServerVersion()
-		if err != nil {
-			log.Errorf(err.Error())
-			return false
-		}
-
-		return true
-	})
-
-	require.NoError(t, err)
 }
 
 func (ts *TestSuite) CreateTestRunnerPod(t *testing.T) {
@@ -142,7 +121,7 @@ func (ts *TestSuite) WaitForTestRunnerToFinish(t *testing.T) *v1.ContainerStatus
 			return false
 		}
 
-		if testsStatus, finished = ts.isIfPodFinished(testRunnerPod); !finished {
+		if testsStatus, finished = ts.isPodFinished(testRunnerPod); !finished {
 			return false
 		}
 
@@ -155,7 +134,7 @@ func (ts *TestSuite) WaitForTestRunnerToFinish(t *testing.T) *v1.ContainerStatus
 	return testsStatus
 }
 
-func (ts *TestSuite) isIfPodFinished(pod *v1.Pod) (*v1.ContainerStatus, bool) {
+func (ts *TestSuite) isPodFinished(pod *v1.Pod) (*v1.ContainerStatus, bool) {
 	for _, c := range pod.Status.ContainerStatuses {
 		if c.Name == ts.testRunnerName {
 			if c.State.Terminated != nil {
@@ -182,7 +161,6 @@ func (ts *TestSuite) GetTestRunnerLogs(t *testing.T) {
 	strLogs = strings.Replace(strLogs, "\\n", "\n", -1)
 	strLogs = strings.Replace(strLogs, "\\t", "\t", -1)
 
-	// TODO - enhance logs displaying
 	log.Infof(strLogs)
 }
 
@@ -190,6 +168,7 @@ func (ts *TestSuite) DeleteTestRunnerPod(t *testing.T) {
 	err := ts.podClient.Delete(ts.testRunnerName, &metav1.DeleteOptions{})
 	if err != nil {
 		if !errors.IsNotFound(err) {
+			// TODO some retry?
 			t.Logf("Failed to delete test runner: %s", err.Error())
 			t.FailNow()
 		}
