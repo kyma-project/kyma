@@ -23,6 +23,8 @@ spec:
         app: {{ .Values.global.natsStreaming.fullname }}
         release: {{ .Release.Name }}
         rand: {{ randAlpha 6 }}
+        kyma-grafana: enabled
+        kyma-alerts: enabled
     spec:
       initContainers:
       - name: prepare-config
