@@ -117,6 +117,11 @@ function configure_sidecar_injector() {
   fi
 }
 
+function restart_sidecar_injector() {
+  INJECTOR_POD_NAME=$(kubectl get pods -n istio-system -l istio=sidecar-injector -o=name)
+  kubectl delete "${INJECTOR_POD_NAME}"
+}
+
 function check_requirements() {
   while read crd; do
     echo "    Require CRD crd $crd"
@@ -132,6 +137,7 @@ require_istio_version
 require_mtls_disabled
 check_requirements
 configure_sidecar_injector
+restart_sidecar_injector
 run_all_patches
 remove_not_used
 label_namespaces
