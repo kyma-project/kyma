@@ -4,6 +4,7 @@ metadata:
   name: test-{{.Release.Name }}-event-service-acceptance
   annotations:
     "helm.sh/hook": test-success
+    "sidecar.istio.io/inject": "false"
   labels:
     "helm-chart-test": "true"
 spec:
@@ -12,11 +13,10 @@ spec:
       image: {{ .Values.global.eventServiceTestsImage }}
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
       env:
-      - name: EVENT_SERVICE_URL
-        value: http://{{.Release.Name }}-event-service-external-api.{{ .Release.Namespace }}.svc.cluster.local:8081
-      - name: NAMESPACE
-        value: {{ .Release.Namespace }}
-      - name: APPLICATION
-        value: {{ .Release.Name }}
+        - name: EVENT_SERVICE_URL
+          value: http://{{.Release.Name }}-event-service-external-api.{{ .Release.Namespace }}.svc.cluster.local:8081
+        - name: NAMESPACE
+          value: {{ .Release.Namespace }}
+        - name: APPLICATION
+          value: {{ .Release.Name }}
   restartPolicy: Never
-  
