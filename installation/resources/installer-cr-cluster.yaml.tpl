@@ -12,6 +12,8 @@ spec:
   components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
+    - name: "istio-init"
+      namespace: "istio-system"
     - name: "istio"
       namespace: "istio-system"
     - name: "knative"
@@ -42,6 +44,8 @@ spec:
       namespace: "kyma-system"
     - name: "application-connector-ingress"
       namespace: "kyma-system"
+    - name: "application-connector-helper"
+      namespace: "kyma-integration"
     - name: "application-connector"
       namespace: "kyma-integration"
     - name: "ark"

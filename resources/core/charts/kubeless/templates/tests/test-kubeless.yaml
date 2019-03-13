@@ -76,7 +76,7 @@ spec:
     - name: KUBELESS_CONFIG
       value: {{ template "fullname" . }}-config
     - name: DOMAIN_NAME
-      value: {{ .Values.global.domainName }}
+      value: {{ .Values.global.ingress.domainName }}
   restartPolicy: Never
 ---
 {{- if not .Values.global.isLocalEnv }}
@@ -180,7 +180,7 @@ spec:
     - name: KUBELESS_CONFIG
       value: {{ template "fullname" . }}-config
     - name: DOMAIN_NAME
-      value: {{ .Values.global.domainName }}
+      value: {{ .Values.global.ingress.domainName }}
   volumes:
     - name: k8syaml
       configMap:

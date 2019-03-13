@@ -267,7 +267,7 @@ func makeChannel(provisioner string, name string, namespace string) *evapisv1alp
 }
 
 func makeHttpRequest(channel *evapisv1alpha1.Channel, message *string) (*http.Request, error) {
-	var jsonStr = []byte(`{"` + *message + `"}`)
+	var jsonStr = []byte(*message)
 
 	channelUri := "http://" + channel.Status.Address.Hostname
 	req, err := http.NewRequest(http.MethodPost, channelUri, bytes.NewBuffer(jsonStr))

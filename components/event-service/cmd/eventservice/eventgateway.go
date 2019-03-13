@@ -32,7 +32,7 @@ func main() {
 
 	bus.Init(options.sourceID, options.eventsTargetURL)
 
-	externalHandler := externalapi.NewHandler()
+	externalHandler := externalapi.NewHandler(options.maxRequestSize)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)

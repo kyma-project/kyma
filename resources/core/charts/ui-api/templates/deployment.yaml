@@ -40,9 +40,9 @@ spec:
             value: "0.0.0.0"
           - name: APP_ALLOWED_ORIGINS
             {{- if .Values.global.isLocalEnv }}
-            value: "https://*.{{ .Values.global.domainName }},*.svc.cluster.local:44134,http://console-dev.{{ .Values.global.domainName }}:*"
+            value: "https://*.{{ .Values.global.ingress.domainName }},*.svc.cluster.local:44134,http://console-dev.{{ .Values.global.ingress.domainName }}:*"
             {{- else }}
-            value: "https://*.{{ .Values.global.domainName }},*.svc.cluster.local:44134"
+            value: "https://*.{{ .Values.global.ingress.domainName }},*.svc.cluster.local:44134"
             {{- end }}
           - name: APP_VERBOSE
             value: "true"
@@ -95,7 +95,7 @@ spec:
           - name: APP_APPLICATION_CONNECTOR_HTTP_CALL_TIMEOUT
             value: "2s"
           - name: APP_OIDC_ISSUER_URL
-            value: "https://dex.{{ .Values.global.domainName }}"
+            value: "https://dex.{{ .Values.global.ingress.domainName }}"
           - name: APP_OIDC_CLIENT_ID
             value: "kyma-client"
           - name: APP_OIDC_CA_FILE
