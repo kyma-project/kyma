@@ -23,16 +23,16 @@ type TokenStrategy interface {
 }
 
 type strategyFactory struct {
-	csrfClient *Client
+	csrfClient Client
 }
 
 type strategy struct {
 	authorizationStrategy authorization.Strategy
 	csrfTokenURL          string
-	csrfClient            *Client
+	csrfClient            Client
 }
 
-func NewTokenStrategyFactory(csrfClient *Client) TokenStrategyFactory {
+func NewTokenStrategyFactory(csrfClient Client) TokenStrategyFactory {
 	return &strategyFactory{csrfClient}
 }
 
@@ -62,7 +62,7 @@ func (s *strategy) AddCSRFToken(apiRequest *http.Request) apperrors.AppError {
 }
 
 func (s *strategy) Invalidate() {
-	s.csrfClient.invalidateTokenCache(s.csrfTokenURL)
+	s.csrfClient.InvalidateTokenCache(s.csrfTokenURL)
 }
 
 type noTokenStrategy struct{}

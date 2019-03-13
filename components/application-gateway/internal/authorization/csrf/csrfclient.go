@@ -17,19 +17,24 @@ type Response struct {
 	cookies   []*http.Cookie
 }
 
-type Client struct {
+type Client interface {
+	GetTokenEndpointResponse(csrfEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError)
+	InvalidateTokenCache(csrfEndpointURL string)
+}
+
+type client struct {
 	timeoutDuration int
 	tokenCache      TokenCache
 }
 
-func NewCSRFClient(timeoutDuration int, tokenCache TokenCache) *Client {
-	return &Client{
+func NewCSRFClient(timeoutDuration int, tokenCache TokenCache) Client {
+	return &client{
 		timeoutDuration: timeoutDuration,
 		tokenCache:      tokenCache,
 	}
 }
 
-func (c *Client) GetTokenEndpointResponse(csrfEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError) {
+func (c *client) GetTokenEndpointResponse(csrfEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError) {
 
 	resp, found := c.tokenCache.Get(csrfEndpointURL)
 	if found {
@@ -49,11 +54,11 @@ func (c *Client) GetTokenEndpointResponse(csrfEndpointURL string, strategy autho
 
 }
 
-func (c *Client) invalidateTokenCache(csrfEndpointURL string) {
+func (c *client) InvalidateTokenCache(csrfEndpointURL string) {
 	c.tokenCache.Remove(csrfEndpointURL)
 }
 
-func (c *Client) requestToken(csrfEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError) {
+func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError) {
 
 	//TODO: DEBUG
 	log.Printf("requestToken: csrfEndpointURL=%s", csrfEndpointURL)
@@ -65,12 +70,12 @@ func (c *Client) requestToken(csrfEndpointURL string, strategy authorization.Str
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
 
-	err = c.addAuthorization(tokenRequest, client, strategy)
+	err = addAuthorization(tokenRequest, client, strategy)
 	if err != nil {
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
 
-	c.setCSRFSpecificHeaders(tokenRequest)
+	setCSRFSpecificHeaders(tokenRequest)
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.timeoutDuration)*time.Second)
 	defer cancel()
@@ -97,13 +102,13 @@ func (c *Client) requestToken(csrfEndpointURL string, strategy authorization.Str
 
 }
 
-func (c *Client) addAuthorization(r *http.Request, client *http.Client, strategy authorization.Strategy) apperrors.AppError {
+func addAuthorization(r *http.Request, client *http.Client, strategy authorization.Strategy) apperrors.AppError {
 	return strategy.AddAuthorization(r, func(transport *http.Transport) {
 		client.Transport = transport
 	})
 }
 
-func (c *Client) setCSRFSpecificHeaders(r *http.Request) {
+func setCSRFSpecificHeaders(r *http.Request) {
 	r.Header.Add(httpconsts.HeaderCSRFToken, httpconsts.HeaderCSRFTokenVal)
 	r.Header.Add(httpconsts.HeaderAccept, httpconsts.HeaderAcceptVal)
 	r.Header.Add(httpconsts.HeaderCacheControl, httpconsts.HeaderCacheControlVal)
