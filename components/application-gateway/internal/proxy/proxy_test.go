@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf/mocks"
 	authMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
@@ -37,18 +38,14 @@ func TestProxy(t *testing.T) {
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
-			Return(nil).Twice()
-
-		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
-		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
-			Return(nil)
+			Return(nil).
+			Twice()
 
 		credentials := &metadatamodel.Credentials{}
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
 
-		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
-		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, credentials.CSRFTokenEndpointURL).Return(csrfTokenStrategyMock).Once()
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledTwice)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -56,7 +53,7 @@ func TestProxy(t *testing.T) {
 			Credentials: credentials,
 		}, nil).Once()
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -79,6 +76,8 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, "test", rr.Body.String())
 		authStrategyFactoryMock.AssertExpectations(t)
 		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
 	})
 
 	t.Run("should proxy OAuth calls", func(t *testing.T) {
@@ -105,17 +104,12 @@ func TestProxy(t *testing.T) {
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(nil)
 
-		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
-		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
-			Return(nil)
-
 		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", tsOAuth.URL+"/token")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
 
-		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
-		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Once()
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -129,7 +123,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -138,6 +132,11 @@ func TestProxy(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "test", rr.Body.String())
+
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
 	})
 
 	t.Run("should proxy BasicAuth auth calls", func(t *testing.T) {
@@ -158,17 +157,12 @@ func TestProxy(t *testing.T) {
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(nil)
 
-		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
-		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
-			Return(nil)
-
 		credentialsMatcher := createBasicCredentialsMatcher("username", "password")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
 
-		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
-		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Once()
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -181,7 +175,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -190,6 +184,11 @@ func TestProxy(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusOK, rr.Code)
 		assert.Equal(t, "test", rr.Body.String())
+
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
 	})
 
 	t.Run("should fail with Bad Gateway error when failed to get OAuth token", func(t *testing.T) {
@@ -210,17 +209,11 @@ func TestProxy(t *testing.T) {
 			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(apperrors.UpstreamServerCallFailed("failed"))
 
-		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
-		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
-			Return(nil)
-
 		credentialsMatcher := createOAuthCredentialsMatcher("clientId", "clientSecret", "www.example.com/token")
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.MatchedBy(credentialsMatcher)).Return(authStrategyMock)
-
-		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
-		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Once()
+		csrfFactoryMock, csrfStrategyMock := neverCalledCSRFStrategy(authStrategyMock)
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
 		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
@@ -234,7 +227,7 @@ func TestProxy(t *testing.T) {
 			},
 		}, nil)
 
-		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
 
 		// when
@@ -242,6 +235,11 @@ func TestProxy(t *testing.T) {
 
 		// then
 		assert.Equal(t, http.StatusBadGateway, rr.Code)
+
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
 	})
 
 	t.Run("should return 500 if failed to get service definition", func(t *testing.T) {
@@ -270,9 +268,9 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 	})
 
-	t.Run("should invalidate proxy and retry when 401 occurred", func(t *testing.T) {
+	testRetryOnAuthFailure := func(statusCode int, t *testing.T) {
 		// given
-		tsf := NewTestServerForRetryTest(http.StatusUnauthorized, func(req *http.Request) {
+		tsf := NewTestServerForRetryTest(statusCode, func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
 		})
@@ -294,15 +292,14 @@ func TestProxy(t *testing.T) {
 		authStrategyMock.On("Invalidate").Return().Once()
 
 		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
-		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
-			Return(nil)
-		csrfTokenStrategyMock.On("Invalidate").Return()
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).Return(nil).Twice()
+		csrfTokenStrategyMock.On("Invalidate").Return().Once()
 
 		authStrategyFactoryMock := &authMock.StrategyFactory{}
 		authStrategyFactoryMock.On("Create", mock.Anything).Return(authStrategyMock).Twice()
 
 		csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
-		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock)
+		csrfTokenStrategyFactoryMock.On("Create", authStrategyMock, "").Return(csrfTokenStrategyMock).Twice()
 
 		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfTokenStrategyFactoryMock, createProxyConfig(proxyTimeout))
 		rr := httptest.NewRecorder()
@@ -317,6 +314,16 @@ func TestProxy(t *testing.T) {
 		serviceDefServiceMock.AssertExpectations(t)
 		authStrategyFactoryMock.AssertExpectations(t)
 		authStrategyMock.AssertExpectations(t)
+		csrfTokenStrategyFactoryMock.AssertExpectations(t)
+		csrfTokenStrategyMock.AssertExpectations(t)
+	}
+
+	t.Run("should invalidate proxy and retry when 401 occurred", func(t *testing.T) {
+		testRetryOnAuthFailure(http.StatusUnauthorized, t)
+	})
+
+	t.Run("should invalidate proxy and retry when 403 occurred due to CRSF Token validation", func(t *testing.T) {
+		testRetryOnAuthFailure(http.StatusForbidden, t)
 	})
 }
 
@@ -390,4 +397,36 @@ func createBasicCredentialsMatcher(username, password string) func(*metadatamode
 		return c.BasicAuth != nil && c.BasicAuth.Username == username &&
 			c.BasicAuth.Password == password
 	}
+}
+
+func mockCSRFStrategy(authorizationStrategy authorization.Strategy, ef ensureCalledFunc) (*csrfMock.TokenStrategyFactory, *csrfMock.TokenStrategy) {
+
+	csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+	strategyCall := csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+		Return(nil)
+	ef(strategyCall)
+
+	csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
+	csrfTokenStrategyFactoryMock.On("Create", authorizationStrategy, "").Return(csrfTokenStrategyMock).Once()
+
+	return csrfTokenStrategyFactoryMock, csrfTokenStrategyMock
+}
+
+func neverCalledCSRFStrategy(authorizationStrategy authorization.Strategy) (*csrfMock.TokenStrategyFactory, *csrfMock.TokenStrategy) {
+	csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+
+	csrfTokenStrategyFactoryMock := &csrfMock.TokenStrategyFactory{}
+	csrfTokenStrategyFactoryMock.On("Create", authorizationStrategy, "").Return(csrfTokenStrategyMock).Once()
+
+	return csrfTokenStrategyFactoryMock, csrfTokenStrategyMock
+}
+
+type ensureCalledFunc func(mockCall *mock.Call)
+
+func calledTwice(mockCall *mock.Call) {
+	mockCall.Twice()
+}
+
+func calledOnce(mockCall *mock.Call) {
+	mockCall.Once()
 }
