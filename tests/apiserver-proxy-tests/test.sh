@@ -24,8 +24,8 @@ test(){
   set -e
 
   if [[ ${UUID} != ${NEW_UUID} ]]; then
-    echo "UUID should be ${UUID}"
-    echo "UUID is ${NEW_UUID}"
+    echo "NEW_UUID should be ${UUID}"
+    echo "NEW_UUID is ${NEW_UUID}"
     echo "TEST FAILED"
     exit 1
   fi
