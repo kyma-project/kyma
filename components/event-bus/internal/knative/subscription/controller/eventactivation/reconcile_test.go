@@ -3,10 +3,11 @@ package eventactivation
 import (
 	"context"
 	"fmt"
-	controllertesting "github.com/knative/eventing/pkg/controller/testing"
+
+	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
-//	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
+	//	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -15,15 +16,16 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 	"testing"
+
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 const (
-	subUid          = "test-uid"
-	subName    = "my-sub-1"
-	eaName     = "my-event-activation"
-	sourceID   = "my_source_ID"
+	subUid   = "test-uid"
+	subName  = "my-sub-1"
+	eaName   = "my-event-activation"
+	sourceID = "my_source_ID"
 
 	testNamespace = "default"
 )
@@ -48,7 +50,7 @@ var testCases = []controllertesting.TestCase{
 			addEventActivationFinalizer(
 				makeNewEventActivation(testNamespace, eaName), finalizerName),
 		},
-		Scheme: scheme.Scheme,
+		Scheme:      scheme.Scheme,
 		IgnoreTimes: true,
 	},
 	{
@@ -74,15 +76,15 @@ var testCases = []controllertesting.TestCase{
 		Name: "new event activation activate subscription",
 		InitialState: []runtime.Object{
 			addEventActivationFinalizer(
-				makeNewEventActivation(testNamespace, eaName),finalizerName),
+				makeNewEventActivation(testNamespace, eaName), finalizerName),
 		},
 		Mocks: controllertesting.Mocks{
-			MockLists: mockSubscriptionDeactivatedList(),
+			MockLists:   mockSubscriptionDeactivatedList(),
 			MockUpdates: mockSubscriptionUpdate(),
 		},
 		ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, eaName),
 		WantResult:   reconcile.Result{},
-		WantPresent: []runtime.Object{},
+		WantPresent:  []runtime.Object{},
 		//WantPresent: []runtime.Object{
 		//	makeEventsActivatedSubscription("my-sub-1"),
 		//},
@@ -100,7 +102,7 @@ func TestAllCases(t *testing.T) {
 			recorder: recorder,
 		}
 		t.Logf("Running test %s", tc.Name)
-		t.Run(tc.Name, tc.Runner(t, r, c))
+		t.Run(tc.Name, tc.Runner(t, r, c, tc.GetEventRecorder()))
 	}
 }
 
@@ -132,7 +134,7 @@ func mockSubscriptionEmptyList() []controllertesting.MockList {
 	}
 }
 
-func mockSubscriptionActivatedGet() []controllertesting.MockGet{
+func mockSubscriptionActivatedGet() []controllertesting.MockGet {
 	return []controllertesting.MockGet{
 		func(innerClient client.Client, ctx context.Context, key client.ObjectKey, obj runtime.Object) (controllertesting.MockHandled, error) {
 			if _, ok := obj.(*subApis.Subscription); ok {
@@ -144,7 +146,7 @@ func mockSubscriptionActivatedGet() []controllertesting.MockGet{
 	}
 }
 
-func mockSubscriptionUpdate() []controllertesting.MockUpdate{
+func mockSubscriptionUpdate() []controllertesting.MockUpdate {
 	return []controllertesting.MockUpdate{
 		func(innerClient client.Client, ctx context.Context, obj runtime.Object) (controllertesting.MockHandled, error) {
 			if _, ok := obj.(*subApis.Subscription); ok {
@@ -155,12 +157,11 @@ func mockSubscriptionUpdate() []controllertesting.MockUpdate{
 	}
 }
 
-
 func mockSubscriptionDeactivatedList() []controllertesting.MockList {
 	return []controllertesting.MockList{
 		func(_ client.Client, _ context.Context, _ *client.ListOptions, obj runtime.Object) (controllertesting.MockHandled, error) {
 			if l, ok := obj.(*subApis.SubscriptionList); ok {
-				l.Items = []subApis.Subscription {
+				l.Items = []subApis.Subscription{
 					*makeEventsDeactivatedSubscription(subName),
 				}
 				return controllertesting.Handled, nil
