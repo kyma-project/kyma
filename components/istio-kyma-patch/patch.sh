@@ -88,7 +88,7 @@ function configure_sidecar_injector() {
     configmap=$(sed 's/policy: disabled/policy: enabled/' <<< "$configmap")
   fi
 
-  configmap=$(sed 's/\[\[ \.ProxyConfig\.ZipkinAddress \]\]/zipkin.kyma-system:9411/g' <<< "$configmap")
+  configmap=$(sed 's/\[\[ \.ProxyConfig\.GetTracing\.GetZipkin\.GetAddress \]\]/zipkin.kyma-system:9411/g' <<< "$configmap")
 
   # Set limits for sidecar. Our namespaces have resource quota set thus every container needs to have limits defined.
   # In case there is no limits section add one at the beginning of container definition. It serves as default.
