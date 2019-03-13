@@ -1,9 +1,24 @@
 configmapName: oidc-ca
-containerPort: 8444  
+
+port:
+  secure: 9443
+  insecure: 8444
 
 image: 
   name: kube-rbac-proxy
   tag: 0.3.1
+
+corsPolicy:
+  allowOrigin:
+    - "*"
+  allowHeaders:
+    - "authorization"
+    - "content-type"
+  allowMethods:
+    - "GET"
+    - "POST"
+    - "PUT"
+    - "DELETE"
 
 hpa:
   minReplicas: 1

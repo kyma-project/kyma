@@ -25,6 +25,11 @@ APP_NAME_SV = event-bus-sub-validator
 IMG_SV = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_SV)
 BINARY_SV = $(APP_NAME_SV)
 
+# event-bus-nats-init
+APP_NAME_NI = event-bus-nats-init
+IMG_NI = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME_NI)
+BINARY_NI = $(APP_NAME_NI)
+
 .PHONY: build
 build:
 	# todo activate before-commit phase and remove the gometalinter
@@ -41,7 +46,7 @@ build-image:
 	./docker-build-event-bus-push.sh $(APP_NAME_PUSH) latest event-bus
 	./docker-build-event-bus-sck.sh $(APP_NAME_SCK) latest event-bus
 	./docker-build-event-bus-sv.sh $(APP_NAME_SV) latest event-bus
-
+	./docker-build-nats-init.sh $(APP_NAME_NI) latest event-bus
 .PHONY: push-image
 push-image:
 	docker tag $(APP_NAME_PUBLISH) $(IMG_PUBLISH):$(TAG)
@@ -54,6 +59,8 @@ push-image:
 	docker push $(IMG_SCK):$(TAG)
 	docker tag $(APP_NAME_SV) $(IMG_SV):$(TAG)
 	docker push $(IMG_SV):$(TAG)
+	docker tag $(APP_NAME_NI) $(IMG_NI):$(TAG)
+	docker push $(IMG_NI):$(TAG)
 
 .PHONY: ci-pr
 ci-pr: build build-image push-image
@@ -79,3 +86,4 @@ clean:
 	rm -rf ./cmd/event-bus-push/$(BINARY_PUSH) ./cmd/event-bus-push/docker
 	rm -rf ./cmd/event-bus-subscription-controller-knative/$(BINARY_SCK) ./cmd/event-bus-subscription-controller-knative/docker
 	rm -rf ./cmd/event-bus-sv/$(BINARY_SV) ./cmd/event-bus-sv/docker
+	rm -rf ./cmd/nats-streaming-init/$(BINARY_NI) ./cmd/nats-streaming-init/docker

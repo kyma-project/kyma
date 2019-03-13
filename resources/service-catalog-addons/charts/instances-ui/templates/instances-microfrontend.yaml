@@ -9,7 +9,7 @@ spec:
   version: v1
   category: Service Catalog
   placement: namespace
-  viewBaseUrl: 'https://instances.{{ js .Values.global.domainName }}'
+  viewBaseUrl: 'https://instances.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
     - label: Instances
       navigationPath: instances

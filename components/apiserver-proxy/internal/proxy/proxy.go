@@ -84,6 +84,8 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 		req.Header.Set(headerCfg.GroupsFieldName, strings.Join(u.GetGroups(), headerCfg.GroupSeparator))
 	}
 
+	req.Header.Set("Impersonate-User", u.GetName())
+
 	return true
 }
 

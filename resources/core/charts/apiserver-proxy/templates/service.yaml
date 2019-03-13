@@ -7,9 +7,9 @@ metadata:
 spec:
   ports:
   - name: http
-    port: {{.Values.containerPort}}
+    port: {{ .Values.port.insecure }}
     protocol: TCP
-    targetPort: {{.Values.containerPort}}
+    targetPort: {{ .Values.port.insecure }}
   selector:
     app: {{ template "name" . }}
   
