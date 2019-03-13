@@ -33,6 +33,11 @@ data:
         - "-m"
         - {{ "[[ annotation .ObjectMeta `sidecar.istio.io/interceptionMode` .ProxyConfig.InterceptionMode ]]" }}
         - "-i"
+        {{ "[[ if (isset .ObjectMeta.Annotations \"traffic.sidecar.istio.io/includeOutboundIPRanges\") -]]" }}
+        {{ "- \"[[ index .ObjectMeta.Annotations \"traffic.sidecar.istio.io/includeOutboundIPRanges\"  ]]\"" }}
+        {{ "[[ else -]]" }}
+        - "{{ .Values.global.proxy.includeIPRanges }}"
+        {{ "[[ end -]]" }}
         - {{ "\"[[ annotation .ObjectMeta `traffic.sidecar.istio.io/includeOutboundIPRanges` " }} "{{ .Values.global.proxy.includeIPRanges }}" {{ " ]]\"" }}
         - "-x"
         - {{ "\"[[ annotation .ObjectMeta `traffic.sidecar.istio.io/excludeOutboundIPRanges` " }} "{{ .Values.global.proxy.excludeIPRanges }}" {{ " ]]\"" }}
