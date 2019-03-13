@@ -121,20 +121,16 @@ func (s *service) removeApiSpec(id, extension string) ([]byte, apperrors.AppErro
 }
 
 func tryDifferentExtensions(serviceOperation func(string, string) ([]byte, apperrors.AppError), id string) ([]byte, apperrors.AppError) {
-	var apperr apperrors.AppError
 	for _, extension := range apiExtensions {
 		data, err := serviceOperation(id, extension)
-		if err == nil {
+		if err != nil {
+			return nil, apperrors.Internal("Error occurred while using Minio, %s", err.Error())
+		}
+		if data != nil {
 			return data, nil
 		}
-
-		if apperr != nil {
-			apperr.Append(err.Error(), apperr)
-		} else {
-			apperr = err
-		}
 	}
-	return nil, apperr
+	return nil, nil
 }
 
 func makeFilePath(id, fileName string) string {

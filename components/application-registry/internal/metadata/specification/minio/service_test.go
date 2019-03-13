@@ -215,7 +215,7 @@ func TestMinioService_Get(t *testing.T) {
 		service := NewService(repositoryMock)
 
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/content.json").Return(expectedDocumentationJSON, nil)
-		repositoryMock.On("Get", bucketName, "service-class/1111-2222/apiSpec.json").Return(nil, apperrors.Internal(""))
+		repositoryMock.On("Get", bucketName, "service-class/1111-2222/apiSpec.json").Return(nil, nil)
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(expectedEventsSpecJSON, nil)
 
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/apiSpec.xml").Return(expectedApiSpecXML, nil)
@@ -253,7 +253,6 @@ func TestMinioService_Get(t *testing.T) {
 
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/content.json").Return(expectedDocumentationJSON, nil)
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/apiSpec.json").Return(nil, apperrors.Internal(""))
-		repositoryMock.On("Get", bucketName, "service-class/1111-2222/apiSpec.xml").Return(nil, apperrors.Internal(""))
 
 		// when
 		_, _, _, apperr := service.Get("1111-2222")
@@ -291,6 +290,8 @@ func TestMinioService_Remove(t *testing.T) {
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.json").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(nil)
 
+		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.xml").Return(nil)
+
 		// when
 		apperr := service.Remove("1111-2222")
 
@@ -304,7 +305,7 @@ func TestMinioService_Remove(t *testing.T) {
 		service := NewService(repositoryMock)
 
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.json").Return(nil)
-		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.json").Return(apperrors.Internal(""))
+		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.json").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(nil)
 
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.xml").Return(nil)
@@ -337,7 +338,6 @@ func TestMinioService_Remove(t *testing.T) {
 
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.json").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.json").Return(apperrors.Internal(""))
-		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.xml").Return(apperrors.Internal(""))
 
 		// when
 		apperr := service.Remove("1111-2222")
@@ -354,6 +354,8 @@ func TestMinioService_Remove(t *testing.T) {
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.json").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.json").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(apperrors.Internal(""))
+
+		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.xml").Return(nil)
 
 		// when
 		apperr := service.Remove("1111-2222")
