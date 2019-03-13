@@ -16,9 +16,7 @@ func TestMinioService_Create(t *testing.T) {
 	apiSpecJSON := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
 	eventsSpecJSON := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
 
-	documentationXML := []byte("<description>Some docs blah blah blah</description>")
 	apiSpecXML := []byte("<productsEndpoint>Endpoint /products returns products.</productsEndpoint>")
-	eventsSpecXML := []byte("<orderCreated>Published when order is placed.</orderCreated>")
 
 	const bucketName = "content"
 
@@ -40,18 +38,18 @@ func TestMinioService_Create(t *testing.T) {
 		repositoryMock.AssertExpectations(t)
 	})
 
-	t.Run("should create all xml specs", func(t *testing.T) {
+	t.Run("should create xml api spec", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.Repository{}
 		service := NewService(repositoryMock)
 
 		repositoryMock.On("Remove", bucketName, mock.Anything).Return(nil)
-		repositoryMock.On("Put", bucketName, "service-class/1111-2222/content.xml", documentationXML).Return(nil)
+		repositoryMock.On("Put", bucketName, "service-class/1111-2222/content.json", documentationJSON).Return(nil)
 		repositoryMock.On("Put", bucketName, "service-class/1111-2222/apiSpec.xml", apiSpecXML).Return(nil)
-		repositoryMock.On("Put", bucketName, "service-class/1111-2222/asyncApiSpec.xml", eventsSpecXML).Return(nil)
+		repositoryMock.On("Put", bucketName, "service-class/1111-2222/asyncApiSpec.json", eventsSpecJSON).Return(nil)
 
 		// when
-		apperr := service.Put("1111-2222", documentationXML, apiSpecXML, eventsSpecXML)
+		apperr := service.Put("1111-2222", documentationJSON, apiSpecXML, eventsSpecJSON)
 
 		// then
 		require.NoError(t, apperr)
@@ -189,9 +187,7 @@ func TestMinioService_Get(t *testing.T) {
 	expectedApiSpecJSON := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
 	expectedEventsSpecJSON := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
 
-	expectedDocumentationXML := []byte("<description>Some docs blah blah blah</description>")
 	expectedApiSpecXML := []byte("<productsEndpoint>Endpoint /products returns products.</productsEndpoint>")
-	expectedEventsSpecXML := []byte("<orderCreated>Published when order is placed.</orderCreated>")
 
 	t.Run("should get all json specs", func(t *testing.T) {
 		// given
@@ -218,22 +214,20 @@ func TestMinioService_Get(t *testing.T) {
 		repositoryMock := &mocks.Repository{}
 		service := NewService(repositoryMock)
 
-		repositoryMock.On("Get", bucketName, "service-class/1111-2222/content.json").Return(nil, apperrors.Internal(""))
+		repositoryMock.On("Get", bucketName, "service-class/1111-2222/content.json").Return(expectedDocumentationJSON, nil)
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/apiSpec.json").Return(nil, apperrors.Internal(""))
-		repositoryMock.On("Get", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(nil, apperrors.Internal(""))
+		repositoryMock.On("Get", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(expectedEventsSpecJSON, nil)
 
-		repositoryMock.On("Get", bucketName, "service-class/1111-2222/content.xml").Return(expectedDocumentationXML, nil)
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/apiSpec.xml").Return(expectedApiSpecXML, nil)
-		repositoryMock.On("Get", bucketName, "service-class/1111-2222/asyncApiSpec.xml").Return(expectedEventsSpecXML, nil)
 
 		// when
 		documentation, apiSpec, eventsSpec, apperr := service.Get("1111-2222")
 
 		// then
 		require.NoError(t, apperr)
-		assert.Equal(t, expectedDocumentationXML, documentation)
+		assert.Equal(t, expectedDocumentationJSON, documentation)
 		assert.Equal(t, expectedApiSpecXML, apiSpec)
-		assert.Equal(t, expectedEventsSpecXML, eventsSpec)
+		assert.Equal(t, expectedEventsSpecJSON, eventsSpec)
 		repositoryMock.AssertExpectations(t)
 	})
 
@@ -243,7 +237,6 @@ func TestMinioService_Get(t *testing.T) {
 		service := NewService(repositoryMock)
 
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/content.json").Return(nil, apperrors.Internal(""))
-		repositoryMock.On("Get", bucketName, "service-class/1111-2222/content.xml").Return(nil, apperrors.Internal(""))
 
 		// when
 		_, _, _, apperr := service.Get("1111-2222")
@@ -278,7 +271,6 @@ func TestMinioService_Get(t *testing.T) {
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/content.json").Return(expectedDocumentationJSON, nil)
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/apiSpec.json").Return(expectedApiSpecJSON, nil)
 		repositoryMock.On("Get", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(nil, apperrors.Internal(""))
-		repositoryMock.On("Get", bucketName, "service-class/1111-2222/asyncApiSpec.xml").Return(nil, apperrors.Internal(""))
 
 		// when
 		_, _, _, apperr := service.Get("1111-2222")
@@ -307,17 +299,15 @@ func TestMinioService_Remove(t *testing.T) {
 		repositoryMock.AssertExpectations(t)
 	})
 
-	t.Run("should delete all xml specs", func(t *testing.T) {
+	t.Run("should delete xml api spec", func(t *testing.T) {
 		repositoryMock := &mocks.Repository{}
 		service := NewService(repositoryMock)
 
-		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.json").Return(apperrors.Internal(""))
+		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.json").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.json").Return(apperrors.Internal(""))
-		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(apperrors.Internal(""))
+		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(nil)
 
-		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.xml").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.xml").Return(nil)
-		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/asyncApiSpec.xml").Return(nil)
 
 		// when
 		apperr := service.Remove("1111-2222")
@@ -332,7 +322,6 @@ func TestMinioService_Remove(t *testing.T) {
 		service := NewService(repositoryMock)
 
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.json").Return(apperrors.Internal(""))
-		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.xml").Return(apperrors.Internal(""))
 
 		// when
 		apperr := service.Remove("1111-2222")
@@ -365,7 +354,6 @@ func TestMinioService_Remove(t *testing.T) {
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/content.json").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/apiSpec.json").Return(nil)
 		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/asyncApiSpec.json").Return(apperrors.Internal(""))
-		repositoryMock.On("Remove", bucketName, "service-class/1111-2222/asyncApiSpec.xml").Return(apperrors.Internal(""))
 
 		// when
 		apperr := service.Remove("1111-2222")
