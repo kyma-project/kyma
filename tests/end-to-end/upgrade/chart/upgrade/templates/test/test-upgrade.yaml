@@ -7,6 +7,7 @@ metadata:
     "helm.sh/hook": test-success
   labels:
     "helm-chart-test": "true"
+    "kyma-project.io/upgrade-e2e-test": "true"
 spec:
   serviceAccountName:  test-{{ template "fullname" . }}
   containers:
