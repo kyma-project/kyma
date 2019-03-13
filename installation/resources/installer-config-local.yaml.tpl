@@ -97,8 +97,6 @@ metadata:
     component: assetstore
     kyma-project.io/installation: ""
 data:
-  minio.resources.requests.memory: 64Mi
-  minio.resources.limits.cpu: 100m
   assetstore-controller-manager.minikubeIP: ""
   test.integration.minikubeIP: ""
 ---

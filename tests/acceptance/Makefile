@@ -30,3 +30,6 @@ clean:
 	rm -f env-tester.bin
 	rm -f client.bin
 
+#.PHONY: path-to-referenced-charts
+#path-to-referenced-charts:
+#	@echo "resources/core"
