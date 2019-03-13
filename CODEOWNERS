@@ -176,7 +176,7 @@
 /components/api-controller/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Asset Store Controller Manager Component
-/components/assetstore-controller-manager/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/components/asset-store-controller-manager/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
 # Asset Upload Service
 /components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
