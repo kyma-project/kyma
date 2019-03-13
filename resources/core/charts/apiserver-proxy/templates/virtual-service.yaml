@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   hosts:
-  - "apiserver.{{ .Values.global.domainName }}"
+  - "apiserver.{{ .Values.global.ingress.domainName }}"
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:
@@ -15,16 +15,7 @@ spec:
     route:
     - destination:
         port:
-          number: {{.Values.containerPort}}
+          number: {{ .Values.port.insecure }}
         host: {{ template "name" . }}
     corsPolicy:
-      allowOrigin:
-      - "*"
-      allowHeaders:
-      - "authorization"
-      - "content-type"
-      allowMethods:
-      - "GET"
-      - "POST"
-      - "PUT"
-      - "DELETE"
+{{ toYaml .Values.corsPolicy | indent 6 }}

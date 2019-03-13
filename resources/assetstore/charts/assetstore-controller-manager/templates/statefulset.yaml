@@ -25,7 +25,7 @@ spec:
       hostAliases:
        - ip: {{ .Values.minikubeIP }}
          hostnames:
-          - "minio.{{ .Values.global.domainName }}"
+          - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       serviceAccountName: {{ template "fullname" . }}
       containers:

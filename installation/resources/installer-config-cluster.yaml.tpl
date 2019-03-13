@@ -33,7 +33,6 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.domainName: "__DOMAIN__"
-  global.applicationConnectorDomainName: "__APPLICATION_CONNECTOR_DOMAIN__"
   global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
@@ -54,18 +53,6 @@ data:
   global.alertTools.credentials.slack.channel: "__SLACK_CHANNEL_VALUE__"
   global.alertTools.credentials.victorOps.routingkey: "__VICTOR_OPS_ROUTING_KEY_VALUE__"
   global.alertTools.credentials.victorOps.apikey: "__VICTOR_OPS_API_KEY_VALUE__"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: application-connector-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: application-connector
-    kyma-project.io/installation: ""
-data:
-  connector-service.tests.skipSslVerify: "__SKIP_SSL_VERIFY__"
 ---
 apiVersion: v1
 kind: ConfigMap

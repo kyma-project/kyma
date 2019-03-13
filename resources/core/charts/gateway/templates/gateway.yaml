@@ -24,7 +24,7 @@ spec:
       serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
       privateKey: /etc/istio/ingressgateway-certs/tls.key
     hosts:
-    - "*.{{.Values.global.domainName}}"
+    - "*.{{.Values.global.ingress.domainName}}"
   - port:
       number: 80
       {{ if .Values.global.knative }}
@@ -36,4 +36,4 @@ spec:
     tls:
       httpsRedirect: true # automatic 301 redirect from http to https
     hosts:
-    - "*.{{.Values.global.domainName}}"
+    - "*.{{.Values.global.ingress.domainName}}"

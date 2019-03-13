@@ -19,7 +19,7 @@ spec:
       - name: RELEASE_NAMESPACE
         value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
       - name: KYMA_DOMAIN
-        value: {{ .Values.global.domainName }}
+        value: {{ .Values.global.ingress.domainName }}
       - name: IS_LOCAL_ENV
         value: {{ .Values.global.isLocalEnv | toString | quote }}
       - name: DEX_USER_EMAIL
