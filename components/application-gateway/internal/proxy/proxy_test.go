@@ -236,6 +236,7 @@ func TestProxy(t *testing.T) {
 		// then
 		assert.Equal(t, http.StatusBadGateway, rr.Code)
 
+		serviceDefServiceMock.AssertExpectations(t)
 		authStrategyFactoryMock.AssertExpectations(t)
 		authStrategyMock.AssertExpectations(t)
 		csrfFactoryMock.AssertExpectations(t)
