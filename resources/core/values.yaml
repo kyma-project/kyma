@@ -62,7 +62,7 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: "24337d95"
+    version: "df845f56"
   test_namespace_controller:
     dir: develop/
     version: 429bfbcc
