@@ -10,7 +10,7 @@ metadata:
 spec:
   containers:
     - name: {{.Release.Name }}-gateway-tests
-      image: szymongib/application-gateway-tests:0.0.1
+      image: {{ .Values.global.applicationGatewayTestsImage }}
         imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
         env:
           - name: APPLICATION
