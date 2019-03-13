@@ -20,7 +20,7 @@ spec:
       - "dex.{{ .Values.global.ingress.domainName }}"
       - "docs.{{ .Values.global.ingress.domainName }}"
       - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
-      - "ui-api.{{ .Values.global.ingress.domainName }}"
+      - "console-backend.{{ .Values.global.ingress.domainName }}"
       - "minio.{{ .Values.global.ingress.domainName }}"
   {{ end }}
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
