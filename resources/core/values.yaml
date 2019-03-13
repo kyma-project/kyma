@@ -71,7 +71,7 @@ global:
     version: b426d54d
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: a63544bb
+    version: 2c2182cf
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
