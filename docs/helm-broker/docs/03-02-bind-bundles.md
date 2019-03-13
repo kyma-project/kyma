@@ -33,7 +33,7 @@ credentialFrom:
     name: redis-v2-secrets
 ```
 
-In this example of the [binding action][bind], the Helm Broker returns the following values:
+In this example of the binding action, the Helm Broker returns the following values:
 - A `HOST` key with the defined inlined value.
 - A `PORT` key with the value from the field specified by the JSONPath expressions. The `redis-svc` Service runs this expression.
 - A `REDIS_PASSWORD` key with a value selected by the `redis-password` key from the `redis-secrets` Secret.
@@ -61,33 +61,25 @@ In this example, the system renders the `bind.yaml` file. The system resolves al
 
 ### Credential name conflicts policy
 
-The following rules apply in cases of credential name conflicts:
-- When the `credential` and the `credentialFrom` sections have duplicate values, the system uses the values from the `credential` section.
-- When you duplicate a key in the `credential` section, an error appears and informs you about the name of the key that the conflict refers to.
-- When a key exists in the multiple sources defined by the `credentialFrom` section, the value associated with the last source takes precedence.
+The following rules apply in case of credential name conflicts:
+- If the **credential** and **credentialFrom** fields have duplicate values, the system uses the values from the **credential** field.
+- If you duplicate a key in the **credential** field, an error appears and informs you about the name of the key that the conflict refers to.
+- If a key exists in the multiple sources defined by the **credentialFrom** section, the value associated with the last source takes precedence.
 
 ### File specification
 
-|   Field Name   |                                                                                                                              Description                                                                                                                              |
-|:--------------:|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------:|
-|   [credential](#configuration-binding-bundles-credential)   |                                                                                                         The list of the credential variables to return during the binding action.                                                                                                        |
-| [credentialFrom](#configuration-binding-bundles-credentialfrom) | The list of the sources to populate the credential variables on the binding action. When the key exists in multiple sources, the value associated with the last source takes precedence. The variables from the `credential` section override the values if duplicate keys exist. |
-
-#### Credential
-
-| Field Name |                                    Description                                    |
-|:----------:|:---------------------------------------------------------------------------------:|
-|    **name**    |                          The name of the credential variable.                         |
-|    **value**   |      A variable value. You can also use the Helm Chart templating directives.      |
-| [valueFrom](#configuration-binding-bundles-valuefrom)  | The source of the credential variable's value. You cannot use it if the value is not empty. |
-
-##### ValueFrom
-
-|    Field Name   |                               Description                              |
-|:---------------:|:----------------------------------------------------------------------:|
-| [configMapKeyRef](#configuration-binding-bundles-configmapkeyref) |    Selects a ConfigMap key in the Helm chart release Namespace.   |
-|   [secretKeyRef](#configuration-binding-bundles-secretkeyref)  |     Selects a Secret key in the Helm Chart release Namespace.     |
-|    [serviceRef](#configuration-binding-bundles-serviceref)   | Selects a Service resource in the Helm Chart release Namespace. |
+|   Field Name   |                                 Description                       |
+|:--------------:|:--------------------------------------------------------------:|
+| credential |    The list of the credential variables to return during the binding action.       |
+| credential.name |    The name of the credential variable.  |
+| credential.value |    A variable value. You can also use the Helm Chart templating directives.  |
+| credential.valueFrom |  The source of the credential variable's value. You cannot use it if the value is not empty.  |
+| credential.valueFrom.configMapKeyRef |    Selects a ConfigMap key in the Helm chart release Namespace.    |
+| credential.valueFrom.secretKeyRef  |     Selects a Secret key in the Helm Chart release Namespace.     |
+| credential.valueFrom.serviceRef   | Selects a Service resource in the Helm Chart release Namespace. |
+| credentialFrom | The list of the sources to populate the credential variables on the binding action. When the key exists in multiple sources, the value associated with the last source takes precedence. The variables from the `credential` section override the values if duplicate keys exist. |
+| credentialFrom.configMapRef | The ConfigMap to retrieve the values from. It must be available in the Helm Chart release Namespace. |
+| credentialFrom.secretRef |   The Secret to retrieve the values from. It must be available in the Helm Chart release Namespace.  |
 
 ###### ConfigMapKeyRef
 
@@ -109,13 +101,6 @@ The following rules apply in cases of credential name conflicts:
 |:----------:|:-------------------------------------------------------------------------------------------------------------------------------------------------:|
 |    **name**    |                                                                The name of the Service.                                                               |
 |  **jsonpath**  | The JSONPath expression used to select the specified field value. For more information, see the [User Guide](https://kubernetes.io/docs/user-guide/jsonpath/). |
-
-#### CredentialFrom
-
-|  Field Name  |                                   Description                                 |
-|:------------:|:-----------------------------------------------------------------------------:|
-| [configMapRef](#configuration-binding-bundles-configmapref) | The ConfigMap to retrieve the values from. It must be available in the Helm Chart release Namespace. |
-|   [secretRef](#configuration-binding-bundles-secretref)  |   The Secret to retrieve the values from. It must be available in the Helm Chart release Namespace.  |
 
 ##### ConfigMapRef
 

@@ -44,8 +44,8 @@ For details about the particular files, read the following sections.
 
 The `meta.yaml` file contains information about the bundle. Set the following fields to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
 
-|      Field Name     | Required |                                                                  Description                                                                           |
-|:-------------------:|:--------:|:------------------------------------------------------------------------------------------------------------------------------------------------------:|
+|      Field Name     | Required |                   Description             |
+|:-------------------:|:--------:|:----------------------------------------------:|
 |         **name**        |   YES   | A name of the bundle.  |
 |       **version**       |   YES   | A version of the bundle. It is a broker service identifier.  |
 |          **id**         |   YES   | A broker service identifier.  |
@@ -78,8 +78,8 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 * `meta.yaml` file - contains information about a given plan. Set the following fields to create a plan object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object).
 
-|  Field Name | Required |                                             Description                                                    |
-|:-----------:|:--------:|:----------------------------------------------------------------------------------------------------------:|
+|  Field Name | Required |      Description               |
+|:-----------:|:--------:|:------------------------------------:|
 |     **name**    |   YES   |     A name of the plan.   |
 |      **id**     |   YES   |     An ID of the plan. |
 | **description** |   YES   | A description of the plan. |
