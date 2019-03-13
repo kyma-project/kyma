@@ -5,7 +5,7 @@ set -o errexit
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SCRIPTS_DIR="${CURRENT_DIR}/../scripts"
 DOMAIN="kyma.local"
-
+DISABLE_KNATIVE=false
 VM_DRIVER="virtualbox"
 if [ `uname -s` = "Darwin" ]; then
     VM_DRIVER="hyperkit"
@@ -36,8 +36,8 @@ do
             shift
             shift
         ;;
-        --knative)
-            KNATIVE="--knative"
+        --disable_knative)
+            DISABLE_KNATIVE="--disable_knative"
             shift
         ;;
         --password)
@@ -58,12 +58,10 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-MINIKUBE_EXTRA_ARGS=""
-
-if [ -n "$KNATIVE" ]; then
-
+if [[ ${DISABLE_KNATIVE} == "--disable_knative" ]]; then
+    MINIKUBE_EXTRA_ARGS=""
+else
     MINIKUBE_EXTRA_ARGS="${MINIKUBE_EXTRA_ARGS} --memory 10240 --disk-size 30g"
-
 fi
 
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then
@@ -73,12 +71,10 @@ fi
 bash ${SCRIPTS_DIR}/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"
 
 if [ -z "$CR_PATH" ]; then
-
     TMPDIR=`mktemp -d "${CURRENT_DIR}/../../temp-XXXXXXXXXX"`
     CR_PATH="${TMPDIR}/installer-cr-local.yaml"
     bash ${SCRIPTS_DIR}/create-cr.sh --output "${CR_PATH}" --domain "${DOMAIN}"
-
 fi
 
-bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}" --password "${ADMIN_PASSWORD}"
+bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${DISABLE_KNATIVE}" --password "${ADMIN_PASSWORD}"
 rm -rf $TMPDIR

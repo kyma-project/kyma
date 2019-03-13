@@ -39,6 +39,8 @@ data:
   global.adminPassword: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
   cluster-users.users.adminGroup: ""
+  global.knative: "true"
+  global.kymaEventBus: "false"
 ---
 apiVersion: v1
 kind: ConfigMap

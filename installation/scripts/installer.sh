@@ -27,8 +27,8 @@ do
             shift # past argument
             shift # past value
             ;;
-        --knative)
-            KNATIVE=true
+        --disable_knative)
+            DISABLE_KNATIVE=true
             shift
             ;;
         --password)
@@ -60,46 +60,41 @@ bash ${CURRENT_DIR}/is-ready.sh kube-system k8s-app kube-dns
 bash ${CURRENT_DIR}/install-tiller.sh
 
 if [ $LOCAL ]; then
-
     INSTALLER="${RESOURCES_DIR}/installer-local.yaml"
     INSTALLER_CONFIG="${RESOURCES_DIR}/installer-config-local.yaml.tpl"
-
 fi
 
 if [ $CR_PATH ]; then
-
     case $CR_PATH in
     /*) ;;
     *) CR_PATH="$(pwd)/$CR_PATH";;
     esac
 
-    if [ ! -f $CR_PATH ]; then
+    if [[ ! -f $CR_PATH ]]; then
         echo "CR file not found in path $CR_PATH"
         exit 1
     fi
-
 fi
-
 
 echo -e "\nApplying installation combo yaml"
 COMBO_YAML=$(bash ${CURRENT_DIR}/concat-yamls.sh ${INSTALLER} ${INSTALLER_CONFIG} ${AZURE_BROKER_CONFIG} ${CR_PATH})
 
 rm -rf ${AZURE_BROKER_CONFIG}
 
-if [ ${ADMIN_PASSWORD} ]; then
+if [[ ${ADMIN_PASSWORD} ]]; then
     ADMIN_PASSWORD=$(echo ${ADMIN_PASSWORD} | base64)
     COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
 fi
 
-if [ ${LOCAL} ]; then
+if [[ ${LOCAL} ]]; then
     MINIKUBE_IP=$(minikube ip)
     COMBO_YAML=$(sed 's/\.minikubeIP: .*/\.minikubeIP: '"${MINIKUBE_IP}"'/g' <<<"$COMBO_YAML")
 fi
 
 kubectl apply -f - <<<"$COMBO_YAML"
 
-if [ $KNATIVE ]; then
-    kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
+if [[ ${DISABLE_KNATIVE} == true ]] ; then
+    kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "false", "global.kymaEventBus": "true"}}'
 fi
 
 echo -e "\nConfiguring sub-components"

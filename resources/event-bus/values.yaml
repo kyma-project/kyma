@@ -47,8 +47,8 @@ global:
     apiURL: http://zipkin.kyma-system:9411/api/v1/spans
   eventBusVersion: "0.2.34"
   isLocalEnv: false
-  knative: false
-  kymaEventBus: true
+  knative: true
+  kymaEventBus: false
 e2eTests:
   nameTester: "test-event-bus-tester"
   nameSubscriber: "test-event-bus-subscriber"    

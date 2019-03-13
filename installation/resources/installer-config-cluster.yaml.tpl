@@ -38,6 +38,8 @@ data:
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
   nginx-ingress.controller.service.loadBalancerIP: "__REMOTE_ENV_IP__"
   cluster-users.users.adminGroup: "__ADMIN_GROUP__"
+  global.knative: "true"
+  global.kymaEventBus: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
