@@ -47,8 +47,8 @@ global:
     dir: pr/
     version: PR-3102
   application_registry_tests:
-    dir: develop/
-    version: fd308559
+    dir: pr/
+    version: PR-3102
   application_broker:
     dir: develop/
     version: f78529c4
