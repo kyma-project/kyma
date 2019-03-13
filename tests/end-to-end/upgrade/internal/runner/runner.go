@@ -19,8 +19,8 @@ import (
 )
 
 const (
-	gracefulTimeout = time.Second * 10
-	runnerLabelName = "upgrade.tester.kyma-project.io"
+	gracefulTimeout    = time.Second * 10
+	createdByLabelName = "kyma-project.io/created-by"
 	// negative value for regex used for name validation in k8s:
 	// https://github.com/kubernetes/apimachinery/blob/98853ca904e81a25e2000cae7f077dc30f81b85f/pkg/util/validation/validation.go#L110
 	regexSanitize = "[^a-z0-9]([^-a-z0-9]*[^a-z0-9])?"
@@ -184,9 +184,9 @@ func (r *TestRunner) ensureNamespaceExists(name string) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 			Labels: map[string]string{
-				"env":             "true",
-				"istio-injection": "enabled",
-				runnerLabelName:   "creator",
+				"env":              "true",
+				"istio-injection":  "enabled",
+				createdByLabelName: "e2e-upgrade-test-runner",
 			},
 		},
 	})

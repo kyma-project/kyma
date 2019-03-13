@@ -12,7 +12,7 @@ spec:
   template:
     metadata:
       labels:
-        "kyma-project.io/upgrade-e2e-test": "true"
+        "kyma-project.io/upgrade-e2e-data": "prepareData"
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
