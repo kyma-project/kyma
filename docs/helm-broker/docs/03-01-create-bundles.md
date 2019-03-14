@@ -12,9 +12,8 @@ sample-bundle/
   │    └── {chart-name}/                    # A Helm chart directory
   │         └── ....                        # Helm chart files          
   └── plans/                                # A directory which contains the possible plans for an installed chart
-       ├── example-enterprise               # A directory of files for a specific plan
-       │   └── meta.yaml                    # A file which contains metadata information about this plan
-       └── ....
+       └── example-enterprise               # A directory of files for a specific plan
+           └── meta.yaml                    # A file which contains metadata information about this plan
  ```
 
 However, your bundle can be more complex, depending on its purpose and setup. These are all possible files that you can include:
@@ -50,18 +49,18 @@ The `meta.yaml` file contains information about the bundle. Set the following fi
 |       **version**       |   YES   | A version of the bundle. It is a broker service identifier.  |
 |          **id**         |   YES   | A broker service identifier.  |
 |     **description**     |   YES   | A short description of the service. |
-|         **tags**        |   NO  |   Keywords describing the provided service, separated by commas.     |
-|       **bindable**      |   NO  |   A field that specifies whether you can bind a given bundle. |
+|         **tags**        |   NO  | Keywords describing the provided service, separated by commas.     |
+|       **bindable**      |   NO  | A field that specifies whether you can bind a given bundle. |
 |     **displayName**     |   YES   | A display name of the bundle.    |
-| **providerDisplayName** |   NO  |  A name of the upstream entity providing the actual service.  |
-|   **longDescription**   |   NO  |  Long description.     |
-|   **documentationURL**  |   NO  |  Link to documentation page for the service.        |
-|      **supportURL**     |   NO  |  Link to support page for the service.     |
-|       **imageURL**      |   NO  |  The URL to an image. You must provide the image as an SVG.          |
-|       **labels**        |   NO  |  Key/value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
+| **providerDisplayName** |   NO  | A name of the upstream entity providing the actual service.  |
+|   **longDescription**   |   NO  | A long description of the service.     |
+|   **documentationURL**  |   NO  | A link to the documentation page for the service.        |
+|      **supportURL**     |   NO  | A link to the support page for the service.     |
+|       **imageURL**      |   NO  | The URL to an image. You must provide the image as an SVG.          |
+|       **labels**        |   NO  | Key/value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
 | **bindingsRetrievable** |   NO  | A field that specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
 |   **planUpdatable**     |   NO  |  A field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
-|       **requires**      |   NO  |  A list of permissions the user must grant to the instances of this service. |
+|       **requires**      |   NO  | A list of permissions the user must grant to the instances of this service. |
 | **provisionOnlyOnce**   |   NO  | A field that specifies whether the bundle can be provisioned only once in a given Namespace. The default value is `false`. |
 
 > **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`.
@@ -102,7 +101,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 ## Troubleshooting
 
 Use the dry-run mode to check the generated manifests of the chart without installing it.
-The **--debug** option prints the generated manifests.
+The `--debug` option prints the generated manifests.
 As a prerequisite, you must install [Helm](https://github.com/kubernetes/helm) on your machine to run this command:
 
 ```
