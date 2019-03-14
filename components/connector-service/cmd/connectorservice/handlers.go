@@ -68,7 +68,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		Province:           env.province,
 	}
 
-	certificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.certificateValidityTime), opts.caSecretName, subjectValues)
+	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, subjectValues)
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
@@ -95,13 +95,14 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		CertificateProtectedBaseURL: fmt.Sprintf(AppURLFormat, opts.certificateProtectedHost),
 		Subject:                     subjectValues,
 		ContextExtractor:            clientcontext.CreateApplicationClientContextService,
-		CertService:                 certificateService,
+		CertService:                 appCertificateService,
 		RevokedCertsRepo:            revocationListRepository,
 	}
 
 	handlerBuilder.WithApps(appHandlerConfig)
 
 	if opts.central {
+		runtimeCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.runtimeCertificateValidityTime), opts.caSecretName, subjectValues)
 		runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
 
 		runtimeHandlerConfig := externalapi.Config{
@@ -111,7 +112,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 			CertificateProtectedBaseURL: fmt.Sprintf(RuntimeURLFormat, opts.certificateProtectedHost),
 			Subject:                     subjectValues,
 			ContextExtractor:            clientcontext.CreateClusterClientContextService,
-			CertService:                 certificateService,
+			CertService:                 runtimeCertificateService,
 			RevokedCertsRepo:            revocationListRepository,
 		}
 
