@@ -19,40 +19,40 @@ var (
 	namespace = "namespace"
 )
 
-func TestKServiceResolver_KServiceQuery(t *testing.T) {
+func TestServiceResolver_ServiceQuery(t *testing.T) {
 
 	assert := _assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
-		expected := &gqlschema.KService{
+		expected := &gqlschema.Service{
 			Name: "Test",
 		}
 		resource := &v1.Service{}
-		resourceGetter := automock.NewKServiceSvc()
+		resourceGetter := automock.NewServiceSvc()
 		resourceGetter.On("Find", name, namespace).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := automock.NewGqlKServiceConverter()
+		converter := automock.NewGqlServiceConverter()
 		converter.On("ToGQL", resource).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 
-		resolver := k8s.NewKServiceResolver(resourceGetter)
+		resolver := k8s.NewServiceResolver(resourceGetter)
 		resolver.SetInstanceConverter(converter)
 
-		result, err := resolver.KServiceQuery(nil, name, namespace)
+		result, err := resolver.ServiceQuery(nil, name, namespace)
 
 		require.NoError(t, err)
 		assert.Equal(expected, result)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		resourceGetter := automock.NewKServiceSvc()
+		resourceGetter := automock.NewServiceSvc()
 		resourceGetter.On("Find", name, namespace).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		resolver := k8s.NewKServiceResolver(resourceGetter)
+		resolver := k8s.NewServiceResolver(resourceGetter)
 
-		result, err := resolver.KServiceQuery(nil, name, namespace)
+		result, err := resolver.ServiceQuery(nil, name, namespace)
 
 		require.NoError(t, err)
 		assert.Nil(result)
@@ -61,13 +61,13 @@ func TestKServiceResolver_KServiceQuery(t *testing.T) {
 	t.Run("ErrorGetting", func(t *testing.T) {
 		expected := errors.New("test")
 		resource := &v1.Service{}
-		resourceGetter := automock.NewKServiceSvc()
+		resourceGetter := automock.NewServiceSvc()
 		resourceGetter.On("Find", name, namespace).Return(resource, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		resolver := k8s.NewKServiceResolver(resourceGetter)
+		resolver := k8s.NewServiceResolver(resourceGetter)
 
-		result, err := resolver.KServiceQuery(nil, name, namespace)
+		result, err := resolver.ServiceQuery(nil, name, namespace)
 
 		assert.Error(err)
 		assert.True(gqlerror.IsInternal(err))
@@ -76,7 +76,7 @@ func TestKServiceResolver_KServiceQuery(t *testing.T) {
 
 }
 
-func TestKserviceResolver_KServicesQuery(t *testing.T) {
+func TestserviceResolver_ServicesQuery(t *testing.T) {
 
 	assert := _assert.New(t)
 
@@ -86,7 +86,7 @@ func TestKserviceResolver_KServicesQuery(t *testing.T) {
 		resources := []*v1.Service{
 			resource, resource,
 		}
-		expected := []gqlschema.KService{
+		expected := []gqlschema.Service{
 			{
 				Name: name,
 			},
@@ -95,18 +95,18 @@ func TestKserviceResolver_KServicesQuery(t *testing.T) {
 			},
 		}
 
-		resourceGetter := automock.NewKServiceSvc()
+		resourceGetter := automock.NewServiceSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := automock.NewGqlKServiceConverter()
+		converter := automock.NewGqlServiceConverter()
 		converter.On("ToGQLs", resources).Return(expected, nil)
 		defer converter.AssertExpectations(t)
 
-		resolver := k8s.NewKServiceResolver(resourceGetter)
+		resolver := k8s.NewServiceResolver(resourceGetter)
 		resolver.SetInstanceConverter(converter)
 
-		result, err := resolver.KServicesQuery(nil, namespace, nil, nil)
+		result, err := resolver.ServicesQuery(nil, namespace, nil, nil)
 
 		require.NoError(t, err)
 		assert.Equal(expected, result)
@@ -114,15 +114,15 @@ func TestKserviceResolver_KServicesQuery(t *testing.T) {
 
 	t.Run("NotFound", func(t *testing.T) {
 		var resources []*v1.Service
-		var expected []gqlschema.KService
+		var expected []gqlschema.Service
 
-		resourceGetter := automock.NewKServiceSvc()
+		resourceGetter := automock.NewServiceSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		resolver := k8s.NewKServiceResolver(resourceGetter)
+		resolver := k8s.NewServiceResolver(resourceGetter)
 
-		result, err := resolver.KServicesQuery(nil, namespace, nil, nil)
+		result, err := resolver.ServicesQuery(nil, namespace, nil, nil)
 
 		require.NoError(t, err)
 		assert.Equal(expected, result)
@@ -131,13 +131,13 @@ func TestKserviceResolver_KServicesQuery(t *testing.T) {
 	t.Run("ErrorGetting", func(t *testing.T) {
 		expected := errors.New("test")
 		var resources []*v1.Service
-		resourceGetter := automock.NewKServiceSvc()
+		resourceGetter := automock.NewServiceSvc()
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		resolver := k8s.NewKServiceResolver(resourceGetter)
+		resolver := k8s.NewServiceResolver(resourceGetter)
 
-		result, err := resolver.KServicesQuery(nil, namespace, nil, nil)
+		result, err := resolver.ServicesQuery(nil, namespace, nil, nil)
 
 		require.Error(t, err)
 		assert.True(gqlerror.IsInternal(err))

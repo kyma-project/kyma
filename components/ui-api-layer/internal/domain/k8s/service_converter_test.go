@@ -15,20 +15,20 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 	assert := _assert.New(t)
 
 	t.Run("Nil", func(t *testing.T) {
-		converter := &kserviceConverter{}
+		converter := &serviceConverter{}
 		result := converter.ToGQL(nil)
 		assert.Nil(result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		converter := &kserviceConverter{}
-		expected := &gqlschema.KService{}
+		converter := &serviceConverter{}
+		expected := &gqlschema.Service{}
 		result := converter.ToGQL(&v1.Service{})
 		assert.Equal(expected, result)
 	})
 
 	t.Run("Success", func(t *testing.T) {
-		converter := &kserviceConverter{}
+		converter := &serviceConverter{}
 		in := v1.Service{
 			Spec: v1.ServiceSpec{
 				Ports: []v1.ServicePort{
@@ -60,7 +60,7 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 				},
 			},
 		}
-		expected := gqlschema.KService{
+		expected := gqlschema.Service{
 			Name: "exampleName",
 			Labels: map[string]string{
 				"exampleKey":  "exampleValue",
@@ -91,12 +91,12 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 	})
 }
 
-func TestKServiceConverter_ToGQLs(t *testing.T) {
+func TestServiceConverter_ToGQLs(t *testing.T) {
 
 	assert := _assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
-		converter := kserviceConverter{}
+		converter := serviceConverter{}
 		expectedName := "exampleName"
 		in := []*v1.Service{
 			{
@@ -116,14 +116,14 @@ func TestKServiceConverter_ToGQLs(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		converter := kserviceConverter{}
+		converter := serviceConverter{}
 		var in []*v1.Service
 		result := converter.ToGQLs(in)
 		assert.Empty(result)
 	})
 
 	t.Run("With nil", func(t *testing.T) {
-		converter := kserviceConverter{}
+		converter := serviceConverter{}
 		expectedName := "exampleName"
 		in := []*v1.Service{
 			nil,
@@ -140,7 +140,7 @@ func TestKServiceConverter_ToGQLs(t *testing.T) {
 	})
 }
 
-func TestKServiceConverter_toGQLSchemaServicePort(t *testing.T) {
+func TestServiceConverter_toGQLSchemaServicePort(t *testing.T) {
 
 	assert := _assert.New(t)
 
@@ -171,7 +171,7 @@ func TestKServiceConverter_toGQLSchemaServicePort(t *testing.T) {
 	})
 }
 
-func TestKServiceConverter_toGQLSchemaServiceProtocol(t *testing.T) {
+func TestServiceConverter_toGQLSchemaServiceProtocol(t *testing.T) {
 
 	assert := _assert.New(t)
 

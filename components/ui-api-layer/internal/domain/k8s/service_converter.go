@@ -5,14 +5,14 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-type kserviceConverter struct {
+type serviceConverter struct {
 }
 
-func (c *kserviceConverter) ToGQL(in *v1.Service) *gqlschema.KService {
+func (c *serviceConverter) ToGQL(in *v1.Service) *gqlschema.Service {
 	if in == nil {
 		return nil
 	}
-	return &gqlschema.KService{
+	return &gqlschema.Service{
 		Name:              in.Name,
 		ClusterIP:         in.Spec.ClusterIP,
 		CreationTimestamp: in.CreationTimestamp.Time,
@@ -37,8 +37,8 @@ func toGQLSchemaServiceStatus(s v1.ServiceStatus) gqlschema.ServiceStatus {
 	}
 }
 
-func (c *kserviceConverter) ToGQLs(in []*v1.Service) []gqlschema.KService {
-	var result []gqlschema.KService
+func (c *serviceConverter) ToGQLs(in []*v1.Service) []gqlschema.Service {
+	var result []gqlschema.Service
 	for _, u := range in {
 		converted := c.ToGQL(u)
 		if converted != nil {

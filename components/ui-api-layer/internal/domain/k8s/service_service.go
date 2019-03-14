@@ -14,22 +14,22 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type kserviceService struct {
+type serviceService struct {
 	client   corev1.CoreV1Interface
 	informer cache.SharedIndexInformer
 	notifier resource.Notifier
 }
 
-func newKserviceService(informer cache.SharedIndexInformer) *kserviceService {
+func newServiceService(informer cache.SharedIndexInformer) *serviceService {
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
-	return &kserviceService{
+	return &serviceService{
 		informer: informer,
 		notifier: notifier,
 	}
 }
 
-func (svc *kserviceService) List(namespace string, pagingParams pager.PagingParams) ([]*v1.Service, error) {
+func (svc *serviceService) List(namespace string, pagingParams pager.PagingParams) ([]*v1.Service, error) {
 	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", namespace).Limit(pagingParams)
 	if err != nil {
 		return nil, err
@@ -51,7 +51,7 @@ func (svc *kserviceService) List(namespace string, pagingParams pager.PagingPara
 	return services, nil
 }
 
-func (svc *kserviceService) Find(name, namespace string) (*v1.Service, error) {
+func (svc *serviceService) Find(name, namespace string) (*v1.Service, error) {
 
 	key := fmt.Sprintf("%s/%s", namespace, name)
 
@@ -68,26 +68,26 @@ func (svc *kserviceService) Find(name, namespace string) (*v1.Service, error) {
 	return service, nil
 }
 
-func (svc *kserviceService) ensureTypeMeta(service *v1.Service) {
+func (svc *serviceService) ensureTypeMeta(service *v1.Service) {
 	service.TypeMeta = svc.serviceTypeMetadata()
 }
 
-func (svc *kserviceService) serviceTypeMetadata() metav1.TypeMeta {
+func (svc *serviceService) serviceTypeMetadata() metav1.TypeMeta {
 	return metav1.TypeMeta{
 		Kind:       "Service",
 		APIVersion: "v1",
 	}
 }
 
-func (svc *kserviceService) Subscribe(listener resource.Listener) {
+func (svc *serviceService) Subscribe(listener resource.Listener) {
 	svc.notifier.AddListener(listener)
 }
 
-func (svc *kserviceService) Unsubscribe(listener resource.Listener) {
+func (svc *serviceService) Unsubscribe(listener resource.Listener) {
 	svc.notifier.DeleteListener(listener)
 }
 
-func (svc *kserviceService) Update(name, namespace string, update v1.Service) (*v1.Service, error) {
+func (svc *serviceService) Update(name, namespace string, update v1.Service) (*v1.Service, error) {
 	err := svc.checkUpdatePreconditions(name, namespace, update)
 	if err != nil {
 		return nil, err
@@ -103,11 +103,11 @@ func (svc *kserviceService) Update(name, namespace string, update v1.Service) (*
 	return updated, nil
 }
 
-func (svc *kserviceService) Delete(name, namespace string) error {
+func (svc *serviceService) Delete(name, namespace string) error {
 	return svc.client.Services(namespace).Delete(name, nil)
 }
 
-func (svc *kserviceService) checkUpdatePreconditions(name string, namespace string, update v1.Service) error {
+func (svc *serviceService) checkUpdatePreconditions(name string, namespace string, update v1.Service) error {
 	errorList := field.ErrorList{}
 	if name != update.Name {
 		errorList = append(errorList, field.Invalid(field.NewPath("metadata.name"), update.Name, fmt.Sprintf("name of updated object does not match the original (%s)", name)))
