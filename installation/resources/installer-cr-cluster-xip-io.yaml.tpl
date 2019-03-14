@@ -9,13 +9,13 @@ metadata:
 spec:
   version: "__VERSION__"
   url: "__URL__"
-  components:
+  components: 
     - name: "cluster-essentials"
       namespace: "kyma-system"
     - name: "istio"
       namespace: "istio-system"
-    - name: "knative"
-      namespace: "istio-system" # KNative comes with namespaces hardcoded so this one is only for installer
+    - name: "xip-patch"
+      namespace: "kyma-installer"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     - name: "prometheus-operator"
@@ -38,10 +38,8 @@ spec:
       namespace: "kyma-system"
     - name: "event-bus"
       namespace: "kyma-system"
-    - name: "application-connector-ingress"
-      namespace: "kyma-system"
     - name: "application-connector"
-      namespace: "kyma-integration"
+      namespace: "kyma-system"
     - name: "ark"
       namespace: "heptio-ark"
     - name: "logging"
