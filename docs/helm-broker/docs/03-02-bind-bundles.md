@@ -87,6 +87,7 @@ In this example, the Helm Broker returns the following values:
 - All the key-value pairs fetched from the `redis-config` ConfigMap.
 - All the key-value pairs fetched from the `redis-v2-secrets` Secrets.
 
+
 ### Credential name conflicts policy
 
 The following rules apply in case of credential name conflicts:

@@ -3,30 +3,17 @@ title: Create a bundle
 type: Details
 ---
 
-Bundles which the Helm Broker uses must have a specific structure. These are the obligatory files that you must include in your bundle:
+Bundles which the Helm Broker uses must have a specific structure. These are all possible files that you can include in your bundle:
 
 ```
 sample-bundle/
-  ├── meta.yaml                             # A file which contains metadata information about this bundle
-  ├── chart/                                # A directory which contains a Helm chart that installs your Kubernetes resources      
-  │    └── {chart-name}/                    # A Helm chart directory
-  │         └── ....                        # Helm chart files          
-  └── plans/                                # A directory which contains the possible plans for an installed chart
-       └── example-enterprise               # A directory of files for a specific plan
-           └── meta.yaml                    # A file which contains metadata information about this plan
- ```
-
-However, your bundle can be more complex, depending on its purpose and setup. These are all possible files that you can include:
-
-```
-sample-bundle/
-  ├── meta.yaml                             
-  ├── chart/                                
-  │    └── {chart-name}/                    
-  │         └── ....                        
-  └── plans/                                
-       ├── example-enterprise               
-       │   ├── meta.yaml                    
+  ├── meta.yaml                             # [REQUIRED] A file which contains metadata information about this bundle
+  ├── chart/                                # [REQUIRED] A directory which contains a Helm chart that installs your Kubernetes
+  │    └── {chart-name}/                    # [REQUIRED] A Helm chart directory
+  │         └── ....                        # [REQUIRED] Helm chart files   
+  └── plans/                                # [REQUIRED] A directory which contains the possible plans for an installed chart
+       ├── example-enterprise               # [REQUIRED] A directory of files for a specific plan
+       │   ├── meta.yaml                    # [REQUIRED] A file which contains metadata information about this plan
        │   ├── bind.yaml                    # A file which contains information required to bind a given plan
        │   ├── create-instance-schema.json  # JSON schema definitions for creating a ServiceInstance
        │   ├── bind-instance-schema.json    # JSON schema definitions for binding a ServiceInstance
@@ -56,7 +43,7 @@ The `meta.yaml` file contains information about the bundle. Set the following fi
 |   **longDescription**   |   NO  | A long description of the service.     |
 |   **documentationURL**  |   NO  | A link to the documentation page for the service.        |
 |      **supportURL**     |   NO  | A link to the support page for the service.     |
-|       **imageURL**      |   NO  | The URL to an image. You must provide the image as an SVG.          |
+|       **imageURL**      |   NO  | The URL to an image. You must provide the image in the `SVG` format.          |
 |       **labels**        |   NO  | Key/value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
 | **bindingsRetrievable** |   NO  | A field that specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
 |   **planUpdatable**     |   NO  |  A field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |

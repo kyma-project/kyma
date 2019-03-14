@@ -31,4 +31,4 @@ entries:
     - name: redis
       description: Redis service
       version: 0.0.1
-      ```
+```
