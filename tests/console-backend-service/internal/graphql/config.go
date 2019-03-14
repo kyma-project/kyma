@@ -66,7 +66,7 @@ func loadConfig(userContext User) (config, error) {
 
 	graphQLEndpoint := env.GraphQLEndpoint
 	if graphQLEndpoint == "" {
-		graphQLEndpoint = fmt.Sprintf("https://ui-api.%s/graphql", env.Domain)
+		graphQLEndpoint = fmt.Sprintf("https://console-backend.%s/graphql", env.Domain)
 	}
 	config.GraphQLEndpoint = graphQLEndpoint
 

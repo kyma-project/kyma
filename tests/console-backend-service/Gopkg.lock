@@ -142,7 +142,7 @@
   version = "v0.1.28"
 
 [[projects]]
-  digest = "1:fb0f3e3676556703c5fcba926bc68edb20bb2ea109528326593ed3d47238edd5"
+  digest = "1:6a916db8e64c705910ab22e9e2ca0e2dc2b8a68b94a7cf17120302250678b440"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
@@ -150,18 +150,18 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
-    "components/idppreset/pkg/apis/authentication/v1alpha1",
-    "components/idppreset/pkg/client/clientset/versioned",
-    "components/idppreset/pkg/client/clientset/versioned/scheme",
-    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
     "components/console-backend-service/pkg/apis/ui",
     "components/console-backend-service/pkg/apis/ui/v1alpha1",
     "components/console-backend-service/pkg/client/clientset/versioned",
     "components/console-backend-service/pkg/client/clientset/versioned/scheme",
     "components/console-backend-service/pkg/client/clientset/versioned/typed/ui/v1alpha1",
+    "components/idppreset/pkg/apis/authentication/v1alpha1",
+    "components/idppreset/pkg/client/clientset/versioned",
+    "components/idppreset/pkg/client/clientset/versioned/scheme",
+    "components/idppreset/pkg/client/clientset/versioned/typed/authentication/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "ab3d772008f8b831dc831882fe7fdb9665b1fdb7"
+  revision = "7cacbc23728d59fb589482afe2059eee5797b61d"
 
 [[projects]]
   digest = "1:d946fa644b263e26091e0ae20cd12ee958ab869926abbc2d111fbd39902f91eb"
@@ -481,9 +481,9 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
-    "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
     "github.com/machinebox/graphql",
     "github.com/mitchellh/mapstructure",
     "github.com/pkg/errors",
