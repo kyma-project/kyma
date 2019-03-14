@@ -177,6 +177,9 @@
 # The `knative-eventing` chart
 /resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
+# The `knative-build` chart
+/resources/knative-build/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @joergbastian
+
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
