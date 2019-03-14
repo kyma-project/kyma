@@ -31,61 +31,61 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   api_controller:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   api_controller_acceptance_tests:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   configurations_generator:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   docs:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   namespace_controller:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   etcd_backup_job:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   kubeless_integration_tests:
     dir: tests/
-    version: 0.8.0-rc1
+    version: 0.8.0
   kubeless_tests:
     dir: 
-    version: 0.8.0-rc1
+    version: 0.8.0
   test_apiserver_proxy:
     dir: 
-    version: 0.8.0-rc1
+    version: 0.8.0
   test_namespace_controller:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   ui_api_layer:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   ui_api_layer_acceptance_tests:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   cluster_users_test:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   xip_patch:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   kubeless_images:
     runtime:
       node6:
         dir:
-        version: 0.8.0-rc1
+        version: 0.8.0
       node8:
         dir:
-        version: 0.8.0-rc1
+        version: 0.8.0
     installation:
       node6:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"

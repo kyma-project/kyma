@@ -3,52 +3,22 @@ title: Install Kyma on a GKE cluster
 type: Installation
 ---
 
-This Installation guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster. Kyma is installed on a cluster using a proprietary installer based on a Kubernetes operator.
-By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster. 
+This Installation guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster. Kyma installs on a cluster using a proprietary installer based on a Kubernetes operator.
 
 ## Prerequisites
+- A domain for your GKE cluster
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
 - [Kubernetes](https://kubernetes.io/) 1.12
 - Tiller 2.10.0 or higher
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
-- A domain for your GKE cluster (optional)
 
-## Prepare the GKE cluster
+>**NOTE:** If you don't own a domain which you can use or you don't want to assign a domain to a cluster, see [this](#installation-install-kyma-on-a-gke-cluster-with-wildcard-dns) document which shows you how to create a cluster-based playground environment using a wildcard DNS provided by xip.io.
 
-1. Select a name for your cluster. Set the cluster name and the name of your GCP project as environment variables. Run:
-    ```
-    export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
-    export PROJECT={YOUR_GCP_PROJECT}
-    ```
+## DNS setup
 
-2. Create a cluster in the `europe-west1` region. Run:
-    ```
-    gcloud container --project "$PROJECT" clusters \
-    create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.12.5" --machine-type "n1-standard-2" \
-    --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
-    ```
-
-3. Install Tiller on your GKE cluster. Run:
-
-    ```
-    kubectl apply -f installation/resources/tiller.yaml
-    ```
-
-4. Add your account as the cluster administrator:
-    ```
-    kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
-    ```
-
-## DNS setup and TLS certificate generation
-
->**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section. 
-
-### Delegate the management of your domain to Google Cloud DNS
-
-Follow these steps:
+Delegate the management of your domain to Google Cloud DNS. Follow these steps:
 
 1. Export the domain name, project name, and DNS zone name as environment variables. Run the commands listed below:
 
@@ -85,7 +55,7 @@ Follow these steps:
     ```
     A successful response returns the list of the name servers you fetched from GCP.
 
-### Get the TLS certificate
+## Get the TLS certificate
 
 1. Create a folder for certificates. Run:
     ```
@@ -124,11 +94,30 @@ Follow these steps:
     export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64 | sed 's/ /\\ /g')
     ```
 
+## Prepare the GKE cluster
+
+1. Select a name for your cluster and set it as an environment variable. Run:
+    ```
+    export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
+    ```
+
+2. Create a cluster in the `europe-west1` region. Run:
+    ```
+    gcloud container --project "$PROJECT" clusters \
+    create "$CLUSTER_NAME" --zone "europe-west1-b" \
+    --cluster-version "1.12.5" --machine-type "n1-standard-2" \
+    --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
+    ```
+
+3. Install Tiller on your GKE cluster. Run:
+
+    ```
+    kubectl apply -f installation/resources/tiller.yaml
+    ```
+
 ## Prepare the installation configuration file
 
 ### Using the latest GitHub release
-
->**NOTE:** You can use Kyma version 0.8 or higher.
 
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.
 
@@ -143,16 +132,9 @@ Follow these steps:
    wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-cluster.yaml
    ```
 
-4. Prepare the deployment file.
-
-    - Run this command if you use the `xip.io` default domain:
+4. Update the file with the values from your environment variables. Merge files from step 3 to one `my-kyma.yaml` file. Run:
     ```
-    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__.*__//g" > my-kyma.yaml
-    ```
-
-    - Run this command if you use your own domain:
-    ```
-    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g"|sed -e "s/__.*__//g"  >my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
@@ -170,23 +152,20 @@ Follow these steps:
 
 3. Push the image to your Docker Hub:
     ```
-    docker tag kyma-installer:latest {YOUR_DOCKER_LOGIN}/kyma-installer:latest
-    docker push {YOUR_DOCKER_LOGIN}/kyma-installer:latest
+    docker tag kyma-installer:latest [YOUR_DOCKER_LOGIN]/kyma-installer:latest
+    ```
+    ```
+    docker push [YOUR_DOCKER_LOGIN]/kyma-installer:latest
     ```
 
 4. Prepare the deployment file:
 
-    - Run this command if you use the `xip.io` default domain:
     ```
-    (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__.*__//g" > my-kyma.yaml
-    ```
-
-    - Run this command if you use your own domain:
-    ```
-    (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    cat installation/resources/installer.yaml <(echo -e "\n---") installation/resources/installer-config-cluster.yaml.tpl  <(echo -e "\n---") installation/resources/installer-cr-cluster.yaml.tpl | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ([YOUR_DOCKER_LOGIN]/kyma-installer:latest). Use the modified file to deploy Kyma on your GKE cluster.
+
 
 ## Deploy Kyma
 
@@ -194,23 +173,25 @@ Follow these steps:
     ```
     gcloud container clusters get-credentials $CLUSTER_NAME --zone europe-west1-b --project $PROJECT
     ```
-
-2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
+2. Add your account as the cluster administrator:
+    ```
+    kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
+    ```
+3. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
     ```
     kubectl apply -f my-kyma.yaml
     ```
-
-3. Check if the Pods of Tiller and the Kyma Installer are running:
+4. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
     kubectl get pods --all-namespaces
     ```
 
-4. Start Kyma installation:
+5. Start Kyma installation:
     ```
     kubectl label installation/kyma-installation action=install
     ```
 
-5. To watch the installation progress, run:
+6. To watch the installation progress, run:
     ```
     while true; do \
       kubectl -n default get installation/kyma-installation -o jsonpath="{'Status: '}{.status.state}{', description: '}{.status.description}"; echo; \
@@ -223,51 +204,54 @@ Follow these steps:
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
-## Add the xip.io self-signed certificate to your OS trusted certificates
-
->**NOTE:** Skip this section if you use your own domain.
-
-After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS run:
-```
-tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-&& kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
-&& sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
-&& rm $tmpfile
-```
 
 ## Configure DNS for the cluster load balancer
 
-1. Export the domain of your cluster and DNS zone as environment variables. Run:
-    ```
-    export DOMAIN=$(kubectl get cm installation-config-overrides -n kyma-installer -o jsonpath='{.data.global\.domainName}')
-    export DNS_ZONE={YOUR_DNS_ZONE}
-    ```
-
-2. To add DNS entries, run these commands:
-    ```
-    export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-
-    export APISERVER_PUBLIC_IP=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-    
-    export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-
-    gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
-
-    gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
-
-    gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
-    
-    gcloud dns --project=$PROJECT record-sets transaction add APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
-
-    gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
-    ```
-
-## Access the cluster
-
-Access your cluster under this address:
+Run these commands:
 
 ```
-https://console.{DOMAIN}
+export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+
+export APISERVER_PUBLIC_IP=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+
+export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+
+gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
+
+gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
+
+gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
+
+gcloud dns --project=$PROJECT record-sets transaction add APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
+
+gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
 ```
 
->**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see [this](#installation-install-kyma-locally-from-the-release-access-the-kyma-console) document.
+## Prepare your Kyma deployment for production use
+
+To use the cluster in a production environment, it is recommended you configure a new server-side certificate for the Application Connector and replace the placeholder certificate it installs with.
+If you don't generate a new certificate, the system uses the placeholder certificate. As a result, the security of your implementation is compromised.
+
+Follow this steps to configure a new, more secure certificate suitable for production use.
+
+1. Generate a new certificate and key. Run:
+
+    ```
+    openssl req -new -newkey rsa:4096 -nodes -keyout ca.key -out ca.csr -subj "/C=PL/ST=N/L=GLIWICE/O=SAP Hybris/OU=Kyma/CN=wormhole.kyma.cx"
+
+    openssl x509 -req -sha256 -days 365 -in ca.csr -signkey ca.key -out ca.pem
+    ```
+
+2. Export the certificate and key to environment variables:
+
+    ```
+    export AC_CRT=$(cat ./ca.pem | base64 | base64)
+    export AC_KEY=$(cat ./ca.key | base64 | base64)
+
+    ```
+
+3. Prepare installation file with the following command:
+
+    ```
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") cat kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__REMOTE_ENV_CA__/$AC_CRT/g" | sed -e "s/__REMOTE_ENV_CA_KEY__/$AC_KEY/g" |sed -e "s/__.*__//g"  >my-kyma.yaml
+    ```

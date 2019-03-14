@@ -21,7 +21,4 @@ spec:
           value: {{ .Values.global.loadBalancerIP }}
         - name: INGRESSGATEWAY_SERVICE_NAME
           value: {{ $serviceName }}
-        - name: PUBLIC_DOMAIN
-          value: {{ .Values.global.domainName }}
-        - name: TLS_CERT
-          value: {{ .Values.global.tlsCrt }}
+          
