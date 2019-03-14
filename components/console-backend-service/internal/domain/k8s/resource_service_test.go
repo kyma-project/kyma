@@ -52,10 +52,10 @@ func TestResourceService_Create(t *testing.T) {
 
 			if testCase.success {
 				require.NoError(t, err)
-				assert.NotEmpty(t, result)
+				assert.NotNil(t, result)
 			} else {
 				require.Error(t, err)
-				assert.Empty(t, result)
+				assert.Nil(t, result)
 			}
 
 		})

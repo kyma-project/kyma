@@ -14,7 +14,7 @@ import (
 
 //go:generate mockery -name=resourceSvc -output=automock -outpkg=automock -case=underscore
 type resourceSvc interface {
-	Create(namespace string, resource types.Resource) (types.Resource, error)
+	Create(namespace string, resource types.Resource) (*types.Resource, error)
 }
 
 //go:generate mockery -name=gqlResourceConverter -output=automock -outpkg=automock -case=underscore

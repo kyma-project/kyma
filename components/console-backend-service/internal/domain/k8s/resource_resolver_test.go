@@ -46,7 +46,7 @@ func TestResourceResolver_CreateResourceMutation(t *testing.T) {
 		createdResource.Body = body
 
 		svc := automock.NewResourceSvc()
-		svc.On("Create", namespace, resource).Return(createdResource, nil).Once()
+		svc.On("Create", namespace, resource).Return(&createdResource, nil).Once()
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLResourceConverter()
@@ -91,7 +91,7 @@ func TestResourceResolver_CreateResourceMutation(t *testing.T) {
 		createdResource.Body = body
 
 		svc := automock.NewResourceSvc()
-		svc.On("Create", namespace, resource).Return(types.Resource{}, expected).Once()
+		svc.On("Create", namespace, resource).Return(nil, expected).Once()
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLResourceConverter()
@@ -117,7 +117,7 @@ func TestResourceResolver_CreateResourceMutation(t *testing.T) {
 		createdResource.Body = body
 
 		svc := automock.NewResourceSvc()
-		svc.On("Create", namespace, resource).Return(createdResource, nil).Once()
+		svc.On("Create", namespace, resource).Return(&createdResource, nil).Once()
 		defer svc.AssertExpectations(t)
 
 		converter := automock.NewGQLResourceConverter()

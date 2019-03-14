@@ -22,16 +22,16 @@ func newResourceService(client discovery.DiscoveryInterface) *resourceService {
 	}
 }
 
-func (svc *resourceService) Create(namespace string, resource types.Resource) (types.Resource, error) {
+func (svc *resourceService) Create(namespace string, resource types.Resource) (*types.Resource, error) {
 	if namespace != resource.Namespace {
-		return types.Resource{}, apierror.NewInvalid(pretty.Resource, apierror.ErrorFieldAggregate{
+		return nil, apierror.NewInvalid(pretty.Resource, apierror.ErrorFieldAggregate{
 			apierror.NewInvalidField("namespace", resource.Namespace, fmt.Sprintf("namespace of provided object does not match the namespace sent on the request (%s)", namespace)),
 		})
 	}
 
 	pluralName, err := extractor.GetPluralNameFromKind(resource.Kind, resource.APIVersion, svc.client)
 	if err != nil {
-		return types.Resource{}, errors.Wrap(err, "while getting resource's plural name")
+		return nil, errors.Wrap(err, "while getting resource's plural name")
 	}
 
 	result := svc.client.RESTClient().Post().
@@ -42,15 +42,15 @@ func (svc *resourceService) Create(namespace string, resource types.Resource) (t
 		Do()
 	err = result.Error()
 	if err != nil {
-		return types.Resource{}, errors.Wrap(err, "while creating resource")
+		return nil, errors.Wrap(err, "while creating resource")
 	}
 
 	body, err := result.Raw()
 	if err != nil {
-		return types.Resource{}, errors.Wrap(err, "while creating resource")
+		return nil, errors.Wrap(err, "while creating resource")
 	}
 
-	return types.Resource{
+	return &types.Resource{
 		APIVersion: resource.APIVersion,
 		Name:       resource.Name,
 		Namespace:  resource.Namespace,
