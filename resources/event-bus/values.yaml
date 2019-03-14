@@ -16,11 +16,13 @@ global:
     clusterID: "kyma-nats-streaming"
   publish:
     maxRequests: 16
+    maxRequestSize: 65536
     resources:
       limits:
         memory: "32M"
   publishKnative:
     maxRequests: 16
+    maxRequestSize: 65536
     resources:
       limits:
         memory: "32M"

@@ -34,7 +34,7 @@ global:
     version: e12b49fc
   api_controller:
     dir: develop/
-    version: bc120200
+    version: "0bcf18a4"
   api_controller_acceptance_tests:
     dir: develop/
     version: 736988df
