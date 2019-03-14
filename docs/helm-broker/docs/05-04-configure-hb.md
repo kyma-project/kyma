@@ -37,7 +37,7 @@ By default, the Helm Broker fetches bundles from the newest release of the [`bun
 
     Then, run:
     ```bash
-    kubectl apply {configmap_name}
+    kubectl apply helm-repos-configs
     ```
 
 The Helm Broker triggers the Service Catalog synchronization automatically. New ClusterServiceClasses appear after a few seconds.
