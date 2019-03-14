@@ -25,12 +25,14 @@ type Client interface {
 type client struct {
 	timeoutDuration int
 	tokenCache      TokenCache
+	requestToken    func(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError)
 }
 
 func NewCSRFClient(timeoutDuration int, tokenCache TokenCache) Client {
 	return &client{
 		timeoutDuration: timeoutDuration,
 		tokenCache:      tokenCache,
+		requestToken:    requestToken,
 	}
 }
 
@@ -43,7 +45,7 @@ func (c *client) GetTokenEndpointResponse(csrfEndpointURL string, strategy autho
 		return resp, nil
 	}
 
-	tokenResponse, err := c.requestToken(csrfEndpointURL, strategy)
+	tokenResponse, err := c.requestToken(csrfEndpointURL, strategy, c.timeoutDuration)
 	if err != nil {
 		return nil, err
 	}
@@ -58,7 +60,7 @@ func (c *client) InvalidateTokenCache(csrfEndpointURL string) {
 	c.tokenCache.Remove(csrfEndpointURL)
 }
 
-func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError) {
+func requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError) {
 
 	//TODO: DEBUG
 	log.Printf("requestToken: csrfEndpointURL=%s", csrfEndpointURL)
@@ -77,7 +79,7 @@ func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Str
 
 	setCSRFSpecificHeaders(tokenRequest)
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(c.timeoutDuration)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeoutDuration)*time.Second)
 	defer cancel()
 	requestWithContext := tokenRequest.WithContext(ctx)
 
