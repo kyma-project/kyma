@@ -205,8 +205,8 @@
 # Helm broker controller Component
 /components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# UI API Layer Component
-/components/ui-api-layer/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+# Console Backend Service Component
+/components/console-backend-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # IDPPreset Component
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
