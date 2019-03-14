@@ -8,7 +8,7 @@ The `bind.yaml` file supports the [Service Catalog](https://github.com/kubernete
 
 >**NOTE:** Resolving the values from the `bind.yaml` file is a post-provision action. If this operation ends with an error, the provisioning also fails.
 
-In the `bind.yaml` file, you can use the Helm Chart templates directives.
+In the `bind.yaml` file, you can use the Helm chart templates directives. See the example:
 
 ```yaml
 # bind.yaml
