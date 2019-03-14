@@ -67,7 +67,7 @@ fi
 # GO TEST
 ##
 echo "? go test"
-go test ./...
+go test -v ./...
 # Check if tests passed
 if [[ $? != 0 ]]; then
 	echo -e "${RED}✗ go test\n${NC}"

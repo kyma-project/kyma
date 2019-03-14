@@ -16,7 +16,7 @@ const (
 // Formatter is a log formatter
 type Formatter struct{}
 
-// Format formats log entry to adhere to YaaS specs
+// Format formats log entry
 func (f *Formatter) Format(entry *logrus.Entry) ([]byte, error) {
 	data := make(logrus.Fields, len(entry.Data)+2)
 

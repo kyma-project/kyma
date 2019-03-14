@@ -12,7 +12,6 @@ metadata:
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  # "namespace" omitted since ClusterRoles are not namespaced
   name: test-{{ template "fullname" . }}
   labels:
     app: {{ template "name" . }}
