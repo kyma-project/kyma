@@ -36,6 +36,8 @@ Follow these installation guides to install Kyma locally:
 You can also install Kyma depending on the supported cloud providers:
 - [Install Kyma on a GKE cluster](#installation-install-kyma-on-a-gke-cluster)
 - [Install Kyma on an AKS cluster](#installation-install-kyma-on-an-aks-cluster)
+- [Install Kyma on a GKE cluster with the wildcard DNS](#installation-install-kyma-on-a-gke-cluster-with-wildcard-dns)
+- [Install Kyma on an AKS cluster with the wildcard DNS](#installation-install-kyma-on-an-aks-cluster-with-wildcard-dns)
 
 Read rest of the installation documents to learn how to:
 - [Install Kyma with Knative](#installation-installation-with-knative)
