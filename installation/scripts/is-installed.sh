@@ -105,6 +105,12 @@ do
   else 
     echo "Status: ${STATUS}, description: ${DESC}"
     if [ "$TIMEOUT_SET" -ne 0 ] && [ "$ITERATIONS_LEFT" -le 0 ]; then
+      kubectl get installation  kyma-installation -o go-template --template='{{- range .status.errorLog }}
+{{.component}}:
+  {{.log}}
+{{- end}}
+'
+      echo "----------"
       echo "timeout reached. Exiting"
       exit 1
     fi
