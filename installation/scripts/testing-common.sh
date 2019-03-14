@@ -1,14 +1,20 @@
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source ${ROOT_PATH}/utils.sh
 
+function context_arg() {
+    if [ -n "$KUBE_CONTEXT" ]; then
+        echo "--context $KUBE_CONTEXT"
+    fi
+}
+
 function printLogsFromFailedHelmTests() {
     local namespace=$1
 
-    for POD in $(kubectl get pods -n ${namespace} -l helm-chart-test=true --show-all -o jsonpath='{.items[*].metadata.name}')
+    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} -l helm-chart-test=true --show-all -o jsonpath='{.items[*].metadata.name}')
     do
         log "Testing '${POD}'" nc bold
 
-        phase=$(kubectl get pod ${POD} -n ${namespace} -o jsonpath="{ .status.phase }")
+        phase=$(kubectl $(context_arg)  get pod ${POD} -n ${namespace} -o jsonpath="{ .status.phase }")
 
         case ${phase} in
         "Failed")
@@ -22,7 +28,7 @@ function printLogsFromFailedHelmTests() {
         "Pending")
             log "'${POD}' failed due to too long Pending status" red
             printf "Fetching events from '${POD}':\n"
-            kubectl describe po ${POD} -n ${namespace} | awk 'x==1 {print} /Events:/ {x=1}'
+            kubectl $(context_arg)  describe po ${POD} -n ${namespace} | awk 'x==1 {print} /Events:/ {x=1}'
         ;;
         "Unknown")
             log "'${POD}' failed with Unknown status" red
@@ -45,7 +51,7 @@ function printLogsFromPod() {
     local namespace=$1 pod=$2
     local tailLimit=2000 bytesLimit=500000
     log "Fetching logs from '${pod}' with options tailLimit=${tailLimit} and bytesLimit=${bytesLimit}" nc bold
-    result=$(kubectl logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} ${pod})
+    result=$(kubectl $(context_arg)  logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} ${pod})
     if [ "${#result}" -eq 0 ]; then
         log "FAILED" red
         return 1
@@ -58,9 +64,9 @@ function checkTestPodTerminated() {
 
     runningPods=false
 
-    for POD in $(kubectl get pods -n ${namespace} -l helm-chart-test=true --show-all -o jsonpath='{.items[*].metadata.name}')
+    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} -l helm-chart-test=true --show-all -o jsonpath='{.items[*].metadata.name}')
     do
-        phase=$(kubectl get pod "$POD" -n ${namespace} -o jsonpath="{ .status.phase }")
+        phase=$(kubectl $(context_arg)  get pod "$POD" -n ${namespace} -o jsonpath="{ .status.phase }")
         # A Pod's phase  Failed or Succeeded means pod has terminated.
         # see: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-phase
         if [ "${phase}" !=  "Succeeded" ] && [ "${phase}" != "Failed" ]
@@ -82,12 +88,12 @@ function checkTestPodLabel() {
     err=false
 
     log "Test pods should be marked with label 'helm-chart-test=true'. Checking..." nc bold
-    for POD in $(kubectl get pods -n ${namespace} --show-all -o jsonpath='{.items[*].metadata.name}')
+    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} --show-all -o jsonpath='{.items[*].metadata.name}')
     do
-        annotation=$(kubectl get pod "$POD" -n ${namespace} -o jsonpath="{ .metadata.annotations.helm\.sh/hook }")
+        annotation=$(kubectl $(context_arg)  get pod "$POD" -n ${namespace} -o jsonpath="{ .metadata.annotations.helm\.sh/hook }")
         if [ "${annotation}" == "test-success" ] || [ "${annotation}" == "test-failure" ]
         then
-            helmLabel=$(kubectl get pod "${POD}" -n ${namespace} -o jsonpath="{ .metadata.labels.helm-chart-test }" )
+            helmLabel=$(kubectl $(context_arg)  get pod "${POD}" -n ${namespace} -o jsonpath="{ .metadata.labels.helm-chart-test }" )
             if [ "${helmLabel}" != "true" ];
             then
                 err=true
@@ -108,7 +114,7 @@ function cleanupHelmTestPods() {
     local namespace=$1
 
     log "\nCleaning up helm test pods in namespace ${namespace}" nc bold
-    kubectl delete pod -n ${namespace} -l helm-chart-test=true
+    kubectl $(context_arg)  delete pod -n ${namespace} -l helm-chart-test=true
     deleteErr=$?
     if [ ${deleteErr} -ne 0 ]
     then
@@ -161,7 +167,7 @@ function checkAndCleanupTest() {
 
 function printImagesWithLatestTag() {
 
-    local images=$(kubectl get pods --all-namespaces -o jsonpath="{..image}" |\
+    local images=$(kubectl $(context_arg)  get pods --all-namespaces -o jsonpath="{..image}" |\
     tr -s '[[:space:]]' '\n' |\
     grep ":latest")
 
