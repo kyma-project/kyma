@@ -75,8 +75,7 @@ required = [
 
 [[override]]
   name = "github.com/knative/eventing"
-  # HEAD as of 2018-12-05
-  revision = "604de5d66f1692af13f9c7fb7e25f554b2f5bba9"
+  version = "v0.4.1"
 
 [prune]
   go-tests = true
