@@ -1,6 +1,9 @@
 package csrf_test
 
 import (
+	"net/http"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf/mocks"
@@ -8,8 +11,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"net/http"
-	"testing"
 )
 
 const (
@@ -42,7 +43,6 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 			}
 
 			c.On("GetTokenEndpointResponse", testCSRFTokenEndpointURL, authStrategy).Return(cachedItem, nil)
-
 
 			// when
 			err := s.AddCSRFToken(req)
@@ -85,7 +85,6 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 			sf := csrf.NewTokenStrategyFactory(c)
 
 			s := sf.Create(nil, "")
-
 
 			// when
 			err := s.AddCSRFToken(req)
