@@ -20,9 +20,7 @@ Environment parameters used by the tests:
 | **TEST_EXECUTOR_IMAGE** | No | Same version as the Helm test image  | Image name of the test executor created by the Helm test  | `user/my-image:1.0.0` |
 
 
-## Testing process
+## Development
 
-As the Helm test pod can not be injected with Istio Proxy sidecar, which is required to communicate with the Application Gateway, the test creates a pod which carries out the test (`executor`).
-
-
-
+Project contains of two applications Helm Test and Test Executor.
+Test Executor pod is managed by Helm Test.

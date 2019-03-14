@@ -153,22 +153,24 @@ func (ts *TestSuite) GetTestExecutorLogs(t *testing.T) {
 	require.NoError(t, err)
 
 	defer reader.Close()
-	testExecutorLogs, err := ioutil.ReadAll(reader)
+
+	bytes, err := ioutil.ReadAll(reader)
 	require.NoError(t, err)
 
-	strLogs := string(testExecutorLogs)
+	strLogs := strings.Replace(string(bytes), "\\t", "    ", -1)
 
-	strLogs = strings.Replace(strLogs, "\\n", "\n", -1)
-	strLogs = strings.Replace(strLogs, "\\t", "\t", -1)
-
-	log.Infof(strLogs)
+	log.Infoln("--------------------------------------------Logs from test executor--------------------------------------------")
+	lines := strings.Split(strLogs, "\n")
+	for _, l := range lines {
+		log.Infoln(l)
+	}
+	log.Info("--------------------------------------------End of logs from test executor--------------------------------------------")
 }
 
 func (ts *TestSuite) DeleteTestExecutorPod(t *testing.T) {
 	err := ts.podClient.Delete(ts.testExecutorName, &metav1.DeleteOptions{})
 	if err != nil {
 		if !errors.IsNotFound(err) {
-			// TODO some retry?
 			t.Logf("Failed to delete test executor: %s", err.Error())
 			t.FailNow()
 		}
