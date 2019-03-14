@@ -21,7 +21,6 @@ func (svc *oauth) ToCredentials(secretData SecretData, appCredentials *applicati
 			ClientID:     clientId,
 			ClientSecret: clientSecret,
 			URL:          appCredentials.AuthenticationUrl,
-			CSRFInfo:     convertToModelCSRInfo(appCredentials),
 		},
 	}
 }
@@ -35,12 +34,10 @@ func (svc *oauth) CreateSecretData(credentials *model.Credentials) (SecretData, 
 }
 
 func (svc *oauth) ToCredentialsInfo(credentials *model.Credentials, secretName string) applications.Credentials {
-
 	applicationCredentials := applications.Credentials{
 		AuthenticationUrl: credentials.Oauth.URL,
 		Type:              applications.CredentialsOAuthType,
 		SecretName:        secretName,
-		CSRFInfo:          toAppCSRFInfo(credentials),
 	}
 
 	return applicationCredentials

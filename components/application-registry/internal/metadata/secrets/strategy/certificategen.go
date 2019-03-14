@@ -25,7 +25,6 @@ func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *
 	return model.Credentials{
 		CertificateGen: &model.CertificateGen{
 			CommonName: commonName,
-			CSRFInfo:   convertToModelCSRInfo(appCredentials),
 		},
 	}
 }
@@ -47,7 +46,6 @@ func (svc *certificateGen) ToCredentialsInfo(credentials *model.Credentials, sec
 	applicationCredentials := applications.Credentials{
 		Type:       applications.CredentialsCertificateGenType,
 		SecretName: secretName,
-		CSRFInfo:   toAppCSRFInfo(credentials),
 	}
 
 	return applicationCredentials

@@ -46,20 +46,6 @@ func TestCertificateGen_ToCredentials(t *testing.T) {
 		// then
 		assert.Equal(t, commonName, credentials.CertificateGen.CommonName)
 	})
-
-	t.Run("should convert to credentials with CSRFInfo", func(t *testing.T) {
-		// given
-		certificateGenStrategy := certificateGen{}
-
-		// when
-		credentials := certificateGenStrategy.ToCredentials(secretData, &applications.Credentials{CSRFInfo: &applications.CSRFInfo{TokenEndpointURL: "https://test.it"}})
-
-		// then
-		assert.Equal(t, commonName, credentials.CertificateGen.CommonName)
-		assert.NotNil(t, credentials.CertificateGen)
-		assert.NotNil(t, credentials.CertificateGen.CSRFInfo)
-		assert.Equal(t, "https://test.it", credentials.CertificateGen.CSRFInfo.TokenEndpointURL)
-	})
 }
 
 func TestCertificateGen_CredentialsProvided(t *testing.T) {

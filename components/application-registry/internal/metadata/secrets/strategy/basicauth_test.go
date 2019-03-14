@@ -43,22 +43,6 @@ func TestBasicAuth_ToCredentials(t *testing.T) {
 		assert.Equal(t, password, credentials.Basic.Password)
 
 	})
-
-	t.Run("should convert to credentials with CSRFInfo", func(t *testing.T) {
-		// given
-		basicAuthStrategy := basicAuth{}
-
-		// when
-		credentials := basicAuthStrategy.ToCredentials(secretData, &applications.Credentials{CSRFInfo: &applications.CSRFInfo{TokenEndpointURL: "https://test.it"}})
-
-		// then
-		assert.Equal(t, username, credentials.Basic.Username)
-		assert.Equal(t, password, credentials.Basic.Password)
-		assert.NotNil(t, credentials.Basic)
-		assert.NotNil(t, credentials.Basic.CSRFInfo)
-		assert.Equal(t, "https://test.it", credentials.Basic.CSRFInfo.TokenEndpointURL)
-
-	})
 }
 
 func TestBasicAuth_CredentialsProvided(t *testing.T) {

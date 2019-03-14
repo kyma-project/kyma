@@ -22,10 +22,6 @@ type Credentials struct {
 	CertificateGen *CertificateGen
 }
 
-type CSRFInfo struct {
-	TokenEndpointURL string
-}
-
 // Oauth contains details of OAuth configuration.
 type Oauth struct {
 	// URL to OAuth token provider.
@@ -34,8 +30,6 @@ type Oauth struct {
 	ClientID string
 	// ClientSecret to use for authentication.
 	ClientSecret string
-	// Optional CSRF Data
-	CSRFInfo *CSRFInfo
 }
 
 // Basic contains details of Basic configuration.
@@ -44,15 +38,11 @@ type Basic struct {
 	Username string
 	// Password to use for authentication.
 	Password string
-	// Optional CSRF Data
-	CSRFInfo *CSRFInfo
 }
 
 // CertificateGen contains common name of the certificate to generate
 type CertificateGen struct {
 	CommonName string
-	// Optional CSRF Data
-	CSRFInfo *CSRFInfo
 }
 
 // ServiceDefinition is an internal representation of a service.

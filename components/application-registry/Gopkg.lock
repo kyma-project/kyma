@@ -150,7 +150,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "csrf-token-support-operator"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -158,7 +157,7 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  source = "github.com/jakkab/kyma"
+  revision = "d37318b3a84115bd9ee64d3c3130ef657b8a81a5"
 
 [[projects]]
   branch = "master"
@@ -549,6 +548,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "637e56eff95bdfaf0ef8e5baf74dab957397ece97b9781f23ac7bc586059445b"
+  inputs-digest = "a87720bbf5e4e04ac14aa3586417874d3178e47c67de57665c974542e7ca2a39"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -51,24 +51,6 @@ func TestOauth_ToCredentials(t *testing.T) {
 		assert.Equal(t, clientSecret, credentials.Oauth.ClientSecret)
 		assert.Equal(t, oauthUrl, credentials.Oauth.URL)
 	})
-
-	t.Run("should convert to credentials with CSRF", func(t *testing.T) {
-		// given
-		oauthStrategy := oauth{}
-
-		c := &applications.Credentials{
-			AuthenticationUrl: oauthUrl,
-			CSRFInfo:          &applications.CSRFInfo{TokenEndpointURL: "https://test.it"},
-		}
-		// when
-		credentials := oauthStrategy.ToCredentials(secretData, c)
-
-		// then
-		assert.Equal(t, clientId, credentials.Oauth.ClientID)
-		assert.Equal(t, clientSecret, credentials.Oauth.ClientSecret)
-		assert.Equal(t, oauthUrl, credentials.Oauth.URL)
-		assert.Equal(t, "https://test.it", credentials.Oauth.CSRFInfo.TokenEndpointURL)
-	})
 }
 
 func TestOauth_CredentialsProvided(t *testing.T) {
