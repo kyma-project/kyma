@@ -37,7 +37,6 @@ import (
 	"k8s.io/apimachinery/pkg/util/rand"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
@@ -54,24 +53,20 @@ type Config struct {
 func TestServiceBindingUsagePrefixing(t *testing.T) {
 	// given
 	ts := NewTestSuite(t)
-
 	ts.createTestNamespace()
-	fmt.Println( "Created test namespace")
 	ts.createApplication()
-	fmt.Println("Created application")
 
 	defer func() {
 		if t.Failed() {
 			namespaceReport := report.NewReport(t, ts.k8sClientCfg)
 			namespaceReport.PrintJsonReport(ts.namespace)
 		}
-		//ts.cleanup()
+		ts.cleanup()
 	}()
 
 
 	ts.enableApplicationInTestNamespace()
-	fmt.Println("Enabled application")
-	ts.waitForAppServiceClasses(time.Second * 300)
+	ts.waitForAppServiceClasses(time.Second * 90)
 
 	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
 	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
@@ -95,7 +90,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	err := envconfig.Init(&cfg)
 	require.NoError(t, err)
 
-	k8sCfg, err := clientcmd.BuildConfigFromFlags("","/Users/i303785/.kube/config")
+	k8sCfg, err := restclient.InClusterConfig()
 	require.NoError(t, err)
 
 	randID := rand.String(5)
