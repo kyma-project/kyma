@@ -1,4 +1,4 @@
-knative:
+knative-serving:
   ingressgateway:
     service:
       type: LoadBalancer
