@@ -52,7 +52,7 @@ Set the following fields to create a valid `bind.yaml` file:
 | **credentialFrom.secretRef.name**    | A name of the Secret.      |
 
 
-See the example of the `bind.yaml` file:
+See the fully extended example of the `bind.yaml` file:
 
 ```yaml
 credential:
@@ -68,6 +68,11 @@ credential:
       secretKeyRef:
         name: redis-secrets
         key: redis-password
+  - name: REDIS_DB_NAME
+    valueFrom:
+      configMapKeyRef:
+        name: redis-cm
+        key: redis-db-name
 
 credentialFrom:
   - configMapRef:

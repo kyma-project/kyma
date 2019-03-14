@@ -36,9 +36,9 @@ The `meta.yaml` file contains information about the bundle. Set the following fi
 |       **version**       |   YES   | A version of the bundle. It is a broker service identifier.  |
 |          **id**         |   YES   | A broker service identifier.  |
 |     **description**     |   YES   | A short description of the service. |
+|     **displayName**     |   YES   | A display name of the bundle.    |
 |         **tags**        |   NO  | Keywords describing the provided service, separated by commas.     |
 |       **bindable**      |   NO  | A field that specifies whether you can bind a given bundle. |
-|     **displayName**     |   YES   | A display name of the bundle.    |
 | **providerDisplayName** |   NO  | A name of the upstream entity providing the actual service.  |
 |   **longDescription**   |   NO  | A long description of the service.     |
 |   **documentationURL**  |   NO  | A link to the documentation page for the service.        |
@@ -54,9 +54,9 @@ The `meta.yaml` file contains information about the bundle. Set the following fi
 
 ## chart directory
 
-In the `chart` directory, create a folder with the same name as your chart. Put all the files related to your chart in this folder. The system supports chart version 2.6.
+In the `chart` directory, create a folder with the same name as your chart. Put all the files related to your chart in this folder. The system supports Helm version 2.6.
 
-> **NOTE:** Helm Broker uses the [helm wait](https://github.com/kubernetes/helm/blob/release-2.6/docs/using_helm.md#helpful-options-for-installupgraderollback) option to ensure that all the resources that a chart creates are available. If you set your Deployment **replicas** to `1`, you must set **maxUnavailable** to `0` as a part of the rolling update strategy.
+> **NOTE:** The Helm Broker uses the [helm wait](https://github.com/kubernetes/helm/blob/release-2.6/docs/using_helm.md#helpful-options-for-installupgraderollback) option to ensure that all the resources that a chart creates are available. If you set your Deployment **replicas** to `1`, you must set **maxUnavailable** to `0` as a part of the rolling update strategy.
 
 ## plans directory
 
@@ -70,7 +70,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 |      **id**     |   YES   |     An ID of the plan. |
 | **description** |   YES   | A description of the plan. |
 | **displayName** |   YES   | A display name of the plan. |
-|  **bindable**   |   NO  | A field that specifies whether you can bind an instance of the plan.  |
+|  **bindable**   |   NO  | A field that specifies whether you can bind an instance of the plan. The default value is `false`. |
 |     **free**    |   NO  | An attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
 * `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-bundles) document.

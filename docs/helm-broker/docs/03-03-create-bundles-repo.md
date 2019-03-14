@@ -8,7 +8,7 @@ The repository in which you create your own bundles must have a specific format 
 ```
 sample-bundle-repository
   ├── {your-bundle}                # A directory for each bundle version defined in the index.yaml file
-  ├── index.yaml                   # A file which defines available bundles
+  └── index.yaml                   # A file which defines available bundles
 ```
 
 Follow the `{bundle_name}-{bundle_version}` convention to name your bundles. In the `index.yaml` file, provide an entry for every single bundle from your bundles repository. The `index.yaml` file must have the following structure:
