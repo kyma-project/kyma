@@ -29,7 +29,7 @@ global:
     path: eu.gcr.io/kyma-project
   helm_broker:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   alpine_net:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0

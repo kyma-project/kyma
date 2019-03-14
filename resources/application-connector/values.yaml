@@ -18,40 +18,40 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   application_operator_tests:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   connector_service:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   connector_service_tests:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   connection_token_handler:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   connectivity_certs_controller:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   event_service:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   application_gateway:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   gateway_tests:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   application_registry:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   application_registry_tests:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
   application_broker:
     dir:
-    version: 0.8.0-rc1
+    version: 0.8.0
 
 connectivity_certs_controller:
   enabled: false
