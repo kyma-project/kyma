@@ -43,10 +43,10 @@ global:
   application_gateway:
     dir: develop/
     version: 6afb8179
-  application_registry:
   application_gateway_tests:
     dir: pr/
     version: PR-3159
+  application_registry:
     dir: develop/
     version: 07fabb90
   application_registry_tests:
