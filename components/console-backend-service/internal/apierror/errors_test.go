@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

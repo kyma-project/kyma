@@ -3,11 +3,11 @@ package k8s
 import (
 	"fmt"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/types"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/extractor"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/extractor"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/apierror"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/discovery"
 )

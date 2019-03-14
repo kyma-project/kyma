@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	extractor "github.com/kyma-project/kyma/components/ui-api-layer/internal/extractor"
+	extractor "github.com/kyma-project/kyma/components/console-backend-service/internal/extractor"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/discovery"
 

@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 
-	apierrors "github.com/kyma-project/kyma/components/ui-api-layer/internal/apierror"
+	apierrors "github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
 	"github.com/pkg/errors"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )

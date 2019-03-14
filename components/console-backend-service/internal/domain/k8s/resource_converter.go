@@ -4,12 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/types"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/extractor"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/extractor"
 
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/gqlschema"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
 )
 

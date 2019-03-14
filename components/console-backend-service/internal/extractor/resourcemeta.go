@@ -1,8 +1,8 @@
 package extractor
 
 import (
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/apierror"
-	"github.com/kyma-project/kyma/components/ui-api-layer/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/discovery"
 )

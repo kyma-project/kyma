@@ -10,8 +10,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
-	jsonEncoder "encoding/json"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
