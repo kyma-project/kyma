@@ -1,8 +1,8 @@
 APP_NAME = application-gateway-tests
-TEST_RUNNER_APP_NAME = application-gateway-tests-runner
+TEST_EXECUTOR_APP_NAME = application-gateway-tests-executor
 
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
-TEST_EXECUTOR_IMAGE = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(TEST_RUNNER_APP_NAME)
+TEST_EXECUTOR_IMAGE = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(TEST_EXECUTOR_APP_NAME)
 TAG = $(DOCKER_TAG)
 
 .PHONY: build
@@ -12,12 +12,12 @@ build:
 .PHONY: build-image
 build-image:
 	docker build -t $(APP_NAME):latest . -f ./test/helmtest/Dockerfile --build-arg TEST_EXECUTOR_IMAGE=$(TEST_EXECUTOR_IMAGE):$(TAG)
-	docker build -t $(TEST_RUNNER_APP_NAME):latest . -f ./test/executor/Dockerfile
+	docker build -t $(TEST_EXECUTOR_APP_NAME):latest . -f ./test/executor/Dockerfile
 
 .PHONY: push-image
 push-image:
 	docker tag $(APP_NAME) $(IMG):$(TAG)
-	docker tag $(TEST_RUNNER_APP_NAME) $(TEST_EXECUTOR_IMAGE):$(TAG)
+	docker tag $(TEST_EXECUTOR_APP_NAME) $(TEST_EXECUTOR_IMAGE):$(TAG)
 	docker push $(IMG):$(TAG)
 	docker push $(TEST_EXECUTOR_IMAGE):$(TAG)
 

@@ -30,8 +30,8 @@ const (
 	accessServiceConnectionTimeout = 120 * time.Second
 	apiServerAccessTimeout         = 60 * time.Second
 
-	mockServiceNameFormat   = "%s-gateway-test-mock-service"
-	testRunnerPodNameFormat = "%s-tests-test-runner"
+	mockServiceNameFormat     = "%s-gateway-test-mock-service"
+	testExecutorPodNameFormat = "%s-tests-test-executor"
 )
 
 type TestSuite struct {
@@ -193,7 +193,7 @@ func (ts *TestSuite) deleteMockService(t *testing.T) {
 }
 
 func (ts *TestSuite) AddDenierLabel(t *testing.T, apiId string) {
-	pod, err := ts.podClient.Get(fmt.Sprintf(testRunnerPodNameFormat, ts.config.Application), metav1.GetOptions{})
+	pod, err := ts.podClient.Get(fmt.Sprintf(testExecutorPodNameFormat, ts.config.Application), metav1.GetOptions{})
 	require.NoError(t, err)
 
 	serviceName := fmt.Sprintf("app-%s-%s", ts.config.Application, apiId)

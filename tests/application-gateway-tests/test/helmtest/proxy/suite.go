@@ -32,7 +32,7 @@ const (
 	mockSelectorFormat = "%s-mock-service"
 
 	defaultCheckInterval = 2 * time.Second
-	testRunnerTimeout    = 300 * time.Second
+	testExecutorTimeout  = 300 * time.Second
 
 	applicationEnv     = "APPLICATION"
 	namespaceEnv       = "NAMESPACE"
@@ -46,7 +46,7 @@ type TestSuite struct {
 	podClient  corev1.PodInterface
 	config     helmtest.TestConfig
 
-	testRunnerName    string
+	testExecutorName  string
 	mockSelectorValue string
 }
 
@@ -64,25 +64,25 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		httpClient:        &http.Client{},
 		podClient:         coreClientset.CoreV1().Pods(config.Namespace),
 		config:            config,
-		testRunnerName:    fmt.Sprintf("%s-tests-test-runner", config.Application),
+		testExecutorName:  fmt.Sprintf("%s-tests-test-executor", config.Application),
 		mockSelectorValue: fmt.Sprintf(mockSelectorFormat, config.Application),
 	}
 }
 
 func (ts *TestSuite) Setup(t *testing.T) {
-	log.Infoln("Creating Test Runner pod.")
-	ts.CreateTestRunnerPod(t)
+	log.Infoln("Creating Test Executor pod.")
+	ts.CreateTestExecutorPod(t)
 }
 
 func (ts *TestSuite) Cleanup(t *testing.T) {
 	log.Infoln("Cleaning up...")
-	ts.DeleteTestRunnerPod(t)
+	ts.DeleteTestExecutorPod(t)
 }
 
-func (ts *TestSuite) CreateTestRunnerPod(t *testing.T) {
-	testRunnerPod := &v1.Pod{
+func (ts *TestSuite) CreateTestExecutorPod(t *testing.T) {
+	testExecutorPod := &v1.Pod{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      ts.testRunnerName,
+			Name:      ts.testExecutorName,
 			Namespace: ts.config.Namespace,
 			Labels: map[string]string{
 				mockSelectorKey: ts.mockSelectorValue,
@@ -91,7 +91,7 @@ func (ts *TestSuite) CreateTestRunnerPod(t *testing.T) {
 		Spec: v1.PodSpec{
 			Containers: []v1.Container{
 				{
-					Name:  ts.testRunnerName,
+					Name:  ts.testExecutorName,
 					Image: ts.config.TestExecutorImage,
 					Env: []v1.EnvVar{
 						{Name: applicationEnv, Value: ts.config.Application},
@@ -106,22 +106,22 @@ func (ts *TestSuite) CreateTestRunnerPod(t *testing.T) {
 		},
 	}
 
-	_, err := ts.podClient.Create(testRunnerPod)
+	_, err := ts.podClient.Create(testExecutorPod)
 	require.NoError(t, err)
 }
 
-func (ts *TestSuite) WaitForTestRunnerToFinish(t *testing.T) *v1.ContainerStatus {
+func (ts *TestSuite) WaitForTestExecutorToFinish(t *testing.T) *v1.ContainerStatus {
 	var testsStatus *v1.ContainerStatus
 
-	err := tools.WaitForFunction(defaultCheckInterval, testRunnerTimeout, func() bool {
+	err := tools.WaitForFunction(defaultCheckInterval, testExecutorTimeout, func() bool {
 		var finished bool
 
-		testRunnerPod, err := ts.podClient.Get(ts.testRunnerName, metav1.GetOptions{})
+		testExecutorPod, err := ts.podClient.Get(ts.testExecutorName, metav1.GetOptions{})
 		if err != nil {
 			return false
 		}
 
-		if testsStatus, finished = ts.isPodFinished(testRunnerPod); !finished {
+		if testsStatus, finished = ts.isPodFinished(testExecutorPod); !finished {
 			return false
 		}
 
@@ -136,7 +136,7 @@ func (ts *TestSuite) WaitForTestRunnerToFinish(t *testing.T) *v1.ContainerStatus
 
 func (ts *TestSuite) isPodFinished(pod *v1.Pod) (*v1.ContainerStatus, bool) {
 	for _, c := range pod.Status.ContainerStatuses {
-		if c.Name == ts.testRunnerName {
+		if c.Name == ts.testExecutorName {
 			if c.State.Terminated != nil {
 				return &c, true
 			}
@@ -146,17 +146,17 @@ func (ts *TestSuite) isPodFinished(pod *v1.Pod) (*v1.ContainerStatus, bool) {
 	return nil, false
 }
 
-func (ts *TestSuite) GetTestRunnerLogs(t *testing.T) {
-	req := ts.podClient.GetLogs(ts.testRunnerName, &v1.PodLogOptions{Container: ts.testRunnerName})
+func (ts *TestSuite) GetTestExecutorLogs(t *testing.T) {
+	req := ts.podClient.GetLogs(ts.testExecutorName, &v1.PodLogOptions{Container: ts.testExecutorName})
 
 	reader, err := req.Stream()
 	require.NoError(t, err)
 
 	defer reader.Close()
-	testRunnerLogs, err := ioutil.ReadAll(reader)
+	testExecutorLogs, err := ioutil.ReadAll(reader)
 	require.NoError(t, err)
 
-	strLogs := string(testRunnerLogs)
+	strLogs := string(testExecutorLogs)
 
 	strLogs = strings.Replace(strLogs, "\\n", "\n", -1)
 	strLogs = strings.Replace(strLogs, "\\t", "\t", -1)
@@ -164,12 +164,12 @@ func (ts *TestSuite) GetTestRunnerLogs(t *testing.T) {
 	log.Infof(strLogs)
 }
 
-func (ts *TestSuite) DeleteTestRunnerPod(t *testing.T) {
-	err := ts.podClient.Delete(ts.testRunnerName, &metav1.DeleteOptions{})
+func (ts *TestSuite) DeleteTestExecutorPod(t *testing.T) {
+	err := ts.podClient.Delete(ts.testExecutorName, &metav1.DeleteOptions{})
 	if err != nil {
 		if !errors.IsNotFound(err) {
 			// TODO some retry?
-			t.Logf("Failed to delete test runner: %s", err.Error())
+			t.Logf("Failed to delete test executor: %s", err.Error())
 			t.FailNow()
 		}
 	}

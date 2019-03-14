@@ -16,12 +16,12 @@ func TestApplicationGateway(t *testing.T) {
 	defer testSuit.Cleanup(t)
 	testSuit.Setup(t)
 
-	logrus.Infoln("Waiting for test runner to finish...")
-	testRunnerStatus := testSuit.WaitForTestRunnerToFinish(t)
-	require.NotNil(t, testRunnerStatus.State.Terminated)
+	logrus.Infoln("Waiting for test executor to finish...")
+	testExecutorStatus := testSuit.WaitForTestExecutorToFinish(t)
+	require.NotNil(t, testExecutorStatus.State.Terminated)
 
-	logrus.Infoln("Getting logs from test runner...")
-	testSuit.GetTestRunnerLogs(t)
+	logrus.Infoln("Getting logs from test executor...")
+	testSuit.GetTestExecutorLogs(t)
 
-	require.Equal(t, int32(0), testRunnerStatus.State.Terminated.ExitCode, "Test runner exited with code: ", testRunnerStatus.State.Terminated.ExitCode)
+	require.Equal(t, int32(0), testExecutorStatus.State.Terminated.ExitCode, "Test executor exited with code: ", testExecutorStatus.State.Terminated.ExitCode)
 }
