@@ -274,13 +274,13 @@ func (s *store) prepareBucketPolicy(bucketName string, bucketPolicy v1alpha2.Buc
 	statements := make([]policy.Statement, 0)
 	switch {
 	case bucketPolicy == v1alpha2.BucketPolicyReadOnly:
-		statements = policy.SetPolicy(statements, policy.BucketPolicyReadOnly, bucketName, "*")
+		statements = policy.SetPolicy(statements, policy.BucketPolicyReadOnly, bucketName, "")
 	case bucketPolicy == v1alpha2.BucketPolicyWriteOnly:
-		statements = policy.SetPolicy(statements, policy.BucketPolicyWriteOnly, bucketName, "*")
+		statements = policy.SetPolicy(statements, policy.BucketPolicyWriteOnly, bucketName, "")
 	case bucketPolicy == v1alpha2.BucketPolicyReadWrite:
-		statements = policy.SetPolicy(statements, policy.BucketPolicyReadWrite, bucketName, "*")
+		statements = policy.SetPolicy(statements, policy.BucketPolicyReadWrite, bucketName, "")
 	default:
-		statements = policy.SetPolicy(statements, policy.BucketPolicyNone, bucketName, "*")
+		statements = policy.SetPolicy(statements, policy.BucketPolicyNone, bucketName, "")
 	}
 
 	return policy.BucketAccessPolicy{

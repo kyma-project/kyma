@@ -73,6 +73,8 @@ spec:
         sidecar.istio.io/inject: "true"
       labels:
         app: {{ .Release.Name }}-event-service
+        kyma-grafana: {{ .Values.eventService.deployment.labels.grafana }}
+        kyma-alerts: {{ .Values.eventService.deployment.labels.alerts }}
         release: {{ .Release.Name }}-event-service
     spec:
       containers:
@@ -83,6 +85,7 @@ spec:
         - "/eventservice"
         - "--externalAPIPort={{ .Values.eventService.deployment.args.externalAPIPort }}"
         - "--eventsTargetURL={{ .Values.eventService.deployment.args.eventsTargetURL }}"
+        - "--maxRequestSize={{ .Values.eventService.deployment.args.maxRequestSize }}"
         - "--requestTimeout={{ .Values.eventService.deployment.args.requestTimeout }}"
         - "--requestLogging={{ .Values.eventService.deployment.args.requestLogging }}"
         - "--sourceId={{ .Release.Name }}"

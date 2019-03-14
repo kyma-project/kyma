@@ -44,7 +44,7 @@ func Add(mgr manager.Manager) error {
 	}
 
 	store := store.New(minioClient)
-	loader := loader.New(cfg.Loader.TemporaryDirectory)
+	loader := loader.New(cfg.Loader.TemporaryDirectory, cfg.Loader.VerifySSL)
 	findBucketFnc := bucketFinder(mgr)
 	deleteFinalizer := finalizer.New(deleteClusterAssetFinalizerName)
 

@@ -1,13 +1,12 @@
 package authorization
 
 import (
-	"encoding/base64"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/util"
+
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
 )
 
 type basicAuthStrategy struct {
@@ -23,15 +22,9 @@ func newBasicAuthStrategy(username, password string) basicAuthStrategy {
 }
 
 func (b basicAuthStrategy) AddAuthorization(r *http.Request, _ *httputil.ReverseProxy) apperrors.AppError {
-	r.Header.Set(httpconsts.HeaderAuthorization, fmt.Sprintf("Basic %s", basicAuth(b.username, b.password)))
+	util.AddBasicAuthHeader(r, b.username, b.password)
 
 	return nil
-}
-
-func basicAuth(username, password string) string {
-	auth := username + ":" + password
-
-	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
 func (b basicAuthStrategy) Invalidate() {

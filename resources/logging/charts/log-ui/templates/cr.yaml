@@ -6,7 +6,7 @@ metadata:
 spec:
   version: 0.0.1
   category: Diagnostics
-  viewBaseUrl: https://log-ui.{{ .Values.global.domainName }}
+  viewBaseUrl: https://log-ui.{{ .Values.global.ingress.domainName }}
   placement: cluster
   navigationNodes:
     - label: Logs

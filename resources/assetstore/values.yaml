@@ -6,10 +6,13 @@ global:
       name: kyma-gateway
   assetstore_controller_manager:
     dir: develop/
-    version: 11d887b4
+    version: 8a8b2544
   asset_upload_service:
     dir: develop/
-    version: 2b2c8c04
+    version: 8a8b2544
+  asset_store_test:
+    dir: develop/
+    version: a63544bb
 
 minio:
   mode: standalone
@@ -41,5 +44,5 @@ minio:
       memory: 32Mi
       cpu: 10m
     limits:
-      memory: 64Mi
+      memory: 128Mi
       cpu: 100m

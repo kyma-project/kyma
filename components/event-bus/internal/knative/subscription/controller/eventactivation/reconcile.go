@@ -2,8 +2,7 @@ package eventactivation
 
 import (
 	"context"
-	"fmt"
-	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	corev1 "k8s.io/api/core/v1"
@@ -47,7 +46,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 	// Any other error should be retrieved in another reconciliation. ???
 	if err != nil {
-		log.Error(err,"Unable to Get EventActivation object")
+		log.Error(err, "Unable to Get EventActivation object")
 		return reconcile.Result{}, err
 	}
 
@@ -85,7 +84,7 @@ func (r *reconciler) reconcile(ctx context.Context, ea *eventingv1alpha1.EventAc
 	if !ea.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
 		subs, _ := util.GetSubscriptionsForEventActivation(ctx, r.client, ea)
-		r.deactivateSubscriptions(ctx , subs)
+		util.DeactivateSubscriptions(ctx, r.client, subs, log)
 
 		// remove the finalizer from the list
 		ea.ObjectMeta.Finalizers = util.RemoveString(&ea.ObjectMeta.Finalizers, finalizerName)
@@ -102,40 +101,15 @@ func (r *reconciler) reconcile(ctx context.Context, ea *eventingv1alpha1.EventAc
 	}
 
 	// check an activate, if necessary, all the subscriptions
-	if subs, err:=util.GetSubscriptionsForEventActivation(ctx, r.client, ea); err != nil {
+	if subs, err := util.GetSubscriptionsForEventActivation(ctx, r.client, ea); err != nil {
 		log.Error(err, "GetSubscriptionsForEventActivation() failed")
 	} else {
-		log.Info("Kyma subscriptions found: ", "subs", subs )
+		log.Info("Kyma subscriptions found: ", "subs", subs)
 		// activate all subscriptions
-		if err := r.activateSubscriptions(ctx, subs); err != nil {
+		if err := util.ActivateSubscriptions(ctx, r.client, subs, log); err != nil {
 			log.Error(err, "activateSubscriptions() failed")
 			return false, err
 		}
 	}
 	return false, nil
-}
-
-func (r *reconciler) activateSubscriptions(ctx context.Context, subs []*subApis.Subscription)  error{
-	updatedSubs := util.UpdateSubscriptionsEventActivatedStatus(subs, subApis.ConditionTrue)
-	return r.updateSubscriptions(ctx, updatedSubs)
-}
-
-func (r *reconciler) deactivateSubscriptions(ctx context.Context, subs []*subApis.Subscription) error{
-	updatedSubs := util.UpdateSubscriptionsEventActivatedStatus(subs, subApis.ConditionFalse)
-	return r.updateSubscriptions(ctx, updatedSubs)
-}
-
-func (r *reconciler) updateSubscriptions(ctx context.Context, subs []*subApis.Subscription) error{
-	if subsWithErrors := util.WriteSubscriptions(ctx, r.client, subs); len(subsWithErrors) != 0 {
-		// try to set the "Ready" status to false
-		for _, es := range subsWithErrors {
-			log.Error(es.Err, "WriteSubscription() failed for this subscription:", "subscription", es.Sub)
-			us := util.UpdateSubscriptionReadyStatus(es.Sub, subApis.ConditionFalse, es.Err.Error())
-			if err := util.WriteSubscription(ctx, r.client, us); err != nil {
-				log.Error(err, "Update Ready status failed")
-			}
-		}
-		return fmt.Errorf("WriteSubscriptions() failed, see thr Readuy status of each subscription")
-	}
-	return nil
 }

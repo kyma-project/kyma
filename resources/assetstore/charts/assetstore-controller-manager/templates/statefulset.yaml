@@ -21,6 +21,12 @@ spec:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
     spec:
+     {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+       - ip: {{ .Values.minikubeIP }}
+         hostnames:
+          - "minio.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
       serviceAccountName: {{ template "fullname" . }}
       containers:
       - command:
@@ -58,6 +64,8 @@ spec:
               secretKeyRef:
                 name: assetstore-minio
                 key: secretkey
+          - name: APP_LOADER_VERIFY_SSL
+            value: 'false'
           - name: APP_TEMPORARY_DIRECTORY
             value: /tmp
         resources:

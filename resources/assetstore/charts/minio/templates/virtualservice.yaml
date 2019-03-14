@@ -10,7 +10,7 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   hosts:
-  - minio.{{ .Values.global.domainName }}
+  - minio.{{ .Values.global.ingress.domainName }}
   gateways:
   - {{ .Values.global.istio.gateway.name }}
   http:
