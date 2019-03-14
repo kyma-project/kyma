@@ -31,20 +31,25 @@ spec:
           {{- if .Values.kubeletService.enable }}
             - --kubelet-service={{ .Values.kubeletService.namespace }}/{{ .Values.kubeletService.name }}
           {{- end }}
+            - --logtostderr=true
             - --prometheus-config-reloader={{ .Values.prometheusConfigReloader.repository }}:{{ .Values.prometheusConfigReloader.tag }}
             - --config-reloader-image={{ .Values.configmapReload.repository }}:{{ .Values.configmapReload.tag }}
           {{- if lt .Values.image.tag "v0.13.0" }}
-            - --analytics=false
+            - --analytics=false 
           {{- end }}
           ports:
             - containerPort: 8080
               name: http
           resources:
-{{ toYaml .Values.resources | indent 12 }}
+{{ toYaml .Values.container.resources | indent 12 }}
+          securityContext:
+{{ toYaml .Values.container.securityContext | indent 12 }}
     {{- if .Values.nodeSelector }}
       nodeSelector:
 {{ toYaml .Values.nodeSelector | indent 8 }}
     {{- end }}
+      securityContext:
+{{ toYaml .Values.securityContext | indent 12 }}
     {{- if .Values.rbacEnable }}
       serviceAccountName: {{ template "prometheus-operator.fullname" . }}
     {{- end }}

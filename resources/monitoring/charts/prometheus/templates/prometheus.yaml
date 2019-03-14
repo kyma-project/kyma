@@ -51,6 +51,7 @@ spec:
 {{- else }}
 {{ toYaml .Values.isLocalEnv.resources | indent 4 }}
 {{ end }}
+
   retention: "{{ .Values.retention }}"
 {{- if .Values.routePrefix }}
   routePrefix: "{{ .Values.routePrefix }}"
@@ -79,6 +80,8 @@ spec:
   remoteWrite:
 {{ toYaml .Values.remoteWrite | indent 4 }}
 {{- end }}
+  securityContext:
+{{ toYaml .Values.securityContext | indent 4 }}
 {{- if .Values.rulesSelector }}
   ruleSelector:
 {{ toYaml .Values.rulesSelector | indent 4 }}

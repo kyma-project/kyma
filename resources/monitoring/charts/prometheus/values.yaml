@@ -42,7 +42,12 @@ additionalRulesConfigMapLabels: {}
 ##
 image:
   repository: quay.io/prometheus/prometheus
-  tag: v2.2.1
+  tag: v2.7.1
+
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 1000
+  fsGroup: 2000
 
 ## Labels to be added to the Prometheus
 ##

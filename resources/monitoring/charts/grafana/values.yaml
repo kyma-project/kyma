@@ -67,7 +67,7 @@ service:
 ##
 image:
   repository: grafana/grafana
-  tag: 5.2.4
+  tag: 6.0.1
 
 containersEnv:
   gfAuthGenericOauthClientId: grafana
