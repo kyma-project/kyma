@@ -4,9 +4,9 @@
 controller:
   image:
     pullPolicy: IfNotPresent
-    location: eu.gcr.io/kyma-project/event-bus/knative/natss/controller:604de5d6
+    location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/controller:v0.4.0
 dispatcher:
   image:
     pullPolicy: IfNotPresent
-    location: eu.gcr.io/kyma-project/event-bus/knative/natss/dispatcher:604de5d6
+    location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/dispatcher:v0.4.0
 

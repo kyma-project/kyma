@@ -17,6 +17,7 @@ To install the Event-Service, follow these steps:
 The Event-Service has the following parameters:
 - **externalAPIPort** - This port exposes the Event-Service API to an external solution. The default port is `8081`.
 - **eventsTargetURL** - A URL to which you proxy the incoming Events. The default URL is `http://localhost:9000`.
+- **maxRequestSize** - The maximum publish request body size in bytes. The default is `65536`.
 - **requestTimeout** - A time-out for requests sent through the Event-Service. It is provided in seconds. The default time-out is `1`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
 - **sourceId** - The identifier of the Events' source.
