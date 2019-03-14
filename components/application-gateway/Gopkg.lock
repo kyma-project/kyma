@@ -81,7 +81,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  branch = "csrf-token-support-operator"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -89,7 +88,7 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  source = "github.com/jakkab/kyma"
+  revision = "c109ba8343f521a5be658f55f51c8dacff563a24"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -393,6 +392,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "82fc12c753c0722adf9aec2f1f7ff369231671b2a67cdeefd516d60e965da0ad"
+  inputs-digest = "c1d07a84a58e6400717f156303ea7c37f1c7d3867d8b3e6dcb336ff5284bab6f"
   solver-name = "gps-cdcl"
   solver-version = 1
