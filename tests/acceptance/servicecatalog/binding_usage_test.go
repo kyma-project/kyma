@@ -53,6 +53,7 @@ type Config struct {
 func TestServiceBindingUsagePrefixing(t *testing.T) {
 	// given
 	ts := NewTestSuite(t)
+
 	ts.createTestNamespace()
 	ts.createApplication()
 
@@ -63,7 +64,6 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 		}
 		ts.cleanup()
 	}()
-
 
 	ts.enableApplicationInTestNamespace()
 	ts.waitForAppServiceClasses(time.Second * 90)
