@@ -20,7 +20,7 @@ func (svc *basicAuth) ToCredentials(secretData SecretData, appCredentials *appli
 		Basic: &model.Basic{
 			Username: username,
 			Password: password,
-			CSRFInfo: convertToModel(appCredentials.CSRFInfo),
+			CSRFInfo: convertToModelCSRInfo(appCredentials),
 		},
 	}
 }

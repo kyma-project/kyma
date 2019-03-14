@@ -5,13 +5,13 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
 )
 
-func convertToModel(appCSRFInfo *applications.CSRFInfo) *model.CSRFInfo {
-	if appCSRFInfo == nil {
+func convertToModelCSRInfo(appCredentials *applications.Credentials) *model.CSRFInfo {
+	if appCredentials == nil || appCredentials.CSRFInfo == nil {
 		return nil
 	}
 
 	return &model.CSRFInfo{
-		TokenEndpointURL: appCSRFInfo.TokenEndpointURL,
+		TokenEndpointURL: appCredentials.CSRFInfo.TokenEndpointURL,
 	}
 }
 
