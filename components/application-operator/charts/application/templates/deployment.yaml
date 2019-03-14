@@ -85,6 +85,7 @@ spec:
         - "/eventservice"
         - "--externalAPIPort={{ .Values.eventService.deployment.args.externalAPIPort }}"
         - "--eventsTargetURL={{ .Values.eventService.deployment.args.eventsTargetURL }}"
+        - "--maxRequestSize={{ .Values.eventService.deployment.args.maxRequestSize }}"
         - "--requestTimeout={{ .Values.eventService.deployment.args.requestTimeout }}"
         - "--requestLogging={{ .Values.eventService.deployment.args.requestLogging }}"
         - "--sourceId={{ .Release.Name }}"

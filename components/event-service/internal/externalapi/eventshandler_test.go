@@ -2,6 +2,8 @@ package externalapi
 
 import (
 	"bytes"
+	"encoding/base64"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -14,6 +16,10 @@ import (
 	"github.com/kyma-project/kyma/components/event-service/internal/events/shared"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
+)
+
+const (
+	maxRequestSize = 64 * 1024
 )
 
 func TestEventOk(t *testing.T) {
@@ -31,10 +37,28 @@ func TestEventOk(t *testing.T) {
 		t.Fatal(err)
 	}
 	recorder := httptest.NewRecorder()
-	handler := NewEventsHandler()
+	handler := NewEventsHandler(maxRequestSize)
 	handler.ServeHTTP(recorder, req)
 	if status := recorder.Code; status != http.StatusOK {
 		t.Errorf("Wrong status code: got %v want %v", status, http.StatusOK)
+	}
+	if contentType := recorder.Result().Header.Get("Content-Type"); contentType != httpconsts.ContentTypeApplicationJSON {
+		t.Errorf("Wrong Content-Type: got %v want %v", contentType, httpconsts.ContentTypeApplicationJSON)
+	}
+}
+
+func TestRequestTooLarge(t *testing.T) {
+	data := base64.StdEncoding.EncodeToString((make([]byte, maxRequestSize+1)))
+	s := fmt.Sprintf("{\"event-type\":\"order.created\",\"event-type-version\":\"v1\",\"event-id\":\"31109198-4d69-4ae0-972d-76117f3748c8\",\"event-time\":\"2012-11-01T22:08:41+00:00\",\"data\":\"%s\"}", data)
+	req, err := http.NewRequest(http.MethodPost, shared.EventsPath, strings.NewReader(s))
+	if err != nil {
+		t.Fatal(err)
+	}
+	recorder := httptest.NewRecorder()
+	handler := NewEventsHandler(maxRequestSize)
+	handler.ServeHTTP(recorder, req)
+	if status := recorder.Code; status != http.StatusRequestEntityTooLarge {
+		t.Errorf("Wrong status code: got %v want %v", status, http.StatusRequestEntityTooLarge)
 	}
 	if contentType := recorder.Result().Header.Get("Content-Type"); contentType != httpconsts.ContentTypeApplicationJSON {
 		t.Errorf("Wrong Content-Type: got %v want %v", contentType, httpconsts.ContentTypeApplicationJSON)
@@ -96,7 +120,7 @@ func TestPropagateTraceHeaders(t *testing.T) {
 	}
 
 	recorder := httptest.NewRecorder()
-	handler := NewEventsHandler()
+	handler := NewEventsHandler(maxRequestSize)
 	handler.ServeHTTP(recorder, req)
 
 	// trace headers should be added to downstream request headers

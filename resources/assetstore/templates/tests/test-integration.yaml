@@ -12,7 +12,7 @@ spec:
   hostAliases:
    - ip: {{ .Values.test.integration.minikubeIP }}
      hostnames:
-      - "minio.{{ .Values.global.domainName }}"
+      - "minio.{{ .Values.global.ingress.domainName }}"
   {{ end }}
   serviceAccountName:  "test-{{ template "fullname" . }}-integration"
   restartPolicy: Never

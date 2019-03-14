@@ -34,14 +34,14 @@ global:
     version: e12b49fc
   api_controller:
     dir: develop/
-    version: bc120200
+    version: "0bcf18a4"
   api_controller_acceptance_tests:
     dir: develop/
     version: 736988df
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
-    version: 2f5d18c2
+    version: "962ad9b6"
   configurations_generator:
     dir: develop/
     version: aabedc33
@@ -62,7 +62,7 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: "24337d95"
+    version: "df845f56"
   test_namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -71,13 +71,13 @@ global:
     version: b426d54d
   ui_api_layer_acceptance_tests:
     dir: develop/
-    version: a63544bb
+    version: 2c2182cf
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
   xip_patch:
     dir: develop/
-    version: "1103850e"
+    version: "d20b1c29"
   kubeless_images:
     runtime:
       node6:

@@ -7,6 +7,11 @@ echo "-------------------------------"
 echo "- Ensure test Pods are deleted "
 echo "-------------------------------"
 
+if [ -n "$KUBE_CONTEXT" ]; then
+    echo "Using context: $KUBE_CONTEXT"
+    KUBE_CONTEXT_ARG="--kube-context $KUBE_CONTEXT"
+fi
+
 cleanupHelmTestPods kyma-system
 cleanupCoreErr=$?
 
@@ -34,34 +39,34 @@ echo "----------------------------"
 
 echo "- Testing Core components..."
 # timeout set to 10 minutes
-helm test core --timeout 600
+helm ${KUBE_CONTEXT_ARG} test core --timeout 600
 coreTestErr=$?
 
 # execute assetstore tests if 'assetstore' is installed
-if helm list | grep -q "assetstore"; then
+if helm ${KUBE_CONTEXT_ARG} list | grep -q "assetstore"; then
 echo "- Testing Asset Store"
-helm test assetstore --timeout 600
+helm ${KUBE_CONTEXT_ARG} test assetstore --timeout 600
 assetstoreTestErr=$?
 fi
 
 # execute monitoring tests if 'monitoring' is installed
-if helm list | grep -q "monitoring"; then
+if helm ${KUBE_CONTEXT_ARG} list | grep -q "monitoring"; then
 echo "- Montitoring module is installed. Running tests for same"
-helm test monitoring --timeout 600
+helm ${KUBE_CONTEXT_ARG} test monitoring --timeout 600
 monitoringTestErr=$?
 fi
 
 # execute logging tests if 'logging' is installed
-if helm list | grep -q "logging"; then
+if helm ${KUBE_CONTEXT_ARG} list | grep -q "logging"; then
 echo "- Logging module is installed. Running tests for same"
-helm test logging --timeout 600
+helm ${KUBE_CONTEXT_ARG} test logging --timeout 600
 loggingTestErr=$?
 fi
 
 # run event-bus tests if Knative is not installed
 if ! kubectl get namespaces | grep -q "knative-eventing"; then
     echo "- Testing Event-Bus..."
-    helm test event-bus --timeout 600
+    helm ${KUBE_CONTEXT_ARG} test event-bus --timeout 600
     eventBusTestErr=$?
 fi
 
@@ -69,21 +74,21 @@ checkAndCleanupTest kyma-system
 testCheckCore=$?
 
 echo "- Testing Istio components..."
-helm test istio
+helm ${KUBE_CONTEXT_ARG} test istio
 istioTestErr=$?
 
 checkAndCleanupTest istio-system
 testCheckIstio=$?
 
 echo "- Testing Knative components..."
-helm test knative
+helm ${KUBE_CONTEXT_ARG} test knative
 knativeTestErr=$?
 
 checkAndCleanupTest knative-serving
 knativeTestErr=$?
 
 echo "- Testing Application Connector"
-helm test application-connector --timeout 600
+helm ${KUBE_CONTEXT_ARG} test application-connector --timeout 600
 acTestErr=$?
 
 checkAndCleanupTest kyma-integration

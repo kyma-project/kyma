@@ -16,7 +16,7 @@ This guide shows how to create a simple lambda function and trigger it with an e
 
 1. Register a service with the following specification to the desired App.
 
->**NOTE:** See [this](#getting-started-get-the-client-certificate) Getting Started Guide to learn how to register a service.
+>**NOTE:** See [this](#tutorials-get-the-client-certificate) tutorial to learn how to register a service.
 ```json
 {
   "name": "my-service",

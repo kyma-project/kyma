@@ -9,7 +9,7 @@ spec:
   version: v1
   category: Service Catalog
   placement: namespace
-  viewBaseUrl: 'https://brokers.{{ js .Values.global.domainName }}'
+  viewBaseUrl: 'https://brokers.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
     - label: Brokers
       navigationPath: brokers
@@ -27,7 +27,7 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: 'https://console.{{ js .Values.global.domainName }}/consoleapp.html#'
+  viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
     - label: Service Brokers
       navigationPath: service-brokers

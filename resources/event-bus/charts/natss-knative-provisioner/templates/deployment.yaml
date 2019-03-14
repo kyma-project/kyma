@@ -25,6 +25,7 @@ rules:
       - channels
       - channels/status
       - clusterchannelprovisioners
+      - clusterchannelprovisioners/status
     verbs:
       - get
       - list
@@ -82,8 +83,6 @@ spec:
       role: controller
   template:
     metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"    
       labels: *labels
     spec:
       serviceAccountName: natss-controller
@@ -91,6 +90,11 @@ spec:
         - name: controller
           image: {{ .Values.controller.image.location }}
           imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
+          env:
+          - name: SYSTEM_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
 
 ---
 
@@ -164,3 +168,8 @@ spec:
         - name: dispatcher
           image: {{ .Values.dispatcher.image.location }}
           imagePullPolicy: {{ .Values.dispatcher.image.pullPolicy }}
+          env:
+          - name: SYSTEM_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace

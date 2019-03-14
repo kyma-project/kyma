@@ -30,7 +30,7 @@ spec:
    labelsPath: spec.deployment.spec.template.metadata.labels
 ```
 
-## Ui-api-layer
+## Console Backend Service 
 
 UI needs two new endpoints which return:
  * all kinds which you can use with the binding usage. It is a list of all usage kinds.
@@ -41,7 +41,7 @@ The Binding Usage Controller takes the value of the **spec.usedBy.kind** field o
 
 ## Security
 
-The administrator who adds UsageKind must take care of RBAC settings. BUC and ui-api-layer must be allowed to perform needed operations on resources with the kind defined in the UsageKind resource.
+The administrator who adds UsageKind must take care of RBAC settings. BUC and console-backend-service must be allowed to perform needed operations on resources with the kind defined in the UsageKind resource.
 
 ## Example
 
@@ -65,7 +65,7 @@ There is also a RBAC role with the following rule for the Binding Usage Controll
   resources: ["functions"]
   verbs: ["get", "update"]
 ```
-and for the UI-Api-Layer:
+and for the Console Backend Service:
 ```yaml
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]

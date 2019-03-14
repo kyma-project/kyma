@@ -43,7 +43,7 @@ spec:
         - --upstream=https://kubernetes.default
         - --logtostderr=true
         - --v=10
-        - --oidc-issuer=https://dex.{{ .Values.global.domainName }}
+        - --oidc-issuer=https://dex.{{ .Values.global.ingress.domainName }}
         - --oidc-clientID=kyma-client
         - --oidc-ca-file=/etc/dex-tls-cert/tls.crt
         - --cors-allow-origin={{ .Values.corsPolicy.allowOrigin | join "," }}

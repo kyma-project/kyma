@@ -205,8 +205,8 @@
 # Helm broker controller Component
 /components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# UI API Layer Component
-/components/ui-api-layer/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+# Console Backend Service Component
+/components/console-backend-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # IDPPreset Component
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
@@ -264,8 +264,8 @@
 # apiserver-proxy tests
 /tests/apiserver-proxy-tests/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
-# UI API Layer acceptance tests
-/tests/ui-api-layer-acceptance-tests/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+# Console Backend Service tests
+/tests/console-backend-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Asset Store tests
 /tests/asset-store/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
@@ -316,7 +316,7 @@
 # The tools/load-test directory
 /tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
-# kubeless-integration tests directory 
+# kubeless-integration tests directory
 /tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # kubeless tests
@@ -335,10 +335,10 @@
 /tests/cluster-users-test @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # All .md files
-*.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc
+*.md @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
 
 # All files and subdirectories in /docs
-/docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc
+/docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
 
 # Config file for MILV - milv.config.yaml
 milv.config.yaml @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu

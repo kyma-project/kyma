@@ -46,4 +46,4 @@ These components use this CR:
 | Name   |   Description |
 |:----------:|:------|
 | IDP Preset |  Generates Go client which allows components and tests to create, delete, or get IDP Preset resources. |
-| UI API Layer |  Enables the IDP Preset management with GraphQL API. |
+| Console Backend Service |  Enables the IDP Preset management with GraphQL API. |

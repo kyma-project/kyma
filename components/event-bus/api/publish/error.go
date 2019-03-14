@@ -25,6 +25,10 @@ const (
 	*/
 	ErrorTypeInvalidField  = "invalid_field"
 	ErrorTypeInvalidHeader = "invalid_header"
+	// ErrorTypeRequestBodyTooLarge is error type code for error responses where request body is too large
+	ErrorTypeRequestBodyTooLarge = "request_body_too_large"
+	// ErrorMessageRequestBodyTooLarge is error message for error responses where request body is too large
+	ErrorMessageRequestBodyTooLarge = "Request body too large"
 	// ErrorTypeInternalServerError Some unexpected internal error occurred while processing the request.
 	ErrorTypeInternalServerError = "internal_server_error"
 	// ErrorMessageInternalServerError represents the error message for `ErrorTypeInternalServerError`
@@ -71,6 +75,17 @@ func ErrorResponseInternalServer() (response *Error) {
 		MoreInfo: "",
 	}
 	return &apiError
+}
+
+// ErrorResponseRequestBodyTooLarge creates API Error response for case of request body being too large
+func ErrorResponseRequestBodyTooLarge() (response *Error) {
+	apiError := &Error{
+		Status:   http.StatusRequestEntityTooLarge,
+		Type:     ErrorTypeRequestBodyTooLarge,
+		Message:  ErrorMessageRequestBodyTooLarge,
+		MoreInfo: "",
+	}
+	return apiError
 }
 
 func ErrorResponseBadRequest() (response *Error) {

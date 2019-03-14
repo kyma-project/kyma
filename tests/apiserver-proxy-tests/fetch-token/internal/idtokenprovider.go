@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -65,7 +66,8 @@ func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
 
 	var loginEndpoint string
 	if authorizeResp.StatusCode == http.StatusOK {
-		loginEndpoint, err = getLocalAuthEndpoint(authorizeResp.Body)
+		b := bytes.NewBufferString(authorizeRespBody)
+		loginEndpoint, err = getLocalAuthEndpoint(b)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while fetching link to static authentication")
 		}

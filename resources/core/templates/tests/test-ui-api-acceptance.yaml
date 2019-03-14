@@ -15,7 +15,7 @@ spec:
       image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_api_layer_acceptance_tests.dir }}ui-api-layer-acceptance-tests:{{ .Values.global.ui_api_layer_acceptance_tests.version }}
       env:
         - name: DOMAIN
-          value: "{{ .Values.global.domainName }}"
+          value: "{{ .Values.global.ingress.domainName }}"
         - name: ADMIN_EMAIL
           valueFrom:
             secretKeyRef:
