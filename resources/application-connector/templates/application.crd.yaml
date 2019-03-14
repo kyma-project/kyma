@@ -81,6 +81,12 @@ spec:
                               type: string
                             authenticationUrl:
                               type: string
+                            csrfInfo:
+                              type: object
+                              required:
+                              - "tokenEndpointURL"
+                              properties:
+                                tokenEndpointURL: string
                   tags:
                     type: array
                     items:
