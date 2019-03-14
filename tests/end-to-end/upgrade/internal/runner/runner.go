@@ -67,8 +67,8 @@ func (r *TestRunner) PrepareData(stopCh <-chan struct{}) error {
 	for i := 0; i < r.maxConcurrencyLevel; i++ {
 		wg.Add(1)
 		go func() {
-			for task := range queue {
-				failed := r.executeTask(task.CreateResources, stopCh, "CreateResources", task.Name(), true)
+			for test := range queue {
+				failed := r.executeTaskFunc(test.CreateResources, stopCh, "CreateResources", test.Name(), true)
 				if failed {
 					failedTaskCnt++
 				}
@@ -103,8 +103,8 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 	for i := 0; i < r.maxConcurrencyLevel; i++ {
 		wg.Add(1)
 		go func() {
-			for task := range queue {
-				failed := r.executeTask(task.TestResources, stopCh, "TestResources", task.Name(), false)
+			for test := range queue {
+				failed := r.executeTaskFunc(test.TestResources, stopCh, "TestResources", test.Name(), false)
 				if failed {
 					failedTaskCnt++
 				}
@@ -129,7 +129,7 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 	return nil
 }
 
-func (r *TestRunner) executeTask(task taskFn, stopCh <-chan struct{}, header, taskName string, createNs bool) bool {
+func (r *TestRunner) executeTaskFunc(taskHandler taskFn, stopCh <-chan struct{}, header, taskName string, createNs bool) bool {
 	taskLog := r.newLoggerForTask()
 
 	fullHeader := fmt.Sprintf("[%s: %s]", header, taskName)
@@ -153,7 +153,7 @@ func (r *TestRunner) executeTask(task taskFn, stopCh <-chan struct{}, header, ta
 	taskLog.Logger.SetOutput(sink)
 	startTime := time.Now()
 
-	if err := task(stopCh, taskLog, nsName); err != nil {
+	if err := taskHandler(stopCh, taskLog, nsName); err != nil {
 		taskLog.Errorf("%s End with error [start time: %v, duration: %v]: %v", fullHeader, startTime.Format(time.RFC1123), time.Since(startTime), err)
 		fmt.Fprint(originalOutput, sink.String())
 		return true
