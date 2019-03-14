@@ -21,7 +21,14 @@ test(){
   
   set +e
   NEW_UUID=$(kubectl exec ${POD_NAME} cat ${PWD}/uuid)
+  ERR=$(kubectl exec ${POD_NAME} cat ${PWD}/uuid >&2)
   set -e
+
+  if [[ -z ${ERR} ]]; then
+  echo "Error:"
+  echo ${ERR}
+  echo "TEST FAILED"
+  fi
 
   if [[ ${UUID} != ${NEW_UUID} ]]; then
     echo "NEW_UUID should be ${UUID}"
