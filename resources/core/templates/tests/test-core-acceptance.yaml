@@ -1,4 +1,3 @@
-{{ $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -33,7 +32,7 @@ spec:
             name: admin-user
             key: password
       - name: INGRESSGATEWAY_FQDN
-        value: {{ $serviceName }}.istio-system.svc.cluster.local
+        value: istio-ingressgateway.istio-system.svc.cluster.local
       - name: STUBS_DOCKER_IMAGE
         value: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
       - name: APPLICATION_UNLINKING_TIMEOUT

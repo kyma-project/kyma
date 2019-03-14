@@ -40,11 +40,11 @@ git tag YOUR_NEW_VERSION
 git push --tags
 ```
 
-##### IDPPreset as a ui-api-layer dependency
+##### IDPPreset as a console-backend-service dependency
 
-After releasing a new version in **idppreset** repository, change the version in Gopkg.toml in [ui-api-layer](https://github.com/kyma-project/kyma/tree/master/components/ui-api-layer) project:
+After releasing a new version in **idppreset** repository, change the version in Gopkg.toml in [console-backend-service](../console-backend-service) project:
 ```
-# Gopkg.toml file in ui-api-layer project
+# Gopkg.toml file in console-backend-service project
 ...
 [[constraint]]
   name = "github.com/kyma-project/idppreset"
