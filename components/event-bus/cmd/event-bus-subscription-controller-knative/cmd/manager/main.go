@@ -78,6 +78,7 @@ func main() {
 	go func() {
 		if err := mgr.Start(stopCh); err != nil {
 			log.Error(err, "unable to run the manager")
+			os.Exit(1)
 		}
 	}()
 
@@ -95,6 +96,7 @@ func main() {
 	go func() {
 		if err := server.ListenAndServe(); err != nil {
 			log.Error(err, "HTTP server failed with error")
+			os.Exit(1)
 		}
 	}()
 
