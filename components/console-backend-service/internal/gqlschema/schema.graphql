@@ -612,6 +612,16 @@ type BackendModule {
     name: String!
 }
 
+# Config Maps 
+
+type ConfigMap {
+    name: String!
+    namespace: String!
+    creationTimestamp: Timestamp!
+    labels: Labels!
+    data: JSON!
+}
+
 # Queries
 
 type Query {
@@ -647,6 +657,9 @@ type Query {
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]!
     pod(name: String!, namespace: String!): Pod
     pods(namespace: String!, first: Int, offset: Int): [Pod!]!
+
+    configMap(name: String!, namespace: String!): ConfigMap
+    configMaps(namespace: String!, first: Int, offset: Int): [ConfigMap!]!
 
     replicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "get", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
     replicaSets(namespace: String!, first: Int, offset: Int): [ReplicaSet!]! @HasAccess(attributes: {resource: "replicasets", verb: "list", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
@@ -690,6 +703,9 @@ type Mutation {
 
     updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
     deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+
+    updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap
+    deleteConfigMap(name: String!, namespace: String!): ConfigMap
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})

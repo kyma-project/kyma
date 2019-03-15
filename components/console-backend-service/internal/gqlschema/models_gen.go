@@ -86,6 +86,14 @@ type ClusterServicePlan struct {
 	BindingCreateParameterSchema   *JSON   `json:"bindingCreateParameterSchema"`
 }
 
+type ConfigMap struct {
+	Name              string    `json:"name"`
+	Namespace         string    `json:"namespace"`
+	CreationTimestamp time.Time `json:"creationTimestamp"`
+	Labels            Labels    `json:"labels"`
+	Data              JSON      `json:"data"`
+}
+
 type ConnectorService struct {
 	URL string `json:"url"`
 }
