@@ -7,7 +7,7 @@ import (
 	"k8s.io/client-go/tools/record"
 	"time"
 
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/asset-store/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset/pretty"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/loader"

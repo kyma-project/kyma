@@ -14,7 +14,7 @@ import (
 	"net/http"
 	"time"
 
-	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/asset-store/v1alpha2"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -28,7 +28,7 @@ import (
 
 var log = logf.Log.WithName("asset-controller")
 
-const deleteAssetFinalizerName = "deleteasset.finalizers.asset-store.kyma-project.io"
+const deleteAssetFinalizerName = "deleteasset.finalizers.assetstore.kyma-project.io"
 
 // Add creates a new Asset Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -117,10 +117,10 @@ type ReconcileAsset struct {
 }
 
 // Reconcile reads that state of the cluster for a Asset object and makes changes based on the state read
-// +kubebuilder:rbac:groups=asset-store.kyma-project.io,resources=assets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=asset-store.kyma-project.io,resources=assets/status,verbs=get;update;patch
-// +kubebuilder:rbac:groups=asset-store.kyma-project.io,resources=buckets,verbs=get;list;watch
-// +kubebuilder:rbac:groups=asset-store.kyma-project.io,resources=buckets/status,verbs=get;list
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;list
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 func (r *ReconcileAsset) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())

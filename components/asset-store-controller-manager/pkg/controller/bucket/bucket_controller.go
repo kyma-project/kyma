@@ -2,7 +2,7 @@ package bucket
 
 import (
 	"context"
-	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/asset-store/v1alpha2"
+	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/finalizer"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/bucket"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store"
@@ -22,7 +22,7 @@ import (
 
 var log = logf.Log.WithName("bucket-controller")
 
-const deleteBucketFinalizerName = "deletebucket.finalizers.asset-store.kyma-project.io"
+const deleteBucketFinalizerName = "deletebucket.finalizers.assetstore.kyma-project.io"
 
 // Add creates a new Bucket Controller and adds it to the Manager with default RBAC. The Manager will set fields on the Controller
 // and Start it when the Manager is Started.
@@ -82,8 +82,8 @@ type ReconcileBucket struct {
 }
 
 // Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
-// +kubebuilder:rbac:groups=asset-store.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=asset-store.kyma-project.io,resources=buckets/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="",resources=events,verbs=create;patch
 func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())

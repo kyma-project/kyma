@@ -3,10 +3,10 @@ title: Asset
 type: Custom Resource
 ---
 
-The `assets.asset-store.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define an asset to store in a cloud storage bucket. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
+The `assets.assetstore.kyma-project.io` CustomResourceDefinition (CRD) is a detailed description of the kind of data and the format used to define an asset to store in a cloud storage bucket. To get the up-to-date CRD and show the output in the `yaml` format, run this command:
 
 ```
-kubectl get crd assets.asset-store.kyma-project.io -o yaml
+kubectl get crd assets.assetstore.kyma-project.io -o yaml
 ```
 
 ## Sample custom resource
@@ -14,7 +14,7 @@ kubectl get crd assets.asset-store.kyma-project.io -o yaml
 This is a sample resource (CR) that provides details of the bucket for storing assets.
 
 ```
-apiVersion: asset-store.kyma-project.io/v1alpha2
+apiVersion: assetstore.kyma-project.io/v1alpha2
 kind: Asset
 metadata:
   name: my-package-assets
@@ -36,7 +36,7 @@ You can also define validation and mutation services:
 - **Mutation webhook** acts similarly to the validation service. The difference is that it mutates the asset instead of just validating it. For example, this can mean asset rewriting through the `regex` operation or `keyvalue`, or the modification in the JSON specification. The mutation webhook returns modified files instead of information on the status.
 
 ```
-apiVersion: asset-store.kyma-project.io/v1alpha2
+apiVersion: assetstore.kyma-project.io/v1alpha2
 kind: Asset
 metadata:
   name: my-package-assets

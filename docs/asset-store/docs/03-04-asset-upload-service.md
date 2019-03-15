@@ -21,7 +21,7 @@ Once you upload the files, system buckets store them permanently. There is no po
 You can expose the service for development purposes. To use the Asset Upload Service on a local machine, run the following command:
 
 ```bash
-kubectl port-forward deployment/asset-store-asset-upload-service 3000:3000 -n kyma-system
+kubectl port-forward deployment/assetstore-asset-upload-service 3000:3000 -n kyma-system
 ```
 
 You can access the service on port `3000`.

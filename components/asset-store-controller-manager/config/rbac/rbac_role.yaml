@@ -5,7 +5,7 @@ metadata:
   name: manager-role
 rules:
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - assets
   verbs:
@@ -17,7 +17,7 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - assets/status
   verbs:
@@ -25,7 +25,7 @@ rules:
   - update
   - patch
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - buckets
   verbs:
@@ -33,7 +33,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - buckets/status
   verbs:
@@ -47,7 +47,7 @@ rules:
   - create
   - patch
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - buckets
   verbs:
@@ -59,7 +59,7 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - buckets/status
   verbs:
@@ -74,7 +74,7 @@ rules:
   - create
   - patch
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - clusterassets
   verbs:
@@ -86,7 +86,7 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - clusterassets/status
   verbs:
@@ -94,7 +94,7 @@ rules:
   - update
   - patch
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - clusterbuckets
   verbs:
@@ -102,7 +102,7 @@ rules:
   - list
   - watch
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - clusterbuckets/status
   verbs:
@@ -116,7 +116,7 @@ rules:
   - create
   - patch
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - clusterbuckets
   verbs:
@@ -128,7 +128,7 @@ rules:
   - patch
   - delete
 - apiGroups:
-  - asset-store.kyma-project.io
+  - assetstore.kyma-project.io
   resources:
   - clusterbuckets/status
   verbs:

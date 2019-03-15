@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/asset-store/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/minio/minio-go"
 	"github.com/minio/minio-go/pkg/policy"
 	"github.com/pkg/errors"

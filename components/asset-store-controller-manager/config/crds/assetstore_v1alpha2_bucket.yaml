@@ -4,9 +4,9 @@ metadata:
   creationTimestamp: null
   labels:
     controller-tools.k8s.io: "1.0"
-  name: buckets.asset-store.kyma-project.io
+  name: buckets.assetstore.kyma-project.io
 spec:
-  group: asset-store.kyma-project.io
+  group: assetstore.kyma-project.io
   names:
     kind: Bucket
     plural: buckets

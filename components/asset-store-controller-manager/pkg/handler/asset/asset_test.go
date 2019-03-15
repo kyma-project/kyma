@@ -3,7 +3,7 @@ package asset_test
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/asset-store/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine"
 	automock3 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine/automock"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset"

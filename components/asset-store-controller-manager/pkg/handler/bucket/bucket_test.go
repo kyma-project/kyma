@@ -3,7 +3,7 @@ package bucket_test
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/asset-store/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/bucket"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/bucket/pretty"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store/automock"

@@ -5,7 +5,7 @@
 // +k8s:deepcopy-gen=package,register
 // +k8s:conversion-gen=github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore
 // +k8s:defaulter-gen=TypeMeta
-// +groupName=asset-store.kyma-project.io
+// +groupName=assetstore.kyma-project.io
 package v1alpha2
 
 import (
@@ -15,7 +15,7 @@ import (
 
 var (
 	// SchemeGroupVersion is group version used to register these objects
-	SchemeGroupVersion = schema.GroupVersion{Group: "asset-store.kyma-project.io", Version: "v1alpha2"}
+	SchemeGroupVersion = schema.GroupVersion{Group: "assetstore.kyma-project.io", Version: "v1alpha2"}
 
 	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
 	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
