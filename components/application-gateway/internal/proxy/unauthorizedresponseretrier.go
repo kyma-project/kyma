@@ -76,7 +76,6 @@ func (rr *retrier) prepareRequest() (*http.Request, context.CancelFunc) {
 }
 
 func (rr *retrier) addAuthorization(r *http.Request, cacheEntry *CacheEntry) error {
-	log.Printf("[DEBUG] addAuthorization(r, cacheEntry)")
 	authorizationStrategy := cacheEntry.AuthorizationStrategy
 	authorizationStrategy.Invalidate()
 	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r)
@@ -90,7 +89,6 @@ func (rr *retrier) addAuthorization(r *http.Request, cacheEntry *CacheEntry) err
 }
 
 func (rr *retrier) performRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Response, error) {
-	log.Printf("[DEBUG] performRequest(r, cacheEntry)")
 	reverseProxy := cacheEntry.Proxy
 	reverseProxy.Director(r)
 

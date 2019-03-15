@@ -2,7 +2,6 @@ package csrf
 
 import (
 	"context"
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -10,6 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
+	log "github.com/sirupsen/logrus"
 )
 
 type Response struct {
@@ -43,20 +43,21 @@ func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy auth
 		return resp, nil
 	}
 
+	log.Infof("CSRF Token not found in cache, fetching (Endpoint: %s)", tokenEndpointURL)
 	tokenResponse, err := c.requestToken(tokenEndpointURL, strategy, c.timeoutDuration)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[DEBUG] Adding tokenResponse to cache: %s => %#v", tokenEndpointURL, resp)
 	c.tokenCache.Add(tokenEndpointURL, tokenResponse)
 
 	return tokenResponse, nil
 
 }
 
-func (c *client) InvalidateTokenCache(csrfEndpointURL string) {
-	c.tokenCache.Remove(csrfEndpointURL)
+func (c *client) InvalidateTokenCache(tokenEndpointURL string) {
+	log.Infof("Invalidating token for endpoint: %s", tokenEndpointURL)
+	c.tokenCache.Remove(tokenEndpointURL)
 }
 
 func requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError) {
