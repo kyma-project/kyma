@@ -56,7 +56,7 @@ The Application Gateway is an intermediary component between a lambda function o
 - OAuth
 - Client certificates
 
-Additionally, the Application Gateway supports CSRF tokens as an optional layer of authorization. 
+Additionally, the Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of authorization. 
 
 ## Access Service
 
