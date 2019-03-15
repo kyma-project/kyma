@@ -44,14 +44,14 @@ func TestRevocationListRepository(t *testing.T) {
 		configListManagerMock.On("Get", configMapName, mock.AnythingOfType("v1.GetOptions")).Return(
 			&v1.ConfigMap{
 				Data: nil,
-		}, nil)
+			}, nil)
 
 		configListManagerMock.On("Update", &v1.ConfigMap{
-			Data: map[string]string {
-				someHash:someHash,
-		}}).Return(&v1.ConfigMap{
-			Data: map[string]string {
-				someHash:someHash,
+			Data: map[string]string{
+				someHash: someHash,
+			}}).Return(&v1.ConfigMap{
+			Data: map[string]string{
+				someHash: someHash,
 			}}, nil)
 
 		repository := NewRepository(configListManagerMock, configMapName)
@@ -84,7 +84,6 @@ func TestRevocationListRepository(t *testing.T) {
 		configListManagerMock.AssertExpectations(t)
 	})
 
-
 	t.Run("should return error when failed to update config map", func(t *testing.T) {
 		// given
 		someHash := "someHash"
@@ -96,8 +95,8 @@ func TestRevocationListRepository(t *testing.T) {
 			}, nil)
 
 		configListManagerMock.On("Update", &v1.ConfigMap{
-			Data: map[string]string {
-				someHash:someHash,
+			Data: map[string]string{
+				someHash: someHash,
 			}}).Return(nil, errors.New("some error"))
 
 		repository := NewRepository(configListManagerMock, configMapName)
@@ -110,4 +109,3 @@ func TestRevocationListRepository(t *testing.T) {
 		configListManagerMock.AssertExpectations(t)
 	})
 }
-
