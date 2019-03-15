@@ -3,10 +3,13 @@ package eventactivation
 import (
 	"context"
 	"fmt"
-
 	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
 	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	"sigs.k8s.io/controller-runtime/pkg/client/fake"
+	"time"
+
 	//	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -17,8 +20,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	"testing"
-
-	"sigs.k8s.io/controller-runtime/pkg/client/fake"
 )
 
 const (
@@ -37,7 +38,7 @@ func init() {
 
 var testCases = []controllertesting.TestCase{
 	{
-		Name: "new event activation add finalizer",
+		Name: "New event activation adds finalizer",
 		InitialState: []runtime.Object{
 			makeNewEventActivation(testNamespace, eaName),
 		},
@@ -50,11 +51,9 @@ var testCases = []controllertesting.TestCase{
 			addEventActivationFinalizer(
 				makeNewEventActivation(testNamespace, eaName), finalizerName),
 		},
-		Scheme:      scheme.Scheme,
-		IgnoreTimes: true,
 	},
 	{
-		Name: "marked to be deleted event activation remove finalizer",
+		Name: "Marked to be deleted event activation removes finalizer",
 		InitialState: []runtime.Object{
 			markedToBeDeletedEventActivation(
 				addEventActivationFinalizer(
@@ -69,27 +68,33 @@ var testCases = []controllertesting.TestCase{
 			markedToBeDeletedEventActivation(
 				makeNewEventActivation(testNamespace, eaName)),
 		},
-		Scheme:      scheme.Scheme,
-		IgnoreTimes: true,
 	},
 	{
-		Name: "new event activation activate subscription",
+		Name: "New event activation will activate subscription",
 		InitialState: []runtime.Object{
+			makeEventsDeactivatedSubscription(subName),
 			addEventActivationFinalizer(
 				makeNewEventActivation(testNamespace, eaName), finalizerName),
 		},
-		Mocks: controllertesting.Mocks{
-			MockLists:   mockSubscriptionDeactivatedList(),
-			MockUpdates: mockSubscriptionUpdate(),
+		ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, eaName),
+		WantResult:   reconcile.Result{},
+		WantPresent: []runtime.Object{
+			makeEventsActivatedSubscription(subName),
+		},
+	},
+	{
+		Name: "Marked to be deleted event activation will deactivate subscription",
+		InitialState: []runtime.Object{
+			makeEventsActivatedSubscription(subName),
+			markedToBeDeletedEventActivation(
+				addEventActivationFinalizer(
+					makeNewEventActivation(testNamespace, eaName), finalizerName)),
 		},
 		ReconcileKey: fmt.Sprintf("%s/%s", testNamespace, eaName),
 		WantResult:   reconcile.Result{},
-		WantPresent:  []runtime.Object{},
-		//WantPresent: []runtime.Object{
-		//	makeEventsActivatedSubscription("my-sub-1"),
-		//},
-		Scheme:      scheme.Scheme,
-		IgnoreTimes: true,
+		WantPresent: []runtime.Object{
+			makeEventsDeactivatedSubscription(subName),
+		},
 	},
 }
 
@@ -100,7 +105,9 @@ func TestAllCases(t *testing.T) {
 		r := &reconciler{
 			client:   c,
 			recorder: recorder,
+			time: NewMockCurrentTime(),
 		}
+		tc.IgnoreTimes = true
 		t.Logf("Running test %s", tc.Name)
 		t.Run(tc.Name, tc.Runner(t, r, c, tc.GetEventRecorder()))
 	}
@@ -207,11 +214,12 @@ func makeEventsDeactivatedSubscription(name string) *subApis.Subscription {
 func makeSubscription(name string) *subApis.Subscription {
 	return &subApis.Subscription{
 		TypeMeta: metav1.TypeMeta{
-			APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+			APIVersion: subApis.SchemeGroupVersion.String(),
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
+			Namespace: testNamespace,
 			UID:  subUid,
 		},
 		SubscriptionSpec: subApis.SubscriptionSpec{
@@ -237,4 +245,16 @@ func om(namespace, name string) metav1.ObjectMeta {
 		Name:      name,
 		SelfLink:  fmt.Sprintf("/apis/eventing/v1alpha1/namespaces/%s/object/%s", namespace, name),
 	}
+}
+
+// Mock the current time for Status "LastTranscationTime"
+type MockCurrentTime struct{}
+
+func NewMockCurrentTime() util.CurrentTime {
+	mockCurrentTime := new(MockCurrentTime)
+	return mockCurrentTime
+}
+
+func (m *MockCurrentTime) GetCurrentTime() metav1.Time {
+	return metav1.NewTime(time.Time{})
 }

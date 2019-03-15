@@ -1,6 +1,7 @@
 package eventactivation
 
 import (
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -23,6 +24,7 @@ func ProvideController(mgr manager.Manager) (controller.Controller, error) {
 	// Setup a new controller to Reconcile EventActivation.
 	r := &reconciler{
 		recorder: mgr.GetRecorder(controllerAgentName),
+		time: util.NewDefaultCurrentTime(),
 	}
 	c, err := controller.New(controllerAgentName, mgr, controller.Options{
 		Reconciler: r,

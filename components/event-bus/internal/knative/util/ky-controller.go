@@ -55,7 +55,15 @@ func CheckIfEventActivationExistForSubscription(ctx context.Context, client runt
 	subSourceID := sub.SourceID
 
 	eal := &eventingv1alpha1.EventActivationList{}
-	lo := &runtimeClient.ListOptions{Namespace: subNamespace}
+	lo := &runtimeClient.ListOptions{
+		Namespace: subNamespace,
+		Raw: &metav1.ListOptions{  // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: eventingv1alpha1.SchemeGroupVersion.String(),
+				Kind:       "EventActivation",
+			},
+		},
+	}
 	if err := client.List(ctx, lo, eal); err != nil {
 		return false
 	}
@@ -73,7 +81,15 @@ func GetSubscriptionsForEventActivation(ctx context.Context, client runtimeClien
 	eaSourceID := ea.EventActivationSpec.SourceID
 
 	sl := &subApis.SubscriptionList{}
-	lo := &runtimeClient.ListOptions{Namespace: eaNamespace} // query using SourceID too?
+	lo := &runtimeClient.ListOptions{ // query using SourceID too?
+		Namespace: eaNamespace,
+		Raw: &metav1.ListOptions{  // TODO this is here because the fake client needs it. Remove this when it's no longer needed.
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: subApis.SchemeGroupVersion.String(),
+				Kind:       "Subscription",
+			},
+		},
+	}
 	if err := client.List(ctx, lo, sl); err != nil {
 		return nil, err
 	}
@@ -109,8 +125,23 @@ func WriteSubscription(ctx context.Context, client runtimeClient.Client, sub *su
 	return nil
 }
 
-func UpdateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, conditionStatus subApis.ConditionStatus) []*subApis.Subscription {
-	t := metav1.NewTime(time.Now())
+// Use it cause it should be mocked
+type CurrentTime interface {
+	GetCurrentTime() metav1.Time
+}
+
+type DefaultCurrentTime struct{}
+
+func NewDefaultCurrentTime() CurrentTime {
+	return new(DefaultCurrentTime)
+}
+
+func (t *DefaultCurrentTime) GetCurrentTime() metav1.Time {
+	return metav1.NewTime(time.Now())
+}
+
+func UpdateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, conditionStatus subApis.ConditionStatus, time CurrentTime) []*subApis.Subscription {
+	t := time.GetCurrentTime()
 	var newCondition subApis.SubscriptionCondition
 	if conditionStatus == subApis.ConditionTrue {
 		newCondition = subApis.SubscriptionCondition{Type: subApis.EventsActivated, Status: subApis.ConditionTrue, LastTransitionTime: t}
@@ -138,8 +169,8 @@ func UpdateSubscriptionsEventActivatedStatus(subs []*subApis.Subscription, condi
 	return updatedSubs
 }
 
-func UpdateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string) *subApis.Subscription {
-	t := metav1.NewTime(time.Now())
+func UpdateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus subApis.ConditionStatus, msg string, time CurrentTime) *subApis.Subscription {
+	t := time.GetCurrentTime()
 	var newCondition subApis.SubscriptionCondition
 	if conditionStatus == subApis.ConditionTrue {
 		newCondition = subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue, LastTransitionTime: t, Message: msg}
@@ -161,22 +192,22 @@ func UpdateSubscriptionReadyStatus(sub *subApis.Subscription, conditionStatus su
 	return sub
 }
 
-func ActivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger) error {
-	updatedSubs := UpdateSubscriptionsEventActivatedStatus(subs, subApis.ConditionTrue)
-	return updateSubscriptions(ctx, client, updatedSubs, log)
+func ActivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger, time CurrentTime) error {
+	updatedSubs := UpdateSubscriptionsEventActivatedStatus(subs, subApis.ConditionTrue, time)
+	return updateSubscriptions(ctx, client, updatedSubs, log, time)
 }
 
-func DeactivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger) error {
-	updatedSubs := UpdateSubscriptionsEventActivatedStatus(subs, subApis.ConditionFalse)
-	return updateSubscriptions(ctx, client, updatedSubs, log)
+func DeactivateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger, time CurrentTime) error {
+	updatedSubs := UpdateSubscriptionsEventActivatedStatus(subs, subApis.ConditionFalse, time)
+	return updateSubscriptions(ctx, client, updatedSubs, log, time)
 }
 
-func updateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger) error {
+func updateSubscriptions(ctx context.Context, client runtimeClient.Client, subs []*subApis.Subscription, log logr.Logger, time CurrentTime) error {
 	if subsWithErrors := WriteSubscriptions(ctx, client, subs); len(subsWithErrors) != 0 {
 		// try to set the "Ready" status to false
 		for _, es := range subsWithErrors {
 			log.Error(es.Err, "WriteSubscriptions() failed for this subscription:", "subscription", es.Sub)
-			us := UpdateSubscriptionReadyStatus(es.Sub, subApis.ConditionFalse, es.Err.Error())
+			us := UpdateSubscriptionReadyStatus(es.Sub, subApis.ConditionFalse, es.Err.Error(), time)
 			if err := WriteSubscription(ctx, client, us); err != nil {
 				log.Error(err, "Update Ready status failed")
 			}

@@ -1,6 +1,7 @@
 package subscription
 
 import (
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 
@@ -26,7 +27,7 @@ const (
 func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Controller, error) {
 
 	// init the knative lib
-	knativeLib, err := knative.GetKnativeLib()
+	knativeLib, err := knative.NewKnativeLib()
 	if err != nil {
 		log.Error(err, "Failed to get Knative library")
 		return nil, err
@@ -37,6 +38,7 @@ func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Cont
 		recorder: mgr.GetRecorder(controllerAgentName),
 		opts: opts,
 		knativeLib: knativeLib,
+		time: util.NewDefaultCurrentTime(),
 	}
 	c, err := controller.New(controllerAgentName, mgr, controller.Options{
 		Reconciler: r,
