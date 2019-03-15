@@ -44,11 +44,11 @@ global:
     dir: develop/
     version: 8b074a71
   application_registry:
-    dir: pr/
-    version: PR-3102
+    dir: develop/
+    version: 5465b5fe
   application_registry_tests:
-    dir: pr/
-    version: PR-3102
+    dir: develop/
+    version: 5465b5fe
   application_broker:
     dir: develop/
     version: f78529c4
