@@ -67,6 +67,7 @@ func (r *serviceResolver) ServiceQuery(ctx context.Context, name string, namespa
 }
 
 func (r *serviceResolver) ServiceEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceEvent, error) {
+
 	channel := make(chan gqlschema.ServiceEvent, 1)
 	filter := func(service *v1.Service) bool {
 		return service != nil && service.Namespace == namespace

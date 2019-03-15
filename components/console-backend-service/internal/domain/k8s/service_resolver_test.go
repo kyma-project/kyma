@@ -3,10 +3,6 @@ package k8s_test
 import (
 	"errors"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/mock"
-	v1 "k8s.io/api/core/v1"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
@@ -14,17 +10,19 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 
-	"context"
-
-	"github.com/stretchr/testify/assert"
+	_assert "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	v1 "k8s.io/api/core/v1"
+)
+
+var (
+	name      = "name"
+	namespace = "namespace"
 )
 
 func TestServiceResolver_ServiceQuery(t *testing.T) {
-	name := "name"
-	namespace := "namespace"
 
-	assert := assert.New(t)
+	assert := _assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
 		expected := &gqlschema.Service{
@@ -79,11 +77,9 @@ func TestServiceResolver_ServiceQuery(t *testing.T) {
 
 }
 
-func TestServiceResolver_ServicesQuery(t *testing.T) {
-	name := "name"
-	namespace := "namespace"
+func TestserviceResolver_ServicesQuery(t *testing.T) {
 
-	assert := assert.New(t)
+	assert := _assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
 
@@ -147,38 +143,5 @@ func TestServiceResolver_ServicesQuery(t *testing.T) {
 		require.Error(t, err)
 		assert.True(gqlerror.IsInternal(err))
 		assert.Nil(result)
-	})
-}
-
-func TestServiceResolver_ServiceEventSubscription(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
-		cancel()
-
-		svc := automock.NewServiceSvc()
-		svc.On("Subscribe", mock.Anything).Once()
-		svc.On("Unsubscribe", mock.Anything).Once()
-		resolver := k8s.NewServiceResolver(svc)
-
-		_, err := resolver.ServiceEventSubscription(ctx, "test")
-
-		require.NoError(t, err)
-		svc.AssertCalled(t, "Subscribe", mock.Anything)
-	})
-
-	t.Run("Unsubscribe after connection close", func(t *testing.T) {
-		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
-		cancel()
-
-		svc := automock.NewServiceSvc()
-		svc.On("Subscribe", mock.Anything).Once()
-		svc.On("Unsubscribe", mock.Anything).Once()
-		resolver := k8s.NewServiceResolver(svc)
-
-		channel, err := resolver.ServiceEventSubscription(ctx, "test")
-		<-channel
-
-		require.NoError(t, err)
-		svc.AssertCalled(t, "Unsubscribe", mock.Anything)
 	})
 }

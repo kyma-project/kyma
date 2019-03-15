@@ -35,8 +35,9 @@ func (svc *serviceService) List(namespace string, pagingParams pager.PagingParam
 	if err != nil {
 		return nil, err
 	}
-	services := make([]*v1.Service, len(items))
-	for i, item := range items {
+
+	var services []*v1.Service
+	for _, item := range items {
 		service, ok := item.(*v1.Service)
 		if !ok {
 			return nil, fmt.Errorf("incorrect item type: %T, should be: *Service", item)
@@ -45,13 +46,14 @@ func (svc *serviceService) List(namespace string, pagingParams pager.PagingParam
 			Kind:       "Service",
 			APIVersion: "v1",
 		}
-		services[i] = service
+		services = append(services, service)
 	}
 
 	return services, nil
 }
 
 func (svc *serviceService) Find(name, namespace string) (*v1.Service, error) {
+
 	key := fmt.Sprintf("%s/%s", namespace, name)
 
 	item, exists, err := svc.informer.GetStore().GetByKey(key)

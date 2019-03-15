@@ -20,7 +20,10 @@ type Service struct {
 	converter gqlServiceConverter
 }
 
-func NewService(channel chan<- gqlschema.ServiceEvent, filter func(service *v1.Service) bool, converter gqlServiceConverter) *Service {
+func NewService(channel chan<- gqlschema.ServiceEvent,
+	filter func(service *v1.Service) bool,
+	converter gqlServiceConverter) *Service {
+
 	return &Service{channel, filter, converter}
 }
 
