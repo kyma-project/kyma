@@ -17,6 +17,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+        checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
       labels:
         app: {{ .Values.global.natsStreaming.fullname }}
         release: {{ .Release.Name }}
