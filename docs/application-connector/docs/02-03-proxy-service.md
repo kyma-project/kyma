@@ -7,7 +7,7 @@ The Application Gateway sends the requests from Lambda functions and services in
 
 >**NOTE:** The system creates an Access Service for every external API registered by the Application Registry.
 
-The following diagram illustrates how the Application Gateway interacts with other components and external APIs secured with OAuth.
+The following diagram illustrates how the Application Gateway interacts with other components and external APIs secured with OAuth and protected against cross-site request forgery (CSRF) attacks.
 
 ![Application Gateway Diagram](./assets/003-architecture-proxy-service.svg)
 
@@ -15,8 +15,8 @@ The following diagram illustrates how the Application Gateway interacts with oth
 2. The Access Service exposes the Application Gateway.
 3. The Application Gateway extracts the Application name and the service ID from the name of the Access Service name. Using the extracted Application name, the Application Gateway finds the respective Application custom resource and obtains the information about the registered external API, such as the API URL and the OAuth server URL.
 4. The Application Gateway gets a token from the OAuth server.
-5. The Application Gateway gets a CSRF token from the endpoint exposed by the upstream service (optional).
-6. The Application Gateway calls the target API using the OAuth token.
+5. The Application Gateway gets a CSRF token from the endpoint exposed by the upstream service.
+6. The Application Gateway calls the target API using the OAuth and CSRF tokens.
 
 ## Caching
 
