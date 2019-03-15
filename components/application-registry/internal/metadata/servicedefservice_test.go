@@ -69,7 +69,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1", nil, nil)
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "app", "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
