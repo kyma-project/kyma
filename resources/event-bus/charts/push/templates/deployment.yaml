@@ -31,6 +31,8 @@ metadata:
   name: {{ template "push.fullname" . }}
   labels:
 {{ include "push.labels.standard" . | indent 4 }}
+  annotations:
+    date: {{ now }}
 spec:
   {{ if .Values.global.isLocalEnv }}
   replicas: 1

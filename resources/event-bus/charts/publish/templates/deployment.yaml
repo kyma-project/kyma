@@ -4,6 +4,8 @@ metadata:
   name: {{ template "publish.fullname" . }}
   labels:
 {{ include "publish.labels.standard" . | indent 4 }}
+  annotations:
+    date: {{ now }}
 spec:
   {{ if .Values.global.isLocalEnv }}
   replicas: 1
