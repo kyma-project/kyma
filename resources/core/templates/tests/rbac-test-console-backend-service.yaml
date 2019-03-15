@@ -1,14 +1,14 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: "test-{{ template "fullname" . }}-ui-api-acceptance"
+  name: "test-{{ template "fullname" . }}-console-backend-service"
   labels:
     app: {{ template "name" . }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: "test-{{ template "fullname" . }}-ui-api-acceptance"
+  name: "test-{{ template "fullname" . }}-console-backend-service"
   labels:
     app: {{ template "name" . }}
 rules:
@@ -52,12 +52,12 @@ rules:
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: "test-{{ template "fullname" . }}-ui-api-acceptance"
+  name: "test-{{ template "fullname" . }}-console-backend-service"
 subjects:
   - kind: ServiceAccount
-    name: "test-{{ template "fullname" . }}-ui-api-acceptance"
+    name: "test-{{ template "fullname" . }}-console-backend-service"
     namespace: {{ .Release.Namespace }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: "test-{{ template "fullname" . }}-ui-api-acceptance"
+  name: "test-{{ template "fullname" . }}-console-backend-service"

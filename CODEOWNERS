@@ -129,8 +129,8 @@
 # The `docs` subchart
 /resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The `ui-api` subchart
-/resources/core/charts/ui-api/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+# The `console-backend-service` subchart
+/resources/core/charts/console-backend-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `templates` chart
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach

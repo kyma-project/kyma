@@ -66,12 +66,12 @@ global:
   test_namespace_controller:
     dir: develop/
     version: 429bfbcc
-  ui_api_layer:
+  console_backend_service:
     dir: develop/
-    version: b426d54d
-  ui_api_layer_acceptance_tests:
+    version: 7cacbc23
+  console_backend_service_test:
     dir: develop/
-    version: 2c2182cf
+    version: 79732b88
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
