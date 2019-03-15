@@ -30,3 +30,6 @@ ci-master: build build-image push-image
 .PHONY: ci-release
 ci-release: build build-image push-image
 
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/application-connector"
