@@ -109,7 +109,11 @@ kubectl -n kyma-integration patch secrets app-{APP_NAME}-{SERVICE_ID} --patch 'd
 
 ## Register a CSRF-protected API
 
+<<<<<<< Updated upstream
 The application-registry supports CSRF tokens as an additional layer of API protection. To register a CSRF-protected API, you must add the `credentials.csrfInfo` object to the `api` section of the service registration request body.
+=======
+The application-registry supports CSRF tokens as an additional layer of authorization. To register a CSRF-protected API, you must add the `credentials.{AUTHENTICATION_METHOD}.csrfInfo` object to the `api` section of the service registration request body.
+>>>>>>> Stashed changes
 
 Include this field in the service registration request body:
 
@@ -125,10 +129,10 @@ This is an example of the `api` section of the request body for an API secured w
         "credentials": {
             "basic": {
                 "username": "{USERNAME}",
-                "password": "{PASSWORD}"
+                "password": "{PASSWORD}",
+                "csrfInfo": {
+                    "tokenEndpointURL": "{TOKEN_ENDPOINT_URL}"
+                }
             },
-            "csrfInfo": {
-                "tokenEndpointURL": "{TOKEN_ENDPOINT_URL}"
-            }
         }
 ```
