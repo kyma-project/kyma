@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"context"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -24,7 +25,10 @@ func newUnauthorizedResponseRetrier(id string, request *http.Request, timeout in
 }
 
 func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
+	//TODO: Debug
+	log.Printf("[DEBUG] RetryIfFailedToAuthorize(r) ->")
 	if rr.retried {
+		log.Printf("[DEBUG] Already retried!")
 		return nil
 	}
 
@@ -33,19 +37,31 @@ func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
 	if r.StatusCode == http.StatusForbidden || r.StatusCode == http.StatusUnauthorized {
 		log.Infof("Request from service with id %s failed with %d status, invalidating proxy and retrying.", rr.id, r.StatusCode)
 
-		res, err := rr.retry()
+		retryRes, err := rr.retry()
 		if err != nil {
 			return err
 		}
 
-		if res != nil {
+		//TODO: Debug
+		debug, err := ioutil.ReadAll(r.Body)
+		if err != nil {
+			return err
+		}
+		log.Infof("[DEBUG] target API response body: %s\n", string(debug))
+
+		if retryRes != nil {
 			if r.Body != nil {
 				r.Body.Close()
 			}
-			*r = *res
+			*r = *retryRes
+		} else {
+			//TODO: Debug
+			log.Infof("[DEBUG] Response on retry was nil!")
 		}
-
 	}
+
+	//TODO: DEBUG
+	log.Printf("[DEBUG] RetryIfFailedToAuthorize(r) <-")
 
 	return nil
 }
@@ -77,6 +93,7 @@ func (rr *retrier) prepareRequest() (*http.Request, context.CancelFunc) {
 }
 
 func (rr *retrier) addAuthorization(r *http.Request, cacheEntry *CacheEntry) error {
+	log.Printf("[DEBUG] addAuthorization(r, cacheEntry)")
 	authorizationStrategy := cacheEntry.AuthorizationStrategy
 	authorizationStrategy.Invalidate()
 	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r)
@@ -90,6 +107,7 @@ func (rr *retrier) addAuthorization(r *http.Request, cacheEntry *CacheEntry) err
 }
 
 func (rr *retrier) performRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Response, error) {
+	log.Printf("[DEBUG] performRequest(r, cacheEntry)")
 	reverseProxy := cacheEntry.Proxy
 	reverseProxy.Director(r)
 

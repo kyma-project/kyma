@@ -36,21 +36,22 @@ func NewCSRFClient(timeoutDuration int, tokenCache TokenCache) Client {
 	}
 }
 
-func (c *client) GetTokenEndpointResponse(csrfEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError) {
+func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError) {
 
-	resp, found := c.tokenCache.Get(csrfEndpointURL)
+	resp, found := c.tokenCache.Get(tokenEndpointURL)
 	if found {
 		//TODO: DEBUG
-		log.Printf("Found cached Token Response: %#v", resp)
+		log.Printf("[DEBUG] Found cached Token Response: %#v", resp)
 		return resp, nil
 	}
 
-	tokenResponse, err := c.requestToken(csrfEndpointURL, strategy, c.timeoutDuration)
+	tokenResponse, err := c.requestToken(tokenEndpointURL, strategy, c.timeoutDuration)
 	if err != nil {
 		return nil, err
 	}
 
-	c.tokenCache.Add(csrfEndpointURL, tokenResponse)
+	log.Printf("[DEBUG] Adding tokenResponse to cache: %s => %#v", tokenEndpointURL, resp)
+	c.tokenCache.Add(tokenEndpointURL, tokenResponse)
 
 	return tokenResponse, nil
 
@@ -63,7 +64,7 @@ func (c *client) InvalidateTokenCache(csrfEndpointURL string) {
 func requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError) {
 
 	//TODO: DEBUG
-	log.Printf("requestToken: csrfEndpointURL=%s", csrfEndpointURL)
+	log.Printf("[DEBUG] requestToken: csrfEndpointURL=%s", csrfEndpointURL)
 
 	client := &http.Client{}
 
@@ -98,7 +99,7 @@ func requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeo
 	}
 
 	//TODO: DEBUG
-	log.Printf("Token Response: %#v", tokenRes)
+	log.Printf("[DEBUG] Token Response: %#v", tokenRes)
 
 	return tokenRes, nil
 
