@@ -111,7 +111,7 @@ global:
   hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: 1.1.0-rc.3
+  tag: 1.1.0-rc.5
 
   # monitoring port used by mixer, pilot, galley
   monitoringPort: 15014
@@ -138,7 +138,7 @@ global:
     # Resources for the sidecar.
     resources:
       requests:
-        cpu: 10m
+        cpu: 100m
         memory: 128Mi
       limits:
         cpu: 2000m
@@ -188,7 +188,7 @@ global:
     # example: includeIPRanges: "172.30.0.0/16,172.20.0.0/16"
     # would only capture egress traffic on those two IP Ranges, all other outbound traffic would
     # be allowed by the sidecar
-    includeIPRanges: "10.0.0.1/8" # Adjust for Kyma, previous value: "*"
+    includeIPRanges: "10.0.0.1/8"
     excludeIPRanges: ""
 
     # pod internal interfaces

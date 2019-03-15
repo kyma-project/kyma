@@ -1,11 +1,9 @@
+{{- if .Values.certmanager.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
   namespace: {{ .Release.Namespace }}
   name: istio-init-crd-certmanager-11
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
     metadata:
@@ -27,3 +25,4 @@ spec:
         configMap:
           name: istio-crd-certmanager-11
       restartPolicy: OnFailure
+{{- end }}
