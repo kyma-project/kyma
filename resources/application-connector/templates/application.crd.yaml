@@ -86,7 +86,7 @@ spec:
                               required:
                               - "tokenEndpointURL"
                               properties:
-                                tokenEndpointURL
+                                tokenEndpointURL:
                                   type: string
                   tags:
                     type: array
