@@ -526,7 +526,7 @@ metadata:
   name: queue-proxy
   namespace: knative-serving
 spec:
-  image: gcr.io/knative-releases/github.com/knative/serving/cmd/queue:v0.4.1
+  image: gcr.io/knative-releases/github.com/knative/serving/cmd/queue:{{ .Values.version }}
 
 ---
 apiVersion: apps/v1
@@ -563,7 +563,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: gcr.io/knative-releases/github.com/knative/serving/cmd/activator:v0.4.1
+        image: gcr.io/knative-releases/github.com/knative/serving/cmd/activator:{{ .Values.version }}
         name: activator
         ports:
         - containerPort: 8080
@@ -641,7 +641,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: gcr.io/knative-releases/github.com/knative/serving/cmd/autoscaler:v0.4.1
+        image: gcr.io/knative-releases/github.com/knative/serving/cmd/autoscaler:{{ .Values.version }}
         name: autoscaler
         ports:
         - containerPort: 8080
@@ -1111,7 +1111,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: gcr.io/knative-releases/github.com/knative/serving/cmd/controller:v0.4.1
+        image: gcr.io/knative-releases/github.com/knative/serving/cmd/controller:{{ .Values.version }}
         name: controller
         ports:
         - containerPort: 9090
@@ -1160,7 +1160,7 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: gcr.io/knative-releases/github.com/knative/serving/cmd/webhook:v0.4.1
+        image: gcr.io/knative-releases/github.com/knative/serving/cmd/webhook:{{ .Values.version }}
         name: webhook
         resources:
           limits:

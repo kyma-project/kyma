@@ -4,11 +4,13 @@
 global:
   isLocalEnv: false
   knative: false
+
+natss-knative-provisioner:
   controller:
     image:
       pullPolicy: IfNotPresent
-      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/controller:v0.4.0
+      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/controller:v0.4.1
   dispatcher:
     image:
       pullPolicy: IfNotPresent
-      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/dispatcher:v0.4.0
+      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/dispatcher:v0.4.1

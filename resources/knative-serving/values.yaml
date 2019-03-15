@@ -6,6 +6,7 @@ knative-serving:
     tls:
       enabled: true
   domainName: example.com
+  version: v0.4.1
 
 global:
   isLocalEnv: false
