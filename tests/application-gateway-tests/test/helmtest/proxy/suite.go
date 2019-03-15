@@ -157,7 +157,7 @@ func (ts *TestSuite) GetTestExecutorLogs(t *testing.T) {
 	bytes, err := ioutil.ReadAll(reader)
 	require.NoError(t, err)
 
-	strLogs := strings.Replace(string(bytes), "\\t", "    ", -1)
+	strLogs := strings.Replace(string(bytes), "\t", "    ", -1)
 
 	log.Infoln("--------------------------------------------Logs from test executor--------------------------------------------")
 	lines := strings.Split(strLogs, "\n")

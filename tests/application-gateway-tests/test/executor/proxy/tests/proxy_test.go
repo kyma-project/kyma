@@ -33,7 +33,7 @@ func TestProxyService(t *testing.T) {
 		testSuit.AddDenierLabel(t, apiId)
 
 		log.Infoln("Calling Access Service")
-		resp := testSuit.CallAccessService(t, apiId, "")
+		resp := testSuit.CallAccessService(t, apiId, "status/ok")
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		log.Infoln("Successfully accessed application")
@@ -43,7 +43,7 @@ func TestProxyService(t *testing.T) {
 		userName := "myUser"
 		password := "mySecret"
 
-		apiId := client.CreateBasicAuthSecuredAPI(t, testSuit.GetMockServiceURL()+"auth/basic/", userName, password)
+		apiId := client.CreateBasicAuthSecuredAPI(t, testSuit.GetMockServiceURL(), userName, password)
 		log.Infof("Created service with apiId: %s", apiId)
 		defer func() {
 			log.Infof("Cleaning up service %s", apiId)
@@ -54,7 +54,7 @@ func TestProxyService(t *testing.T) {
 		testSuit.AddDenierLabel(t, apiId)
 
 		log.Infoln("Calling Access Service")
-		resp := testSuit.CallAccessService(t, apiId, fmt.Sprintf("%s/%s", userName, password))
+		resp := testSuit.CallAccessService(t, apiId, fmt.Sprintf("auth/basic/%s/%s", userName, password))
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		log.Infoln("Successfully accessed application")

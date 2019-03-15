@@ -18,10 +18,13 @@ type AppMockServer struct {
 func NewAppMockServer(port int32) *AppMockServer {
 	router := mux.NewRouter()
 
-	router.Path("/").HandlerFunc(Success)
+	router.Path("/status/ok").HandlerFunc(StatusOK)
 
 	basicAuth := NewBasicAuthHandler()
 	router.Path("/auth/basic/{username}/{password}").HandlerFunc(basicAuth.BasicAuth)
+
+	router.NotFoundHandler = NewErrorHandler(404, "Requested resource could not be found.")
+	router.MethodNotAllowedHandler = NewErrorHandler(405, "Method not allowed.")
 
 	server := http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
@@ -46,8 +49,9 @@ func (ams *AppMockServer) Kill() error {
 	return ams.Server.Shutdown(context.Background())
 }
 
-func Success(w http.ResponseWriter, r *http.Request) {
+func StatusOK(w http.ResponseWriter, r *http.Request) {
 	successResponse(w)
+	w.Write([]byte("Ok"))
 }
 
 func successResponse(w http.ResponseWriter) {

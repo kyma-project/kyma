@@ -77,6 +77,8 @@ func (arc *AppRegistryClient) createAPI(t *testing.T, api *API) string {
 	require.NoError(t, err)
 	util.RequireStatus(t, http.StatusOK, response)
 
+	defer response.Body.Close()
+
 	var idResponse PostServiceResponse
 	err = json.NewDecoder(response.Body).Decode(&idResponse)
 	require.NoError(t, err)

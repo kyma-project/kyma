@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"testing"
 	"time"
@@ -143,9 +144,14 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 			log.Errorf("Access service not ready: %s", err.Error())
 			return false
 		}
+		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
 			log.Errorf("Access service not ready: Invalid response from access service, status: %d.", resp.StatusCode)
+			bytes, err := ioutil.ReadAll(resp.Body)
+			require.NoError(t, err)
+			log.Errorf(string(bytes))
+
 			return false
 		}
 
