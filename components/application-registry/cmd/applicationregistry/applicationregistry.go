@@ -148,8 +148,12 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 	accessServiceManager := newAccessServiceManager(coreClientset, namespace, proxyPort)
 	secretsService := newSecretsRepository(coreClientset, nameResolver, namespace)
 
-	uuidGenerator := metauuid.GeneratorFunc(func() string {
-		return uuid.NewV4().String()
+	uuidGenerator := metauuid.GeneratorFunc(func() (string, error) {
+		uuidInstance, err := uuid.NewV4()
+		if err != nil {
+			return "", err
+		}
+		return uuidInstance.String(), nil
 	})
 
 	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsService, istioService)

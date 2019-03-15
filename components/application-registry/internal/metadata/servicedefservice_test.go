@@ -69,7 +69,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil, nil)
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "app", "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -119,7 +119,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		specService := new(specmocks.Service)
@@ -163,7 +163,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		specService := new(specmocks.Service)
@@ -207,7 +207,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		specService := new(specmocks.Service)
@@ -252,7 +252,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		specService := new(specmocks.Service)
@@ -296,7 +296,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		specService := new(specmocks.Service)
@@ -341,7 +341,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
 		serviceRepository.On("Create", "app", applicationService).Return(nil)
 		specService := new(specmocks.Service)
@@ -374,7 +374,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "app", "uuid-1", serviceAPI).Return(nil, apperrors.Internal("some error"))
 
@@ -405,7 +405,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		specService := new(specmocks.Service)
 		specService.On("PutSpec", &serviceDefinition, "").Return(apperrors.Internal("error"))
 
@@ -454,7 +454,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 		}
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "app", "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -511,7 +511,7 @@ func TestServiceDefinitionService_Create(t *testing.T) {
 			Events:              false,
 		}
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 		serviceAPIService := new(serviceapimocks.Service)
 		serviceAPIService.On("New", "app", "uuid-1", serviceAPI).Return(applicationServiceAPI, nil)
 		serviceRepository := new(applicationsmocks.ServiceRepository)
@@ -1342,7 +1342,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		serviceRepository.On("Delete", "app", "uuid-1").Return(nil)
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 
 		specService := new(specmocks.Service)
 		specService.On("RemoveSpec", "uuid-1").Return(nil)
@@ -1366,7 +1366,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		serviceAPIService.On("Delete", "app", "uuid-1").Return(apperrors.Internal("an error"))
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, nil, nil)
 
@@ -1390,7 +1390,7 @@ func TestServiceDefinitionService_Delete(t *testing.T) {
 		serviceAPIService.On("Delete", "app", "uuid-1").Return(nil)
 
 		uuidGenerator := new(uuidmocks.Generator)
-		uuidGenerator.On("NewUUID").Return("uuid-1")
+		uuidGenerator.On("NewUUID").Return("uuid-1", nil)
 
 		service := NewServiceDefinitionService(uuidGenerator, serviceAPIService, serviceRepository, nil)
 
