@@ -3,10 +3,11 @@ package authz
 import (
 	"context"
 
-	"github.com/99designs/gqlgen/graphql"
-	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
+	"github.com/99designs/gqlgen/graphql"
+	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 	"k8s.io/client-go/discovery"

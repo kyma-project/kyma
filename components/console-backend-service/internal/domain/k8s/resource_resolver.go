@@ -3,12 +3,12 @@ package k8s
 import (
 	"context"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
-
-	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
+	"github.com/golang/glog"
 	"github.com/pkg/errors"
 )
 

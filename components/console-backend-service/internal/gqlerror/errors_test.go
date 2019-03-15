@@ -27,25 +27,24 @@ func (k testKind) String() string {
 }
 
 func TestNew(t *testing.T) {
-	var testCases = []struct {
-		caseName  string
+	var testCases = map[string]struct {
 		kind      fmt.Stringer
 		err       error
 		validator func(error) bool
 	}{
-		{"K8sNotFound", someTestKind, k8serrors.NewNotFound(schema.GroupResource{}, "test"), gqlerror.IsNotFound},
-		{"K8sAlreadyExists", someTestKind, k8serrors.NewAlreadyExists(schema.GroupResource{}, "test"), gqlerror.IsAlreadyExists},
-		{"K8sInvalid", someTestKind, k8serrors.NewInvalid(schema.GroupKind{}, "test", field.ErrorList{}), gqlerror.IsInvalid},
-		{"K8sOther", someTestKind, k8serrors.NewBadRequest("test"), gqlerror.IsInternal},
-		{"APIInvalid", someTestKind, apierror.NewInvalid(pretty.Pod, apierror.ErrorFieldAggregate{}), gqlerror.IsInvalid},
-		{"Nested", someTestKind, errors.Wrap(k8serrors.NewNotFound(schema.GroupResource{}, "while test"), "test"), gqlerror.IsNotFound},
-		{"DoubleNested", someTestKind, errors.Wrap(errors.Wrap(k8serrors.NewNotFound(schema.GroupResource{}, "while test"), "while more"), "test"), gqlerror.IsNotFound},
-		{"Generic", someTestKind, errors.New("test"), gqlerror.IsInternal},
-		{"Nil", someTestKind, nil, nil},
+		"K8sNotFound":      {someTestKind, k8serrors.NewNotFound(schema.GroupResource{}, "test"), gqlerror.IsNotFound},
+		"K8sAlreadyExists": {someTestKind, k8serrors.NewAlreadyExists(schema.GroupResource{}, "test"), gqlerror.IsAlreadyExists},
+		"K8sInvalid":       {someTestKind, k8serrors.NewInvalid(schema.GroupKind{}, "test", field.ErrorList{}), gqlerror.IsInvalid},
+		"K8sOther":         {someTestKind, k8serrors.NewBadRequest("test"), gqlerror.IsInternal},
+		"APIInvalid":       {someTestKind, apierror.NewInvalid(pretty.Pod, apierror.ErrorFieldAggregate{}), gqlerror.IsInvalid},
+		"Nested":           {someTestKind, errors.Wrap(k8serrors.NewNotFound(schema.GroupResource{}, "while test"), "test"), gqlerror.IsNotFound},
+		"DoubleNested":     {someTestKind, errors.Wrap(errors.Wrap(k8serrors.NewNotFound(schema.GroupResource{}, "while test"), "while more"), "test"), gqlerror.IsNotFound},
+		"Generic":          {someTestKind, errors.New("test"), gqlerror.IsInternal},
+		"Nil":              {someTestKind, nil, nil},
 	}
 
-	for _, testCase := range testCases {
-		t.Run(testCase.caseName, func(t *testing.T) {
+	for testName, testCase := range testCases {
+		t.Run(testName, func(t *testing.T) {
 			// when
 			result := gqlerror.New(testCase.err, testCase.kind)
 

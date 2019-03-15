@@ -58,10 +58,10 @@ func TestResource(t *testing.T) {
 	t.Log("Retrieving resource...")
 	err = waiter.WaitAtMost(func() (bool, error) {
 		_, err := k8sClient.Pods(resourceNamespace).Get(resourceName, metav1.GetOptions{})
-		if err == nil {
-			return true, nil
+		if err != nil {
+			return false, err
 		}
-		return false, err
+		return true, nil
 	}, time.Minute)
 	require.NoError(t, err)
 }

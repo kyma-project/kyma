@@ -3,11 +3,11 @@ package k8s
 import (
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/extractor"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/discovery"
 )
@@ -47,7 +47,7 @@ func (svc *resourceService) Create(namespace string, resource types.Resource) (*
 
 	body, err := result.Raw()
 	if err != nil {
-		return nil, errors.Wrap(err, "while creating resource")
+		return nil, errors.Wrap(err, "while extracting raw result")
 	}
 
 	return &types.Resource{
@@ -60,11 +60,8 @@ func (svc *resourceService) Create(namespace string, resource types.Resource) (*
 }
 
 func (svc *resourceService) getAPIPath(apiVersion string) string {
-	var apiPath string
 	if apiVersion == "v1" {
-		apiPath = "/api/v1"
-	} else {
-		apiPath = fmt.Sprintf("/apis/%s", apiVersion)
+		return "/api/v1"
 	}
-	return apiPath
+	return fmt.Sprintf("/apis/%s", apiVersion)
 }

@@ -4,12 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
-
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/extractor"
-
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/types"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/extractor"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
 	"github.com/pkg/errors"
 )
 
@@ -21,7 +20,7 @@ func (c *resourceConverter) GQLJSONToResource(in gqlschema.JSON) (types.Resource
 
 	resourceMeta, err := extractor.ExtractResourceMeta(in)
 	if err != nil {
-		return types.Resource{}, err
+		return types.Resource{}, errors.Wrapf(err, "while extracting resource meta")
 	}
 
 	return types.Resource{

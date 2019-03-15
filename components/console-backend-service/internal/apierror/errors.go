@@ -65,26 +65,22 @@ func NewInvalid(kind fmt.Stringer, errs ErrorFieldAggregate) *APIError {
 
 func NewInvalidField(path string, value string, detail string) ErrorField {
 	message := ""
-	if len(path) > 0 {
+	if path != "" {
 		message += fmt.Sprintf("`%s` ", path)
 	}
 	message += "field "
-	if len(value) > 0 {
+	if value != "" {
 		message += fmt.Sprintf("(%s) ", value)
 	}
 	message += "is invalid"
-	if len(detail) != 0 {
+	if detail != "" {
 		message += fmt.Sprintf(": %s", detail)
 	}
 	return ErrorField(message)
 }
 
 func NewMissingField(path string) ErrorField {
-	message := ""
-	if len(path) > 0 {
-		message += fmt.Sprintf("`%s` ", path)
-	}
-	message += "field is missing"
+	message := fmt.Sprintf("`%s` field is missing", path)
 	return ErrorField(message)
 }
 
@@ -97,9 +93,8 @@ func statusForError(err error) Status {
 		Status() Status
 	}
 
-	switch t := err.(type) {
-	case errorWithStatus:
-		return t.Status()
+	if err, ok := err.(errorWithStatus); ok {
+		return err.Status()
 	}
 
 	return Unknown
