@@ -334,7 +334,7 @@ func TestStore_CreateBucket(t *testing.T) {
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
-		g.Expect(name).To(gomega.HavePrefix("ns-%s-%s", namespace, crName))
+		g.Expect(name).To(gomega.HavePrefix(crName))
 		g.Expect(name).ToNot(gomega.HaveSuffix(crName))
 	})
 
@@ -380,7 +380,7 @@ func TestStore_CreateBucket(t *testing.T) {
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
-		g.Expect(name).To(gomega.HavePrefix("ns-%s-%s", namespace, crName))
+		g.Expect(name).To(gomega.HavePrefix(crName))
 		g.Expect(name).ToNot(gomega.HaveSuffix(crName))
 	})
 

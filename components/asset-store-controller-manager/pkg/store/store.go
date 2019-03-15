@@ -60,7 +60,7 @@ func New(client MinioClient) Store {
 // Bucket
 
 func (s *store) CreateBucket(namespace, crName, region string) (string, error) {
-	bucketName, err := s.findBucketName(crName, namespace)
+	bucketName, err := s.findBucketName(crName)
 	if err != nil {
 		return "", err
 	}
@@ -241,10 +241,10 @@ func (s *store) listObjects(ctx context.Context, bucketName, prefix string) (map
 	return result, nil
 }
 
-func (s *store) findBucketName(name, namespace string) (string, error) {
+func (s *store) findBucketName(name string) (string, error) {
 	sleep := time.Millisecond
 	for i := 0; i < 10; i++ {
-		name := s.generateBucketName(name, namespace)
+		name := s.generateBucketName(name)
 		exists, err := s.BucketExists(name)
 		if err != nil {
 			return "", errors.Wrap(err, "while checking if bucket name is available")
@@ -259,13 +259,9 @@ func (s *store) findBucketName(name, namespace string) (string, error) {
 	return "", errors.New("cannot find bucket name")
 }
 
-func (s *store) generateBucketName(name, namespace string) string {
+func (s *store) generateBucketName(name string) string {
 	unixNano := time.Now().UnixNano()
 	suffix := strconv.FormatInt(unixNano, 32)
-
-	if len(namespace) > 0 {
-		return fmt.Sprintf("ns-%s-%s-%s", namespace, name, suffix)
-	}
 
 	return fmt.Sprintf("%s-%s", name, suffix)
 }
