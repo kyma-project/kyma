@@ -1,0 +1,127 @@
+# End To End Upgrade Tests
+
+## Overview
+
+This project contains end-to-end upgrade tests that are executed for Kyma [upgrade plan](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) on CI. The tests are written in Go. Implemented framework allows you to define two action:
+- prepare data
+- execute tests against prepared data
+
+## Prerequisites
+
+To set up the project, use these tools:
+* Version 1.11 or higher of [Go](https://golang.org/dl/)
+* Version 0.5 or higher of [Dep](https://github.com/golang/dep)
+* The latest version of [Docker](https://www.docker.com/)
+
+## Usage
+
+This section explains how the end-to-end upgrade tests are used.
+
+### Continuous Integration
+
+The end-to-end upgrade tests are run on [upgrade plan](https://github.com/kyma-project/test-infra/blob/master/prow/scripts/cluster-integration/kyma-gke-upgrade.sh) execute by Prow.
+
+Flow:
+1. Kyma is installed from the [latest](https://github.com/kyma-project/kyma/releases/latest) release 
+2. Data for end-to-end upgrade tests are created. That's mean that **CreateResources** method is executed for all registered tests.
+3. Kyma cluster is upgraded
+4. The [`testing.sh`](../../../installation/scripts/testing.sh) script is executed
+5. The end-to-end upgrade tests are executed. That's mean that **TestResources** method is executed for all registered tests.
+ 
+
+### Use environment variables
+
+Use the following environment variables to configure the application:
+
+| Name | Required | Default | Description |
+|:-----|:---------:|:--------:|:------------|
+| **APP_LOGGER_LEVEL** | No | `info` | Show detailed logs in the application. |
+| **APP_KUBECONFIG_PATH** | No |  | The path to the `kubeconfig` file that you need to run an application outside of the cluster. |
+| **APP_MAX_CONCURRENCY_LEVEL** | No | 1 | The maximum concurrency level used for running tests. | 
+
+## Development
+
+This section presents how to add and run a new test. It also describes how to verify the code and ensure your test is correct.
+
+### Add a new test
+
+Add a new test under the `pkg/tests/{domain-name}` directory and implement the following interface:
+
+```go
+    UpgradeTest interface {
+        CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error
+        TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error
+    }
+```
+
+In each method test framework injects:
+- **stop** - channel which is called when application shutdown is requested. You should use it to gracefully shutdown your test.
+- **log** - logger which you should use for additional logging in your test if you need to. Logged data are printed only if method failed.
+- **namespace** - space created for you by test framework
+
+This allows you to easily register the test in the [`main.go`](./main.go) file by adding new entry in test map:
+```go
+	// Register tests. Convention:
+	// <test-name> : <test-instance>
+	//
+	// Using map is on purpose - we ensure that test name will not be duplicated.
+	// Test name is sanitized and used for creating dedicated namespace for given test,
+	// so it cannot overlap with others.
+	tests := map[string]runner.UpgradeTest{
+		"YourTestName": yourpkg.NewTest(),
+	}
+```
+
+The example test can be found in [`pkg/test/hello-world/test.go`](./pkg/tests/hello-world/test.go).  
+
+> *NOTE:*  If your test operates on Kubernetes resources then ensure that RBAC rules are updated in [upgrade](./chart/upgrade) Helm chart. 
+
+### Run end-to-end tests locally
+
+Run the application without building the binary file, by action:
+
+- prepare upgrade data
+  ```bash
+  env APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action prepareData
+  ```
+
+- execute tests
+  ```bash
+  env APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action executeTests
+  ```
+
+For the description of the available environment variables, see the **Use environment variables** section.
+
+### Run tests using Helm chart
+
+Run the application by action using Helm:
+
+- prepare upgrade data
+    ```bash
+    helm install --name e2e-test-upgrade --namespace {namespace} ./chart/upgrade/ --wait    
+    ```
+
+- execute tests
+    ```bash
+    helm test e2e-test-upgrade
+    ```
+
+### Verify the code
+
+Use the `before-commit.sh` script or the `make build` command to test your changes before each commit.
+
+### Project structure
+
+The repository has the following structure:
+
+```
+.
+├── chart                   # Helm chart for deploying the upgrade test application
+├── internal                # Internal source code of the upgrade test framework
+├── pkg                     # Contains all non-"main" Go packages
+│   └── tests               # Package where upgrade tests are defined. Put your test here.
+├── vendor                  # dep-managed dependencies
+├── main.go                 # The entrypoint for upgrade test runner
+├── Gopkg.toml              # dep manifest
+└── Gopkg.lock              # dep lock (autogenerated, do not edit)
+```
