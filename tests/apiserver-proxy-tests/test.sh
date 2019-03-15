@@ -34,7 +34,7 @@ test(){
   exit 1
   fi
 
-  if [[ ${UUID} != ${KUBECTL_OUT} ]]; then
+  if [[ "${UUID}" != "${KUBECTL_OUT}" ]]; then
     echo "KUBECTL_OUT should be ${UUID}"
     echo "KUBECTL_OUT is ${KUBECTL_OUT}"
     echo "TEST FAILED"
