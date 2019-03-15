@@ -40,8 +40,6 @@ func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy auth
 
 	resp, found := c.tokenCache.Get(tokenEndpointURL)
 	if found {
-		//TODO: DEBUG
-		log.Printf("[DEBUG] Found cached Token Response: %#v", resp)
 		return resp, nil
 	}
 
@@ -62,9 +60,6 @@ func (c *client) InvalidateTokenCache(csrfEndpointURL string) {
 }
 
 func requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError) {
-
-	//TODO: DEBUG
-	log.Printf("[DEBUG] requestToken: csrfEndpointURL=%s", csrfEndpointURL)
 
 	client := &http.Client{}
 
@@ -97,9 +92,6 @@ func requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeo
 		CSRFToken: resp.Header.Get(httpconsts.HeaderCSRFToken),
 		Cookies:   resp.Cookies(),
 	}
-
-	//TODO: DEBUG
-	log.Printf("[DEBUG] Token Response: %#v", tokenRes)
 
 	return tokenRes, nil
 

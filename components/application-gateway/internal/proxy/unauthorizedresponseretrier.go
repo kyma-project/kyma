@@ -2,7 +2,6 @@ package proxy
 
 import (
 	"context"
-	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -25,10 +24,7 @@ func newUnauthorizedResponseRetrier(id string, request *http.Request, timeout in
 }
 
 func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
-	//TODO: Debug
-	log.Printf("[DEBUG] RetryIfFailedToAuthorize(r) ->")
 	if rr.retried {
-		log.Printf("[DEBUG] Already retried!")
 		return nil
 	}
 
@@ -42,28 +38,13 @@ func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
 			return err
 		}
 
-		//TODO: Debug
-		if r.Body != nil {
-			debug, err := ioutil.ReadAll(r.Body)
-			if err != nil {
-				return err
-			}
-			log.Infof("[DEBUG] target API response body: %s\n", string(debug))
-		}
-
 		if retryRes != nil {
 			if r.Body != nil {
 				r.Body.Close()
 			}
 			*r = *retryRes
-		} else {
-			//TODO: Debug
-			log.Infof("[DEBUG] Response on retry was nil!")
 		}
 	}
-
-	//TODO: DEBUG
-	log.Printf("[DEBUG] RetryIfFailedToAuthorize(r) <-")
 
 	return nil
 }

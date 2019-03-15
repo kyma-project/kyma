@@ -115,7 +115,7 @@ func failingTestRequestToken(_ string, _ authorization.Strategy, _ int) (*Respon
 
 func TestAddAuthorization(t *testing.T) {
 
-	sf := authorization.NewStrategyFactory(authorization.FactoryConfiguration{timeoutDuration})
+	sf := authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: timeoutDuration})
 
 	t.Run("Should update request with authorization headers in case of basicAuth strategy", func(t *testing.T) {
 

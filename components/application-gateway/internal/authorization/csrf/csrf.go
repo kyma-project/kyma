@@ -38,8 +38,6 @@ func NewTokenStrategyFactory(csrfClient Client) TokenStrategyFactory {
 
 func (tsf *strategyFactory) Create(authorizationStrategy authorization.Strategy, csrfTokenEndpointURL string) TokenStrategy {
 	if csrfTokenEndpointURL == "" {
-		//TODO: DEBUG
-		log.Print("CSRF Token not configured!")
 		return &noTokenStrategy{}
 	}
 	return &strategy{authorizationStrategy, csrfTokenEndpointURL, tsf.csrfClient}
