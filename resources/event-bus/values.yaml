@@ -49,6 +49,7 @@ global:
   isLocalEnv: false
   knative: false
   kymaEventBus: true
+  enableNatsClientAuth: false
 e2eTests:
   nameTester: "test-event-bus-tester"
   nameSubscriber: "test-event-bus-subscriber"    

@@ -55,7 +55,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --client_id=$(POD_NAME)
-            {{ if .Values.global.kymaEventBus }}
+            {{ if and .Values.global.kymaEventBus .Values.global.enableNatsClientAuth }}
             - --nats_url=nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
             {{ else }}
             - --nats_url=nats://{{ .Values.global.natsStreaming.url }}
@@ -80,7 +80,7 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
-          {{ if .Values.global.kymaEventBus }}
+          {{ if and .Values.global.kymaEventBus .Values.global.enableNatsClientAuth }}
           - name: EB_USER
             valueFrom:
               secretKeyRef:
