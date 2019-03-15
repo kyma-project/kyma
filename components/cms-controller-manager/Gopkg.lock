@@ -214,11 +214,11 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:b130a54250ee7614f5ec09a85252c1f8f5d50cdadc15a8c889fd74bc5cb74784"
+  digest = "1:43317c8683b0784ef3694cf5bd0dab0fe4d946f7d4d1b0ac50c75edce0ad737e"
   name = "github.com/kyma-project/kyma"
-  packages = ["components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"]
-  pruneopts = "T"
-  revision = "11d887b44e1088043d8edae59ea7ea7521ed6b04"
+  packages = ["components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"]
+  pruneopts = "NUT"
+  revision = "cbd820fd14c70f6e6426312a01442fa62b659bd8"
 
 [[projects]]
   digest = "1:3804a3a02964db8e6db3e5e7960ac1c1a9b12835642dd4f4ac4e56c749ec73eb"
@@ -439,9 +439,7 @@
   digest = "1:17c4ccf5cdb1627aaaeb5c1725cb13aec97b63ea2033d4a6824dcaedf94223dc"
   name = "github.com/stretchr/testify"
   packages = [
-    ".",
     "assert",
-    "http",
     "mock",
   ]
   pruneopts = "T"
@@ -982,11 +980,10 @@
   input-imports = [
     "github.com/emicklei/go-restful",
     "github.com/go-logr/logr",
-    "github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2",
+    "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
     "github.com/pkg/errors",
-    "github.com/stretchr/testify",
     "github.com/stretchr/testify/mock",
     "github.com/vrischmann/envconfig",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
