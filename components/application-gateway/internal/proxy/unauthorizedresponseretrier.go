@@ -43,11 +43,13 @@ func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
 		}
 
 		//TODO: Debug
-		debug, err := ioutil.ReadAll(r.Body)
-		if err != nil {
-			return err
+		if r.Body != nil {
+			debug, err := ioutil.ReadAll(r.Body)
+			if err != nil {
+				return err
+			}
+			log.Infof("[DEBUG] target API response body: %s\n", string(debug))
 		}
-		log.Infof("[DEBUG] target API response body: %s\n", string(debug))
 
 		if retryRes != nil {
 			if r.Body != nil {
