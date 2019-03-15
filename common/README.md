@@ -18,7 +18,7 @@ To add a new library to this package, it must meet these criteria:
 
 ## Naming conventions
 
-If the common package is a kubernetes client for a custom resource please add a `-client` suffix to the folder name.
+If the common package is a Kubernetes client for a custom resource, add a `-client` suffix to the folder name.
 
 ## Testing
 
