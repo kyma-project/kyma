@@ -1,0 +1,22 @@
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: api-controller
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccount: api-controller-test-account
+      containers:
+      - name: test-api-controller-acceptance
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller_acceptance_tests.dir }}api-controller-acceptance-tests:{{ .Values.global.api_controller_acceptance_tests.version }}
+        env:
+        - name: DOMAIN_NAME
+          value: {{ .Values.global.ingress.domainName }}
+        - name: INGRESSGATEWAY_ADDRESS
+          value: istio-ingressgateway.istio-system.svc.cluster.local
+        - name: NAMESPACE
+          value: {{ .Values.global.api_controller_acceptance_tests.testNamespace }}
+      restartPolicy: Never
