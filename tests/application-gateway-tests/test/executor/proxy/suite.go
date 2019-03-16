@@ -28,8 +28,9 @@ import (
 const (
 	defaultCheckInterval           = 2 * time.Second
 	appGatewayHealthCheckTimeout   = 15 * time.Second
-	accessServiceConnectionTimeout = 120 * time.Second
+	accessServiceConnectionTimeout = 90 * time.Second
 	apiServerAccessTimeout         = 60 * time.Second
+	dnsWaitTime                    = 20 * time.Second
 
 	mockServiceNameFormat     = "%s-gateway-test-mock-service"
 	testExecutorPodNameFormat = "%s-tests-test-executor"
@@ -132,6 +133,10 @@ func (ts *TestSuite) CheckApplicationGatewayHealth(t *testing.T) {
 
 func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.Response {
 	url := fmt.Sprintf("http://app-%s-%s/%s", ts.config.Application, apiId, path)
+
+	// Sometimes Istio Proxy has problems with DNS
+	// this wait prevents random failures
+	time.Sleep(dnsWaitTime)
 
 	var resp *http.Response
 
