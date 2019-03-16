@@ -2,7 +2,7 @@
 
 ## Overview
 
-This chart packs the [knative-serving](https://github.com/knative/docs/tree/master/serving) release files.
+This chart packs the [knative-serving](https://github.com/knative/docs/tree/master/docs/serving) release files.
 
 Included releases:
  * https://github.com/knative/serving/releases/download/v0.4.1/serving.yaml
