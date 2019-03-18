@@ -42,7 +42,8 @@ type Basic struct {
 
 // CertificateGen contains common name of the certificate to generate
 type CertificateGen struct {
-	CommonName string
+	CommonName  string
+	Certificate string
 }
 
 // ServiceDefinition is an internal representation of a service.
