@@ -40,13 +40,16 @@ import (
 )
 
 const (
-	domain            = "http://monitoring-prometheus.kyma-system"
-	prometheusNS      = "kyma-system"
-	api               = "/api/v1/query?"
-	metricsQuery      = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
-	port              = "9090"
-	metricName        = "kube_pod_container_resource_requests_cpu_cores"
-	prometheusPodName = "prometheus-monitoring-0"
+	domain                           = "http://monitoring-prometheus.kyma-system"
+	prometheusNS                     = "kyma-system"
+	api                              = "/api/v1/query?"
+	metricsQuery                     = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
+	port                             = "9090"
+	metricName                       = "kube_pod_container_resource_requests_cpu_cores"
+	prometheusPodName                = "prometheus-monitoring-0"
+	prometheusServiceName            = "monitoring-prometheus"
+	prometheusStatefulsetName string = "monitoring-prometheus"
+	prometheusLabelSelector          = "app=prometheus"
 )
 
 type queryResponse struct {
@@ -204,6 +207,43 @@ func (pt *prometheusTest) CreateResources(namespace string) {
 
 func (t *prometheusTest) DeleteResources() {
 	// It needs to be implemented for this test.
+	err := t.waitForPodPrometheus(1 * time.Minute)
+	So(err, ShouldBeNil)
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	serviceList, err := t.coreClient.CoreV1().Services(prometheusNS).List(metav1.ListOptions{LabelSelector: prometheusLabelSelector,})
+	So(err, ShouldBeNil)
+
+	for _, service := range serviceList.Items {
+		if service.Name == prometheusServiceName {
+			// Delete Service
+			err = t.coreClient.CoreV1().Services(prometheusNS).Delete(prometheusServiceName, &metav1.DeleteOptions{
+				PropagationPolicy: &deletePolicy,
+			})
+			So(err, ShouldBeNil)
+		}
+	}
+
+	collection := t.coreClient.AppsV1().StatefulSets(prometheusNS)
+	err = collection.Delete(prometheusStatefulsetName, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+	So(err, ShouldBeNil)
+
+	podList, err := t.coreClient.CoreV1().Pods(prometheusNS).List(metav1.ListOptions{LabelSelector: prometheusLabelSelector,})
+	So(err, ShouldBeNil)
+
+	for _, pod := range podList.Items {
+		if pod.Name == prometheusPodName {
+			// Delete Pod
+			err = t.coreClient.CoreV1().Pods(prometheusNS).Delete(prometheusPodName, &metav1.DeleteOptions{})
+			So(err, ShouldBeNil)
+		}
+	}
+
+	err = t.waitForPodPrometheus(2 * time.Minute)
+	So(err, ShouldBeError)
 }
 
 func (pt *prometheusTest) TestResources(namespace string) {

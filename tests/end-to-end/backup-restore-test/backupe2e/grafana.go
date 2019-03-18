@@ -35,6 +35,7 @@ import (
 	"io"
 	"io/ioutil"
 	. "github.com/smartystreets/goconvey/convey"
+	"log"
 )
 
 const (
@@ -165,7 +166,10 @@ func (t *grafanaTest) TestResources(namespace string) {
 		dashboard, err := t.requestToGrafana(domain, "GET", nil, strings.NewReader(formData.Encode()), cookie)
 		So(err, ShouldBeNil)
 		So(dashboard.StatusCode, ShouldEqual, http.StatusOK)
+		log.Printf("\n%v request: %s", dashboard.StatusCode, domain)
 	}
+
+	log.Printf("\ntest success? %v", true)
 
 }
 
