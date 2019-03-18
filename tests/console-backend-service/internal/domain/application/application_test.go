@@ -74,7 +74,7 @@ func TestApplicationMutations(t *testing.T) {
 	subscription := subscribeApplicationEvent(c)
 	defer subscription.Close()
 
-	const fixName = "test-ui-api-application"
+	const fixName = "test-console-backend-application"
 	fixApp := fixApplication(fixName, "fix-desc1", map[string]string{"fix": "lab"})
 
 	t.Log("Create Application")

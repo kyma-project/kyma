@@ -23,7 +23,7 @@ func TestMain(m *testing.M) {
 		CRDDirectoryPaths: []string{
 			filepath.Join("..", "..", "..", "config", "crds"),
 			// Hack for registering CRDs from vendored project
-			filepath.Join("..", "..", "..", "vendor", "github.com", "kyma-project", "kyma", "components", "assetstore-controller-manager", "config", "crds"),
+			filepath.Join("..", "..", "..", "hack", "crds"),
 		},
 	}
 	apis.AddToScheme(scheme.Scheme)
