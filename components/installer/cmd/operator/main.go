@@ -43,6 +43,8 @@ func main() {
 	kubeconfig := flag.String("kubeconfig", "", "Path to a kubeconfig file")
 	helmHost := flag.String("helmhost", "tiller-deploy.kube-system.svc.cluster.local:44134", "Helm host")
 	kymaDir := flag.String("kymadir", "/kyma", "Directory where kyma packages will be extracted")
+	tlsKey := flag.String("tlsKey", "/root/.helm/key.pem", "Path to TLS key file")
+	tlsCrt := flag.String("tlsCrt", "/root/.helm/cert.pem", "Path to TLS cert file")
 
 	flag.Parse()
 
@@ -62,7 +64,7 @@ func main() {
 		log.Fatalf("Unable to create internal client. Error: %v", err)
 	}
 
-	helmClient := kymahelm.NewClient(*helmHost)
+	helmClient := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt)
 	serviceCatalogClient := servicecatalog.NewClient(config)
 	kymaCommandExecutor := &toolkit.KymaCommandExecutor{}
 
