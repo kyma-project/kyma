@@ -4,8 +4,8 @@ title: Configuration
 
 By default, the Helm Broker fetches bundles from the newest release of the [`bundles`](https://github.com/kyma-project/bundles/releases) repository. You can also configure the Helm Broker to fetch bundle definitions from HTTP servers defined in the `helm-repos-urls` ConfigMap. Follow these steps:
 
-1. Create a remote repository with your bundles definitions.
-2. Install Kyma on Minikube. See [this](/root/kyma#installation-install-kyma-locally-from-the-release) document to learn how.
+1. [Create a repository](#details-create-a-bundles-repository) with your bundles.
+2. Install Kyma locally or on a cluster. See [this](https://kyma-project.io/docs/master/root/kyma/#installation-overview-installation-guides) document to learn how.
 3. Create a ConfigMap which contains an URL to the repository. You can either:
 
   * Create a ConfigMap using the `kubectl create` command:
@@ -40,4 +40,6 @@ By default, the Helm Broker fetches bundles from the newest release of the [`bun
     kubectl apply helm-repos-configs
     ```
 
-The Helm Broker triggers the Service Catalog synchronization automatically. New ClusterServiceClasses appear after a few seconds.
+    The default ConfigMap provided by the Helm Broker is the `helm-repos-urls` ConfigMap. Do not edit this ConfigMap. Create a separate one instead. Depending on your needs and preferences, you can create one or more ConfigMaps with URLs to different remote HTTP servers.
+
+4. The Helm Broker triggers the Service Catalog synchronization automatically. New Service Classes appear after a few seconds.
