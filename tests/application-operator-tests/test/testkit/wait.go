@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-func (ts *TestSuite) waitForFunction(interval, timeout time.Duration, conditionalFunc func() bool) error {
+func WaitForFunction(interval, timeout time.Duration, conditionalFunc func() bool) error {
 	done := time.After(timeout)
 
 	for {
@@ -22,7 +22,7 @@ func (ts *TestSuite) waitForFunction(interval, timeout time.Duration, conditiona
 	}
 }
 
-func (ts *TestSuite) shouldLastFor(interval, timeout time.Duration, conditionalFunc func() bool) error {
+func ShouldLastFor(interval, timeout time.Duration, conditionalFunc func() bool) error {
 	done := time.After(timeout)
 
 	for {
@@ -38,7 +38,7 @@ func (ts *TestSuite) shouldLastFor(interval, timeout time.Duration, conditionalF
 
 			return nil
 		default:
-			time.Sleep(defaultCheckInterval)
+			time.Sleep(interval)
 		}
 	}
 }

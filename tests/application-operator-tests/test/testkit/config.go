@@ -19,7 +19,7 @@ const (
 type TestConfig struct {
 	Namespace           string
 	TillerHost          string
-	ProvisioningTimeout int
+	InstallationTimeout int
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -48,7 +48,7 @@ func ReadConfig() (TestConfig, error) {
 	config := TestConfig{
 		Namespace:           namespace,
 		TillerHost:          tillerHost,
-		ProvisioningTimeout: timeoutValue,
+		InstallationTimeout: timeoutValue,
 	}
 
 	log.Printf("Read configuration: %+v", config)

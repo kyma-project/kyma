@@ -1,13 +1,13 @@
-package controllertests
+package test
 
 import (
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/application-operator-tests/test/testkit"
+	"github.com/kyma-project/kyma/tests/application-operator-tests/test/controller"
 )
 
 func TestApplicationOperator(t *testing.T) {
-	testSuite := testkit.NewTestSuite(t)
+	testSuite := controller.NewTestSuite(t)
 
 	t.Run("Application Operator - Application lifecycle test", func(t *testing.T) {
 		t.Log("Creating Application without access label")
@@ -35,12 +35,8 @@ func TestApplicationOperator(t *testing.T) {
 	testSuite.CleanUp()
 }
 
-func TestInstalledRelease(t *testing.T) {
-
-}
-
 func TestApplicationOperator_SkipProvisioning(t *testing.T) {
-	testSuite := testkit.NewTestSuite(t)
+	testSuite := controller.NewTestSuite(t)
 
 	t.Run("Application Operator - skip provisioning test", func(t *testing.T) {
 		t.Log("Creating Application without access label")

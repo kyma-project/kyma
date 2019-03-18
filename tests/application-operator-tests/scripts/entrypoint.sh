@@ -8,3 +8,9 @@ echo "Run controller tests"
 res=$((res+$?))
 
 exit ${res}
+
+echo "Run application tests"
+./applicationtests.test
+res=$((res+$?))
+
+exit ${res}

@@ -1,15 +1,16 @@
-package testkit
+package controller
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/application-operator-tests/test/testkit"
+
 	"github.com/stretchr/testify/require"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
-	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )
 
 const (
@@ -22,25 +23,25 @@ const (
 type TestSuite struct {
 	application string
 
-	config     TestConfig
-	helmClient HelmClient
-	k8sClient  K8sResourcesClient
-	k8sChecker *K8sResourceChecker
+	config     testkit.TestConfig
+	helmClient testkit.HelmClient
+	k8sClient  testkit.K8sResourcesClient
+	k8sChecker *testkit.K8sResourceChecker
 
 	installationTimeout time.Duration
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
-	config, err := ReadConfig()
+	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
 	app := fmt.Sprintf(testAppName, rand.String(5))
 
-	k8sResourcesClient, err := NewK8sResourcesClient(config.Namespace)
+	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient := NewHelmClient(config.TillerHost)
-	k8sResourcesChecker := NewK8sChecker(k8sResourcesClient, app)
+	helmClient := testkit.NewHelmClient(config.TillerHost)
+	k8sResourcesChecker := testkit.NewK8sChecker(k8sResourcesClient, app)
 
 	return &TestSuite{
 		application: app,
@@ -49,7 +50,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		helmClient:          helmClient,
 		k8sClient:           k8sResourcesClient,
 		k8sChecker:          k8sResourcesChecker,
-		installationTimeout: time.Second * time.Duration(config.ProvisioningTimeout),
+		installationTimeout: time.Second * time.Duration(config.InstallationTimeout),
 	}
 }
 
@@ -76,38 +77,34 @@ func (ts *TestSuite) CleanUp() {
 }
 
 func (ts *TestSuite) WaitForReleaseToInstall(t *testing.T) {
-	err := ts.waitForFunction(defaultCheckInterval, ts.installationTimeout, ts.helmReleaseInstalled)
+	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
+		return ts.helmClient.IsInstalled(ts.application)
+	})
 	require.NoError(t, err, "Received timeout while waiting for release to install")
 }
 
 func (ts *TestSuite) WaitForReleaseToUninstall(t *testing.T) {
-	err := ts.waitForFunction(defaultCheckInterval, ts.installationTimeout, ts.helmReleaseNotExist)
+	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, ts.helmReleaseNotExist)
 	require.NoError(t, err, "Received timeout while waiting for release to uninstall")
 }
 
 func (ts *TestSuite) EnsureReleaseNotInstalling(t *testing.T) {
-	err := ts.shouldLastFor(defaultCheckInterval, installationStartTimeout, ts.helmReleaseNotExist)
+	err := testkit.ShouldLastFor(defaultCheckInterval, installationStartTimeout, ts.helmReleaseNotExist)
 	require.NoError(t, err, fmt.Sprintf("Release for %s Application installing when shouldn't", ts.application))
 }
 
 func (ts *TestSuite) CheckK8sResourcesDeployed(t *testing.T) {
 	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.checkK8sResources(t, ts.checkResourceDeployed)
+	ts.k8sChecker.CheckK8sResources(t, ts.checkResourceDeployed)
 }
 
 func (ts *TestSuite) CheckK8sResourceRemoved(t *testing.T) {
 	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.checkK8sResources(t, ts.checkResourceRemoved)
-}
-
-func (ts *TestSuite) helmReleaseInstalled() bool {
-	status, err := ts.helmClient.CheckReleaseStatus(ts.application)
-	return err == nil && status.Info.Status.Code == hapi_4.Status_DEPLOYED
+	ts.k8sChecker.CheckK8sResources(t, ts.checkResourceRemoved)
 }
 
 func (ts *TestSuite) helmReleaseNotExist() bool {
-	exists, err := ts.helmClient.CheckReleaseExistence(ts.application)
-	return err == nil && exists == false
+	return !ts.helmClient.IsInstalled(ts.application)
 }
 
 func (ts *TestSuite) checkResourceDeployed(t *testing.T, resource interface{}, err error, failMessage string) {

@@ -1,15 +1,17 @@
 package testkit
 
 import (
+	"time"
+
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
-	"time"
 )
 
 type HelmClient interface {
 	CheckReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error)
 	CheckReleaseExistence(name string) (bool, error)
+	IsInstalled(rlsName string) bool
 }
 
 type helmClient struct {
@@ -26,6 +28,11 @@ func NewHelmClient(host string) HelmClient {
 
 func (hc *helmClient) CheckReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error) {
 	return hc.helm.ReleaseStatus(rlsName)
+}
+
+func (hc *helmClient) IsInstalled(rlsName string) bool {
+	status, err := hc.CheckReleaseStatus(rlsName)
+	return err == nil && status.Info.Status.Code == release.Status_DEPLOYED
 }
 
 func (hc *helmClient) CheckReleaseExistence(name string) (bool, error) {
