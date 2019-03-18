@@ -4,6 +4,7 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: kubeless-integration
+  namespace: {{ .Release.Namespace }}
 spec:
   template:
     metadata:
