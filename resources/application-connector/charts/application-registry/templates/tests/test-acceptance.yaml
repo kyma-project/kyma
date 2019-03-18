@@ -1,23 +1,21 @@
 {{ if not .Values.global.isLocalEnv }}
-apiVersion: v1
-kind: Pod
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
-  name: {{ .Chart.Name }}-tests
-  namespace: {{ .Values.global.namespace }}
-  annotations:
-    sidecar.istio.io/inject: "false"
-    "helm.sh/hook": test-success
-  labels:
-    "helm-chart-test": "true"
+  name: {{ template "fullname" . }}
 spec:
-  containers:
-    - name: {{ .Chart.Name }}-tests
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_registry_tests.dir }}application-registry-tests:{{ .Values.global.application_registry_tests.version }}
-      imagePullPolicy: IfNotPresent
-      env:
-      - name: METADATA_URL
-        value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:8081
-      - name: NAMESPACE
-        value: {{ .Values.global.namespace }}
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-tests
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_registry_tests.dir }}application-registry-tests:{{ .Values.global.application_registry_tests.version }}
+          imagePullPolicy: IfNotPresent
+          env:
+          - name: METADATA_URL
+            value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:8081
+          - name: NAMESPACE
+            value: {{ .Values.global.namespace }}
 {{ end }}

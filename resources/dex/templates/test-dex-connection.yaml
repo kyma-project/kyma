@@ -1,0 +1,21 @@
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: {{ template "fullname" . }}
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: "test-{{ template "fullname" . }}-connection-dex"
+        image: tutum/curl:alpine
+        command: ["/usr/bin/curl"]
+        args: [
+          "--fail",
+          "--max-time", "10",
+          "--retry", "60",
+          "--retry-delay", "3",
+          "http://dex-service.{{ .Release.Namespace }}.svc.cluster.local:5556/.well-known/openid-configuration"
+        ]
