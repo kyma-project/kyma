@@ -12,7 +12,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 )
 
 type serviceResolver struct {
@@ -34,6 +34,7 @@ type serviceSvc interface {
 type gqlServiceConverter interface {
 	ToGQL(in *v1.Service) *gqlschema.Service
 	ToGQLs(in []*v1.Service) []gqlschema.Service
+	GQLJSONToService(in gqlschema.JSON) (v1.Service, error)
 }
 
 func newServiceResolver(serviceSvc serviceSvc) *serviceResolver {
@@ -82,4 +83,22 @@ func (r *serviceResolver) ServiceEventSubscription(ctx context.Context, namespac
 	}()
 
 	return channel, nil
+}
+
+func (r *serviceResolver) UpdateServiceMutation(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Service, error) {
+	service, err := r.gqlServiceConverter.GQLJSONToService(update)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace `%s`", pretty.Service, name, namespace))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	updated, err := r.serviceSvc.Update(name, namespace, service)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace %s", pretty.Service, name, namespace))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	updatedGql := r.gqlServiceConverter.ToGQL(updated)
+
+	return updatedGql, nil
 }

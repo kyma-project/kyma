@@ -175,6 +175,10 @@ func (r *mutationResolver) CreateResource(ctx context.Context, namespace string,
 	return r.k8s.CreateResourceMutation(ctx, namespace, resource)
 }
 
+func (r *mutationResolver) UpdateService(ctx context.Context, name string, namespace string, service gqlschema.JSON) (*gqlschema.Service, error) {
+	return r.k8s.UpdateServiceMutation(ctx, name, namespace, service)
+}
+
 func (r *mutationResolver) UpdatePod(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Pod, error) {
 	return r.k8s.UpdatePodMutation(ctx, name, namespace, update)
 }

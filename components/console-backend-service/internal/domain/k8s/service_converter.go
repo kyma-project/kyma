@@ -1,8 +1,12 @@
 package k8s
 
 import (
+	"bytes"
+	"encoding/json"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	v1 "k8s.io/api/core/v1"
+	"github.com/pkg/errors"
+	"k8s.io/api/core/v1"
 )
 
 type serviceConverter struct {
@@ -53,6 +57,44 @@ func (c *serviceConverter) ToGQLs(in []*v1.Service) []gqlschema.Service {
 		}
 	}
 	return result
+}
+
+func (c *serviceConverter) serviceToGQLJSON(in *v1.Service) (gqlschema.JSON, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	jsonByte, err := json.Marshal(in)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while marshalling %s `%s`", pretty.Service, in.Name)
+	}
+
+	var jsonMap map[string]interface{}
+	err = json.Unmarshal(jsonByte, &jsonMap)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while unmarshalling %s `%s` to map", pretty.Service, in.Name)
+	}
+
+	var result gqlschema.JSON
+	err = result.UnmarshalGQL(jsonMap)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while unmarshalling %s `%s` to GQL JSON", pretty.Service, in.Name)
+	}
+
+	return result, nil
+}
+
+func (c *serviceConverter) GQLJSONToService(in gqlschema.JSON) (v1.Service, error) {
+	var buf bytes.Buffer
+	in.MarshalGQL(&buf)
+	bufBytes := buf.Bytes()
+	result := v1.Service{}
+	err := json.Unmarshal(bufBytes, &result)
+	if err != nil {
+		return v1.Service{}, errors.Wrapf(err, "while unmarshalling GQL JSON of %s", pretty.Service)
+	}
+
+	return result, nil
 }
 
 func toGQLSchemaServicePort(in *v1.ServicePort) *gqlschema.ServicePort {
