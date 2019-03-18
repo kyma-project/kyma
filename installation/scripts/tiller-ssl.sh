@@ -13,7 +13,7 @@ for CMD in openssl kubectl base64 helm; do
 	fi
 done
 
-cat <<EOF > ./openssl.cnf
+cat <<EOF > "${CURRENT_DIR}/openssl.cnf"
 [ req ]
 #default_bits		= 2048
 #default_md		= sha256
@@ -45,18 +45,18 @@ authorityKeyIdentifier = keyid:always,issuer:always
 EOF
 
 echo "---> Generate CA"
-openssl genrsa -out ./ca.key.pem 4096
-openssl req -key ca.key.pem -new -x509 -days 365 -sha256 -out ca.cert.pem -extensions v3_ca -config ./openssl.cnf -subj "/C=PL/ST=Gliwice/L=Gliwice/O=tiller/CN=tiller"
+openssl genrsa -out "${CURRENT_DIR}/ca.key.pem" 4096
+openssl req -key "${CURRENT_DIR}/ca.key.pem" -new -x509 -days 365 -sha256 -out "${CURRENT_DIR}/ca.cert.pem" -extensions v3_ca -config "${CURRENT_DIR}/openssl.cnf" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=tiller/CN=tiller"
 
 echo "---> Generate Tiller key"
-openssl genrsa -out ./tiller.key.pem 4096
-openssl req -key tiller.key.pem -new -sha256 -out tiller.csr.pem -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Tiller Server/CN=tiller-server"
-openssl x509 -req -CA ca.cert.pem -CAkey ca.key.pem -CAcreateserial -in tiller.csr.pem -out tiller.cert.pem -days 365
+openssl genrsa -out "${CURRENT_DIR}/tiller.key.pem" 4096
+openssl req -key "${CURRENT_DIR}/tiller.key.pem" -new -sha256 -out "${CURRENT_DIR}/tiller.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Tiller Server/CN=tiller-server"
+openssl x509 -req -CA "${CURRENT_DIR}/ca.cert.pem" -CAkey "${CURRENT_DIR}/ca.key.pem" -CAcreateserial -in "${CURRENT_DIR}/tiller.csr.pem" -out "${CURRENT_DIR}/tiller.cert.pem" -days 365
 
 echo "---> Generate Helm key"
-openssl genrsa -out ./helm.key.pem 4096
-openssl req -key helm.key.pem -new -sha256 -out helm.csr.pem -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Helm Client/CN=helm-client"
-openssl x509 -req -CA ca.cert.pem -CAkey ca.key.pem -CAcreateserial -in helm.csr.pem -out helm.cert.pem  -days 365
+openssl genrsa -out "${CURRENT_DIR}/helm.key.pem" 4096
+openssl req -key "${CURRENT_DIR}helm.key.pem" -new -sha256 -out "${CURRENT_DIR}/helm.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Helm Client/CN=helm-client"
+openssl x509 -req -CA "${CURRENT_DIR}/ca.cert.pem" -CAkey "${CURRENT_DIR}/ca.key.pem" -CAcreateserial -in "${CURRENT_DIR}/helm.csr.pem" -out "${CURRENT_DIR}/helm.cert.pem" -days 365
 
 echo "---> Create secrets in k8s"
 TILLER_SECRETS=$(cat << EOF
@@ -92,7 +92,7 @@ metadata:
     app: helm
     name: helm
   name: helm-secret
-  namespace: kyma-system
+  namespace: kyma-installer
 type: Opaque
 EOF
 )
@@ -100,12 +100,11 @@ EOF
 echo "${TILLER_SECRETS}" | kubectl apply -f -
 
 echo "---> Move secrets to helm home"
-mv ca.cert.pem $(helm home)/ca.pem
-mv helm.cert.pem $(helm home)/cert.pem
-mv helm.key.pem $(helm home)/key.pem
+mv "${CURRENT_DIR}/ca.cert.pem" "$(helm home)/ca.pem"
+mv "${CURRENT_DIR}/helm.cert.pem" "$(helm home)/cert.pem"
+mv "${CURRENT_DIR}/helm.key.pem" "$(helm home)/key.pem"
 
 echo "---> Cleanup"
-rm ./openssl.cnf
-rm ./*.pem
-rm ./*.srl
-
+rm "${CURRENT_DIR}/openssl.cnf"
+rm "${CURRENT_DIR}/*.pem"
+rm "${CURRENT_DIR}/*.srl"

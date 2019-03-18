@@ -85,8 +85,16 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:55bc6038
+        image: demonsthere/kyma-installer:tls
         imagePullPolicy: IfNotPresent
+        volumeMounts:
+          - mountPath: /etc/certs
+            name: helm-certs
+            readOnly: true
+      volumes:
+      - name: helm-certs
+        secret:
+          secretName: helm-secret
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
