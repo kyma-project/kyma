@@ -3,12 +3,10 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: kubeless-integration
-  namespace: {{ .Release.Namespace }}
+  name: {{ template "fullname" . }}-integration
 spec:
   template:
     metadata:
-      name: test-{{ template "fullname" . }}
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -23,7 +21,6 @@ spec:
             value: {{ template "fullname" . }}-config
           - name: DOMAIN_NAME
             value: {{ .Values.global.ingress.domainName }}
-      restartPolicy: Never
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

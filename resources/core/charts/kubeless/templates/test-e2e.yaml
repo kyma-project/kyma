@@ -5,12 +5,10 @@
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: kubeless-e2e
-  namespace: {{ .Release.Namespace }}
+  name: {{ template "fullname" . }}-e2e
 spec:
   template:
     metadata:
-      name: test-{{ template "fullname" . }}-int
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -39,7 +37,6 @@ spec:
                 path: k8s.yaml
               - key: svcBindLambdaYaml
                 path: svcbind-lambda.yaml
-      restartPolicy: Never
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -5,8 +5,6 @@ metadata:
 spec:
   template:
     metadata:
-      name: test-{{ .Release.Name }}-apiserver-proxy
-      namespace: kyma-system
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
@@ -20,7 +18,9 @@ spec:
           imagePullPolicy: Always
           env:
           - name: POD_NAME
-            value: test-{{ .Release.Name }}-apiserver-proxy
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
           - name: DOMAIN
             value: {{ .Values.global.ingress.domainName }}
           - name: USER_EMAIL
