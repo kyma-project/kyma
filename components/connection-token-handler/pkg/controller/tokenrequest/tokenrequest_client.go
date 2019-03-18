@@ -13,6 +13,8 @@ const (
 	applicationHeader = "Application"
 	tenantHeader      = "Tenant"
 	groupHeader       = "Group"
+	emptyTenant       = ""
+	emptyGroup        = ""
 )
 
 // TokenDto represents data structure returned from connector-service
@@ -46,7 +48,7 @@ func (c *connectorServiceClient) FetchToken(appName, tenant, group string) (*Tok
 
 	req.Header.Set(applicationHeader, appName)
 
-	if tenant != "" && group != "" {
+	if tenant != emptyTenant && group != emptyGroup {
 		req.Header.Set(tenantHeader, tenant)
 		req.Header.Set(groupHeader, group)
 	}

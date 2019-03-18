@@ -25,7 +25,7 @@ func getServerMock(t *testing.T, appName, tenant, group, token string) *httptest
 
 func checkHeaders(t *testing.T, appName string, r *http.Request, tenant string, group string) {
 	assert.Equal(t, appName, r.Header.Get(applicationHeader))
-	if tenant != "" && group != "" {
+	if tenant != emptyTenant && group != emptyGroup {
 		assert.Equal(t, tenant, r.Header.Get(tenantHeader))
 		assert.Equal(t, group, r.Header.Get(groupHeader))
 	}
@@ -37,11 +37,11 @@ func TestTokenRequestClient_FetchToken(t *testing.T) {
 
 	t.Run("should return TokenDto with valid token", func(t *testing.T) {
 		//given
-		srvMock := getServerMock(t, appName, "", "", token)
+		srvMock := getServerMock(t, appName, emptyTenant, emptyGroup, token)
 		defer srvMock.Close()
 		//when
 		svcClient := NewConnectorServiceClient(srvMock.URL)
-		tokenDto, err := svcClient.FetchToken(appName, "", "")
+		tokenDto, err := svcClient.FetchToken(appName, emptyTenant, emptyGroup)
 		//then
 		assert.NoError(t, err)
 		assert.NotNil(t, tokenDto)
@@ -65,11 +65,11 @@ func TestTokenRequestClient_FetchToken(t *testing.T) {
 
 	t.Run("should return error when calling invalid URL", func(t *testing.T) {
 		//given
-		srvMock := getServerMock(t, appName, "", "", token)
+		srvMock := getServerMock(t, appName, emptyTenant, emptyGroup, token)
 		defer srvMock.Close()
 		//when
 		svcClient := NewConnectorServiceClient(srvMock.URL + "/some-text")
-		_, err := svcClient.FetchToken(appName, "", "")
+		_, err := svcClient.FetchToken(appName, emptyTenant, emptyGroup)
 		//then
 		assert.Error(t, err)
 	})
