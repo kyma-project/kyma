@@ -2,6 +2,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "name" . }}-certs-job
+  annotations:
+    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   backoffLimit: 1
   template:
@@ -12,7 +15,6 @@ spec:
     spec:
       serviceAccountName: {{ template "name" . }}-certs-job
       restartPolicy: OnFailure
-      ttlSecondsAfterFinished: 600
       volumes:
         - name: {{ template "name" . }}-tls-cert
           secret:

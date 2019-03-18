@@ -9,7 +9,7 @@ spec:
   version: v1
   category: Development
   placement: namespace
-  viewBaseUrl: 'https://lambdas-ui.{{ js .Values.global.domainName }}'
+  viewBaseUrl: 'https://lambdas-ui.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
     - label: Lambdas
       navigationPath: lambdas

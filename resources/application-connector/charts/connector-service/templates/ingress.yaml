@@ -22,7 +22,7 @@ metadata:
       proxy_set_header Client-Certificate $ssl_client_escaped_cert;
 spec:
   rules:
-  - host: gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}
+  - host: gateway.{{ .Values.global.applicationConnector.domainName }}
     http:
       paths:
       - path: /v1/applications/management/info
@@ -52,5 +52,5 @@ spec:
 
   tls:
   - hosts:
-    - gateway.{{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}
+    - gateway.{{ .Values.global.applicationConnector.domainName }}
     secretName: {{ .Values.ingress.tlsSecret }}

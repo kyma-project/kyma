@@ -82,6 +82,12 @@ This is an example of the `api` section of the request body for an API secured w
 
 When you register an API with the `credentials.certificateGen` object, the Application Registry generates a SHA256withRSA-encrypted certificate and a matching key. To enable communication between Kyma and an API secured with this authentication method, set the certificate as a valid authentication medium for all calls coming from Kyma in your external solution.
 
+You can retrieve the client certificate by sending the following request:
+```
+curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
+```
+A successful call will return a response body with the details of a registered service and a base64-encoded client certificate.
+
 The certificate and key pair is stored in a Secret in the `kyma-integration` Namespace. List all Secrets and find the one created for your API:
 
 ```

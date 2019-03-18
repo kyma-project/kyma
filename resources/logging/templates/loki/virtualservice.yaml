@@ -10,7 +10,7 @@ metadata:
     heritage: {{ .Release.Service }}
 spec:
   hosts:
-  - loki.{{ .Values.global.domainName }}
+  - loki.{{ .Values.global.ingress.domainName }}
   http:
   - match:
     - uri:

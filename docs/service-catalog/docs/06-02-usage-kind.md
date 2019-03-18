@@ -56,4 +56,4 @@ These components use this CR:
 | Component   |   Description |
 |:----------:|:------|
 | Binding Usage Controller |  Uses the UsageKind **spec.resource** and **spec.labelsPath** parameters to find a resource and a path to which it should inject Secrets. |
-| UI API Layer |  Exposes the given CR to the Console UI. |
+| Console Backend Service |  Exposes the given CR to the Console UI. |

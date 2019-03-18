@@ -9,7 +9,7 @@ metadata:
     function: test-hello
 spec:
   authentication: []
-  hostname: test-hello.{{ .Values.global.domainName }}
+  hostname: test-hello.{{ .Values.global.ingress.domainName }}
   service:
     name: test-hello
     port: 8080
@@ -23,7 +23,7 @@ metadata:
     function: test-event
 spec:
   authentication: []
-  hostname: test-event.{{ .Values.global.domainName }}
+  hostname: test-event.{{ .Values.global.ingress.domainName }}
   service:
     name: test-event
     port: 8080

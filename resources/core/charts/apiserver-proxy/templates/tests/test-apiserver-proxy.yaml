@@ -22,7 +22,7 @@ spec:
       - name: POD_NAME
         value: test-{{ .Release.Name }}-apiserver-proxy
       - name: DOMAIN
-        value: {{ .Values.global.domainName }}
+        value: {{ .Values.global.ingress.domainName }}
       - name: USER_EMAIL
         valueFrom:
           secretKeyRef:

@@ -25,7 +25,7 @@ Kyma comes with the ready-to-use code snippets that you can use to test the exte
 ## Development
 
 Develop on your remote repository forked from the original repository in Go.
-See the example that uses the [`ui-api-layer`](./components/ui-api-layer) project located in the `components` directory but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://github.com/kyma-project/community/blob/master/git-workflow.md) and the general [contribution flow](https://github.com/kyma-project/community/blob/master/CONTRIBUTING.md#contribute-code-or-content). Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
+See the example that uses the [`console-backend-service`](components/console-backend-service) project located in the `components` directory but applies to any Go project. This set of instructions uses the recommended [`git workflow`](https://github.com/kyma-project/community/blob/master/git-workflow.md) and the general [contribution flow](https://github.com/kyma-project/community/blob/master/CONTRIBUTING.md#contribute-code-or-content). Read also the [`CONTRIBUTING.md`](CONTRIBUTING.md) document that includes the contributing rules specific for this repository.
 
 Follow these steps:
 
@@ -46,7 +46,7 @@ Follow the steps described in the [`git-workflow.md`](https://github.com/kyma-pr
 Go to the main directory of the project in your workspace location and install the required dependencies:
 
 ```
-$ cd components/ui-api-layer
+$ cd components/console-backend-service
 $ dep ensure -vendor-only
 ```
 

@@ -43,18 +43,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: application-connector-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: application-connector
-    kyma-project.io/installation: ""
-data:
-  connector-service.tests.skipSslVerify: "true"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
@@ -109,8 +97,6 @@ metadata:
     component: assetstore
     kyma-project.io/installation: ""
 data:
-  minio.resources.requests.memory: 64Mi
-  minio.resources.limits.cpu: 100m
   assetstore-controller-manager.minikubeIP: ""
   test.integration.minikubeIP: ""
 ---

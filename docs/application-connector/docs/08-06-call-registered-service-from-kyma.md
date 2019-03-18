@@ -16,7 +16,7 @@ This guide shows how to call a registered external service from Kyma using a sim
 ## Steps
 
 1. Register a service with the following specification to the desired Application.
->**NOTE:** See [this](#getting-started-register-a-service) Getting Started Guide to learn how to register a service.
+>**NOTE:** See [this](#tutorials-register-a-service) tutorial to learn how to register a service.
 ```json
 {
   "name": "my-service",

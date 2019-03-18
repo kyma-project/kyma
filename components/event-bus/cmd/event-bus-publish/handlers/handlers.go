@@ -17,6 +17,18 @@ import (
 	"github.com/opentracing/opentracing-go/ext"
 )
 
+const (
+	requestBodyTooLargeErrorMessage = "http: request body too large"
+)
+
+// WithRequestSizeLimiting creates a new request size limiting HandlerFunc
+func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(rw, r.Body, limit)
+		next.ServeHTTP(rw, r)
+	}
+}
+
 // GetPublishHandler is a factory for publish events handler
 // TODO research a better way for dependency injection
 func GetPublishHandler(publisher *controllers.Publisher, tracer *trace.Tracer) func(http.ResponseWriter, *http.Request) {
@@ -73,7 +85,13 @@ func handlePublishRequest(w http.ResponseWriter, r *http.Request, publisher *con
 
 	if err != nil {
 		log.Printf("PublishHandler :: handlePublishRequest :: Unexpected error while reading request body. Error: %v", err)
-		publish.SendJSONError(w, api.ErrorResponseInternalServer())
+		var apiError *api.Error
+		if err.Error() == requestBodyTooLargeErrorMessage {
+			apiError = api.ErrorResponseRequestBodyTooLarge()
+		} else {
+			apiError = api.ErrorResponseInternalServer()
+		}
+		publish.SendJSONError(w, apiError)
 		trace.TagSpanAsError(publishSpan, "error while reading request body", err.Error())
 		return
 	}

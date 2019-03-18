@@ -19,3 +19,7 @@ ci-master: build-image push-image
 
 .PHONY: ci-release
 ci-release: build-image push-image
+
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/istio-kyma-patch"

@@ -58,7 +58,8 @@ type BasicAuth struct {
 }
 
 type CertificateGen struct {
-	CommonName string `json:"commonName"`
+	CommonName  string `json:"commonName"`
+	Certificate string `json:"certificate"`
 }
 
 type Events struct {
@@ -158,7 +159,8 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 	if credentials.CertificateGen != nil {
 		return &Credentials{
 			CertificateGen: &CertificateGen{
-				CommonName: credentials.CertificateGen.CommonName,
+				CommonName:  credentials.CertificateGen.CommonName,
+				Certificate: credentials.CertificateGen.Certificate,
 			},
 		}
 	}

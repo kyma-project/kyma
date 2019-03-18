@@ -175,7 +175,7 @@ func updateSubscriptions(ctx context.Context, client runtimeClient.Client, subs 
 	if subsWithErrors := WriteSubscriptions(ctx, client, subs); len(subsWithErrors) != 0 {
 		// try to set the "Ready" status to false
 		for _, es := range subsWithErrors {
-			log.Error(es.Err, "WriteSubscription() failed for this subscription:", "subscription", es.Sub)
+			log.Error(es.Err, "WriteSubscriptions() failed for this subscription:", "subscription", es.Sub)
 			us := UpdateSubscriptionReadyStatus(es.Sub, subApis.ConditionFalse, es.Err.Error())
 			if err := WriteSubscription(ctx, client, us); err != nil {
 				log.Error(err, "Update Ready status failed")

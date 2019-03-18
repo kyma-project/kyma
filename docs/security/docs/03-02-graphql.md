@@ -3,7 +3,7 @@ title: GraphQL
 type: Details
 ---
 
-Kyma uses a custom [GraphQL](https://graphql.org/) implementation in the UI API Layer and deploys an RBAC-based logic to control the access to the GraphQL endpoint. All calls to the GraphQL endpoint require a valid Kyma token for authentication.
+Kyma uses a custom [GraphQL](https://graphql.org/) implementation in the Console Backend Service and deploys an RBAC-based logic to control the access to the GraphQL endpoint. All calls to the GraphQL endpoint require a valid Kyma token for authentication.
 
 The authorization in GraphQL uses RBAC, which means that:
   - All of the Roles, RoleBindings, ClusterRoles and CluserRoleBindings that you create and assign are effective and give the same permissions when users interact with the cluster resources both through the CLI and the GraphQL endpoints.
@@ -22,7 +22,7 @@ The implementation assigns GraphQL actions to specific Kubernetes verbs:
 ## Available GraphQL actions
 
 To access cluster resources through GraphQL, an action securing given resource must be defined and implemented in the cluster.
-See the [GraphQL schema](https://github.com/kyma-project/kyma/blob/master/components/ui-api-layer/internal/gqlschema/schema.graphql) file for the list of actions implemented in every Kyma cluster by default.
+See the [GraphQL schema](https://github.com/kyma-project/kyma/blob/master/components/console-backend-service/internal/gqlschema/schema.graphql) file for the list of actions implemented in every Kyma cluster by default.
 
 ## Secure a defined GraphQL action
 

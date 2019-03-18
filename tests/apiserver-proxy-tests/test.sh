@@ -20,10 +20,23 @@ test(){
   echo ${UUID} > "${PWD}/uuid"
   
   set +e
-  NEW_UUID=$(kubectl exec ${POD_NAME} cat ${PWD}/uuid)
+  KUBECTL_OUT=$(kubectl exec ${POD_NAME} cat ${PWD}/uuid)
+  KUBECTL_ERR=$((kubectl exec ${POD_NAME} cat ${PWD}/uuid) 2>&1 1>/dev/null)
   set -e
 
-  if [[ ${UUID} != ${NEW_UUID} ]]; then
+  if [[ -n "${KUBECTL_ERR}" ]]; then
+  echo "kubectl exec output:"
+  echo "${KUBECTL_OUT}"
+  echo "kubectl exec error:"
+  echo "${KUBECTL_ERR}"
+
+  echo "TEST FAILED"
+  exit 1
+  fi
+
+  if [[ "${UUID}" != "${KUBECTL_OUT}" ]]; then
+    echo "KUBECTL_OUT should be ${UUID}"
+    echo "KUBECTL_OUT is ${KUBECTL_OUT}"
     echo "TEST FAILED"
     exit 1
   fi
