@@ -7,9 +7,9 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/stretchr/testify/assert"
-	"k8s.io/api/core/v1"
 )
 
 func TestServiceListener_OnAdd(t *testing.T) {

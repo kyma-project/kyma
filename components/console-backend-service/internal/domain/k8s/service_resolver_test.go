@@ -2,9 +2,11 @@ package k8s_test
 
 import (
 	"errors"
-	"github.com/stretchr/testify/mock"
 	"testing"
 	"time"
+
+	"github.com/stretchr/testify/mock"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
@@ -13,9 +15,9 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 
 	"context"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
 )
 
 func TestServiceResolver_ServiceQuery(t *testing.T) {
