@@ -45,10 +45,10 @@ global:
     version: 8b074a71
   application_registry:
     dir: develop/
-    version: 07fabb90
+    version: 5465b5fe
   application_registry_tests:
     dir: develop/
-    version: fd308559
+    version: 5465b5fe
   application_broker:
     dir: develop/
     version: f78529c4
