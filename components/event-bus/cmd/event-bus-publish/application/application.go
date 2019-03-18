@@ -36,7 +36,7 @@ func NewPublishApplication(publishOpts *publish.Options) *PublishApplication {
 	tracer := trace.StartNewTracer(&traceOpts)
 
 	serveMux := http.NewServeMux()
-	serveMux.HandleFunc("/v1/events", handlers.GetPublishHandler(&publisher, &tracer))
+	serveMux.HandleFunc("/v1/events", handlers.WithRequestSizeLimiting(http.HandlerFunc(handlers.GetPublishHandler(&publisher, &tracer)), publishOpts.MaxRequestSize))
 	serveMux.HandleFunc("/v1/status/ready", handlers.GetReadinessHandler(&publisher))
 
 	return &PublishApplication{

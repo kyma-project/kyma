@@ -17,3 +17,7 @@ build-image:
 push-image:
 	docker tag $(IMG_NAME) $(IMG):$(TAG)
 	docker push $(IMG):$(TAG)
+
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/assetstore"

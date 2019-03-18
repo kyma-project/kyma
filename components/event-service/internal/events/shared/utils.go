@@ -13,6 +13,13 @@ func ErrorResponseBadRequest(moreInfo string) (response *api.PublishEventRespons
 	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
 }
 
+// ErrorResponseRequestBodyTooLarge returns an error of type PublishEventResponses with BadRequest status code
+func ErrorResponseRequestBodyTooLarge(moreInfo string) (response *api.PublishEventResponses) {
+	var details []api.ErrorDetail
+	apiError := api.Error{Status: http.StatusRequestEntityTooLarge, Type: ErrorTypeRequestBodyTooLarge, Message: ErrorMessageRequestBodyTooLarge, MoreInfo: moreInfo, Details: details}
+	return &api.PublishEventResponses{Ok: nil, Error: &apiError}
+}
+
 // ErrorResponseMissingFieldEventType returns an error of type PublishEventResponses for missing EventType field
 func ErrorResponseMissingFieldEventType() (response *api.PublishEventResponses) {
 	return createMissingFieldError(FieldEventType)

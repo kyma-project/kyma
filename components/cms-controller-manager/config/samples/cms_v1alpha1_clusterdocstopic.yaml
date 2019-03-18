@@ -1,0 +1,23 @@
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: ClusterDocsTopic
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: clusterdocstopic-sample
+spec:
+  displayName: "Cluster Docs Topic Sample"
+  description: "Cluster Docs Topic Description"
+  sources:
+    redis:
+      mode: package
+      url: https://github.com/kyma-project/bundles/releases/download/latest/redis-0.0.3.tgz
+    asyncapi:
+      mode: single
+      url: https://raw.githubusercontent.com/asyncapi/asyncapi/master/examples/1.2.0/slack-rtm.yml
+    markdown:
+      mode: package
+      url: https://github.com/kyma-project/kyma/archive/master.zip
+      filter: ^kyma-master/docs/
+    openapi:
+      mode: single
+      url: https://petstore.swagger.io/v2/swagger.json

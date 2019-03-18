@@ -1,4 +1,3 @@
-{{- $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" -}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,7 +7,7 @@ metadata:
     app: istio-kyma-patch
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  {{ $serviceName }}.deployment.patch.json: |
+  istio-ingressgateway.deployment.patch.json: |
     [
       {
         "op": "replace",
@@ -103,7 +102,7 @@ data:
     service jaeger-query
     service jaeger-agent
     service jaeger-collector
-    pod -lapp={{ $serviceName }}
+    pod -lapp=istio-ingressgateway
 
   required-crds: |
     policies.authentication.istio.io

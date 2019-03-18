@@ -9,6 +9,10 @@ import (
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 )
 
+const (
+	requestBodyTooLargeErrorMessage = "http: request body too large"
+)
+
 func ValidateRequest(r *http.Request) (*api.PublishRequest, *api.Error) {
 	// validate the http method
 	if r.Method != http.MethodPost {
@@ -27,6 +31,11 @@ func ValidateRequest(r *http.Request) (*api.PublishRequest, *api.Error) {
 	_ = r.Body.Close()
 	if err != nil {
 		log.Printf("failed to read request body: %v", err)
+
+		if err.Error() == requestBodyTooLargeErrorMessage {
+			return nil, api.ErrorResponseRequestBodyTooLarge()
+		}
+
 		return nil, api.ErrorResponseInternalServer()
 	}
 
