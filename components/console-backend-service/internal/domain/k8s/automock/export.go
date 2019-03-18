@@ -32,8 +32,16 @@ func NewPodSvc() *podSvc {
 	return new(podSvc)
 }
 
-func NewGqlPodConverter() *gqlPodConverter {
+func NewGQLPodConverter() *gqlPodConverter {
 	return new(gqlPodConverter)
+}
+
+func NewResourceSvc() *resourceSvc {
+	return new(resourceSvc)
+}
+
+func NewGQLResourceConverter() *gqlResourceConverter {
+	return new(gqlResourceConverter)
 }
 
 func NewReplicaSetSvc() *replicaSetSvc {

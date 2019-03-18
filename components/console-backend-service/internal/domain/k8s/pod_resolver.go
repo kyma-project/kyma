@@ -37,9 +37,9 @@ type podResolver struct {
 	podConverter gqlPodConverter
 }
 
-func newPodResolver(podLister podSvc) *podResolver {
+func newPodResolver(podSvc podSvc) *podResolver {
 	return &podResolver{
-		podSvc:       podLister,
+		podSvc:       podSvc,
 		podConverter: &podConverter{},
 	}
 }

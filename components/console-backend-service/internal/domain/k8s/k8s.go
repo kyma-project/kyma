@@ -19,6 +19,7 @@ type ApplicationLister interface {
 }
 
 type Resolver struct {
+	*resourceResolver
 	*namespaceResolver
 	*secretResolver
 	*deploymentResolver
@@ -50,13 +51,14 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	}
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
 	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
-
+	resourceService := newResourceService(clientset.Discovery())
 	replicaSetService := newReplicaSetService(informerFactory.Apps().V1().ReplicaSets().Informer(), clientset.AppsV1())
 	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
 
 	return &Resolver{
+		resourceResolver:            newResourceResolver(resourceService),
 		namespaceResolver:           newNamespaceResolver(namespaceService, applicationRetriever),
 		secretResolver:              newSecretResolver(client),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),

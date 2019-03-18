@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"k8s.io/client-go/discovery"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	apps "k8s.io/client-go/kubernetes/typed/apps/v1"
 	"k8s.io/client-go/kubernetes/typed/core/v1"
@@ -33,7 +34,7 @@ func NewPodResolver(podSvc podSvc) *podResolver {
 	return newPodResolver(podSvc)
 }
 
-func (r *podResolver) SetInstanceConverter(converter gqlPodConverter) {
+func (r *podResolver) SetPodConverter(converter gqlPodConverter) {
 	r.podConverter = converter
 }
 
@@ -41,6 +42,23 @@ func NewPodService(informer cache.SharedIndexInformer, client v1.CoreV1Interface
 	return newPodService(informer, client)
 }
 
+// Resource
+
+func NewResourceResolver(resourceSvc resourceSvc) *resourceResolver {
+	return newResourceResolver(resourceSvc)
+}
+
+func (r *resourceResolver) SetResourceConverter(converter gqlResourceConverter) {
+	r.gqlResourceConverter = converter
+}
+
+func NewResourceService(client discovery.DiscoveryInterface) *resourceService {
+	return newResourceService(client)
+}
+
+func NewResourceConverter() *resourceConverter {
+	return &resourceConverter{}
+}
 // ReplicaSet
 
 func NewReplicaSetResolver(replicaSetSvc replicaSetSvc) *replicaSetResolver {

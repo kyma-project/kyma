@@ -171,6 +171,10 @@ type mutationResolver struct {
 	*RootResolver
 }
 
+func (r *mutationResolver) CreateResource(ctx context.Context, namespace string, resource gqlschema.JSON) (*gqlschema.JSON, error) {
+	return r.k8s.CreateResourceMutation(ctx, namespace, resource)
+}
+
 func (r *mutationResolver) UpdatePod(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Pod, error) {
 	return r.k8s.UpdatePodMutation(ctx, name, namespace, update)
 }

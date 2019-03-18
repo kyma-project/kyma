@@ -13,6 +13,8 @@ const (
 	Pods
 	ReplicaSet
 	ReplicaSets
+	Resource
+	Resources
 	StatefulSets
 	ResourceQuota
 	ResourceQuotas
@@ -43,6 +45,10 @@ func (k Kind) String() string {
 		return "Replica Set"
 	case ReplicaSets:
 		return "Replica Sets"
+	case Resource:
+		return "Resource"
+	case Resources:
+		return "Resources"
 	case StatefulSets:
 		return "Stateful Sets"
 	case ResourceQuota:
