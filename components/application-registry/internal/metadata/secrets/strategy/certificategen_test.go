@@ -2,6 +2,7 @@ package strategy
 
 import (
 	"crypto/x509/pkix"
+	"encoding/base64"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -45,6 +46,18 @@ func TestCertificateGen_ToCredentials(t *testing.T) {
 
 		// then
 		assert.Equal(t, commonName, credentials.CertificateGen.CommonName)
+	})
+
+	t.Run("should convert to credentials with base64 encoded client certificate", func(t *testing.T) {
+		// given
+		certificateGenStrategy := certificateGen{}
+		base64EncodedCert := base64.StdEncoding.EncodeToString([]byte(certificate))
+
+		// when
+		credentials := certificateGenStrategy.ToCredentials(secretData, nil)
+
+		// then
+		assert.Equal(t, base64EncodedCert, credentials.CertificateGen.Certificate)
 	})
 }
 

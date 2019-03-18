@@ -75,7 +75,8 @@ type Basic struct {
 }
 
 type CertificateGen struct {
-	CommonName string `json:"commonName"`
+	CommonName  string `json:"commonName"`
+	Certificate string `json:"certificate"`
 }
 
 type Events struct {
