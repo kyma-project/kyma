@@ -149,6 +149,20 @@
   version = "v0.6.0"
 
 [[projects]]
+  branch = "master"
+  digest = "1:096f6a7a4e89a6dac85f818208f0a7716b07bd8fa07cac8c762529c9ebd10738"
+  name = "github.com/kyma-project/kyma"
+  packages = [
+    "common/microfrontend-client/pkg/apis/ui",
+    "common/microfrontend-client/pkg/apis/ui/v1alpha1",
+    "common/microfrontend-client/pkg/client/clientset/versioned",
+    "common/microfrontend-client/pkg/client/clientset/versioned/scheme",
+    "common/microfrontend-client/pkg/client/clientset/versioned/typed/ui/v1alpha1",
+  ]
+  pruneopts = "UT"
+  revision = "87fc9a356f6800934f844bd5969b8d56aadfe13e"
+
+[[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
   name = "github.com/modern-go/concurrent"
   packages = ["."]
@@ -453,6 +467,8 @@
     "github.com/heptio/ark/pkg/generated/clientset/versioned",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
     "github.com/smartystreets/goconvey/convey",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
