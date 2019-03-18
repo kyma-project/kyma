@@ -75,7 +75,7 @@ roleRef:
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ .Values.e2eTests.nameTester }}
 spec:
   template:
     metadata:
