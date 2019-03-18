@@ -2,13 +2,14 @@ package testkit
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/require"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
-	"testing"
-	"time"
 )
 
 const (
@@ -19,8 +20,6 @@ const (
 )
 
 type TestSuite struct {
-	t *testing.T
-
 	application string
 
 	config     TestConfig
@@ -44,7 +43,6 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesChecker := NewK8sChecker(k8sResourcesClient, app)
 
 	return &TestSuite{
-		t:           t,
 		application: app,
 
 		config:              config,
@@ -55,21 +53,21 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	}
 }
 
-func (ts *TestSuite) CreateApplication(accessLabel string, skipInstallation bool) {
+func (ts *TestSuite) CreateApplication(t *testing.T, accessLabel string, skipInstallation bool) {
 	application, err := ts.k8sClient.CreateDummyApplication(ts.application, accessLabel, skipInstallation)
-	require.NoError(ts.t, err)
-	require.NotNil(ts.t, application)
+	require.NoError(t, err)
+	require.NotNil(t, application)
 }
 
-func (ts *TestSuite) DeleteApplication() {
+func (ts *TestSuite) DeleteApplication(t *testing.T) {
 	err := ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
-	require.NoError(ts.t, err)
+	require.NoError(t, err)
 }
 
-func (ts *TestSuite) CheckAccessLabel() {
+func (ts *TestSuite) CheckAccessLabel(t *testing.T) {
 	application, err := ts.k8sClient.GetApplication(ts.application, metav1.GetOptions{})
-	require.NoError(ts.t, err)
-	require.Equal(ts.t, ts.application, application.Spec.AccessLabel)
+	require.NoError(t, err)
+	require.Equal(t, ts.application, application.Spec.AccessLabel)
 }
 
 func (ts *TestSuite) CleanUp() {
@@ -77,29 +75,29 @@ func (ts *TestSuite) CleanUp() {
 	ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
 }
 
-func (ts *TestSuite) WaitForReleaseToInstall() {
-	msg := fmt.Sprintf("Timeout waiting for %s release installation", ts.application)
-	ts.waitForFunction(ts.helmReleaseInstalled, msg, ts.installationTimeout)
+func (ts *TestSuite) WaitForReleaseToInstall(t *testing.T) {
+	err := ts.waitForFunction(defaultCheckInterval, ts.installationTimeout, ts.helmReleaseInstalled)
+	require.NoError(t, err, "Received timeout while waiting for release to install")
 }
 
-func (ts *TestSuite) WaitForReleaseToUninstall() {
-	msg := fmt.Sprintf("Timeout waiting for %s release to uninstall", ts.application)
-	ts.waitForFunction(ts.helmReleaseNotExist, msg, ts.installationTimeout)
+func (ts *TestSuite) WaitForReleaseToUninstall(t *testing.T) {
+	err := ts.waitForFunction(defaultCheckInterval, ts.installationTimeout, ts.helmReleaseNotExist)
+	require.NoError(t, err, "Received timeout while waiting for release to uninstall")
 }
 
-func (ts *TestSuite) EnsureReleaseNotInstalling() {
-	msg := fmt.Sprintf("Release for %s Application installing when shouldn't", ts.application)
-	ts.shouldLastFor(ts.helmReleaseNotExist, msg, installationStartTimeout)
+func (ts *TestSuite) EnsureReleaseNotInstalling(t *testing.T) {
+	err := ts.shouldLastFor(defaultCheckInterval, installationStartTimeout, ts.helmReleaseNotExist)
+	require.NoError(t, err, fmt.Sprintf("Release for %s Application installing when shouldn't", ts.application))
 }
 
-func (ts *TestSuite) CheckK8sResourcesDeployed() {
+func (ts *TestSuite) CheckK8sResourcesDeployed(t *testing.T) {
 	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.checkK8sResources(ts.checkResourceDeployed)
+	ts.k8sChecker.checkK8sResources(t, ts.checkResourceDeployed)
 }
 
-func (ts *TestSuite) CheckK8sResourceRemoved() {
+func (ts *TestSuite) CheckK8sResourceRemoved(t *testing.T) {
 	time.Sleep(waitBeforeCheck)
-	ts.k8sChecker.checkK8sResources(ts.checkResourceRemoved)
+	ts.k8sChecker.checkK8sResources(t, ts.checkResourceRemoved)
 }
 
 func (ts *TestSuite) helmReleaseInstalled() bool {
@@ -112,11 +110,11 @@ func (ts *TestSuite) helmReleaseNotExist() bool {
 	return err == nil && exists == false
 }
 
-func (ts *TestSuite) checkResourceDeployed(resource interface{}, err error, failMessage string) {
-	require.NoError(ts.t, err, failMessage)
+func (ts *TestSuite) checkResourceDeployed(t *testing.T, resource interface{}, err error, failMessage string) {
+	require.NoError(t, err, failMessage)
 }
 
-func (ts *TestSuite) checkResourceRemoved(_ interface{}, err error, failMessage string) {
-	require.Error(ts.t, err, failMessage)
-	require.True(ts.t, k8serrors.IsNotFound(err), failMessage)
+func (ts *TestSuite) checkResourceRemoved(t *testing.T, _ interface{}, err error, failMessage string) {
+	require.Error(t, err, failMessage)
+	require.True(t, k8serrors.IsNotFound(err), failMessage)
 }

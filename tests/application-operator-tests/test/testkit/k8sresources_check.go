@@ -2,6 +2,7 @@ package testkit
 
 import (
 	"fmt"
+	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -55,10 +56,10 @@ func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecke
 	}
 }
 
-func (c *K8sResourceChecker) checkK8sResources(checkFunc func(resource interface{}, err error, failMessage string)) {
+func (c *K8sResourceChecker) checkK8sResources(t *testing.T, checkFunc func(t *testing.T, resource interface{}, err error, failMessage string)) {
 	for _, r := range c.resources {
 		failMessage := fmt.Sprintf("%s resource %s not handled properly", r.kind, r.name)
 		resource, err := r.getFunction(r.name, v1.GetOptions{})
-		checkFunc(resource, err, failMessage)
+		checkFunc(t, resource, err, failMessage)
 	}
 }
