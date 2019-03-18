@@ -385,7 +385,7 @@ func randomString(n int) string {
 }
 
 func publishEvent(testID string) {
-	cmd := exec.Command("curl", "-s", "http://event-bus-publish:8080/v1/events", "-H", "Content-Type: application/json", "-d", `{"source-id": "dummy", "event-type": "test", "event-type-version": "v1", "event-time": "0001-01-01T00:00:00+00:00", "data": "`+testID+`"}`)
+	cmd := exec.Command("curl", "-s", "http://event-bus-publish.kyma-system:8080/v1/events", "-H", "Content-Type: application/json", "-d", `{"source-id": "dummy", "event-type": "test", "event-type-version": "v1", "event-time": "0001-01-01T00:00:00+00:00", "data": "`+testID+`"}`)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Unable to publish event(error: %s): %s\n", err, string(stdoutStderr))
