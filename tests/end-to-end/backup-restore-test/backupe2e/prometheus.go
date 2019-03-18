@@ -40,16 +40,16 @@ import (
 )
 
 const (
-	domain                           = "http://monitoring-prometheus.kyma-system"
-	prometheusNS                     = "kyma-system"
-	api                              = "/api/v1/query?"
-	metricsQuery                     = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
-	port                             = "9090"
-	metricName                       = "kube_pod_container_resource_requests_cpu_cores"
-	prometheusPodName                = "prometheus-monitoring-0"
-	prometheusServiceName            = "monitoring-prometheus"
-	prometheusStatefulsetName string = "monitoring-prometheus"
-	prometheusLabelSelector          = "app=prometheus"
+	domain                    = "http://monitoring-prometheus.kyma-system"
+	prometheusNS              = "kyma-system"
+	api                       = "/api/v1/query?"
+	metricsQuery              = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
+	port                      = "9090"
+	metricName                = "kube_pod_container_resource_requests_cpu_cores"
+	prometheusPodName         = "prometheus-monitoring-0"
+	prometheusServiceName     = "monitoring-prometheus"
+	prometheusStatefulsetName = "monitoring-prometheus"
+	prometheusLabelSelector   = "app=prometheus"
 )
 
 type queryResponse struct {
@@ -292,7 +292,7 @@ func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 				return nil
 			}
 			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
-				return fmt.Errorf("Grafana in state %v: \n%+v", pod.Status.Phase, pod)
+				return fmt.Errorf("Prometheus in state %v: \n%+v", pod.Status.Phase, pod)
 			}
 		}
 	}
