@@ -246,9 +246,10 @@ type ReplicaSet struct {
 
 type ResourceAttributes struct {
 	Verb            string  `json:"verb"`
-	APIGroup        string  `json:"apiGroup"`
-	APIVersion      string  `json:"apiVersion"`
-	Resource        string  `json:"resource"`
+	APIGroup        *string `json:"apiGroup"`
+	APIVersion      *string `json:"apiVersion"`
+	Resource        *string `json:"resource"`
+	ResourceArg     *string `json:"resourceArg"`
 	Subresource     string  `json:"subresource"`
 	NameArg         *string `json:"nameArg"`
 	NamespaceArg    *string `json:"namespaceArg"`

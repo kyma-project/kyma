@@ -55,6 +55,13 @@ The variables are:
 * `{image_name}` - name of the output image (default: `console-backend-service`)
 * `{image_tag}` - tag of the output image (default: `latest`)
 
+### Certificate error
+When you run the UI API Layer project, you can get the following error:
+```bash
+oidc.go:222] oidc authenticator: initializing plugin: Get https://dex.kyma.local/.well-known/openid-configuration: x509: certificate signed by unknown authority
+```
+This error can occur if you use Go version 1.11.5 or lower on macOS. Try upgrading to version 1.11.6 or higher. For details, see [this](https://github.com/golang/go/issues/24652) issue.
+
 ## Development
 
 ### Install dependencies

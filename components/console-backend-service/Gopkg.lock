@@ -839,7 +839,7 @@
   version = "kubernetes-1.11.3"
 
 [[projects]]
-  digest = "1:305422755d1d5fecb39982f4e1d92984842c3279cde2b4b975a584397d396b4d"
+  digest = "1:97e4f6d0e5b475ed09dc524b87b224224fc83e0a446a5cc56a7a710bbe9ceddf"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -979,6 +979,7 @@
     "pkg/version",
     "plugin/pkg/client/auth/exec",
     "rest",
+    "rest/fake",
     "rest/watch",
     "testing",
     "tools/auth",
@@ -1086,6 +1087,7 @@
     "github.com/99designs/gqlgen/handler",
     "github.com/allegro/bigcache",
     "github.com/golang/glog",
+    "github.com/googleapis/gnostic/OpenAPIv2",
     "github.com/gorilla/mux",
     "github.com/gorilla/websocket",
     "github.com/kisielk/errcheck",
@@ -1152,6 +1154,7 @@
     "k8s.io/apimachinery/pkg/util/intstr",
     "k8s.io/apimachinery/pkg/util/runtime",
     "k8s.io/apimachinery/pkg/util/validation/field",
+    "k8s.io/apimachinery/pkg/version",
     "k8s.io/apimachinery/pkg/watch",
     "k8s.io/apiserver/pkg/authentication/authenticator",
     "k8s.io/apiserver/pkg/authentication/request/bearertoken",
@@ -1166,10 +1169,12 @@
     "k8s.io/client-go/informers",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
+    "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/apps/v1",
     "k8s.io/client-go/kubernetes/typed/authorization/v1beta1",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
+    "k8s.io/client-go/rest/fake",
     "k8s.io/client-go/testing",
     "k8s.io/client-go/tools/cache",
     "k8s.io/client-go/tools/clientcmd",

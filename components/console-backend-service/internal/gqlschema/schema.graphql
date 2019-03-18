@@ -12,9 +12,10 @@ directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
 input ResourceAttributes {
 	verb: String!
-	apiGroup: String!
-	apiVersion: String!
-	resource: String!
+	apiGroup: String
+	apiVersion: String
+	resource: String
+    resourceArg: String
 	subresource: String! = ""
 	nameArg: String
 	namespaceArg: String
@@ -671,6 +672,7 @@ type Query {
 # Mutations
 
 type Mutation {
+    createResource(namespace: String!, resource: JSON!): JSON @HasAccess(attributes: {verb: "create", resourceArg: "resource", namespaceArg: "namespace"})
     createServiceInstance(params: ServiceInstanceCreateInput!): ServiceInstance
     deleteServiceInstance(name: String!, namespace: String!): ServiceInstance
     createServiceBinding(serviceBindingName: String, serviceInstanceName: String!, namespace: String!, parameters: JSON): CreateServiceBindingOutput
