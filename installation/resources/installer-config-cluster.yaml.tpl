@@ -77,16 +77,5 @@ metadata:
     component: knative-serving
     kyma-project.io/installation: ""
 data:
-  knative.domainName: "__DOMAIN__"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: knative-eventing-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: knative-eventing
-    kyma-project.io/installation: ""
-data:
-  knative.domainName: "__DOMAIN__"
+  knative-serving.domainName: "__DOMAIN__"
+
