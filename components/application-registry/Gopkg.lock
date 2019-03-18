@@ -74,6 +74,12 @@
   version = "v0.17.2"
 
 [[projects]]
+  name = "github.com/gofrs/uuid"
+  packages = ["."]
+  revision = "6b08a5c5172ba18946672b49749cde22873dd7c2"
+  version = "v3.2.0"
+
+[[projects]]
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
@@ -248,12 +254,6 @@
     "xfs"
   ]
   revision = "1dc9a6cbc91aacc3e8b2d63db4d2e957a5394ac4"
-
-[[projects]]
-  name = "github.com/satori/go.uuid"
-  packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
-  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -548,6 +548,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a87720bbf5e4e04ac14aa3586417874d3178e47c67de57665c974542e7ca2a39"
+  inputs-digest = "d4dfa2adac28cf8010b719b05d6af57608bcd8868f3ebbe8769db34ca8c8d94d"
   solver-name = "gps-cdcl"
   solver-version = 1
