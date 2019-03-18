@@ -106,6 +106,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 			So(err, ShouldBeNil)
 			Convey("Delete resources from cluster", func() {
 				for _, e2eTest := range e2eTests {
+					e2eTest.backupTest.DeleteResources()
 					err := myBackupClient.DeleteNamespace(e2eTest.namespace)
 					So(err, ShouldBeNil)
 					err = myBackupClient.WaitForNamespaceToBeDeleted(e2eTest.namespace, 2*time.Minute)

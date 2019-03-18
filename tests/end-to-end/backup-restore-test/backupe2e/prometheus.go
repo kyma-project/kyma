@@ -202,7 +202,7 @@ func (pt *prometheusTest) CreateResources(namespace string) {
 
 }
 
-func (t *prometheusTest) DeleteResources(namespace, label string) {
+func (t *prometheusTest) DeleteResources() {
 	// It needs to be implemented for this test.
 }
 

@@ -38,10 +38,13 @@ import (
 )
 
 const (
-	grafanaNS           string = "kyma-system"
-	grafanaPodName      string = "monitoring-grafana-0"
-	adminUserSecretName string = "admin-user"
-	containerName       string = "grafana"
+	grafanaNS              string = "kyma-system"
+	grafanaPodName         string = "monitoring-grafana-0"
+	grafanaServiceName     string = "monitoring-grafana"
+	grafanaStatefulsetName string = "monitoring-grafana"
+	adminUserSecretName    string = "admin-user"
+	containerName          string = "grafana"
+	grafanaLabelSelector   string = "app=monitoring-grafana"
 )
 
 type grafanaTest struct {
@@ -84,8 +87,46 @@ func (t *grafanaTest) CreateResources(namespace string) {
 	// There is not need to be implemented for this test.
 }
 
-func (t *grafanaTest) DeleteResources(namespace, label string) {
+func (t *grafanaTest) DeleteResources() {
 	// It needs to be implemented for this test.
+	err := t.waitForPodGrafana(1 * time.Minute)
+	So(err, ShouldBeNil)
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	serviceList, err := t.coreClient.CoreV1().Services(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector,})
+	So(err, ShouldBeNil)
+
+	for _, service := range serviceList.Items {
+		if service.Name == grafanaServiceName {
+			// Delete Service
+			err = t.coreClient.CoreV1().Services(grafanaNS).Delete(grafanaServiceName, &metav1.DeleteOptions{
+				PropagationPolicy: &deletePolicy,
+			})
+			So(err, ShouldBeNil)
+		}
+	}
+
+	collection := t.coreClient.AppsV1().StatefulSets(grafanaNS)
+	err = collection.Delete(grafanaStatefulsetName, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+	So(err, ShouldBeNil)
+
+	podList, err := t.coreClient.CoreV1().Pods(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector,})
+	So(err, ShouldBeNil)
+
+	for _, pod := range podList.Items {
+		if pod.Name == grafanaPodName {
+			// Delete Pod
+			err = t.coreClient.CoreV1().Pods(grafanaNS).Delete(grafanaPodName, &metav1.DeleteOptions{})
+			So(err, ShouldBeNil)
+		}
+	}
+
+	err = t.waitForPodGrafana(2 * time.Minute)
+	So(err, ShouldBeError)
+
 }
 
 func (t *grafanaTest) TestResources(namespace string) {
