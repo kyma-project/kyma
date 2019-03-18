@@ -3,6 +3,7 @@ package testkit
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -17,6 +18,8 @@ type K8sResourcesClient interface {
 	CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 	GetApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+	ListPods(options v1.ListOptions) (*corev1.PodList, error)
+	GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request
 }
 
 type k8sResourcesClient struct {
@@ -94,4 +97,12 @@ func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOp
 
 func (c *k8sResourcesClient) GetApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
 	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Get(name, options)
+}
+
+func (c *k8sResourcesClient) ListPods(options v1.ListOptions) (*corev1.PodList, error) {
+	return c.coreClient.Core().Pods(c.namespace).List(options)
+}
+
+func (c *k8sResourcesClient) GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request {
+	return c.GetLogs(podName, options)
 }

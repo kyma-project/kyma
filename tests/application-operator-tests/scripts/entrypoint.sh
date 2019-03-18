@@ -7,8 +7,6 @@ echo "Run controller tests"
 ./controllertests.test
 res=$((res+$?))
 
-exit ${res}
-
 echo "Run application tests"
 ./applicationtests.test
 res=$((res+$?))
