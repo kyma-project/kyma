@@ -15,8 +15,8 @@ import (
 const resourceQuotaObjName = "kyma-default"
 
 type namespaceControllerTest struct {
-	namespaceName, resourceQuotaObjName string
-	coreClient                          *kubernetes.Clientset
+	namespaceName string
+	coreClient    *kubernetes.Clientset
 }
 
 func NewNamespaceControllerTest() (namespaceControllerTest, error) {
@@ -83,6 +83,6 @@ func (n namespaceControllerTest) waitForResources() error {
 			return nil
 
 		case <-timeout:
-			return fmt.Errorf("Resources could not be found: %v, %v", n.namespaceName, n.resourceQuotaObjName)}
+			return fmt.Errorf("resources could not be found: %v, %v", n.namespaceName, resourceQuotaObjName)}
 	}
 }
