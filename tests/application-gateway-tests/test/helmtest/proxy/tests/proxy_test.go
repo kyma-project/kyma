@@ -23,5 +23,5 @@ func TestApplicationGateway(t *testing.T) {
 	logrus.Infoln("Getting logs from test executor...")
 	testSuit.GetTestExecutorLogs(t)
 
-	require.Equal(t, int32(0), testExecutorStatus.State.Terminated.ExitCode, "Test executor exited with code: ", int32(testExecutorStatus.State.Terminated.ExitCode))
+	require.Equal(t, int32(0), testExecutorStatus.State.Terminated.ExitCode, "Test executor exited with code: ", testExecutorStatus.State.Terminated.ExitCode)
 }
