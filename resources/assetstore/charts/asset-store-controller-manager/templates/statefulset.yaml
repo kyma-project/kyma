@@ -31,7 +31,7 @@ spec:
       containers:
       - command:
         - /manager
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.assetstore_controller_manager.dir }}assetstore-controller-manager:{{ .Values.global.assetstore_controller_manager.version }}"
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_controller_manager.dir }}asset-store-controller-manager:{{ .Values.global.asset_store_controller_manager.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: {{ .Chart.Name }}
         env:
