@@ -30,7 +30,7 @@ type Client struct {
 }
 
 // NewClient .
-func NewClient(host string, TLSKey string, TLSCert string) *Client {
+func NewClient(host string, TLSKey string, TLSCert string) (*Client, error) {
 	tlsopts := tlsutil.Options{
 		KeyFile:            TLSKey,
 		CertFile:           TLSCert,

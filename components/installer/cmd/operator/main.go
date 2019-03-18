@@ -64,7 +64,11 @@ func main() {
 		log.Fatalf("Unable to create internal client. Error: %v", err)
 	}
 
-	helmClient := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt)
+	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt)
+	if err != nil {
+		log.Fatalf("Unable create helm client. Error: %v", err)
+	}
+
 	serviceCatalogClient := servicecatalog.NewClient(config)
 	kymaCommandExecutor := &toolkit.KymaCommandExecutor{}
 
