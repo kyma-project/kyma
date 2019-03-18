@@ -49,7 +49,6 @@ spec:
                 key: password
           - name: NAMESPACE
             value: {{ .Values.namespace }}
-      restartPolicy: Never
 ---
 apiVersion: v1
 kind: ServiceAccount

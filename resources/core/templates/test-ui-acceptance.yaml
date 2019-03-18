@@ -62,4 +62,3 @@ spec:
             items:
               - key: config.yaml
                 path: config.yaml
-      restartPolicy: Never

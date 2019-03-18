@@ -46,4 +46,3 @@ spec:
             value: {{ .Values.test.acceptance.core.application.disabled | quote }}
           - name: TEAR_DOWN_TIMEOUT_PER_STEP
             value: {{ .Values.test.acceptance.core.application.tearDownTimeoutPerStep | quote }}
-      restartPolicy: Never

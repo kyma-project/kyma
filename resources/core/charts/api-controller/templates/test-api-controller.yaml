@@ -19,4 +19,3 @@ spec:
           value: istio-ingressgateway.istio-system.svc.cluster.local
         - name: NAMESPACE
           value: {{ .Values.global.api_controller_acceptance_tests.testNamespace }}
-      restartPolicy: Never

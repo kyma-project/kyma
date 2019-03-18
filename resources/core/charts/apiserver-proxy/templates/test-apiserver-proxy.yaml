@@ -33,4 +33,3 @@ spec:
               secretKeyRef:
                 name: admin-user
                 key: password
-      restartPolicy: Never

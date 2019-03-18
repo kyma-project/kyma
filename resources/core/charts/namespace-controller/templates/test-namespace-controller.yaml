@@ -60,5 +60,4 @@ spec:
             value: "{{ .Values.resourceQuota.limitsMemory}}"
           - name: EXPECTED_RESOURCE_QUOTA_REQUESTS_MEMORY
             value: "{{ .Values.resourceQuota.requestsMemory}}"
-      restartPolicy: Never
 ---
