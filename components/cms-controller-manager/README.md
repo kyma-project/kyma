@@ -32,7 +32,7 @@ IMG={image_name}:{image_tag} make docker-build
 
 The variables are:
 
-* `{image_name}` which is the name of the output image. Use `assetstore-controller-manager` for the image name.
+* `{image_name}` which is the name of the output image. Use `cms-controller-manager` for the image name.
 * `{image_tag}` which is the tag of the output image. Use `latest` for the tag name.
 
 ### Environment Variables

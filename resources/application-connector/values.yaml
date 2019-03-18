@@ -48,7 +48,7 @@ global:
     version: f772bc66
   application_registry_tests:
     dir: develop/
-    version: fd308559
+    version: 5465b5fe
   application_broker:
     dir: develop/
     version: f78529c4
