@@ -3,7 +3,6 @@ package backupe2e
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -17,33 +16,34 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	. "github.com/smartystreets/goconvey/convey"
+	"k8s.io/apimachinery/pkg/api/resource"
 )
 
 type statefulSetTest struct {
-	statefulSetName, uuid string
-	coreClient            *kubernetes.Clientset
+	statefulSetName, uuid, output string
+	coreClient                    *kubernetes.Clientset
 }
 
-func NewStatefulSetTest() (statefulSetTest, error) {
+func NewStatefulSetTest() (*statefulSetTest, error) {
 
 	kubeconfig := os.Getenv("KUBECONFIG")
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		return statefulSetTest{}, err
+		return nil, err
 	}
 
 	coreClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return statefulSetTest{}, err
+		return nil, err
 	}
-	return statefulSetTest{
+	return &statefulSetTest{
 		coreClient:      coreClient,
 		statefulSetName: "hello",
 		uuid:            uuid.New().String(),
 	}, nil
 }
 
-func (t statefulSetTest) TestResources(namespace string) {
+func (t *statefulSetTest) TestResources(namespace string) {
 	replicas := int32(2)
 	err := t.waitForPodDeployment(namespace, replicas, 2*time.Minute)
 	So(err, ShouldBeNil)
@@ -51,13 +51,18 @@ func (t statefulSetTest) TestResources(namespace string) {
 	//value, err := t.getOutput(host, 2*time.Minute)
 	//So(err, ShouldBeNil)
 	//So(value, ShouldContainSubstring, "Welcome to nginx!")
-	host := fmt.Sprintf("http://%s-%v.%s.%s", t.statefulSetName, replicas-1, t.statefulSetName, namespace)
+	host := fmt.Sprintf("http://%s-%v.%s.%s/date", t.statefulSetName, replicas-1, t.statefulSetName, namespace)
 	value, err := t.getOutput(host, 2*time.Minute)
 	So(err, ShouldBeNil)
-	So(value, ShouldContainSubstring, "Welcome to nginx!")
+	if t.output == "" {
+		t.output = value
+		So(value, ShouldNotBeEmpty)
+	} else {
+		So(value, ShouldEqual, t.output)
+	}
 }
 
-func (t statefulSetTest) getOutput(host string, waitmax time.Duration) (string, error) {
+func (t *statefulSetTest) getOutput(host string, waitmax time.Duration) (string, error) {
 
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
@@ -87,7 +92,7 @@ func (t statefulSetTest) getOutput(host string, waitmax time.Duration) (string, 
 
 }
 
-func (t statefulSetTest) CreateResources(namespace string) {
+func (t *statefulSetTest) CreateResources(namespace string) {
 	replicas := int32(2)
 	err := t.createService(namespace, replicas)
 	So(err, ShouldBeNil)
@@ -95,7 +100,7 @@ func (t statefulSetTest) CreateResources(namespace string) {
 	So(err, ShouldBeNil)
 }
 
-func (t statefulSetTest) createStatefulSet(namespace string, replicas int32) error {
+func (t *statefulSetTest) createStatefulSet(namespace string, replicas int32) error {
 	statefulSet := &appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: t.statefulSetName,
@@ -115,6 +120,22 @@ func (t statefulSetTest) createStatefulSet(namespace string, replicas int32) err
 					},
 				},
 				Spec: corev1.PodSpec{
+					InitContainers: []corev1.Container{
+						corev1.Container{
+							Name:  "busybox",
+							Image: "busybox",
+							Command: []string{
+								"sh", "-c",
+								"cat /usr/share/nginx/html/date ; test -e /usr/share/nginx/html/date || date > /usr/share/nginx/html/date",
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								corev1.VolumeMount{
+									Name:      "www",
+									MountPath: "/usr/share/nginx/html",
+								},
+							},
+						},
+					},
 					Containers: []corev1.Container{
 						corev1.Container{
 							Name:  "nginx",
@@ -123,6 +144,29 @@ func (t statefulSetTest) createStatefulSet(namespace string, replicas int32) err
 								corev1.ContainerPort{
 									ContainerPort: 80,
 								},
+							},
+							VolumeMounts: []corev1.VolumeMount{
+								corev1.VolumeMount{
+									Name:      "www",
+									MountPath: "/usr/share/nginx/html",
+								},
+							},
+						},
+					},
+				},
+			},
+			VolumeClaimTemplates: []corev1.PersistentVolumeClaim{
+				corev1.PersistentVolumeClaim{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: "www",
+					},
+					Spec: corev1.PersistentVolumeClaimSpec{
+						AccessModes: []corev1.PersistentVolumeAccessMode{
+							corev1.ReadWriteOnce,
+						},
+						Resources: corev1.ResourceRequirements{
+							Requests: corev1.ResourceList{
+								corev1.ResourceStorage: resource.MustParse("5M"),
 							},
 						},
 					},
@@ -134,7 +178,7 @@ func (t statefulSetTest) createStatefulSet(namespace string, replicas int32) err
 	return err
 }
 
-func (t statefulSetTest) createService(namespace string, replicas int32) error {
+func (t *statefulSetTest) createService(namespace string, replicas int32) error {
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: t.statefulSetName,
@@ -156,7 +200,7 @@ func (t statefulSetTest) createService(namespace string, replicas int32) error {
 	return err
 }
 
-func (t statefulSetTest) waitForPodDeployment(namespace string, replicas int32, waitmax time.Duration) error {
+func (t *statefulSetTest) waitForPodDeployment(namespace string, replicas int32, waitmax time.Duration) error {
 	timeout := time.After(waitmax)
 	tick := time.Tick(2 * time.Second)
 
@@ -170,7 +214,6 @@ func (t statefulSetTest) waitForPodDeployment(namespace string, replicas int32, 
 				return err
 			}
 			if len(pods.Items) < int(replicas) {
-				log.Printf("%+v", pods.Items)
 				break
 			}
 			if len(pods.Items) > int(replicas) {
