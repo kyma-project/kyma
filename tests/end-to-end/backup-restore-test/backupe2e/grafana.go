@@ -47,6 +47,16 @@ const (
 	grafanaLabelSelector   string = "app=monitoring-grafana"
 )
 
+var (
+	apiRequestsStatus = map[string]int{
+		"Lambda Dashboard":        0,
+		"Etcd":                    0,
+		"Connector-Service":       0,
+		"Istio Mesh Dashboard":    0,
+		"Istio Service Dashboard": 0,
+	}
+)
+
 type grafanaTest struct {
 	grafanaName string
 	uuid        string
@@ -152,9 +162,11 @@ func (t *grafanaTest) TestResources(namespace string) {
 	dataBody, err := ioutil.ReadAll(apiSearchFolders.Body)
 	So(err, ShouldBeNil)
 
+	// Query to api
 	dashboardFolders := make([]map[string]interface{}, 0)
 	err = json.Unmarshal(dataBody, &dashboardFolders)
 	So(err, ShouldBeNil)
+	So(len(dashboardFolders), ShouldNotEqual, 0)
 
 	for _, folder := range dashboardFolders {
 		// http request to every dashboard
@@ -165,6 +177,29 @@ func (t *grafanaTest) TestResources(namespace string) {
 		dashboard, err := t.requestToGrafana(domain, "GET", nil, strings.NewReader(formData.Encode()), cookie)
 		So(err, ShouldBeNil)
 		So(dashboard.StatusCode, ShouldEqual, http.StatusOK)
+		title := folder["title"].(string)
+		switch title {
+		case "Lambda Dashboard":
+			apiRequestsStatus[title] = dashboard.StatusCode
+		case "Etcd":
+			apiRequestsStatus[title] = dashboard.StatusCode
+		case "Connector-Service":
+			apiRequestsStatus[title] = dashboard.StatusCode
+		case "Istio Mesh Dashboard":
+			apiRequestsStatus[title] = dashboard.StatusCode
+		case "Istio Service Dashboard":
+
+		}
+	}
+
+	t.testResult()
+
+}
+
+func (t *grafanaTest) testResult() {
+
+	for _, status := range apiRequestsStatus {
+		So(status, ShouldEqual, http.StatusOK)
 	}
 
 }
