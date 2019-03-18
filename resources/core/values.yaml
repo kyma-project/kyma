@@ -71,7 +71,7 @@ global:
     version: 7cacbc23
   console_backend_service_test:
     dir: develop/
-    version: 79732b88
+    version: "f28ec57c"
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
