@@ -22,6 +22,8 @@ spec:
       labels:
         app: {{ .Values.global.natsStreaming.fullname }}
         release: {{ .Release.Name }}
+        kyma-grafana: enabled
+        kyma-alerts: enabled
         rand: {{ randAlpha 6 }}
     spec:
       initContainers:
