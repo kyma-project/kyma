@@ -12,8 +12,8 @@
 // 3. https://dex.kyma.local/auth (GET)
 // 4. https://dex.kyma.local/auth/local (POST)
 // Api:
-// 1. https://grafana.kyma.local/api/search?folderIds=0
-// 2. https://grafana.kyma.local/d/opc3b8Tyik/lambda-dashboard
+// 1. https://grafana.kyma.local/api/search?query=Lambda%20Dashboard
+
 
 package backupe2e
 
