@@ -5,15 +5,14 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
-	_assert "github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
+	"github.com/stretchr/testify/assert"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 func TestServiceConverter_ToGQL(t *testing.T) {
-
-	assert := _assert.New(t)
+	assert := assert.New(t)
 
 	t.Run("Nil", func(t *testing.T) {
 		converter := &serviceConverter{}
@@ -30,39 +29,11 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 
 	t.Run("Success", func(t *testing.T) {
 		converter := &serviceConverter{}
-		in := v1.Service{
-			Spec: v1.ServiceSpec{
-				Ports: []v1.ServicePort{
-					{
-						Name:       "test",
-						Protocol:   v1.ProtocolTCP,
-						Port:       1,
-						TargetPort: intstr.FromInt(2),
-						NodePort:   3,
-					},
-				},
-			},
-			ObjectMeta: metav1.ObjectMeta{
-				Name:              "exampleName",
-				CreationTimestamp: metav1.Time{},
-				Labels: map[string]string{
-					"exampleKey":  "exampleValue",
-					"exampleKey2": "exampleValue2",
-				},
-			},
-			Status: v1.ServiceStatus{
-				LoadBalancer: v1.LoadBalancerStatus{
-					Ingress: []v1.LoadBalancerIngress{
-						{
-							IP:       "123.123.123.123",
-							Hostname: "test",
-						},
-					},
-				},
-			},
-		}
+		name := "test_name"
+		namespace := "test_namespace"
+		in := fixService(name, namespace)
 		expected := gqlschema.Service{
-			Name: "exampleName",
+			Name: name,
 			Labels: map[string]string{
 				"exampleKey":  "exampleValue",
 				"exampleKey2": "exampleValue2",
@@ -87,29 +58,20 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 				},
 			},
 		}
-		result := converter.ToGQL(&in)
+		result := converter.ToGQL(in)
 		assert.Equal(&expected, result)
 	})
 }
 
 func TestServiceConverter_ToGQLs(t *testing.T) {
-
-	assert := _assert.New(t)
+	assert := assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
 		converter := serviceConverter{}
 		expectedName := "exampleName"
 		in := []*v1.Service{
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: expectedName,
-				},
-			},
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: "exampleName2",
-				},
-			},
+			fixServiceWithName(expectedName, ""),
+			fixServiceWithName("exampleName2", ""),
 		}
 		result := converter.ToGQLs(in)
 		assert.Len(result, 2)
@@ -128,11 +90,7 @@ func TestServiceConverter_ToGQLs(t *testing.T) {
 		expectedName := "exampleName"
 		in := []*v1.Service{
 			nil,
-			{
-				ObjectMeta: metav1.ObjectMeta{
-					Name: expectedName,
-				},
-			},
+			fixServiceWithName(expectedName, ""),
 			nil,
 		}
 		result := converter.ToGQLs(in)
@@ -142,8 +100,7 @@ func TestServiceConverter_ToGQLs(t *testing.T) {
 }
 
 func TestServiceConverter_toGQLSchemaServicePort(t *testing.T) {
-
-	assert := _assert.New(t)
+	assert := assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
 		actual := toGQLSchemaServicePort(&v1.ServicePort{
@@ -173,9 +130,7 @@ func TestServiceConverter_toGQLSchemaServicePort(t *testing.T) {
 }
 
 func TestServiceConverter_toGQLSchemaServiceProtocol(t *testing.T) {
-
-	assert := _assert.New(t)
-
+	assert := assert.New(t)
 	tests := []struct {
 		protocol v1.Protocol
 		expected gqlschema.ServiceProtocol
@@ -199,4 +154,44 @@ func TestServiceConverter_toGQLSchemaServiceProtocol(t *testing.T) {
 			assert.Equal(test.expected, actual)
 		})
 	}
+}
+
+func fixServiceWithName(name, namespace string) *v1.Service {
+	return &v1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+}
+
+func fixService(name, namespace string) *v1.Service {
+	result := fixServiceWithName(name, namespace)
+	result.Spec = v1.ServiceSpec{
+		Ports: []v1.ServicePort{
+			{
+				Name:       "test",
+				Protocol:   v1.ProtocolTCP,
+				Port:       1,
+				TargetPort: intstr.FromInt(2),
+				NodePort:   3,
+			},
+		},
+	}
+	result.ObjectMeta.CreationTimestamp = metav1.Time{}
+	result.Labels = map[string]string{
+		"exampleKey":  "exampleValue",
+		"exampleKey2": "exampleValue2",
+	}
+	result.Status = v1.ServiceStatus{
+		LoadBalancer: v1.LoadBalancerStatus{
+			Ingress: []v1.LoadBalancerIngress{
+				{
+					IP:       "123.123.123.123",
+					Hostname: "test",
+				},
+			},
+		},
+	}
+	return result
 }

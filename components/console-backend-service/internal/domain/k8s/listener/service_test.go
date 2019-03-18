@@ -8,13 +8,12 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
-	_assert "github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
+	"github.com/stretchr/testify/assert"
+	"k8s.io/api/core/v1"
 )
 
 func TestServiceListener_OnAdd(t *testing.T) {
-
-	assert := _assert.New(t)
+	assert := assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
 		// given
@@ -89,8 +88,7 @@ func TestServiceListener_OnAdd(t *testing.T) {
 }
 
 func TestServiceListener_OnDelete(t *testing.T) {
-
-	assert := _assert.New(t)
+	assert := assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
 		// given
@@ -166,8 +164,7 @@ func TestServiceListener_OnDelete(t *testing.T) {
 }
 
 func TestServiceListener_OnUpdate(t *testing.T) {
-
-	assert := _assert.New(t)
+	assert := assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
 		// given

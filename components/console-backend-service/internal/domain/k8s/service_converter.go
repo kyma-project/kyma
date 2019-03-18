@@ -2,7 +2,7 @@ package k8s
 
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 )
 
 type serviceConverter struct {
@@ -23,16 +23,23 @@ func (c *serviceConverter) ToGQL(in *v1.Service) *gqlschema.Service {
 }
 
 func toGQLSchemaServiceStatus(s v1.ServiceStatus) gqlschema.ServiceStatus {
-	var ingress []gqlschema.LoadBalancerIngress
-	for _, i := range s.LoadBalancer.Ingress {
-		ingress = append(ingress, gqlschema.LoadBalancerIngress{
-			IP:       i.IP,
-			HostName: i.Hostname,
-		})
+	if s.LoadBalancer.Ingress == nil {
+		return gqlschema.ServiceStatus{
+			LoadBalancer: gqlschema.LoadBalancerStatus{
+				Ingress: nil,
+			},
+		}
+	}
+	ingressSlice := make([]gqlschema.LoadBalancerIngress, len(s.LoadBalancer.Ingress))
+	for i, ingress := range s.LoadBalancer.Ingress {
+		ingressSlice[i] = gqlschema.LoadBalancerIngress{
+			IP:       ingress.IP,
+			HostName: ingress.Hostname,
+		}
 	}
 	return gqlschema.ServiceStatus{
 		LoadBalancer: gqlschema.LoadBalancerStatus{
-			Ingress: ingress,
+			Ingress: ingressSlice,
 		},
 	}
 }

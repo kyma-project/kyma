@@ -7,29 +7,25 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
-	_assert "github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/kubernetes/fake"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
 
-var (
-	instanceName = "testExample"
-)
-
 func TestServiceService_Find(t *testing.T) {
+	namespace := "namespace"
+	instanceName := "testExample"
 
-	assert := _assert.New(t)
+	assert := assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
-
 		service := fixService(instanceName, namespace, nil)
-		serviceInformer, _ := fixServiceInformer(service)
+		serviceInformer := fixServiceInformer(service)
 
 		svc := k8s.NewServiceService(serviceInformer)
 
@@ -41,7 +37,7 @@ func TestServiceService_Find(t *testing.T) {
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		serviceInformer, _ := fixServiceInformer()
+		serviceInformer := fixServiceInformer()
 
 		svc := k8s.NewServiceService(serviceInformer)
 
@@ -53,10 +49,9 @@ func TestServiceService_Find(t *testing.T) {
 	})
 
 	t.Run("NoTypeMetaReturned", func(t *testing.T) {
-
 		expectedService := fixService(instanceName, namespace, nil)
 		returnedService := fixServiceWithoutTypeMeta(instanceName, namespace, nil)
-		serviceInformer, _ := fixServiceInformer(returnedService)
+		serviceInformer := fixServiceInformer(returnedService)
 
 		svc := k8s.NewServiceService(serviceInformer)
 
@@ -69,8 +64,9 @@ func TestServiceService_Find(t *testing.T) {
 }
 
 func TestServiceService_List(t *testing.T) {
+	namespace := "namespace"
 
-	assert := _assert.New(t)
+	assert := assert.New(t)
 
 	t.Run("Success", func(t *testing.T) {
 
@@ -78,7 +74,7 @@ func TestServiceService_List(t *testing.T) {
 		service2 := fixService("service2", namespace, nil)
 		service3 := fixService("service3", "differentNamespace", nil)
 
-		serviceInformer, _ := fixServiceInformer(service1, service2, service3)
+		serviceInformer := fixServiceInformer(service1, service2, service3)
 		svc := k8s.NewServiceService(serviceInformer)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInformer)
@@ -91,27 +87,25 @@ func TestServiceService_List(t *testing.T) {
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		serviceInformer, _ := fixServiceInformer()
+		serviceInformer := fixServiceInformer()
 
 		svc := k8s.NewServiceService(serviceInformer)
 
 		testingUtils.WaitForInformerStartAtMost(t, time.Second, serviceInformer)
 
-		var emptyArray []*v1.Service
 		services, err := svc.List("notExistingNamespace", pager.PagingParams{})
 		require.NoError(t, err)
-		assert.Equal(emptyArray, services)
+		assert.Empty(services)
 	})
 
 	t.Run("NoTypeMetaReturned", func(t *testing.T) {
-
 		returnedService1 := fixServiceWithoutTypeMeta("service1", namespace, nil)
 		returnedService2 := fixServiceWithoutTypeMeta("service2", namespace, nil)
 		returnedService3 := fixServiceWithoutTypeMeta("service3", "differentNamespace", nil)
 		expectedService1 := fixService("service1", namespace, nil)
 		expectedService2 := fixService("service2", namespace, nil)
 
-		serviceInformer, _ := fixServiceInformer(returnedService1, returnedService2, returnedService3)
+		serviceInformer := fixServiceInformer(returnedService1, returnedService2, returnedService3)
 
 		svc := k8s.NewServiceService(serviceInformer)
 
@@ -125,12 +119,12 @@ func TestServiceService_List(t *testing.T) {
 	})
 }
 
-func fixServiceInformer(objects ...runtime.Object) (cache.SharedIndexInformer, corev1.CoreV1Interface) {
+func fixServiceInformer(objects ...runtime.Object) cache.SharedIndexInformer {
 	client := fake.NewSimpleClientset(objects...)
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
 	informer := informerFactory.Core().V1().Services().Informer()
 
-	return informer, client.CoreV1()
+	return informer
 }
 
 func fixService(name, namespace string, labels map[string]string) *v1.Service {

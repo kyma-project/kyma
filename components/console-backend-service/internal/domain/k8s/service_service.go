@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -35,9 +35,8 @@ func (svc *serviceService) List(namespace string, pagingParams pager.PagingParam
 	if err != nil {
 		return nil, err
 	}
-
-	var services []*v1.Service
-	for _, item := range items {
+	services := make([]*v1.Service, len(items))
+	for i, item := range items {
 		service, ok := item.(*v1.Service)
 		if !ok {
 			return nil, fmt.Errorf("incorrect item type: %T, should be: *Service", item)
@@ -46,14 +45,13 @@ func (svc *serviceService) List(namespace string, pagingParams pager.PagingParam
 			Kind:       "Service",
 			APIVersion: "v1",
 		}
-		services = append(services, service)
+		services[i] = service
 	}
 
 	return services, nil
 }
 
 func (svc *serviceService) Find(name, namespace string) (*v1.Service, error) {
-
 	key := fmt.Sprintf("%s/%s", namespace, name)
 
 	item, exists, err := svc.informer.GetStore().GetByKey(key)
