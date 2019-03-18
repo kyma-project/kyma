@@ -1,40 +1,4 @@
 {
-  "__inputs": [
-    {
-      "name": "DS_PROMETHEUS",
-      "label": "Prometheus",
-      "description": "",
-      "type": "datasource",
-      "pluginId": "prometheus",
-      "pluginName": "Prometheus"
-    }
-  ],
-  "__requires": [
-    {
-      "type": "grafana",
-      "id": "grafana",
-      "name": "Grafana",
-      "version": "5.2.4"
-    },
-    {
-      "type": "panel",
-      "id": "graph",
-      "name": "Graph",
-      "version": "5.0.0"
-    },
-    {
-      "type": "datasource",
-      "id": "prometheus",
-      "name": "Prometheus",
-      "version": "5.0.0"
-    },
-    {
-      "type": "panel",
-      "id": "singlestat",
-      "name": "Singlestat",
-      "version": "5.0.0"
-    }
-  ],
   "annotations": {
     "list": [
       {
@@ -51,8 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": null,
-  "iteration": 1552231494310,
+  "id": 25,
+  "iteration": 1552912407378,
   "links": [],
   "panels": [
     {
@@ -95,18 +59,21 @@
           "expr": "histogram_quantile(0.50, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Histogram 50 Quantile",
           "refId": "A"
         },
         {
           "expr": "histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Histogram 90 Quantile",
           "refId": "B"
         },
         {
           "expr": "histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"destination\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Histogram 99 Quantile",
           "refId": "C"
         }
       ],
@@ -191,18 +158,21 @@
           "format": "time_series",
           "hide": false,
           "intervalFactor": 1,
+          "legendFormat": "Histogram 50 Quantile",
           "refId": "A"
         },
         {
           "expr": "histogram_quantile(0.90, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Histogram 90 Quantile",
           "refId": "B"
         },
         {
           "expr": "histogram_quantile(0.99, sum(irate(istio_request_duration_seconds_bucket{reporter=\"source\",destination_service_name=~\"$ui\"}[1m])) by (le))",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Histogram 99 Quantile",
           "refId": "C"
         }
       ],
@@ -286,6 +256,7 @@
           "expr": "sum(irate(istio_requests_total{source_workload_namespace=~\"$namespace\",source_workload=\"$ui\"}[5m]))",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "",
           "refId": "A"
         }
       ],
@@ -610,6 +581,7 @@
           "expr": "count(kube_pod_info{namespace=\"$namespace\",pod=~\"$ui.*\"}) by (created_by_kind)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Pod Count",
           "refId": "A"
         }
       ],
@@ -693,18 +665,21 @@
           "expr": "container_memory_usage_bytes{namespace=\"$namespace\",pod_name=~\"$ui.*\", container_name!=\"POD\",container_name!=\"\"}/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Usage: {{pod_name}}/{{container_name}})",
           "refId": "A"
         },
         {
-          "expr": "kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\",pod=~\"$ui.*\"}/(1024*1024)",
+          "expr": "kube_pod_container_resource_limits_memory_bytes{namespace=\"$namespace\", pod=~\"$ui.*\"}/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Limit: {{pod}}/{{container}}",
           "refId": "B"
         },
         {
           "expr": "kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\",pod=~\"$ui.*\"}*1000",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Request: {{pod}}/{{container}}",
           "refId": "C"
         }
       ],
@@ -788,6 +763,7 @@
           "expr": "container_memory_cache{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",pod_name=~\"$ui.*\"}/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "memory_cache: {{pod_name}}/{{container_name}}",
           "refId": "A"
         }
       ],
@@ -871,6 +847,7 @@
           "expr": "container_memory_rss{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",pod_name=~\"$ui.*\"}/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{pod_name}}/{{container_name}}",
           "refId": "A"
         }
       ],
@@ -954,6 +931,7 @@
           "expr": "container_memory_swap{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",pod_name=~\"$ui.*\"}/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{pod_name}}/{{container_name}}",
           "refId": "A"
         }
       ],
@@ -1037,6 +1015,7 @@
           "expr": "container_memory_failcnt{namespace=\"$namespace\",container_name!=\"POD\",container_name!=\"\",pod_name=~\"$ui.*\"}",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "{{pod_name}}/{{container_name}}",
           "refId": "A"
         }
       ],
@@ -1120,18 +1099,21 @@
           "expr": "sum by (pod_name, container_name)(rate(container_cpu_usage_seconds_total{namespace=\"$namespace\",image!=\"\",container_name!=\"POD\",pod_name=~\"$ui.*\"}[5m]))*1000",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Usage:{{pod_name}}/{{container_name}}",
           "refId": "A"
         },
         {
           "expr": "kube_pod_container_resource_requests_cpu_cores{namespace=\"$namespace\",pod=~\"$ui.*\"}*1000",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Requests: {{pod}}/{{container}}",
           "refId": "B"
         },
         {
           "expr": "kube_pod_container_resource_limits_cpu_cores{namespace=\"$namespace\",pod=~\"$ui.*\"}*1000",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Limits:{{pod}}/{{container}}",
           "refId": "C"
         }
       ],
@@ -1215,6 +1197,7 @@
           "expr": "rate(container_cpu_cfs_throttled_seconds_total{namespace=\"$namespace\",container_name!=\"\",pod_name=~\"$ui.*\"}[5m])",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "cpu_cfs_throttled:{{pod_name}}/{{container_name}}",
           "refId": "A"
         }
       ],
@@ -1298,12 +1281,14 @@
           "expr": "sort_desc(sum by (pod_name) (rate(container_network_receive_bytes_total{namespace=\"$namespace\",pod_name=~\"$ui.*\"}[5m])))/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "RX: {{pod_name}}",
           "refId": "A"
         },
         {
           "expr": "sort_desc(sum by (pod_name) (rate(container_network_transmit_bytes_total{namespace=\"$namespace\",pod_name=~\"$ui.*\"}[5m])))/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "TX: {{pod_name}}",
           "refId": "B"
         }
       ],
@@ -1387,12 +1372,14 @@
           "expr": "sum(rate(container_fs_writes_bytes_total{namespace=\"$namespace\",pod_name=~\"$ui.*\"}[5m])) by (pod_name,device)/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Container FS Writes Bytes  (Pod: {{pod_name}})",
           "refId": "A"
         },
         {
           "expr": "sum(rate(container_fs_reads_bytes_total{namespace=\"$namespace\",pod_name=~\"$ui.*\"}[5m])) by (pod_name,device)/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
+          "legendFormat": "Container FS Read Bytes  (Pod: {{pod_name}})",
           "refId": "B"
         }
       ],
@@ -1445,7 +1432,10 @@
     "list": [
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "kyma-system",
+          "value": "kyma-system"
+        },
         "datasource": "Prometheus",
         "hide": 0,
         "includeAll": true,
@@ -1465,7 +1455,10 @@
       },
       {
         "allValue": null,
-        "current": {},
+        "current": {
+          "text": "core-lambdas-ui",
+          "value": "core-lambdas-ui"
+        },
         "datasource": "Prometheus",
         "hide": 0,
         "includeAll": false,
@@ -1516,6 +1509,6 @@
   },
   "timezone": "",
   "title": "Web APPs",
-  "uid": "SUxJ6hCik",
-  "version": 51
+  "uid": "U1eCGKqik",
+  "version": 11
 }
