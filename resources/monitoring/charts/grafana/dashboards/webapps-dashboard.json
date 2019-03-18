@@ -676,7 +676,7 @@
           "refId": "B"
         },
         {
-          "expr": "kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\",pod=~\"$ui.*\"}*1000",
+          "expr": "kube_pod_container_resource_requests_memory_bytes{namespace=\"$namespace\",pod=~\"$ui.*\"}/(1024*1024)",
           "format": "time_series",
           "intervalFactor": 1,
           "legendFormat": "Request: {{pod}}/{{container}}",
