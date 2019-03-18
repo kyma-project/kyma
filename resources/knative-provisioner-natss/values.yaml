@@ -1,11 +1,11 @@
-# Default values for natss-knative-provisioner.
+# Default values for knative-provisioner-natss.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 global:
   isLocalEnv: false
   knative: false
 
-natss-knative-provisioner:
+knative-provisioner-natss:
   controller:
     image:
       pullPolicy: IfNotPresent

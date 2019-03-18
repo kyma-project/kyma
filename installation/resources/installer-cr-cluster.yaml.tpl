@@ -40,7 +40,7 @@ spec:
       namespace: "kyma-system"
     - name: "core"
       namespace: "kyma-system"
-    - name: "natss-knative-provisioner"
+    - name: "knative-provisioner-natss"
       namespace: "knative-eventing"
     - name: "event-bus"
       namespace: "kyma-system"

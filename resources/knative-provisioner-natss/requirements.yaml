@@ -1,3 +1,3 @@
 dependencies:
-  - name: natss-knative-provisioner
+  - name: knative-provisioner-natss
     condition: global.knative
