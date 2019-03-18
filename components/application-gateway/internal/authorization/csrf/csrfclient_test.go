@@ -2,9 +2,9 @@ package csrf
 
 import (
 	"net/http"
+	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/testconsts"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
@@ -15,7 +15,7 @@ import (
 
 const (
 	timeoutDuration = 5
-	testURL         = "someURL"
+	testURL         = "test.io/token"
 
 	cachedTestToken            = "someToken"
 	cachedTestCookieName       = "someCookie"
@@ -33,6 +33,13 @@ var (
 )
 
 func TestClient_GetTokenEndpointResponse(t *testing.T) {
+
+	sf := authorization.NewStrategyFactory(authorization.FactoryConfiguration{OAuthClientTimeout: timeoutDuration})
+
+	strategy := sf.Create(&model.Credentials{BasicAuth: &model.BasicAuth{
+		Username: testUsername,
+		Password: testPassword,
+	}})
 
 	t.Run("Should fetch the token from cache if it is present", func(t *testing.T) {
 
@@ -63,11 +70,14 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		// given
 		fakeCache := NewTokenCache()
 
-		c := client{timeoutDuration, fakeCache, testRequestToken}
+		c := client{timeoutDuration, fakeCache, &http.Client{}}
+
+		srv := startTestServer()
+		mockURL := srv.URL
 
 		// when
-		response, appError := c.GetTokenEndpointResponse(testURL, nil)
-		item, found := fakeCache.Get(testURL)
+		response, appError := c.GetTokenEndpointResponse(mockURL, strategy)
+		item, found := fakeCache.Get(mockURL)
 
 		// then
 		require.Nil(t, appError)
@@ -87,11 +97,14 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		// given
 		fakeCache := NewTokenCache()
 
-		c := client{timeoutDuration, fakeCache, failingTestRequestToken}
+		c := client{timeoutDuration, fakeCache, &http.Client{}}
+
+		srv := startFailingTestServer()
+		mockURL := srv.URL
 
 		// when
-		response, appError := c.GetTokenEndpointResponse(testURL, nil)
-		item, found := fakeCache.Get(testURL)
+		response, appError := c.GetTokenEndpointResponse(mockURL, strategy)
+		item, found := fakeCache.Get(mockURL)
 
 		// then
 		require.NotNil(t, appError)
@@ -100,17 +113,6 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 		require.Nil(t, item)
 		assert.False(t, found)
 	})
-}
-
-func testRequestToken(_ string, _ authorization.Strategy, _ int) (*Response, apperrors.AppError) {
-	return &Response{
-		CSRFToken: endpointTestToken,
-		Cookies:   []*http.Cookie{{Name: endpointResponseCookieName}},
-	}, nil
-}
-
-func failingTestRequestToken(_ string, _ authorization.Strategy, _ int) (*Response, apperrors.AppError) {
-	return nil, apperrors.NotFound("")
 }
 
 func TestAddAuthorization(t *testing.T) {
@@ -137,7 +139,7 @@ func TestAddAuthorization(t *testing.T) {
 		assert.Equal(t, expectedAuthHeaderVal, request.Header.Get(httpconsts.HeaderAuthorization))
 	})
 
-	t.Run("Should update client with transport in case of certificateGen strategy", func(t *testing.T) {
+	t.Run("Should update httpClient with transport in case of certificateGen strategy", func(t *testing.T) {
 
 		// given
 		strategy := sf.Create(&model.Credentials{CertificateGen: &model.CertificateGen{
@@ -179,4 +181,18 @@ func getNewEmptyRequest() *http.Request {
 	return &http.Request{
 		Header: make(map[string][]string),
 	}
+}
+
+func startTestServer() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Add("x-csrf-token", endpointTestToken)
+		http.SetCookie(w, &http.Cookie{Name: endpointResponseCookieName})
+		w.WriteHeader(http.StatusOK)
+	}))
+}
+
+func startFailingTestServer() *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusNotFound)
+	}))
 }

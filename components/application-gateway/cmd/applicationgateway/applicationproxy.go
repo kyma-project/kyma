@@ -144,5 +144,6 @@ func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace, applic
 
 func newCSRFClient(timeout int) csrf.Client {
 	cache := csrf.NewTokenCache()
-	return csrf.NewCSRFClient(timeout, cache)
+	client := &http.Client{}
+	return csrf.NewCSRFClient(timeout, cache, client)
 }

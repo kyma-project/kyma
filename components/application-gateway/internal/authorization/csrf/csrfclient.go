@@ -25,14 +25,14 @@ type Client interface {
 type client struct {
 	timeoutDuration int
 	tokenCache      TokenCache
-	requestToken    func(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError)
+	httpClient      *http.Client
 }
 
-func NewCSRFClient(timeoutDuration int, tokenCache TokenCache) Client {
+func NewCSRFClient(timeoutDuration int, tokenCache TokenCache, httpClient *http.Client) Client {
 	return &client{
 		timeoutDuration: timeoutDuration,
 		tokenCache:      tokenCache,
-		requestToken:    requestToken,
+		httpClient:      httpClient,
 	}
 }
 
@@ -60,16 +60,14 @@ func (c *client) InvalidateTokenCache(tokenEndpointURL string) {
 	c.tokenCache.Remove(tokenEndpointURL)
 }
 
-func requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError) {
-
-	client := &http.Client{}
+func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError) {
 
 	tokenRequest, err := http.NewRequest(http.MethodGet, csrfEndpointURL, strings.NewReader(""))
 	if err != nil {
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
 
-	err = addAuthorization(tokenRequest, client, strategy)
+	err = addAuthorization(tokenRequest, c.httpClient, strategy)
 	if err != nil {
 		return nil, apperrors.Internal("failed to create token request: %s", err.Error())
 	}
@@ -80,7 +78,7 @@ func requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeo
 	defer cancel()
 	requestWithContext := tokenRequest.WithContext(ctx)
 
-	resp, err := client.Do(requestWithContext)
+	resp, err := c.httpClient.Do(requestWithContext)
 	if err != nil {
 		return nil, apperrors.UpstreamServerCallFailed("failed to make a request to '%s': %s", csrfEndpointURL, err.Error())
 	}
