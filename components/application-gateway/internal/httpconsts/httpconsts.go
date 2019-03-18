@@ -6,8 +6,6 @@ const (
 	HeaderAccessToken     = "Access-Token"
 	HeaderCSRFToken       = "X-csrf-token"
 	HeaderCSRFTokenVal    = "fetch"
-	HeaderSetCookie       = "set-cookie"
-	HeaderCookie          = "cookie"
 	HeaderAccept          = "Accept"
 	HeaderAcceptVal       = "*/*"
 	HeaderCacheControl    = "cache-control"
