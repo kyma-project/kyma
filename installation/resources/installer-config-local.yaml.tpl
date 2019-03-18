@@ -84,21 +84,7 @@ metadata:
     component: knative-serving
     kyma-project.io/installation: ""
 data:
-  knative.ingressgateway.service.type: NodePort
-  knative.domainName: "kyma.local"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: knative-eventing-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: knative-eventing
-    kyma-project.io/installation: ""
-data:
-  knative.ingressgateway.service.type: NodePort
-  knative.domainName: "kyma.local"
+  knative-serving.domainName: "kyma.local"
 ---
 apiVersion: v1
 kind: ConfigMap

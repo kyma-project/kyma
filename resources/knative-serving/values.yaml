@@ -1,12 +1,5 @@
 knative-serving:
-  ingressgateway:
-    service:
-      type: LoadBalancer
-  gateway:
-    tls:
-      enabled: true
   domainName: example.com
-  version: v0.4.1
 
 global:
   isLocalEnv: false
