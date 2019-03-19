@@ -43,8 +43,8 @@ func main() {
 	kubeconfig := flag.String("kubeconfig", "", "Path to a kubeconfig file")
 	helmHost := flag.String("helmhost", "tiller-deploy.kube-system.svc.cluster.local:44134", "Helm host")
 	kymaDir := flag.String("kymadir", "/kyma", "Directory where kyma packages will be extracted")
-	tlsKey := flag.String("tlsKey", "/etc/certs/key.pem", "Path to TLS key file")
-	tlsCrt := flag.String("tlsCrt", "/etc/certs/cert.pem", "Path to TLS cert file")
+	tlsKey := flag.String("tlsKey", "/etc/certs/tls.key", "Path to TLS key file")
+	tlsCrt := flag.String("tlsCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
 
 	flag.Parse()
 
