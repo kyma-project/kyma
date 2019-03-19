@@ -8,7 +8,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httptools"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata"

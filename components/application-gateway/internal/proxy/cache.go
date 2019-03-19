@@ -7,7 +7,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf"
 	gocache "github.com/patrickmn/go-cache"
 )
 
