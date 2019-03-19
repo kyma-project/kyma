@@ -10,6 +10,6 @@ spec:
   placement: cluster
   navigationNodes:
     - label: Logs
-      viewUrl: /
+      viewUrl: "/?function={nodeParams.function}&pod={nodeParams.pod}&namespace={nodeParams.namespace}"
       navigationPath: logs
 {{- end }}
