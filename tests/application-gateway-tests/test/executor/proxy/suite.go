@@ -28,9 +28,9 @@ import (
 const (
 	defaultCheckInterval           = 2 * time.Second
 	appGatewayHealthCheckTimeout   = 15 * time.Second
-	accessServiceConnectionTimeout = 60 * time.Second
+	accessServiceConnectionTimeout = 45 * time.Second
 	apiServerAccessTimeout         = 60 * time.Second
-	dnsWaitTime                    = 30 * time.Second
+	dnsWaitTime                    = 35 * time.Second
 
 	mockServiceNameFormat     = "%s-gateway-test-mock-service"
 	testExecutorPodNameFormat = "%s-tests-test-executor"

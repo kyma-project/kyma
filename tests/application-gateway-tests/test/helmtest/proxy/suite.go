@@ -121,11 +121,9 @@ func (ts *TestSuite) WaitForTestExecutorToFinish(t *testing.T) *v1.ContainerStat
 			return false
 		}
 
-		if testsStatus, finished = ts.isPodFinished(testExecutorPod); !finished {
-			return false
-		}
+		testsStatus, finished = ts.isPodFinished(testExecutorPod)
 
-		return true
+		return finished
 	})
 
 	require.NoError(t, err)
