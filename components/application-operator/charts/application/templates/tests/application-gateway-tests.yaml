@@ -20,6 +20,8 @@ spec:
           value: {{.Release.Name }}
         - name: NAMESPACE
           value: kyma-integration
+        - name: SERVICE_ACCOUNT
+          value: {{.Release.Name }}-gateway-tests
         - name: MOCK_SERVICE_PORT
           value: "8080"
   restartPolicy: Never

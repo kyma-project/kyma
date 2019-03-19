@@ -89,6 +89,7 @@ func (ts *TestSuite) CreateTestExecutorPod(t *testing.T) {
 			},
 		},
 		Spec: v1.PodSpec{
+			ServiceAccountName: ts.config.ServiceAccountName,
 			Containers: []v1.Container{
 				{
 					Name:  ts.testExecutorName,

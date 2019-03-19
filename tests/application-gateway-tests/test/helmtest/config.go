@@ -12,15 +12,17 @@ import (
 const (
 	applicationEnvName       = "APPLICATION"
 	namespaceEnvName         = "NAMESPACE"
+	serviceAccountEnvName    = "SERVICE_ACCOUNT"
 	mockServicePortEnvName   = "MOCK_SERVICE_PORT"
 	testExecutorImageEnvName = "TEST_EXECUTOR_IMAGE"
 )
 
 type TestConfig struct {
-	Application       string
-	Namespace         string
-	MockServicePort   int
-	TestExecutorImage string
+	Application        string
+	Namespace          string
+	ServiceAccountName string
+	MockServicePort    int
+	TestExecutorImage  string
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -32,6 +34,11 @@ func ReadConfig() (TestConfig, error) {
 	application, found := os.LookupEnv(applicationEnvName)
 	if !found {
 		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", applicationEnvName))
+	}
+
+	serviceAccountName, found := os.LookupEnv(serviceAccountEnvName)
+	if !found {
+		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", serviceAccountEnvName))
 	}
 
 	mockServicePortStr, found := os.LookupEnv(mockServicePortEnvName)
@@ -50,10 +57,11 @@ func ReadConfig() (TestConfig, error) {
 	}
 
 	config := TestConfig{
-		Application:       application,
-		Namespace:         namespace,
-		MockServicePort:   mockServicePort,
-		TestExecutorImage: testExecutorImage,
+		Application:        application,
+		Namespace:          namespace,
+		ServiceAccountName: serviceAccountName,
+		MockServicePort:    mockServicePort,
+		TestExecutorImage:  testExecutorImage,
 	}
 
 	log.Printf("Read configuration: %+v", config)
