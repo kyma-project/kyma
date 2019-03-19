@@ -1,4 +1,4 @@
-package csrf_test
+package strategy
 
 import (
 	"net/http"
@@ -12,6 +12,38 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
+
+const (
+	TestTokenEndpointURL = "myapp.com/csrf/token"
+	noURL                = ""
+)
+
+func TestStrategyFactory_Create(t *testing.T) {
+
+	// given
+	factory := NewTokenStrategyFactory(nil)
+	authStrategy := &authmocks.Strategy{}
+
+	t.Run("Should create strategy if the CSRF token endpoint URL has been provided", func(t *testing.T) {
+
+		// when
+		tokenStrategy := factory.Create(authStrategy, TestTokenEndpointURL)
+
+		// then
+		require.NotNil(t, tokenStrategy)
+		assert.IsType(t, &strategy{}, tokenStrategy)
+	})
+
+	t.Run("Should create noTokenStrategy if the CSRF token has not been provided", func(t *testing.T) {
+
+		// when
+		tokenStrategy := factory.Create(authStrategy, noURL)
+
+		// then
+		require.NotNil(t, tokenStrategy)
+		assert.IsType(t, &noTokenStrategy{}, tokenStrategy)
+	})
+}
 
 const (
 	cachedToken              = "someToken"
@@ -31,7 +63,7 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 			req := getNewEmptyRequest()
 
 			c := &mocks.Client{}
-			sf := csrf.NewTokenStrategyFactory(c)
+			sf := NewTokenStrategyFactory(c)
 
 			s := sf.Create(authStrategy, testCSRFTokenEndpointURL)
 
@@ -60,7 +92,7 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 			req := getNewEmptyRequest()
 
 			c := &mocks.Client{}
-			sf := csrf.NewTokenStrategyFactory(c)
+			sf := NewTokenStrategyFactory(c)
 
 			s := sf.Create(authStrategy, testCSRFTokenEndpointURL)
 
@@ -82,7 +114,7 @@ func TestStrategy_AddCSRFToken(t *testing.T) {
 			req := getNewEmptyRequest()
 
 			c := &mocks.Client{}
-			sf := csrf.NewTokenStrategyFactory(c)
+			sf := NewTokenStrategyFactory(c)
 
 			s := sf.Create(nil, "")
 

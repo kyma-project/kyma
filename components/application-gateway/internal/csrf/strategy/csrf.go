@@ -1,8 +1,9 @@
-package csrf
+package strategy
 
 import (
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
@@ -10,37 +11,25 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-type TokenStrategyFactory interface {
-	Create(authorizationStrategy authorization.Strategy, csrfTokenEndpointURL string) TokenStrategy
-}
-
-type TokenStrategy interface {
-	//Sets CSRF Token into requests to external APIs
-	AddCSRFToken(apiRequest *http.Request) apperrors.AppError
-
-	//Invalidates cached CSRF Token
-	Invalidate()
+func NewTokenStrategyFactory(csrfClient csrf.Client) csrf.TokenStrategyFactory {
+	return &strategyFactory{csrfClient}
 }
 
 type strategyFactory struct {
-	csrfClient Client
+	csrfClient csrf.Client
+}
+
+func (tsf *strategyFactory) Create(authorizationStrategy authorization.Strategy, csrfTokenEndpointURL string) csrf.TokenStrategy {
+	if csrfTokenEndpointURL == "" {
+		return &noTokenStrategy{}
+	}
+	return &strategy{authorizationStrategy, csrfTokenEndpointURL, tsf.csrfClient}
 }
 
 type strategy struct {
 	authorizationStrategy authorization.Strategy
 	csrfTokenURL          string
-	csrfClient            Client
-}
-
-func NewTokenStrategyFactory(csrfClient Client) TokenStrategyFactory {
-	return &strategyFactory{csrfClient}
-}
-
-func (tsf *strategyFactory) Create(authorizationStrategy authorization.Strategy, csrfTokenEndpointURL string) TokenStrategy {
-	if csrfTokenEndpointURL == "" {
-		return &noTokenStrategy{}
-	}
-	return &strategy{authorizationStrategy, csrfTokenEndpointURL, tsf.csrfClient}
+	csrfClient            csrf.Client
 }
 
 func (s *strategy) AddCSRFToken(apiRequest *http.Request) apperrors.AppError {

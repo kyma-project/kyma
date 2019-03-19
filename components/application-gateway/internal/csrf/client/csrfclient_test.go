@@ -1,4 +1,4 @@
-package csrf
+package client
 
 import (
 	"net/http"
@@ -7,6 +7,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/testconsts"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
 	"github.com/stretchr/testify/assert"
@@ -44,7 +45,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 	t.Run("Should fetch the token from cache if it is present", func(t *testing.T) {
 
 		// given
-		r := &Response{
+		r := &csrf.Response{
 			CSRFToken: cachedTestToken,
 			Cookies:   []*http.Cookie{{Name: cachedTestCookieName}},
 		}

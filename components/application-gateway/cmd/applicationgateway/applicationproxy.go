@@ -9,6 +9,8 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	csrfClient "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/client"
+	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/strategy"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httptools"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata"
@@ -83,7 +85,7 @@ func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 
 		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
 		csrfClient := newCSRFClient(options.proxyTimeout)
-		csrfTokenStrategyFactory := csrf.NewTokenStrategyFactory(csrfClient)
+		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfClient)
 
 		proxyConfig := proxy.Config{
 			SkipVerify:    options.skipVerify,
@@ -143,7 +145,7 @@ func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace, applic
 }
 
 func newCSRFClient(timeout int) csrf.Client {
-	cache := csrf.NewTokenCache()
+	cache := csrfClient.NewTokenCache()
 	client := &http.Client{}
-	return csrf.NewCSRFClient(timeout, cache, client)
+	return csrfClient.New(timeout, cache, client)
 }

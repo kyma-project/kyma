@@ -1,4 +1,4 @@
-package csrf
+package client
 
 import (
 	"context"
@@ -8,18 +8,17 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
 )
 
-type Response struct {
-	CSRFToken string
-	Cookies   []*http.Cookie
-}
-
-type Client interface {
-	GetTokenEndpointResponse(csrfEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError)
-	InvalidateTokenCache(csrfEndpointURL string)
+func New(timeoutDuration int, tokenCache TokenCache, httpClient *http.Client) csrf.Client {
+	return &client{
+		timeoutDuration: timeoutDuration,
+		tokenCache:      tokenCache,
+		httpClient:      httpClient,
+	}
 }
 
 type client struct {
@@ -28,15 +27,7 @@ type client struct {
 	httpClient      *http.Client
 }
 
-func NewCSRFClient(timeoutDuration int, tokenCache TokenCache, httpClient *http.Client) Client {
-	return &client{
-		timeoutDuration: timeoutDuration,
-		tokenCache:      tokenCache,
-		httpClient:      httpClient,
-	}
-}
-
-func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy authorization.Strategy) (*Response, apperrors.AppError) {
+func (c *client) GetTokenEndpointResponse(tokenEndpointURL string, strategy authorization.Strategy) (*csrf.Response, apperrors.AppError) {
 
 	resp, found := c.tokenCache.Get(tokenEndpointURL)
 	if found {
@@ -60,7 +51,7 @@ func (c *client) InvalidateTokenCache(tokenEndpointURL string) {
 	c.tokenCache.Remove(tokenEndpointURL)
 }
 
-func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*Response, apperrors.AppError) {
+func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Strategy, timeoutDuration int) (*csrf.Response, apperrors.AppError) {
 
 	tokenRequest, err := http.NewRequest(http.MethodGet, csrfEndpointURL, strings.NewReader(""))
 	if err != nil {
@@ -87,7 +78,7 @@ func (c *client) requestToken(csrfEndpointURL string, strategy authorization.Str
 		return nil, apperrors.UpstreamServerCallFailed("incorrect response code '%d' while getting token from %s", resp.StatusCode, csrfEndpointURL)
 	}
 
-	tokenRes := &Response{
+	tokenRes := &csrf.Response{
 		CSRFToken: resp.Header.Get(httpconsts.HeaderCSRFToken),
 		Cookies:   resp.Cookies(),
 	}

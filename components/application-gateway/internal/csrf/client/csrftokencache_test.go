@@ -1,9 +1,10 @@
-package csrf
+package client
 
 import (
 	"net/http"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -17,7 +18,7 @@ func TestTokenCache(t *testing.T) {
 
 	testCookie := http.Cookie{Name: cachedCookieName}
 
-	resp := &Response{
+	resp := &csrf.Response{
 		CSRFToken: cachedToken,
 		Cookies:   []*http.Cookie{&testCookie},
 	}
