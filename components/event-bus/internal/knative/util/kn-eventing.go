@@ -82,7 +82,7 @@ func GetKnativeLib() (*KnativeLib, error) {
 // standard K8S function: "k8serrors.IsNotFound(err) "
 func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
 	if channel, err := k.evClient.Channels(namespace).Get(name, metav1.GetOptions{}); err != nil {
-		log.Printf("ERROR: GetChannel(): getting channel: %v", err)
+		//log.Printf("ERROR: GetChannel(): getting channel: %v", err)
 		return nil, err
 	} else {
 		if !channel.Status.IsReady() {
@@ -149,7 +149,7 @@ func (k *KnativeLib) DeleteSubscription(name string, namespace string) error {
 // GetSubscription gets a Knative/Eventing subscription
 func (k *KnativeLib) GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error) {
 	if sub, err := k.evClient.Subscriptions(namespace).Get(name, metav1.GetOptions{}); err != nil {
-		log.Printf("ERROR: GetSubscription(): getting subscription: %v", err)
+		//log.Printf("ERROR: GetSubscription(): getting subscription: %v", err)
 		return nil, err
 	} else {
 		return sub, nil
@@ -267,7 +267,7 @@ func makeChannel(provisioner string, name string, namespace string) *evapisv1alp
 }
 
 func makeHttpRequest(channel *evapisv1alpha1.Channel, message *string) (*http.Request, error) {
-	var jsonStr = []byte(`{"` + *message + `"}`)
+	var jsonStr = []byte(*message)
 
 	channelUri := "http://" + channel.Status.Address.Hostname
 	req, err := http.NewRequest(http.MethodPost, channelUri, bytes.NewBuffer(jsonStr))

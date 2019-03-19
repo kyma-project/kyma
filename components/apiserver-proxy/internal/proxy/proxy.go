@@ -10,13 +10,12 @@ import (
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authn"
 	"github.com/kyma-project/kyma/components/apiserver-proxy/internal/authz"
 
-	yaml "gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v2"
 	"k8s.io/apimachinery/pkg/util/sets"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
 	apirequest "k8s.io/apiserver/pkg/endpoints/request"
-	clientset "k8s.io/client-go/kubernetes"
 )
 
 const KUBERNETES_SERVICE = "kubernetes.default"
@@ -39,13 +38,9 @@ type kubeRBACProxy struct {
 	Config Config
 }
 
-func new(authenticator authenticator.Request, authorizer authorizer.Authorizer, config Config) *kubeRBACProxy {
-	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config}
-}
-
 // New creates an authenticator, an authorizer, and a matching authorizer attributes getter compatible with the kube-rbac-proxy
-func New(client clientset.Interface, config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request) (*kubeRBACProxy, error) {
-	return new(authenticator, authorizer, config), nil
+func New(config Config, authorizer authorizer.Authorizer, authenticator authenticator.Request) *kubeRBACProxy {
+	return &kubeRBACProxy{authenticator, newKubeRBACProxyAuthorizerAttributesGetter(config.Authorization), authorizer, config}
 }
 
 // Handle authenticates the client and authorizes the request.
@@ -87,6 +82,11 @@ func (h *kubeRBACProxy) Handle(w http.ResponseWriter, req *http.Request) bool {
 		headerCfg := h.Config.Authentication.Header
 		req.Header.Set(headerCfg.UserFieldName, u.GetName())
 		req.Header.Set(headerCfg.GroupsFieldName, strings.Join(u.GetGroups(), headerCfg.GroupSeparator))
+	}
+
+	req.Header.Set("Impersonate-User", u.GetName())
+	for _, gr := range u.GetGroups() {
+		req.Header.Add("Impersonate-Group", gr)
 	}
 
 	return true

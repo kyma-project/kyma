@@ -31,6 +31,7 @@ type ClusterClientIdentity struct {
 type ManagementInfoURLs struct {
 	*RuntimeURLs
 	RenewCertUrl string `json:"renewCertUrl"`
+	RevocationCertURL string `json:"revocationCertUrl"`
 }
 
 type RuntimeURLs struct {
@@ -74,4 +75,8 @@ type DecodedCrtResponse struct {
 	CRTChain  []*x509.Certificate
 	ClientCRT *x509.Certificate
 	CaCRT     *x509.Certificate
+}
+
+type RevocationBody struct {
+	Hash string
 }

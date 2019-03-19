@@ -16,6 +16,7 @@ const (
 	defaultNatsURL                = stan.DefaultNatsURL
 	defaultClientID               = "kyma-publish"
 	defaultMaxRequests            = 100
+	defaultMaxRequestSize         = 65536
 	defaultNatsStreamingClusterID = "kyma-nats-streaming"
 	defaultTraceAPIURL            = "http://localhost:9411/api/v1/spans"
 	defaultTraceHostPort          = "0.0.0.0:0"
@@ -28,6 +29,7 @@ type Options struct {
 	NatsURL                string
 	ClientID               string
 	NoOfConcurrentRequests int
+	MaxRequestSize         int64
 	NatsStreamingClusterID string
 	TraceRequests          bool
 	TraceAPIURL            string
@@ -56,6 +58,7 @@ func configureOptions(fs *flag.FlagSet, args []string) (*Options, error) {
 	fs.StringVar(&opts.NatsURL, "nats_url", defaultNatsURL, "The NATS URL")
 	fs.StringVar(&opts.ClientID, "client_id", defaultClientID, "client ID to use")
 	fs.IntVar(&opts.NoOfConcurrentRequests, "max_requests", defaultMaxRequests, "The max number of accepted concurrent requests")
+	fs.Int64Var(&opts.MaxRequestSize, "max_request_size", defaultMaxRequestSize, "The max request size in bytes")
 	fs.StringVar(&opts.NatsStreamingClusterID, "nats_streaming_cluster_id", defaultNatsStreamingClusterID, "The NATS Streaming cluster id")
 	fs.BoolVar(&opts.TraceRequests, "trace", false, "Log verbosily the received HTTP requests traces.")
 	fs.BoolVar(&showHelp, "showHelp", false, "Print the command line options")
@@ -82,6 +85,7 @@ func DefaultOptions() *Options {
 	return &Options{
 		Port:                   defaultPort,
 		ClientID:               defaultClientID,
+		MaxRequestSize:         defaultMaxRequestSize,
 		NoOfConcurrentRequests: defaultMaxRequests,
 		OperationName:          defaultOperationName,
 		ServiceName:            defaultServiceName,

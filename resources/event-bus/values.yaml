@@ -1,25 +1,28 @@
 # Default values for event-bus.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
+# Update .global.event_bus.version and .global.kymaEventBus also in nasts-streaming chart
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: develop/
-    version: 7e6b2c9b
+    version: 218b96c9
   event_bus_tests:
     dir: develop/
     version: 0c471dd3
   natsStreaming:
-    url: "http://nats-streaming.natss:4222"
+    url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
   publish:
     maxRequests: 16
+    maxRequestSize: 65536
     resources:
       limits:
         memory: "32M"
   publishKnative:
     maxRequests: 16
+    maxRequestSize: 65536
     resources:
       limits:
         memory: "32M"
@@ -36,6 +39,7 @@ global:
         memory: "32M"
   subscriptionControllerKnative:
     resyncPeriod: "10s"
+    channelTimeout: "10s"
     resources:
       limits:
         memory: "32M"

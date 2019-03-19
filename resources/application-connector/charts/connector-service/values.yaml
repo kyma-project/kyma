@@ -8,10 +8,12 @@ deployment:
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
     caSecretName: connector-service-app-ca
-    appsInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/applications/management/info
-    runtimesInfoURL: https://gateway.{{ .Values.global.domainName }}/v1/runtimes/management/info
-    validityTime: "92d"
+    appsInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/applications/management/info
+    runtimesInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/runtimes/management/info
+    appValidityTime: "92d"
+    runtimeValidityTime: "92d"
     central: &central false
+    revocationConfigMapName: "revocations-config"
   envvars:
     country: DE
     organization: Organization
@@ -31,10 +33,11 @@ ingress:
   externalapi:
     port: *externalAPIPort
   authSecret: kyma-integration/nginx-auth-ca
-  tlsSecret: ingress-tls-cert
+  tlsSecret: application-connector-ingress-tls-cert
 
 tests:
-  skipSslVerify: false
+  enabled: true
+  skipSslVerify: true
   central: *central
   image:
     pullPolicy: IfNotPresent

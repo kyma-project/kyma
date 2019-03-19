@@ -1,11 +1,11 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Release.Name }}-application-proxy-role
+  name: {{ .Release.Name }}-application-gateway-role
   labels:
-    app: {{ .Release.Name }}-application-proxy
-    release: {{ .Release.Name }}-application-proxy
-    heritage: {{ .Release.Service }}-application-proxy
+    app: {{ .Release.Name }}-application-gateway
+    release: {{ .Release.Name }}-application-gateway
+    heritage: {{ .Release.Service }}-application-gateway
 rules:
 - apiGroups: ["*"]
   resources: ["secrets"]
@@ -14,16 +14,16 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-application-proxy-rolebinding
+  name: {{ .Release.Name }}-application-gateway-rolebinding
   labels:
-    app: {{ .Release.Name }}-application-proxy
-    release: {{ .Release.Name }}-application-proxy
-    heritage: {{ .Release.Service }}-application-proxy
+    app: {{ .Release.Name }}-application-gateway
+    release: {{ .Release.Name }}-application-gateway
+    heritage: {{ .Release.Service }}-application-gateway
 subjects:
 - kind: User
   name: system:serviceaccount:{{ .Release.Namespace }}:default
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-application-proxy-role
+  name: {{ .Release.Name }}-application-gateway-role
   apiGroup: rbac.authorization.k8s.io

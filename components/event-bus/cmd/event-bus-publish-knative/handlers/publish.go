@@ -17,8 +17,16 @@ import (
 )
 
 var (
-	defaultChannelNamespace = "kyma-system"
+	defaultChannelNamespace = knative.GetDefaultChannelNamespace()
 )
+
+// WithRequestSizeLimiting creates a new request size limiting HandlerFunc
+func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request) {
+		r.Body = http.MaxBytesReader(rw, r.Body, limit)
+		next.ServeHTTP(rw, r)
+	}
+}
 
 func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {

@@ -8,8 +8,8 @@ RESOURCES_DIR="${CURRENT_DIR}/../resources"
 MINIKUBE_DOMAIN=""
 # Supported Minikube Versions: MINIKUBE_VERSION_MIN (inclusive) up to MINIKUBE_VERSION_MAX (exclusive)
 MINIKUBE_VERSION=0.33.0
-KUBERNETES_VERSION=1.11.5
-KUBECTL_CLI_VERSION=1.11.0
+KUBERNETES_VERSION=1.12.5
+KUBECTL_CLI_VERSION=1.12.0
 VM_DRIVER=hyperkit
 DISK_SIZE=20g
 MEMORY=8192
@@ -221,7 +221,7 @@ function start() {
     configureMinikubeAddons
 
     # Adding domains to /etc/hosts files
-    addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} ui-api.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN}  configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
+    addDevDomainsToEtcHosts "apiserver.${MINIKUBE_DOMAIN} console.${MINIKUBE_DOMAIN} catalog.${MINIKUBE_DOMAIN} instances.${MINIKUBE_DOMAIN} brokers.${MINIKUBE_DOMAIN} dex.${MINIKUBE_DOMAIN} docs.${MINIKUBE_DOMAIN} lambdas-ui.${MINIKUBE_DOMAIN} console-backend.${MINIKUBE_DOMAIN} minio.${MINIKUBE_DOMAIN} jaeger.${MINIKUBE_DOMAIN} grafana.${MINIKUBE_DOMAIN} log-ui.${MINIKUBE_DOMAIN} loki.${MINIKUBE_DOMAIN} configurations-generator.${MINIKUBE_DOMAIN} gateway.${MINIKUBE_DOMAIN} connector-service.${MINIKUBE_DOMAIN}"
 
     increaseFsInotifyMaxUserInstances
 

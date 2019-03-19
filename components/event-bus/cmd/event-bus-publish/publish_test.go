@@ -185,3 +185,9 @@ func TestPublishInvalidSourceIdInHeader(t *testing.T) {
 	body, statusCode := test.PerformPublishRequestWithHeaders(t, publishServer.URL, payload, map[string]string{api.HeaderSourceId: test.TestSourceIdInvalid})
 	test.AssertExpectedError(t, body, statusCode, http.StatusBadRequest, api.HeaderSourceId, api.ErrorTypeValidationViolation)
 }
+
+func TestPublishWithTooLargePayload(t *testing.T) {
+	payload := string(make([]byte, publish.DefaultOptions().MaxRequestSize+1))
+	body, statusCode := test.PerformPublishRequest(t, publishServer.URL, payload)
+	test.AssertExpectedError(t, body, statusCode, http.StatusRequestEntityTooLarge, nil, api.ErrorTypeRequestBodyTooLarge)
+}

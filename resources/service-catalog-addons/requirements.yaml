@@ -1,6 +1,6 @@
 dependencies:
-- name: binding-usage-controller
-  condition: binding-usage-controller.enabled
+- name: service-binding-usage-controller
+  condition: service-binding-usage-controller.enabled
 - name: broker-ui
   condition: broker-ui.enabled
 - name: catalog-ui

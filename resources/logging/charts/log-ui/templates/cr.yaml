@@ -1,0 +1,15 @@
+{{- if .Values.global.uiapp.create }}
+apiVersion: ui.kyma-project.io/v1alpha1
+kind: ClusterMicroFrontend
+metadata:
+  name: log-ui
+spec:
+  version: 0.0.1
+  category: Diagnostics
+  viewBaseUrl: https://log-ui.{{ .Values.global.ingress.domainName }}
+  placement: cluster
+  navigationNodes:
+    - label: Logs
+      viewUrl: /
+      navigationPath: logs
+{{- end }}
