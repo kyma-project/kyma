@@ -5,9 +5,9 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf/mocks"
 	authmocks "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

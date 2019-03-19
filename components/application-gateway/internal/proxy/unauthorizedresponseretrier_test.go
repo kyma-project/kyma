@@ -6,9 +6,9 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
-	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf"
-	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf/mocks"
 	authMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -263,7 +263,7 @@ func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorizatio
 		require.NoError(t, err)
 
 		return &CacheEntry{
-			Proxy: proxy,
+			Proxy:                 proxy,
 			AuthorizationStrategy: &authorizationStrategyWrapper{strategy, proxy},
 			CSRFTokenStrategy:     csrfTokenStrategy,
 		}, nil
