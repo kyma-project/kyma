@@ -4,7 +4,7 @@ type: Details
 ---
 
 If you defined in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file.
-The `bind.yaml` file supports the [Service Catalog](https://github.com/kubernetes-incubator/service-catalog) binding concept. It is mandatory for all bindable plans as it contains information needed in the binding process. Currently, Kyma supports only the [credentials-type binding](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#types-of-binding).   
+The `bind.yaml` file supports the Service Catalog binding concept. It is mandatory for all bindable plans as it contains information needed during the binding process. Currently, Kyma supports only the [credentials-type binding](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13/spec.md#types-of-binding).   
 
 >**NOTE:** Resolving the values from the `bind.yaml` file is a post-provision action. If this operation ends with an error, the provisioning also fails.
 
