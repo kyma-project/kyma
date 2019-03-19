@@ -34,7 +34,7 @@ metadata:
   name: {{ .Release.Name }}-job
   namespace: kyma-system
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
+    "helm.sh/hook": post-install,pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
