@@ -11,15 +11,15 @@ import (
 )
 
 const (
-	waitTime = 5 * time.Second
-	retries  = 5
+	waitTime    = 5 * time.Second
+	retries     = 5
+	emptyTenant = ""
+	emptyGroup  = ""
 )
 
 func TestTokenRequests(t *testing.T) {
 
 	appName := "test-name"
-	tenant := "test-tenant"
-	group := "test-group"
 
 	client, err := testkit.NewK8sResourcesClient()
 
@@ -27,14 +27,33 @@ func TestTokenRequests(t *testing.T) {
 
 	t.Run("should create token request CR with token", func(t *testing.T) {
 		//when
+		tokenRequest, e := client.CreateTokenRequest(appName, emptyGroup, emptyTenant)
+		require.NoError(t, e)
+
+		//then
+		tokenRequest = waitUntilTokenRequestIsProperlyCreated(t, client, tokenRequest)
+
+		assert.NotEmpty(t, tokenRequest.Status.Token)
+	})
+
+	t.Run("should create token request CR with token when tenant and group provided", func(t *testing.T) {
+		//given
+		tenant := "test-tenant"
+		group := "test-group"
+
+		//when
 		tokenRequest, e := client.CreateTokenRequest(appName, group, tenant)
 		require.NoError(t, e)
 
 		//then
-		checkIfTokenRequestIsProperlyCreated(t, client, tokenRequest)
+		tokenRequest = waitUntilTokenRequestIsProperlyCreated(t, client, tokenRequest)
+
+		assert.NotEmpty(t, tokenRequest.Status.Token)
+		assert.Equal(t, tokenRequest.Context.Tenant, tenant)
+		assert.Equal(t, tokenRequest.Context.Group, group)
 	})
 }
-func checkIfTokenRequestIsProperlyCreated(t *testing.T, client testkit.K8sResourcesClient, tokenRequest *v1alpha1.TokenRequest) {
+func waitUntilTokenRequestIsProperlyCreated(t *testing.T, client testkit.K8sResourcesClient, tokenRequest *v1alpha1.TokenRequest) *v1alpha1.TokenRequest {
 	isReady := &tokenRequest.Status != nil
 
 	var e error
@@ -48,7 +67,5 @@ func checkIfTokenRequestIsProperlyCreated(t *testing.T, client testkit.K8sResour
 
 	require.True(t, isReady)
 
-	assert.NotEmpty(t, tokenRequest.Status.Token)
-	assert.NotEmpty(t, tokenRequest.Context.Tenant)
-	assert.NotEmpty(t, tokenRequest.Context.Group)
+	return tokenRequest
 }
