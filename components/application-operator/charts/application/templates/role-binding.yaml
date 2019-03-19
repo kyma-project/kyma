@@ -31,7 +31,7 @@ metadata:
     heritage: {{ .Release.Service }}-application-gateway
 subjects:
 - kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:default
+  name: system:serviceaccount:{{ .Release.Namespace }}:{{.Release.Name }}-application-gateway
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
