@@ -24,6 +24,9 @@ import (
 const (
 	testAppName          = "ctrl-app-test-%s"
 	defaultCheckInterval = 2 * time.Second
+
+	releaseLabelKey  = "release"
+	helmTestLabelKey = "helm-chart-test"
 )
 
 type TestSuite struct {
@@ -49,8 +52,8 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	helmClient := testkit.NewHelmClient(config.TillerHost)
 
 	testPodsLabels := labels.Set{
-		"release":         app,
-		"helm-chart-test": "true",
+		releaseLabelKey:  app,
+		helmTestLabelKey: "true",
 	}
 
 	return &TestSuite{
@@ -76,48 +79,6 @@ func (ts *TestSuite) Cleanup(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func (ts *TestSuite) RunApplicationTests(t *testing.T) {
-	wg := sync.WaitGroup{}
-	wg.Add(2)
-
-	log.Info("Running application tests")
-	responseChan, errorChan := ts.helmClient.TestRelease(ts.application)
-
-	go func(responseChan <-chan *rls.TestReleaseResponse) {
-		defer wg.Done()
-
-		testFailed := false
-
-		for msg := range responseChan {
-			log.Infoln(msg.String())
-			if msg.Status == hapirelease1.TestRun_FAILURE {
-				testFailed = true
-			}
-		}
-
-		if testFailed {
-			log.Infof("%s tests failed", ts.application)
-			ts.GetTestPodsLogs(t)
-		}
-
-		log.Infof("%s tests finished. Message channel closed", ts.application)
-	}(responseChan)
-
-	go func(errorChan <-chan error) {
-		defer wg.Done()
-
-		for err := range errorChan {
-			log.Errorf(err.Error())
-			t.Fatalf("Error while executing tests for %s release", ts.application)
-		}
-
-		log.Infoln("Error channel closed")
-	}(errorChan)
-
-	wg.Wait()
-
-}
-
 func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 	err := testkit.WaitForFunction(defaultCheckInterval, ts.installationTimeout, func() bool {
 		app, err := ts.k8sClient.GetApplication(ts.application, metav1.GetOptions{})
@@ -135,14 +96,56 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 	require.NoError(t, err)
 }
 
+func (ts *TestSuite) RunApplicationTests(t *testing.T) {
+	wg := sync.WaitGroup{}
+	wg.Add(2)
+
+	log.Info("Running application tests")
+	responseChan, errorChan := ts.helmClient.TestRelease(ts.application)
+
+	go ts.receiveTestResponse(t, &wg, responseChan)
+	go ts.receiveErrorResponse(t, &wg, errorChan)
+
+	wg.Wait()
+}
+
+func (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, responseChan <-chan *rls.TestReleaseResponse) {
+	defer wg.Done()
+
+	testFailed := false
+
+	for msg := range responseChan {
+		log.Infoln(msg.String())
+		if msg.Status == hapirelease1.TestRun_FAILURE {
+			testFailed = true
+		}
+	}
+	log.Infof("%s tests finished. Message channel closed", ts.application)
+
+	if testFailed {
+		log.Infof("%s tests failed", ts.application)
+		ts.GetTestPodsLogs(t)
+		t.Fatal("Application tests failed")
+	}
+}
+
+func (ts *TestSuite) receiveErrorResponse(t *testing.T, wg *sync.WaitGroup, errorChan <-chan error) {
+	defer wg.Done()
+
+	for err := range errorChan {
+		log.Errorf(err.Error())
+		t.Fatalf("Error while executing tests for %s release", ts.application)
+	}
+
+	log.Infoln("Error channel closed")
+}
+
 func (ts *TestSuite) GetTestPodsLogs(t *testing.T) {
+	// TODO - rolebinding
 	podsToFetch, err := ts.k8sClient.ListPods(metav1.ListOptions{LabelSelector: ts.labelSelector})
 	require.NoError(t, err)
 
-	log.Infoln(podsToFetch)
-
 	for _, pod := range podsToFetch.Items {
-		log.Infoln(pod.Name)
 		ts.getPodLogs(t, pod)
 	}
 }

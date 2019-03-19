@@ -46,6 +46,49 @@ spec:
   restartPolicy: Never
 EOF
 
+cat <<EOF | kubectl -n kyma-integration apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    helm-chart-test: "true"
+  name: app-operator-tests-role
+  namespace: kyma-integration
+rules:
+- apiGroups:
+  - '*'
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+- apiGroups:
+  - '*'
+  resources:
+  - pods/log
+  verbs:
+  - get
+  - list
+EOF
+
+cat <<EOF | kubectl -n kyma-integration apply -f -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    helm-chart-test: "true"
+  name: app-operator-tests-rolebinding
+  namespace: kyma-integration
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: app-operator-tests-role
+subjects:
+- apiGroup: rbac.authorization.k8s.io
+  kind: User
+  name: system:serviceaccount:kyma-integration:default
+EOF
+
 echo ""
 echo "------------------------"
 echo "Waiting 5 seconds for pod to start..."

@@ -100,9 +100,9 @@ func (c *k8sResourcesClient) GetApplication(name string, options v1.GetOptions) 
 }
 
 func (c *k8sResourcesClient) ListPods(options v1.ListOptions) (*corev1.PodList, error) {
-	return c.coreClient.Core().Pods(c.namespace).List(options)
+	return c.coreClient.CoreV1().Pods(c.namespace).List(options)
 }
 
 func (c *k8sResourcesClient) GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request {
-	return c.GetLogs(podName, options)
+	return c.coreClient.CoreV1().Pods(c.namespace).GetLogs(podName, options)
 }
