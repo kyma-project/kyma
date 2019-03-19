@@ -155,9 +155,10 @@
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
-    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/cms-controller-manager/pkg/apis/cms/v1alpha1"
   ]
-  revision = "d37318b3a84115bd9ee64d3c3130ef657b8a81a5"
+  revision = "11bdad6e6625e319c13bfe539fd924883598dcb3"
 
 [[projects]]
   branch = "master"
@@ -545,9 +546,15 @@
   ]
   revision = "01a732e01d00cb9a81bb0ca050d3e6d2b947927b"
 
+[[projects]]
+  name = "sigs.k8s.io/controller-runtime"
+  packages = ["pkg/runtime/scheme"]
+  revision = "12d98582e72927b6cd0123e2b4e819f9341ce62c"
+  version = "v0.1.10"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a87720bbf5e4e04ac14aa3586417874d3178e47c67de57665c974542e7ca2a39"
+  inputs-digest = "190c01a2c4d6cede74f3a7710852d518c543cf7403d1b8d1264a38f8b6722a5b"
   solver-name = "gps-cdcl"
   solver-version = 1
