@@ -3,19 +3,19 @@ title: Create a bundles repository
 type: Details
 ---
 
-The repository in which you create your own bundles must be an HTTP server with a specific structure so that the Helm Broker can fetch bundles from it. Your remote bundle repository can contain many bundles compressed to the `.tgz` format and defined in `index.yaml` files. Depending on your needs and preferences, you can create one or more `index.yaml` files to categorize your bundles. The repository structure looks as follows:
+The repository in which you create your own bundles must be an HTTPS server with a specific structure so that the Helm Broker can fetch bundles from it. Your remote bundle repository can contain many bundles, each one compressed to the `.tgz` format and defined in `index.yaml` files. Depending on your needs and preferences, you can create one or more `index.yaml` files to categorize your bundles. The repository structure looks as follows:
 
 ```
 sample-bundle-repository
-  ├── {bundle_x}-{bundle_x_version}.tgz         # A .tgz file for a bundle version
-  ├── {bundle_y}-{bundle_y_version}.tgz        
+  ├── {bundle_x_name}-{bundle_x_version}.tgz         # A bundle compressed to a .tgz file
+  ├── {bundle_y_name}-{bundle_y_version}.tgz        
   ├── ...                                      
-  ├── index.yaml                                # A file which defines available bundles
+  ├── index.yaml                                     # A file which defines available bundles
   ├── index-2.yaml                              
   └── ...                                                    
 ```
 
-Read [this](https://github.com/kyma-project/bundles/blob/master/docs/getting-started.md) document to learn how to set up your own HTTP server. See the example of a configured HTTP server [here](https://github.com/kyma-project/bundles/releases).
+Read [this](https://github.com/kyma-project/bundles/blob/master/docs/getting-started.md) document to learn how to set up your own bundles repository which generates `.tgz` and `index.yaml` files, and expose them using an HTTPS server. See the example of the Kyma bundles repository [here](https://github.com/kyma-project/bundles/releases).
 
 ### {bundle_name}-{bundle_version}.tgz file
 

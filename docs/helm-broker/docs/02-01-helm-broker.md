@@ -2,7 +2,7 @@
 title: Architecture
 ---
 
-The Helm Broker workflow starts with the registration process, during which the Helm Broker fetches bundles from the Kyma [`bundles`](https://github.com/kyma-project/bundles) repository, or from a remote HTTP server.
+The Helm Broker workflow starts with the registration process, during which the Helm Broker fetches bundles from the Kyma [`bundles`](https://github.com/kyma-project/bundles) repository, or from a remote HTTPS server.
 
 ### Registration process
 
