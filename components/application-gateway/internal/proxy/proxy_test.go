@@ -8,8 +8,8 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
-	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/csrf/mocks"
 	authMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
+	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httperrors"
 	metadataMock "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/mocks"
 	metadatamodel "github.com/kyma-project/kyma/components/application-gateway/internal/metadata/model"
