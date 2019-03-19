@@ -1,9 +1,20 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{.Release.Name }}-gateway-tests
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{.Release.Name }}-gateway-tests
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   name: {{.Release.Name }}-gateway-tests-role
   labels:
-    "helm-chart-test": "true"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 rules:
   - apiGroups:
       - '*'
@@ -27,7 +38,8 @@ kind: RoleBinding
 metadata:
   name: {{.Release.Name }}-gateway-tests-rolebinding
   labels:
-    "helm-chart-test": "true"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: Role

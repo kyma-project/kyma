@@ -3,12 +3,14 @@ kind: Pod
 metadata:
   name: {{.Release.Name }}-gateway-tests
   annotations:
-    "helm.sh/hook": test-success
+    helm.sh/hook: test-success
     sidecar.istio.io/inject: "false"
   labels:
-    "helm-chart-test": "true"
+    helm-chart-test: "true"
     release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
+  serviceAccountName: {{.Release.Name }}-gateway-tests
   containers:
     - name: {{.Release.Name }}-gateway-tests
       image: {{ .Values.global.applicationGatewayTestsImage }}

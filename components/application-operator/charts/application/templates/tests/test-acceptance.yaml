@@ -3,11 +3,12 @@ kind: Pod
 metadata:
   name: test-{{.Release.Name }}-event-service-acceptance
   annotations:
-    "helm.sh/hook": test-success
-    "sidecar.istio.io/inject": "false"
+    helm.sh/hook: test-success
+    sidecar.istio.io/inject: "false"
   labels:
-    "helm-chart-test": "true"
+    helm-chart-test: "true"
     release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   containers:
     - name: test-{{.Release.Name }}-event-service-acceptance
