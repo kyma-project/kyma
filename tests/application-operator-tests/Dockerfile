@@ -5,8 +5,8 @@ ENV SRC_DIR=/go/src/github.com/kyma-project/kyma/tests/application-operator-test
 WORKDIR $SRC_DIR
 COPY . $SRC_DIR
 
-RUN go test -o controllertests.test -c ./test/controller/test
-RUN go test -o applicationtests.test -c ./test/application/test
+RUN go test -o controllertests.test -c ./test/controller/tests
+RUN go test -o applicationtests.test -c ./test/application/tests
 
 FROM alpine:3.8
 

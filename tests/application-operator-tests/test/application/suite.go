@@ -13,7 +13,6 @@ import (
 	"k8s.io/api/core/v1"
 
 	"github.com/kyma-project/kyma/tests/application-operator-tests/test/testkit"
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
@@ -68,13 +67,13 @@ func NewTestSuite(t *testing.T) *TestSuite {
 }
 
 func (ts *TestSuite) Setup(t *testing.T) {
-	log.Infof("Creating %s Application", ts.application)
+	t.Logf("Creating %s Application", ts.application)
 	_, err := ts.k8sClient.CreateDummyApplication(ts.application, ts.application, false)
 	require.NoError(t, err)
 }
 
 func (ts *TestSuite) Cleanup(t *testing.T) {
-	log.Info("Cleaning up...")
+	t.Log("Cleaning up...")
 	err := ts.k8sClient.DeleteApplication(ts.application, &metav1.DeleteOptions{})
 	require.NoError(t, err)
 }
@@ -96,7 +95,7 @@ func (ts *TestSuite) RunApplicationTests(t *testing.T) {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 
-	log.Info("Running application tests")
+	t.Log("Running application tests")
 	responseChan, errorChan := ts.helmClient.TestRelease(ts.application)
 
 	go ts.receiveTestResponse(t, &wg, responseChan)
@@ -111,15 +110,15 @@ func (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, respo
 	testFailed := false
 
 	for msg := range responseChan {
-		log.Infoln(msg.String())
+		t.Log(msg.String())
 		if msg.Status == hapirelease1.TestRun_FAILURE {
 			testFailed = true
 		}
 	}
-	log.Infof("%s tests finished. Message channel closed", ts.application)
+	t.Logf("%s tests finished. Message channel closed", ts.application)
 
 	if testFailed {
-		log.Infof("%s tests failed", ts.application)
+		t.Logf("%s tests failed", ts.application)
 		ts.GetTestPodsLogs(t)
 		t.Error("Application tests failed")
 	}
@@ -129,15 +128,13 @@ func (ts *TestSuite) receiveErrorResponse(t *testing.T, wg *sync.WaitGroup, erro
 	defer wg.Done()
 
 	for err := range errorChan {
-		log.Errorf(err.Error())
-		t.Errorf("Error while executing tests for %s release", ts.application)
+		t.Errorf("Error while executing tests for %s release: %s", ts.application, err.Error())
 	}
 
-	log.Infoln("Error channel closed")
+	t.Log("Error channel closed")
 }
 
 func (ts *TestSuite) GetTestPodsLogs(t *testing.T) {
-	// TODO - rolebinding
 	podsToFetch, err := ts.k8sClient.ListPods(metav1.ListOptions{LabelSelector: ts.labelSelector})
 	require.NoError(t, err)
 
@@ -159,10 +156,10 @@ func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
 
 	strLogs := strings.Replace(string(bytes), "\t", "    ", -1)
 
-	log.Infof("--------------------------------------------Logs from %s test--------------------------------------------", pod.Name)
+	t.Logf("--------------------------------------------Logs from %s test--------------------------------------------", pod.Name)
 	lines := strings.Split(strLogs, "\n")
 	for _, l := range lines {
-		log.Infoln(l)
+		t.Log(l)
 	}
-	log.Infof("--------------------------------------------End of logs from %s test--------------------------------------------", pod.Name)
+	t.Logf("--------------------------------------------End of logs from %s test--------------------------------------------", pod.Name)
 }

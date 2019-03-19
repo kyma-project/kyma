@@ -98,12 +98,6 @@
   version = "v1.1.5"
 
 [[projects]]
-  name = "github.com/konsorten/go-windows-terminal-sequences"
-  packages = ["."]
-  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
-  version = "v1.0.2"
-
-[[projects]]
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
@@ -136,12 +130,6 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/sirupsen/logrus"
-  packages = ["."]
-  revision = "dae0fa8d5b0c810a8ab733fbd5510c7cae84eca4"
-  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -513,6 +501,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "87d611d45b0bd976cbadf886d194fca899458d179f0dc5a5c834bee2d1ceed35"
+  inputs-digest = "04ccdd06faf67bc01a6f03a2e307c100181769569db6da211786d3c7ab0d0338"
   solver-name = "gps-cdcl"
   solver-version = 1
