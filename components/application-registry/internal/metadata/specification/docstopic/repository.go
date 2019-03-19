@@ -1,4 +1,4 @@
-package assetstore
+package docstopic
 
 import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -26,17 +26,8 @@ type DocsTopicRepository interface {
 	Update(docstopic *v1alpha1.DocsTopic) (*v1alpha1.DocsTopic, error)
 }
 
-type ApiType int
-
-const (
-	Swagger   ApiType = 0
-	ODataXML  ApiType = 1
-	ODataJSON ApiType = 2
-)
-
 type ApiSpec struct {
-	Url  string
-	Type ApiType
+	Url string
 }
 
 type EventsSpec struct {
@@ -48,10 +39,12 @@ type Documentation struct {
 }
 
 type DocumentationTopic struct {
-	id            string
-	ApiSpec       *ApiSpec
-	EventsSpec    *EventsSpec
-	Documentation *Documentation
+	Id               string
+	DisplayName      string
+	Description      string
+	ApiSpecUrl       string
+	EventsSpecUrl    string
+	DocumentationUrl string
 }
 
 type Repository interface {

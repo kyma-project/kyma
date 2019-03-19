@@ -10,41 +10,40 @@ import (
 	"net/url"
 )
 
-
 const (
 	AssetFieldName = "assetFile"
 )
 
 type InputFile struct {
 	Directory string
-	Name string
-	Contents []byte
+	Name      string
+	Contents  []byte
 }
 
 type OutputFile struct {
-	FileName string
+	FileName   string
 	RemotePath string
-	Bucket string
-	Size int
+	Bucket     string
+	Size       int
 }
 
-type UploadClient interface {
+type Client interface {
 	Upload(file InputFile) (OutputFile, apperrors.AppError)
 }
 
 type uploadClient struct {
-	httpClient *http.Client
+	httpClient       *http.Client
 	uploadServiceUrl *url.URL
 }
 
-func NewUploadClient(uploadServiceUrl *url.URL, httpclient *http.Client) UploadClient {
+func NewUploadClient(uploadServiceUrl *url.URL, httpclient *http.Client) Client {
 	return uploadClient{
 		uploadServiceUrl: uploadServiceUrl,
-		httpClient: httpclient,
+		httpClient:       httpclient,
 	}
 }
 
-func (uc uploadClient) Upload(file InputFile) (OutputFile, apperrors.AppError){
+func (uc uploadClient) Upload(file InputFile) (OutputFile, apperrors.AppError) {
 
 	req, err := uc.prepareRequest(file)
 	if err != nil {
@@ -59,7 +58,7 @@ func (uc uploadClient) Upload(file InputFile) (OutputFile, apperrors.AppError){
 	return uc.unmarshal(res)
 }
 
-func (uc uploadClient) prepareRequest(file InputFile) (*http.Request, apperrors.AppError){
+func (uc uploadClient) prepareRequest(file InputFile) (*http.Request, apperrors.AppError) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 
