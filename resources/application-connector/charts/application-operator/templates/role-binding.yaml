@@ -16,6 +16,9 @@ rules:
   - roles
   - rolebindings
   - ingresses
+  - clusterroles
+  - clusterrolebindings
+  - serviceaccounts
   verbs:
   - get
 - apiGroups:
