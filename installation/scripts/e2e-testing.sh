@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-
-set -x
-
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source ${ROOT_PATH}/utils.sh
 source ${ROOT_PATH}/testing-common.sh
@@ -31,7 +28,7 @@ echo "----------------------------"
 echo "- E2E Testing Kyma..."
 echo "----------------------------"
 
-result=0
+exitCode=0
 
 for testcase in $(ls -d ${ROOT_PATH}/../../tests/end-to-end/*/deploy/chart/*)
 do
@@ -50,7 +47,7 @@ do
     then
         releasesToClean="$releasesToClean $release"
     else
-        result=$testResult
+        exitCode=$testResult
     fi
 done
 
@@ -58,7 +55,7 @@ checkAndCleanupTest end-to-end
 cleanupResult=$?
 if [ $cleanupResult -ne 0 ]
 then
-    result=$cleanupResult
+   exitCode=$cleanupResult
 fi
 
 
@@ -67,11 +64,11 @@ for release in $releasesToClean; do
     cleanupResult=$?
     if [ $cleanupResult -ne 0 ]
     then
-        result=$cleanupResult
+        exitCode=$cleanupResult
     fi
 done
 
-if [ ${result} -ne 0 ]
+if [ ${exitCode} -ne 0 ]
 then
     log FAIL red
     exit 1
