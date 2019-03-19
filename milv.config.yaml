@@ -39,3 +39,6 @@ files:
   - path: "./kyma/docs/kyma/docs/04-06-gke-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
+  - path: "./kyma/docs/helm-broker/docs/05-04-configure-hb.md"
+    config:
+      white-list-external: ["https://{host}/{path}/{bundle_repo_version}/"]
