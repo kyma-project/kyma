@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	testAppName              = "app-ctrl-test-%s"
+	testAppName              = "operator-test-%s"
 	defaultCheckInterval     = 2 * time.Second
 	installationStartTimeout = 10 * time.Second
 	waitBeforeCheck          = 2 * time.Second
@@ -35,7 +35,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
-	app := fmt.Sprintf(testAppName, rand.String(5))
+	app := fmt.Sprintf(testAppName, rand.String(4))
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)

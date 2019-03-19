@@ -22,7 +22,7 @@ import (
 )
 
 const (
-	testAppName          = "ctrl-app-test-%s"
+	testAppName          = "operator-app-test-%s"
 	defaultCheckInterval = 2 * time.Second
 
 	releaseLabelKey  = "release"
@@ -44,7 +44,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
-	app := fmt.Sprintf(testAppName, rand.String(5))
+	app := fmt.Sprintf(testAppName, rand.String(4))
 
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
@@ -86,11 +86,7 @@ func (ts *TestSuite) WaitForApplicationToBeDeployed(t *testing.T) {
 			return false
 		}
 
-		if app.Status.InstallationStatus.Status != hapirelease1.Status_DEPLOYED.String() {
-			return false
-		}
-
-		return true
+		return app.Status.InstallationStatus.Status == hapirelease1.Status_DEPLOYED.String()
 	})
 
 	require.NoError(t, err)
@@ -125,7 +121,7 @@ func (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, respo
 	if testFailed {
 		log.Infof("%s tests failed", ts.application)
 		ts.GetTestPodsLogs(t)
-		t.Fatal("Application tests failed")
+		t.Error("Application tests failed")
 	}
 }
 
@@ -134,7 +130,7 @@ func (ts *TestSuite) receiveErrorResponse(t *testing.T, wg *sync.WaitGroup, erro
 
 	for err := range errorChan {
 		log.Errorf(err.Error())
-		t.Fatalf("Error while executing tests for %s release", ts.application)
+		t.Errorf("Error while executing tests for %s release", ts.application)
 	}
 
 	log.Infoln("Error channel closed")
