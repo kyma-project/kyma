@@ -2,16 +2,17 @@ package listener
 
 import (
 	"fmt"
+	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/golang/glog"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 )
 
 //go:generate mockery -name=gqlServiceConverter -output=automock -outpkg=automock -case=underscore
 type gqlServiceConverter interface {
-	ToGQL(in *v1.Service) *gqlschema.Service
+	ToGQL(in *v1.Service) (*gqlschema.Service, error)
 }
 
 type Service struct {
@@ -49,7 +50,11 @@ func (l *Service) onEvent(eventType gqlschema.SubscriptionEventType, object inte
 }
 
 func (l *Service) notify(eventType gqlschema.SubscriptionEventType, service *v1.Service) {
-	gqlService := l.converter.ToGQL(service)
+	gqlService, err := l.converter.ToGQL(service)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting *Service"))
+		return
+	}
 	if gqlService == nil {
 		return
 	}

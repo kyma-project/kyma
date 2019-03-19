@@ -25,15 +25,14 @@ type serviceSvc interface {
 	Find(name, namespace string) (*v1.Service, error)
 	List(namespace string, pagingParams pager.PagingParams) ([]*v1.Service, error)
 	Update(name, namespace string, update v1.Service) (*v1.Service, error)
-	Delete(name, namespace string) error
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
 }
 
 //go:generate mockery -name=gqlServiceConverter -output=automock -outpkg=automock -case=underscore
 type gqlServiceConverter interface {
-	ToGQL(in *v1.Service) *gqlschema.Service
-	ToGQLs(in []*v1.Service) []gqlschema.Service
+	ToGQL(in *v1.Service) (*gqlschema.Service, error)
+	ToGQLs(in []*v1.Service) ([]gqlschema.Service, error)
 	GQLJSONToService(in gqlschema.JSON) (v1.Service, error)
 }
 
@@ -53,8 +52,7 @@ func (r *serviceResolver) ServicesQuery(ctx context.Context, namespace string, f
 		glog.Error(errors.Wrapf(err, "while listing %s from namespace %s", pretty.Services, namespace))
 		return nil, gqlerror.New(err, pretty.Services, gqlerror.WithNamespace(namespace))
 	}
-	converted := r.gqlServiceConverter.ToGQLs(services)
-	return converted, nil
+	return r.gqlServiceConverter.ToGQLs(services)
 }
 
 func (r *serviceResolver) ServiceQuery(ctx context.Context, name string, namespace string) (*gqlschema.Service, error) {
@@ -63,8 +61,7 @@ func (r *serviceResolver) ServiceQuery(ctx context.Context, name string, namespa
 		glog.Error(errors.Wrapf(err, "while getting %s with name %s from namespace %s", pretty.Service, name, namespace))
 		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
-	converted := r.gqlServiceConverter.ToGQL(service)
-	return converted, nil
+	return r.gqlServiceConverter.ToGQL(service)
 }
 
 func (r *serviceResolver) ServiceEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceEvent, error) {
@@ -98,7 +95,5 @@ func (r *serviceResolver) UpdateServiceMutation(ctx context.Context, name string
 		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
 
-	updatedGql := r.gqlServiceConverter.ToGQL(updated)
-
-	return updatedGql, nil
+	return r.gqlServiceConverter.ToGQL(updated)
 }

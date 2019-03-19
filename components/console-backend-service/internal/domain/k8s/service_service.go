@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -21,10 +21,11 @@ type serviceService struct {
 	notifier resource.Notifier
 }
 
-func newServiceService(informer cache.SharedIndexInformer) *serviceService {
+func newServiceService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) *serviceService {
 	notifier := resource.NewNotifier()
 	informer.AddEventHandler(notifier)
 	return &serviceService{
+		client:   client,
 		informer: informer,
 		notifier: notifier,
 	}
@@ -100,10 +101,6 @@ func (svc *serviceService) Update(name, namespace string, update v1.Service) (*v
 	svc.ensureTypeMeta(updated)
 
 	return updated, nil
-}
-
-func (svc *serviceService) Delete(name, namespace string) error {
-	return svc.client.Services(namespace).Delete(name, nil)
 }
 
 func (svc *serviceService) checkUpdatePreconditions(name string, namespace string, update v1.Service) error {

@@ -430,6 +430,7 @@ type Service {
     labels: Labels!
     ports: [ServicePort!]!
     status: ServiceStatus!
+    json: JSON!
 }
 
 type Pod {

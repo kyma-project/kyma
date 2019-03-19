@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/client-go/informers"
 	k8sClientset "k8s.io/client-go/kubernetes"
-	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
+	"k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
 
@@ -58,7 +58,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
 
-	serviceSvc := newServiceService(informerFactory.Core().V1().Services().Informer())
+	serviceSvc := newServiceService(informerFactory.Core().V1().Services().Informer(), client)
 
 	return &Resolver{
 		resourceResolver:            newResourceResolver(resourceService),

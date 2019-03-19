@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	tester "github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
@@ -16,7 +16,7 @@ import (
 
 	_assert "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -38,6 +38,10 @@ type servicesQueryResponse struct {
 	Services []service `json:"services"`
 }
 
+type updateServiceMutationResponse struct {
+	UpdateService service `json:"updateService"`
+}
+
 type service struct {
 	Name              string        `json:"name"`
 	ClusterIP         string        `json:"clusterIP"`
@@ -45,6 +49,7 @@ type service struct {
 	Labels            labels        `json:"labels"`
 	Ports             []ServicePort `json:"ports"`
 	Status            ServiceStatus `json:"status"`
+	JSON              json          `json:"json"`
 }
 
 type ServiceStatus struct {
@@ -118,6 +123,14 @@ func TestService(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(serviceName, serviceRes.Service.Name)
 
+	t.Log("Updating...")
+	serviceRes.Service.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
+	update := stringifyJSON(serviceRes.Service.JSON)
+	var updateRes updateServiceMutationResponse
+	err = grapqlClient.Do(fixUpdateServiceMutation(update), &updateRes)
+	require.NoError(t, err)
+	assert.Equal(serviceName, updateRes.UpdateService.Name)
+
 	t.Log("Querying for services...")
 	var servicesRes servicesQueryResponse
 	err = grapqlClient.Do(fixServicesQuery(), &servicesRes)
@@ -168,6 +181,7 @@ func fixServiceQuery() *graphql.Request {
         }
       }
     }
+	json
   }
 }`
 	req := graphql.NewRequest(query)
@@ -267,4 +281,36 @@ func checkServiceEvent(expected ServiceEvent, sub *graphql.Subscription) error {
 			return nil
 		}
 	}
+}
+
+func fixUpdateServiceMutation(service string) *graphql.Request {
+	mutation := `mutation UpdateService($name: String!, $namespace: String!, $service: JSON!) {
+  updateService(name: $name, namespace: $namespace, service: $service) {
+    name
+    clusterIP
+    creationTimestamp
+    labels
+    ports {
+      name
+      serviceProtocol
+      port
+      nodePort
+      targetPort
+    }
+    status {
+      loadBalancer {
+        ingress {
+          ip
+          hostName
+        }
+      }
+    }
+  }
+}`
+	req := graphql.NewRequest(mutation)
+	req.SetVar("name", serviceName)
+	req.SetVar("namespace", namespace)
+	req.SetVar("service", service)
+
+	return req
 }

@@ -425,6 +425,7 @@ type ComplexityRoot struct {
 		Labels            func(childComplexity int) int
 		Ports             func(childComplexity int) int
 		Status            func(childComplexity int) int
+		Json              func(childComplexity int) int
 	}
 
 	ServiceBinding struct {
@@ -4354,6 +4355,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Service.Status(childComplexity), true
+
+	case "Service.json":
+		if e.complexity.Service.Json == nil {
+			break
+		}
+
+		return e.complexity.Service.Json(childComplexity), true
 
 	case "ServiceBinding.name":
 		if e.complexity.ServiceBinding.Name == nil {
@@ -15438,6 +15446,11 @@ func (ec *executionContext) _Service(ctx context.Context, sel ast.SelectionSet, 
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "json":
+			out.Values[i] = ec._Service_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15643,6 +15656,33 @@ func (ec *executionContext) _Service_status(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._ServiceStatus(ctx, field.Selections, &res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Service_json(ctx context.Context, field graphql.CollectedField, obj *Service) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Service",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JSON, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var serviceBindingImplementors = []string{"ServiceBinding"}
@@ -22666,6 +22706,7 @@ type Service {
     labels: Labels!
     ports: [ServicePort!]!
     status: ServiceStatus!
+    json: JSON!
 }
 
 type Pod {

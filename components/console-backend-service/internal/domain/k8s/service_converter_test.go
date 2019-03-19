@@ -1,12 +1,13 @@
 package k8s
 
 import (
+	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/stretchr/testify/assert"
-	v1 "k8s.io/api/core/v1"
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
@@ -16,14 +17,19 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 
 	t.Run("Nil", func(t *testing.T) {
 		converter := &serviceConverter{}
-		result := converter.ToGQL(nil)
+		result, err := converter.ToGQL(nil)
+		require.NoError(t, err)
 		assert.Nil(result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		converter := &serviceConverter{}
-		expected := &gqlschema.Service{}
-		result := converter.ToGQL(&v1.Service{})
+		emptyServiceJSON, err := converter.serviceToGQLJSON(&v1.Service{})
+		expected := &gqlschema.Service{
+			JSON: emptyServiceJSON,
+		}
+		result, err := converter.ToGQL(&v1.Service{})
+		require.NoError(t, err)
 		assert.Equal(expected, result)
 	})
 
@@ -32,6 +38,7 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 		name := "test_name"
 		namespace := "test_namespace"
 		in := fixService(name, namespace)
+		expectedJSON, err := converter.serviceToGQLJSON(in)
 		expected := gqlschema.Service{
 			Name: name,
 			Labels: map[string]string{
@@ -57,8 +64,10 @@ func TestServiceConverter_ToGQL(t *testing.T) {
 					},
 				},
 			},
+			JSON: expectedJSON,
 		}
-		result := converter.ToGQL(in)
+		result, err := converter.ToGQL(in)
+		require.NoError(t, err)
 		assert.Equal(&expected, result)
 	})
 }
@@ -73,7 +82,8 @@ func TestServiceConverter_ToGQLs(t *testing.T) {
 			fixServiceWithName(expectedName, ""),
 			fixServiceWithName("exampleName2", ""),
 		}
-		result := converter.ToGQLs(in)
+		result, err := converter.ToGQLs(in)
+		require.NoError(t, err)
 		assert.Len(result, 2)
 		assert.Equal(expectedName, result[0].Name)
 	})
@@ -81,7 +91,8 @@ func TestServiceConverter_ToGQLs(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		converter := serviceConverter{}
 		var in []*v1.Service
-		result := converter.ToGQLs(in)
+		result, err := converter.ToGQLs(in)
+		require.NoError(t, err)
 		assert.Empty(result)
 	})
 
@@ -93,7 +104,8 @@ func TestServiceConverter_ToGQLs(t *testing.T) {
 			fixServiceWithName(expectedName, ""),
 			nil,
 		}
-		result := converter.ToGQLs(in)
+		result, err := converter.ToGQLs(in)
+		require.NoError(t, err)
 		assert.Len(result, 1)
 		assert.Equal(expectedName, result[0].Name)
 	})
@@ -154,6 +166,27 @@ func TestServiceConverter_toGQLSchemaServiceProtocol(t *testing.T) {
 			assert.Equal(test.expected, actual)
 		})
 	}
+}
+
+func TestServiceConverter_GQLJSONToService(t *testing.T) {
+	assert := assert.New(t)
+	emptyService := v1.Service{}
+	converter := &serviceConverter{}
+
+	t.Run("Nil", func(t *testing.T) {
+		result, err := converter.GQLJSONToService(nil)
+		assert.Nil(err)
+		assert.Equal(emptyService, result)
+	})
+
+	t.Run("Success", func(t *testing.T) {
+		originalService := fixService("originalService", "namespace")
+		gqlJSON, err := converter.serviceToGQLJSON(originalService)
+		assert.Nil(err)
+		assert.NotEmpty(gqlJSON)
+		convertedService, err := converter.GQLJSONToService(gqlJSON)
+		assert.Equal(originalService, &convertedService)
+	})
 }
 
 func fixServiceWithName(name, namespace string) *v1.Service {
