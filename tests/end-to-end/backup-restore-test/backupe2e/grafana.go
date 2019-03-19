@@ -12,8 +12,8 @@
 // 3. https://dex.kyma.local/auth (GET)
 // 4. https://dex.kyma.local/auth/local (POST)
 // Api:
-// 1. https://grafana.kyma.local/api/search?query=Lambda%20Dashboard
-
+// 1. https://grafana.kyma.local/api/search?folderIds=0
+// 2. https://grafana.kyma.local/api/search?query=Lambda%20Dashboard
 
 package backupe2e
 
@@ -38,38 +38,37 @@ import (
 )
 
 const (
-	grafanaNS              string = "kyma-system"
-	grafanaPodName         string = "monitoring-grafana-0"
-	grafanaServiceName     string = "monitoring-grafana"
-	grafanaStatefulsetName string = "monitoring-grafana"
-	adminUserSecretName    string = "admin-user"
-	containerName          string = "grafana"
-	grafanaLabelSelector   string = "app=monitoring-grafana"
+	grafanaNS              = "kyma-system"
+	grafanaPodName         = "monitoring-grafana-0"
+	grafanaServiceName     = "monitoring-grafana"
+	grafanaStatefulsetName = "monitoring-grafana"
+	adminUserSecretName    = "admin-user"
+	containerName          = "grafana"
+	grafanaLabelSelector   = "app=monitoring-grafana"
 )
 
 var (
-	apiRequestsStatus = map[string]int{
-		"Lambda Dashboard":        0,
-		"Etcd":                    0,
-		"Connector-Service":       0,
-		"Istio Mesh Dashboard":    0,
-		"Istio Service Dashboard": 0,
-	}
+	dashboards = make(map[string]dashboard)
 )
 
 type grafanaTest struct {
 	grafanaName string
 	uuid        string
 	coreClient  *kubernetes.Clientset
+	before      bool
 	grafana
 }
 
 type grafana struct {
 	url        string
 	oauthUrl   string
-	user       string
-	password   string
+	loginForm  url.Values
 	httpClient *http.Client
+}
+
+type dashboard struct {
+	title string
+	url   string
 }
 
 func NewGrafanaTest() (*grafanaTest, error) {
@@ -89,7 +88,8 @@ func NewGrafanaTest() (*grafanaTest, error) {
 		coreClient:  coreClient,
 		grafanaName: "grafana",
 		uuid:        uuid.New().String(),
-		grafana:     grafana{},
+		before:      false,
+		grafana:     grafana{loginForm: url.Values{}},
 	}, nil
 }
 
@@ -102,40 +102,17 @@ func (t *grafanaTest) DeleteResources() {
 	err := t.waitForPodGrafana(1 * time.Minute)
 	So(err, ShouldBeNil)
 
-	deletePolicy := metav1.DeletePropagationForeground
-
-	serviceList, err := t.coreClient.CoreV1().Services(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector,})
+	err = t.deleteServices(grafanaNS, grafanaServiceName, grafanaLabelSelector)
 	So(err, ShouldBeNil)
 
-	for _, service := range serviceList.Items {
-		if service.Name == grafanaServiceName {
-			// Delete Service
-			err = t.coreClient.CoreV1().Services(grafanaNS).Delete(grafanaServiceName, &metav1.DeleteOptions{
-				PropagationPolicy: &deletePolicy,
-			})
-			So(err, ShouldBeNil)
-		}
-	}
-
-	collection := t.coreClient.AppsV1().StatefulSets(grafanaNS)
-	err = collection.Delete(grafanaStatefulsetName, &metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	})
+	err = t.deleteStatefulset(grafanaNS, grafanaStatefulsetName)
 	So(err, ShouldBeNil)
 
-	podList, err := t.coreClient.CoreV1().Pods(grafanaNS).List(metav1.ListOptions{LabelSelector: grafanaLabelSelector,})
+	err = t.deletePod(grafanaNS, grafanaPodName, grafanaLabelSelector)
 	So(err, ShouldBeNil)
-
-	for _, pod := range podList.Items {
-		if pod.Name == grafanaPodName {
-			// Delete Pod
-			err = t.coreClient.CoreV1().Pods(grafanaNS).Delete(grafanaPodName, &metav1.DeleteOptions{})
-			So(err, ShouldBeNil)
-		}
-	}
 
 	err = t.waitForPodGrafana(2 * time.Minute)
-	So(err, ShouldBeError)
+	So(err, ShouldBeError) // And error is expected.
 
 }
 
@@ -163,44 +140,90 @@ func (t *grafanaTest) TestResources(namespace string) {
 	So(err, ShouldBeNil)
 
 	// Query to api
-	dashboardFolders := make([]map[string]interface{}, 0)
-	err = json.Unmarshal(dataBody, &dashboardFolders)
-	So(err, ShouldBeNil)
-	So(len(dashboardFolders), ShouldNotEqual, 0)
-
-	for _, folder := range dashboardFolders {
-		// http request to every dashboard
-		domain = fmt.Sprintf("%s%s", t.url, folder["url"])
-		formData := url.Values{}
-		formData.Set("login", t.user)
-		formData.Set("password", t.password)
-		dashboard, err := t.requestToGrafana(domain, "GET", nil, strings.NewReader(formData.Encode()), cookie)
+	if !t.before {
+		t.before = true
+		dashboardFolders := make([]map[string]interface{}, 0)
+		err = json.Unmarshal(dataBody, &dashboardFolders)
 		So(err, ShouldBeNil)
-		So(dashboard.StatusCode, ShouldEqual, http.StatusOK)
-		title := folder["title"].(string)
-		switch title {
-		case "Lambda Dashboard":
-			apiRequestsStatus[title] = dashboard.StatusCode
-		case "Etcd":
-			apiRequestsStatus[title] = dashboard.StatusCode
-		case "Connector-Service":
-			apiRequestsStatus[title] = dashboard.StatusCode
-		case "Istio Mesh Dashboard":
-			apiRequestsStatus[title] = dashboard.StatusCode
-		case "Istio Service Dashboard":
+		So(len(dashboardFolders), ShouldNotEqual, 0)
 
+		for _, folder := range dashboardFolders {
+			// http request to every dashboard
+			domain = fmt.Sprintf("%s%s", t.url, folder["url"])
+			dashResp, err := t.requestToGrafana(domain, "GET", nil, strings.NewReader(t.loginForm.Encode()), cookie)
+			So(err, ShouldBeNil)
+			So(dashResp.StatusCode, ShouldEqual, http.StatusOK)
+			title := fmt.Sprintf("%s", folder["title"])
+			dashboards[title] = dashboard{title: title, url: fmt.Sprintf("%s", folder["url"])}
+		}
+	} else {
+		// iterate over the list of dashboards found before the backup (first time the test runs)
+		for _, dash := range dashboards {
+			domain = fmt.Sprintf("%s%s", t.url, dash.url)
+			resp, err := t.requestToGrafana(domain, "GET", nil, strings.NewReader(t.loginForm.Encode()), cookie)
+			So(err, ShouldBeNil)
+			So(resp.StatusCode, ShouldEqual, http.StatusOK)
+		}
+	}
+}
+
+func (t *grafanaTest) deleteServices(namespace, serviceName, labelSelector string) error {
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	serviceList, err := t.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, service := range serviceList.Items {
+		if service.Name == serviceName {
+			err := t.coreClient.CoreV1().Services(namespace).Delete(serviceName, &metav1.DeleteOptions{
+				PropagationPolicy: &deletePolicy,
+			})
+			if err != nil {
+				return err
+			}
 		}
 	}
 
-	t.testResult()
+	return nil
 
 }
 
-func (t *grafanaTest) testResult() {
+func (t *grafanaTest) deleteStatefulset(namespace, statefulsetName string) error {
 
-	for _, status := range apiRequestsStatus {
-		So(status, ShouldEqual, http.StatusOK)
+	deletePolicy := metav1.DeletePropagationForeground
+
+	collection := t.coreClient.AppsV1().StatefulSets(namespace)
+	err := collection.Delete(statefulsetName, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+	if err != nil {
+		return err
 	}
+
+	return nil
+}
+
+func (t *grafanaTest) deletePod(namespace, podName, labelSelector string) error {
+
+	podList, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, pod := range podList.Items {
+		if pod.Name == podName {
+			// Delete Pod
+			err = t.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 
 }
 
@@ -226,10 +249,7 @@ func (t *grafanaTest) getGrafanaAndDexAuth() (*http.Response) {
 
 	// /auth/local
 	domain = dexAuth.Request.URL.String()
-	formData := url.Values{}
-	formData.Set("login", t.user)
-	formData.Set("password", t.password)
-	dexAuthLocal, err := t.requestToGrafana(domain, "POST", nil, strings.NewReader(formData.Encode()), nil)
+	dexAuthLocal, err := t.requestToGrafana(domain, "POST", nil, strings.NewReader(t.loginForm.Encode()), nil)
 	So(err, ShouldBeNil)
 	So(dexAuthLocal.StatusCode, ShouldEqual, http.StatusOK)
 
@@ -319,12 +339,12 @@ func (t *grafanaTest) getCredentials() error {
 			if string(value) == "" {
 				return fmt.Errorf("No email found in secret '%s'\n", adminUserSecretName)
 			}
-			t.user = string(value)
+			t.loginForm.Set("login", string(value))
 		case "password":
 			if string(value) == "" {
 				return fmt.Errorf("No password found in secret '%s'\n", adminUserSecretName)
 			}
-			t.password = string(value)
+			t.loginForm.Set("password", string(value))
 		}
 
 	}
