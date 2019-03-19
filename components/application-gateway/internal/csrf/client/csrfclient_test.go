@@ -1,8 +1,10 @@
 package client
 
 import (
+	"encoding/base64"
 	"net/http"
 	"net/http/httptest"
+	"strings"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
@@ -73,7 +75,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 
 		c := client{timeoutDuration, fakeCache, &http.Client{}}
 
-		srv := startTestServer()
+		srv := startTestServer(t)
 		mockURL := srv.URL
 
 		// when
@@ -100,7 +102,7 @@ func TestClient_GetTokenEndpointResponse(t *testing.T) {
 
 		c := client{timeoutDuration, fakeCache, &http.Client{}}
 
-		srv := startFailingTestServer()
+		srv := startFailingTestServer(t)
 		mockURL := srv.URL
 
 		// when
@@ -184,16 +186,33 @@ func getNewEmptyRequest() *http.Request {
 	}
 }
 
-func startTestServer() *httptest.Server {
+func startTestServer(t *testing.T) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkRequest(t, r)
 		w.Header().Add("x-csrf-token", endpointTestToken)
 		http.SetCookie(w, &http.Cookie{Name: endpointResponseCookieName})
 		w.WriteHeader(http.StatusOK)
 	}))
 }
 
-func startFailingTestServer() *httptest.Server {
+func startFailingTestServer(t *testing.T) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		checkRequest(t, r)
 		w.WriteHeader(http.StatusNotFound)
 	}))
+}
+
+func checkRequest(t *testing.T, r *http.Request) {
+	authHeader := r.Header.Get(httpconsts.HeaderAuthorization)
+	encodedCredentials := strings.TrimPrefix(string(authHeader), "Basic ")
+	decoded, err := base64.StdEncoding.DecodeString(encodedCredentials)
+	require.NoError(t, err)
+	credentials := strings.Split(string(decoded), ":")
+
+	assert.Equal(t, testUsername, credentials[0])
+	assert.Equal(t, testPassword, credentials[1])
+
+	assert.NotEmpty(t, r.Header.Get(httpconsts.HeaderCSRFToken))
+	assert.NotEmpty(t, r.Header.Get(httpconsts.HeaderAccept))
+	assert.NotEmpty(t, r.Header.Get(httpconsts.HeaderCacheControl))
 }
