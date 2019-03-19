@@ -11,6 +11,14 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:7aa9a66297508eb8aeda7926c8f071e88f31764695a2fc62fcb2ce9ffe074777"
+  name = "github.com/ericaro/frontmatter"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9fedef9406e420da012d078cd83645bbac08f291"
+
+[[projects]]
+  branch = "master"
   digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
   name = "github.com/golang/glog"
   packages = ["."]
@@ -93,10 +101,19 @@
   pruneopts = "UT"
   revision = "bb1270c20edf080f9f069ea11a1fe5c2b0ebd62c"
 
+[[projects]]
+  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/ericaro/frontmatter",
     "github.com/golang/glog",
     "github.com/kisielk/errcheck",
     "github.com/pkg/errors",
