@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils"
 	. "github.com/smartystreets/goconvey/convey"
 )
@@ -16,40 +16,15 @@ var testUUID = uuid.New()
 var backupName = "test-" + testUUID.String()
 
 type e2eTest struct {
-	backupTest BackupTest
+	backupTest backupe2e.BackupTest
 	namespace  string
 	testUUID   string
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
-	myFunctionTest, err := NewFunctionTest()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	e2eTests := make([]e2eTest, len(backupe2e.Tests()))
 
-	myStatefulSetTest, err := NewStatefulSetTest()
-
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	myDeploymentTest, err := NewDeploymentTest()
-
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	myPrometheusTest, err := NewPrometheusTest()
-
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
-	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest}
-
-	e2eTests := make([]e2eTest, len(backupTests))
-
-	for idx, backupTest := range backupTests {
+	for idx, backupTest := range backupe2e.Tests() {
 		testUUID := uuid.New()
 
 		name := string("")

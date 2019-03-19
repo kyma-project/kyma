@@ -21,6 +21,14 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 )
 
+func init() {
+	deploymentTest, err := NewDeploymentTest()
+	if err != nil {
+		log.Fatal(err)
+	}
+	Register(deploymentTest)
+}
+
 type deploymentTest struct {
 	deploymentName, uuid string
 	coreClient           *kubernetes.Clientset

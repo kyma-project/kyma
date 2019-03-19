@@ -24,15 +24,25 @@ package backupe2e
 import (
 	"encoding/json"
 	"errors"
-	"github.com/google/uuid"
+	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
-	"time"
-	. "github.com/smartystreets/goconvey/convey"
-	"fmt"
 	"strings"
+	"time"
+
+	"github.com/google/uuid"
+	. "github.com/smartystreets/goconvey/convey"
 )
+
+func init() {
+	prometheusTest, err := NewPrometheusTest()
+	if err != nil {
+		log.Fatal(err)
+	}
+	Register(prometheusTest)
+}
 
 const (
 	domain       = "http://monitoring-prometheus.kyma-system"

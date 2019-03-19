@@ -3,6 +3,7 @@ package backupe2e
 import (
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -18,6 +19,14 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/api/resource"
 )
+
+func init() {
+	statefulSetTest, err := NewStatefulSetTest()
+	if err != nil {
+		log.Fatal(err)
+	}
+	Register(statefulSetTest)
+}
 
 type statefulSetTest struct {
 	statefulSetName, uuid, output string

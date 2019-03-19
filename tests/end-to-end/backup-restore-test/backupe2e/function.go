@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"time"
@@ -19,6 +20,14 @@ import (
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 )
+
+func init() {
+	functionTest, err := NewFunctionTest()
+	if err != nil {
+		log.Fatal(err)
+	}
+	Register(functionTest)
+}
 
 type functionTest struct {
 	functionName, uuid string
