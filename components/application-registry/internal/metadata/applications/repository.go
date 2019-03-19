@@ -39,10 +39,15 @@ type ServiceAPI struct {
 	Credentials      Credentials
 }
 
+type CSRFInfo struct {
+	TokenEndpointURL string
+}
+
 type Credentials struct {
 	Type              string
 	SecretName        string
 	AuthenticationUrl string
+	CSRFInfo          *CSRFInfo
 }
 
 // Service represents a service stored in Application RE
