@@ -22,8 +22,94 @@ input ResourceAttributes {
     isChildResolver: Boolean! = false
 }
 
-# Content
+# Asset Store
 
+type File {
+    url: String!
+    metadata: JSON!
+}
+
+type Asset {
+    name: String!
+    namespace: String!
+    type: String!
+    files(filterExtensions: [String!]): [File!]!
+    status: AssetStatus!
+}
+
+type AssetEvent {
+    type: SubscriptionEventType!
+    asset: Asset!
+}
+
+type ClusterAsset {
+    name: String!
+    type: String!
+    files(filterExtensions: [String!]): [File!]!
+    status: AssetStatus!
+}
+
+type ClusterAssetEvent {
+    type: SubscriptionEventType!
+    clusterAsset: ClusterAsset!
+}
+
+type AssetStatus {
+    phase: AssetPhaseType!
+    reason: String!
+    message: String!
+}
+
+enum AssetPhaseType {
+    READY
+    PENDING
+    FAILED
+}
+
+# CMS
+
+type DocsTopic {
+    name: String!
+    namespace: String!
+    groupName: String!
+    assets(types: [String!]): [Asset!]!
+    displayName: String!
+    description: String!
+    status: DocsTopicStatus!
+}
+
+type DocsTopicEvent {
+    type: SubscriptionEventType!
+    docsTopic: DocsTopic!
+}
+
+type ClusterDocsTopic {
+    name: String!
+    groupName: String!
+    assets(types: [String!]): [ClusterAsset!]!
+    displayName: String!
+    description: String!
+    status: DocsTopicStatus!
+}
+
+type ClusterDocsTopicEvent {
+    type: SubscriptionEventType!
+    clusterDocsTopic: ClusterDocsTopic!
+}
+
+type DocsTopicStatus {
+    phase: DocsTopicPhaseType!
+    reason: String!
+    message: String!
+}
+
+enum DocsTopicPhaseType {
+    READY
+    PENDING
+    FAILED
+}
+
+# Content
 
 type Title {
     name: String!
@@ -138,10 +224,14 @@ type ServiceClass {
     activated: Boolean!
     instances: [ServiceInstance!]!
     apiSpec: JSON @deprecated(reason: "No longer supported")
-    openApiSpec: JSON
-    odataSpec: String
-    asyncApiSpec: JSON
-    content: JSON
+    openApiSpec: JSON @deprecated(reason: "No longer supported")
+    odataSpec: String @deprecated(reason: "No longer supported")
+    asyncApiSpec: JSON @deprecated(reason: "No longer supported")
+    content: JSON @deprecated(reason: "No longer supported")
+
+    # Depends on cms domain
+    clusterDocsTopic: ClusterDocsTopic
+    docsTopic: DocsTopic
 }
 
 type ClusterServiceClass {
@@ -161,10 +251,13 @@ type ClusterServiceClass {
     activated(namespace: String): Boolean!
     instances(namespace: String): [ServiceInstance!]!
     apiSpec: JSON @deprecated(reason: "No longer supported")
-    openApiSpec: JSON
-    odataSpec: String
-    asyncApiSpec: JSON
-    content: JSON
+    openApiSpec: JSON @deprecated(reason: "No longer supported")
+    odataSpec: String @deprecated(reason: "No longer supported")
+    asyncApiSpec: JSON @deprecated(reason: "No longer supported")
+    content: JSON @deprecated(reason: "No longer supported")
+
+    # Depends on cms domain
+    clusterDocsTopic: ClusterDocsTopic
 }
 
 type ServicePlan {
@@ -681,6 +774,8 @@ type ConfigMapEvent {
 # Queries
 
 type Query {
+    clusterDocsTopics(viewContext: String, groupName: String): [ClusterDocsTopic!]!
+
     serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
@@ -727,8 +822,8 @@ type Query {
 
     functions(namespace: String!, first: Int, offset: Int): [Function!]! @HasAccess(attributes: {resource: "functions", verb: "list", apiGroup: "kubeless.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
-    content(contentType: String!, id: String!): JSON # TODO: TO BE REMOVED
-    topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!] # TODO: TO BE REMOVED
+    content(contentType: String!, id: String!): JSON @deprecated(reason: "No longer supported")
+    topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!] @deprecated(reason: "No longer supported")
     eventActivations(namespace: String!): [EventActivation!]! @HasAccess(attributes: {resource: "eventactivations", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
     limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -782,6 +877,10 @@ type Mutation {
 # Subscriptions
 
 type Subscription {
+    clusterAssetEvent: ClusterAssetEvent!
+    assetEvent(namespace: String!): AssetEvent!
+    clusterDocsTopicEvent: ClusterDocsTopicEvent!
+    docsTopicEvent(namespace: String!): DocsTopicEvent!
     serviceInstanceEvent(namespace: String!): ServiceInstanceEvent! @HasAccess(attributes: {resource: "serviceinstances", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent! @HasAccess(attributes: {resource: "servicebindingusages", verb: "watch", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
