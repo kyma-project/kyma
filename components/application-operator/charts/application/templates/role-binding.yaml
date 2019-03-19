@@ -11,7 +11,7 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: {{ .Release.Name }}-application-gateway-role
+  name: {{ .Release.Name }}-application-gateway
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}-application-gateway
@@ -24,16 +24,46 @@ rules:
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-application-gateway-rolebinding
+  name: {{ .Release.Name }}-application-gateway
   labels:
     app: {{ .Release.Name }}-application-gateway
     release: {{ .Release.Name }}-application-gateway
     heritage: {{ .Release.Service }}-application-gateway
 subjects:
 - kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:{{.Release.Name }}-application-gateway
+  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-application-gateway
   apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
-  name: {{ .Release.Name }}-application-gateway-role
+  name: {{ .Release.Name }}-application-gateway
   apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Release.Name }}-application-gateway
+  labels:
+    app: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+rules:
+  - apiGroups: ["applicationconnector.kyma-project.io"]
+    resources: ["applications"]
+    verbs: ["get", "list"]
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: {{ .Release.Name }}-application-gateway
+  labels:
+    app: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+subjects:
+  - kind: User
+    name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Release.Name }}-application-gateway
+    apiGroup: rbac.authorization.k8s.io
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ .Release.Name }}-application-gateway
