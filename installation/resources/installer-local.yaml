@@ -86,6 +86,7 @@ spec:
       containers:
       - name: kyma-installer-container
         image: demonsthere/kyma-installer:tls
+        # command: ["tail", "-f", "/dev/null"]
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: /etc/certs

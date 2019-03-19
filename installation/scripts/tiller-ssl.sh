@@ -1,6 +1,7 @@
 #!/usr/bin/env bash -e
 
 CURRENT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+WORKING_DIR="${CURRENT_DIR}/tmp-certs"
 
 function command_exists() {
     type "$1" &> /dev/null ;
@@ -13,7 +14,9 @@ for CMD in openssl kubectl base64 helm; do
 	fi
 done
 
-cat <<EOF > "${CURRENT_DIR}/openssl.cnf"
+mkdir -p "${WORKING_DIR}"
+
+cat <<EOF > "${WORKING_DIR}/openssl.cnf"
 [ req ]
 #default_bits		= 2048
 #default_md		= sha256
@@ -45,27 +48,27 @@ authorityKeyIdentifier = keyid:always,issuer:always
 EOF
 
 echo "---> Generate CA"
-openssl genrsa -out "${CURRENT_DIR}/ca.key.pem" 4096
-openssl req -key "${CURRENT_DIR}/ca.key.pem" -new -x509 -days 365 -sha256 -out "${CURRENT_DIR}/ca.cert.pem" -extensions v3_ca -config "${CURRENT_DIR}/openssl.cnf" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=tiller/CN=tiller"
+openssl genrsa -out "${WORKING_DIR}/ca.key.pem" 4096
+openssl req -key "${WORKING_DIR}/ca.key.pem" -new -x509 -days 365 -sha256 -out "${WORKING_DIR}/ca.cert.pem" -extensions v3_ca -config "${WORKING_DIR}/openssl.cnf" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=tiller/CN=tiller"
 
 echo "---> Generate Tiller key"
-openssl genrsa -out "${CURRENT_DIR}/tiller.key.pem" 4096
-openssl req -key "${CURRENT_DIR}/tiller.key.pem" -new -sha256 -out "${CURRENT_DIR}/tiller.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Tiller Server/CN=tiller-server"
-openssl x509 -req -CA "${CURRENT_DIR}/ca.cert.pem" -CAkey "${CURRENT_DIR}/ca.key.pem" -CAcreateserial -in "${CURRENT_DIR}/tiller.csr.pem" -out "${CURRENT_DIR}/tiller.cert.pem" -days 365
+openssl genrsa -out "${WORKING_DIR}/tiller.key.pem" 4096
+openssl req -key "${WORKING_DIR}/tiller.key.pem" -new -sha256 -out "${WORKING_DIR}/tiller.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Tiller Server/CN=tiller-server"
+openssl x509 -req -CA "${WORKING_DIR}/ca.cert.pem" -CAkey "${WORKING_DIR}/ca.key.pem" -CAcreateserial -in "${WORKING_DIR}/tiller.csr.pem" -out "${WORKING_DIR}/tiller.cert.pem" -days 365
 
 echo "---> Generate Helm key"
-openssl genrsa -out "${CURRENT_DIR}/helm.key.pem" 4096
-openssl req -key "${CURRENT_DIR}helm.key.pem" -new -sha256 -out "${CURRENT_DIR}/helm.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Helm Client/CN=helm-client"
-openssl x509 -req -CA "${CURRENT_DIR}/ca.cert.pem" -CAkey "${CURRENT_DIR}/ca.key.pem" -CAcreateserial -in "${CURRENT_DIR}/helm.csr.pem" -out "${CURRENT_DIR}/helm.cert.pem" -days 365
+openssl genrsa -out "${WORKING_DIR}/helm.key.pem" 4096
+openssl req -key "${WORKING_DIR}/helm.key.pem" -new -sha256 -out "${WORKING_DIR}/helm.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Helm Client/CN=helm-client"
+openssl x509 -req -CA "${WORKING_DIR}/ca.cert.pem" -CAkey "${WORKING_DIR}/ca.key.pem" -CAcreateserial -in "${WORKING_DIR}/helm.csr.pem" -out "${WORKING_DIR}/helm.cert.pem" -days 365
 
 echo "---> Create secrets in k8s"
 TILLER_SECRETS=$(cat << EOF
 ---
 apiVersion: v1
 data:
-  ca.crt: "$(base64 ./ca.cert.pem)"
-  tls.crt: "$(base64 ./tiller.cert.pem)"
-  tls.key: "$(base64 ./tiller.key.pem)"
+  ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem)"
+  tls.crt: "$(base64 ${WORKING_DIR}/tiller.cert.pem)"
+  tls.key: "$(base64 ${WORKING_DIR}/tiller.key.pem)"
 kind: Secret
 metadata:
   creationTimestamp: null
@@ -81,10 +84,15 @@ EOF
 HELM_SECRETS=$(cat << EOF
 ---
 apiVersion: v1
+kind: Namespace
+metadata:
+  name: kyma-installer
+---
+apiVersion: v1
 data:
-  ca.crt: "$(base64 ./ca.cert.pem)"
-  tls.crt: "$(base64 ./helm.cert.pem)"
-  tls.key: "$(base64 ./helm.key.pem)"
+  ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem)"
+  tls.crt: "$(base64 ${WORKING_DIR}/helm.cert.pem)"
+  tls.key: "$(base64 ${WORKING_DIR}/helm.key.pem)"
 kind: Secret
 metadata:
   creationTimestamp: null
@@ -98,13 +106,12 @@ EOF
 )
 
 echo "${TILLER_SECRETS}" | kubectl apply -f -
+echo "${HELM_SECRETS}" | kubectl apply -f -
 
 echo "---> Move secrets to helm home"
-mv "${CURRENT_DIR}/ca.cert.pem" "$(helm home)/ca.pem"
-mv "${CURRENT_DIR}/helm.cert.pem" "$(helm home)/cert.pem"
-mv "${CURRENT_DIR}/helm.key.pem" "$(helm home)/key.pem"
+cp "${WORKING_DIR}/ca.cert.pem" "$(helm home)/ca.pem"
+cp "${WORKING_DIR}/helm.cert.pem" "$(helm home)/cert.pem"
+cp "${WORKING_DIR}/helm.key.pem" "$(helm home)/key.pem"
 
 echo "---> Cleanup"
-rm "${CURRENT_DIR}/openssl.cnf"
-rm "${CURRENT_DIR}/*.pem"
-rm "${CURRENT_DIR}/*.srl"
+rm -rf "${WORKING_DIR}"
