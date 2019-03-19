@@ -66,9 +66,9 @@ TILLER_SECRETS=$(cat << EOF
 ---
 apiVersion: v1
 data:
-  ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem)"
-  tls.crt: "$(base64 ${WORKING_DIR}/tiller.cert.pem)"
-  tls.key: "$(base64 ${WORKING_DIR}/tiller.key.pem)"
+  ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem | tr -d '\n')"
+  tls.crt: "$(base64 ${WORKING_DIR}/tiller.cert.pem | tr -d '\n')"
+  tls.key: "$(base64 ${WORKING_DIR}/tiller.key.pem | tr -d '\n')"
 kind: Secret
 metadata:
   creationTimestamp: null
@@ -90,9 +90,9 @@ metadata:
 ---
 apiVersion: v1
 data:
-  ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem)"
-  tls.crt: "$(base64 ${WORKING_DIR}/helm.cert.pem)"
-  tls.key: "$(base64 ${WORKING_DIR}/helm.key.pem)"
+  ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem | tr -d '\n')"
+  tls.crt: "$(base64 ${WORKING_DIR}/helm.cert.pem | tr -d '\n')"
+  tls.key: "$(base64 ${WORKING_DIR}/helm.key.pem | tr -d '\n')"
 kind: Secret
 metadata:
   creationTimestamp: null
