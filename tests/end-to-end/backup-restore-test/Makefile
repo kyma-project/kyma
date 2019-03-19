@@ -8,7 +8,7 @@ build:
 
 .PHONY: build-image
 build-image:
-	mkdir build-temp
+	mkdir -p build-temp
 	cp ../../../docs/backup/docs/assets/all-backup.yaml build-temp
 	cp ../../../docs/backup/docs/assets/system-backup.yaml build-temp
 	docker build -t $(APP_NAME):latest .

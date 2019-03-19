@@ -3,15 +3,15 @@
 res=0
 
 echo "Run dex tests"
-./dex.test
+./dex.test -test.v
 res=$((res+$?))
 
 echo "Run servicecatalog tests"
-./servicecatalog.test
+./servicecatalog.test -test.v
 res=$((res+$?))
 
 echo "Run application tests"
-./application.test
+./application.test -test.v
 res=$((res+$?))
 
 exit ${res}

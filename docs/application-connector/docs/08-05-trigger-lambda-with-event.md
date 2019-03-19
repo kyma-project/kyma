@@ -19,7 +19,7 @@ This guide shows how to create a simple lambda function and trigger it with an e
 >**NOTE:** See [this](#tutorials-get-the-client-certificate) tutorial to learn how to register a service.
 ```json
 {
-  "name": "my-service",
+  "name": "my-events-service",
   "provider": "myCompany",
   "Identifier": "identifier",
   "description": "This is some service",
@@ -76,7 +76,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: servicecatalog.k8s.io/v1beta1
 kind: ServiceInstance
 metadata:
-  name: my-service-instance-name
+  name: my-events-service-instance-name
   namespace: production
 spec:
   serviceClassExternalName: {EXTERNAL_NAME}
@@ -89,7 +89,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: kubeless.io/v1beta1
 kind: Function
 metadata:
-  name: my-lambda
+  name: my-events-lambda
   namespace: production
 spec:
   deployment:
@@ -144,7 +144,7 @@ spec:
       targetPort: 8080
     selector:
       created-by: kubeless
-      function: my-lambda
+      function: my-events-lambda
   timeout: ""
   topic: exampleEvent
 EOF
@@ -153,15 +153,15 @@ EOF
 5. Create a Subscription to allow events to trigger the lambda function.
 ```
 cat <<EOF | kubectl apply -f -
-apiVersion: eventing.kyma.cx/v1alpha1
+apiVersion: eventing.kyma-project.io/v1alpha1
 kind: Subscription
 metadata:
   labels:
-    Function: my-lambda
-  name: lambda-my-lambda-exampleevent-v1
+    Function: my-events-lambda
+  name: lambda-my-events-lambda-exampleevent-v1
   namespace: production
 spec:
-  endpoint: http://my-lambda.production:8080/
+  endpoint: http://my-events-lambda.production:8080/
   event_type: exampleEvent
   event_type_version: v1
   include_subscription_name_header: true
@@ -197,5 +197,5 @@ EOF
 
 7. Check the logs of the lambda function to see if it was triggered. Every time an event successfully triggers the function, this message appears in the logs: `Response acquired successfully! Uuid: {RECEIVED_UUID}`. Run this command:
 ```
-kubectl -n production logs "$(kubectl -n production get po -l function=my-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-lambda | grep "Response acquired successfully! Uuid: "
+kubectl -n production logs "$(kubectl -n production get po -l function=my-events-lambda -o jsonpath='{.items[0].metadata.name}')" -c my-events-lambda | grep "Response acquired successfully! Uuid: "
 ```

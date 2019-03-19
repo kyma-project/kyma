@@ -3,4 +3,4 @@ containerRegistry:
 
 image:
   dir: pr/
-  tag: PR-3049
+  tag: PR-2921

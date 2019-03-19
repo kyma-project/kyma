@@ -11,6 +11,7 @@ import (
 
 	"sync"
 
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
@@ -29,7 +30,6 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/monitoring"
 	istioclient "github.com/kyma-project/kyma/components/application-registry/pkg/client/clientset/versioned"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	"github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -148,8 +148,12 @@ func newServiceDefinitionService(minioURL, namespace string, proxyPort int, name
 	accessServiceManager := newAccessServiceManager(coreClientset, namespace, proxyPort)
 	secretsService := newSecretsRepository(coreClientset, nameResolver, namespace)
 
-	uuidGenerator := metauuid.GeneratorFunc(func() string {
-		return uuid.NewV4().String()
+	uuidGenerator := metauuid.GeneratorFunc(func() (string, error) {
+		uuidInstance, err := uuid.NewV4()
+		if err != nil {
+			return "", err
+		}
+		return uuidInstance.String(), nil
 	})
 
 	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsService, istioService)

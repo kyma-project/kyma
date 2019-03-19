@@ -97,7 +97,7 @@ metadata:
     component: assetstore
     kyma-project.io/installation: ""
 data:
-  assetstore-controller-manager.minikubeIP: ""
+  asset-store-controller-manager.minikubeIP: ""
   test.integration.minikubeIP: ""
 ---
 apiVersion: v1
