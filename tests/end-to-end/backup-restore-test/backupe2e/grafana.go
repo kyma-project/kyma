@@ -35,6 +35,7 @@ import (
 	"io"
 	"io/ioutil"
 	. "github.com/smartystreets/goconvey/convey"
+	"log"
 )
 
 const (
@@ -88,13 +89,14 @@ func NewGrafanaTest() (*grafanaTest, error) {
 		coreClient:  coreClient,
 		grafanaName: "grafana",
 		uuid:        uuid.New().String(),
-		before:      false,
+		before:      true,
 		grafana:     grafana{loginForm: url.Values{}},
 	}, nil
 }
 
 func (t *grafanaTest) CreateResources(namespace string) {
 	// There is not need to be implemented for this test.
+	log.Print("---------------------CreateResources----------------------------------------------------------")
 }
 
 func (t *grafanaTest) DeleteResources() {
@@ -114,9 +116,12 @@ func (t *grafanaTest) DeleteResources() {
 	err = t.waitForPodGrafana(2 * time.Minute)
 	So(err, ShouldBeError) // And error is expected.
 
+	log.Print("---------------------DeleteResources----------------------------------------------------------")
+
 }
 
 func (t *grafanaTest) TestResources(namespace string) {
+	log.Print("---------------------TestResource----------------------------------------------------------")
 	err := t.waitForPodGrafana(5 * time.Minute)
 	So(err, ShouldBeNil)
 
@@ -140,8 +145,8 @@ func (t *grafanaTest) TestResources(namespace string) {
 	So(err, ShouldBeNil)
 
 	// Query to api
-	if !t.before {
-		t.before = true
+	if t.before {
+		t.before = false
 		dashboardFolders := make([]map[string]interface{}, 0)
 		err = json.Unmarshal(dataBody, &dashboardFolders)
 		So(err, ShouldBeNil)
@@ -156,6 +161,7 @@ func (t *grafanaTest) TestResources(namespace string) {
 			title := fmt.Sprintf("%s", folder["title"])
 			dashboards[title] = dashboard{title: title, url: fmt.Sprintf("%s", folder["url"])}
 		}
+		log.Print("---------------------Before Backup----------------------------------------------------------")
 	} else {
 		// iterate over the list of dashboards found before the backup (first time the test runs)
 		for _, dash := range dashboards {
@@ -164,6 +170,7 @@ func (t *grafanaTest) TestResources(namespace string) {
 			So(err, ShouldBeNil)
 			So(resp.StatusCode, ShouldEqual, http.StatusOK)
 		}
+		log.Print("---------------------After Backup----------------------------------------------------------")
 	}
 }
 
