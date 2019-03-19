@@ -18,6 +18,14 @@ rules:
   - ingresses
   verbs:
   - get
+- apiGroups:
+  - '*'
+  resources:
+  - pods
+  - pods/log
+  verbs:
+  - list
+  - get
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
