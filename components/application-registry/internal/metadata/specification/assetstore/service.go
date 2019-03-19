@@ -13,10 +13,15 @@ type Service interface {
 }
 
 type service struct {
+	docsTopicRepository docstopic.Repository
+	uploadClient        upload.Client
 }
 
-func NewService(repository docstopic.Repository, uplocadClient upload.Client) Service {
-	return &service{}
+func NewService(repository docstopic.Repository, uploadClient upload.Client) Service {
+	return &service{
+		docsTopicRepository: repository,
+		uploadClient:        uploadClient,
+	}
 }
 
 type ContentEntry struct {
@@ -25,7 +30,27 @@ type ContentEntry struct {
 }
 
 func (s service) Put(id string, documentation ContentEntry, apiSpec ContentEntry, eventsSpec ContentEntry) apperrors.AppError {
+
+	docsTopic, err := s.uploadSpecs(id, documentation, apiSpec, eventsSpec)
+	if err != nil {
+		return apperrors.Internal("Failed to upload specifications")
+	}
+
+	err = s.docsTopicRepository.Update(docsTopic)
+	if err != nil {
+		if err.Code() == apperrors.CodeNotFound {
+			return s.docsTopicRepository.Create(docsTopic)
+		} else {
+			return err
+		}
+	}
+
 	return nil
+}
+
+func (s service) uploadSpecs(id string, documentation ContentEntry, apiSpec ContentEntry, eventsSpec ContentEntry) (docstopic.DocumentationTopic, apperrors.AppError) {
+
+	return docstopic.DocumentationTopic{}, nil
 }
 
 func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpec []byte, apperr apperrors.AppError) {
