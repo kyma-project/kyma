@@ -141,7 +141,7 @@ global:
         cpu: 50m
         memory: 128Mi
       limits:
-        cpu: 500m
+        cpu: 200m
         memory: 128Mi
 
     # Controls number of Proxy worker threads.
