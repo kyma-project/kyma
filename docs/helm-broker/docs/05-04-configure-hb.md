@@ -5,7 +5,7 @@ title: Configuration
 By default, the Helm Broker fetches bundles listed in the `index.yaml` file from the `bundles` repository [release](https://github.com/kyma-project/bundles/releases). You can also configure the Helm Broker to fetch bundle definitions from other remote HTTPS servers. To do so, follow these steps:
 
 1. [Create a repository](#details-create-a-bundles-repository) with your bundles. To complete this tutorial step by step, use the existing [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository.
-2. Install Kyma locally or on a cluster. See [this](https://kyma-project.io/docs/master/root/kyma/#installation-overview-installation-guides) document to learn how.
+2. Install Kyma locally or on a cluster. See [this](/root/kyma/#installation-installation) document to learn how.
 3. Create a ConfigMap which contains an URL to the repository. You can either:
 
   * Create a ConfigMap using the `kubectl create` command:
