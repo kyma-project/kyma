@@ -15,6 +15,9 @@ type K8sResourcesClient interface {
 	GetIngress(name string, options v1.GetOptions) (interface{}, error)
 	GetRole(name string, options v1.GetOptions) (interface{}, error)
 	GetRoleBinding(name string, options v1.GetOptions) (interface{}, error)
+	GetClusterRole(name string, options v1.GetOptions) (interface{}, error)
+	GetClusterRoleBinding(name string, options v1.GetOptions) (interface{}, error)
+	GetServiceAccount(name string, options v1.GetOptions) (interface{}, error)
 	CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 	GetApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error)
@@ -69,6 +72,18 @@ func (c *k8sResourcesClient) GetRole(name string, options v1.GetOptions) (interf
 
 func (c *k8sResourcesClient) GetRoleBinding(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.RbacV1().RoleBindings(c.namespace).Get(name, options)
+}
+
+func (c *k8sResourcesClient) GetClusterRole(name string, options v1.GetOptions) (interface{}, error) {
+	return c.coreClient.RbacV1().ClusterRoles().Get(name, options)
+}
+
+func (c *k8sResourcesClient) GetClusterRoleBinding(name string, options v1.GetOptions) (interface{}, error) {
+	return c.coreClient.RbacV1().ClusterRoleBindings().Get(name, options)
+}
+
+func (c *k8sResourcesClient) GetServiceAccount(name string, options v1.GetOptions) (interface{}, error) {
+	return c.coreClient.CoreV1().ServiceAccounts(c.namespace).Get(name, options)
 }
 
 func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (interface{}, error) {

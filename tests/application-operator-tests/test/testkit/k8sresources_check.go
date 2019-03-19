@@ -8,13 +8,16 @@ import (
 )
 
 const (
-	ingressNameFormat                 = "%s-application"
-	applicationProxyDeploymentFormat  = "%s-application-gateway"
-	applicationProxyRoleFormat        = "%s-application-gateway-role"
-	applicationProxyRoleBindingFormat = "%s-application-gateway-rolebinding"
-	applicationProxySvcFormat         = "%s-application-gateway-external-api"
-	eventServiceDeploymentFormat      = "%s-event-service"
-	eventServiceSvcFormat             = "%s-event-service-external-api"
+	ingressNameFormat                          = "%s-application"
+	applicationGatewayDeploymentFormat         = "%s-application-gateway"
+	applicationGatewayRoleFormat               = "%s-application-gateway"
+	applicationGatewayRoleBindingFormat        = "%s-application-gateway"
+	applicationGatewayClusterRoleFormat        = "%s-application-gateway"
+	applicationGatewayClusterRoleBindingFormat = "%s-application-gateway"
+	applicationGatewaySvcFormat                = "%s-application-gateway-external-api"
+	applicationGatewayServiceAccountFormat     = "%s-application-gateway"
+	eventServiceDeploymentFormat               = "%s-event-service"
+	eventServiceSvcFormat                      = "%s-event-service-external-api"
 )
 
 type k8sResource struct {
@@ -41,10 +44,13 @@ type K8sResourceChecker struct {
 func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecker {
 	resources := []k8sResource{
 		newResource(fmt.Sprintf(ingressNameFormat, appName), "ingress", client.GetIngress),
-		newResource(fmt.Sprintf(applicationProxyDeploymentFormat, appName), "deployment", client.GetDeployment),
-		newResource(fmt.Sprintf(applicationProxyRoleFormat, appName), "role", client.GetRole),
-		newResource(fmt.Sprintf(applicationProxyRoleBindingFormat, appName), "ingress", client.GetRoleBinding),
-		newResource(fmt.Sprintf(applicationProxySvcFormat, appName), "ingress", client.GetService),
+		newResource(fmt.Sprintf(applicationGatewayDeploymentFormat, appName), "deployment", client.GetDeployment),
+		newResource(fmt.Sprintf(applicationGatewayRoleFormat, appName), "role", client.GetRole),
+		newResource(fmt.Sprintf(applicationGatewayRoleBindingFormat, appName), "rolebinding", client.GetRoleBinding),
+		newResource(fmt.Sprintf(applicationGatewayClusterRoleFormat, appName), "clusterrole", client.GetClusterRole),
+		newResource(fmt.Sprintf(applicationGatewayClusterRoleBindingFormat, appName), "clusterrolebinding", client.GetClusterRoleBinding),
+		newResource(fmt.Sprintf(applicationGatewayServiceAccountFormat, appName), "serviceaccount", client.GetServiceAccount),
+		newResource(fmt.Sprintf(applicationGatewaySvcFormat, appName), "ingress", client.GetService),
 		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "ingress", client.GetDeployment),
 		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "ingress", client.GetService),
 	}
