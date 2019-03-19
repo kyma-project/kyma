@@ -9,8 +9,6 @@ import (
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/testkit/util"
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/executor/proxy"
-
-	log "github.com/sirupsen/logrus"
 )
 
 func TestProxyService(t *testing.T) {
@@ -23,20 +21,20 @@ func TestProxyService(t *testing.T) {
 
 	t.Run("no-auth api test", func(t *testing.T) {
 		apiId := client.CreateNotSecuredAPI(t, testSuit.GetMockServiceURL())
-		log.Infoln("Created service with apiId: ", apiId)
+		t.Logf("Created service with apiId: %s", apiId)
 		defer func() {
-			log.Infof("Cleaning up service %s", apiId)
+			t.Logf("Cleaning up service %s", apiId)
 			client.CleanupService(t, apiId)
 		}()
 
-		log.Infoln("Labeling tests pod with denier label")
+		t.Log("Labeling tests pod with denier label")
 		testSuit.AddDenierLabel(t, apiId)
 
-		log.Infoln("Calling Access Service")
+		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiId, "status/ok")
 		util.RequireStatus(t, http.StatusOK, resp)
 
-		log.Infoln("Successfully accessed application")
+		t.Log("Successfully accessed application")
 	})
 
 	t.Run("basic auth api test", func(t *testing.T) {
@@ -44,20 +42,20 @@ func TestProxyService(t *testing.T) {
 		password := "mySecret"
 
 		apiId := client.CreateBasicAuthSecuredAPI(t, testSuit.GetMockServiceURL(), userName, password)
-		log.Infof("Created service with apiId: %s", apiId)
+		t.Logf("Created service with apiId: %s", apiId)
 		defer func() {
-			log.Infof("Cleaning up service %s", apiId)
+			t.Logf("Cleaning up service %s", apiId)
 			client.CleanupService(t, apiId)
 		}()
 
-		log.Infoln("Labeling tests pod with denier label")
+		t.Log("Labeling tests pod with denier label")
 		testSuit.AddDenierLabel(t, apiId)
 
-		log.Infoln("Calling Access Service")
+		t.Log("Calling Access Service")
 		resp := testSuit.CallAccessService(t, apiId, fmt.Sprintf("auth/basic/%s/%s", userName, password))
 		util.RequireStatus(t, http.StatusOK, resp)
 
-		log.Infoln("Successfully accessed application")
+		t.Log("Successfully accessed application")
 	})
 
 }

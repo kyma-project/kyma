@@ -5,13 +5,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
-	"strings"
 	"testing"
 	"time"
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/helmtest"
-
-	log "github.com/sirupsen/logrus"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -70,12 +67,12 @@ func NewTestSuite(t *testing.T) *TestSuite {
 }
 
 func (ts *TestSuite) Setup(t *testing.T) {
-	log.Infoln("Creating Test Executor pod.")
+	t.Log("Creating Test Executor pod.")
 	ts.CreateTestExecutorPod(t)
 }
 
 func (ts *TestSuite) Cleanup(t *testing.T) {
-	log.Infoln("Cleaning up...")
+	t.Log("Cleaning up...")
 	ts.DeleteTestExecutorPod(t)
 }
 
@@ -156,14 +153,9 @@ func (ts *TestSuite) GetTestExecutorLogs(t *testing.T) {
 	bytes, err := ioutil.ReadAll(reader)
 	require.NoError(t, err)
 
-	strLogs := strings.Replace(string(bytes), "\t", "    ", -1)
-
-	log.Infoln("--------------------------------------------Logs from test executor--------------------------------------------")
-	lines := strings.Split(strLogs, "\n")
-	for _, l := range lines {
-		log.Infoln(l)
-	}
-	log.Info("--------------------------------------------End of logs from test executor--------------------------------------------")
+	t.Log("--------------------------------------------Logs from test executor--------------------------------------------")
+	t.Log(string(bytes))
+	t.Log("--------------------------------------------End of logs from test executor--------------------------------------------")
 }
 
 func (ts *TestSuite) DeleteTestExecutorPod(t *testing.T) {

@@ -17,7 +17,6 @@ import (
 
 	"github.com/kyma-project/kyma/tests/application-gateway-tests/test/tools"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -79,7 +78,7 @@ func (ts *TestSuite) Setup(t *testing.T) {
 }
 
 func (ts *TestSuite) Cleanup(t *testing.T) {
-	log.Infoln("Calling cleanup")
+	t.Log("Calling cleanup")
 
 	err := ts.appMockServer.Kill()
 	assert.NoError(t, err)
@@ -94,10 +93,10 @@ func (ts *TestSuite) ApplicationName() string {
 // WaitForAccessToAPIServer waits for access to API Server which might be delayed by initialization of Istio sidecar
 func (ts *TestSuite) WaitForAccessToAPIServer(t *testing.T) {
 	err := tools.WaitForFunction(defaultCheckInterval, apiServerAccessTimeout, func() bool {
-		log.Infoln("Trying to access API Server...")
+		t.Log("Trying to access API Server...")
 		_, err := ts.k8sClient.ServerVersion()
 		if err != nil {
-			log.Errorf(err.Error())
+			t.Log(err.Error())
 			return false
 		}
 
@@ -108,7 +107,7 @@ func (ts *TestSuite) WaitForAccessToAPIServer(t *testing.T) {
 }
 
 func (ts *TestSuite) CheckApplicationGatewayHealth(t *testing.T) {
-	log.Infoln("Checking application gateway health...")
+	t.Log("Checking application gateway health...")
 
 	err := tools.WaitForFunction(defaultCheckInterval, appGatewayHealthCheckTimeout, func() bool {
 		req, err := http.NewRequest(http.MethodGet, ts.proxyURL()+"/v1/health", nil)
@@ -134,7 +133,7 @@ func (ts *TestSuite) CheckApplicationGatewayHealth(t *testing.T) {
 func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.Response {
 	url := fmt.Sprintf("http://app-%s-%s/%s", ts.config.Application, apiId, path)
 
-	log.Infoln("Waiting for DNS in Istio Proxy...")
+	t.Log("Waiting for DNS in Istio Proxy...")
 	// Sometimes Istio Proxy has problems with DNS
 	// this wait prevents random failures
 	time.Sleep(dnsWaitTime)
@@ -142,21 +141,21 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 	var resp *http.Response
 
 	err := tools.WaitForFunction(defaultCheckInterval, accessServiceConnectionTimeout, func() bool {
-		log.Infoln("Accessing proxy at: ", url)
+		t.Logf("Accessing proxy at: %s", url)
 		var err error
 
 		resp, err = http.Get(url)
 		if err != nil {
-			log.Errorf("Access service not ready: %s", err.Error())
+			t.Logf("Access service not ready: %s", err.Error())
 			return false
 		}
 		defer resp.Body.Close()
 
 		if resp.StatusCode != http.StatusOK {
-			log.Errorf("Access service not ready: Invalid response from access service, status: %d.", resp.StatusCode)
+			t.Logf("Access service not ready: Invalid response from access service, status: %d.", resp.StatusCode)
 			bytes, err := ioutil.ReadAll(resp.Body)
 			require.NoError(t, err)
-			log.Errorf(string(bytes))
+			t.Log(string(bytes))
 
 			return false
 		}
