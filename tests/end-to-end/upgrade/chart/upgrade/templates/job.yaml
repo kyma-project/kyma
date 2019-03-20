@@ -1,5 +1,5 @@
-apiVersion: batch/v1
-kind: Job
+apiVersion: v1
+kind: Pod
 metadata:
   name: test-{{ template "fullname" . }}
   labels:
@@ -7,25 +7,20 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
+    "kyma-project.io/upgrade-e2e-test": "prepareData"
+  annotations:
+    sidecar.istio.io/inject: "false"
 spec:
-  backoffLimit: 0
-  template:
-    metadata:
-      labels:
-        "kyma-project.io/upgrade-e2e-test": "prepareData"
-      annotations:
-        sidecar.istio.io/inject: "false"
-    spec:
-      serviceAccountName: test-{{ template "fullname" . }}
-      restartPolicy: Never
-      containers:
-      - name: runner
-        image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
-        imagePullPolicy: "{{ .Values.image.pullPolicy}}"
-        command: ["e2e-upgrade-test"]
-        args: ["--action", "prepareData"]
-        env:
-        - name: APP_MAX_CONCURRENCY_LEVEL
-          value: "1"
-        - name: APP_LOGGER_LEVEL
-          value: "info"
+  serviceAccountName: test-{{ template "fullname" . }}
+  restartPolicy: Never
+  containers:
+  - name: runner
+    image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
+    imagePullPolicy: "{{ .Values.image.pullPolicy}}"
+    command: ["e2e-upgrade-test"]
+    args: ["--action", "prepareData"]
+    env:
+    - name: APP_MAX_CONCURRENCY_LEVEL
+      value: "1"
+    - name: APP_LOGGER_LEVEL
+      value: "info"
