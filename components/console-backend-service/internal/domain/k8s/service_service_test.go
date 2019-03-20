@@ -1,6 +1,7 @@
 package k8s_test
 
 import (
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"testing"
@@ -197,6 +198,7 @@ func TestServiceService_Unsubscribe(t *testing.T) {
 }
 
 func TestServiceService_Update(t *testing.T) {
+	assert := assert.New(t)
 	t.Run("Success", func(t *testing.T) {
 		exampleName := "exampleService"
 		exampleNamespace := "exampleNamespace"
@@ -211,11 +213,11 @@ func TestServiceService_Update(t *testing.T) {
 
 		service, err := svc.Update(exampleName, exampleNamespace, *update)
 		require.NoError(t, err)
-		assert.Equal(t, update, service)
+		assert.Equal(update, service)
 
 		service, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
-		assert.Equal(t, update, service)
+		assert.Equal(update, service)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
@@ -232,11 +234,11 @@ func TestServiceService_Update(t *testing.T) {
 
 		service, err := svc.Update(exampleName, exampleNamespace, *update)
 		require.Error(t, err)
-		assert.Nil(t, service)
+		assert.Nil(service)
 
 		service, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
 		require.Error(t, err)
-		assert.Nil(t, service)
+		assert.Nil(service)
 	})
 
 	t.Run("NameMismatch", func(t *testing.T) {
@@ -254,16 +256,17 @@ func TestServiceService_Update(t *testing.T) {
 
 		service, err := svc.Update(exampleName, exampleNamespace, *update)
 		require.Error(t, err)
-		assert.True(t, errors.IsInvalid(err))
-		assert.Nil(t, service)
+		assert.True(apierror.IsInvalid(err))
+		assert.Nil(service)
 
 		service, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
 		require.NoError(t, err)
-		assert.Equal(t, exampleService, service)
+		assert.Equal(exampleService, service)
 	})
 }
 
 func TestServiceService_Delete(t *testing.T) {
+	assert := assert.New(t)
 	t.Run("Success", func(t *testing.T) {
 		exampleName := "exampleService"
 		exampleNamespace := "exampleNamespace"
@@ -275,7 +278,7 @@ func TestServiceService_Delete(t *testing.T) {
 
 		require.NoError(t, err)
 		_, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
-		assert.True(t, errors.IsNotFound(err))
+		assert.True(errors.IsNotFound(err))
 	})
 }
 

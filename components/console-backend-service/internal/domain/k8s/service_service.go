@@ -2,15 +2,14 @@ package k8s
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
 	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/validation/field"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
@@ -108,26 +107,23 @@ func (svc *serviceService) Delete(name, namespace string) error {
 }
 
 func (svc *serviceService) checkUpdatePreconditions(name string, namespace string, update v1.Service) error {
-	errorList := field.ErrorList{}
+	var errs apierror.ErrorFieldAggregate
 	if name != update.Name {
-		errorList = append(errorList, field.Invalid(field.NewPath("metadata.name"), update.Name, fmt.Sprintf("name of updated object does not match the original (%s)", name)))
+		errs = append(errs, apierror.NewInvalidField("metadata.name", update.Name, fmt.Sprintf("name of updated object does not match the original (%s)", name)))
 	}
 	if namespace != update.Namespace {
-		errorList = append(errorList, field.Invalid(field.NewPath("metadata.namespace"), update.Namespace, fmt.Sprintf("namespace of updated object does not match the original (%s)", namespace)))
+		errs = append(errs, apierror.NewInvalidField("metadata.namespace", update.Namespace, fmt.Sprintf("namespace of updated object does not match the original (%s)", namespace)))
 	}
 	typeMeta := svc.serviceTypeMetadata()
 	if update.Kind != typeMeta.Kind {
-		errorList = append(errorList, field.Invalid(field.NewPath("kind"), update.Kind, "service kind should not be changed"))
+		errs = append(errs, apierror.NewInvalidField("kind", update.Kind, "service's kind should not be changed"))
 	}
 	if update.APIVersion != typeMeta.APIVersion {
-		errorList = append(errorList, field.Invalid(field.NewPath("apiVersion"), update.APIVersion, "service apiVersion should not be changed"))
+		errs = append(errs, apierror.NewInvalidField("apiVersion", update.APIVersion, "service's apiVersion should not be changed"))
 	}
 
-	if len(errorList) > 0 {
-		return errors.NewInvalid(schema.GroupKind{
-			Group: "",
-			Kind:  "Service",
-		}, name, errorList)
+	if len(errs) > 0 {
+		return apierror.NewInvalid(pretty.Service, errs)
 	}
 
 	return nil
