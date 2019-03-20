@@ -28,7 +28,7 @@ In this example, the system renders the `bind.yaml` file. The system resolves al
 
 ### File specification
 
-Set the following fields to create a valid `bind.yaml` file:
+Define the following fields to create a valid `bind.yaml` file:
 
 |   Field Name   |      Description                       |
 |--------------|--------------------------------------------------------------|
