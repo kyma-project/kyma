@@ -4,7 +4,7 @@ TEST_EXIT_STATUS=0
 
 for f in *.test; do
     chmod +x ./${f}
-    ./${f}
+    ./${f} -test.v
     EXIT_STATUS=$?
     if [ ${EXIT_STATUS} -ne 0 ]; then
         echo "Setting exit status to ${EXIT_STATUS}"

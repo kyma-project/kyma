@@ -3,4 +3,4 @@ global:
     path: eu.gcr.io/kyma-project
   cms_controller_manager:
     dir: develop/
-    version: f38f010c
+    version: daf235a6

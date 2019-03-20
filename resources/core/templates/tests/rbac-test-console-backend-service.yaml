@@ -34,7 +34,7 @@ rules:
     nonResourceURLs: []
   - apiGroups: [""]
     resources: ["services"]
-    verbs: ["create", "delete"]
+    verbs: ["create", "delete", "get", "list"]
   - apiGroups: [""]
     resources: ["limitranges", "resourcequotas"]
     verbs: ["create", "get"]

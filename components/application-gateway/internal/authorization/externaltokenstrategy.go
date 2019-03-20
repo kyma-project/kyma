@@ -2,7 +2,6 @@ package authorization
 
 import (
 	"net/http"
-	"net/http/httputil"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
@@ -16,7 +15,7 @@ func newExternalTokenStrategy(strategy Strategy) Strategy {
 	return externalTokenStrategy{strategy: strategy}
 }
 
-func (e externalTokenStrategy) AddAuthorization(r *http.Request, proxy *httputil.ReverseProxy) apperrors.AppError {
+func (e externalTokenStrategy) AddAuthorization(r *http.Request, setter TransportSetter) apperrors.AppError {
 	externalToken := r.Header.Get(httpconsts.HeaderAccessToken)
 
 	if externalToken != "" {
@@ -25,7 +24,7 @@ func (e externalTokenStrategy) AddAuthorization(r *http.Request, proxy *httputil
 
 		return nil
 	} else {
-		return e.strategy.AddAuthorization(r, proxy)
+		return e.strategy.AddAuthorization(r, setter)
 	}
 }
 
