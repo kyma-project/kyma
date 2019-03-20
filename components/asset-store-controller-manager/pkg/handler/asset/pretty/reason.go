@@ -18,6 +18,7 @@ const (
 	RemoteContentVerificationError Reason = "RemoteContentVerificationError"
 	CleanupError                   Reason = "CleanupError"
 	Cleaned                        Reason = "Cleaned"
+	Scheduled                      Reason = "Scheduled"
 )
 
 func (r Reason) String() string {
@@ -56,6 +57,8 @@ func (r Reason) Message() string {
 		return "Removing old asset content failed due to error %s"
 	case Cleaned:
 		return "Old asset content hes been removed"
+	case Scheduled:
+		return "Asset scheduled for processing"
 	default:
 		return ""
 	}

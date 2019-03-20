@@ -45,6 +45,7 @@ type Store interface {
 	ContainsAllObjects(ctx context.Context, bucketName, assetName string, files []string) (bool, error)
 	PutObjects(ctx context.Context, bucketName, assetName, sourceBasePath string, files []string) error
 	DeleteObjects(ctx context.Context, bucketName, prefix string) error
+	ListObjects(ctx context.Context, bucketName, prefix string) ([]string, error)
 }
 
 type store struct {
@@ -161,6 +162,20 @@ func (s *store) PutObjects(ctx context.Context, bucketName, assetName, sourceBas
 	}
 
 	return nil
+}
+
+func (s *store) ListObjects(ctx context.Context, bucketName, prefix string) ([]string, error) {
+	objects, err := s.listObjects(ctx, bucketName, prefix)
+	if err != nil {
+		return nil, err
+	}
+
+	result := make([]string, 0, len(objects))
+	for key := range objects {
+		result = append(result, key)
+	}
+
+	return result, nil
 }
 
 func (s *store) DeleteObjects(ctx context.Context, bucketName, prefix string) error {

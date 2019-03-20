@@ -3,7 +3,7 @@ package pretty
 type Reason string
 
 const (
-	NotFoundReason                 Reason = "BucketNotFound"
+	BucketNotFound                 Reason = "BucketNotFound"
 	BucketCreationFailure          Reason = "BucketCreationFailure"
 	BucketVerificationFailure      Reason = "BucketVerificationFailure"
 	BucketCreated                  Reason = "BucketCreated"
@@ -21,7 +21,7 @@ func (r Reason) Message() string {
 	switch r {
 	case BucketCreated:
 		return "Bucket has been created"
-	case NotFoundReason:
+	case BucketNotFound:
 		return "Bucket %s doesn't exist anymore"
 	case BucketCreationFailure:
 		return "Bucket couldn't be created due to error %s"

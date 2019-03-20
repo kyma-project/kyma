@@ -15,7 +15,7 @@ type Config struct {
 	Loader  loader.Config
 	Webhook assethook.Config
 
-	ClusterAssetRelistInterval time.Duration `envconfig:"default=5m"`
+	ClusterAssetRelistInterval time.Duration `envconfig:"default=30s"`
 }
 
 func loadConfig(prefix string) (Config, error) {
