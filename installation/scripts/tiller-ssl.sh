@@ -90,15 +90,15 @@ metadata:
 ---
 apiVersion: v1
 data:
-  ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem | tr -d '\n')"
-  tls.crt: "$(base64 ${WORKING_DIR}/helm.cert.pem | tr -d '\n')"
-  tls.key: "$(base64 ${WORKING_DIR}/helm.key.pem | tr -d '\n')"
+  global.helm.ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem | tr -d '\n')"
+  global.helm.tls.crt: "$(base64 ${WORKING_DIR}/helm.cert.pem | tr -d '\n')"
+  global.helm.tls.key: "$(base64 ${WORKING_DIR}/helm.key.pem | tr -d '\n')"
 kind: Secret
 metadata:
   creationTimestamp: null
   labels:
-    app: helm
-    name: helm
+    installer: overrides
+    kyma-project.io/installation: ""
   name: helm-secret
   namespace: kyma-installer
 type: Opaque

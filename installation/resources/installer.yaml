@@ -86,7 +86,6 @@ spec:
       containers:
       - name: kyma-installer-container
         image: demonsthere/kyma-installer:tls
-        # command: ["tail", "-f", "/dev/null"]
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: /etc/certs
@@ -96,6 +95,11 @@ spec:
       - name: helm-certs
         secret:
           secretName: helm-secret
+          items:
+            - key: global.helm.tls.crt
+              path: tls.crt
+            - key: global.helm.tls.key
+              path: tls.key
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
