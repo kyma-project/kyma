@@ -8,13 +8,13 @@ Bundles which the Helm Broker uses must have a specific structure. These are all
 ```
 sample-bundle/
   ├── meta.yaml                             # [REQUIRED] A file which contains metadata information about this bundle
-  ├── chart/                                # [REQUIRED] A directory which contains a Helm chart that installs your Kubernetes
+  ├── chart/                                # [REQUIRED] A directory which contains a Helm chart that installs your Kubernetes resources
   │    └── {chart-name}/                    # [REQUIRED] A Helm chart directory
   │         └── ....                        # [REQUIRED] Helm chart files   
   └── plans/                                # [REQUIRED] A directory which contains the possible plans for an installed chart
        ├── example-enterprise               # [REQUIRED] A directory which contains files for a specific plan
        │   ├── meta.yaml                    # [REQUIRED] A file which contains metadata information about this plan
-       │   ├── bind.yaml                    # A file which contains information required to bind a given plan
+       │   ├── bind.yaml                    # A file which contains information required to bind this plan
        │   ├── create-instance-schema.json  # JSON schema definitions for creating a ServiceInstance
        │   ├── bind-instance-schema.json    # JSON schema definitions for binding a ServiceInstance
        │   ├── update-instance-schema.json  # JSON schema definitions for updating a ServiceInstance
@@ -32,23 +32,23 @@ The `meta.yaml` file contains information about the bundle. Define the following
 
 |      Field Name     | Required |                   Description             |
 |-------------------|:--------:|----------------------------------------------|
-|         **name**        |   YES   | A name of the bundle.  |
-|       **version**       |   YES   | A version of the bundle. It is a broker service identifier.  |
-|          **id**         |   YES   | A broker service identifier.  |
-|     **description**     |   YES   | A short description of the service. |
-|     **displayName**     |   YES   | A display name of the bundle.    |
+|         **name**        |   YES   | The name of the bundle.  |
+|       **version**       |   YES   | The version of the bundle. It is a broker service identifier.  |
+|          **id**         |   YES   | The broker service identifier.  |
+|     **description**     |   YES   | The short description of the service. |
+|     **displayName**     |   YES   | The display name of the bundle.    |
 |         **tags**        |   NO  | Keywords describing the provided service, separated by commas.     |
-|       **bindable**      |   NO  | A field that specifies whether you can bind a given bundle. |
-| **providerDisplayName** |   NO  | A name of the upstream entity providing the actual service.  |
-|   **longDescription**   |   NO  | A long description of the service.     |
-|   **documentationURL**  |   NO  | A link to the documentation page for the service.        |
-|      **supportURL**     |   NO  | A link to the support page for the service.     |
+|       **bindable**      |   NO  | The field that specifies whether you can bind a given bundle. |
+| **providerDisplayName** |   NO  | The name of the upstream entity providing the actual service.  |
+|   **longDescription**   |   NO  | The long description of the service.     |
+|   **documentationURL**  |   NO  | The link to the documentation page for the service.        |
+|      **supportURL**     |   NO  | The link to the support page for the service.     |
 |       **imageURL**      |   NO  | The URL to an image. You must provide the image in the `SVG` format.          |
 |       **labels**        |   NO  | Key-value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
-| **bindingsRetrievable** |   NO  | A field that specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
-|   **planUpdatable**     |   NO  |  A field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
-|       **requires**      |   NO  | A list of permissions the user must grant to the instances of this service. |
-| **provisionOnlyOnce**   |   NO  | A field that specifies whether the bundle can be provisioned only once in a given Namespace. The default value is `false`. |
+| **bindingsRetrievable** |   NO  | The field that specifies whether fetching a ServiceBinding using a GET request on the resource's endpoint is supported for all plans. The default value is `false`.   |
+|   **planUpdatable**     |   NO  |  The field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
+|       **requires**      |   NO  | The list of permissions the user must grant to the instances of this service. |
+| **provisionOnlyOnce**   |   NO  | The field that specifies whether the bundle can be provisioned only once in a given Namespace. The default value is `false`. |
 
 > **NOTE**: The **provisionOnlyOnce** and **local** keys are reserved and cannot be added to the **labels** entry, since the Helm Broker overrides them at runtime. The Helm Broker always adds the `local:true` label and it adds the `provisionOnlyOnce:true` label only if **provisionOnlyOnce** is set to `true`.
 
@@ -66,12 +66,12 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
-|     **name**    |   YES   |     A name of the plan.   |
-|      **id**     |   YES   |     An ID of the plan. |
-| **description** |   YES   | A description of the plan. |
-| **displayName** |   YES   | A display name of the plan. |
-|  **bindable**   |   NO  | A field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
-|     **free**    |   NO  | An attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
+|     **name**    |   YES   |     The name of the plan.   |
+|      **id**     |   YES   |     The ID of the plan. |
+| **description** |   YES   | The description of the plan. |
+| **displayName** |   YES   | The display name of the plan. |
+|  **bindable**   |   NO  | The field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
+|     **free**    |   NO  | The attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
 * `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-bundles) document.
 
@@ -87,7 +87,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 ## Troubleshooting
 
-Use the dry-run mode to check the generated manifests of the chart without installing it.
+Use the dry run mode to check the generated manifests of the chart without installing it.
 The `--debug` option prints the generated manifests.
 As a prerequisite, you must install [Helm](https://github.com/kubernetes/helm) on your machine to run this command:
 

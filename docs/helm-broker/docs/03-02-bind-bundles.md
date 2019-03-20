@@ -32,24 +32,24 @@ Define the following fields to create a valid `bind.yaml` file:
 
 |   Field Name   |      Description                       |
 |--------------|--------------------------------------------------------------|
-| **credential** | A list of credential variables returned during the binding action.  |
-| **credential.name** | A name of a given credential variable.  |
-| **credential.value** | A variable value. You can also use the Helm Chart templating directives. This field is interchangeable with **credential.valueFrom**. |
-| **credential.valueFrom** | A source of the given credential variable's value. This field is interchangeable with **credential.value**.  |
-| **credential.valueFrom.configMapKeyRef** | A field which selects a ConfigMap key in the Helm chart release Namespace.    |
-| **credential.valueFrom.configMapKeyRef.name** | A name of the ConfigMap.  |
-| **credential.valueFrom.configMapKeyRef.key**  | A name of the key from which the value is retrieved.  |
-| **credential.valueFrom.secretKeyRef**  | A field which selects a Secret key in the Helm Chart release Namespace.     |
-| **credential.valueFrom.secretKeyRef.name**    | A name of the Secret.     |
-| **credential.valueFrom.secretKeyRef.key**    | A name of the key from which the value is retrieved. |
-| **credential.valueFrom.serviceRef**   | A field which selects a service resource in the Helm Chart release Namespace. |
-| **credential.valueFrom.serviceRef.name**    | A name of the service.          |
-| **credential.valueFrom.serviceRef.jsonpath**  | A JSONPath expression used to select the specified field value. For more information, see the [User Guide](https://kubernetes.io/docs/user-guide/jsonpath/). |
-| **credentialFrom** | A list of sources to populate credential variables on the binding action. When the key exists in multiple sources, the value associated with the last source takes precedence. Variables from the `credential` section override the values if duplicated keys exist. |
-| **credentialFrom.configMapRef** | A ConfigMap to retrieve the values from. It must be available in the Helm chart release Namespace. |
-| **credentialFrom.configMapRef.name**    | A name of the ConfigMap.   |
-| **credentialFrom.secretRef** | A Secret to retrieve the values from. It must be available in the Helm chart release Namespace.  |
-| **credentialFrom.secretRef.name**    | A name of the Secret.      |
+| **credential** | The list of credential variables returned during the binding action.  |
+| **credential.name** | The name of a given credential variable.  |
+| **credential.value** | The variable value. You can also use the Helm Chart templating directives. This field is interchangeable with **credential.valueFrom**. |
+| **credential.valueFrom** | The source of the given credential variable's value. This field is interchangeable with **credential.value**.  |
+| **credential.valueFrom.configMapKeyRef** | The field which selects a ConfigMap key in the Helm chart release Namespace.    |
+| **credential.valueFrom.configMapKeyRef.name** | The name of the ConfigMap.  |
+| **credential.valueFrom.configMapKeyRef.key**  | The name of the key from which the value is retrieved.  |
+| **credential.valueFrom.secretKeyRef**  | The field which selects a Secret key in the Helm Chart release Namespace.     |
+| **credential.valueFrom.secretKeyRef.name**    | The name of the Secret.     |
+| **credential.valueFrom.secretKeyRef.key**    | The name of the key from which the value is retrieved. |
+| **credential.valueFrom.serviceRef**   | The field which selects a service resource in the Helm Chart release Namespace. |
+| **credential.valueFrom.serviceRef.name**    | The name of the service.          |
+| **credential.valueFrom.serviceRef.jsonpath**  | The JSONPath expression used to select the specified field value. For more information, see the [User Guide](https://kubernetes.io/docs/user-guide/jsonpath/). |
+| **credentialFrom** | The list of sources to populate credential variables on the binding action. When the key exists in multiple sources, the value associated with the last source takes precedence. Variables from the `credential` section override the values if duplicated keys exist. |
+| **credentialFrom.configMapRef** | The ConfigMap to retrieve the values from. It must be available in the Helm chart release Namespace. |
+| **credentialFrom.configMapRef.name**    | The name of the ConfigMap.   |
+| **credentialFrom.secretRef** | The Secret to retrieve the values from. It must be available in the Helm chart release Namespace.  |
+| **credentialFrom.secretRef.name**    | The name of the Secret.      |
 
 
 See the fully extended example of the `bind.yaml` file:

@@ -15,7 +15,7 @@ sample-bundle-repository
   └── ...                                                    
 ```
 
-Read [this](https://github.com/kyma-project/bundles/blob/master/docs/getting-started.md) document to learn how to set up your own bundles repository which generates `.tgz` and `index.yaml` files, and expose them using an HTTPS server. See the example of the Kyma bundles repository [here](https://github.com/kyma-project/bundles/releases).
+Read [this](https://github.com/kyma-project/bundles/blob/master/docs/getting-started.md) document to learn how to set up your own bundles repository which generates `.tgz` and `index.yaml` files, and expose them using an HTTPS server. See the example of the Kyma `bundles` repository [here](https://github.com/kyma-project/bundles/releases).
 
 ### {bundle_name}-{bundle_version}.tgz file
 
