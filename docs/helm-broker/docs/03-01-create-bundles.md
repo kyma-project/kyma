@@ -44,7 +44,7 @@ The `meta.yaml` file contains information about the bundle. Define the following
 |   **documentationURL**  |   NO  | A link to the documentation page for the service.        |
 |      **supportURL**     |   NO  | A link to the support page for the service.     |
 |       **imageURL**      |   NO  | The URL to an image. You must provide the image in the `SVG` format.          |
-|       **labels**        |   NO  | Key/value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
+|       **labels**        |   NO  | Key-value pairs that help you to organize your project. Use labels to indicate different elements, such as Namespaces, services, or teams.   |
 | **bindingsRetrievable** |   NO  | A field that specifies whether fetching a ServiceBinding using a `GET` call on the resource's endpoint is supported for all plans. The default value is `false`.   |
 |   **planUpdatable**     |   NO  |  A field that specifies whether instances of this service can be updated to a different plan. The default value is `false`  |
 |       **requires**      |   NO  | A list of permissions the user must grant to the instances of this service. |
