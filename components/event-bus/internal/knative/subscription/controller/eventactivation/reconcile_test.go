@@ -105,7 +105,7 @@ func TestAllCases(t *testing.T) {
 		r := &reconciler{
 			client:   c,
 			recorder: recorder,
-			time: NewMockCurrentTime(),
+			time:     NewMockCurrentTime(),
 		}
 		tc.IgnoreTimes = true
 		t.Logf("Running test %s", tc.Name)
@@ -218,9 +218,9 @@ func makeSubscription(name string) *subApis.Subscription {
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: name,
+			Name:      name,
 			Namespace: testNamespace,
-			UID:  subUid,
+			UID:       subUid,
 		},
 		SubscriptionSpec: subApis.SubscriptionSpec{
 			SourceID: sourceID,

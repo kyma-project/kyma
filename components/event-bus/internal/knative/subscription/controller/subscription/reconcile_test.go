@@ -27,16 +27,16 @@ import (
 )
 
 const (
-	kySubName = "ky-subscription"
-	kyNamespace = "default"
-	eventType = "testevent"
+	kySubName        = "ky-subscription"
+	kyNamespace      = "default"
+	eventType        = "testevent"
 	eventTypeVersion = "v1"
-	sourceID = "testsourceid"
+	sourceID         = "testsourceid"
 
-	subUid             = "sub-uid"
-	chanUid			   = "channel-uid"
-	provisioner        = "natss"
-	subscriberUri      = "URL-test-susbscriber"
+	subUid        = "sub-uid"
+	chanUid       = "channel-uid"
+	provisioner   = "natss"
+	subscriberUri = "URL-test-susbscriber"
 
 	testErrorMessage = "test induced error"
 )
@@ -47,8 +47,8 @@ var (
 	deletionTime = metav1.Now().Rfc3339Copy()
 
 	events = map[string]corev1.Event{
-		subReconciled:          {Reason: subReconciled, Type: corev1.EventTypeNormal},
-		subReconcileFailed:  	{Reason: subReconcileFailed, Type: corev1.EventTypeWarning},
+		subReconciled:      {Reason: subReconciled, Type: corev1.EventTypeNormal},
+		subReconcileFailed: {Reason: subReconcileFailed, Type: corev1.EventTypeWarning},
 	}
 
 	knativeLib = NewMockKnativeLib()
@@ -119,7 +119,9 @@ var testCases = []controllertesting.TestCase{
 				}
 			},
 		},
-		WantPresent: []runtime.Object{},
+		WantPresent: []runtime.Object{
+			makeReadySubscription(),
+		},
 		WantEvent: []corev1.Event{
 			events[subReconciled],
 		},
@@ -142,7 +144,9 @@ var testCases = []controllertesting.TestCase{
 				}
 			},
 		},
-		WantPresent: []runtime.Object{ },
+		WantPresent: []runtime.Object{
+			makeReadySubscription(),
+		},
 		WantEvent: []corev1.Event{
 			events[subReconciled],
 		},
@@ -165,7 +169,9 @@ var testCases = []controllertesting.TestCase{
 				}
 			},
 		},
-		WantPresent: []runtime.Object{},
+		WantPresent: []runtime.Object{
+			makeNotReadySubscription(),
+		},
 		WantEvent: []corev1.Event{
 			events[subReconciled],
 		},
@@ -191,18 +197,18 @@ func TestAllCases(t *testing.T) {
 	for _, tc := range testCases {
 		c := tc.GetClient()
 		opts := opts.Options{
-			Port: 8080,
-			ResyncPeriod: 10 * time.Second,
+			Port:           8080,
+			ResyncPeriod:   10 * time.Second,
 			ChannelTimeout: 10 * time.Second,
 		}
 
 		recorder := tc.GetEventRecorder()
 		r := &reconciler{
-			client:   c,
-			recorder: recorder,
+			client:     c,
+			recorder:   recorder,
 			knativeLib: knativeLib,
-			opts: &opts,
-			time: NewMockCurrentTime(),
+			opts:       &opts,
+			time:       NewMockCurrentTime(),
 		}
 		t.Logf("Running test %s", tc.Name)
 		if tc.ReconcileKey == "" {
@@ -220,14 +226,14 @@ func makeKySubscription() *eventingv1alpha1.Subscription {
 			Kind:       "Subscription",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: kySubName,
+			Name:      kySubName,
 			Namespace: kyNamespace,
-			UID:  subUid,
+			UID:       subUid,
 		},
 		SubscriptionSpec: eventingv1alpha1.SubscriptionSpec{
-			EventType: eventType,
+			EventType:        eventType,
 			EventTypeVersion: eventTypeVersion,
-			SourceID:sourceID,
+			SourceID:         sourceID,
 		},
 	}
 }
@@ -235,8 +241,8 @@ func makeKySubscription() *eventingv1alpha1.Subscription {
 func makeReadySubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{
-		{ Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue },
-		{ Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionTrue	},
+		{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue},
+		{Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionTrue},
 	}
 	return subscription
 }
@@ -244,8 +250,8 @@ func makeReadySubscription() *eventingv1alpha1.Subscription {
 func makeNotReadySubscription() *eventingv1alpha1.Subscription {
 	subscription := makeSubscriptionWithFinalizer()
 	subscription.Status.Conditions = []eventingv1alpha1.SubscriptionCondition{
-		{ Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionTrue },
-		{ Type:   eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionFalse},
+		{Type: eventingv1alpha1.EventsActivated, Status: eventingv1alpha1.ConditionFalse},
+		{Type: eventingv1alpha1.Ready, Status: eventingv1alpha1.ConditionFalse},
 	}
 	return subscription
 }
@@ -321,7 +327,7 @@ func NewMockKnativeLib() util.KnativeLibIntf {
 func (k *MockKnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
 	channel, ok := knChannels[name]
 	if !ok {
-		gr := schema.GroupResource {Group: "test", Resource: "channel"}
+		gr := schema.GroupResource{Group: "test", Resource: "channel"}
 		return nil, apierrors.NewNotFound(gr, name)
 	}
 	return channel, nil
@@ -336,7 +342,7 @@ func (k *MockKnativeLib) DeleteChannel(name string, namespace string) error {
 	return nil
 }
 func (k *MockKnativeLib) CreateSubscription(name string, namespace string, channelName string, uri *string) error {
-	knSub :=makeKnSubscription(makeEventsActivatedSubscription())
+	knSub := makeKnSubscription(makeEventsActivatedSubscription())
 	knSubscriptions[knSub.Name] = knSub
 	return nil
 }
@@ -347,7 +353,7 @@ func (k *MockKnativeLib) DeleteSubscription(name string, namespace string) error
 func (k *MockKnativeLib) GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error) {
 	knSub, ok := knSubscriptions[name]
 	if !ok {
-		gr := schema.GroupResource {Group: "test", Resource: "kn-subscriptoin"}
+		gr := schema.GroupResource{Group: "test", Resource: "kn-subscriptoin"}
 		return nil, apierrors.NewNotFound(gr, name)
 	}
 	return knSub, nil

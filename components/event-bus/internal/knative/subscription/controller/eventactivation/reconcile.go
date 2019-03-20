@@ -19,7 +19,7 @@ const (
 type reconciler struct {
 	client   client.Client
 	recorder record.EventRecorder
-	time util.CurrentTime
+	time     util.CurrentTime
 }
 
 // Verify the struct implements reconcile.Reconciler

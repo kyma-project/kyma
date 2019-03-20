@@ -27,7 +27,7 @@ type reconciler struct {
 	recorder   record.EventRecorder
 	knativeLib util.KnativeLibIntf
 	opts       *opts.Options
-	time 	   util.CurrentTime
+	time       util.CurrentTime
 }
 
 // Verify the struct implements reconcile.Reconciler
@@ -66,12 +66,37 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	requeue, reconcileErr := r.reconcile(ctx, subscription)
 	if reconcileErr != nil {
 		log.Error(reconcileErr, "Reconciling Subscription")
-		util.UpdateSubscriptionReadyStatus(subscription, eventingv1alpha1.ConditionFalse, reconcileErr.Error(), r.time)
+		if err := util.SetNotReadySubscription(ctx, r.client, subscription, reconcileErr.Error(), r.time); err != nil {
+			log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
+		}
 		r.recorder.Eventf(subscription, corev1.EventTypeWarning, subReconcileFailed, "Subscription reconciliation failed: %v", err)
 	} else if !requeue {
-		util.UpdateSubscriptionReadyStatus(subscription, eventingv1alpha1.ConditionTrue, "", r.time)
-		log.Info("Subscription reconciled")
-		r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled, "Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+		// the work was done without errors
+		if !subscription.ObjectMeta.DeletionTimestamp.IsZero() {
+			// subscription is marked for deletion, all the work was done
+			r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
+				"Subscription reconciled and deleted, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+		} else if util.IsSubscriptionActivated(subscription) {
+			// reconcile finished with no errors
+			if err := util.SetReadySubscription(ctx, r.client, subscription, "", r.time); err != nil {
+				log.Error(err, "SetReadySubscription() failed for the subscription:", "subscription", subscription)
+				reconcileErr = err
+			} else {
+				log.Info("Subscription reconciled")
+				r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
+					"Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+			}
+		} else {
+			// reconcile finished with no errors, but subscripition is not activated
+			if err := util.SetNotReadySubscription(ctx, r.client, subscription, "", r.time); err != nil {
+				log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
+				reconcileErr = err
+			} else {
+				log.Info("Subscription reconciled")
+				r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
+					"Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+			}
+		}
 	}
 
 	return reconcile.Result{
@@ -93,7 +118,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		// then lets add the finalizer and update the object.
 		if !util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
-			if err := r.client.Update(context.Background(), subscription); err == nil {
+			if err := util.WriteSubscription(context.Background(), r.client, subscription); err == nil {
 				return true, nil
 			} else {
 				return false, err
@@ -111,8 +136,8 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 
 			// remove our finalizer from the list and update it.
 			subscription.ObjectMeta.Finalizers = util.RemoveString(&subscription.ObjectMeta.Finalizers, finalizerName)
-			if err := r.client.Update(context.Background(), subscription); err != nil {
-				return true, nil
+			if err := util.WriteSubscription(context.Background(), r.client, subscription); err != nil {
+				return false, err
 			}
 		}
 
