@@ -2,10 +2,10 @@ global:
   # Default hub for Istio images.
   # Releases are published to docker hub under 'istio' project.
   # Daily builds from prow are on gcr.io, and nightly builds from circle on docker.io/istionightly
-  hub: gcr.io/istio-release
+  hub: docker.io/istio
 
   # Default tag for Istio images.
-  tag: master-latest-daily
+  tag: 1.1.0
 
   # imagePullPolicy is applied to istio control plane components.
   # local tests require IfNotPresent, to avoid uploading to dockerhub.
