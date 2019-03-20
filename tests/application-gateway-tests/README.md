@@ -23,4 +23,4 @@ Environment parameters used by the tests:
 ## Development
 
 The project consists of two applications: Helm Test and Test Executor.
-Test Executor pod is managed by Helm Test.
+The Test Executor Pod is managed by Helm Test.
