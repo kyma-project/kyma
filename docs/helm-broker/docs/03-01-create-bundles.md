@@ -24,7 +24,7 @@ sample-bundle/
 
 > **NOTE:** All file names in a bundle repository are case-sensitive.
 
-For details about the particular files, read the following sections.
+For details about particular files, read the following sections.
 
 ## meta.yaml file
 
