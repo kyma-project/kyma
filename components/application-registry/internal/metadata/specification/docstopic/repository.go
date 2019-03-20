@@ -2,8 +2,6 @@ package docstopic
 
 import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
@@ -19,32 +17,18 @@ type ResourceInterface interface {
 	Update(obj *unstructured.Unstructured) (*unstructured.Unstructured, error)
 }
 
-type DocsTopicRepository interface {
-	Create(docstopic *v1alpha1.DocsTopic) (*v1alpha1.DocsTopic, error)
-	Get(name string, options v1.GetOptions) (*v1alpha1.DocsTopic, error)
-	Delete(name string, options *metav1.DeleteOptions) error
-	Update(docstopic *v1alpha1.DocsTopic) (*v1alpha1.DocsTopic, error)
-}
-
-type ApiSpec struct {
+type SpecEntry struct {
 	Url string
-}
-
-type EventsSpec struct {
-	Url string
-}
-
-type Documentation struct {
-	Url string
+	Key string
 }
 
 type DocumentationTopic struct {
-	Id               string
-	DisplayName      string
-	Description      string
-	ApiSpecUrl       string
-	EventsSpecUrl    string
-	DocumentationUrl string
+	Id            string
+	DisplayName   string
+	Description   string
+	ApiSpec       *SpecEntry
+	EventsSpec    *SpecEntry
+	Documentation *SpecEntry
 }
 
 type Repository interface {
@@ -62,6 +46,7 @@ func NewRepository(resourceInterface ResourceInterface) Repository {
 }
 
 func (r repository) Create(documentationTopic DocumentationTopic) apperrors.AppError {
+
 	return nil
 }
 

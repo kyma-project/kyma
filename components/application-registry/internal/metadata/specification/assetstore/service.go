@@ -7,8 +7,16 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/upload"
 )
 
+const (
+	DocTopicDisplayNameFormat     = "Documentation topic for service class id=%s"
+	DocTopicDescriptionFormat     = "Documentation topic for service class id=%s"
+	DocsTopicApiSpecKey           = "api"
+	DocsTopicEventsSpecKey        = "events"
+	DocsTopicDocumentationSpecKey = "documentation"
+)
+
 type Service interface {
-	Put(id string, documentation ContentEntry, ContentEntry, eventsSpec ContentEntry) apperrors.AppError
+	Put(id string, documentation, apiSpec, eventsSpec *ContentEntry) apperrors.AppError
 	Get(id string) (documentation []byte, apiSpec []byte, eventsSpec []byte, apperr apperrors.AppError)
 	Remove(id string) apperrors.AppError
 }
@@ -30,9 +38,9 @@ type ContentEntry struct {
 	Content  []byte
 }
 
-func (s service) Put(id string, documentation ContentEntry, apiSpec ContentEntry, eventsSpec ContentEntry) apperrors.AppError {
+func (s service) Put(id string, documentation *ContentEntry, apiSpec *ContentEntry, eventsSpec *ContentEntry) apperrors.AppError {
 
-	docsTopic, err := s.uploadSpecs(id, documentation, apiSpec, eventsSpec)
+	docsTopic, err := s.createDocumentationTopic(id, documentation, apiSpec, eventsSpec)
 	if err != nil {
 		return apperrors.Internal("Failed to upload specifications")
 	}
@@ -49,34 +57,49 @@ func (s service) Put(id string, documentation ContentEntry, apiSpec ContentEntry
 	return nil
 }
 
-func (s service) uploadSpecs(id string, documentation ContentEntry, apiSpec ContentEntry, eventsSpec ContentEntry) (docstopic.DocumentationTopic, apperrors.AppError) {
+func (s service) createDocumentationTopic(id string, documentation *ContentEntry, apiSpec *ContentEntry, eventsSpec *ContentEntry) (docstopic.DocumentationTopic, apperrors.AppError) {
 
-	apiOutputFile, err := s.uploadSpec(id, apiSpec)
+	apiSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, apiSpec, DocsTopicApiSpecKey)
 	if err != nil {
 		return docstopic.DocumentationTopic{}, apperrors.Internal("Failed to upload specification file.")
 	}
 
-	eventsOutputFile, err := s.uploadSpec(id, eventsSpec)
+	eventsSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, eventsSpec, DocsTopicEventsSpecKey)
 	if err != nil {
 		return docstopic.DocumentationTopic{}, apperrors.Internal("Failed to upload events specification file.")
 	}
 
-	docsOutputFile, err := s.uploadSpec(id, documentation)
+	docsSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, documentation, DocsTopicDocumentationSpecKey)
 	if err != nil {
 		return docstopic.DocumentationTopic{}, apperrors.Internal("Failed to upload documentation file.")
 	}
 
 	return docstopic.DocumentationTopic{
-		Id:               id,
-		DisplayName:      fmt.Sprintf("Documentation topic for service class id=%s", id),
-		Description:      "",
-		ApiSpecUrl:       apiOutputFile.RemotePath,
-		EventsSpecUrl:    eventsOutputFile.RemotePath,
-		DocumentationUrl: docsOutputFile.RemotePath,
+		Id:            id,
+		DisplayName:   fmt.Sprintf(DocTopicDisplayNameFormat, id),
+		Description:   fmt.Sprintf(DocTopicDescriptionFormat, id),
+		ApiSpec:       apiSpecEntry,
+		EventsSpec:    eventsSpecEntry,
+		Documentation: docsSpecEntry,
 	}, nil
 }
 
-func (s service) uploadSpec(id string, entry ContentEntry) (upload.OutputFile, apperrors.AppError) {
+func (s service) uploadFileAndCreateSpecEntry(id string, entry *ContentEntry, key string) (*docstopic.SpecEntry, apperrors.AppError) {
+	if entry != nil {
+		outputFile, err := s.uploadSpec(id, entry)
+		if err != nil {
+			return nil, err
+		}
+
+		return &docstopic.SpecEntry{
+			Url: outputFile.RemotePath,
+			Key: key,
+		}, nil
+	}
+	return nil, nil
+}
+
+func (s service) uploadSpec(id string, entry *ContentEntry) (upload.OutputFile, apperrors.AppError) {
 	inputFile := upload.InputFile{
 		Directory: id,
 		Name:      entry.FileName,

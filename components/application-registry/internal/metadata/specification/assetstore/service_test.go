@@ -7,7 +7,6 @@ import (
 	docsTopicMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/docstopic/mocks"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/upload"
 	uploadMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/upload/mocks"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -24,12 +23,13 @@ func TestAddingToAssetStore(t *testing.T) {
 		service := NewService(repositoryMock, uploadClientMock)
 
 		{
-			matcher := getDocumentationTopicMatcher(
+			docsTopic := createTestDocsTopic("id1",
 				"www.somestorage.com/openapi.json",
 				"www.somestorage.com/asyncapi.json",
 				"www.somestorage.com/docs.json")
-			repositoryMock.On("Update", mock.MatchedBy(matcher)).Return(apperrors.NotFound("Not found."))
-			repositoryMock.On("Create", mock.MatchedBy(matcher)).Return(nil)
+
+			repositoryMock.On("Update", docsTopic).Return(apperrors.NotFound("Not found."))
+			repositoryMock.On("Create", docsTopic).Return(nil)
 		}
 
 		{
@@ -49,9 +49,9 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		// when
 		err := service.Put("id1",
-			ContentEntry{"docs.json", documentation},
-			ContentEntry{"openapi.json", jsonApiSpec},
-			ContentEntry{"asyncapi.json", eventsSpec},
+			&ContentEntry{"docs.json", documentation},
+			&ContentEntry{"openapi.json", jsonApiSpec},
+			&ContentEntry{"asyncapi.json", eventsSpec},
 		)
 		// then
 		require.NoError(t, err)
@@ -140,15 +140,30 @@ func TestRemovingFromAssetStore(t *testing.T) {
 	})
 }
 
-func getDocumentationTopicMatcher(apiSpecUrl string, eventsSpecUrl string, documentationUrl string) func(docstopic.DocumentationTopic) bool {
-	return func(d docstopic.DocumentationTopic) bool {
+func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, documentationUrl string) docstopic.DocumentationTopic {
 
-		descriptionNonEmpty := len(d.DisplayName) > 0 && len(d.DisplayName) > 0
-		specsMatch := d.ApiSpecUrl == apiSpecUrl &&
-			d.EventsSpecUrl == eventsSpecUrl &&
-			d.DocumentationUrl == documentationUrl
+	createSpecEntry := func(url string, key string) *docstopic.SpecEntry {
+		if url != "" {
+			return &docstopic.SpecEntry{
+				Url: url,
+				Key: key,
+			}
+		} else {
+			return nil
+		}
+	}
 
-		return descriptionNonEmpty && specsMatch
+	apiSpec := createSpecEntry(apiSpecUrl, DocsTopicApiSpecKey)
+	eventsSpec := createSpecEntry(eventsSpecUrl, DocsTopicEventsSpecKey)
+	documentation := createSpecEntry(documentationUrl, DocsTopicDocumentationSpecKey)
+
+	return docstopic.DocumentationTopic{
+		Id:            id,
+		DisplayName:   fmt.Sprintf(DocTopicDisplayNameFormat, id),
+		Description:   fmt.Sprintf(DocTopicDescriptionFormat, id),
+		ApiSpec:       apiSpec,
+		EventsSpec:    eventsSpec,
+		Documentation: documentation,
 	}
 }
 
