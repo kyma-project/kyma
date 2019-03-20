@@ -8,6 +8,7 @@ import (
 )
 
 //go:generate mockery -name=Matador -output=automock -outpkg=automock -case=underscore
+// Matador is a metadata extractor
 type Matador interface {
 	ReadMetadata(fileHeader fileheader.FileHeader) (map[string]interface{}, error)
 }
@@ -16,6 +17,7 @@ type matador struct {
 	frontMatter *front.Matter
 }
 
+// New constructs a new Matador instance
 func New() Matador {
 	f := front.NewMatter()
 	f.Handle("---", front.YAMLHandler)
@@ -25,6 +27,7 @@ func New() Matador {
 	}
 }
 
+// ReadMetadata opens file and reads its metadata
 func (m *matador) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]interface{}, error) {
 	f, err := fileHeader.Open()
 	if err != nil {
