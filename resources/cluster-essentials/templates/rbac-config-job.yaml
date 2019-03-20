@@ -70,8 +70,4 @@ spec:
           - bash
           - -c
           - |
-            if [ -z "$(kubectl get rbacconfig default -n kyma-system --ignore-not-found)" ]; then
-              echo "---> No RBACConfig is present. Exitting."
-            else
-              kubectl delete rbacconfig default -n kyma-system
-            fi
+            kubectl delete rbacconfig default -n kyma-system --ignore-not-found
