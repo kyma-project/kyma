@@ -66,6 +66,6 @@ spec:
           - bash
           - -c
           - |
-            if [ -n "$(kubectl get rbacconfig default -n kyma-system --ignore-not-found)" ]; then
+            if [ -z "$(kubectl get rbacconfig default -n kyma-system --ignore-not-found)" ]; then
               kubectl delete rbacconfig default -n kyma-system
             fi
