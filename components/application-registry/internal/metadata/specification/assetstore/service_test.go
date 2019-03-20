@@ -3,10 +3,10 @@ package assetstore
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/docstopic"
-	docsTopicMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/docstopic/mocks"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/upload"
-	uploadMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/upload/mocks"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
+	uploadMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload/mocks"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -18,7 +18,7 @@ func TestAddingToAssetStore(t *testing.T) {
 
 	t.Run("Should add specifications to asset store", func(t *testing.T) {
 		// given
-		repositoryMock := &docsTopicMocks.Repository{}
+		repositoryMock := &mocks.Repository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
@@ -75,7 +75,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 
 	t.Run("Should get specifications from asset store", func(t *testing.T) {
 		//	// given
-		//	repositoryMock := &docsTopicMocks.Repository{}
+		//	repositoryMock := &docsTopicMocks.DocsTopicRepository{}
 		//	uploadClientMock := &uploadMocks.Client{}
 		//	service := NewService(repositoryMock, uploadClientMock)
 		//

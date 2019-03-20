@@ -3,8 +3,8 @@ package assetstore
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/docstopic"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/upload"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
 )
 
 const (
@@ -22,11 +22,11 @@ type Service interface {
 }
 
 type service struct {
-	docsTopicRepository docstopic.Repository
+	docsTopicRepository DocsTopicRepository
 	uploadClient        upload.Client
 }
 
-func NewService(repository docstopic.Repository, uploadClient upload.Client) Service {
+func NewService(repository DocsTopicRepository, uploadClient upload.Client) Service {
 	return &service{
 		docsTopicRepository: repository,
 		uploadClient:        uploadClient,

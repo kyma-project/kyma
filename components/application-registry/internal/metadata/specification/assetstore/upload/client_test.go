@@ -13,11 +13,11 @@ import (
 	"testing"
 )
 
-func TestUploadClient(t *testing.T){
+func TestUploadClient(t *testing.T) {
 
 	testContent := []byte("test content")
 
-	t.Run("Should upload single file", func (t *testing.T){
+	t.Run("Should upload single file", func(t *testing.T) {
 		// given
 		testServer := getTestServer(t)
 		client := &http.Client{}
@@ -28,8 +28,8 @@ func TestUploadClient(t *testing.T){
 		// when
 		input := InputFile{
 			Directory: "testDir",
-			Name: "testfile",
-			Contents: testContent,
+			Name:      "testfile",
+			Contents:  testContent,
 		}
 		output, err := uploadClient.Upload(input)
 		require.NoError(t, err)
@@ -41,7 +41,7 @@ func TestUploadClient(t *testing.T){
 		assert.Equal(t, output.Size, 10)
 	})
 
-	t.Run("Should fail when uploading file failed", func (t *testing.T){
+	t.Run("Should fail when uploading file failed", func(t *testing.T) {
 		// given
 
 		// when
@@ -51,7 +51,7 @@ func TestUploadClient(t *testing.T){
 	})
 }
 
-func getTestServer(t *testing.T) *httptest.Server{
+func getTestServer(t *testing.T) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
 			err := r.ParseMultipartForm(32 << 20)
@@ -79,10 +79,10 @@ func getTestServer(t *testing.T) *httptest.Server{
 			assert.NotZero(t, fileHeader.Size)
 
 			outputFile := OutputFile{
-				FileName: "testFile",
+				FileName:   "testFile",
 				RemotePath: "testDir/testPath",
-				Bucket: "testBucket",
-				Size: 10,
+				Bucket:     "testBucket",
+				Size:       10,
 			}
 
 			var b bytes.Buffer
@@ -94,6 +94,6 @@ func getTestServer(t *testing.T) *httptest.Server{
 
 			w.Write(b.Bytes())
 
-	}))
+		}))
 
 }
