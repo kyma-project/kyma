@@ -38,7 +38,7 @@ telemetry:
     latencyThreshold: 100ms
   resources:
     requests:
-      cpu: 1000m
+      cpu: 600m
       memory: 1G
     limits:
       # It is best to do horizontal scaling of mixer using moderate cpu allocation.
