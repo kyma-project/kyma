@@ -7,6 +7,7 @@ metadata:
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
 subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}-job-sa
@@ -24,6 +25,7 @@ metadata:
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
 rules:
 - apiGroups: ["rbac.istio.io"]
   resources: ["RbacConfig"]
@@ -36,6 +38,7 @@ metadata:
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "2"
 ---
 apiVersion: batch/v1
 kind: Job
@@ -45,6 +48,7 @@ metadata:
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "3"
 spec:
   template:
     metadata:
