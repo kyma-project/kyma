@@ -1,10 +1,4 @@
-knative:
-  ingressgateway:
-    service:
-      type: LoadBalancer
-  gateway:
-    tls:
-      enabled: true
+knative-serving:
   domainName: example.com
 
 global:
