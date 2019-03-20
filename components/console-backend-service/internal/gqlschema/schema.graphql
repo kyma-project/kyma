@@ -263,6 +263,10 @@ type Secret {
     name: String!
     namespace: String!
     data: JSON!
+    type: String!
+    creationTime: Timestamp!
+    labels: JSON!
+    annotations: JSON!
 }
 
 type DeleteServiceBindingOutput {
@@ -471,6 +475,11 @@ type PodEvent {
 type ServiceEvent {
     type: SubscriptionEventType!
     service: Service!
+}
+
+type SecretEvent {
+    type: SubscriptionEventType!
+    secret: Secret!
 }
 
 type ContainerState {
@@ -710,6 +719,8 @@ type Query {
 
     backendModules: [BackendModule!]!
 
+    secrets(namespace: String!, first: Int, offset: Int): [Secret!]!
+
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
@@ -756,6 +767,7 @@ type Subscription {
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secretEvent(namespace: String!): SecretEvent!
 }
 
 # Schema

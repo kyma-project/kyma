@@ -20,8 +20,16 @@ func NewDeploymentResolver(service deploymentLister, scRetriever shared.ServiceC
 
 // Secret
 
-func NewSecretResolver(secretGetter v1.SecretsGetter) *secretResolver {
-	return newSecretResolver(secretGetter)
+func NewSecretResolver(svc secretSvc) *secretResolver {
+	return newSecretResolver(svc)
+}
+
+func NewSecretService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) *secretService {
+	return newSecretService(informer, client)
+}
+
+func (r *secretResolver) SetSecretConverter(converter gqlSecretConverter) {
+	r.converter = converter
 }
 
 func NewResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer cache.SharedIndexInformer, ssInformer cache.SharedIndexInformer, podClient v1.CoreV1Interface) *resourceQuotaService {
