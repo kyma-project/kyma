@@ -130,7 +130,7 @@ func TestService(t *testing.T) {
 
 	t.Log("Updating...")
 	serviceRes.Service.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update := stringifyJSON(serviceRes.Service.JSON)
+	update,_ := stringifyJSON(serviceRes.Service.JSON)
 	var updateRes updateServiceMutationResponse
 	err = grapqlClient.Do(fixUpdateServiceMutation(update), &updateRes)
 	require.NoError(t, err)
