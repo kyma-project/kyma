@@ -22,7 +22,7 @@ type SpecEntry struct {
 	Key string
 }
 
-type DocumentationTopic struct {
+type Entry struct {
 	Id            string
 	DisplayName   string
 	Description   string
@@ -32,10 +32,10 @@ type DocumentationTopic struct {
 }
 
 type Repository interface {
-	Create(documentationTopic DocumentationTopic) apperrors.AppError
-	Get(id string) (DocumentationTopic, apperrors.AppError)
+	Create(documentationTopic Entry) apperrors.AppError
+	Get(id string) (Entry, apperrors.AppError)
 	Delete(id string) apperrors.AppError
-	Update(documentationTopic DocumentationTopic) apperrors.AppError
+	Update(documentationTopic Entry) apperrors.AppError
 }
 
 type repository struct {
@@ -45,19 +45,19 @@ func NewRepository(resourceInterface ResourceInterface) Repository {
 	return repository{}
 }
 
-func (r repository) Create(documentationTopic DocumentationTopic) apperrors.AppError {
+func (r repository) Create(documentationTopic Entry) apperrors.AppError {
 
 	return nil
 }
 
-func (r repository) Get(id string) (DocumentationTopic, apperrors.AppError) {
-	return DocumentationTopic{}, nil
+func (r repository) Get(id string) (Entry, apperrors.AppError) {
+	return Entry{}, nil
 }
 
 func (r repository) Delete(id string) apperrors.AppError {
 	return nil
 }
 
-func (r repository) Update(documentationTopic DocumentationTopic) apperrors.AppError {
+func (r repository) Update(documentationTopic Entry) apperrors.AppError {
 	return nil
 }

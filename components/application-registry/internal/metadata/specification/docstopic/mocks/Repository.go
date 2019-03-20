@@ -12,11 +12,11 @@ type Repository struct {
 }
 
 // Create provides a mock function with given fields: documentationTopic
-func (_m *Repository) Create(documentationTopic docstopic.DocumentationTopic) apperrors.AppError {
+func (_m *Repository) Create(documentationTopic docstopic.Entry) apperrors.AppError {
 	ret := _m.Called(documentationTopic)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(docstopic.DocumentationTopic) apperrors.AppError); ok {
+	if rf, ok := ret.Get(0).(func(docstopic.Entry) apperrors.AppError); ok {
 		r0 = rf(documentationTopic)
 	} else {
 		if ret.Get(0) != nil {
@@ -44,14 +44,14 @@ func (_m *Repository) Delete(id string) apperrors.AppError {
 }
 
 // Get provides a mock function with given fields: id
-func (_m *Repository) Get(id string) (docstopic.DocumentationTopic, apperrors.AppError) {
+func (_m *Repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
 	ret := _m.Called(id)
 
-	var r0 docstopic.DocumentationTopic
-	if rf, ok := ret.Get(0).(func(string) docstopic.DocumentationTopic); ok {
+	var r0 docstopic.Entry
+	if rf, ok := ret.Get(0).(func(string) docstopic.Entry); ok {
 		r0 = rf(id)
 	} else {
-		r0 = ret.Get(0).(docstopic.DocumentationTopic)
+		r0 = ret.Get(0).(docstopic.Entry)
 	}
 
 	var r1 apperrors.AppError
@@ -67,11 +67,11 @@ func (_m *Repository) Get(id string) (docstopic.DocumentationTopic, apperrors.Ap
 }
 
 // Update provides a mock function with given fields: documentationTopic
-func (_m *Repository) Update(documentationTopic docstopic.DocumentationTopic) apperrors.AppError {
+func (_m *Repository) Update(documentationTopic docstopic.Entry) apperrors.AppError {
 	ret := _m.Called(documentationTopic)
 
 	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(docstopic.DocumentationTopic) apperrors.AppError); ok {
+	if rf, ok := ret.Get(0).(func(docstopic.Entry) apperrors.AppError); ok {
 		r0 = rf(documentationTopic)
 	} else {
 		if ret.Get(0) != nil {

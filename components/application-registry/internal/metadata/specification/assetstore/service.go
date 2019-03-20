@@ -57,24 +57,24 @@ func (s service) Put(id string, documentation *ContentEntry, apiSpec *ContentEnt
 	return nil
 }
 
-func (s service) createDocumentationTopic(id string, documentation *ContentEntry, apiSpec *ContentEntry, eventsSpec *ContentEntry) (docstopic.DocumentationTopic, apperrors.AppError) {
+func (s service) createDocumentationTopic(id string, documentation *ContentEntry, apiSpec *ContentEntry, eventsSpec *ContentEntry) (docstopic.Entry, apperrors.AppError) {
 
 	apiSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, apiSpec, DocsTopicApiSpecKey)
 	if err != nil {
-		return docstopic.DocumentationTopic{}, apperrors.Internal("Failed to upload specification file.")
+		return docstopic.Entry{}, apperrors.Internal("Failed to upload specification file.")
 	}
 
 	eventsSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, eventsSpec, DocsTopicEventsSpecKey)
 	if err != nil {
-		return docstopic.DocumentationTopic{}, apperrors.Internal("Failed to upload events specification file.")
+		return docstopic.Entry{}, apperrors.Internal("Failed to upload events specification file.")
 	}
 
 	docsSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, documentation, DocsTopicDocumentationSpecKey)
 	if err != nil {
-		return docstopic.DocumentationTopic{}, apperrors.Internal("Failed to upload documentation file.")
+		return docstopic.Entry{}, apperrors.Internal("Failed to upload documentation file.")
 	}
 
-	return docstopic.DocumentationTopic{
+	return docstopic.Entry{
 		Id:            id,
 		DisplayName:   fmt.Sprintf(DocTopicDisplayNameFormat, id),
 		Description:   fmt.Sprintf(DocTopicDescriptionFormat, id),

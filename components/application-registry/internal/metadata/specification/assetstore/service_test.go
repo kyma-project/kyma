@@ -80,7 +80,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 		//	service := NewService(repositoryMock, uploadClientMock)
 		//
 		//	{
-		//		repositoryMock.On("Get", "id1").Return(docstopic.DocumentationTopic{
+		//		repositoryMock.On("Get", "id1").Return(docstopic.Entry{
 		//			Id:               "id1",
 		//			DisplayName:      "Some display name",
 		//			Description:      "Some description",
@@ -140,7 +140,7 @@ func TestRemovingFromAssetStore(t *testing.T) {
 	})
 }
 
-func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, documentationUrl string) docstopic.DocumentationTopic {
+func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, documentationUrl string) docstopic.Entry {
 
 	createSpecEntry := func(url string, key string) *docstopic.SpecEntry {
 		if url != "" {
@@ -157,7 +157,7 @@ func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, doc
 	eventsSpec := createSpecEntry(eventsSpecUrl, DocsTopicEventsSpecKey)
 	documentation := createSpecEntry(documentationUrl, DocsTopicDocumentationSpecKey)
 
-	return docstopic.DocumentationTopic{
+	return docstopic.Entry{
 		Id:            id,
 		DisplayName:   fmt.Sprintf(DocTopicDisplayNameFormat, id),
 		Description:   fmt.Sprintf(DocTopicDescriptionFormat, id),
