@@ -62,7 +62,7 @@ In the `chart` directory, create a folder with the same name as your chart. Put 
 
 The `plans` directory must contain at least one plan. Each plan must contain the `meta.yaml` file. Other files are not mandatory.
 
-* `meta.yaml` file - contains information about a given plan. Set the following fields to create a plan object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object).
+* `meta.yaml` file - contains information about a given plan. Define the following fields to create a plan object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#plan-object).
 
 |  Field Name | Required |      Description               |
 |-----------|:--------:|------------------------------------|
