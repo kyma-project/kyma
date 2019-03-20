@@ -35,7 +35,6 @@ import (
 	"io"
 	"io/ioutil"
 	. "github.com/smartystreets/goconvey/convey"
-	"log"
 )
 
 const (
@@ -53,10 +52,10 @@ var (
 )
 
 type grafanaTest struct {
-	grafanaName string
-	uuid        string
-	coreClient  *kubernetes.Clientset
-	before      bool
+	grafanaName  string
+	uuid         string
+	coreClient   *kubernetes.Clientset
+	beforeBackup bool
 	grafana
 }
 
@@ -89,18 +88,16 @@ func NewGrafanaTest() (*grafanaTest, error) {
 		coreClient:  coreClient,
 		grafanaName: "grafana",
 		uuid:        uuid.New().String(),
-		before:      true,
+		beforeBackup :      true,
 		grafana:     grafana{loginForm: url.Values{}},
 	}, nil
 }
 
 func (t *grafanaTest) CreateResources(namespace string) {
 	// There is not need to be implemented for this test.
-	log.Print("---------------------CreateResources----------------------------------------------------------")
 }
 
 func (t *grafanaTest) DeleteResources() {
-	log.Print("---------------------DeleteResources starts----------------------------------------------------------")
 
 	// It needs to be implemented for this test.
 	err := t.waitForPodGrafana(1 * time.Minute)
@@ -118,13 +115,10 @@ func (t *grafanaTest) DeleteResources() {
 	err = t.waitForPodGrafana(2 * time.Minute)
 	So(err, ShouldBeError) // And error is expected.
 
-	log.Print("---------------------DeleteResources ends ----------------------------------------------------------")
-
 }
 
-
 func (t *grafanaTest) TestResources(namespace string) {
-	log.Print("---------------------TestResource starts----------------------------------------------------------")
+
 	err := t.waitForPodGrafana(5 * time.Minute)
 	So(err, ShouldBeNil)
 
@@ -148,8 +142,8 @@ func (t *grafanaTest) TestResources(namespace string) {
 	So(err, ShouldBeNil)
 
 	// Query to api
-	if t.before {
-		t.before = false
+	if t.beforeBackup  {
+		t.beforeBackup  = false
 		dashboardFolders := make([]map[string]interface{}, 0)
 		err = json.Unmarshal(dataBody, &dashboardFolders)
 		So(err, ShouldBeNil)
@@ -164,7 +158,6 @@ func (t *grafanaTest) TestResources(namespace string) {
 			title := fmt.Sprintf("%s", folder["title"])
 			dashboards[title] = dashboard{title: title, url: fmt.Sprintf("%s", folder["url"])}
 		}
-		log.Print("---------------------Before Backup----------------------------------------------------------")
 	} else {
 		// iterate over the list of dashboards found before the backup (first time the test runs)
 		for _, dash := range dashboards {
@@ -173,10 +166,8 @@ func (t *grafanaTest) TestResources(namespace string) {
 			So(err, ShouldBeNil)
 			So(resp.StatusCode, ShouldEqual, http.StatusOK)
 		}
-		log.Print("---------------------After Backup----------------------------------------------------------")
 	}
 
-	log.Print("---------------------TestResource end----------------------------------------------------------")
 }
 
 func (t *grafanaTest) deleteServices(namespace, serviceName, labelSelector string) error {
