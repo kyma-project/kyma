@@ -12,6 +12,10 @@ subjects:
 - kind: ServiceAccount
   name: {{ .Release.Name }}-job-sa
   namespace: kyma-system
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
 roleRef:
   kind: Role
   name: {{ .Release.Name }}-job-role
@@ -71,11 +75,3 @@ spec:
             else
               kubectl delete rbacconfig default -n kyma-system
             fi
-
----
-apiVersion: "rbac.istio.io/v1alpha1"
-kind: RbacConfig
-metadata:
-  name: default
-spec:
-  mode: 'OFF'
