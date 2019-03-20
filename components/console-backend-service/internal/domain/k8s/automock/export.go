@@ -51,3 +51,11 @@ func NewReplicaSetSvc() *replicaSetSvc {
 func NewGqlReplicaSetConverter() *gqlReplicaSetConverter {
 	return new(gqlReplicaSetConverter)
 }
+
+func NewGqlServiceConverter() *gqlServiceConverter {
+	return new(gqlServiceConverter)
+}
+
+func NewServiceSvc() *serviceSvc {
+	return new(serviceSvc)
+}
