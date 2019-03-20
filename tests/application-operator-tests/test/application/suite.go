@@ -117,10 +117,11 @@ func (ts *TestSuite) receiveTestResponse(t *testing.T, wg *sync.WaitGroup, respo
 	}
 	t.Logf("%s tests finished. Message channel closed", ts.application)
 
+	ts.getLogsAndCleanup(t)
+
 	if testFailed {
 		t.Logf("%s tests failed", ts.application)
-		ts.GetTestPodsLogs(t)
-		t.Error("Application tests failed")
+		t.Fatal("Application tests failed")
 	}
 }
 
@@ -134,12 +135,13 @@ func (ts *TestSuite) receiveErrorResponse(t *testing.T, wg *sync.WaitGroup, erro
 	t.Log("Error channel closed")
 }
 
-func (ts *TestSuite) GetTestPodsLogs(t *testing.T) {
+func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {
 	podsToFetch, err := ts.k8sClient.ListPods(metav1.ListOptions{LabelSelector: ts.labelSelector})
 	require.NoError(t, err)
 
 	for _, pod := range podsToFetch.Items {
 		ts.getPodLogs(t, pod)
+		ts.deleteTestPod(t, pod)
 	}
 }
 
@@ -162,4 +164,9 @@ func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
 		t.Log(l)
 	}
 	t.Logf("--------------------------------------------End of logs from %s test--------------------------------------------", pod.Name)
+}
+
+func (ts *TestSuite) deleteTestPod(t *testing.T, pod v1.Pod) {
+	err := ts.k8sClient.DeletePod(pod.Name, &metav1.DeleteOptions{})
+	require.NoError(t, err)
 }

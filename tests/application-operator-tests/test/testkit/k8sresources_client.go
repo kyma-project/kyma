@@ -22,6 +22,7 @@ type K8sResourcesClient interface {
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 	GetApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 	ListPods(options v1.ListOptions) (*corev1.PodList, error)
+	DeletePod(name string, options *v1.DeleteOptions) error
 	GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request
 }
 
@@ -116,6 +117,10 @@ func (c *k8sResourcesClient) GetApplication(name string, options v1.GetOptions) 
 
 func (c *k8sResourcesClient) ListPods(options v1.ListOptions) (*corev1.PodList, error) {
 	return c.coreClient.CoreV1().Pods(c.namespace).List(options)
+}
+
+func (c *k8sResourcesClient) DeletePod(name string, options *v1.DeleteOptions) error {
+	return c.coreClient.CoreV1().Pods(c.namespace).Delete(name, options)
 }
 
 func (c *k8sResourcesClient) GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request {
