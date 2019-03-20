@@ -4,4 +4,3 @@ containerRegistry:
 image:
   dir: develop/
   tag: 8ac83ad8
-
