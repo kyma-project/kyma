@@ -70,7 +70,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 |      **id**     |   YES   |     An ID of the plan. |
 | **description** |   YES   | A description of the plan. |
 | **displayName** |   YES   | A display name of the plan. |
-|  **bindable**   |   NO  | A field that specifies whether you can bind an instance of the plan. The default value is `false`. |
+|  **bindable**   |   NO  | A field that specifies whether you can bind an instance of the plan or not. The default value is `false`. |
 |     **free**    |   NO  | An attribute which specifies whether an instance of the plan is free or not. The default value is `false`.    |
 
 * `bind.yaml` file - contains information about binding in a specific plan. If you define in the `meta.yaml` file that your plan is bindable, you must also create a `bind.yaml` file. For more information about this file, see [this](#details-bind-bundles) document.
