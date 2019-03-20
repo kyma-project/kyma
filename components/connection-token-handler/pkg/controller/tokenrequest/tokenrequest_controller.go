@@ -85,7 +85,7 @@ func (r *ReconcileTokenRequest) Reconcile(request reconcile.Request) (reconcile.
 	} else if instance.ShouldFetch() {
 		log.Printf("Fetching token for TokenRequest %s", request.NamespacedName)
 
-		tokenDto, err := r.connectorServiceClient.FetchToken(instance.ObjectMeta.Name)
+		tokenDto, err := r.connectorServiceClient.FetchToken(instance.ObjectMeta.Name, instance.Context.Tenant, instance.Context.Group)
 		if err != nil {
 			log.Printf("Fetching token for TokenRequest %s failed", request.NamespacedName)
 

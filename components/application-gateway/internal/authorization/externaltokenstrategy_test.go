@@ -26,7 +26,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		request.Header.Set(httpconsts.HeaderAccessToken, "Bearer external")
 
 		// when
-		err = externalTokenStrategy.AddAuthorization(request, proxyStub)
+		err = externalTokenStrategy.AddAuthorization(request, nil)
 
 		// then
 		require.NoError(t, err)
@@ -51,7 +51,7 @@ func TestExternalAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = externalTokenStrategy.AddAuthorization(request, proxyStub)
+		err = externalTokenStrategy.AddAuthorization(request, nil)
 
 		// then
 		require.NoError(t, err)

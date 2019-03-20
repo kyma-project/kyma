@@ -17,7 +17,7 @@ func TestApiConverter_ToGQL(t *testing.T) {
 		expected := &gqlschema.API{
 			Name:     api.Name,
 			Hostname: api.Spec.Hostname,
-			Service: gqlschema.Service{
+			Service: gqlschema.ApiService{
 				Name: api.Spec.Service.Name,
 				Port: api.Spec.Service.Port,
 			},

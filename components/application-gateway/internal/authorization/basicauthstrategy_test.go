@@ -19,7 +19,7 @@ func TestBasicAuthStrategy(t *testing.T) {
 		require.NoError(t, err)
 
 		// when
-		err = basicAuthStrategy.AddAuthorization(request, proxyStub)
+		err = basicAuthStrategy.AddAuthorization(request, nil)
 
 		// then
 		require.NoError(t, err)

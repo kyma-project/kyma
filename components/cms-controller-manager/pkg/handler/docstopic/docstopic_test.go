@@ -3,7 +3,7 @@ package docstopic_test
 import (
 	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/assetstore-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/automock"

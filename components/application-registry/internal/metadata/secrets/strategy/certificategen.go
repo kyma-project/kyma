@@ -2,6 +2,7 @@ package strategy
 
 import (
 	"crypto/x509/pkix"
+	"encoding/base64"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
@@ -20,11 +21,13 @@ type certificateGen struct {
 }
 
 func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *applications.Credentials) model.Credentials {
-	commonName := svc.readCertificateGenMap(secretData)
+	commonName, cert := svc.readCertificateGenMap(secretData)
 
 	return model.Credentials{
 		CertificateGen: &model.CertificateGen{
-			CommonName: commonName,
+			CommonName:  commonName,
+			Certificate: cert,
+			CSRFInfo:    convertToModelCSRInfo(appCredentials),
 		},
 	}
 }
@@ -46,6 +49,7 @@ func (svc *certificateGen) ToCredentialsInfo(credentials *model.Credentials, sec
 	applicationCredentials := applications.Credentials{
 		Type:       applications.CredentialsCertificateGenType,
 		SecretName: secretName,
+		CSRFInfo:   toAppCSRFInfo(credentials),
 	}
 
 	return applicationCredentials
@@ -67,6 +71,10 @@ func (svc *certificateGen) makeCertificateGenMap(commonName string, key, certifi
 	}
 }
 
-func (svc *certificateGen) readCertificateGenMap(data map[string][]byte) (commonName string) {
-	return string(data[CertificateGenCNKey])
+func (svc *certificateGen) readCertificateGenMap(data map[string][]byte) (commonName, certificate string) {
+	return string(data[CertificateGenCNKey]), encodeCertificateToString(data[CertificateGenCertKey])
+}
+
+func encodeCertificateToString(cert []byte) string {
+	return base64.StdEncoding.EncodeToString(cert)
 }
