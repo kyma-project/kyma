@@ -28,7 +28,7 @@ For details about particular files, read the following sections.
 
 ## meta.yaml file
 
-The `meta.yaml` file contains information about the bundle. Set the following fields to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
+The `meta.yaml` file contains information about the bundle. Define the following fields to create a service object which complies with the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/v2.14/spec.md#service-object).
 
 |      Field Name     | Required |                   Description             |
 |-------------------|:--------:|----------------------------------------------|
