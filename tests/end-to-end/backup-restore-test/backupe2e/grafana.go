@@ -118,9 +118,10 @@ func (t *grafanaTest) DeleteResources() {
 	err = t.waitForPodGrafana(2 * time.Minute)
 	So(err, ShouldBeError) // And error is expected.
 
-	log.Print("---------------------DeleteResources ends----------------------------------------------------------")
+	log.Print("---------------------DeleteResources ends ----------------------------------------------------------")
 
 }
+
 
 func (t *grafanaTest) TestResources(namespace string) {
 	log.Print("---------------------TestResource starts----------------------------------------------------------")

@@ -50,6 +50,7 @@ const (
 	prometheusServiceName     = "monitoring-prometheus"
 	prometheusStatefulsetName = "prometheus-monitoring"
 	prometheusLabelSelector   = "app=prometheus"
+
 )
 
 type queryResponse struct {
