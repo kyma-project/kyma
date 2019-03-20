@@ -108,10 +108,10 @@ global:
   # Default hub for Istio images.
   # Releases are published to docker hub under 'istio' project.
   # Daily builds from prow are on gcr.io, and nightly builds from circle on docker.io/istionightly
-  hub: docker.io/istio
+  hub: gcr.io/istio-release
 
   # Default tag for Istio images.
-  tag: 1.1.0-rc.6
+  tag: release-1.1-latest-daily
 
   # monitoring port used by mixer, pilot, galley
   monitoringPort: 15014
