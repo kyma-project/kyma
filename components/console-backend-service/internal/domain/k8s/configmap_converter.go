@@ -30,7 +30,7 @@ func (c *configMapConverter) ToGQL(in *v1.ConfigMap) (*gqlschema.ConfigMap, erro
 		Namespace:         in.Namespace,
 		CreationTimestamp: in.CreationTimestamp.Time,
 		Labels:            in.Labels,
-		Data:              gqlJSON,
+		JSON:              gqlJSON,
 	}, nil
 }
 

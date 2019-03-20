@@ -91,7 +91,7 @@ type ConfigMap struct {
 	Namespace         string    `json:"namespace"`
 	CreationTimestamp time.Time `json:"creationTimestamp"`
 	Labels            Labels    `json:"labels"`
-	Data              JSON      `json:"data"`
+	JSON              JSON      `json:"json"`
 }
 
 type ConnectorService struct {

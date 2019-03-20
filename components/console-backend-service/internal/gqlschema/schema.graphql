@@ -619,7 +619,7 @@ type ConfigMap {
     namespace: String!
     creationTimestamp: Timestamp!
     labels: Labels!
-    data: JSON!
+    json: JSON!
 }
 
 # Queries

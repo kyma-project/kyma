@@ -165,7 +165,7 @@ type ComplexityRoot struct {
 		Namespace         func(childComplexity int) int
 		CreationTimestamp func(childComplexity int) int
 		Labels            func(childComplexity int) int
-		Data              func(childComplexity int) int
+		Json              func(childComplexity int) int
 	}
 
 	ConnectorService struct {
@@ -2935,12 +2935,12 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ConfigMap.Labels(childComplexity), true
 
-	case "ConfigMap.data":
-		if e.complexity.ConfigMap.Data == nil {
+	case "ConfigMap.json":
+		if e.complexity.ConfigMap.Json == nil {
 			break
 		}
 
-		return e.complexity.ConfigMap.Data(childComplexity), true
+		return e.complexity.ConfigMap.Json(childComplexity), true
 
 	case "ConnectorService.url":
 		if e.complexity.ConnectorService.Url == nil {
@@ -7946,8 +7946,8 @@ func (ec *executionContext) _ConfigMap(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "data":
-			out.Values[i] = ec._ConfigMap_data(ctx, field, obj)
+		case "json":
+			out.Values[i] = ec._ConfigMap_json(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -8071,7 +8071,7 @@ func (ec *executionContext) _ConfigMap_labels(ctx context.Context, field graphql
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ConfigMap_data(ctx context.Context, field graphql.CollectedField, obj *ConfigMap) graphql.Marshaler {
+func (ec *executionContext) _ConfigMap_json(ctx context.Context, field graphql.CollectedField, obj *ConfigMap) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -8083,7 +8083,7 @@ func (ec *executionContext) _ConfigMap_data(ctx context.Context, field graphql.C
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return obj.Data, nil
+		return obj.JSON, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -22073,12 +22073,13 @@ type BackendModule {
 }
 
 # Config Maps 
+
 type ConfigMap {
     name: String!
     namespace: String!
     creationTimestamp: Timestamp!
     labels: Labels!
-    data: JSON!
+    json: JSON!
 }
 
 # Queries
@@ -22159,7 +22160,7 @@ type Mutation {
 
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
-    
+
     updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
     deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
 
