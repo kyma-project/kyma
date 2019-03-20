@@ -13,15 +13,20 @@ required = [
     "sigs.k8s.io/controller-runtime/pkg/runtime/signals",
     "sigs.k8s.io/controller-runtime/pkg/source",
     "sigs.k8s.io/testing_frameworks/integration", # for integration testing
-	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
+	"k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
     ]
 
 [prune]
   go-tests = true
 
+  [[prune.project]]
+    name = "github.com/kyma-project/kyma"
+    unused-packages = true
+    non-go = true
+
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  revision="11d887b44e1088043d8edae59ea7ea7521ed6b04"
+  revision="cbd820fd14c70f6e6426312a01442fa62b659bd8"
 
 [[constraint]]
   name = "github.com/pkg/errors"
@@ -50,3 +55,4 @@ version="v1.4.7"
 [[constraint]]
   name = "github.com/stretchr/testify"
   version = "1.3.0"
+

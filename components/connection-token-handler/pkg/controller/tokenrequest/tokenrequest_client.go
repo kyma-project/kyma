@@ -11,6 +11,10 @@ import (
 
 const (
 	applicationHeader = "Application"
+	tenantHeader      = "Tenant"
+	groupHeader       = "Group"
+	emptyTenant       = ""
+	emptyGroup        = ""
 )
 
 // TokenDto represents data structure returned from connector-service
@@ -21,7 +25,7 @@ type TokenDto struct {
 
 // ConnectorServiceClient interface describes client contract to communicate with connector-service
 type ConnectorServiceClient interface {
-	FetchToken(appName string) (*TokenDto, error)
+	FetchToken(appName, tenant, group string) (*TokenDto, error)
 }
 
 type connectorServiceClient struct {
@@ -30,7 +34,7 @@ type connectorServiceClient struct {
 }
 
 // FetchToken method connects to connector-service and fetches new token for remote-environment
-func (c *connectorServiceClient) FetchToken(appName string) (*TokenDto, error) {
+func (c *connectorServiceClient) FetchToken(appName, tenant, group string) (*TokenDto, error) {
 	if strings.TrimSpace(appName) == "" {
 		return nil, errors.New("appName cannot be empty")
 	}
@@ -43,6 +47,12 @@ func (c *connectorServiceClient) FetchToken(appName string) (*TokenDto, error) {
 	}
 
 	req.Header.Set(applicationHeader, appName)
+
+	if tenant != emptyTenant && group != emptyGroup {
+		req.Header.Set(tenantHeader, tenant)
+		req.Header.Set(groupHeader, group)
+	}
+
 	req.Header.Set("Content-Type", "application/json")
 
 	res, err := c.Do(req)

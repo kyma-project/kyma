@@ -206,7 +206,8 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireDefinitionsWithCertCredentialsEqual(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireCertificateNotEmpty(t, *receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -838,4 +839,19 @@ func hideClientCredentials(original testkit.ServiceDetails) testkit.ServiceDetai
 	}
 
 	return result
+}
+
+func requireDefinitionsWithCertCredentialsEqual(t *testing.T, expected testkit.ServiceDetails, actual testkit.ServiceDetails) {
+	require.Equal(t, expected.Description, actual.Description)
+	require.Equal(t, expected.Identifier, actual.Identifier)
+	require.Equal(t, expected.Api.Credentials.CertificateGen.CommonName, actual.Api.Credentials.CertificateGen.CommonName)
+	require.Equal(t, expected.Name, actual.Name)
+	require.Equal(t, expected.Provider, actual.Provider)
+	require.EqualValues(t, expected.Labels, actual.Labels)
+	require.EqualValues(t, expected.Events, actual.Events)
+	require.EqualValues(t, expected.Documentation, actual.Documentation)
+}
+
+func requireCertificateNotEmpty(t *testing.T, actual testkit.ServiceDetails) {
+	require.NotEmpty(t, actual.Api.Credentials.CertificateGen.Certificate)
 }

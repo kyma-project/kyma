@@ -3,13 +3,12 @@ package k8s
 import (
 	"fmt"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/apimachinery/pkg/util/validation/field"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
@@ -100,26 +99,23 @@ func (svc *podService) Delete(name, namespace string) error {
 }
 
 func (svc *podService) checkUpdatePreconditions(name string, namespace string, update v1.Pod) error {
-	errorList := field.ErrorList{}
+	var errs apierror.ErrorFieldAggregate
 	if name != update.Name {
-		errorList = append(errorList, field.Invalid(field.NewPath("metadata.name"), update.Name, fmt.Sprintf("name of updated object does not match the original (%s)", name)))
+		errs = append(errs, apierror.NewInvalidField("metadata.name", update.Name, fmt.Sprintf("name of updated object does not match the original (%s)", name)))
 	}
 	if namespace != update.Namespace {
-		errorList = append(errorList, field.Invalid(field.NewPath("metadata.namespace"), update.Namespace, fmt.Sprintf("namespace of updated object does not match the original (%s)", namespace)))
+		errs = append(errs, apierror.NewInvalidField("metadata.namespace", update.Namespace, fmt.Sprintf("namespace of updated object does not match the original (%s)", namespace)))
 	}
 	typeMeta := svc.podTypeMeta()
 	if update.Kind != typeMeta.Kind {
-		errorList = append(errorList, field.Invalid(field.NewPath("kind"), update.Kind, "pod's kind should not be changed"))
+		errs = append(errs, apierror.NewInvalidField("kind", update.Kind, "pod's kind should not be changed"))
 	}
 	if update.APIVersion != typeMeta.APIVersion {
-		errorList = append(errorList, field.Invalid(field.NewPath("apiVersion"), update.APIVersion, "pod's apiVersion should not be changed"))
+		errs = append(errs, apierror.NewInvalidField("apiVersion", update.APIVersion, "pod's apiVersion should not be changed"))
 	}
 
-	if len(errorList) > 0 {
-		return errors.NewInvalid(schema.GroupKind{
-			Group: "",
-			Kind:  "Pod",
-		}, name, errorList)
+	if len(errs) > 0 {
+		return apierror.NewInvalid(pretty.Pod, errs)
 	}
 
 	return nil
