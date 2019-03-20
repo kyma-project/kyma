@@ -16,6 +16,17 @@ import (
 
 func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) {
 	var api *ServiceAPI
+
+	fromK8sCSRFInfo := func(csrfInfo *v1alpha1.CSRFInfo) *CSRFInfo {
+		if csrfInfo == nil {
+			return nil
+		}
+
+		return &CSRFInfo{
+			TokenEndpointURL: csrfInfo.TokenEndpointURL,
+		}
+	}
+
 	var events bool
 	{
 		for _, entry := range service.Entries {
@@ -28,6 +39,7 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 					ApiType:          entry.ApiType,
 					Credentials: Credentials{
 						AuthenticationUrl: entry.Credentials.AuthenticationUrl,
+						CSRFInfo:          fromK8sCSRFInfo(entry.Credentials.CSRFInfo),
 						SecretName:        entry.Credentials.SecretName,
 						Type:              entry.Credentials.Type,
 					},
@@ -59,6 +71,17 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 func convertToK8sType(service Service) v1alpha1.Service {
 	var serviceEntries = make([]v1alpha1.Entry, 0, 2)
 	if service.API != nil {
+
+		toK8sCSRFInfo := func(model *CSRFInfo) *v1alpha1.CSRFInfo {
+			if model == nil {
+				return nil
+			}
+
+			return &v1alpha1.CSRFInfo{
+				TokenEndpointURL: model.TokenEndpointURL,
+			}
+		}
+
 		apiEntry := v1alpha1.Entry{
 			Type:             specAPIType,
 			GatewayUrl:       service.API.GatewayURL,
@@ -68,6 +91,7 @@ func convertToK8sType(service Service) v1alpha1.Service {
 			ApiType:          service.API.ApiType,
 			Credentials: v1alpha1.Credentials{
 				AuthenticationUrl: service.API.Credentials.AuthenticationUrl,
+				CSRFInfo:          toK8sCSRFInfo(service.API.Credentials.CSRFInfo),
 				SecretName:        service.API.Credentials.SecretName,
 				Type:              service.API.Credentials.Type,
 			},

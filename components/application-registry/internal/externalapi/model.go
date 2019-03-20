@@ -46,19 +46,27 @@ type Credentials struct {
 	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
 }
 
+type CSRFInfo struct {
+	TokenEndpointURL string `json:"tokenEndpointURL" valid:"url,required~tokenEndpointURL field cannot be empty"`
+}
+
 type Oauth struct {
-	URL          string `json:"url" valid:"url,required~oauth url field cannot be empty"`
-	ClientID     string `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
-	ClientSecret string `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
+	URL          string    `json:"url" valid:"url,required~oauth url field cannot be empty"`
+	ClientID     string    `json:"clientId" valid:"required~oauth clientId field cannot be empty"`
+	ClientSecret string    `json:"clientSecret" valid:"required~oauth clientSecret cannot be empty"`
+	CSRFInfo     *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type BasicAuth struct {
-	Username string `json:"username" valid:"required~basic auth username field cannot be empty"`
-	Password string `json:"password" valid:"required~basic auth password field cannot be empty"`
+	Username string    `json:"username" valid:"required~basic auth username field cannot be empty"`
+	Password string    `json:"password" valid:"required~basic auth password field cannot be empty"`
+	CSRFInfo *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type CertificateGen struct {
-	CommonName string `json:"commonName"`
+	CommonName  string    `json:"commonName"`
+	Certificate string    `json:"certificate"`
+	CSRFInfo    *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type Events struct {
@@ -136,12 +144,23 @@ func serviceDefinitionToServiceDetails(serviceDefinition model.ServiceDefinition
 }
 
 func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.Credentials) *Credentials {
+
+	csrfInfoFromModel := func(model *model.CSRFInfo) *CSRFInfo {
+		if model == nil {
+			return nil
+		}
+		return &CSRFInfo{
+			TokenEndpointURL: model.TokenEndpointURL,
+		}
+	}
+
 	if credentials.Oauth != nil {
 		return &Credentials{
 			Oauth: &Oauth{
 				ClientID:     stars,
 				ClientSecret: stars,
 				URL:          credentials.Oauth.URL,
+				CSRFInfo:     csrfInfoFromModel(credentials.Oauth.CSRFInfo),
 			},
 		}
 	}
@@ -151,6 +170,7 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 			Basic: &BasicAuth{
 				Username: stars,
 				Password: stars,
+				CSRFInfo: csrfInfoFromModel(credentials.Basic.CSRFInfo),
 			},
 		}
 	}
@@ -158,7 +178,9 @@ func serviceDefinitionCredentialsToServiceDetailsCredentials(credentials *model.
 	if credentials.CertificateGen != nil {
 		return &Credentials{
 			CertificateGen: &CertificateGen{
-				CommonName: credentials.CertificateGen.CommonName,
+				CommonName:  credentials.CertificateGen.CommonName,
+				Certificate: credentials.CertificateGen.Certificate,
+				CSRFInfo:    csrfInfoFromModel(credentials.CertificateGen.CSRFInfo),
 			},
 		}
 	}
@@ -211,12 +233,23 @@ func serviceDetailsToServiceDefinition(serviceDetails ServiceDetails) (model.Ser
 }
 
 func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Credentials) *model.Credentials {
+
+	csrfInfoToModel := func(api *CSRFInfo) *model.CSRFInfo {
+		if api == nil {
+			return nil
+		}
+		return &model.CSRFInfo{
+			TokenEndpointURL: api.TokenEndpointURL,
+		}
+	}
+
 	if credentials.Oauth != nil {
 		return &model.Credentials{
 			Oauth: &model.Oauth{
 				ClientID:     credentials.Oauth.ClientID,
 				ClientSecret: credentials.Oauth.ClientSecret,
 				URL:          credentials.Oauth.URL,
+				CSRFInfo:     csrfInfoToModel(credentials.Oauth.CSRFInfo),
 			},
 		}
 	}
@@ -226,6 +259,7 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 			Basic: &model.Basic{
 				Username: credentials.Basic.Username,
 				Password: credentials.Basic.Password,
+				CSRFInfo: csrfInfoToModel(credentials.Basic.CSRFInfo),
 			},
 		}
 	}
@@ -234,6 +268,7 @@ func serviceDetailsCredentialsToServiceDefinitionCredentials(credentials *Creden
 		return &model.Credentials{
 			CertificateGen: &model.CertificateGen{
 				CommonName: credentials.CertificateGen.CommonName,
+				CSRFInfo:   csrfInfoToModel(credentials.CertificateGen.CSRFInfo),
 			},
 		}
 	}
