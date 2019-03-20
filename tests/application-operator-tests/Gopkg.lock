@@ -414,6 +414,8 @@
     "pkg/proto/hapi/version",
     "pkg/storage/driver",
     "pkg/sympath",
+    "pkg/tlsutil",
+    "pkg/urlutil",
     "pkg/version"
   ]
   revision = "9ad53aac42165a5fadc6c87be0dea6b115f93090"
@@ -501,6 +503,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "f8a3fdc48171af4d463bd02397bafc330e3ad3e394f213a9a9e971f1699ef85d"
+  inputs-digest = "ad25d1779bc7e2bd753bfe3abd7d5fbc1805a64066e2a9f2c4956572c8478d80"
   solver-name = "gps-cdcl"
   solver-version = 1

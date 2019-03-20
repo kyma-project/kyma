@@ -9,17 +9,24 @@ import (
 )
 
 const (
-	namespaceEnvName           = "NAMESPACE"
-	tillerHostEnvName          = "TILLER_HOST"
+	namespaceEnvName              = "NAMESPACE"
+	tillerHostEnvName             = "TILLER_HOST"
+	helmTLSKeyFileEnvName         = "HELM_TLS_KEY_FILE"
+	helmTLSCertificateFileEnvName = "HELM_TLS_CERTIFICATE_FILE"
+
 	installationTimeoutEnvName = "INSTALLATION_TIMEOUT"
 
-	defaultInstallationTimeout = 180
+	defaultHelmTLSKeyFile         = "/etc/certs/tls.key"
+	defaultHelmTLSCertificateFile = "/etc/certs/tls.crt"
+	defaultInstallationTimeout    = 180
 )
 
 type TestConfig struct {
-	Namespace           string
-	TillerHost          string
-	ProvisioningTimeout int
+	Namespace                string
+	TillerHost               string
+	TillerTLSKeyFile         string
+	TillerTLSCertificateFile string
+	ProvisioningTimeout      int
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -31,6 +38,18 @@ func ReadConfig() (TestConfig, error) {
 	tillerHost, found := os.LookupEnv(tillerHostEnvName)
 	if !found {
 		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", tillerHostEnvName))
+	}
+
+	helmTLSKeyFile, found := os.LookupEnv(helmTLSKeyFileEnvName)
+	if !found {
+		log.Printf("failed to read %s environment variable, using default value %s", helmTLSKeyFileEnvName, defaultHelmTLSKeyFile)
+		helmTLSKeyFile = defaultHelmTLSKeyFile
+	}
+
+	helmTLSCertificateFile, found := os.LookupEnv(helmTLSCertificateFileEnvName)
+	if !found {
+		log.Printf("failed to read %s environment variable, using default value %s", helmTLSCertificateFileEnvName, defaultHelmTLSCertificateFile)
+		helmTLSCertificateFile = defaultHelmTLSCertificateFile
 	}
 
 	var timeoutValue int
@@ -46,9 +65,11 @@ func ReadConfig() (TestConfig, error) {
 	}
 
 	config := TestConfig{
-		Namespace:           namespace,
-		TillerHost:          tillerHost,
-		ProvisioningTimeout: timeoutValue,
+		Namespace:                namespace,
+		TillerHost:               tillerHost,
+		TillerTLSKeyFile:         helmTLSKeyFile,
+		TillerTLSCertificateFile: helmTLSCertificateFile,
+		ProvisioningTimeout:      timeoutValue,
 	}
 
 	log.Printf("Read configuration: %+v", config)

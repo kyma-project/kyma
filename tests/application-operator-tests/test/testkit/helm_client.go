@@ -4,6 +4,8 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"k8s.io/helm/pkg/tlsutil"
+
 	"time"
 )
 
@@ -18,10 +20,21 @@ type helmClient struct {
 	retryWaitTime time.Duration
 }
 
-func NewHelmClient(host string) HelmClient {
-	return &helmClient{
-		helm: helm.NewClient(helm.Host(host)),
+func NewHelmClient(host, tlsKeyFile, tlsCertFile string) (HelmClient, error) {
+	tlsOpts := tlsutil.Options{
+		KeyFile:            tlsKeyFile,
+		CertFile:           tlsCertFile,
+		InsecureSkipVerify: true,
 	}
+
+	tlsCfg, err := tlsutil.ClientConfig(tlsOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &helmClient{
+		helm: helm.NewClient(helm.Host(host), helm.WithTLS(tlsCfg)),
+	}, nil
 }
 
 func (hc *helmClient) CheckReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error) {

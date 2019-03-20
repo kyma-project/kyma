@@ -2,13 +2,14 @@ package testkit
 
 import (
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/stretchr/testify/require"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
-	"testing"
-	"time"
 )
 
 const (
@@ -40,7 +41,9 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesClient, err := NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient := NewHelmClient(config.TillerHost)
+	helmClient, err := NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile)
+	require.NoError(t, err)
+
 	k8sResourcesChecker := NewK8sChecker(k8sResourcesClient, app)
 
 	return &TestSuite{

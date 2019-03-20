@@ -1,9 +1,10 @@
 package main
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"k8s.io/client-go/rest"
-	"time"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/scheme"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/controller"
@@ -86,7 +87,11 @@ func newReleaseManager(options *options, cfg *rest.Config) (appRelease.ReleaseMa
 		log.Fatal(err)
 	}
 
-	helmClient := kymahelm.NewClient(options.tillerUrl, options.installationTimeout)
+	helmClient, err := kymahelm.NewClient(options.tillerUrl, options.helmTLSKeyFile, options.helmTLSCertificateFile, options.installationTimeout)
+	if err != nil {
+		return nil, err
+	}
+
 	releaseManager := appRelease.NewReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace)
 
 	return releaseManager, nil
