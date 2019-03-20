@@ -2,16 +2,17 @@ package k8s_test
 
 import (
 	"errors"
+	"testing"
+	"time"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sTesting "k8s.io/client-go/testing"
-	"testing"
-	"time"
 )
 
 func failingReactor(action k8sTesting.Action) (handled bool, ret runtime.Object, err error) {

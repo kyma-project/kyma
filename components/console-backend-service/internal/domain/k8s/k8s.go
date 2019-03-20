@@ -37,7 +37,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8S Client")
 	}
-	
+
 	clientset, err := k8sClientset.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while creating K8S Clientset")

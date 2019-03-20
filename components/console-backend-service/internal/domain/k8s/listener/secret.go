@@ -5,7 +5,7 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 //go:generate mockery -name=gqlPodConverter -output=automock -outpkg=automock -case=underscore

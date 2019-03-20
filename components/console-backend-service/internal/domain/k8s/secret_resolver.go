@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"context"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
@@ -11,7 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 

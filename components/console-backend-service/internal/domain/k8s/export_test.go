@@ -4,7 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"k8s.io/client-go/discovery"
 	apps "k8s.io/client-go/kubernetes/typed/apps/v1"
-	"k8s.io/client-go/kubernetes/typed/core/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
 
