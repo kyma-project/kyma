@@ -38,8 +38,8 @@ global:
     dir: develop/
     version: 74a78ec9
   application_gateway:
-    dir: pr/
-    version: PR-2998
+    dir: develop/
+    version: c90f63c6
   gateway_tests:
     dir: develop/
     version: 8b074a71
