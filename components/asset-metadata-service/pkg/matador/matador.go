@@ -1,11 +1,10 @@
 package matador
 
 import (
+	"github.com/gernest/front"
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
-	"github.com/ericaro/frontmatter"
 	"github.com/pkg/errors"
-	"io/ioutil"
 )
 
 //go:generate mockery -name=Matador -output=automock -outpkg=automock -case=underscore
@@ -13,10 +12,17 @@ type Matador interface {
 	ReadMetadata(fileHeader fileheader.FileHeader) (map[string]interface{}, error)
 }
 
-type matador struct {}
+type matador struct {
+	frontMatter *front.Matter
+}
 
 func New() Matador {
-	return &matador{}
+	f := front.NewMatter()
+	f.Handle("---", front.YAMLHandler)
+
+	return &matador{
+		frontMatter: f,
+	}
 }
 
 func (m *matador) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]interface{}, error) {
@@ -31,14 +37,7 @@ func (m *matador) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]int
 		}
 	}()
 
-	bytes, err := ioutil.ReadAll(f)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while reading file %s", fileHeader.Filename())
-	}
-
-
-	var metadata map[string]interface{}
-	err = frontmatter.Unmarshal(bytes, &metadata)
+	metadata, _, err := m.frontMatter.Parse(f)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while reading metadata from file %s", fileHeader.Filename())
 	}
