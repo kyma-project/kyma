@@ -12,7 +12,7 @@ sample-bundle/
   │    └── {chart-name}/                    # [REQUIRED] A Helm chart directory
   │         └── ....                        # [REQUIRED] Helm chart files   
   └── plans/                                # [REQUIRED] A directory which contains the possible plans for an installed chart
-       ├── example-enterprise               # [REQUIRED] A directory of files for a specific plan
+       ├── example-enterprise               # [REQUIRED] A directory which contains files for a specific plan
        │   ├── meta.yaml                    # [REQUIRED] A file which contains metadata information about this plan
        │   ├── bind.yaml                    # A file which contains information required to bind a given plan
        │   ├── create-instance-schema.json  # JSON schema definitions for creating a ServiceInstance
