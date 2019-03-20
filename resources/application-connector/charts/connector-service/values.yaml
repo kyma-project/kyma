@@ -10,7 +10,8 @@ deployment:
     caSecretName: connector-service-app-ca
     appsInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/applications/management/info
     runtimesInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/runtimes/management/info
-    validityTime: "92d"
+    appValidityTime: "92d"
+    runtimeValidityTime: "92d"
     central: &central false
     revocationConfigMapName: "revocations-config"
   envvars:
