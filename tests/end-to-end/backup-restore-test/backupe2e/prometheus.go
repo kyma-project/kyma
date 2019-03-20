@@ -206,45 +206,25 @@ func (pt *prometheusTest) CreateResources(namespace string) {
 }
 
 func (t *prometheusTest) DeleteResources() {
+
 	// It needs to be implemented for this test.
 	err := t.waitForPodPrometheus(1 * time.Minute)
 	So(err, ShouldBeNil)
 
-	deletePolicy := metav1.DeletePropagationForeground
-
-	serviceList, err := t.coreClient.CoreV1().Services(prometheusNS).List(metav1.ListOptions{LabelSelector: prometheusLabelSelector,})
+	err = t.deleteServices(prometheusNS, prometheusServiceName, prometheusLabelSelector)
 	So(err, ShouldBeNil)
 
-	for _, service := range serviceList.Items {
-		if service.Name == prometheusServiceName {
-			// Delete Service
-			err = t.coreClient.CoreV1().Services(prometheusNS).Delete(prometheusServiceName, &metav1.DeleteOptions{
-				PropagationPolicy: &deletePolicy,
-			})
-			So(err, ShouldBeNil)
-		}
-	}
-
-	collection := t.coreClient.AppsV1().StatefulSets(prometheusNS)
-	err = collection.Delete(prometheusStatefulsetName, &metav1.DeleteOptions{
-		PropagationPolicy: &deletePolicy,
-	})
+	err = t.deleteStatefulset(prometheusNS, prometheusStatefulsetName)
 	So(err, ShouldBeNil)
 
-	podList, err := t.coreClient.CoreV1().Pods(prometheusNS).List(metav1.ListOptions{LabelSelector: prometheusLabelSelector,})
+	err = t.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
 	So(err, ShouldBeNil)
-
-	for _, pod := range podList.Items {
-		if pod.Name == prometheusPodName {
-			// Delete Pod
-			err = t.coreClient.CoreV1().Pods(prometheusNS).Delete(prometheusPodName, &metav1.DeleteOptions{})
-			So(err, ShouldBeNil)
-		}
-	}
 
 	err = t.waitForPodPrometheus(2 * time.Minute)
-	So(err, ShouldBeError)
+	So(err, ShouldBeError) // An error is expected.
+
 }
+
 
 func (pt *prometheusTest) TestResources(namespace string) {
 	err := pt.waitForPodPrometheus(5 * time.Minute)
@@ -296,4 +276,64 @@ func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 			}
 		}
 	}
+}
+
+func (t *prometheusTest) deleteServices(namespace, serviceName, labelSelector string) error {
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	serviceList, err := t.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, service := range serviceList.Items {
+		if service.Name == serviceName {
+			err := t.coreClient.CoreV1().Services(namespace).Delete(serviceName, &metav1.DeleteOptions{
+				PropagationPolicy: &deletePolicy,
+			})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
+}
+
+func (t *prometheusTest) deleteStatefulset(namespace, statefulsetName string) error {
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	collection := t.coreClient.AppsV1().StatefulSets(namespace)
+	err := collection.Delete(statefulsetName, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *prometheusTest) deletePod(namespace, podName, labelSelector string) error {
+
+	podList, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, pod := range podList.Items {
+		if pod.Name == podName {
+			// Delete Pod
+			err = t.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
 }

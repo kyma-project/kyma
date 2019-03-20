@@ -113,7 +113,7 @@ func (t *grafanaTest) DeleteResources() {
 	So(err, ShouldBeNil)
 
 	err = t.waitForPodGrafana(2 * time.Minute)
-	So(err, ShouldBeError) // And error is expected.
+	So(err, ShouldBeError) // An error is expected.
 
 }
 
