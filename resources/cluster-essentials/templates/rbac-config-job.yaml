@@ -28,7 +28,7 @@ metadata:
     "helm.sh/hook-weight": "1"
 rules:
 - apiGroups: ["rbac.istio.io"]
-  resources: ["RbacConfig"]
+  resources: ["rbacconfigs"]
   verbs: ["get", "list", "delete"]
 ---
 apiVersion: v1
@@ -67,5 +67,15 @@ spec:
           - -c
           - |
             if [ -z "$(kubectl get rbacconfig default -n kyma-system --ignore-not-found)" ]; then
+              echo "---> No RBACConfig is present. Exitting."
+            else
               kubectl delete rbacconfig default -n kyma-system
             fi
+
+---
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: RbacConfig
+metadata:
+  name: default
+spec:
+  mode: 'OFF'
