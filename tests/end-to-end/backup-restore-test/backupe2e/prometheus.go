@@ -48,7 +48,7 @@ const (
 	metricName                = "kube_pod_container_resource_requests_cpu_cores"
 	prometheusPodName         = "prometheus-monitoring-0"
 	prometheusServiceName     = "monitoring-prometheus"
-	prometheusStatefulsetName = "monitoring-prometheus"
+	prometheusStatefulsetName = "prometheus-monitoring"
 	prometheusLabelSelector   = "app=prometheus"
 )
 

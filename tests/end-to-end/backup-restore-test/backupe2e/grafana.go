@@ -100,6 +100,8 @@ func (t *grafanaTest) CreateResources(namespace string) {
 }
 
 func (t *grafanaTest) DeleteResources() {
+	log.Print("---------------------DeleteResources starts----------------------------------------------------------")
+
 	// It needs to be implemented for this test.
 	err := t.waitForPodGrafana(1 * time.Minute)
 	So(err, ShouldBeNil)
@@ -116,12 +118,12 @@ func (t *grafanaTest) DeleteResources() {
 	err = t.waitForPodGrafana(2 * time.Minute)
 	So(err, ShouldBeError) // And error is expected.
 
-	log.Print("---------------------DeleteResources----------------------------------------------------------")
+	log.Print("---------------------DeleteResources ends----------------------------------------------------------")
 
 }
 
 func (t *grafanaTest) TestResources(namespace string) {
-	log.Print("---------------------TestResource----------------------------------------------------------")
+	log.Print("---------------------TestResource starts----------------------------------------------------------")
 	err := t.waitForPodGrafana(5 * time.Minute)
 	So(err, ShouldBeNil)
 
@@ -172,6 +174,8 @@ func (t *grafanaTest) TestResources(namespace string) {
 		}
 		log.Print("---------------------After Backup----------------------------------------------------------")
 	}
+
+	log.Print("---------------------TestResource end----------------------------------------------------------")
 }
 
 func (t *grafanaTest) deleteServices(namespace, serviceName, labelSelector string) error {
