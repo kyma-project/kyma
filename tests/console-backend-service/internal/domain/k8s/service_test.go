@@ -3,6 +3,7 @@
 package k8s
 
 import (
+	"k8s.io/apimachinery/pkg/api/errors"
 	"testing"
 	"time"
 
@@ -75,6 +76,10 @@ type LoadBalancerStatus struct {
 	Ingress []LoadBalancerIngress `json:"ingress"`
 }
 
+type deleteServiceMutationResponse struct {
+	DeleteService service `json:"deleteService"`
+}
+
 func TestService(t *testing.T) {
 
 	assert := _assert.New(t)
@@ -136,6 +141,29 @@ func TestService(t *testing.T) {
 	err = grapqlClient.Do(fixServicesQuery(), &servicesRes)
 	require.NoError(t, err)
 	assert.Equal(servicesRes.Services[0].Name, serviceName)
+
+	t.Log("Deleting service...")
+	var deleteRes deleteServiceMutationResponse
+	err = grapqlClient.Do(fixDeleteServiceMutation(), &deleteRes)
+	require.NoError(t, err)
+	assert.Equal(serviceName, deleteRes.DeleteService.Name)
+
+	t.Log("Waiting for deletion...")
+	err = waiter.WaitAtMost(func() (bool, error) {
+		_, err := k8sClient.Services(namespace).Get(serviceName, metav1.GetOptions{})
+		if errors.IsNotFound(err) {
+			return true, nil
+		}
+		if err != nil {
+			return false, err
+		}
+		return false, nil
+	}, time.Minute)
+	require.NoError(t, err)
+
+	t.Log("Checking subscription for deleted service...")
+	expectedEvent = serviceEvent("DELETE", service{Name: serviceName})
+	assert.NoError(checkServiceEvent(expectedEvent, subscription))
 }
 
 func fixService(name, namespace string) *v1.Service {
@@ -312,5 +340,35 @@ func fixUpdateServiceMutation(service string) *graphql.Request {
 	req.SetVar("namespace", namespace)
 	req.SetVar("service", service)
 
+	return req
+}
+
+func fixDeleteServiceMutation() *graphql.Request {
+	mutation := `mutation DeleteService($name: String!, $namespace: String!) {
+  deleteService(name: $name, namespace: $namespace){
+    name
+    clusterIP
+    creationTimestamp
+    labels
+    ports {
+      name
+      serviceProtocol
+      port
+      nodePort
+      targetPort
+    }
+    status {
+      loadBalancer {
+        ingress {
+          ip
+          hostName
+        }
+      }
+    }
+  }
+}`
+	req := graphql.NewRequest(mutation)
+	req.SetVar("name", serviceName)
+	req.SetVar("namespace", namespace)
 	return req
 }

@@ -12,6 +12,20 @@ type serviceSvc struct {
 	mock.Mock
 }
 
+// Delete provides a mock function with given fields: name, namespace
+func (_m *serviceSvc) Delete(name string, namespace string) error {
+	ret := _m.Called(name, namespace)
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(string, string) error); ok {
+		r0 = rf(name, namespace)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
 // Find provides a mock function with given fields: name, namespace
 func (_m *serviceSvc) Find(name string, namespace string) (*v1.Service, error) {
 	ret := _m.Called(name, namespace)

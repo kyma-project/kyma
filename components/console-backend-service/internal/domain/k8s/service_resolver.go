@@ -25,6 +25,7 @@ type serviceSvc interface {
 	Find(name, namespace string) (*v1.Service, error)
 	List(namespace string, pagingParams pager.PagingParams) ([]*v1.Service, error)
 	Update(name, namespace string, update v1.Service) (*v1.Service, error)
+	Delete(name, namespace string) error
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
 }
@@ -96,4 +97,27 @@ func (r *serviceResolver) UpdateServiceMutation(ctx context.Context, name string
 	}
 
 	return r.gqlServiceConverter.ToGQL(updated)
+}
+
+func (r *serviceResolver) DeleteServiceMutation(context context.Context, name string, namespace string) (*gqlschema.Service, error) {
+	service, err := r.serviceSvc.Find(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while finding %s `%s` in namespace `%s`", pretty.Service, name, namespace))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	serviceCopy := service.DeepCopy()
+	deletedService, err := r.gqlServiceConverter.ToGQL(serviceCopy)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Service))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	err = r.serviceSvc.Delete(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.Service, name, namespace))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	return deletedService, nil
 }

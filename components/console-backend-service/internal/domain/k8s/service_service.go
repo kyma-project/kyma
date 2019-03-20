@@ -103,6 +103,10 @@ func (svc *serviceService) Update(name, namespace string, update v1.Service) (*v
 	return updated, nil
 }
 
+func (svc *serviceService) Delete(name, namespace string) error {
+	return svc.client.Services(namespace).Delete(name, nil)
+}
+
 func (svc *serviceService) checkUpdatePreconditions(name string, namespace string, update v1.Service) error {
 	errorList := field.ErrorList{}
 	if name != update.Name {

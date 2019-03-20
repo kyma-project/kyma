@@ -263,6 +263,22 @@ func TestServiceService_Update(t *testing.T) {
 	})
 }
 
+func TestServiceService_Delete(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		exampleName := "exampleService"
+		exampleNamespace := "exampleNamespace"
+		exampleService := fixService(exampleName, exampleNamespace, nil)
+		serviceInformer, client := fixServiceInformer(exampleService)
+		svc := k8s.NewServiceService(serviceInformer, client)
+
+		err := svc.Delete(exampleName, exampleNamespace)
+
+		require.NoError(t, err)
+		_, err = client.Services(exampleNamespace).Get(exampleName, metav1.GetOptions{})
+		assert.True(t, errors.IsNotFound(err))
+	})
+}
+
 func fixServiceInformer(objects ...runtime.Object) (cache.SharedIndexInformer, corev1.CoreV1Interface) {
 	client := fake.NewSimpleClientset(objects...)
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
