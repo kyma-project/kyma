@@ -16,7 +16,7 @@ The UsageKind contains a finalizer which prevents deletion of the UsageKind in u
 
 ## RBAC settings
 
-The administrator who adds the UsageKind must take care of the RBAC settings. The BUC and ui-api-layer must be allowed to perform needed operations on the resources, with the type defined in the UsageKind object.
+The administrator who adds the UsageKind must take care of the RBAC settings. The BUC and console-backend-service must be allowed to perform needed operations on the resources, with the type defined in the UsageKind object.
 
 See the example of the RBAC Rule for the Binding Usage Controller:
 ```yaml
@@ -24,7 +24,7 @@ See the example of the RBAC Rule for the Binding Usage Controller:
   resources: ["functions"]
   verbs: ["get", "update"]
 ```
-Here is the example for the ui-api-layer:
+Here is the example for the console-backend-service:
 ```yaml
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]

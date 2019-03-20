@@ -2,7 +2,6 @@ package authorization
 
 import (
 	"net/http"
-	"net/http/httputil"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/util"
 
@@ -21,9 +20,8 @@ func newBasicAuthStrategy(username, password string) basicAuthStrategy {
 	}
 }
 
-func (b basicAuthStrategy) AddAuthorization(r *http.Request, _ *httputil.ReverseProxy) apperrors.AppError {
+func (b basicAuthStrategy) AddAuthorization(r *http.Request, _ TransportSetter) apperrors.AppError {
 	util.AddBasicAuthHeader(r, b.username, b.password)
-
 	return nil
 }
 

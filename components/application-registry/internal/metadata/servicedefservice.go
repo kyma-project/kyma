@@ -61,7 +61,11 @@ func (sds *serviceDefinitionService) Create(application string, serviceDef *mode
 		}
 	}
 
-	serviceDef.ID = sds.uuidGenerator.NewUUID()
+	var err error
+	serviceDef.ID, err = sds.uuidGenerator.NewUUID()
+	if err != nil {
+		return "", apperrors.Internal("Creating uuid failed, %s", err)
+	}
 	service := initService(serviceDef, serviceDef.Identifier, application)
 
 	var gatewayUrl string

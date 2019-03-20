@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
@@ -22,6 +24,7 @@ type proxy struct {
 	skipVerify                   bool
 	proxyTimeout                 int
 	authorizationStrategyFactory authorization.StrategyFactory
+	csrfTokenStrategyFactory     csrf.TokenStrategyFactory
 }
 
 type Config struct {
@@ -32,7 +35,7 @@ type Config struct {
 }
 
 // New creates proxy for handling user's services calls
-func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, config Config) http.Handler {
+func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrategyFactory authorization.StrategyFactory, csrfTokenStrategyFactory csrf.TokenStrategyFactory, config Config) http.Handler {
 	return &proxy{
 		nameResolver:                 k8sconsts.NewNameResolver(config.Application),
 		serviceDefService:            serviceDefService,
@@ -40,6 +43,7 @@ func New(serviceDefService metadata.ServiceDefinitionService, authorizationStrat
 		skipVerify:                   config.SkipVerify,
 		proxyTimeout:                 config.ProxyTimeout,
 		authorizationStrategyFactory: authorizationStrategyFactory,
+		csrfTokenStrategyFactory:     csrfTokenStrategyFactory,
 	}
 }
 
@@ -99,12 +103,21 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 	}
 
 	authorizationStrategy := p.newAuthorizationStrategy(serviceApi.Credentials)
+	csrfTokenStrategy := p.newCSRFTokenStrategy(authorizationStrategy, serviceApi.Credentials)
 
-	return p.cache.Put(id, proxy, authorizationStrategy), nil
+	return p.cache.Put(id, proxy, authorizationStrategy, csrfTokenStrategy), nil
 }
 
 func (p *proxy) newAuthorizationStrategy(credentials *metadatamodel.Credentials) authorization.Strategy {
 	return p.authorizationStrategyFactory.Create(credentials)
+}
+
+func (p *proxy) newCSRFTokenStrategy(authorizationStrategy authorization.Strategy, credentials *metadatamodel.Credentials) csrf.TokenStrategy {
+	csrfTokenEndpointURL := ""
+	if credentials != nil {
+		csrfTokenEndpointURL = credentials.CSRFTokenEndpointURL
+	}
+	return p.csrfTokenStrategyFactory.Create(authorizationStrategy, csrfTokenEndpointURL)
 }
 
 func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Request, context.CancelFunc) {
@@ -115,7 +128,14 @@ func (p *proxy) prepareRequest(r *http.Request, cacheEntry *CacheEntry) (*http.R
 }
 
 func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperrors.AppError {
-	return cacheEntry.AuthorizationStrategy.AddAuthorization(r, cacheEntry.Proxy)
+
+	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r)
+
+	if err != nil {
+		return err
+	}
+
+	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
 }
 
 func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) {

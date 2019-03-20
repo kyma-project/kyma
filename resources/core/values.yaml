@@ -34,20 +34,20 @@ global:
     version: e12b49fc
   api_controller:
     dir: develop/
-    version: bc120200
+    version: "0bcf18a4"
   api_controller_acceptance_tests:
     dir: develop/
     version: 736988df
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir: develop/
-    version: 2f5d18c2
+    version: "962ad9b6"
   configurations_generator:
     dir: develop/
     version: aabedc33
   docs:
     dir: develop/
-    version: ce4d1ae7
+    version: daf235a6
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -62,16 +62,16 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: "df845f56"
+    version: "d74ff201"
   test_namespace_controller:
     dir: develop/
     version: 429bfbcc
-  ui_api_layer:
+  console_backend_service:
     dir: develop/
-    version: b426d54d
-  ui_api_layer_acceptance_tests:
+    version: dc2e3cca
+  console_backend_service_test:
     dir: develop/
-    version: a63544bb
+    version: dc2e3cca
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
