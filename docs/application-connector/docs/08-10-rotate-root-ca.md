@@ -9,7 +9,7 @@ Two different components use the Root CA certificate. As a result, the certifica
   - The `connector-service-app-ca` Connector Service CA Secret responsible for signing certificate requests
   - The `nginx-auth-ca` Nginx Ingress Secret responsible for security in the Connector Service API
 
-Keeping both secrets up-to-date is vital for the security of your implementation as it guarantees that the Connector Service issues proper certificates and no unregistered applications can access its API.
+Keeping both Secrets up-to-date is vital for the security of your implementation as it guarantees that the Connector Service issues proper certificates and no unregistered applications can access its API.
 
 The Root CA certificate has a set expiration date and must be renewed periodically to prevent its expiration. You must also renew the Root CA certificate and key every time they are compromised.
 
@@ -20,7 +20,7 @@ This tutorial describes the procedure you must follow for these scenarios:
 
 ## Rotating a soon-to-expire CA certificate
 
-To successfully rotate a soon-to-expire CA certificate, you must replace it with a new certificate in both the Connector Service CA Secret and the Nginx Ingress Secret. Follow these steps to replace the old certificate in both Secrets:
+To successfully rotate a soon-to-expire CA certificate, replace it with a new certificate in both the Connector Service CA Secret and the Nginx Ingress Secret. Follow these steps to replace the old certificate in both Secrets:
 
 1. Get the existing Root CA key. Fetch it from the `connector-service-app-ca` Secret and save it to a `ca.key` file. Run:
   ```
@@ -39,7 +39,7 @@ To successfully rotate a soon-to-expire CA certificate, you must replace it with
   cat new-ca.crt | base64
   ```
 
-4. Replace the old certificate in the Connector Service CA Secret. Edit the Secret and replace `ca.crt` value with the new base64-encoded certificate. Run:
+4. Replace the old certificate in the Connector Service CA Secret. Edit the Secret and replace the `ca.crt` value with the new base64-encoded certificate. Run:
   ```
   kubectl -n kyma-integration edit secret connector-service-app-ca
   ```
@@ -60,7 +60,7 @@ To successfully rotate a soon-to-expire CA certificate, you must replace it with
   cat nginx-ca.crt | base64
   ```
 
-8. Replace the old certificate in the Nginx Ingress Secret. Edit the Secret and replace `ca.crt` value with the `nginx-ca.crt` base64-encoded certificate. Run:
+8. Replace the old certificate in the Nginx Ingress Secret. Edit the Secret and replace the `ca.crt` value with the `nginx-ca.crt` base64-encoded certificate. Run:
   ```
   kubectl -n kyma-integration edit secret nginx-auth-ca
   ```
@@ -73,7 +73,7 @@ To successfully rotate a soon-to-expire CA certificate, you must replace it with
   cat new-ca.crt | base64
   ```
 
-11. Edit the Secret and replace `ca.crt` value with the `new-ca.crt` base64-encoded certificate. Run:
+11. Edit the Secret and replace the `ca.crt` value with the `new-ca.crt` base64-encoded certificate. Run:
   ```
   kubectl -n kyma-integration edit secret nginx-auth-ca
   ```
@@ -102,7 +102,7 @@ To successfully rotate a soon-to-expire CA certificate, you must replace it with
   kubectl -n kyma-integration edit secret connector-service-app-ca
   ```
 
-5. Replace the old certificate in the Nginx Ingress Secret. Edit the Secret and replace `ca.crt` value with the new base64-encoded certificate. Run:
+5. Replace the old certificate in the Nginx Ingress Secret. Edit the Secret and replace the `ca.crt` value with the new base64-encoded certificate. Run:
   ```
   kubectl -n kyma-integration edit secret nginx-auth-ca
   ```
@@ -131,12 +131,12 @@ To successfully rotate a soon-to-expire CA certificate, you must replace it with
   cat new-ca.crt | base64
   ```
 
-4. Replace the old certificate and key in the Connector Service CA Secret. Edit the Secret and replace `ca.crt` and `ca.key` value with the new base64-encoded certificate and key respectively. Run:
+4. Replace the old certificate and key in the Connector Service CA Secret. Edit the Secret and replace the `ca.crt` and `ca.key` values with the new base64-encoded certificate and key respectively. Run:
   ```
   kubectl -n kyma-integration edit secret connector-service-app-ca
   ```
 
-5. Replace the old certificate in the Nginx Ingress Secret. Edit the Secret and replace `ca.crt` value with the new base64-encoded certificate. Run:
+5. Replace the old certificate in the Nginx Ingress Secret. Edit the Secret and replace the `ca.crt` value with the new base64-encoded certificate. Run:
   ```
   kubectl -n kyma-integration edit secret nginx-auth-ca
   ```
