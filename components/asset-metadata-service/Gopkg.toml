@@ -25,4 +25,4 @@ required = [
 
 [[constraint]]
   branch = "master"
-  name = "github.com/ericaro/frontmatter"
+  name = "github.com/gernest/front"

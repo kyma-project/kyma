@@ -11,11 +11,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:7aa9a66297508eb8aeda7926c8f071e88f31764695a2fc62fcb2ce9ffe074777"
-  name = "github.com/ericaro/frontmatter"
+  digest = "1:bb0bc66d975e44a8379ca48962bf337dfa3cc004b3ef97874011dd990e8d86b9"
+  name = "github.com/gernest/front"
   packages = ["."]
   pruneopts = "UT"
-  revision = "9fedef9406e420da012d078cd83645bbac08f291"
+  revision = "ed80ca338b8848e3bfc3fa13824c91ebbcad53db"
 
 [[projects]]
   branch = "master"
@@ -35,6 +35,27 @@
   pruneopts = "UT"
   revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
   version = "v1.2.0"
+
+[[projects]]
+  digest = "1:fe167e8f858cbfc10c721f2000f2446140800bb53fa83c088e03d191275611a4"
+  name = "github.com/onsi/gomega"
+  packages = [
+    ".",
+    "format",
+    "internal/assertion",
+    "internal/asyncassertion",
+    "internal/oraclematcher",
+    "internal/testingtsupport",
+    "matchers",
+    "matchers/support/goraph/bipartitegraph",
+    "matchers/support/goraph/edge",
+    "matchers/support/goraph/node",
+    "matchers/support/goraph/util",
+    "types",
+  ]
+  pruneopts = "UT"
+  revision = "90e289841c1ed79b7a598a7cd9959750cb5e89e2"
+  version = "v1.5.0"
 
 [[projects]]
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
@@ -81,6 +102,44 @@
 
 [[projects]]
   branch = "master"
+  digest = "1:03a8ff54c1a62710fe21a08ad9ccd554ac90232c4fd34c2731f65dd47e1f2077"
+  name = "golang.org/x/net"
+  packages = [
+    "html",
+    "html/atom",
+    "html/charset",
+  ]
+  pruneopts = "UT"
+  revision = "1272bf9dcd53ea65c09668fb4c76e65deb740072"
+
+[[projects]]
+  digest = "1:aa4d6967a3237f8367b6bf91503964a77183ecf696f1273e8ad3551bb4412b5f"
+  name = "golang.org/x/text"
+  packages = [
+    "encoding",
+    "encoding/charmap",
+    "encoding/htmlindex",
+    "encoding/internal",
+    "encoding/internal/identifier",
+    "encoding/japanese",
+    "encoding/korean",
+    "encoding/simplifiedchinese",
+    "encoding/traditionalchinese",
+    "encoding/unicode",
+    "internal/gen",
+    "internal/tag",
+    "internal/utf8internal",
+    "language",
+    "runes",
+    "transform",
+    "unicode/cldr",
+  ]
+  pruneopts = "UT"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
+
+[[projects]]
+  branch = "master"
   digest = "1:6e06c8794bc3ccc0710643da35d2702b431f86a69843c60c96d932c282848a9a"
   name = "golang.org/x/tools"
   packages = [
@@ -113,9 +172,10 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/ericaro/frontmatter",
+    "github.com/gernest/front",
     "github.com/golang/glog",
     "github.com/kisielk/errcheck",
+    "github.com/onsi/gomega",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/mock",
     "github.com/vrischmann/envconfig",
