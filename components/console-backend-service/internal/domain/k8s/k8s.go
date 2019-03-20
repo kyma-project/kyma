@@ -9,7 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/client-go/informers"
 	k8sClientset "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/kubernetes/typed/core/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
 

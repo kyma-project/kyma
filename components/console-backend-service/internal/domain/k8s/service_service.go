@@ -2,13 +2,14 @@ package k8s
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"

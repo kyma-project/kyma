@@ -2,12 +2,13 @@ package listener
 
 import (
 	"fmt"
+
 	"github.com/pkg/errors"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 
 	"github.com/golang/glog"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 )
 
 //go:generate mockery -name=gqlServiceConverter -output=automock -outpkg=automock -case=underscore

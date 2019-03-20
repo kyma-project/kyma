@@ -3,11 +3,12 @@
 package k8s
 
 import (
-	"k8s.io/apimachinery/pkg/api/errors"
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service"
+	"k8s.io/apimachinery/pkg/api/errors"
+
+	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
@@ -17,7 +18,7 @@ import (
 
 	_assert "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -130,7 +131,7 @@ func TestService(t *testing.T) {
 
 	t.Log("Updating...")
 	serviceRes.Service.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update,_ := stringifyJSON(serviceRes.Service.JSON)
+	update, _ := stringifyJSON(serviceRes.Service.JSON)
 	var updateRes updateServiceMutationResponse
 	err = grapqlClient.Do(fixUpdateServiceMutation(update), &updateRes)
 	require.NoError(t, err)
