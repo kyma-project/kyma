@@ -29,7 +29,7 @@ func TestK8sResources(t *testing.T) {
 
 	metadataServiceClient := testkit.NewMetadataServiceClient(config.MetadataServiceUrl + "/" + dummyApp.Name + "/v1/metadata/services")
 
-	t.Run("when creating service only with OAuth API", func(t *testing.T) {
+	testWithOAuth := func(csrf *testkit.CSRFInfo, t *testing.T) {
 
 		// setup
 		initialServiceDefinition := testkit.ServiceDetails{
@@ -43,6 +43,7 @@ func TestK8sResources(t *testing.T) {
 						URL:          "http://oauth.com",
 						ClientID:     "clientId",
 						ClientSecret: "clientSecret",
+						CSRFInfo:     csrf,
 					},
 				},
 				Spec: testkit.ApiRawSpec,
@@ -100,17 +101,23 @@ func TestK8sResources(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
+			expectedCSRF := "not used in this test run"
+			if csrf != nil {
+				expectedCSRF = csrf.TokenEndpointURL
+			}
+
 			expectedServiceData := testkit.ServiceData{
-				ServiceId:           serviceId,
-				DisplayName:         "test service",
-				ProviderDisplayName: "service provider",
-				LongDescription:     "service description",
-				HasAPI:              true,
-				TargetUrl:           "http://service.com",
-				OauthUrl:            "http://oauth.com",
-				GatewayUrl:          "http://" + resourceName + ".kyma-integration.svc.cluster.local",
-				AccessLabel:         resourceName,
-				HasEvents:           false,
+				ServiceId:            serviceId,
+				DisplayName:          "test service",
+				ProviderDisplayName:  "service provider",
+				LongDescription:      "service description",
+				HasAPI:               true,
+				TargetUrl:            "http://service.com",
+				OauthUrl:             "http://oauth.com",
+				GatewayUrl:           "http://" + resourceName + ".kyma-integration.svc.cluster.local",
+				AccessLabel:          resourceName,
+				HasEvents:            false,
+				CSRFTokenEndpointURL: expectedCSRF,
 			}
 
 			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
@@ -118,9 +125,19 @@ func TestK8sResources(t *testing.T) {
 
 		// clean up
 		metadataServiceClient.DeleteService(t, serviceId)
+	}
+
+	t.Run("when creating service only with OAuth API", func(t *testing.T) {
+		var csrfInfo *testkit.CSRFInfo = nil
+		testWithOAuth(csrfInfo, t)
 	})
 
-	t.Run("when creating service only with Basic Auth API", func(t *testing.T) {
+	t.Run("when creating service only with OAuth API and CSRF", func(t *testing.T) {
+		csrfInfo := &testkit.CSRFInfo{TokenEndpointURL: "https://csrf.token.endpoint.org"}
+		testWithOAuth(csrfInfo, t)
+	})
+
+	testWithBasicAuth := func(csrf *testkit.CSRFInfo, t *testing.T) {
 
 		// setup
 		initialServiceDefinition := testkit.ServiceDetails{
@@ -133,6 +150,7 @@ func TestK8sResources(t *testing.T) {
 					Basic: &testkit.Basic{
 						Username: "username",
 						Password: "password",
+						CSRFInfo: csrf,
 					},
 				},
 				Spec: testkit.ApiRawSpec,
@@ -190,17 +208,23 @@ func TestK8sResources(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
+			expectedCSRF := "not used in this test run"
+			if csrf != nil {
+				expectedCSRF = csrf.TokenEndpointURL
+			}
+
 			expectedServiceData := testkit.ServiceData{
-				ServiceId:           serviceId,
-				DisplayName:         "test service",
-				ProviderDisplayName: "service provider",
-				LongDescription:     "service description",
-				HasAPI:              true,
-				TargetUrl:           "http://service.com",
-				OauthUrl:            "",
-				GatewayUrl:          "http://" + resourceName + ".kyma-integration.svc.cluster.local",
-				AccessLabel:         resourceName,
-				HasEvents:           false,
+				ServiceId:            serviceId,
+				DisplayName:          "test service",
+				ProviderDisplayName:  "service provider",
+				LongDescription:      "service description",
+				HasAPI:               true,
+				TargetUrl:            "http://service.com",
+				OauthUrl:             "",
+				GatewayUrl:           "http://" + resourceName + ".kyma-integration.svc.cluster.local",
+				AccessLabel:          resourceName,
+				HasEvents:            false,
+				CSRFTokenEndpointURL: expectedCSRF,
 			}
 
 			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
@@ -208,9 +232,19 @@ func TestK8sResources(t *testing.T) {
 
 		// clean up
 		metadataServiceClient.DeleteService(t, serviceId)
+	}
+
+	t.Run("when creating service only with Basic Auth API", func(t *testing.T) {
+		var csrfInfo *testkit.CSRFInfo = nil
+		testWithBasicAuth(csrfInfo, t)
 	})
 
-	t.Run("when creating service only with CertificateGen API", func(t *testing.T) {
+	t.Run("when creating service only with Basic Auth API and CSRF", func(t *testing.T) {
+		csrfInfo := &testkit.CSRFInfo{TokenEndpointURL: "https://csrf.token.endpoint.org"}
+		testWithBasicAuth(csrfInfo, t)
+	})
+
+	testWithCertGen := func(csrf *testkit.CSRFInfo, t *testing.T) {
 
 		// setup
 		initialServiceDefinition := testkit.ServiceDetails{
@@ -222,6 +256,7 @@ func TestK8sResources(t *testing.T) {
 				Credentials: &testkit.Credentials{
 					CertificateGen: &testkit.CertificateGen{
 						CommonName: "commonName",
+						CSRFInfo:   csrf,
 					},
 				},
 				Spec: testkit.ApiRawSpec,
@@ -279,17 +314,23 @@ func TestK8sResources(t *testing.T) {
 			application, err := k8sResourcesClient.GetApplicationServices(dummyApp.Name, v1.GetOptions{})
 			require.NoError(t, err)
 
+			expectedCSRF := "not used in this test run"
+			if csrf != nil {
+				expectedCSRF = csrf.TokenEndpointURL
+			}
+
 			expectedServiceData := testkit.ServiceData{
-				ServiceId:           serviceId,
-				DisplayName:         "test service",
-				ProviderDisplayName: "service provider",
-				LongDescription:     "service description",
-				HasAPI:              true,
-				TargetUrl:           "http://service.com",
-				OauthUrl:            "",
-				GatewayUrl:          "http://" + resourceName + ".kyma-integration.svc.cluster.local",
-				AccessLabel:         resourceName,
-				HasEvents:           false,
+				ServiceId:            serviceId,
+				DisplayName:          "test service",
+				ProviderDisplayName:  "service provider",
+				LongDescription:      "service description",
+				HasAPI:               true,
+				TargetUrl:            "http://service.com",
+				OauthUrl:             "",
+				GatewayUrl:           "http://" + resourceName + ".kyma-integration.svc.cluster.local",
+				AccessLabel:          resourceName,
+				HasEvents:            false,
+				CSRFTokenEndpointURL: expectedCSRF,
 			}
 
 			testkit.CheckK8sApplication(t, application, dummyApp.Name, expectedServiceData)
@@ -297,6 +338,16 @@ func TestK8sResources(t *testing.T) {
 
 		// clean up
 		metadataServiceClient.DeleteService(t, serviceId)
+	}
+
+	t.Run("when creating service only with CertificateGen API", func(t *testing.T) {
+		var csrfInfo *testkit.CSRFInfo = nil
+		testWithCertGen(csrfInfo, t)
+	})
+
+	t.Run("when creating service only with CertificateGen API", func(t *testing.T) {
+		csrfInfo := &testkit.CSRFInfo{TokenEndpointURL: "https://csrf.token.endpoint.org"}
+		testWithCertGen(csrfInfo, t)
 	})
 
 	t.Run("when creating service only with Events", func(t *testing.T) {
