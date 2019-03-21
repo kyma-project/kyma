@@ -175,6 +175,14 @@ func (r *mutationResolver) CreateResource(ctx context.Context, namespace string,
 	return r.k8s.CreateResourceMutation(ctx, namespace, resource)
 }
 
+func (r *mutationResolver) DeleteService(ctx context.Context, name string, namespace string) (*gqlschema.Service, error) {
+	return r.k8s.DeleteServiceMutation(ctx, name, namespace)
+}
+
+func (r *mutationResolver) UpdateService(ctx context.Context, name string, namespace string, service gqlschema.JSON) (*gqlschema.Service, error) {
+	return r.k8s.UpdateServiceMutation(ctx, name, namespace, service)
+}
+
 func (r *mutationResolver) UpdatePod(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Pod, error) {
 	return r.k8s.UpdatePodMutation(ctx, name, namespace, update)
 }
@@ -267,6 +275,14 @@ func (r *queryResolver) ResourceQuotas(ctx context.Context, namespace string) ([
 
 func (r *RootResolver) ResourceQuotasStatus(ctx context.Context, namespace string) (gqlschema.ResourceQuotasStatus, error) {
 	return r.k8s.ResourceQuotasStatus(ctx, namespace)
+}
+
+func (r *queryResolver) Service(ctx context.Context, name string, namespace string) (*gqlschema.Service, error) {
+	return r.k8s.ServiceQuery(ctx, name, namespace)
+}
+
+func (r *queryResolver) Services(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Service, error) {
+	return r.k8s.ServicesQuery(ctx, namespace, first, offset)
 }
 
 func (r *queryResolver) Pod(ctx context.Context, name string, namespace string) (*gqlschema.Pod, error) {
@@ -417,6 +433,10 @@ func (r *subscriptionResolver) ApplicationEvent(ctx context.Context) (<-chan gql
 
 func (r *subscriptionResolver) PodEvent(ctx context.Context, namespace string) (<-chan gqlschema.PodEvent, error) {
 	return r.k8s.PodEventSubscription(ctx, namespace)
+}
+
+func (r *subscriptionResolver) ServiceEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceEvent, error) {
+	return r.k8s.ServiceEventSubscription(ctx, namespace)
 }
 
 // Service Instance

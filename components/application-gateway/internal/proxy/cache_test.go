@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
+	csrfmocks "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/util/net"
@@ -30,15 +31,17 @@ func TestCache(t *testing.T) {
 
 		// when
 		authorizationStrategyMock := &mocks.Strategy{}
+		csrfTokenStrategy := &csrfmocks.TokenStrategy{}
 		url := net.FormatURL("http", "www.example.com", 8080, "")
 		proxy := httputil.NewSingleHostReverseProxy(url)
 
-		cacheEntry := cache.Put("id1", proxy, authorizationStrategyMock)
+		cacheEntry := cache.Put("id1", proxy, authorizationStrategyMock, csrfTokenStrategy)
 
 		// then
 		require.NotNil(t, cacheEntry)
 		assert.Equal(t, proxy, cacheEntry.Proxy)
-		assert.Equal(t, authorizationStrategyMock, cacheEntry.AuthorizationStrategy)
+		assert.Equal(t, authorizationStrategyMock, cacheEntry.AuthorizationStrategy.actualStrategy)
+		assert.Equal(t, csrfTokenStrategy, cacheEntry.CSRFTokenStrategy)
 
 		// when
 		cacheEntry, found := cache.Get("id1")
@@ -47,6 +50,7 @@ func TestCache(t *testing.T) {
 		require.NotNil(t, cacheEntry)
 		assert.True(t, found)
 		assert.Equal(t, proxy, cacheEntry.Proxy)
-		assert.Equal(t, authorizationStrategyMock, cacheEntry.AuthorizationStrategy)
+		assert.Equal(t, authorizationStrategyMock, cacheEntry.AuthorizationStrategy.actualStrategy)
+		assert.Equal(t, csrfTokenStrategy, cacheEntry.CSRFTokenStrategy)
 	})
 }

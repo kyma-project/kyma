@@ -396,6 +396,43 @@ type Deployment {
     boundServiceInstanceNames: [String!]
 }
 
+enum ServiceProtocol {
+    TCP
+    UDP
+    UNKNOWN
+}
+
+type ServicePort {
+    name: String!
+    serviceProtocol: ServiceProtocol!
+    port: Int!
+    nodePort: Int!
+    targetPort: Int!
+}
+
+type LoadBalancerIngress {
+    ip: String!
+    hostName: String!
+}
+
+type LoadBalancerStatus {
+    ingress: [LoadBalancerIngress!]!
+}
+
+type ServiceStatus {
+    loadBalancer: LoadBalancerStatus!
+}
+
+type Service {
+    name: String!
+    clusterIP: String!
+    creationTimestamp: Timestamp!
+    labels: Labels!
+    ports: [ServicePort!]!
+    status: ServiceStatus!
+    json: JSON!
+}
+
 type Pod {
     name: String!
     nodeName: String!
@@ -429,6 +466,11 @@ enum PodStatusType {
 type PodEvent {
     type: SubscriptionEventType!
     pod: Pod!
+}
+
+type ServiceEvent {
+    type: SubscriptionEventType!
+    service: Service!
 }
 
 type ContainerState {
@@ -586,7 +628,7 @@ input InputTopic {
 
 # API controller
 
-type Service {
+type ApiService {
     name: String!
     port: Int!
 }
@@ -604,7 +646,7 @@ type AuthenticationPolicy  {
 type API {
     name: String!
     hostname: String!
-    service: Service!
+    service: ApiService!
     authenticationPolicies: [AuthenticationPolicy!]!
 }
 
@@ -648,6 +690,9 @@ type Query {
     deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]!
     pod(name: String!, namespace: String!): Pod
     pods(namespace: String!, first: Int, offset: Int): [Pod!]!
+
+    service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1", isChildResolver: false})
+    services(namespace: String!, first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1", isChildResolver: false})
 
     replicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "get", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
     replicaSets(namespace: String!, first: Int, offset: Int): [ReplicaSet!]! @HasAccess(attributes: {resource: "replicasets", verb: "list", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
@@ -695,6 +740,9 @@ type Mutation {
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+
+    updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
 # Subscriptions
@@ -707,6 +755,7 @@ type Subscription {
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
+    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
 # Schema

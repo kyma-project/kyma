@@ -74,7 +74,7 @@
     "components/application-registry/pkg/client/clientset/versioned/scheme",
     "components/application-registry/pkg/client/clientset/versioned/typed/istio/v1alpha2"
   ]
-  revision = "d37318b3a84115bd9ee64d3c3130ef657b8a81a5"
+  revision = "b47050577a88799e92888fbf4716b4e3b0f83ff8"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -306,6 +306,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "22d6116eb8b7c96b0c721ca9f1832b652602f66dc325a962577511cee81d1f2d"
+  inputs-digest = "7cc5f83a9a590f3b11c2a4a73ab9a8d227567d78a34940044660343b08f464e8"
   solver-name = "gps-cdcl"
   solver-version = 1
