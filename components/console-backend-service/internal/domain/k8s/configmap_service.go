@@ -124,6 +124,6 @@ func (svc *configMapService) ensureTypeMeta(configMap *v1.ConfigMap) {
 func (svc *configMapService) configMapTypeMeta() metav1.TypeMeta {
 	return metav1.TypeMeta{
 		Kind:       "ConfigMap",
-		APIVersion: "apps/v1",
+		APIVersion: "v1",
 	}
 }

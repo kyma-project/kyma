@@ -31,7 +31,7 @@ func TestConfigMapResolver_ConfigMapQuery(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(resourceGetter)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.ConfigMapQuery(nil, name, namespace)
 
@@ -86,7 +86,7 @@ func TestConfigMapResolver_ConfigMapQuery(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(resourceGetter)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.ConfigMapQuery(nil, name, namespace)
 
@@ -124,7 +124,7 @@ func TestConfigMapResolver_ConfigMapsQuery(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(resourceGetter)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.ConfigMapsQuery(nil, namespace, nil, nil)
 
@@ -186,7 +186,7 @@ func TestConfigMapResolver_ConfigMapsQuery(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(resourceGetter)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.ConfigMapsQuery(nil, namespace, nil, nil)
 
@@ -222,7 +222,7 @@ func TestConfigMapResolver_UpdateConfigMapMutation(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(configMapSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.UpdateConfigMapMutation(nil, name, namespace, gqlJSONFix)
 
@@ -243,7 +243,7 @@ func TestConfigMapResolver_UpdateConfigMapMutation(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(configMapSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.UpdateConfigMapMutation(nil, name, namespace, gqlJSONFix)
 
@@ -270,7 +270,7 @@ func TestConfigMapResolver_UpdateConfigMapMutation(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(configMapSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.UpdateConfigMapMutation(nil, name, namespace, gqlJSONFix)
 
@@ -297,7 +297,7 @@ func TestConfigMapResolver_UpdateConfigMapMutation(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(configMapSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.UpdateConfigMapMutation(nil, name, namespace, gqlJSONFix)
 
@@ -329,7 +329,7 @@ func TestConfigMapResolver_DeleteConfigMapMutation(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(configMapSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.DeleteConfigMapMutation(nil, name, namespace)
 
@@ -394,7 +394,7 @@ func TestConfigMapResolver_DeleteConfigMapMutation(t *testing.T) {
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewConfigMapResolver(configMapSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetConfigMapConverter(converter)
 
 		result, err := resolver.DeleteConfigMapMutation(nil, name, namespace)
 
