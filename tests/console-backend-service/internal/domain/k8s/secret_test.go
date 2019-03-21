@@ -39,11 +39,11 @@ type secretsQueryResponse struct {
 type secret struct {
 	Name         string    `json:"name"`
 	Namespace    string    `json:"namespace"`
-	Data         JSON      `json:"data"`
+	Data         string    `json:"data"`
 	Type         string    `json:"type"`
 	CreationTime time.Time `json:"creationTime"`
-	Labels       JSON      `json:"labels"`
-	Annotations  JSON      `json:"annotations"`
+	Labels       string    `json:"labels"`
+	Annotations  string    `json:"annotations"`
 }
 
 type secretStatusType string
