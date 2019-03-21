@@ -12,8 +12,29 @@ type gqlServiceConverter struct {
 	mock.Mock
 }
 
+// GQLJSONToService provides a mock function with given fields: in
+func (_m *gqlServiceConverter) GQLJSONToService(in gqlschema.JSON) (v1.Service, error) {
+	ret := _m.Called(in)
+
+	var r0 v1.Service
+	if rf, ok := ret.Get(0).(func(gqlschema.JSON) v1.Service); ok {
+		r0 = rf(in)
+	} else {
+		r0 = ret.Get(0).(v1.Service)
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(gqlschema.JSON) error); ok {
+		r1 = rf(in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ToGQL provides a mock function with given fields: in
-func (_m *gqlServiceConverter) ToGQL(in *v1.Service) *gqlschema.Service {
+func (_m *gqlServiceConverter) ToGQL(in *v1.Service) (*gqlschema.Service, error) {
 	ret := _m.Called(in)
 
 	var r0 *gqlschema.Service
@@ -25,11 +46,18 @@ func (_m *gqlServiceConverter) ToGQL(in *v1.Service) *gqlschema.Service {
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*v1.Service) error); ok {
+		r1 = rf(in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ToGQLs provides a mock function with given fields: in
-func (_m *gqlServiceConverter) ToGQLs(in []*v1.Service) []gqlschema.Service {
+func (_m *gqlServiceConverter) ToGQLs(in []*v1.Service) ([]gqlschema.Service, error) {
 	ret := _m.Called(in)
 
 	var r0 []gqlschema.Service
@@ -41,5 +69,12 @@ func (_m *gqlServiceConverter) ToGQLs(in []*v1.Service) []gqlschema.Service {
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func([]*v1.Service) error); ok {
+		r1 = rf(in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
