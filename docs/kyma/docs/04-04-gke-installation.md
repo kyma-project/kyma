@@ -257,7 +257,7 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
 
     gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
     
-    gcloud dns --project=$PROJECT record-sets transaction add APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
+    gcloud dns --project=$PROJECT record-sets transaction add $APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
     gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
     ```

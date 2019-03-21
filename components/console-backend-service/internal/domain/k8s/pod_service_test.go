@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 
 	v1 "k8s.io/api/core/v1"
@@ -256,7 +258,7 @@ func TestPodService_Update(t *testing.T) {
 
 		pod, err := svc.Update(exampleName, exampleNamespace, *update)
 		require.Error(t, err)
-		assert.True(t, errors.IsInvalid(err))
+		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, pod)
 
 		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
@@ -279,7 +281,7 @@ func TestPodService_Update(t *testing.T) {
 
 		pod, err := svc.Update(exampleName, exampleNamespace, *update)
 		require.Error(t, err)
-		assert.True(t, errors.IsInvalid(err))
+		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, pod)
 
 		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})
@@ -319,14 +321,14 @@ func TestPodService_Update(t *testing.T) {
 		update.Kind = "OtherKind"
 		pod, err := svc.Update(exampleName, exampleNamespace, *update)
 		require.Error(t, err)
-		assert.True(t, errors.IsInvalid(err))
+		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, pod)
 
 		update.Kind = "Pod"
 		update.APIVersion = "OtherVersion"
 		pod, err = svc.Update(exampleName, exampleNamespace, *update)
 		require.Error(t, err)
-		assert.True(t, errors.IsInvalid(err))
+		assert.True(t, apierror.IsInvalid(err))
 		assert.Nil(t, pod)
 
 		pod, err = client.Pods(exampleNamespace).Get(exampleName, metav1.GetOptions{})

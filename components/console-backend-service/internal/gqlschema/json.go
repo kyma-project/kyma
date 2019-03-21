@@ -15,7 +15,6 @@ func (y *JSON) UnmarshalGQL(v interface{}) error {
 		var jsonMap map[string]interface{}
 		err := json.Unmarshal([]byte(in), &jsonMap)
 		if err != nil {
-			glog.Error(errors.Wrapf(err, "while unmarshalling %+v scalar object", y))
 			return errors.Wrapf(err, "while unmarshalling %+v scalar object", y)
 		}
 		v = jsonMap
@@ -23,7 +22,6 @@ func (y *JSON) UnmarshalGQL(v interface{}) error {
 
 	value, ok := v.(map[string]interface{})
 	if !ok {
-		glog.Error(errors.Errorf("Unable to convert interface %T to map[string]interface{}", v))
 		return errors.Errorf("Unable to convert interface %T to map[string]interface{}", v)
 	}
 	*y = value

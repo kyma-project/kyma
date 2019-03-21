@@ -3,6 +3,7 @@ package strategy
 import (
 	"crypto/x509/pkix"
 	"encoding/base64"
+
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/applications"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/certificates"
@@ -26,6 +27,7 @@ func (svc *certificateGen) ToCredentials(secretData SecretData, appCredentials *
 		CertificateGen: &model.CertificateGen{
 			CommonName:  commonName,
 			Certificate: cert,
+			CSRFInfo:    convertToModelCSRInfo(appCredentials),
 		},
 	}
 }
@@ -47,6 +49,7 @@ func (svc *certificateGen) ToCredentialsInfo(credentials *model.Credentials, sec
 	applicationCredentials := applications.Credentials{
 		Type:       applications.CredentialsCertificateGenType,
 		SecretName: secretName,
+		CSRFInfo:   toAppCSRFInfo(credentials),
 	}
 
 	return applicationCredentials
