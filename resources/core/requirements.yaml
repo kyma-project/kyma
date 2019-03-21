@@ -9,7 +9,7 @@ dependencies:
     condition: cluster-users.enabled
   - name: kubeless
     condition: kubeless.enabled
-  - name: ui-api
-    condition: ui-api.enabled
+  - name: console-backend-service
+    condition: console-backend-service.enabled
   - name: docs
     condition: docs.enabled

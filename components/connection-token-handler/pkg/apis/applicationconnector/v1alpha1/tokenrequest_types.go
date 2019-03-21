@@ -23,6 +23,11 @@ type TokenRequestStatus struct {
 	State       TokenRequestState `json:"state"`
 }
 
+type ClusterContext struct {
+	Tenant string `json:"tenant,omitempty"`
+	Group  string `json:"group,omitempty"`
+}
+
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
@@ -31,6 +36,8 @@ type TokenRequestStatus struct {
 type TokenRequest struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
+
+	Context ClusterContext `json:"context,omitempty"`
 
 	Status TokenRequestStatus `json:"status,omitempty"`
 }

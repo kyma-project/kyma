@@ -12,8 +12,8 @@ The Connector Service has the following parameters, that can be set through the 
 - **internalAPIPort** - This port exposes the Connector Service within Kubernetes cluster. The default port is `8080`.
 - **namespace** - Namespace where Connector Service is deployed. The default Namespace is `kyma-integration`.
 - **tokenLength** - Length of registration tokens. The default value is `64`.
-- **appTokenExpirationMinutes** - Time after which tokens for applications expire and are no longer valid. The default value is `5` minutes.
-- **runtimeTokenExpirationMinutes** - Time after which tokens for runtimes expire and are no longer valid. The default value is `10` minutes.
+- **appTokenExpirationMinutes** - Time after which tokens for Applications expire and are no longer valid. The default value is `5` minutes.
+- **runtimeTokenExpirationMinutes** - Time after which tokens for Runtimes expire and are no longer valid. The default value is `10` minutes.
 - **caSecretName** - Name of the Secret which contains the root Certificate Authority (CA). The default value is `connector-service-app-ca`.
 - **requestLogging** - Flag for logging incoming requests. It is set to `False` by default.
 - **connectorServiceHost** - Host under which this service is accessible. It is used for generating the URL. The default host is `cert-service.wormhole.cluster.kyma.cx`.
@@ -23,7 +23,8 @@ The Connector Service has the following parameters, that can be set through the 
 - **runtimesInfoURL** - URL at which management information for runtimes is available. If not provided, it bases on `connectorServiceHost`.
 - **group** - Group for which certificates are generated. If the chart does not provide a default value, you must specify it in the request header of the request sent to the token endpoint.
 - **tenant** - Tenant for which certificates are generated. If the chart does not provide the default value, you must specify it in the header of the request sent to the token endpoint.
-- **certificateValidityTime** - Time after which the certificates issued by the Connector Service expire. Allowed time units are: `d`, `h`, `m` for days, hours and minutes. You can use only one unit at a time. The default value is `92d`.
+- **appCertificateValidityTime** - Time until which the certificates that the service issues for Applications are valid. The default value is 90 days.
+- **runtimeCertificateValidityTime** - Time until which the certificates that the service issues for Runtimes are valid. The default value is 90 days.
 - **central** - Determines whether the Connector Service works in the central mode.
 - **revocationConfigMapName** - Name of the ConfigMap containing the revoked certificates list.
 

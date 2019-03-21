@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"k8s.io/client-go/kubernetes/fake"
+
 	"github.com/stretchr/testify/assert"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
@@ -11,7 +13,7 @@ import (
 )
 
 func TestNewRBACDirective(t *testing.T) {
-	ctx := authn.WithUserInfoContext(withArgsContext(), &userInfo)
+	ctx := authn.WithUserInfoContext(withArgsContext(resourceJSON), &userInfo)
 
 	t.Run("When decision is 'allow'", func(t *testing.T) {
 		authorizerMock := &mockAuthorizer{decision: authorizer.DecisionAllow}
@@ -19,7 +21,8 @@ func TestNewRBACDirective(t *testing.T) {
 
 		attributes := withArgsAttributes(withoutChildResolverSet)
 
-		directive := NewRBACDirective(authorizerMock)
+		clientset := fake.NewSimpleClientset()
+		directive := NewRBACDirective(authorizerMock, clientset.Discovery())
 
 		_, err := directive(ctx, 0, resolver.Mock, attributes)
 
@@ -39,7 +42,8 @@ func TestNewRBACDirective(t *testing.T) {
 		resolver := &mockResolver{}
 		attributes := withArgsAttributes(withoutChildResolverSet)
 
-		directive := NewRBACDirective(authorizerMock)
+		clientset := fake.NewSimpleClientset()
+		directive := NewRBACDirective(authorizerMock, clientset.Discovery())
 
 		_, err := directive(ctx, 0, resolver.Mock, attributes)
 
@@ -59,7 +63,8 @@ func TestNewRBACDirective(t *testing.T) {
 		resolver := &mockResolver{}
 		attributes := withArgsAttributes(withoutChildResolverSet)
 
-		directive := NewRBACDirective(authorizerMock)
+		clientset := fake.NewSimpleClientset()
+		directive := NewRBACDirective(authorizerMock, clientset.Discovery())
 
 		_, err := directive(ctx, 0, resolver.Mock, attributes)
 

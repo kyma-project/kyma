@@ -70,7 +70,7 @@ status:
     assets:
     - README.md
     - directory/subdirectory/file.md
-    baseUrl: https://minio.kyma.local/ns-default-test-sample-1b19rnbuc6ir8/asset-sample
+    baseUrl: https://minio.kyma.local/test-sample-1b19rnbuc6ir8/asset-sample
 
 ```
 

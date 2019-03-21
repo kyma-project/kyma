@@ -35,6 +35,7 @@ func (l *Pod) OnAdd(object interface{}) {
 func (l *Pod) OnUpdate(oldObject, newObject interface{}) {
 	l.onEvent(gqlschema.SubscriptionEventTypeUpdate, newObject)
 }
+
 func (l *Pod) OnDelete(object interface{}) {
 	l.onEvent(gqlschema.SubscriptionEventTypeDelete, object)
 }
