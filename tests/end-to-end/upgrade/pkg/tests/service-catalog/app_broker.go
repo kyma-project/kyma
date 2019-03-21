@@ -275,7 +275,7 @@ func (f *appBrokerFlow) verifyEnvTesterHasGatewayInjected() error {
 
 func (f *appBrokerFlow) verifyDeploymentDoesNotContainGatewayEnvs() error {
 	f.log.Info("Verify deployment does not contain GATEWAY_URL environment variable")
-	return f.waitForEnvNotInjected(envTesterName, "GATEWAY_URL")
+	return f.waitForEnvNotInjected(appEnvTester, "GATEWAY_URL")
 }
 
 func (f *appBrokerFlow) deleteAPIServiceBindingUsage() error {
