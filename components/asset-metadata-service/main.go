@@ -19,7 +19,7 @@ type config struct {
 	Host           string        `envconfig:"default=127.0.0.1"`
 	Port           int           `envconfig:"default=3000"`
 	MaxWorkers     int           `envconfig:"default=10"`
-	ProcessTimeout time.Duration `envconfig:"default=30m"`
+	ProcessTimeout time.Duration `envconfig:"default=10m"`
 	Verbose        bool          `envconfig:"default=false"`
 }
 
