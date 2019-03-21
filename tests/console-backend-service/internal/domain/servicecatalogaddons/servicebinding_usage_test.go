@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
@@ -96,6 +98,14 @@ func TestServiceBindingUsageMutationsAndQueries(t *testing.T) {
 	// THEN
 	assert.NoError(t, err)
 	suite.assertBindingUsageDeleteResponse(deleteRes)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:    {suite.fixServiceBindingUsageRequest()},
+		auth.Create: {suite.fixCreateServiceBindingUsageRequest()},
+		auth.Delete: {suite.fixDeleteServiceBindingUsageRequest()},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func newBindingUsageSuite(t *testing.T) *bindingUsageTestSuite {
@@ -197,12 +207,11 @@ func (s *bindingUsageTestSuite) deleteBinding() error {
 	return s.svcatCli.ServicecatalogV1beta1().ServiceBindings(TestNamespace).Delete(s.givenBinding.Name, &metav1.DeleteOptions{})
 }
 
-func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutationResponse, error) {
+func (s *bindingUsageTestSuite) fixCreateServiceBindingUsageRequest() *graphql.Request {
 	query := fmt.Sprintf(`
 		mutation ($name: String!, $namespace: String!, $serviceBindingRefName: String!, $usedByName: String!, $usedByKind: String!) {
-			createServiceBindingUsage(createServiceBindingUsageInput: {
+			createServiceBindingUsage(namespace: $namespace, createServiceBindingUsageInput: {
 				name: $name,
-				namespace: $namespace,
 				serviceBindingRef: {
 					name: $serviceBindingRefName,
 				},
@@ -221,6 +230,12 @@ func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutation
 	req.SetVar("serviceBindingRefName", s.givenBindingUsage.ServiceBinding.Name)
 	req.SetVar("usedByName", s.givenBindingUsage.UsedBy.Name)
 	req.SetVar("usedByKind", s.givenBindingUsage.UsedBy.Kind)
+
+	return req
+}
+
+func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutationResponse, error) {
+	req := s.fixCreateServiceBindingUsageRequest()
 
 	var res bindingUsageCreateMutationResponse
 	err := s.gqlCli.Do(req, &res)
@@ -297,7 +312,7 @@ func (s *bindingUsageTestSuite) deleteServiceInstanceAndBinding() {
 	assert.NoError(s.t, err)
 }
 
-func (s *bindingUsageTestSuite) deleteBindingUsage() (bindingUsageDeleteMutationResponse, error) {
+func (s *bindingUsageTestSuite) fixDeleteServiceBindingUsageRequest() *graphql.Request {
 	query := `
 		mutation ($name: String!, $namespace: String!) {
 			deleteServiceBindingUsage(serviceBindingUsageName: $name, namespace: $namespace) {
@@ -309,6 +324,12 @@ func (s *bindingUsageTestSuite) deleteBindingUsage() (bindingUsageDeleteMutation
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.givenBindingUsage.Name)
 	req.SetVar("namespace", s.givenBindingUsage.Namespace)
+
+	return req
+}
+
+func (s *bindingUsageTestSuite) deleteBindingUsage() (bindingUsageDeleteMutationResponse, error) {
+	req := s.fixDeleteServiceBindingUsageRequest()
 
 	var res bindingUsageDeleteMutationResponse
 	err := s.gqlCli.Do(req, &res)
@@ -344,7 +365,7 @@ func (s *bindingUsageTestSuite) assertServiceInstanceContainsServiceBindingUsage
 	}, "Resource does not exist")
 }
 
-func (s *bindingUsageTestSuite) queryBindingUsage() (bindingUsageQueryResponse, error) {
+func (s *bindingUsageTestSuite) fixServiceBindingUsageRequest() *graphql.Request {
 	query := fmt.Sprintf(`
 		query ($name: String!, $namespace: String!) {
 			serviceBindingUsage(name: $name, namespace: $namespace) {
@@ -355,6 +376,12 @@ func (s *bindingUsageTestSuite) queryBindingUsage() (bindingUsageQueryResponse, 
 	req := graphql.NewRequest(query)
 	req.SetVar("name", s.givenBindingUsage.Name)
 	req.SetVar("namespace", s.givenBindingUsage.Namespace)
+
+	return req
+}
+
+func (s *bindingUsageTestSuite) queryBindingUsage() (bindingUsageQueryResponse, error) {
+	req := s.fixServiceBindingUsageRequest()
 
 	var res bindingUsageQueryResponse
 	err := s.gqlCli.Do(req, &res)

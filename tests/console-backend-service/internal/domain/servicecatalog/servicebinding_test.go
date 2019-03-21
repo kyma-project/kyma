@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
@@ -144,6 +146,14 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	t.Log("Wait for instance deletion")
 	err = wait.ForServiceInstanceDeletion(instance.Name, instance.Namespace, svcatCli)
 	assert.NoError(t, err)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:    {fixQueryBindingRequest(binding)},
+		auth.Create: {fixCreateBingindRequest(createBindingOutput)},
+		auth.Delete: {fixDeleteBindingRequest(deleteBindingOutput)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func subscribeBinding(c *graphql.Client, resourceDetailsQuery string, namespace string) *graphql.Subscription {
@@ -160,7 +170,7 @@ func subscribeBinding(c *graphql.Client, resourceDetailsQuery string, namespace 
 	return c.Subscribe(req)
 }
 
-func createBinding(c *graphql.Client, expectedResource CreateServiceBindingOutput) (bindingCreateMutationResponse, error) {
+func fixCreateBingindRequest(expectedResource CreateServiceBindingOutput) *graphql.Request {
 	query := `
 			mutation ($bindingName: String!, $namespace: String!, $instanceName: String!) {
 				createServiceBinding(serviceBindingName: $bindingName, serviceInstanceName: $instanceName, namespace: $namespace) {
@@ -175,13 +185,19 @@ func createBinding(c *graphql.Client, expectedResource CreateServiceBindingOutpu
 	req.SetVar("namespace", expectedResource.Namespace)
 	req.SetVar("instanceName", expectedResource.ServiceInstanceName)
 
+	return req
+}
+
+func createBinding(c *graphql.Client, expectedResource CreateServiceBindingOutput) (bindingCreateMutationResponse, error) {
+	req := fixCreateBingindRequest(expectedResource)
+
 	var res bindingCreateMutationResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func queryBinding(c *graphql.Client, expectedResource shared.ServiceBinding) (bindingQueryResponse, error) {
+func fixQueryBindingRequest(expectedResource shared.ServiceBinding) *graphql.Request {
 	query := `
 		query ($name: String!, $namespace: String!) {
 			serviceBinding(name: $name, namespace: $namespace) {
@@ -203,13 +219,19 @@ func queryBinding(c *graphql.Client, expectedResource shared.ServiceBinding) (bi
 	req.SetVar("name", expectedResource.Name)
 	req.SetVar("namespace", expectedResource.Namespace)
 
+	return req
+}
+
+func queryBinding(c *graphql.Client, expectedResource shared.ServiceBinding) (bindingQueryResponse, error) {
+	req := fixQueryBindingRequest(expectedResource)
+
 	var res bindingQueryResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func deleteBinding(c *graphql.Client, expectedResource DeleteServiceBindingOutput) (bindingDeleteMutationResponse, error) {
+func fixDeleteBindingRequest(expectedResource DeleteServiceBindingOutput) *graphql.Request {
 	query := `
 			mutation ($bindingName: String!, $namespace: String!) {
 				deleteServiceBinding(serviceBindingName: $bindingName, namespace: $namespace) {
@@ -221,6 +243,12 @@ func deleteBinding(c *graphql.Client, expectedResource DeleteServiceBindingOutpu
 	req := graphql.NewRequest(query)
 	req.SetVar("bindingName", expectedResource.Name)
 	req.SetVar("namespace", expectedResource.Namespace)
+
+	return req
+}
+
+func deleteBinding(c *graphql.Client, expectedResource DeleteServiceBindingOutput) (bindingDeleteMutationResponse, error) {
+	req := fixDeleteBindingRequest(expectedResource)
 
 	var res bindingDeleteMutationResponse
 	err := c.Do(req, &res)

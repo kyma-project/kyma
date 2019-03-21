@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
@@ -165,6 +167,15 @@ func TestService(t *testing.T) {
 	t.Log("Checking subscription for deleted service...")
 	expectedEvent = serviceEvent("DELETE", service{Name: serviceName})
 	assert.NoError(checkServiceEvent(expectedEvent, subscription))
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:    {fixServiceQuery()},
+		auth.List:   {fixServicesQuery()},
+		auth.Create: {fixUpdateServiceMutation("{\"\":\"\"}")},
+		auth.Delete: {fixDeleteServiceMutation()},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func fixService(name, namespace string) *v1.Service {

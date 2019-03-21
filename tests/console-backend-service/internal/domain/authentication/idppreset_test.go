@@ -5,6 +5,8 @@ package authentication
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/module"
@@ -60,4 +62,14 @@ func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	t.Log("Wait For IDP Preset Deletion")
 	err = waitForIDPPresetDeletion(expectedResource.Name, client)
 	assert.NoError(t, err)
+
+	t.Log("Checking authorization directives...")
+	as := auth.New()
+	ops := &auth.OperationsInput{
+		auth.Get:    {singleResourceQueryRequest(resourceDetailsQuery, expectedResource)},
+		auth.List:   {multipleResourcesQueryRequest(resourceDetailsQuery, expectedResource)},
+		auth.Create: {fixCreateIDPPresetRequest(resourceDetailsQuery, expectedResource)},
+		auth.Delete: {fixDeleteIDPPresetRequest(resourceDetailsQuery, expectedResource)},
+	}
+	as.Run(t, ops)
 }

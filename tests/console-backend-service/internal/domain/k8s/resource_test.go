@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
 	"github.com/stretchr/testify/assert"
 
@@ -64,6 +66,12 @@ func TestResource(t *testing.T) {
 		return true, nil
 	}, time.Minute)
 	require.NoError(t, err)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Create: {fixCreateResourceMutation(resourceNamespace, resourceJSON)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func fixCreateResourceMutation(namespace, resource string) *graphql.Request {

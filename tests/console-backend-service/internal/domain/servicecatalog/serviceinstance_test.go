@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
@@ -132,14 +134,28 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get: {fixServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass)},
+		auth.List: {
+			fixServiceInstancesRequest(resourceDetailsQuery, expectedResourceFromServiceClass.Namespace),
+			fixServiceInstancesWithStatusRequest(resourceDetailsQuery, expectedResourceFromServiceClass.Namespace),
+		},
+		auth.Create: {
+			fixCreateServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromClusterServiceClass, true),
+			fixCreateServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass, false),
+		},
+		auth.Delete: {fixDeleteServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
-func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance, clusterWide bool) (instanceCreateMutationResponse, error) {
+func fixCreateServiceInstanceRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance, clusterWide bool) *graphql.Request {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $namespace: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
-				createServiceInstance(params: {
+				createServiceInstance(namespace: $namespace, params: {
     				name: $name,
-    				namespace: $namespace,
 					classRef: {
 						externalName: $externalServiceClassName,
 						clusterWide: %v,
@@ -168,6 +184,12 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	req.SetVar("labels", expectedResource.Labels)
 	req.SetVar("parameterSchema", expectedResource.PlanSpec)
 
+	return req
+}
+
+func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance, clusterWide bool) (instanceCreateMutationResponse, error) {
+	req := fixCreateServiceInstanceRequest(resourceDetailsQuery, expectedResource, clusterWide)
+
 	var res instanceCreateMutationResponse
 	err := c.Do(req, &res)
 
@@ -189,7 +211,7 @@ func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace
 }
 
 func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceQueryResponse, error) {
-	req := singleResourceQueryRequest(resourceDetailsQuery, expectedResource)
+	req := fixServiceInstanceRequest(resourceDetailsQuery, expectedResource)
 
 	var res instanceQueryResponse
 	err := c.Do(req, &res)
@@ -197,7 +219,7 @@ func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expecte
 	return res, err
 }
 
-func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
+func fixServiceInstancesRequest(resourceDetailsQuery, namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 			query ($namespace: String!) {
 				serviceInstances(namespace: $namespace) {
@@ -208,13 +230,19 @@ func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, namespace s
 	req := graphql.NewRequest(query)
 	req.SetVar("namespace", namespace)
 
+	return req
+}
+
+func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
+	req := fixServiceInstancesRequest(resourceDetailsQuery, namespace)
+
 	var res instancesQueryResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
+func fixServiceInstancesWithStatusRequest(resourceDetailsQuery, namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 			query ($namespace: String!, $status: InstanceStatusType) {
 				serviceInstances(namespace: $namespace, status: $status) {
@@ -226,13 +254,19 @@ func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, n
 	req.SetVar("namespace", namespace)
 	req.SetVar("status", shared.ServiceInstanceStatusTypeRunning)
 
+	return req
+}
+
+func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
+	req := fixServiceInstancesWithStatusRequest(resourceDetailsQuery, namespace)
+
 	var res instancesQueryResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceDeleteMutationResponse, error) {
+func fixDeleteServiceInstanceRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $namespace: String!) {
 				deleteServiceInstance(name: $name, namespace: $namespace) {
@@ -244,13 +278,19 @@ func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	req.SetVar("name", expectedResource.Name)
 	req.SetVar("namespace", expectedResource.Namespace)
 
+	return req
+}
+
+func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceDeleteMutationResponse, error) {
+	req := fixDeleteServiceInstanceRequest(resourceDetailsQuery, expectedResource)
+
 	var res instanceDeleteMutationResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
+func fixServiceInstanceRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
 	query := fmt.Sprintf(`
 			query ($name: String!, $namespace: String!) {
 				serviceInstance(name: $name, namespace: $namespace) {

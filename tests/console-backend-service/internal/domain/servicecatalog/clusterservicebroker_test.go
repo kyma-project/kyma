@@ -7,8 +7,9 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
-
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -54,31 +55,17 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query {
-				clusterServiceBrokers {
-					%s
-				}
-			}	
-		`, resourceDetailsQuery)
+		req := fixClusterServiceBrokersRequest(resourceDetailsQuery)
 
 		var res clusterServiceBrokersQueryResponse
-		err = c.DoQuery(query, &res)
+		err = c.Do(req, &res)
 
 		require.NoError(t, err)
 		assertClusterBrokerExistsAndEqual(t, res.ClusterServiceBrokers, expectedResource)
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query ($name: String!) {
-				clusterServiceBroker(name: $name) {
-					%s
-				}
-			}
-		`, resourceDetailsQuery)
-		req := graphql.NewRequest(query)
-		req.SetVar("name", expectedResource.Name)
+		req := fixClusterServiceBrokerRequest(resourceDetailsQuery, expectedResource.Name)
 
 		var res clusterServiceBrokerQueryResponse
 		err = c.Do(req, &res)
@@ -86,6 +73,13 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 		require.NoError(t, err)
 		checkClusterBroker(t, expectedResource, res.ClusterServiceBroker)
 	})
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:  {fixClusterServiceBrokerRequest(resourceDetailsQuery, "test")},
+		auth.List: {fixClusterServiceBrokersRequest(resourceDetailsQuery)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func checkClusterBroker(t *testing.T, expected, actual ClusterServiceBroker) {
@@ -116,4 +110,31 @@ func clusterBroker() ClusterServiceBroker {
 			Ready: true,
 		},
 	}
+}
+
+func fixClusterServiceBrokerRequest(resourceDetailsQuery, name string) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($name: String!) {
+				clusterServiceBroker(name: $name) {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("name", name)
+
+	return req
+}
+
+func fixClusterServiceBrokersRequest(resourceDetailsQuery string) *graphql.Request {
+	query := fmt.Sprintf(`
+			query {
+				clusterServiceBrokers {
+					%s
+				}
+			}	
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+
+	return req
 }

@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -65,15 +65,7 @@ func TestServiceClassesQueries(t *testing.T) {
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query ($namespace: String!) {
-				serviceClasses(namespace: $namespace) {
-					%s
-				}
-			}	
-		`, resourceDetailsQuery)
-		req := graphql.NewRequest(query)
-		req.SetVar("namespace", expectedResource.Namespace)
+		req := fixServiceClassesRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceClassesQueryResponse
 		err = c.Do(req, &res)
@@ -83,16 +75,7 @@ func TestServiceClassesQueries(t *testing.T) {
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query ($name: String!, $namespace: String!) {
-				serviceClass(name: $name, namespace: $namespace) {
-					%s
-				}
-			}	
-		`, resourceDetailsQuery)
-		req := graphql.NewRequest(query)
-		req.SetVar("name", expectedResource.Name)
-		req.SetVar("namespace", expectedResource.Namespace)
+		req := fixServiceClassRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceClassQueryResponse
 		err = c.Do(req, &res)
@@ -100,6 +83,13 @@ func TestServiceClassesQueries(t *testing.T) {
 		require.NoError(t, err)
 		checkClass(t, expectedResource, res.ServiceClass)
 	})
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:  {fixServiceClassRequest(resourceDetailsQuery, expectedResource)},
+		auth.List: {fixServiceClassesRequest(resourceDetailsQuery, expectedResource)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func checkClass(t *testing.T, expected, actual shared.ServiceClass) {
@@ -174,4 +164,33 @@ func serviceClass() shared.ServiceClass {
 			},
 		},
 	}
+}
+
+func fixServiceClassRequest(resourceDetailsQuery string, expectedResource shared.ServiceClass) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($name: String!, $namespace: String!) {
+				serviceClass(name: $name, namespace: $namespace) {
+					%s
+				}
+			}	
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("name", expectedResource.Name)
+	req.SetVar("namespace", expectedResource.Namespace)
+
+	return req
+}
+
+func fixServiceClassesRequest(resourceDetailsQuery string, expectedResource shared.ServiceClass) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($namespace: String!) {
+				serviceClasses(namespace: $namespace) {
+					%s
+				}
+			}	
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("namespace", expectedResource.Namespace)
+
+	return req
 }
