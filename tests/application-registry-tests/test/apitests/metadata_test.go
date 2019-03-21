@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	connectedApp = "connected-app"
+	connectedApp         = "connected-app"
+	csrfTokenEndpointURL = "https://csrf.token.endpoint.org"
 )
 
 func TestApiMetadata(t *testing.T) {
@@ -31,28 +32,13 @@ func TestApiMetadata(t *testing.T) {
 
 	expectedLabels := map[string]string{connectedApp: dummyApp.Name}
 
-	oauthAPI := &testkit.API{
-		TargetUrl: "http://service.com",
-		Credentials: &testkit.Credentials{
-			Oauth: &testkit.Oauth{
-				URL:          "http://oauth.com",
-				ClientID:     "clientId",
-				ClientSecret: "clientSecret",
-			},
-		},
-		Spec: testkit.ApiRawSpec,
-	}
+	oauthAPI := newOauthAPI()
+	oauthAPIWithCSRF := newOauthAPI()
+	oauthAPIWithCSRF.Credentials.Oauth.CSRFInfo = &testkit.CSRFInfo{TokenEndpointURL: csrfTokenEndpointURL}
 
-	basicAuthAPI := &testkit.API{
-		TargetUrl: "http://service.com",
-		Credentials: &testkit.Credentials{
-			Basic: &testkit.Basic{
-				Username: "username",
-				Password: "password",
-			},
-		},
-		Spec: testkit.ApiRawSpec,
-	}
+	basicAuthAPI := newBasicAuthAPI()
+	basicAuthAPIWithCSRF := newBasicAuthAPI()
+	basicAuthAPIWithCSRF.Credentials.Basic.CSRFInfo = &testkit.CSRFInfo{TokenEndpointURL: csrfTokenEndpointURL}
 
 	oauthAndBasicAuthAPI := &testkit.API{
 		TargetUrl: "http://service.com",
@@ -70,15 +56,9 @@ func TestApiMetadata(t *testing.T) {
 		Spec: testkit.ApiRawSpec,
 	}
 
-	certGenAPI := &testkit.API{
-		TargetUrl: "http://service.com",
-		Credentials: &testkit.Credentials{
-			CertificateGen: &testkit.CertificateGen{
-				CommonName: "commonName",
-			},
-		},
-		Spec: testkit.ApiRawSpec,
-	}
+	certGenAPI := newCertGenAPI()
+	certGenAPIWithCSRF := newCertGenAPI()
+	certGenAPIWithCSRF.Credentials.CertificateGen.CSRFInfo = &testkit.CSRFInfo{TokenEndpointURL: csrfTokenEndpointURL}
 
 	specAndSpecUrlAPI := &testkit.API{
 		TargetUrl:        "http://service.com",
@@ -92,10 +72,11 @@ func TestApiMetadata(t *testing.T) {
 	}
 
 	t.Run("registration API", func(t *testing.T) {
-		t.Run("should register a service with OAuth credentials (with API, Events catalog, Documentation)", func(t *testing.T) {
+
+		testOAuthAPI := func(api *testkit.API, t *testing.T) {
 			// when
 			identifier := testkit.GenerateIdentifier()
-			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(oauthAPI)
+			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(api)
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -134,56 +115,72 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
 			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
+		}
+
+		t.Run("should register a service with OAuth credentials (with API, Events catalog, Documentation)", func(t *testing.T) {
+			testOAuthAPI(oauthAPI, t)
 		})
+
+		t.Run("should register a service with OAuth credentials and CSRF token (with API, Events catalog, Documentation)", func(t *testing.T) {
+			testOAuthAPI(oauthAPIWithCSRF, t)
+		})
+
+		testBasicApi := func(api *testkit.API, t *testing.T) {
+			// when
+			identifier := testkit.GenerateIdentifier()
+			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(api)
+
+			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
+			require.NoError(t, err)
+
+			defer func() {
+				// clean up
+				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
+				require.NoError(t, err)
+				require.Equal(t, http.StatusNoContent, statusCode)
+			}()
+
+			// then
+			require.Equal(t, http.StatusOK, statusCode)
+			require.NotEmpty(t, postResponseData.ID)
+
+			// when
+			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
+			require.NoError(t, err)
+			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, receivedServiceDefinition.Identifier)
+
+			// then
+			require.Equal(t, http.StatusOK, statusCode)
+			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+
+			// when
+			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
+			require.NoError(t, err)
+
+			postedService := findPostedService(existingServices, postResponseData.ID)
+
+			// then
+			require.Equal(t, http.StatusOK, statusCode)
+			require.NotNil(t, postedService)
+			require.Equal(t, "test service", postedService.Name)
+			require.Equal(t, "service provider", postedService.Provider)
+			require.Equal(t, "service description", postedService.Description)
+			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
+			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
+		}
 
 		t.Run("should register a service with Basic Auth credentials (with API, Events catalog, Documentation", func(t *testing.T) {
-			// when
-			identifier := testkit.GenerateIdentifier()
-			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(basicAuthAPI)
-
-			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
-			require.NoError(t, err)
-
-			defer func() {
-				// clean up
-				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
-
-			// then
-			require.Equal(t, http.StatusOK, statusCode)
-			require.NotEmpty(t, postResponseData.ID)
-
-			// when
-			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
-			require.NoError(t, err)
-			expectedServiceDefinition := getExpectedDefinition(initialServiceDefinition, expectedLabels, receivedServiceDefinition.Identifier)
-
-			// then
-			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
-
-			// when
-			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
-			require.NoError(t, err)
-
-			postedService := findPostedService(existingServices, postResponseData.ID)
-
-			// then
-			require.Equal(t, http.StatusOK, statusCode)
-			require.NotNil(t, postedService)
-			require.Equal(t, "test service", postedService.Name)
-			require.Equal(t, "service provider", postedService.Provider)
-			require.Equal(t, "service description", postedService.Description)
-			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
-			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
+			testBasicApi(basicAuthAPI, t)
 		})
 
-		t.Run("should register a service with CertificateGen credentials (with API, Events catalog, Documentation", func(t *testing.T) {
+		t.Run("should register a service with Basic Auth credentials and CSRF token (with API, Events catalog, Documentation", func(t *testing.T) {
+			testBasicApi(basicAuthAPIWithCSRF, t)
+		})
+
+		testCertGenApi := func(api *testkit.API, t *testing.T) {
 			// when
 			identifier := testkit.GenerateIdentifier()
-			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(certGenAPI)
+			initialServiceDefinition := prepareServiceDetails(identifier, map[string]string{}).WithAPI(api)
 
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
@@ -206,7 +203,8 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			require.EqualValues(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireDefinitionsWithCertCredentialsEqual(t, expectedServiceDefinition, *receivedServiceDefinition)
+			requireCertificateNotEmpty(t, *receivedServiceDefinition)
 
 			// when
 			statusCode, existingServices, err := metadataServiceClient.GetAllServices(t)
@@ -222,6 +220,14 @@ func TestApiMetadata(t *testing.T) {
 			require.Equal(t, "service description", postedService.Description)
 			require.True(t, strings.HasPrefix(postedService.Identifier, identifier))
 			require.Equal(t, map[string]string{connectedApp: dummyApp.Name}, postedService.Labels)
+		}
+
+		t.Run("should register a service with CertificateGen credentials (with API, Events catalog, Documentation", func(t *testing.T) {
+			testCertGenApi(certGenAPI, t)
+		})
+
+		t.Run("should register a service with CertificateGen credentials and CSRF token (with API, Events catalog, Documentation", func(t *testing.T) {
+			testCertGenApi(certGenAPIWithCSRF, t)
 		})
 
 		t.Run("should return 400 when both OAuth and BasicAuth credentials provided", func(t *testing.T) {
@@ -783,25 +789,40 @@ func hideClientCredentials(original testkit.ServiceDetails) testkit.ServiceDetai
 
 		if original.Api.Credentials != nil {
 			if original.Api.Credentials.Oauth != nil {
+
+				var csrfInfo *testkit.CSRFInfo = nil
+				if original.Api.Credentials.Oauth.CSRFInfo != nil {
+					csrfInfo = original.Api.Credentials.Oauth.CSRFInfo
+				}
+
 				result.Api.Credentials = &testkit.Credentials{
 					Oauth: &testkit.Oauth{
 						URL:          "http://oauth.com",
 						ClientID:     "********",
 						ClientSecret: "********",
+						CSRFInfo:     csrfInfo,
 					},
 				}
 			}
 
 			if original.Api.Credentials.Basic != nil {
+
+				var csrfInfo *testkit.CSRFInfo = nil
+				if original.Api.Credentials.Basic.CSRFInfo != nil {
+					csrfInfo = original.Api.Credentials.Basic.CSRFInfo
+				}
+
 				result.Api.Credentials = &testkit.Credentials{
 					Basic: &testkit.Basic{
 						Username: "********",
 						Password: "********",
+						CSRFInfo: csrfInfo,
 					},
 				}
 			}
 
 			if original.Api.Credentials.CertificateGen != nil {
+
 				result.Api.Credentials = &testkit.Credentials{
 					CertificateGen: original.Api.Credentials.CertificateGen,
 				}
@@ -838,4 +859,58 @@ func hideClientCredentials(original testkit.ServiceDetails) testkit.ServiceDetai
 	}
 
 	return result
+}
+
+func requireDefinitionsWithCertCredentialsEqual(t *testing.T, expected testkit.ServiceDetails, actual testkit.ServiceDetails) {
+	require.Equal(t, expected.Description, actual.Description)
+	require.Equal(t, expected.Identifier, actual.Identifier)
+	require.Equal(t, expected.Api.Credentials.CertificateGen.CommonName, actual.Api.Credentials.CertificateGen.CommonName)
+	require.Equal(t, expected.Name, actual.Name)
+	require.Equal(t, expected.Provider, actual.Provider)
+	require.EqualValues(t, expected.Labels, actual.Labels)
+	require.EqualValues(t, expected.Events, actual.Events)
+	require.EqualValues(t, expected.Documentation, actual.Documentation)
+}
+
+func requireCertificateNotEmpty(t *testing.T, actual testkit.ServiceDetails) {
+	require.NotEmpty(t, actual.Api.Credentials.CertificateGen.Certificate)
+}
+
+func newOauthAPI() *testkit.API {
+	return &testkit.API{
+		TargetUrl: "http://service.com",
+		Credentials: &testkit.Credentials{
+			Oauth: &testkit.Oauth{
+				URL:          "http://oauth.com",
+				ClientID:     "clientId",
+				ClientSecret: "clientSecret",
+			},
+		},
+		Spec: testkit.ApiRawSpec,
+	}
+}
+
+func newBasicAuthAPI() *testkit.API {
+	return &testkit.API{
+		TargetUrl: "http://service.com",
+		Credentials: &testkit.Credentials{
+			Basic: &testkit.Basic{
+				Username: "username",
+				Password: "password",
+			},
+		},
+		Spec: testkit.ApiRawSpec,
+	}
+}
+
+func newCertGenAPI() *testkit.API {
+	return &testkit.API{
+		TargetUrl: "http://service.com",
+		Credentials: &testkit.Credentials{
+			CertificateGen: &testkit.CertificateGen{
+				CommonName: "commonName",
+			},
+		},
+		Spec: testkit.ApiRawSpec,
+	}
 }

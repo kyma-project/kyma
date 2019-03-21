@@ -33,6 +33,7 @@ eventService:
     args:
       externalAPIPort: &eventServiceExternalAPIPort 8081
       eventsTargetURL: http://event-bus-publish.kyma-system.svc.cluster.local:8080/v1/events
+      maxRequestSize: 65536
       requestTimeout: 10
       requestLogging: false
   service:

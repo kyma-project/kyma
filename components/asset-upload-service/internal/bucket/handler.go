@@ -138,7 +138,7 @@ func (h *Handler) tryCreatingBucket(prefix string) (string, error) {
 }
 
 func (h *Handler) bucketPolicyString(bucketName string, bucketPolicy policy.BucketPolicy) (string, error) {
-	statements := policy.SetPolicy([]policy.Statement{}, bucketPolicy, bucketName, "*")
+	statements := policy.SetPolicy([]policy.Statement{}, bucketPolicy, bucketName, "")
 	p := policy.BucketAccessPolicy{
 		Version:    "2012-10-17", // Fixed version
 		Statements: statements,

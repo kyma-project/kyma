@@ -30,6 +30,7 @@ The Application Registry allows you to register APIs:
 - Secured with OAuth flow
 - Secured with client certificates
 - Not secured
+- Protected against cross-site request forgery (CSRF) attacks
 
 The Application Gateway calls the registered APIs accordingly, basing on the security type specified in the API registration process.
 

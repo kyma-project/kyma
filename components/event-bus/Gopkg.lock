@@ -374,7 +374,7 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:db0fb8de13ab7924a114fd8af3e6279db0410e43ef1260a85cf7bb53975a4fdc"
+  digest = "1:78386a699972468c7218f0879cc7b1a6018bc1214c92584b80c5b3f46aa3d195"
   name = "github.com/knative/eventing"
   packages = [
     "pkg/apis/duck/v1alpha1",
@@ -385,10 +385,11 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1/fake",
-    "pkg/controller/testing",
+    "pkg/reconciler/testing",
   ]
   pruneopts = "UT"
-  revision = "604de5d66f1692af13f9c7fb7e25f554b2f5bba9"
+  revision = "86064bdeeb7635ae7dfe903bd085ede9ea29b4aa"
+  version = "v0.4.1"
 
 [[projects]]
   branch = "master"
@@ -1200,7 +1201,7 @@
     "github.com/knative/eventing/pkg/client/clientset/versioned",
     "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
     "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
-    "github.com/knative/eventing/pkg/controller/testing",
+    "github.com/knative/eventing/pkg/reconciler/testing",
     "github.com/knative/pkg/apis",
     "github.com/knative/pkg/apis/duck/v1alpha1",
     "github.com/nats-io/go-nats",

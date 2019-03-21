@@ -2,6 +2,8 @@ apiVersion: apps/v1beta2
 kind: StatefulSet
 metadata:
   name: {{ .Values.global.natsStreaming.fullname }}
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
   labels:
 {{ include "nats-streaming.labels.standard" . | indent 4 }}
 spec:
@@ -20,6 +22,9 @@ spec:
       labels:
         app: {{ .Values.global.natsStreaming.fullname }}
         release: {{ .Release.Name }}
+        kyma-grafana: enabled
+        kyma-alerts: enabled
+        rand: {{ randAlpha 6 }}
     spec:
       initContainers:
       - name: prepare-config

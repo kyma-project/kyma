@@ -77,15 +77,14 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knative-overrides
+  name: knative-serving-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: knative
+    component: knative-serving
     kyma-project.io/installation: ""
 data:
-  knative.ingressgateway.service.type: NodePort
-  knative.domainName: "kyma.local"
+  knative-serving.domainName: "kyma.local"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -97,9 +96,7 @@ metadata:
     component: assetstore
     kyma-project.io/installation: ""
 data:
-  minio.resources.requests.memory: 64Mi
-  minio.resources.limits.cpu: 100m
-  assetstore-controller-manager.minikubeIP: ""
+  asset-store-controller-manager.minikubeIP: ""
   test.integration.minikubeIP: ""
 ---
 apiVersion: v1
