@@ -17,7 +17,6 @@ import (
 	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
 	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
-	_ "github.com/satori/go.uuid"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
