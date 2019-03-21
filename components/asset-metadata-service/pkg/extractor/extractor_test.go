@@ -3,19 +3,16 @@ package extractor_test
 import (
 	"context"
 	"errors"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/matador/automock"
 	"testing"
 	"time"
 
-	fautomock "github.com/kyma-project/kyma/components/asset-upload-service/internal/fileheader/automock"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader"
-	"github.com/kyma-project/kyma/components/asset-upload-service/internal/uploader/automock"
+	fautomock "github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader/automock"
 	"github.com/onsi/gomega"
-	"github.com/stretchr/testify/mock"
-
-	"github.com/minio/minio-go"
 )
 
-func TestUploader_UploadFiles(t *testing.T) {
+func TestExtractor_Process(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
@@ -25,57 +22,63 @@ func TestUploader_UploadFiles(t *testing.T) {
 
 		mock1 := &fautomock.FileHeader{}
 		mock1.On("Filename").Return("test1.yaml")
-		mock1.On("Size").Return(int64(-1)).Once()
+		mock1.On("Size").Return(int64(3213)).Once()
 		mock1.On("Open").Return(file, nil).Once()
 
 		mock2 := &fautomock.FileHeader{}
 		mock2.On("Filename").Return("test2.yaml")
-		mock2.On("Size").Return(int64(-1)).Once()
+		mock2.On("Size").Return(int64(213)).Once()
 		mock2.On("Open").Return(file, nil).Once()
 
-		files := []uploader.FileUpload{
+		files := []extractor.Job{
 			{
-				Bucket:    "test",
-				File:      mock1,
-				Directory: "testDir",
+				FilePath: "test/test1.yaml",
+				File:     mock1,
 			},
 			{
-				Bucket:    "test2",
-				File:      mock2,
-				Directory: "testDir",
+				FilePath: "test/test2.yaml",
+				File:     mock2,
 			},
 		}
 
-		expectedResult := []uploader.UploadResult{
+		expectedResult := []extractor.ResultSuccess{
 			{
-				FileName:   "test1.yaml",
-				RemotePath: "https://minio.example.com/test/testDir/test1.yaml",
-				Bucket:     "test",
-				Size:       -1,
+				FilePath: "test/test1.yaml",
+				Metadata: map[string]interface{}{
+					"foo": "bar",
+					"bar": 3,
+				},
 			},
 			{
-				FileName:   "test2.yaml",
-				RemotePath: "https://minio.example.com/test2/testDir/test2.yaml",
-				Bucket:     "test2",
-				Size:       -1,
+				FilePath: "test/test2.yaml",
+				Metadata: map[string]interface{}{
+					"foo": 32,
+					"bar": "test.example.com",
+				},
 			},
 		}
 
 		timeout, err := time.ParseDuration("10h")
 		g.Expect(err).NotTo(gomega.HaveOccurred())
-		filesCh, filesCount := testUploads(files)
+		jobCh, jobCount := fixJobCh(files)
 
-		ctxArgFn := func(ctx context.Context) bool { return true }
+		matadorMock := new(automock.Matador)
+		matadorMock.On("ReadMetadata", mock1).Return(map[string]interface{}{
+			"foo": "bar",
+			"bar": 3,
+		}, nil).Once()
+		matadorMock.On("ReadMetadata", mock2).Return(map[string]interface{}{
+			"foo": 32,
+			"bar": "test.example.com",
+		}, nil).Once()
+		defer matadorMock.AssertExpectations(t)
 
-		clientMock := new(automock.MinioClient)
-		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "test", "testDir/test1.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
-		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), "test2", "testDir/test2.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), nil).Once()
-		defer clientMock.AssertExpectations(t)
 
-		uploadClient := uploader.New(clientMock, "https://minio.example.com", timeout, 5)
+		e := extractor.New(5, timeout)
+		e.SetMatador(matadorMock)
 
 		// When
-		res, errs := uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
+		res, errs := e.Process(context.TODO(),jobCh, jobCount)
 
 		// Then
 		g.Expect(errs).To(gomega.BeEmpty())
@@ -88,83 +91,79 @@ func TestUploader_UploadFiles(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
+		testErr := errors.New("Test error")
+
 		file := &fautomock.File{}
 		file.On("Close").Return(nil)
 
 		mock1 := &fautomock.FileHeader{}
 		mock1.On("Filename").Return("test1.yaml")
-		mock1.On("Size").Return(int64(-1)).Once()
+		mock1.On("Size").Return(int64(3213)).Once()
 		mock1.On("Open").Return(file, nil).Once()
 
 		mock2 := &fautomock.FileHeader{}
 		mock2.On("Filename").Return("test2.yaml")
-		mock2.On("Size").Return(int64(-1)).Once()
+		mock2.On("Size").Return(int64(213)).Once()
 		mock2.On("Open").Return(file, nil).Once()
 
-		testErr := errors.New("Test error")
-		bucketName := "test"
-		files := []uploader.FileUpload{
+		files := []extractor.Job{
 			{
-				Bucket:    bucketName,
-				File:      mock1,
-				Directory: "testDir",
+				FilePath: "test/test1.yaml",
+				File:     mock1,
 			},
 			{
-				Bucket:    bucketName,
-				File:      mock2,
-				Directory: "testDir",
+				FilePath: "test/test2.yaml",
+				File:     mock2,
 			},
 		}
 
 		timeout, err := time.ParseDuration("10h")
 		g.Expect(err).NotTo(gomega.HaveOccurred())
-		filesCh, filesCount := testUploads(files)
+		jobCh, jobCount := fixJobCh(files)
 
-		ctxArgFn := func(ctx context.Context) bool { return true }
+		matadorMock := new(automock.Matador)
+		matadorMock.On("ReadMetadata", mock1).Return(nil, testErr).Once()
+		matadorMock.On("ReadMetadata", mock2).Return(nil, testErr).Once()
+		defer matadorMock.AssertExpectations(t)
 
-		clientMock := new(automock.MinioClient)
-		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), bucketName, "testDir/test1.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), testErr).Once()
-		clientMock.On("PutObjectWithContext", mock.MatchedBy(ctxArgFn), bucketName, "testDir/test2.yaml", file, int64(-1), minio.PutObjectOptions{}).Return(int64(1), testErr).Once()
-		defer clientMock.AssertExpectations(t)
-
-		uploadClient := uploader.New(clientMock, "https://minio.example.com", timeout, 5)
+		e := extractor.New(5, timeout)
+		e.SetMatador(matadorMock)
 
 		// When
-		_, errs := uploadClient.UploadFiles(context.TODO(), filesCh, filesCount)
+		_, errs := e.Process(context.TODO(),jobCh, jobCount)
 
 		// Then
 		g.Expect(errs).To(gomega.HaveLen(2))
 
 		for _, err := range errs {
-			g.Expect(err.Error.Error()).To(gomega.ContainSubstring("while uploading file"))
+			g.Expect(err.Error.Error()).To(gomega.ContainSubstring("Test error"))
 		}
-		clientMock.AssertExpectations(t)
 	})
 }
 
-func TestUploader_PopulateErrors(t *testing.T) {
+func TestExtractor_PopulateErrors(t *testing.T) {
 	t.Run("Errors", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		elem1 := uploader.UploadError{
+		elem1 := extractor.ResultError{
 			Error: errors.New("Test 1"),
 		}
-		elem2 := uploader.UploadError{
-			FileName: "test",
+		elem2 := extractor.ResultError{
+			FilePath: "test/path.js",
 			Error:    errors.New("Test 2"),
 		}
 
-		errCh := make(chan *uploader.UploadError, 3)
+		errCh := make(chan *extractor.ResultError, 3)
 		errCh <- &elem1
 		errCh <- &elem2
 		errCh <- nil
 		close(errCh)
 
-		u := uploader.Uploader{}
+		e := extractor.Extractor{}
 
 		// When
-		errs := u.PopulateErrors(errCh)
+		errs := e.PopulateErrors(errCh)
 
 		// Then
 		g.Expect(errs).To(gomega.HaveLen(2))
@@ -176,41 +175,41 @@ func TestUploader_PopulateErrors(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		errCh := make(chan *uploader.UploadError)
+		errCh := make(chan *extractor.ResultError)
 		close(errCh)
 
-		u := uploader.Uploader{}
+		e := extractor.Extractor{}
 
 		// When
-		errs := u.PopulateErrors(errCh)
+		errs := e.PopulateErrors(errCh)
 
 		// Then
 		g.Expect(errs).To(gomega.BeEmpty())
 	})
 }
 
-func TestUploader_PopulateResults(t *testing.T) {
+func TestExtractor_PopulateResults(t *testing.T) {
 	t.Run("Results", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		res1 := uploader.UploadResult{
-			FileName: "test.yaml",
+		res1 := extractor.ResultSuccess{
+			FilePath: "test.yaml",
 		}
-		res2 := uploader.UploadResult{
-			FileName: "test2.yaml",
+		res2 := extractor.ResultSuccess{
+			FilePath: "test2.yaml",
 		}
 
-		resultsCh := make(chan *uploader.UploadResult, 3)
+		resultsCh := make(chan *extractor.ResultSuccess, 3)
 		resultsCh <- &res1
 		resultsCh <- &res2
 		resultsCh <- nil
 		close(resultsCh)
 
-		u := uploader.Uploader{}
+		e := extractor.Extractor{}
 
 		// When
-		res := u.PopulateResults(resultsCh)
+		res := e.PopulateResults(resultsCh)
 
 		// Then
 		g.Expect(res).To(gomega.HaveLen(2))
@@ -222,13 +221,13 @@ func TestUploader_PopulateResults(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		resultsCh := make(chan *uploader.UploadResult, 3)
+		resultsCh := make(chan *extractor.ResultSuccess, 3)
 		close(resultsCh)
 
-		u := uploader.Uploader{}
+		e := extractor.Extractor{}
 
 		// When
-		res := u.PopulateResults(resultsCh)
+		res := e.PopulateResults(resultsCh)
 
 		// Then
 		g.Expect(res).To(gomega.BeEmpty())
@@ -236,42 +235,14 @@ func TestUploader_PopulateResults(t *testing.T) {
 
 }
 
-func TestOrigin(t *testing.T) {
-	t.Run("Not secure", func(t *testing.T) {
-		// Given
-		g := gomega.NewGomegaWithT(t)
-		endpoint := "minio.example.local:9000"
-		secure := false
+func fixJobCh(jobs []extractor.Job) (chan extractor.Job, int) {
+	jobLen := len(jobs)
 
-		// When
-		origin := uploader.Origin(endpoint, secure)
-
-		// Then
-		g.Expect(origin).To(gomega.Equal("http://minio.example.local:9000"))
-	})
-
-	t.Run("Secure", func(t *testing.T) {
-		// Given
-		g := gomega.NewGomegaWithT(t)
-		endpoint := "minio.foo.bar"
-		secure := true
-
-		// When
-		origin := uploader.Origin(endpoint, secure)
-
-		// Then
-		g.Expect(origin).To(gomega.Equal("https://minio.foo.bar"))
-	})
-}
-
-func testUploads(files []uploader.FileUpload) (chan uploader.FileUpload, int) {
-	filesCount := len(files)
-
-	filesChannel := make(chan uploader.FileUpload, filesCount)
-	for _, file := range files {
-		filesChannel <- file
+	jobsChannel := make(chan extractor.Job, jobLen)
+	for _, job := range jobs {
+		jobsChannel <- job
 	}
-	close(filesChannel)
+	close(jobsChannel)
 
-	return filesChannel, filesCount
+	return jobsChannel, jobLen
 }

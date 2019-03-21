@@ -12,18 +12,19 @@ import (
 )
 
 type Job struct {
+	FilePath string
 	File fileheader.FileHeader
 }
 
 // ResultError stores success data
 type ResultSuccess struct {
-	FileName string                 `json:"fileName"`
+	FilePath string                 `json:"filePath"`
 	Metadata map[string]interface{} `json:"metadata"`
 }
 
 // ResultError stores error data
 type ResultError struct {
-	FileName string `json:"fileName,omitempty"`
+	FilePath string `json:"filePath,omitempty"`
 	Error    error `json:"error"`
 }
 
@@ -72,11 +73,11 @@ func (e *Extractor) Process(ctx context.Context, filesChannel chan Job, filesCou
 					if !ok {
 						return
 					}
-					res, err := e.processFile(contextWithTimeout, job)
+					res, err := e.processFile(job)
 					if err != nil {
 						errorsCh <- &ResultError{
 							Error:    err,
-							FileName: job.File.Filename(),
+							FilePath: job.FilePath,
 						}
 					}
 
@@ -106,19 +107,18 @@ func (e *Extractor) countNeededWorkers(filesCount, maxUploadWorkers int) int {
 }
 
 // processFile processes a single file from given path to particular bucket
-func (e *Extractor) processFile(ctx context.Context, job Job) (*ResultSuccess, error) {
+func (e *Extractor) processFile(job Job) (*ResultSuccess, error) {
 	file := job.File
-	fileName := file.Filename()
 
-	glog.Infof("Extracting metadata `%s`...\n", file.Filename())
+	glog.Infof("Extracting metadata for `%s`...\n", job.FilePath)
 
 	m, err := e.matador.ReadMetadata(file)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while processing file `%s`", file.Filename())
+		return nil, errors.Wrapf(err, "while processing file `%s`", job.FilePath)
 	}
 
 	result := &ResultSuccess{
-		FileName: fileName,
+		FilePath: job.FilePath,
 		Metadata: m,
 	}
 
