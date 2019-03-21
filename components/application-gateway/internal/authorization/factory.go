@@ -2,7 +2,6 @@ package authorization
 
 import (
 	"net/http"
-	"net/http/httputil"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization/oauth"
@@ -12,10 +11,12 @@ import (
 
 type Strategy interface {
 	// Adds Authorization header to the request
-	AddAuthorization(r *http.Request, proxy *httputil.ReverseProxy) apperrors.AppError
+	AddAuthorization(r *http.Request, setter TransportSetter) apperrors.AppError
 	// Invalidates internal state
 	Invalidate()
 }
+
+type TransportSetter func(transport *http.Transport)
 
 type StrategyFactory interface {
 	// Creates strategy for credentials provided

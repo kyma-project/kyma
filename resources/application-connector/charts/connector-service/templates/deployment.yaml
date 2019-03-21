@@ -42,7 +42,8 @@ spec:
           - "--certificateProtectedHost=gateway.{{ .Values.global.applicationConnector.domainName }}"
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
           - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
-          - "--certificateValidityTime={{ .Values.deployment.args.validityTime }}"
+          - "--appCertificateValidityTime={{ .Values.deployment.args.appValidityTime }}"
+          - "--runtimeCertificateValidityTime={{ .Values.deployment.args.runtimeValidityTime }}"
           - "--central={{ .Values.deployment.args.central }}"
           - "--revocationConfigMapName={{ .Values.deployment.args.revocationConfigMapName }}"
         env:

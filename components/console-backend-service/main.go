@@ -73,7 +73,7 @@ func main() {
 	resolvers.WaitForCacheSync(stopCh)
 
 	c := gqlschema.Config{Resolvers: resolvers}
-	c.Directives.HasAccess = authz.NewRBACDirective(authorizer)
+	c.Directives.HasAccess = authz.NewRBACDirective(authorizer, kubeClient.Discovery())
 	executableSchema := gqlschema.NewExecutableSchema(c)
 	addr := fmt.Sprintf("%s:%d", cfg.Host, cfg.Port)
 

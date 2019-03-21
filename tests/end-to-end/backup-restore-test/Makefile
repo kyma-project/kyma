@@ -1,5 +1,5 @@
 APP_NAME = backup-restore-test
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
+IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/tests/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
 .PHONY: build
@@ -8,7 +8,7 @@ build:
 
 .PHONY: build-image
 build-image:
-	mkdir build-temp
+	mkdir -p build-temp
 	cp ../../../docs/backup/docs/assets/all-backup.yaml build-temp
 	cp ../../../docs/backup/docs/assets/system-backup.yaml build-temp
 	docker build -t $(APP_NAME):latest .

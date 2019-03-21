@@ -20,14 +20,14 @@ This tutorial shows how to expose custom metrics to Prometheus with a Golang ser
 
 ### Configure Istio
 
-For the `default` Namespace, the sidecar injection must be enabled. To enable the sidecar injection for all Pods in the `default` Namespace, run the following command:
+For the `default` Namespace, you must enable the sidecar injection. To enable the sidecar injection for all Pods in the `default` Namespace, run the following command:
 
 ```bash
 kubectl label namespace default istio-injection=enabled
 namespace "default" labeled
 ```
 
-For more details on deploying your application with Istio, read [this](https://istio.io/docs/setup/kubernetes/quick-start#deploy-your-application) documentation.
+For more details on deploying your application with Istio, read [this](https://istio.io/docs/setup/kubernetes/install/) documentation.
 
 You must also add the **sidecar.istio.io/inject** annotation with the value set to `true` to the Pod template specification, to enable the injection as shown in [this](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/deployment/deployment.yaml#L12) example.
 
@@ -39,7 +39,7 @@ spec:
         sidecar.istio.io/inject: "true"
 ```
 
-For more details on installing the Istio sidecar, read [this](https://istio.io/docs/setup/kubernetes/sidecar-injection/#policy) documentation.
+For more details on installing the Istio sidecar, read [this](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/) documentation.
 
 The following ports are used in the Pod:
 
