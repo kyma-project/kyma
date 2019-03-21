@@ -42,4 +42,12 @@ spec:
           requests:
             cpu: 100m
             memory: 20Mi
+        volumeMounts:
+          - mountPath: /etc/certs
+            name: helm-certs
+            readOnly: true
+      volumes:
+        - name: helm-certs
+          secret:
+            secretName: helm-secret
       terminationGracePeriodSeconds: 10

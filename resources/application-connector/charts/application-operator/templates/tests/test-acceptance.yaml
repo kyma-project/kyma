@@ -19,5 +19,13 @@ spec:
         value: {{ .Values.global.namespace }}
       - name: TILLER_HOST
         value: {{ .Values.controller.args.tillerUrl }}
+      volumeMounts:
+        - mountPath: /etc/certs
+          name: helm-certs
+          readOnly: true
+  volumes:
+    - name: helm-certs
+      secret:
+        secretName: helm-secret
   restartPolicy: Never
 {{ end }}
