@@ -1,9 +1,8 @@
-package extractor
+package processor
 
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/matador"
 	"sync"
 	"time"
 
@@ -13,47 +12,47 @@ import (
 
 type Job struct {
 	FilePath string
-	File fileheader.FileHeader
+	File     fileheader.FileHeader
 }
 
 // ResultError stores success data
 type ResultSuccess struct {
-	FilePath string                 `json:"filePath"`
-	Metadata map[string]interface{} `json:"metadata"`
+	FilePath string
+	Output   interface{}
 }
 
 // ResultError stores error data
 type ResultError struct {
-	FilePath string `json:"filePath,omitempty"`
-	Error    error `json:"error"`
+	FilePath string
+	Error    error
 }
 
-// Extractor is an abstraction layer for Minio client
-type Extractor struct {
+// Processor processes jobs concurrently
+type Processor struct {
 	ProcessTimeout time.Duration
 	MaxWorkers     int
 
-	matador matador.Matador
+	workerFn func(job Job) (interface{}, error)
 }
 
-// New returns a new instance of Extractor
-func New(maxWorkers int, processTimeout time.Duration) *Extractor {
-	return &Extractor{
+// New returns a new instance of Processor
+func New(workerFn func(job Job) (interface{}, error), maxWorkers int, processTimeout time.Duration) *Processor {
+	return &Processor{
 		ProcessTimeout: processTimeout,
 		MaxWorkers:     maxWorkers,
-		matador:        matador.New(),
+		workerFn:       workerFn,
 	}
 }
 
 // Process processes files and extracts file metadata
-func (e *Extractor) Process(ctx context.Context, filesChannel chan Job, filesCount int) ([]ResultSuccess, []ResultError) {
-	errorsCh := make(chan *ResultError, filesCount)
-	resultsCh := make(chan *ResultSuccess, filesCount)
+func (e *Processor) Do(ctx context.Context, jobCh chan Job, jobCount int) ([]ResultSuccess, []ResultError) {
+	errorsCh := make(chan *ResultError, jobCount)
+	resultsCh := make(chan *ResultSuccess, jobCount)
 
 	contextWithTimeout, cancel := context.WithTimeout(ctx, e.ProcessTimeout)
 	defer cancel()
 
-	workersCount := e.countNeededWorkers(filesCount, e.MaxWorkers)
+	workersCount := e.countNeededWorkers(jobCount, e.MaxWorkers)
 	glog.Infof("Creating %d concurrent worker(s)...", workersCount)
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(workersCount)
@@ -69,7 +68,7 @@ func (e *Extractor) Process(ctx context.Context, filesChannel chan Job, filesCou
 				}
 
 				select {
-				case job, ok := <-filesChannel:
+				case job, ok := <-jobCh:
 					if !ok {
 						return
 					}
@@ -99,34 +98,33 @@ func (e *Extractor) Process(ctx context.Context, filesChannel chan Job, filesCou
 	return result, errs
 }
 
-func (e *Extractor) countNeededWorkers(filesCount, maxUploadWorkers int) int {
+// countNeededWorkers counts how many workers are needed
+func (e *Processor) countNeededWorkers(filesCount, maxUploadWorkers int) int {
 	if filesCount < maxUploadWorkers {
 		return filesCount
 	}
 	return maxUploadWorkers
 }
 
-// processFile processes a single file from given path to particular bucket
-func (e *Extractor) processFile(job Job) (*ResultSuccess, error) {
-	file := job.File
+// processFile processes a single file
+func (e *Processor) processFile(job Job) (*ResultSuccess, error) {
+	glog.Infof("Processing file `%s`...\n", job.FilePath)
 
-	glog.Infof("Extracting metadata for `%s`...\n", job.FilePath)
-
-	m, err := e.matador.ReadMetadata(file)
+	res, err := e.workerFn(job)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while processing file `%s`", job.FilePath)
 	}
 
 	result := &ResultSuccess{
 		FilePath: job.FilePath,
-		Metadata: m,
+		Output: res,
 	}
 
 	return result, nil
 }
 
 // populateResults populates all results from all jobs
-func (e *Extractor) populateResults(resultsCh chan *ResultSuccess) []ResultSuccess {
+func (e *Processor) populateResults(resultsCh chan *ResultSuccess) []ResultSuccess {
 	var result []ResultSuccess
 	for i := range resultsCh {
 		if i == nil {
@@ -140,7 +138,7 @@ func (e *Extractor) populateResults(resultsCh chan *ResultSuccess) []ResultSucce
 }
 
 // populateErrors consolidates all error messages into one and returns it
-func (e *Extractor) populateErrors(errorsCh chan *ResultError) []ResultError {
+func (e *Processor) populateErrors(errorsCh chan *ResultError) []ResultError {
 	var errs []ResultError
 	for uploadErr := range errorsCh {
 		if uploadErr == nil {

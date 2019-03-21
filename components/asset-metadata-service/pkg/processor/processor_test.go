@@ -1,9 +1,9 @@
-package extractor_test
+package processor_test
 
 import (
 	"context"
 	"errors"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/matador/automock"
 	"testing"
 	"time"
@@ -12,7 +12,7 @@ import (
 	"github.com/onsi/gomega"
 )
 
-func TestExtractor_Process(t *testing.T) {
+func TestProcessor_Do(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
@@ -30,7 +30,7 @@ func TestExtractor_Process(t *testing.T) {
 		mock2.On("Size").Return(int64(213)).Once()
 		mock2.On("Open").Return(file, nil).Once()
 
-		files := []extractor.Job{
+		files := []processor.Job{
 			{
 				FilePath: "test/test1.yaml",
 				File:     mock1,
@@ -41,17 +41,17 @@ func TestExtractor_Process(t *testing.T) {
 			},
 		}
 
-		expectedResult := []extractor.ResultSuccess{
+		expectedResult := []processor.ResultSuccess{
 			{
 				FilePath: "test/test1.yaml",
-				Metadata: map[string]interface{}{
+				Output: map[string]interface{}{
 					"foo": "bar",
 					"bar": 3,
 				},
 			},
 			{
 				FilePath: "test/test2.yaml",
-				Metadata: map[string]interface{}{
+				Output: map[string]interface{}{
 					"foo": 32,
 					"bar": "test.example.com",
 				},
@@ -74,11 +74,12 @@ func TestExtractor_Process(t *testing.T) {
 		defer matadorMock.AssertExpectations(t)
 
 
-		e := extractor.New(5, timeout)
-		e.SetMatador(matadorMock)
+		e := processor.New(func(job processor.Job) (interface{}, error) {
+			return matadorMock.ReadMetadata(job.File)
+		}, 5, timeout)
 
 		// When
-		res, errs := e.Process(context.TODO(),jobCh, jobCount)
+		res, errs := e.Do(context.TODO(),jobCh, jobCount)
 
 		// Then
 		g.Expect(errs).To(gomega.BeEmpty())
@@ -106,7 +107,7 @@ func TestExtractor_Process(t *testing.T) {
 		mock2.On("Size").Return(int64(213)).Once()
 		mock2.On("Open").Return(file, nil).Once()
 
-		files := []extractor.Job{
+		files := []processor.Job{
 			{
 				FilePath: "test/test1.yaml",
 				File:     mock1,
@@ -126,11 +127,12 @@ func TestExtractor_Process(t *testing.T) {
 		matadorMock.On("ReadMetadata", mock2).Return(nil, testErr).Once()
 		defer matadorMock.AssertExpectations(t)
 
-		e := extractor.New(5, timeout)
-		e.SetMatador(matadorMock)
+		e := processor.New(func(job processor.Job) (interface{}, error) {
+			return matadorMock.ReadMetadata(job.File)
+		}, 5, timeout)
 
 		// When
-		_, errs := e.Process(context.TODO(),jobCh, jobCount)
+		_, errs := e.Do(context.TODO(),jobCh, jobCount)
 
 		// Then
 		g.Expect(errs).To(gomega.HaveLen(2))
@@ -141,26 +143,26 @@ func TestExtractor_Process(t *testing.T) {
 	})
 }
 
-func TestExtractor_PopulateErrors(t *testing.T) {
+func TestProcessor_PopulateErrors(t *testing.T) {
 	t.Run("Errors", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		elem1 := extractor.ResultError{
+		elem1 := processor.ResultError{
 			Error: errors.New("Test 1"),
 		}
-		elem2 := extractor.ResultError{
+		elem2 := processor.ResultError{
 			FilePath: "test/path.js",
 			Error:    errors.New("Test 2"),
 		}
 
-		errCh := make(chan *extractor.ResultError, 3)
+		errCh := make(chan *processor.ResultError, 3)
 		errCh <- &elem1
 		errCh <- &elem2
 		errCh <- nil
 		close(errCh)
 
-		e := extractor.Extractor{}
+		e := processor.Processor{}
 
 		// When
 		errs := e.PopulateErrors(errCh)
@@ -175,10 +177,10 @@ func TestExtractor_PopulateErrors(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		errCh := make(chan *extractor.ResultError)
+		errCh := make(chan *processor.ResultError)
 		close(errCh)
 
-		e := extractor.Extractor{}
+		e := processor.Processor{}
 
 		// When
 		errs := e.PopulateErrors(errCh)
@@ -188,25 +190,25 @@ func TestExtractor_PopulateErrors(t *testing.T) {
 	})
 }
 
-func TestExtractor_PopulateResults(t *testing.T) {
+func TestProcessor_PopulateResults(t *testing.T) {
 	t.Run("Results", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		res1 := extractor.ResultSuccess{
+		res1 := processor.ResultSuccess{
 			FilePath: "test.yaml",
 		}
-		res2 := extractor.ResultSuccess{
+		res2 := processor.ResultSuccess{
 			FilePath: "test2.yaml",
 		}
 
-		resultsCh := make(chan *extractor.ResultSuccess, 3)
+		resultsCh := make(chan *processor.ResultSuccess, 3)
 		resultsCh <- &res1
 		resultsCh <- &res2
 		resultsCh <- nil
 		close(resultsCh)
 
-		e := extractor.Extractor{}
+		e := processor.Processor{}
 
 		// When
 		res := e.PopulateResults(resultsCh)
@@ -221,10 +223,10 @@ func TestExtractor_PopulateResults(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 
-		resultsCh := make(chan *extractor.ResultSuccess, 3)
+		resultsCh := make(chan *processor.ResultSuccess, 3)
 		close(resultsCh)
 
-		e := extractor.Extractor{}
+		e := processor.Processor{}
 
 		// When
 		res := e.PopulateResults(resultsCh)
@@ -235,10 +237,10 @@ func TestExtractor_PopulateResults(t *testing.T) {
 
 }
 
-func fixJobCh(jobs []extractor.Job) (chan extractor.Job, int) {
+func fixJobCh(jobs []processor.Job) (chan processor.Job, int) {
 	jobLen := len(jobs)
 
-	jobsChannel := make(chan extractor.Job, jobLen)
+	jobsChannel := make(chan processor.Job, jobLen)
 	for _, job := range jobs {
 		jobsChannel <- job
 	}

@@ -3,8 +3,9 @@ package route
 import (
 	"context"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/matador"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
 	"mime/multipart"
 	"net/http"
 	"time"
@@ -14,25 +15,28 @@ import (
 )
 
 type ExtractHandler struct {
-	maxWorkers int
+	maxWorkers     int
 	processTimeout time.Duration
+
+	matador matador.Matador
 }
 
 // ResultError stores error data
 type ResultError struct {
-	FileName string `json:"fileName,omitempty"`
+	FilePath string `json:"filePath,omitempty"`
 	Message  string `json:"message,omitempty"`
 }
 
 type Response struct {
-	Data   []extractor.ResultSuccess `json:"uploadedFiles,omitempty"`
+	Data   []processor.ResultSuccess `json:"uploadedFiles,omitempty"`
 	Errors []ResultError             `json:"errors,omitempty"`
 }
 
 func NewExtractHandler(maxWorkers int, processTimeout time.Duration) *ExtractHandler {
 	return &ExtractHandler{
-		maxWorkers:maxWorkers,
-		processTimeout:processTimeout,
+		maxWorkers:     maxWorkers,
+		processTimeout: processTimeout,
+		matador:        matador.New(),
 	}
 }
 
@@ -85,16 +89,20 @@ func (r *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 
 	filesToProcessCh := r.chanFromFiles(files)
 
-	e := extractor.New(r.maxWorkers, r.processTimeout)
-	result, errs := e.Process(context.Background(), filesToProcessCh, filesLen)
+	processFn := func(job processor.Job) (interface{}, error) {
+		return r.matador.ReadMetadata(job.File)
+	}
+
+	e := processor.New(processFn, r.maxWorkers, r.processTimeout)
+	result, errs := e.Do(context.Background(), filesToProcessCh, filesLen)
 
 	glog.Infof("Finished processing request with uploading %d files.", filesLen)
 
 	var responseErrors []ResultError
 	for _, err := range errs {
 		responseErrors = append(responseErrors, ResultError{
+			FilePath: err.FilePath,
 			Message:  err.Error.Error(),
-			FileName: err.FileName,
 		})
 	}
 
@@ -114,13 +122,13 @@ func (r *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	})
 }
 
-func (r *ExtractHandler) chanFromFiles(files []*multipart.FileHeader) chan extractor.Job {
-	filesCh := make(chan extractor.Job, len(files))
+func (r *ExtractHandler) chanFromFiles(files []*multipart.FileHeader) chan processor.Job {
+	filesCh := make(chan processor.Job, len(files))
 
 	go func() {
 		defer close(filesCh)
 		for _, file := range files {
-			filesCh <- extractor.Job{
+			filesCh <- processor.Job{
 				File: fileheader.FromMultipart(file),
 			}
 		}
