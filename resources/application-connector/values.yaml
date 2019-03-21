@@ -30,7 +30,10 @@ global:
     version: 07b5422e
   connection_token_handler:
     dir: develop/
-    version: fa0de1b9
+    version: 3d922c3d
+  connection_token_handler_tests:
+    dir: pr/
+    version: PR-3246
   connectivity_certs_controller:
     dir: develop/
     version: 2dc766a0
