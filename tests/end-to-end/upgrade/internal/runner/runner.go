@@ -38,10 +38,11 @@ type TestRunner struct {
 	tests               map[string]UpgradeTest
 	maxConcurrencyLevel int
 	sanitizeRegex       *regexp.Regexp
+	verbose             bool
 }
 
 // NewTestRunner is a constructor for TestRunner
-func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[string]UpgradeTest, maxConcurrencyLevel int) (*TestRunner, error) {
+func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[string]UpgradeTest, maxConcurrencyLevel int, verbose bool) (*TestRunner, error) {
 	sanitizeRegex, err := regexp.Compile(regexSanitize)
 	if err != nil {
 		return nil, errors.Wrap(err, "while compiling sanitize regexp")
@@ -53,6 +54,7 @@ func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[stri
 		tests:               tests,
 		maxConcurrencyLevel: maxConcurrencyLevel,
 		sanitizeRegex:       sanitizeRegex,
+		verbose:             verbose,
 	}, nil
 }
 
@@ -150,7 +152,10 @@ func (r *TestRunner) executeTaskFunc(taskHandler taskFn, stopCh <-chan struct{},
 
 	sink := &bytes.Buffer{}
 	originalOutput := taskLog.Logger.Out
-	taskLog.Logger.SetOutput(sink)
+	// verbose means "do not suppress logs"
+	if !r.verbose {
+		taskLog.Logger.SetOutput(sink)
+	}
 	startTime := time.Now()
 
 	if err := taskHandler(stopCh, taskLog, nsName); err != nil {
