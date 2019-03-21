@@ -60,8 +60,8 @@ func (n namespaceControllerTest) createTestNamespace() error {
 
 func (n namespaceControllerTest) waitForResources() error {
 
-	timeout := time.After(10 * time.Second)
-	tick := time.Tick(2 * time.Second)
+	timeout := time.After(5 * time.Second)
+	tick := time.Tick(1 * time.Second)
 
 	for {
 		select {
@@ -83,6 +83,6 @@ func (n namespaceControllerTest) waitForResources() error {
 			return nil
 
 		case <-timeout:
-			return fmt.Errorf("resources could not be found: %v, %v", n.namespaceName, resourceQuotaObjName)}
+			return fmt.Errorf("unable to fetch namespace %v or reqource quota %v", n.namespaceName, resourceQuotaObjName)}
 	}
 }
