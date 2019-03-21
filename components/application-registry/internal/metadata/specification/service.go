@@ -111,7 +111,7 @@ func shouldModifySpec(apiSpec []byte, apiType string) bool {
 }
 
 func isNilOrEmpty(array []byte) bool {
-	return array == nil || len(array) == 0
+	return array == nil || len(array) == 0 || string(array) == "null"
 }
 
 func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {

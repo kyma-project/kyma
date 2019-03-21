@@ -33,18 +33,17 @@ func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
 	if r.StatusCode == http.StatusForbidden || r.StatusCode == http.StatusUnauthorized {
 		log.Infof("Request from service with id %s failed with %d status, invalidating proxy and retrying.", rr.id, r.StatusCode)
 
-		res, err := rr.retry()
+		retryRes, err := rr.retry()
 		if err != nil {
 			return err
 		}
 
-		if res != nil {
+		if retryRes != nil {
 			if r.Body != nil {
 				r.Body.Close()
 			}
-			*r = *res
+			*r = *retryRes
 		}
-
 	}
 
 	return nil
@@ -79,8 +78,14 @@ func (rr *retrier) prepareRequest() (*http.Request, context.CancelFunc) {
 func (rr *retrier) addAuthorization(r *http.Request, cacheEntry *CacheEntry) error {
 	authorizationStrategy := cacheEntry.AuthorizationStrategy
 	authorizationStrategy.Invalidate()
+	err := cacheEntry.AuthorizationStrategy.AddAuthorization(r)
+	if err != nil {
+		return err
+	}
 
-	return authorizationStrategy.AddAuthorization(r, cacheEntry.Proxy)
+	csrfTokenStrategy := cacheEntry.CSRFTokenStrategy
+	csrfTokenStrategy.Invalidate()
+	return csrfTokenStrategy.AddCSRFToken(r)
 }
 
 func (rr *retrier) performRequest(r *http.Request, cacheEntry *CacheEntry) (*http.Response, error) {

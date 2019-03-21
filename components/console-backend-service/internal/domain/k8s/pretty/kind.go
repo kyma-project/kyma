@@ -21,6 +21,8 @@ const (
 	ResourceQuotaStatus
 	ResourceQuotaStatuses
 	Secret
+	Service
+	Services
 )
 
 func (k Kind) String() string {
@@ -61,6 +63,10 @@ func (k Kind) String() string {
 		return "Resource Quota Statuses"
 	case Secret:
 		return "Secret"
+	case Service:
+		return "Service"
+	case Services:
+		return "Services"
 	default:
 		return ""
 	}

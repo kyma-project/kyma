@@ -77,7 +77,7 @@ spec:
   containers:
   - name: backup-test
     image: "eu.gcr.io/kyma-project/pr/tests/backup-restore-test:PR-3229"
-    #image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}backup-restore-test:{{ .Values.image.tag }}"
+    #image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
     imagePullPolicy: Always
     #command: ["sleep", "6000"]
   restartPolicy: Never
