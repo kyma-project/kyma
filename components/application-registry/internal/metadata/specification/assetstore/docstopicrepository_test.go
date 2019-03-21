@@ -20,18 +20,7 @@ func TestAddDocsTopic(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewDocsTopicRepository(resourceInterfaceMock, "kyma-integration")
 
-		urls := map[string]string{
-			docstopic.DocsTopicKeyOpenApiSpec: "www.somestorage.com/api",
-		}
-		docsTopicEntry := docstopic.Entry{
-			Id:          "id1",
-			DisplayName: "Some display name",
-			Description: "Some description",
-			Urls:        urls,
-			Labels: map[string]string{
-				"key": "value",
-			},
-		}
+		docsTopicEntry := createTestDocsTopicEntry()
 
 		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "kyma-integration"))).Return(&unstructured.Unstructured{}, nil)
 
@@ -104,7 +93,20 @@ func TestGetDocsTopic(t *testing.T) {
 
 func TestUpdateDocsTopic(t *testing.T) {
 	t.Run("Should update DocsTopic", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock, "kyma-integration")
 
+		docsTopicEntry := createTestDocsTopicEntry()
+
+		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "kyma-integration"))).Return(&unstructured.Unstructured{}, nil)
+
+		// when
+		err := repository.Update(docsTopicEntry)
+
+		// then
+		require.NoError(t, err)
+		resourceInterfaceMock.AssertExpectations(t)
 	})
 
 	t.Run("Should fail if k8s client returned error", func(t *testing.T) {
@@ -120,6 +122,20 @@ func TestDeleteDocsTopic(t *testing.T) {
 	t.Run("Should fail if k8s client returned error", func(t *testing.T) {
 
 	})
+}
+
+func createTestDocsTopicEntry() docstopic.Entry {
+	return docstopic.Entry{
+		Id:          "id1",
+		DisplayName: "Some display name",
+		Description: "Some description",
+		Urls: map[string]string{
+			docstopic.DocsTopicKeyOpenApiSpec: "www.somestorage.com/api",
+		},
+		Labels: map[string]string{
+			"key": "value",
+		},
+	}
 }
 
 func createMatcherFunction(docsTopicEntry docstopic.Entry, namespace string) func(*unstructured.Unstructured) bool {

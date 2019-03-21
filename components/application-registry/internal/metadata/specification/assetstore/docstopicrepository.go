@@ -12,9 +12,6 @@ import (
 
 const (
 	DocsTopicModeSingle = "single"
-	ApiSpecKey          = "api"
-	EventSpecKey        = "events"
-	DocsSpecKey         = "docs"
 )
 
 type ResourceInterface interface {
@@ -132,6 +129,20 @@ func (r repository) Delete(id string) apperrors.AppError {
 	return nil
 }
 
-func (r repository) Update(documentationTopicdocstopic docstopic.Entry) apperrors.AppError {
+func (r repository) Update(documentationTopic docstopic.Entry) apperrors.AppError {
+	docsTopic := toK8sType(documentationTopic, r.namespace)
+	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&docsTopic)
+	if err != nil {
+		return apperrors.Internal("Failed to convert Docs Topic object.")
+	}
+
+	_, err = r.resourceInterface.Update(&unstructured.Unstructured{
+		Object: obj,
+	})
+
+	if err != nil {
+		return apperrors.Internal("Failed to create Documentation Topic")
+	}
+
 	return nil
 }
