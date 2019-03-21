@@ -4,12 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
-
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
