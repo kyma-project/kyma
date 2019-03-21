@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	restclient "k8s.io/client-go/rest"
+	"time"
 )
 
 const namespace = "default"
@@ -42,6 +43,8 @@ func (c *k8sResourcesClient) CreateTokenRequest(name, group, tenant string) (*v1
 		TypeMeta:   v1.TypeMeta{Kind: "TokenRequest", APIVersion: v1alpha1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: name},
 		Context:    v1alpha1.ClusterContext{Group: group, Tenant: tenant},
+		//TODO CR should be created without passing status
+		Status: v1alpha1.TokenRequestStatus{ExpireAfter: v1.Date(2999, time.December, 12, 12, 12, 12, 12, time.Local)},
 	}
 
 	return c.tokenRequestsClient.ApplicationconnectorV1alpha1().TokenRequests(namespace).Create(tokenRequest)

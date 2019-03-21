@@ -6,6 +6,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/rand"
 	"testing"
 	"time"
 )
@@ -27,7 +28,7 @@ func TestTokenRequests(t *testing.T) {
 
 	t.Run("should create token request CR with token", func(t *testing.T) {
 		//when
-		tokenRequest, e := client.CreateTokenRequest(appName, emptyGroup, emptyTenant)
+		tokenRequest, e := client.CreateTokenRequest(appName+addSuffix(), emptyGroup, emptyTenant)
 		require.NoError(t, e)
 
 		//then
@@ -42,20 +43,20 @@ func TestTokenRequests(t *testing.T) {
 		group := "test-group"
 
 		//when
-		tokenRequest, e := client.CreateTokenRequest(appName, group, tenant)
+		tokenRequest, e := client.CreateTokenRequest(appName+addSuffix(), group, tenant)
 		require.NoError(t, e)
 
 		//then
 		tokenRequest = waitForToken(t, client, tokenRequest)
 
 		assert.NotEmpty(t, tokenRequest.Status.Token)
-		assert.Equal(t, tokenRequest.Context.Tenant, tenant)
-		assert.Equal(t, tokenRequest.Context.Group, group)
+		assert.Equal(t, tenant, tokenRequest.Context.Tenant)
+		assert.Equal(t, group, tokenRequest.Context.Group)
 	})
 }
 
 func waitForToken(t *testing.T, client testkit.K8sResourcesClient, tokenRequest *v1alpha1.TokenRequest) *v1alpha1.TokenRequest {
-	isReady := &tokenRequest.Status != nil
+	isReady := isTokenReady(tokenRequest)
 
 	var e error
 
@@ -63,10 +64,18 @@ func waitForToken(t *testing.T, client testkit.K8sResourcesClient, tokenRequest 
 		time.Sleep(waitTime)
 		tokenRequest, e = client.GetTokenRequest(tokenRequest.Name, v1.GetOptions{})
 		require.NoError(t, e)
-		isReady = &tokenRequest.Status != nil
+		isReady = isTokenReady(tokenRequest)
 	}
 
 	require.True(t, isReady)
 
 	return tokenRequest
+}
+
+func isTokenReady(tokenRequest *v1alpha1.TokenRequest) bool {
+	return &tokenRequest.Status != nil && tokenRequest.Status.State == "OK"
+}
+
+func addSuffix() string {
+	return "-" + rand.String(5)
 }
