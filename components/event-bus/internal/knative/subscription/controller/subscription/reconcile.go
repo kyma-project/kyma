@@ -14,9 +14,6 @@ import (
 )
 
 const (
-	// Name is the name of the Kyma Subscription.
-	Name = "subscription"
-
 	// Name of the corev1.Events emitted from the reconciliation process
 	subReconciled      = "SubscriptionReconciled"
 	subReconcileFailed = "SubscriptionReconcileFailed"
@@ -28,8 +25,9 @@ const (
 type reconciler struct {
 	client     client.Client
 	recorder   record.EventRecorder
-	knativeLib *util.KnativeLib
+	knativeLib util.KnativeAccessLib
 	opts       *opts.Options
+	time       util.CurrentTime
 }
 
 // Verify the struct implements reconcile.Reconciler
@@ -68,10 +66,37 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	requeue, reconcileErr := r.reconcile(ctx, subscription)
 	if reconcileErr != nil {
 		log.Error(reconcileErr, "Reconciling Subscription")
+		if err := util.SetNotReadySubscription(ctx, r.client, subscription, reconcileErr.Error(), r.time); err != nil {
+			log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
+		}
 		r.recorder.Eventf(subscription, corev1.EventTypeWarning, subReconcileFailed, "Subscription reconciliation failed: %v", err)
 	} else if !requeue {
-		log.Info("Subscription reconciled")
-		r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled, "Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+		// the work was done without errors
+		if !subscription.ObjectMeta.DeletionTimestamp.IsZero() {
+			// subscription is marked for deletion, all the work was done
+			r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
+				"Subscription reconciled and deleted, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+		} else if util.IsSubscriptionActivated(subscription) {
+			// reconcile finished with no errors
+			if err := util.SetReadySubscription(ctx, r.client, subscription, "", r.time); err != nil {
+				log.Error(err, "SetReadySubscription() failed for the subscription:", "subscription", subscription)
+				reconcileErr = err
+			} else {
+				log.Info("Subscription reconciled")
+				r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
+					"Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+			}
+		} else {
+			// reconcile finished with no errors, but subscripition is not activated
+			if err := util.SetNotReadySubscription(ctx, r.client, subscription, "", r.time); err != nil {
+				log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
+				reconcileErr = err
+			} else {
+				log.Info("Subscription reconciled")
+				r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
+					"Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
+			}
+		}
 	}
 
 	return reconcile.Result{
@@ -81,7 +106,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alpha1.Subscription) (bool, error) {
 
-	knativeSubsName := util.GetSubscriptionName(&subscription.Name, &subscription.Namespace)
+	knativeSubsName := util.GetKnSubscriptionName(&subscription.Name, &subscription.Namespace)
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
 	knativeChannelName := util.GetChannelName(&subscription.SourceID, &subscription.EventType, &subscription.EventTypeVersion)
@@ -93,8 +118,10 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		// then lets add the finalizer and update the object.
 		if !util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			subscription.ObjectMeta.Finalizers = append(subscription.ObjectMeta.Finalizers, finalizerName)
-			if err := r.client.Update(context.Background(), subscription); err != nil {
+			if err := util.WriteSubscription(context.Background(), r.client, subscription); err == nil {
 				return true, nil
+			} else {
+				return false, err
 			}
 		}
 	} else {
@@ -109,8 +136,8 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 
 			// remove our finalizer from the list and update it.
 			subscription.ObjectMeta.Finalizers = util.RemoveString(&subscription.ObjectMeta.Finalizers, finalizerName)
-			if err := r.client.Update(context.Background(), subscription); err != nil {
-				return true, nil
+			if err := util.WriteSubscription(context.Background(), r.client, subscription); err != nil {
+				return false, err
 			}
 		}
 
@@ -160,7 +187,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	} else if util.CheckIfEventActivationExistForSubscription(ctx, r.client, subscription) {
 		// In case Kyma Subscription does not have events-activated condition, but there is an EventActivation for it.
 		// Activate subscription
-		if err := util.ActivateSubscriptions(ctx, r.client, []*eventingv1alpha1.Subscription{subscription}, log); err != nil {
+		if err := util.ActivateSubscriptions(ctx, r.client, []*eventingv1alpha1.Subscription{subscription}, log, r.time); err != nil {
 			log.Error(err, "ActivateSubscriptions() failed")
 			return false, err
 		}
