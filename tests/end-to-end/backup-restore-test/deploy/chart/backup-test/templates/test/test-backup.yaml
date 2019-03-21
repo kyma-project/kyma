@@ -33,6 +33,9 @@ rules:
 - apiGroups: ["autoscaling"]
   resources: ["horizontalpodautoscalers"]
   verbs: ["get", "list"]
+- apiGroups: [""]
+  resources: ["secrets", "statefulsets", "pods"]
+  verbs: ["create", "get", "update", "delete"]
 ---
 apiVersion: v1
 kind: ServiceAccount
