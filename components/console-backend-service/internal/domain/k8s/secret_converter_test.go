@@ -41,7 +41,9 @@ func TestSecretConverter_ToGQL(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		converter := secretConverter{}
-		converter.ToGQL(&v1.Secret{})
+		result := converter.ToGQL(&v1.Secret{})
+		expected := &gqlschema.Secret{Data: make(gqlschema.JSON), Labels: make(gqlschema.JSON), Annotations: make(gqlschema.JSON)}
+		assert.Equal(t, result, expected)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
@@ -76,7 +78,7 @@ func TestSecretConverter_ToGQLs(t *testing.T) {
 				Namespace:         "production",
 				CreationTimestamp: metav1.NewTime(t1),
 				Labels:            map[string]string{"sec-label": "data"},
-				Annotations:       map[string]string{"second-annot": "content"},
+				Annotations:       map[string]string{"second-annotation": "content"},
 			},
 			Data: map[string][]byte{
 				"pass": []byte("sec"),
@@ -99,19 +101,20 @@ func TestSecretConverter_ToGQLs(t *testing.T) {
 		assert.Equal(t, "production", actualQL[1].Namespace)
 		assert.Equal(t, t1, actualQL[1].CreationTime)
 		assert.Equal(t, gqlschema.JSON{"sec-label": "data"}, actualQL[1].Labels)
-		assert.Equal(t, gqlschema.JSON{"second-annot": "content"}, actualQL[1].Annotations)
+		assert.Equal(t, gqlschema.JSON{"second-annotation": "content"}, actualQL[1].Annotations)
 		assert.Equal(t, "second-type", actualQL[1].Type)
-
 	})
 
-	t.Run("Empty", func(t *testing.T) {
+	t.Run("EmptyList", func(t *testing.T) {
 		converter := secretConverter{}
-		converter.ToGQL(&v1.Secret{})
+		result := converter.ToGQLs([]*v1.Secret{})
+		expected := []gqlschema.Secret(nil)
+		assert.Equal(t, result, expected)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
 		converter := secretConverter{}
-		result := converter.ToGQL(nil)
+		result := converter.ToGQLs(nil)
 
 		assert.Nil(t, result)
 	})

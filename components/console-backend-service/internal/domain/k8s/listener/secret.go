@@ -8,18 +8,18 @@ import (
 	v1 "k8s.io/api/core/v1"
 )
 
-//go:generate mockery -name=gqlPodConverter -output=automock -outpkg=automock -case=underscore
+//go:generate mockery -name=gqlSecretConverter -output=automock -outpkg=automock -case=underscore
 type gqlSecretConverter interface {
 	ToGQL(in *v1.Secret) *gqlschema.Secret
 }
 
 type Secret struct {
 	channel   chan<- gqlschema.SecretEvent
-	filter    func(pod *v1.Secret) bool
+	filter    func(secret *v1.Secret) bool
 	converter gqlSecretConverter
 }
 
-func NewSecret(channel chan<- gqlschema.SecretEvent, filter func(pod *v1.Secret) bool, converter gqlSecretConverter) *Secret {
+func NewSecret(channel chan<- gqlschema.SecretEvent, filter func(secret *v1.Secret) bool, converter gqlSecretConverter) *Secret {
 	return &Secret{
 		channel:   channel,
 		filter:    filter,
