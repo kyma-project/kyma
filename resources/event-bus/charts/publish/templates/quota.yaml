@@ -1,0 +1,14 @@
+apiVersion: config.istio.io/v1alpha2
+kind: QuotaSpecBinding
+metadata:
+  name: {{ template "publish.fullname" . }}-request-count
+  namespace: {{.Release.Namespace}}
+  labels:
+{{ include "publish.labels.standard" . | indent 4 }}
+spec:
+  quotaSpecs:
+  - name: request-count
+    namespace: istio-system
+  services:
+  - name: {{ template "publish.name" . }}
+    namespace: {{.Release.Namespace}}
