@@ -24,7 +24,7 @@ func TestAuthenticationAnonymousUser(t *testing.T) {
 
 	c := gqlClientForUser(t, graphql.NoUser)
 
-	testResource := idpPreset("test-name", "test-issuer", "https://test-jwksUri")
+	testResource := idpPreset("anonymous-name", "test-issuer", "https://test-jwksUri")
 	resourceDetailsQuery := idpPresetDetailsFields()
 
 	// should not be able to do any request  - should receive 401 Unauthorized
@@ -39,127 +39,107 @@ func TestAuthenticationAnonymousUser(t *testing.T) {
 func TestAuthorizationForNoRightsUser(t *testing.T) {
 	dex.SkipTestIfSCIEnabled(t)
 
-	t.Run("User with no rights", func(t *testing.T) {
+	c := gqlClientForUser(t, graphql.NoRightsUser)
 
-		c := gqlClientForUser(t, graphql.NoRightsUser)
+	testResource := idpPreset("norights-name", "test-issuer", "https://test-jwksUri")
+	resourceDetailsQuery := idpPresetDetailsFields()
 
-		testResource := idpPreset("test-name", "test-issuer", "https://test-jwksUri")
-		resourceDetailsQuery := idpPresetDetailsFields()
+	t.Log("should not be able to get idppresets")
+	queryRes, err := querySingleIDPPreset(c, resourceDetailsQuery, testResource)
 
-		t.Run("should not be able to get idppresets", func(t *testing.T) {
-			queryRes, err := querySingleIDPPreset(c, resourceDetailsQuery, testResource)
+	assert.Equal(t, IDPPreset{}, queryRes.IDPPreset)
+	assert.EqualError(t, err, RBACError)
 
-			assert.Equal(t, IDPPreset{}, queryRes.IDPPreset)
-			assert.EqualError(t, err, RBACError)
-		})
+	t.Log("should not be able to create idppreset")
+	createRes, err := createIDPPreset(c, resourceDetailsQuery, testResource)
 
-		t.Run("should not be able to create idppreset", func(t *testing.T) {
-			createRes, err := createIDPPreset(c, resourceDetailsQuery, testResource)
+	assert.Equal(t, IDPPreset{}, createRes.CreateIDPPreset)
+	assert.EqualError(t, err, RBACError)
 
-			assert.Equal(t, IDPPreset{}, createRes.CreateIDPPreset)
-			assert.EqualError(t, err, RBACError)
-		})
+	t.Log("should not be able to delete idppreset")
+	deleteRes, err := deleteIDPPreset(c, resourceDetailsQuery, testResource)
 
-		t.Run("should not be able to delete idppreset", func(t *testing.T) {
-			deleteRes, err := deleteIDPPreset(c, resourceDetailsQuery, testResource)
-
-			assert.Equal(t, IDPPreset{}, deleteRes.DeleteIDPPreset)
-			assert.EqualError(t, err, RBACError)
-		})
-
-	})
+	assert.Equal(t, IDPPreset{}, deleteRes.DeleteIDPPreset)
+	assert.EqualError(t, err, RBACError)
 }
 
 func TestAuthorizationForReadOnlyUser(t *testing.T) {
 
 	dex.SkipTestIfSCIEnabled(t)
 
-	t.Run("Read only user", func(t *testing.T) {
+	c := gqlClientForUser(t, graphql.ReadOnlyUser)
 
-		c := gqlClientForUser(t, graphql.ReadOnlyUser)
+	moduleEnabled, err := module.IsEnabled(ModuleName, c)
+	require.NoError(t, err)
 
-		moduleEnabled, err := module.IsEnabled(ModuleName, c)
+	testResource := idpPreset("readonly-name", "test-issuer", "https://test-jwksUri")
+	resourceDetailsQuery := idpPresetDetailsFields()
+
+	t.Log("should be able to get idppresets")
+	queryRes, err := querySingleIDPPreset(c, resourceDetailsQuery, testResource)
+
+	assert.Equal(t, IDPPreset{}, queryRes.IDPPreset)
+	if moduleEnabled {
 		assert.Nil(t, err)
+	} else {
+		assert.EqualError(t, err, ModuleDisabledError)
+	}
 
-		testResource := idpPreset("test-name", "test-issuer", "https://test-jwksUri")
-		resourceDetailsQuery := idpPresetDetailsFields()
+	t.Log("should not be able to create idppreset")
+	createRes, err := createIDPPreset(c, resourceDetailsQuery, testResource)
 
-		t.Run("should be able to get idppresets", func(t *testing.T) {
-			queryRes, err := querySingleIDPPreset(c, resourceDetailsQuery, testResource)
+	assert.Equal(t, IDPPreset{}, createRes.CreateIDPPreset)
+	assert.EqualError(t, err, RBACError)
 
-			assert.Equal(t, IDPPreset{}, queryRes.IDPPreset)
-			if moduleEnabled {
-				assert.Nil(t, err)
-			} else {
-				assert.EqualError(t, err, ModuleDisabledError)
-			}
-		})
+	t.Log("should not be able to delete idppreset")
+	deleteRes, err := deleteIDPPreset(c, resourceDetailsQuery, testResource)
 
-		t.Run("should not be able to create idppreset", func(t *testing.T) {
-			createRes, err := createIDPPreset(c, resourceDetailsQuery, testResource)
-
-			assert.Equal(t, IDPPreset{}, createRes.CreateIDPPreset)
-			assert.EqualError(t, err, RBACError)
-		})
-
-		t.Run("should not be able to delete idppreset", func(t *testing.T) {
-			deleteRes, err := deleteIDPPreset(c, resourceDetailsQuery, testResource)
-
-			assert.Equal(t, IDPPreset{}, deleteRes.DeleteIDPPreset)
-			assert.EqualError(t, err, RBACError)
-		})
-	})
+	assert.Equal(t, IDPPreset{}, deleteRes.DeleteIDPPreset)
+	assert.EqualError(t, err, RBACError)
 }
 
 func TestAuthorizationForReadWriteUser(t *testing.T) {
 	dex.SkipTestIfSCIEnabled(t)
 
-	t.Run("Read write user", func(t *testing.T) {
-		c := gqlClientForUser(t, graphql.AdminUser)
+	c := gqlClientForUser(t, graphql.AdminUser)
 
-		moduleEnabled, err := module.IsEnabled(ModuleName, c)
+	moduleEnabled, err := module.IsEnabled(ModuleName, c)
+	require.NoError(t, err)
+
+	testResource := idpPreset("readwrite-name", "test-issuer", "https://test-jwksUri")
+	resourceDetailsQuery := idpPresetDetailsFields()
+
+	t.Log("should be able to get idppresets")
+	queryRes, err := querySingleIDPPreset(c, resourceDetailsQuery, testResource)
+
+	checkIDPPreset(t, IDPPreset{}, queryRes.IDPPreset)
+	if moduleEnabled {
 		assert.Nil(t, err)
+	} else {
+		assert.EqualError(t, err, ModuleDisabledError)
+	}
 
-		testResource := idpPreset("test-name", "test-issuer", "https://test-jwksUri")
-		resourceDetailsQuery := idpPresetDetailsFields()
+	t.Log("should be able to create idppreset")
+	createRes, err := createIDPPreset(c, resourceDetailsQuery, testResource)
 
-		t.Run("should be able to get idppresets", func(t *testing.T) {
-			queryRes, err := querySingleIDPPreset(c, resourceDetailsQuery, testResource)
+	if moduleEnabled {
+		checkIDPPreset(t, testResource, createRes.CreateIDPPreset)
+		assert.Nil(t, err)
+	} else {
+		checkIDPPreset(t, IDPPreset{}, createRes.CreateIDPPreset)
+		assert.EqualError(t, err, ModuleDisabledError)
+	}
 
-			checkIDPPreset(t, IDPPreset{}, queryRes.IDPPreset)
-			if moduleEnabled {
-				assert.Nil(t, err)
-			} else {
-				assert.EqualError(t, err, ModuleDisabledError)
-			}
-		})
+	t.Log("should be able to delete idppreset")
+	deleteRes, err := deleteIDPPreset(c, resourceDetailsQuery, testResource)
 
-		t.Run("should be able to create idppreset", func(t *testing.T) {
-			createRes, err := createIDPPreset(c, resourceDetailsQuery, testResource)
-
-			if moduleEnabled {
-				checkIDPPreset(t, testResource, createRes.CreateIDPPreset)
-				assert.Nil(t, err)
-			} else {
-				checkIDPPreset(t, IDPPreset{}, createRes.CreateIDPPreset)
-				assert.EqualError(t, err, ModuleDisabledError)
-			}
-		})
-
-		t.Run("should be able to delete idppreset", func(t *testing.T) {
-			deleteRes, err := deleteIDPPreset(c, resourceDetailsQuery, testResource)
-
-			if moduleEnabled {
-				checkIDPPreset(t, testResource, deleteRes.DeleteIDPPreset)
-				assert.Nil(t, err)
-			} else {
-				checkIDPPreset(t, IDPPreset{}, deleteRes.DeleteIDPPreset)
-				assert.EqualError(t, err, ModuleDisabledError)
-			}
-		})
-
-	})
-
+	if moduleEnabled {
+		checkIDPPreset(t, testResource, deleteRes.DeleteIDPPreset)
+		assert.Nil(t, err)
+	} else {
+		checkIDPPreset(t, IDPPreset{}, deleteRes.DeleteIDPPreset)
+		assert.EqualError(t, err, ModuleDisabledError)
+	}
 }
 
 func gqlClientForUser(t *testing.T, user graphql.User) *graphql.Client {

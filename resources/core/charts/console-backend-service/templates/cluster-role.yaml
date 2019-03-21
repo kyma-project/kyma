@@ -47,3 +47,6 @@ rules:
   - apiGroups: ["ui.kyma-project.io"]
     resources: ["backendmodules"]
     verbs: ["get", "list", "watch"]
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["create"]

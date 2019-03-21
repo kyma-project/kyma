@@ -17,7 +17,10 @@ This is a sample custom resource (CR) which allows to get the configuration requ
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: TokenRequest
 metadata:
-  name: test
+  name: test-app
+context:
+  tenant: test-tenant
+  group: test-group
 ```
 
 ## Custom resource parameters
@@ -27,6 +30,8 @@ This table lists all the possible parameters of a given resource together with t
 | Parameter   |      Mandatory      |  Description |
 |:----------:|:-------------:|:------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the App to request token for. |
+| **context.tenant**|    **NO**    | Specifies the name of the Tenant.  |
+| **context.group** |    **NO**    | Specifies the name of the Group. |
 
 
 ## Additional information
