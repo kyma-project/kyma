@@ -70,11 +70,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knative-overrides
+  name: knative-serving-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: knative
+    component: knative-serving
     kyma-project.io/installation: ""
 data:
-  knative.domainName: "__DOMAIN__"
+  knative-serving.domainName: "__DOMAIN__"
+
