@@ -20,7 +20,7 @@ func TestAddingToAssetStore(t *testing.T) {
 	documentation := []byte("{\"description\": \"Some docs blah blah blah\"}}")
 	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
 
-	t.Run("Should add specifications to asset store", func(t *testing.T) {
+	t.Run("Should add all specifications to asset store", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.Repository{}
 		uploadClientMock := &uploadMocks.Client{}
@@ -28,39 +28,44 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		{
 			docsTopic := createTestDocsTopic("id1",
-				"www.somestorage.com/openapi.json",
-				"www.somestorage.com/asyncapi.json",
-				"www.somestorage.com/docs.json")
+				"www.somestorage.com/apiSpec.json",
+				"www.somestorage.com/asyncApiSpec.json",
+				"www.somestorage.com/content.json")
 
 			repositoryMock.On("Update", docsTopic).Return(apperrors.NotFound("Not found."))
 			repositoryMock.On("Create", docsTopic).Return(nil)
 		}
 
 		{
-			specFile := createTestInputFile("openapi.json", "id1", jsonApiSpec)
-			eventsFile := createTestInputFile("asyncapi.json", "id1", eventsSpec)
-			docsFile := createTestInputFile("docs.json", "id1", documentation)
+			specFile := createTestInputFile(openApiSpecFileName, "id1", jsonApiSpec)
+			eventsFile := createTestInputFile(eventsSpecFileName, "id1", eventsSpec)
+			docsFile := createTestInputFile(documentationFileName, "id1", documentation)
 
 			uploadClientMock.On("Upload", specFile).
-				Return(createTestOutputFile("openapi.json", "www.somestorage.com"), nil)
+				Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
 
 			uploadClientMock.On("Upload", eventsFile).
-				Return(createTestOutputFile("asyncapi.json", "www.somestorage.com"), nil)
+				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
 			uploadClientMock.On("Upload", docsFile).
-				Return(createTestOutputFile("docs.json", "www.somestorage.com"), nil)
+				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
 		}
 
 		// when
-		err := service.Put("id1",
-			&ContentEntry{"docs.json", docstopic.DocsTopicKeyDocumentationSpec, documentation},
-			&ContentEntry{"openapi.json", docstopic.DocsTopicKeyOpenApiSpec, jsonApiSpec},
-			&ContentEntry{"asyncapi.json", docstopic.DocsTopicKeyEventsSpec, eventsSpec},
-		)
+		err := service.Put("id1", OpenAPI, documentation, jsonApiSpec, eventsSpec)
+
 		// then
 		require.NoError(t, err)
 		repositoryMock.AssertExpectations(t)
 		uploadClientMock.AssertExpectations(t)
+	})
+
+	t.Run("Should detect OData XML specification", func(t *testing.T) {
+
+	})
+
+	t.Run("Should detect OData JSON specification", func(t *testing.T) {
+
 	})
 
 	t.Run("Should fail when failed to upload file", func(t *testing.T) {
@@ -98,9 +103,9 @@ func TestGettingFromAssetStore(t *testing.T) {
 				DisplayName: "Some display name",
 				Description: "Some description",
 				Urls: map[string]string{
-					docstopic.DocsTopicKeyOpenApiSpec:       apiTestServer.URL,
-					docstopic.DocsTopicKeyEventsSpec:        eventTestServer.URL,
-					docstopic.DocsTopicKeyDocumentationSpec: documentationServer.URL,
+					docstopic.KeyOpenApiSpec:       apiTestServer.URL,
+					docstopic.KeyEventsSpec:        eventTestServer.URL,
+					docstopic.KeyDocumentationSpec: documentationServer.URL,
 				},
 			}, nil)
 		}
@@ -140,34 +145,31 @@ func TestUpdatingInAssetStore(t *testing.T) {
 
 		{
 			docsTopic := createTestDocsTopic("id1",
-				"www.somestorage.com/openapi.json",
-				"www.somestorage.com/asyncapi.json",
-				"www.somestorage.com/docs.json")
+				"www.somestorage.com/apiSpec.json",
+				"www.somestorage.com/asyncApiSpec.json",
+				"www.somestorage.com/content.json")
 
 			repositoryMock.On("Update", docsTopic).Return(nil)
 		}
 
 		{
-			specFile := createTestInputFile("openapi.json", "id1", jsonApiSpec)
-			eventsFile := createTestInputFile("asyncapi.json", "id1", eventsSpec)
-			docsFile := createTestInputFile("docs.json", "id1", documentation)
+			specFile := createTestInputFile(openApiSpecFileName, "id1", jsonApiSpec)
+			eventsFile := createTestInputFile(eventsSpecFileName, "id1", eventsSpec)
+			docsFile := createTestInputFile(documentationFileName, "id1", documentation)
 
 			uploadClientMock.On("Upload", specFile).
-				Return(createTestOutputFile("openapi.json", "www.somestorage.com"), nil)
+				Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
 
 			uploadClientMock.On("Upload", eventsFile).
-				Return(createTestOutputFile("asyncapi.json", "www.somestorage.com"), nil)
+				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
 			uploadClientMock.On("Upload", docsFile).
-				Return(createTestOutputFile("docs.json", "www.somestorage.com"), nil)
+				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
 		}
 
 		// when
-		err := service.Put("id1",
-			&ContentEntry{"docs.json", docstopic.DocsTopicKeyDocumentationSpec, documentation},
-			&ContentEntry{"openapi.json", docstopic.DocsTopicKeyOpenApiSpec, jsonApiSpec},
-			&ContentEntry{"asyncapi.json", docstopic.DocsTopicKeyEventsSpec, eventsSpec},
-		)
+		err := service.Put("id1", OpenAPI, documentation, jsonApiSpec, eventsSpec)
+
 		// then
 		require.NoError(t, err)
 		repositoryMock.AssertExpectations(t)
@@ -204,9 +206,9 @@ func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, doc
 		DisplayName: fmt.Sprintf(DocTopicDisplayNameFormat, id),
 		Description: fmt.Sprintf(DocTopicDescriptionFormat, id),
 		Urls: map[string]string{
-			docstopic.DocsTopicKeyOpenApiSpec:       apiSpecUrl,
-			docstopic.DocsTopicKeyEventsSpec:        eventsSpecUrl,
-			docstopic.DocsTopicKeyDocumentationSpec: documentationUrl,
+			docstopic.KeyOpenApiSpec:       apiSpecUrl,
+			docstopic.KeyEventsSpec:        eventsSpecUrl,
+			docstopic.KeyDocumentationSpec: documentationUrl,
 		},
 	}
 }

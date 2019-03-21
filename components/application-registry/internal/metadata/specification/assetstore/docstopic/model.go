@@ -1,11 +1,11 @@
 package docstopic
 
 const (
-	DocsTopicKeyOpenApiSpec       = "openapi"
-	DocsTopicKeyODataXMLSpec      = "odataxml"
-	DocsTopicKeyODataJSONSpec     = "odatajson"
-	DocsTopicKeyEventsSpec        = "events"
-	DocsTopicKeyDocumentationSpec = "docs"
+	KeyOpenApiSpec       = "openapi"
+	KeyODataXMLSpec      = "odataxml"
+	KeyODataJSONSpec     = "odatajson"
+	KeyEventsSpec        = "events"
+	KeyDocumentationSpec = "docs"
 )
 
 type Entry struct {

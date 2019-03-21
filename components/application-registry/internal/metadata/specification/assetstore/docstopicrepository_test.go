@@ -130,7 +130,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 		DisplayName: "Some display name",
 		Description: "Some description",
 		Urls: map[string]string{
-			docstopic.DocsTopicKeyOpenApiSpec: "www.somestorage.com/api",
+			docstopic.KeyOpenApiSpec: "www.somestorage.com/api",
 		},
 		Labels: map[string]string{
 			"key": "value",
