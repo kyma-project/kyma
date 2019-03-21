@@ -1,0 +1,57 @@
+required = [
+    "golang.org/x/tools/cmd/goimports",
+    "github.com/kisielk/errcheck",
+]
+
+[[constraint]]
+  name = "github.com/kisielk/errcheck"
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
+
+[[constraint]]
+  name = "github.com/machinebox/graphql"
+  revision = "3a92531802258604bd12793465c2e28bc4b2fc85"
+
+[[constraint]]
+  name = "github.com/pkg/errors"
+  version = "0.8.0"
+
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.2.1"
+
+[[constraint]]
+  name = "github.com/kubernetes-incubator/service-catalog"
+  version = "=v0.1.28"
+
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  revision = "7cacbc23728d59fb589482afe2059eee5797b61d"
+
+[[constraint]]
+  name = "github.com/gorilla/websocket"
+  version = "1.4.0"
+
+[[constraint]]
+  name = "github.com/mitchellh/mapstructure"
+  version = "1.0.0"
+
+[[constraint]]
+  name = "github.com/vrischmann/envconfig"
+  version = "1.1.0"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.11.3"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.11.3"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.11.3"
+  
+[prune]
+  go-tests = true
+  unused-packages = true
+  non-go = true

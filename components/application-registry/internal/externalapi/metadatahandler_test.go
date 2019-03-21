@@ -564,7 +564,8 @@ func TestMetadataHandler_GetService(t *testing.T) {
 				TargetUrl: "http://service.com",
 				Credentials: &model.Credentials{
 					CertificateGen: &model.CertificateGen{
-						CommonName: "commonName",
+						CommonName:  "commonName",
+						Certificate: "test-cert",
 					},
 				},
 				Spec: apiRawSpec,
@@ -609,6 +610,7 @@ func TestMetadataHandler_GetService(t *testing.T) {
 		assert.Equal(t, "documentation name", serviceDetails.Documentation.DisplayName)
 		assert.Equal(t, "documentation description", serviceDetails.Documentation.Description)
 		assert.Equal(t, "documentation type", serviceDetails.Documentation.Type)
+		assert.Equal(t, "test-cert", serviceDefinition.Api.Credentials.CertificateGen.Certificate)
 		assert.Len(t, serviceDetails.Documentation.Docs, 1)
 		assert.Equal(t, DocsObject{Title: "doc title", Type: "doc type", Source: "doc source"}, serviceDetails.Documentation.Docs[0])
 

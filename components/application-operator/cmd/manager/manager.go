@@ -1,6 +1,8 @@
 package main
 
 import (
+	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	"k8s.io/client-go/rest"
 	"time"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/scheme"
@@ -48,7 +50,14 @@ func main() {
 
 	log.Printf("Preparing Release Manager.")
 
-	releaseManager, err := newReleaseManager(options)
+	releaseManager, err := newReleaseManager(options, cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	log.Printf("Upgrading releases.")
+
+	err = releaseManager.UpgradeReleases()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,7 +73,7 @@ func main() {
 	log.Info(mgr.Start(signals.SetupSignalHandler()))
 }
 
-func newReleaseManager(options *options) (appRelease.ReleaseManager, error) {
+func newReleaseManager(options *options, cfg *rest.Config) (appRelease.ReleaseManager, error) {
 	overridesDefaults := appRelease.OverridesData{
 		DomainName:              options.domainName,
 		ApplicationGatewayImage: options.applicationGatewayImage,
@@ -72,8 +81,13 @@ func newReleaseManager(options *options) (appRelease.ReleaseManager, error) {
 		EventServiceTestsImage:  options.eventServiceTestsImage,
 	}
 
+	appClient, err := versioned.NewForConfig(cfg)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	helmClient := kymahelm.NewClient(options.tillerUrl, options.installationTimeout)
-	releaseManager := appRelease.NewReleaseManager(helmClient, overridesDefaults, options.namespace)
+	releaseManager := appRelease.NewReleaseManager(helmClient, appClient.ApplicationconnectorV1alpha1().Applications(), overridesDefaults, options.namespace)
 
 	return releaseManager, nil
 }

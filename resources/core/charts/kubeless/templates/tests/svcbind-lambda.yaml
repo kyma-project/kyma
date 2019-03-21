@@ -9,7 +9,7 @@ metadata:
     function: test-svcbind
 spec:
   authentication: []
-  hostname: test-svcbind.{{ .Values.global.domainName }}
+  hostname: test-svcbind.{{ .Values.global.ingress.domainName }}
   service:
     name: test-svcbind
     port: 8080

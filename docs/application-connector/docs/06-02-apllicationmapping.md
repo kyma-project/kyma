@@ -37,4 +37,4 @@ These components use this CR:
 | Component   |   Description |
 |:----------:|:------|
 | Application Broker |  Uses this CR to enable the provisioning of ServiceClasses in a given Namespace. |
-| UI API Layer | Uses this CR to filter the enabled Apps. It also allows you to create or delete ApplicationMappings. |
+| Console Backend Service | Uses this CR to filter the enabled Apps. It also allows you to create or delete ApplicationMappings. |

@@ -1,12 +1,4 @@
 {{- define "publish-knative.name" -}}
-{{- printf "publish-knative" -}}
-{{- end -}}
-
-{{- define "publish-knative.fullname" -}}
-{{- printf "%s-%s" .Release.Name "publish-knative" | trunc 63 | trimSuffix "-" -}}
-{{- end -}}
-
-{{- define "publish-knative.service.name" -}}
 {{- printf "%s-%s" .Release.Name "publish" | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
 

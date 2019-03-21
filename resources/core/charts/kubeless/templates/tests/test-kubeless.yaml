@@ -1,6 +1,5 @@
 # NOTE: The Role, ServiceAccount, and RoleBinding are created once during installation and not removed after (or recreated before) each test. This is a limitation of Helm: it can only create a Pod during testing.
 # (This applies to Helm 2.7.2.)
-{{ $serviceName := .Values.global.knative | ternary "knative-ingressgateway" "istio-ingressgateway" }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -76,7 +75,7 @@ spec:
     - name: KUBELESS_CONFIG
       value: {{ template "fullname" . }}-config
     - name: DOMAIN_NAME
-      value: {{ .Values.global.domainName }}
+      value: {{ .Values.global.ingress.domainName }}
   restartPolicy: Never
 ---
 {{- if not .Values.global.isLocalEnv }}
@@ -168,19 +167,19 @@ spec:
   serviceAccount: "test-{{ template "fullname" . }}-int"
   containers:
   - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration-tests:{{ .Values.global.kubeless_integration_tests.version }}
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration:{{ .Values.global.kubeless_integration_tests.version }}
     volumeMounts:
     - name: k8syaml
       mountPath: /k8syaml
     env:
     - name: INGRESSGATEWAY_ADDRESS
-      value: {{ $serviceName }}.istio-system.svc.cluster.local
+      value: istio-ingressgateway.istio-system.svc.cluster.local
     - name: KUBELESS_NAMESPACE
       value: kyma-system
     - name: KUBELESS_CONFIG
       value: {{ template "fullname" . }}-config
     - name: DOMAIN_NAME
-      value: {{ .Values.global.domainName }}
+      value: {{ .Values.global.ingress.domainName }}
   volumes:
     - name: k8syaml
       configMap:

@@ -25,7 +25,7 @@ spec:
         args:
         - "/manager"
         - "--appName={{ .Values.controller.args.appName }}"
-        - "--domainName={{ .Values.global.applicationConnectorDomainName | default .Values.global.domainName }}"
+        - "--domainName={{ .Values.global.applicationConnector.domainName }}"
         - "--namespace={{ .Values.global.namespace }}"
         - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway.dir }}application-gateway:{{ .Values.global.application_gateway.version }}"

@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"k8s.io/client-go/tools/record"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"testing"
 
+	"k8s.io/client-go/tools/record"
+	"sigs.k8s.io/controller-runtime/pkg/client"
+
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
-	controllertesting "github.com/knative/eventing/pkg/controller/testing"
+	controllertesting "github.com/knative/eventing/pkg/reconciler/testing"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client/fake"
@@ -56,19 +57,18 @@ func TestInjectClient(t *testing.T) {
 	}
 }
 
-var	testCases = []controllertesting.TestCase{
-		{
-			Name: "Subscription not found",
+var testCases = []controllertesting.TestCase{
+	{
+		Name: "Subscription not found",
+	},
+	{
+		Name: "Error getting Subscription",
+		Mocks: controllertesting.Mocks{
+			MockGets: errorGettingSubscription(),
 		},
-		{
-			Name: "Error getting Subscription",
-			Mocks: controllertesting.Mocks{
-				MockGets: errorGettingSubscription(),
-			},
-			WantErrMsg: testErrorMessage,
-		},
+		WantErrMsg: testErrorMessage,
+	},
 }
-
 
 func TestAllCases(t *testing.T) {
 	recorder := record.NewBroadcaster().NewRecorder(scheme.Scheme, corev1.EventSource{Component: controllerAgentName})
@@ -83,7 +83,7 @@ func TestAllCases(t *testing.T) {
 			tc.ReconcileKey = fmt.Sprintf("/%s", Name)
 		}
 		tc.IgnoreTimes = true
-		t.Run(tc.Name, tc.Runner(t, r, c))
+		t.Run(tc.Name, tc.Runner(t, r, c, tc.GetEventRecorder()))
 	}
 }
 
