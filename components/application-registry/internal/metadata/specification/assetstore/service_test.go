@@ -49,9 +49,9 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		// when
 		err := service.Put("id1",
-			&ContentEntry{"docs.json", documentation},
-			&ContentEntry{"openapi.json", jsonApiSpec},
-			&ContentEntry{"asyncapi.json", eventsSpec},
+			&ContentEntry{"docs.json", docstopic.DocsTopicKeyDocumentationSpec, documentation},
+			&ContentEntry{"openapi.json", docstopic.DocsTopicKeyOpenApiSpec, jsonApiSpec},
+			&ContentEntry{"asyncapi.json", docstopic.DocsTopicKeyEventsSpec, eventsSpec},
 		)
 		// then
 		require.NoError(t, err)
@@ -142,28 +142,15 @@ func TestRemovingFromAssetStore(t *testing.T) {
 
 func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, documentationUrl string) docstopic.Entry {
 
-	createSpecEntry := func(url string, key string) *docstopic.SpecEntry {
-		if url != "" {
-			return &docstopic.SpecEntry{
-				Url: url,
-				Key: key,
-			}
-		} else {
-			return nil
-		}
-	}
-
-	apiSpec := createSpecEntry(apiSpecUrl, DocsTopicApiSpecKey)
-	eventsSpec := createSpecEntry(eventsSpecUrl, DocsTopicEventsSpecKey)
-	documentation := createSpecEntry(documentationUrl, DocsTopicDocumentationSpecKey)
-
 	return docstopic.Entry{
-		Id:            id,
-		DisplayName:   fmt.Sprintf(DocTopicDisplayNameFormat, id),
-		Description:   fmt.Sprintf(DocTopicDescriptionFormat, id),
-		ApiSpec:       apiSpec,
-		EventsSpec:    eventsSpec,
-		Documentation: documentation,
+		Id:          id,
+		DisplayName: fmt.Sprintf(DocTopicDisplayNameFormat, id),
+		Description: fmt.Sprintf(DocTopicDescriptionFormat, id),
+		Urls: map[string]string{
+			docstopic.DocsTopicKeyOpenApiSpec:       apiSpecUrl,
+			docstopic.DocsTopicKeyEventsSpec:        eventsSpecUrl,
+			docstopic.DocsTopicKeyDocumentationSpec: documentationUrl,
+		},
 	}
 }
 

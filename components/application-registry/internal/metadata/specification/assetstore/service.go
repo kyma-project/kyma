@@ -35,6 +35,7 @@ func NewService(repository DocsTopicRepository, uploadClient upload.Client) Serv
 
 type ContentEntry struct {
 	FileName string
+	FileKey  string
 	Content  []byte
 }
 
@@ -59,51 +60,49 @@ func (s service) Put(id string, documentation *ContentEntry, apiSpec *ContentEnt
 
 func (s service) createDocumentationTopic(id string, documentation *ContentEntry, apiSpec *ContentEntry, eventsSpec *ContentEntry) (docstopic.Entry, apperrors.AppError) {
 
-	apiSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, apiSpec, DocsTopicApiSpecKey)
-	if err != nil {
-		return docstopic.Entry{}, apperrors.Internal("Failed to upload specification file.")
+	docsTopic := docstopic.Entry{
+		Id:          id,
+		DisplayName: fmt.Sprintf(DocTopicDisplayNameFormat, id),
+		Description: fmt.Sprintf(DocTopicDescriptionFormat, id),
+		Urls:        make(map[string]string),
 	}
 
-	eventsSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, eventsSpec, DocsTopicEventsSpecKey)
+	err := s.processSpec(apiSpec, &docsTopic)
 	if err != nil {
-		return docstopic.Entry{}, apperrors.Internal("Failed to upload events specification file.")
+		return docstopic.Entry{}, err
 	}
 
-	docsSpecEntry, err := s.uploadFileAndCreateSpecEntry(id, documentation, DocsTopicDocumentationSpecKey)
+	err = s.processSpec(eventsSpec, &docsTopic)
 	if err != nil {
-		return docstopic.Entry{}, apperrors.Internal("Failed to upload documentation file.")
+		return docstopic.Entry{}, err
 	}
 
-	return docstopic.Entry{
-		Id:            id,
-		DisplayName:   fmt.Sprintf(DocTopicDisplayNameFormat, id),
-		Description:   fmt.Sprintf(DocTopicDescriptionFormat, id),
-		ApiSpec:       apiSpecEntry,
-		EventsSpec:    eventsSpecEntry,
-		Documentation: docsSpecEntry,
-	}, nil
+	err = s.processSpec(documentation, &docsTopic)
+	if err != nil {
+		return docstopic.Entry{}, err
+	}
+
+	return docsTopic, nil
 }
 
-func (s service) uploadFileAndCreateSpecEntry(id string, entry *ContentEntry, key string) (*docstopic.SpecEntry, apperrors.AppError) {
-	if entry != nil {
-		outputFile, err := s.uploadSpec(id, entry)
+func (s service) processSpec(contentEntry *ContentEntry, docsTopicEntry *docstopic.Entry) apperrors.AppError {
+	if contentEntry != nil {
+		outputFile, err := s.uploadFile(docsTopicEntry.Id, contentEntry)
 		if err != nil {
-			return nil, err
+			return apperrors.Internal("Failed to upload file: %s.", contentEntry.FileName)
 		}
 
-		return &docstopic.SpecEntry{
-			Url: outputFile.RemotePath,
-			Key: key,
-		}, nil
+		docsTopicEntry.Urls[contentEntry.FileKey] = outputFile.RemotePath
 	}
-	return nil, nil
+
+	return nil
 }
 
-func (s service) uploadSpec(id string, entry *ContentEntry) (upload.OutputFile, apperrors.AppError) {
+func (s service) uploadFile(id string, contentEntry *ContentEntry) (upload.OutputFile, apperrors.AppError) {
 	inputFile := upload.InputFile{
 		Directory: id,
-		Name:      entry.FileName,
-		Contents:  entry.Content,
+		Name:      contentEntry.FileName,
+		Contents:  contentEntry.Content,
 	}
 	return s.uploadClient.Upload(inputFile)
 }

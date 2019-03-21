@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -11,6 +12,9 @@ import (
 
 const (
 	DocsTopicModeSingle = "single"
+	ApiSpecKey          = "api"
+	EventSpecKey        = "events"
+	DocsSpecKey         = "docs"
 )
 
 type ResourceInterface interface {
@@ -64,20 +68,13 @@ func (r repository) Create(documentationTopic docstopic.Entry) apperrors.AppErro
 
 func toK8sType(docsTopicEntry docstopic.Entry, namespace string) v1alpha1.DocsTopic {
 
-	addSource := func(entry *docstopic.SpecEntry, sources map[string]v1alpha1.Source) {
-		if entry != nil {
-			source := v1alpha1.Source{
-				URL:  entry.Url,
-				Mode: DocsTopicModeSingle,
-			}
-			sources[entry.Key] = source
+	sources := make(map[string]v1alpha1.Source)
+	for key, url := range docsTopicEntry.Urls {
+		sources[key] = v1alpha1.Source{
+			URL:  url,
+			Mode: DocsTopicModeSingle,
 		}
 	}
-
-	sources := make(map[string]v1alpha1.Source)
-	addSource(docsTopicEntry.ApiSpec, sources)
-	addSource(docsTopicEntry.EventsSpec, sources)
-	addSource(docsTopicEntry.Documentation, sources)
 
 	return v1alpha1.DocsTopic{
 		ObjectMeta: metav1.ObjectMeta{
@@ -95,7 +92,40 @@ func toK8sType(docsTopicEntry docstopic.Entry, namespace string) v1alpha1.DocsTo
 }
 
 func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
-	return docstopic.Entry{}, nil
+
+	unstructured, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return docstopic.Entry{}, apperrors.NotFound("Docs Topic with id:%s not found", id)
+		}
+
+		if err != nil {
+			return docstopic.Entry{}, nil
+		}
+	}
+
+	var docsTopic v1alpha1.DocsTopic
+	runtime.DefaultUnstructuredConverter.FromUnstructured(unstructured.Object, &docsTopic)
+	if err != nil {
+		return docstopic.Entry{}, apperrors.Internal("Failed to convert from unstructured object.")
+	}
+
+	return fromK8sType(docsTopic), nil
+}
+
+func fromK8sType(k8sDocsTopic v1alpha1.DocsTopic) docstopic.Entry {
+	urls := make(map[string]string)
+	for key, source := range k8sDocsTopic.Spec.Sources {
+		urls[key] = source.URL
+	}
+
+	return docstopic.Entry{
+		Id:          k8sDocsTopic.Name,
+		Description: k8sDocsTopic.Spec.Description,
+		DisplayName: k8sDocsTopic.Spec.DisplayName,
+		Urls:        urls,
+		Labels:      k8sDocsTopic.Labels,
+	}
 }
 
 func (r repository) Delete(id string) apperrors.AppError {

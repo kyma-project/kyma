@@ -1,16 +1,17 @@
 package docstopic
 
-type SpecEntry struct {
-	Url string
-	Key string
-}
+const (
+	DocsTopicKeyOpenApiSpec       = "openapi"
+	DocsTopicKeyODataXMLSpec      = "odataxml"
+	DocsTopicKeyODataJSONSpec     = "odatajson"
+	DocsTopicKeyEventsSpec        = "events"
+	DocsTopicKeyDocumentationSpec = "docs"
+)
 
 type Entry struct {
-	Id            string
-	DisplayName   string
-	Description   string
-	ApiSpec       *SpecEntry
-	EventsSpec    *SpecEntry
-	Documentation *SpecEntry
-	Labels        map[string]string
+	Id          string
+	DisplayName string
+	Description string
+	Urls        map[string]string
+	Labels      map[string]string
 }
