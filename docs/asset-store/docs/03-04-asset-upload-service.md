@@ -68,4 +68,4 @@ The result is as follows:
 }
 ```
 
-See the [Swagger specification](./assets/asset-upload-service-swagger.yaml) for the full API documentation. You can use the [Swagger Editor](https://editor.swagger.io) to preview and test the API service.
+See the [OpenAPI specification](./assets/asset-upload-service-openapi.yaml) for the full API documentation. You can use the [Swagger Editor](https://editor.swagger.io) to preview and test the API service.
