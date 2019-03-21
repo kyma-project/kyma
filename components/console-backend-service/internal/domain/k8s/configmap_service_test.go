@@ -327,7 +327,7 @@ func fixConfigMapInformer(objects ...runtime.Object) (cache.SharedIndexInformer,
 
 func fixFailingConfigMapInformer(objects ...runtime.Object) (cache.SharedIndexInformer, corev1.CoreV1Interface) {
 	client := fake.NewSimpleClientset(objects...)
-	client.PrependReactor("update", "configMaps", failingReactor)
+	client.PrependReactor("update", "configmaps", failingReactor)
 	informerFactory := informers.NewSharedInformerFactory(client, 0)
 	informer := informerFactory.Core().V1().ConfigMaps().Informer()
 
