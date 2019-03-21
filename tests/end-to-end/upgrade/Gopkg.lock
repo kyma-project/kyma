@@ -60,14 +60,14 @@
     "ptypes/duration",
     "ptypes/timestamp"
   ]
-  revision = "c823c79ea1570fb5ff454033735a8e68575d1d0f"
-  version = "v1.3.0"
+  revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
+  version = "v1.3.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/google/btree"
   packages = ["."]
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
+  version = "v1.0.0"
 
 [[projects]]
   branch = "master"
@@ -103,8 +103,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
-  version = "v1.1.5"
+  revision = "0ff49de124c6f76f8494e194af75bde0f1a49a29"
+  version = "v1.1.6"
 
 [[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
@@ -201,7 +201,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "c2843e01d9a2bc60bb26ad24e09734fdc2d9ec58"
+  revision = "b7391e95e576cacdcdd422573063bc057239113d"
 
 [[projects]]
   branch = "master"
@@ -214,7 +214,7 @@
     "http2/hpack",
     "idna"
   ]
-  revision = "d8887717615a059821345a5c23649351b52a1c0b"
+  revision = "1272bf9dcd53ea65c09668fb4c76e65deb740072"
 
 [[projects]]
   branch = "master"
@@ -223,7 +223,7 @@
     ".",
     "internal"
   ]
-  revision = "e64efc72b421e893cbf63f17ba2221e7d6d0b0f3"
+  revision = "c85d3e98c914e3a33234ad863dcbff5dbc425bb8"
 
 [[projects]]
   branch = "master"
@@ -232,7 +232,7 @@
     "unix",
     "windows"
   ]
-  revision = "c8c8c57fd1e1a977c10821a559dda983a9a9a3b5"
+  revision = "f7bb7a8bee54210937e93ec56d007d892c1f0580"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -279,7 +279,7 @@
     "internal/module",
     "internal/semver"
   ]
-  revision = "5c2858a9cfe5880270ceee8da4391f3c44612b47"
+  revision = "36c10c0a621fb2fede4686e8ae7bb1d900735d53"
 
 [[projects]]
   name = "google.golang.org/appengine"
@@ -292,8 +292,8 @@
     "internal/urlfetch",
     "urlfetch"
   ]
-  revision = "e9657d882bb81064595ca3b56cbe2546bbabf7b1"
-  version = "v1.4.0"
+  revision = "54a98f90d1c46b7731eb8fb305d2a321c30ef610"
+  version = "v1.5.0"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
