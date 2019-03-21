@@ -3,83 +3,72 @@
 kind: ServiceAccount
 apiVersion: v1
 metadata:
-  name: {{ template "apichecker.fullname" . }}
-  labels:
-    app: {{ template "apichecker.name" . }}
-    chart: {{ template "apichecker.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    name: {{ template "apichecker.fullname" . }}
+    labels:
+        app: {{ template "apichecker.name" . }}
+        chart: {{ template "apichecker.chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
 ---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ template "apichecker.fullname" . }}
-  labels:
-    app: {{ template "apichecker.name" . }}
-    chart: {{ template "apichecker.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    name: {{ template "apichecker.fullname" . }}
+    labels:
+        app: {{ template "apichecker.name" . }}
+        chart: {{ template "apichecker.chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
 
 rules:
-  - apiGroups: ["servicecatalog.k8s.io"]
-    resources: ["clusterserviceclasses", "serviceclasses"]
-    verbs: ["list", "get"]
+    - apiGroups: ["servicecatalog.k8s.io"]
+      resources: ["clusterservicebrokers"]
+      verbs: ["create", "delete", "get", "list"]
 
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
 metadata:
-  name: {{ template "apichecker.fullname" . }}
-  labels:
-    app: {{ template "apichecker.name" . }}
-    chart: {{ template "apichecker.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
-subjects:
-  - kind: ServiceAccount
     name: {{ template "apichecker.fullname" . }}
-    namespace: {{ .Release.Namespace }}
+    labels:
+        app: {{ template "apichecker.name" . }}
+        chart: {{ template "apichecker.chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
+subjects:
+    - kind: ServiceAccount
+      name: {{ template "apichecker.fullname" . }}
+      namespace: {{ .Release.Namespace }}
 roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: {{ template "apichecker.fullname" . }}
+    apiGroup: rbac.authorization.k8s.io
+    kind: ClusterRole
+    name: {{ template "apichecker.fullname" . }}
 ---
 
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ template "apichecker.fullname" . }}
-  annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
-  labels:
-    app: {{ template "apichecker.name" . }}
-    chart: {{ template "apichecker.chart" . }}
-    release: {{ .Release.Name }}
-    heritage: {{ .Release.Service }}
+    name: {{ template "apichecker.fullname" . }}
+    annotations:
+        "helm.sh/hook": post-install,post-upgrade
+        "helm.sh/hook-delete-policy": hook-succeeded,hook-failed
+    labels:
+        app: {{ template "apichecker.name" . }}
+        chart: {{ template "apichecker.chart" . }}
+        release: {{ .Release.Name }}
+        heritage: {{ .Release.Service }}
 spec:
-  backoffLimit: 1
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"
-    spec:
-      serviceAccountName: {{ template "apichecker.fullname" . }}
-      restartPolicy: Never
-      containers:
-        - name: {{ template "apichecker.name" . }}
-          image: wernight/kubectl:1.6.4
-          command:
-            - "/bin/sh"
-            - "-c"
-            - |
-              while true; do
-              kubectl get clusterserviceclass;
-              if [[ $? -eq 0 ]]; then
-                echo "Everything is fine"
-                sleep 30;
-                exit 0
-              fi
-              sleep 1;
-              done
-          imagePullPolicy: IfNotPresent
+    backoffLimit: 1
+    template:
+        metadata:
+            annotations:
+                sidecar.istio.io/inject: "false"
+        spec:
+            serviceAccountName: {{ template "apichecker.fullname" . }}
+            restartPolicy: Never
+            containers:
+                - name: {{ template "apichecker.name" . }}
+                  image: eu.gcr.io/kyma-project/kyma/pr/scchecker:1.0.0
+                  command:
+                    - "./script.sh"
+                  imagePullPolicy: Always
