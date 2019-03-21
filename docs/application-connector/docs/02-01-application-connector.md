@@ -56,6 +56,8 @@ The Application Gateway is an intermediary component between a lambda function o
 - OAuth
 - Client certificates
 
+Additionally, the Application Gateway supports cross-site request forgery (CSRF) tokens as an optional layer of API protection. 
+
 ## Access Service
 
 The Access Service exposes the Application Gateway and manages the access from the Lambda functions and services deployed in Kyma to the external APIs over the Application Gateway.
