@@ -8,6 +8,9 @@ import (
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	csrfClient "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/client"
+	csrfStrategy "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/strategy"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/externalapi"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/httptools"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/metadata"
@@ -79,14 +82,18 @@ func main() {
 
 func newInternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, options *options) http.Handler {
 	if serviceDefinitionService != nil {
+
 		authStrategyFactory := newAuthenticationStrategyFactory(options.proxyTimeout)
+		csrfClient := newCSRFClient(options.proxyTimeout)
+		csrfTokenStrategyFactory := csrfStrategy.NewTokenStrategyFactory(csrfClient)
+
 		proxyConfig := proxy.Config{
 			SkipVerify:    options.skipVerify,
 			ProxyTimeout:  options.proxyTimeout,
 			Application:   options.application,
 			ProxyCacheTTL: options.proxyCacheTTL,
 		}
-		return proxy.New(serviceDefinitionService, authStrategyFactory, proxyConfig)
+		return proxy.New(serviceDefinitionService, authStrategyFactory, csrfTokenStrategyFactory, proxyConfig)
 	}
 	return proxy.NewInvalidStateHandler("Application Gateway is not initialized properly")
 }
@@ -135,4 +142,10 @@ func newSecretsRepository(coreClientset *kubernetes.Clientset, namespace, applic
 	sei := coreClientset.CoreV1().Secrets(namespace)
 
 	return secrets.NewRepository(sei, application)
+}
+
+func newCSRFClient(timeout int) csrf.Client {
+	cache := csrfClient.NewTokenCache()
+	client := &http.Client{}
+	return csrfClient.New(timeout, cache, client)
 }

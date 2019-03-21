@@ -1,0 +1,16 @@
+# Default values for knative-provisioner-natss.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+global:
+  isLocalEnv: false
+  knative: false
+
+knative-provisioner-natss:
+  controller:
+    image:
+      pullPolicy: IfNotPresent
+      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/controller:v0.4.1
+  dispatcher:
+    image:
+      pullPolicy: IfNotPresent
+      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/dispatcher:v0.4.1

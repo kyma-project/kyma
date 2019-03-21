@@ -1,18 +1,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
-	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"net/http"
 	"os"
-	"os/signal"
-	"syscall"
+	"time"
 
 	"github.com/go-logr/logr"
 	pushv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/common"
 	eav1alpha1 "github.com/kyma-project/kyma/components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/eventactivation"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/controller/subscription"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"sigs.k8s.io/controller-runtime/pkg/client/config"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -59,61 +59,54 @@ func main() {
 	log.Info("Setting up Subscription Controller")
 	_, err = subscription.ProvideController(mgr, sckOpts)
 	if err != nil {
-		log.Error(err,"Unable to create Subscription controller")
+		log.Error(err, "Unable to create Subscription controller")
 		os.Exit(1)
 	}
 
 	log.Info("Setting up Event Activation Controller")
 	_, err = eventactivation.ProvideController(mgr)
 	if err != nil {
-		log.Error(err,"Unable to create Event Activation controller")
+		log.Error(err, "Unable to create Event Activation controller")
 		os.Exit(1)
 	}
 
-	// Set up healthcheck handlers
+	// set up signals so we handle the first shutdown signal gracefully
+	stopCh := signals.SetupSignalHandler()
+
+	// Start the Manager
+	log.Info("Starting the manager.")
+	go func() {
+		if err := mgr.Start(stopCh); err != nil {
+			log.Error(err, "unable to run the manager")
+			os.Exit(1)
+		}
+	}()
+
+	// Set up health check handlers
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/v1/status/live", statusLiveHandler(&mgr, log))
 	serveMux.Handle("/v1/status/ready", statusReadyHandler(&mgr, log))
-
-	// Start HTTP server for healthchecks
-	log.Info("HTTP server starting on", "port", sckOpts.Port)
-	go func() {
-		if err := http.ListenAndServe(fmt.Sprintf(":%v", sckOpts.Port), serveMux); err != nil {
-			log.Error(err, "HTTP server failed with error")
-		}
-	}()
-
-	signalChannel := make(chan os.Signal, 2)
-	signal.Notify(signalChannel, os.Interrupt,
-		syscall.SIGTERM, syscall.SIGHUP, syscall.SIGINT, syscall.SIGQUIT)
-	go func() {
-		sig := <-signalChannel
-		switch sig {
-		case os.Interrupt:
-			println("Subscription controller manager signaled with: os.Interrupt")
-			println("Signal: ", sig)
-		case syscall.SIGTERM:
-			println("Subscription controller manager signaled with: SIGTERM")
-			println("Signal: ", sig)
-		case syscall.SIGHUP:
-			println("Subscription controller manager signaled with: SIGHUP")
-			println("Signal: ", sig)
-		case syscall.SIGINT:
-			println("Subscription controller manager signaled with: SIGINT")
-			println("Signal: ", sig)
-		case syscall.SIGQUIT:
-			println("Subscription controller manager signaled with: SIGQUIT")
-			println("Signal: ", sig)
-		}
-	}()
-
-	// Start the Cmd
-	log.Info("Starting the Cmd.")
-	if err := mgr.Start(signals.SetupSignalHandler()); err != nil {
-		log.Error(err, "unable to run the manager")
-		os.Exit(1)
+	server := http.Server{
+		Addr:    fmt.Sprintf(":%d", sckOpts.Port),
+		Handler: serveMux,
 	}
 
+	// Start HTTP server for health checks
+	log.Info("HTTP server starting on", "port", sckOpts.Port)
+	go func() {
+		if err := server.ListenAndServe(); err != nil {
+			log.Error(err, "HTTP server failed with error")
+			os.Exit(1)
+		}
+	}()
+
+	<-stopCh
+
+	log.Info("Signal received, shutting down gracefully")
+	// Close the http server gracefully
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	server.Shutdown(ctx)
 }
 
 var statusLive, statusReady common.StatusReady
