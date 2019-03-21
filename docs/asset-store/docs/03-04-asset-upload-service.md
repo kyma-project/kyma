@@ -35,7 +35,7 @@ To upload files, send the multipart form **POST** request to the `/v1/upload` en
 - `public` that is an array of files to upload to a public system bucket.  
 - `directory` that is an optional directory for storing the uploaded files. If you do not specify it, the service creates a directory with a random name. If the directory and files already exist, the service overwrites them.
 
-To do the multipart request using `curl`, run the following command in this repository:
+To do the multipart request using `curl`, run the following command:
 
 ```bash
 curl -v -F directory='example' -F private=@sample.md -F private=@text-file.md -F public=@archive.zip http://localhost:3000/v1/upload

@@ -9,7 +9,7 @@ info:
 paths:
   /extract:
     post:
-      description: Extracts metadata from text files sent in `multipart/form-data` forms.
+      description: Extracts metadata from text files sent in `multipart/form-data` form. As a field name, specify relative or absolute path to the file.
       tags:
         - extract
       summary: Extracts metadata from files.
@@ -19,13 +19,9 @@ paths:
           multipart/form-data:
             schema:
               type: object
-              properties:
-                files:
-                  description: Files, which should be processed to extract metadata.
-                  type: array
-                  items:
-                    type: string
-                    format: binary
+              additionalProperties:
+                type: string
+                format: binary
       responses:
         "200":
           $ref: "#/components/responses/successResponse"
@@ -111,8 +107,8 @@ components:
       description: "It represents a success result for single file processing."
       type: object
       properties:
-        fileName:
-          description: "File name"
+        filePath:
+          description: "Relative or absolute path to the file, which was sent in form body"
           type: string
         metadata:
           description: "Front Matter Metadata extracted from the file"
@@ -123,8 +119,8 @@ components:
       description: "It represents a single file processing failure."
       type: object
       properties:
-        fileName:
-          description: "The name of the file which the service failed to process."
+        filePath:
+          description: "Relative or absolute path to the file, which was sent in form body"
           type: string
         message:
           description: "Error message"
