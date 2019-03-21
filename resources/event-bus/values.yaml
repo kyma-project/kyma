@@ -9,8 +9,8 @@ global:
     dir: develop/
     version: 218b96c9
   event_bus_tests:
-    dir: develop/
-    version: 0c471dd3
+    dir: pr/
+    version: PR-3289
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
