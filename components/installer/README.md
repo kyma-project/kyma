@@ -13,14 +13,14 @@ Kyma Installer is a tool for installing all Kyma components. The project is base
 
 ## Development
 
-Before each commit, use the [before-commit.sh](./before-commit.sh) script to test your changes:
+Before each commit, use the [`before-commit.sh`](./before-commit.sh) script to test your changes:
   ```
   ./before-commit.sh
   ```
 
 ## Build a Docker image
 
-Run the [build.sh](./scripts/build.sh) script to build a Docker image of the Installer:
+Run the [`build.sh`](./scripts/build.sh) script to build a Docker image of the Installer:
   ```
   ./scripts/build.sh
   ```
@@ -32,7 +32,7 @@ Export the path to Kyma sources as an environment variable. This environment var
   export KYMA_PATH={PATH_TO_KYMA_SOURCES}
   ```
 
-Run this script to run Minikube, set up the installer, and install Kyma from local sources. If Minikube was started before, it will be restarted.
+Use this script to run Minikube, set up the Installer, and install Kyma from local sources. If Minikube was started before, it will be restarted.
   ```
   ./scripts/run.sh --local --cr {PATH_TO_CR}
   ```
@@ -91,7 +91,7 @@ The required properties include:
 
 ## Generate the custom resource file
 
-Generate a custom resource file using the [create-cr.sh](../../installation/scripts/create-cr.sh) script. It accepts the following arguments:
+Generate a custom resource file using the [`create-cr.sh`](../../installation/scripts/create-cr.sh) script. It accepts the following arguments:
 
 - `--output` is a mandatory parameter which indicates the location of the custom resource output file.
 - `--url` is the URL to the Kyma package.
