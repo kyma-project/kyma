@@ -101,6 +101,28 @@ func TestSpecService_PutSpec(t *testing.T) {
 		minioSvc.AssertExpectations(t)
 	})
 
+	t.Run("should fetch spec if spec equal to null", func(t *testing.T) {
+		// given
+		specServer := newSpecServer(baseApiSpec, func(req *http.Request) {
+			assert.Equal(t, http.MethodGet, req.Method)
+			assert.Equal(t, "/path", req.URL.Path)
+		})
+
+		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: []byte("null"), SpecificationUrl: specServer.URL + "/path"})
+
+		minioSvc := &mocks.Service{}
+		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+
+		specService := NewSpecService(minioSvc)
+
+		// when
+		err := specService.PutSpec(serviceDef, gatewayUrl)
+
+		// then
+		require.NoError(t, err)
+		minioSvc.AssertExpectations(t)
+	})
+
 	t.Run("should fetch, modify and save spec", func(t *testing.T) {
 		// given
 		specServer := newSpecServer(swaggerApiSpec, func(req *http.Request) {
