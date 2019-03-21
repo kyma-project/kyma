@@ -25,10 +25,6 @@ required = [
   version = "kubernetes-1.10.1"
 
 [[constraint]]
-  name = "github.com/satori/go.uuid"
-  version = "1.2.0"
-
-[[constraint]]
   name = "k8s.io/code-generator"
   branch = "release-1.10"
 
@@ -63,4 +59,5 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "d37318b3a84115bd9ee64d3c3130ef657b8a81a5"
+  revision = "b47050577a88799e92888fbf4716b4e3b0f83ff8"
+
