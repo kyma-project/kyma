@@ -17,14 +17,14 @@ type Job struct {
 
 // ResultError stores success data
 type ResultSuccess struct {
-	Metadata map[string]interface{} `json:"metadata"`
 	FileName string                 `json:"fileName"`
+	Metadata map[string]interface{} `json:"metadata"`
 }
 
 // ResultError stores error data
 type ResultError struct {
+	FileName string `json:"fileName,omitempty"`
 	Error    error `json:"error"`
-	FileName string `json:"omitempty,fileName"`
 }
 
 // Extractor is an abstraction layer for Minio client

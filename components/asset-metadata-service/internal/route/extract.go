@@ -20,8 +20,8 @@ type ExtractHandler struct {
 
 // ResultError stores error data
 type ResultError struct {
-	Message  string `json:"message"`
-	FileName string `json:"omitempty,fileName"`
+	FileName string `json:"fileName,omitempty"`
+	Message  string `json:"message,omitempty"`
 }
 
 type Response struct {
