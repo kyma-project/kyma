@@ -36,24 +36,14 @@ type secretsQueryResponse struct {
 	Secrets []secret `json:"secrets"`
 }
 
-type updateSecretMutationResponse struct {
-	UpdateSecret secret `json:"updateSecret"`
-}
-
-type deleteSecretMutationResponse struct {
-	DeleteSecret secret `json:"deleteSecret"`
-}
-
 type secret struct {
-	Name              string           `json:"name"`
-	NodeName          string           `json:"nodeName"`
-	Namespace         string           `json:"namespace"`
-	RestartCount      int              `json:"restartCount"`
-	CreationTimestamp int64            `json:"creationTimestamp"`
-	Labels            labels           `json:"labels"`
-	Status            secretStatusType `json:"status"`
-	ContainerStates   []containerState `json:"containerStates"`
-	JSON              json             `json:"json"`
+	Name         string    `json:"name"`
+	Namespace    string    `json:"namespace"`
+	Data         JSON      `json:"data"`
+	Type         string    `json:"type"`
+	CreationTime time.Time `json:"creationTime"`
+	Labels       JSON      `json:"labels"`
+	Annotations  JSON      `json:"annotations"`
 }
 
 type secretStatusType string
@@ -81,10 +71,6 @@ func TestSecret(t *testing.T) {
 	subscription := c.Subscribe(fixSecretSubscription())
 	defer subscription.Close()
 
-	// t.Log("Creating secret...")
-	// _, err = k8sClient.Secrets(secretNamespace).Create(fixSecret(secretName, secretNamespace))
-	// require.NoError(t, err)
-
 	t.Log("Retrieving secret...")
 	err = waiter.WaitAtMost(func() (bool, error) {
 		_, err := k8sClient.Secrets(secretNamespace).Get(secretName, metav1.GetOptions{})
@@ -94,10 +80,6 @@ func TestSecret(t *testing.T) {
 		return false, err
 	}, time.Minute)
 	require.NoError(t, err)
-
-	// t.Log("Checking subscription for created secret...")
-	// expectedEvent := secretEvent("ADD", secret{Name: secretName})
-	// assert.NoError(t, checkSecretEvent(expectedEvent, subscription))
 
 	t.Log("Querying for secret...")
 	var secretRes secretQueryResponse
@@ -112,44 +94,6 @@ func TestSecret(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, secretName, secretsRes.Secrets[0].Name)
 	assert.Equal(t, secretNamespace, secretsRes.Secrets[0].Namespace)
-
-	// t.Log("Updating...")
-	// secretRes.Secret.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	// update, err := stringifyJSON(secretRes.Secret.JSON)
-	// require.NoError(t, err)
-	// var updateRes updateSecretMutationResponse
-	// err = c.Do(fixUpdateSecretMutation(update), &updateRes)
-	// require.NoError(t, err)
-	// assert.Equal(t, secretName, updateRes.UpdateSecret.Name)
-	// assert.Equal(t, secretNamespace, updateRes.UpdateSecret.Namespace)
-	//
-	// t.Log("Checking subscription for updated secret...")
-	// expectedEvent = secretEvent("UPDATE", secret{Name: secretName})
-	// assert.NoError(t, checkSecretEvent(expectedEvent, subscription))
-
-	// t.Log("Deleting secret...")
-	// var deleteRes deleteSecretMutationResponse
-	// err = c.Do(fixDeleteSecretMutation(), &deleteRes)
-	// require.NoError(t, err)
-	// assert.Equal(t, secretName, deleteRes.DeleteSecret.Name)
-	// assert.Equal(t, secretNamespace, deleteRes.DeleteSecret.Namespace)
-	//
-	// t.Log("Waiting for deletion...")
-	// err = waiter.WaitAtMost(func() (bool, error) {
-	// 	_, err := k8sClient.Secrets(secretNamespace).Get(secretName, metav1.GetOptions{})
-	// 	if errors.IsNotFound(err) {
-	// 		return true, nil
-	// 	}
-	// 	if err != nil {
-	// 		return false, err
-	// 	}
-	// 	return false, nil
-	// }, time.Minute)
-	// require.NoError(t, err)
-	//
-	// t.Log("Checking subscription for deleted secret...")
-	// expectedEvent = secretEvent("DELETE", secret{Name: secretName})
-	// assert.NoError(t, checkSecretEvent(expectedEvent, subscription))
 }
 
 func fixSecret(name, namespace string) *v1.Secret {
@@ -225,57 +169,6 @@ func fixSecretSubscription() *graphql.Request {
 
 	return req
 }
-
-// func fixUpdateSecretMutation(secret string) *graphql.Request {
-// 	mutation := `mutation ($name: String!, $namespace: String!, $secret: JSON!) {
-// 					updateSecret(name: $name, namespace: $namespace, secret: $secret) {
-// 						name
-// 						nodeName
-// 						namespace
-// 						restartCount
-// 						creationTimestamp
-// 						labels
-// 						status
-// 						containerStates {
-// 							state
-// 							reason
-// 							message
-// 						}
-// 						json
-// 					}
-// 				}`
-// 	req := graphql.NewRequest(mutation)
-// 	req.SetVar("name", secretName)
-// 	req.SetVar("namespace", secretNamespace)
-// 	req.SetVar("secret", secret)
-//
-// 	return req
-// }
-
-// func fixDeleteSecretMutation() *graphql.Request {
-// 	mutation := `mutation ($name: String!, $namespace: String!) {
-// 					deleteSecret(name: $name, namespace: $namespace) {
-// 						name
-// 						nodeName
-// 						namespace
-// 						restartCount
-// 						creationTimestamp
-// 						labels
-// 						status
-// 						containerStates {
-// 							state
-// 							reason
-// 							message
-// 						}
-// 						json
-// 					}
-// 				}`
-// 	req := graphql.NewRequest(mutation)
-// 	req.SetVar("name", secretName)
-// 	req.SetVar("namespace", secretNamespace)
-//
-// 	return req
-// }
 
 func secretEvent(eventType string, secret secret) SecretEvent {
 	return SecretEvent{

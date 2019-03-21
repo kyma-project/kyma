@@ -74,59 +74,8 @@ func (svc secretService) List(namespace string, pagingParams pager.PagingParams)
 	return secrets, nil
 }
 
-//
-//func (svc secretService) Update(name, namespace string, update v1.Secret) (*v1.Secret, error) {
-//	err := svc.checkUpdatePreconditions(name, namespace, update)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	updated, err := svc.client.Secrets(namespace).Update(&update)
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	svc.ensureTypeMeta(updated)
-//
-//	return updated, nil
-//}
-
-//func (svc secretService) Delete(name, namespace string) error {
-//	return svc.client.Secrets(namespace).Delete(name, nil)
-//}
-
-//func (r *secretResolver) Delete(name, namespace string) error {
-//	return svc.client.Secrets(namespace).Delete(name, nil)
-//}
-
-//func (svc secretService) checkUpdatePreconditions(name string, namespace string, update v1.Secret) error {
-//	errorList := field.ErrorList{}
-//	if name != update.Name {
-//		errorList = append(errorList, field.Invalid(field.NewPath("metadata.name"), update.Name, fmt.Sprintf("name of updated object does not match the original (%s)", name)))
-//	}
-//	if namespace != update.Namespace {
-//		errorList = append(errorList, field.Invalid(field.NewPath("metadata.namespace"), update.Namespace, fmt.Sprintf("namespace of updated object does not match the original (%s)", namespace)))
-//	}
-//	typeMeta := svc.secretTypeMeta()
-//	if update.Kind != typeMeta.Kind {
-//		errorList = append(errorList, field.Invalid(field.NewPath("kind"), update.Kind, "secrets's kind should not be changed"))
-//	}
-//	if update.APIVersion != typeMeta.APIVersion {
-//		errorList = append(errorList, field.Invalid(field.NewPath("apiVersion"), update.APIVersion, "secret's apiVersion should not be changed"))
-//	}
-//
-//	if len(errorList) > 0 {
-//		return errors.NewInvalid(schema.GroupKind{
-//			Group: "",
-//			Kind:  "Secret",
-//		}, name, errorList)
-//	}
-//
-//	return nil
-//}
-
-//Kubernetes API used by client-go doesn't provide kind and apiVersion so we have to add it here
-//See: https://github.com/kubernetes/kubernetes/issues/3030
+// Kubernetes API used by client-go doesn't provide kind and apiVersion so we have to add it here
+// See: https://github.com/kubernetes/kubernetes/issues/3030
 func (svc secretService) ensureTypeMeta(secret *v1.Secret) {
 	secret.TypeMeta = svc.secretTypeMeta()
 }
