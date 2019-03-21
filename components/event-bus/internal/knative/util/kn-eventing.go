@@ -56,7 +56,7 @@ return
 */
 
 // Use it cause it should be mocked
-type KnativeLibIntf interface {
+type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
 	CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*evapisv1alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
@@ -69,7 +69,7 @@ type KnativeLibIntf interface {
 }
 
 // NewKnativeLib returns an interface to KnativeLib, which can be mocked
-func NewKnativeLib() (KnativeLibIntf, error) {
+func NewKnativeLib() (KnativeAccessLib, error) {
 	return GetKnativeLib()
 }
 
@@ -78,7 +78,7 @@ type KnativeLib struct {
 }
 
 // Verify the struct KnativeLib implements KnativeLibIntf
-var _ KnativeLibIntf = &KnativeLib{}
+var _ KnativeAccessLib = &KnativeLib{}
 
 // GetKnativeLib returns the Knative/Eventing access layer
 func GetKnativeLib() (*KnativeLib, error) {

@@ -25,7 +25,7 @@ const (
 type reconciler struct {
 	client     client.Client
 	recorder   record.EventRecorder
-	knativeLib util.KnativeLibIntf
+	knativeLib util.KnativeAccessLib
 	opts       *opts.Options
 	time       util.CurrentTime
 }

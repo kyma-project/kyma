@@ -321,7 +321,7 @@ var knChannels = make(map[string]*evapisv1alpha1.Channel)
 
 type MockKnativeLib struct{}
 
-func NewMockKnativeLib() util.KnativeLibIntf {
+func NewMockKnativeLib() util.KnativeAccessLib {
 	return new(MockKnativeLib)
 }
 func (k *MockKnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error) {
