@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/matador/automock"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor/automock"
 	"testing"
 	"time"
 
@@ -62,20 +62,20 @@ func TestProcessor_Do(t *testing.T) {
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 		jobCh, jobCount := fixJobCh(files)
 
-		matadorMock := new(automock.Matador)
-		matadorMock.On("ReadMetadata", mock1).Return(map[string]interface{}{
+		extractorMock := new(automock.Extractor)
+		extractorMock.On("ReadMetadata", mock1).Return(map[string]interface{}{
 			"foo": "bar",
 			"bar": 3,
 		}, nil).Once()
-		matadorMock.On("ReadMetadata", mock2).Return(map[string]interface{}{
+		extractorMock.On("ReadMetadata", mock2).Return(map[string]interface{}{
 			"foo": 32,
 			"bar": "test.example.com",
 		}, nil).Once()
-		defer matadorMock.AssertExpectations(t)
+		defer extractorMock.AssertExpectations(t)
 
 
 		e := processor.New(func(job processor.Job) (interface{}, error) {
-			return matadorMock.ReadMetadata(job.File)
+			return extractorMock.ReadMetadata(job.File)
 		}, 5, timeout)
 
 		// When
@@ -122,13 +122,13 @@ func TestProcessor_Do(t *testing.T) {
 		g.Expect(err).NotTo(gomega.HaveOccurred())
 		jobCh, jobCount := fixJobCh(files)
 
-		matadorMock := new(automock.Matador)
-		matadorMock.On("ReadMetadata", mock1).Return(nil, testErr).Once()
-		matadorMock.On("ReadMetadata", mock2).Return(nil, testErr).Once()
-		defer matadorMock.AssertExpectations(t)
+		extractorMock := new(automock.Extractor)
+		extractorMock.On("ReadMetadata", mock1).Return(nil, testErr).Once()
+		extractorMock.On("ReadMetadata", mock2).Return(nil, testErr).Once()
+		defer extractorMock.AssertExpectations(t)
 
 		e := processor.New(func(job processor.Job) (interface{}, error) {
-			return matadorMock.ReadMetadata(job.File)
+			return extractorMock.ReadMetadata(job.File)
 		}, 5, timeout)
 
 		// When

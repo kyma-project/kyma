@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/matador"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
 	"mime/multipart"
 	"net/http"
@@ -18,7 +18,7 @@ type ExtractHandler struct {
 	maxWorkers     int
 	processTimeout time.Duration
 
-	matador matador.Matador
+	metadataExtractor extractor.Extractor
 }
 
 // ResultError stores error data
@@ -34,9 +34,9 @@ type Response struct {
 
 func NewExtractHandler(maxWorkers int, processTimeout time.Duration) *ExtractHandler {
 	return &ExtractHandler{
-		maxWorkers:     maxWorkers,
-		processTimeout: processTimeout,
-		matador:        matador.New(),
+		maxWorkers:        maxWorkers,
+		processTimeout:    processTimeout,
+		metadataExtractor: extractor.New(),
 	}
 }
 
@@ -90,7 +90,7 @@ func (r *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	filesToProcessCh := r.chanFromFiles(files)
 
 	processFn := func(job processor.Job) (interface{}, error) {
-		return r.matador.ReadMetadata(job.File)
+		return r.metadataExtractor.ReadMetadata(job.File)
 	}
 
 	e := processor.New(processFn, r.maxWorkers, r.processTimeout)

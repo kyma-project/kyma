@@ -1,10 +1,10 @@
-package matador_test
+package extractor_test
 
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
 	fautomock "github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader/automock"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/matador"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"os"
@@ -12,7 +12,7 @@ import (
 	"testing"
 )
 
-func TestMatador_ReadMetadata(t *testing.T) {
+func TestExtractor_ReadMetadata(t *testing.T) {
 	testCases := []struct {
 		Name             string
 		Path             string
@@ -60,7 +60,7 @@ func TestMatador_ReadMetadata(t *testing.T) {
 			fHeader.On("Size").Return(int64(10)).Once()
 			fHeader.On("Open").Return(f, nil).Once()
 
-			m := matador.New()
+			m := extractor.New()
 			metadata, err := m.ReadMetadata(fHeader)
 
 			if tC.ExpectedErrorMessage != "" {

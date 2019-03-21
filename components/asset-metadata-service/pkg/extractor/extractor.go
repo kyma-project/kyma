@@ -1,4 +1,4 @@
-package matador
+package extractor
 
 import (
 	"github.com/gernest/front"
@@ -7,28 +7,28 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=Matador -output=automock -outpkg=automock -case=underscore
-// Matador is a metadata extractor
-type Matador interface {
+//go:generate mockery -name=Extractor -output=automock -outpkg=automock -case=underscore
+// Extractor is a metadata extractor
+type Extractor interface {
 	ReadMetadata(fileHeader fileheader.FileHeader) (map[string]interface{}, error)
 }
 
-type matador struct {
+type extractor struct {
 	frontMatter *front.Matter
 }
 
-// New constructs a new Matador instance
-func New() Matador {
+// New constructs a new Extractor instance
+func New() Extractor {
 	f := front.NewMatter()
 	f.Handle("---", front.YAMLHandler)
 
-	return &matador{
+	return &extractor{
 		frontMatter: f,
 	}
 }
 
 // ReadMetadata opens file and reads its metadata
-func (m *matador) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]interface{}, error) {
+func (e *extractor) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]interface{}, error) {
 	f, err := fileHeader.Open()
 	if err != nil {
 		return nil, errors.Wrapf(err, "while opening file %s", fileHeader.Filename())
@@ -40,7 +40,7 @@ func (m *matador) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]int
 		}
 	}()
 
-	metadata, _, err := m.frontMatter.Parse(f)
+	metadata, _, err := e.frontMatter.Parse(f)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while reading metadata from file %s", fileHeader.Filename())
 	}
