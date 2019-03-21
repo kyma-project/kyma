@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	apiv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,6 +23,7 @@ import (
 
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 )
 
 type apiControllerTest struct {
@@ -29,6 +31,7 @@ type apiControllerTest struct {
 	uuid           string
 	kubelessClient *kubeless.Clientset
 	coreClient     *kubernetes.Clientset
+	apiClient      *kyma.Clientset
 }
 
 func NewApiControllerTest() (apiControllerTest, error) {
@@ -48,9 +51,16 @@ func NewApiControllerTest() (apiControllerTest, error) {
 	if err != nil {
 		return apiControllerTest{}, err
 	}
+
+	apiClient, err := kyma.NewForConfig(config)
+	if err != nil {
+		return apiControllerTest{}, err
+	}
+
 	return apiControllerTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
+		apiClient:      apiClient,
 		functionName:   "apicontroller",
 		uuid:           uuid.New().String(),
 	}, nil
@@ -58,6 +68,11 @@ func NewApiControllerTest() (apiControllerTest, error) {
 
 func (t apiControllerTest) CreateResources(namespace string) {
 	_, err := t.createFunction(namespace)
+	if err != nil {
+		log.Println("%+v", err)
+	}
+
+	_, err = t.createApi(namespace)
 	if err != nil {
 		log.Println("%+v", err)
 	}
@@ -104,6 +119,35 @@ func (t apiControllerTest) getFunctionOutput(host string, waitmax time.Duration)
 
 }
 
+func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error) {
+	authRules := []apiv1alpha2.AuthenticationRule{}
+	authRule := apiv1alpha2.AuthenticationRule{
+		Type: apiv1alpha2.JwtType,
+		Jwt: apiv1alpha2.JwtAuthentication{
+			Issuer:  "https://dex.kyma.local",
+			JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
+		},
+	}
+
+	authRules = append(authRules, authRule)
+
+	api := &apiv1alpha2.Api{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: t.functionName,
+		},
+		Spec: apiv1alpha2.ApiSpec{
+			Authentication: authRules,
+			Hostname:       "apicontroller-stage.kyma.local",
+			Service: apiv1alpha2.Service{
+				Name: t.functionName,
+				Port: 8080,
+			},
+		},
+	}
+
+	return t.apiClient.GatewayV1alpha2().Apis(namespace).Create(api)
+}
+
 func (t apiControllerTest) createFunction(namespace string) (*kubelessV1.Function, error) {
 	functionServicePort := corev1.ServicePort{
 		Name:       "http-function-port",
@@ -123,7 +167,7 @@ func (t apiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 	resources[corev1.ResourceMemory] = resource.MustParse("128Mi")
 
 	annotations := make(map[string]string)
-	annotations["function-size"]="S"
+	annotations["function-size"] = "S"
 
 	podContainers := []corev1.Container{}
 	podContainer := corev1.Container{
@@ -151,12 +195,12 @@ func (t apiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 	}
 
 	serviceSelector := make(map[string]string)
-	serviceSelector["created-by"]= "kubeless"
-	serviceSelector["function"]= t.functionName
+	serviceSelector["created-by"] = "kubeless"
+	serviceSelector["function"] = t.functionName
 
 	function := &kubelessV1.Function{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: t.functionName,
+			Name:        t.functionName,
 			Annotations: annotations,
 		},
 		Spec: kubelessV1.FunctionSpec{
@@ -169,7 +213,7 @@ func (t apiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 			  }`,
 			FunctionContentType: "text",
 			ServiceSpec: corev1.ServiceSpec{
-				Ports: functionServicePorts,
+				Ports:    functionServicePorts,
 				Selector: serviceSelector,
 			},
 			Deployment: functionDeployment,
