@@ -109,6 +109,7 @@ echo "${TILLER_SECRETS}" | kubectl apply -f -
 echo "${HELM_SECRETS}" | kubectl apply -f -
 
 echo "---> Move secrets to helm home"
+mkdir -p "$(helm home)"
 cp "${WORKING_DIR}/ca.cert.pem" "$(helm home)/ca.pem"
 cp "${WORKING_DIR}/helm.cert.pem" "$(helm home)/cert.pem"
 cp "${WORKING_DIR}/helm.key.pem" "$(helm home)/key.pem"
