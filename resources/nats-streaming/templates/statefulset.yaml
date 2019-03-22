@@ -18,7 +18,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "true"
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ .Values.global.natsStreaming.fullname }}
         release: {{ .Release.Name }}

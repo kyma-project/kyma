@@ -68,10 +68,10 @@ global:
     version: 429bfbcc
   console_backend_service:
     dir: develop/
-    version: dc2e3cca
+    version: fbf6fcf1
   console_backend_service_test:
     dir: develop/
-    version: dc2e3cca
+    version: fbf6fcf1
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
