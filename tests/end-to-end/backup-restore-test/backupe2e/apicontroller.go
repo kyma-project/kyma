@@ -79,11 +79,7 @@ func (t apiControllerTest) CreateResources(namespace string) {
 	if err != nil {
 		log.Println("%+v", err)
 	}
-	token, err := fetchDexToken()
-	if err != nil {
-		panic(err)
-	}
-	log.Println(token)
+
 
 	//So(err, ShouldBeNil)
 }
@@ -100,6 +96,16 @@ func (t apiControllerTest) TestResources(namespace string) {
 	//So(err, ShouldBeNil)
 	//So(value, ShouldContainSubstring, t.uuid)
 
+	if err != nil {
+		log.Println("%+v", err)
+	}
+
+	token, err := fetchDexToken()
+	if err != nil {
+		log.Println("%+v", err)
+	}
+
+	err = t.callFunctionWithToken(host, token, 2*time.Minute)
 	if err != nil {
 		log.Println("%+v", err)
 	}
@@ -133,6 +139,46 @@ func (t apiControllerTest) callFunctionWithoutToken(host string, waitmax time.Du
 
 }
 
+func (t apiControllerTest) callFunctionWithToken(host string, token string, waitmax time.Duration) error {
+	client := &http.Client{
+		Transport: &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		},
+	}
+
+	req, err := http.NewRequest("GET", host, nil)
+	if err!=nil{
+		return err
+	}
+
+	req.Header.Add("Authorization", "Bearer " + token)
+
+	tick := time.Tick(2 * time.Second)
+	timeout := time.After(waitmax)
+	messages := ""
+
+	for {
+		select {
+		case <-tick:
+
+			resp, err := client.Do(req)
+			if err != nil {
+				messages += fmt.Sprintf("%+v\n", err)
+				break
+			}
+			log.Println("response code: %s", resp.StatusCode)
+			if resp.StatusCode == http.StatusOK {
+				return nil
+			}
+			messages += fmt.Sprintf("%+v", err)
+
+		case <-timeout:
+			return fmt.Errorf("Could not get function output:\n %v", messages)
+		}
+	}
+
+}
+
 func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error) {
 	authEnabled := true
 	servicePort := 8080
@@ -143,8 +189,16 @@ func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error)
 		},
 		Spec: apiv1alpha2.ApiSpec{
 			AuthenticationEnabled: &authEnabled,
-			Authentication:        []apiv1alpha2.AuthenticationRule{},
-			Hostname:              hostName,
+			Authentication: []apiv1alpha2.AuthenticationRule{
+				{
+					Type: apiv1alpha2.JwtType,
+					Jwt: apiv1alpha2.JwtAuthentication{
+						Issuer:  "https://dex.kyma.local",
+						JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
+					},
+				},
+			},
+			Hostname: hostName,
 			Service: apiv1alpha2.Service{
 				Name: t.functionName,
 				Port: servicePort,
