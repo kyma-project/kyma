@@ -4,7 +4,6 @@ required = [
   "k8s.io/code-generator/cmd/client-gen",
   "k8s.io/code-generator/cmd/lister-gen",
   "k8s.io/code-generator/cmd/informer-gen",
-  "k8s.io/apimachinery/pkg/apimachinery/registered",
 ]
 
 [prune]
@@ -22,11 +21,11 @@ required = [
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.10"
+  branch = "release-1.12"
 
 [[constraint]]
   name = "github.com/prometheus/client_golang"
@@ -34,11 +33,11 @@ required = [
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[override]]
   name = "k8s.io/gengo"
@@ -46,7 +45,7 @@ required = [
 
 [[override]]
   name = "k8s.io/kubernetes"
-  branch = "release-1.10"
+  branch = "release-1.12"
 
 
 [[constraint]]

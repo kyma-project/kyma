@@ -20,8 +20,8 @@ const (
 type ApiType string
 
 const (
-	OpenAPI ApiType = "OpenApi"
-	OData   ApiType = "OData"
+	OpenAPI       = "OpenApi"
+	oDataSpecType = "odata"
 )
 
 const (
@@ -33,7 +33,7 @@ const (
 )
 
 type Service interface {
-	Put(id string, apiType ApiType, documentation, apiSpec, eventsSpec []byte) apperrors.AppError
+	Put(id string, apiType string, documentation, apiSpec, eventsSpec []byte) apperrors.AppError
 	Get(id string) (documentation []byte, apiSpec []byte, eventsSpec []byte, apperr apperrors.AppError)
 	Remove(id string) apperrors.AppError
 }
@@ -60,7 +60,7 @@ type ContentEntry struct {
 	Content  []byte
 }
 
-func (s service) Put(id string, apiType ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
+func (s service) Put(id string, apiType string, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
 
 	docsTopic, err := s.createDocumentationTopic(id, apiType, documentation, apiSpec, eventsSpec)
 	if err != nil {
@@ -104,7 +104,7 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 	return documentation, apiSpec, eventsSpec, nil
 }
 
-func (s service) createDocumentationTopic(id string, apiType ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) (docstopic.Entry, apperrors.AppError) {
+func (s service) createDocumentationTopic(id string, apiType string, documentation []byte, apiSpec []byte, eventsSpec []byte) (docstopic.Entry, apperrors.AppError) {
 
 	docsTopic := docstopic.Entry{
 		Id:          id,
@@ -132,8 +132,8 @@ func (s service) createDocumentationTopic(id string, apiType ApiType, documentat
 	return docsTopic, nil
 }
 
-func getApiSpecFileNameAndKey(content []byte, apiType ApiType) (fileName, key string) {
-	if apiType == OData {
+func getApiSpecFileNameAndKey(content []byte, apiType string) (fileName, key string) {
+	if apiType == oDataSpecType {
 		mimeType := http.DetectContentType(content)
 		if mimeType == httpconsts.ContentTypeXML {
 			return odataXMLSpecFileName, docstopic.KeyODataXMLSpec

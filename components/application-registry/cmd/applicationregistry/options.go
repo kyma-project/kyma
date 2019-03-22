@@ -13,6 +13,7 @@ type options struct {
 	requestTimeout        int
 	requestLogging        bool
 	detailedErrorResponse bool
+	uploadServiceURL      string
 }
 
 func parseArgs() *options {
@@ -23,7 +24,7 @@ func parseArgs() *options {
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	detailedErrorResponse := flag.Bool("detailedErrorResponse", false, "Flag for showing full internal error response messages.")
-
+	uploadServiceURL := flag.String("uploadServiceURL", "localhost:9000", "Upload Service URL.")
 	flag.Parse()
 
 	return &options{
@@ -34,6 +35,7 @@ func parseArgs() *options {
 		requestTimeout:        *requestTimeout,
 		requestLogging:        *requestLogging,
 		detailedErrorResponse: *detailedErrorResponse,
+		uploadServiceURL:      *uploadServiceURL,
 	}
 }
 

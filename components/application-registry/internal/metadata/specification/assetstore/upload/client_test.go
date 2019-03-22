@@ -9,7 +9,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
-	"net/url"
 	"testing"
 )
 
@@ -21,9 +20,8 @@ func TestUploadClient(t *testing.T) {
 		// given
 		testServer := getTestServer(t)
 		client := &http.Client{}
-		u, err := url.Parse(testServer.URL)
-		require.NoError(t, err)
-		uploadClient := NewUploadClient(u, client)
+
+		uploadClient := NewUploadClient(testServer.URL, client)
 
 		// when
 		input := InputFile{

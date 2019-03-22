@@ -16,13 +16,13 @@ const (
 
 type ResourceInterface interface {
 	// Get gets the resource with the specified name.
-	Get(name string, opts metav1.GetOptions) (*unstructured.Unstructured, error)
+	Get(name string, opts metav1.GetOptions, subresources ...string) (*unstructured.Unstructured, error)
 	// Delete deletes the resource with the specified name.
-	Delete(name string, opts *metav1.DeleteOptions) error
+	Delete(name string, opts *metav1.DeleteOptions, subresources ...string) error
 	// Create creates the provided resource.
-	Create(obj *unstructured.Unstructured) (*unstructured.Unstructured, error)
+	Create(obj *unstructured.Unstructured, options metav1.CreateOptions, subresources ...string) (*unstructured.Unstructured, error)
 	// Update updates the provided resource.
-	Update(obj *unstructured.Unstructured) (*unstructured.Unstructured, error)
+	Update(obj *unstructured.Unstructured, options metav1.UpdateOptions, subresources ...string) (*unstructured.Unstructured, error)
 }
 
 type DocsTopicRepository interface {
@@ -34,19 +34,17 @@ type DocsTopicRepository interface {
 
 type repository struct {
 	resourceInterface ResourceInterface
-	namespace         string
 }
 
-func NewDocsTopicRepository(resourceInterface ResourceInterface, namespace string) DocsTopicRepository {
+func NewDocsTopicRepository(resourceInterface ResourceInterface) DocsTopicRepository {
 	return repository{
 		resourceInterface: resourceInterface,
-		namespace:         namespace,
 	}
 }
 
 func (r repository) Create(documentationTopic docstopic.Entry) apperrors.AppError {
 
-	docsTopic := toK8sType(documentationTopic, r.namespace)
+	docsTopic := toK8sType(documentationTopic)
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&docsTopic)
 	if err != nil {
 		return apperrors.Internal("Failed to convert Docs Topic object.")
@@ -54,7 +52,7 @@ func (r repository) Create(documentationTopic docstopic.Entry) apperrors.AppErro
 
 	_, err = r.resourceInterface.Create(&unstructured.Unstructured{
 		Object: obj,
-	})
+	}, metav1.CreateOptions{})
 
 	if err != nil {
 		return apperrors.Internal("Failed to create Documentation Topic")
@@ -63,7 +61,7 @@ func (r repository) Create(documentationTopic docstopic.Entry) apperrors.AppErro
 	return nil
 }
 
-func toK8sType(docsTopicEntry docstopic.Entry, namespace string) v1alpha1.DocsTopic {
+func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 
 	sources := make(map[string]v1alpha1.Source)
 	for key, url := range docsTopicEntry.Urls {
@@ -75,9 +73,8 @@ func toK8sType(docsTopicEntry docstopic.Entry, namespace string) v1alpha1.DocsTo
 
 	return v1alpha1.DocsTopic{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      docsTopicEntry.Id,
-			Namespace: namespace,
-			Labels:    docsTopicEntry.Labels,
+			Name:   docsTopicEntry.Id,
+			Labels: docsTopicEntry.Labels,
 		},
 		Spec: v1alpha1.DocsTopicSpec{
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
@@ -130,7 +127,7 @@ func (r repository) Delete(id string) apperrors.AppError {
 }
 
 func (r repository) Update(documentationTopic docstopic.Entry) apperrors.AppError {
-	docsTopic := toK8sType(documentationTopic, r.namespace)
+	docsTopic := toK8sType(documentationTopic)
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&docsTopic)
 	if err != nil {
 		return apperrors.Internal("Failed to convert Docs Topic object.")
@@ -138,7 +135,7 @@ func (r repository) Update(documentationTopic docstopic.Entry) apperrors.AppErro
 
 	_, err = r.resourceInterface.Update(&unstructured.Unstructured{
 		Object: obj,
-	})
+	}, metav1.UpdateOptions{})
 
 	if err != nil {
 		return apperrors.Internal("Failed to create Documentation Topic")

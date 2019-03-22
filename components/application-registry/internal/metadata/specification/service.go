@@ -3,6 +3,7 @@ package specification
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -12,7 +13,6 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/minio"
 )
 
 const (
@@ -30,13 +30,13 @@ type Service interface {
 }
 
 type specService struct {
-	minioService minio.Service
-	httpClient   http.Client
+	assetStoreService assetstore.Service
+	httpClient        http.Client
 }
 
-func NewSpecService(minioService minio.Service) Service {
+func NewSpecService(assetStoreService assetstore.Service) Service {
 	return &specService{
-		minioService: minioService,
+		assetStoreService: assetStoreService,
 		httpClient: http.Client{
 			Timeout: specRequestTimeout,
 		},
@@ -44,11 +44,11 @@ func NewSpecService(minioService minio.Service) Service {
 }
 
 func (svc *specService) GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError) {
-	return svc.minioService.Get(id)
+	return svc.assetStoreService.Get(id)
 }
 
 func (svc *specService) RemoveSpec(id string) apperrors.AppError {
-	return svc.minioService.Remove(id)
+	return svc.assetStoreService.Remove(id)
 }
 
 func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl string) apperrors.AppError {
@@ -62,17 +62,17 @@ func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl 
 		}
 	}
 
-	return svc.insertSpecs(serviceDef.ID, serviceDef.Documentation, apiSpec, serviceDef.Events)
+	return svc.insertSpecs(serviceDef.ID, serviceDef.Api.ApiType, serviceDef.Documentation, apiSpec, serviceDef.Events)
 }
 
-func (svc *specService) insertSpecs(id string, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
+func (svc *specService) insertSpecs(id string, apiType string, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
 	var eventsSpec []byte
 
 	if events != nil {
 		eventsSpec = events.Spec
 	}
 
-	err := svc.minioService.Put(id, docs, apiSpec, eventsSpec)
+	err := svc.assetStoreService.Put(id, apiType, docs, apiSpec, eventsSpec)
 	if err != nil {
 		return apperrors.Internal("Inserting specs failed, %s", err.Error())
 	}

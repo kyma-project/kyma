@@ -18,11 +18,12 @@ func TestAddDocsTopic(t *testing.T) {
 	t.Run("Should add DocsTopic", func(t *testing.T) {
 		// given
 		resourceInterfaceMock := &mocks.ResourceInterface{}
-		repository := NewDocsTopicRepository(resourceInterfaceMock, "kyma-integration")
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
 		docsTopicEntry := createTestDocsTopicEntry()
 
-		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "kyma-integration"))).Return(&unstructured.Unstructured{}, nil)
+		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "kyma-integration")), metav1.CreateOptions{}).
+			Return(&unstructured.Unstructured{}, nil)
 
 		// when
 		err := repository.Create(docsTopicEntry)
@@ -41,7 +42,7 @@ func TestGetDocsTopic(t *testing.T) {
 	t.Run("Should get DocsTopic", func(t *testing.T) {
 		// given
 		resourceInterfaceMock := &mocks.ResourceInterface{}
-		repository := NewDocsTopicRepository(resourceInterfaceMock, "kyma-integration")
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
 		{
 
 			dc := v1alpha1.DocsTopic{
@@ -95,11 +96,11 @@ func TestUpdateDocsTopic(t *testing.T) {
 	t.Run("Should update DocsTopic", func(t *testing.T) {
 		// given
 		resourceInterfaceMock := &mocks.ResourceInterface{}
-		repository := NewDocsTopicRepository(resourceInterfaceMock, "kyma-integration")
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
 		docsTopicEntry := createTestDocsTopicEntry()
 
-		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "kyma-integration"))).Return(&unstructured.Unstructured{}, nil)
+		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "kyma-integration")), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
 
 		// when
 		err := repository.Update(docsTopicEntry)
@@ -162,7 +163,7 @@ func createMatcherFunction(docsTopicEntry docstopic.Entry, namespace string) fun
 			return false
 		}
 
-		objectMetadataMatch := dc.Name == docsTopicEntry.Id && dc.Namespace == namespace
+		objectMetadataMatch := dc.Name == docsTopicEntry.Id
 
 		specBasicDataMatch := dc.Spec.DisplayName == docsTopicEntry.DisplayName &&
 			dc.Spec.Description == docsTopicEntry.Description

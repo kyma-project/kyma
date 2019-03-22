@@ -7,7 +7,6 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
-	"net/url"
 )
 
 const (
@@ -33,10 +32,10 @@ type Client interface {
 
 type uploadClient struct {
 	httpClient       *http.Client
-	uploadServiceUrl *url.URL
+	uploadServiceUrl string
 }
 
-func NewUploadClient(uploadServiceUrl *url.URL, httpclient *http.Client) Client {
+func NewUploadClient(uploadServiceUrl string, httpclient *http.Client) Client {
 	return uploadClient{
 		uploadServiceUrl: uploadServiceUrl,
 		httpClient:       httpclient,
@@ -74,7 +73,7 @@ func (uc uploadClient) prepareRequest(file InputFile) (*http.Request, apperrors.
 
 	writer.Close()
 
-	req, err := http.NewRequest(http.MethodPost, uc.uploadServiceUrl.String(), body)
+	req, err := http.NewRequest(http.MethodPost, uc.uploadServiceUrl, body)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create request.")
 	}
