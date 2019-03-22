@@ -20,8 +20,10 @@ func TestStorageDocsTopic(t *testing.T) {
 		},
 		Spec: DocsTopicSpec{
 			CommonDocsTopicSpec: CommonDocsTopicSpec{
-				Sources: map[string]Source{
-					"swag": {
+				Sources: []Source{
+					{
+						Name: "source-one",
+						Type: "swag",
 						Mode: DocsTopicSingle,
 						URL:  "dummy",
 					},

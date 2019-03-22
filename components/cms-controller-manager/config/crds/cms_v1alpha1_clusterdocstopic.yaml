@@ -42,7 +42,32 @@ spec:
             displayName:
               type: string
             sources:
-              type: object
+              items:
+                properties:
+                  filter:
+                    type: string
+                  mode:
+                    enum:
+                    - single
+                    - package
+                    - index
+                    type: string
+                  name:
+                    maximum: 253
+                    pattern: ^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
+                    type: string
+                  type:
+                    type: string
+                  url:
+                    type: string
+                required:
+                - name
+                - type
+                - url
+                - mode
+                type: object
+              minItems: 1
+              type: array
           required:
           - sources
           type: object

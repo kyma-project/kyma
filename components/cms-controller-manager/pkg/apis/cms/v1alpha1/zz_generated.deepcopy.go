@@ -108,10 +108,8 @@ func (in *CommonDocsTopicSpec) DeepCopyInto(out *CommonDocsTopicSpec) {
 	*out = *in
 	if in.Sources != nil {
 		in, out := &in.Sources, &out.Sources
-		*out = make(map[string]Source, len(*in))
-		for key, val := range *in {
-			(*out)[key] = val
-		}
+		*out = make([]Source, len(*in))
+		copy(*out, *in)
 	}
 	return
 }

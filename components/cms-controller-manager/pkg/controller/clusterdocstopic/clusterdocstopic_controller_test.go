@@ -12,11 +12,8 @@ import (
 	"time"
 
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
-
-var c client.Client
 
 const timeout = time.Second * 5
 
@@ -96,17 +93,17 @@ func TestReconcile(t *testing.T) {
 	g.Expect(currentTopic.Status.Phase).To(gomega.Equal(v1alpha1.DocsTopicReady))
 	g.Expect(currentTopic.Status.Reason).To(gomega.Equal(pretty.AssetsReady.String()))
 
-	// Update DocsTopic spec
+	// Delete DocsTopic spec
 	// When
-	delete(currentTopic.Spec.Sources, "dita")
-	markdown := currentTopic.Spec.Sources["markdown"]
-	markdown.Filter = "zyx"
-	currentTopic.Spec.Sources["markdown"] = markdown
+	currentTopic.Spec.Sources = filter(currentTopic.Spec.Sources, "dita")
+	markdownIndex := firstIndex(currentTopic.Spec.Sources, "markdown")
+	g.Expect(markdownIndex).NotTo(gomega.Equal(-1))
+	currentTopic.Spec.Sources[markdownIndex].Filter = "zyx"
 	err = c.Update(context.TODO(), currentTopic)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
+	// Delete DocsTopic spec
 	// Then
-	// Update Assets
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
 
@@ -125,17 +122,23 @@ func fixClusterDocsTopic() *v1alpha1.ClusterDocsTopic {
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
 				Description: "Test topic, have fun",
 				DisplayName: "Test Topic",
-				Sources: map[string]v1alpha1.Source{
-					"openapi": v1alpha1.Source{
+				Sources: []v1alpha1.Source{
+					{
+						Name: "source-one",
+						Type: "openapi",
 						Mode: v1alpha1.DocsTopicSingle,
 						URL:  "https://dummy.url/single",
 					},
-					"markdown": v1alpha1.Source{
+					{
+						Name:   "source-two",
+						Type:   "markdown",
 						Filter: "xyz",
 						Mode:   v1alpha1.DocsTopicPackage,
 						URL:    "https://dummy.url/package",
 					},
-					"dita": v1alpha1.Source{
+					{
+						Name:   "source-three",
+						Type:   "dita",
 						Filter: "xyz",
 						Mode:   v1alpha1.DocsTopicIndex,
 						URL:    "https://dummy.url/index",
@@ -150,4 +153,28 @@ func fixRequest(topic *v1alpha1.ClusterDocsTopic) reconcile.Request {
 	return reconcile.Request{
 		NamespacedName: types.NamespacedName{Name: topic.Name, Namespace: topic.Namespace},
 	}
+}
+
+// returns index to the first source object from given slice with given source type
+// or -1 if not found
+func firstIndex(slice []v1alpha1.Source, sourceType string) int {
+	for i, source := range slice {
+		if source.Type != sourceType {
+			continue
+		}
+		return i
+	}
+	return -1
+}
+
+// returns a copy of given slice that will not contain sources with given source type
+func filter(sources []v1alpha1.Source, sourceType string) []v1alpha1.Source {
+	var result []v1alpha1.Source
+	for _, source := range sources {
+		if source.Type == sourceType {
+			continue
+		}
+		result = append(result, source)
+	}
+	return result
 }
