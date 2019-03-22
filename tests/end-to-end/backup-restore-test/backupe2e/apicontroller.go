@@ -110,7 +110,6 @@ func (t apiControllerTest) callFunctionWithoutToken(host string, waitmax time.Du
 				messages += fmt.Sprintf("%+v\n", err)
 				break
 			}
-			log.Println("response code: %s", resp.StatusCode)
 			if resp.StatusCode == http.StatusUnauthorized {
 				return nil
 			}
@@ -120,7 +119,6 @@ func (t apiControllerTest) callFunctionWithoutToken(host string, waitmax time.Du
 			return fmt.Errorf("Could not get function output:\n %v", messages)
 		}
 	}
-
 }
 
 func (t apiControllerTest) callFunctionWithToken(host string, token string, waitmax time.Duration) error {
@@ -150,7 +148,6 @@ func (t apiControllerTest) callFunctionWithToken(host string, token string, wait
 				messages += fmt.Sprintf("%+v\n", err)
 				break
 			}
-			log.Println("response code: %s", resp.StatusCode)
 			if resp.StatusCode == http.StatusOK {
 				return nil
 			}
@@ -160,7 +157,6 @@ func (t apiControllerTest) callFunctionWithToken(host string, token string, wait
 			return fmt.Errorf("Could not get function output:\n %v", messages)
 		}
 	}
-
 }
 
 func (t apiControllerTest) createApi(namespace string, domain string) (*apiv1alpha2.Api, error) {
