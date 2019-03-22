@@ -46,3 +46,7 @@ required = [
 [[constraint]]
   branch = "release-1.12"
   name = "k8s.io/cli-runtime"
+
+[[constraint]]
+  name = "github.com/gofrs/uuid"
+  version = "3.2.0"

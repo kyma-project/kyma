@@ -134,7 +134,7 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 func (r *TestRunner) executeTaskFunc(taskHandler taskFn, stopCh <-chan struct{}, header, taskName string, createNs bool) bool {
 	taskLog, err := r.newLoggerForTask()
 	if err != nil {
-		taskLog.Errorf("Cannot create uuid: %v", err)
+		r.log.Errorf("Cannot create uuid, the task won't be started, got err: %v", err)
 		return true
 	}
 
@@ -251,7 +251,7 @@ func (r *TestRunner) wgWait(stopCh <-chan struct{}, wg *sync.WaitGroup) {
 func (r *TestRunner) newLoggerForTask() (*logrus.Entry, error) {
 	taskID, err := r.generateTaskID()
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "while generating ID for task logger")
 	}
 
 	cfg := &logger.Config{
