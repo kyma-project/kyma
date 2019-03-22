@@ -36,10 +36,13 @@ function require_mtls_disabled() {
 
 function require_policy_checks_enabled(){
   echo "--> Enable policy checks if not enabled"
-  local istioConfigmap=$(kubectl -n istio-system get cm istio -o jsonpath='{@.data.mesh}')
+  local istioConfigmap="$(kubectl -n istio-system get cm istio -o jsonpath='{@.data.mesh}')"
   local policyChecksDisabled=$(grep "disablePolicyChecks: true" <<< "$istioConfigmap")
   if [[ -n ${policyChecksDisabled} ]]; then
     istioConfigmap=$(sed 's/disablePolicyChecks: true/disablePolicyChecks: false/' <<< "$istioConfigmap")
+
+    # Escape commented escaped newlines
+    istioConfigmap=$(sed 's/\\n/\\\\n/g' <<< "$istioConfigmap")
 
     # Escape new lines and double quotes for kubectl
     istioConfigmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$istioConfigmap")
@@ -157,10 +160,10 @@ function check_requirements() {
 require_istio_system
 require_istio_version
 require_mtls_disabled
+require_policy_checks_enabled
 check_requirements
 configure_sidecar_injector
 restart_sidecar_injector
-require_policy_checks_enabled
 run_all_patches
 remove_not_used
 label_namespaces
