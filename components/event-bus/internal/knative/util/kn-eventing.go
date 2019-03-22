@@ -64,7 +64,7 @@ type KnativeAccessLib interface {
 	DeleteSubscription(name string, namespace string) error
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
-	SendMessage(channel *evapisv1alpha1.Channel, message *string) error
+	SendMessage(channel *evapisv1alpha1.Channel, headers *map[string]string, message *string) error
 	InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error
 }
 
