@@ -13,6 +13,6 @@ spec:
   serviceAccountName: {{ .Release.Name }}-connection-token-handler-tests
   containers:
   - name: {{ .Release.Name }}-connection-token-handler-tests
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connection_token_handler_tests.dir }}connection_token_handler_tests:{{ .Values.global.connection_token_handler_tests.version }}
+    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connection_token_handler_tests.dir }}connection-token-handler-tests:{{ .Values.global.connection_token_handler_tests.version }}
     imagePullPolicy: IfNotPresent
   restartPolicy: Never
