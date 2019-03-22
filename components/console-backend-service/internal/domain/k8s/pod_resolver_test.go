@@ -30,12 +30,12 @@ func TestPodResolver_PodQuery(t *testing.T) {
 		resourceGetter.On("Find", name, namespace).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("ToGQL", resource).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(resourceGetter)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.PodQuery(nil, name, namespace)
 
@@ -85,12 +85,12 @@ func TestPodResolver_PodQuery(t *testing.T) {
 		resourceGetter.On("Find", name, namespace).Return(resource, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("ToGQL", resource).Return(nil, expected).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(resourceGetter)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.PodQuery(nil, name, namespace)
 
@@ -121,12 +121,12 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("ToGQLs", resources).Return(expected, nil)
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(resourceGetter)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.PodsQuery(nil, namespace, nil, nil)
 
@@ -181,12 +181,12 @@ func TestPodResolver_PodsQuery(t *testing.T) {
 		resourceGetter.On("List", namespace, pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("ToGQLs", resources).Return(nil, expected)
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(resourceGetter)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.PodsQuery(nil, namespace, nil, nil)
 
@@ -249,13 +249,13 @@ func TestPodResolver_UpdatePodMutation(t *testing.T) {
 		podSvc.On("Update", name, namespace, *updatedPodFix).Return(updatedPodFix, nil).Once()
 		defer podSvc.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
 		converter.On("ToGQL", updatedPodFix).Return(updatedGQLPodFix, nil).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(podSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
 
@@ -271,12 +271,12 @@ func TestPodResolver_UpdatePodMutation(t *testing.T) {
 
 		podSvc := automock.NewPodSvc()
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("GQLJSONToPod", gqlJSONFix).Return(v1.Pod{}, expected).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(podSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
 
@@ -298,12 +298,12 @@ func TestPodResolver_UpdatePodMutation(t *testing.T) {
 		podSvc.On("Update", name, namespace, *updatedPodFix).Return(nil, expected).Once()
 		defer podSvc.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(podSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
 
@@ -324,13 +324,13 @@ func TestPodResolver_UpdatePodMutation(t *testing.T) {
 		podSvc.On("Update", name, namespace, *updatedPodFix).Return(updatedPodFix, nil).Once()
 		defer podSvc.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("GQLJSONToPod", gqlJSONFix).Return(*updatedPodFix, nil).Once()
 		converter.On("ToGQL", updatedPodFix).Return(nil, expected).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(podSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.UpdatePodMutation(nil, name, namespace, gqlJSONFix)
 
@@ -355,12 +355,12 @@ func TestPodResolver_DeletePodMutation(t *testing.T) {
 		podSvc.On("Delete", name, namespace).Return(nil).Once()
 		defer podSvc.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("ToGQL", resource).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(podSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.DeletePodMutation(nil, name, namespace)
 
@@ -416,12 +416,12 @@ func TestPodResolver_DeletePodMutation(t *testing.T) {
 		podSvc.On("Find", name, namespace).Return(resource, nil).Once()
 		defer podSvc.AssertExpectations(t)
 
-		converter := automock.NewGqlPodConverter()
+		converter := automock.NewGQLPodConverter()
 		converter.On("ToGQL", resource).Return(nil, error).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewPodResolver(podSvc)
-		resolver.SetInstanceConverter(converter)
+		resolver.SetPodConverter(converter)
 
 		result, err := resolver.DeletePodMutation(nil, name, namespace)
 

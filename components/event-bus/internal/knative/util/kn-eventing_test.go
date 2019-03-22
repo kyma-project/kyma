@@ -12,22 +12,22 @@ import (
 
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
-	"github.com/knative/pkg/apis"
-	"github.com/stretchr/testify/assert"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	evapisv1alpha1 "github.com/knative/eventing/pkg/apis/eventing/v1alpha1"
 	evclientsetfake "github.com/knative/eventing/pkg/client/clientset/versioned/fake"
+	"github.com/knative/pkg/apis"
 	duckv1alpha1 "github.com/knative/pkg/apis/duck/v1alpha1"
+	"github.com/stretchr/testify/assert"
+	corev1 "k8s.io/api/core/v1"
 	k8serrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	k8stesting "k8s.io/client-go/testing"
 )
 
 const (
-	channelName = "test-channel"
-	testNS      = "test-namespace"
-	provisioner = "test-provisioner"
+	channelName      = "test-channel"
+	testNS           = "test-namespace"
+	provisioner      = "test-provisioner"
 	subscriptionName = "test-subscription"
 )
 
@@ -61,14 +61,14 @@ func Test_CreateChannel(t *testing.T) {
 	log.Print("Test_CreateChannel")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create","channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
 
-	k := &KnativeLib {
+	k := &KnativeLib{
 		evClient: client.EventingV1alpha1(),
 	}
-	ch, err := k.CreateChannel(provisioner, channelName, testNS, 10 * time.Second)
+	ch, err := k.CreateChannel(provisioner, channelName, testNS, 10*time.Second)
 	assert.Nil(t, err)
 	log.Printf("Channel created: %v", ch)
 
@@ -82,17 +82,17 @@ func Test_CreateChannelTimeout(t *testing.T) {
 	log.Print("Test_CreateChannelTimeout")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create","channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		notReadyCondition := duckv1alpha1.Condition{Type: evapisv1alpha1.ChannelConditionReady, Status: corev1.ConditionFalse}
 		tc := testChannel.DeepCopy()
 		tc.Status.Conditions[0] = notReadyCondition
 		return true, tc, nil
 	})
 
-	k := &KnativeLib {
+	k := &KnativeLib{
 		evClient: client.EventingV1alpha1(),
 	}
-	_, err := k.CreateChannel(provisioner, channelName, testNS, 1 * time.Second)
+	_, err := k.CreateChannel(provisioner, channelName, testNS, 1*time.Second)
 	assert.NotNil(t, err)
 	log.Printf("Test_CreateChannelTimeout: %v", err)
 }
@@ -100,7 +100,7 @@ func Test_CreateChannelTimeout(t *testing.T) {
 func Test_SendMessage(t *testing.T) {
 	log.Print("Test_SendMessage")
 	// create the test http server
-	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request){
+	handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		body, _ := ioutil.ReadAll(r.Body)
 		defer r.Body.Close()
 
@@ -114,12 +114,12 @@ func Test_SendMessage(t *testing.T) {
 	// create a KN channel to connect to test http server
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create","channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
-	k := &KnativeLib {}
+	k := &KnativeLib{}
 	k.InjectClient(client.EventingV1alpha1())
-	ch, err := k.CreateChannel(provisioner, channelName, testNS, 10 * time.Second)
+	ch, err := k.CreateChannel(provisioner, channelName, testNS, 10*time.Second)
 	assert.Nil(t, err)
 	u, err := url.Parse(srv.URL)
 	assert.Nil(t, err)
@@ -134,7 +134,7 @@ func Test_SendMessage(t *testing.T) {
 func Test_InjectClient(t *testing.T) {
 	log.Print("Test_InjectClient")
 	client := evclientsetfake.NewSimpleClientset().EventingV1alpha1()
-	k := &KnativeLib {}
+	k := &KnativeLib{}
 	err := k.InjectClient(client)
 	assert.Nil(t, err)
 }
@@ -142,7 +142,7 @@ func Test_InjectClient(t *testing.T) {
 func Test_DeleteInexistentChannel(t *testing.T) {
 	log.Print("Test_DeleteInexistentChannel")
 	client := evclientsetfake.NewSimpleClientset().EventingV1alpha1()
-	k := &KnativeLib {}
+	k := &KnativeLib{}
 	k.InjectClient(client)
 	err := k.DeleteChannel(channelName, testNS)
 	assert.True(t, k8serrors.IsNotFound(err))
@@ -152,12 +152,12 @@ func Test_CreateDeleteChannel(t *testing.T) {
 	log.Print("Test_CreateDeleteChannel")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create","channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
-	k := &KnativeLib {}
+	k := &KnativeLib{}
 	k.InjectClient(client.EventingV1alpha1())
-	ch, err := k.CreateChannel(provisioner, channelName, testNS, 1 * time.Second)
+	ch, err := k.CreateChannel(provisioner, channelName, testNS, 1*time.Second)
 	assert.Nil(t, err)
 	err = k.DeleteChannel(ch.Name, ch.Namespace)
 	assert.Nil(t, err)
@@ -165,7 +165,7 @@ func Test_CreateDeleteChannel(t *testing.T) {
 
 func Test_CreateSubscription(t *testing.T) {
 	log.Print("Test_CreateSubscription")
-	k := &KnativeLib {}
+	k := &KnativeLib{}
 	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
 	var uri = "dnsName: hello-00001-service.default"
 	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
@@ -174,7 +174,7 @@ func Test_CreateSubscription(t *testing.T) {
 
 func Test_DeleteInexistentSubscription(t *testing.T) {
 	log.Print("Test_DeleteInexistentSubscription")
-	k := &KnativeLib {}
+	k := &KnativeLib{}
 	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
 	err := k.DeleteSubscription(subscriptionName, testNS)
 	assert.True(t, k8serrors.IsNotFound(err))
@@ -182,7 +182,7 @@ func Test_DeleteInexistentSubscription(t *testing.T) {
 
 func Test_CreateDeleteSubscription(t *testing.T) {
 	log.Print("Test_CreateDeleteSubscription")
-	k := &KnativeLib {}
+	k := &KnativeLib{}
 	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
 	var uri = "dnsName: hello-00001-service.default"
 	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
@@ -193,7 +193,7 @@ func Test_CreateDeleteSubscription(t *testing.T) {
 
 func Test_CreateSubscriptionAgain(t *testing.T) {
 	log.Print("Test_CreateSubscriptionAgain")
-	k := &KnativeLib {}
+	k := &KnativeLib{}
 	k.InjectClient(evclientsetfake.NewSimpleClientset().EventingV1alpha1())
 	var uri = "dnsName: hello-00001-service.default"
 	err := k.CreateSubscription(subscriptionName, testNS, channelName, &uri)

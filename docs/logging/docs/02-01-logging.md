@@ -4,6 +4,8 @@ title: Architecture
 
 This document provides an overview of the logging architecture in Kyma. 
 
+![Logging architecture in Kyma](./assets/loki-overview.png)
+
 ## Agent (Promtail)
 Promtail is the agent responsible for collecting reliable metadata, consistent with the time series or metrics metadata. To achieve this, the agent uses the same service discovery and relabelling libraries as Prometheus. Promtail is used as a Deamon Set to discover targets, create metadata labels, and tail log files to produce a stream of logs. The logs are buffered on the client side and then sent to the service.
 
