@@ -19,7 +19,6 @@ type options struct {
 func parseArgs() *options {
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
 	proxyPort := flag.Int("proxyPort", 8080, "Proxy port.")
-	minioURL := flag.String("minioURL", "localhost:9000", "Target URL for events to be sent.")
 	namespace := flag.String("namespace", "kyma-system", "Namespace used by Gateway")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
@@ -30,7 +29,6 @@ func parseArgs() *options {
 	return &options{
 		externalAPIPort:       *externalAPIPort,
 		proxyPort:             *proxyPort,
-		minioURL:              *minioURL,
 		namespace:             *namespace,
 		requestTimeout:        *requestTimeout,
 		requestLogging:        *requestLogging,
@@ -40,8 +38,8 @@ func parseArgs() *options {
 }
 
 func (o *options) String() string {
-	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --minioURL=%s"+
+	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s"+
 		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --detailedErrorResponse=%t",
-		o.externalAPIPort, o.proxyPort, o.minioURL,
+		o.externalAPIPort, o.proxyPort, o.uploadServiceURL,
 		o.namespace, o.requestTimeout, o.requestLogging, o.detailedErrorResponse)
 }
