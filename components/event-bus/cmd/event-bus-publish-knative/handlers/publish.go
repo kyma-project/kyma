@@ -159,11 +159,11 @@ func generateEventID() (string, error) {
 func buildCloudEvent(publishRequest *api.PublishRequest, traceContext *api.TraceContext) *Message {
 
 	headers := make(map[string]string)
-	headers[api.FieldSourceId] = publishRequest.SourceID
-	headers[api.FieldEventType] = publishRequest.EventType
-	headers[api.FieldEventTypeVersion] = publishRequest.EventTypeVersion
-	headers[api.FieldEventId] = publishRequest.EventID
-	headers[api.FieldEventTime] = publishRequest.EventTime
+	headers[trace.HeaderSourceID] = publishRequest.SourceID
+	headers[trace.HeaderEventType] = publishRequest.EventType
+	headers[trace.HeaderEventTypeVersion] = publishRequest.EventTypeVersion
+	headers[trace.HeaderEventID] = publishRequest.EventID
+	headers[trace.HeaderEventTime] = publishRequest.EventTime
 	if traceContext != nil {
 		for k, v := range *traceContext {
 			headers[k] = v

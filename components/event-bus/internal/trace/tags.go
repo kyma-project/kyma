@@ -11,6 +11,15 @@ const (
 	SubscriptionEnvironment = "sub-env"
 )
 
+const (
+	// push request headers to endpoint
+	HeaderSourceID         = "Ce-Source-ID"
+	HeaderEventType        = "Ce-Event-Type"
+	HeaderEventTypeVersion = "Ce-Event-Type-Version"
+	HeaderEventID          = "Ce-Event-ID"
+	HeaderEventTime        = "Ce-Event-Time"
+)
+
 func CreateTraceTagsFromCloudEvent(cloudEvent *api.CloudEvent) map[string]string {
 	return map[string]string{
 		eventID:          cloudEvent.EventID,
@@ -22,7 +31,7 @@ func CreateTraceTagsFromCloudEvent(cloudEvent *api.CloudEvent) map[string]string
 
 func CreateTraceTagsFromMessageHeader(headers map[string]string) map[string]string {
 	return map[string]string{
-		eventID:          headers[eventID],
+		eventID:          headers[HeaderEventID],
 		sourceID:         headers[sourceID],
 		eventType:        headers[eventType],
 		eventTypeVersion: headers[eventTypeVersion],
