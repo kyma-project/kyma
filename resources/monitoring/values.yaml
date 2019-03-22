@@ -4,7 +4,7 @@ test:
   image:
     name: monitoring
     dir: tests/
-    version: 0.8.0
+    version: 0.8.1
 global:
   isLocalEnv: false
   knative: false
