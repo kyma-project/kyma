@@ -35,7 +35,6 @@ import (
 	"io"
 	"io/ioutil"
 	. "github.com/smartystreets/goconvey/convey"
-	"log"
 )
 
 const (
@@ -113,10 +112,9 @@ func (t *grafanaTest) DeleteResources() {
 	err = t.deletePod(grafanaNS, grafanaPodName, grafanaLabelSelector)
 	So(err, ShouldBeNil)
 
-	time.Sleep(10 * time.Second)
-	err1 := t.waitForPodGrafana(2 * time.Minute)
-	log.Printf("grafanaTest.DeleteResources() %v", err1)
-	So(err1, ShouldBeError) // An error is expected.
+	//time.Sleep(10 * time.Second)
+	//err1 := t.waitForPodGrafana(2 * time.Minute)
+	//So(err1, ShouldBeError) // An error is expected.
 
 }
 

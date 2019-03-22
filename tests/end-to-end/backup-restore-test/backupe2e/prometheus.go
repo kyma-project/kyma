@@ -37,7 +37,6 @@ import (
 	"fmt"
 	"strings"
 	"os"
-	"log"
 )
 
 const (
@@ -221,10 +220,9 @@ func (t *prometheusTest) DeleteResources() {
 	err = t.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
 	So(err, ShouldBeNil)
 
-	time.Sleep(10 * time.Second)
-	err1 := t.waitForPodPrometheus(2 * time.Minute)
-	log.Printf("prometheusTest.DeleteResources() %v", err1)
-	So(err1, ShouldBeError) // An error is expected.
+	//time.Sleep(10 * time.Second)
+	//err1 := t.waitForPodPrometheus(2 * time.Minute)
+	//So(err1, ShouldBeError) // An error is expected.
 
 }
 
