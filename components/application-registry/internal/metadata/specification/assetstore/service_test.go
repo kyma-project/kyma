@@ -52,7 +52,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		}
 
 		// when
-		err := service.Put("id1", OpenAPI, documentation, jsonApiSpec, eventsSpec)
+		err := service.Put("id1", docstopic.OpenApiType, documentation, jsonApiSpec, eventsSpec)
 
 		// then
 		require.NoError(t, err)
@@ -168,7 +168,7 @@ func TestUpdatingInAssetStore(t *testing.T) {
 		}
 
 		// when
-		err := service.Put("id1", OpenAPI, documentation, jsonApiSpec, eventsSpec)
+		err := service.Put("id1", docstopic.OpenApiType, documentation, jsonApiSpec, eventsSpec)
 
 		// then
 		require.NoError(t, err)

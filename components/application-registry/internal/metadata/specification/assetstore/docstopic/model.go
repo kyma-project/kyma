@@ -15,3 +15,11 @@ type Entry struct {
 	Urls        map[string]string
 	Labels      map[string]string
 }
+
+type ApiType string
+
+const (
+	OpenApiType  ApiType = "openapi"
+	ODataApiType ApiType = "odata"
+	NoneApiType  ApiType = ""
+)

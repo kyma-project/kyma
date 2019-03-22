@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -62,10 +63,12 @@ func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl 
 		}
 	}
 
-	return svc.insertSpecs(serviceDef.ID, serviceDef.Api.ApiType, serviceDef.Documentation, apiSpec, serviceDef.Events)
+	apiType := toApiSpecType(serviceDef.Api)
+
+	return svc.insertSpecs(serviceDef.ID, apiType, serviceDef.Documentation, apiSpec, serviceDef.Events)
 }
 
-func (svc *specService) insertSpecs(id string, apiType string, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
+func (svc *specService) insertSpecs(id string, apiType docstopic.ApiType, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
 	var eventsSpec []byte
 
 	if events != nil {
@@ -112,6 +115,18 @@ func shouldModifySpec(apiSpec []byte, apiType string) bool {
 
 func isNilOrEmpty(array []byte) bool {
 	return array == nil || len(array) == 0 || string(array) == "null"
+}
+
+func toApiSpecType(api *model.API) docstopic.ApiType {
+	if api == nil {
+		return docstopic.NoneApiType
+	}
+
+	if strings.ToLower(api.ApiType) == oDataSpecType {
+		return docstopic.ODataApiType
+	} else {
+		return docstopic.OpenApiType
+	}
 }
 
 func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {

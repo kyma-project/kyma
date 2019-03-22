@@ -17,13 +17,6 @@ const (
 	specRequestTimeout        = time.Duration(5 * time.Second)
 )
 
-type ApiType string
-
-const (
-	OpenAPI       = "OpenApi"
-	oDataSpecType = "odata"
-)
-
 const (
 	documentationFileName = "content.json"
 	openApiSpecFileName   = "apiSpec.json"
@@ -33,7 +26,7 @@ const (
 )
 
 type Service interface {
-	Put(id string, apiType string, documentation, apiSpec, eventsSpec []byte) apperrors.AppError
+	Put(id string, apiType docstopic.ApiType, documentation, apiSpec, eventsSpec []byte) apperrors.AppError
 	Get(id string) (documentation []byte, apiSpec []byte, eventsSpec []byte, apperr apperrors.AppError)
 	Remove(id string) apperrors.AppError
 }
@@ -60,7 +53,7 @@ type ContentEntry struct {
 	Content  []byte
 }
 
-func (s service) Put(id string, apiType string, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
+func (s service) Put(id string, apiType docstopic.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
 
 	docsTopic, err := s.createDocumentationTopic(id, apiType, documentation, apiSpec, eventsSpec)
 	if err != nil {
@@ -104,7 +97,7 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 	return documentation, apiSpec, eventsSpec, nil
 }
 
-func (s service) createDocumentationTopic(id string, apiType string, documentation []byte, apiSpec []byte, eventsSpec []byte) (docstopic.Entry, apperrors.AppError) {
+func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) (docstopic.Entry, apperrors.AppError) {
 
 	docsTopic := docstopic.Entry{
 		Id:          id,
@@ -132,8 +125,8 @@ func (s service) createDocumentationTopic(id string, apiType string, documentati
 	return docsTopic, nil
 }
 
-func getApiSpecFileNameAndKey(content []byte, apiType string) (fileName, key string) {
-	if apiType == oDataSpecType {
+func getApiSpecFileNameAndKey(content []byte, apiType docstopic.ApiType) (fileName, key string) {
+	if apiType == docstopic.ODataApiType {
 		mimeType := http.DetectContentType(content)
 		if mimeType == httpconsts.ContentTypeXML {
 			return odataXMLSpecFileName, docstopic.KeyODataXMLSpec
