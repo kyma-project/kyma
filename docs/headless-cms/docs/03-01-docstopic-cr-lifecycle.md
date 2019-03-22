@@ -31,7 +31,7 @@ There are two labels in every Asset CR created from DocsTopic CRs that are based
 
 - the **docsTopic** label equals the **name** metadata from the DocsTopic CR. For example, that is `service-catalog`.
 
-## Statuses
+### Statuses
 
 The status of the DocsTopic CR heavily depends on the status phase of all Asset CRs it creates. It is:
 
