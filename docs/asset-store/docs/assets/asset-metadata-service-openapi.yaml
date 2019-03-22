@@ -29,10 +29,10 @@ paths:
           $ref: "#/components/responses/multiStatusResponse"
         "400":
           $ref: "#/components/responses/badRequestResponse"
+        "422":
+          $ref: "#/components/responses/unprocessableEntity"
         "500":
           $ref: "#/components/responses/internalServerErrorResponse"
-        "502":
-          $ref: "#/components/responses/badGatewayResponse"
 servers:
   - url: http://localhost:3000/v1
 components:
@@ -49,8 +49,8 @@ components:
                 type: array
                 items:
                   $ref: "#/components/schemas/RequestError"
-    badGatewayResponse:
-      description: Bad gateway response
+    unprocessableEntity:
+      description: Unprocessable entities. Extracting metadata failed for all files.
       content:
         application/json:
           schema:

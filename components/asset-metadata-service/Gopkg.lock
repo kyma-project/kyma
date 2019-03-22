@@ -37,11 +37,13 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:fe167e8f858cbfc10c721f2000f2446140800bb53fa83c088e03d191275611a4"
+  digest = "1:32a1ad8f318bf9610b2d2034c8d34b5193ef11ff44ed9fb6ec421581e14e2ea2"
   name = "github.com/onsi/gomega"
   packages = [
     ".",
     "format",
+    "gstruct",
+    "gstruct/errors",
     "internal/assertion",
     "internal/asyncassertion",
     "internal/oraclematcher",
@@ -176,6 +178,7 @@
     "github.com/golang/glog",
     "github.com/kisielk/errcheck",
     "github.com/onsi/gomega",
+    "github.com/onsi/gomega/gstruct",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/mock",
     "github.com/vrischmann/envconfig",

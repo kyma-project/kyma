@@ -112,7 +112,7 @@ func (e *Processor) processFile(job Job) (*ResultSuccess, error) {
 
 	res, err := e.workerFn(job)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while processing file `%s`", job.FilePath)
+		return nil, errors.Wrapf(err, "Error while processing file `%s`", job.FilePath)
 	}
 
 	result := &ResultSuccess{
