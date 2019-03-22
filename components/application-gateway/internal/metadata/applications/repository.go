@@ -27,9 +27,10 @@ type repository struct {
 }
 
 type Credentials struct {
-	Type       string
-	SecretName string
-	Url        string
+	Type                 string
+	SecretName           string
+	Url                  string
+	CSRFTokenEndpointURL string
 }
 
 // ServiceAPI stores information needed to call an API
@@ -143,9 +144,15 @@ func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credential
 		return nil
 	}
 
+	csrfTokenEndpointURL := ""
+	if credentials.CSRFInfo != nil {
+		csrfTokenEndpointURL = credentials.CSRFInfo.TokenEndpointURL
+	}
+
 	return &Credentials{
-		Type:       credentials.Type,
-		SecretName: credentials.SecretName,
-		Url:        credentials.AuthenticationUrl,
+		Type:                 credentials.Type,
+		SecretName:           credentials.SecretName,
+		Url:                  credentials.AuthenticationUrl,
+		CSRFTokenEndpointURL: csrfTokenEndpointURL,
 	}
 }

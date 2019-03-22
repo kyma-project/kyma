@@ -3,11 +3,12 @@ package subscription
 import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 
-	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	logf "sigs.k8s.io/controller-runtime/pkg/runtime/log"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
@@ -26,7 +27,7 @@ const (
 func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Controller, error) {
 
 	// init the knative lib
-	knativeLib, err := knative.GetKnativeLib()
+	knativeLib, err := knative.NewKnativeLib()
 	if err != nil {
 		log.Error(err, "Failed to get Knative library")
 		return nil, err
@@ -34,9 +35,10 @@ func ProvideController(mgr manager.Manager, opts *opts.Options) (controller.Cont
 
 	// Setup a new controller to Reconcile Kyma Subscription.
 	r := &reconciler{
-		recorder: mgr.GetRecorder(controllerAgentName),
-		opts: opts,
+		recorder:   mgr.GetRecorder(controllerAgentName),
+		opts:       opts,
 		knativeLib: knativeLib,
+		time:       util.NewDefaultCurrentTime(),
 	}
 	c, err := controller.New(controllerAgentName, mgr, controller.Options{
 		Reconciler: r,

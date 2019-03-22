@@ -3,7 +3,6 @@ package authorization
 import (
 	"crypto/tls"
 	"net/http"
-	"net/http/httputil"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 )
@@ -20,7 +19,7 @@ func newCertificateGenStrategy(certificate, privateKey []byte) certificateGenStr
 	}
 }
 
-func (b certificateGenStrategy) AddAuthorization(r *http.Request, proxy *httputil.ReverseProxy) apperrors.AppError {
+func (b certificateGenStrategy) AddAuthorization(r *http.Request, setter TransportSetter) apperrors.AppError {
 	cert, err := b.prepareCertificate()
 	if err != nil {
 		return apperrors.Internal("Failed to prepare certificate, %s", err.Error())
@@ -32,7 +31,7 @@ func (b certificateGenStrategy) AddAuthorization(r *http.Request, proxy *httputi
 		},
 	}
 
-	proxy.Transport = transport
+	setter(transport)
 
 	return nil
 }
