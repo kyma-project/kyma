@@ -11,7 +11,7 @@ kubectl get crd assets.assetstore.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource (CR) that provides details of the bucket for storing assets.
+This is a sample Asset CR configuration:
 
 ```
 apiVersion: assetstore.kyma-project.io/v1alpha2

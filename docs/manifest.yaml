@@ -34,3 +34,5 @@ spec:
       id: console
     - displayName: Asset Store
       id: asset-store
+    - displayName: Headless CMS
+      id: headless-cms

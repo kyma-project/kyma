@@ -9,7 +9,7 @@ Depending on the usage scenario, you can:
 - Use Minio for local development.
 - Store your assets on a production scale using Minio in a [Gateway mode](https://github.com/minio/minio/tree/master/docs/gateway).
 
-The Asset Store ensures that both usage scenarios work for Kyma, without additional configuration of the in-build controllers.
+The Asset Store ensures that both usage scenarios work for Kyma, without additional configuration of the built-in controllers.
 
 ## Development mode storage
 
