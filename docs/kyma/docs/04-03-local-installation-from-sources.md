@@ -21,6 +21,8 @@ This script sets up default parameters, starts Minikube, builds the Kyma Install
 
 > **NOTE:** See [this](#installation-local-installation-scripts-deep-dive) document for a detailed explanation of the `run.sh` script and the subscripts it triggers.
 
+> **NOTE:** This method will automatically retrieve the Helm Client TLS certificates and store them in `HELM_HOME`
+
 You can execute the `installation/cmd/run.sh` script with the following parameters:
 
 - `--password {YOUR_PASSWORD}` which allows you to set a password for the **admin@kyma.cx** user.

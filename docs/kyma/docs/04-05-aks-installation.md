@@ -245,6 +245,14 @@ Follow these steps:
       sleep 5; \
     done
     ```
+
+5. Retrieve the Helm Client TLS certificates, in order to ensure secure communication :
+    ```
+    kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.ca.crt"' | tr -d '"' | base64 -D > "$(helm home)/ca.pem"
+    kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.tls.crt"' | tr -d '"' | base64 -D > "$(helm home)/cert.pem"
+    kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.tls.key"' | tr -d '"' | base64 -D > "$(helm home)/key.pem"
+    ```
+
     After the installation process is finished, the `Status: Installed, description: Kyma installed` message appears.
     In case of an error, you can fetch the logs from the Installer by running:
     ```

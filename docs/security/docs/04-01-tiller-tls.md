@@ -4,7 +4,10 @@ type: Installation
 ---
 
 ## Secured by default
-Kyma is supplied with a custom installation of [Tiller](https://helm.sh/docs/glossary/#tiller), which secured all incoming connections with a TLS certificate. Because of that, all client connections (whether from inside or outside of the cluster) require a special pair of certificates. 
+Kyma is supplied with a custom installation of [Tiller](https://helm.sh/docs/glossary/#tiller), which secured all incoming connections with a TLS certificate. Because of that, all client connections (whether from inside or outside of the cluster) require a special pair of client certificates. 
+
+## Retrieving 
+
 During the installation phase we store those client certificates in [`HELM_HOME`](https://helm.sh/docs/glossary/#helm-home-helm-home):
 
 Content of `HELM_HOME`

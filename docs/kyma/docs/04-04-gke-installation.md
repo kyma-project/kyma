@@ -223,6 +223,13 @@ Follow these steps:
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
+6. Retrieve the Helm Client TLS certificates, in order to ensure secure communication :
+    ```
+    kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.ca.crt"' | tr -d '"' | base64 -D > "$(helm home)/ca.pem"
+    kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.tls.crt"' | tr -d '"' | base64 -D > "$(helm home)/cert.pem"
+    kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.tls.key"' | tr -d '"' | base64 -D > "$(helm home)/key.pem"
+    ```
+
 ## Add the xip.io self-signed certificate to your OS trusted certificates
 
 >**NOTE:** Skip this section if you use your own domain.
