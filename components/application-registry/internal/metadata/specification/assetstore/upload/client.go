@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
+	log "github.com/sirupsen/logrus"
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
@@ -63,12 +64,12 @@ func (uc uploadClient) prepareRequest(file InputFile) (*http.Request, apperrors.
 
 	part, err := writer.CreateFormFile(AssetFieldName, file.Name)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to create multipart content.")
+		return nil, apperrors.Internal("Failed to create multipart content: %s.", err.Error())
 	}
 
 	_, err = part.Write(file.Contents)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to write file contents.")
+		return nil, apperrors.Internal("Failed to write file contents: %s.", err.Error())
 	}
 
 	writer.Close()
@@ -86,6 +87,7 @@ func (uc uploadClient) prepareRequest(file InputFile) (*http.Request, apperrors.
 func (uc uploadClient) executeRequest(r *http.Request) (*http.Response, apperrors.AppError) {
 	res, err := uc.httpClient.Do(r)
 	if err != nil {
+		log.Errorf("Failed to call Upload Service: %s", err.Error())
 		return nil, apperrors.Internal("Failed to execute request.")
 	}
 
@@ -93,8 +95,10 @@ func (uc uploadClient) executeRequest(r *http.Request) (*http.Response, apperror
 	case http.StatusOK:
 		return res, nil
 	case http.StatusNotFound:
-		return nil, apperrors.NotFound("Upload service call failed.")
+		log.Errorf("Failed to call Upload Service: not found.", err.Error())
+		return nil, apperrors.NotFound("Upload Service call failed.")
 	default:
+		log.Errorf("Failed to call Upload Service: unexpected status: %s", res.Status)
 		return nil, apperrors.Internal("Failed to call Upload Service.")
 	}
 }

@@ -57,7 +57,7 @@ func (s service) Put(id string, apiType docstopic.ApiType, documentation []byte,
 
 	docsTopic, err := s.createDocumentationTopic(id, apiType, documentation, apiSpec, eventsSpec)
 	if err != nil {
-		return apperrors.Internal("Failed to upload specifications")
+		return apperrors.Internal("Failed to upload specifications: %s", err.Error())
 	}
 
 	err = s.docsTopicRepository.Update(docsTopic)
