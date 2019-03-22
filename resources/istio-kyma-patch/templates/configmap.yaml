@@ -103,7 +103,6 @@ data:
     service jaeger-agent
     service jaeger-collector
     pod -lapp=istio-ingressgateway
-    pod -lapp=policy
 
   required-crds: |
     policies.authentication.istio.io

@@ -36,18 +36,18 @@ function require_mtls_disabled() {
 
 function require_policy_checks_enabled(){
   echo "--> Enable policy checks if not enabled"
-  local configmap=$(kubectl -n istio-system get cm istio -o jsonpath='{@.data.mesh}')
-  local policyChecksDisabled=$(grep "disablePolicyChecks: true" <<< "$configmap")
+  local istioConfigmap=$(kubectl -n istio-system get cm istio -o jsonpath='{@.data.mesh}')
+  local policyChecksDisabled=$(grep "disablePolicyChecks: true" <<< "$istioConfigmap")
   if [[ -n ${policyChecksDisabled} ]]; then
-    configmap=$(sed 's/disablePolicyChecks: true/disablePolicyChecks: false/' <<< "$configmap")
+    istioConfigmap=$(sed 's/disablePolicyChecks: true/disablePolicyChecks: false/' <<< "$istioConfigmap")
 
     # Escape new lines and double quotes for kubectl
-    configmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$configmap")
-    configmap=$(sed 's/"/\\"/g' <<< "$configmap")
+    istioConfigmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$istioConfigmap")
+    istioConfigmap=$(sed 's/"/\\"/g' <<< "$istioConfigmap")
 
     set +e
     local out
-    out=$(kubectl patch -n istio-system configmap istio --type merge -p '{"data": {"mesh":"'"$configmap"'"}}')
+    out=$(kubectl patch -n istio-system configmap istio --type merge -p '{"data": {"mesh":"'"$istioConfigmap"'"}}')
     local result=$?
     set -e
     echo "$out"
@@ -157,10 +157,10 @@ function check_requirements() {
 require_istio_system
 require_istio_version
 require_mtls_disabled
-require_policy_checks_enabled
 check_requirements
 configure_sidecar_injector
 restart_sidecar_injector
+require_policy_checks_enabled
 run_all_patches
 remove_not_used
 label_namespaces
