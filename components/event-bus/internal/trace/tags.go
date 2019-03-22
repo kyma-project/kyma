@@ -19,3 +19,12 @@ func CreateTraceTagsFromCloudEvent(cloudEvent *api.CloudEvent) map[string]string
 		eventTypeVersion: cloudEvent.EventTypeVersion,
 	}
 }
+
+func CreateTraceTagsFromMessageHeader(headers map[string]string) map[string]string {
+	return map[string]string{
+		eventID:          headers[eventID],
+		sourceID:         headers[sourceID],
+		eventType:        headers[eventType],
+		eventTypeVersion: headers[eventTypeVersion],
+	}
+}
