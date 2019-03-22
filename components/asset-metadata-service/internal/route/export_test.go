@@ -5,4 +5,3 @@ import "github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extra
 func (h *ExtractHandler) SetMetadataExtractor(metadataExtractor extractor.Extractor) {
 	h.metadataExtractor = metadataExtractor
 }
-

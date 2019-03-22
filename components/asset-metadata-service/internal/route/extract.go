@@ -4,12 +4,13 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
 	"mime/multipart"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"

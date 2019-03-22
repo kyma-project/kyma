@@ -117,7 +117,7 @@ func (e *Processor) processFile(job Job) (*ResultSuccess, error) {
 
 	result := &ResultSuccess{
 		FilePath: job.FilePath,
-		Output: res,
+		Output:   res,
 	}
 
 	return result, nil

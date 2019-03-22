@@ -4,9 +4,10 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/internal/route"
 	"net/http"
 	"time"
+
+	"github.com/kyma-project/kyma/components/asset-metadata-service/internal/route"
 
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/signal"

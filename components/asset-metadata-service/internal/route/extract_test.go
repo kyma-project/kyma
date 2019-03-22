@@ -3,8 +3,6 @@ package route_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/internal/route"
-	"github.com/onsi/gomega/gstruct"
 	"io"
 	"mime/multipart"
 	"net/http"
@@ -13,6 +11,9 @@ import (
 	"path/filepath"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/components/asset-metadata-service/internal/route"
+	"github.com/onsi/gomega/gstruct"
 
 	"github.com/onsi/gomega"
 )
@@ -33,34 +34,21 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 			},
 		}
 
-		expectedResult := []struct {
-			FilePath string
-			MetadataKeys gstruct.Keys
-		}{
+		expectedSuccess := []ExpectedSuccess{
 			{
 				FilePath: files[1].FieldName,
-				//Metadata: map[string]interface{}{
-				//	"title": "Hello world",
-				//	"number": 9,
-				//	"url": "https://kyma-project.io",
-				//},
 				MetadataKeys: gstruct.Keys{
-					"title": gomega.Equal("Hello world"),
+					"title":  gomega.Equal("Hello world"),
 					"number": gomega.Equal(float64(9)),
-					"url": gomega.Equal("https://kyma-project.io"),
+					"url":    gomega.Equal("https://kyma-project.io"),
 				},
 			},
 			{
 				FilePath: files[0].FieldName,
-				//Metadata: map[string]interface{}{
-				//	"title": "Access logs",
-				//	"type": "Details",
-				//	"no": 3,
-				//},
 				MetadataKeys: gstruct.Keys{
 					"title": gomega.Equal("Access logs"),
-					"type": gomega.Equal("Details"),
-					"no": gomega.Equal(float64(3)),
+					"type":  gomega.Equal("Details"),
+					"no":    gomega.Equal(float64(3)),
 				},
 			},
 		}
@@ -72,23 +60,9 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 		// Then
 
 		g.Expect(httpResp.StatusCode).Should(gomega.Equal(http.StatusOK))
-		g.Expect(result.Data).To(gomega.HaveLen(len(files)))
 		g.Expect(result.Errors).To(gomega.BeEmpty())
 
-		for _, successResult := range result.Data {
-			idx := -1
-			for index, expected := range expectedResult {
-				if expected.FilePath == successResult.FilePath {
-					idx = index
-				}
-			}
-
-			if idx == -1 {
-				t.Errorf("Unexpected item with FilePath %s", successResult.FilePath)
-			}
-
-			g.Expect(successResult.Metadata).To(gstruct.MatchAllKeys(expectedResult[idx].MetadataKeys))
-		}
+		assertResponseDataEqual(t, g, result.Data, expectedSuccess)
 	})
 
 	t.Run("No files to process", func(t *testing.T) {
@@ -120,18 +94,18 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 			},
 		}
 
-		expectedResult := []route.ResultSuccess{
+		expectedSuccess := []ExpectedSuccess{
 			{
 				FilePath: files[0].FieldName,
-				Metadata: map[string]interface{}{
-					"title": "Access logs",
-					"type":  "Details",
-					"no":    3,
+				MetadataKeys: gstruct.Keys{
+					"title": gomega.Equal("Access logs"),
+					"type":  gomega.Equal("Details"),
+					"no":    gomega.Equal(float64(3)),
 				},
 			},
 		}
 		expectedErrors := []route.ResultError{
-			{Message: "Error while uploading file `test/sample.txt` into `private`: Test err 1", FilePath: "sample.txt"},
+			{Message: "Error while processing file `/testdata/error.md`: while reading metadata from file error.md: front: unknown delim", FilePath: "/testdata/error.md"},
 		}
 
 		// When
@@ -140,9 +114,7 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 		// Then
 		g.Expect(httpResp.StatusCode).To(gomega.Equal(http.StatusMultiStatus))
 
-		for _, file := range expectedResult {
-			g.Expect(result.Data).To(gomega.ContainElement(file))
-		}
+		assertResponseDataEqual(t, g, result.Data, expectedSuccess)
 
 		for _, responseError := range expectedErrors {
 			g.Expect(result.Errors).To(gomega.ContainElement(responseError))
@@ -185,6 +157,11 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 type RequestFile struct {
 	Path      string
 	FieldName string
+}
+
+type ExpectedSuccess struct {
+	FilePath     string
+	MetadataKeys gstruct.Keys
 }
 
 func testServeHTTP(g *gomega.GomegaWithT, files []RequestFile) (*http.Response, route.Response) {
@@ -250,4 +227,22 @@ func fixRequest(files []RequestFile) (*http.Request, error) {
 	rq.Header.Add("Content-Type", writer.FormDataContentType())
 
 	return rq, nil
+}
+
+func assertResponseDataEqual(t *testing.T, g *gomega.GomegaWithT, respData []route.ResultSuccess, expectedSuccess []ExpectedSuccess) {
+	g.Expect(respData).To(gomega.HaveLen(len(expectedSuccess)))
+	for _, successResult := range respData {
+		idx := -1
+		for index, expected := range expectedSuccess {
+			if expected.FilePath == successResult.FilePath {
+				idx = index
+			}
+		}
+
+		if idx == -1 {
+			t.Errorf("Unexpected item with FilePath %s", successResult.FilePath)
+		}
+
+		g.Expect(successResult.Metadata).To(gstruct.MatchAllKeys(expectedSuccess[idx].MetadataKeys))
+	}
 }

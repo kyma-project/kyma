@@ -47,4 +47,3 @@ func (e *extractor) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]i
 
 	return metadata, nil
 }
-

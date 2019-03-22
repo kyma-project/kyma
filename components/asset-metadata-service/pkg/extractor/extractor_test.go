@@ -2,9 +2,9 @@ package extractor_test
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader"
 	fautomock "github.com/kyma-project/kyma/components/asset-metadata-service/pkg/fileheader/automock"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor"
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"os"
@@ -14,9 +14,9 @@ import (
 
 func TestExtractor_ReadMetadata(t *testing.T) {
 	testCases := []struct {
-		Name             string
-		Path             string
-		ExpectedMetadata map[string]interface{}
+		Name                 string
+		Path                 string
+		ExpectedMetadata     map[string]interface{}
 		ExpectedErrorMessage string
 	}{
 		{
@@ -24,27 +24,27 @@ func TestExtractor_ReadMetadata(t *testing.T) {
 			Path: "./testdata/success.md",
 			ExpectedMetadata: map[string]interface{}{
 				"title": "Access logs",
-				"type": "Details",
-				"no": 3,
+				"type":  "Details",
+				"no":    3,
 			},
 		},
 		{
 			Name: "YAML success",
 			Path: "./testdata/success.yaml",
 			ExpectedMetadata: map[string]interface{}{
-				"title": "Hello world",
+				"title":  "Hello world",
 				"number": 9,
-				"url": "https://kyma-project.io",
+				"url":    "https://kyma-project.io",
 			},
 		},
 		{
-			Name: "Markdown error",
-			Path: "./testdata/error.md",
+			Name:                 "Markdown error",
+			Path:                 "./testdata/error.md",
 			ExpectedErrorMessage: "while reading metadata from file fileName.md",
 		},
 		{
-			Name: "YAML error",
-			Path: "./testdata/error.yaml",
+			Name:                 "YAML error",
+			Path:                 "./testdata/error.yaml",
 			ExpectedErrorMessage: "while reading metadata from file fileName.md",
 		},
 	}

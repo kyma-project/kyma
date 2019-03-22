@@ -3,8 +3,8 @@ package processor_test
 import (
 	"context"
 	"errors"
-	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
 	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/extractor/automock"
+	"github.com/kyma-project/kyma/components/asset-metadata-service/pkg/processor"
 	"testing"
 	"time"
 
@@ -73,13 +73,12 @@ func TestProcessor_Do(t *testing.T) {
 		}, nil).Once()
 		defer extractorMock.AssertExpectations(t)
 
-
 		e := processor.New(func(job processor.Job) (interface{}, error) {
 			return extractorMock.ReadMetadata(job.File)
 		}, 5, timeout)
 
 		// When
-		res, errs := e.Do(context.TODO(),jobCh, jobCount)
+		res, errs := e.Do(context.TODO(), jobCh, jobCount)
 
 		// Then
 		g.Expect(errs).To(gomega.BeEmpty())
@@ -132,7 +131,7 @@ func TestProcessor_Do(t *testing.T) {
 		}, 5, timeout)
 
 		// When
-		_, errs := e.Do(context.TODO(),jobCh, jobCount)
+		_, errs := e.Do(context.TODO(), jobCh, jobCount)
 
 		// Then
 		g.Expect(errs).To(gomega.HaveLen(2))
