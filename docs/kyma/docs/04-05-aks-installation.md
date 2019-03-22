@@ -13,7 +13,7 @@ By default, Kyma is installed on an AKS cluster with a wildcard DNS provided by 
 - Tiller 2.10.0 or higher
 - [Docker](https://www.docker.com/)
 - [Docker Hub](https://hub.docker.com/) account
-- [az](https://docs.microsoft.com/pl-pl/cli/azure/install-azure-cli)
+- [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 - A domain for your AKS cluster (optional)
 
 ## Prepare the AKS cluster
