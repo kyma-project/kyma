@@ -13,5 +13,5 @@ Kyma takes the concept of the Headless CMS into a higher, cloud-native level. It
 The Headless CMS brings a number of benefits:
 
 - It provides a unified way of uploading different documentation types on a Kyma cluster.
-- It fits the Kyma modularity concept as you load onto a cluster only documentation for the installed components. This is possible as the DocsTopic CR and code for a given component go together in the `kyma` repository.
+- It fits in the Kyma modularity concept as you load onto a cluster only documentation for the installed components. This is possible as the DocsTopic CR and code for a given component go together in the `kyma` repository.
 - It supports baked-in documentation. Apart from the default documentation, you can add your own and group it as you like, the same way you personalize views in the Console UI with micro frontends. For example, you can add contextual help for a given Service Broker in the Service Catalog.
