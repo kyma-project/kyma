@@ -123,52 +123,28 @@ metadata:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: helm-certs-sa
+  name: tiller-certs-sa
   namespace: kube-system
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: helm-certs-rolebinding
+  name: tiller-certs
   namespace: kube-system
 subjects:
 - kind: ServiceAccount
-  name: helm-certs-sa
+  name: tiller-certs-sa
   namespace: kube-system
 roleRef:
   kind: Role
-  name: helm-certs-installer
-  apiGroup: rbac.authorization.k8s.io
----
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: helm-certs-rolebinding
-  namespace: kyma-installer
-subjects:
-- kind: ServiceAccount
-  name: helm-certs-sa
-  namespace: kube-system
-roleRef:
-  kind: Role
-  name: helm-certs-installer
+  name: tiller-certs-installer
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: helm-certs-installer
+  name: tiller-certs-installer
   namespace: kube-system
-rules:
-- apiGroups: [""]
-  resources: ["secrets"]
-  verbs: ["get", "list", "create", "patch"]
----
-kind: Role
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: helm-certs-installer
-  namespace: kyma-installer
 rules:
 - apiGroups: [""]
   resources: ["secrets"]
@@ -177,19 +153,19 @@ rules:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: helm-certs-job
+  name: tiller-certs-job
   namespace: kube-system
   labels:
     kyma-project.io/installation: ""
 spec:
   template:
     metadata:
-      name: helm-certs-job
+      name: tiller-certs-job
       namespace: kube-system
       annotations:
         sidecar.istio.io/inject: “false”
     spec:
-      serviceAccountName: helm-certs-sa
+      serviceAccountName: tiller-certs-sa
       restartPolicy: OnFailure
       containers:
       - name: certhelper
@@ -241,17 +217,13 @@ spec:
             openssl req -key "${WORKING_DIR}/tiller.key.pem" -new -sha256 -out "${WORKING_DIR}/tiller.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Tiller Server/CN=tiller-server"
             openssl x509 -req -CA "${WORKING_DIR}/ca.cert.pem" -CAkey "${WORKING_DIR}/ca.key.pem" -CAcreateserial -in "${WORKING_DIR}/tiller.csr.pem" -out "${WORKING_DIR}/tiller.cert.pem" -days 365
 
-            echo "---> Generate Helm key"
-            openssl genrsa -out "${WORKING_DIR}/helm.key.pem" 4096
-            openssl req -key "${WORKING_DIR}/helm.key.pem" -new -sha256 -out "${WORKING_DIR}/helm.csr.pem" -subj "/C=PL/ST=Gliwice/L=Gliwice/O=Helm Client/CN=helm-client"
-            openssl x509 -req -CA "${WORKING_DIR}/ca.cert.pem" -CAkey "${WORKING_DIR}/ca.key.pem" -CAcreateserial -in "${WORKING_DIR}/helm.csr.pem" -out "${WORKING_DIR}/helm.cert.pem" -days 365
-
             echo "---> Create secrets in k8s"
             COMBO_YAML=$(cat << EOF
             ---
             apiVersion: v1
             data:
               ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem | tr -d '\n')"
+              ca.key: "$(base64 ${WORKING_DIR}/ca.key.pem | tr -d '\n')"
               tls.crt: "$(base64 ${WORKING_DIR}/tiller.cert.pem | tr -d '\n')"
               tls.key: "$(base64 ${WORKING_DIR}/tiller.key.pem | tr -d '\n')"
             kind: Secret
@@ -262,21 +234,6 @@ spec:
                 name: tiller
               name: tiller-secret
               namespace: kube-system
-            type: Opaque
-            ---
-            apiVersion: v1
-            data:
-              global.helm.ca.crt: "$(base64 ${WORKING_DIR}/ca.cert.pem | tr -d '\n')"
-              global.helm.tls.crt: "$(base64 ${WORKING_DIR}/helm.cert.pem | tr -d '\n')"
-              global.helm.tls.key: "$(base64 ${WORKING_DIR}/helm.key.pem | tr -d '\n')"
-            kind: Secret
-            metadata:
-              creationTimestamp: null
-              labels:
-                installer: overrides
-                kyma-project.io/installation: ""
-              name: helm-secret
-              namespace: kyma-installer
             type: Opaque
             EOF
             )
