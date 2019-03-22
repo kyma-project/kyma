@@ -95,7 +95,7 @@ func (uc uploadClient) executeRequest(r *http.Request) (*http.Response, apperror
 	case http.StatusOK:
 		return res, nil
 	case http.StatusNotFound:
-		log.Errorf("Failed to call Upload Service: not found.", err.Error())
+		log.Errorf("Failed to call Upload Service: not found.")
 		return nil, apperrors.NotFound("Upload Service call failed.")
 	default:
 		log.Errorf("Failed to call Upload Service: unexpected status: %s", res.Status)
