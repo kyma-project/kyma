@@ -10,6 +10,9 @@ global:
   asset_upload_service:
     dir: develop/
     version: 8a8b2544
+  asset_metadata_service:
+    dir: pr/ # TODO: Change
+    version: PR-3310 # TODO: Change
   asset_store_test:
     dir: develop/
     version: daf235a6
