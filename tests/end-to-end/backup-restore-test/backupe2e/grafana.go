@@ -42,6 +42,7 @@ const (
 	grafanaPodName         = "monitoring-grafana-0"
 	grafanaServiceName     = "monitoring-grafana"
 	grafanaStatefulsetName = "monitoring-grafana"
+	grafanaPvcName         = "monitoring-grafana"
 	adminUserSecretName    = "admin-user"
 	containerName          = "grafana"
 	grafanaLabelSelector   = "app=monitoring-grafana"
@@ -85,11 +86,11 @@ func NewGrafanaTest() (*grafanaTest, error) {
 	}
 
 	return &grafanaTest{
-		coreClient:  coreClient,
-		grafanaName: "grafana",
-		uuid:        uuid.New().String(),
-		beforeBackup :      true,
-		grafana:     grafana{loginForm: url.Values{}},
+		coreClient:   coreClient,
+		grafanaName:  "grafana",
+		uuid:         uuid.New().String(),
+		beforeBackup: true,
+		grafana:      grafana{loginForm: url.Values{}},
 	}, nil
 }
 
@@ -112,7 +113,9 @@ func (t *grafanaTest) DeleteResources() {
 	err = t.deletePod(grafanaNS, grafanaPodName, grafanaLabelSelector)
 	So(err, ShouldBeNil)
 
-	//time.Sleep(10 * time.Second)
+	err = t.deletePVC(grafanaNS, grafanaPvcName, grafanaLabelSelector)
+	So(err, ShouldBeNil)
+
 	//err1 := t.waitForPodGrafana(2 * time.Minute)
 	//So(err1, ShouldBeError) // An error is expected.
 
@@ -143,8 +146,8 @@ func (t *grafanaTest) TestResources(namespace string) {
 	So(err, ShouldBeNil)
 
 	// Query to api
-	if t.beforeBackup  {
-		t.beforeBackup  = false
+	if t.beforeBackup {
+		t.beforeBackup = false
 		dashboardFolders := make([]map[string]interface{}, 0)
 		err = json.Unmarshal(dataBody, &dashboardFolders)
 		So(err, ShouldBeNil)
@@ -219,8 +222,27 @@ func (t *grafanaTest) deletePod(namespace, podName, labelSelector string) error 
 
 	for _, pod := range podList.Items {
 		if pod.Name == podName {
-			// Delete Pod
 			err = t.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
+}
+
+func (t *grafanaTest) deletePVC(namespace, pvcName, labelSelector string) error {
+
+	pvcList, err := t.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, pvc := range pvcList.Items {
+		if pvc.Name == pvcName {
+			err = t.coreClient.CoreV1().PersistentVolumeClaims(namespace).Delete(pvcName, &metav1.DeleteOptions{})
 			if err != nil {
 				return err
 			}

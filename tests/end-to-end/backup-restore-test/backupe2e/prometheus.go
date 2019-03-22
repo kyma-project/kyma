@@ -49,6 +49,7 @@ const (
 	prometheusPodName         = "prometheus-monitoring-0"
 	prometheusServiceName     = "monitoring-prometheus"
 	prometheusStatefulsetName = "prometheus-monitoring"
+	prometheusPvcName         = "prometheus-monitoring-db-prometheus-monitoring-0"
 	prometheusLabelSelector   = "app=prometheus"
 )
 
@@ -220,7 +221,9 @@ func (t *prometheusTest) DeleteResources() {
 	err = t.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
 	So(err, ShouldBeNil)
 
-	//time.Sleep(10 * time.Second)
+	err = t.deletePVC(prometheusNS, prometheusPvcName, prometheusLabelSelector)
+	So(err, ShouldBeNil)
+
 	//err1 := t.waitForPodPrometheus(2 * time.Minute)
 	//So(err1, ShouldBeError) // An error is expected.
 
@@ -328,6 +331,26 @@ func (t *prometheusTest) deletePod(namespace, podName, labelSelector string) err
 		if pod.Name == podName {
 			// Delete Pod
 			err = t.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
+}
+
+func (t *prometheusTest) deletePVC(namespace, pvcName, labelSelector string) error {
+
+	pvcList, err := t.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, pvc := range pvcList.Items {
+		if pvc.Name == pvcName {
+			err = t.coreClient.CoreV1().PersistentVolumeClaims(namespace).Delete(pvcName, &metav1.DeleteOptions{})
 			if err != nil {
 				return err
 			}
