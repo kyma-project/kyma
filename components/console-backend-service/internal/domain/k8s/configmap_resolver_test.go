@@ -1,8 +1,10 @@
 package k8s_test
 
 import (
+	"context"
 	"errors"
 	"testing"
+	"time"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
@@ -10,6 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
 )
@@ -401,5 +404,38 @@ func TestConfigMapResolver_DeleteConfigMapMutation(t *testing.T) {
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
 		assert.Nil(t, result)
+	})
+}
+
+func TestConfigMapResolver_ConfigMapEventSubscription(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
+		cancel()
+
+		svc := automock.NewConfigMapSvc()
+		svc.On("Subscribe", mock.Anything).Once()
+		svc.On("Unsubscribe", mock.Anything).Once()
+		resolver := k8s.NewConfigMapResolver(svc)
+
+		_, err := resolver.ConfigMapEventSubscription(ctx, "test")
+
+		require.NoError(t, err)
+		svc.AssertCalled(t, "Subscribe", mock.Anything)
+	})
+
+	t.Run("Unsubscribe after connection close", func(t *testing.T) {
+		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
+		cancel()
+
+		svc := automock.NewConfigMapSvc()
+		svc.On("Subscribe", mock.Anything).Once()
+		svc.On("Unsubscribe", mock.Anything).Once()
+		resolver := k8s.NewConfigMapResolver(svc)
+
+		channel, err := resolver.ConfigMapEventSubscription(ctx, "test")
+		<-channel
+
+		require.NoError(t, err)
+		svc.AssertCalled(t, "Unsubscribe", mock.Anything)
 	})
 }

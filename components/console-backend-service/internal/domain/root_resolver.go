@@ -447,6 +447,10 @@ func (r *subscriptionResolver) ServiceEvent(ctx context.Context, namespace strin
 	return r.k8s.ServiceEventSubscription(ctx, namespace)
 }
 
+func (r *subscriptionResolver) ConfigMapEvent(ctx context.Context, namespace string) (<-chan gqlschema.ConfigMapEvent, error) {
+	return r.k8s.ConfigMapEventSubscription(ctx, namespace)
+}
+
 // Service Instance
 
 type serviceInstanceResolver struct {
