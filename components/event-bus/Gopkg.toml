@@ -74,6 +74,11 @@ required = [
   name = "github.com/apache/thrift"
 
 [[override]]
+  name = "github.com/knative/pkg"
+  # HEAD as of 2019-02-14
+  revision = "0183bf9cdc7349e3c76c26e51f84689b411fccea"
+
+[[override]]
   name = "github.com/knative/eventing"
   version = "v0.4.1"
 

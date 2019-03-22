@@ -62,8 +62,8 @@ func NewResourceConverter() *resourceConverter {
 
 // Service
 
-func NewServiceService(informer cache.SharedIndexInformer) *serviceService {
-	return newServiceService(informer)
+func NewServiceService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) *serviceService {
+	return newServiceService(informer, client)
 }
 
 func NewServiceResolver(svc serviceSvc) *serviceResolver {

@@ -12,6 +12,8 @@ spec:
   components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
+    - name: "istio-init"
+      namespace: "istio-system"
     - name: "istio"
       namespace: "istio-system"
     - name: "xip-patch"

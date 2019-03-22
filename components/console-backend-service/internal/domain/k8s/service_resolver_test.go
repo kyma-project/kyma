@@ -182,3 +182,176 @@ func TestServiceResolver_ServiceEventSubscription(t *testing.T) {
 		svc.AssertCalled(t, "Unsubscribe", mock.Anything)
 	})
 }
+
+func TestServiceResolver_UpdateServiceMutation(t *testing.T) {
+	assert := assert.New(t)
+	t.Run("Success", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		updatedServiceFix := fixService(name, namespace, map[string]string{
+			"test": "test",
+		})
+		updatedGQLServiceFix := &gqlschema.Service{
+			Name: name,
+			Labels: map[string]string{
+				"test": "test",
+			},
+		}
+		gqlJSONFix := gqlschema.JSON{}
+
+		serviceSvc := automock.NewServiceSvc()
+		serviceSvc.On("Update", name, namespace, *updatedServiceFix).Return(updatedServiceFix, nil).Once()
+		defer serviceSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlServiceConverter()
+		converter.On("GQLJSONToService", gqlJSONFix).Return(*updatedServiceFix, nil).Once()
+		converter.On("ToGQL", updatedServiceFix).Return(updatedGQLServiceFix, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewServiceResolver(serviceSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdateServiceMutation(nil, name, namespace, gqlJSONFix)
+
+		require.NoError(t, err)
+		assert.Equal(updatedGQLServiceFix, result)
+	})
+
+	t.Run("ErrorConvertingToService", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		gqlJSONFix := gqlschema.JSON{}
+		expected := errors.New("fix")
+
+		serviceSvc := automock.NewServiceSvc()
+
+		converter := automock.NewGqlServiceConverter()
+		converter.On("GQLJSONToService", gqlJSONFix).Return(v1.Service{}, expected).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewServiceResolver(serviceSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdateServiceMutation(nil, name, namespace, gqlJSONFix)
+
+		require.Error(t, err)
+		assert.True(gqlerror.IsInternal(err))
+		assert.Nil(result)
+	})
+
+	t.Run("ErrorUpdating", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		updatedServiceFix := fixService(name, namespace, map[string]string{
+			"test": "test",
+		})
+		gqlJSONFix := gqlschema.JSON{}
+		expected := errors.New("fix")
+
+		serviceSvc := automock.NewServiceSvc()
+		serviceSvc.On("Update", name, namespace, *updatedServiceFix).Return(nil, expected).Once()
+		defer serviceSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlServiceConverter()
+		converter.On("GQLJSONToService", gqlJSONFix).Return(*updatedServiceFix, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewServiceResolver(serviceSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.UpdateServiceMutation(nil, name, namespace, gqlJSONFix)
+
+		require.Error(t, err)
+		assert.Nil(result)
+	})
+}
+
+func TestServiceResolver_DeleteServiceMutation(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		resource := fixService(name, namespace, nil)
+		expected := &gqlschema.Service{
+			Name: name,
+		}
+
+		serviceSvc := automock.NewServiceSvc()
+		serviceSvc.On("Find", name, namespace).Return(resource, nil).Once()
+		serviceSvc.On("Delete", name, namespace).Return(nil).Once()
+		defer serviceSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlServiceConverter()
+		converter.On("ToGQL", resource).Return(expected, nil).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewServiceResolver(serviceSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.DeleteServiceMutation(nil, name, namespace)
+
+		require.NoError(t, err)
+		assert.Equal(t, expected, result)
+	})
+
+	t.Run("NotFound", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		expected := errors.New("fix")
+
+		serviceSvc := automock.NewServiceSvc()
+		serviceSvc.On("Find", name, namespace).Return(nil, expected).Once()
+		defer serviceSvc.AssertExpectations(t)
+
+		resolver := k8s.NewServiceResolver(serviceSvc)
+
+		result, err := resolver.DeleteServiceMutation(nil, name, namespace)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("ErrorDeleting", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		resource := fixService(name, namespace, nil)
+		expected := errors.New("fix")
+
+		serviceSvc := automock.NewServiceSvc()
+		serviceSvc.On("Find", name, namespace).Return(resource, nil).Once()
+		serviceSvc.On("Delete", name, namespace).Return(expected).Once()
+		defer serviceSvc.AssertExpectations(t)
+
+		resolver := k8s.NewServiceResolver(serviceSvc)
+
+		result, err := resolver.DeleteServiceMutation(nil, name, namespace)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("ErrorConverting", func(t *testing.T) {
+		name := "exampleName"
+		namespace := "exampleNamespace"
+		resource := fixService(name, namespace, nil)
+		error := errors.New("fix")
+
+		serviceSvc := automock.NewServiceSvc()
+		serviceSvc.On("Find", name, namespace).Return(resource, nil).Once()
+		defer serviceSvc.AssertExpectations(t)
+
+		converter := automock.NewGqlServiceConverter()
+		converter.On("ToGQL", resource).Return(nil, error).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewServiceResolver(serviceSvc)
+		resolver.SetInstanceConverter(converter)
+
+		result, err := resolver.DeleteServiceMutation(nil, name, namespace)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+}
