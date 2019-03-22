@@ -9,7 +9,7 @@ The Headless CMS in Kyma consists of these components:
 - **DocsTopic custom resource** (CR) is a resource used to orchestrate the creation of multiple Asset CRs for a specific documentation topic in a given Namespace. It has a cluster-wide counterpart called **ClusterDocsTopic CR**.
 
 - **DocsTopic Controller** creates the Asset custom resources (CRs) based on the DocsTopic CR definition. If the DocsTopic CR defines two sources of the documentation topics, such as `asyncapi` and `markdown`, the DocsTopic Controller creates two Asset CRs.
-The Documentation Controller also monitors the status of the Asset CR and updates the status of the DocsTopic CR accordingly.
+The DocsTopic Controller also monitors the status of the Asset CR and updates the status of the DocsTopic CR accordingly.
 
 ## Headless CMS flow
 
