@@ -132,13 +132,14 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 }
 
 func (r *TestRunner) executeTaskFunc(taskHandler taskFn, stopCh <-chan struct{}, header, taskName string, createNs bool) bool {
+	fullHeader := fmt.Sprintf("[%s: %s]", header, taskName)
+
 	taskLog, err := r.newLoggerForTask()
 	if err != nil {
-		r.log.Errorf("Cannot create uuid, the task won't be started, got err: %v", err)
+		r.log.Errorf("%s Cannot create uuid, the task won't be started, got err: %v", fullHeader, err)
 		return true
 	}
 
-	fullHeader := fmt.Sprintf("[%s: %s]", header, taskName)
 	if r.shutdownRequested(stopCh) {
 		taskLog.Debugf("Stop channel called. Not executing %s", fullHeader)
 		return true
