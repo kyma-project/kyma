@@ -370,6 +370,7 @@ type ComplexityRoot struct {
 		EventActivations      func(childComplexity int, namespace string) int
 		LimitRanges           func(childComplexity int, namespace string) int
 		BackendModules        func(childComplexity int) int
+		Secret                func(childComplexity int, name string, namespace string) int
 		Secrets               func(childComplexity int, namespace string, first *int, offset *int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
@@ -720,6 +721,7 @@ type QueryResolver interface {
 	EventActivations(ctx context.Context, namespace string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, namespace string) ([]LimitRange, error)
 	BackendModules(ctx context.Context) ([]BackendModule, error)
+	Secret(ctx context.Context, name string, namespace string) (*Secret, error)
 	Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]Secret, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
@@ -2296,6 +2298,30 @@ func field_Query_limitRanges_args(rawArgs map[string]interface{}) (map[string]in
 		}
 	}
 	args["namespace"] = arg0
+	return args, nil
+
+}
+
+func field_Query_secret_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
 	return args, nil
 
 }
@@ -4230,6 +4256,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.BackendModules(childComplexity), true
+
+	case "Query.secret":
+		if e.complexity.Query.Secret == nil {
+			break
+		}
+
+		args, err := field_Query_secret_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Secret(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
 	case "Query.secrets":
 		if e.complexity.Query.Secrets == nil {
@@ -12611,6 +12649,12 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "secret":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_secret(ctx, field)
+				wg.Done()
+			}(i, field)
 		case "secrets":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -14446,6 +14490,41 @@ func (ec *executionContext) _Query_backendModules(ctx context.Context, field gra
 	}
 	wg.Wait()
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_secret(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_secret_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Secret(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Secret)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Secret(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -22825,15 +22904,15 @@ scalar Timestamp
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
 input ResourceAttributes {
-	verb: String!
-	apiGroup: String
-	apiVersion: String
-	resource: String
+    verb: String!
+    apiGroup: String
+    apiVersion: String
+    resource: String
     resourceArg: String
-	subresource: String! = ""
-	nameArg: String
-	namespaceArg: String
-	isChildResolver: Boolean! = false
+    subresource: String! = ""
+    nameArg: String
+    namespaceArg: String
+    isChildResolver: Boolean! = false
 }
 
 # Content
@@ -23493,7 +23572,7 @@ type Query {
     clusterServiceBroker(name: String!): ClusterServiceBroker
     serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
     serviceBroker(name: String!, namespace: String!): ServiceBroker
-    
+
     serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
     serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
@@ -23533,7 +23612,8 @@ type Query {
 
     backendModules: [BackendModule!]!
 
-    secrets(namespace: String!, first: Int, offset: Int): [Secret!]!
+    secret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secrets(namespace: String!, first: Int, offset: Int): [Secret!]!  @HasAccess(attributes: {resource: "secrets", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
@@ -23581,7 +23661,7 @@ type Subscription {
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    secretEvent(namespace: String!): SecretEvent!
+    secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
 # Schema

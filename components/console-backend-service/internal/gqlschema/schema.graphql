@@ -11,15 +11,15 @@ scalar Timestamp
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
 input ResourceAttributes {
-	verb: String!
-	apiGroup: String
-	apiVersion: String
-	resource: String
+    verb: String!
+    apiGroup: String
+    apiVersion: String
+    resource: String
     resourceArg: String
-	subresource: String! = ""
-	nameArg: String
-	namespaceArg: String
-	isChildResolver: Boolean! = false
+    subresource: String! = ""
+    nameArg: String
+    namespaceArg: String
+    isChildResolver: Boolean! = false
 }
 
 # Content
@@ -679,7 +679,7 @@ type Query {
     clusterServiceBroker(name: String!): ClusterServiceBroker
     serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
     serviceBroker(name: String!, namespace: String!): ServiceBroker
-    
+
     serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
     serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
@@ -719,7 +719,8 @@ type Query {
 
     backendModules: [BackendModule!]!
 
-    secrets(namespace: String!, first: Int, offset: Int): [Secret!]!
+    secret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secrets(namespace: String!, first: Int, offset: Int): [Secret!]!  @HasAccess(attributes: {resource: "secrets", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
@@ -767,7 +768,7 @@ type Subscription {
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    secretEvent(namespace: String!): SecretEvent!
+    secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
 # Schema

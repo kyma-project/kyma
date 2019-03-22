@@ -400,6 +400,11 @@ func (r *queryResolver) IDPPresets(ctx context.Context, first *int, offset *int)
 func (r *queryResolver) BackendModules(ctx context.Context) ([]gqlschema.BackendModule, error) {
 	return r.ui.BackendModulesQuery(ctx)
 }
+
+func (r *queryResolver) Secret(ctx context.Context, name, namespace string) (*gqlschema.Secret, error) {
+	return r.k8s.SecretQuery(ctx, name, namespace)
+}
+
 func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Secret, error) {
 	return r.k8s.SecretsQuery(ctx, namespace, first, offset)
 }

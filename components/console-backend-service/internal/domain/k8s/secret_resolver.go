@@ -20,8 +20,6 @@ import (
 type secretSvc interface {
 	Find(name, namespace string) (*v1.Secret, error)
 	List(namespace string, params pager.PagingParams) ([]*v1.Secret, error)
-	//Update(name, namespace string, update v1.Secret) (*v1.Secret, error)
-	//Delete(name, namespace string) error
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
 }
