@@ -47,7 +47,7 @@ To access the Application Connector and connect an external solution to the loca
 
 You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. Read [this](/root/kyma#installation-custom-component-installation) document to learn how to install only the selected subcomponents.
 
-> **NOTE:** Running the installation script deletes any previously existing cluster from your Minikube.
+> **CAUTION:** Running the installation script deletes any previously existing cluster from your Minikube.
 
 > **NOTE:** Logging and Monitoring subcomponents are not included by default when you install Kyma on Minikube. You can install them using the instructions provided [here](https://github.com/kyma-project/kyma/tree/master/resources).
 
@@ -123,24 +123,6 @@ kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | ba
 
 * Click the **Namespaces** section and select a Namespace from the drop-down menu to explore Kyma further.
 
-### Access the Kubernetes Dashboard
-
-Additionally, confirm that you can access your Kubernetes Dashboard. Run the following command to check the IP address on which Minikube is running:
-
-```bash
-minikube ip
-```
-
-The address of your Kubernetes Dashboard looks similar to this:
-```
-http://{ip-address}:30000
-```
-
-See the example of the website address:
-
-```
-http://192.168.64.44:30000
-```
 
 ## Enable Horizontal Pod Autoscaler (HPA)
 

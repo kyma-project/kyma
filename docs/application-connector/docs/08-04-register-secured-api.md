@@ -7,6 +7,8 @@ The Application Registry allows you to register a secured API for every service.
 
 You can specify only one authentication method for every secured API you register. If you try to register and specify more than one authentication method, the Application Registry returns a `400` code response.
 
+Additionally, you can secure the API against cross-site request forgery (CSRF) attacks. CSRF tokens are an additional layer of protection and can accompany any authentication method.  
+
 >**NOTE:** Registering a secured API is a part of registering services of an external solution connected to Kyma. To learn more about this process, follow [this](#tutorials-register-a-service) tutorial.
 
 ## Register a Basic Authentication-secured API
@@ -109,4 +111,30 @@ If the API you registered provides a certificate-key pair or the generated certi
 kubectl -n kyma-integration patch secrets app-{APP_NAME}-{SERVICE_ID} --patch 'data:
   crt: {BASE64_ENCODED_CRT}
   key: {BASE64_ENCODED_KEY}'
+```
+
+## Register a CSRF-protected API
+
+The Application Registry supports CSRF tokens as an additional layer of API protection. To register a CSRF-protected API, add the `credentials.{AUTHENTICATION_METHOD}.csrfInfo` object to the `api` section of the service registration request body.
+
+Include this field in the service registration request body:
+
+| Field | Description |
+|:-----:|:-----------:|
+| **tokenEndpointURL** | The URL to the upstream service endpoint that exposes CSRF tokens. |
+
+This is an example of the `api` section of the request body for an API secured with both Basic Authentication and a CSRF token.
+
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "credentials": {
+            "basic": {
+                "username": "{USERNAME}",
+                "password": "{PASSWORD}",
+                "csrfInfo": {
+                    "tokenEndpointURL": "{TOKEN_ENDPOINT_URL}"
+                }
+            },
+        }
 ```

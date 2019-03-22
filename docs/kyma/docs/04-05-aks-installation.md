@@ -5,7 +5,7 @@ type: Installation
 
 This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster. Kyma is installed on a cluster using a proprietary installer based on a Kubernetes operator.
 
-By default, Kyma is installed on an AKS cluster with a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster. 
+By default, Kyma is installed on an AKS cluster with a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster.
 
 ## Prerequisites
 - [Microsoft Azure](https://azure.microsoft.com)
@@ -60,7 +60,7 @@ Set the following environment variables:
 
 ## DNS setup and TLS certificate generation
 
->**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section. 
+>**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section.
 
 ### Delegate the management of your domain to Azure DNS
 
@@ -265,6 +265,8 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
 
 ## Configure DNS for the cluster load balancer
 
+>**NOTE:** Execute instructions from this section only if you want to use your own domain.
+
 Run these commands:
 
 ```
@@ -284,13 +286,6 @@ az network dns record-set a create -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.$SUB
 az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.$SUB_DOMAIN -a APISERVER_PUBLIC_IP
 ```
 
-Access your cluster under this address:
-```
-https://console.$SUB_DOMAIN.$DNS_DOMAIN
-```
-
-## Prepare your Kyma deployment for production use
-
 ## Access the cluster
 
 Access your cluster under this address:
@@ -300,4 +295,3 @@ https://console.{SUB_DOMAIN}.{DNS_DOMAIN}
 ```
 
 >**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see [this](#installation-install-kyma-locally-from-the-release-access-the-kyma-console) document.
-    ```

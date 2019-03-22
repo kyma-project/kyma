@@ -4,16 +4,20 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
-	helloworld "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/hello-world"
-
+	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	k8sclientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+
+	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
+	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 )
 
 // Config holds application configuration
@@ -32,7 +36,9 @@ func main() {
 	actionUsage := fmt.Sprintf("Define what kind of action runner should execute. Possible values: %s or %s", prepareDataActionName, executeTestsActionName)
 
 	var action string
+	var verbose bool
 	flag.StringVar(&action, "action", "", actionUsage)
+	flag.BoolVar(&verbose, "verbose", false, "Print all test logs")
 	flag.Parse()
 
 	var cfg Config
@@ -51,6 +57,18 @@ func main() {
 	k8sCli, err := k8sclientset.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating k8s clientset")
 
+	scCli, err := sc.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Service CAtalog clientset")
+
+	buCli, err := bu.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Binding Usage clientset")
+
+	appConnectorCli, err := ao.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Application Connector clientset")
+
+	appBrokerCli, err := ab.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Application Broker clientset")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 	//
@@ -58,11 +76,12 @@ func main() {
 	// Test name is sanitized and used for creating dedicated namespace for given test,
 	// so it cannot overlap with others.
 	tests := map[string]runner.UpgradeTest{
-		"HelloWorldBackupTest": helloworld.NewTest(k8sCli.AppsV1()),
+		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 	}
 
 	// Execute requested action
-	testRunner, err := runner.NewTestRunner(log, k8sCli.CoreV1().Namespaces(), tests, cfg.MaxConcurrencyLevel)
+	testRunner, err := runner.NewTestRunner(log, k8sCli.CoreV1().Namespaces(), tests, cfg.MaxConcurrencyLevel, verbose)
 	fatalOnError(err, "while creating test runner")
 
 	switch action {
