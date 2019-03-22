@@ -173,6 +173,11 @@ type ComplexityRoot struct {
 		Json              func(childComplexity int) int
 	}
 
+	ConfigMapEvent struct {
+		Type      func(childComplexity int) int
+		ConfigMap func(childComplexity int) int
+	}
+
 	ConnectorService struct {
 		Url func(childComplexity int) int
 	}
@@ -610,6 +615,7 @@ type ComplexityRoot struct {
 		ApplicationEvent          func(childComplexity int) int
 		PodEvent                  func(childComplexity int, namespace string) int
 		ServiceEvent              func(childComplexity int, namespace string) int
+		ConfigMapEvent            func(childComplexity int, namespace string) int
 	}
 
 	Title struct {
@@ -757,6 +763,7 @@ type SubscriptionResolver interface {
 	ApplicationEvent(ctx context.Context) (<-chan ApplicationEvent, error)
 	PodEvent(ctx context.Context, namespace string) (<-chan PodEvent, error)
 	ServiceEvent(ctx context.Context, namespace string) (<-chan ServiceEvent, error)
+	ConfigMapEvent(ctx context.Context, namespace string) (<-chan ConfigMapEvent, error)
 }
 
 func field_ClusterServiceClass_activated_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -2519,6 +2526,21 @@ func field_Subscription_serviceEvent_args(rawArgs map[string]interface{}) (map[s
 
 }
 
+func field_Subscription_configMapEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
 func field___Type_fields_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 bool
@@ -3104,6 +3126,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ConfigMap.Json(childComplexity), true
+
+	case "ConfigMapEvent.type":
+		if e.complexity.ConfigMapEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.ConfigMapEvent.Type(childComplexity), true
+
+	case "ConfigMapEvent.configMap":
+		if e.complexity.ConfigMapEvent.ConfigMap == nil {
+			break
+		}
+
+		return e.complexity.ConfigMapEvent.ConfigMap(childComplexity), true
 
 	case "ConnectorService.url":
 		if e.complexity.ConnectorService.Url == nil {
@@ -5316,6 +5352,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ServiceEvent(childComplexity, args["namespace"].(string)), true
+
+	case "Subscription.configMapEvent":
+		if e.complexity.Subscription.ConfigMapEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_configMapEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.ConfigMapEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Title.name":
 		if e.complexity.Title.Name == nil {
@@ -8500,6 +8548,96 @@ func (ec *executionContext) _ConfigMap_json(ctx context.Context, field graphql.C
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+var configMapEventImplementors = []string{"ConfigMapEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ConfigMapEvent(ctx context.Context, sel ast.SelectionSet, obj *ConfigMapEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, configMapEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ConfigMapEvent")
+		case "type":
+			out.Values[i] = ec._ConfigMapEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "configMap":
+			out.Values[i] = ec._ConfigMapEvent_configMap(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ConfigMapEvent_type(ctx context.Context, field graphql.CollectedField, obj *ConfigMapEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ConfigMapEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ConfigMapEvent_configMap(ctx context.Context, field graphql.CollectedField, obj *ConfigMapEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ConfigMapEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ConfigMap, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(ConfigMap)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._ConfigMap(ctx, field.Selections, &res)
 }
 
 var connectorServiceImplementors = []string{"ConnectorService"}
@@ -20095,6 +20233,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_podEvent(ctx, fields[0])
 	case "serviceEvent":
 		return ec._Subscription_serviceEvent(ctx, fields[0])
+	case "configMapEvent":
+		return ec._Subscription_configMapEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -20331,6 +20471,37 @@ func (ec *executionContext) _Subscription_serviceEvent(ctx context.Context, fiel
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ServiceEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_configMapEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_configMapEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().ConfigMapEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._ConfigMapEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -23414,6 +23585,11 @@ type ConfigMap {
     json: JSON!
 }
 
+type ConfigMapEvent {
+    type: SubscriptionEventType!
+    configMap: ConfigMap!
+}
+
 # Queries
 
 type Query {
@@ -23516,7 +23692,8 @@ type Subscription {
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
-    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}),
+    configMapEvent(namespace: String!): ConfigMapEvent!
 }
 
 # Schema

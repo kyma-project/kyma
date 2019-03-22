@@ -10,6 +10,7 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/apierror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
@@ -295,6 +296,80 @@ func TestConfigMapService_Delete(t *testing.T) {
 		require.NoError(t, err)
 		_, err = client.ConfigMaps(exampleNamespace).Get(exampleName, metav1.GetOptions{})
 		assert.True(t, errors.IsNotFound(err))
+	})
+}
+
+func TestConfigMapService_Subscribe(t *testing.T) {
+	t.Run("Simple", func(t *testing.T) {
+		configMapInformer, _ := fixConfigMapInformer()
+		svc := k8s.NewConfigMapService(configMapInformer, nil)
+		configMapListener := listener.NewConfigMap(nil, nil, nil)
+		svc.Subscribe(configMapListener)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		configMapInformer, _ := fixConfigMapInformer()
+		svc := k8s.NewConfigMapService(configMapInformer, nil)
+		configMapListener := listener.NewConfigMap(nil, nil, nil)
+
+		svc.Subscribe(configMapListener)
+		svc.Subscribe(configMapListener)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		configMapInformer, _ := fixConfigMapInformer()
+		svc := k8s.NewConfigMapService(configMapInformer, nil)
+		configMapListenerA := listener.NewConfigMap(nil, nil, nil)
+		configMapListenerB := listener.NewConfigMap(nil, nil, nil)
+
+		svc.Subscribe(configMapListenerA)
+		svc.Subscribe(configMapListenerB)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		configMapInformer, _ := fixConfigMapInformer()
+		svc := k8s.NewConfigMapService(configMapInformer, nil)
+
+		svc.Subscribe(nil)
+	})
+}
+
+func TestConfigMapService_Unsubscribe(t *testing.T) {
+	t.Run("Existing", func(t *testing.T) {
+		configMapInformer, _ := fixConfigMapInformer()
+		svc := k8s.NewConfigMapService(configMapInformer, nil)
+		configMapListener := listener.NewConfigMap(nil, nil, nil)
+		svc.Subscribe(configMapListener)
+
+		svc.Unsubscribe(configMapListener)
+	})
+
+	t.Run("Duplicated", func(t *testing.T) {
+		configMapInformer, _ := fixConfigMapInformer()
+		svc := k8s.NewConfigMapService(configMapInformer, nil)
+		configMapListener := listener.NewConfigMap(nil, nil, nil)
+		svc.Subscribe(configMapListener)
+		svc.Subscribe(configMapListener)
+
+		svc.Unsubscribe(configMapListener)
+	})
+
+	t.Run("Multiple", func(t *testing.T) {
+		configMapInformer, _ := fixConfigMapInformer()
+		svc := k8s.NewConfigMapService(configMapInformer, nil)
+		configMapListenerA := listener.NewConfigMap(nil, nil, nil)
+		configMapListenerB := listener.NewConfigMap(nil, nil, nil)
+		svc.Subscribe(configMapListenerA)
+		svc.Subscribe(configMapListenerB)
+
+		svc.Unsubscribe(configMapListenerA)
+	})
+
+	t.Run("Nil", func(t *testing.T) {
+		configMapInformer, _ := fixConfigMapInformer()
+		svc := k8s.NewConfigMapService(configMapInformer, nil)
+
+		svc.Unsubscribe(nil)
 	})
 }
 

@@ -19,6 +19,7 @@ import (
 type configMapService struct {
 	client   corev1.CoreV1Interface
 	informer cache.SharedIndexInformer
+	notifier resource.Notifier
 }
 
 func newConfigMapService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) *configMapService {
@@ -27,6 +28,7 @@ func newConfigMapService(informer cache.SharedIndexInformer, client corev1.CoreV
 	return &configMapService{
 		client:   client,
 		informer: informer,
+		notifier: notifier,
 	}
 }
 
@@ -86,6 +88,14 @@ func (svc *configMapService) Update(name, namespace string, update v1.ConfigMap)
 
 func (svc *configMapService) Delete(name, namespace string) error {
 	return svc.client.ConfigMaps(namespace).Delete(name, nil)
+}
+
+func (svc *configMapService) Subscribe(listener resource.Listener) {
+	svc.notifier.AddListener(listener)
+}
+
+func (svc *configMapService) Unsubscribe(listener resource.Listener) {
+	svc.notifier.DeleteListener(listener)
 }
 
 func (svc *configMapService) checkUpdatePreconditions(name string, namespace string, update v1.ConfigMap) error {

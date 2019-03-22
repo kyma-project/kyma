@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
+	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 )
@@ -18,6 +20,8 @@ type configMapSvc interface {
 	List(namespace string, pagingParams pager.PagingParams) ([]*v1.ConfigMap, error)
 	Update(name, namespace string, update v1.ConfigMap) (*v1.ConfigMap, error)
 	Delete(name, namespace string) error
+	Subscribe(listener resource.Listener)
+	Unsubscribe(listener resource.Listener)
 }
 
 //go:generate mockery -name=gqlConfigMapConverter -output=automock -outpkg=automock -case=underscore
@@ -121,4 +125,22 @@ func (r *configMapResolver) DeleteConfigMapMutation(ctx context.Context, name st
 	}
 
 	return deletedConfigMap, nil
+}
+
+func (r *configMapResolver) ConfigMapEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ConfigMapEvent, error) {
+	channel := make(chan gqlschema.ConfigMapEvent, 1)
+	filter := func(configMap *v1.ConfigMap) bool {
+		return configMap != nil && configMap.Namespace == namespace
+	}
+
+	configMapListener := listener.NewConfigMap(channel, filter, r.configMapConverter)
+
+	r.configMapSvc.Subscribe(configMapListener)
+	go func() {
+		defer close(channel)
+		defer r.configMapSvc.Unsubscribe(configMapListener)
+		<-ctx.Done()
+	}()
+
+	return channel, nil
 }

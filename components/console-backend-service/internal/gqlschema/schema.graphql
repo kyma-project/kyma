@@ -664,6 +664,11 @@ type ConfigMap {
     json: JSON!
 }
 
+type ConfigMapEvent {
+    type: SubscriptionEventType!
+    configMap: ConfigMap!
+}
+
 # Queries
 
 type Query {
@@ -766,7 +771,8 @@ type Subscription {
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
-    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}),
+    configMapEvent(namespace: String!): ConfigMapEvent!
 }
 
 # Schema

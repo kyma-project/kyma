@@ -99,6 +99,11 @@ type ConfigMap struct {
 	JSON              JSON      `json:"json"`
 }
 
+type ConfigMapEvent struct {
+	Type      SubscriptionEventType `json:"type"`
+	ConfigMap ConfigMap             `json:"configMap"`
+}
+
 type ConnectorService struct {
 	URL string `json:"url"`
 }
