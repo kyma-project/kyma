@@ -12,17 +12,17 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/google/uuid"
+	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
+	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	apiv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	. "github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
-
-	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
-	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 )
 
 type apiControllerTest struct {
@@ -70,45 +70,29 @@ func NewApiControllerTest() (apiControllerTest, error) {
 }
 
 func (t apiControllerTest) CreateResources(namespace string) {
+
+	domain := os.Getenv("DOMAIN")
+
 	_, err := t.createFunction(namespace)
-	if err != nil {
-		log.Println("%+v", err)
-	}
+	So(err, ShouldBeNil)
 
-	_, err = t.createApi(namespace)
-	if err != nil {
-		log.Println("%+v", err)
-	}
-
-
-	//So(err, ShouldBeNil)
+	_, err = t.createApi(namespace, domain)
+	So(err, ShouldBeNil)
 }
 
 func (t apiControllerTest) TestResources(namespace string) {
 	err := t.getFunctionPodStatus(namespace, 2*time.Minute)
-	//So(err, ShouldBeNil)
-	if err != nil {
-		log.Println("%+v", err)
-	}
+	So(err, ShouldBeNil)
 
 	host := fmt.Sprintf("https://%s", hostName)
 	err = t.callFunctionWithoutToken(host, 2*time.Minute)
-	//So(err, ShouldBeNil)
-	//So(value, ShouldContainSubstring, t.uuid)
-
-	if err != nil {
-		log.Println("%+v", err)
-	}
+	So(err, ShouldBeNil)
 
 	token, err := fetchDexToken()
-	if err != nil {
-		log.Println("%+v", err)
-	}
+	So(err, ShouldBeNil)
 
 	err = t.callFunctionWithToken(host, token, 2*time.Minute)
-	if err != nil {
-		log.Println("%+v", err)
-	}
+	So(err, ShouldBeNil)
 }
 
 func (t apiControllerTest) callFunctionWithoutToken(host string, waitmax time.Duration) error {
@@ -147,11 +131,11 @@ func (t apiControllerTest) callFunctionWithToken(host string, token string, wait
 	}
 
 	req, err := http.NewRequest("GET", host, nil)
-	if err!=nil{
+	if err != nil {
 		return err
 	}
 
-	req.Header.Add("Authorization", "Bearer " + token)
+	req.Header.Add("Authorization", "Bearer "+token)
 
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
@@ -179,7 +163,7 @@ func (t apiControllerTest) callFunctionWithToken(host string, token string, wait
 
 }
 
-func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error) {
+func (t apiControllerTest) createApi(namespace string, domain string) (*apiv1alpha2.Api, error) {
 	authEnabled := true
 	servicePort := 8080
 
@@ -193,7 +177,7 @@ func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error)
 				{
 					Type: apiv1alpha2.JwtType,
 					Jwt: apiv1alpha2.JwtAuthentication{
-						Issuer:  "https://dex.kyma.local",
+						Issuer:  "https://dex." + domain,
 						JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
 					},
 				},
