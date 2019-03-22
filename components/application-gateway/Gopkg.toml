@@ -59,4 +59,5 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "d37318b3a84115bd9ee64d3c3130ef657b8a81a5"
+  revision = "c109ba8343f521a5be658f55f51c8dacff563a24"
+

@@ -7,6 +7,8 @@ import (
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	authMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/csrf"
+	csrfMock "github.com/kyma-project/kyma/components/application-gateway/internal/csrf/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -39,11 +41,16 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(nil)
 		authStrategyMock.On("Invalidate").Return()
 
-		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock)
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Return(nil)
+		csrfTokenStrategyMock.On("Invalidate").Return()
+
+		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock, csrfTokenStrategyMock)
 
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
@@ -69,11 +76,16 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(nil)
 		authStrategyMock.On("Invalidate").Return()
 
-		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock)
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Return(nil)
+		csrfTokenStrategyMock.On("Invalidate").Return()
+
+		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock, csrfTokenStrategyMock)
 
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
@@ -133,11 +145,16 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(nil)
 		authStrategyMock.On("Invalidate").Return()
 
-		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock)
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Return(nil)
+		csrfTokenStrategyMock.On("Invalidate").Return()
+
+		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock, csrfTokenStrategyMock)
 
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
@@ -163,11 +180,16 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(nil)
 		authStrategyMock.On("Invalidate").Return()
 
-		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock)
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Return(nil)
+		csrfTokenStrategyMock.On("Invalidate").Return()
+
+		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, ts.URL, authStrategyMock, csrfTokenStrategyMock)
 
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
@@ -207,11 +229,16 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		// given
 		authStrategyMock := &authMock.Strategy{}
 		authStrategyMock.
-			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("*httputil.ReverseProxy")).
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
 			Return(apperrors.Internal("failed"))
 		authStrategyMock.On("Invalidate").Return()
 
-		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, "", authStrategyMock)
+		csrfTokenStrategyMock := &csrfMock.TokenStrategy{}
+		csrfTokenStrategyMock.On("AddCSRFToken", mock.AnythingOfType("*http.Request")).
+			Return(nil)
+		csrfTokenStrategyMock.On("Invalidate").Return()
+
+		updateCacheEntryFunction := newUpdateCacheEntryFunction(t, "", authStrategyMock, csrfTokenStrategyMock)
 
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
@@ -228,7 +255,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 	})
 }
 
-func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorization.Strategy) func(id string) (*CacheEntry, apperrors.AppError) {
+func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorization.Strategy, csrfTokenStrategy csrf.TokenStrategy) func(id string) (*CacheEntry, apperrors.AppError) {
 	return func(id string) (*CacheEntry, apperrors.AppError) {
 		assert.Equal(t, "id1", id)
 
@@ -237,7 +264,8 @@ func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorizatio
 
 		return &CacheEntry{
 			Proxy: proxy,
-			AuthorizationStrategy: strategy,
+			AuthorizationStrategy: &authorizationStrategyWrapper{strategy, proxy},
+			CSRFTokenStrategy:     csrfTokenStrategy,
 		}, nil
 	}
 }

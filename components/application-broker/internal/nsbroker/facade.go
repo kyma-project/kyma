@@ -92,7 +92,7 @@ func (f *Facade) Create(destinationNs string) error {
 			},
 			Ports: []corev1.ServicePort{
 				{
-					Name: "broker",
+					Name: "http",
 					Port: 80,
 					TargetPort: intstr.IntOrString{
 						IntVal: f.abTargetPort,

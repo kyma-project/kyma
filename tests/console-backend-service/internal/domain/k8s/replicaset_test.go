@@ -103,7 +103,8 @@ func TestReplicaSet(t *testing.T) {
 
 	t.Log("Updating...")
 	replicaSetRes.ReplicaSet.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo1": "bar1"}
-	update := stringifyJSON(replicaSetRes.ReplicaSet.JSON)
+	update, err := stringifyJSON(replicaSetRes.ReplicaSet.JSON)
+	require.NoError(t, err)
 	var updateRes updateReplicaSetMutationResponse
 	err = c.Do(fixUpdateReplicaSetMutation(update), &updateRes)
 	require.NoError(t, err)

@@ -47,7 +47,7 @@ global:
     version: aabedc33
   docs:
     dir: develop/
-    version: ce4d1ae7
+    version: daf235a6
   namespace_controller:
     dir: develop/
     version: 429bfbcc
@@ -62,16 +62,16 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: "df845f56"
+    version: "d74ff201"
   test_namespace_controller:
     dir: develop/
     version: 429bfbcc
   console_backend_service:
     dir: develop/
-    version: 7cacbc23
+    version: fbf6fcf1
   console_backend_service_test:
     dir: develop/
-    version: 79732b88
+    version: fbf6fcf1
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

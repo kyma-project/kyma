@@ -1,0 +1,3 @@
+dependencies:
+  - name: knative-provisioner-natss
+    condition: global.knative
