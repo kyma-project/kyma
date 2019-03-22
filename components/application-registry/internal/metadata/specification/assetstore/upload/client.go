@@ -3,6 +3,7 @@ package upload
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	log "github.com/sirupsen/logrus"
 	"io/ioutil"
@@ -74,7 +75,9 @@ func (uc uploadClient) prepareRequest(file InputFile) (*http.Request, apperrors.
 
 	writer.Close()
 
-	req, err := http.NewRequest(http.MethodPost, uc.uploadServiceUrl, body)
+	url := fmt.Sprintf("%s/%s", uc.uploadServiceUrl, "/v1/upload")
+
+	req, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
 		return nil, apperrors.Internal("Failed to create request.")
 	}
