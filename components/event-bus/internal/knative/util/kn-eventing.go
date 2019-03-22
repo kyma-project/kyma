@@ -55,9 +55,30 @@ if err := k.CreateSubscription("my-sub", namespace, channelName, &uri); err != n
 return
 */
 
+// Use it cause it should be mocked
+type KnativeAccessLib interface {
+	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
+	CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*evapisv1alpha1.Channel, error)
+	DeleteChannel(name string, namespace string) error
+	CreateSubscription(name string, namespace string, channelName string, uri *string) error
+	DeleteSubscription(name string, namespace string) error
+	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
+	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
+	SendMessage(channel *evapisv1alpha1.Channel, message *string) error
+	InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error
+}
+
+// NewKnativeLib returns an interface to KnativeLib, which can be mocked
+func NewKnativeLib() (KnativeAccessLib, error) {
+	return GetKnativeLib()
+}
+
 type KnativeLib struct {
 	evClient eventingv1alpha1.EventingV1alpha1Interface
 }
+
+// Verify the struct KnativeLib implements KnativeLibIntf
+var _ KnativeAccessLib = &KnativeLib{}
 
 // GetKnativeLib returns the Knative/Eventing access layer
 func GetKnativeLib() (*KnativeLib, error) {

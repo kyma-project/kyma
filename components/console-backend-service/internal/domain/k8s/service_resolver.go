@@ -9,10 +9,10 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/golang/glog"
 	"github.com/pkg/errors"
-	v1 "k8s.io/api/core/v1"
 )
 
 type serviceResolver struct {
@@ -32,8 +32,9 @@ type serviceSvc interface {
 
 //go:generate mockery -name=gqlServiceConverter -output=automock -outpkg=automock -case=underscore
 type gqlServiceConverter interface {
-	ToGQL(in *v1.Service) *gqlschema.Service
-	ToGQLs(in []*v1.Service) []gqlschema.Service
+	ToGQL(in *v1.Service) (*gqlschema.Service, error)
+	ToGQLs(in []*v1.Service) ([]gqlschema.Service, error)
+	GQLJSONToService(in gqlschema.JSON) (v1.Service, error)
 }
 
 func newServiceResolver(serviceSvc serviceSvc) *serviceResolver {
@@ -52,8 +53,7 @@ func (r *serviceResolver) ServicesQuery(ctx context.Context, namespace string, f
 		glog.Error(errors.Wrapf(err, "while listing %s from namespace %s", pretty.Services, namespace))
 		return nil, gqlerror.New(err, pretty.Services, gqlerror.WithNamespace(namespace))
 	}
-	converted := r.gqlServiceConverter.ToGQLs(services)
-	return converted, nil
+	return r.gqlServiceConverter.ToGQLs(services)
 }
 
 func (r *serviceResolver) ServiceQuery(ctx context.Context, name string, namespace string) (*gqlschema.Service, error) {
@@ -62,8 +62,7 @@ func (r *serviceResolver) ServiceQuery(ctx context.Context, name string, namespa
 		glog.Error(errors.Wrapf(err, "while getting %s with name %s from namespace %s", pretty.Service, name, namespace))
 		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
 	}
-	converted := r.gqlServiceConverter.ToGQL(service)
-	return converted, nil
+	return r.gqlServiceConverter.ToGQL(service)
 }
 
 func (r *serviceResolver) ServiceEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceEvent, error) {
@@ -82,4 +81,43 @@ func (r *serviceResolver) ServiceEventSubscription(ctx context.Context, namespac
 	}()
 
 	return channel, nil
+}
+
+func (r *serviceResolver) UpdateServiceMutation(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Service, error) {
+	service, err := r.gqlServiceConverter.GQLJSONToService(update)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace `%s`", pretty.Service, name, namespace))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	updated, err := r.serviceSvc.Update(name, namespace, service)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s `%s` from namespace %s", pretty.Service, name, namespace))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	return r.gqlServiceConverter.ToGQL(updated)
+}
+
+func (r *serviceResolver) DeleteServiceMutation(context context.Context, name string, namespace string) (*gqlschema.Service, error) {
+	service, err := r.serviceSvc.Find(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while finding %s `%s` in namespace `%s`", pretty.Service, name, namespace))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	serviceCopy := service.DeepCopy()
+	deletedService, err := r.gqlServiceConverter.ToGQL(serviceCopy)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Service))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	err = r.serviceSvc.Delete(name, namespace)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while deleting %s `%s` from namespace `%s`", pretty.Service, name, namespace))
+		return nil, gqlerror.New(err, pretty.Service, gqlerror.WithName(name), gqlerror.WithNamespace(namespace))
+	}
+
+	return deletedService, nil
 }

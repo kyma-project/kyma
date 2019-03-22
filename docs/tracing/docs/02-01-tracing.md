@@ -24,7 +24,7 @@ The process of requesting traces from Jaeger looks as follows:
 
 Traces are stored in Jaeger in the following way:
 
-1. A Kyma user configures the application to propagate the correct [HTTP headers](https://istio.io/docs/tasks/telemetry/distributed-tracing.html#understanding-what-happened) for the outbound calls.
+1. A Kyma user configures the application to propagate the correct [HTTP headers](https://istio.io/docs/tasks/telemetry/distributed-tracing/overview/#understanding-what-happened) for the outbound calls.
 2. Envoy passes the trace details to the Zipkin Kubernetes service. This service acts as a facade receiving the trace and span details.
 3. The Zipkin service forwards the tracing information to Jaeger Deployment, allowing it to process them. 
 
