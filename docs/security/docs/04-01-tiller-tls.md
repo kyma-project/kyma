@@ -10,9 +10,9 @@ Kyma is supplied with a custom installation of [Tiller](https://helm.sh/docs/glo
 In order to secure a local connection the certificates need to be downloaded from the cluster and stored in [`HELM_HOME`](https://helm.sh/docs/glossary/#helm-home-helm-home). This can be done by calling:
 
 ```
-kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.ca.crt"' | tr -d '"' | base64 -D > "$(helm home)/ca.pem"
-kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.tls.crt"' | tr -d '"' | base64 -D > "$(helm home)/cert.pem"
-kubectl get -n kyma-installer secret helm-secret -o json | jq '.data."global.helm.tls.key"' | tr -d '"' | base64 -D > "$(helm home)/key.pem"
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 -D > "$(helm home)/ca.pem"
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 -D > "$(helm home)/cert.pem"
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 -D > "$(helm home)/key.pem"
 ```
 
 Content of `HELM_HOME`
