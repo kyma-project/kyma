@@ -1,6 +1,6 @@
 [[constraint]]
   name = "github.com/heptio/ark"
-  version = "v0.9.11"
+  version = "v0.10.1"
 
 [[override]]
   name = "k8s.io/client-go"

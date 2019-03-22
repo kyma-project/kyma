@@ -79,7 +79,7 @@
   revision = "d547d1d9531ed93dbdebcbff7f83e7c876a1e0ee"
 
 [[projects]]
-  digest = "1:22db124ee87af7f5280fd5e360e470086df3504ca05eeea78d37d8eb7e749b5d"
+  digest = "1:78bf6076898218e4b90ebed5414e3dbe55b56f7d2d5ed232e24486118833bf7b"
   name = "github.com/heptio/ark"
   packages = [
     "pkg/apis/ark/v1",
@@ -88,8 +88,8 @@
     "pkg/generated/clientset/versioned/typed/ark/v1",
   ]
   pruneopts = "UT"
-  revision = "9f72cf9c614bb4dc02dfacae08c9dcd11fbb5eaa"
-  version = "v0.9.11"
+  revision = "bcc76c63d01a3d9adb83f76ed0ecab74a7be1d74"
+  version = "v0.10.2"
 
 [[projects]]
   branch = "master"
