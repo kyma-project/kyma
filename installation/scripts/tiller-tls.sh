@@ -15,8 +15,23 @@ do
 done
 
 mkdir -p "$(helm home)"
-
 echo "---> Get Helm secrets and put then into $(helm home)"
-kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 -D > "$(helm home)/ca.pem"
-kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 -D > "$(helm home)/cert.pem"
-kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 -D > "$(helm home)/key.pem"
+
+case "$(uname -s)" in
+   Darwin )
+        kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 -D > "$(helm home)/ca.pem"
+        kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 -D > "$(helm home)/cert.pem"
+        kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 -D > "$(helm home)/key.pem"
+        ;;
+
+   Linux )
+        kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 -d > "$(helm home)/ca.pem"
+        kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 -d > "$(helm home)/cert.pem"
+        kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 -d > "$(helm home)/key.pem"
+        ;;
+
+   *)
+     echo "---> Could not detect OS Type" 
+     exit 1
+     ;;
+esac
