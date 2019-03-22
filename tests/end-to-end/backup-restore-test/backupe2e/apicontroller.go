@@ -3,11 +3,13 @@ package backupe2e
 import (
 	"crypto/tls"
 	"fmt"
-	"k8s.io/apimachinery/pkg/api/resource"
 	"log"
 	"net/http"
 	"os"
 	"time"
+
+	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
+	"k8s.io/apimachinery/pkg/api/resource"
 
 	"github.com/google/uuid"
 	apiv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
@@ -77,6 +79,12 @@ func (t apiControllerTest) CreateResources(namespace string) {
 	if err != nil {
 		log.Println("%+v", err)
 	}
+	token, err := fetchDexToken()
+	if err != nil {
+		panic(err)
+	}
+	log.Println(token)
+
 	//So(err, ShouldBeNil)
 }
 
@@ -248,4 +256,17 @@ func (t apiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 			}
 		}
 	}
+}
+
+func fetchDexToken() (string, error) {
+	config, err := dex.LoadConfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	token, err := dex.Authenticate(config.IdProviderConfig)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return token, nil
 }
