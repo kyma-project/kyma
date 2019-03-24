@@ -55,8 +55,8 @@ global:
     dir: develop/
     version: 6e0a7fe2
   kubeless_integration_tests:
-    dir: develop/tests/
-    version: 7ee6af96
+    dir: pr/tests/
+    version: PR-3317
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
