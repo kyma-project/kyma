@@ -79,7 +79,7 @@ func deleteNamespace(namespace string) {
 }
 
 func deployFun(namespace, name, runtime, codeFile, handler string) {
-	cmd := exec.Command("kubeless", "-n", namespace, "function", "deploy", name, "-r", runtime, "-f", codeFile, "--handler", handler)
+	cmd := exec.Command("kubeless", "-n", namespace, "function", "deploy", name, "-r", runtime, "-f", codeFile, "--handler", handler, "--memory", "128Mi")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatal("Unable to deploy function ", name, ":\n", string(stdoutStderr))
