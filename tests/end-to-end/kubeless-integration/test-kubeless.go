@@ -235,14 +235,14 @@ func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
 	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
 
 	controllerNamespace := os.Getenv("KUBELESS_NAMESPACE")
-	svcBindingUsageControllerPodNameCmd := exec.Command("kubectl", "-n", controllerNamespace, "get", "po", "-l", "app=binding-usage-controller", "-o", "jsonpath={.items[0].metadata.name}")
+	svcBindingUsageControllerPodNameCmd := exec.Command("kubectl", "-n", controllerNamespace, "get", "po", "-l", "app=service-binding-usage-controller", "-o", "jsonpath={.items[0].metadata.name}")
 
 	svcBindingUsageControllerPodName, err := svcBindingUsageControllerPodNameCmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Error while fetching servicebindingusagercontroller pod: \n%s\n", string(svcBindingUsageControllerPodName))
 	}
 
-	svcBindingUsageControllerLogsCmd := exec.Command("kubectl", "-n", controllerNamespace, "log", string(svcBindingUsageControllerPodName), "-c", "binding-usage-controller")
+	svcBindingUsageControllerLogsCmd := exec.Command("kubectl", "-n", controllerNamespace, "log", string(svcBindingUsageControllerPodName), "-c", "service-binding-usage-controller")
 
 	svcBindingUsageControllerLogsCmdOutErr, err := svcBindingUsageControllerLogsCmd.CombinedOutput()
 	if err != nil {
