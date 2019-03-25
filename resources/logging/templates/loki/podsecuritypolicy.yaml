@@ -1,5 +1,6 @@
+{{- if .Values.loki.enabled }}
 {{- if .Values.rbac.pspEnabled }}
-apiVersion: extensions/v1beta1
+apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: {{ template "loki.fullname" . }}
@@ -13,6 +14,9 @@ spec:
   allowPrivilegeEscalation: false
   volumes:
     - 'configMap'
+    - 'emptyDir'
+    - 'persistentVolumeClaim'
+    - 'secret'
   hostNetwork: false
   hostIPC: false
   hostPID: false
@@ -25,4 +29,5 @@ spec:
   fsGroup:
     rule: 'RunAsAny'
   readOnlyRootFilesystem: false
+{{- end }}
 {{- end }}
