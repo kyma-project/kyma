@@ -64,7 +64,7 @@ spec:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: helm-certs-sa
+  name: helm-certs-job-sa
   namespace: kyma-installer
 ---
 kind: RoleBinding
@@ -74,11 +74,11 @@ metadata:
   namespace: kube-system
 subjects:
 - kind: ServiceAccount
-  name: helm-certs-sa
+  name: helm-certs-job-sa
   namespace: kyma-installer
 roleRef:
   kind: Role
-  name: helm-certs-installer
+  name: helm-certs-getter
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: RoleBinding
@@ -88,17 +88,17 @@ metadata:
   namespace: kyma-installer
 subjects:
 - kind: ServiceAccount
-  name: helm-certs-sa
+  name: helm-certs-job-sa
   namespace: kyma-installer
 roleRef:
   kind: Role
-  name: helm-certs-installer
+  name: helm-certs-setter
   apiGroup: rbac.authorization.k8s.io
 ---
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: helm-certs-installer
+  name: helm-certs-getter
   namespace: kube-system
 rules:
 - apiGroups: [""]
@@ -108,7 +108,7 @@ rules:
 kind: Role
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: helm-certs-installer
+  name: helm-certs-setter
   namespace: kyma-installer
 rules:
 - apiGroups: [""]
@@ -130,7 +130,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: “false”
     spec:
-      serviceAccountName: helm-certs-sa
+      serviceAccountName: helm-certs-job-sa
       restartPolicy: OnFailure
       containers:
       - name: certhelper
