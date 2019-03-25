@@ -36,6 +36,8 @@ type Credentials struct {
 	BasicAuth *BasicAuth
 	// CertificateGen is CertificateGen configuration.
 	CertificateGen *CertificateGen
+	// CSRFTokenEndpointURL (optional) to fetch CSRF token
+	CSRFTokenEndpointURL string
 }
 
 // BasicAuth contains details of BasicAuth Auth configuration

@@ -13,7 +13,7 @@ type gqlServiceConverter struct {
 }
 
 // ToGQL provides a mock function with given fields: in
-func (_m *gqlServiceConverter) ToGQL(in *v1.Service) *gqlschema.Service {
+func (_m *gqlServiceConverter) ToGQL(in *v1.Service) (*gqlschema.Service, error) {
 	ret := _m.Called(in)
 
 	var r0 *gqlschema.Service
@@ -25,5 +25,12 @@ func (_m *gqlServiceConverter) ToGQL(in *v1.Service) *gqlschema.Service {
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*v1.Service) error); ok {
+		r1 = rf(in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

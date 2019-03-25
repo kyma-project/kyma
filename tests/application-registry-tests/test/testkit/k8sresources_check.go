@@ -13,16 +13,17 @@ import (
 type Labels map[string]string
 
 type ServiceData struct {
-	ServiceId           string
-	DisplayName         string
-	ProviderDisplayName string
-	LongDescription     string
-	HasAPI              bool
-	TargetUrl           string
-	OauthUrl            string
-	GatewayUrl          string
-	AccessLabel         string
-	HasEvents           bool
+	ServiceId            string
+	DisplayName          string
+	ProviderDisplayName  string
+	LongDescription      string
+	HasAPI               bool
+	TargetUrl            string
+	OauthUrl             string
+	GatewayUrl           string
+	AccessLabel          string
+	HasEvents            bool
+	CSRFTokenEndpointURL string
 }
 
 func CheckK8sService(t *testing.T, service *v1core.Service, name string, labels Labels, protocol v1core.Protocol, port, targetPort int) {
@@ -118,6 +119,10 @@ func CheckK8sApplication(t *testing.T, app *application.Application, name string
 
 		if apiEntry.Type == "OAuth" {
 			require.Equal(t, expectedServiceData.OauthUrl, apiEntry.Credentials.AuthenticationUrl)
+		}
+
+		if apiEntry.Credentials.CSRFInfo != nil {
+			require.Equal(t, expectedServiceData.CSRFTokenEndpointURL, apiEntry.Credentials.CSRFInfo.TokenEndpointURL)
 		}
 
 		require.Equal(t, expectedServiceData.TargetUrl, apiEntry.TargetUrl)

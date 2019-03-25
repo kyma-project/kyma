@@ -19,6 +19,7 @@ const (
 type reconciler struct {
 	client   client.Client
 	recorder record.EventRecorder
+	time     util.CurrentTime
 }
 
 // Verify the struct implements reconcile.Reconciler
@@ -84,7 +85,7 @@ func (r *reconciler) reconcile(ctx context.Context, ea *eventingv1alpha1.EventAc
 	if !ea.DeletionTimestamp.IsZero() {
 		// deactivate all Kyma subscriptions related to this ea
 		subs, _ := util.GetSubscriptionsForEventActivation(ctx, r.client, ea)
-		util.DeactivateSubscriptions(ctx, r.client, subs, log)
+		util.DeactivateSubscriptions(ctx, r.client, subs, log, r.time)
 
 		// remove the finalizer from the list
 		ea.ObjectMeta.Finalizers = util.RemoveString(&ea.ObjectMeta.Finalizers, finalizerName)
@@ -106,7 +107,7 @@ func (r *reconciler) reconcile(ctx context.Context, ea *eventingv1alpha1.EventAc
 	} else {
 		log.Info("Kyma subscriptions found: ", "subs", subs)
 		// activate all subscriptions
-		if err := util.ActivateSubscriptions(ctx, r.client, subs, log); err != nil {
+		if err := util.ActivateSubscriptions(ctx, r.client, subs, log, r.time); err != nil {
 			log.Error(err, "activateSubscriptions() failed")
 			return false, err
 		}
