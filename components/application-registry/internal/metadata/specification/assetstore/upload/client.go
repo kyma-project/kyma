@@ -13,9 +13,9 @@ import (
 )
 
 const (
-	PrivateFileField = "private"
-	DirectoryField   = "directory"
-	EndpointFormat   = "%s/v1/upload"
+	PublicFileField = "public"
+	DirectoryField  = "directory"
+	EndpointFormat  = "%s/v1/upload"
 )
 
 type File struct {
@@ -101,12 +101,12 @@ func (uc uploadClient) prepareRequest(file File) (*http.Request, apperrors.AppEr
 func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipart.Writer, file File) apperrors.AppError {
 	defer writer.Close()
 
-	privateFilePart, err := writer.CreateFormFile(PrivateFileField, file.Name)
+	publicFilePart, err := writer.CreateFormFile(PublicFileField, file.Name)
 	if err != nil {
 		return apperrors.Internal("Failed to create multipart content: %s.", err.Error())
 	}
 
-	_, err = privateFilePart.Write(file.Contents)
+	_, err = publicFilePart.Write(file.Contents)
 	if err != nil {
 		return apperrors.Internal("Failed to write file contents: %s.", err.Error())
 	}

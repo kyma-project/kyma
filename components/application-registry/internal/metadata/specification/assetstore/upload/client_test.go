@@ -123,7 +123,7 @@ func validateMultipartForm(t *testing.T, r *http.Request) {
 	files := r.MultipartForm.File
 	require.Equal(t, len(files), 1)
 
-	filesList, found := files[PrivateFileField]
+	filesList, found := files[PublicFileField]
 	require.True(t, found)
 	require.Equal(t, len(filesList), 1)
 

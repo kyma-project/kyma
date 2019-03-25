@@ -23,6 +23,8 @@ const (
 	eventsSpecFileName    = "asyncApiSpec.json"
 	odataXMLSpecFileName  = "odata.xml"
 	odataJSONSpecFileName = "odata.json"
+	DocsTopicLabelKey     = "cms.kyma-project.io/viewContext"
+	DocsTopicLabelValue   = "service-catalog"
 )
 
 type Service interface {
@@ -112,6 +114,7 @@ func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, 
 		DisplayName: fmt.Sprintf(DocTopicDisplayNameFormat, id),
 		Description: fmt.Sprintf(DocTopicDescriptionFormat, id),
 		Urls:        make(map[string]string),
+		Labels:      map[string]string{DocsTopicLabelKey: DocsTopicLabelValue},
 	}
 
 	apiSpecFileName, apiSpecKey := getApiSpecFileNameAndKey(apiSpec, apiType)
@@ -162,9 +165,8 @@ func (s service) processSpec(content []byte, filename, fileKey string, docsTopic
 
 func (s service) uploadFile(id string, fileName string, content []byte) (upload.UploadedFile, apperrors.AppError) {
 	inputFile := upload.File{
-		Directory: id,
-		Name:      fileName,
-		Contents:  content,
+		Name:     fileName,
+		Contents: content,
 	}
 	return s.uploadClient.Upload(inputFile)
 }
