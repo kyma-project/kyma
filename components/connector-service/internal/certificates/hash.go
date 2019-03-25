@@ -2,17 +2,25 @@ package certificates
 
 import (
 	"crypto/sha256"
+	"crypto/x509"
 	"encoding/hex"
-	"net/url"
+	"encoding/pem"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
-func CalculateHash(cert string) (string, error) {
-	uc, err := url.PathUnescape(cert)
-	if err != nil {
-		return "", err
+func FingerprintSHA256(rawPem []byte) (string, error) {
+	block, _ := pem.Decode(rawPem)
+	if block == nil {
+		return "", apperrors.Internal("Faield to decode pem block")
 	}
-	input := []byte(uc)
-	sha := sha256.Sum256(input)
+
+	certificate, err := x509.ParseCertificate(block.Bytes)
+	if err != nil {
+		return "", apperrors.Internal("Failed to parse certificate: %s", err.Error())
+	}
+
+	sha := sha256.Sum256(certificate.Raw)
 
 	return hex.EncodeToString(sha[:]), nil
 }
