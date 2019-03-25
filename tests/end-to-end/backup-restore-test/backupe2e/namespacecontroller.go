@@ -86,3 +86,7 @@ func (n namespaceControllerTest) waitForResources() error {
 			return fmt.Errorf("unable to fetch namespace %v or reqource quota %v", n.namespaceName, resourceQuotaObjName)}
 	}
 }
+
+func (n namespaceControllerTest) DeleteResources() {
+	// There is not need to be implemented for this test.
+}
