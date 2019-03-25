@@ -15,4 +15,7 @@ spec:
   - name: {{ .Release.Name }}-connection-token-handler-tests
     image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connection_token_handler_tests.dir }}connection-token-handler-tests:{{ .Values.global.connection_token_handler_tests.version }}
     imagePullPolicy: IfNotPresent
+    env:
+    - name: CENTRAL
+      value: "{{ .Values.tests.central }}"
   restartPolicy: Never
