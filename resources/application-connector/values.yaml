@@ -24,7 +24,7 @@ global:
     version: e1af648f
   connector_service:
     dir: develop/
-    version: 342734f5
+    version: e2a26198
   connector_service_tests:
     dir: develop/
     version: e1af648f
