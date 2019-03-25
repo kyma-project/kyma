@@ -152,7 +152,7 @@ func (s service) processSpec(content []byte, filename, fileKey string, docsTopic
 	return nil
 }
 
-func (s service) uploadFile(id string, fileName string, content []byte) (upload.OutputFile, apperrors.AppError) {
+func (s service) uploadFile(id string, fileName string, content []byte) (upload.UploadedFile, apperrors.AppError) {
 	inputFile := upload.InputFile{
 		Directory: id,
 		Name:      fileName,

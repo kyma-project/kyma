@@ -22,15 +22,25 @@ type InputFile struct {
 	Contents  []byte
 }
 
-type OutputFile struct {
-	FileName   string
-	RemotePath string
-	Bucket     string
-	Size       int
+type Response struct {
+	UploadedFiles []UploadedFile  `json:"uploadedFiles,omitempty"`
+	Errors        []ResponseError `json:"errors,omitempty"`
+}
+
+type ResponseError struct {
+	Message  string `json:"message"`
+	FileName string `json:"omitempty,fileName"`
+}
+
+type UploadedFile struct {
+	FileName   string `json:"fileName"`
+	RemotePath string `json:"remotePath"`
+	Bucket     string `json:"bucket"`
+	Size       int64  `json:"size"`
 }
 
 type Client interface {
-	Upload(file InputFile) (OutputFile, apperrors.AppError)
+	Upload(file InputFile) (UploadedFile, apperrors.AppError)
 }
 
 type uploadClient struct {
@@ -45,18 +55,23 @@ func NewClient(uploadServiceUrl string, httpclient *http.Client) Client {
 	}
 }
 
-func (uc uploadClient) Upload(file InputFile) (OutputFile, apperrors.AppError) {
+func (uc uploadClient) Upload(file InputFile) (UploadedFile, apperrors.AppError) {
 	req, err := uc.prepareRequest(file)
 	if err != nil {
-		return OutputFile{}, err
+		return UploadedFile{}, err
 	}
 
-	res, err := uc.executeRequest(req)
+	httpRes, err := uc.executeRequest(req)
 	if err != nil {
-		return OutputFile{}, err
+		return UploadedFile{}, err
 	}
 
-	return uc.unmarshal(res)
+	uploadRes, err := uc.unmarshal(httpRes)
+	if err != nil {
+		return UploadedFile{}, err
+	}
+
+	return uc.extract(file, uploadRes)
 }
 
 func (uc uploadClient) prepareRequest(file InputFile) (*http.Request, apperrors.AppError) {
@@ -122,21 +137,33 @@ func (uc uploadClient) executeRequest(r *http.Request) (*http.Response, apperror
 	}
 }
 
-func (uc uploadClient) unmarshal(r *http.Response) (OutputFile, apperrors.AppError) {
+func (uc uploadClient) unmarshal(r *http.Response) (Response, apperrors.AppError) {
 	b, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		return OutputFile{}, apperrors.Internal("Failed to read request body.")
+		return Response{}, apperrors.Internal("Failed to read request body.")
 	}
 
 	defer r.Body.Close()
 
-	var outputFile OutputFile
-	err = json.Unmarshal(b, &outputFile)
+	var uploadResponse Response
+	err = json.Unmarshal(b, &uploadResponse)
 
 	if err != nil {
-		return OutputFile{}, apperrors.Internal("Failed to unmarshal body.")
+		return Response{}, apperrors.Internal("Failed to unmarshal body.")
 	}
 
-	return outputFile, nil
+	return uploadResponse, nil
+}
+
+func (uc uploadClient) extract(inputFile InputFile, response Response) (UploadedFile, apperrors.AppError) {
+	if len(response.UploadedFiles) == 1 {
+		return response.UploadedFiles[0], nil
+	} else {
+		for _, error := range response.Errors {
+			log.Errorf("Failed to upload file %s: %s", error.FileName, error.Message)
+		}
+
+		return UploadedFile{}, apperrors.Internal("Failed to upload file %s.", inputFile.Name)
+	}
 }

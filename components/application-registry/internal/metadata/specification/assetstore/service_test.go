@@ -221,8 +221,8 @@ func createTestInputFile(name string, directory string, contents []byte) upload.
 	}
 }
 
-func createTestOutputFile(filename string, url string) upload.OutputFile {
-	return upload.OutputFile{
+func createTestOutputFile(filename string, url string) upload.UploadedFile {
+	return upload.UploadedFile{
 		FileName:   filename,
 		RemotePath: fmt.Sprintf("%s/%s", url, filename),
 		Bucket:     "BucketName",

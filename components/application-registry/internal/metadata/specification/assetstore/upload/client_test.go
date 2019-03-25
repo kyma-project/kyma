@@ -81,7 +81,7 @@ func getTestServer(t *testing.T) *httptest.Server {
 			assert.True(t, found)
 			assert.Equal(t, []string{"testDir"}, directory)
 
-			outputFile := OutputFile{
+			outputFile := UploadedFile{
 				FileName:   "testFile",
 				RemotePath: "testDir/testPath",
 				Bucket:     "testBucket",
