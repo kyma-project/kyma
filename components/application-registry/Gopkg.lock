@@ -32,22 +32,10 @@
   version = "v1.1.1"
 
 [[projects]]
-  name = "github.com/dustin/go-humanize"
-  packages = ["."]
-  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
-  version = "v1.0.0"
-
-[[projects]]
   name = "github.com/ghodss/yaml"
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/go-ini/ini"
-  packages = ["."]
-  revision = "f55231ca73a76c1d61eb05fe0d64a1ccebf93cba"
-  version = "v1.39.3"
 
 [[projects]]
   name = "github.com/go-openapi/jsonpointer"
@@ -198,26 +186,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  name = "github.com/minio/minio-go"
-  packages = [
-    ".",
-    "pkg/credentials",
-    "pkg/encrypt",
-    "pkg/policy",
-    "pkg/s3signer",
-    "pkg/s3utils",
-    "pkg/set"
-  ]
-  revision = "66252c2a3c15f7b90cc8493d497a04ac3b6e3606"
-  version = "5.0.0"
-
-[[projects]]
-  name = "github.com/mitchellh/go-homedir"
-  packages = ["."]
-  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
-  version = "v1.0.0"
-
-[[projects]]
   name = "github.com/modern-go/concurrent"
   packages = ["."]
   revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
@@ -314,11 +282,7 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = [
-    "argon2",
-    "blake2b",
-    "ssh/terminal"
-  ]
+  packages = ["ssh/terminal"]
   revision = "505ab145d0a99da450461ae2c1a9f6cd10d1f447"
 
 [[projects]]
@@ -347,7 +311,6 @@
   branch = "master"
   name = "golang.org/x/sys"
   packages = [
-    "cpu",
     "unix",
     "windows"
   ]
@@ -623,6 +586,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "aa0f5736765067e04c3f9a59f75de362a789a768601febee82976c90c02b7fa1"
+  inputs-digest = "16e9a7b0a4980f26c14c69d9f29361f040623e2312d5667e0883428b1104c25e"
   solver-name = "gps-cdcl"
   solver-version = 1
