@@ -15193,26 +15193,6 @@ func (ec *executionContext) _ResourceQuotasStatus(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "type":
-			out.Values[i] = ec._Secret_type(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "creationTime":
-			out.Values[i] = ec._Secret_creationTime(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "labels":
-			out.Values[i] = ec._Secret_labels(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "annotations":
-			out.Values[i] = ec._Secret_annotations(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15507,6 +15487,26 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 			}
 		case "data":
 			out.Values[i] = ec._Secret_data(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "type":
+			out.Values[i] = ec._Secret_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "creationTime":
+			out.Values[i] = ec._Secret_creationTime(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "labels":
+			out.Values[i] = ec._Secret_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "annotations":
+			out.Values[i] = ec._Secret_annotations(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -23661,7 +23661,7 @@ type Subscription {
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
 # Schema
