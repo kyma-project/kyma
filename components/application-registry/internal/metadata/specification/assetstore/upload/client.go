@@ -14,7 +14,6 @@ import (
 
 const (
 	PublicFileField = "public"
-	DirectoryField  = "directory"
 	EndpointFormat  = "%s/v1/upload"
 )
 
@@ -111,16 +110,6 @@ func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipar
 		return apperrors.Internal("Failed to write file contents: %s.", err.Error())
 	}
 
-	directoryPart, err := writer.CreateFormField(DirectoryField)
-	if err != nil {
-		return apperrors.Internal("Failed to create multipart content: %s.", err.Error())
-	}
-
-	_, err = directoryPart.Write([]byte(file.Directory))
-	if err != nil {
-		return apperrors.Internal("Failed to write directory name: %s.", err.Error())
-	}
-
 	return nil
 }
 
@@ -131,12 +120,7 @@ func (uc uploadClient) executeRequest(r *http.Request) (*http.Response, apperror
 		return nil, apperrors.Internal("Failed to execute request.")
 	}
 
-	if res.StatusCode == http.StatusOK {
-		return res, nil
-	} else {
-		log.Errorf("Upload Service returned unexpected status: %s.", res.Status)
-		return nil, apperrors.Internal("Failed to call Upload Service.")
-	}
+	return res, nil
 }
 
 func (uc uploadClient) unmarshal(r *http.Response) (Response, apperrors.AppError) {

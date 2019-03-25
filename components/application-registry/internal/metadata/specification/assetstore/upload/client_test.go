@@ -54,7 +54,7 @@ func TestUploadClient(t *testing.T) {
 
 	t.Run("Should fail when upload service returned 500 status", func(t *testing.T) {
 		// given
-		testServer := getTestServerWithStatus(http.StatusInternalServerError)
+		testServer := getTestServerWithStatus(t, http.StatusInternalServerError)
 		uploadClient := NewClient(testServer.URL)
 
 		// when
@@ -70,9 +70,24 @@ func TestUploadClient(t *testing.T) {
 	})
 }
 
-func getTestServerWithStatus(status int) *httptest.Server {
+func getTestServerWithStatus(t *testing.T, status int) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(
 		func(w http.ResponseWriter, r *http.Request) {
+			response := Response{
+				UploadedFiles: []UploadedFile{},
+				Errors: []ResponseError{
+					{
+						FileName: "testfile",
+						Message:  "failed",
+					},
+				},
+			}
+
+			var b bytes.Buffer
+			err := json.NewEncoder(&b).Encode(response)
+			require.NoError(t, err)
+
+			w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
 			w.WriteHeader(status)
 		}))
 }
@@ -144,9 +159,4 @@ func validateMultipartForm(t *testing.T, r *http.Request) {
 
 	assert.Equal(t, []byte("test content"), b)
 	assert.NotZero(t, fileHeader.Size)
-
-	values := r.MultipartForm.Value
-	directory, found := values[DirectoryField]
-	assert.True(t, found)
-	assert.Equal(t, []string{"testDir"}, directory)
 }
