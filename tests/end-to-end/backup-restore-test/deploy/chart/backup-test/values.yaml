@@ -2,5 +2,5 @@ containerRegistry:
   path: eu.gcr.io/kyma-project
 
 image:
-  dir: develop/
-  tag: 25d7e7bf
+  dir: pr/tests/
+  tag: PR-3336
