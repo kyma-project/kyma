@@ -37,9 +37,9 @@ func TestAddingToAssetStore(t *testing.T) {
 		}
 
 		{
-			specFile := createTestInputFile(openApiSpecFileName, "id1", jsonApiSpec)
-			eventsFile := createTestInputFile(eventsSpecFileName, "id1", eventsSpec)
-			docsFile := createTestInputFile(documentationFileName, "id1", documentation)
+			specFile := createTestInputFile(openApiSpecFileName, "", jsonApiSpec)
+			eventsFile := createTestInputFile(eventsSpecFileName, "", eventsSpec)
+			docsFile := createTestInputFile(documentationFileName, "", documentation)
 
 			uploadClientMock.On("Upload", specFile).
 				Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
@@ -183,9 +183,9 @@ func TestUpdatingInAssetStore(t *testing.T) {
 		}
 
 		{
-			specFile := createTestInputFile(openApiSpecFileName, "id1", jsonApiSpec)
-			eventsFile := createTestInputFile(eventsSpecFileName, "id1", eventsSpec)
-			docsFile := createTestInputFile(documentationFileName, "id1", documentation)
+			specFile := createTestInputFile(openApiSpecFileName, "", jsonApiSpec)
+			eventsFile := createTestInputFile(eventsSpecFileName, "", eventsSpec)
+			docsFile := createTestInputFile(documentationFileName, "", documentation)
 
 			uploadClientMock.On("Upload", specFile).
 				Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
@@ -226,6 +226,7 @@ func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, doc
 			docstopic.KeyEventsSpec:        eventsSpecUrl,
 			docstopic.KeyDocumentationSpec: documentationUrl,
 		},
+		Labels: map[string]string{DocsTopicLabelKey: DocsTopicLabelValue},
 		Status: status,
 	}
 }
