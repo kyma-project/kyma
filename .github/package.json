@@ -25,7 +25,8 @@
       "area/luigi": "Luigi",
       "area/documentation": "Documentation",
       "area/community": "Community",
-      "area/ci": "CI"
+      "area/ci": "CI",
+      "area/core-and-supporting": "Core and Supporting"
     },
     "cacheDir": ".changelog"
   }
