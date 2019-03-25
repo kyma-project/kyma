@@ -30,7 +30,7 @@ func TestAddingToAssetStore(t *testing.T) {
 			docsTopic := createTestDocsTopic("id1",
 				"www.somestorage.com/apiSpec.json",
 				"www.somestorage.com/asyncApiSpec.json",
-				"www.somestorage.com/content.json")
+				"www.somestorage.com/content.json", docstopic.StatusNone)
 
 			repositoryMock.On("Update", docsTopic).Return(apperrors.NotFound("Not found."))
 			repositoryMock.On("Create", docsTopic).Return(nil)
@@ -88,26 +88,18 @@ func TestGettingFromAssetStore(t *testing.T) {
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
-		apiTestServer := createTestServer(jsonApiSpec)
+		apiTestServer := createTestServer(t, jsonApiSpec)
 		defer apiTestServer.Close()
 
-		eventTestServer := createTestServer(eventsSpec)
+		eventTestServer := createTestServer(t, eventsSpec)
 		defer eventTestServer.Close()
 
-		documentationServer := createTestServer(documentation)
+		documentationServer := createTestServer(t, documentation)
 		defer documentationServer.Close()
 
 		{
-			repositoryMock.On("Get", "id1").Return(docstopic.Entry{
-				Id:          "id1",
-				DisplayName: "Some display name",
-				Description: "Some description",
-				Urls: map[string]string{
-					docstopic.KeyOpenApiSpec:       apiTestServer.URL,
-					docstopic.KeyEventsSpec:        eventTestServer.URL,
-					docstopic.KeyDocumentationSpec: documentationServer.URL,
-				},
-			}, nil)
+			repositoryMock.On("Get", "id1").
+				Return(createTestDocsTopic("id1", apiTestServer.URL, eventTestServer.URL, documentationServer.URL, docstopic.StatusSucceeded), nil)
 		}
 
 		// then
@@ -123,12 +115,49 @@ func TestGettingFromAssetStore(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should fail when failed to upload file", func(t *testing.T) {
+	t.Run("Should fail when DocsTopic status is failed", func(t *testing.T) {
+		// given
+		repositoryMock := &mocks.DocsTopicRepository{}
+		uploadClientMock := &uploadMocks.Client{}
+		service := NewService(repositoryMock, uploadClientMock)
 
+		{
+			repositoryMock.On("Get", "id1").Return(createTestDocsTopic("id1", "", "", "", docstopic.StatusFailed), nil)
+		}
+
+		// then
+		docs, api, events, err := service.Get("id1")
+
+		// then
+		require.Error(t, err)
+		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		assert.Nil(t, api)
+		assert.Nil(t, events)
+		assert.Nil(t, docs)
+
+		repositoryMock.AssertExpectations(t)
 	})
 
-	t.Run("Should fail when failed to create DocsTopic CR", func(t *testing.T) {
+	t.Run("Should fail when DocsTopic status is pending", func(t *testing.T) {
+		// given
+		repositoryMock := &mocks.DocsTopicRepository{}
+		uploadClientMock := &uploadMocks.Client{}
+		service := NewService(repositoryMock, uploadClientMock)
 
+		{
+			repositoryMock.On("Get", "id1").Return(createTestDocsTopic("id1", "", "", "", docstopic.StatusPending), nil)
+		}
+
+		// then
+		docs, api, events, err := service.Get("id1")
+
+		// then
+		require.NoError(t, err)
+		assert.Nil(t, api)
+		assert.Nil(t, events)
+		assert.Nil(t, docs)
+
+		repositoryMock.AssertExpectations(t)
 	})
 }
 
@@ -147,7 +176,8 @@ func TestUpdatingInAssetStore(t *testing.T) {
 			docsTopic := createTestDocsTopic("id1",
 				"www.somestorage.com/apiSpec.json",
 				"www.somestorage.com/asyncApiSpec.json",
-				"www.somestorage.com/content.json")
+				"www.somestorage.com/content.json",
+				docstopic.StatusNone)
 
 			repositoryMock.On("Update", docsTopic).Return(nil)
 		}
@@ -199,7 +229,7 @@ func TestRemovingFromAssetStore(t *testing.T) {
 	})
 }
 
-func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, documentationUrl string) docstopic.Entry {
+func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, documentationUrl string, status docstopic.StatusType) docstopic.Entry {
 
 	return docstopic.Entry{
 		Id:          id,
@@ -210,11 +240,12 @@ func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, doc
 			docstopic.KeyEventsSpec:        eventsSpecUrl,
 			docstopic.KeyDocumentationSpec: documentationUrl,
 		},
+		Status: status,
 	}
 }
 
-func createTestInputFile(name string, directory string, contents []byte) upload.InputFile {
-	return upload.InputFile{
+func createTestInputFile(name string, directory string, contents []byte) upload.File {
+	return upload.File{
 		Name:      name,
 		Directory: directory,
 		Contents:  contents,
@@ -230,9 +261,11 @@ func createTestOutputFile(filename string, url string) upload.UploadedFile {
 	}
 }
 
-func createTestServer(body []byte) *httptest.Server {
+func createTestServer(t *testing.T, body []byte) *httptest.Server {
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Write(body)
+		_, err := w.Write(body)
+		assert.NoError(t, err)
+
 		w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
 		w.WriteHeader(http.StatusOK)
 	}))

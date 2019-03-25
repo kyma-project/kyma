@@ -22,7 +22,7 @@ func TestAddDocsTopic(t *testing.T) {
 
 		docsTopicEntry := createTestDocsTopicEntry()
 
-		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "kyma-integration")), metav1.CreateOptions{}).
+		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.CreateOptions{}).
 			Return(&unstructured.Unstructured{}, nil)
 
 		// when
@@ -100,7 +100,7 @@ func TestUpdateDocsTopic(t *testing.T) {
 
 		docsTopicEntry := createTestDocsTopicEntry()
 
-		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "kyma-integration")), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
+		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
 
 		// when
 		err := repository.Update(docsTopicEntry)
@@ -108,6 +108,10 @@ func TestUpdateDocsTopic(t *testing.T) {
 		// then
 		require.NoError(t, err)
 		resourceInterfaceMock.AssertExpectations(t)
+	})
+
+	t.Run("Should return NotFound if k8s client returned NotFound error", func(t *testing.T) {
+
 	})
 
 	t.Run("Should fail if k8s client returned error", func(t *testing.T) {
@@ -139,7 +143,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 	}
 }
 
-func createMatcherFunction(docsTopicEntry docstopic.Entry, namespace string) func(*unstructured.Unstructured) bool {
+func createMatcherFunction(docsTopicEntry docstopic.Entry) func(*unstructured.Unstructured) bool {
 
 	checkUrls := func(urls map[string]string, sources map[string]v1alpha1.Source) bool {
 		if len(urls) != len(sources) {

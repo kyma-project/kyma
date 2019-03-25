@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"net/http"
@@ -19,12 +18,10 @@ func TestUploadClient(t *testing.T) {
 	t.Run("Should upload single file", func(t *testing.T) {
 		// given
 		testServer := getTestServer(t)
-		client := &http.Client{}
-
-		uploadClient := NewClient(testServer.URL, client)
+		uploadClient := NewClient(testServer.URL)
 
 		// when
-		input := InputFile{
+		input := File{
 			Directory: "testDir",
 			Name:      "testfile",
 			Contents:  testContent,
@@ -33,20 +30,51 @@ func TestUploadClient(t *testing.T) {
 		require.NoError(t, err)
 
 		// then
-		assert.Equal(t, output.Bucket, "testBucket")
-		assert.Equal(t, output.FileName, "testFile")
-		assert.Equal(t, output.RemotePath, "testDir/testPath")
-		assert.Equal(t, output.Size, 10)
+		assert.Equal(t, "testBucket", output.Bucket)
+		assert.Equal(t, "testFile", output.FileName)
+		assert.Equal(t, "testDir/testPath", output.RemotePath)
+		assert.Equal(t, int64(10), output.Size)
 	})
 
 	t.Run("Should fail when uploading file failed", func(t *testing.T) {
 		// given
+		uploadClient := NewClient("non-existent-url")
 
 		// when
+		input := File{
+			Directory: "testDir",
+			Name:      "testfile",
+			Contents:  testContent,
+		}
+		_, err := uploadClient.Upload(input)
 
 		// then
-
+		assert.Error(t, err)
 	})
+
+	t.Run("Should fail when upload service returned 500 status", func(t *testing.T) {
+		// given
+		testServer := getTestServerWithStatus(http.StatusInternalServerError)
+		uploadClient := NewClient(testServer.URL)
+
+		// when
+		input := File{
+			Directory: "testDir",
+			Name:      "testfile",
+			Contents:  testContent,
+		}
+		_, err := uploadClient.Upload(input)
+
+		// then
+		assert.Error(t, err)
+	})
+}
+
+func getTestServerWithStatus(status int) *httptest.Server {
+	return httptest.NewServer(http.HandlerFunc(
+		func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(status)
+		}))
 }
 
 func getTestServer(t *testing.T) *httptest.Server {
@@ -55,31 +83,18 @@ func getTestServer(t *testing.T) *httptest.Server {
 			err := r.ParseMultipartForm(32 << 20)
 			defer func() {
 				err := r.MultipartForm.RemoveAll()
-				if err != nil {
-					logrus.Error("Cleaning up multipart form data failed.")
-				}
+				require.NoError(t, err)
 			}()
 
-			defer r.Body.Close()
+			defer func() {
+				err = r.Body.Close()
+				require.NoError(t, err)
+			}()
 
 			require.NoError(t, err)
 			require.NotNil(t, r.MultipartForm)
 
-			files := r.MultipartForm.File
-			require.Equal(t, len(files), 1)
-
-			filesList, found := files[PrivateFileField]
-			require.True(t, found)
-			require.Equal(t, len(filesList), 1)
-
-			fileHeader := filesList[0]
-			assert.Equal(t, fileHeader.Filename, "testfile")
-			assert.NotZero(t, fileHeader.Size)
-
-			values := r.MultipartForm.Value
-			directory, found := values[DirectoryField]
-			assert.True(t, found)
-			assert.Equal(t, []string{"testDir"}, directory)
+			validateMultipartForm(t, r)
 
 			outputFile := UploadedFile{
 				FileName:   "testFile",
@@ -88,15 +103,50 @@ func getTestServer(t *testing.T) *httptest.Server {
 				Size:       10,
 			}
 
+			response := Response{
+				UploadedFiles: []UploadedFile{outputFile},
+			}
+
 			var b bytes.Buffer
-			err = json.NewEncoder(&b).Encode(outputFile)
+			err = json.NewEncoder(&b).Encode(response)
 			require.NoError(t, err)
 
 			w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJson)
 			w.WriteHeader(http.StatusOK)
 
-			w.Write(b.Bytes())
-
+			_, err = w.Write(b.Bytes())
+			assert.NoError(t, err)
 		}))
+}
 
+func validateMultipartForm(t *testing.T, r *http.Request) {
+	files := r.MultipartForm.File
+	require.Equal(t, len(files), 1)
+
+	filesList, found := files[PrivateFileField]
+	require.True(t, found)
+	require.Equal(t, len(filesList), 1)
+
+	fileHeader := filesList[0]
+	assert.Equal(t, "testfile", fileHeader.Filename)
+	f, err := fileHeader.Open()
+	require.NoError(t, err)
+
+	defer func() {
+		err = f.Close()
+		assert.NoError(t, err)
+	}()
+
+	b := make([]byte, fileHeader.Size)
+
+	_, err = f.Read(b)
+	require.NoError(t, err)
+
+	assert.Equal(t, []byte("test content"), b)
+	assert.NotZero(t, fileHeader.Size)
+
+	values := r.MultipartForm.Value
+	directory, found := values[DirectoryField]
+	assert.True(t, found)
+	assert.Equal(t, []string{"testDir"}, directory)
 }

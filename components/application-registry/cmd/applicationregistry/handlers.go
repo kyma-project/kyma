@@ -90,12 +90,12 @@ func NewSpecificationService(dynamicClient dynamic.Interface, namespace, uploadS
 	groupVersionResource := schema.GroupVersionResource{
 		Version:  v1alpha1.SchemeGroupVersion.Version,
 		Group:    v1alpha1.SchemeGroupVersion.Group,
-		Resource: "assets",
+		Resource: "docstopics",
 	}
 	resourceInterface := dynamicClient.Resource(groupVersionResource).Namespace(namespace)
 
 	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
-	uploadClient := upload.NewClient(uploadServiceURL, &http.Client{})
+	uploadClient := upload.NewClient(uploadServiceURL)
 	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient)
 
 	return specification.NewSpecService(assetStoreService)

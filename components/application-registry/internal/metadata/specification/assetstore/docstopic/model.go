@@ -14,7 +14,17 @@ type Entry struct {
 	Description string
 	Urls        map[string]string
 	Labels      map[string]string
+	Status      StatusType
 }
+
+type StatusType string
+
+const (
+	StatusNone      StatusType = ""
+	StatusPending   StatusType = "Pending"
+	StatusFailed    StatusType = "Failed"
+	StatusSucceeded StatusType = "Succeeded"
+)
 
 type ApiType string
 

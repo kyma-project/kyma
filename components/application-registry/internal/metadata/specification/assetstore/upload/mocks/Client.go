@@ -12,18 +12,18 @@ type Client struct {
 }
 
 // Upload provides a mock function with given fields: file
-func (_m *Client) Upload(file upload.InputFile) (upload.UploadedFile, apperrors.AppError) {
+func (_m *Client) Upload(file upload.File) (upload.UploadedFile, apperrors.AppError) {
 	ret := _m.Called(file)
 
 	var r0 upload.UploadedFile
-	if rf, ok := ret.Get(0).(func(upload.InputFile) upload.UploadedFile); ok {
+	if rf, ok := ret.Get(0).(func(upload.File) upload.UploadedFile); ok {
 		r0 = rf(file)
 	} else {
 		r0 = ret.Get(0).(upload.UploadedFile)
 	}
 
 	var r1 apperrors.AppError
-	if rf, ok := ret.Get(1).(func(upload.InputFile) apperrors.AppError); ok {
+	if rf, ok := ret.Get(1).(func(upload.File) apperrors.AppError); ok {
 		r1 = rf(file)
 	} else {
 		if ret.Get(1) != nil {

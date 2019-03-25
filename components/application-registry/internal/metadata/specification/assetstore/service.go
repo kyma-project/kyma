@@ -79,6 +79,14 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 		return nil, nil, nil, apperrors.Internal("Failed to read Docs Topic.")
 	}
 
+	if docsTopic.Status == docstopic.StatusFailed {
+		return nil, nil, nil, apperrors.Internal("DocsTopic has failed status.")
+	}
+
+	if docsTopic.Status == docstopic.StatusNone || docsTopic.Status == docstopic.StatusPending {
+		return nil, nil, nil, nil
+	}
+
 	apiSpec, err = s.getApiSpec(docsTopic)
 	if err != nil {
 		return nil, nil, nil, err
@@ -153,7 +161,7 @@ func (s service) processSpec(content []byte, filename, fileKey string, docsTopic
 }
 
 func (s service) uploadFile(id string, fileName string, content []byte) (upload.UploadedFile, apperrors.AppError) {
-	inputFile := upload.InputFile{
+	inputFile := upload.File{
 		Directory: id,
 		Name:      fileName,
 		Contents:  content,

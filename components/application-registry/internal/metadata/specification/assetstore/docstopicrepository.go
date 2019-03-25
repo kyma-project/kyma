@@ -43,7 +43,6 @@ func NewDocsTopicRepository(resourceInterface ResourceInterface) DocsTopicReposi
 }
 
 func (r repository) Create(documentationTopic docstopic.Entry) apperrors.AppError {
-
 	docsTopic := toK8sType(documentationTopic)
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&docsTopic)
 	if err != nil {
@@ -62,7 +61,6 @@ func (r repository) Create(documentationTopic docstopic.Entry) apperrors.AppErro
 }
 
 func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
-
 	sources := make(map[string]v1alpha1.Source)
 	for key, url := range docsTopicEntry.Urls {
 		sources[key] = v1alpha1.Source{
@@ -72,9 +70,14 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 	}
 
 	return v1alpha1.DocsTopic{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "DocsTopic",
+			APIVersion: v1alpha1.SchemeGroupVersion.String(),
+		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:   docsTopicEntry.Id,
-			Labels: docsTopicEntry.Labels,
+			Name:      docsTopicEntry.Id,
+			Namespace: "kyma-integration",
+			Labels:    docsTopicEntry.Labels,
 		},
 		Spec: v1alpha1.DocsTopicSpec{
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
@@ -86,8 +89,7 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 }
 
 func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
-
-	unstructured, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+	u, err := r.resourceInterface.Get(id, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
 			return docstopic.Entry{}, apperrors.NotFound("Docs Topic with id:%s not found", id)
@@ -99,7 +101,7 @@ func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
 	}
 
 	var docsTopic v1alpha1.DocsTopic
-	runtime.DefaultUnstructuredConverter.FromUnstructured(unstructured.Object, &docsTopic)
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &docsTopic)
 	if err != nil {
 		return docstopic.Entry{}, apperrors.Internal("Failed to convert from unstructured object.")
 	}
@@ -138,6 +140,9 @@ func (r repository) Update(documentationTopic docstopic.Entry) apperrors.AppErro
 	}, metav1.UpdateOptions{})
 
 	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return apperrors.NotFound("DocsTopic %s not found.", documentationTopic.Id)
+		}
 		return apperrors.Internal("Failed to create Documentation Topic")
 	}
 
