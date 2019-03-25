@@ -1,4 +1,3 @@
-{{- if .Values.loki.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -22,4 +21,4 @@ spec:
   selector:
     app: {{ template "loki.name" . }}
     release: {{ .Release.Name }}
-{{- end }}
+

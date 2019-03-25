@@ -1,4 +1,3 @@
-{{- if .Values.loki.enabled }}
 {{- if and .Values.loki.persistence.enabled (not .Values.loki.persistence.existingClaim) }}
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -22,4 +21,4 @@ spec:
       storage: {{ .Values.loki.persistence.size | quote }}
   storageClassName: {{ .Values.loki.persistence.storageClassName }}
 {{- end }}
-{{- end }}
+
