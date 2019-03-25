@@ -53,7 +53,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		// send success response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		publishResponse := &api.PublishResponse{EventID: cloudEvent.Headers[api.FieldEventId]}
+		publishResponse := &api.PublishResponse{EventID: cloudEvent.Headers[trace.HeaderEventID]}
 		if err := json.NewEncoder(w).Encode(*publishResponse); err != nil {
 			log.Printf("failed to send response back: %v", err)
 		} else {

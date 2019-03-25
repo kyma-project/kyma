@@ -32,8 +32,8 @@ func CreateTraceTagsFromCloudEvent(cloudEvent *api.CloudEvent) map[string]string
 func CreateTraceTagsFromMessageHeader(headers map[string]string) map[string]string {
 	return map[string]string{
 		eventID:          headers[HeaderEventID],
-		sourceID:         headers[sourceID],
-		eventType:        headers[eventType],
-		eventTypeVersion: headers[eventTypeVersion],
+		sourceID:         headers[HeaderSourceID],
+		eventType:        headers[HeaderEventType],
+		eventTypeVersion: headers[HeaderEventTypeVersion],
 	}
 }
