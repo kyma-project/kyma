@@ -4,7 +4,7 @@ deployment:
   args:
     proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
-    uploadServiceURL:  assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
+    uploadServiceURL:  http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
     requestTimeout: 10
     requestLogging: false
 
