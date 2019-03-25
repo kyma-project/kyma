@@ -169,7 +169,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: certhelper
-        image: demonsthere/alpine-kubectl:latest
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
         command:
           - bash
           - -c
