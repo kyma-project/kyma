@@ -360,8 +360,7 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 					log.Printf("[%v] Name of the Successful Pod is: %v", testName, string(functionPodName))
 					return
 				}
-				log.Printf("[%v] Name of the Failed Pod is: %v", testName, string(functionPodName))
-				log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
+				log.Printf("[%v] Response is not equal to expected output: %v != %v, pod name: %s. Retry...", testName, string(bodyBytes), expectedOutput, string(functionPodName))
 			} else {
 				log.Printf("[%v] Tick: Response code is: %v", testName, resp.StatusCode)
 				bodyBytes, err := ioutil.ReadAll(resp.Body)
