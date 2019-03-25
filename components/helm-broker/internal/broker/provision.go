@@ -53,6 +53,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		return &osb.ProvisionResponse{Async: false}, nil
 	}
 
+	svc.log.Println("dupa1")
 	switch opIDInProgress, inProgress, err := svc.instanceStateGetter.IsProvisioningInProgress(iID); true {
 	case err != nil:
 		return nil, errors.Wrap(err, "while checking if instance is being provisioned")
@@ -60,6 +61,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		opKeyInProgress := osb.OperationKey(opIDInProgress)
 		return &osb.ProvisionResponse{Async: true, OperationKey: &opKeyInProgress}, nil
 	}
+	svc.log.Println("dupa2")
 
 	namespace, err := getNamespaceFromContext(req.Context)
 	if err != nil {
@@ -82,6 +84,29 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		return nil, errors.New("this bundle has a provisioningOnlyOnce flag. An instance of this bundle already exists")
 	}
 
+	svcPlanID := internal.ServicePlanID(req.PlanID)
+
+	// bundlePlanID is in 1:1 match with servicePlanID (from service catalog)
+	bundlePlanID := internal.BundlePlanID(svcPlanID)
+	bundlePlan, found := bundle.Plans[bundlePlanID]
+	if !found {
+		return nil, errors.Errorf("bundle does not contain requested plan (planID: %s)", bundlePlanID)
+	}
+	releaseName := createReleaseName(bundle.Name, bundlePlan.Name, iID)
+
+	svc.log.Println("dupa3")
+	// TODO: add check if provisioning parameters are the same: https://github.com/kyma-project/kyma/issues/3608
+	// release could have been already installed in case of backup restore
+	_, err = svc.instanceGetter.GetByReleaseName(releaseName)
+	switch {
+	case err == nil:
+		return &osb.ProvisionResponse{Async: false}, nil
+	case IsNotFoundError(err):
+	default:
+		return nil, errors.Wrapf(err, "while getting instance by release name")
+	}
+	svc.log.Println("dupa4")
+
 	id, err := svc.operationIDProvider()
 	if err != nil {
 		return nil, errors.Wrap(err, "while generating ID for operation")
@@ -102,16 +127,6 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	if err := svc.operationInserter.Insert(&op); err != nil {
 		return nil, errors.Wrap(err, "while inserting instance operation to storage")
 	}
-
-	svcPlanID := internal.ServicePlanID(req.PlanID)
-
-	// bundlePlanID is in 1:1 match with servicePlanID (from service catalog)
-	bundlePlanID := internal.BundlePlanID(svcPlanID)
-	bundlePlan, found := bundle.Plans[bundlePlanID]
-	if !found {
-		return nil, errors.Errorf("bundle does not contain requested plan (planID: %s)", bundlePlanID)
-	}
-	releaseName := createReleaseName(bundle.Name, bundlePlan.Name, iID)
 
 	i := internal.Instance{
 		ID:            iID,

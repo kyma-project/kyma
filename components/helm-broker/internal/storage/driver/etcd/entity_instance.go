@@ -137,6 +137,20 @@ func (s *Instance) Remove(id internal.InstanceID) error {
 	return nil
 }
 
+// GetByReleaseName returns instance from storage with given releaseName.
+func (s *Instance) GetByReleaseName(releaseName internal.ReleaseName) (*internal.Instance, error) {
+	instances, err := s.GetAll()
+	if err != nil {
+		return nil, err
+	}
+	for _, instance := range instances {
+		if instance.ReleaseName == releaseName {
+			return instance, nil
+		}
+	}
+	return nil, notFoundError{}
+}
+
 func (*Instance) key(id internal.InstanceID) string {
 	return string(id)
 }

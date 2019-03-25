@@ -75,6 +75,7 @@ type (
 	instanceGetter interface {
 		Get(id internal.InstanceID) (*internal.Instance, error)
 		GetAll() ([]*internal.Instance, error)
+		GetByReleaseName(releaseName internal.ReleaseName) (*internal.Instance, error)
 	}
 	instanceRemover interface {
 		Remove(id internal.InstanceID) error

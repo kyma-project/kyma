@@ -91,6 +91,7 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	expInstanceCollection := ts.FixInstanceCollection()
 	iiMock.On("Insert", &expInstance).Return(nil).Once()
 	iiMock.On("GetAll").Return(expInstanceCollection, nil)
+	iiMock.On("GetByReleaseName", ts.Exp.ReleaseName).Return(nil, notFoundError{}).Once()
 
 	ioMock := &automock.OperationStorage{}
 	defer ioMock.AssertExpectations(t)
@@ -181,6 +182,7 @@ func TestProvisionServiceProvisionFailureAsync(t *testing.T) {
 	expInstanceCollection := ts.FixInstanceCollection()
 	iiMock.On("Insert", &expInstance).Return(nil).Once()
 	iiMock.On("GetAll").Return(expInstanceCollection, nil)
+	iiMock.On("GetByReleaseName", ts.Exp.ReleaseName).Return(nil, notFoundError{}).Once()
 
 	ioMock := &automock.OperationStorage{}
 	defer ioMock.AssertExpectations(t)
@@ -342,4 +344,52 @@ func TestProvisionServiceProvisionSuccessRepeatedOnProvisioningInProgress(t *tes
 		t.Fatal("async test hook called")
 	default:
 	}
+}
+
+func TestProvisionServiceSuccessWithAlreadyExistingReleaseName(t *testing.T) {
+	// GIVEN
+	ts := newProvisionServiceTestSuite(t)
+	ts.SetUp()
+
+	isgMock := &automock.InstanceStateGetter{}
+	defer isgMock.AssertExpectations(t)
+	isgMock.On("IsProvisioned", ts.Exp.InstanceID).Return(false, nil).Once()
+	isgMock.On("IsProvisioningInProgress", ts.Exp.InstanceID).Return(internal.OperationID(""), false, nil).Once()
+
+	bgMock := &automock.BundleStorage{}
+	expBundle := ts.FixBundle()
+	bgMock.On("GetByID", ts.Exp.Bundle.ID).Return(&expBundle, nil).Once()
+	defer bgMock.AssertExpectations(t)
+
+	cgMock := &automock.ChartGetter{}
+	defer cgMock.AssertExpectations(t)
+
+	iiMock := &automock.InstanceStorage{}
+	expInstanceCollection := ts.FixInstanceCollection()
+	iiMock.On("GetAll").Return(expInstanceCollection, nil)
+	iiMock.On("GetByReleaseName", ts.Exp.ReleaseName).Return(&internal.Instance{}, nil).Once()
+	defer iiMock.AssertExpectations(t)
+
+	ioMock := &automock.OperationStorage{}
+	defer ioMock.AssertExpectations(t)
+
+	hiMock := &automock.HelmClient{}
+	defer hiMock.AssertExpectations(t)
+
+	oipFake := func() (internal.OperationID, error) {
+		t.Error("operation ID provider called when it should not be")
+		return ts.Exp.OperationID, nil
+	}
+
+	svc := broker.NewProvisionService(bgMock, cgMock, iiMock, isgMock, ioMock, ioMock, nil, nil, nil, hiMock, oipFake, spy.NewLogDummy())
+
+	osbCtx := *broker.NewOSBContext("", "v1")
+	req := ts.FixProvisionRequest()
+
+	// WHEN
+	resp, err := svc.Provision(context.Background(), osbCtx, &req)
+
+	// THEN
+	assert.NoError(t, err)
+	assert.False(t, resp.Async)
 }

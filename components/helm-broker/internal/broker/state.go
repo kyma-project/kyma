@@ -3,6 +3,8 @@ package broker
 import (
 	"github.com/pkg/errors"
 
+	"log"
+
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
@@ -16,9 +18,14 @@ func (svc *instanceStateService) IsProvisioned(iID internal.InstanceID) (bool, e
 	ops, err := svc.operationCollectionGetter.GetAll(iID)
 	switch {
 	case err == nil:
+		for _, o := range ops {
+			log.Println(o)
+		}
 	case IsNotFoundError(err):
+		log.Println(err)
 		return false, nil
 	default:
+		log.Println(err)
 		return false, errors.Wrap(err, "while getting operations from storage")
 	}
 
@@ -32,6 +39,8 @@ OpsLoop:
 			break OpsLoop
 		}
 	}
+
+	log.Println(result)
 
 	return result, nil
 }
