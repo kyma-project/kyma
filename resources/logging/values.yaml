@@ -139,7 +139,7 @@ promtail:
 global:
   ## to deploy console ui app
   uiapp:
-    create: false
+    create: true
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
@@ -151,4 +151,3 @@ global:
 test:
   image:
     name: test-logging
-    
