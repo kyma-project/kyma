@@ -12,7 +12,6 @@ cp Dockerfile docker/image/
 cp -R main.go application httpserver handlers publisher validators docker/image/
 cp -R ../../internal/knative/publish docker/image/
 cp -R ../../internal docker/image/
-cp -R ../../internal docker/image/
 cp -R ../../vendor docker/image/
 cp -R ../../api docker/image/
 tagName="${NAME}:${VERSION}"
