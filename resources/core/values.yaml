@@ -71,7 +71,7 @@ global:
     version: PR-3190
   console_backend_service_test:
     dir: pr/
-    version: PR-3190
+    version: PR-319
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
