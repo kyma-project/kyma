@@ -7,7 +7,7 @@ type: Installation
 Kyma is supplied with a custom installation of [Tiller](https://helm.sh/docs/glossary/#tiller), which secured all incoming connections with a TLS certificate. Because of that, all client connections (whether from inside or outside of the cluster) require a special pair of client certificates. 
 
 ## Retrieving 
-In order to secure a local connection the certificates need to be downloaded from the cluster and stored in [`HELM_HOME`](https://helm.sh/docs/glossary/#helm-home-helm-home). This can be done by calling:
+In order to secure connection, the certificates need to be downloaded from the cluster and stored in [`HELM_HOME`](https://helm.sh/docs/glossary/#helm-home-helm-home). This can be done by calling:
 
 ```
 kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 -D > "$(helm home)/ca.pem"
