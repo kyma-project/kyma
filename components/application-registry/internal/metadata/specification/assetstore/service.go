@@ -248,5 +248,5 @@ func (s service) requestAPISpec(specUrl string) (*http.Response, apperrors.AppEr
 }
 
 func (s service) Remove(id string) apperrors.AppError {
-	return nil
+	return s.docsTopicRepository.Delete(id)
 }

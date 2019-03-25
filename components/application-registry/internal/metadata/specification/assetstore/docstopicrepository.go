@@ -125,6 +125,11 @@ func fromK8sType(k8sDocsTopic v1alpha1.DocsTopic) docstopic.Entry {
 }
 
 func (r repository) Delete(id string) apperrors.AppError {
+	err := r.resourceInterface.Delete(id, &metav1.DeleteOptions{})
+	if err != nil {
+		return apperrors.Internal("Failed to delete DocsTopic: %s.", err)
+	}
+
 	return nil
 }
 

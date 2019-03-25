@@ -215,20 +215,6 @@ func TestUpdatingInAssetStore(t *testing.T) {
 	})
 }
 
-func TestRemovingFromAssetStore(t *testing.T) {
-	t.Run("Should remove specifications from asset store", func(t *testing.T) {
-
-	})
-
-	t.Run("Should fail when failed to upload file", func(t *testing.T) {
-
-	})
-
-	t.Run("Should fail when failed to create DocsTopic CR", func(t *testing.T) {
-
-	})
-}
-
 func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, documentationUrl string, status docstopic.StatusType) docstopic.Entry {
 
 	return docstopic.Entry{

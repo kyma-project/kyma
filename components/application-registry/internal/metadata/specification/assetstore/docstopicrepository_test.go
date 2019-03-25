@@ -1,6 +1,7 @@
 package assetstore
 
 import (
+	"errors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
@@ -121,11 +122,33 @@ func TestUpdateDocsTopic(t *testing.T) {
 
 func TestDeleteDocsTopic(t *testing.T) {
 	t.Run("Should delete DocsTopic", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
+		resourceInterfaceMock.On("Delete", "id1", &metav1.DeleteOptions{}).Return(nil)
+
+		// when
+		err := repository.Delete("id1")
+
+		// then
+		require.NoError(t, err)
+		resourceInterfaceMock.AssertExpectations(t)
 	})
 
 	t.Run("Should fail if k8s client returned error", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
+		resourceInterfaceMock.On("Delete", "id1", &metav1.DeleteOptions{}).Return(errors.New("some error"))
+
+		// when
+		err := repository.Delete("id1")
+
+		// then
+		require.Error(t, err)
+		resourceInterfaceMock.AssertExpectations(t)
 	})
 }
 
