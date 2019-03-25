@@ -68,10 +68,10 @@ global:
     version: 429bfbcc
   console_backend_service:
     dir: pr/
-    version: PR-319
+    version: PR-3190
   console_backend_service_test:
     dir: pr/
-    version: PR-319
+    version: PR-3190
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
