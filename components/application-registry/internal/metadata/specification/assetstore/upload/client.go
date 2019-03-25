@@ -25,20 +25,20 @@ type File struct {
 }
 
 type Response struct {
-	UploadedFiles []UploadedFile  `json:"uploadedFiles,omitempty"`
-	Errors        []ResponseError `json:"errors,omitempty"`
+	UploadedFiles []UploadedFile
+	Errors        []ResponseError
 }
 
 type ResponseError struct {
-	Message  string `json:"message"`
-	FileName string `json:"omitempty,fileName"`
+	Message  string
+	FileName string
 }
 
 type UploadedFile struct {
-	FileName   string `json:"fileName"`
-	RemotePath string `json:"remotePath"`
-	Bucket     string `json:"bucket"`
-	Size       int64  `json:"size"`
+	FileName   string
+	RemotePath string
+	Bucket     string
+	Size       int64
 }
 
 type Client interface {
