@@ -75,7 +75,7 @@ These are the resources related to this CR:
 
 | Custom resource   |   Description |
 |----------|------|
-| [UsageKind](#custom-resource-usagekind) |  Provides information where to inject Secrets. |
+| [UsageKind](#custom-resource-usagekind) |  Provides information on where to inject Secrets. |
 | [ServiceBinding](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/#api-resources) |  Provides Secrets to inject.  |
 
 
