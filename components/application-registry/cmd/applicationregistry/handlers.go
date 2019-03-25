@@ -58,7 +58,7 @@ func newServiceDefinitionService(uploadServiceURL, namespace string, proxyPort i
 		return nil, apperrors.Internal("Failed to create dynamic client, %s", err)
 	}
 
-	specificationService := NewSepcificationService(dynamicClient, namespace, uploadServiceURL)
+	specificationService := NewSpecificationService(dynamicClient, namespace, uploadServiceURL)
 
 	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig)
 	if apperror != nil {
@@ -86,7 +86,7 @@ func newServiceDefinitionService(uploadServiceURL, namespace string, proxyPort i
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
 }
 
-func NewSepcificationService(dynamicClient dynamic.Interface, namespace, uploadServiceURL string) specification.Service {
+func NewSpecificationService(dynamicClient dynamic.Interface, namespace, uploadServiceURL string) specification.Service {
 	groupVersionResource := schema.GroupVersionResource{
 		Version:  v1alpha1.SchemeGroupVersion.Version,
 		Group:    v1alpha1.SchemeGroupVersion.Group,
@@ -95,7 +95,7 @@ func NewSepcificationService(dynamicClient dynamic.Interface, namespace, uploadS
 	resourceInterface := dynamicClient.Resource(groupVersionResource).Namespace(namespace)
 
 	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
-	uploadClient := upload.NewUploadClient(uploadServiceURL, &http.Client{})
+	uploadClient := upload.NewClient(uploadServiceURL, &http.Client{})
 	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient)
 
 	return specification.NewSpecService(assetStoreService)

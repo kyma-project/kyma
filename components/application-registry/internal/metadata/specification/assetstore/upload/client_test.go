@@ -21,7 +21,7 @@ func TestUploadClient(t *testing.T) {
 		testServer := getTestServer(t)
 		client := &http.Client{}
 
-		uploadClient := NewUploadClient(testServer.URL, client)
+		uploadClient := NewClient(testServer.URL, client)
 
 		// when
 		input := InputFile{
@@ -68,13 +68,18 @@ func getTestServer(t *testing.T) *httptest.Server {
 			files := r.MultipartForm.File
 			require.Equal(t, len(files), 1)
 
-			filesList, found := files[AssetFieldName]
+			filesList, found := files[PrivateFileField]
 			require.True(t, found)
 			require.Equal(t, len(filesList), 1)
 
 			fileHeader := filesList[0]
 			assert.Equal(t, fileHeader.Filename, "testfile")
 			assert.NotZero(t, fileHeader.Size)
+
+			values := r.MultipartForm.Value
+			directory, found := values[DirectoryField]
+			assert.True(t, found)
+			assert.Equal(t, []string{"testDir"}, directory)
 
 			outputFile := OutputFile{
 				FileName:   "testFile",
