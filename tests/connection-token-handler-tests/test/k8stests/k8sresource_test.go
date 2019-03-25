@@ -20,22 +20,28 @@ const (
 
 func TestTokenRequests(t *testing.T) {
 
+	config, e := testkit.ReadConfig()
+
+	require.NoError(t, e)
+
 	appName := "test-name"
 
 	client, err := testkit.NewK8sResourcesClient()
 
 	require.NoError(t, err)
 
-	t.Run("should create token request CR with token", func(t *testing.T) {
-		//when
-		tokenRequest, e := client.CreateTokenRequest(appName+addSuffix(), emptyGroup, emptyTenant)
-		require.NoError(t, e)
+	if !config.Central {
+		t.Run("should create token request CR with token", func(t *testing.T) {
+			//when
+			tokenRequest, e := client.CreateTokenRequest(appName+addSuffix(), emptyGroup, emptyTenant)
+			require.NoError(t, e)
 
-		//then
-		tokenRequest = waitForToken(t, client, tokenRequest)
+			//then
+			tokenRequest = waitForToken(t, client, tokenRequest)
 
-		assert.NotEmpty(t, tokenRequest.Status.Token)
-	})
+			assert.NotEmpty(t, tokenRequest.Status.Token)
+		})
+	}
 
 	t.Run("should create token request CR with token when tenant and group provided", func(t *testing.T) {
 		//given
