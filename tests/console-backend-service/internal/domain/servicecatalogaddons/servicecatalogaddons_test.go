@@ -3,6 +3,7 @@
 package servicecatalogaddons
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"testing"
@@ -22,18 +23,20 @@ func TestMain(m *testing.M) {
 
 	module.SkipPluggableMainIfShould(c, ModuleName)
 
-	scInstaller, err := setup.NewServiceCatalogInstaller(TestNamespace)
-	exitOnError(err, "while initializing Service Catalog installer")
+	scInstaller, err := setup.NewServiceCatalogConfigurer(TestNamespace)
+	exitOnError(err, fmt.Sprintf("while initializing Service Catalog installer for module %s", ModuleName))
 
 	err = scInstaller.Setup()
 	if err != nil {
-		scInstaller.Cleanup()
-		exitOnError(err, "while setup")
+		cleanupErr := scInstaller.Cleanup()
+		log.Printf("Error while cleanup after failed setup for %s: %s", ModuleName, cleanupErr.Error())
+		exitOnError(err, fmt.Sprintf("while setup for module %s", ModuleName))
 	}
 
 	code := m.Run()
 
-	scInstaller.Cleanup()
+	cleanupErr := scInstaller.Cleanup()
+	log.Printf("Error while cleanup for %s: %s", ModuleName, cleanupErr.Error())
 	os.Exit(code)
 }
 
