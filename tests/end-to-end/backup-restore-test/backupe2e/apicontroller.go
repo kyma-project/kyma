@@ -28,7 +28,7 @@ import (
 type apiControllerTest struct {
 	functionName   string
 	uuid           string
-	domain         string
+	domainName     string
 	hostName       string
 	kubelessClient *kubeless.Clientset
 	coreClient     *kubernetes.Clientset
@@ -58,15 +58,16 @@ func NewApiControllerTest() (apiControllerTest, error) {
 		return apiControllerTest{}, err
 	}
 
-	domain := os.Getenv("DOMAIN")
+	functionName := "apicontroller"
+	domainName := os.Getenv("DOMAIN")
 
 	return apiControllerTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
 		apiClient:      apiClient,
-		functionName:   "apicontroller",
-		domain:         domain,
-		hostName:       "apicontroller." + domain,
+		functionName:   functionName,
+		domainName:     domainName,
+		hostName:       functionName + "." + domainName,
 		uuid:           uuid.New().String(),
 	}, nil
 }
@@ -84,18 +85,17 @@ func (t apiControllerTest) TestResources(namespace string) {
 	err := t.getFunctionPodStatus(namespace, 2*time.Minute)
 	So(err, ShouldBeNil)
 
-	host := fmt.Sprintf("https://%s", t.hostName)
-	err = t.callFunctionWithoutToken(host, 2*time.Minute)
+	err = t.callFunctionWithoutToken(2 * time.Minute)
 	So(err, ShouldBeNil)
 
 	token, err := fetchDexToken()
 	So(err, ShouldBeNil)
 
-	err = t.callFunctionWithToken(host, token, 2*time.Minute)
+	err = t.callFunctionWithToken(token, 2*time.Minute)
 	So(err, ShouldBeNil)
 }
 
-func (t apiControllerTest) callFunctionWithoutToken(host string, waitmax time.Duration) error {
+func (t apiControllerTest) callFunctionWithoutToken(waitmax time.Duration) error {
 
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
@@ -105,6 +105,7 @@ func (t apiControllerTest) callFunctionWithoutToken(host string, waitmax time.Du
 	for {
 		select {
 		case <-tick:
+			host := fmt.Sprintf("https://%s", t.hostName)
 			resp, err := http.Get(host)
 			if err != nil {
 				messages += fmt.Sprintf("%+v\n", err)
@@ -121,13 +122,14 @@ func (t apiControllerTest) callFunctionWithoutToken(host string, waitmax time.Du
 	}
 }
 
-func (t apiControllerTest) callFunctionWithToken(host string, token string, waitmax time.Duration) error {
+func (t apiControllerTest) callFunctionWithToken(token string, waitmax time.Duration) error {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 		},
 	}
 
+	host := fmt.Sprintf("https://%s", t.hostName)
 	req, err := http.NewRequest("GET", host, nil)
 	if err != nil {
 		return err
@@ -173,7 +175,7 @@ func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error)
 				{
 					Type: apiv1alpha2.JwtType,
 					Jwt: apiv1alpha2.JwtAuthentication{
-						Issuer:  "https://dex." + t.domain,
+						Issuer:  "https://dex." + t.domainName,
 						JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
 					},
 				},
