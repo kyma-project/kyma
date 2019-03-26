@@ -8,7 +8,7 @@ import (
 )
 
 type KnativePublisher interface {
-	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, payload *[]byte) *api.Error
+	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string]string, payload *[]byte) *api.Error
 }
 
 type DefaultKnativePublisher struct{}
@@ -18,7 +18,7 @@ func NewKnativePublisher() KnativePublisher {
 	return publisher
 }
 
-func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, payload *[]byte) *api.Error {
+func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string]string, payload *[]byte) *api.Error {
 	// knativelib should not be nil
 	if knativeLib == nil {
 		log.Println("knative-lib is nil")
@@ -37,6 +37,12 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		return api.ErrorResponseInternalServer()
 	}
 
+	// headers should be present
+	if headers == nil || len(*headers) == 0 {
+		log.Println("headers are missing")
+		return api.ErrorResponseInternalServer()
+	}
+
 	// payload should be present
 	if payload == nil || len(*payload) == 0 {
 		log.Println("payload is missing")
@@ -51,8 +57,8 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	}
 
 	// send message to the knative channel
-	message := string(*payload)
-	err = knativeLib.SendMessage(channel, &message)
+	messagePayload := string(*payload)
+	err = knativeLib.SendMessage(channel, headers, &messagePayload)
 	if err != nil {
 		log.Printf("failed to send message to the knative channel '%v' in namespace '%v'", *channelName, *namespace)
 		return api.ErrorResponseInternalServer()
