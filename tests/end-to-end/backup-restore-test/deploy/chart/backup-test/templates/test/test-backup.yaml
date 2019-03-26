@@ -81,7 +81,7 @@ spec:
     #command: ["sleep", "6000"]
     env:
     - name: DOMAIN
-      value: {{ .Values.global.ingress.domainName }}
+      value: {{ .Values.global.ingress.domainName | default "kyma.local" }}
     - name: USER_EMAIL
       valueFrom:
         secretKeyRef:
