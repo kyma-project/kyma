@@ -141,7 +141,7 @@ global:
     path: eu.gcr.io/kyma-project
   test_logging:
     dir: 
-    version: 0.8.1
+    version: 0.8.2
   ## to enable auth and authz set value to true
   rbac:
     create: false
