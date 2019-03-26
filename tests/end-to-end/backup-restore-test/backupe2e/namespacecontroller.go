@@ -60,7 +60,7 @@ func (n namespaceControllerTest) createTestNamespace() error {
 
 func (n namespaceControllerTest) waitForResources() error {
 
-	timeout := time.After(5 * time.Second)
+	timeout := time.After(5 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
 	for {
