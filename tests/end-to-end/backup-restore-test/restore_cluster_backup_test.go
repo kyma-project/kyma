@@ -46,13 +46,13 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	}
 
 	myNamespaceControllerTest, err := NewNamespaceControllerTest()
-  
+
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 
 	apiControllerTest, err := NewApiControllerTest()
-  
+
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
