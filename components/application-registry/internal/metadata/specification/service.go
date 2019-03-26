@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
-	"io/ioutil"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
 	"net/http"
 	"net/url"
 	"strings"
@@ -32,15 +32,15 @@ type Service interface {
 
 type specService struct {
 	assetStoreService assetstore.Service
-	httpClient        http.Client
+	downloadClient    download.Client
 }
 
 func NewSpecService(assetStoreService assetstore.Service) Service {
 	return &specService{
 		assetStoreService: assetStoreService,
-		httpClient: http.Client{
+		downloadClient: download.NewClient(&http.Client{
 			Timeout: specRequestTimeout,
-		},
+		}),
 	}
 }
 
@@ -135,17 +135,7 @@ func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 		return nil, apperr
 	}
 
-	response, apperr := svc.requestAPISpec(specUrl)
-	if apperr != nil {
-		return nil, apperr
-	}
-
-	apiSpec, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, apperrors.Internal("Reading API spec response body failed, %s", err.Error())
-	}
-
-	return apiSpec, nil
+	return svc.downloadClient.Fetch(specUrl)
 }
 
 func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
@@ -166,24 +156,6 @@ func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
 	}
 
 	return specUrl.String(), nil
-}
-
-func (svc *specService) requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
-	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
-	if err != nil {
-		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	response, err := svc.httpClient.Do(req)
-	if err != nil {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	if response.StatusCode != http.StatusOK {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed with status %s", specUrl, response.Status)
-	}
-
-	return response, nil
 }
 
 func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {

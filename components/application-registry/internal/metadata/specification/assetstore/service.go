@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
-	"io/ioutil"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
 	"net/http"
 	"time"
 )
@@ -36,16 +36,17 @@ type Service interface {
 type service struct {
 	docsTopicRepository DocsTopicRepository
 	uploadClient        upload.Client
-	httpClient          http.Client
+	downloadClient      download.Client
 }
 
 func NewService(repository DocsTopicRepository, uploadClient upload.Client) Service {
+	downloadClient := download.NewClient(&http.Client{
+		Timeout: specRequestTimeout,
+	})
 	return &service{
 		docsTopicRepository: repository,
 		uploadClient:        uploadClient,
-		httpClient: http.Client{
-			Timeout: specRequestTimeout,
-		},
+		downloadClient:      downloadClient,
 	}
 }
 
@@ -92,6 +93,10 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 	}
 
 	return documentation, apiSpec, eventsSpec, nil
+}
+
+func (s service) Remove(id string) apperrors.AppError {
+	return s.docsTopicRepository.Delete(id)
 }
 
 func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) (docstopic.Entry, apperrors.AppError) {
@@ -162,17 +167,17 @@ func (s service) getApiSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) 
 
 	url, found := entry.Urls[docstopic.KeyOpenApiSpec]
 	if found {
-		return s.fetchUrl(url)
+		return s.downloadClient.Fetch(url)
 	}
 
 	url, found = entry.Urls[docstopic.KeyODataJSONSpec]
 	if found {
-		return s.fetchUrl(url)
+		return s.downloadClient.Fetch(url)
 	}
 
 	url, found = entry.Urls[docstopic.KeyODataXMLSpec]
 	if found {
-		return s.fetchUrl(url)
+		return s.downloadClient.Fetch(url)
 	}
 
 	return nil, nil
@@ -182,7 +187,7 @@ func (s service) getEventsSpec(entry docstopic.Entry) ([]byte, apperrors.AppErro
 
 	url, found := entry.Urls[docstopic.KeyEventsSpec]
 	if found {
-		return s.fetchUrl(url)
+		return s.downloadClient.Fetch(url)
 	}
 
 	return nil, nil
@@ -192,50 +197,8 @@ func (s service) getDocumentation(entry docstopic.Entry) ([]byte, apperrors.AppE
 
 	url, found := entry.Urls[docstopic.KeyDocumentationSpec]
 	if found {
-		return s.fetchUrl(url)
+		return s.downloadClient.Fetch(url)
 	}
 
 	return nil, nil
-}
-
-func (s service) fetchUrl(url string) ([]byte, apperrors.AppError) {
-	res, err := s.requestAPISpec(url)
-	if err != nil {
-		return nil, err
-	}
-
-	if res.StatusCode != http.StatusOK {
-		return nil, apperrors.Internal("Failed to fetch from Asset Store.")
-	}
-
-	{
-		bytes, err := ioutil.ReadAll(res.Body)
-		if err != nil {
-			return nil, apperrors.Internal("Failed to read response body from Asset Store.")
-		}
-
-		return bytes, nil
-	}
-}
-
-func (s service) requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
-	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
-	if err != nil {
-		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	response, err := s.httpClient.Do(req)
-	if err != nil {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	if response.StatusCode != http.StatusOK {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed with status %s", specUrl, response.Status)
-	}
-
-	return response, nil
-}
-
-func (s service) Remove(id string) apperrors.AppError {
-	return s.docsTopicRepository.Delete(id)
 }
