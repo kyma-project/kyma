@@ -9,7 +9,7 @@ The main purpose of the service is to provide metadata extraction for Asset Stor
 
 ## Front matter metadata
 
-Front matter YAML metadata are YAML properties written at the beginning of a file, written between `---` lines. The following snippet represents an exemplary Markdown file with metadata specified:
+Front matter YAML metadata are YAML properties added at the beginning of a file, between `---` lines. The following snippet represents an exemplary Markdown file with metadata specified:
 
 ```markdown
 
