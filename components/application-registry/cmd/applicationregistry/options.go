@@ -14,6 +14,7 @@ type options struct {
 	requestLogging        bool
 	detailedErrorResponse bool
 	uploadServiceURL      string
+	insecureAssetDownload bool
 }
 
 func parseArgs() *options {
@@ -24,6 +25,8 @@ func parseArgs() *options {
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	detailedErrorResponse := flag.Bool("detailedErrorResponse", false, "Flag for showing full internal error response messages.")
 	uploadServiceURL := flag.String("uploadServiceURL", "http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000", "Upload Service URL.")
+	insecureAssetDownload := flag.Bool("insecureAssetDownload", false, "Flag for skipping certificate verification for asset download. ")
+
 	flag.Parse()
 
 	return &options{
@@ -34,12 +37,13 @@ func parseArgs() *options {
 		requestLogging:        *requestLogging,
 		detailedErrorResponse: *detailedErrorResponse,
 		uploadServiceURL:      *uploadServiceURL,
+		insecureAssetDownload: *insecureAssetDownload,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s"+
-		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --detailedErrorResponse=%t",
+		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --detailedErrorResponse=%t --uploadServiceURL=%s --insecureAssetDownload=%t",
 		o.externalAPIPort, o.proxyPort, o.uploadServiceURL,
-		o.namespace, o.requestTimeout, o.requestLogging, o.detailedErrorResponse)
+		o.namespace, o.requestTimeout, o.requestLogging, o.detailedErrorResponse, o.uploadServiceURL, o.insecureAssetDownload)
 }

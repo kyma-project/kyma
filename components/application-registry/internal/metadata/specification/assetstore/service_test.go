@@ -23,7 +23,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock)
+		service := NewService(repositoryMock, uploadClientMock, false)
 
 		{
 			docsTopic := createTestDocsTopic("id1",
@@ -80,7 +80,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock)
+		service := NewService(repositoryMock, uploadClientMock, false)
 
 		apiTestServer := createTestServer(t, jsonApiSpec)
 		defer apiTestServer.Close()
@@ -113,7 +113,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock)
+		service := NewService(repositoryMock, uploadClientMock, false)
 
 		{
 			repositoryMock.On("Get", "id1").Return(createTestDocsTopic("id1", "", "", "", docstopic.StatusFailed), nil)
@@ -135,7 +135,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock)
+		service := NewService(repositoryMock, uploadClientMock, false)
 
 		{
 			repositoryMock.On("Get", "id1").Return(createTestDocsTopic("id1", "", "", "", docstopic.StatusPending), nil)

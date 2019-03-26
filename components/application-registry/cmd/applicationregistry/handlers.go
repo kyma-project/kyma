@@ -30,11 +30,11 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, middlewares []mux.MiddlewareFunc, detailedErrorResponse bool) http.Handler {
+func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionService, middlewares []mux.MiddlewareFunc, opt *options) http.Handler {
 	var metadataHandler externalapi.MetadataHandler
 
 	if serviceDefinitionService != nil {
-		metadataHandler = externalapi.NewMetadataHandler(externalapi.NewServiceDetailsValidator(), serviceDefinitionService, detailedErrorResponse)
+		metadataHandler = externalapi.NewMetadataHandler(externalapi.NewServiceDetailsValidator(), serviceDefinitionService, opt.detailedErrorResponse)
 	} else {
 		metadataHandler = externalapi.NewInvalidStateMetadataHandler("Service is not initialized properly.")
 	}
@@ -42,7 +42,7 @@ func newExternalHandler(serviceDefinitionService metadata.ServiceDefinitionServi
 	return externalapi.NewHandler(metadataHandler, middlewares)
 }
 
-func newServiceDefinitionService(uploadServiceURL, namespace string, proxyPort int, nameResolver k8sconsts.NameResolver) (metadata.ServiceDefinitionService, apperrors.AppError) {
+func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolver) (metadata.ServiceDefinitionService, apperrors.AppError) {
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		return nil, apperrors.Internal("Failed to read k8s in-cluster configuration, %s", err)
@@ -58,20 +58,20 @@ func newServiceDefinitionService(uploadServiceURL, namespace string, proxyPort i
 		return nil, apperrors.Internal("Failed to create dynamic client, %s", err)
 	}
 
-	specificationService := NewSpecificationService(dynamicClient, namespace, uploadServiceURL)
+	specificationService := NewSpecificationService(dynamicClient, opt)
 
 	applicationServiceRepository, apperror := newApplicationRepository(k8sConfig)
 	if apperror != nil {
 		return nil, apperror
 	}
 
-	istioService, apperror := newIstioService(k8sConfig, namespace)
+	istioService, apperror := newIstioService(k8sConfig, opt.namespace)
 	if apperror != nil {
 		return nil, apperror
 	}
 
-	accessServiceManager := newAccessServiceManager(coreClientset, namespace, proxyPort)
-	secretsService := newSecretsRepository(coreClientset, nameResolver, namespace)
+	accessServiceManager := newAccessServiceManager(coreClientset, opt.namespace, opt.proxyPort)
+	secretsService := newSecretsRepository(coreClientset, nameResolver, opt.namespace)
 
 	uuidGenerator := metauuid.GeneratorFunc(func() (string, error) {
 		uuidInstance, err := uuid.NewV4()
@@ -86,17 +86,17 @@ func newServiceDefinitionService(uploadServiceURL, namespace string, proxyPort i
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
 }
 
-func NewSpecificationService(dynamicClient dynamic.Interface, namespace, uploadServiceURL string) specification.Service {
+func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) specification.Service {
 	groupVersionResource := schema.GroupVersionResource{
 		Version:  v1alpha1.SchemeGroupVersion.Version,
 		Group:    v1alpha1.SchemeGroupVersion.Group,
 		Resource: "docstopics",
 	}
-	resourceInterface := dynamicClient.Resource(groupVersionResource).Namespace(namespace)
+	resourceInterface := dynamicClient.Resource(groupVersionResource).Namespace(opt.namespace)
 
 	docsTopicRepository := assetstore.NewDocsTopicRepository(resourceInterface)
-	uploadClient := upload.NewClient(uploadServiceURL)
-	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient)
+	uploadClient := upload.NewClient(opt.uploadServiceURL)
+	assetStoreService := assetstore.NewService(docsTopicRepository, uploadClient, opt.insecureAssetDownload)
 
 	return specification.NewSpecService(assetStoreService)
 }

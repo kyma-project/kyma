@@ -28,9 +28,7 @@ func main() {
 	nameResolver := k8sconsts.NewNameResolver(options.namespace)
 
 	serviceDefinitionService, err := newServiceDefinitionService(
-		options.uploadServiceURL,
-		options.namespace,
-		options.proxyPort,
+		options,
 		nameResolver,
 	)
 
@@ -43,7 +41,7 @@ func main() {
 		log.Errorf("Failed to setup monitoring middleware, %s", err.Error())
 	}
 
-	externalHandler := newExternalHandler(serviceDefinitionService, middlewares, options.detailedErrorResponse)
+	externalHandler := newExternalHandler(serviceDefinitionService, middlewares, options)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)

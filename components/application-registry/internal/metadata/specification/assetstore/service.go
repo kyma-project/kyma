@@ -1,6 +1,7 @@
 package assetstore
 
 import (
+	"crypto/tls"
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
@@ -39,10 +40,12 @@ type service struct {
 	downloadClient      download.Client
 }
 
-func NewService(repository DocsTopicRepository, uploadClient upload.Client) Service {
+func NewService(repository DocsTopicRepository, uploadClient upload.Client, insecureAssetDownload bool) Service {
 	downloadClient := download.NewClient(&http.Client{
-		Timeout: specRequestTimeout,
+		Timeout:   specRequestTimeout,
+		Transport: &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: insecureAssetDownload}},
 	})
+
 	return &service{
 		docsTopicRepository: repository,
 		uploadClient:        uploadClient,
