@@ -18,4 +18,4 @@ global:
     secretName: etcd-backup-abs-credentials
   etcd_backup_job:
     dir:
-    version: 0.8.1
+    version: 0.8.2
