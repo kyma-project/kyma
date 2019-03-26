@@ -196,6 +196,9 @@
 # Asset Upload Service
 /components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
+# Asset Metadata Service
+/components/asset-metadata-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+
 # CMS Controller Manager Component
 /components/cms-controller-manager/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
