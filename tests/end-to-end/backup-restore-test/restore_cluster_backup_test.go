@@ -22,7 +22,9 @@ type e2eTest struct {
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
+
 	myFunctionTest, err := NewFunctionTest()
+
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -51,10 +53,6 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	}
 
 	apiControllerTest, err := NewApiControllerTest()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
-
 	if err != nil {
 		t.Fatalf("%v", err)
 	}

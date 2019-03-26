@@ -28,14 +28,12 @@ import (
 type apiControllerTest struct {
 	functionName   string
 	uuid           string
+	domain         string
+	hostName       string
 	kubelessClient *kubeless.Clientset
 	coreClient     *kubernetes.Clientset
 	apiClient      *kyma.Clientset
 }
-
-const (
-	hostName = "apicontroller-stage.kyma.local"
-)
 
 func NewApiControllerTest() (apiControllerTest, error) {
 
@@ -60,23 +58,25 @@ func NewApiControllerTest() (apiControllerTest, error) {
 		return apiControllerTest{}, err
 	}
 
+	domain := os.Getenv("DOMAIN")
+
 	return apiControllerTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
 		apiClient:      apiClient,
 		functionName:   "apicontroller",
+		domain:         domain,
+		hostName:       "apicontroller." + domain,
 		uuid:           uuid.New().String(),
 	}, nil
 }
 
 func (t apiControllerTest) CreateResources(namespace string) {
 
-	domain := os.Getenv("DOMAIN")
-
 	_, err := t.createFunction(namespace)
 	So(err, ShouldBeNil)
 
-	_, err = t.createApi(namespace, domain)
+	_, err = t.createApi(namespace)
 	So(err, ShouldBeNil)
 }
 
@@ -84,7 +84,7 @@ func (t apiControllerTest) TestResources(namespace string) {
 	err := t.getFunctionPodStatus(namespace, 2*time.Minute)
 	So(err, ShouldBeNil)
 
-	host := fmt.Sprintf("https://%s", hostName)
+	host := fmt.Sprintf("https://%s", t.hostName)
 	err = t.callFunctionWithoutToken(host, 2*time.Minute)
 	So(err, ShouldBeNil)
 
@@ -159,7 +159,7 @@ func (t apiControllerTest) callFunctionWithToken(host string, token string, wait
 	}
 }
 
-func (t apiControllerTest) createApi(namespace string, domain string) (*apiv1alpha2.Api, error) {
+func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error) {
 	authEnabled := true
 	servicePort := 8080
 
@@ -173,12 +173,12 @@ func (t apiControllerTest) createApi(namespace string, domain string) (*apiv1alp
 				{
 					Type: apiv1alpha2.JwtType,
 					Jwt: apiv1alpha2.JwtAuthentication{
-						Issuer:  "https://dex." + domain,
+						Issuer:  "https://dex." + t.domain,
 						JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
 					},
 				},
 			},
-			Hostname: hostName,
+			Hostname: t.hostName,
 			Service: apiv1alpha2.Service{
 				Name: t.functionName,
 				Port: servicePort,
