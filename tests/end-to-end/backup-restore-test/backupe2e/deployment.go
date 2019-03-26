@@ -203,3 +203,7 @@ func (d deploymentTest) waitForPodDeployment(namespace string, replicas int32, w
 }
 
 func int32Ptr(i int32) *int32 { return &i }
+
+func (d deploymentTest) DeleteResources() {
+	// There is not need to be implemented for this test.
+}

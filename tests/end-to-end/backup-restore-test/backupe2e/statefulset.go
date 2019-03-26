@@ -244,3 +244,7 @@ func (t *statefulSetTest) waitForPodDeployment(namespace string, replicas int32,
 		}
 	}
 }
+
+func (t statefulSetTest) DeleteResources() {
+	// There is not need to be implemented for this test.
+}
