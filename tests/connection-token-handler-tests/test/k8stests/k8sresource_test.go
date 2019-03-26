@@ -30,10 +30,12 @@ func TestTokenRequests(t *testing.T) {
 
 	require.NoError(t, err)
 
-	if !config.Central {
+	headersRequired := config.Central
+
+	if !headersRequired {
 		t.Run("should create token request CR with token", func(t *testing.T) {
 			//when
-			tokenRequest, e := client.CreateTokenRequest(appName+addSuffix(), emptyGroup, emptyTenant)
+			tokenRequest, e := client.CreateTokenRequest(addSuffix(appName), emptyGroup, emptyTenant)
 			require.NoError(t, e)
 
 			//then
@@ -49,7 +51,7 @@ func TestTokenRequests(t *testing.T) {
 		group := "test-group"
 
 		//when
-		tokenRequest, e := client.CreateTokenRequest(appName+addSuffix(), group, tenant)
+		tokenRequest, e := client.CreateTokenRequest(addSuffix(appName), group, tenant)
 		require.NoError(t, e)
 
 		//then
@@ -82,6 +84,6 @@ func isTokenReady(tokenRequest *v1alpha1.TokenRequest) bool {
 	return &tokenRequest.Status != nil && tokenRequest.Status.State == "OK"
 }
 
-func addSuffix() string {
-	return "-" + rand.String(5)
+func addSuffix(appName string) string {
+	return appName + "-" + rand.String(5)
 }
