@@ -42,13 +42,13 @@ loki:
       port: http
     initialDelaySeconds: 45
 
-  resources: {}
-    # limits:
-    #   cpu: 200m
-    #   memory: 256Mi
-    # requests:
-    #   cpu: 100m
-  #   memory: 128Mi
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
   ## Pod Annotations
   podAnnotations:
@@ -152,13 +152,13 @@ promtail:
 
   livenessProbe: null
 
-  resources: {}
-  #  limits:
-  #    cpu: 200m
-  #    memory: 128Mi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 128Mi
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
   ## Pod Annotations
   podAnnotations: {}
@@ -193,7 +193,7 @@ promtail:
 global:
   ## to deploy console ui app
   uiapp:
-    create: false
+    create: true
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
