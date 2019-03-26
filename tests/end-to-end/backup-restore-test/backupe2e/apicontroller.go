@@ -306,3 +306,7 @@ func fetchDexToken() (string, error) {
 	}
 	return token, nil
 }
+
+func (t apiControllerTest) DeleteResources() {
+	// There is not need to be implemented for this test.
+}
