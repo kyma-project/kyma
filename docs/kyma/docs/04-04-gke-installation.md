@@ -43,7 +43,7 @@ By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
 
-## (Optional) DNS setup and TLS certificate generation
+## DNS setup and TLS certificate generation (optional)
 
 >**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section. 
 
