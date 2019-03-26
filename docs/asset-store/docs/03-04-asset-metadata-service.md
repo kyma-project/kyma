@@ -3,7 +3,7 @@ title: Asset Metadata Service
 type: Details
 ---
 
-The Asset Metadata Service is an HTTP server that exposes files metadata extraction functionality. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. The service extracts front matter YAML metadata from text files in arbitrary extension.
+The Asset Metadata Service is an HTTP server that exposes the functionality for extracting metadata from files. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. The service extracts front matter YAML metadata from text files of all extensions. 
 
 The main purpose of the service is to provide metadata extraction for Asset Store controllers. That's why it is only available inside the cluster. To use it, define `metadataWebhookService` in Asset and ClusterAsset custom resources.
 
@@ -22,7 +22,7 @@ array:
  - bar
 ---
 
-# Lorem ipsum
+## Lorem ipsum
 Dolores sit amet
 
 ```
@@ -39,7 +39,7 @@ You can access the service on port `3000`.
 
 ### Metadata files
 
-To extract metadata from files, send the multipart form **POST** request to the `/v1/extract` endpoint. As a field name, specify relative or absolute path to the file.
+To extract metadata from files, send the multipart form **POST** request to the `/v1/extract` endpoint. Specify the relative or absolute path to the file as a field name.
 To do the multipart request using `curl`, run the following command:
 
 ```bash

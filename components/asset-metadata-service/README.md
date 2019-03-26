@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Asset Metadata Service is an HTTP server that exposes files metadata extraction functionality. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. The service extracts front matter YAML metadata from text files in arbitrary extension. 
+The Asset Metadata Service is an HTTP server that exposes the functionality for extracting metadata from files. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. The service extracts front matter YAML metadata from text files of all extensions. 
 
 ## Prerequisites
 
@@ -23,7 +23,7 @@ APP_VERBOSE=true go run main.go
 
 The service listens on port `3000`.
 
-### Access on a cluster
+### Access the service on a cluster
 
 To use the Asset Metadata Service on a cluster, run the command:
 
@@ -50,12 +50,12 @@ The variables are:
 
 For the full API documentation, including OpenAPI specification, see the [Asset Store docs](../../docs/asset-store/docs/03-04-asset-metadata-service.md).
 
-### Environmental variables
+### Environment variables
 
 Use the following environment variables to configure the application:
 
 | Name | Required | Default | Description |
-|------|----------|---------|-------------|
+|------|:----------:|---------|-------------|
 | **APP_HOST** | No | `127.0.0.1` | The host on which the HTTP server listens |
 | **APP_PORT** | No | `3000` | The port on which the HTTP server listens |
 | **APP_VERBOSE** | No | No | The toggle used to enable detailed logs in the application |
