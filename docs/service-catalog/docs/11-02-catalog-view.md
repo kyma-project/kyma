@@ -65,7 +65,7 @@ A [plan object](https://github.com/openservicebrokerapi/servicebroker/blob/v2.13
 
 See the sample schema:
 
-```
+```json
 {
           "$schema": "http://json-schema.org/draft-04/schema#",
           "properties": {
