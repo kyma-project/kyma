@@ -1,3 +1,4 @@
+{{ if .Values.global.isLocalEnv }}
 ---
 apiVersion: v1
 kind: Pod
@@ -34,3 +35,4 @@ spec:
             name: admin-user
             key: password
   restartPolicy: Never
+{{ end }}
