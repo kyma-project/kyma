@@ -52,6 +52,10 @@ func (cu *certificateUtility) LoadKey(encodedData []byte) (*rsa.PrivateKey, appe
 		return nil, apperrors.Internal("Error while decoding pem block.")
 	}
 
+	if caPrivateKey, err := x509.ParsePKCS1PrivateKey(pemBlock.Bytes); err == nil {
+		return caPrivateKey, nil
+	}
+
 	caPrivateKey, err := x509.ParsePKCS8PrivateKey(pemBlock.Bytes)
 	if err != nil {
 		return nil, apperrors.Internal("Error while parsing private key: %s", err)
