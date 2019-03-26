@@ -17,12 +17,6 @@ const (
 	EndpointFormat  = "%s/v1/upload"
 )
 
-type File struct {
-	Directory string
-	Name      string
-	Contents  []byte
-}
-
 type Response struct {
 	UploadedFiles []UploadedFile
 	Errors        []ResponseError
@@ -41,7 +35,7 @@ type UploadedFile struct {
 }
 
 type Client interface {
-	Upload(file File) (UploadedFile, apperrors.AppError)
+	Upload(fileName string, contents []byte) (UploadedFile, apperrors.AppError)
 }
 
 type uploadClient struct {
@@ -56,8 +50,8 @@ func NewClient(uploadServiceUrl string) Client {
 	}
 }
 
-func (uc uploadClient) Upload(file File) (UploadedFile, apperrors.AppError) {
-	req, err := uc.prepareRequest(file)
+func (uc uploadClient) Upload(fileName string, contents []byte) (UploadedFile, apperrors.AppError) {
+	req, err := uc.prepareRequest(fileName, contents)
 	if err != nil {
 		return UploadedFile{}, err
 	}
@@ -72,14 +66,14 @@ func (uc uploadClient) Upload(file File) (UploadedFile, apperrors.AppError) {
 		return UploadedFile{}, err
 	}
 
-	return uc.extract(file, uploadRes)
+	return uc.extract(fileName, uploadRes)
 }
 
-func (uc uploadClient) prepareRequest(file File) (*http.Request, apperrors.AppError) {
+func (uc uploadClient) prepareRequest(fileName string, contents []byte) (*http.Request, apperrors.AppError) {
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
 	{
-		err := uc.prepareMultipartForm(body, writer, file)
+		err := uc.prepareMultipartForm(body, writer, fileName, contents)
 		if err != nil {
 			return nil, err
 		}
@@ -97,15 +91,15 @@ func (uc uploadClient) prepareRequest(file File) (*http.Request, apperrors.AppEr
 	return req, nil
 }
 
-func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipart.Writer, file File) apperrors.AppError {
+func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipart.Writer, fileName string, contents []byte) apperrors.AppError {
 	defer writer.Close()
 
-	publicFilePart, err := writer.CreateFormFile(PublicFileField, file.Name)
+	publicFilePart, err := writer.CreateFormFile(PublicFileField, fileName)
 	if err != nil {
 		return apperrors.Internal("Failed to create multipart content: %s.", err.Error())
 	}
 
-	_, err = publicFilePart.Write(file.Contents)
+	_, err = publicFilePart.Write(contents)
 	if err != nil {
 		return apperrors.Internal("Failed to write file contents: %s.", err.Error())
 	}
@@ -142,7 +136,7 @@ func (uc uploadClient) unmarshal(r *http.Response) (Response, apperrors.AppError
 	return uploadResponse, nil
 }
 
-func (uc uploadClient) extract(inputFile File, response Response) (UploadedFile, apperrors.AppError) {
+func (uc uploadClient) extract(fileName string, response Response) (UploadedFile, apperrors.AppError) {
 	if len(response.UploadedFiles) == 1 {
 		return response.UploadedFiles[0], nil
 	} else {
@@ -150,6 +144,6 @@ func (uc uploadClient) extract(inputFile File, response Response) (UploadedFile,
 			log.Errorf("Failed to upload file %s with Upload Service: %s.", e.FileName, e.Message)
 		}
 
-		return UploadedFile{}, apperrors.Internal("Failed to extract file %s from response.", inputFile.Name)
+		return UploadedFile{}, apperrors.Internal("Failed to extract file %s from response.", fileName)
 	}
 }

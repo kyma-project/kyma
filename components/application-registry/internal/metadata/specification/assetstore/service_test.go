@@ -35,17 +35,13 @@ func TestAddingToAssetStore(t *testing.T) {
 		}
 
 		{
-			specFile := createTestInputFile(openApiSpecFileName, "", jsonApiSpec)
-			eventsFile := createTestInputFile(eventsSpecFileName, "", eventsSpec)
-			docsFile := createTestInputFile(documentationFileName, "", documentation)
-
-			uploadClientMock.On("Upload", specFile).
+			uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
 				Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
 
-			uploadClientMock.On("Upload", eventsFile).
+			uploadClientMock.On("Upload", eventsSpecFileName, eventsSpec).
 				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
-			uploadClientMock.On("Upload", docsFile).
+			uploadClientMock.On("Upload", documentationFileName, documentation).
 				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
 		}
 
@@ -171,14 +167,6 @@ func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, doc
 		},
 		Labels: map[string]string{DocsTopicLabelKey: DocsTopicLabelValue},
 		Status: status,
-	}
-}
-
-func createTestInputFile(name string, directory string, contents []byte) upload.File {
-	return upload.File{
-		Name:      name,
-		Directory: directory,
-		Contents:  contents,
 	}
 }
 

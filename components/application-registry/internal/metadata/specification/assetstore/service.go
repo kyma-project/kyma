@@ -144,7 +144,7 @@ func getApiSpecFileNameAndKey(content []byte, apiType docstopic.ApiType) (fileNa
 
 func (s service) processSpec(content []byte, filename, fileKey string, docsTopicEntry *docstopic.Entry) apperrors.AppError {
 	if content != nil {
-		outputFile, err := s.uploadFile(docsTopicEntry.Id, filename, content)
+		outputFile, err := s.uploadClient.Upload(filename, content)
 		if err != nil {
 			return apperrors.Internal("Failed to upload file: %s.", filename)
 		}
@@ -153,14 +153,6 @@ func (s service) processSpec(content []byte, filename, fileKey string, docsTopic
 	}
 
 	return nil
-}
-
-func (s service) uploadFile(id string, fileName string, content []byte) (upload.UploadedFile, apperrors.AppError) {
-	inputFile := upload.File{
-		Name:     fileName,
-		Contents: content,
-	}
-	return s.uploadClient.Upload(inputFile)
 }
 
 func (s service) getApiSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) {

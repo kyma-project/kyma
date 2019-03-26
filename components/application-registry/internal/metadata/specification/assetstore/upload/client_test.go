@@ -21,12 +21,7 @@ func TestUploadClient(t *testing.T) {
 		uploadClient := NewClient(testServer.URL)
 
 		// when
-		input := File{
-			Directory: "testDir",
-			Name:      "testfile",
-			Contents:  testContent,
-		}
-		output, err := uploadClient.Upload(input)
+		output, err := uploadClient.Upload("testfile", testContent)
 		require.NoError(t, err)
 
 		// then
@@ -41,12 +36,7 @@ func TestUploadClient(t *testing.T) {
 		uploadClient := NewClient("non-existent-url")
 
 		// when
-		input := File{
-			Directory: "testDir",
-			Name:      "testfile",
-			Contents:  testContent,
-		}
-		_, err := uploadClient.Upload(input)
+		_, err := uploadClient.Upload("testfile", testContent)
 
 		// then
 		assert.Error(t, err)
@@ -58,12 +48,7 @@ func TestUploadClient(t *testing.T) {
 		uploadClient := NewClient(testServer.URL)
 
 		// when
-		input := File{
-			Directory: "testDir",
-			Name:      "testfile",
-			Contents:  testContent,
-		}
-		_, err := uploadClient.Upload(input)
+		_, err := uploadClient.Upload("testfile", testContent)
 
 		// then
 		assert.Error(t, err)
