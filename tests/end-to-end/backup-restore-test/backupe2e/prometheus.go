@@ -22,6 +22,10 @@ package backupe2e
 // {success {vector [{map[] [1.551424874014e+09 1.661]}]}}
 
 import (
+	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/client-go/kubernetes"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"encoding/json"
 	"errors"
 	"github.com/google/uuid"
@@ -32,15 +36,21 @@ import (
 	. "github.com/smartystreets/goconvey/convey"
 	"fmt"
 	"strings"
+	"os"
 )
 
 const (
-	domain       = "http://monitoring-prometheus.kyma-system"
-	prometheusNS = "kyma-system"
-	api          = "/api/v1/query?"
-	metricsQuery = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
-	port         = "9090"
-	metricName   = "kube_pod_container_resource_requests_cpu_cores"
+	domain                    = "http://monitoring-prometheus.kyma-system"
+	prometheusNS              = "kyma-system"
+	api                       = "/api/v1/query?"
+	metricsQuery              = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
+	port                      = "9090"
+	metricName                = "kube_pod_container_resource_requests_cpu_cores"
+	prometheusPodName         = "prometheus-monitoring-0"
+	prometheusServiceName     = "monitoring-prometheus"
+	prometheusStatefulsetName = "prometheus-monitoring"
+	prometheusPvcName         = "prometheus-monitoring-db-prometheus-monitoring-0"
+	prometheusLabelSelector   = "app=prometheus"
 )
 
 type queryResponse struct {
@@ -60,6 +70,7 @@ type dataResult struct {
 
 type prometheusTest struct {
 	metricName, uuid string
+	coreClient       *kubernetes.Clientset
 	beforeBackup     queryResponse
 	expectedResult   string
 	finalResult      string
@@ -83,9 +94,21 @@ type apiQuery struct {
 
 func NewPrometheusTest() (*prometheusTest, error) {
 
+	kubeconfig := os.Getenv("KUBECONFIG")
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	if err != nil {
+		return &prometheusTest{}, err
+	}
+
+	coreClient, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return &prometheusTest{}, err
+	}
+
 	queryToApi := apiQuery{api: api, domain: domain, metricQuery: metricsQuery, port: port, prometheusNS: prometheusNS}
 
 	return &prometheusTest{
+		coreClient: coreClient,
 		metricName: metricName,
 		uuid:       uuid.New().String(),
 		apiQuery:   queryToApi,
@@ -183,9 +206,35 @@ func (pt *prometheusTest) CreateResources(namespace string) {
 
 }
 
+func (t *prometheusTest) DeleteResources() {
+
+	// It needs to be implemented for this test.
+	err := t.waitForPodPrometheus(1 * time.Minute)
+	So(err, ShouldBeNil)
+
+	err = t.deleteServices(prometheusNS, prometheusServiceName, prometheusLabelSelector)
+	So(err, ShouldBeNil)
+
+	err = t.deleteStatefulset(prometheusNS, prometheusStatefulsetName)
+	So(err, ShouldBeNil)
+
+	err = t.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
+	So(err, ShouldBeNil)
+
+	err = t.deletePVC(prometheusNS, prometheusPvcName, prometheusLabelSelector)
+	So(err, ShouldBeNil)
+
+	//err1 := t.waitForPodPrometheus(2 * time.Minute)
+	//So(err1, ShouldBeError) // An error is expected.
+
+}
+
 func (pt *prometheusTest) TestResources(namespace string) {
+	err := pt.waitForPodPrometheus(5 * time.Minute)
+	So(err, ShouldBeNil)
+
 	qresp := &queryResponse{}
-	err := qresp.connectToPrometheusApi(pt.domain, pt.port, pt.api, pt.metricQuery, pt.pointInTime.formmattedValue)
+	err = qresp.connectToPrometheusApi(pt.domain, pt.port, pt.api, pt.metricQuery, pt.pointInTime.formmattedValue)
 	So(err, ShouldBeNil)
 
 	if len(qresp.Data.Result) > 0 && len(qresp.Data.Result[0].Value) > 0 {
@@ -203,4 +252,111 @@ func (pt *prometheusTest) TestResources(namespace string) {
 	}
 
 	So(strings.TrimSpace(pt.finalResult), ShouldEqual, strings.TrimSpace(pt.expectedResult))
+}
+
+func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
+	timeout := time.After(waitmax)
+	tick := time.Tick(2 * time.Second)
+	for {
+		select {
+		case <-timeout:
+			pod, err := pt.coreClient.CoreV1().Pods(prometheusNS).Get(prometheusPodName, metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pod)
+		case <-tick:
+			pod, err := pt.coreClient.CoreV1().Pods(prometheusNS).Get(prometheusPodName, metav1.GetOptions{})
+			if err != nil {
+				return err
+			}
+
+			if pod.Status.Phase == corev1.PodRunning {
+				return nil
+			}
+			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
+				return fmt.Errorf("Prometheus in state %v: \n%+v", pod.Status.Phase, pod)
+			}
+		}
+	}
+}
+
+func (t *prometheusTest) deleteServices(namespace, serviceName, labelSelector string) error {
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	serviceList, err := t.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, service := range serviceList.Items {
+		if service.Name == serviceName {
+			err := t.coreClient.CoreV1().Services(namespace).Delete(serviceName, &metav1.DeleteOptions{
+				PropagationPolicy: &deletePolicy,
+			})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
+}
+
+func (t *prometheusTest) deleteStatefulset(namespace, statefulsetName string) error {
+
+	deletePolicy := metav1.DeletePropagationForeground
+
+	collection := t.coreClient.AppsV1().StatefulSets(namespace)
+	err := collection.Delete(statefulsetName, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t *prometheusTest) deletePod(namespace, podName, labelSelector string) error {
+
+	podList, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, pod := range podList.Items {
+		if pod.Name == podName {
+			// Delete Pod
+			err = t.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
+}
+
+func (t *prometheusTest) deletePVC(namespace, pvcName, labelSelector string) error {
+
+	pvcList, err := t.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	if err != nil {
+		return err
+	}
+
+	for _, pvc := range pvcList.Items {
+		if pvc.Name == pvcName {
+			err = t.coreClient.CoreV1().PersistentVolumeClaims(namespace).Delete(pvcName, &metav1.DeleteOptions{})
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
+
 }
