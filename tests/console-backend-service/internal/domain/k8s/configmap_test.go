@@ -102,7 +102,7 @@ func TestConfigMap(t *testing.T) {
 	assert.Equal(t, configMapName, configMapRes.ConfigMap.Name)
 	assert.Equal(t, configMapNamespace, configMapRes.ConfigMap.Namespace)
 
-	t.Log("Querying for config map...")
+	t.Log("Querying for config maps...")
 	var configMapsRes configMapsQueryResponse
 	err = c.Do(fixConfigMapsQuery(), &configMapsRes)
 	require.NoError(t, err)
