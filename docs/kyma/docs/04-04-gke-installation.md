@@ -12,7 +12,9 @@ By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [
 - [Docker](https://www.docker.com/)
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
-- A domain for your GKE cluster. You can get one for free using services like https://www.freenom.com (optional)
+- A domain for your GKE cluster  (optional)
+
+>**{TIP}:** You can get one for free using services like https://www.freenom.com
 
 ## Prepare the GKE cluster
 
