@@ -231,7 +231,7 @@ Follow these steps:
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
-## (Optional) Add the xip.io self-signed certificate to your OS trusted certificates
+## Add the xip.io self-signed certificate to your OS trusted certificates (optional)
 
 >**NOTE:** Skip this section if you use your own domain.
 
