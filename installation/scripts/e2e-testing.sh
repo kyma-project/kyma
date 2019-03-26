@@ -3,7 +3,7 @@ ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "${ROOT_PATH}/utils.sh"
 source "${ROOT_PATH}/testing-common.sh"
 
-if [ -z "${!DOMAIN}" ] ; then
+if [ -z "${DOMAIN}" ] ; then
   echo "ERROR: $DOMAIN is not set"
   exit 1
 fi
