@@ -73,7 +73,7 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 		return nil, nil, nil, apperrors.Internal("Failed to read Docs Topic.")
 	}
 
-	if docsTopic.Status != docstopic.StatusSucceeded {
+	if docsTopic.Status != docstopic.StatusReady {
 		return nil, nil, nil, nil
 	}
 

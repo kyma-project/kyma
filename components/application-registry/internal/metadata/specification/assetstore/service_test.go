@@ -93,7 +93,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 
 		{
 			repositoryMock.On("Get", "id1").
-				Return(createTestDocsTopic("id1", apiTestServer.URL, eventTestServer.URL, documentationServer.URL, docstopic.StatusSucceeded), nil)
+				Return(createTestDocsTopic("id1", apiTestServer.URL, eventTestServer.URL, documentationServer.URL, docstopic.StatusReady), nil)
 		}
 
 		// then

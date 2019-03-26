@@ -20,10 +20,10 @@ type Entry struct {
 type StatusType string
 
 const (
-	StatusNone      StatusType = ""
-	StatusPending   StatusType = "Pending"
-	StatusFailed    StatusType = "Failed"
-	StatusSucceeded StatusType = "Succeeded"
+	StatusNone    StatusType = ""
+	StatusPending StatusType = "Pending"
+	StatusFailed  StatusType = "Failed"
+	StatusReady   StatusType = "Ready"
 )
 
 type ApiType string

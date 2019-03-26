@@ -142,5 +142,6 @@ func fromK8sType(k8sDocsTopic v1alpha1.DocsTopic) docstopic.Entry {
 		DisplayName: k8sDocsTopic.Spec.DisplayName,
 		Urls:        urls,
 		Labels:      k8sDocsTopic.Labels,
+		Status:      docstopic.StatusType(k8sDocsTopic.Status.Phase),
 	}
 }
