@@ -30,7 +30,7 @@
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "d37318b3a84115bd9ee64d3c3130ef657b8a81a5"
+  revision = "b47050577a88799e92888fbf4716b4e3b0f83ff8"
 
 [[constraint]]
   name = "k8s.io/client-go"

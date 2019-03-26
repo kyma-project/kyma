@@ -2,7 +2,11 @@ package authz
 
 import (
 	"context"
+	"fmt"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/stretchr/testify/assert"
 
@@ -14,18 +18,59 @@ import (
 
 const (
 	verb        = "list"
-	apiGroup    = "k8s.io"
-	apiVersion  = "v1alpha1"
-	resource    = "pod"
 	subresource = "logs"
 	namespace   = "x-system"
 	name        = "x-deployment"
+	kind        = "Deployment"
 )
 
 var (
+	apiGroup     = "extensions"
+	apiVersion   = "v1beta1"
+	groupVersion = fmt.Sprintf("%s/%s", apiGroup, apiVersion)
+	resource     = "deployments"
+	resourceArg  = "MyResource"
 	namespaceArg = "MyNamespace"
 	nameArg      = "MyName"
 	userInfo     = user.DefaultInfo{Name: "Test User", UID: "deadbeef", Groups: []string{"admins", "testers"}}
+	resourceJSON = gqlschema.JSON{
+		"apiVersion": groupVersion,
+		"kind":       kind,
+		"metadata": map[string]interface{}{
+			"name":      name,
+			"namespace": namespace,
+		},
+	}
+	noGroupResourceJSON = gqlschema.JSON{
+		"apiVersion": apiVersion,
+		"kind":       kind,
+		"metadata": map[string]interface{}{
+			"name":      name,
+			"namespace": namespace,
+		},
+	}
+	fakeResources = []*v1.APIResourceList{
+		&v1.APIResourceList{
+			TypeMeta:     v1.TypeMeta{},
+			GroupVersion: groupVersion,
+			APIResources: []v1.APIResource{
+				v1.APIResource{
+					Name: resource,
+					Kind: kind,
+				},
+			},
+		},
+		&v1.APIResourceList{
+			TypeMeta:     v1.TypeMeta{},
+			GroupVersion: apiVersion,
+			APIResources: []v1.APIResource{
+				v1.APIResource{
+					Name: resource,
+					Kind: kind,
+				},
+			},
+		},
+	}
 )
 
 type ChildResolverSetting bool
@@ -38,9 +83,10 @@ const (
 func noArgsAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
 	return gqlschema.ResourceAttributes{
 		Verb:            verb,
-		APIGroup:        apiGroup,
-		APIVersion:      apiVersion,
-		Resource:        resource,
+		APIGroup:        &apiGroup,
+		APIVersion:      &apiVersion,
+		Resource:        &resource,
+		ResourceArg:     nil,
 		Subresource:     subresource,
 		NameArg:         nil,
 		NamespaceArg:    nil,
@@ -51,9 +97,10 @@ func noArgsAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAt
 func withArgsAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
 	return gqlschema.ResourceAttributes{
 		Verb:            verb,
-		APIGroup:        apiGroup,
-		APIVersion:      apiVersion,
-		Resource:        resource,
+		APIGroup:        &apiGroup,
+		APIVersion:      &apiVersion,
+		Resource:        &resource,
+		ResourceArg:     nil,
 		Subresource:     subresource,
 		NameArg:         &nameArg,
 		NamespaceArg:    &namespaceArg,
@@ -64,12 +111,55 @@ func withArgsAttributes(isChildResolver ChildResolverSetting) gqlschema.Resource
 func withNamespaceArgAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
 	return gqlschema.ResourceAttributes{
 		Verb:            verb,
-		APIGroup:        apiGroup,
-		APIVersion:      apiVersion,
-		Resource:        resource,
+		APIGroup:        &apiGroup,
+		APIVersion:      &apiVersion,
+		Resource:        &resource,
+		ResourceArg:     nil,
 		Subresource:     subresource,
 		NameArg:         nil,
 		NamespaceArg:    &namespaceArg,
+		IsChildResolver: bool(isChildResolver),
+	}
+}
+
+func withResourceArgAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
+	return gqlschema.ResourceAttributes{
+		Verb:            verb,
+		APIGroup:        nil,
+		APIVersion:      nil,
+		Resource:        nil,
+		ResourceArg:     &resourceArg,
+		Subresource:     subresource,
+		NameArg:         nil,
+		NamespaceArg:    nil,
+		IsChildResolver: bool(isChildResolver),
+	}
+}
+
+func noResourceAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
+	return gqlschema.ResourceAttributes{
+		Verb:            verb,
+		APIGroup:        nil,
+		APIVersion:      nil,
+		Resource:        nil,
+		ResourceArg:     nil,
+		Subresource:     subresource,
+		NameArg:         nil,
+		NamespaceArg:    nil,
+		IsChildResolver: bool(isChildResolver),
+	}
+}
+
+func withRedundantResourceArgAttributes(isChildResolver ChildResolverSetting) gqlschema.ResourceAttributes {
+	return gqlschema.ResourceAttributes{
+		Verb:            verb,
+		APIGroup:        &apiGroup,
+		APIVersion:      &apiVersion,
+		Resource:        &resource,
+		ResourceArg:     &resourceArg,
+		Subresource:     subresource,
+		NameArg:         nil,
+		NamespaceArg:    nil,
 		IsChildResolver: bool(isChildResolver),
 	}
 }
@@ -79,15 +169,17 @@ func noArgsContext() context.Context {
 	return graphql.WithResolverContext(context.Background(), &resolver)
 }
 
-func withArgsContext() context.Context {
+func withArgsContext(resource gqlschema.JSON) context.Context {
 	resolver := graphql.ResolverContext{Args: map[string]interface{}{
 		namespaceArg: namespace,
 		nameArg:      name,
+		resourceArg:  resource,
 	}}
 	return graphql.WithResolverContext(context.Background(), &resolver)
 }
 
 func verifyCommonAttributes(t *testing.T, authAttributes authorizer.Attributes) {
+	require.NotNil(t, authAttributes)
 	t.Run("Then user is set", func(t *testing.T) {
 		assert.Equal(t, &userInfo, authAttributes.GetUser())
 	})

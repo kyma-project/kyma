@@ -111,6 +111,9 @@
 # The `nats-streaming` chart
 /resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
+# The `knative-provisioner-natss` chart
+/resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+
 # The `k8s-dashboard-proxy` subchart
 /resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
@@ -153,14 +156,20 @@
 # The `helm-broker-repo` subdirectory
 /resources/helm-broker-repo/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
+# The `istio-init` chart
+/resources/istio-init/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
+
 # The `istio` chart
 /resources/istio/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `istio-kyma-patch` chart
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
-# The `knative` chart
-/resources/knative/ @kyma-project/wg-knative
+# The `knative-serving` chart
+/resources/knative-serving/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+
+# The `knative-eventing` chart
+/resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # The `jaeger` charts
 /resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91

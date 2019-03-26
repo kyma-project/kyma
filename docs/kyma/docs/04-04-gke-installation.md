@@ -4,16 +4,17 @@ type: Installation
 ---
 
 This Installation guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster. Kyma is installed on a cluster using a proprietary installer based on a Kubernetes operator.
-By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster. 
+By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster.
 
 ## Prerequisites
-- [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
-- [Kubernetes](https://kubernetes.io/) 1.12
-- Tiller 2.10.0 or higher
+- [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
 - [Docker](https://www.docker.com/)
-- [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
+- [wget](https://www.gnu.org/software/wget/)
 - A domain for your GKE cluster (optional)
+
+>**TIP:** Get a free domain for your cluster using services like [freenom.com](https://www.freenom.com) or similar.
 
 ## Prepare the GKE cluster
 
@@ -34,7 +35,7 @@ By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [
 3. Install Tiller on your GKE cluster. Run:
 
     ```
-    kubectl apply -f installation/resources/tiller.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{RELEASE_TAG}/installation/resources/tiller.yaml
     ```
 
 4. Add your account as the cluster administrator:
@@ -42,9 +43,9 @@ By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
 
-## DNS setup and TLS certificate generation
+## DNS setup and TLS certificate generation (optional)
 
->**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section. 
+>**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section.
 
 ### Delegate the management of your domain to Google Cloud DNS
 
@@ -55,8 +56,15 @@ Follow these steps:
     ```
     export DOMAIN={YOUR_SUBDOMAIN}
     export DNS_NAME={YOUR_DOMAIN}.
-    export PROJECT={YOUR_GOOGLE_PROJECT}
+    export PROJECT={YOUR_GOOGLE_PROJECT_ID}
     export DNS_ZONE={YOUR_DNS_ZONE}
+    ```
+    Example:
+    ```
+    export DOMAIN=my.kyma-demo.ga
+    export DNS_NAME=kyma-demo.ga.
+    export PROJECT=kyma-demo-235208
+    export DNS_ZONE=myzone
     ```
 
 2. Create a DNS-managed zone in your Google project. Run:
@@ -223,23 +231,25 @@ Follow these steps:
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
-## Add the xip.io self-signed certificate to your OS trusted certificates
+## Add the xip.io self-signed certificate to your OS trusted certificates (optional)
 
 >**NOTE:** Skip this section if you use your own domain.
 
 After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS run:
-```
-tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-&& kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
-&& sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
-&& rm $tmpfile
-```
+  ```
+  tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
+  && kubectl get configmap  net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}'  | base64 --decode > $tmpfile \
+  && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
+  && rm $tmpfile
+  ```
 
 ## Configure DNS for the cluster load balancer
 
+>**NOTE:** Execute instructions from this section only if you want to use your own domain.
+
 1. Export the domain of your cluster and DNS zone as environment variables. Run:
     ```
-    export DOMAIN=$(kubectl get cm installation-config-overrides -n kyma-installer -o jsonpath='{.data.global\.domainName}')
+    export DOMAIN=$(kubectl get cm net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.domainName}')
     export DNS_ZONE={YOUR_DNS_ZONE}
     ```
 
@@ -248,7 +258,7 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
     export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
     export APISERVER_PUBLIC_IP=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
-    
+
     export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
     gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
@@ -256,8 +266,8 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
     gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
     gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
-    
-    gcloud dns --project=$PROJECT record-sets transaction add APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
+
+    gcloud dns --project=$PROJECT record-sets transaction add $APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
     gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
     ```
