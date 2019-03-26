@@ -15,9 +15,9 @@ This document includes an overview of resources that the Kyma Service Catalog pr
 
 * **ServiceBroker** is any Service Broker registered in a given Namespace where it exposes ServiceClasses and ServicePlans that are available only in that Namespace.
 
-* **ServiceClass**  is an Namespace-wide representation of a ClusterServiceClass. Similarly to the ClusterServiceClass, it is synonymous with a service in the Service Catalog.
+* **ServiceClass**  is a Namespace-scoped representation of a ClusterServiceClass. Similarly to the ClusterServiceClass, it is synonymous with a service in the Service Catalog.
 
-* **ServicePlan** is an Namespace-wide representation of a ClusterServicePlan.
+* **ServicePlan** is a Namespace-scoped representation of a ClusterServicePlan.
 
 * **ServiceInstance** is a provisioned instance of a ClusterServiceClass to use in one or more cluster applications.
 

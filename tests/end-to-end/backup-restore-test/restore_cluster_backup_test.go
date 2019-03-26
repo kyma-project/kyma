@@ -46,7 +46,13 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	}
 
 	myNamespaceControllerTest, err := NewNamespaceControllerTest()
+  
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
 
+	apiControllerTest, err := NewApiControllerTest()
+  
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -57,7 +63,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
-	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest, myNamespaceControllerTest, myGrafanaTest}
+	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest, myNamespaceControllerTest, apiControllerTest, myGrafanaTest}
 
 	e2eTests := make([]e2eTest, len(backupTests))
 
