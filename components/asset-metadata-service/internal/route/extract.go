@@ -100,7 +100,7 @@ func (h *ExtractHandler) ServeHTTP(w http.ResponseWriter, rq *http.Request) {
 	e := processor.New(processFn, h.maxWorkers, h.processTimeout)
 	succ, errs := e.Do(context.Background(), jobCh, jobsCount)
 
-	glog.Infof("Finished processing request with uploading %d files.", jobsCount)
+	glog.Infof("Finished processing request with %d files attached.", jobsCount)
 
 	response := h.convertToResponse(succ, errs)
 
