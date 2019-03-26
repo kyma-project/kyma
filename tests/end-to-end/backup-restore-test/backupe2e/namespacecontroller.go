@@ -61,7 +61,7 @@ func (n namespaceControllerTest) labelTestNamespace(namespaceName string) error 
 
 func (n namespaceControllerTest) waitForResourceQuota(namespaceName string) error {
 
-	timeout := time.After(5 * time.Second)
+	timeout := time.After(5 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
 	var messages string
@@ -80,4 +80,8 @@ func (n namespaceControllerTest) waitForResourceQuota(namespaceName string) erro
 		case <-timeout:
 			return fmt.Errorf("unable to fetch resourcequota:\n %v", messages)}
 	}
+}
+
+func (n namespaceControllerTest) DeleteResources() {
+	// There is not need to be implemented for this test.
 }
