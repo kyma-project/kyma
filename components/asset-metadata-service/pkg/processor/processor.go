@@ -45,72 +45,76 @@ func New(workerFn func(job Job) (interface{}, error), maxWorkers int, processTim
 }
 
 // Process processes files and extracts file metadata
-func (e *Processor) Do(ctx context.Context, jobCh chan Job, jobCount int) ([]ResultSuccess, []ResultError) {
+func (p *Processor) Do(ctx context.Context, jobCh chan Job, jobCount int) ([]ResultSuccess, []ResultError) {
 	errorsCh := make(chan *ResultError, jobCount)
-	resultsCh := make(chan *ResultSuccess, jobCount)
+	successCh := make(chan *ResultSuccess, jobCount)
 
-	contextWithTimeout, cancel := context.WithTimeout(ctx, e.ProcessTimeout)
+	contextWithTimeout, cancel := context.WithTimeout(ctx, p.ProcessTimeout)
 	defer cancel()
 
-	workersCount := e.countNeededWorkers(jobCount, e.MaxWorkers)
+	workersCount := p.countNeededWorkers(jobCount, p.MaxWorkers)
 	glog.Infof("Creating %d concurrent worker(s)...", workersCount)
 	var waitGroup sync.WaitGroup
 	waitGroup.Add(workersCount)
 	for i := 0; i < workersCount; i++ {
 		go func() {
 			defer waitGroup.Done()
-			for {
-				select {
-				case <-contextWithTimeout.Done():
-					glog.Error(errors.Wrapf(contextWithTimeout.Err(), "ResultError while concurrently processing file"))
-					return
-				default:
-				}
-
-				select {
-				case job, ok := <-jobCh:
-					if !ok {
-						return
-					}
-					res, err := e.processFile(job)
-					if err != nil {
-						errorsCh <- &ResultError{
-							Error:    err,
-							FilePath: job.FilePath,
-						}
-					}
-
-					if res != nil {
-						resultsCh <- res
-					}
-				default:
-				}
-			}
+			p.work(contextWithTimeout, jobCh, errorsCh, successCh)
 		}()
 	}
 
 	waitGroup.Wait()
-	close(resultsCh)
+	close(successCh)
 	close(errorsCh)
 
-	result := e.populateResults(resultsCh)
-	errs := e.populateErrors(errorsCh)
+	result := p.populateResults(successCh)
+	errs := p.populateErrors(errorsCh)
 	return result, errs
 }
 
 // countNeededWorkers counts how many workers are needed
-func (e *Processor) countNeededWorkers(filesCount, maxUploadWorkers int) int {
+func (p *Processor) countNeededWorkers(filesCount, maxUploadWorkers int) int {
 	if filesCount < maxUploadWorkers {
 		return filesCount
 	}
 	return maxUploadWorkers
 }
 
+func (p *Processor) work(context context.Context, jobCh chan Job, errorsCh chan *ResultError, successCh chan *ResultSuccess) {
+	for {
+		select {
+		case <-context.Done():
+			glog.Error(errors.Wrapf(context.Err(), "ResultError while concurrently processing file"))
+			return
+		default:
+		}
+
+		select {
+		case job, ok := <-jobCh:
+			if !ok {
+				return
+			}
+			res, err := p.processFile(job)
+			if err != nil {
+				errorsCh <- &ResultError{
+					Error:    err,
+					FilePath: job.FilePath,
+				}
+			}
+
+			if res != nil {
+				successCh <- res
+			}
+		default:
+		}
+	}
+}
+
 // processFile processes a single file
-func (e *Processor) processFile(job Job) (*ResultSuccess, error) {
+func (p *Processor) processFile(job Job) (*ResultSuccess, error) {
 	glog.Infof("Processing file `%s`...\n", job.FilePath)
 
-	res, err := e.workerFn(job)
+	res, err := p.workerFn(job)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Error while processing file `%s`", job.FilePath)
 	}
@@ -124,7 +128,7 @@ func (e *Processor) processFile(job Job) (*ResultSuccess, error) {
 }
 
 // populateResults populates all results from all jobs
-func (e *Processor) populateResults(resultsCh chan *ResultSuccess) []ResultSuccess {
+func (p *Processor) populateResults(resultsCh chan *ResultSuccess) []ResultSuccess {
 	var result []ResultSuccess
 	for i := range resultsCh {
 		if i == nil {
@@ -138,7 +142,7 @@ func (e *Processor) populateResults(resultsCh chan *ResultSuccess) []ResultSucce
 }
 
 // populateErrors consolidates all error messages into one and returns it
-func (e *Processor) populateErrors(errorsCh chan *ResultError) []ResultError {
+func (p *Processor) populateErrors(errorsCh chan *ResultError) []ResultError {
 	var errs []ResultError
 	for uploadErr := range errorsCh {
 		if uploadErr == nil {
