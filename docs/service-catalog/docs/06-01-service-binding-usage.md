@@ -50,23 +50,23 @@ This table lists all the possible parameters of a given resource together with t
 
 
 | Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR. |
-| **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is created. |
-| **metadata.ownerReferences** |    **YES**   | Contains an ownerReference to the binding specified at **spec.serviceBindingRef.name** field if the binding exist. |
-| **spec.serviceBindingRef.name** |    **YES**   | Specifies the name of the ServiceBinding. |
-| **spec.usedBy** |    **YES**   | Specifies the application into which the Secret is injected. |
-| **spec.usedBy.kind** |    **YES**   | Specifies the name of the UsageKind custom resource. |
-| **spec.usedBy.name** |    **YES**   | Specifies the name of the application. |
-| **spec.parameters.envPrefix** |    **NO**   | Defines the prefix of the environment variables that the ServiceBindingUsage injects. The prefixing is disabled by default. |
-| **spec.parameters.envPrefix.name** |    **YES**   | Specifies the name of the prefix. This field is mandatory if **envPrefix** is specified.  |
-| **status.conditions** |    **NO**   | Specifies the state of the ServiceBindingUsage.|
-| **status.conditions.lastTransitionTime** |    **NO**   | Specifies the time when the Binding Usage Controller processes the ServiceBindingUsage for the first time or when the **status.conditions.status** field changes. |
-| **status.conditions.lastUpdateTime** |    **NO**   | Specifies the time of the last ServiceBindingUsage condition update. |
-| **status.conditions.status** |    **NO**   |  Specifies whether the status of the **status.conditions.type** field is `True` or `False`. |
-| **status.conditions.type** |    **NO**   | Defines the type of the condition. The value of this field is always `Ready`. |
-| **message** |    **NO**   | Describes in a human-readable way why the ServiceBinding injection has failed. |
-| **reason** |    **NO**   | Specifies a unique, one-word, CamelCase reason for the condition's last transition. |
+|----------|:-------------:|------|
+| **metadata.name** |    YES   | Specifies the name of the CR. |
+| **metadata.namespace** |    YES   | Specifies the Namespace in which the CR is created. |
+| **metadata.ownerReferences** |    YES   | Contains an ownerReference to the binding specified at **spec.serviceBindingRef.name** field if the binding exists. |
+| **spec.serviceBindingRef.name** |    YES   | Specifies the name of the ServiceBinding. |
+| **spec.usedBy** |    YES   | Specifies the application into which the Secret is injected. |
+| **spec.usedBy.kind** |    YES   | Specifies the name of the UsageKind custom resource. |
+| **spec.usedBy.name** |    YES   | Specifies the name of the application. |
+| **spec.parameters.envPrefix** |    NO   | Defines the prefix of the environment variables that the ServiceBindingUsage injects. The prefixing is disabled by default. |
+| **spec.parameters.envPrefix.name** |    YES   | Specifies the name of the prefix. This field is mandatory if **envPrefix** is specified.  |
+| **status.conditions** |    NO   | Specifies the state of the ServiceBindingUsage.|
+| **status.conditions.lastTransitionTime** |    NO   | Specifies time when the Service Binding Usage Controller processes the ServiceBindingUsage for the first time or when the **status.conditions.status** field changes. |
+| **status.conditions.lastUpdateTime** |    NO   | Specifies the time of the last ServiceBindingUsage condition update. |
+| **status.conditions.status** |    NO   |  Specifies whether the status of the **status.conditions.type** field is `true` or `false`. |
+| **status.conditions.type** |    NO   | Defines the type of the condition. The value of this field is always `ready`. |
+| **message** |    NO   | Describes in a human-readable way why the ServiceBinding injection has failed. |
+| **reason** |    NO   | Specifies a unique, one-word, CamelCase reason for the condition's last transition. |
 
 
 ## Related resources and components
@@ -74,14 +74,14 @@ This table lists all the possible parameters of a given resource together with t
 These are the resources related to this CR:
 
 | Custom resource   |   Description |
-|:----------:|:------|
-| UsageKind |  Provides information where to inject Secrets. |
+|----------|------|
+| [UsageKind](#custom-resource-usagekind) |  Provides information on where to inject Secrets. |
 | [ServiceBinding](https://kubernetes.io/docs/concepts/extend-kubernetes/service-catalog/#api-resources) |  Provides Secrets to inject.  |
 
 
 These components use this CR:
 
 | Component   |   Description |
-|:----------:|:------|
-| Binding Usage Controller |  Reacts to every action of creating, updating, or deleting ServiceBindingUsages in all Namespaces, and uses ServiceBindingUsage data to inject binding. |
+|----------|------|
+| Service Binding Usage Controller |  Reacts to every action of creating, updating, or deleting ServiceBindingUsages in all Namespaces, and uses ServiceBindingUsage data to inject binding. |
 | Console Backend Service |  Exposes the given CR to the Console UI. It also allows you to create and delete a ServiceBindingUsage. |

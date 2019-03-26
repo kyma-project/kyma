@@ -79,7 +79,7 @@ func deleteNamespace(namespace string) {
 }
 
 func deployFun(namespace, name, runtime, codeFile, handler string) {
-	cmd := exec.Command("kubeless", "-n", namespace, "function", "deploy", name, "-r", runtime, "-f", codeFile, "--handler", handler)
+	cmd := exec.Command("kubeless", "-n", namespace, "function", "deploy", name, "-r", runtime, "-f", codeFile, "--handler", handler, "--memory", "128Mi")
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
 		log.Fatal("Unable to deploy function ", name, ":\n", string(stdoutStderr))
@@ -235,14 +235,14 @@ func printDebugLogsSvcBindingUsageFailed(namespace, name string) {
 	log.Printf("Function pods status:\n%s\n", string(functionPodsStdOutStdErr))
 
 	controllerNamespace := os.Getenv("KUBELESS_NAMESPACE")
-	svcBindingUsageControllerPodNameCmd := exec.Command("kubectl", "-n", controllerNamespace, "get", "po", "-l", "app=binding-usage-controller", "-o", "jsonpath={.items[0].metadata.name}")
+	svcBindingUsageControllerPodNameCmd := exec.Command("kubectl", "-n", controllerNamespace, "get", "po", "-l", "app=service-binding-usage-controller", "-o", "jsonpath={.items[0].metadata.name}")
 
 	svcBindingUsageControllerPodName, err := svcBindingUsageControllerPodNameCmd.CombinedOutput()
 	if err != nil {
 		log.Fatalf("Error while fetching servicebindingusagercontroller pod: \n%s\n", string(svcBindingUsageControllerPodName))
 	}
 
-	svcBindingUsageControllerLogsCmd := exec.Command("kubectl", "-n", controllerNamespace, "log", string(svcBindingUsageControllerPodName), "-c", "binding-usage-controller")
+	svcBindingUsageControllerLogsCmd := exec.Command("kubectl", "-n", controllerNamespace, "log", string(svcBindingUsageControllerPodName), "-c", "service-binding-usage-controller")
 
 	svcBindingUsageControllerLogsCmdOutErr, err := svcBindingUsageControllerLogsCmd.CombinedOutput()
 	if err != nil {
@@ -360,8 +360,7 @@ func ensureOutputIsCorrect(host, expectedOutput, testID, namespace, testName str
 					log.Printf("[%v] Name of the Successful Pod is: %v", testName, string(functionPodName))
 					return
 				}
-				log.Printf("[%v] Name of the Failed Pod is: %v", testName, string(functionPodName))
-				log.Fatalf("[%v] Response is not equal to expected output: %v != %v", testName, string(bodyBytes), expectedOutput)
+				log.Printf("[%v] Response is not equal to expected output: %v != %v, pod name: %s. Retry...", testName, string(bodyBytes), expectedOutput, string(functionPodName))
 			} else {
 				log.Printf("[%v] Tick: Response code is: %v", testName, resp.StatusCode)
 				bodyBytes, err := ioutil.ReadAll(resp.Body)
