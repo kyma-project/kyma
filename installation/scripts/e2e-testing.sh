@@ -52,7 +52,7 @@ cleanupHelmE2ERelease "${release}"
 ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D)
 ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D)
 
-helm install "$testcase" --name "${release}" --namespace end-to-end --set global.ingress.domainName="${DOMAIN}",global.adminEmail="${ADMIN_EMAIL}",global.adminPassword="${ADMIN_PASSWORD}"
+helm install "$testcase" --name "${release}" --namespace end-to-end --set global.ingress.domainName="${DOMAIN}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}")
 helm test "${release}" --timeout 10000
 testResult=$?
 if [ $testResult -eq 0 ]
