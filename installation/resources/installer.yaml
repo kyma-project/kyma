@@ -203,7 +203,6 @@ spec:
             )
 
             echo "${COMBO_YAML}" | kubectl create -f -
-
 ---
 apiVersion: v1
 kind: ServiceAccount
