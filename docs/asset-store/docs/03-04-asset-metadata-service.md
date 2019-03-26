@@ -5,7 +5,7 @@ type: Details
 
 The Asset Metadata Service is an HTTP server that exposes files metadata extraction functionality. It contains a simple HTTP endpoint which accepts `multipart/form-data` forms. The service extracts front matter YAML metadata from text files in arbitrary extension.
 
-The main purpose of the service is to provide metadata extraction for Asset Store. To use it, define `metadataWebhookService` in Asset and ClusterAsset custom resources.
+The main purpose of the service is to provide metadata extraction for Asset Store controllers. That's why it is only available inside the cluster. To use it, define `metadataWebhookService` in Asset and ClusterAsset custom resources.
 
 ## Front matter metadata
 
