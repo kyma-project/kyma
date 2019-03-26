@@ -46,6 +46,7 @@ spec:
           - "--runtimeCertificateValidityTime={{ .Values.deployment.args.runtimeValidityTime }}"
           - "--central={{ .Values.deployment.args.central }}"
           - "--revocationConfigMapName={{ .Values.deployment.args.revocationConfigMapName }}"
+          - "--insecureAssetDownload={{ .Values.global.isLocalEnv }}"
         env:
           - name: COUNTRY
             value: "{{ .Values.deployment.envvars.country }}"
