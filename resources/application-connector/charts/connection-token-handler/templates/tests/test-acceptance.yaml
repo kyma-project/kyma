@@ -10,7 +10,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  serviceAccountName: {{ .Release.Name }}-connection-token-handler-tests
+  serviceAccountName: {{ .Chart.Name }}-tests
   containers:
   - name: {{ .Release.Name }}-connection-token-handler-tests
     image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connection_token_handler_tests.dir }}connection-token-handler-tests:{{ .Values.global.connection_token_handler_tests.version }}
