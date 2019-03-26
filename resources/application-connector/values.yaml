@@ -21,13 +21,13 @@ global:
     version: c109ba83
   application_operator_tests:
     dir: develop/
-    version: 6cb16c1c
+    version: e1af648f
   connector_service:
     dir: develop/
     version: 342734f5
   connector_service_tests:
     dir: develop/
-    version: 07b5422e
+    version: e1af648f
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
@@ -42,7 +42,7 @@ global:
     version: c90f63c6
   gateway_tests:
     dir: develop/
-    version: 8b074a71
+    version: e1af648f
   application_registry:
     dir: develop/
     version: ec4b880b
@@ -51,7 +51,7 @@ global:
     version: 0b828d1a
   application_broker:
     dir: develop/
-    version: f78529c4
+    version: e1af648f
 
 connectivity_certs_controller:
   enabled: false
