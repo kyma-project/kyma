@@ -8,34 +8,88 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
+	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"reflect"
 	"testing"
 )
 
-func TestAddDocsTopic(t *testing.T) {
-	t.Run("Should add DocsTopic", func(t *testing.T) {
+func TestUpsertDocsTopic(t *testing.T) {
+	t.Run("Should create DocsTopic", func(t *testing.T) {
 		// given
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
 		docsTopicEntry := createTestDocsTopicEntry()
 
+		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.UpdateOptions{}).
+			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
+
 		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.CreateOptions{}).
 			Return(&unstructured.Unstructured{}, nil)
 
 		// when
-		err := repository.Create(docsTopicEntry)
+		err := repository.Upsert(docsTopicEntry)
 
 		// then
 		require.NoError(t, err)
 		resourceInterfaceMock.AssertExpectations(t)
 	})
 
-	t.Run("Should fail if k8s client returned error", func(t *testing.T) {
+	t.Run("Should update DocsTopic", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
+		docsTopicEntry := createTestDocsTopicEntry()
+
+		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
+		resourceInterfaceMock.On("Create", mock.Anything, metav1.CreateOptions{}).Return(&unstructured.Unstructured{}, nil).Return(nil)
+
+		// when
+		err := repository.Upsert(docsTopicEntry)
+
+		// then
+		require.NoError(t, err)
+		resourceInterfaceMock.AssertNumberOfCalls(t, "Create", 0)
+		resourceInterfaceMock.AssertNumberOfCalls(t, "Update", 1)
+	})
+
+	t.Run("Should fail if k8s client returned error on Update", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
+
+		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).
+			Return(&unstructured.Unstructured{}, errors.New("some error"))
+
+		// when
+		err := repository.Upsert(createTestDocsTopicEntry())
+
+		// then
+		require.Error(t, err)
+		resourceInterfaceMock.AssertExpectations(t)
+	})
+
+	t.Run("Should fail if k8s client returned error on Create", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
+
+		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).
+			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
+		resourceInterfaceMock.On("Create", mock.Anything, metav1.CreateOptions{}).
+			Return(&unstructured.Unstructured{}, errors.New("some error"))
+
+		// when
+		err := repository.Upsert(createTestDocsTopicEntry())
+
+		// then
+		require.Error(t, err)
+		resourceInterfaceMock.AssertExpectations(t)
 	})
 }
 
@@ -87,37 +141,6 @@ func TestGetDocsTopic(t *testing.T) {
 		assert.Equal(t, len(docsTopic.Labels), 1)
 		assert.Equal(t, "value", docsTopic.Labels["key"])
 	})
-
-	t.Run("Should fail if k8s client returned error", func(t *testing.T) {
-
-	})
-}
-
-func TestUpdateDocsTopic(t *testing.T) {
-	t.Run("Should update DocsTopic", func(t *testing.T) {
-		// given
-		resourceInterfaceMock := &mocks.ResourceInterface{}
-		repository := NewDocsTopicRepository(resourceInterfaceMock)
-
-		docsTopicEntry := createTestDocsTopicEntry()
-
-		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
-
-		// when
-		err := repository.Update(docsTopicEntry)
-
-		// then
-		require.NoError(t, err)
-		resourceInterfaceMock.AssertExpectations(t)
-	})
-
-	t.Run("Should return NotFound if k8s client returned NotFound error", func(t *testing.T) {
-
-	})
-
-	t.Run("Should fail if k8s client returned error", func(t *testing.T) {
-
-	})
 }
 
 func TestDeleteDocsTopic(t *testing.T) {
@@ -167,7 +190,6 @@ func createTestDocsTopicEntry() docstopic.Entry {
 }
 
 func createMatcherFunction(docsTopicEntry docstopic.Entry) func(*unstructured.Unstructured) bool {
-
 	checkUrls := func(urls map[string]string, sources map[string]v1alpha1.Source) bool {
 		if len(urls) != len(sources) {
 			return false

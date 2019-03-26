@@ -26,10 +26,9 @@ type ResourceInterface interface {
 }
 
 type DocsTopicRepository interface {
-	Create(documentationTopic docstopic.Entry) apperrors.AppError
 	Get(id string) (docstopic.Entry, apperrors.AppError)
+	Upsert(documentationTopic docstopic.Entry) apperrors.AppError
 	Delete(id string) apperrors.AppError
-	Update(documentationTopic docstopic.Entry) apperrors.AppError
 }
 
 type repository struct {
@@ -42,22 +41,65 @@ func NewDocsTopicRepository(resourceInterface ResourceInterface) DocsTopicReposi
 	}
 }
 
-func (r repository) Create(documentationTopic docstopic.Entry) apperrors.AppError {
+func (r repository) Upsert(documentationTopic docstopic.Entry) apperrors.AppError {
 	docsTopic := toK8sType(documentationTopic)
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&docsTopic)
 	if err != nil {
 		return apperrors.Internal("Failed to convert Docs Topic object.")
 	}
 
-	_, err = r.resourceInterface.Create(&unstructured.Unstructured{
-		Object: obj,
-	}, metav1.CreateOptions{})
+	u := &unstructured.Unstructured{Object: obj}
 
+	_, err = r.resourceInterface.Update(u, metav1.UpdateOptions{})
 	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return r.create(u)
+		}
+
 		return apperrors.Internal("Failed to create Documentation Topic")
 	}
 
 	return nil
+}
+
+func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
+	u, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return docstopic.Entry{}, apperrors.NotFound("Docs Topic with id:%s not found", id)
+		}
+
+		if err != nil {
+			return docstopic.Entry{}, nil
+		}
+	}
+
+	var docsTopic v1alpha1.DocsTopic
+	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &docsTopic)
+	if err != nil {
+		return docstopic.Entry{}, apperrors.Internal("Failed to convert from unstructured object.")
+	}
+
+	return fromK8sType(docsTopic), nil
+}
+
+func (r repository) Delete(id string) apperrors.AppError {
+	err := r.resourceInterface.Delete(id, &metav1.DeleteOptions{})
+	if err != nil {
+		return apperrors.Internal("Failed to delete DocsTopic: %s.", err)
+	}
+
+	return nil
+}
+
+func (r repository) create(u *unstructured.Unstructured) apperrors.AppError {
+	_, err := r.resourceInterface.Create(u, metav1.CreateOptions{})
+
+	if err != nil {
+		return apperrors.Internal("Failed to create Documentation Topic")
+	} else {
+		return nil
+	}
 }
 
 func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
@@ -88,27 +130,6 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 		}}
 }
 
-func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
-	u, err := r.resourceInterface.Get(id, metav1.GetOptions{})
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return docstopic.Entry{}, apperrors.NotFound("Docs Topic with id:%s not found", id)
-		}
-
-		if err != nil {
-			return docstopic.Entry{}, nil
-		}
-	}
-
-	var docsTopic v1alpha1.DocsTopic
-	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &docsTopic)
-	if err != nil {
-		return docstopic.Entry{}, apperrors.Internal("Failed to convert from unstructured object.")
-	}
-
-	return fromK8sType(docsTopic), nil
-}
-
 func fromK8sType(k8sDocsTopic v1alpha1.DocsTopic) docstopic.Entry {
 	urls := make(map[string]string)
 	for key, source := range k8sDocsTopic.Spec.Sources {
@@ -122,34 +143,4 @@ func fromK8sType(k8sDocsTopic v1alpha1.DocsTopic) docstopic.Entry {
 		Urls:        urls,
 		Labels:      k8sDocsTopic.Labels,
 	}
-}
-
-func (r repository) Delete(id string) apperrors.AppError {
-	err := r.resourceInterface.Delete(id, &metav1.DeleteOptions{})
-	if err != nil {
-		return apperrors.Internal("Failed to delete DocsTopic: %s.", err)
-	}
-
-	return nil
-}
-
-func (r repository) Update(documentationTopic docstopic.Entry) apperrors.AppError {
-	docsTopic := toK8sType(documentationTopic)
-	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&docsTopic)
-	if err != nil {
-		return apperrors.Internal("Failed to convert Docs Topic object.")
-	}
-
-	_, err = r.resourceInterface.Update(&unstructured.Unstructured{
-		Object: obj,
-	}, metav1.UpdateOptions{})
-
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return apperrors.NotFound("DocsTopic %s not found.", documentationTopic.Id)
-		}
-		return apperrors.Internal("Failed to create Documentation Topic")
-	}
-
-	return nil
 }

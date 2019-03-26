@@ -62,16 +62,7 @@ func (s service) Put(id string, apiType docstopic.ApiType, documentation []byte,
 		return apperrors.Internal("Failed to upload specifications: %s", err.Error())
 	}
 
-	err = s.docsTopicRepository.Update(docsTopic)
-	if err != nil {
-		if err.Code() == apperrors.CodeNotFound {
-			return s.docsTopicRepository.Create(docsTopic)
-		} else {
-			return err
-		}
-	}
-
-	return nil
+	return s.docsTopicRepository.Upsert(docsTopic)
 }
 
 func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpec []byte, apperr apperrors.AppError) {
@@ -81,11 +72,7 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 		return nil, nil, nil, apperrors.Internal("Failed to read Docs Topic.")
 	}
 
-	if docsTopic.Status == docstopic.StatusFailed {
-		return nil, nil, nil, apperrors.Internal("DocsTopic has failed status.")
-	}
-
-	if docsTopic.Status == docstopic.StatusNone || docsTopic.Status == docstopic.StatusPending {
+	if docsTopic.Status != docstopic.StatusSucceeded {
 		return nil, nil, nil, nil
 	}
 

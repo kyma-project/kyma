@@ -12,22 +12,6 @@ type DocsTopicRepository struct {
 	mock.Mock
 }
 
-// Create provides a mock function with given fields: documentationTopic
-func (_m *DocsTopicRepository) Create(documentationTopic docstopic.Entry) apperrors.AppError {
-	ret := _m.Called(documentationTopic)
-
-	var r0 apperrors.AppError
-	if rf, ok := ret.Get(0).(func(docstopic.Entry) apperrors.AppError); ok {
-		r0 = rf(documentationTopic)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(apperrors.AppError)
-		}
-	}
-
-	return r0
-}
-
 // Delete provides a mock function with given fields: id
 func (_m *DocsTopicRepository) Delete(id string) apperrors.AppError {
 	ret := _m.Called(id)
@@ -67,8 +51,8 @@ func (_m *DocsTopicRepository) Get(id string) (docstopic.Entry, apperrors.AppErr
 	return r0, r1
 }
 
-// Update provides a mock function with given fields: documentationTopic
-func (_m *DocsTopicRepository) Update(documentationTopic docstopic.Entry) apperrors.AppError {
+// Upsert provides a mock function with given fields: documentationTopic
+func (_m *DocsTopicRepository) Upsert(documentationTopic docstopic.Entry) apperrors.AppError {
 	ret := _m.Called(documentationTopic)
 
 	var r0 apperrors.AppError

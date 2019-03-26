@@ -2,7 +2,6 @@ package assetstore
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
@@ -20,9 +19,9 @@ func TestAddingToAssetStore(t *testing.T) {
 	documentation := []byte("{\"description\": \"Some docs blah blah blah\"}}")
 	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
 
-	t.Run("Should add all specifications to asset store", func(t *testing.T) {
+	t.Run("Should put all specifications to asset store", func(t *testing.T) {
 		// given
-		repositoryMock := &mocks.Repository{}
+		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
 		service := NewService(repositoryMock, uploadClientMock)
 
@@ -32,8 +31,7 @@ func TestAddingToAssetStore(t *testing.T) {
 				"www.somestorage.com/asyncApiSpec.json",
 				"www.somestorage.com/content.json", docstopic.StatusNone)
 
-			repositoryMock.On("Update", docsTopic).Return(apperrors.NotFound("Not found."))
-			repositoryMock.On("Create", docsTopic).Return(nil)
+			repositoryMock.On("Upsert", docsTopic).Return(nil)
 		}
 
 		{
@@ -115,7 +113,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should fail when DocsTopic status is failed", func(t *testing.T) {
+	t.Run("Should not fail when DocsTopic status is failed", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
@@ -129,8 +127,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 		docs, api, events, err := service.Get("id1")
 
 		// then
-		require.Error(t, err)
-		assert.Equal(t, apperrors.CodeInternal, err.Code())
+		require.NoError(t, err)
 		assert.Nil(t, api)
 		assert.Nil(t, events)
 		assert.Nil(t, docs)
@@ -138,7 +135,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 		repositoryMock.AssertExpectations(t)
 	})
 
-	t.Run("Should fail when DocsTopic status is pending", func(t *testing.T) {
+	t.Run("Should not fail when DocsTopic status is pending", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
@@ -158,60 +155,6 @@ func TestGettingFromAssetStore(t *testing.T) {
 		assert.Nil(t, docs)
 
 		repositoryMock.AssertExpectations(t)
-	})
-}
-
-func TestUpdatingInAssetStore(t *testing.T) {
-	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
-	documentation := []byte("{\"description\": \"Some docs blah blah blah\"}}")
-	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
-
-	t.Run("Should update specifications in asset store", func(t *testing.T) {
-		// given
-		repositoryMock := &mocks.Repository{}
-		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock)
-
-		{
-			docsTopic := createTestDocsTopic("id1",
-				"www.somestorage.com/apiSpec.json",
-				"www.somestorage.com/asyncApiSpec.json",
-				"www.somestorage.com/content.json",
-				docstopic.StatusNone)
-
-			repositoryMock.On("Update", docsTopic).Return(nil)
-		}
-
-		{
-			specFile := createTestInputFile(openApiSpecFileName, "", jsonApiSpec)
-			eventsFile := createTestInputFile(eventsSpecFileName, "", eventsSpec)
-			docsFile := createTestInputFile(documentationFileName, "", documentation)
-
-			uploadClientMock.On("Upload", specFile).
-				Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
-
-			uploadClientMock.On("Upload", eventsFile).
-				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
-
-			uploadClientMock.On("Upload", docsFile).
-				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
-		}
-
-		// when
-		err := service.Put("id1", docstopic.OpenApiType, documentation, jsonApiSpec, eventsSpec)
-
-		// then
-		require.NoError(t, err)
-		repositoryMock.AssertExpectations(t)
-		uploadClientMock.AssertExpectations(t)
-	})
-
-	t.Run("Should fail when failed to upload file", func(t *testing.T) {
-
-	})
-
-	t.Run("Should fail when failed to create DocsTopic CR", func(t *testing.T) {
-
 	})
 }
 
