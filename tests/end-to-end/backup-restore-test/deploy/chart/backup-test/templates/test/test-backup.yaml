@@ -37,7 +37,7 @@ rules:
   resources: ["horizontalpodautoscalers"]
   verbs: ["get", "list"]
 - apiGroups: [""]
-  resources: ["secrets", "statefulsets", "pods"]
+  resources: ["secrets", "statefulsets", "pods", "persistentvolumeclaims", "persistentvolumes"]
   verbs: ["create", "get", "update", "delete"]
 ---
 apiVersion: v1
