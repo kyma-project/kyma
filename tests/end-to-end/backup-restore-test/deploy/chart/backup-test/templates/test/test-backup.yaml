@@ -36,9 +36,12 @@ rules:
 - apiGroups: ["autoscaling"]
   resources: ["horizontalpodautoscalers"]
   verbs: ["get", "list"]
+- apiGroups: [“gateway.kyma-project.io”]
+  resources: [“apis”]
+  verbs: [“create”]
 - apiGroups: [""]
-  resources: ["secrets", "statefulsets", "pods"]
-  verbs: ["create", "get", "update", "delete"]
+  resources: ["secrets", "statefulsets", "pods", "persistentvolumeclaims", "persistentvolumes"]
+  verbs: ["*"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -86,14 +89,8 @@ spec:
     - name: DOMAIN
       value: {{ .Values.global.ingress.domainName | default "kyma.local" }}
     - name: USER_EMAIL
-      valueFrom:
-        secretKeyRef:
-          name: admin-user
-          key: email
+      value: {{ .Values.global.adminEmail }}
     - name: USER_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: admin-user
-          key: password
+      value: {{ .Values.global.adminPassword }}
   restartPolicy: Never
 ---
