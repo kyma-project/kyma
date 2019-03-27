@@ -81,6 +81,7 @@ spec:
     matchLabels: &labels
       clusterChannelProvisioner: natss
       role: controller
+      app: natss-controller
   template:
     metadata:
       labels: *labels
@@ -157,6 +158,7 @@ spec:
     matchLabels: &labels
       clusterChannelProvisioner: natss
       role: dispatcher
+      app: natss-dispatcher
   template:
     metadata:
       annotations:
