@@ -83,7 +83,7 @@ func (uc uploadClient) prepareRequest(fileName string, contents []byte) (*http.R
 
 	req, err := http.NewRequest(http.MethodPost, url, body)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to create request.")
+		return nil, apperrors.Internal("Failed to create request, %s.", err)
 	}
 
 	req.Header.Set(httpconsts.HeaderContentType, writer.FormDataContentType())
@@ -96,12 +96,12 @@ func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipar
 
 	publicFilePart, err := writer.CreateFormFile(PublicFileField, fileName)
 	if err != nil {
-		return apperrors.Internal("Failed to create multipart content: %s.", err.Error())
+		return apperrors.Internal("Failed to create multipart content, %s.", err.Error())
 	}
 
 	_, err = publicFilePart.Write(contents)
 	if err != nil {
-		return apperrors.Internal("Failed to write file contents: %s.", err.Error())
+		return apperrors.Internal("Failed to write file contents, %s.", err.Error())
 	}
 
 	return nil
@@ -110,7 +110,7 @@ func (uc uploadClient) prepareMultipartForm(body *bytes.Buffer, writer *multipar
 func (uc uploadClient) executeRequest(r *http.Request) (*http.Response, apperrors.AppError) {
 	res, err := uc.httpClient.Do(r)
 	if err != nil {
-		log.Errorf("Failed to execute request: %s.", err.Error())
+		log.Errorf("Failed to execute request, %s.", err.Error())
 		return nil, apperrors.Internal("Failed to execute request.")
 	}
 
@@ -121,7 +121,7 @@ func (uc uploadClient) unmarshal(r *http.Response) (Response, apperrors.AppError
 	b, err := ioutil.ReadAll(r.Body)
 
 	if err != nil {
-		return Response{}, apperrors.Internal("Failed to read request body.")
+		return Response{}, apperrors.Internal("Failed to read request body, %s.", err)
 	}
 
 	defer r.Body.Close()
@@ -130,7 +130,7 @@ func (uc uploadClient) unmarshal(r *http.Response) (Response, apperrors.AppError
 	err = json.Unmarshal(b, &uploadResponse)
 
 	if err != nil {
-		return Response{}, apperrors.Internal("Failed to unmarshal body.")
+		return Response{}, apperrors.Internal("Failed to unmarshal body, %s", err)
 	}
 
 	return uploadResponse, nil
@@ -141,9 +141,9 @@ func (uc uploadClient) extract(fileName string, response Response) (UploadedFile
 		return response.UploadedFiles[0], nil
 	} else {
 		for _, e := range response.Errors {
-			log.Errorf("Failed to upload file %s with Upload Service: %s.", e.FileName, e.Message)
+			log.Errorf("Failed to upload %s file with Upload Service, %s.", e.FileName, e.Message)
 		}
 
-		return UploadedFile{}, apperrors.Internal("Failed to extract file %s from response.", fileName)
+		return UploadedFile{}, apperrors.Internal("Failed to extract %s file from response.", fileName)
 	}
 }

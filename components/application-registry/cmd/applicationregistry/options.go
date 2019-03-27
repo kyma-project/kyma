@@ -20,7 +20,7 @@ type options struct {
 func parseArgs() *options {
 	externalAPIPort := flag.Int("externalAPIPort", 8081, "External API port.")
 	proxyPort := flag.Int("proxyPort", 8080, "Proxy port.")
-	namespace := flag.String("namespace", "kyma-integration", "Namespace used by Gateway")
+	namespace := flag.String("namespace", "kyma-integration", "Namespace used by Application Registry")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	detailedErrorResponse := flag.Bool("detailedErrorResponse", false, "Flag for showing full internal error response messages.")

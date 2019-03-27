@@ -13,8 +13,8 @@ import (
 )
 
 const (
-	DocTopicDisplayNameFormat = "Documentation topic for service class id=%s"
-	DocTopicDescriptionFormat = "Documentation topic for service class id=%s"
+	docTopicDisplayNameFormat = "Documentation topic for service class id=%s"
+	docTopicDescriptionFormat = "Documentation topic for service class id=%s"
 	specRequestTimeout        = time.Duration(5 * time.Second)
 )
 
@@ -24,8 +24,8 @@ const (
 	eventsSpecFileName    = "asyncApiSpec.json"
 	odataXMLSpecFileName  = "odata.xml"
 	odataJSONSpecFileName = "odata.json"
-	DocsTopicLabelKey     = "cms.kyma-project.io/viewContext"
-	DocsTopicLabelValue   = "service-catalog"
+	docsTopicLabelKey     = "cms.kyma-project.io/viewContext"
+	docsTopicLabelValue   = "service-catalog"
 )
 
 type Service interface {
@@ -53,12 +53,6 @@ func NewService(repository DocsTopicRepository, uploadClient upload.Client, inse
 	}
 }
 
-type ContentEntry struct {
-	FileName string
-	FileKey  string
-	Content  []byte
-}
-
 func (s service) Put(id string, apiType docstopic.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
 
 	if documentation == nil && apiSpec == nil && eventsSpec == nil {
@@ -67,7 +61,7 @@ func (s service) Put(id string, apiType docstopic.ApiType, documentation []byte,
 
 	docsTopic, err := s.createDocumentationTopic(id, apiType, documentation, apiSpec, eventsSpec)
 	if err != nil {
-		return apperrors.Internal("Failed to upload specifications: %s", err.Error())
+		return apperrors.Internal("Failed to upload specifications, %s.", err.Error())
 	}
 
 	return s.docsTopicRepository.Upsert(docsTopic)
@@ -77,7 +71,7 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 
 	docsTopic, err := s.docsTopicRepository.Get(id)
 	if err != nil {
-		return nil, nil, nil, apperrors.Internal("Failed to read Docs Topic.")
+		return nil, nil, nil, apperrors.Internal("Failed to read Docs Topic, %s.", err)
 	}
 
 	if docsTopic.Status != docstopic.StatusReady {
@@ -89,12 +83,12 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 		return nil, nil, nil, err
 	}
 
-	eventsSpec, err = s.getEventsSpec(docsTopic)
+	eventsSpec, err = s.getSpec(docsTopic, docstopic.KeyEventsSpec)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 
-	documentation, err = s.getDocumentation(docsTopic)
+	documentation, err = s.getSpec(docsTopic, docstopic.KeyDocumentationSpec)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -110,10 +104,10 @@ func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, 
 
 	docsTopic := docstopic.Entry{
 		Id:          id,
-		DisplayName: fmt.Sprintf(DocTopicDisplayNameFormat, id),
-		Description: fmt.Sprintf(DocTopicDescriptionFormat, id),
+		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),
+		Description: fmt.Sprintf(docTopicDescriptionFormat, id),
 		Urls:        make(map[string]string),
-		Labels:      map[string]string{DocsTopicLabelKey: DocsTopicLabelValue},
+		Labels:      map[string]string{docsTopicLabelKey: docsTopicLabelValue},
 	}
 
 	apiSpecFileName, apiSpecKey := getApiSpecFileNameAndKey(apiSpec, apiType)
@@ -169,7 +163,7 @@ func (s service) processSpec(content []byte, filename, fileKey string, docsTopic
 	if content != nil {
 		outputFile, err := s.uploadClient.Upload(filename, content)
 		if err != nil {
-			return apperrors.Internal("Failed to upload file: %s.", filename)
+			return apperrors.Internal("Failed to upload file %s, %s.", filename, err)
 		}
 
 		docsTopicEntry.Urls[fileKey] = outputFile.RemotePath
@@ -198,19 +192,9 @@ func (s service) getApiSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) 
 	return nil, nil
 }
 
-func (s service) getEventsSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) {
+func (s service) getSpec(entry docstopic.Entry, key string) ([]byte, apperrors.AppError) {
 
-	url, found := entry.Urls[docstopic.KeyEventsSpec]
-	if found {
-		return s.downloadClient.Fetch(url)
-	}
-
-	return nil, nil
-}
-
-func (s service) getDocumentation(entry docstopic.Entry) ([]byte, apperrors.AppError) {
-
-	url, found := entry.Urls[docstopic.KeyDocumentationSpec]
+	url, found := entry.Urls[key]
 	if found {
 		return s.downloadClient.Fetch(url)
 	}

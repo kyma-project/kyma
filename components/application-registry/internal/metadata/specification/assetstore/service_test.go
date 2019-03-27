@@ -35,20 +35,20 @@ func TestAddingToAssetStore(t *testing.T) {
 				docstopic.KeyEventsSpec:        "www.somestorage.com/asyncApiSpec.json",
 				docstopic.KeyDocumentationSpec: "www.somestorage.com/content.json",
 			}
-			docsTopic := createTestDocsTopic("id1", urls, docstopic.StatusNone)
+			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
 
 			repositoryMock.On("Upsert", docsTopic).Return(nil)
 		}
 
 		{
 			uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
-				Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
+				Return(createUploadedFile(openApiSpecFileName, "www.somestorage.com"), nil)
 
 			uploadClientMock.On("Upload", eventsSpecFileName, eventsSpec).
-				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
+				Return(createUploadedFile(eventsSpecFileName, "www.somestorage.com"), nil)
 
 			uploadClientMock.On("Upload", documentationFileName, documentation).
-				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
+				Return(createUploadedFile(documentationFileName, "www.somestorage.com"), nil)
 		}
 
 		// when
@@ -68,28 +68,18 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		{
 			urls := map[string]string{
-				docstopic.KeyODataXMLSpec:      "www.somestorage.com/odata.xml",
-				docstopic.KeyEventsSpec:        "www.somestorage.com/asyncApiSpec.json",
-				docstopic.KeyDocumentationSpec: "www.somestorage.com/content.json",
+				docstopic.KeyODataXMLSpec: "www.somestorage.com/odata.xml",
 			}
-			docsTopic := createTestDocsTopic("id1", urls, docstopic.StatusNone)
+			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
 
 			repositoryMock.On("Upsert", docsTopic).Return(nil)
 		}
 
-		{
-			uploadClientMock.On("Upload", odataXMLSpecFileName, odataXMLApiSpec).
-				Return(createTestOutputFile(odataXMLSpecFileName, "www.somestorage.com"), nil)
-
-			uploadClientMock.On("Upload", eventsSpecFileName, eventsSpec).
-				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
-
-			uploadClientMock.On("Upload", documentationFileName, documentation).
-				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
-		}
+		uploadClientMock.On("Upload", odataXMLSpecFileName, odataXMLApiSpec).
+			Return(createUploadedFile(odataXMLSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.ODataApiType, documentation, odataXMLApiSpec, eventsSpec)
+		err := service.Put("id1", docstopic.ODataApiType, nil, odataXMLApiSpec, nil)
 
 		// then
 		require.NoError(t, err)
@@ -105,28 +95,18 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		{
 			urls := map[string]string{
-				docstopic.KeyODataJSONSpec:     "www.somestorage.com/odata.xml",
-				docstopic.KeyEventsSpec:        "www.somestorage.com/asyncApiSpec.json",
-				docstopic.KeyDocumentationSpec: "www.somestorage.com/content.json",
+				docstopic.KeyODataJSONSpec: "www.somestorage.com/odata.xml",
 			}
-			docsTopic := createTestDocsTopic("id1", urls, docstopic.StatusNone)
+			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
 
 			repositoryMock.On("Upsert", docsTopic).Return(nil)
 		}
 
-		{
-			uploadClientMock.On("Upload", odataJSONSpecFileName, jsonApiSpec).
-				Return(createTestOutputFile(odataXMLSpecFileName, "www.somestorage.com"), nil)
-
-			uploadClientMock.On("Upload", eventsSpecFileName, eventsSpec).
-				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
-
-			uploadClientMock.On("Upload", documentationFileName, documentation).
-				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
-		}
+		uploadClientMock.On("Upload", odataJSONSpecFileName, jsonApiSpec).
+			Return(createUploadedFile(odataXMLSpecFileName, "www.somestorage.com"), nil)
 
 		// when
-		err := service.Put("id1", docstopic.ODataApiType, documentation, jsonApiSpec, eventsSpec)
+		err := service.Put("id1", docstopic.ODataApiType, nil, jsonApiSpec, nil)
 
 		// then
 		require.NoError(t, err)
@@ -160,7 +140,7 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		repositoryMock.On("Upsert", mock.Anything).Return(apperrors.Internal("some error"))
 		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
-			Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
+			Return(createUploadedFile(openApiSpecFileName, "www.somestorage.com"), nil)
 
 		// when
 		err := service.Put("id1", docstopic.OpenApiType, nil, jsonApiSpec, nil)
@@ -214,7 +194,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 			}
 
 			repositoryMock.On("Get", "id1").
-				Return(createTestDocsTopic("id1", urls, docstopic.StatusReady), nil)
+				Return(createDocsTopic("id1", urls, docstopic.StatusReady), nil)
 		}
 
 		// then
@@ -268,7 +248,7 @@ func TestGettingFromAssetStoreIfStatusIsNotReady(t *testing.T) {
 			service := NewService(repositoryMock, uploadClientMock, false)
 
 			{
-				repositoryMock.On("Get", "id1").Return(createTestDocsTopic("id1", nil, testData.status), nil)
+				repositoryMock.On("Get", "id1").Return(createDocsTopic("id1", nil, testData.status), nil)
 			}
 
 			// then
@@ -285,19 +265,19 @@ func TestGettingFromAssetStoreIfStatusIsNotReady(t *testing.T) {
 	}
 }
 
-func createTestDocsTopic(id string, urls map[string]string, status docstopic.StatusType) docstopic.Entry {
+func createDocsTopic(id string, urls map[string]string, status docstopic.StatusType) docstopic.Entry {
 
 	return docstopic.Entry{
 		Id:          id,
-		DisplayName: fmt.Sprintf(DocTopicDisplayNameFormat, id),
-		Description: fmt.Sprintf(DocTopicDescriptionFormat, id),
+		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),
+		Description: fmt.Sprintf(docTopicDescriptionFormat, id),
 		Urls:        urls,
-		Labels:      map[string]string{DocsTopicLabelKey: DocsTopicLabelValue},
+		Labels:      map[string]string{docsTopicLabelKey: docsTopicLabelValue},
 		Status:      status,
 	}
 }
 
-func createTestOutputFile(filename string, url string) upload.UploadedFile {
+func createUploadedFile(filename string, url string) upload.UploadedFile {
 	return upload.UploadedFile{
 		FileName:   filename,
 		RemotePath: fmt.Sprintf("%s/%s", url, filename),
