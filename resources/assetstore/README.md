@@ -2,33 +2,14 @@
 
 ## Overview
 
-This chart consists of the following items:
-* Asset Store Controller Manager
-* Minio
+The Asset Store is a Kubernetes-native solution for storing assets, such as documents, files, images, API specifications, and client-side applications.
 
-## Change Minio to the Google Cloud Storage (GCS) Gateway mode
+The Asset Store consists of the following sub-charts:
 
-To configure Minio as a Gateway mode, you need a Secret with a service account that has the **Storage Admin** role permissions.
+- [Asset Store Controller Manager](charts/asset-store-controller-manager/README.md)
+- [Asset Upload Service](charts/asset-upload-service/README.md)
+- [Minio](charts/minio/README.md)
 
-### Create a Secret
+## Details
 
-1. Open the [service accounts page](https://console.cloud.google.com/iam-admin/serviceaccounts).
-2. Select one of the projects or create a new one. Note down the project ID as you must use it to update the Asset Store deployment.
-3. Click **Create service account**, name your account, and click **Create**.
-4. Set the **Storage Admin** role.
-5. Click **Create key** and choose `JSON` as a key type.
-6. Save the `JSON` file.
-7. Create a Secret from the `JSON` file by running this command:
-    ```bahs
-    kubectl create secret generic assetstore-gcs-credentials --from-file=service-account.json={filename} --namespace kyma-system
-    ```
-
-### Update the Asset Store deployment
-
-To update the Asset Store deployment, run this command:
-
-```bash
-helm upgrade assetstore resources/assetstore --namespace kyma-system --wait=true --reuse-values --set minio.persistence.enabled=false --set minio.gcsgateway.enabled=true --set minio.gcsgateway.replicas=1 --set minio.gcsgateway.gcsKeySecret=assetstore-gcs-credentials --set minio.gcsgateway.projectId={gcp-project} --set minio.defaultBucket.enabled=false
-```
-
->**NOTE:** This is an alpha version of the Asset Store. In this version, the GCS `content` bucket is not available in the Minio Gateway mode.
+To learn more about the Asset Store, see the [Asset Store documentation](https://kyma-project.io/docs/components/asset-store) on [kyma-project.io](https://kyma-project.io/).
