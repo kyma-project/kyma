@@ -238,7 +238,7 @@ func (t *statefulSetTest) waitForPodDeployment(namespace string, replicas int32,
 			}
 
 			if statefulSet.Status.ReadyReplicas != int32(len(pods.Items)) {
-				return fmt.Errorf("Number of pods %v different from ready replicas %v", len(pods.Items), statefulSet.Status.ReadyReplicas)
+				break
 			}
 			return nil
 		}
