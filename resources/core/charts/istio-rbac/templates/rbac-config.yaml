@@ -1,13 +1,7 @@
 ---
-apiVersion: rbac.istio.io/v1alpha1
+apiVersion: "rbac.istio.io/v1alpha1"
 kind: ClusterRbacConfig
 metadata:
   name: default
-  labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
 spec:
-  mode: ON_WITH_INCLUSION
-  inclusion:
-    services: ["logging.kyma-system.svc.cluster.local"]
+  mode: 'OFF'
