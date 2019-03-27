@@ -29,6 +29,7 @@ type Resolver struct {
 	*podResolver
 	*serviceResolver
 	*replicaSetResolver
+	*configMapResolver
 	informerFactory informers.SharedInformerFactory
 }
 
@@ -57,7 +58,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
-
+	configMapService := newConfigMapService(informerFactory.Core().V1().ConfigMaps().Informer(), clientset.CoreV1())
 	serviceSvc := newServiceService(informerFactory.Core().V1().Services().Informer(), client)
 
 	return &Resolver{
@@ -71,6 +72,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
 		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
+		configMapResolver:           newConfigMapResolver(configMapService),
 		informerFactory:             informerFactory,
 	}, nil
 }

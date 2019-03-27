@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,10 +33,17 @@ func makeProxy(targetUrl string, id string, skipVerify bool) (*httputil.ReverseP
 		} else {
 			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
 		}
-		if _, ok := req.Header["User-Agent"]; !ok {
+
+		if _, ok := req.Header[httpconsts.HeaderUserAgent]; !ok {
 			// explicitly disable User-Agent so it's not set to default value
-			req.Header.Set("User-Agent", "")
+			req.Header.Set(httpconsts.HeaderUserAgent, "")
 		}
+
+		removeHeader(req.Header, httpconsts.HeaderXForwardedProto)
+		removeHeader(req.Header, httpconsts.HeaderXForwardedFor)
+		removeHeader(req.Header, httpconsts.HeaderXForwardedHost)
+		removeHeader(req.Header, httpconsts.HeaderXForwardedClientCert)
+
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
 	newProxy := &httputil.ReverseProxy{Director: director}
@@ -59,4 +67,11 @@ func joinPaths(a, b string) string {
 		return a + "/" + b
 	}
 	return a + b
+}
+
+func removeHeader(headers http.Header, headerToRemove string) {
+	if _, ok := headers[headerToRemove]; ok {
+		log.Debugf("Removing header %s\n", headerToRemove)
+		headers.Del(headerToRemove)
+	}
 }
