@@ -3,5 +3,5 @@ package wait
 import "time"
 
 const (
-	readyTimeout = time.Minute
+	readyTimeout = 3 * time.Minute
 )

@@ -4,12 +4,19 @@ package servicecatalog
 
 import (
 	"fmt"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
+	"github.com/pkg/errors"
 	"testing"
+	"log"
 
-	tester "github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ServiceBroker struct {
@@ -40,6 +47,24 @@ func TestServiceBrokerQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedResource := broker()
+
+	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
+	require.NoError(t, err)
+
+	testBroker := newTestServiceBroker(expectedResource.Name, expectedResource.Namespace, svcatCli)
+	err = testBroker.Create()
+	require.NoError(t, err)
+
+	defer func() {
+		err := testBroker.Delete()
+		if err != nil {
+			log.Printf(errors.Wrapf(err, "while deleting test ServiceBroker").Error())
+		}
+	}()
+
+	err = wait.ForServiceBroker(expectedResource.Name, expectedResource.Namespace, svcatCli)
+	require.NoError(t, err)
+
 	resourceDetailsQuery := `
 		name
 		namespace
@@ -100,11 +125,6 @@ func checkBroker(t *testing.T, expected, actual ServiceBroker) {
 
 	// Namespace
 	assert.Equal(t, expected.Namespace, actual.Namespace)
-
-	// Status
-	assert.Equal(t, expected.Status.Ready, actual.Status.Ready)
-	assert.NotEmpty(t, actual.Status.Message)
-	assert.NotEmpty(t, actual.Status.Reason)
 }
 
 func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedElement ServiceBroker) {
@@ -120,12 +140,34 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedEleme
 	}, "Resource does not exist")
 }
 
+func newTestServiceBroker(name string, namespace string, svcatCli *clientset.Clientset) *testServiceBroker {
+	return &testServiceBroker{name: name, namespace: namespace, svcatCli: svcatCli}
+}
+
+func (t *testServiceBroker) Create() error {
+	broker := &v1beta1.ServiceBroker{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      t.name,
+			Namespace: t.namespace,
+		},
+		Spec: v1beta1.ServiceBrokerSpec{
+			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
+				URL: "example.com",
+			},
+		},
+	}
+
+	_, err := t.svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Create(broker)
+	return err
+}
+
+func (t *testServiceBroker) Delete() error {
+	return t.svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.namespace).Delete(t.name, &metav1.DeleteOptions{GracePeriodSeconds: &brokerDeletionGracefulPeriod})
+}
+
 func broker() ServiceBroker {
 	return ServiceBroker{
 		Name:      tester.BrokerReleaseName,
 		Namespace: TestNamespace,
-		Status: ServiceBrokerStatus{
-			Ready: true,
-		},
 	}
 }
