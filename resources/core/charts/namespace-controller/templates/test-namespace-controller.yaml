@@ -32,6 +32,9 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: namespace-controller
+  labels:
+    release: {{ .Release.Name }}
+    component/namespace-controller: ""
 spec:
   template:
     metadata:

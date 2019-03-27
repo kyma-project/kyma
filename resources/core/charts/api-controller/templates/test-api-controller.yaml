@@ -2,6 +2,9 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: api-controller
+  labels:
+    release: {{ .Release.Name }}
+    component/api-controller: ""
 spec:
   template:
     metadata:

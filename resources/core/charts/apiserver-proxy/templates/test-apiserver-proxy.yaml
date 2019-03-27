@@ -2,6 +2,11 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: apiserver-proxy
+  labels:
+    release: {{ .Release.Name }}
+    component/apiserver-proxy: ""
+    component/dex: ""
+    component/configurations-generator: ""
 spec:
   template:
     metadata:

@@ -4,6 +4,9 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: {{ template "fullname" . }}-integration
+  labels:
+    release: {{ .Release.Name }}
+    component/kubeless: ""
 spec:
   template:
     metadata:

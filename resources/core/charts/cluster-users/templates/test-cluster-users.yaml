@@ -3,6 +3,12 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: cluster-users
+  labels:
+    release: {{ .Release.Name }}
+    component/apiserver-proxy: ""
+    component/dex: ""
+    component/cluster-users: ""
+    component/configurations-generator: ""
 spec:
   template:
     metadata:

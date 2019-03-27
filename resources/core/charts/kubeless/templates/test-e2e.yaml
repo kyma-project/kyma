@@ -6,6 +6,10 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: {{ template "fullname" . }}-e2e
+  labels:
+    release: {{ .Release.Name }}
+    component/kubeless: ""
+    component/api-controller: ""
 spec:
   template:
     metadata:
