@@ -54,7 +54,6 @@ func NewService(repository DocsTopicRepository, uploadClient upload.Client, inse
 }
 
 func (s service) Put(id string, apiType docstopic.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
-
 	if documentation == nil && apiSpec == nil && eventsSpec == nil {
 		return nil
 	}
@@ -68,9 +67,8 @@ func (s service) Put(id string, apiType docstopic.ApiType, documentation []byte,
 }
 
 func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpec []byte, apperr apperrors.AppError) {
-
 	docsTopic, err := s.docsTopicRepository.Get(id)
-	if err != nil {
+	if err != nil && err.Code() != apperrors.CodeNotFound {
 		return nil, nil, nil, apperrors.Internal("Failed to read Docs Topic, %s.", err)
 	}
 
@@ -101,7 +99,6 @@ func (s service) Remove(id string) apperrors.AppError {
 }
 
 func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) (docstopic.Entry, apperrors.AppError) {
-
 	docsTopic := docstopic.Entry{
 		Id:          id,
 		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),

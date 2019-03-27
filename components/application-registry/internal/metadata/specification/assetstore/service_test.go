@@ -228,6 +228,26 @@ func TestGettingFromAssetStore(t *testing.T) {
 
 		repositoryMock.AssertExpectations(t)
 	})
+
+	t.Run("Should return nil specs if Docs Topic CR doesn't exist", func(t *testing.T) {
+		// given
+		repositoryMock := &mocks.DocsTopicRepository{}
+		service := NewService(repositoryMock, nil, false)
+
+		repositoryMock.On("Get", "id1").
+			Return(docstopic.Entry{}, apperrors.NotFound("object not found"))
+
+		// then
+		docs, api, events, err := service.Get("id1")
+
+		// then
+		require.NoError(t, err)
+		assert.Equal(t, []byte(nil), api)
+		assert.Equal(t, []byte(nil), events)
+		assert.Equal(t, []byte(nil), docs)
+
+		repositoryMock.AssertExpectations(t)
+	})
 }
 
 func TestGettingFromAssetStoreIfStatusIsNotReady(t *testing.T) {
@@ -266,7 +286,6 @@ func TestGettingFromAssetStoreIfStatusIsNotReady(t *testing.T) {
 }
 
 func createDocsTopic(id string, urls map[string]string, status docstopic.StatusType) docstopic.Entry {
-
 	return docstopic.Entry{
 		Id:          id,
 		DisplayName: fmt.Sprintf(docTopicDisplayNameFormat, id),

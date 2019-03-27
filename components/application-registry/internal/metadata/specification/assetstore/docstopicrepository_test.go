@@ -2,6 +2,7 @@ package assetstore
 
 import (
 	"errors"
+	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
@@ -140,6 +141,23 @@ func TestGetDocsTopic(t *testing.T) {
 		assert.Equal(t, docsTopic.Urls["api"], "www.somestorage.com/api")
 		assert.Equal(t, len(docsTopic.Labels), 1)
 		assert.Equal(t, "value", docsTopic.Labels["key"])
+	})
+
+	t.Run("Should fail with Not Found if DocsTopic doesn't exist", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
+		{
+			resourceInterfaceMock.On("Get", mock.Anything, metav1.GetOptions{}).
+				Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
+		}
+
+		// when
+		_, err := repository.Get("id1")
+
+		// then
+		assert.Error(t, err)
+		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
 }
 
