@@ -61,7 +61,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		config:              config,
 		helmClient:          helmClient,
 		k8sClient:           k8sResourcesClient,
-		installationTimeout: time.Second * time.Duration(config.InstallationTimeout),
+		installationTimeout: time.Second * time.Duration(config.InstallationTimeoutSeconds),
 		labelSelector:       labels.SelectorFromSet(testPodsLabels).String(),
 	}
 }

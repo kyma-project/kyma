@@ -50,7 +50,7 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		helmClient:          helmClient,
 		k8sClient:           k8sResourcesClient,
 		k8sChecker:          k8sResourcesChecker,
-		installationTimeout: time.Second * time.Duration(config.InstallationTimeout),
+		installationTimeout: time.Second * time.Duration(config.InstallationTimeoutSeconds),
 	}
 }
 

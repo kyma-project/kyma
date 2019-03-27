@@ -27,13 +27,13 @@ func ShouldLastFor(interval, timeout time.Duration, conditionalFunc func() bool)
 
 	for {
 		if !conditionalFunc() {
-			return errors.New("unexpected condition occurred when should not")
+			return errors.New("unexpected condition occurred")
 		}
 
 		select {
 		case <-done:
 			if !conditionalFunc() {
-				return errors.New("unexpected condition occurred when should not")
+				return errors.New("unexpected condition occurred")
 			}
 
 			return nil
