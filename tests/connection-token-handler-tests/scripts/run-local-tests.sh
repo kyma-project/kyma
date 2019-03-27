@@ -32,7 +32,7 @@ metadata:
   annotations:
     sidecar.istio.io/inject: “false”
 spec:
-  serviceAccountName: application-connector-connection-token-handler-tests
+  serviceAccountName: connection-token-handler-tests
   containers:
   - name: connection-token-handler-tests
     image: connection-token-handler-tests
