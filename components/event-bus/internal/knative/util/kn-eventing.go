@@ -64,7 +64,7 @@ type KnativeAccessLib interface {
 	DeleteSubscription(name string, namespace string) error
 	GetSubscription(name string, namespace string) (*evapisv1alpha1.Subscription, error)
 	UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error)
-	SendMessage(channel *evapisv1alpha1.Channel, message *string) error
+	SendMessage(channel *evapisv1alpha1.Channel, headers *map[string]string, message *string) error
 	InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) error
 }
 
@@ -188,25 +188,26 @@ func (k *KnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evap
 }
 
 // SendMessage sends a message to a channel
-func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, message *string) error {
+func (k *KnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string]string, payload *string) error {
 	httpClient := &http.Client{
 		Transport: initHTTPTransport(),
 	}
-	req, err := makeHttpRequest(channel, message)
+	req, err := makeHttpRequest(channel, headers, payload)
 	if err != nil {
 		log.Printf("ERROR: SendMessage(): makeHttpRequest() failed: %v", err)
 		return err
 	}
+
 	res, err := httpClient.Do(req)
 	if err != nil {
 		log.Printf("ERROR: SendMessage(): could not send HTTP request: %v", err)
 		return err
 	}
 	defer res.Body.Close()
-	//dumpResponse(res)
+
 	if res.StatusCode == http.StatusNotFound {
 		// try to resend the mesasge only once
-		if err := resendMessage(httpClient, channel, message); err != nil {
+		if err := resendMessage(httpClient, channel, headers, payload); err != nil {
 			log.Printf("ERROR: SendMessage(): resendMessage() failed: %v", err)
 			return err
 		}
@@ -224,10 +225,10 @@ func (r *KnativeLib) InjectClient(c eventingv1alpha1.EventingV1alpha1Interface) 
 	return nil
 }
 
-func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, message *string) error {
+func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, headers *map[string]string, message *string) error {
 	timeout := time.After(10 * time.Second)
 	tick := time.Tick(200 * time.Millisecond)
-	req, err := makeHttpRequest(channel, message)
+	req, err := makeHttpRequest(channel, headers, message)
 	if err != nil {
 		log.Printf("ERROR: resendMessage(): makeHttpRequest() failed: %v", err)
 		return err
@@ -246,7 +247,7 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, mes
 			log.Printf("ERROR: resendMessage(): timed out")
 			return errors.New("ERROR: timed out")
 		case <-tick:
-			req, err := makeHttpRequest(channel, message)
+			req, err := makeHttpRequest(channel, headers, message)
 			if err != nil {
 				log.Printf("ERROR: resendMessage(): makeHttpRequest() failed: %v", err)
 				return err
@@ -287,8 +288,8 @@ func makeChannel(provisioner string, name string, namespace string) *evapisv1alp
 	return c
 }
 
-func makeHttpRequest(channel *evapisv1alpha1.Channel, message *string) (*http.Request, error) {
-	var jsonStr = []byte(*message)
+func makeHttpRequest(channel *evapisv1alpha1.Channel, headers *map[string]string, payload *string) (*http.Request, error) {
+	var jsonStr = []byte(*payload)
 
 	channelUri := "http://" + channel.Status.Address.Hostname
 	req, err := http.NewRequest(http.MethodPost, channelUri, bytes.NewBuffer(jsonStr))
@@ -297,6 +298,11 @@ func makeHttpRequest(channel *evapisv1alpha1.Channel, message *string) (*http.Re
 		return nil, err
 	}
 	req.Header.Set("Content-Type", "application/json")
+
+	for k, v := range *headers {
+		req.Header.Set(k, v)
+	}
+
 	return req, nil
 }
 

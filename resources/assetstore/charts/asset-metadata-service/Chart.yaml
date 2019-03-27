@@ -1,0 +1,3 @@
+name: asset-metadata-service
+description: HTTP service for file metadata operations
+version: 0.1.0
