@@ -30,7 +30,7 @@ The Application Gateway removes the following headers while making calls to the 
 
 - `X-Forwarded-Proto`
 - `X-Forwarded-For`
-- X-Forwarded-Host
+- `X-Forwarded-Host`
 - `X-Forwarded-Client-Cert`
 
 In addition, the header `User-Agent` is set to empty value if present.
