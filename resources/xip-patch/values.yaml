@@ -6,4 +6,4 @@ xip_patch:
 
 global:
   isLocalEnv: false
-  knative: false
+  knative: true

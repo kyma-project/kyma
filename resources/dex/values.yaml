@@ -18,7 +18,7 @@ dex:
 
 global:
   isLocalEnv: false
-  knative: false
+  knative: true
   gateway:
     name: kyma-gateway
   static_users_generator:

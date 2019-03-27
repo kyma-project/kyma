@@ -58,13 +58,7 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-MINIKUBE_EXTRA_ARGS=""
-
-if [ -n "$KNATIVE" ]; then
-
-    MINIKUBE_EXTRA_ARGS="${MINIKUBE_EXTRA_ARGS} --memory 10240 --disk-size 30g"
-
-fi
+MINIKUBE_EXTRA_ARGS="${MINIKUBE_EXTRA_ARGS} --memory 10240 --disk-size 30g"
 
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then
     bash ${SCRIPTS_DIR}/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}" ${MINIKUBE_EXTRA_ARGS}
@@ -80,5 +74,5 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" "${KNATIVE}" --password "${ADMIN_PASSWORD}"
+bash ${SCRIPTS_DIR}/installer.sh --local --cr "${CR_PATH}" --password "${ADMIN_PASSWORD}"
 rm -rf $TMPDIR

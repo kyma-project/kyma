@@ -54,7 +54,7 @@ global:
         user: "knative" 
         pass: ""
   isLocalEnv: false
-  knative: false
+  knative: true
 # Custom configuration files used to override default NATS and NATS Streaming settings
 # Note that store type, ports, debug and tracing have dedicated configuration options here in values.yaml
 # and cannot be overriden through the configuration files.
