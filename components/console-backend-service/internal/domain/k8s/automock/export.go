@@ -59,3 +59,11 @@ func NewGqlServiceConverter() *gqlServiceConverter {
 func NewServiceSvc() *serviceSvc {
 	return new(serviceSvc)
 }
+
+func NewGqlConfigMapConverter() *gqlConfigMapConverter {
+	return new(gqlConfigMapConverter)
+}
+
+func NewConfigMapSvc() *configMapSvc {
+	return new(configMapSvc)
+}
