@@ -17,7 +17,6 @@ spec:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
     spec:
-      serviceAccountName: {{ template "fullname" . }}
       strategy:
         type: RollingUpdate
         rollingUpdate:
