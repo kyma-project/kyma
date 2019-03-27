@@ -10,7 +10,7 @@ serviceAccount:
   name:
 
 loki:
-
+  nameOverride: loki
   replicas: 1
   minReadySeconds: 0
   terminationGracePeriodSeconds: 30
