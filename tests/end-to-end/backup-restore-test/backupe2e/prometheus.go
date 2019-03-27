@@ -275,7 +275,7 @@ func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 			if len(pod.Status.Conditions) > 0 {
 				conditions:=pod.Status.Conditions
 				for _,cond:= range conditions {
-					if cond.Type == corev1.PodReady {
+					if cond.Type == corev1.PodReady && cond.Status == "True"{
 						return nil
 					}
 				}
