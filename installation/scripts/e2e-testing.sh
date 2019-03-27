@@ -3,8 +3,8 @@ ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "${ROOT_PATH}/utils.sh"
 source "${ROOT_PATH}/testing-common.sh"
 
-if [ -z "${!DOMAIN}" ] ; then
-  echo "ERROR: $DOMAIN is not set"
+if [ -z "${DOMAIN}" ] ; then
+  echo "ERROR: DOMAIN is not set"
   exit 1
 fi
 
@@ -49,8 +49,8 @@ release=$(basename "$testcase")
 
 cleanupHelmE2ERelease "${release}"
 
-ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D)
-ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D)
+ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode)
+ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
 
 helm install "$testcase" --name "${release}" --namespace end-to-end --set global.ingress.domainName="${DOMAIN}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}")
 helm test "${release}" --timeout 10000
