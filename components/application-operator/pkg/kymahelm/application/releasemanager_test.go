@@ -2,8 +2,9 @@ package application
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm/application/mocks"
 
 	"github.com/stretchr/testify/mock"
 
@@ -24,6 +25,7 @@ const (
 	expectedOverridesFormat = `global:
     domainName: 
     applicationGatewayImage: 
+    applicationGatewayTestsImage: 
     eventServiceImage: 
     eventServiceTestsImage: 
     subjectCN: %s`
