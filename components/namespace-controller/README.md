@@ -2,7 +2,7 @@
 
 ## Overview
 
-This controller injects limit ranges and resource quotas into each Namespace that you create. In addtion it enables Istio injection for the Namespace by labelling it with `istio-injection` label.
+This controller injects limit ranges and resource quotas into each Namespace that you create. In addition, it enables Istio injection for the Namespace by labeling it with `istio-injection` label.
 
 Developers create default roles from a roles template that they first define in a Namespace inside the Kubernetes cluster.
 At the time of cluster provisioning, developers might define the roles in the `3-bootstrap-roles.yaml` file. The controller looks for roles labeled as `env=true` at the creation of the new Namespace. Next, the controller copies the roles to the new Namespace.
