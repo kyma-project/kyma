@@ -76,6 +76,9 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: {{ .Values.e2eTests.nameTester }}
+  labels:
+    release: {{ .Release.Name }}
+    component/event-bus: ""
 spec:
   template:
     metadata:

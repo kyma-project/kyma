@@ -32,6 +32,9 @@ apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
   name: {{ template "fullname" . }}
+  labels:
+    release: {{ .Release.Name }}
+    component/monitoring: ""
 spec:
   template:
     metadata:
