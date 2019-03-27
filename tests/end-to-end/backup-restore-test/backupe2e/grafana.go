@@ -407,9 +407,17 @@ func (t *grafanaTest) waitForPodGrafana(waitmax time.Duration) error {
 				return err
 			}
 
-			if pod.Status.Phase == corev1.PodRunning {
-				return nil
+			// If Pod condition is not ready the for will continue until timeout
+			if len(pod.Status.Conditions) > 0 {
+				conditions:=pod.Status.Conditions
+				for _,cond:= range conditions {
+					if cond.Type == corev1.PodReady {
+						return nil
+					}
+				}
 			}
+
+			// Succeeded or Failed or Unknoen are taken as a error
 			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
 				return fmt.Errorf("Grafana in state %v: \n%+v", pod.Status.Phase, pod)
 			}
