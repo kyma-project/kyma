@@ -273,9 +273,9 @@ func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 
 			// If Pod condition is not ready the for will continue until timeout
 			if len(pod.Status.Conditions) > 0 {
-				conditions:=pod.Status.Conditions
-				for _,cond:= range conditions {
-					if cond.Type == corev1.PodReady && cond.Status == "True"{
+				conditions := pod.Status.Conditions
+				for _, cond := range conditions {
+					if cond.Type == corev1.PodReady && cond.Status == corev1.ConditionTrue {
 						return nil
 					}
 				}
