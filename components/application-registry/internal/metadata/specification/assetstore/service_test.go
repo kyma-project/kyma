@@ -2,12 +2,14 @@ package assetstore
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
 	uploadMocks "github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload/mocks"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 	"net/http"
 	"net/http/httptest"
@@ -18,6 +20,8 @@ func TestAddingToAssetStore(t *testing.T) {
 	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
 	documentation := []byte("{\"description\": \"Some docs blah blah blah\"}}")
 	eventsSpec := []byte("{\"orderCreated\": \"Published when order is placed.\"}}")
+	odataXMLApiSpec := []byte("<ODataServiceDocument xmlns:i=\"http://www.w3.org/2001/XMLSchema-instance\"" +
+		"xmlns=\"http://schemas.datacontract.org/2004/07/Microsoft.OData.Core\"></ODataServiceDocument>")
 
 	t.Run("Should put all specifications to asset store", func(t *testing.T) {
 		// given
@@ -26,10 +30,12 @@ func TestAddingToAssetStore(t *testing.T) {
 		service := NewService(repositoryMock, uploadClientMock, false)
 
 		{
-			docsTopic := createTestDocsTopic("id1",
-				"www.somestorage.com/apiSpec.json",
-				"www.somestorage.com/asyncApiSpec.json",
-				"www.somestorage.com/content.json", docstopic.StatusNone)
+			urls := map[string]string{
+				docstopic.KeyOpenApiSpec:       "www.somestorage.com/apiSpec.json",
+				docstopic.KeyEventsSpec:        "www.somestorage.com/asyncApiSpec.json",
+				docstopic.KeyDocumentationSpec: "www.somestorage.com/content.json",
+			}
+			docsTopic := createTestDocsTopic("id1", urls, docstopic.StatusNone)
 
 			repositoryMock.On("Upsert", docsTopic).Return(nil)
 		}
@@ -55,19 +61,129 @@ func TestAddingToAssetStore(t *testing.T) {
 	})
 
 	t.Run("Should detect OData XML specification", func(t *testing.T) {
+		// given
+		repositoryMock := &mocks.DocsTopicRepository{}
+		uploadClientMock := &uploadMocks.Client{}
+		service := NewService(repositoryMock, uploadClientMock, false)
 
+		{
+			urls := map[string]string{
+				docstopic.KeyODataXMLSpec:      "www.somestorage.com/odata.xml",
+				docstopic.KeyEventsSpec:        "www.somestorage.com/asyncApiSpec.json",
+				docstopic.KeyDocumentationSpec: "www.somestorage.com/content.json",
+			}
+			docsTopic := createTestDocsTopic("id1", urls, docstopic.StatusNone)
+
+			repositoryMock.On("Upsert", docsTopic).Return(nil)
+		}
+
+		{
+			uploadClientMock.On("Upload", odataXMLSpecFileName, odataXMLApiSpec).
+				Return(createTestOutputFile(odataXMLSpecFileName, "www.somestorage.com"), nil)
+
+			uploadClientMock.On("Upload", eventsSpecFileName, eventsSpec).
+				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
+
+			uploadClientMock.On("Upload", documentationFileName, documentation).
+				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
+		}
+
+		// when
+		err := service.Put("id1", docstopic.ODataApiType, documentation, odataXMLApiSpec, eventsSpec)
+
+		// then
+		require.NoError(t, err)
+		repositoryMock.AssertExpectations(t)
+		uploadClientMock.AssertExpectations(t)
 	})
 
 	t.Run("Should detect OData JSON specification", func(t *testing.T) {
+		// given
+		repositoryMock := &mocks.DocsTopicRepository{}
+		uploadClientMock := &uploadMocks.Client{}
+		service := NewService(repositoryMock, uploadClientMock, false)
 
+		{
+			urls := map[string]string{
+				docstopic.KeyODataJSONSpec:     "www.somestorage.com/odata.xml",
+				docstopic.KeyEventsSpec:        "www.somestorage.com/asyncApiSpec.json",
+				docstopic.KeyDocumentationSpec: "www.somestorage.com/content.json",
+			}
+			docsTopic := createTestDocsTopic("id1", urls, docstopic.StatusNone)
+
+			repositoryMock.On("Upsert", docsTopic).Return(nil)
+		}
+
+		{
+			uploadClientMock.On("Upload", odataJSONSpecFileName, jsonApiSpec).
+				Return(createTestOutputFile(odataXMLSpecFileName, "www.somestorage.com"), nil)
+
+			uploadClientMock.On("Upload", eventsSpecFileName, eventsSpec).
+				Return(createTestOutputFile(eventsSpecFileName, "www.somestorage.com"), nil)
+
+			uploadClientMock.On("Upload", documentationFileName, documentation).
+				Return(createTestOutputFile(documentationFileName, "www.somestorage.com"), nil)
+		}
+
+		// when
+		err := service.Put("id1", docstopic.ODataApiType, documentation, jsonApiSpec, eventsSpec)
+
+		// then
+		require.NoError(t, err)
+		repositoryMock.AssertExpectations(t)
+		uploadClientMock.AssertExpectations(t)
 	})
 
 	t.Run("Should fail when failed to upload file", func(t *testing.T) {
+		// given
+		repositoryMock := &mocks.DocsTopicRepository{}
+		uploadClientMock := &uploadMocks.Client{}
+		service := NewService(repositoryMock, uploadClientMock, false)
 
+		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
+			Return(upload.UploadedFile{}, apperrors.Internal("some error"))
+
+		// when
+		err := service.Put("id1", docstopic.OpenApiType, documentation, jsonApiSpec, eventsSpec)
+
+		// then
+		require.Error(t, err)
+		repositoryMock.AssertNotCalled(t, "Upsert")
+		uploadClientMock.AssertExpectations(t)
 	})
 
 	t.Run("Should fail when failed to create DocsTopic CR", func(t *testing.T) {
+		// given
+		repositoryMock := &mocks.DocsTopicRepository{}
+		uploadClientMock := &uploadMocks.Client{}
+		service := NewService(repositoryMock, uploadClientMock, false)
 
+		repositoryMock.On("Upsert", mock.Anything).Return(apperrors.Internal("some error"))
+		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
+			Return(createTestOutputFile(openApiSpecFileName, "www.somestorage.com"), nil)
+
+		// when
+		err := service.Put("id1", docstopic.OpenApiType, nil, jsonApiSpec, nil)
+
+		// then
+		require.Error(t, err)
+		repositoryMock.AssertExpectations(t)
+		uploadClientMock.AssertExpectations(t)
+	})
+
+	t.Run("Should not create DocsTopic if specs are not provided", func(t *testing.T) {
+		// given
+		repositoryMock := &mocks.DocsTopicRepository{}
+		uploadClientMock := &uploadMocks.Client{}
+		service := NewService(repositoryMock, uploadClientMock, false)
+
+		// when
+		err := service.Put("id1", "", []byte(nil), []byte(nil), []byte(nil))
+
+		// then
+		assert.NoError(t, err)
+		uploadClientMock.AssertNotCalled(t, "Upload")
+		repositoryMock.AssertNotCalled(t, "Upsert")
 	})
 }
 
@@ -79,8 +195,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 	t.Run("Should get specifications from asset store", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
-		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
+		service := NewService(repositoryMock, nil, false)
 
 		apiTestServer := createTestServer(t, jsonApiSpec)
 		defer apiTestServer.Close()
@@ -92,8 +207,14 @@ func TestGettingFromAssetStore(t *testing.T) {
 		defer documentationServer.Close()
 
 		{
+			urls := map[string]string{
+				docstopic.KeyOpenApiSpec:       apiTestServer.URL,
+				docstopic.KeyEventsSpec:        eventTestServer.URL,
+				docstopic.KeyDocumentationSpec: documentationServer.URL,
+			}
+
 			repositoryMock.On("Get", "id1").
-				Return(createTestDocsTopic("id1", apiTestServer.URL, eventTestServer.URL, documentationServer.URL, docstopic.StatusReady), nil)
+				Return(createTestDocsTopic("id1", urls, docstopic.StatusReady), nil)
 		}
 
 		// then
@@ -106,67 +227,73 @@ func TestGettingFromAssetStore(t *testing.T) {
 		assert.Equal(t, documentation, docs)
 
 		repositoryMock.AssertExpectations(t)
-		uploadClientMock.AssertExpectations(t)
 	})
 
-	t.Run("Should not fail when DocsTopic status is failed", func(t *testing.T) {
+	t.Run("Should fail when failed to read DocsTopic CR", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
-		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
+		service := NewService(repositoryMock, nil, false)
 
-		{
-			repositoryMock.On("Get", "id1").Return(createTestDocsTopic("id1", "", "", "", docstopic.StatusFailed), nil)
-		}
+		repositoryMock.On("Get", "id1").
+			Return(docstopic.Entry{}, apperrors.Internal("some error"))
 
 		// then
 		docs, api, events, err := service.Get("id1")
 
 		// then
-		require.NoError(t, err)
-		assert.Nil(t, api)
-		assert.Nil(t, events)
-		assert.Nil(t, docs)
-
-		repositoryMock.AssertExpectations(t)
-	})
-
-	t.Run("Should not fail when DocsTopic status is pending", func(t *testing.T) {
-		// given
-		repositoryMock := &mocks.DocsTopicRepository{}
-		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
-
-		{
-			repositoryMock.On("Get", "id1").Return(createTestDocsTopic("id1", "", "", "", docstopic.StatusPending), nil)
-		}
-
-		// then
-		docs, api, events, err := service.Get("id1")
-
-		// then
-		require.NoError(t, err)
-		assert.Nil(t, api)
-		assert.Nil(t, events)
-		assert.Nil(t, docs)
+		require.Error(t, err)
+		assert.Equal(t, []byte(nil), api)
+		assert.Equal(t, []byte(nil), events)
+		assert.Equal(t, []byte(nil), docs)
 
 		repositoryMock.AssertExpectations(t)
 	})
 }
 
-func createTestDocsTopic(id string, apiSpecUrl string, eventsSpecUrl string, documentationUrl string, status docstopic.StatusType) docstopic.Entry {
+func TestGettingFromAssetStoreIfStatusIsNotReady(t *testing.T) {
+	statuses := []struct {
+		description string
+		status      docstopic.StatusType
+	}{
+		{"Should return nil specs if DocsTopic status is empty", docstopic.StatusNone},
+		{"Should return nil specs if DocsTopic status is Failed", docstopic.StatusFailed},
+		{"Should return nil specs if DocsTopic status is Pending", docstopic.StatusPending},
+	}
+
+	for _, testData := range statuses {
+		t.Run(testData.description, func(t *testing.T) {
+			// given
+			repositoryMock := &mocks.DocsTopicRepository{}
+			uploadClientMock := &uploadMocks.Client{}
+			service := NewService(repositoryMock, uploadClientMock, false)
+
+			{
+				repositoryMock.On("Get", "id1").Return(createTestDocsTopic("id1", nil, testData.status), nil)
+			}
+
+			// then
+			docs, api, events, err := service.Get("id1")
+
+			// then
+			require.NoError(t, err)
+			assert.Nil(t, api)
+			assert.Nil(t, events)
+			assert.Nil(t, docs)
+
+			repositoryMock.AssertExpectations(t)
+		})
+	}
+}
+
+func createTestDocsTopic(id string, urls map[string]string, status docstopic.StatusType) docstopic.Entry {
 
 	return docstopic.Entry{
 		Id:          id,
 		DisplayName: fmt.Sprintf(DocTopicDisplayNameFormat, id),
 		Description: fmt.Sprintf(DocTopicDescriptionFormat, id),
-		Urls: map[string]string{
-			docstopic.KeyOpenApiSpec:       apiSpecUrl,
-			docstopic.KeyEventsSpec:        eventsSpecUrl,
-			docstopic.KeyDocumentationSpec: documentationUrl,
-		},
-		Labels: map[string]string{DocsTopicLabelKey: DocsTopicLabelValue},
-		Status: status,
+		Urls:        urls,
+		Labels:      map[string]string{DocsTopicLabelKey: DocsTopicLabelValue},
+		Status:      status,
 	}
 }
 

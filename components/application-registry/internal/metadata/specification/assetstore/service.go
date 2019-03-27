@@ -4,11 +4,11 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
-	"github.com/kyma-project/kyma/components/application-registry/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/upload"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -60,6 +60,10 @@ type ContentEntry struct {
 }
 
 func (s service) Put(id string, apiType docstopic.ApiType, documentation []byte, apiSpec []byte, eventsSpec []byte) apperrors.AppError {
+
+	if documentation == nil && apiSpec == nil && eventsSpec == nil {
+		return nil
+	}
 
 	docsTopic, err := s.createDocumentationTopic(id, apiType, documentation, apiSpec, eventsSpec)
 	if err != nil {
@@ -133,16 +137,32 @@ func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, 
 
 func getApiSpecFileNameAndKey(content []byte, apiType docstopic.ApiType) (fileName, key string) {
 	if apiType == docstopic.ODataApiType {
-		mimeType := http.DetectContentType(content)
-		if mimeType == httpconsts.ContentTypeXML {
+		if isXML(content) {
 			return odataXMLSpecFileName, docstopic.KeyODataXMLSpec
 		} else {
 			return odataJSONSpecFileName, docstopic.KeyODataJSONSpec
 		}
-
 	} else {
 		return openApiSpecFileName, docstopic.KeyOpenApiSpec
 	}
+}
+
+func isXML(content []byte) bool {
+	const snippetLength = 512
+
+	length := len(content)
+	var snippet string
+
+	if length < snippetLength {
+		snippet = string(content)
+	} else {
+		snippet = string(content[:snippetLength])
+	}
+
+	openingIndex := strings.Index(snippet, "<")
+	closingIndex := strings.Index(snippet, ">")
+
+	return openingIndex != -1 && openingIndex < closingIndex
 }
 
 func (s service) processSpec(content []byte, filename, fileKey string, docsTopicEntry *docstopic.Entry) apperrors.AppError {
