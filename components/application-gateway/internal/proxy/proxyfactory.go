@@ -42,6 +42,7 @@ func makeProxy(targetUrl string, id string, skipVerify bool) (*httputil.ReverseP
 		removeHeader(req.Header, httpconsts.HeaderXForwardedProto)
 		removeHeader(req.Header, httpconsts.HeaderXForwardedFor)
 		removeHeader(req.Header, httpconsts.HeaderXForwardedHost)
+		removeHeader(req.Header, httpconsts.HeaderXForwardedClientCert)
 
 		log.Infof("Modified request url : '%s', schema : '%s', path : '%s'", req.URL.String(), req.URL.Scheme, req.URL.Path)
 	}
