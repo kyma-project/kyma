@@ -26,10 +26,11 @@ function require_istio_system() {
     kubectl get namespace istio-system >/dev/null
 }
 
-function require_mtls_disabled() {
-    local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers[0].mtls.mode}' --ignore-not-found=true )
-    if [[ ${mTLS} != "PERMISSIVE" ]]; then
-        echo "mTLS must be disabled"
+function require_mtls_enabled() {
+    # TODO: rethink how that should be done
+    local mTLS=$(kubectl get meshpolicy default -o jsonpath='{.spec.peers[0].mtls.mode}')
+    if [[ "${mTLS}" != "STRICT" ]] && [[ "${mTLS}" != "" ]]; then
+        echo "mTLS must be \"STRICT\""
         exit 1
     fi
 }
@@ -134,7 +135,7 @@ function check_requirements() {
 
 require_istio_system
 require_istio_version
-require_mtls_disabled
+require_mtls_enabled
 check_requirements
 configure_sidecar_injector
 restart_sidecar_injector
