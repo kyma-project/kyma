@@ -194,8 +194,8 @@ func (d deploymentTest) waitForPodDeployment(namespace string, replicas int32, w
 			if err != nil {
 				return err
 			}
-			if deployment.Status.AvailableReplicas != replicas {
-				return fmt.Errorf("Number of pods %v different from available replicas %v", len(pods.Items), replicas)
+			if deployment.Status.ReadyReplicas != replicas {
+				break
 			}
 			return nil
 		}
