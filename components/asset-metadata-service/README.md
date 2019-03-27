@@ -48,7 +48,7 @@ The variables are:
 
 ### Extract metadata from files
 
-For the full API documentation, including OpenAPI specification, see the [Asset Store docs](../../docs/asset-store/docs/03-04-asset-metadata-service.md).
+For the full API documentation, including OpenAPI specification, see the [Asset Store docs](https://kyma-project.io/docs/master/components/asset-store#details-asset-metadata-service).
 
 ### Environment variables
 

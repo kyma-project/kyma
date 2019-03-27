@@ -43,7 +43,7 @@ To extract metadata from files, send the multipart form **POST** request to the 
 To do the multipart request using `curl`, run the following command:
 
 ```bash
-curl -v -F directory='example' -F foo/foo.md=@foo.md -F bar/bar.yaml=@bar.yaml -F public=@archive.zip http://localhost:3000/v1/extract
+curl -v -F foo/foo.md=@foo.md -F bar/bar.yaml=@bar.yaml http://localhost:3000/v1/extract
 ```
 
 The result is as follows:
