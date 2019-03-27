@@ -20,13 +20,13 @@ spec:
       - "dex.{{ .Values.global.ingress.domainName }}"
       - "docs.{{ .Values.global.ingress.domainName }}"
       - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
-      - "ui-api.{{ .Values.global.ingress.domainName }}"
+      - "console-backend.{{ .Values.global.ingress.domainName }}"
       - "minio.{{ .Values.global.ingress.domainName }}"
   {{ end }}
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:41eca821
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:da775d93
       imagePullPolicy: IfNotPresent
       resources:
          requests:

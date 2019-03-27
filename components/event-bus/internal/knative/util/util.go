@@ -26,8 +26,8 @@ func GetChannelName(sourceID, eventType, eventTypeVersion *string) string {
 	return fmt.Sprintf("%s-%s-%s", escapeHyphensAndPeriods(sourceID), escapeHyphensAndPeriods(eventType), escapeHyphensAndPeriods(eventTypeVersion))
 }
 
-// GetSubscriptionName joins the kySubscriptionName and kySubscriptionNamespace
-func GetSubscriptionName(kySubscriptionName, kySubscriptionNamespace *string) string {
+// GetKnSubscriptionName joins the kySubscriptionName and kySubscriptionNamespace
+func GetKnSubscriptionName(kySubscriptionName, kySubscriptionNamespace *string) string {
 	return fmt.Sprintf("%s-%s", *kySubscriptionName, escapeHyphensAndPeriods(kySubscriptionNamespace))
 }
 

@@ -60,22 +60,30 @@ type API struct {
 type Credentials struct {
 	Oauth          *Oauth          `json:"oauth,omitempty"`
 	Basic          *Basic          `json:"basic,omitempty"`
-	CertificateGen *CertificateGen `json:"certificateGen, omitempty"`
+	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
+}
+
+type CSRFInfo struct {
+	TokenEndpointURL string `json:"tokenEndpointURL"`
 }
 
 type Oauth struct {
-	URL          string `json:"url"`
-	ClientID     string `json:"clientId"`
-	ClientSecret string `json:"clientSecret"`
+	URL          string    `json:"url"`
+	ClientID     string    `json:"clientId"`
+	ClientSecret string    `json:"clientSecret"`
+	CSRFInfo     *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type Basic struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
+	Username string    `json:"username"`
+	Password string    `json:"password"`
+	CSRFInfo *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type CertificateGen struct {
-	CommonName string `json:"commonName"`
+	CommonName  string    `json:"commonName"`
+	Certificate string    `json:"certificate"`
+	CSRFInfo    *CSRFInfo `json:"csrfInfo,omitempty"`
 }
 
 type Events struct {

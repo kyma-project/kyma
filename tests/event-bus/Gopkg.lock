@@ -2,10 +2,22 @@
 
 
 [[projects]]
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   name = "github.com/ghodss/yaml"
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/gofrs/uuid"
+  packages = ["."]
+  revision = "6b08a5c5172ba18946672b49749cde22873dd7c2"
+  version = "v3.2.0"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -13,8 +25,8 @@
     "proto",
     "sortkeys"
   ]
-  revision = "636bf0302bc95575d69441b25a2603156ffdddf1"
-  version = "v1.1.1"
+  revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
+  version = "v1.2.1"
 
 [[projects]]
   branch = "master"
@@ -40,8 +52,8 @@
     "ptypes/duration",
     "ptypes/timestamp"
   ]
-  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
-  version = "v1.2.0"
+  revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
+  version = "v1.3.1"
 
 [[projects]]
   branch = "master"
@@ -62,8 +74,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
-  version = "v1.1.5"
+  revision = "0ff49de124c6f76f8494e194af75bde0f1a49a29"
+  version = "v1.1.6"
 
 [[projects]]
   branch = "master"
@@ -82,7 +94,7 @@
     "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1",
     "components/event-bus/test/util"
   ]
-  revision = "488696a02facc05f4b90dfc902983d9b543d2cd2"
+  revision = "20e4eaf3bccf585c00984cbd965e480ba6b89444"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -97,10 +109,10 @@
   version = "1.0.1"
 
 [[projects]]
-  name = "github.com/satori/go.uuid"
-  packages = ["."]
-  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
-  version = "v1.2.0"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -109,10 +121,16 @@
   version = "v1.0.3"
 
 [[projects]]
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
+
+[[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "3d3f9f413869b949e48070b5bc593aa22cc2b8f2"
+  revision = "b7391e95e576cacdcdd422573063bc057239113d"
 
 [[projects]]
   branch = "master"
@@ -123,7 +141,7 @@
     "http2/hpack",
     "idna"
   ]
-  revision = "88d92db4c548972d942ac2a3531a8a9a34c82ca6"
+  revision = "1272bf9dcd53ea65c09668fb4c76e65deb740072"
 
 [[projects]]
   branch = "master"
@@ -132,7 +150,7 @@
     "unix",
     "windows"
   ]
-  revision = "66b7b1311ac80bbafcd2daeef9a5e6e2cd1e2399"
+  revision = "f7bb7a8bee54210937e93ec56d007d892c1f0580"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -159,7 +177,7 @@
   branch = "master"
   name = "golang.org/x/time"
   packages = ["rate"]
-  revision = "85acf8d2951cb2a3bde7632f9ff273ef0379bcbd"
+  revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
 
 [[projects]]
   branch = "master"
@@ -168,13 +186,18 @@
     "cmd/goimports",
     "go/ast/astutil",
     "go/gcexportdata",
+    "go/internal/cgo",
     "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
     "go/types/typeutil",
     "imports",
     "internal/fastwalk",
-    "internal/gopathwalk"
+    "internal/gopathwalk",
+    "internal/module",
+    "internal/semver"
   ]
-  revision = "3576414c54a492fc48cd913814eb209914c717f0"
+  revision = "36c10c0a621fb2fede4686e8ae7bb1d900735d53"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -185,11 +208,11 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [[projects]]
-  branch = "master"
+  branch = "release-1.10"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -221,7 +244,7 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "a33c8200050fc0751848276811abf3fc029b3133"
+  revision = "c89978d5f86d7427bef2fc7752732c8c60b1d188"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -319,6 +342,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c5bc73d723e14730958d33d1c11d45f6bbd6d1add1744c2d997c3613641e5ad7"
+  inputs-digest = "73f6c1dcfe795b192eecd156051cef34b088d09e3a80eb01945b5bd7f28a54d4"
   solver-name = "gps-cdcl"
   solver-version = 1

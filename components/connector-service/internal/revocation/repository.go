@@ -18,19 +18,19 @@ type RevocationListRepository interface {
 
 type revocationListRepository struct {
 	configListManager Manager
-	configMapName string
+	configMapName     string
 }
 
 func NewRepository(configListManager Manager, configMapName string) RevocationListRepository {
 	return &revocationListRepository{
 		configListManager: configListManager,
-		configMapName: configMapName,
+		configMapName:     configMapName,
 	}
 }
 
 func (r *revocationListRepository) Insert(hash string) error {
 	configMap, err := r.configListManager.Get(r.configMapName, metav1.GetOptions{})
-	if err != nil{
+	if err != nil {
 		return err
 	}
 
@@ -44,7 +44,7 @@ func (r *revocationListRepository) Insert(hash string) error {
 	updatedConfigMap.Data = revokedCerts
 
 	err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		_, err  = r.configListManager.Update(updatedConfigMap)
+		_, err = r.configListManager.Update(updatedConfigMap)
 		return err
 	})
 
@@ -53,7 +53,7 @@ func (r *revocationListRepository) Insert(hash string) error {
 
 func (r *revocationListRepository) Contains(hash string) (bool, error) {
 	configMap, err := r.configListManager.Get(r.configMapName, metav1.GetOptions{})
-	if err != nil{
+	if err != nil {
 		return false, err
 	}
 

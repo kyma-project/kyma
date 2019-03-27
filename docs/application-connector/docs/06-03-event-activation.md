@@ -51,5 +51,5 @@ These components use this CR:
 |:----------:|:------|
 | Application Broker |  Uses this CR to enable the user to receive Events from a given service. |
 | Event Bus | Uses this CR to control the consumption of an Event.  |
-| Serverless | Lambda UI sends a GraphQL query to UI API Layer to list EventActivations. |
-| UI API Layer |  Exposes the given CR to the Console UI. |
+| Serverless | Lambda UI sends a GraphQL query to Console Backend Service to list EventActivations. |
+| Console Backend Service |  Exposes the given CR to the Console UI. |

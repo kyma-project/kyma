@@ -1,0 +1,3 @@
+dependencies:
+  - name: knative-serving
+    condition: global.knative
