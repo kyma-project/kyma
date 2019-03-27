@@ -110,15 +110,3 @@ metadata:
     kyma-project.io/installation: ""
 data:
   test.acceptance.ui.minikubeIP: ""
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: connector-service-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    kyma-project.io/installation: ""
-data:
-  connector_service.enabled: "false"
-  connectivity_certs_controller.enabled: "true"
