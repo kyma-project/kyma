@@ -1,4 +1,4 @@
-package backupe2e
+package function
 
 import (
 	"bytes"
@@ -14,36 +14,36 @@ import (
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
-	. "github.com/smartystreets/goconvey/convey"
-
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	"github.com/sirupsen/logrus"
+	"strings"
 )
 
-type functionTest struct {
+type FunctionUpgradeTest struct {
 	functionName, uuid string
 	kubelessClient     *kubeless.Clientset
 	coreClient         *kubernetes.Clientset
 }
 
-func NewFunctionTest() (functionTest, error) {
-
+func NewFunctionUpgradeTest() (*FunctionUpgradeTest, error) {
 	kubeconfig := os.Getenv("KUBECONFIG")
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		return functionTest{}, err
-	}
-
-	kubelessClient, err := kubeless.NewForConfig(config)
-	if err != nil {
-		return functionTest{}, err
+		return &FunctionUpgradeTest{}, err
 	}
 
 	coreClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return functionTest{}, err
+		return &FunctionUpgradeTest{}, err
 	}
-	return functionTest{
+
+	kubelessClient, err := kubeless.NewForConfig(config)
+	if err != nil {
+		return &FunctionUpgradeTest{}, err
+	}
+
+	return &FunctionUpgradeTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
 		functionName:   "hello",
@@ -51,22 +51,36 @@ func NewFunctionTest() (functionTest, error) {
 	}, nil
 }
 
-func (f functionTest) CreateResources(namespace string) {
+func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	log.Println("FunctionUpgradeTest creating resources")
 	_, err := f.createFunction(namespace)
-	So(err, ShouldBeNil)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
-func (f functionTest) TestResources(namespace string) {
+func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+	log.Println("FunctionUpgradeTest testing resources")
 	err := f.getFunctionPodStatus(namespace, 2*time.Minute)
-	So(err, ShouldBeNil)
+	if err != nil {
+		return err
+	}
 
 	host := fmt.Sprintf("http://%s.%s:8080", f.functionName, namespace)
 	value, err := f.getFunctionOutput(host, 2*time.Minute)
-	So(err, ShouldBeNil)
-	So(value, ShouldContainSubstring, f.uuid)
+	if err != nil {
+		return err
+	}
+
+	if !strings.Contains(value, f.uuid) {
+		return fmt.Errorf("Could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
+	}
+
+	return nil
 }
 
-func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (string, error) {
+func (f *FunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Duration) (string, error) {
 
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
@@ -96,7 +110,7 @@ func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (st
 
 }
 
-func (f functionTest) createFunction(namespace string) (*kubelessV1.Function, error) {
+func (f *FunctionUpgradeTest) createFunction(namespace string) (*kubelessV1.Function, error) {
 	function := &kubelessV1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: f.functionName,
@@ -114,7 +128,7 @@ func (f functionTest) createFunction(namespace string) (*kubelessV1.Function, er
 	return f.kubelessClient.KubelessV1beta1().Functions(namespace).Create(function)
 }
 
-func (f functionTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
+func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
 	timeout := time.After(waitmax)
 	tick := time.Tick(2 * time.Second)
 	for {
@@ -147,8 +161,4 @@ func (f functionTest) getFunctionPodStatus(namespace string, waitmax time.Durati
 			}
 		}
 	}
-}
-
-func (f functionTest) DeleteResources() {
-	// There is not need to be implemented for this test.
 }
