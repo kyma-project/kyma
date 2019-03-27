@@ -147,10 +147,9 @@ func TestGetDocsTopic(t *testing.T) {
 		// given
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewDocsTopicRepository(resourceInterfaceMock)
-		{
-			resourceInterfaceMock.On("Get", mock.Anything, metav1.GetOptions{}).
-				Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
-		}
+
+		resourceInterfaceMock.On("Get", mock.Anything, metav1.GetOptions{}).
+			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
 		// when
 		_, err := repository.Get("id1")
