@@ -15,7 +15,7 @@ spec:
       restartPolicy: OnFailure
       containers:
       - name: istio-kyma-patch
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.istio_kyma_patch.dir }}istio-kyma-patch:{{ .Values.global.istio_kyma_patch.version }}
+        image: kubagoryl/istio-kyma-patch:mtls2
         volumeMounts:
         - name: config-volume
           mountPath: /etc/config
