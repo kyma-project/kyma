@@ -33,4 +33,4 @@ The Application Gateway removes the following headers while making calls to the 
 - `X-Forwarded-Host`
 - `X-Forwarded-Client-Cert`
 
-In addition, the header `User-Agent` is set to empty value if present.
+In addition, the header `User-Agent` is set to empty value if it is not given in the call. It will prevent setting it to the default value.
