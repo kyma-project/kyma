@@ -10,11 +10,13 @@ import (
 	"io/ioutil"
 	"mime/multipart"
 	"net/http"
+	"time"
 )
 
 const (
-	PublicFileField = "public"
-	EndpointFormat  = "%s/v1/upload"
+	PublicFileField      = "public"
+	EndpointFormat       = "%s/v1/upload"
+	uploadRequestTimeout = time.Duration(5 * time.Second)
 )
 
 type Response struct {
@@ -46,7 +48,9 @@ type uploadClient struct {
 func NewClient(uploadServiceUrl string) Client {
 	return uploadClient{
 		uploadServiceUrl: uploadServiceUrl,
-		httpClient:       http.Client{},
+		httpClient: http.Client{
+			Timeout: uploadRequestTimeout,
+		},
 	}
 }
 
