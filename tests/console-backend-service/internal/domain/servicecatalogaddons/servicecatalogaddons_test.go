@@ -36,7 +36,9 @@ func TestMain(m *testing.M) {
 	code := m.Run()
 
 	cleanupErr := scInstaller.Cleanup()
-	log.Printf("Error while cleanup for %s: %s", ModuleName, cleanupErr.Error())
+	if cleanupErr != nil {
+		log.Printf("Error while cleanup for %s: %s", ModuleName, cleanupErr.Error())
+	}
 	os.Exit(code)
 }
 

@@ -48,43 +48,43 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	expectedResourceFromServiceClass := instanceFromServiceClass("test-instance")
 	resourceDetailsQuery := instanceDetailsFields()
 
-	t.Log(fmt.Sprintf("Subscribe instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Subscribe instance created by %s", ClusterServiceBrokerKind))
 	subscription := subscribeInstance(c, instanceEventDetailsFields(), expectedResourceFromClusterServiceClass.Namespace)
 	defer subscription.Close()
 
-	t.Log(fmt.Sprintf("Create instance from %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Create instance from %s", ClusterServiceBrokerKind))
 	createRes, err := createInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass, true)
 
 	require.NoError(t, err)
 	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, createRes.CreateServiceInstance)
 
-	t.Log(fmt.Sprintf("Check subscription event of instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Check subscription event of instance created by %s", ClusterServiceBrokerKind))
 	expectedEvent := instanceEvent("ADD", expectedResourceFromClusterServiceClass)
 	event, err := readInstanceEvent(subscription)
 	assert.NoError(t, err)
 	checkInstanceEvent(t, expectedEvent, event)
 
-	t.Log(("Wait for instance Ready created by %s"), tester.ClusterServiceBroker)
+	t.Log(("Wait for instance Ready created by %s"), ClusterServiceBrokerKind)
 	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Create instance from %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Create instance from %s", ServiceBrokerKind))
 	createRes, err = createInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass, false)
 
 	require.NoError(t, err)
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, createRes.CreateServiceInstance)
 
-	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", ClusterServiceBrokerKind))
 	res, err := querySingleInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass)
 
 	assert.NoError(t, err)
 	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, res.ServiceInstance)
 
-	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", ServiceBrokerKind))
 	res, err = querySingleInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass)
 
 	assert.NoError(t, err)
@@ -98,11 +98,11 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	assertInstanceFromServiceClassExistsAndEqual(t, expectedResourceFromServiceClass, multipleRes.ServiceInstances)
 
 	// We must again wait for RUNNING status of created instances, because sometimes Kubernetess change status from RUNNING to PROVISIONING at the first queries - Query Single Resource
-	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ClusterServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
@@ -113,23 +113,23 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	assertInstanceFromClusterServiceClassExistsAndEqual(t, expectedResourceFromClusterServiceClass, multipleResWithStatus.ServiceInstances)
 	assertInstanceFromServiceClassExistsAndEqual(t, expectedResourceFromServiceClass, multipleRes.ServiceInstances)
 
-	t.Log(fmt.Sprintf("Delete instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Delete instance created by %s", ClusterServiceBrokerKind))
 	deleteRes, err := deleteInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass)
 
 	assert.NoError(t, err)
 	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, deleteRes.DeleteServiceInstance)
 
-	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", ClusterServiceBrokerKind))
 	err = wait.ForServiceInstanceDeletion(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Delete instance created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Delete instance created by %s", ServiceBrokerKind))
 	deleteRes, err = deleteInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass)
 
 	assert.NoError(t, err)
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, deleteRes.DeleteServiceInstance)
 
-	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 }

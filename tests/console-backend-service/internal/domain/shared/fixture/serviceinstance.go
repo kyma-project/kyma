@@ -10,18 +10,16 @@ func ServiceInstance(name string, namespace string) shared.ServiceInstance {
 		Namespace: namespace,
 		Labels:    []string{"test", "test2"},
 		PlanSpec: map[string]interface{}{
-			"first": "1",
-			"second": map[string]interface{}{
-				"value": "2",
-			},
+			"planName": "test",
+			"additionalData": "foo",
 		},
 		ClusterServicePlan: shared.ClusterServicePlan{
-			Name:         "86064792-7ea2-467b-af93-ac9694d96d52",
-			ExternalName: "default",
+			Name:         "a6078799-70a1-4674-af91-aba44dd6a56",
+			ExternalName: "full",
 		},
 		ClusterServiceClass: shared.ClusterServiceClass{
-			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-			ExternalName: "user-provided-service",
+			Name:         "faebbe18-0a84-11e9-ab14-d663bd873d94",
+			ExternalName: "testing",
 		},
 		Status: shared.ServiceInstanceStatus{
 			Type: shared.ServiceInstanceStatusTypeRunning,

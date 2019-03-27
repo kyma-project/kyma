@@ -8,11 +8,10 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/pkg/errors"
-	"testing"
 	"log"
+	"testing"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -121,7 +120,7 @@ func checkBroker(t *testing.T, expected, actual ServiceBroker) {
 	assert.Equal(t, expected.Name, actual.Name)
 
 	// Url
-	assert.Contains(t, actual.Url, expected.Name)
+	assert.Contains(t, actual.Url, expected.Url)
 
 	// Namespace
 	assert.Equal(t, expected.Namespace, actual.Namespace)
@@ -140,6 +139,12 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedEleme
 	}, "Resource does not exist")
 }
 
+type testServiceBroker struct {
+	name      string
+	namespace string
+	svcatCli  *clientset.Clientset
+}
+
 func newTestServiceBroker(name string, namespace string, svcatCli *clientset.Clientset) *testServiceBroker {
 	return &testServiceBroker{name: name, namespace: namespace, svcatCli: svcatCli}
 }
@@ -152,7 +157,7 @@ func (t *testServiceBroker) Create() error {
 		},
 		Spec: v1beta1.ServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: "example.com",
+				URL: CommonBrokerURL,
 			},
 		},
 	}
@@ -167,7 +172,8 @@ func (t *testServiceBroker) Delete() error {
 
 func broker() ServiceBroker {
 	return ServiceBroker{
-		Name:      tester.BrokerReleaseName,
+		Name:      BrokerReleaseName,
 		Namespace: TestNamespace,
+		Url: CommonBrokerURL,
 	}
 }
