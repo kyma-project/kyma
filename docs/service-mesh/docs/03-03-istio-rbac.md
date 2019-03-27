@@ -7,9 +7,9 @@ As a core component, Istio is installed with Kyma by default. As a part of this 
 
 The default configuration file can be found [here](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/istio-rbac/templates/rbac-config.yaml)
 
-> **NOTE:** As of Istio 1.1 the previous implementation (RbacConfig) has been deprecated in favor of ClusterRbacConfig. More information can be found in the Istio upgrade [documentation](https://istio.io/docs/setup/kubernetes/upgrade/steps/#migrating-from-rbacconfig-to-clusterrbacconfig)
+> **NOTE:** As of Istio 1.1 the previous implementation (`RbacConfig`) has been deprecated in favor of `ClusterRbacConfig`. More information can be found in the Istio upgrade [documentation](https://istio.io/docs/setup/kubernetes/upgrade/steps/#migrating-from-rbacconfig-to-clusterrbacconfig)
 
-> **NOTE:** The ClusterRBACConfig object is a singleton, meaning there can be only one configuration file, and only the name `default` is valid. 
+> **NOTE:** The `ClusterRBACConfig` object is a singleton, meaning there can be only one configuration file, and only the name `default` is valid. 
 
 ## Overriding the default configuration
 Because the object is a singleton, any customization of the RBACConig needs to be made in the `default` configuration file. 
