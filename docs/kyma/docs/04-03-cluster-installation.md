@@ -9,7 +9,7 @@ Follow these installation guides to install Kyma on a cluster depending on the s
 <div tabs>
   <details>
   <summary>
-  Install Kyma on a GKE cluster
+  GKE
   </summary>
 
 This Installation guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster.
@@ -272,7 +272,7 @@ After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-sign
   </details>
   <details>
   <summary>
-  Install Kyma on an AKS cluster
+  AKS
   </summary>
 
 This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster.
