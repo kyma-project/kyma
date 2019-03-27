@@ -18,7 +18,7 @@ global:
   event_bus:
     dir: develop/
     version: 5e4264e9
-  kymaEventBus: true
+  kymaEventBus: false
   namespace: natss
   natsStreaming:
     fullname: nats-streaming

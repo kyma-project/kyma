@@ -40,7 +40,7 @@ spec:
         {{- end }}
         env:
         - name: ENABLE_BA
-          value: "{{ .Values.global.kymaEventBus }}"
+          value: false
         - name: STAN_USERNAME
           valueFrom:
             secretKeyRef:
