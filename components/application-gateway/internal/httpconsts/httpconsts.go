@@ -1,15 +1,20 @@
 package httpconsts
 
 const (
-	HeaderContentType     = "Content-Type"
-	HeaderAuthorization   = "Authorization"
-	HeaderAccessToken     = "Access-Token"
-	HeaderCSRFToken       = "X-csrf-token"
-	HeaderCSRFTokenVal    = "fetch"
-	HeaderAccept          = "Accept"
-	HeaderAcceptVal       = "*/*"
-	HeaderCacheControl    = "cache-control"
-	HeaderCacheControlVal = "no-cache"
+	HeaderContentType          = "Content-Type"
+	HeaderAuthorization        = "Authorization"
+	HeaderAccessToken          = "Access-Token"
+	HeaderCSRFToken            = "X-csrf-token"
+	HeaderUserAgent            = "User-Agent"
+	HeaderXForwardedProto      = "X-Forwarded-Proto"
+	HeaderXForwardedFor        = "X-Forwarded-For"
+	HeaderXForwardedHost       = "X-Forwarded-Host"
+	HeaderXForwardedClientCert = "X-Forwarded-Client-Cert"
+	HeaderCSRFTokenVal         = "fetch"
+	HeaderAccept               = "Accept"
+	HeaderAcceptVal            = "*/*"
+	HeaderCacheControl         = "cache-control"
+	HeaderCacheControlVal      = "no-cache"
 )
 
 const (
