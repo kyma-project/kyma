@@ -24,12 +24,14 @@ To add components to the backup pipeline, implement the following go interface:
 type BackupTest interface {
     CreateResources(namespace string)
     TestResources(namespace string)
+    DeleteResources()
 }
 ```
 The functions work as follows:
 
 - The `TestResources` function validates if the test data works as expected. 
 - The `CreateResources` function installs the required test data before the backup process starts.
+- The `DeleteResources` function deletes the resources that are a part of the cluster before executing the test. The resources need to be deleted to test the restore process.
 - After the pipeline executes the backup and restore processes on the cluster, the `TestResources` function validates if the restore worked as expected.
 
 Add the test in the [E2E tests](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test).
