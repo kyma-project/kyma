@@ -16,51 +16,51 @@ const (
 	brokerReadyTimeout = time.Second * 300
 )
 
+
+type TestBundleConfig struct {
+	ConfigMap TestBundleConfigMap
+
+	ClusterServiceClassExternalName string `envconfig:"default=testing"`
+	ClusterServicePlanExternalNames []string `envconfig:"default=full,minimal"`
+}
+
 type TestBundleConfigMap struct {
 	Name      string  `envconfig:"default=helm-broker"`
 	Namespace string `envconfig:"default=kyma-system"`
-	Labels    map[string]string
-	Data      map[string]string
+	RepositoryURL string `envconfig:"default=https://github.com/kyma-project/bundles/releases/download/0.3.0/index-testing.yaml"`
+	LabelKey string `envconfig:"default=helm-broker-repo"`
+	LabelValue string `envconfig:"default=true"`
 }
 
 type TestBundleConfigurer struct {
-	ConfigMap                       TestBundleConfigMap
-	ClusterServiceClassExternalName string `envconfig:"default=testing"`
-	ClusterServicePlanExternalNames []string `envconfig:"default=full;minimal"`
+	cfg TestBundleConfig
 
 	coreCli  *corev1Type.CoreV1Client
 	svcatCli *clientset.Clientset
 }
 
-func NewTestBundle(name, namespace, urls string, coreCli *corev1Type.CoreV1Client, svcatCli *clientset.Clientset) *TestBundleConfigurer {
+func NewTestBundle(cfg TestBundleConfig, coreCli *corev1Type.CoreV1Client, svcatCli *clientset.Clientset) *TestBundleConfigurer {
 	return &TestBundleConfigurer{
-		ConfigMap: TestBundleConfigMap{
-			Name:      name,
-			Namespace: namespace,
-			Labels: map[string]string{
-				"helm-broker-repo": "true",
-			},
-			Data: map[string]string{
-				"URLs": urls,
-			},
-		},
-		ClusterServiceClassExternalName: "testing",
-		ClusterServicePlanExternalNames: []string{"minimal", "full"},
-
+		cfg: cfg,
 		coreCli:  coreCli,
 		svcatCli: svcatCli,
 	}
 }
 
 func (c *TestBundleConfigurer) Configure() error {
-	_, err := c.coreCli.ConfigMaps(c.ConfigMap.Namespace).Create(
+	cfg := c.cfg
+	_, err := c.coreCli.ConfigMaps(cfg.ConfigMap.Namespace).Create(
 		&corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      c.ConfigMap.Name,
-				Namespace: c.ConfigMap.Namespace,
-				Labels:    c.ConfigMap.Labels,
+				Name:      cfg.ConfigMap.Name,
+				Namespace: cfg.ConfigMap.Namespace,
+				Labels: map[string]string{
+					cfg.ConfigMap.LabelKey: cfg.ConfigMap.LabelValue,
+				},
 			},
-			Data: c.ConfigMap.Data,
+			Data: map[string]string{
+				"URLs": cfg.ConfigMap.RepositoryURL,
+			},
 		})
 
 	if err != nil && !apiErrors.IsAlreadyExists(err) {
@@ -71,7 +71,8 @@ func (c *TestBundleConfigurer) Configure() error {
 }
 
 func (c *TestBundleConfigurer) Cleanup() error {
-	err := c.coreCli.ConfigMaps(c.ConfigMap.Namespace).Delete(c.ConfigMap.Name, &metav1.DeleteOptions{})
+	cfgMap := c.cfg.ConfigMap
+	err := c.coreCli.ConfigMaps(cfgMap.Namespace).Delete(cfgMap.Name, &metav1.DeleteOptions{})
 	if err != nil && !apiErrors.IsNotFound(err) {
 		return err
 	}
@@ -82,12 +83,12 @@ func (c *TestBundleConfigurer) Cleanup() error {
 func (c *TestBundleConfigurer) WaitForTestBundleReady() error {
 	err := c.waitForClusterServiceClass()
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ClusterServiceClass with externalName %s", c.ClusterServiceClassExternalName)
+		return errors.Wrapf(err, "while waiting for ClusterServiceClass with externalName %s", c.cfg.ClusterServiceClassExternalName)
 	}
 
 	err = c.waitForClusterServicePlans()
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ClusterServicePlans for ClusterServiceClass with externalName %s", c.ClusterServiceClassExternalName)
+		return errors.Wrapf(err, "while waiting for ClusterServicePlans for ClusterServiceClass with externalName %s", c.cfg.ClusterServiceClassExternalName)
 	}
 
 	return nil
@@ -101,7 +102,7 @@ func (c *TestBundleConfigurer) waitForClusterServiceClass() error {
 		}
 
 		for _, class := range classesList.Items {
-			if class.GetExternalName() == c.ClusterServiceClassExternalName {
+			if class.GetExternalName() == c.cfg.ClusterServiceClassExternalName {
 				return true, nil
 			}
 		}
@@ -113,7 +114,7 @@ func (c *TestBundleConfigurer) waitForClusterServiceClass() error {
 func (c *TestBundleConfigurer) waitForClusterServicePlans() error {
 	plansFound := map[string]bool{}
 
-	for _, planName := range c.ClusterServicePlanExternalNames {
+	for _, planName := range c.cfg.ClusterServicePlanExternalNames {
 		plansFound[planName] = false
 	}
 

@@ -1,25 +1,27 @@
 package setup
 
 import (
-	"fmt"
+	"github.com/vrischmann/envconfig"
 	"log"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/configurer"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/upsbroker"
 	"github.com/pkg/errors"
-	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
-type TestBundleInstaller struct {
+type ServiceCatalogConfigurer struct {
 	nsConfigurer *configurer.NamespaceConfigurer
 	bundleConfigurer *configurer.TestBundleConfigurer
 }
 
-func NewServiceCatalogConfigurer(namespace string) (*TestBundleInstaller, error) {
-	k8sClient, _, err := client.NewClientWithConfig()
+func NewServiceCatalogConfigurer(namespace string) (*ServiceCatalogConfigurer, error) {
+	var cfg configurer.TestBundleConfig
+	err := envconfig.InitWithPrefix(&cfg, "TEST")
+	if err != nil {
+		return nil, errors.Wrap(err, "while loading config")
+	}
+
+	coreCli, _, err := client.NewClientWithConfig()
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing K8S Client")
 	}
@@ -29,17 +31,17 @@ func NewServiceCatalogConfigurer(namespace string) (*TestBundleInstaller, error)
 		return nil, errors.Wrap(err, "while initializing service catalog client")
 	}
 
-	nsConfigurer := configurer.NewNamespace(namespace, k8sClient)
+	nsConfigurer := configurer.NewNamespace(namespace, coreCli)
 
-	bundleConfigurer := configurer.NewTestBundle()
+	bundleConfigurer := configurer.NewTestBundle(cfg, coreCli, svcatCli)
 
-	return &TestBundleInstaller{
+	return &ServiceCatalogConfigurer{
 		bundleConfigurer: bundleConfigurer,
 		nsConfigurer:nsConfigurer,
 	}, nil
 }
 
-func (i *TestBundleInstaller) Setup() error {
+func (i *ServiceCatalogConfigurer) Setup() error {
 	log.Println("Setting up tests...")
 
 	err := i.nsConfigurer.Create()
@@ -60,7 +62,7 @@ func (i *TestBundleInstaller) Setup() error {
 	return nil
 }
 
-func (i *TestBundleInstaller) Cleanup() error {
+func (i *ServiceCatalogConfigurer) Cleanup() error {
 	log.Println("Cleaning up...")
 
 	err := i.bundleConfigurer.Cleanup()

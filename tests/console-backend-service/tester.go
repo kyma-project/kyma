@@ -8,6 +8,6 @@ const (
 	UPSBrokerImage             = "quay.io/kubernetes-service-catalog/user-broker:v0.1.36"
 	ClusterServiceBroker       = "ClusterServiceBroker"
 	ServiceBroker              = "ServiceBroker"
-	ClusterBrokerReleaseName   = "cluster-ups-broker"
-	BrokerReleaseName          = "ups-broker"
+	ClusterBrokerReleaseName   = "cluster-test-broker"
+	BrokerReleaseName          = "test-broker"
 )

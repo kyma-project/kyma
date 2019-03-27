@@ -246,12 +246,11 @@
   version = "v1.3.0"
 
 [[projects]]
-  digest = "1:2b6cc5f08ea4ec1499cb7f9282fef8d1558423152d1b7f046f30187bbc5076be"
+  digest = "1:dc2fb9fbadabda2bc4f23a952449600109a85d77ba9bd9a8b707610bd0b8ee7a"
   name = "github.com/vrischmann/envconfig"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "7a443243d539c9595dd8aa7f03a6f68707b80e66"
-  version = "v1.1.0"
+  revision = "d647766a494a7182c05fa4ddd1702c2c307a770d"
 
 [[projects]]
   branch = "master"
