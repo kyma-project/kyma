@@ -32,8 +32,8 @@ global:
     dir: develop/
     version: 3d922c3d
   connection_token_handler_tests:
-    dir: pr/
-    version: PR-3246
+    dir: develop/
+    version: 00d7f520
   connectivity_certs_controller:
     dir: develop/
     version: 2dc766a0
