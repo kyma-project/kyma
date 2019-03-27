@@ -72,7 +72,16 @@ data:
 EOF
 )
   echo "---> DOMAIN used: ${DOMAIN}, patching configmap"
-  kubectl patch configmap application-connector-overrides --patch "${DOMAIN_YAML}" -n kyma-installer
+  set +e
+  local msg
+  local status
+  msg=$(kubectl patch configmap application-connector-overrides --patch "${DOMAIN_YAML}" -n kyma-installer 2>&1)
+  status=$?
+  set -e
+  if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
+    echo "$msg"
+    exit $status
+  fi
 }
 
 function rewriteCerts() {
@@ -85,7 +94,16 @@ data:
 EOF
 )
   echo "---> Certs have been created, creating patching configmap"
-  kubectl patch configmap application-connector-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer
+  set +e
+  local msg
+  local status
+  msg=$(kubectl patch configmap application-connector-overrides --patch "${TLS_CERT_AND_KEY_YAML}" -n kyma-installer 2>&1)
+  status=$?
+  set -e
+  if [[ $status -ne 0 ]] && [[ ! "$msg" == *"not patched"* ]]; then
+    echo "$msg"
+    exit $status
+  fi
 }
 
 createOverrideCM
