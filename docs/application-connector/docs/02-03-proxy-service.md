@@ -26,7 +26,7 @@ Additionally, the service caches ReverseProxy objects used to proxy the requests
 
 ## Handling of headers
 
-Please note that Application Gateway is removing the following headers while making the calls to registered applications:
+The Application Gateway removes the following headers while making calls to the registered applications:
 
 - X-Forwarded-Proto
 - X-Forwarded-For
