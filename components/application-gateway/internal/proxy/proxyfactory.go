@@ -71,7 +71,6 @@ func joinPaths(a, b string) string {
 func removeHeader(headers http.Header, headerToRemove string) {
 	if _, ok := headers[headerToRemove]; ok {
 		log.Debugf("Removing header %s\n", headerToRemove)
-
-		delete(headers, headerToRemove)
+		headers.Del(headerToRemove)
 	}
 }
