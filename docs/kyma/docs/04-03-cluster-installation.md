@@ -233,7 +233,7 @@ Follow these steps:
 
 >**NOTE:** Skip this section if you use your own domain.
 
-After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For the MacOS, run:
+After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
   ```
   tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
   && kubectl get configmap  net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}'  | base64 --decode > $tmpfile \
@@ -474,7 +474,7 @@ Follow these steps:
 
 >**NOTE:** Skip this section if you use your own domain.
 
-After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For the MacOS, run:
+After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
 ```
 tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
 && kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
