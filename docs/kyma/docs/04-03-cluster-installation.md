@@ -229,7 +229,7 @@ Follow these steps:
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
-## Add the xip.io self-signed certificate to your OS trusted certificates (optional)
+## Add the xip.io self-signed certificate to your OS trusted certificates
 
 >**NOTE:** Skip this section if you use your own domain.
 
@@ -241,7 +241,7 @@ After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-sign
   && rm $tmpfile
   ```
 
-## Configure DNS for the cluster load balancer
+## Configure DNS for the cluster load balancer (optional)
 
 >**NOTE:** Execute instructions from this section only if you want to use your own domain.
 
@@ -285,11 +285,12 @@ This Installation guide shows developers how to quickly deploy Kyma on an [Azure
 
 Follow these steps:
 
-1. Export the domain name, and sub-domain as environment variables. Run the commands listed below:
+1. Export the domain name, the sub-domain, and the resource group name as environment variables. Run these commands:
 
     ```
     export DNS_DOMAIN={YOUR_DOMAIN} # example.com
     export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
+    export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
     ```
 
 2. Create a DNS-managed zone in your Azure subscription. Run:
@@ -318,7 +319,7 @@ Follow these steps:
     ```
     A successful response returns the list of the name servers you fetched from Azure.
 
-## Get the TLS certificate
+### Get the TLS certificate
 
 >**NOTE:** Azure DNS is not yet supported by Certbot so you must perform manual verification.
 
@@ -326,11 +327,11 @@ Follow these steps:
     ```
     mkdir letsencrypt
     ```
-2. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot stores the TLS certificates in that folder. Export your email address:
+2. Export your email address as an environment variable:
     ```
     export YOUR_EMAIL={YOUR_EMAIL}
     ```
-    To obtain a certificate, run:
+3. To get the certificate, run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot stores the TLS certificates in that folder.
     ```
     docker run -it --name certbot --rm \
         -v "$(pwd)/letsencrypt:/etc/letsencrypt" \
@@ -355,7 +356,14 @@ Follow these steps:
     ```
     Copy the `TXT_VALUE`.
 
-3. Open a new console and set the environment variables from the [Environment variables](#installation-install-kyma-on-an-aks-cluster-environment-variables) section. Export the `TXT_VALUE`.
+3. Open a new terminal and export these environment variables:
+    ```
+    export DNS_DOMAIN={YOUR_DOMAIN} # example.com
+    export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
+    export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
+    ```
+
+4. Export the `TXT_VALUE`.
 
     ```
     export TXT_VALUE={YOUR_TXT_VALUE}
@@ -366,9 +374,9 @@ Follow these steps:
     az network dns record-set txt create -n "_acme-challenge.$SUB_DOMAIN" -g $RS_GROUP -z $DNS_DOMAIN --ttl 60 > /dev/null
     az network dns record-set txt add-record -n "_acme-challenge.$SUB_DOMAIN" -g $RS_GROUP -z $DNS_DOMAIN --value $TXT_VALUE
     ```
-4. Go back to the first console, wait 2 minutes and press enter.
+5. Go back to the first console, wait about 2 minutes and press enter.
 
-5. Export the certificate and key as environment variables. Run these commands:
+6. Export the certificate and key as environment variables. Run these commands:
 
     ```
     export TLS_CERT=$(cat ./letsencrypt/live/$SUB_DOMAIN.$DNS_DOMAIN/fullchain.pem | base64 | sed 's/ /\\ /g')
@@ -470,7 +478,7 @@ Follow these steps:
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
-## Add the xip.io self-signed certificate to your OS trusted certificates (optional)
+## Add the xip.io self-signed certificate to your OS trusted certificates
 
 >**NOTE:** Skip this section if you use your own domain.
 
@@ -482,7 +490,7 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
 && rm $tmpfile
 ```
 
-## Configure DNS for the cluster load balancer
+## Configure DNS for the cluster load balancer (optional)
 
 >**NOTE:** Execute instructions from this section only if you want to use your own domain.
 
@@ -509,10 +517,16 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
 
 ### Access the cluster
 
-Access your cluster under this address:
+1. Check the virtual service name of your cluster which corresponds to the console address, such as `console.kyma.local`. To check your virtual service name, run:
 
 ```
-https://console.{DOMAIN}
+kubectl get virtualservice core-console -n kyma-system
+```
+
+2. Access your cluster under this address:
+
+```
+https://{VIRTUAL_SERVICE_NAME}
 ```
 
 >**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see [this](#installation-install-kyma-locally-access-the-kyma-console) document.
