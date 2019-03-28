@@ -64,7 +64,7 @@ fi
 #fi
 
 # run event-bus tests if Knative is not installed
-if ! kubectl -n knative-eventing get deployments.apps | grep -q "webhook"; then
+if kubectl -n knative-eventing get deployments.apps | grep -q "webhook"; then
     echo "- Testing Event-Bus..."
     helm ${KUBE_CONTEXT_ARG} test event-bus --timeout 600
     eventBusTestErr=$?
