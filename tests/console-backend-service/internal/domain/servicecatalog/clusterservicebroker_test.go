@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -109,7 +111,7 @@ func assertClusterBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker,
 
 func clusterBroker() ClusterServiceBroker {
 	return ClusterServiceBroker{
-		Name: "helm-broker",
+		Name: fixture.TestingBrokerName,
 		Status: ClusterServiceBrokerStatus{
 			Ready: true,
 		},

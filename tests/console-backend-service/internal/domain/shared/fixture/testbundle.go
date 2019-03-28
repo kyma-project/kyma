@@ -1,5 +1,7 @@
 package fixture
 
+const TestingBrokerName = "helm-broker"
+
 const TestingBundleClassName = "faebbe18-0a84-11e9-ab14-d663bd873d94"
 const TestingBundleClassExternalName = "testing"
 
