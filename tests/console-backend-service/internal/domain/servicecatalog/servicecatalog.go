@@ -8,5 +8,3 @@ const (
 	ClusterServiceBrokerKind = "ClusterServiceBroker"
 	ServiceBrokerKind        = "ServiceBroker"
 )
-
-var noGracefulPeriod int64 = 0

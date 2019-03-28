@@ -77,6 +77,11 @@ func (c *ServiceCatalogConfigurer) Setup() error {
 		if err != nil {
 			return errors.Wrap(err, "while creating ServiceBroker")
 		}
+
+		err = c.brokerConfigurer.WaitForReady()
+		if err != nil {
+			return errors.Wrap(err, "while waiting for ServiceBroker ready")
+		}
 	}
 
 	return nil

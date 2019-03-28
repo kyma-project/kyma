@@ -4,8 +4,6 @@ package servicecatalog
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
@@ -41,12 +39,6 @@ func TestServiceBrokerQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedResource := broker()
-
-	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
-	require.NoError(t, err)
-
-	err = wait.ForServiceBroker(expectedResource.Name, expectedResource.Namespace, svcatCli)
-	require.NoError(t, err)
 
 	resourceDetailsQuery := `
 		name

@@ -1,21 +1,15 @@
 package configurer
 
 import (
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
 	"github.com/pkg/errors"
+	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"time"
-
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
-	corev1 "k8s.io/api/core/v1"
 	corev1Type "k8s.io/client-go/kubernetes/typed/core/v1"
 )
-
-const (
-	brokerReadyTimeout = time.Second * 300
-)
-
 
 type TestBundleConfig struct {
 	ConfigMap TestBundleConfigMap
@@ -108,7 +102,7 @@ func (c *TestBundleConfigurer) waitForClusterServiceClass() error {
 		}
 
 		return true, nil
-	}, brokerReadyTimeout)
+	}, tester.DefaultReadyTimeout)
 }
 
 func (c *TestBundleConfigurer) waitForClusterServicePlans() error {
@@ -139,7 +133,7 @@ func (c *TestBundleConfigurer) waitForClusterServicePlans() error {
 		}
 
 		return true, nil
-	}, brokerReadyTimeout)
+	}, tester.DefaultReadyTimeout)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for ClusterServicePlans: %+v", plansFound)
 	}
