@@ -10,6 +10,10 @@ spec:
   {{ else }}
   replicas: {{ .Values.replicaCount }}
   {{ end }}
+  selector:
+    matchLabels:
+      app: {{ template "publish-knative.name" . }}
+      release: {{ .Release.Name }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
