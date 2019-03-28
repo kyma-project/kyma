@@ -22,7 +22,9 @@ type e2eTest struct {
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
+
 	myFunctionTest, err := NewFunctionTest()
+
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
@@ -45,13 +47,31 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
+	myNamespaceControllerTest, err := NewNamespaceControllerTest()
+
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	apiControllerTest, err := NewApiControllerTest()
+
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
+	myGrafanaTest, err := NewGrafanaTest()
+
+	if err != nil {
+		t.Fatalf("%v", err)
+	}
+
 	myMicrofrontendTest, err := NewMicrofrontendTest()
 
 	if err != nil {
 		t.Fatalf("%v", err)
 	}
 
-	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest, myMicrofrontendTest}
+	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest, myNamespaceControllerTest, apiControllerTest, myGrafanaTest, myMicrofrontendTest}
 
 	e2eTests := make([]e2eTest, len(backupTests))
 
@@ -100,12 +120,13 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		So(err, ShouldBeNil)
 
 		Convey("Check backup status", func() {
-			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 15*time.Minute)
+			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 20*time.Minute)
 			So(err, ShouldBeNil)
-			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 15*time.Minute)
+			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 20*time.Minute)
 			So(err, ShouldBeNil)
 			Convey("Delete resources from cluster", func() {
 				for _, e2eTest := range e2eTests {
+					e2eTest.backupTest.DeleteResources()
 					err := myBackupClient.DeleteNamespace(e2eTest.namespace)
 					So(err, ShouldBeNil)
 					err = myBackupClient.WaitForNamespaceToBeDeleted(e2eTest.namespace, 2*time.Minute)
