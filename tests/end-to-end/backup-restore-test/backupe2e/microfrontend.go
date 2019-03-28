@@ -72,6 +72,10 @@ func (t microfrontendTest) TestResources(namespace string) {
 
 }
 
+func (t microfrontendTest) DeleteResources() {
+	// There is not need to be implemented for this test.
+}
+
 func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.MicroFrontend, error) {
 	microfrontend := &uiV1alpha1v.MicroFrontend{
 		ObjectMeta: metav1.ObjectMeta{
