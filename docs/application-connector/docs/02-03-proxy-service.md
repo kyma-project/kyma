@@ -16,7 +16,7 @@ which might be unsecured or secured with various security mechanism and also pro
 2. The Access Service exposes the Application Gateway.
 3. The Application Gateway extracts the Application name and the service ID from the name of the Access Service name. Using the extracted Application name, the Application Gateway finds the respective Application custom resource and obtains the information about the registered external API, such as the API URL and security credentials.
 4. The Application Gateway gets a token from the OAuth server.
-5. The Application Gateway gets a CSRF token from the endpoint exposed by the upstream service. (optional step based on API registration in App Registry)
+5. The Application Gateway gets a CSRF token from the endpoint exposed by the upstream service. This step is optional and is valid only for the API which was registered with a CSRF token turned on.
 6. The Application Gateway calls the target API.
 
 ## Caching
