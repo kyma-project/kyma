@@ -62,46 +62,46 @@ Follow these instructions to install Kyma from a release or from local sources:
   </summary>
 
   1. Change the working directory to `installation`:
-    ```
-    cd installation
-    ```
+      ```
+      cd installation
+      ```
 
   2. Use the following command to run Kubernetes locally using Minikube:
-    ```
-    ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
-    ```
+      ```
+      ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
+      ```
 
   3. Wait until the `kube-dns` Pod is ready. Run this script to setup Tiller:
-    ```
-    ./scripts/install-tiller.sh
-    ```
+      ```
+      ./scripts/install-tiller.sh
+      ```
 
   4. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.
 
   5. Export the release version as an environment variable. Run:
-    ```
-    export LATEST={KYMA_RELEASE_VERSION}
-    ```
+      ```
+      export LATEST={KYMA_RELEASE_VERSION}
+      ```
 
   6. Deploy the Kyma Installer in your cluster from the `$LATEST` release:
-    ```
-    kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-local.yaml
-    ```
+      ```
+      kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-local.yaml
+      ```
 
   7. Configure the Kyma installation using the local configuration file from the `$LATEST` release:
-    ```
-    kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
-    ```
+      ```
+      kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
+      ```
 
   8. To trigger the installation process, label the `kyma-installation` custom resource:
-    ```
-    kubectl label installation/kyma-installation action=install
-    ```
+      ```
+      kubectl label installation/kyma-installation action=install
+      ```
 
   9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
-    ```
-    ./scripts/is-installed.sh
-    ```
+      ```
+      ./scripts/is-installed.sh
+      ```
 </details>
 <details>
 <summary>
