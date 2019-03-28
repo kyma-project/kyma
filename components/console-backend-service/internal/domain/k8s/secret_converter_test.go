@@ -1,6 +1,7 @@
 package k8s
 
 import (
+	"encoding/base64"
 	"testing"
 	"time"
 
@@ -129,7 +130,7 @@ func TestSecretConverter_ToGQLs(t *testing.T) {
 	})
 }
 
-func TestSecretConverter_GQLJSONToPod(t *testing.T) {
+func TestSecretConverter_GQLJSONToSecret(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		converter := secretConverter{}
 		inMap := map[string]interface{}{
@@ -177,5 +178,80 @@ func TestSecretConverter_GQLJSONToPod(t *testing.T) {
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
+	})
+}
+
+func TestSecretConverter_SecretToGQLJSON(t *testing.T) {
+	t.Run("Success", func(t *testing.T) {
+		converter := secretConverter{}
+
+		expectedMap := map[string]interface{}{
+			"kind": "exampleKind",
+			"metadata": map[string]interface{}{
+				"name": "exampleName",
+				"labels": map[string]interface{}{
+					"exampleKey":  "exampleValue",
+					"exampleKey2": "exampleValue2",
+				},
+				"creationTimestamp": nil,
+				"ownerReferences": []interface{}{
+					map[string]interface{}{
+						"apiVersion": "exampleApiVersion",
+						"kind":       "exampleKind",
+						"name":       "exampleName",
+						"uid":        "exampleUID",
+					},
+				},
+			},
+			"type": "exampleType",
+			"data": map[string]interface{}{
+				"exampleKey":  base64.StdEncoding.EncodeToString([]byte("exampleData")),
+				"exampleKey2": base64.StdEncoding.EncodeToString([]byte("exampleData2")),
+			},
+		}
+		in := v1.Secret{
+			TypeMeta: metav1.TypeMeta{
+				Kind: "exampleKind",
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "exampleName",
+				Labels: map[string]string{
+					"exampleKey":  "exampleValue",
+					"exampleKey2": "exampleValue2",
+				},
+				CreationTimestamp: metav1.Time{},
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						APIVersion: "exampleApiVersion",
+						Name:       "exampleName",
+						UID:        "exampleUID",
+						Kind:       "exampleKind",
+					},
+				},
+			},
+			Data: map[string][]byte{
+				"exampleKey":  []byte("exampleData"),
+				"exampleKey2": []byte("exampleData2"),
+			},
+			Type: "exampleType",
+		}
+
+		expectedJSON := new(gqlschema.JSON)
+		err := expectedJSON.UnmarshalGQL(expectedMap)
+		require.NoError(t, err)
+
+		result, err := converter.secretToGQLJSON(&in)
+
+		require.NoError(t, err)
+		assert.Equal(t, *expectedJSON, result)
+	})
+
+	t.Run("NilPassed", func(t *testing.T) {
+		converter := secretConverter{}
+
+		result, err := converter.secretToGQLJSON(nil)
+
+		require.Nil(t, result)
+		require.NoError(t, err)
 	})
 }
