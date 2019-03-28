@@ -9,8 +9,8 @@ metadata:
 data:
   config.js: |
     window.clusterConfig = {
-      domain: '{{ .Values.global.domainName }}',
-      graphqlApiUrl: 'https://ui-api.{{ .Values.global.domainName }}/graphql',
+      domain: '{{ .Values.global.ingress.domainName }}',
+      graphqlApiUrl: 'https://console-backend.{{ .Values.global.ingress.domainName }}/graphql',
       hpaCpuTargetAverageUtilization: 50,
       functionResources:{requests:{cpu: '100m', memory: '100Mi'}},
       functionSizes: [

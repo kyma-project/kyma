@@ -1,0 +1,14 @@
+replicaCount: 1
+image:
+  name: console-backend-service
+  pullPolicy: IfNotPresent
+service:
+  internalPort: 3000
+  externalPort: 3000
+  protocol: TCP
+virtualservice:
+  enabled: true
+  host: console-backend
+  annotations: {}
+istio:
+  namespace: istio-system

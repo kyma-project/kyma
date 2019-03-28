@@ -239,7 +239,7 @@ func VerifyReceivedMsg(t *testing.T, a string, b []byte) {
 func AssertExpectedError(t *testing.T, body []byte, actualStatusCode int, expectedStatusCode int, errorField interface{}, errorType interface{}) {
 	var responseError api.Error
 	err := json.Unmarshal(body, &responseError)
-	assert.Equal(t, actualStatusCode, expectedStatusCode)
+	assert.Equal(t, expectedStatusCode, actualStatusCode)
 	assert.Nil(t, err)
 	if errorType != nil {
 		assert.Equal(t, errorType, responseError.Type)

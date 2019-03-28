@@ -1,0 +1,27 @@
+[[constraint]]
+  name = "github.com/stretchr/testify"
+  version = "1.2.1"
+
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  revision = "3d922c3db8df290ef0388b810933d2c26a0d1188"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/kubernetes"
+  branch = "release-1.10"
+
+[prune]
+  go-tests = true
+  unused-packages = true

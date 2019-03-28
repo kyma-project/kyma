@@ -27,7 +27,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e95de5c830369d6592224de57a31cd87a2ba1cec2abaf050d06a63ee8f7babd8"
+  digest = "1:1b2208b11ad707c7fce6bb4d093b507dd3dfe378dfd88fdf5097cf26ad5beff4"
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
@@ -374,7 +374,7 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:db0fb8de13ab7924a114fd8af3e6279db0410e43ef1260a85cf7bb53975a4fdc"
+  digest = "1:7efb90db9895e498312c13862ad6dff0f6ed76237726e31ba568d138dd9bc920"
   name = "github.com/knative/eventing"
   packages = [
     "pkg/apis/duck/v1alpha1",
@@ -385,26 +385,27 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1",
     "pkg/client/clientset/versioned/typed/eventing/v1alpha1/fake",
-    "pkg/controller/testing",
+    "pkg/reconciler/testing",
   ]
   pruneopts = "UT"
-  revision = "604de5d66f1692af13f9c7fb7e25f554b2f5bba9"
+  revision = "86064bdeeb7635ae7dfe903bd085ede9ea29b4aa"
+  version = "v0.4.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:f9681c841fde4780c25e26edeeeb1f18ae12f0756e723a24bf46174389fe5e3e"
+  digest = "1:ad53260ed7809c62ab48a4c4e14f75addcdd54cb4274b429ba126cacbb62e4f3"
   name = "github.com/knative/pkg"
   packages = [
     "apis",
     "apis/duck",
     "apis/duck/v1alpha1",
     "changeset",
+    "kmp",
     "logging",
     "logging/logkey",
     "webhook",
   ]
   pruneopts = "UT"
-  revision = "fcefd953681e7127c2d13609bf2364e55d31086c"
+  revision = "0183bf9cdc7349e3c76c26e51f84689b411fccea"
 
 [[projects]]
   branch = "master"
@@ -1200,7 +1201,7 @@
     "github.com/knative/eventing/pkg/client/clientset/versioned",
     "github.com/knative/eventing/pkg/client/clientset/versioned/fake",
     "github.com/knative/eventing/pkg/client/clientset/versioned/typed/eventing/v1alpha1",
-    "github.com/knative/eventing/pkg/controller/testing",
+    "github.com/knative/eventing/pkg/reconciler/testing",
     "github.com/knative/pkg/apis",
     "github.com/knative/pkg/apis/duck/v1alpha1",
     "github.com/nats-io/go-nats",

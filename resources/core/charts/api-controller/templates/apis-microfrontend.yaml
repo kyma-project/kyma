@@ -9,23 +9,23 @@ spec:
   version: v1
   category: Configuration
   placement: namespace
-  viewBaseUrl: 'https://console.{{ js .Values.global.domainName }}/consoleapp.html#'
+  viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
     - label: APIs
       navigationPath: apis
-      viewUrl: '/home/namespaces/:environmentId/apis'
+      viewUrl: '/home/namespaces/:namespaceId/apis'
       order: -1
     - label: API Details
       navigationPath: apis/details
-      viewUrl: '/home/namespaces/:environmentId/apis'
+      viewUrl: '/home/namespaces/:namespaceId/apis'
       showInNavigation: false
     - label: API Details
       navigationPath: apis/details/:name
-      viewUrl: '/home/namespaces/:environmentId/apis/details/:name'
+      viewUrl: '/home/namespaces/:namespaceId/apis/details/:name'
       showInNavigation: false
     - label: Create API
       navigationPath: apis/create
-      viewUrl: '/home/namespaces/:environmentId/apis/create'
+      viewUrl: '/home/namespaces/:namespaceId/apis/create'
       showInNavigation: false
 ---
 apiVersion: "ui.kyma-project.io/v1alpha1"
@@ -39,7 +39,7 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: 'https://console.{{ js .Values.global.domainName }}/consoleapp.html#'
+  viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
     - label: IDP Presets
       navigationPath: idp-presets

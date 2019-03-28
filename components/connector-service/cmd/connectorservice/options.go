@@ -13,22 +13,24 @@ import (
 const defaultCertificateValidityTime = 90 * 24 * time.Hour
 
 type options struct {
-	appName                       string
-	externalAPIPort               int
-	internalAPIPort               int
-	namespace                     string
-	tokenLength                   int
-	appTokenExpirationMinutes     int
-	runtimeTokenExpirationMinutes int
-	caSecretName                  string
-	requestLogging                bool
-	connectorServiceHost          string
-	gatewayHost                   string
-	certificateProtectedHost      string
-	appsInfoURL                   string
-	runtimesInfoURL               string
-	certificateValidityTime       time.Duration
-	central                       bool
+	appName                        string
+	externalAPIPort                int
+	internalAPIPort                int
+	namespace                      string
+	tokenLength                    int
+	appTokenExpirationMinutes      int
+	runtimeTokenExpirationMinutes  int
+	caSecretName                   string
+	requestLogging                 bool
+	connectorServiceHost           string
+	gatewayHost                    string
+	certificateProtectedHost       string
+	appsInfoURL                    string
+	runtimesInfoURL                string
+	appCertificateValidityTime     time.Duration
+	runtimeCertificateValidityTime time.Duration
+	central                        bool
+	revocationConfigMapName        string
 }
 
 type environment struct {
@@ -54,33 +56,42 @@ func parseArgs() *options {
 	certificateProtectedHost := flag.String("certificateProtectedHost", "gateway.wormhole.cluster.kyma.cx", "Host secured with client certificate, used for certificate renewal.")
 	appsInfoURL := flag.String("appsInfoURL", "", "URL at which management information is available.")
 	runtimesInfoURL := flag.String("runtimesInfoURL", "", "URL at which management information is available.")
-	certificateValidityTime := flag.String("certificateValidityTime", "90d", "Validity time of certificates issued by this service.")
+	appCertificateValidityTime := flag.String("appCertificateValidityTime", "90d", "Validity time of certificates issued for apps by this service.")
+	runtimeCertificateValidityTime := flag.String("runtimeCertificateValidityTime", "90d", "Validity time of certificates issued for runtimes by this service.")
 	central := flag.Bool("central", false, "Determines whether connector works as the central")
+	revocationConfigMapName := flag.String("revocationConfigMapName", "revocations-config", "Name of the config map containing revoked certificates")
 
 	flag.Parse()
 
-	validityTime, err := parseDuration(*certificateValidityTime)
+	appValidityTime, err := parseDuration(*appCertificateValidityTime)
 	if err != nil {
-		logrus.Infof("Failed to parse certificate validity time: %s, using default value.", err)
+		logrus.Infof("Failed to parse certificate validity time for applications: %s, using default value.", err)
+	}
+
+	runtimeValidityTime, err := parseDuration(*runtimeCertificateValidityTime)
+	if err != nil {
+		logrus.Infof("Failed to parse certificate validity time for applications: %s, using default value.", err)
 	}
 
 	return &options{
-		appName:                       *appName,
-		externalAPIPort:               *externalAPIPort,
-		internalAPIPort:               *internalAPIPort,
-		namespace:                     *namespace,
-		tokenLength:                   *tokenLength,
-		appTokenExpirationMinutes:     *appTokenExpirationMinutes,
-		runtimeTokenExpirationMinutes: *runtimeTokenExpirationMinutes,
-		caSecretName:                  *caSecretName,
-		requestLogging:                *requestLogging,
-		connectorServiceHost:          *connectorServiceHost,
-		gatewayHost:                   *gatewayHost,
-		certificateProtectedHost:      *certificateProtectedHost,
-		central:                       *central,
-		appsInfoURL:                   *appsInfoURL,
-		runtimesInfoURL:               *runtimesInfoURL,
-		certificateValidityTime:       validityTime,
+		appName:                        *appName,
+		externalAPIPort:                *externalAPIPort,
+		internalAPIPort:                *internalAPIPort,
+		namespace:                      *namespace,
+		tokenLength:                    *tokenLength,
+		appTokenExpirationMinutes:      *appTokenExpirationMinutes,
+		runtimeTokenExpirationMinutes:  *runtimeTokenExpirationMinutes,
+		caSecretName:                   *caSecretName,
+		requestLogging:                 *requestLogging,
+		connectorServiceHost:           *connectorServiceHost,
+		gatewayHost:                    *gatewayHost,
+		certificateProtectedHost:       *certificateProtectedHost,
+		central:                        *central,
+		appsInfoURL:                    *appsInfoURL,
+		runtimesInfoURL:                *runtimesInfoURL,
+		appCertificateValidityTime:     appValidityTime,
+		runtimeCertificateValidityTime: runtimeValidityTime,
+		revocationConfigMapName:        *revocationConfigMapName,
 	}
 }
 
@@ -88,11 +99,11 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --requestLogging=%t "+
 		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayHost=%s "+
-		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --certificateValidityTime=%s",
+		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s --revocationConfigMapName=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.requestLogging,
 		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayHost,
-		o.appsInfoURL, o.runtimesInfoURL, o.central, o.certificateValidityTime)
+		o.appsInfoURL, o.runtimesInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime, o.revocationConfigMapName)
 }
 
 func parseEnv() *environment {

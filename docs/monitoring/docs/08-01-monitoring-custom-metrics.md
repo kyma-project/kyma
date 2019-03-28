@@ -20,14 +20,14 @@ This tutorial shows how to expose custom metrics to Prometheus with a Golang ser
 
 ### Configure Istio
 
-For the `default` Namespace, the sidecar injection must be enabled. To enable the sidecar injection for all Pods in the `default` Namespace, run the following command:
+For the `default` Namespace, you must enable the sidecar injection. To enable the sidecar injection for all Pods in the `default` Namespace, run the following command:
 
 ```bash
 kubectl label namespace default istio-injection=enabled
 namespace "default" labeled
 ```
 
-For more details on deploying your application with Istio, read [this](https://istio.io/docs/setup/kubernetes/quick-start#deploy-your-application) documentation.
+For more details on deploying your application with Istio, read [this](https://istio.io/docs/setup/kubernetes/install/) documentation.
 
 You must also add the **sidecar.istio.io/inject** annotation with the value set to `true` to the Pod template specification, to enable the injection as shown in [this](https://github.com/kyma-project/examples/blob/master/monitoring-custom-metrics/deployment/deployment.yaml#L12) example.
 
@@ -39,7 +39,7 @@ spec:
         sidecar.istio.io/inject: "true"
 ```
 
-For more details on installing the Istio sidecar, read [this](https://istio.io/docs/setup/kubernetes/sidecar-injection/#policy) documentation.
+For more details on installing the Istio sidecar, read [this](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/) documentation.
 
 The following ports are used in the Pod:
 
@@ -63,10 +63,7 @@ This is a basic example where `Gauge` and `Counter` metrics are exported using t
     ```bash
     kubectl get pods
     NAME                             READY     STATUS    RESTARTS   AGE
-    sample-metrics-c9f998959-jd2fz   2/2       Running   0          2m
-    sample-metrics-c9f998959-kfbp8   2/2       Running   0          2m
-    sample-metrics-c9f998959-nnp2n   2/2       Running   0          2m
-    sample-metrics-c9f998959-vdnkn   2/2       Running   0          2m
+    sample-metrics-67c6885d8c-smt62   2/2       Running   0          2m
     ```
 
 2. Run the `port-forward` command on the `sample-metrics-8081` service for the`8081` port to check the metrics.
@@ -101,7 +98,7 @@ Use either the `cpu_temperature_celsius` or `hd_errors_total` in the [**expressi
 
 Prometheus can reach the service using ServiceMonitor. ServiceMonitor is a specific CRD used by the Prometheus operator to monitor services.
 
-In Kyma, the Prometheus server discovers all ServiceMonitors through the **serviceMonitorSelector** matching the `prometheus: core` label.
+In Kyma, the Prometheus server discovers all ServiceMonitors through the **serviceMonitorSelector** matching the `prometheus: monitoring` label.
 
 ```yaml
   serviceMonitorSelector:

@@ -45,6 +45,9 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
+        #For pods running sidecars w/o service there's a problem with envoy readiness probe.
+        #Details https://github.com/istio/istio/issues/9504#issuecomment-439432130
+        status.sidecar.istio.io/port: "0"
       labels:
         app: "event-http-dispatcher-service" #This is changed because of tracing UI. 
         release: {{ .Release.Name }}
@@ -55,7 +58,11 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --client_id=$(POD_NAME)
-            - --nats_url={{ .Values.global.natsStreaming.url }}
+            {{ if .Values.global.kymaEventBus }}
+            - --nats_url=nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
+            {{ else }}
+            - --nats_url=nats://{{ .Values.global.natsStreaming.url }}
+            {{ end }}
             - --cluster_id={{ .Values.global.natsStreaming.clusterID }}
             - --tls_skip_verify={{ .Values.http.tlsSkipVerify }}
             - --subscription_name_header={{ .Values.global.push.http.subscriptionNameHeader }}
@@ -76,6 +83,18 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.name
+          {{ if .Values.global.kymaEventBus }}
+          - name: EB_USER
+            valueFrom:
+              secretKeyRef:
+                name: nats-user-eventbus
+                key: username
+          - name: EB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: nats-user-eventbus
+                key: password
+          {{ end }}
           resources:
 {{ toYaml .Values.global.push.resources | indent 12 }}
       serviceAccount:  {{ .Release.Name }}-push-sa

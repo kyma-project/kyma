@@ -33,7 +33,6 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.domainName: "__DOMAIN__"
-  global.applicationConnectorDomainName: "__APPLICATION_CONNECTOR_DOMAIN__"
   global.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.etcdBackup.containerName: "__ETCD_BACKUP_ABS_CONTAINER_NAME__"
   global.etcdBackup.enabled: "__ENABLE_ETCD_BACKUP__"
@@ -58,18 +57,6 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: application-connector-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: application-connector
-    kyma-project.io/installation: ""
-data:
-  connector-service.tests.skipSslVerify: "__SKIP_SSL_VERIFY__"
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
   name: istio-overrides
   namespace: kyma-installer
   labels:
@@ -83,11 +70,12 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: knative-overrides
+  name: knative-serving-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: knative
+    component: knative-serving
     kyma-project.io/installation: ""
 data:
-  knative.domainName: "__DOMAIN__"
+  knative-serving.domainName: "__DOMAIN__"
+

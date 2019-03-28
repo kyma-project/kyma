@@ -91,9 +91,9 @@ if [ ${ADMIN_PASSWORD} ]; then
     COMBO_YAML=$(sed 's/global\.adminPassword: .*/global.adminPassword: '"${ADMIN_PASSWORD}"'/g' <<<"$COMBO_YAML")
 fi
 
-if [ $LOCAL ]; then
+if [ ${LOCAL} ]; then
     MINIKUBE_IP=$(minikube ip)
-    COMBO_YAML=$(sed 's/test\.acceptance\.ui\.minikubeIP: .*/test\.acceptance\.ui\.minikubeIP: '"${MINIKUBE_IP}"'/g' <<<"$COMBO_YAML")
+    COMBO_YAML=$(sed 's/\.minikubeIP: .*/\.minikubeIP: '"${MINIKUBE_IP}"'/g' <<<"$COMBO_YAML")
 fi
 
 kubectl apply -f - <<<"$COMBO_YAML"

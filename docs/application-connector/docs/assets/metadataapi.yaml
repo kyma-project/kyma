@@ -11,7 +11,7 @@ paths:
       summary: 'Returns health of a service'
       operationId: 'getHealth'
       tags:
-        - 'health'
+      - 'health'
       responses:
         '200':
           description: 'The service is in a good health'
@@ -111,7 +111,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ServiceDetails'
+              $ref: '#/components/schemas/ServiceUpdate'
       parameters:
       - in: 'path'
         name: 'serviceId'
@@ -195,9 +195,36 @@ components:
         documentation:
           $ref: '#/components/schemas/Documentation'
       required:
-        - provider
-        - name
-        - description
+      - provider
+      - name
+      - description
+    ServiceUpdate:
+      type: 'object'
+      properties:
+        provider:
+          type: 'string'
+        name:
+          type: 'string'
+        description:
+          type: 'string'
+        shortDescription:
+          type: 'string'
+        identifier:
+          type: 'string'
+        labels:
+          type: 'object'
+          additionalProperties:
+            type: 'string'
+        api:
+          $ref: '#/components/schemas/Api'
+        events:
+          $ref: '#/components/schemas/Events'
+        documentation:
+          $ref: '#/components/schemas/Documentation'
+      required:
+      - provider
+      - name
+      - description
     Service:
       type: 'object'
       properties:
@@ -234,7 +261,26 @@ components:
           type: 'string'
           description: 'API type, for example OData'
       required:
-        - targetUrl
+      - targetUrl
+    ApiUpdate:
+      type: 'object'
+      properties:
+        targetUrl:
+          type: 'string'
+          format: 'uri'
+        credentials:
+          $ref: '#/components/schemas/ApiCredentialsUpdate'
+        spec:
+          type: 'object'
+          description: 'OpenApi v2 swagger file: https://github.com/OAI/OpenAPI-Specification/blob/master/schemas/v2.0/schema.json'
+        SpecificationUrl:
+          type: 'string'
+          format: 'uri'
+        ApiType:
+          type: 'string'
+          description: 'API type, for example OData'
+      required:
+      - targetUrl
     Events:
       type: 'object'
       properties:
@@ -244,24 +290,24 @@ components:
     Documentation:
       type: 'object'
       properties:
-        displayName: 
+        displayName:
           type: 'string'
-        description: 
+        description:
           type: 'string'
         type:
           type: 'string'
         tags:
           type: 'array'
-          items: 
+          items:
             type: 'string'
         docs:
           type: 'array'
           items:
             $ref: '#/components/schemas/Document'
       required:
-        - displayName
-        - description
-        - type
+      - displayName
+      - description
+      - type
     Document:
       type: 'object'
       properties:
@@ -272,9 +318,9 @@ components:
         source:
           type: 'string'
       required:
-        - title
-        - type
-        - source
+      - title
+      - type
+      - source
     ApiCredentials:
       type: 'object'
       properties:
@@ -284,6 +330,15 @@ components:
           $ref: '#/components/schemas/Basic'
         certificateGen:
           $ref: '#/components/schemas/CertificateGen'
+    ApiCredentialsUpdate:
+      type: 'object'
+      properties:
+        oauth:
+          $ref: '#/components/schemas/OAuth'
+        basic:
+          $ref: '#/components/schemas/Basic'
+        certificateGen:
+          $ref: '#/components/schemas/CertificateGenUpdate'
     OAuth:
       type: 'object'
       properties:
@@ -295,9 +350,9 @@ components:
         clientSecret:
           type: 'string'
       required:
-        - url
-        - clientId
-        - clientSecret
+      - url
+      - clientId
+      - clientSecret
     Basic:
       type: 'object'
       properties:
@@ -306,6 +361,13 @@ components:
         password:
           type: 'string'
     CertificateGen:
+      type: 'object'
+      properties:
+        commonName:
+          type: 'string'
+        certificate:
+          type: 'string'
+    CertificateGenUpdate:
       type: 'object'
       properties:
         commonName:

@@ -1,12 +1,13 @@
+connector_service:
+  enabled: &connectorServiceEnabled true
+
+connection_token_handler:
+  enabled: *connectorServiceEnabled
+
 global:
-  console:
-    application_management:
-      enabled: true
   isLocalEnv: false
   knative: false
   namespace: kyma-integration
-  nginx:
-    namespace: kyma-system
   istio:
     tls:
       secretName: istio-ingress-certs
@@ -17,40 +18,43 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: fd308559
+    version: c109ba83
   application_operator_tests:
     dir: develop/
-    version: fd308559
+    version: e1af648f
   connector_service:
     dir: develop/
-    version: d2827e7b
+    version: f478b085
   connector_service_tests:
     dir: develop/
-    version: fd308559
+    version: f478b085
   connection_token_handler:
     dir: develop/
-    version: fa0de1b9
+    version: 3d922c3d
+  connection_token_handler_tests:
+    dir: develop/
+    version: 00d7f520
   connectivity_certs_controller:
     dir: develop/
     version: 2dc766a0
   event_service:
     dir: develop/
-    version: 6e0a7fe2
-  application_proxy:
+    version: 74a78ec9
+  application_gateway:
     dir: develop/
-    version: fd308559
+    version: 78b98274
   gateway_tests:
     dir: develop/
-    version: 8b074a71
+    version: e1af648f
   application_registry:
     dir: develop/
-    version: fd308559
+    version: ec4b880b
   application_registry_tests:
     dir: develop/
-    version: fd308559
+    version: 0b828d1a
   application_broker:
     dir: develop/
-    version: f78529c4
+    version: e1af648f
 
 connectivity_certs_controller:
   enabled: false

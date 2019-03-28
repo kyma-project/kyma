@@ -1,0 +1,165 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name: manager-role
+rules:
+- apiGroups:
+  - cms.kyma-project.io
+  resources:
+  - docstopics
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - cms.kyma-project.io
+  resources:
+  - docstopics/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterassets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterassets/status
+  verbs:
+  - get
+  - list
+  - update
+  - patch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterbuckets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - clusterbuckets/status
+  verbs:
+  - get
+  - list
+  - update
+  - patch
+- apiGroups:
+  - cms.kyma-project.io
+  resources:
+  - docstopics
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - cms.kyma-project.io
+  resources:
+  - docstopics/status
+  verbs:
+  - get
+  - update
+  - patch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - assets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - assets/status
+  verbs:
+  - get
+  - list
+  - update
+  - patch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - buckets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+- apiGroups:
+  - assetstore.kyma-project.io
+  resources:
+  - buckets/status
+  verbs:
+  - get
+  - list
+  - update
+  - patch
+- apiGroups:
+  - admissionregistration.k8s.io
+  resources:
+  - mutatingwebhookconfigurations
+  - validatingwebhookconfigurations
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - secrets
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - services
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete

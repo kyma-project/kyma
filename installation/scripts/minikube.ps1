@@ -6,7 +6,7 @@ param (
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
-$KUBERNETES_VERSION = "1.11.5"
+$KUBERNETES_VERSION = "1.12.5"
 
 Write-Output @"
 ################################################################################
@@ -112,5 +112,5 @@ InitializeMinikubeConfig
 StartMinikube
 WaitForMinikubeToBeUp
 ConfigureMinikubeAddons
-AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "ui-api", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
+AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "console-backend", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
 IncreaseFsInotifyMaxUserInstances

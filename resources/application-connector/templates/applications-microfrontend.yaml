@@ -9,14 +9,14 @@ spec:
   version: v1
   category: Integration
   placement: cluster
-  viewBaseUrl: 'https://console.{{ js .Values.global.domainName }}/consoleapp.html#'
+  viewBaseUrl: 'https://console.{{ js .Values.global.ingress.domainName }}/consoleapp.html#'
   navigationNodes:
     - label: Applications
       navigationPath: apps
       viewUrl: '/home/settings/apps'
       order: 1
       settings:
-        readOnly: {{ not .Values.global.console.application_management.enabled }}
+        readOnly: {{ not .Values.connector_service.enabled }}
     - label: Application Details
       navigationPath: apps/details
       viewUrl: '/home/settings/apps'
@@ -24,4 +24,4 @@ spec:
       navigationPath: apps/details/:name
       viewUrl: '/home/settings/apps/:name'
       settings:
-        readOnly: {{ not .Values.global.console.application_management.enabled }}
+        readOnly: {{ not .Values.connector_service.enabled }}

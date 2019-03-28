@@ -12,11 +12,9 @@ import (
 	"k8s.io/apiserver/pkg/authentication/request/bearertoken"
 	"k8s.io/apiserver/pkg/authentication/user"
 	"k8s.io/apiserver/pkg/authorization/authorizer"
-	testclient "k8s.io/client-go/kubernetes/fake"
 )
 
 func TestProxyWithOIDCSupport(t *testing.T) {
-	kc := testclient.NewSimpleClientset()
 	cfg := Config{
 		Authentication: &authn.AuthnConfig{
 			OIDC: &authn.OIDCConfig{},
@@ -38,11 +36,8 @@ func TestProxyWithOIDCSupport(t *testing.T) {
 		t.Run(v.description, func(t *testing.T) {
 
 			w := httptest.NewRecorder()
-			proxy, err := New(kc, cfg, v.authorizer, authenticator)
+			proxy := New(cfg, v.authorizer, authenticator)
 
-			if err != nil {
-				t.Fatalf("Failed to instantiate test proxy. Details : %s", err.Error())
-			}
 			proxy.Handle(w, v.req)
 
 			resp := w.Result()

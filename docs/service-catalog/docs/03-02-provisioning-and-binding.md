@@ -34,16 +34,17 @@ To provision a service, create a ServiceInstance custom resource. Generally spea
 ### Create a ServiceBinding
 
 Kyma binding operation consists of two phases:
+
 1. The system gathers the information necessary to connect to the ServiceInstance and authenticate it. The Service Catalog handles this phase directly, without the use of any additional Kyma custom resources.
 2. The system must make the information it collected available to the application. Since the Service Catalog does not provide this functionality, you must create a ServiceBindingUsage custom resource.
 
 ![Kyma binding](./assets/binding.png)
 
-> **NOTE:** The system allows you to create the ServiceBinding and ServiceBindingUsage resources at the same time.
+> **TIP:** You can create the ServiceBinding and ServiceBindingUsage resources at the same time.
 
 ### Define other types of resources
 
-The UsageKind is a cluster-wide custom resource which allows you to bind a ServiceInstance to any kind of resource. By default, Kyma provides two UsageKinds which enable binding either to a Deployment or a Function. You can add more UsageKinds if you want to bind your ServiceInstance to other types of resources. The UsageKind contains information on how the binding to these custom resources is conducted. The ServiceBindingUsage uses this information to inject Secrets to the application.
+The UsageKind is a cluster-wide custom resource which allows you to bind a ServiceInstance to any kind of resource. By default, Kyma provides two UsageKinds which enable binding either to a Deployment or Function. You can add more UsageKinds if you want to bind your ServiceInstance to other types of resources. The UsageKind contains information on how the binding to these custom resources is conducted. The ServiceBindingUsage uses this information to inject Secrets to the application.
 
 ![Kyma UsageKind](./assets/usagekind.png)
 
@@ -51,7 +52,7 @@ The UsageKind is a cluster-wide custom resource which allows you to bind a Servi
 ### Delete a ServiceBinding
 
 Kyma unbinding can be achieved in two ways:
-- Delete the ServiceBindingUsage. The Binding Usage Controller deletes the Secret injection, but the Secret itself still exists in the Namespace.
+- Delete the ServiceBindingUsage. The Service Binding Usage Controller deletes the Secret injection, but the Secret itself still exists in the Namespace.
 - Delete the ServiceBinding. It deletes the Secret and triggers the deletion of all related ServiceBindingUsages.
 
 ![Kyma unbinding](./assets/unbinding.png)

@@ -30,3 +30,7 @@ ci-release: build build-image push-image
 clean:
 	rm -f $(binary)
 
+.PHONY: path-to-referenced-charts
+path-to-referenced-charts:
+	@echo "resources/application-connector"
+
