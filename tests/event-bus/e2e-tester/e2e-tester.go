@@ -36,7 +36,7 @@ const (
 )
 
 var (
-	subscriberNamespace			  *string
+	subscriberNamespace           *string
 	subscriberEventEndpointURL    *string
 	subscriberResultsEndpointURL  *string
 	subscriberStatusEndpointURL   *string
@@ -58,13 +58,13 @@ func main() {
 	subscriberImage := flags.String("subscriber-image", "", "subscriber Docker `image` name")
 	subscriberNamespace = flags.String("subscriber-ns", "default", "k8s `namespace` in which subscriber test app is running")
 	subscriberEventEndpointURL = flags.String("subscriber-events-uri",
-		"http://" + util.SubscriberName + "." + *subscriberNamespace + ":9000/v1/events", "subscriber service events endpoint `URL`")
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/events", "subscriber service events endpoint `URL`")
 	subscriberResultsEndpointURL = flags.String("subscriber-results-uri",
-		"http://" + util.SubscriberName + "." + *subscriberNamespace + ":9000/v1/results", "subscriber service results endpoint `URL`")
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/results", "subscriber service results endpoint `URL`")
 	subscriberStatusEndpointURL = flags.String("subscriber-status-uri",
-		"http://" + util.SubscriberName + "." + *subscriberNamespace + ":9000/v1/status", "subscriber service status endpoint `URL`")
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/status", "subscriber service status endpoint `URL`")
 	subscriberShutdownEndpointURL = flags.String("subscriber-shutdown-uri",
-		"http://" + util.SubscriberName + "." + *subscriberNamespace + ":9000/v1/shutdown", "subscriber service shutdown endpoint `URL`")
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/shutdown", "subscriber service shutdown endpoint `URL`")
 
 	flags.Parse(os.Args[1:])
 
@@ -415,7 +415,7 @@ func checkSubscriptionReady(subscriberNamespace string, noOfRetries int) bool {
 	for i := 0; i < noOfRetries && !isReady; i++ {
 		kySub, err := subClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Get(subscriptionName, metav1.GetOptions{})
 		if err != nil {
-			log.Printf("Cannot get Kyma subscription, name: %v; namespace: %", subscriptionName, subscriberNamespace)
+			log.Printf("Cannot get Kyma subscription, name: %v; namespace: %v", subscriptionName, subscriberNamespace)
 			break
 		} else {
 			if isReady = kySub.HasCondition(activatedCondition); !isReady {
