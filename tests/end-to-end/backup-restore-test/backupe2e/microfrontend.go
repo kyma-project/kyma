@@ -105,23 +105,10 @@ func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.M
 }
 
 func (t microfrontendTest) getMicrofrontends(namespace string, waitmax time.Duration) (*uiV1alpha1v.MicroFrontendList, error) {
-	timeout := time.After(waitmax)
-	tick := time.Tick(2 * time.Second)
-	for {
-		select {
-		case <-timeout:
-			mfs, err := t.mfClient.UiV1alpha1().MicroFrontends(namespace).List(metav1.ListOptions{})
-			if err != nil {
-				return nil, err
-			}
-			return nil, fmt.Errorf("Microfrontend not availiable within given time  %v: %+v", waitmax, mfs)
-		case <-tick:
-			mfs, err := t.mfClient.UiV1alpha1().MicroFrontends(namespace).List(metav1.ListOptions{})
-			So(err, ShouldBeNil)
-			if 1 != int32(len(mfs.Items)) {
-				return nil, fmt.Errorf("Expected only one microfrontend, but got %v", len(mfs.Items))
-			}
-			return mfs, err
-		}
+	mfs, err := t.mfClient.UiV1alpha1().MicroFrontends(namespace).List(metav1.ListOptions{})
+	So(err, ShouldBeNil)
+	if 1 != int32(len(mfs.Items)) {
+		return nil, fmt.Errorf("Expected only one microfrontend, but got %v", len(mfs.Items))
 	}
+	return mfs, err
 }
