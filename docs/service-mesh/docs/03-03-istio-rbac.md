@@ -1,18 +1,24 @@
 ---
-title: Istio RBAC
+title: Istio RBAC configuration
 type: Details
 ---
 
-As a core component, Istio is installed with Kyma by default. As a part of this installation, we create a [Cluster RBAC Config](https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1/) object, which dictates the global (cluster wide) behavior of Istio. 
+As a core component, Istio is installed with Kyma by default. The [ClusterRbacConfig](https://istio.io/docs/reference/config/authorization/istio.rbac.v1alpha1/) custom resource (CR), which defines the global behavior of Istio, is created as a part of the installaion process.
 
-The default configuration file can be found [here](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/istio-rbac/templates/rbac-config.yaml)
+The default Istio RBAC configuration is defined in [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/istio-rbac/templates/rbac-config.yaml) file. 
 
-> **NOTE:** As of Istio 1.1 the previous implementation (`RbacConfig`) has been deprecated in favor of `ClusterRbacConfig`. More information can be found in the Istio upgrade [documentation](https://istio.io/docs/setup/kubernetes/upgrade/steps/#migrating-from-rbacconfig-to-clusterrbacconfig)
+## Override the default configuration
 
-> **NOTE:** The `ClusterRBACConfig` object is a singleton, meaning there can be only one configuration file, and only the name `default` is valid. 
+To override the default configuration of Istio RBAC, edit the ClusterRbacConfig CR on a running cluster. This CR is created in the `kyma-system` Namespace and therefore requires admin permissions to edit it. 
 
-## Overriding the default configuration
-Because the object is a singleton, any customization of the RBACConig needs to be made in the `default` configuration file. 
-Alternatively, it is possible to delete our default configuration, and supply a new one. 
+To show the current Istio RBAC configuration in the `yaml` format, run: 
+```bash
+kubectl get -n kyma-system clusterrbacconfig -o yaml
+```
 
-> **NOTE:** As the default configuration is installed in the `kyma-system` namespace, be aware that only users with permissions inside the namespace will have access to edit the resource. By default that would require `kyma-admin` access or `kyma-developer` bound to the `kyma-system` namespace access. 
+To edit the Istio RBAC configuration, run: 
+```bash
+kubectl edit -n kyma-system clusterrbacconfig
+```
+
+> **NOTE:** The `ClusterRbacConfig` object is a singleton, which means that only a single object of this kind can exist in a cluster. Additionally, the only valid name for the object is `default`. As such, the best way to customize Istio RBAC is by editing the existing `ClusterRbacConfig` object. 
