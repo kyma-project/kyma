@@ -20,7 +20,6 @@ console:
 
 global:
   isLocalEnv: false
-  knative: true
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:

@@ -1,7 +1,7 @@
 # Default values for event-bus.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-# Update .global.event_bus.version and .global.kymaEventBus also in nasts-streaming chart
+# Update .global.event_bus.version also in nats-streaming chart
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -48,8 +48,6 @@ global:
     apiURL: http://zipkin.kyma-system:9411/api/v1/spans
   eventBusVersion: "0.2.34"
   isLocalEnv: false
-  knative: true
-  kymaEventBus: true
 e2eTests:
   nameTester: "test-event-bus-tester"
   nameSubscriber: "test-event-bus-subscriber"    

@@ -1,6 +1,4 @@
 dependencies:
   # Knative eventing
   - name: publish-knative
-    condition: global.knative
   - name: subscription-controller-knative
-    condition: global.knative

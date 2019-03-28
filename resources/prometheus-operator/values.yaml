@@ -1,6 +1,5 @@
 global:
   isLocalEnv: false
-  knative: true
   ## Hyperkube image to use when getting ThirdPartyResources & cleaning up
   ##
   hyperkube:

@@ -36,10 +36,6 @@ do
             shift
             shift
         ;;
-        --knative)
-            KNATIVE="--knative"
-            shift
-        ;;
         --password)
             checkInputParameterValue "$2"
             ADMIN_PASSWORD="${2}"

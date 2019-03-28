@@ -1,7 +1,6 @@
 param (
     [string]$CR_PATH = $null,
     [switch]$LOCAL = $false,
-	[switch]$KNATIVE = $true
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
@@ -30,13 +29,6 @@ else {
 if ($CR_PATH -ne "") {
     $cmd = "kubectl.exe apply -f ${CR_PATH}"
     Invoke-Expression -Command $cmd
-
-    if ($KNATIVE -eq $true) {
-	    $cmd = @"
-kubectl -n kyma-installer patch configmap installation-config-overrides -p '{\"data\": {\"global.knative\": \"true\", \"global.kymaEventBus\": \"false\", \"global.natsStreaming.clusterID\": \"knative-nats-streaming\"}}'
-"@
-	    Invoke-Expression -Command $cmd
-    }
 
     $cmd = "kubectl.exe label installation/kyma-installation action=install"
     Invoke-Expression -Command $cmd

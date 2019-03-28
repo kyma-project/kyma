@@ -110,7 +110,6 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        {{ if .Values.global.kymaEventBus }}
         - name: STAN_USERNAME
           valueFrom:
             secretKeyRef:
@@ -121,7 +120,6 @@ spec:
             secretKeyRef:
               name: nats-user-stan
               key: password
-        {{ end }}
         ports:
         {{- range $key, $value := .Values.global.natsStreaming.ports }}
         - name: {{ $key }}
