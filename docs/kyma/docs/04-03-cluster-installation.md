@@ -43,7 +43,7 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
 
 ## DNS setup and TLS certificate generation (optional)
 
->**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section.
+>**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-cluster-prepare-the-installation-configuration-file) section.
 
 ### Delegate the management of your domain to Google Cloud DNS
 
@@ -277,9 +277,9 @@ After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-sign
 
 This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster.
 
-## DNS setup and TLS certificate generation
+## DNS setup and TLS certificate generation (optional)
 
->**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section.
+>**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file-1) section.
 
 ### Delegate the management of your domain to Azure DNS
 
@@ -290,9 +290,9 @@ Follow these steps:
     ```
     export DNS_DOMAIN={YOUR_DOMAIN} # example.com
     export SUB_DOMAIN={YOUR_SUBDOMAIN} # cluster (in this case the full name of your cluster is cluster.example.com)
-      ```
+    ```
 
-1. Create a DNS-managed zone in your Azure subscription. Run:
+2. Create a DNS-managed zone in your Azure subscription. Run:
 
     ```
     az network dns zone create -g $RS_GROUP -n $DNS_DOMAIN
@@ -300,7 +300,7 @@ Follow these steps:
 
     Alternatively, create it through the Azure UI. In the **Networking** section, go to **All services**, click **DNS zones**, and select **Add**.
 
-2. Delegate your domain to Azure name servers.
+3. Delegate your domain to Azure name servers.
 
     - Get the list of the name servers from the zone details. This is a sample list:
       ```
@@ -312,7 +312,7 @@ Follow these steps:
 
     - Set up your domain to use these name servers.
 
-3. Check if everything is set up correctly and your domain is managed by Azure name servers. Run:
+4. Check if everything is set up correctly and your domain is managed by Azure name servers. Run:
     ```
     host -t ns $DNS_DOMAIN
     ```
@@ -320,7 +320,7 @@ Follow these steps:
 
 ## Get the TLS certificate
 
->**NOTE:** Azure DNS is not yet supported by Certbot so you must perform a manual verification.
+>**NOTE:** Azure DNS is not yet supported by Certbot so you must perform manual verification.
 
 1. Create a folder for certificates. Run:
     ```
@@ -445,7 +445,7 @@ Follow these steps:
     ```
     kubectl apply -f my-kyma.yaml
     ```
-    >**NOTE:** In case you receive the `Error from server (MethodNotAllowed)` error, run the command again before going to step 2.
+    >**NOTE:** If you get the `Error from server (MethodNotAllowed)` error, run the command again before proceeding to the next step.
 
 2. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
@@ -470,7 +470,7 @@ Follow these steps:
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
-## Add the xip.io self-signed certificate to your OS trusted certificates
+## Add the xip.io self-signed certificate to your OS trusted certificates (optional)
 
 >**NOTE:** Skip this section if you use your own domain.
 

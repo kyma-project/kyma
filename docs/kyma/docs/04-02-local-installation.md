@@ -28,13 +28,16 @@ Virtualization:
 
 Kyma comes with a local wildcard self-signed `server.crt` certificate that you can find under the `/installation/certs/workspace/raw/` directory of the `kyma` repository. Trust it on the OS level for convenience.
 
-Follow these steps to "always trust" the Kyma certificate on a Mac:
+Follow these steps to "always trust" the Kyma certificate on the MacOS:
 
 1. Change the working directory to `installation`:
+
   ```
   cd installation
   ```
+
 2. Run this command:
+
   ```
   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/workspace/raw/server.crt
   ```
@@ -51,24 +54,27 @@ You can install Kyma either with all core subcomponents or only with the selecte
 
   > **NOTE:** Logging and Monitoring subcomponents are not included by default when you install Kyma on Minikube. You can install them using the instructions provided [here](https://github.com/kyma-project/kyma/tree/master/resources).
 
-Follow these instructions to install Kyma from the release or from local sources:
+Follow these instructions to install Kyma from a release or from local sources:
 <div tabs>
   <details>
   <summary>
-  From the release
+  From a release
   </summary>
 
   1. Change the working directory to `installation`:
+
     ```
     cd installation
     ```
 
   2. Use the following command to run Kubernetes locally using Minikube:
+
     ```
     ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
     ```
 
   3. Wait until the `kube-dns` Pod is ready. Run this script to setup Tiller:
+
     ```
     ./scripts/install-tiller.sh
     ```
@@ -76,26 +82,31 @@ Follow these instructions to install Kyma from the release or from local sources
   4. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.
 
   5. Export the release version as an environment variable. Run:
+
     ```
     export LATEST={KYMA_RELEASE_VERSION}
     ```
 
   6. Deploy the Kyma Installer in your cluster from the `$LATEST` release:
+
     ```
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-local.yaml
     ```
 
   7. Configure the Kyma installation using the local configuration file from the `$LATEST` release:
+
     ```
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
     ```
 
   8. To trigger the installation process, label the `kyma-installation` custom resource:
+
     ```
     kubectl label installation/kyma-installation action=install
     ```
 
   9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
+
     ```
     ./scripts/is-installed.sh
     ```
@@ -105,7 +116,7 @@ Follow these instructions to install Kyma from the release or from local sources
 From sources
 </summary>
 
-To start the local installation from sources, run the following command:
+To start the local installation from sources, run this command:
 
 ```
 ./installation/cmd/run.sh
