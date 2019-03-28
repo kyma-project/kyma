@@ -60,14 +60,14 @@ func (t microfrontendTest) TestResources(namespace string) {
 	So(mfValue.Name, ShouldEqual, t.microforntendName)
 	So(mfValue.Spec.Category, ShouldEqual, "Test")
 	So(mfValue.Spec.Version, ShouldEqual, "1")
-	So(mfValue.Spec.ViewBaseURL, ShouldEqual, "/mf-test")
+	So(mfValue.Spec.ViewBaseURL, ShouldEqual, "https://test.kyma.cx/mf-test")
 
 	So(len(mfValue.Spec.NavigationNodes), ShouldEqual, 1)
 	navNode := mfValue.Spec.NavigationNodes[0]
 
 	So(navNode.Label, ShouldEqual, "testMF")
 	So(navNode.NavigationPath, ShouldEqual, "/test/path")
-	So(navNode.ViewURL, ShouldEqual, "resourcePath")
+	So(navNode.ViewURL, ShouldEqual, "/resourcePath")
 	So(navNode.ShowInNavigation, ShouldEqual, true)
 
 }
@@ -78,6 +78,10 @@ func (t microfrontendTest) DeleteResources() {
 
 func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.MicroFrontend, error) {
 	microfrontend := &uiV1alpha1v.MicroFrontend{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "ui.kyma-project.io/v1alpha1",
+			Kind:       "MicroFrontend",
+		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name: t.microforntendName,
 		},
@@ -85,7 +89,7 @@ func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.M
 			CommonMicroFrontendSpec: uiV1alpha1v.CommonMicroFrontendSpec{
 				Version:     "1",
 				Category:    "Test",
-				ViewBaseURL: "/mf-test",
+				ViewBaseURL: "https://test.kyma.cx/mf-test",
 				NavigationNodes: []uiV1alpha1v.NavigationNode{
 					uiV1alpha1v.NavigationNode{
 						Label:            "testMF",
