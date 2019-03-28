@@ -1,15 +1,18 @@
 package testkit
 
 import (
+	"time"
+
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
-	"time"
 )
 
 type HelmClient interface {
 	CheckReleaseStatus(rlsName string) (*rls.GetReleaseStatusResponse, error)
 	CheckReleaseExistence(name string) (bool, error)
+	IsInstalled(rlsName string) bool
+	TestRelease(rlsName string) (<-chan *rls.TestReleaseResponse, <-chan error)
 }
 
 type helmClient struct {
@@ -28,7 +31,12 @@ func (hc *helmClient) CheckReleaseStatus(rlsName string) (*rls.GetReleaseStatusR
 	return hc.helm.ReleaseStatus(rlsName)
 }
 
-func (hc *helmClient) CheckReleaseExistence(name string) (bool, error) {
+func (hc *helmClient) IsInstalled(rlsName string) bool {
+	status, err := hc.CheckReleaseStatus(rlsName)
+	return err == nil && status.Info.Status.Code == release.Status_DEPLOYED
+}
+
+func (hc *helmClient) CheckReleaseExistence(rlsName string) (bool, error) {
 	listResponse, err := hc.helm.ListReleases(helm.ReleaseListStatuses([]release.Status_Code{
 		release.Status_DELETED,
 		release.Status_DELETING,
@@ -45,9 +53,13 @@ func (hc *helmClient) CheckReleaseExistence(name string) (bool, error) {
 	}
 
 	for _, rel := range listResponse.Releases {
-		if rel.Name == name {
+		if rel.Name == rlsName {
 			return true, nil
 		}
 	}
 	return false, nil
+}
+
+func (hc *helmClient) TestRelease(rlsName string) (<-chan *rls.TestReleaseResponse, <-chan error) {
+	return hc.helm.RunReleaseTest(rlsName)
 }
