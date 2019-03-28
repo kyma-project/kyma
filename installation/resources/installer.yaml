@@ -179,7 +179,7 @@ spec:
               kubectl get -n kube-system secret tiller-secret -o jsonpath="{.data['ca\.key']}" | base64 --decode > "${WORKING_DIR}/ca.key"
             else
               echo "Secret: tiller-secret does not exists!"
-              exit 0
+              exit 1
             fi
 
             echo "---> Generate Helm key"
