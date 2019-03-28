@@ -116,7 +116,7 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedEleme
 
 func broker() ServiceBroker {
 	return ServiceBroker{
-		Name:      fixture.TestingBrokerName,
+		Name:      fmt.Sprintf("ns-%s", fixture.TestingBrokerName),
 		Namespace: TestNamespace,
 	}
 }
