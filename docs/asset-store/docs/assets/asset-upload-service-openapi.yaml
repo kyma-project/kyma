@@ -9,7 +9,7 @@ info:
 paths:
   /upload:
     post:
-      description: Uploads files to Minio from `multipart/form-data` forms.
+      description: Uploads files to Minio from `multipart/form-data` form.
       tags:
         - upload
       summary: Uploads files to Minio.

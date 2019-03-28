@@ -47,7 +47,7 @@ global:
     version: aabedc33
   docs:
     dir: develop/
-    version: daf235a6
+    version: 84af083b
   namespace_controller:
     dir: develop/
     version: 429bfbcc

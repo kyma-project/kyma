@@ -6,13 +6,16 @@ global:
       name: kyma-gateway
   asset_store_controller_manager:
     dir: develop/
-    version: cf2d11e4
+    version: 'cf2d11e4'
   asset_upload_service:
     dir: develop/
-    version: 8a8b2544
+    version: '84af083b'
+  asset_metadata_service:
+    dir: develop/
+    version: '84af083b'
   asset_store_test:
     dir: develop/
-    version: daf235a6
+    version: 'daf235a6'
 
 minio:
   mode: standalone

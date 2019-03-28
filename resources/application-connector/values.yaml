@@ -24,10 +24,10 @@ global:
     version: ac61deff
   connector_service:
     dir: develop/
-    version: 342734f5
+    version: f478b085
   connector_service_tests:
     dir: develop/
-    version: e1af648f
+    version: f478b085
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
