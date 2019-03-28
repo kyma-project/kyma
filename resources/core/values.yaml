@@ -68,7 +68,7 @@ global:
     version: 429bfbcc
   console_backend_service:
     dir: develop/
-    version: fbf6fcf1
+    version: 55dc3511
   console_backend_service_test:
     dir: pr/ #TODO: Change it
     version: PR-3415 #TODO: Change it
