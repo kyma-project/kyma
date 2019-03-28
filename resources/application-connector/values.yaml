@@ -31,6 +31,9 @@ global:
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
+  connection_token_handler_tests:
+    dir: develop/
+    version: 00d7f520
   connectivity_certs_controller:
     dir: develop/
     version: 2dc766a0
@@ -39,7 +42,7 @@ global:
     version: 74a78ec9
   application_gateway:
     dir: develop/
-    version: c90f63c6
+    version: 78b98274
   gateway_tests:
     dir: develop/
     version: e1af648f
