@@ -4,18 +4,13 @@ package servicecatalog
 
 import (
 	"fmt"
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
-	"github.com/pkg/errors"
-	"log"
 	"testing"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ClusterServiceBroker struct {
@@ -49,18 +44,7 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
-	testBroker := newTestClusterServiceBroker(expectedResource.Name, svcatCli)
-	err = testBroker.Create()
-	require.NoError(t, err)
-
-	defer func() {
-		err := testBroker.Delete()
-		if err != nil {
-			log.Printf(errors.Wrapf(err, "while deleting test ServiceBroker").Error())
-		}
-	}()
-
-	err = wait.ForClusterServiceBroker(expectedResource.Name, svcatCli)
+	err = wait.ForClusterServiceBrokerReady(expectedResource.Name, svcatCli)
 	require.NoError(t, err)
 
 	resourceDetailsQuery := `
@@ -114,8 +98,8 @@ func checkClusterBroker(t *testing.T, expected, actual ClusterServiceBroker) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
-	// Url
-	assert.Equal(t, expected.Url, actual.Url)
+	// Status
+	assert.Equal(t, expected.Status.Ready, actual.Status.Ready)
 }
 
 func assertClusterBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker, expectedElement ClusterServiceBroker) {
@@ -137,35 +121,6 @@ func clusterBroker() ClusterServiceBroker {
 		Status: ClusterServiceBrokerStatus{
 			Ready: true,
 		},
-		Url: CommonBrokerURL,
 	}
 }
 
-type testClusterServiceBroker struct {
-	name     string
-	svcatCli *clientset.Clientset
-}
-
-func newTestClusterServiceBroker(name string, svcatCli *clientset.Clientset) *testClusterServiceBroker {
-	return &testClusterServiceBroker{name: name, svcatCli: svcatCli}
-}
-
-func (t *testClusterServiceBroker) Create() error {
-	broker := &v1beta1.ClusterServiceBroker{
-		ObjectMeta: metav1.ObjectMeta{
-			Name: t.name,
-		},
-		Spec: v1beta1.ClusterServiceBrokerSpec{
-			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: CommonBrokerURL,
-			},
-		},
-	}
-
-	_, err := t.svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Create(broker)
-	return err
-}
-
-func (t *testClusterServiceBroker) Delete() error {
-	return t.svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Delete(t.name, &metav1.DeleteOptions{GracePeriodSeconds: &brokerDeletionGracefulPeriod})
-}

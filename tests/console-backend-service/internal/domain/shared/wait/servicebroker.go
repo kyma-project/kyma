@@ -8,8 +8,8 @@ import (
 
 func ForServiceBroker(name, namespace string, svcatCli *clientset.Clientset) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		instance, err := svcatCli.ServicecatalogV1beta1().ServiceBrokers(namespace).Get(name, metav1.GetOptions{})
-		if err != nil || instance == nil {
+		broker, err := svcatCli.ServicecatalogV1beta1().ServiceBrokers(namespace).Get(name, metav1.GetOptions{})
+		if err != nil || broker == nil {
 			return false, err
 		}
 

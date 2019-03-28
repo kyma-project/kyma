@@ -25,14 +25,7 @@ dep ensure -vendor-only
 Before you run the acceptance tests, export required environment variables with the following command:
 
 ```bash
-export ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D)
-export ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D)
-export READ_ONLY_USER_PASSWORD=$(kubectl get secret test-read-only-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D)
-export READ_ONLY_USER_EMAIL=$(kubectl get secret test-read-only-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D)
-export NO_RIGHTS_USER_PASSWORD=$(kubectl get secret test-no-rights-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D)
-export NO_RIGHTS_USER_EMAIL=$(kubectl get secret test-no-rights-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D)
-
-export KUBECONFIG=/Users/${USER}/.kube/config
+export KUBECONFIG=/Users/${USER}/.kube/config && export ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D) && export ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D) && export READ_ONLY_USER_PASSWORD=$(kubectl get secret test-read-only-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D) && export READ_ONLY_USER_EMAIL=$(kubectl get secret test-read-only-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D) && export NO_RIGHTS_USER_PASSWORD=$(kubectl get secret test-no-rights-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D) && export NO_RIGHTS_USER_EMAIL=$(kubectl get secret test-no-rights-user -n kyma-system -o jsonpath="{.data.email}" | base64 -D)
 ```
 
 Run acceptance tests using the following command:

@@ -6,13 +6,19 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func ForClusterServiceBroker(name string, svcatCli *clientset.Clientset) error {
+func ForClusterServiceBrokerReady(name string, svcatCli *clientset.Clientset) error {
 	return waiter.WaitAtMost(func() (bool, error) {
-		instance, err := svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Get(name, metav1.GetOptions{})
-		if err != nil || instance == nil {
+		broker, err := svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Get(name, metav1.GetOptions{})
+		if err != nil || broker == nil {
 			return false, err
 		}
 
-		return true, nil
+		for _, v := range broker.Status.Conditions {
+			if v.Type == "Ready" && v.Status == "True" {
+				return true, nil
+			}
+		}
+
+		return false, nil
 	}, readyTimeout)
 }

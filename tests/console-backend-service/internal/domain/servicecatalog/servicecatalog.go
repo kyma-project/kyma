@@ -3,12 +3,10 @@ package servicecatalog
 const (
 	ModuleName               string = "servicecatalog"
 	TestNamespace            string = "console-backend-service-sc"
-	ClusterBrokerReleaseName        = "cluster-test-broker"
-	BrokerReleaseName               = "test-broker"
+	ClusterBrokerReleaseName        = "helm-broker"
 
 	ClusterServiceBrokerKind = "ClusterServiceBroker"
 	ServiceBrokerKind        = "ServiceBroker"
-	CommonBrokerURL = "example.com"
 )
 
-var brokerDeletionGracefulPeriod int64 = 0
+var noGracefulPeriod int64 = 0

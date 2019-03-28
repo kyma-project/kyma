@@ -144,15 +144,21 @@ func assertClusterPlanExistsAndEqual(t *testing.T, arr []shared.ClusterServicePl
 }
 
 func clusterServiceClass() shared.ClusterServiceClass {
+	className := "faebbe18-0a84-11e9-ab14-d663bd873d94"
 	return shared.ClusterServiceClass{
-		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-		ExternalName: "user-provided-service",
+		Name:         className,
+		ExternalName: "testing",
 		Activated:    false,
 		Plans: []shared.ClusterServicePlan{
 			{
-				Name:                           "86064792-7ea2-467b-af93-ac9694d96d52",
-				ExternalName:                   "default",
-				RelatedClusterServiceClassName: "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
+				Name:                           "a6078799-70a1-4674-af91-aba44dd6a56",
+				ExternalName:                   "full",
+				RelatedClusterServiceClassName: className,
+			},
+			{
+				Name:                           "631dae68-98e1-4e45-b79f-1036ca5b29cb",
+				ExternalName:                   "minimal",
+				RelatedClusterServiceClassName: className,
 			},
 		},
 	}

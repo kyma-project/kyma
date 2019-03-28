@@ -4,6 +4,8 @@ package servicecatalog
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
@@ -26,6 +28,13 @@ func TestServiceClassesQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedResource := serviceClass()
+
+	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
+	require.NoError(t, err)
+
+	err = wait.ForServiceClass(expectedResource.Name, expectedResource.Namespace, svcatCli)
+	require.NoError(t, err)
+
 	resourceDetailsQuery := `
 		name
 		namespace
@@ -152,16 +161,22 @@ func assertPlanExistsAndEqual(t *testing.T, arr []shared.ServicePlan, expectedEl
 }
 
 func serviceClass() shared.ServiceClass {
+	className := "faebbe18-0a84-11e9-ab14-d663bd873d94"
 	return shared.ServiceClass{
-		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
+		Name:         className,
 		Namespace:    TestNamespace,
-		ExternalName: "user-provided-service",
+		ExternalName: "testing",
 		Activated:    false,
 		Plans: []shared.ServicePlan{
 			{
-				Name:                    "86064792-7ea2-467b-af93-ac9694d96d52",
-				ExternalName:            "default",
-				RelatedServiceClassName: "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
+				Name:                    "631dae68-98e1-4e45-b79f-1036ca5b29cb",
+				ExternalName:            "minimal",
+				RelatedServiceClassName: className,
+			},
+			{
+				Name:                    "a6078799-70a1-4674-af91-aba44dd6a56",
+				ExternalName:            "full",
+				RelatedServiceClassName: className,
 			},
 		},
 	}
