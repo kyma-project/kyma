@@ -12,7 +12,7 @@ rules:
     resources: ["*"]
     verbs: ["get", "list", "watch"]
   - apiGroups: [""]
-    resources: ["pods","services"]
+    resources: ["pods","services", "secrets"]
     verbs: ["get", "list", "watch", "update", "delete"]
   - apiGroups: ["extensions", "apps"]
     resources: ["deployments"]
