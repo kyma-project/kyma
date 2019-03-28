@@ -12,6 +12,19 @@ PLACEHOLDER="#__STATIC_PASSWORDS__"
 
 NEWLINE="%"
 
+# check if kubectl works as expected. Minikube stop and then minikube start cases temporary unavailability of the api-server)
+while :
+do
+  if [[ $(kubectl get secrets -l dex-user-config=true --all-namespaces -o json) ]]
+    then
+      echo "api-server available via kubectl"
+      break
+    else
+      echo "api-server not available via kubectl - waiting 5s..."
+      sleep 5
+    fi
+done
+
 NUM=0
 for secret in $(kubectl get secrets -l dex-user-config=true --all-namespaces -o json | jq -r -c '.items | .[] | .data')
 do
@@ -49,7 +62,7 @@ do
 
   # generate userID
   USER_ID=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | fold -w 32 | head -n 1)
-  
+
   # prepare config map to enable static users
   if [ $NUM -eq 1 ]
   then
