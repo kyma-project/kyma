@@ -430,6 +430,7 @@
   input-imports = [
     "github.com/golang/lint/golint",
     "github.com/kyma-project/kyma/components/event-bus/api/publish",
+    "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
     "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned",
     "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
     "github.com/kyma-project/kyma/components/event-bus/test/util",
