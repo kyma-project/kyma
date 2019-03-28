@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/source"
 	"github.com/onsi/gomega"
@@ -28,14 +29,16 @@ func TestReconcile(t *testing.T) {
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(c, scheme)
 	bucketService := newBucketService(c, scheme, "")
+	assetWhsConfigService := config.NewAssetWebHookService(c)
 
 	r := &ReconcileDocsTopic{
-		relistInterval: time.Hour,
 		Client:         c,
 		scheme:         scheme,
+		relistInterval: time.Hour,
 		recorder:       mgr.GetRecorder("docstopic-controller"),
 		assetSvc:       assetService,
 		bucketSvc:      bucketService,
+		whsConfigSvc:   assetWhsConfigService,
 	}
 
 	recFn, requests := SetupTestReconcile(r)

@@ -2,6 +2,7 @@ package clusterdocstopic
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic"
 	"github.com/pkg/errors"
 	"k8s.io/client-go/tools/record"
@@ -82,6 +83,7 @@ type ReconcileClusterDocsTopic struct {
 	recorder       record.EventRecorder
 	assetSvc       docstopic.AssetService
 	bucketSvc      docstopic.BucketService
+	whsCfgSvc      config.AssetWebHookConfigService
 }
 
 // Reconcile reads that state of the cluster for a DocsTopic object and makes changes based on the state read
@@ -107,7 +109,7 @@ func (r *ReconcileClusterDocsTopic) Reconcile(request reconcile.Request) (reconc
 	}
 
 	docsTopicLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName())
-	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc)
+	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc, r.whsCfgSvc)
 	commonStatus, err := commonHandler.Handle(ctx, instance, instance.Spec.CommonDocsTopicSpec, instance.Status.CommonDocsTopicStatus)
 	if updateErr := r.updateStatus(ctx, instance, commonStatus); updateErr != nil {
 		finalErr := updateErr
