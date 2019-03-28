@@ -44,8 +44,8 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
-	expectedResourceFromClusterServiceClass := fixture.ServiceInstance("cluster-test-instance", TestNamespace)
-	expectedResourceFromServiceClass := instanceFromServiceClass("test-instance")
+	expectedResourceFromClusterServiceClass := fixture.ServiceInstanceFromClusterServiceClass("cluster-test-instance", TestNamespace)
+	expectedResourceFromServiceClass := fixture.ServiceInstanceFromServiceClass("test-instance", TestNamespace)
 	resourceDetailsQuery := instanceDetailsFields()
 
 	t.Log(fmt.Sprintf("Subscribe instance created by %s", ClusterServiceBrokerKind))
@@ -429,31 +429,6 @@ func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement 
 
 		return false
 	}, "Resource does not exist")
-}
-
-func instanceFromServiceClass(name string) shared.ServiceInstance {
-	return shared.ServiceInstance{
-		Name:      name,
-		Namespace: TestNamespace,
-		Labels:    []string{"test", "test2"},
-		PlanSpec: map[string]interface{}{
-			"planName":       "test",
-			"additionalData": "foo",
-		},
-		ServicePlan: shared.ServicePlan{
-			Name:         "a6078799-70a1-4674-af91-aba44dd6a56",
-			ExternalName: "full",
-		},
-		ServiceClass: shared.ServiceClass{
-			Name:         "faebbe18-0a84-11e9-ab14-d663bd873d94",
-			ExternalName: "testing",
-			Namespace:    TestNamespace,
-		},
-		Status: shared.ServiceInstanceStatus{
-			Type: shared.ServiceInstanceStatusTypeRunning,
-		},
-		Bindable: true,
-	}
 }
 
 func instanceEvent(eventType string, serviceInstance shared.ServiceInstance) ServiceInstanceEvent {

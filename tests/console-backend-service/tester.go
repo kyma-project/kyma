@@ -4,5 +4,5 @@ import "time"
 
 const (
 	DefaultSubscriptionTimeout = 5 * time.Second
-	DefaultReadyTimeout        = time.Second * 300
+	DefaultReadyTimeout        = time.Minute * 3
 )

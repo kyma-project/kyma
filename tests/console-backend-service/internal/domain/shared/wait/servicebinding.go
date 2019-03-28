@@ -2,6 +2,7 @@ package wait
 
 import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -22,7 +23,7 @@ func ForServiceBindingReady(name, namespace string, svcatCli *clientset.Clientse
 		}
 
 		return false, nil
-	}, readyTimeout)
+	}, tester.DefaultReadyTimeout)
 }
 
 func ForServiceBindingDeletion(name, namespace string, svcatCli *clientset.Clientset) error {
@@ -35,5 +36,5 @@ func ForServiceBindingDeletion(name, namespace string, svcatCli *clientset.Clien
 			return false, err
 		}
 		return true, nil
-	}, readyTimeout)
+	}, tester.DefaultReadyTimeout)
 }

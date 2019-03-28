@@ -14,6 +14,7 @@ import (
 type TestBundleConfig struct {
 	ConfigMap TestBundleConfigMap
 
+	ClusterServiceBrokerName        string   `envconfig:"default=helm-broker"`
 	ClusterServiceClassExternalName string   `envconfig:"default=testing"`
 	ClusterServicePlanExternalNames []string `envconfig:"default=full,minimal"`
 }
@@ -86,6 +87,23 @@ func (c *TestBundleConfigurer) WaitForTestBundleReady() error {
 	}
 
 	return nil
+}
+
+func (c *TestBundleConfigurer) waitForClusterServiceBrokerReady() error {
+	return waiter.WaitAtMost(func() (bool, error) {
+		broker, err := c.svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Get(c.cfg.ClusterServiceBrokerName, metav1.GetOptions{})
+		if err != nil || broker == nil {
+			return false, err
+		}
+
+		for _, v := range broker.Status.Conditions {
+			if v.Type == "Ready" && v.Status == "True" {
+				return true, nil
+			}
+		}
+
+		return false, nil
+	}, tester.DefaultReadyTimeout)
 }
 
 func (c *TestBundleConfigurer) waitForClusterServiceClass() error {

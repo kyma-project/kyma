@@ -109,7 +109,7 @@ func assertClusterBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker,
 
 func clusterBroker() ClusterServiceBroker {
 	return ClusterServiceBroker{
-		Name: ClusterBrokerReleaseName,
+		Name: "helm-broker",
 		Status: ClusterServiceBrokerStatus{
 			Ready: true,
 		},

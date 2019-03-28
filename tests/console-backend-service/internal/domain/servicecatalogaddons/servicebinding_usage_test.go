@@ -139,7 +139,7 @@ func (s *bindingUsageTestSuite) fixServiceBindingUsage(name, serviceBindingName,
 func (s *bindingUsageTestSuite) prepareInstanceAndBinding() {
 	instanceName := "binding-usage-test"
 	bindingName := "binding-usage-test"
-	s.givenInstance = fixture.ServiceInstance(instanceName, TestNamespace)
+	s.givenInstance = fixture.ServiceInstanceFromClusterServiceClass(instanceName, TestNamespace)
 	s.givenBinding = fixture.ServiceBinding(bindingName, instanceName, TestNamespace)
 	s.givenBindingUsage = s.fixServiceBindingUsage("binding-usage-test", bindingName, "sample-deployment")
 
