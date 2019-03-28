@@ -228,7 +228,7 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: demonsthere/kyma-installer:tls
+        image: eu.gcr.io/kyma-project/develop/installer:19102bda
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: /etc/certs
