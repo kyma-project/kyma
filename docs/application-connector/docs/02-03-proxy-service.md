@@ -8,7 +8,7 @@ The Application Gateway sends the requests from Lambda functions and services in
 >**NOTE:** The system creates an Access Service for every external API registered by the Application Registry.
 
 The following diagram illustrates how the Application Gateway interacts with other components and external APIs
-which might be unsecured or secured with various security mechanism and also protected against cross-site request forgery (CSRF) attacks.
+which are either unsecured or secured with various security mechanisms and protected against cross-site request forgery (CSRF) attacks.
 
 ![Application Gateway Diagram](./assets/003-architecture-proxy-service.svg)
 
