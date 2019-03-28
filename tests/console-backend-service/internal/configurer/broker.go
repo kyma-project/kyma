@@ -1,21 +1,21 @@
 package configurer
 
 import (
-	"github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
 )
 
 type ServiceBrokerConfig struct {
 	Name      string `envconfig:"default=ns-helm-broker"`
-	Namespace string`envconfig:"default=default"`
+	Namespace string `envconfig:"default=default"`
 	URL       string `envconfig:"default=http://helm-broker.kyma-system.svc.cluster.local"`
 
-	ServiceClassExternalName string `envconfig:"default=testing"`
+	ServiceClassExternalName string   `envconfig:"default=testing"`
 	ServicePlanExternalNames []string `envconfig:"default=full,minimal"`
 }
 
@@ -27,7 +27,7 @@ type ServiceBrokerConfigurer struct {
 
 func NewServiceBroker(cfg ServiceBrokerConfig, svcatCli *clientset.Clientset) *ServiceBrokerConfigurer {
 	return &ServiceBrokerConfigurer{
-		cfg:cfg,
+		cfg:      cfg,
 		svcatCli: svcatCli,
 	}
 }

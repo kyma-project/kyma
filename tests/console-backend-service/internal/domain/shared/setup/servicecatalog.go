@@ -1,8 +1,9 @@
 package setup
 
 import (
-	"github.com/vrischmann/envconfig"
 	"log"
+
+	"github.com/vrischmann/envconfig"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/configurer"
@@ -10,12 +11,12 @@ import (
 )
 
 type ServiceCatalogConfigurerConfig struct {
-	TestBundle configurer.TestBundleConfig
+	TestBundle    configurer.TestBundleConfig
 	ServiceBroker configurer.ServiceBrokerConfig
 }
 
 type ServiceCatalogConfigurer struct {
-	nsConfigurer *configurer.NamespaceConfigurer
+	nsConfigurer     *configurer.NamespaceConfigurer
 	bundleConfigurer *configurer.TestBundleConfigurer
 	brokerConfigurer *configurer.ServiceBrokerConfigurer
 }
@@ -42,15 +43,15 @@ func NewServiceCatalogConfigurer(namespace string, registerServiceBroker bool) (
 	bundleConfigurer := configurer.NewTestBundle(cfg.TestBundle, coreCli, svcatCli)
 
 	var brokerConfigurer *configurer.ServiceBrokerConfigurer
-	if registerServiceBroker  {
+	if registerServiceBroker {
 		cfg.ServiceBroker.Namespace = namespace
-		brokerConfigurer = configurer.NewServiceBroker(cfg.ServiceBroker,  svcatCli)
+		brokerConfigurer = configurer.NewServiceBroker(cfg.ServiceBroker, svcatCli)
 	}
 
 	return &ServiceCatalogConfigurer{
 		bundleConfigurer: bundleConfigurer,
-		nsConfigurer:nsConfigurer,
-		brokerConfigurer:brokerConfigurer,
+		nsConfigurer:     nsConfigurer,
+		brokerConfigurer: brokerConfigurer,
 	}, nil
 }
 

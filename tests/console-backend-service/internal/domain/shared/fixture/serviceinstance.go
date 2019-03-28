@@ -10,7 +10,7 @@ func ServiceInstance(name string, namespace string) shared.ServiceInstance {
 		Namespace: namespace,
 		Labels:    []string{"test", "test2"},
 		PlanSpec: map[string]interface{}{
-			"planName": "test",
+			"planName":       "test",
 			"additionalData": "foo",
 		},
 		ClusterServicePlan: shared.ClusterServicePlan{

@@ -33,19 +33,19 @@ Run acceptance tests using the following command:
 - against the Console Backend Service deployed on the local cluster:
   
   ```bash
-  go test ./... -tags=acceptance
+  go test ./... -tags=acceptance -v -count=1 -p=1
   ```
 
 - against standalone Console Backend Service deployed on the local host:
   
   ```bash
-  GRAPHQL_ENDPOINT=http://localhost:3000/graphql go test ./... -tags=acceptance
+  GRAPHQL_ENDPOINT=http://localhost:3000/graphql go test ./... -tags=acceptance -v -count=1 -p=1
   ```
 
 - against the Console Backend Service deployed on the cluster with custom domain:
   
   ```bash
-  DOMAIN=nightly.kyma.cx go test ./... -tags=acceptance
+  DOMAIN=nightly.kyma.cx go test ./... -tags=acceptance -v -count=1 -p=1
   ```
 
 ### Verify the code

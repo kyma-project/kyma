@@ -2,7 +2,7 @@ package configurer
 
 import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/console-backend-service"
+	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
@@ -14,16 +14,16 @@ import (
 type TestBundleConfig struct {
 	ConfigMap TestBundleConfigMap
 
-	ClusterServiceClassExternalName string `envconfig:"default=testing"`
+	ClusterServiceClassExternalName string   `envconfig:"default=testing"`
 	ClusterServicePlanExternalNames []string `envconfig:"default=full,minimal"`
 }
 
 type TestBundleConfigMap struct {
-	Name      string  `envconfig:"default=helm-broker"`
-	Namespace string `envconfig:"default=kyma-system"`
+	Name          string `envconfig:"default=helm-broker"`
+	Namespace     string `envconfig:"default=kyma-system"`
 	RepositoryURL string `envconfig:"default=https://github.com/kyma-project/bundles/releases/download/0.3.0/index-testing.yaml"`
-	LabelKey string `envconfig:"default=helm-broker-repo"`
-	LabelValue string `envconfig:"default=true"`
+	LabelKey      string `envconfig:"default=helm-broker-repo"`
+	LabelValue    string `envconfig:"default=true"`
 }
 
 type TestBundleConfigurer struct {
@@ -35,7 +35,7 @@ type TestBundleConfigurer struct {
 
 func NewTestBundle(cfg TestBundleConfig, coreCli *corev1Type.CoreV1Client, svcatCli *clientset.Clientset) *TestBundleConfigurer {
 	return &TestBundleConfigurer{
-		cfg: cfg,
+		cfg:      cfg,
 		coreCli:  coreCli,
 		svcatCli: svcatCli,
 	}

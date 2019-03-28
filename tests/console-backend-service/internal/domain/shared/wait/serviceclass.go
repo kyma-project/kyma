@@ -1,9 +1,9 @@
 package wait
 
 import (
-"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
-metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func ForServiceClass(name, namespace string, svcatCli *clientset.Clientset) error {

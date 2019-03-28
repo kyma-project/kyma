@@ -437,7 +437,7 @@ func instanceFromServiceClass(name string) shared.ServiceInstance {
 		Namespace: TestNamespace,
 		Labels:    []string{"test", "test2"},
 		PlanSpec: map[string]interface{}{
-			"planName": "test",
+			"planName":       "test",
 			"additionalData": "foo",
 		},
 		ServicePlan: shared.ServicePlan{
