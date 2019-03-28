@@ -171,16 +171,8 @@ func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error)
 		},
 		Spec: apiv1alpha2.ApiSpec{
 			AuthenticationEnabled: &authEnabled,
-			Authentication: []apiv1alpha2.AuthenticationRule{
-				{
-					Type: apiv1alpha2.JwtType,
-					Jwt: apiv1alpha2.JwtAuthentication{
-						Issuer:  "https://dex." + t.domainName,
-						JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
-					},
-				},
-			},
-			Hostname: t.hostName,
+			Authentication:        []apiv1alpha2.AuthenticationRule{},
+			Hostname:              t.hostName,
 			Service: apiv1alpha2.Service{
 				Name: t.functionName,
 				Port: servicePort,
