@@ -7,3 +7,7 @@ func NewGQLPodConverter() *gqlPodConverter {
 func NewGQLServiceConverter() *gqlServiceConverter {
 	return new(gqlServiceConverter)
 }
+
+func NewGQLConfigMapConverter() *gqlConfigMapConverter {
+	return new(gqlConfigMapConverter)
+}

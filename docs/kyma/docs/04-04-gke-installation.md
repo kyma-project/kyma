@@ -7,13 +7,14 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
 By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [xip.io](http://xip.io). Alternatively, you can provide your own domain for the cluster.
 
 ## Prerequisites
-- [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project
-- [Kubernetes](https://kubernetes.io/) 1.12
-- Tiller 2.10.0 or higher
+- [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
 - [Docker](https://www.docker.com/)
-- [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
+- [wget](https://www.gnu.org/software/wget/)
 - A domain for your GKE cluster (optional)
+
+>**TIP:** Get a free domain for your cluster using services like [freenom.com](https://www.freenom.com) or similar.
 
 ## Prepare the GKE cluster
 
@@ -34,7 +35,7 @@ By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [
 3. Install Tiller on your GKE cluster. Run:
 
     ```
-    kubectl apply -f installation/resources/tiller.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{RELEASE_TAG}/installation/resources/tiller.yaml
     ```
 
 4. Add your account as the cluster administrator:
@@ -42,7 +43,7 @@ By default, Kyma is installed on a GKE cluster with a wildcard DNS provided by [
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
 
-## DNS setup and TLS certificate generation
+## DNS setup and TLS certificate generation (optional)
 
 >**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file) section.
 
@@ -55,8 +56,15 @@ Follow these steps:
     ```
     export DOMAIN={YOUR_SUBDOMAIN}
     export DNS_NAME={YOUR_DOMAIN}.
-    export PROJECT={YOUR_GOOGLE_PROJECT}
+    export PROJECT={YOUR_GOOGLE_PROJECT_ID}
     export DNS_ZONE={YOUR_DNS_ZONE}
+    ```
+    Example:
+    ```
+    export DOMAIN=my.kyma-demo.ga
+    export DNS_NAME=kyma-demo.ga.
+    export PROJECT=kyma-demo-235208
+    export DNS_ZONE=myzone
     ```
 
 2. Create a DNS-managed zone in your Google project. Run:
@@ -223,7 +231,7 @@ Follow these steps:
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
 
-## Add the xip.io self-signed certificate to your OS trusted certificates
+## Add the xip.io self-signed certificate to your OS trusted certificates (optional)
 
 >**NOTE:** Skip this section if you use your own domain.
 
