@@ -174,7 +174,7 @@ spec:
             EOF
 
             echo "---> Get Tiller CA"
-            if [[ $(get -n kube-system secret tiller-secret) ]]
+            if [[ $(kubectl get -n kube-system secret tiller-secret) ]] ; then
               kubectl get -n kube-system secret tiller-secret -o jsonpath="{.data['ca\.crt']}" | base64 --decode > "${WORKING_DIR}/ca.crt"
               kubectl get -n kube-system secret tiller-secret -o jsonpath="{.data['ca\.key']}" | base64 --decode > "${WORKING_DIR}/ca.key"
             else
