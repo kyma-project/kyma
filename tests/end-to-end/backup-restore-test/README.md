@@ -1,9 +1,8 @@
-# End-to-end Backp and Restore Tests
+# End-to-end Backup and Restore Tests
 
 ## Overview
 
-
-This project contains end-to-end upgrade tests for the Kyma installation to validate if the restore process works for all components. The tests run daily on Prow.
+This project contains end-to-end upgrade tests for the Kyma installation. The tests run daily on Prow to validate if the backup and restore process works for all components.
  
 
 ## Prerequisites
