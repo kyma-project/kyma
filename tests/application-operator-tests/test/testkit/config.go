@@ -14,7 +14,7 @@ const (
 	helmTLSKeyFileEnvName         = "HELM_TLS_KEY_FILE"
 	helmTLSCertificateFileEnvName = "HELM_TLS_CERTIFICATE_FILE"
 
-	installationTimeoutEnvName = "INSTALLATION_TIMEOUT"
+	installationTimeoutEnvName = "INSTALLATION_TIMEOUT_SECONDS"
 
 	defaultHelmTLSKeyFile         = "/etc/certs/tls.key"
 	defaultHelmTLSCertificateFile = "/etc/certs/tls.crt"
@@ -22,11 +22,11 @@ const (
 )
 
 type TestConfig struct {
-	Namespace                string
-	TillerHost               string
-	TillerTLSKeyFile         string
-	TillerTLSCertificateFile string
-	ProvisioningTimeout      int
+	Namespace                  string
+	TillerHost                 string
+	TillerTLSKeyFile           string
+	TillerTLSCertificateFile   string
+	InstallationTimeoutSeconds int
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -65,11 +65,11 @@ func ReadConfig() (TestConfig, error) {
 	}
 
 	config := TestConfig{
-		Namespace:                namespace,
-		TillerHost:               tillerHost,
-		TillerTLSKeyFile:         helmTLSKeyFile,
-		TillerTLSCertificateFile: helmTLSCertificateFile,
-		ProvisioningTimeout:      timeoutValue,
+		Namespace:                  namespace,
+		TillerHost:                 tillerHost,
+		TillerTLSKeyFile:           helmTLSKeyFile,
+		TillerTLSCertificateFile:   helmTLSCertificateFile,
+		InstallationTimeoutSeconds: timeoutValue,
 	}
 
 	log.Printf("Read configuration: %+v", config)

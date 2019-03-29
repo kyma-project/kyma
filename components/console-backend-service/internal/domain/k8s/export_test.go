@@ -62,8 +62,8 @@ func NewResourceConverter() *resourceConverter {
 
 // Service
 
-func NewServiceService(informer cache.SharedIndexInformer) *serviceService {
-	return newServiceService(informer)
+func NewServiceService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) *serviceService {
+	return newServiceService(informer, client)
 }
 
 func NewServiceResolver(svc serviceSvc) *serviceResolver {
@@ -86,4 +86,18 @@ func (r *replicaSetResolver) SetInstanceConverter(converter gqlReplicaSetConvert
 
 func NewReplicaSetService(informer cache.SharedIndexInformer, client apps.AppsV1Interface) *replicaSetService {
 	return newReplicaSetService(informer, client)
+}
+
+// ConfigMap
+
+func NewConfigMapResolver(configMapSvc configMapSvc) *configMapResolver {
+	return newConfigMapResolver(configMapSvc)
+}
+
+func (r *configMapResolver) SetConfigMapConverter(converter gqlConfigMapConverter) {
+	r.configMapConverter = converter
+}
+
+func NewConfigMapService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) *configMapService {
+	return newConfigMapService(informer, client)
 }

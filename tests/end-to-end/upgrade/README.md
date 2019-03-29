@@ -33,6 +33,18 @@ Use the following environment variables to configure the application:
 | **APP_KUBECONFIG_PATH** | NO | - | A path to the `kubeconfig` file needed to run an application outside of the cluster. |
 | **APP_MAX_CONCURRENCY_LEVEL** | NO | `1` | A maximum concurrency level used for running tests. |
 
+### Use flags
+Use the following flags to configure the application:
+
+| Name | Required | Description |
+|-----|:---------:|------------|
+| **action** | YES | Defines what kind of action to execute. The possible values are `prepareData` and `executeTests`. |
+| **verbose** | NO | Prints logs for all tests. |
+
+See the example:
+```
+go run main.go --action prepareData --verbose
+```
 
 ## Development
 
@@ -85,7 +97,7 @@ Run the application without building a binary file. To do so:
   env APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action executeTests
   ```
 
-For the description of the available environment variables, see [this](#use-environment-variables] section.
+For the description of the available environment variables, see [this](#use-environment-variables) section.
 
 ### Run tests using a Helm chart
 
@@ -100,6 +112,15 @@ Run the application using Helm:
     ```bash
     helm test e2e-test-upgrade
     ```
+
+### Run tests using Telepresence
+[Telepresence](https://www.telepresence.io/) allows you to run tests locally while connecting a service to a remote Kubernetes cluster. It is helpful when the test needs access to other services in a cluster.
+
+1. [Install Telepresence](https://www.telepresence.io/reference/install).
+2. Run tests:
+```bash
+env APP_KUBECONFIG_PATH=/Users/$User/.kube/config  telepresence --run go run main.go  --action executeTests --verbose
+```
 
 ### Verify the code
 

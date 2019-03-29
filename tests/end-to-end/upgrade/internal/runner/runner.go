@@ -10,8 +10,8 @@ import (
 
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 
+	"github.com/gofrs/uuid"
 	"github.com/pkg/errors"
-	uuid "github.com/satori/go.uuid"
 	"github.com/sirupsen/logrus"
 	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
@@ -38,10 +38,11 @@ type TestRunner struct {
 	tests               map[string]UpgradeTest
 	maxConcurrencyLevel int
 	sanitizeRegex       *regexp.Regexp
+	verbose             bool
 }
 
 // NewTestRunner is a constructor for TestRunner
-func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[string]UpgradeTest, maxConcurrencyLevel int) (*TestRunner, error) {
+func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[string]UpgradeTest, maxConcurrencyLevel int, verbose bool) (*TestRunner, error) {
 	sanitizeRegex, err := regexp.Compile(regexSanitize)
 	if err != nil {
 		return nil, errors.Wrap(err, "while compiling sanitize regexp")
@@ -53,6 +54,7 @@ func NewTestRunner(log *logrus.Entry, nsCreator NamespaceCreator, tests map[stri
 		tests:               tests,
 		maxConcurrencyLevel: maxConcurrencyLevel,
 		sanitizeRegex:       sanitizeRegex,
+		verbose:             verbose,
 	}, nil
 }
 
@@ -130,9 +132,14 @@ func (r *TestRunner) ExecuteTests(stopCh <-chan struct{}) error {
 }
 
 func (r *TestRunner) executeTaskFunc(taskHandler taskFn, stopCh <-chan struct{}, header, taskName string, createNs bool) bool {
-	taskLog := r.newLoggerForTask()
-
 	fullHeader := fmt.Sprintf("[%s: %s]", header, taskName)
+
+	taskLog, err := r.newLoggerForTask()
+	if err != nil {
+		r.log.Errorf("%s Cannot create uuid, the task won't be started, got err: %v", fullHeader, err)
+		return true
+	}
+
 	if r.shutdownRequested(stopCh) {
 		taskLog.Debugf("Stop channel called. Not executing %s", fullHeader)
 		return true
@@ -150,7 +157,10 @@ func (r *TestRunner) executeTaskFunc(taskHandler taskFn, stopCh <-chan struct{},
 
 	sink := &bytes.Buffer{}
 	originalOutput := taskLog.Logger.Out
-	taskLog.Logger.SetOutput(sink)
+	// verbose means "do not suppress logs"
+	if !r.verbose {
+		taskLog.Logger.SetOutput(sink)
+	}
 	startTime := time.Now()
 
 	if err := taskHandler(stopCh, taskLog, nsName); err != nil {
@@ -207,8 +217,12 @@ func (r *TestRunner) shutdownRequested(stopCh <-chan struct{}) bool {
 	return false
 }
 
-func (r *TestRunner) generateTaskID() string {
-	return uuid.NewV4().String()
+func (r *TestRunner) generateTaskID() (string, error) {
+	uuidInstance, err := uuid.NewV4()
+	if err != nil {
+		return "", err
+	}
+	return uuidInstance.String(), nil
 }
 
 // wgWait waits for wg with respection to stopCh
@@ -235,13 +249,16 @@ func (r *TestRunner) wgWait(stopCh <-chan struct{}, wg *sync.WaitGroup) {
 // newLoggerForTask returns new logger which can be used in given task.
 // We need to create new instance of logger otherwise we will start
 // mix logs between each task cause they will share same instance.
-func (r *TestRunner) newLoggerForTask() *logrus.Entry {
-	taskID := r.generateTaskID()
+func (r *TestRunner) newLoggerForTask() (*logrus.Entry, error) {
+	taskID, err := r.generateTaskID()
+	if err != nil {
+		return nil, errors.Wrap(err, "while generating ID for task logger")
+	}
 
 	cfg := &logger.Config{
 		Level: logger.LogLevel(r.log.Logger.Level),
 	}
 	taskLog := logger.New(cfg).WithField("taskID", taskID)
 
-	return taskLog
+	return taskLog, nil
 }

@@ -4,8 +4,8 @@
 [[projects]]
   name = "github.com/BurntSushi/toml"
   packages = ["."]
-  revision = "b26d9c308763d68093482582cea63d69be07a0f0"
-  version = "v0.3.0"
+  revision = "3012a1dbe2e4bd1391d42b32f0577cb7bbc7f005"
+  version = "v0.3.1"
 
 [[projects]]
   name = "github.com/Masterminds/semver"
@@ -25,7 +25,8 @@
     "digestset",
     "reference"
   ]
-  revision = "edc3ab29cdff8694dd6feb85cfeb4b5f1b38ed9c"
+  revision = "2461543d988979529609e8cb6fca9ca190dc48da"
+  version = "v2.7.1"
 
 [[projects]]
   name = "github.com/ghodss/yaml"
@@ -94,8 +95,8 @@
 [[projects]]
   name = "github.com/json-iterator/go"
   packages = ["."]
-  revision = "1624edc4454b8682399def8740d46db5e4362ba4"
-  version = "v1.1.5"
+  revision = "0ff49de124c6f76f8494e194af75bde0f1a49a29"
+  version = "v1.1.6"
 
 [[projects]]
   name = "github.com/kyma-project/kyma"
@@ -150,7 +151,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
+  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
 
 [[projects]]
   branch = "master"
@@ -200,7 +201,7 @@
   branch = "master"
   name = "golang.org/x/time"
   packages = ["rate"]
-  revision = "fbb02b2291d28baffd63558aa44b4b56f178d650"
+  revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
 
 [[projects]]
   branch = "master"
@@ -251,8 +252,8 @@
 [[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
-  version = "v2.2.1"
+  revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
+  version = "v2.2.2"
 
 [[projects]]
   name = "k8s.io/api"
@@ -293,7 +294,7 @@
   branch = "master"
   name = "k8s.io/apiextensions-apiserver"
   packages = ["pkg/features"]
-  revision = "d65f4428c04f2d28f924a47d1d2177d0cbf45a16"
+  revision = "8ada4fd07db47ce53aacb0f49ab6cec2b7029026"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -349,7 +350,7 @@
     "pkg/features",
     "pkg/util/feature"
   ]
-  revision = "3bfd32753e74188b22f853117029bfc4360272c7"
+  revision = "34f0f0079560e49bc5b5b0de606ea3c0b245fc78"
 
 [[projects]]
   name = "k8s.io/client-go"
@@ -420,6 +421,12 @@
   ]
   revision = "9ad53aac42165a5fadc6c87be0dea6b115f93090"
   version = "v2.10.0"
+
+[[projects]]
+  name = "k8s.io/klog"
+  packages = ["."]
+  revision = "71442cd4037d612096940ceb0f3fec3f7fff66e0"
+  version = "v0.2.0"
 
 [[projects]]
   branch = "release-1.10"
@@ -498,11 +505,11 @@
     "pkg/util/parsers",
     "pkg/util/pointer"
   ]
-  revision = "efe960cdc41ee7b18d408128dfb80babb5bc746a"
+  revision = "f170ef66340f6355d331ed90902574ff0532a20a"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ad25d1779bc7e2bd753bfe3abd7d5fbc1805a64066e2a9f2c4956572c8478d80"
+  inputs-digest = "6cc8760852b00703e3974f594865973dcbc4ca5d066222d85ca52eba67555d24"
   solver-name = "gps-cdcl"
   solver-version = 1

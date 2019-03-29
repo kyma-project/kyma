@@ -3,15 +3,16 @@ kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: istio-grafana-pvc
+  namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "grafana.name" . }}
-    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
-    release: {{ .Release.Name }}
+    chart: {{ template "grafana.chart" . }}
     heritage: {{ .Release.Service }}
+    release: {{ .Release.Name }}
 spec:
   storageClassName: {{ .Values.storageClassName }}
   accessModes:
-    - ReadWriteOnce
+    - {{ .Values.accessMode }}
   resources:
     requests:
       storage: 5Gi

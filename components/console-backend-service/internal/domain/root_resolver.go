@@ -175,6 +175,14 @@ func (r *mutationResolver) CreateResource(ctx context.Context, namespace string,
 	return r.k8s.CreateResourceMutation(ctx, namespace, resource)
 }
 
+func (r *mutationResolver) DeleteService(ctx context.Context, name string, namespace string) (*gqlschema.Service, error) {
+	return r.k8s.DeleteServiceMutation(ctx, name, namespace)
+}
+
+func (r *mutationResolver) UpdateService(ctx context.Context, name string, namespace string, service gqlschema.JSON) (*gqlschema.Service, error) {
+	return r.k8s.UpdateServiceMutation(ctx, name, namespace, service)
+}
+
 func (r *mutationResolver) UpdatePod(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.Pod, error) {
 	return r.k8s.UpdatePodMutation(ctx, name, namespace, update)
 }
@@ -189,6 +197,14 @@ func (r *mutationResolver) UpdateReplicaSet(ctx context.Context, name string, na
 
 func (r *mutationResolver) DeleteReplicaSet(ctx context.Context, name string, namespace string) (*gqlschema.ReplicaSet, error) {
 	return r.k8s.DeleteReplicaSetMutation(ctx, name, namespace)
+}
+
+func (r *mutationResolver) UpdateConfigMap(ctx context.Context, name string, namespace string, update gqlschema.JSON) (*gqlschema.ConfigMap, error) {
+	return r.k8s.UpdateConfigMapMutation(ctx, name, namespace, update)
+}
+
+func (r *mutationResolver) DeleteConfigMap(ctx context.Context, name string, namespace string) (*gqlschema.ConfigMap, error) {
+	return r.k8s.DeleteConfigMapMutation(ctx, name, namespace)
 }
 
 func (r *mutationResolver) CreateServiceInstance(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
@@ -291,6 +307,14 @@ func (r *queryResolver) ReplicaSet(ctx context.Context, name string, namespace s
 
 func (r *queryResolver) ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ReplicaSet, error) {
 	return r.k8s.ReplicaSetsQuery(ctx, namespace, first, offset)
+}
+
+func (r *queryResolver) ConfigMap(ctx context.Context, name string, namespace string) (*gqlschema.ConfigMap, error) {
+	return r.k8s.ConfigMapQuery(ctx, name, namespace)
+}
+
+func (r *queryResolver) ConfigMaps(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.ConfigMap, error) {
+	return r.k8s.ConfigMapsQuery(ctx, namespace, first, offset)
 }
 
 func (r *queryResolver) Functions(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Function, error) {
@@ -429,6 +453,10 @@ func (r *subscriptionResolver) PodEvent(ctx context.Context, namespace string) (
 
 func (r *subscriptionResolver) ServiceEvent(ctx context.Context, namespace string) (<-chan gqlschema.ServiceEvent, error) {
 	return r.k8s.ServiceEventSubscription(ctx, namespace)
+}
+
+func (r *subscriptionResolver) ConfigMapEvent(ctx context.Context, namespace string) (<-chan gqlschema.ConfigMapEvent, error) {
+	return r.k8s.ConfigMapEventSubscription(ctx, namespace)
 }
 
 // Service Instance

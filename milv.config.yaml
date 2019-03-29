@@ -1,4 +1,4 @@
-white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION"]
+white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "http://xip.io"]
 black-list: ["/vendor/", "/testdata/"]
 black-list-internal: ["./kyma/docs/"]
 timeout: 60
@@ -45,3 +45,6 @@ files:
   - path: "./kyma/docs/application-connector/docs/08-09-revoke-cert.md"
     config:
       white-list-external: ["https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"]
+  - path: "./kyma/resources/istio/README.md"
+    config:
+      white-list-external: ["https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection"]
