@@ -94,6 +94,14 @@
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
 
 [[projects]]
+  digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:65c4414eeb350c47b8de71110150d0ea8a281835b1f386eacaa3ad7325929c21"
   name = "github.com/googleapis/gnostic"
   packages = [
@@ -139,6 +147,20 @@
   pruneopts = "UT"
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
+
+[[projects]]
+  digest = "1:fb2d7621c69fc11b6ba50604c88515c922d61071cf40e865b40a52c72e879802"
+  name = "github.com/kubeless/kubeless"
+  packages = [
+    "pkg/apis/kubeless",
+    "pkg/apis/kubeless/v1beta1",
+    "pkg/client/clientset/versioned",
+    "pkg/client/clientset/versioned/scheme",
+    "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
+  ]
+  pruneopts = "UT"
+  revision = "3bec4b65f29d830bd6709abb07e00f11fe54d646"
+  version = "v0.6.0"
 
 [[projects]]
   digest = "1:b42dbc41fce3c130d6d08181900fb3af9864f61f25b5a41f83489fdc492e71c4"
@@ -540,6 +562,9 @@
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/golang/lint/golint",
+    "github.com/google/uuid",
+    "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
+    "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",

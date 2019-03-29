@@ -1,4 +1,4 @@
-package function
+package main
 
 import (
 	"bytes"
@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"time"
+	"strings"
 
 	"github.com/google/uuid"
 	corev1 "k8s.io/api/core/v1"
@@ -16,8 +17,7 @@ import (
 
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	"github.com/sirupsen/logrus"
-	"strings"
+	"log"
 )
 
 type FunctionUpgradeTest struct {
@@ -33,12 +33,12 @@ func NewFunctionUpgradeTest() (*FunctionUpgradeTest, error) {
 		return &FunctionUpgradeTest{}, err
 	}
 
-	coreClient, err := kubernetes.NewForConfig(config)
+	kubelessClient, err := kubeless.NewForConfig(config)
 	if err != nil {
 		return &FunctionUpgradeTest{}, err
 	}
 
-	kubelessClient, err := kubeless.NewForConfig(config)
+	coreClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		return &FunctionUpgradeTest{}, err
 	}
@@ -51,7 +51,8 @@ func NewFunctionUpgradeTest() (*FunctionUpgradeTest, error) {
 	}, nil
 }
 
-func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+//func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+func (f *FunctionUpgradeTest) CreateResources(namespace string) error {
 	log.Println("FunctionUpgradeTest creating resources")
 	_, err := f.createFunction(namespace)
 	if err != nil {
@@ -60,9 +61,10 @@ func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	return nil
 }
 
-func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+//func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+func (f *FunctionUpgradeTest) TestResources(namespace string) error {
 	log.Println("FunctionUpgradeTest testing resources")
-	err := f.getFunctionPodStatus(namespace, 2*time.Minute)
+	err := f.getFunctionPodStatus(namespace, 5*time.Minute)
 	if err != nil {
 		return err
 	}
@@ -72,10 +74,14 @@ func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	if err != nil {
 		return err
 	}
+	log.Println("value: ",value)
 
+	log.Println("f.uuid: ",f.uuid)
 	if !strings.Contains(value, f.uuid) {
 		return fmt.Errorf("Could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
 	}
+
+
 
 	return nil
 }
@@ -134,12 +140,14 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 	for {
 		select {
 		case <-timeout:
+			log.Println("timeout")
 			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
 				return err
 			}
 			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pods)
 		case <-tick:
+			log.Println("tick")
 			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
 				return err
@@ -153,12 +161,31 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 			}
 
 			pod := pods.Items[0]
-			if pod.Status.Phase == corev1.PodRunning {
-				return nil
+			// If Pod condition is not ready the for will continue until timeout
+			if len(pod.Status.Conditions) > 0 {
+				conditions := pod.Status.Conditions
+				for _, cond := range conditions {
+					if cond.Type == corev1.PodReady && cond.Status == corev1.ConditionTrue {
+						return nil
+					}
+				}
 			}
+
 			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
 				return fmt.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
 			}
 		}
 	}
+}
+
+func main() {
+
+	myNewFunctionUpgradeTest, err := NewFunctionUpgradeTest()
+
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
+	myNewFunctionUpgradeTest.CreateResources("FunctionUpgradeTest")
+	myNewFunctionUpgradeTest.TestResources("FunctionUpgradeTest")
 }
