@@ -101,7 +101,6 @@ func (client *metadataServiceClient) DeleteService(t *testing.T, idToDelete stri
 
 func (client *metadataServiceClient) GetService(t *testing.T, serviceId string) (int, *ServiceDetails, error) {
 	condition := andPredicate(statusNotServerError, getSpecsPredicate(t, true, true, true))
-
 	return client.getService(t, serviceId, condition)
 }
 
@@ -190,8 +189,8 @@ func (client *metadataServiceClient) requestWithRetries(t *testing.T, data reque
 			t.Log(reqErr)
 			return nil, reqErr
 		}
-
-		if condition(client.httpClient.Do(request)) {
+		response, err := client.httpClient.Do(request)
+		if condition(response, err) {
 			return response, err
 		}
 
