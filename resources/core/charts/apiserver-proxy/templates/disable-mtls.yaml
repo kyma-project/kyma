@@ -1,0 +1,9 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: apiserver-mtls-disable
+spec:
+  host: apiserver-proxy.kyma-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE

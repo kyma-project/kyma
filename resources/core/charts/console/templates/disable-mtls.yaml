@@ -1,0 +1,9 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: console-mtls-disable
+spec:
+  host: core-console.kyma-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
