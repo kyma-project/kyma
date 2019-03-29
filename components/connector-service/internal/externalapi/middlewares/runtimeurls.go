@@ -1,28 +1,28 @@
 package middlewares
 
 import (
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
-)
-
-const (
-	//Header names are not fully consistent with documentation, due to net/http library. It changes all header names to start with uppercase, with following lowercase letters
-	BaseEventsHostHeader   = "Eventshost"
-	BaseMetadataHostHeader = "Metadatahost"
 )
 
 type runtimeURLsMiddleware struct {
-	gatewayHost     string
-	headersRequired clientcontext.HeadersRequiredType
+	gatewayHost                 string
+	lookupEnabled               clientcontext.LookupEnabledType
+	lookupConfigPath            string
+	applicationContextExtractor clientcontext.ApplicationContextExtractor
+	lookupService               LookupService
 }
 
-func NewRuntimeURLsMiddleware(gatewayHost string, headersRequired clientcontext.HeadersRequiredType) *runtimeURLsMiddleware {
+func NewRuntimeURLsMiddleware(gatewayHost, lookupConfigPath string, lookupEnabled clientcontext.LookupEnabledType, extractor clientcontext.ApplicationContextExtractor, lookupService LookupService) *runtimeURLsMiddleware {
 	return &runtimeURLsMiddleware{
-		gatewayHost:     gatewayHost,
-		headersRequired: headersRequired,
+		gatewayHost:                 gatewayHost,
+		lookupEnabled:               lookupEnabled,
+		lookupConfigPath:            lookupConfigPath,
+		applicationContextExtractor: extractor,
+		lookupService:               lookupService,
 	}
 }
 
@@ -33,18 +33,19 @@ func (cc *runtimeURLsMiddleware) Middleware(handler http.Handler) http.Handler {
 			EventsHost:   cc.gatewayHost,
 		}
 
-		if metadataHosts, found := r.Header[BaseMetadataHostHeader]; found {
-			runtimeURLs.MetadataHost = metadataHosts[0]
-		} else if found == false && bool(cc.headersRequired) {
-			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified (%s).", BaseMetadataHostHeader))
-			return
-		}
+		if cc.lookupEnabled {
+			appCtx, err := cc.applicationContextExtractor(r.Context())
+			if err != nil {
+				httphelpers.RespondWithError(w, apperrors.Internal("Could not read Application Context. %s", err))
+				return
+			}
+			fetchedGatewayHost, appErr := cc.lookupService.Fetch(appCtx, cc.lookupConfigPath)
 
-		if eventsHosts, found := r.Header[BaseEventsHostHeader]; found {
-			runtimeURLs.EventsHost = eventsHosts[0]
-		} else if found == false && bool(cc.headersRequired) {
-			httphelpers.RespondWithError(w, apperrors.BadRequest("Required headers not specified (%s).", BaseEventsHostHeader))
-			return
+			if appErr != nil {
+				httphelpers.RespondWithError(w, apperrors.Internal("Could not fetch gateway URL. %s", err))
+			}
+			runtimeURLs.EventsHost = fetchedGatewayHost
+			runtimeURLs.MetadataHost = fetchedGatewayHost
 		}
 
 		reqWithCtx := r.WithContext(runtimeURLs.ExtendContext(r.Context()))

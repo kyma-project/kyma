@@ -31,6 +31,8 @@ type options struct {
 	runtimeCertificateValidityTime time.Duration
 	central                        bool
 	revocationConfigMapName        string
+	lookupEnabled                  bool
+	lookupConfigMapPath            string
 }
 
 type environment struct {
@@ -60,6 +62,8 @@ func parseArgs() *options {
 	runtimeCertificateValidityTime := flag.String("runtimeCertificateValidityTime", "90d", "Validity time of certificates issued for runtimes by this service.")
 	central := flag.Bool("central", false, "Determines whether connector works as the central")
 	revocationConfigMapName := flag.String("revocationConfigMapName", "revocations-config", "Name of the config map containing revoked certificates")
+	lookupEnabled := flag.Bool("lookupEnabled", false, "Determines whether connector should make a call to get gateway endpoint")
+	lookupConfigMapPath := flag.String("lookupConfigMapPath", "etc/config/configmap", "Path in the pod where Config Map for cluster lookup is stored")
 
 	flag.Parse()
 
@@ -92,6 +96,8 @@ func parseArgs() *options {
 		appCertificateValidityTime:     appValidityTime,
 		runtimeCertificateValidityTime: runtimeValidityTime,
 		revocationConfigMapName:        *revocationConfigMapName,
+		lookupEnabled:                  *lookupEnabled,
+		lookupConfigMapPath:            *lookupConfigMapPath,
 	}
 }
 
@@ -99,11 +105,13 @@ func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --requestLogging=%t "+
 		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayHost=%s "+
-		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s --revocationConfigMapName=%s",
+		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s "+
+		"--revocationConfigMapName=%s --lookupEnabled=%t --lookupConfigMapPath=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.requestLogging,
 		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayHost,
-		o.appsInfoURL, o.runtimesInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime, o.revocationConfigMapName)
+		o.appsInfoURL, o.runtimesInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime,
+		o.revocationConfigMapName, o.lookupEnabled, o.lookupConfigMapPath)
 }
 
 func parseEnv() *environment {

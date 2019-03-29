@@ -58,7 +58,9 @@ func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.
 func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider,
 	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository) http.Handler {
 
-	headersRequired := clientcontext.HeadersRequiredType(opts.central)
+	lookupEnabled := clientcontext.LookupEnabledType(opts.central)
+
+	lookupService := middlewares.NewGraphQLLookupService()
 
 	subjectValues := certificates.CSRSubject{
 		Country:            env.country,
@@ -72,7 +74,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
-	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayHost, headersRequired)
+	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayHost, opts.lookupConfigMapPath, lookupEnabled, clientcontext.ExtractApplicationContext, lookupService)
 	appContextFromSubjMiddleware := clientcontextmiddlewares.NewAppContextFromSubjMiddleware()
 	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository)
 
