@@ -3,4 +3,18 @@ bindings:
     groups: []
   kymaView:
     groups: []
+clusterRoles:
+  common:
+    apiGroups:
+      - "applicationconnector.kyma-project.io"
+      - "authentication.kyma-project.io"
+      - "gateway.kyma-project.io"
+      - "servicecatalog.kyma-project.io"
+      - "ui.kyma-project.io"
+      - "kyma.cx"
+      - "ui.kyma.cx"
+      - "authentication.istio.io"
+      - "config.istio.io"
+      - "networking.istio.io"
+      - "kubeless.io"
 namespace: default

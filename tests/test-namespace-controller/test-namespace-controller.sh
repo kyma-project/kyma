@@ -6,8 +6,6 @@ set -o pipefail
 
 FILE_NAME=sample-namespace.yaml
 NAMESPACE=toad-test-1
-BOOTSTRAP_ADMIN=kyma-admin-role
-BOOTSTRAP_VIEWER=kyma-reader-role
 GLOBAL_COUNTDOWN=20
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 RESOURCE_LIMITS_NAME=kyma-default
@@ -17,14 +15,6 @@ EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT=$(echo ${EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT
 EXPECTED_LIMIT_RANGE_MEMORY_MAX=$(echo ${EXPECTED_LIMIT_RANGE_MEMORY_MAX:-1Gi} | ./quantity-to-int)
 EXPECTED_RESOURCE_QUOTA_LIMITS_MEMORY=$(echo ${EXPECTED_RESOURCE_QUOTA_LIMITS_MEMORY:-1Gi} | ./quantity-to-int)
 EXPECTED_RESOURCE_QUOTA_REQUESTS_MEMORY=$(echo ${EXPECTED_RESOURCE_QUOTA_REQUESTS_MEMORY:-768Mi} | ./quantity-to-int)
-
-getAdminRole(){
-    RESULT=$(kubectl get roles/${BOOTSTRAP_ADMIN} -n ${NAMESPACE} -o jsonpath='{.metadata.name}' || :)
-}
-
-getViewerRole(){
-    RESULT=$(kubectl get roles/${BOOTSTRAP_VIEWER} -n ${NAMESPACE} -o jsonpath='{.metadata.name}' || :)
-}
 
 getIstioInjectionLabel(){
     RESULT=$(kubectl get ns ${NAMESPACE} -o jsonpath='{.metadata.labels.istio-injection}' || :)
@@ -36,48 +26,6 @@ createNewEnv(){
 
 clearNamespace(){
     kubectl delete -f ${DIR}/${FILE_NAME}
-}
-
-testAdminRole(){
-    local COUNTDOWN=GLOBAL_COUNTDOWN
-
-    while [[ $COUNTDOWN -gt 0 ]]
-    do
-        getAdminRole
-
-        if [[ "${RESULT}" != "" ]]
-	    then
-	        return 0
-	    else
-            echo "Waiting for admin role..."
-            ((COUNTDOWN--))
-            sleep 2
-	    fi
-    done
-
-    echo "Error on getting admin role..."
-    return 1
-}
-
-testViewerRole(){
-    local COUNTDOWN=GLOBAL_COUNTDOWN
-
-    while [[ $COUNTDOWN -gt 0 ]]
-    do
-        getViewerRole
-
-        if [[ "${RESULT}" != "" ]]
-	    then
-	        return 0
-	    else
-            echo "Waiting for viewer role..."
-            ((COUNTDOWN--))
-            sleep 2
-	    fi
-    done
-
-    echo "Error on getting viewer role..."
-    return 1
 }
 
 testIstioInjectionLabel(){
@@ -183,16 +131,6 @@ echo "------------------------------------"
 echo "Creating namespace... "
 echo "------------------------------------"
 createNewEnv
-
-echo "------------------------------------"
-echo "Testing admin role... "
-echo "------------------------------------"
-testAdminRole
-
-echo "------------------------------------"
-echo "Testing viewer role... "
-echo "------------------------------------"
-testViewerRole
 
 echo "------------------------------------"
 echo "Testing istio-injection label..."
