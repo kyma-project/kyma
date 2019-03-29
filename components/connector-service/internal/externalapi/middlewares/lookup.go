@@ -53,7 +53,7 @@ func readConfigFromFile(configFilePath string) (LookUpConfig, error) {
 	bytesValue, err := ioutil.ReadAll(jsonFile)
 
 	if err != nil {
-		return LookUpConfig{}, e
+		return LookUpConfig{}, err
 	}
 
 	var config LookUpConfig
