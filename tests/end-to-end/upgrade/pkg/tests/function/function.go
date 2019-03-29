@@ -1,4 +1,4 @@
-package main
+package function
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ import (
 
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	"log"
+	"github.com/sirupsen/logrus"
 )
 
 type FunctionUpgradeTest struct {
@@ -43,45 +43,41 @@ func NewFunctionUpgradeTest() (*FunctionUpgradeTest, error) {
 		return &FunctionUpgradeTest{}, err
 	}
 
+	name := strings.ToLower("FunctionUpgradeTest")
 	return &FunctionUpgradeTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
-		functionName:   "hello",
+		functionName:   name,
 		uuid:           uuid.New().String(),
 	}, nil
 }
 
-//func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-func (f *FunctionUpgradeTest) CreateResources(namespace string) error {
+func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest creating resources")
-	_, err := f.createFunction(namespace)
+	_, err := f.createFunction(log, namespace)
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-//func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-func (f *FunctionUpgradeTest) TestResources(namespace string) error {
+func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest testing resources")
-	err := f.getFunctionPodStatus(namespace, 5*time.Minute)
+	err := f.getFunctionPodStatus(namespace, 10*time.Minute)
 	if err != nil {
 		return err
 	}
 
-	host := fmt.Sprintf("http://%s.%s:8080", f.functionName, namespace)
+	host := fmt.Sprintf("http://%s.%s:8080", namespace, namespace)
+
 	value, err := f.getFunctionOutput(host, 2*time.Minute)
 	if err != nil {
 		return err
 	}
-	log.Println("value: ",value)
 
-	log.Println("f.uuid: ",f.uuid)
 	if !strings.Contains(value, f.uuid) {
 		return fmt.Errorf("Could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
 	}
-
-
 
 	return nil
 }
@@ -116,10 +112,14 @@ func (f *FunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Durati
 
 }
 
-func (f *FunctionUpgradeTest) createFunction(namespace string) (*kubelessV1.Function, error) {
+func (f *FunctionUpgradeTest) createFunction(log logrus.FieldLogger, namespace string) (*kubelessV1.Function, error) {
+	log.Println("FunctionUpgradeTest creating function")
 	function := &kubelessV1.Function{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: f.functionName,
+			Labels: map[string]string{
+				"function": f.functionName,
+			},
 		},
 		Spec: kubelessV1.FunctionSpec{
 			Handler: "handler.hello",
@@ -131,23 +131,28 @@ func (f *FunctionUpgradeTest) createFunction(namespace string) (*kubelessV1.Func
 			  }`,
 		},
 	}
-	return f.kubelessClient.KubelessV1beta1().Functions(namespace).Create(function)
+	function, err := f.kubelessClient.KubelessV1beta1().Functions(namespace).Create(function)
+	if err != nil {
+		return nil, err
+	}
+	return function, nil
 }
 
 func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
+
 	timeout := time.After(waitmax)
 	tick := time.Tick(2 * time.Second)
 	for {
 		select {
 		case <-timeout:
-			log.Println("timeout")
+			//log.Println("timeout")
 			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
 				return err
 			}
 			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pods)
 		case <-tick:
-			log.Println("tick")
+			//log.Println("tick")
 			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
 				return err
@@ -176,16 +181,4 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 			}
 		}
 	}
-}
-
-func main() {
-
-	myNewFunctionUpgradeTest, err := NewFunctionUpgradeTest()
-
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-
-	myNewFunctionUpgradeTest.CreateResources("FunctionUpgradeTest")
-	myNewFunctionUpgradeTest.TestResources("FunctionUpgradeTest")
 }
