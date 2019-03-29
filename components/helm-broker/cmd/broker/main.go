@@ -50,6 +50,11 @@ func main() {
 
 	log := logger.New(&cfg.Logger)
 
+	err = cfg.ConfigureWorkMode()
+	if err != nil {
+		log.Infof("Could not configure work mode: %s", err)
+	}
+
 	storageConfig := storage.ConfigList(cfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	fatalOnError(err)
@@ -68,7 +73,7 @@ func main() {
 		options.LabelSelector = fmt.Sprintf("%s=%s", mapLabelKey, mapLabelValue)
 	})
 
-	repositoryWatcher := bundle.NewRepositoryController(bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log)
+	repositoryWatcher := bundle.NewRepositoryController(bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log, cfg.DevelopMode)
 	go repositoryWatcher.Run(stopCh)
 	go cfgMapInformer.Run(stopCh)
 
