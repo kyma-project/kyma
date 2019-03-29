@@ -151,7 +151,9 @@ func (c *backupClient) DescribeBackup(backupName string) error {
 	}
 
 	s := output.DescribeBackup(backup, deleteRequestList.Items, podVolumeBackupList.Items, true, c.backupClient)
+	log.Printf("========================== Begin Backup: %v ==========================\n", backupName)
 	log.Println(s)
+	log.Printf("========================== End Backup: %v ==========================\n", backupName)
 	return nil
 }
 
@@ -167,7 +169,9 @@ func (c *backupClient) DescribeRestore(backupName string) error {
 	}
 
 	s := output.DescribeRestore(restore, podvolumeRestoreList.Items, true, c.backupClient)
+	log.Printf("========================== Begin Restore: %v ==========================\n", backupName)
 	log.Println(s)
+	log.Printf("========================== End Restore: %v ==========================\n", backupName)
 	return nil
 }
 
