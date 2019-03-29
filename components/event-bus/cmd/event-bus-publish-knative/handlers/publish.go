@@ -55,9 +55,20 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		// send success response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
+		var reason string
+		switch status {
+		case publisher.SENT:
+			reason = "Message successfully published to the channel"
+		case publisher.IGNORED:
+			reason = "There was no subscriptions to this event"
+		case publisher.FAILED:
+			reason = "Some validation or internal error occurred"
+		}
 		publishResponse := &api.PublishResponse{
 			EventID: message.Headers[trace.HeaderEventID],
-			Status: status}
+			Status:  status,
+			Reason:  reason,
+		}
 		if err := json.NewEncoder(w).Encode(*publishResponse); err != nil {
 			log.Printf("failed to send response back: %v", err)
 		} else {

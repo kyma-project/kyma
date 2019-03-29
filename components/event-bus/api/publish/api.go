@@ -37,6 +37,7 @@ type AnyValue interface{}
 type PublishResponse struct {
 	EventID string `json:"event-id"`
 	Status string `json:"status,omitempty"`
+	Reason string `json:"status,omitempty"`
 }
 
 // CloudEvent represents the event to be persisted to NATS
