@@ -21,6 +21,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/SpectoLabs/hoverfly"
+  packages = ["core/certs"]
+  revision = "2487055325a19f02e4cdcd05cf265709a3c08067"
+
+[[projects]]
+  branch = "master"
   name = "github.com/alecthomas/jsonschema"
   packages = ["."]
   revision = "f2c93856175a7dd6abe88c5c3900b67ad054adcc"
@@ -1001,6 +1007,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5739128091fecdf0150b2bbb63d4692e0d6d0f13de62afdd649bc2d8e143d41d"
+  inputs-digest = "04816446d265b7762df2cfcde7582cc3af093aaed92c91f38d608a011653c484"
   solver-name = "gps-cdcl"
   solver-version = 1

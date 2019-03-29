@@ -39,11 +39,11 @@ func main() {
 	flag.Parse()
 	cfg, err := config.Load(*verbose)
 	fatalOnError(err)
-
+	
 	// creates the in-cluster k8sConfig
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	fatalOnError(err)
-
+	
 	// creates the clientset
 	clientset, err := kubernetes.NewForConfig(k8sConfig)
 	fatalOnError(err)
@@ -75,7 +75,6 @@ func main() {
 	ctx, cancelFunc := context.WithCancel(context.Background())
 	defer cancelFunc()
 	cancelOnChanInterrupt(ctx, stopCh, cancelFunc)
-	
 	helmClient := helm.NewClient(cfg.Helm, log)
 
 	srv := broker.New(sFact.Bundle(), sFact.Chart(), sFact.InstanceOperation(), sFact.Instance(), sFact.InstanceBindData(),

@@ -1,23 +1,14 @@
 package helm_test
 
 import (
-	"bytes"
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
-	"crypto/rsa"
-	"crypto/x509"
-	"crypto/x509/pkix"
 	"encoding/pem"
-	"fmt"
-	"io/ioutil"
-	"math/big"
 	"net"
 	"os"
 	"testing"
 	"time"
 
+	"github.com/SpectoLabs/hoverfly/core/certs"
 	"github.com/ghodss/yaml"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
@@ -32,15 +23,20 @@ import (
 )
 
 const (
-	keyFile string = "/tmp/dummy.key"
+	keyFile  string = "/tmp/dummy.key"
 	certFile string = "/tmp/dummy.crt"
 )
 
+func TestMain(m *testing.M) {
+	err := createDummyKeyPair(keyFile, certFile)
+	if err != nil {
+		os.Exit(1)
+	}
+	os.Exit(m.Run())
+}
+
 func TestClientInstallSuccess(t *testing.T) {
 	// given
-	err := createDummyKeyPair(keyFile, certFile)
-	assert.NoError(t, err)
-
 	fakeTiller := &fakeTillerSvc{}
 	fakeTiller.SetUp(t)
 
@@ -51,12 +47,12 @@ func TestClientInstallSuccess(t *testing.T) {
 	hClient := helm.NewClient(helm.Config{
 		TillerHost:              fakeTiller.Host,
 		TillerConnectionTimeout: time.Second,
-		TillerTLSCrt:            "testdata/helm-test-key.pub",
-		TillerTLSKey:            "testdata/helm-test-key.secret",
+		TillerTLSCrt:            certFile,
+		TillerTLSKey:            keyFile,
 	}, spy.NewLogDummy())
 
 	// when
-	_, err = hClient.Install(fixChart(), cVals, "r-name", "ns-name")
+	_, err := hClient.Install(fixChart(), cVals, "r-name", "ns-name")
 
 	// then
 	assert.NoError(t, err)
@@ -81,8 +77,8 @@ func TestClientInstallSuccess(t *testing.T) {
 
 func TestClientDeleteSuccess(t *testing.T) {
 	// given
-	err := createDummyKeyPair(keyFile, certFile)
-	assert.NoError(t, err)
+	//err := createDummyKeyPair(keyFile, certFile)
+	//assert.NoError(t, err)
 
 	fakeTiller := &fakeTillerSvc{}
 	fakeTiller.SetUp(t)
@@ -90,12 +86,12 @@ func TestClientDeleteSuccess(t *testing.T) {
 	hClient := helm.NewClient(helm.Config{
 		TillerHost:              fakeTiller.Host,
 		TillerConnectionTimeout: time.Second,
-		TillerTLSCrt:            "testdata/helm-test-key.pub",
-		TillerTLSKey:            "testdata/helm-test-key.secret",
+		TillerTLSCrt:            certFile,
+		TillerTLSKey:            keyFile,
 	}, spy.NewLogDummy())
 
 	// when
-	err = hClient.Delete("r-name")
+	err := hClient.Delete("r-name")
 
 	// then
 	assert.NoError(t, err)
@@ -173,68 +169,24 @@ func fixChart() *chart.Chart {
 	}
 }
 
-func publicKey(priv interface{}) interface{} {
-	switch k := priv.(type) {
-	case *rsa.PrivateKey:
-		return &k.PublicKey
-	case *ecdsa.PrivateKey:
-		return &k.PublicKey
-	default:
-		return nil
-	}
-}
-
-func pemBlockForKey(priv interface{}) *pem.Block {
-	switch k := priv.(type) {
-	case *rsa.PrivateKey:
-		return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}
-	case *ecdsa.PrivateKey:
-		b, err := x509.MarshalECPrivateKey(k)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Unable to marshal ECDSA private key: %v", err)
-			os.Exit(2)
-		}
-		return &pem.Block{Type: "EC PRIVATE KEY", Bytes: b}
-	default:
-		return nil
-	}
-}
-
 func createDummyKeyPair(keyFile, certFile string) error {
-	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	cert, priv, err := certs.NewCertificatePair("Kyma", "SAP", 12*time.Hour)
 	if err != nil {
 		return err
 	}
-	template := x509.Certificate{
-		SerialNumber: big.NewInt(1),
-		Subject: pkix.Name{
-			Organization: []string{"Kyma"},
-		},
-		NotBefore: time.Now(),
-		NotAfter:  time.Now().Add(time.Hour * 24 * 180),
-
-		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
-		BasicConstraintsValid: true,
-	}
-
-	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, publicKey(priv), priv)
+	certOut, err := os.Create(certFile)
 	if err != nil {
 		return err
 	}
+	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw})
+	certOut.Close()
 
-	out := &bytes.Buffer{}
-	pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
-	ioutil.WriteFile(certFile, out.Bytes(), 0644)
-	if err !=nil {
+	keyOut, err := os.OpenFile(keyFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	if err != nil {
 		return err
 	}
+	pem.Encode(keyOut, certs.PemBlockForKey(priv))
+	keyOut.Close()
 
-	out = &bytes.Buffer{}
-	pem.Encode(out, pemBlockForKey(priv))
-	ioutil.WriteFile(keyFile, out.Bytes(), 0644)
-	if err !=nil {
-		return err
-	}
 	return nil
 }
