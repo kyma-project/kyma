@@ -11,4 +11,4 @@ The diagram shows dependencies between the components:
 
 ![kyma-knative](./assets/kyma-knative.svg)
 
-Kyma and Knative cooperation focuses on replacing Kyma eventing with Knative eventing and Kyma Serverless with Knative serving.
+Kyma and Knative cooperation focuses on replacing Kyma eventing with Knative eventing, and Kyma Serverless with Knative serving.
