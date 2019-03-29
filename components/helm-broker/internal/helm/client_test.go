@@ -1,8 +1,20 @@
 package helm_test
 
 import (
+	"bytes"
 	"context"
+	"crypto/ecdsa"
+	"crypto/elliptic"
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
+	"fmt"
+	"io/ioutil"
+	"math/big"
 	"net"
+	"os"
 	"testing"
 	"time"
 
@@ -13,13 +25,22 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	hapi_release5 "k8s.io/helm/pkg/proto/hapi/release"
 	"k8s.io/helm/pkg/proto/hapi/services"
 )
 
+const (
+	keyFile string = "/tmp/dummy.key"
+	certFile string = "/tmp/dummy.crt"
+)
+
 func TestClientInstallSuccess(t *testing.T) {
 	// given
+	err := createDummyKeyPair(keyFile, certFile)
+	assert.NoError(t, err)
+
 	fakeTiller := &fakeTillerSvc{}
 	fakeTiller.SetUp(t)
 
@@ -35,7 +56,7 @@ func TestClientInstallSuccess(t *testing.T) {
 	}, spy.NewLogDummy())
 
 	// when
-	_, err := hClient.Install(fixChart(), cVals, "r-name", "ns-name")
+	_, err = hClient.Install(fixChart(), cVals, "r-name", "ns-name")
 
 	// then
 	assert.NoError(t, err)
@@ -60,6 +81,9 @@ func TestClientInstallSuccess(t *testing.T) {
 
 func TestClientDeleteSuccess(t *testing.T) {
 	// given
+	err := createDummyKeyPair(keyFile, certFile)
+	assert.NoError(t, err)
+
 	fakeTiller := &fakeTillerSvc{}
 	fakeTiller.SetUp(t)
 
@@ -71,7 +95,7 @@ func TestClientDeleteSuccess(t *testing.T) {
 	}, spy.NewLogDummy())
 
 	// when
-	err := hClient.Delete("r-name")
+	err = hClient.Delete("r-name")
 
 	// then
 	assert.NoError(t, err)
@@ -100,9 +124,10 @@ func (s *fakeTillerSvc) SetUp(t *testing.T) {
 	require.NoError(t, err)
 
 	s.Host = lis.Addr().String()
-	//creds, _ := credentials.NewServerTLSFromFile("testdata/helm-test-key.pub", "testdata/helm-test-key.key")
-	//s.grpcSvc = grpc.NewServer(grpc.Creds(creds))
-	s.grpcSvc = grpc.NewServer()
+	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
+	require.NoError(t, err)
+
+	s.grpcSvc = grpc.NewServer(grpc.Creds(creds))
 	services.RegisterReleaseServiceServer(s.grpcSvc, s)
 
 	go func() {
@@ -146,4 +171,70 @@ func fixChart() *chart.Chart {
 			Version: "1.0.0",
 		},
 	}
+}
+
+func publicKey(priv interface{}) interface{} {
+	switch k := priv.(type) {
+	case *rsa.PrivateKey:
+		return &k.PublicKey
+	case *ecdsa.PrivateKey:
+		return &k.PublicKey
+	default:
+		return nil
+	}
+}
+
+func pemBlockForKey(priv interface{}) *pem.Block {
+	switch k := priv.(type) {
+	case *rsa.PrivateKey:
+		return &pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(k)}
+	case *ecdsa.PrivateKey:
+		b, err := x509.MarshalECPrivateKey(k)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Unable to marshal ECDSA private key: %v", err)
+			os.Exit(2)
+		}
+		return &pem.Block{Type: "EC PRIVATE KEY", Bytes: b}
+	default:
+		return nil
+	}
+}
+
+func createDummyKeyPair(keyFile, certFile string) error {
+	priv, err := ecdsa.GenerateKey(elliptic.P521(), rand.Reader)
+	if err != nil {
+		return err
+	}
+	template := x509.Certificate{
+		SerialNumber: big.NewInt(1),
+		Subject: pkix.Name{
+			Organization: []string{"Kyma"},
+		},
+		NotBefore: time.Now(),
+		NotAfter:  time.Now().Add(time.Hour * 24 * 180),
+
+		KeyUsage:              x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
+		BasicConstraintsValid: true,
+	}
+
+	derBytes, err := x509.CreateCertificate(rand.Reader, &template, &template, publicKey(priv), priv)
+	if err != nil {
+		return err
+	}
+
+	out := &bytes.Buffer{}
+	pem.Encode(out, &pem.Block{Type: "CERTIFICATE", Bytes: derBytes})
+	ioutil.WriteFile(certFile, out.Bytes(), 0644)
+	if err !=nil {
+		return err
+	}
+
+	out = &bytes.Buffer{}
+	pem.Encode(out, pemBlockForKey(priv))
+	ioutil.WriteFile(keyFile, out.Bytes(), 0644)
+	if err !=nil {
+		return err
+	}
+	return nil
 }
