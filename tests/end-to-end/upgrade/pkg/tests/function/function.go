@@ -26,30 +26,29 @@ type FunctionUpgradeTest struct {
 	coreClient         *kubernetes.Clientset
 }
 
-func NewFunctionUpgradeTest() (*FunctionUpgradeTest, error) {
+func NewFunctionUpgradeTest() (*FunctionUpgradeTest) {
 	kubeconfig := os.Getenv("KUBECONFIG")
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		return &FunctionUpgradeTest{}, err
+		return &FunctionUpgradeTest{}
 	}
 
 	kubelessClient, err := kubeless.NewForConfig(config)
 	if err != nil {
-		return &FunctionUpgradeTest{}, err
+		return &FunctionUpgradeTest{}
 	}
 
 	coreClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return &FunctionUpgradeTest{}, err
+		return &FunctionUpgradeTest{}
 	}
 
-	name := strings.ToLower("FunctionUpgradeTest")
 	return &FunctionUpgradeTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
-		functionName:   name,
+		functionName:   "hello",
 		uuid:           uuid.New().String(),
-	}, nil
+	}
 }
 
 func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
@@ -59,7 +58,8 @@ func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 		return err
 	}
 
-	stop <- struct{}{}
+	<-stop
+
 	return nil
 }
 
@@ -81,7 +81,7 @@ func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 		return fmt.Errorf("Could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
 	}
 
-	stop <- struct{}{}
+	<-stop
 
 	return nil
 }

@@ -18,6 +18,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 )
 
 // Config holds application configuration
@@ -78,6 +79,7 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		"FunctionUpgradeTest": function.NewFunctionUpgradeTest(),
 	}
 
 	// Execute requested action
