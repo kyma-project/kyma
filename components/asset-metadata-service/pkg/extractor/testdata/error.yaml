@@ -1,3 +1,7 @@
+---
+-
+- as
+---
 test: Lorem ipsum
 test2: value
 properties:

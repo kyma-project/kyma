@@ -60,7 +60,7 @@ func TestFinalizerAdder_IsDefinedIn(t *testing.T) {
 		g.Expect(result).To(gomega.BeTrue())
 	})
 
-	t.Run("Defined", func(t *testing.T) {
+	t.Run("NotDefined", func(t *testing.T) {
 		//Given
 		g := gomega.NewGomegaWithT(t)
 

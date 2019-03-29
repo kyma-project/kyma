@@ -51,6 +51,22 @@ spec:
               properties:
                 filter:
                   type: string
+                metadataWebhookService:
+                  items:
+                    properties:
+                      endpoint:
+                        type: string
+                      filter:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    required:
+                    - name
+                    - namespace
+                    type: object
+                  type: array
                 mode:
                   enum:
                   - single
@@ -62,12 +78,17 @@ spec:
                     properties:
                       endpoint:
                         type: string
+                      filter:
+                        type: string
                       metadata:
                         type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                    required:
+                    - name
+                    - namespace
                     type: object
                   type: array
                 url:
@@ -77,12 +98,17 @@ spec:
                     properties:
                       endpoint:
                         type: string
+                      filter:
+                        type: string
                       metadata:
                         type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                    required:
+                    - name
+                    - namespace
                     type: object
                   type: array
               required:
@@ -96,12 +122,19 @@ spec:
           properties:
             assetRef:
               properties:
-                assets:
-                  items:
-                    type: string
-                  type: array
                 baseUrl:
                   type: string
+                files:
+                  items:
+                    properties:
+                      metadata:
+                        type: object
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  type: array
               required:
               - baseUrl
               type: object
