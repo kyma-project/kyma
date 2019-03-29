@@ -74,9 +74,11 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		} else {
 			switch status {
 			case publisher.PUBLISHED:
-				log.Printf("publish to the knative channel '%v' succeeded in namespace '%v'", *channelName, *namespace)
+				log.Printf("publish to the knative channel '%v' succeeded in namespace '%v'",
+					*channelName, *namespace)
 			case publisher.IGNORED:
-				log.Printf("publish couldn't find a channel '%v' in namespace '%v', message ignored", *channelName, *namespace)
+				log.Printf("publish couldn't find a channel '%v' in namespace '%v', message ignored",
+					*channelName, *namespace)
 			}
 		}
 
@@ -146,7 +148,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	// publish the message
 	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers, &messagePayload)
 	if status == publisher.IGNORED {
-		return nil, nil, nil, nil, status
+		return message, &channelName, &defaultChannelNamespace, nil, status
 	}
 	if err != nil {
 		log.Printf("publish message failed: %v", err)

@@ -14,7 +14,7 @@ type PublishRequest struct {
 // PublishResponse implements the service definition of PublishResponse
 type PublishResponse struct {
 	EventID string `json:"event-id,omitempty"`
-	Status string `json:"status,omitempty"`
+	Status  string `json:"status,omitempty"`
 }
 
 // AnyValue implements the service definition of AnyValue
