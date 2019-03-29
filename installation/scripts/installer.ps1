@@ -1,6 +1,6 @@
 param (
     [string]$CR_PATH = $null,
-    [switch]$LOCAL = $false,
+    [switch]$LOCAL = $false
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
