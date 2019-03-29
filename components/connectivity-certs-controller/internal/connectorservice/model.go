@@ -38,3 +38,21 @@ type EstablishedConnection struct {
 	Certificates      certificates.Certificates
 	ManagementInfoURL string
 }
+
+type ManagementInfo struct {
+	ClientIdentity ClientIdentity `json:"clientIdentity"`
+	ManagementURLs ManagementURLs `json:"urls"`
+}
+
+type ClientIdentity struct {
+	Application string
+	Tenant      string
+	Group       string
+}
+
+type ManagementURLs struct {
+	EventsURL     string `json:"eventsUrl"`
+	MetadataURL   string `json:"metadataUrl"`
+	RenewalURL    string `json:"renewCertUrl"`
+	RevocationURL string `json:"revocationCertUrl"`
+}

@@ -8,8 +8,9 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 	"strings"
+
+	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 
 	"github.com/pkg/errors"
 
@@ -112,7 +113,16 @@ func (cp *csrProvider) provideClusterPrivateKey() (*rsa.PrivateKey, error) {
 		return cp.createClusterKeySecret()
 	}
 
-	return x509.ParsePKCS1PrivateKey(block.Bytes)
+	if privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
+		return privateKey, nil
+	}
+
+	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error while parsing private key")
+	}
+
+	return privateKey.(*rsa.PrivateKey), nil
 }
 
 func (cp *csrProvider) createClusterKeySecret() (*rsa.PrivateKey, error) {

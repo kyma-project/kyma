@@ -49,8 +49,13 @@ type CentralConnectionSpec struct {
 }
 
 type CentralConnectionStatus struct {
-	LastSync           int64 `json:"lastSync"`
-	CertificateValidTo int64 `json:"certificateValidTo"`
+	LastSync           int64                   `json:"lastSync"`
+	CertificateValidTo int64                   `json:"certificateValidTo"`
+	Error              *CentralConnectionError `json:"error,omitempty"`
+}
+
+type CentralConnectionError struct {
+	Message string
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

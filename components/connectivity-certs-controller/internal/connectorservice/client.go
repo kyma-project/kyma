@@ -142,7 +142,8 @@ func extractErrorResponse(response *http.Response) error {
 	return errors.New(errorResponse.Error)
 }
 
-func readResponseBody(body io.Reader, model interface{}) error {
+func readResponseBody(body io.ReadCloser, model interface{}) error {
+	defer body.Close()
 	rawData, err := ioutil.ReadAll(body)
 	if err != nil {
 		return err
