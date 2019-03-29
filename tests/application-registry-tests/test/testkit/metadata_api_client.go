@@ -1,9 +1,3 @@
-/*
- *  © 2018 SAP SE or an SAP affiliate company.
- *  All rights reserved.
- *  Please see http://www.sap.com/corporate-en/legal/copyright/index.epx for additional trademark information and
- *  notices.
- */
 package testkit
 
 import (
@@ -55,7 +49,7 @@ func (client *metadataServiceClient) CreateService(t *testing.T, serviceDetails 
 		data:   &serviceDetails,
 	}
 
-	postResponse, err := client.requestWithRetries(t, requestData, newServiceDetailsRetryRequest)
+	postResponse, err := client.requestWithRetries(t, requestData, newServiceDetailsRetryRequest, statusNotServerError)
 	if err != nil {
 		t.Log(err)
 		return -1, nil, err
@@ -78,7 +72,7 @@ func (client *metadataServiceClient) UpdateService(t *testing.T, idToUpdate stri
 		data:   &updatedServiceDetails,
 	}
 
-	putResponse, err := client.requestWithRetries(t, requestData, newServiceDetailsRetryRequest)
+	putResponse, err := client.requestWithRetries(t, requestData, newServiceDetailsRetryRequest, statusNotServerError)
 	if err != nil {
 		t.Log(err)
 		return -1, err
@@ -95,7 +89,7 @@ func (client *metadataServiceClient) DeleteService(t *testing.T, idToDelete stri
 		data:   nil,
 	}
 
-	deleteResponse, err := client.requestWithRetries(t, requestData, newEmptyRetryRequest)
+	deleteResponse, err := client.requestWithRetries(t, requestData, newEmptyRetryRequest, statusNotServerError)
 	if err != nil {
 		t.Log(err)
 		return -1, err
@@ -106,13 +100,19 @@ func (client *metadataServiceClient) DeleteService(t *testing.T, idToDelete stri
 }
 
 func (client *metadataServiceClient) GetService(t *testing.T, serviceId string) (int, *ServiceDetails, error) {
+	condition := andPredicate(statusNotServerError, getSpecsPredicate(t, true, true, true))
+
+	return client.getService(t, serviceId, condition)
+}
+
+func (client *metadataServiceClient) getService(t *testing.T, serviceId string, condition Predicate) (int, *ServiceDetails, error) {
 	requestData := requestData{
 		method: http.MethodGet,
 		url:    client.url + "/" + serviceId,
 		data:   nil,
 	}
 
-	getResponse, err := client.requestWithRetries(t, requestData, newEmptyRetryRequest)
+	getResponse, err := client.requestWithRetries(t, requestData, newEmptyRetryRequest, condition)
 	if err != nil {
 		t.Log(err)
 		return -1, nil, err
@@ -135,7 +135,7 @@ func (client *metadataServiceClient) GetAllServices(t *testing.T) (int, []Servic
 		data:   nil,
 	}
 
-	getAllResponse, err := client.requestWithRetries(t, requestData, newEmptyRetryRequest)
+	getAllResponse, err := client.requestWithRetries(t, requestData, newEmptyRetryRequest, statusNotServerError)
 	if err != nil {
 		t.Log(err)
 		return -1, nil, err
@@ -174,7 +174,9 @@ func newEmptyRetryRequest(data requestData, retry int) (*http.Request, error) {
 	return http.NewRequest(data.method, data.url, nil)
 }
 
-func (client *metadataServiceClient) requestWithRetries(t *testing.T, data requestData, createRequest func(data requestData, retry int) (*http.Request, error)) (*http.Response, error) {
+type CreateRequestFunc func(data requestData, retry int) (*http.Request, error)
+
+func (client *metadataServiceClient) requestWithRetries(t *testing.T, data requestData, createRequest CreateRequestFunc, condition Predicate) (*http.Response, error) {
 	var response *http.Response
 	var err error
 
@@ -189,8 +191,7 @@ func (client *metadataServiceClient) requestWithRetries(t *testing.T, data reque
 			return nil, reqErr
 		}
 
-		response, err = client.httpClient.Do(request)
-		if err == nil && response.StatusCode < 500 {
+		if condition(client.httpClient.Do(request)) {
 			return response, err
 		}
 
@@ -198,6 +199,49 @@ func (client *metadataServiceClient) requestWithRetries(t *testing.T, data reque
 	}
 
 	return response, err
+}
+
+type Predicate func(response *http.Response, err error) bool
+
+func statusNotServerError(response *http.Response, err error) bool {
+	return err == nil && response.StatusCode < 500
+}
+
+func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, expectDocumentation bool) Predicate {
+	return func(response *http.Response, err error) bool {
+		if response.StatusCode == http.StatusOK {
+			serviceDetails := ServiceDetails{}
+			err = json.NewDecoder(response.Body).Decode(&serviceDetails)
+			if err != nil {
+				return false
+			}
+
+			apiSpecMatch := true
+			if expectApiSpec {
+				apiSpecMatch = serviceDetails.Api != nil && serviceDetails.Api.Spec != nil
+			}
+
+			eventsSpecMatch := true
+			if expectEventsSpec {
+				eventsSpecMatch = serviceDetails.Events != nil && serviceDetails.Events.Spec != nil
+			}
+
+			documentationMatch := true
+			if expectDocumentation {
+				documentationMatch = serviceDetails.Documentation != nil
+			}
+
+			return apiSpecMatch && eventsSpecMatch && documentationMatch
+		}
+
+		return true
+	}
+}
+
+func andPredicate(operand1 Predicate, operand2 Predicate) Predicate {
+	return func(response *http.Response, err error) bool {
+		return operand1(response, err) && operand2(response, err)
+	}
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
