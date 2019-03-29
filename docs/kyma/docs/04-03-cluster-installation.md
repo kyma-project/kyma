@@ -517,7 +517,7 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
 
 ### Access the cluster
 
-1. Check the virtual service name of your cluster which corresponds to the console address, such as `console.kyma.local`. To check your virtual service name, run:
+1. To get the address of the cluster's Console, check the name of the Console's virtual service. The name of this virtual service corresponds to the Console URL. To get the virtual service name, run:
 
 ```
 kubectl get virtualservice core-console -n kyma-system
