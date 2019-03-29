@@ -2,7 +2,7 @@ param (
     [string]$VM_DRIVER = "hyperv",
     [string]$DOMAIN = "kyma.local",
     [string]$DISK_SIZE = "30g",
-    [string]$MEMORY = "10240"
+    [string]$MEMORY = "8192"
 )
 
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
