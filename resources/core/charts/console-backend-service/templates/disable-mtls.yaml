@@ -1,0 +1,11 @@
+{{- if .Values.global.isLocalEnv }}
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: console-backend-mtls-disable
+spec:
+  host: core-console-backend-service.kyma-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
+{{- end }}
