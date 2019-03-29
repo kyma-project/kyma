@@ -10,8 +10,8 @@ type options struct {
 	domainName                   string
 	namespace                    string
 	tillerUrl                    string
-	helmTLSKeyFile          string
-	helmTLSCertificateFile  string
+	helmTLSKeyFile               string
+	helmTLSCertificateFile       string
 	syncPeriod                   int
 	installationTimeout          int64
 	applicationGatewayImage      string
@@ -42,8 +42,8 @@ func parseArgs() *options {
 		domainName:                   *domainName,
 		namespace:                    *namespace,
 		tillerUrl:                    *tillerUrl,
-		helmTLSKeyFile:          *helmTLSKeyFile,
-		helmTLSCertificateFile:  *helmTLSCertificateFile,
+		helmTLSKeyFile:               *helmTLSKeyFile,
+		helmTLSCertificateFile:       *helmTLSCertificateFile,
 		syncPeriod:                   *syncPeriod,
 		installationTimeout:          *installationTimeout,
 		applicationGatewayImage:      *applicationGatewayImage,
