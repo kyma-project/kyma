@@ -17,6 +17,10 @@ getConfigFile() {
 test(){
     local retry=$1
     local maxRetries=$2
+    if [[ "$retry" -ge "$maxRetries" ]]; then
+    	echo "TEST FAILED"
+    	exit 1
+    fi
     echo "Try $retry/$maxRetries"
 
     UUID=$(cat /proc/sys/kernel/random/uuid)
@@ -34,13 +38,7 @@ test(){
         echo "${out}"
         echo "---"
         echo "UUID: $(cat ${PWD}/uuid)"
-        retry=$((retry+1))
-        if [[ "$retry" -ne "$maxRetries" ]]; then
-            test "$retry" "${maxRetries}"
-        else
-            echo "TEST FAILED"
-            exit 1
-        fi
+        test "$((retry+1))" "${maxRetries}"
     else
         echo "TEST SUCCEEDED"
     fi
