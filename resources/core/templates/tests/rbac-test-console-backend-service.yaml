@@ -29,7 +29,7 @@ rules:
     resources: ["replicasets"]
     verbs: ["create", "delete", "get", "update"]
   - apiGroups: [""]
-    resources: ["namespaces", "pods"]
+    resources: ["namespaces", "pods", "configmaps"]
     verbs: ["create", "get", "delete"]
     nonResourceURLs: []
   - apiGroups: [""]
