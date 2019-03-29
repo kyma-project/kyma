@@ -30,6 +30,8 @@ func TestClientInstallSuccess(t *testing.T) {
 	hClient := helm.NewClient(helm.Config{
 		TillerHost:              fakeTiller.Host,
 		TillerConnectionTimeout: time.Second,
+		TillerTLSCrt:            "testdata/helm-test-key.pub",
+		TillerTLSKey:            "testdata/helm-test-key.secret",
 	}, spy.NewLogDummy())
 
 	// when
@@ -64,6 +66,8 @@ func TestClientDeleteSuccess(t *testing.T) {
 	hClient := helm.NewClient(helm.Config{
 		TillerHost:              fakeTiller.Host,
 		TillerConnectionTimeout: time.Second,
+		TillerTLSCrt:            "testdata/helm-test-key.pub",
+		TillerTLSKey:            "testdata/helm-test-key.secret",
 	}, spy.NewLogDummy())
 
 	// when
@@ -96,7 +100,8 @@ func (s *fakeTillerSvc) SetUp(t *testing.T) {
 	require.NoError(t, err)
 
 	s.Host = lis.Addr().String()
-
+	//creds, _ := credentials.NewServerTLSFromFile("testdata/helm-test-key.pub", "testdata/helm-test-key.key")
+	//s.grpcSvc = grpc.NewServer(grpc.Creds(creds))
 	s.grpcSvc = grpc.NewServer()
 	services.RegisterReleaseServiceServer(s.grpcSvc, s)
 

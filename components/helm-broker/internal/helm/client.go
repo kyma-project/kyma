@@ -1,6 +1,8 @@
 package helm
 
 import (
+	"crypto/tls"
+	"fmt"
 	"time"
 
 	"github.com/ghodss/yaml"
@@ -9,6 +11,7 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"k8s.io/helm/pkg/tlsutil"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
@@ -20,10 +23,23 @@ const (
 
 // NewClient creates Tiller client
 func NewClient(cfg Config, log *logrus.Entry) *Client {
+	tlsopts := tlsutil.Options{
+		KeyFile:            cfg.TillerTLSKey,
+		CertFile:           cfg.TillerTLSCrt,
+		InsecureSkipVerify: true,
+	}
+	fmt.Println("KeyFile: ", cfg.TillerTLSKey)
+	fmt.Println("CertFile: ", cfg.TillerTLSCrt)
+	tlscfg, err := tlsutil.ClientConfig(tlsopts)
+	if err != nil {
+		log.Fatalf("Unable create helm client. Error: %v", err)
+	}
+
 	return &Client{
 		tillerHost:        cfg.TillerHost,
 		tillerConnTimeout: int64(cfg.TillerConnectionTimeout),
 		log:               log.WithField("service", "helm_client"),
+		tlscfg:            tlscfg,
 	}
 }
 
@@ -31,6 +47,7 @@ func NewClient(cfg Config, log *logrus.Entry) *Client {
 type Client struct {
 	tillerHost        string
 	tillerConnTimeout int64
+	tlscfg            *tls.Config
 	log               *logrus.Entry
 }
 
@@ -67,5 +84,6 @@ func (cli *Client) helmClient() helmDeleteInstaller {
 	//
 	// helm.ConnectTimeout option is REQUIRED, because of this issue:
 	// https://github.com/kubernetes/helm/issues/3658
-	return helm.NewClient(helm.Host(cli.tillerHost), helm.ConnectTimeout(cli.tillerConnTimeout))
+	//return helm.NewClient(helm.Host(cli.tillerHost), helm.ConnectTimeout(cli.tillerConnTimeout), helm.WithTLS(cli.tlscfg))
+	return helm.NewClient(helm.Host(cli.tillerHost), helm.ConnectTimeout(int64(2)), helm.WithTLS(cli.tlscfg))
 }

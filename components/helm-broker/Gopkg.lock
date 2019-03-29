@@ -985,6 +985,8 @@
     "pkg/renderutil",
     "pkg/storage/errors",
     "pkg/sympath",
+    "pkg/tlsutil",
+    "pkg/urlutil",
     "pkg/version"
   ]
   revision = "02a47c7249b1fc6d8fd3b94e6b4babf9d818144e"
@@ -999,6 +1001,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "4f3587a4db66ee4fab4f700db62f4c0e2c09faf2b71cc1639dac8e9af152b9f4"
+  inputs-digest = "5739128091fecdf0150b2bbb63d4692e0d6d0f13de62afdd649bc2d8e143d41d"
   solver-name = "gps-cdcl"
   solver-version = 1
