@@ -8,8 +8,12 @@ metadata:
     sidecar.istio.io/inject: "false"
     "helm.sh/hook": test-success
   labels:
-    "helm-chart-test": "true"
+    helm-chart-test: "true"
+    app: {{ .Chart.Name }}-tests
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
+  serviceAccountName: {{ .Chart.Name }}-tests
   containers:
     - name: {{ .Chart.Name }}-tests
       image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator_tests.dir }}application-operator-tests:{{ .Values.global.application_operator_tests.version }}

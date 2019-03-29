@@ -96,7 +96,6 @@ func GetTestSetup() (envs *controller, nc *testNamespacesClient, rc *testRolesCl
 		Clientset:           nil,
 		Config:              testNamespacesConfig,
 		NamespacesClient:    nc,
-		RolesClient:         rc,
 		LimitRangeClient:    lr,
 		ResourceQuotaClient: rq,
 		ErrorHandlers:       &internal.ErrorHandlers{},
@@ -188,73 +187,6 @@ func (lr *testResourceQuotaClient) DeleteResourceQuota(namespace string) error {
 }
 
 func TestNamespaces(t *testing.T) {
-	Convey("Adding roles for namespace shouldn't return error", t, func() {
-
-		envs, nc, rc, lr, _ := GetTestSetup()
-
-		err := envs.AddRolesForNamespace(testNamespace)
-
-		So(err, ShouldBeNil)
-		So(nc.GetNamespaceCalled, ShouldBeTrue)
-		So(nc.UpdateNamespaceCalled, ShouldBeTrue)
-
-		allLimitRangeClientMethodsShouldNotBeCalled(lr)
-
-		So(rc.CreateRoleCalled, ShouldBeTrue)
-		So(rc.GetListCalled, ShouldBeTrue)
-		So(rc.DeleteRoleCalled, ShouldBeFalse)
-		So(rc.GetRoleCalled, ShouldBeFalse)
-	})
-
-	Convey("Should not add roles for namespace with existing roles", t, func() {
-
-		origNamespace := testNamespace.DeepCopy()
-		envs, nc, rc, lr, _ := GetTestSetup()
-
-		annotations := make(map[string]string)
-		annotations[rolesAnnotName] = "true"
-		testNamespace.SetAnnotations(annotations)
-
-		err := envs.AddRolesForNamespace(testNamespace)
-
-		So(err, ShouldBeNil)
-		So(nc.GetNamespaceCalled, ShouldBeTrue)
-		So(nc.UpdateNamespaceCalled, ShouldBeFalse)
-
-		allRolesClientMethodsShouldNotBeCalled(rc)
-		allLimitRangeClientMethodsShouldNotBeCalled(lr)
-
-		Reset(func() {
-			testNamespace = origNamespace
-		})
-	})
-
-	Convey("Removing roles from namespace shouldn't return error", t, func() {
-
-		origNamespace := testNamespace.DeepCopy()
-		envs, nc, rc, lr, _ := GetTestSetup()
-
-		annotations := make(map[string]string)
-		annotations[rolesAnnotName] = "true"
-		testNamespace.SetAnnotations(annotations)
-
-		err := envs.RemoveRolesFromNamespace(testNamespace)
-
-		So(err, ShouldBeNil)
-		So(nc.GetNamespaceCalled, ShouldBeTrue)
-		So(nc.UpdateNamespaceCalled, ShouldBeTrue)
-
-		allLimitRangeClientMethodsShouldNotBeCalled(lr)
-
-		So(rc.GetListCalled, ShouldBeTrue)
-		So(rc.DeleteRoleCalled, ShouldBeTrue)
-		So(rc.CreateRoleCalled, ShouldBeFalse)
-		So(rc.GetRoleCalled, ShouldBeFalse)
-
-		Reset(func() {
-			testNamespace = origNamespace
-		})
-	})
 
 	Convey("istio-inject label", t, func() {
 
