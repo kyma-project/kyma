@@ -141,7 +141,7 @@ spec:
           - |
             WORKING_DIR="/tmp/certs"
             mkdir -p "${WORKING_DIR}"
-            cp /etc/tiller-tls/* "${WORKING_DIR}"
+
             cat <<EOF > "${WORKING_DIR}/openssl.cnf"
             [ req ]
             #default_bits   = 2048
