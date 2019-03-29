@@ -181,7 +181,7 @@ kubectl get pods --all-namespaces
 
    If the problem persists, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
 
-3. If you put your local running cluster into hibernation, or execute `minikube stop` and after some time `minikube start` you will be not able log in. The dex access token has some time to live, and your minikube has incorrect date and time. Execute below command to set current time of your local machine into minikube:
+3. If you put your local running cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run: 
    ```
    minikube ssh -- docker run -i --rm --privileged --pid=host debian nsenter -t 1 -m -u -n -i date -u $(date -u +%m%d%H%M%Y)
    ```
