@@ -82,7 +82,7 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
-- apiGroups: ["", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma-project.io", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma-project.io", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "networking.istio.io", "batch", "extensions", "autoscaling", "assetstore.kyma-project.io", "cms.kyma-project.io"]
+- apiGroups: ["", "apps", "authentication.kyma-project.io", "extensions", "gateway.kyma-project.io", "kubeless.io", "rbac.authorization.k8s.io", "applicationconnector.kyma-project.io", "servicecatalog.k8s.io", "servicecatalog.kyma-project.io", "settings.k8s.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "eventing.kyma-project.io", "ui.kyma.cx", "ui.kyma-project.io", "metrics.k8s.io", "networking.istio.io", "batch", "autoscaling", "assetstore.kyma-project.io", "cms.kyma-project.io"]
   resources: ["*"]
   verbs: ["*"]
 - apiGroups: ["apiextensions.k8s.io"]
@@ -136,7 +136,8 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
-- apiGroups: ["authentication.kyma-project.io", "gateway.kyma-project.io", "kubeless.io", "applicationconnector.kyma-project.io", "servicecatalog.kyma-project.io", "kyma.cx", "authentication.istio.io", "config.istio.io", "ui.kyma.cx", "ui.kyma-project.io", "networking.istio.io"]
+- apiGroups:
+{{ toYaml .Values.clusterRoles.common.apiGroups | indent 4 }}
   resources: ["*"]
   verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
 - apiGroups: ["apiextensions.k8s.io"]
@@ -186,14 +187,14 @@ rules:
   resources: ["*"]
   verbs: ["list"]
 - apiGroups: [""]
-  resources: 
+  resources:
     - namespaces
   verbs: ["list"]
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["list"]
 - apiGroups: ["authorization.k8s.io"]
-  resources: 
+  resources:
     - selfsubjectrulesreviews
     - selfsubjectaccessreviews
     - subjectaccessreviews
