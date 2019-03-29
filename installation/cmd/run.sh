@@ -54,10 +54,8 @@ do
 done
 set -- "${POSITIONAL[@]}" # restore positional parameters
 
-MINIKUBE_EXTRA_ARGS="${MINIKUBE_EXTRA_ARGS} --memory 10240 --disk-size 30g"
-
 if [[ ! ${SKIP_MINIKUBE_START} ]]; then
-    bash ${SCRIPTS_DIR}/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}" ${MINIKUBE_EXTRA_ARGS}
+    bash ${SCRIPTS_DIR}/minikube.sh --domain "${DOMAIN}" --vm-driver "${VM_DRIVER}"
 fi
 
 bash ${SCRIPTS_DIR}/build-kyma-installer.sh --vm-driver "${VM_DRIVER}"

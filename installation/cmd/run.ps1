@@ -9,11 +9,10 @@ $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $SCRIPTS_DIR = "${CURRENT_DIR}\..\scripts"
 $DOMAIN = "kyma.local"
 $INSTALLER_EXTRA_ARGS = ""
-$MINIKUBE_EXTRA_ARGS = "-memory 10240 -disk_size 30g"
 $CREATE_CR_EXTRA_ARGS = ""
 
 if ($SKIP_MINIKUBE_START -eq $false) {
-    Invoke-Expression -Command "${SCRIPTS_DIR}\minikube.ps1 -vm_driver ${VM_DRIVER} -domain ${DOMAIN} ${MINIKUBE_EXTRA_ARGS}"
+    Invoke-Expression -Command "${SCRIPTS_DIR}\minikube.ps1 -vm_driver ${VM_DRIVER} -domain ${DOMAIN}
 
     if($LastExitCode -gt 0){
         exit
