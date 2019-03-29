@@ -57,7 +57,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		w.WriteHeader(http.StatusOK)
 		var reason string
 		switch status {
-		case publisher.SENT:
+		case publisher.PUBLISHED:
 			reason = "Message successfully published to the channel"
 		case publisher.IGNORED:
 			reason = "There was no subscriptions to this event"
@@ -73,7 +73,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 			log.Printf("failed to send response back: %v", err)
 		} else {
 			switch status {
-			case publisher.SENT:
+			case publisher.PUBLISHED:
 				log.Printf("publish to the knative channel '%v' succeeded in namespace '%v'", *channelName, *namespace)
 			case publisher.IGNORED:
 				log.Printf("publish couldn't find a channel '%v' in namespace '%v', message ignored", *channelName, *namespace)
@@ -155,7 +155,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 		return nil, nil, nil, err, publisher.FAILED
 	}
 
-	return message, &channelName, &defaultChannelNamespace, nil, publisher.SENT
+	return message, &channelName, &defaultChannelNamespace, nil, publisher.PUBLISHED
 }
 
 func initTrace(r *http.Request, tracer *trace.Tracer) (span *opentracing.Span, context *api.TraceContext) {

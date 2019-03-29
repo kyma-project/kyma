@@ -121,12 +121,12 @@ components:
           example: "31109198-4d69-4ae0-972d-76117f3748c8"
         status:
           type: string
-          description: Status os message publishng
-          example: "SENT"
+          description: Status of message publishng
+          example: "PUBLISHED"
         reason:
           type: string
           description: reason behind the message publishing status
-          example: "Message was ignored since there is no subscriptions to this event"
+          example: "Event was ignored as there are no subscriptions or consumers configured for this event"
       required:
         - event-id
     AnyValue:

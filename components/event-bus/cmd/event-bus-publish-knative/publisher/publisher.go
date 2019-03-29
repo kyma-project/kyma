@@ -10,7 +10,7 @@ import (
 const(
 FAILED = "failed"
 IGNORED = "ignored"
-SENT = "sent"
+PUBLISHED = "published"
 )
 
 type KnativePublisher interface {
@@ -75,5 +75,5 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	}
 
 	// publish to channel succeeded return nil error
-	return nil, SENT
+	return nil, PUBLISHED
 }
