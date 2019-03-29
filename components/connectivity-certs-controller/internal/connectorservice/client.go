@@ -15,7 +15,7 @@ import (
 )
 
 type Client interface {
-	RequestCertificates(csrInfoURL string) (certificates.Certificates, error)
+	ConnectToCentralConnector(csrInfoURL string) (EstablishedConnection, error)
 }
 
 type connectorClient struct {
@@ -30,23 +30,23 @@ func NewConnectorClient(csrProvider certificates.CSRProvider) Client {
 	}
 }
 
-func (cc *connectorClient) RequestCertificates(csrInfoURL string) (certificates.Certificates, error) {
+func (cc *connectorClient) ConnectToCentralConnector(csrInfoURL string) (EstablishedConnection, error) {
 	infoResponse, err := cc.requestCSRInfo(csrInfoURL)
 	if err != nil {
-		return certificates.Certificates{}, errors.Wrap(err, "Failed while requesting CSR info")
+		return EstablishedConnection{}, errors.Wrap(err, "Failed while requesting CSR info")
 	}
 
 	encodedCSR, err := cc.csrProvider.CreateCSR(infoResponse.CertificateInfo.Subject)
 	if err != nil {
-		return certificates.Certificates{}, errors.Wrap(err, "Failed while creating CSR")
+		return EstablishedConnection{}, errors.Wrap(err, "Failed while creating CSR")
 	}
 
 	certificateResponse, err := cc.requestCertificates(infoResponse.CsrURL, encodedCSR)
 	if err != nil {
-		return certificates.Certificates{}, errors.Wrap(err, "Failed while requesting certificate")
+		return EstablishedConnection{}, errors.Wrap(err, "Failed while requesting certificate")
 	}
 
-	return decodeCertificateResponse(certificateResponse)
+	return composeConnectionData(certificateResponse, infoResponse.Api.InfoURL)
 }
 
 func (cc *connectorClient) requestCSRInfo(csrInfoURL string) (InfoResponse, error) {
@@ -104,26 +104,31 @@ func (cc *connectorClient) requestCertificates(csrURL string, encodedCSR string)
 	return certificateResponse, nil
 }
 
-func decodeCertificateResponse(certificateResponse CertificatesResponse) (certificates.Certificates, error) {
+func composeConnectionData(certificateResponse CertificatesResponse, managementInfoURL string) (EstablishedConnection, error) {
 	crtChain, err := base64.StdEncoding.DecodeString(certificateResponse.CRTChain)
 	if err != nil {
-		return certificates.Certificates{}, errors.Wrap(err, "Failed to decode certificate chain")
+		return EstablishedConnection{}, errors.Wrap(err, "Failed to decode certificate chain")
 	}
 
 	clientCRT, err := base64.StdEncoding.DecodeString(certificateResponse.ClientCRT)
 	if err != nil {
-		return certificates.Certificates{}, errors.Wrap(err, "Failed to decode client certificate")
+		return EstablishedConnection{}, errors.Wrap(err, "Failed to decode client certificate")
 	}
 
 	caCRT, err := base64.StdEncoding.DecodeString(certificateResponse.CaCRT)
 	if err != nil {
-		return certificates.Certificates{}, errors.Wrap(err, "Failed to decode CA certificate")
+		return EstablishedConnection{}, errors.Wrap(err, "Failed to decode CA certificate")
 	}
 
-	return certificates.Certificates{
+	certs := certificates.Certificates{
 		CRTChain:  crtChain,
 		ClientCRT: clientCRT,
 		CaCRT:     caCRT,
+	}
+
+	return EstablishedConnection{
+		Certificates:      certs,
+		ManagementInfoURL: managementInfoURL,
 	}, nil
 }
 

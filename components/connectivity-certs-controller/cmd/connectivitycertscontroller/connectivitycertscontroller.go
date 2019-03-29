@@ -3,9 +3,11 @@ package main
 import (
 	"os"
 
+	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/centralconnection"
+
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates"
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/connectorservice"
-	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/controller/certificaterequest"
+	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificaterequest"
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/pkg/apis/applicationconnector/v1alpha1"
 
@@ -66,8 +68,15 @@ func main() {
 	connectorClient := connectorservice.NewConnectorClient(csrProvider)
 
 	// Setup Certificate Request Controller
-	log.Info("Setting up controller")
+	log.Info("Setting up Certificate Request controller")
 	if err := certificaterequest.InitCertificatesRequestController(mgr, options.appName, connectorClient, certPreserver); err != nil {
+		log.Error(err, "Unable to register controllers to the manager")
+		os.Exit(1)
+	}
+
+	// Setup Master Connection Controller
+	log.Info("Setting up Master Connection controller")
+	if err := centralconnection.InitMasterConnectionsController(mgr, options.appName, connectorClient, certPreserver); err != nil {
 		log.Error(err, "Unable to register controllers to the manager")
 		os.Exit(1)
 	}

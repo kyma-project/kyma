@@ -3,6 +3,7 @@ package certificaterequest
 import (
 	"context"
 
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates"
@@ -25,18 +26,23 @@ type Client interface {
 	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error
 }
 
+type CentralConnectionManager interface {
+	Create(*v1alpha1.CentralConnection) (*v1alpha1.CentralConnection, error)
+}
+
 type Controller struct {
 	certificateRequestClient Client
 	connectorClient          connectorservice.Client
 	certificatePreserver     certificates.Preserver
+	connectionClient         CentralConnectionManager
 }
 
-func InitCertificatesRequestController(mgr manager.Manager, appName string, connectorClient connectorservice.Client, certPreserver certificates.Preserver) error {
-	return startController(appName, mgr, connectorClient, certPreserver)
+func InitCertificatesRequestController(mgr manager.Manager, appName string, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager CentralConnectionManager) error {
+	return startController(appName, mgr, connectorClient, certPreserver, connectionManager)
 }
 
-func startController(appName string, mgr manager.Manager, connectorClient connectorservice.Client, certPreserver certificates.Preserver) error {
-	certRequestController := newCertificatesRequestController(mgr.GetClient(), connectorClient, certPreserver)
+func startController(appName string, mgr manager.Manager, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager CentralConnectionManager) error {
+	certRequestController := newCertificatesRequestController(mgr.GetClient(), connectorClient, certPreserver, connectionManager)
 
 	c, err := controller.New(appName, mgr, controller.Options{Reconciler: certRequestController})
 	if err != nil {
@@ -46,11 +52,12 @@ func startController(appName string, mgr manager.Manager, connectorClient connec
 	return c.Watch(&source.Kind{Type: &v1alpha1.CertificateRequest{}}, &handler.EnqueueRequestForObject{})
 }
 
-func newCertificatesRequestController(client Client, connectorClient connectorservice.Client, certPreserver certificates.Preserver) *Controller {
+func newCertificatesRequestController(client Client, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager CentralConnectionManager) *Controller {
 	return &Controller{
 		certificateRequestClient: client,
 		connectorClient:          connectorClient,
 		certificatePreserver:     certPreserver,
+		connectionClient:         connectionManager,
 	}
 }
 
@@ -69,19 +76,17 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, nil
 	}
 
-	certs, err := c.connectorClient.RequestCertificates(instance.Spec.CSRInfoURL)
+	establishedConnection, err := c.connectorClient.ConnectToCentralConnector(instance.Spec.CSRInfoURL)
 	if err != nil {
 		log.Errorf("Error while requesting certificates from Connector Service: %s", err.Error())
 		return reconcile.Result{}, c.setRequestErrorStatus(instance, err)
 	}
 	log.Infoln("Certificates fetched successfully")
 
-	err = c.certificatePreserver.PreserveCertificates(certs)
+	err = c.manageResources(instance.Name, establishedConnection)
 	if err != nil {
-		log.Errorf("Error while saving certificates to secrets: %s", err.Error())
 		return reconcile.Result{}, c.setRequestErrorStatus(instance, err)
 	}
-	log.Infoln("Certificates saved successfully")
 
 	err = c.certificateRequestClient.Delete(context.Background(), instance)
 	if err != nil {
@@ -90,6 +95,30 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 	log.Infof("CertificatesRequest %s successfully deleted", instance.Name)
 
 	return reconcile.Result{}, nil
+}
+
+func (c *Controller) manageResources(connectionName string, connection connectorservice.EstablishedConnection) error {
+	masterConnection := &v1alpha1.CentralConnection{
+		ObjectMeta: v1.ObjectMeta{Name: connectionName}, // TODO - figure out some naming - same as request??
+		Spec: v1alpha1.CentralConnectionSpec{
+			ManagementInfoURL: connection.ManagementInfoURL,
+			// TODO - secret names?
+		},
+	}
+
+	_, err := c.connectionClient.Create(masterConnection)
+	if err != nil {
+		log.Errorf("Error while creating Central Connection resource: %s", err.Error())
+	}
+
+	err = c.certificatePreserver.PreserveCertificates(connection.Certificates)
+	if err != nil {
+		log.Errorf("Error while saving certificates to secrets: %s", err.Error())
+		return err
+	}
+	log.Infoln("Certificates saved successfully")
+
+	return nil
 }
 
 func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {

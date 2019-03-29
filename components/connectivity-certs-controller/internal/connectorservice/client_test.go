@@ -24,6 +24,8 @@ const (
 	caCRTBase64     = "Y2FDUlQ="     // caCRT
 
 	plainSubject = "CN=some-cn"
+
+	infoURL = "https://connector-service/v1/runtimes/management/info"
 )
 
 var (
@@ -70,13 +72,14 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		connectorClient := NewConnectorClient(csrProvider)
 
 		// when
-		certificates, err := connectorClient.RequestCertificates(csrURL)
+		connection, err := connectorClient.ConnectToCentralConnector(csrURL)
 		require.NoError(t, err)
 
 		// then
-		assert.Equal(t, clientCRT, certificates.ClientCRT)
-		assert.Equal(t, caCRT, certificates.CaCRT)
-		assert.Equal(t, crtChain, certificates.CRTChain)
+		assert.Equal(t, clientCRT, connection.Certificates.ClientCRT)
+		assert.Equal(t, caCRT, connection.Certificates.CaCRT)
+		assert.Equal(t, crtChain, connection.Certificates.CRTChain)
+		assert.Equal(t, infoURL, connection.ManagementInfoURL)
 	})
 
 	t.Run("should return error when failed request info response", func(t *testing.T) {
@@ -92,7 +95,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		connectorClient := NewConnectorClient(nil)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.ConnectToCentralConnector(csrURL)
 		require.Error(t, err)
 	})
 
@@ -115,7 +118,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		connectorClient := NewConnectorClient(csrProvider)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.ConnectToCentralConnector(csrURL)
 		require.Error(t, err)
 	})
 
@@ -140,7 +143,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		connectorClient := NewConnectorClient(csrProvider)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.ConnectToCentralConnector(csrURL)
 		require.Error(t, err)
 	})
 
@@ -153,7 +156,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		connectorClient := NewConnectorClient(nil)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.ConnectToCentralConnector(csrURL)
 		require.Error(t, err)
 	})
 
@@ -176,7 +179,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 		connectorClient := NewConnectorClient(csrProvider)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.ConnectToCentralConnector(csrURL)
 		require.Error(t, err)
 	})
 
@@ -222,7 +225,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 				connectorClient := NewConnectorClient(csrProvider)
 
 				// when
-				_, err := connectorClient.RequestCertificates(csrURL)
+				_, err := connectorClient.ConnectToCentralConnector(csrURL)
 				require.Error(t, err)
 			})
 		}
@@ -235,6 +238,9 @@ func createInfoResponse(connectorURL string) InfoResponse {
 		CsrURL: fmt.Sprintf("%s%s", connectorURL, certificatePath),
 		CertificateInfo: CertificateInfo{
 			Subject: plainSubject,
+		},
+		Api: APIUrls{
+			InfoURL: infoURL,
 		},
 	}
 }
