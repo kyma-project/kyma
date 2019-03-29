@@ -24,7 +24,6 @@ func NewKnativePublisher() KnativePublisher {
 	return publisher
 }
 
-//TODO
 func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib, channelName *string,
 	namespace *string, headers *map[string]string, payload *[]byte) (*api.Error, string) {
 	// knativelib should not be nil
@@ -57,11 +56,9 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 		return api.ErrorResponseInternalServer(), FAILED
 	}
 
-	//TODO
 	// get the knative channel
 	channel, err := knativeLib.GetChannel(*channelName, *namespace)
 	if err != nil {
-		//TODO
 		log.Printf("cannot find the knative channel '%v' in namespace '%v'", *channelName, *namespace)
 		return api.ErrorResponseInternalServer(), IGNORED
 	}
