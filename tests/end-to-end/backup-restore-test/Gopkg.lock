@@ -138,9 +138,15 @@
   version = "v0.6.0"
 
 [[projects]]
-  digest = "1:f73c6680480dfc6eca324febc6a3a28c5d4ca7aa7fa8344a846881a9a2ee2d77"
+  branch = "master"
+  digest = "1:995247eb6948fef10ed313eff43c0edb37e53e476c7739e290768f62373805b2"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "common/microfrontend-client/pkg/apis/ui",
+    "common/microfrontend-client/pkg/apis/ui/v1alpha1",
+    "common/microfrontend-client/pkg/client/clientset/versioned",
+    "common/microfrontend-client/pkg/client/clientset/versioned/scheme",
+    "common/microfrontend-client/pkg/client/clientset/versioned/typed/ui/v1alpha1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
@@ -148,8 +154,7 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
   ]
   pruneopts = "UT"
-  revision = "2b7998ba0b38e133a5df17e2a2d8b93603b79aed"
-  version = "0.8.0"
+  revision = "ed60d16ae47a0d80d2bc394c133e15f4b256b7bd"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
@@ -454,6 +459,8 @@
     "github.com/heptio/ark/pkg/generated/clientset/versioned",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "github.com/pkg/errors",

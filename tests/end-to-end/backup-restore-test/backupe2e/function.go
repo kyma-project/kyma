@@ -148,3 +148,7 @@ func (f functionTest) getFunctionPodStatus(namespace string, waitmax time.Durati
 		}
 	}
 }
+
+func (f functionTest) DeleteResources() {
+	// There is not need to be implemented for this test.
+}
