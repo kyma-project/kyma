@@ -58,6 +58,8 @@ func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	if err != nil {
 		return err
 	}
+
+	stop <- struct{}{}
 	return nil
 }
 
@@ -78,6 +80,8 @@ func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	if !strings.Contains(value, f.uuid) {
 		return fmt.Errorf("Could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
 	}
+
+	stop <- struct{}{}
 
 	return nil
 }
