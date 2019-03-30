@@ -5,7 +5,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/wait"
 )
 
-func New(timeout time.Duration, conditionFunc wait.ConditionFunc, stop <-chan struct{}) error {
+func WaitAtMost(conditionFunc wait.ConditionFunc, timeout time.Duration, stop <-chan struct{}) error {
 	timeoutCh := time.After(timeout)
 	stopCh := make(chan struct{})
 	go func() {
