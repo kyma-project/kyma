@@ -2,7 +2,7 @@
 
 ## Overview
 
-This project contains end-to-end upgrade tests for the Kyma installation. The tests run daily on Prow to validate if the backup and restore process works for all components.
+This project contains end-to-end backup and restore tests for the Kyma installation. The tests run daily on Prow to validate if the backup and restore process works for all components.
  
 
 ## Prerequisites
@@ -46,14 +46,17 @@ The functions work as follows:
 
 After the pipeline executes the backup and restore processes on the cluster, the `TestResources` function validates if the restore worked as expected.
 
+The test creates a new Namespace called `restore-test-{UUID}`. This Namespace contains all resources created during the test.
+
 ### Run end-to-end tests locally
 
 > **NOTE:** Before running the test, configure Ark using [these](../../../docs/backup/docs/03-01-backup-configuration.md) guidelines.
 
 Run tests:
 ```bash
-env KUBECONFIG=/Users/$User/.kube/config go run restore_cluster_backup_test.go --action executeTests`
+env KUBECONFIG={KUBECONFIG} go test ./... -count=1 -timeout=0
 ```
+where {KUBECONFIG} is the path to the `kubeconfig` file.
 
 ### Run tests using a Helm chart
 
@@ -69,7 +72,6 @@ helm install deploy/chart/backup-test --namespace end-to-end --name backup-test
 ```bash
 helm test backup-test
 ```
-The test creates a new Namespace called `restore-test-{UUID}`. This Namespace contains all resources created during the test.
 
 ### Run tests using Telepresence
 [Telepresence](https://www.telepresence.io/) allows you to run tests locally while connecting a service to a remote Kubernetes cluster. It is helpful when the test needs access to other services in a cluster.
@@ -77,5 +79,25 @@ The test creates a new Namespace called `restore-test-{UUID}`. This Namespace co
 1. [Install Telepresence](https://www.telepresence.io/reference/install).
 2. Run tests:
 ```bash
-env KUBECONFIG=/Users/$User/.kube/config  telepresence --run go run restore_cluster_backup_test.go  --action execute
+env KUBECONFIG={KUBECONFIG} telepresence --run go test ./... -count=1 -timeout=0
+
+```
+where {KUBECONFIG} is the path to the `kubeconfig` file.
+
+### Verify the code
+
+Use the `before-commit.sh` script or the make build command to test your changes before each commit.
+
+### Project structure
+
+The repository has the following structure:
+
+```
+├── deploy                 # The Helm chart for deploying the backup test application with configuration
+├── backupe2e              # The package where backup tests are defined. Put your test here.
+├── utils                  # The directory which contains all secondary Go packages.
+├── restore_cluster_backup_test.go   # The entrypoint for backup test runner
+├── Gopkg.toml              # A dep manifest
+└── Gopkg.lock              # A dep lock which is generated automatically. Do not edit it.
+
 ```
