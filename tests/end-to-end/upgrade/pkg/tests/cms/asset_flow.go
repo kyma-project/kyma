@@ -15,7 +15,7 @@ type baseFlow struct {
 	dynamicInterface dynamic.Interface
 }
 
-func (f *baseFlow) wait(timeout time.Duration, conditionFunc wait.ConditionFunc) error {
+func (f *baseFlow) wait(timeout time.Duration, conditionFunc wait.ConditionFunc, stop <-chan struct{}) error {
 	timeoutCh := time.After(timeout)
 	stopCh := make(chan struct{})
 	go func() {
