@@ -24,7 +24,7 @@ func newBucketClient(dynamicCli dynamic.Interface, namespace string) *bucket {
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "buckets",
-		}, ""),
+		}, namespace),
 		name: BucketName,
 		namespace: namespace,
 	}
