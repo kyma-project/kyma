@@ -1,0 +1,17 @@
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: ClusterDocsTopic
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+    cms.kyma-project.io/viewContext: "docs-ui"
+    cms.kyma-project.io/groupName: "components"
+    cms.kyma-project.io/order: "1"
+  name: docs-components-security
+spec:
+  displayName: "Security"
+  description: "Overall documentation for Security"
+  sources:
+    markdown:
+      mode: package
+      url: https://github.com/kyma-project/kyma/archive/master.zip
+      filter: ^kyma-master/docs/security
