@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
 )
@@ -74,6 +75,15 @@ func (a *clusterAsset) get() (*v1alpha2.ClusterAsset, error) {
 	return &ca, nil
 }
 
+func (a *clusterAsset) delete() error {
+	err := a.resCli.Delete(a.name)
+	if err != nil {
+		return errors.Wrapf(err, "while deleting ClusterAsset %s", a.name)
+	}
+
+	return nil
+}
+
 func (a *clusterAsset) waitForStatusReady(stop <-chan struct{}) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		res, err := a.get()
@@ -88,8 +98,28 @@ func (a *clusterAsset) waitForStatusReady(stop <-chan struct{}) error {
 		return true, nil
 	}, WaitTimeout, stop)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready ClusterAsset resource")
+		return errors.Wrapf(err, "while waiting for ready ClusterAsset %s", a.name)
 	}
 
 	return nil
+}
+
+func (a *clusterAsset) waitForRemove(stop <-chan struct{}) error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+		_, err := a.get()
+		if err == nil {
+			return false, nil
+		}
+
+		if !apierrors.IsNotFound(err) {
+			return false, err
+		}
+
+		return true, nil
+	}, WaitTimeout, stop)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for delete ClusterAsset %s", a.name)
+	}
+
+	return err
 }

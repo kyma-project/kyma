@@ -65,7 +65,7 @@ func (f *cmsFlow) createResources() error {
 		},
 		{
 			log: fmt.Sprintf("Creating DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
-			fn: f.clusterDocsTopic.create,
+			fn: f.docsTopic.create,
 		},
 	}{
 		f.log.Infof(t.log)
@@ -89,7 +89,48 @@ func (f *cmsFlow) testResources() error {
 		},
 		{
 			log: fmt.Sprintf("Waiting for Ready status of DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
-			fn: f.clusterDocsTopic.waitForStatusReady,
+			fn: f.docsTopic.waitForStatusReady,
+		},
+	}{
+		f.log.Infof(t.log)
+		err := t.fn(f.stop)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, t := range []struct{
+		log string
+		fn func() error
+	}{
+		{
+			log: fmt.Sprintf("Deleting ClusterDocsTopic %s", f.clusterDocsTopic.name),
+			fn: f.clusterDocsTopic.delete,
+		},
+		{
+			log: fmt.Sprintf("Deleting DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
+			fn: f.docsTopic.delete,
+		},
+	}{
+		f.log.Infof(t.log)
+		err := t.fn()
+		if err != nil {
+			return err
+		}
+	}
+
+
+	for _, t := range []struct{
+		log string
+		fn func(stop <-chan struct{}) error
+	}{
+		{
+			log: fmt.Sprintf("Waiting for remove ClusterDocsTopic %s", f.clusterDocsTopic.name),
+			fn: f.clusterDocsTopic.waitForRemove,
+		},
+		{
+			log: fmt.Sprintf("Waiting for remove DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
+			fn: f.docsTopic.waitForRemove,
 		},
 	}{
 		f.log.Infof(t.log)

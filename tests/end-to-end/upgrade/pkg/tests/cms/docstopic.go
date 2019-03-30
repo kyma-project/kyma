@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
 	"k8s.io/client-go/dynamic"
@@ -67,6 +68,15 @@ func (dt *docsTopic) get() (*v1alpha1.DocsTopic, error) {
 	return &res, nil
 }
 
+func (dt *docsTopic) delete() error {
+	err := dt.resCli.Delete(dt.name)
+	if err != nil {
+		return errors.Wrapf(err, "while deleting DocsTopic %s in namespace %s", dt.name, dt.namespace)
+	}
+
+	return nil
+}
+
 func (dt *docsTopic) waitForStatusReady(stop <-chan struct{}) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		res, err := dt.get()
@@ -81,8 +91,28 @@ func (dt *docsTopic) waitForStatusReady(stop <-chan struct{}) error {
 		return true, nil
 	}, WaitTimeout, stop)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready DocsTopic resources")
+		return errors.Wrapf(err, "while waiting for ready DocsTopic %s in namespace %s", dt.name, dt.namespace)
 	}
 
 	return nil
+}
+
+func (dt *docsTopic) waitForRemove(stop <-chan struct{}) error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+		_, err := dt.get()
+		if err == nil {
+			return false, nil
+		}
+
+		if !apierrors.IsNotFound(err) {
+			return false, err
+		}
+
+		return true, nil
+	}, WaitTimeout, stop)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for delete DocsTopic %s in namespace %s", dt.name, dt.namespace)
+	}
+
+	return err
 }

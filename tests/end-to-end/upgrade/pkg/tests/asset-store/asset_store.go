@@ -115,5 +115,61 @@ func (f *assetStoreFlow) testResources() error {
 		}
 	}
 
+	for _, t := range []struct{
+		log string
+		fn func() error
+	}{
+		{
+			log: fmt.Sprintf("Deleting ClusterBucket %s", f.clusterBucket.name),
+			fn: f.clusterBucket.delete,
+		},
+		{
+			log: fmt.Sprintf("Deleting Bucket %s in namespace %s", f.bucket.name, f.namespace),
+			fn: f.bucket.delete,
+		},
+		{
+			log: fmt.Sprintf("Deleting ClusterAsset %s", f.clusterAsset.name),
+			fn: f.clusterAsset.delete,
+		},
+		{
+			log: fmt.Sprintf("Deleting Asset %s in namespace %s", f.asset.name, f.namespace),
+			fn: f.asset.delete,
+		},
+	}{
+		f.log.Infof(t.log)
+		err := t.fn()
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, t := range []struct{
+		log string
+		fn func(stop <-chan struct{}) error
+	}{
+		{
+			log: fmt.Sprintf("Waiting for remove ClusterBucket %s", f.clusterBucket.name),
+			fn: f.clusterBucket.waitForRemove,
+		},
+		{
+			log: fmt.Sprintf("Waiting for remove Bucket %s in namespace %s", f.bucket.name, f.namespace),
+			fn: f.bucket.waitForRemove,
+		},
+		{
+			log: fmt.Sprintf("Waiting for remove ClusterAsset %s", f.clusterAsset.name),
+			fn: f.clusterAsset.waitForRemove,
+		},
+		{
+			log: fmt.Sprintf("Waiting for remove Asset %s in namespace %s", f.asset.name, f.namespace),
+			fn: f.asset.waitForRemove,
+		},
+	}{
+		f.log.Infof(t.log)
+		err := t.fn(f.stop)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }

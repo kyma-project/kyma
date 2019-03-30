@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -69,6 +70,15 @@ func (b *bucket) get() (*v1alpha2.Bucket, error) {
 	return &res, nil
 }
 
+func (b *bucket) delete() error {
+	err := b.resCli.Delete(b.name)
+	if err != nil {
+		return errors.Wrapf(err, "while deleting Bucket %s in namespace %s", b.name, b.namespace)
+	}
+
+	return nil
+}
+
 func (b *bucket) waitForStatusReady(stop <-chan struct{}) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		res, err := b.get()
@@ -83,7 +93,27 @@ func (b *bucket) waitForStatusReady(stop <-chan struct{}) error {
 		return true, nil
 	}, WaitTimeout, stop)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready Bucket resource")
+		return errors.Wrapf(err, "while waiting for ready Bucket %s in namespace %s", b.name, b.namespace)
+	}
+
+	return err
+}
+
+func (b *bucket) waitForRemove(stop <-chan struct{}) error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+		_, err := b.get()
+		if err == nil {
+			return false, nil
+		}
+
+		if !apierrors.IsNotFound(err) {
+			return false, err
+		}
+
+		return true, nil
+	}, WaitTimeout, stop)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for delete Bucket %s in namespace %s", b.name, b.namespace)
 	}
 
 	return err
