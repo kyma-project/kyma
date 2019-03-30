@@ -2,6 +2,7 @@
 
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:4d6f036ea3fe636bcb2e89850bcdc62a771354e157cd51b8b22a2de8562bf663"
   name = "cloud.google.com/go"
   packages = ["compute/metadata"]
@@ -122,33 +123,40 @@
 
 [[projects]]
   digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
+=======
+  digest = "1:81466b4218bf6adddac2572a30ac733a9255919bc2f470b4827a317bd4ee1756"
+>>>>>>> Add backup tests for cms and assetstore
   name = "github.com/ghodss/yaml"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:4d02824a56d268f74a6b6fdd944b20b58a77c3d70e81008b3ee0c4f1a6777340"
+  digest = "1:a1b2a5e38f79688ee8250942d5fa960525fceb1024c855c7bc76fa77b0f3cca2"
   name = "github.com/gogo/protobuf"
   packages = [
     "proto",
     "sortkeys",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "ba06b47c162d49f2af050fb4c75bcbc86a159d5c"
   version = "v1.2.1"
 
 [[projects]]
   branch = "master"
-  digest = "1:1ba1d79f2810270045c328ae5d674321db34e3aae468eb4233883b473c5c0467"
+  digest = "1:e2b86e41f3d669fc36b50d31d32d22c8ac656c75aa5ea89717ce7177e134ff2a"
   name = "github.com/golang/glog"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:239c4c7fd2159585454003d9be7207167970194216193a8a210b8d29576f19c9"
+=======
+  digest = "1:2d0636a8c490d2272dd725db26f74a537111b99b9dbdda0d8b98febe63702aa4"
+>>>>>>> Add backup tests for cms and assetstore
   name = "github.com/golang/protobuf"
   packages = [
     "proto",
@@ -157,43 +165,61 @@
     "ptypes/duration",
     "ptypes/timestamp",
   ]
+<<<<<<< HEAD
   pruneopts = "UT"
+=======
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "b5d812f8a3706043e23a9cd5babf2e5423744d30"
   version = "v1.3.1"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:0bfbe13936953a98ae3cfe8ed6670d396ad81edf069a806d2f6515d7bb6950df"
   name = "github.com/google/btree"
   packages = ["."]
   pruneopts = "UT"
+=======
+  digest = "1:05f95ffdfcf651bdb0f05b40b69e7f5663047f8da75c72d58728acb59b5cc107"
+  name = "github.com/google/btree"
+  packages = ["."]
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "4030bb1f1f0c35b30ca7009e9ebd06849dd45306"
   version = "v1.0.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:3ee90c0d94da31b442dde97c99635aaafec68d0b8a3c12ee2075c6bdabeec6bb"
+  digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
   name = "github.com/google/gofuzz"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:582b704bebaa06b48c29b0cec224a6058a09c86883aaddabde889cd1a5f73e1b"
   name = "github.com/google/uuid"
   packages = ["."]
   pruneopts = "UT"
+=======
+  digest = "1:ab3ec1fe3e39bac4b3ab63390767766622be35b7cab03f47f787f9ec60522a53"
+  name = "github.com/google/uuid"
+  packages = ["."]
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "0cd6bf5da1e1c83f8b45653022c74f71af0538a4"
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:65c4414eeb350c47b8de71110150d0ea8a281835b1f386eacaa3ad7325929c21"
+  digest = "1:06a7dadb7b760767341ffb6c8d377238d68a1226f2b21b5d497d2e3f6ecf6b4e"
   name = "github.com/googleapis/gnostic"
   packages = [
     "OpenAPIv2",
     "compiler",
     "extensions",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "7c663266750e7d82587642f65e60bc4083f1f84e"
   version = "v0.2.0"
 
@@ -202,17 +228,26 @@
   digest = "1:f14d1b50e0075fb00177f12a96dd7addf93d1e2883c25befd17285b779549795"
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
+<<<<<<< HEAD
   pruneopts = "UT"
+=======
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "bb2674552d8fc183605e16acbf9e8f0a0b031dee"
 
 [[projects]]
   branch = "master"
+<<<<<<< HEAD
   digest = "1:b4395b2a4566c24459af3d04009b39cc21762fc77ec7bf7a1aa905c91e8f018d"
+=======
+  digest = "1:a86d65bc23eea505cd9139178e4d889733928fe165c7a008f41eaab039edf9df"
+>>>>>>> Add backup tests for cms and assetstore
   name = "github.com/gregjones/httpcache"
   packages = [
     ".",
     "diskcache",
   ]
+<<<<<<< HEAD
   pruneopts = "UT"
   revision = "3befbb6ad0cc97d4c25d851e9528915809e1a22f"
 
@@ -226,6 +261,10 @@
   pruneopts = "UT"
   revision = "7087cb70de9f7a8bc0a10c375cb0d2280a8edf9c"
   version = "v0.5.1"
+=======
+  pruneopts = "NUT"
+  revision = "3befbb6ad0cc97d4c25d851e9528915809e1a22f"
+>>>>>>> Add backup tests for cms and assetstore
 
 [[projects]]
   digest = "1:3ce4ec15d5766f6e069ab9a8b1be49fb9d8cb9c9402b34d47ebefa13c31b9af3"
@@ -261,19 +300,24 @@
     "pkg/volume",
     "third_party/kubernetes/pkg/kubectl/cmd/util",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "bcc76c63d01a3d9adb83f76ed0ecab74a7be1d74"
   version = "v0.10.2"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:a0cefd27d12712af4b5018dc7046f245e1e3b5760e2e848c30b171b570708f9b"
+=======
+  digest = "1:aaa38889f11896ee3644d77e17dc7764cc47f5f3d3b488268df2af2b52541c5f"
+>>>>>>> Add backup tests for cms and assetstore
   name = "github.com/imdario/mergo"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "7c29201646fa3de8506f701213473dd407f19646"
   version = "v0.3.7"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:870d441fe217b8e689d7949fef6e43efbc787e50f200cb1e70dbca9204a1d6be"
   name = "github.com/inconshreveable/mousetrap"
   packages = ["."]
@@ -293,24 +337,42 @@
   name = "github.com/json-iterator/go"
   packages = ["."]
   pruneopts = "UT"
+=======
+  digest = "1:4e903242fe176238aaa469f59d7035f5abf2aa9acfefb8964ddd203651b574e9"
+  name = "github.com/json-iterator/go"
+  packages = ["."]
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "0ff49de124c6f76f8494e194af75bde0f1a49a29"
   version = "v1.1.6"
 
 [[projects]]
-  digest = "1:4b63210654b1f2b664f74ec434a1bb1cb442b3d75742cc064a10808d1cca6361"
+  digest = "1:395b1480ae42c3fec6fff19823e66e173819f85826811387f9045c88515a7f0f"
   name = "github.com/jtolds/gls"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "b4936e06046bbecbb94cae9c18127ebe510a2cb9"
   version = "v4.20"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:31e761d97c76151dde79e9d28964a812c46efc5baee4085b86f68f0c654450de"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   pruneopts = "UT"
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
+=======
+  digest = "1:d3209f11918bfd131db14e9ea1691bd202568228715980f71e56b1bd60ad1e07"
+  name = "github.com/kisielk/errcheck"
+  packages = [
+    ".",
+    "internal/errcheck",
+  ]
+  pruneopts = "NUT"
+  revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
+  version = "v1.2.0"
+>>>>>>> Add backup tests for cms and assetstore
 
 [[projects]]
   digest = "1:2388149c340b81dd7c6a8e97cd4c268174cfa184769acd1a25f9c0495d344819"
@@ -322,13 +384,16 @@
     "pkg/client/clientset/versioned/scheme",
     "pkg/client/clientset/versioned/typed/kubeless/v1beta1",
   ]
+<<<<<<< HEAD
   pruneopts = "UT"
+=======
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "4064c413a741080ef2ed8980e02362122adf34e3"
   version = "v1.0.3"
 
 [[projects]]
-  branch = "master"
-  digest = "1:995247eb6948fef10ed313eff43c0edb37e53e476c7739e290768f62373805b2"
+  digest = "1:dc6c6a3992e5b5ac819f04ccf591babbe55f852aa40e0d063bb7ec24bfd4297b"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -341,23 +406,26 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
+    "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
+    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "tests/asset-store/pkg/waiter",
   ]
-  pruneopts = "UT"
-  revision = "ed60d16ae47a0d80d2bc394c133e15f4b256b7bd"
+  pruneopts = "NUT"
+  revision = "f09ca1a5a23a9704806fa9264d179979820ce26e"
 
 [[projects]]
-  digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
+  digest = "1:2f42fa12d6911c7b7659738758631bec870b7e9b4c6be5444f963cdcfccc191f"
   name = "github.com/modern-go/concurrent"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "bacd9c7ef1dd9b15be4a9909b8ac7a4e313eec94"
   version = "1.0.3"
 
 [[projects]]
-  digest = "1:e32bdbdb7c377a07a9a46378290059822efdce5c8d96fe71940d87cb4f918855"
+  digest = "1:c6aca19413b13dc59c220ad7430329e2ec454cc310bc6d8de2c7e2b93c18a0f6"
   name = "github.com/modern-go/reflect2"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "4b7aa43c6742a2c18fdef89dd197aaae7dac7ccd"
   version = "1.0.1"
 
@@ -366,6 +434,7 @@
   digest = "1:3bf17a6e6eaa6ad24152148a631d18662f7212e21637c2699bff3369b7f00fa2"
   name = "github.com/petar/GoLLRB"
   packages = ["llrb"]
+<<<<<<< HEAD
   pruneopts = "UT"
   revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
 
@@ -374,18 +443,33 @@
   name = "github.com/peterbourgon/diskv"
   packages = ["."]
   pruneopts = "UT"
+=======
+  pruneopts = "NUT"
+  revision = "53be0d36a84c2a886ca057d34b6aa4468df9ccb4"
+
+[[projects]]
+  digest = "1:6c6d91dc326ed6778783cff869c49fb2f61303cdd2ebbcf90abe53505793f3b6"
+  name = "github.com/peterbourgon/diskv"
+  packages = ["."]
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "5f041e8faa004a95c88a202771f4cc3e991971e6"
   version = "v2.0.1"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:cf31692c14422fa27c83a05292eb5cbe0fb2775972e8f1f8446a71549bd8980b"
+=======
+  digest = "1:14715f705ff5dfe0ffd6571d7d201dd8e921030f8070321a79380d8ca4ec1a24"
+>>>>>>> Add backup tests for cms and assetstore
   name = "github.com/pkg/errors"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:274f67cb6fed9588ea2521ecdac05a6d62a8c51c074c1fccc6a49a40ba80e925"
   name = "github.com/satori/uuid"
   packages = ["."]
@@ -403,29 +487,33 @@
 
 [[projects]]
   digest = "1:cc1c574c9cb5e99b123888c12b828e2d19224ab6c2244bda34647f230bf33243"
+=======
+  digest = "1:1f0b284a6858827de4c27c66b49b2b25df3e16b031c2b57b7892273131e7dd2b"
+>>>>>>> Add backup tests for cms and assetstore
   name = "github.com/smartystreets/assertions"
   packages = [
     ".",
     "internal/go-render/render",
     "internal/oglematchers",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "7678a5452ebea5b7090a6b163f844c133f523da2"
   version = "1.8.3"
 
 [[projects]]
-  digest = "1:a3e081e593ee8e3b0a9af6a5dcac964c67a40c4f2034b5345b2ad78d05920728"
+  digest = "1:7efd0b2309cdd6468029fa30c808c50a820c9344df07e1a4bbdaf18f282907aa"
   name = "github.com/smartystreets/goconvey"
   packages = [
     "convey",
     "convey/gotest",
     "convey/reporting",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "9e8dc3f972df6c8fcc0375ef492c24d0bb204857"
   version = "1.6.3"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:645cabccbb4fa8aab25a956cbcbdf6a6845ca736b2c64e197ca7cbb9d210b939"
   name = "github.com/spf13/cobra"
   packages = ["."]
@@ -435,17 +523,20 @@
 
 [[projects]]
   digest = "1:c1b1102241e7f645bc8e0c22ae352e8f0dc6484b6cb4d132fa9f24174e0119e2"
+=======
+  digest = "1:9d8420bbf131d1618bde6530af37c3799340d3762cc47210c1d9532a4c3a2779"
+>>>>>>> Add backup tests for cms and assetstore
   name = "github.com/spf13/pflag"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "298182f68c66c05229eb03ac171abe6e309ee79a"
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:1b8282c02f3cbf27de019d739246eaf8231f5dbcaaf9d0d7c7524184ee7b2d24"
+  digest = "1:2b6cc5f08ea4ec1499cb7f9282fef8d1558423152d1b7f046f30187bbc5076be"
   name = "github.com/vrischmann/envconfig"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "7a443243d539c9595dd8aa7f03a6f68707b80e66"
   version = "v1.1.0"
 
@@ -454,12 +545,20 @@
   digest = "1:bbe51412d9915d64ffaa96b51d409e070665efc5194fcf145c4a27d4133107a4"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
+<<<<<<< HEAD
   pruneopts = "UT"
+=======
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
 
 [[projects]]
   branch = "master"
+<<<<<<< HEAD
   digest = "1:e4062746bd939735841b06731116013365b394bd1a792f5e347b0e5130dd3631"
+=======
+  digest = "1:dda167b4d3528485976f6bab67ab25516964dc05300bcbecfc501be0b1a4f71e"
+>>>>>>> Add backup tests for cms and assetstore
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -471,11 +570,16 @@
     "http2/hpack",
     "idna",
   ]
+<<<<<<< HEAD
   pruneopts = "UT"
+=======
+  pruneopts = "NUT"
+>>>>>>> Add backup tests for cms and assetstore
   revision = "74de082e2cca95839e88aa0aeee5aadf6ce7710f"
 
 [[projects]]
   branch = "master"
+<<<<<<< HEAD
   digest = "1:399cbecda4e8ab20451d68a1db3812c99791ed95c53c6e9d64f3594a7e608f51"
   name = "golang.org/x/oauth2"
   packages = [
@@ -491,16 +595,27 @@
 [[projects]]
   branch = "master"
   digest = "1:f6321364014431568a59b49b449d6ae60c017f3afa3f4ab787a5636853b16b1e"
+=======
+  digest = "1:af393301820919efc2288c08608a9aab90a3b293aa64e65a06739b7edbb7082f"
+>>>>>>> Add backup tests for cms and assetstore
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
+<<<<<<< HEAD
   pruneopts = "UT"
   revision = "9eb1bfa1ce65ae8a6ff3114b0aaf9a41a6cf3560"
 
 [[projects]]
   digest = "1:e5a8511f063c38c51ab9ab80e718e9149f692652aeb4e393a8c020dd1bf38ca2"
+=======
+  pruneopts = "NUT"
+  revision = "9eb1bfa1ce65ae8a6ff3114b0aaf9a41a6cf3560"
+
+[[projects]]
+  digest = "1:e7071ed636b5422cc51c0e3a6cebc229d6c9fffc528814b519a980641422d619"
+>>>>>>> Add backup tests for cms and assetstore
   name = "golang.org/x/text"
   packages = [
     "collate",
@@ -524,7 +639,7 @@
     "unicode/norm",
     "unicode/rangetable",
   ]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
   version = "v0.3.0"
 
@@ -533,6 +648,7 @@
   digest = "1:9fdc2b55e8e0fafe4b41884091e51e77344f7dc511c5acedcfd98200003bff90"
   name = "golang.org/x/time"
   packages = ["rate"]
+<<<<<<< HEAD
   pruneopts = "UT"
   revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
 
@@ -554,25 +670,54 @@
   pruneopts = "UT"
   revision = "54a98f90d1c46b7731eb8fb305d2a321c30ef610"
   version = "v1.5.0"
+=======
+  pruneopts = "NUT"
+  revision = "9d24e82272b4f38b78bc8cff74fa936d31ccd8ef"
+
+[[projects]]
+  branch = "master"
+  digest = "1:fbd7f2e2c8494d76c7ed284dff8958a949fff274d9f2dbd9560739aa58fca67b"
+  name = "golang.org/x/tools"
+  packages = [
+    "cmd/goimports",
+    "go/ast/astutil",
+    "go/gcexportdata",
+    "go/internal/gcimporter",
+    "go/internal/packagesdriver",
+    "go/packages",
+    "go/types/typeutil",
+    "imports",
+    "internal/fastwalk",
+    "internal/gopathwalk",
+    "internal/module",
+    "internal/semver",
+  ]
+  pruneopts = "NUT"
+  revision = "a96101f168f4ff1e2cd559ba4f61dbd091684e41"
+>>>>>>> Add backup tests for cms and assetstore
 
 [[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
   name = "gopkg.in/inf.v0"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "d2d2541c53f18d2a059457998ce2876cc8e67cbf"
   version = "v0.9.1"
 
 [[projects]]
-  digest = "1:4d2e5a73dc1500038e504a8d78b986630e3626dc027bc030ba5c75da257cdb96"
+  digest = "1:18108594151654e9e696b27b181b953f9a90b16bf14d253dd1b397b025a1487f"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
-  pruneopts = "UT"
+  pruneopts = "NUT"
   revision = "51d6538a90f86fe93ac480b35f37b2be17fef232"
   version = "v2.2.2"
 
 [[projects]]
+<<<<<<< HEAD
   digest = "1:fcc8693dcd553f6a9dfe94487fa66443a166405e4c4cce87d50bbad58c0812ce"
+=======
+  digest = "1:66dba704ec98aef0d6485f4fcfe544c906a7319fb2b20e0de4181b46a3b24c8a"
+>>>>>>> Add backup tests for cms and assetstore
   name = "k8s.io/api"
   packages = [
     "admission/v1beta1",
@@ -607,12 +752,21 @@
     "storage/v1alpha1",
     "storage/v1beta1",
   ]
+<<<<<<< HEAD
   pruneopts = "UT"
   revision = "2d6f90ab1293a1fb871cf149423ebb72aa7423aa"
   version = "kubernetes-1.11.1"
 
 [[projects]]
   digest = "1:d7eff5382a398f78fcb84f09335d89cf0aa9a848583cec7d46a2bc3588871d94"
+=======
+  pruneopts = "NUT"
+  revision = "4e7be11eab3ffcfc1876898b8272df53785a9504"
+  version = "kubernetes-1.11.3"
+
+[[projects]]
+  digest = "1:ff0b493f45330ad03253651422db0b217726cecf12ba2e57ae35c94e2af4e6c4"
+>>>>>>> Add backup tests for cms and assetstore
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -660,12 +814,21 @@
     "third_party/forked/golang/netutil",
     "third_party/forked/golang/reflect",
   ]
+<<<<<<< HEAD
   pruneopts = "UT"
   revision = "103fd098999dc9c0c88536f5c9ad2e5da39373ae"
   version = "kubernetes-1.11.1"
 
 [[projects]]
   digest = "1:12c7a7475436d9a5c2e2e5309ee1a210c240b45b9c03e0eef5a949f11e58243f"
+=======
+  pruneopts = "NUT"
+  revision = "def12e63c512da17043b4f0293f52d1006603d9f"
+  version = "kubernetes-1.11.3"
+
+[[projects]]
+  digest = "1:98d52d18706ec4fdb379f4b228cd8afd780d61c0bc8aa0e18e47301d06d07fdf"
+>>>>>>> Add backup tests for cms and assetstore
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -729,13 +892,17 @@
     "util/buffer",
     "util/cert",
     "util/connrotation",
+<<<<<<< HEAD
     "util/exec",
+=======
+>>>>>>> Add backup tests for cms and assetstore
     "util/flowcontrol",
     "util/homedir",
     "util/integer",
     "util/jsonpath",
     "util/retry",
   ]
+<<<<<<< HEAD
   pruneopts = "UT"
   revision = "59698c7d9724b0f95f9dc9e7f7dfdcc3dfeceb82"
   version = "kubernetes-1.11.1"
@@ -754,6 +921,27 @@
   pruneopts = "UT"
   revision = "16236ce91790d4c75b79f6ce96841db1c843e7d2"
   version = "v1.11.9"
+=======
+  pruneopts = "NUT"
+  revision = "2cefa64ff137e128daeddbd1775cd775708a05bf"
+  version = "kubernetes-1.11.3"
+
+[[projects]]
+  digest = "1:039de76a46cd73e8b48618ade469f2fcdc426c63331d0e0e209511d048b9e65e"
+  name = "k8s.io/kubernetes"
+  packages = ["pkg/apis/core"]
+  pruneopts = "NUT"
+  revision = "641856db18352033a0d96dbc99153fa3b27298e5"
+  version = "v1.14.0"
+
+[[projects]]
+  digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
+  name = "sigs.k8s.io/controller-runtime"
+  packages = ["pkg/runtime/scheme"]
+  pruneopts = "NUT"
+  revision = "12d98582e72927b6cd0123e2b4e819f9341ce62c"
+  version = "v0.1.10"
+>>>>>>> Add backup tests for cms and assetstore
 
 [solve-meta]
   analyzer-name = "dep"
@@ -765,25 +953,39 @@
     "github.com/heptio/ark/pkg/backup",
     "github.com/heptio/ark/pkg/cmd/util/output",
     "github.com/heptio/ark/pkg/generated/clientset/versioned",
+<<<<<<< HEAD
     "github.com/heptio/ark/pkg/restic",
+=======
+    "github.com/kisielk/errcheck",
+>>>>>>> Add backup tests for cms and assetstore
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
+    "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
+    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "github.com/kyma-project/kyma/tests/asset-store/pkg/waiter",
     "github.com/pkg/errors",
     "github.com/smartystreets/goconvey/convey",
     "github.com/vrischmann/envconfig",
     "golang.org/x/net/html",
+    "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
     "k8s.io/api/core/v1",
     "k8s.io/api/extensions/v1beta1",
+    "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
     "k8s.io/apimachinery/pkg/fields",
+    "k8s.io/apimachinery/pkg/runtime",
+    "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
+    "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
+    "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
     "k8s.io/kubernetes/pkg/apis/core",
   ]

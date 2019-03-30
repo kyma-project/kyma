@@ -4,8 +4,8 @@ import (
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/tests/asset-store/pkg/resource"
 	"github.com/kyma-project/kyma/tests/asset-store/pkg/waiter"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/resource"
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -20,13 +20,13 @@ type bucket struct {
 	waitTimeout time.Duration
 }
 
-func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration, logFn func(format string, args ...interface{})) *bucket {
+func newBucket(dynamicCli dynamic.Interface, name, namespace string, waitTimeout time.Duration) *bucket {
 	return &bucket{
 		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "buckets",
-		}, namespace, logFn),
+		}, namespace),
 		name:        name,
 		namespace:   namespace,
 		waitTimeout: waitTimeout,
@@ -52,7 +52,7 @@ func (b *bucket) Create() error {
 
 	err := b.resCli.Create(bucket)
 	if err != nil {
-		return errors.Wrapf(err, "while creating Bucket %s in namespace %s", b.name, b.namespace)
+		return errors.Wrapf(err, "while creating bucket %s in namespace %s", b.name, b.namespace)
 	}
 
 	return err
@@ -72,7 +72,7 @@ func (b *bucket) WaitForStatusReady() error {
 		return true, nil
 	}, b.waitTimeout)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready Bucket resources")
+		return errors.Wrapf(err, "while waiting for ready Bucket resource")
 	}
 
 	return nil
@@ -91,13 +91,4 @@ func (b *bucket) Get(name string) (*v1alpha2.Bucket, error) {
 	}
 
 	return &res, nil
-}
-
-func (b *bucket) Delete() error {
-	err := b.resCli.Delete(b.name)
-	if err != nil {
-		return errors.Wrapf(err, "while deleting Bucket %s in namespace %s", b.name, b.namespace)
-	}
-
-	return nil
 }

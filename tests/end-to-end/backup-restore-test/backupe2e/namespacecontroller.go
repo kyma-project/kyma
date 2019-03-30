@@ -2,12 +2,12 @@ package backupe2e
 
 import (
 	"fmt"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-	"os"
 	"time"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
 )
 
@@ -18,11 +18,12 @@ type namespaceControllerTest struct {
 }
 
 func NewNamespaceControllerTest() (namespaceControllerTest, error) {
+	restConfig, err := config.NewRestClientConfig()
+	if err != nil {
+		return namespaceControllerTest{}, err
+	}
 
-	kubeconfig := os.Getenv("KUBECONFIG")
-	cfg, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-
-	coreClient, err := kubernetes.NewForConfig(cfg)
+	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return namespaceControllerTest{}, err
 	}
@@ -42,8 +43,11 @@ func (n namespaceControllerTest) TestResources(namespace string) {
 	So(err, ShouldBeNil)
 }
 
-func (n namespaceControllerTest) labelTestNamespace(namespaceName string) error {
+func (n namespaceControllerTest) DeleteResources(namespace string) {
+	// There is not need to be implemented for this test.
+}
 
+func (n namespaceControllerTest) labelTestNamespace(namespaceName string) error {
 	namespace, err := n.coreClient.CoreV1().Namespaces().Get(namespaceName, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -60,7 +64,6 @@ func (n namespaceControllerTest) labelTestNamespace(namespaceName string) error 
 }
 
 func (n namespaceControllerTest) waitForResourceQuota(namespaceName string) error {
-
 	timeout := time.After(5 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 
@@ -78,10 +81,7 @@ func (n namespaceControllerTest) waitForResourceQuota(namespaceName string) erro
 			return nil
 
 		case <-timeout:
-			return fmt.Errorf("unable to fetch resourcequota:\n %v", messages)}
+			return fmt.Errorf("unable to fetch resourcequota:\n %v", messages)
+		}
 	}
-}
-
-func (n namespaceControllerTest) DeleteResources() {
-	// There is not need to be implemented for this test.
 }

@@ -1,4 +1,4 @@
-package utils
+package backup
 
 import (
 	"fmt"
@@ -14,12 +14,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 	api "k8s.io/kubernetes/pkg/apis/core"
 
 	"github.com/ghodss/yaml"
 	"github.com/heptio/ark/pkg/cmd/util/output"
 	"github.com/heptio/ark/pkg/restic"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 )
 
 type backupClient struct {
@@ -41,9 +41,7 @@ type BackupClient interface {
 }
 
 func NewBackupClient() (BackupClient, error) {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := config.NewRestClientConfig()
 	if err != nil {
 		return nil, err
 	}
