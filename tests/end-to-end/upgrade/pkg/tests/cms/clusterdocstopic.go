@@ -16,9 +16,9 @@ type clusterDocsTopic struct {
 	name        string
 }
 
-func newClusterDocsTopicClient(dynamicInterface dynamic.Interface) *clusterDocsTopic {
+func newClusterDocsTopicClient(dynamicCli dynamic.Interface) *clusterDocsTopic {
 	return &clusterDocsTopic{
-		resCli: resource.New(dynamicInterface, schema.GroupVersionResource{
+		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha1.SchemeGroupVersion.Version,
 			Group:    v1alpha1.SchemeGroupVersion.Group,
 			Resource: "clusterdocstopics",
@@ -28,7 +28,7 @@ func newClusterDocsTopicClient(dynamicInterface dynamic.Interface) *clusterDocsT
 }
 
 func (dt *clusterDocsTopic) create(spec v1alpha1.CommonDocsTopicSpec) error {
-	clusterDocsTopic := &v1alpha1.DocsTopic{
+	clusterDocsTopic := &v1alpha1.ClusterDocsTopic{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ClusterDocsTopic",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
@@ -36,7 +36,7 @@ func (dt *clusterDocsTopic) create(spec v1alpha1.CommonDocsTopicSpec) error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      dt.name,
 		},
-		Spec: v1alpha1.DocsTopicSpec{
+		Spec: v1alpha1.ClusterDocsTopicSpec{
 			CommonDocsTopicSpec: spec,
 		},
 	}
@@ -49,13 +49,13 @@ func (dt *clusterDocsTopic) create(spec v1alpha1.CommonDocsTopicSpec) error {
 	return nil
 }
 
-func (dt *clusterDocsTopic) get() (*v1alpha1.DocsTopic, error) {
+func (dt *clusterDocsTopic) get() (*v1alpha1.ClusterDocsTopic, error) {
 	u, err := dt.resCli.Get(dt.name)
 	if err != nil {
 		return nil, err
 	}
 
-	var res v1alpha1.DocsTopic
+	var res v1alpha1.ClusterDocsTopic
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting ClusterDocsTopic %s", dt.name)

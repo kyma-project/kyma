@@ -9,8 +9,8 @@ import (
 )
 
 const (
-	DocsTopicName        = "e2ebackup-docs-topic"
-	ClusterDocsTopicName = "e2ebackup-cluster-docs-topic"
+	DocsTopicName        = "e2eupgrade-docs-topic"
+	ClusterDocsTopicName = "e2eupgrade-cluster-docs-topic"
 	WaitTimeout          = 4 * time.Minute
 )
 
@@ -64,7 +64,7 @@ func (f *cmsFlow) createResources() error {
 			fn: f.clusterDocsTopic.create,
 		},
 		{
-			log: fmt.Sprintf("Creating DocsTopic %s", f.docsTopic.name),
+			log: fmt.Sprintf("Creating DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
 			fn: f.clusterDocsTopic.create,
 		},
 	}{
@@ -88,7 +88,7 @@ func (f *cmsFlow) testResources() error {
 			fn: f.clusterDocsTopic.waitForStatusReady,
 		},
 		{
-			log: fmt.Sprintf("Waiting for Ready status of DocsTopic %s", f.docsTopic.name),
+			log: fmt.Sprintf("Waiting for Ready status of DocsTopic %s in namespace %s", f.docsTopic.name, f.namespace),
 			fn: f.clusterDocsTopic.waitForStatusReady,
 		},
 	}{

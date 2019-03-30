@@ -17,9 +17,9 @@ type docsTopic struct {
 	namespace   string
 }
 
-func newDocsTopic(dynamicInterface dynamic.Interface, namespace string) *docsTopic {
+func newDocsTopic(dynamicCli dynamic.Interface, namespace string) *docsTopic {
 	return &docsTopic{
-		resCli: resource.New(dynamicInterface, schema.GroupVersionResource{
+		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha1.SchemeGroupVersion.Version,
 			Group:    v1alpha1.SchemeGroupVersion.Group,
 			Resource: "docstopics",
@@ -61,7 +61,7 @@ func (dt *docsTopic) get() (*v1alpha1.DocsTopic, error) {
 	var res v1alpha1.DocsTopic
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &res)
 	if err != nil {
-		return nil, errors.Wrapf(err, "while converting DocsTopic %s", dt.name)
+		return nil, errors.Wrapf(err, "while converting DocsTopic %s in namespace %s", dt.name, dt.namespace)
 	}
 
 	return &res, nil

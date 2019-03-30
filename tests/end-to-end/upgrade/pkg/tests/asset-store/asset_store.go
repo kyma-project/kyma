@@ -3,14 +3,13 @@ package asset_store
 import (
 	"k8s.io/client-go/dynamic"
 	"github.com/sirupsen/logrus"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"fmt"
 	"time"
 )
 
 const (
-	DocsTopicName        = "e2ebackup-docs-topic"
-	ClusterDocsTopicName = "e2ebackup-cluster-docs-topic"
+	BucketName        	 = "e2eupgrade-bucket"
+	ClusterBucketName 	 = "e2eupgrade-cluster-bucket"
 	WaitTimeout          = 4 * time.Minute
 )
 
@@ -23,10 +22,10 @@ type assetStoreFlow struct {
 	log       logrus.FieldLogger
 	stop      <-chan struct{}
 
-	bucket   		*docsTopic
-	clusterBucket 	*clusterDocsTopic
-	asset   		*docsTopic
-	clusterAsset 	*clusterDocsTopic
+	bucket   		*bucket
+	clusterBucket 	*clusterBucket
+	asset   		*asset
+	clusterAsset 	*clusterAsset
 }
 
 func NewAssetStoreUpgradeTest(dynamicCli dynamic.Interface) *AssetStoreUpgradeTest {
@@ -40,7 +39,7 @@ func (ut *AssetStoreUpgradeTest) CreateResources(stop <-chan struct{}, log logru
 }
 
 func (ut *AssetStoreUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	return nil
+	return ut.newFlow(stop, log, namespace).testResources()
 }
 
 func (ut *AssetStoreUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, namespace string) *assetStoreFlow {
@@ -48,29 +47,69 @@ func (ut *AssetStoreUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldL
 		namespace: namespace,
 		log: log,
 		stop: stop,
-		bucket: newClusterDocsTopicClient(ut.dynamicInterface),
-		clusterBucket: newDocsTopic(ut.dynamicInterface, namespace),
-		asset:
-			clus
+		bucket: newBucketClient(ut.dynamicInterface, namespace),
+		clusterBucket: newClusterBucketClient(ut.dynamicInterface),
+		asset: newAssetClient(ut.dynamicInterface, namespace),
+		clusterAsset: newClusterAssetClient(ut.dynamicInterface),
 	}
 }
 
 func (f *assetStoreFlow) createResources() error {
 	for _, t := range []struct{
 		log string
-		fn func(spec v1alpha1.CommonDocsTopicSpec) error
+		fn func() error
 	}{
 		{
-			log: fmt.Sprintf("Creating ClusterDocsTopic %s", f.clusterDocsTopic.name),
-			fn: f.clusterDocsTopic.create,
+			log: fmt.Sprintf("Creating ClusterBucket %s", f.clusterBucket.name),
+			fn: f.clusterBucket.create,
 		},
 		{
-			log: fmt.Sprintf("Creating DocsTopic %s", f.docsTopic.name),
-			fn: f.clusterDocsTopic.create,
+			log: fmt.Sprintf("Creating ClusterAsset %s", f.clusterAsset.name),
+			fn: f.clusterAsset.create,
+		},
+		{
+			log: fmt.Sprintf("Creating Bucket %s in namespace %s", f.bucket.name, f.namespace),
+			fn: f.bucket.create,
+		},
+		{
+			log: fmt.Sprintf("Creating Asset %s in namespace %s", f.asset.name, f.namespace),
+			fn: f.asset.create,
 		},
 	}{
 		f.log.Infof(t.log)
-		err := t.fn(commonDocsTopicSpec)
+		err := t.fn()
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (f *assetStoreFlow) testResources() error {
+	for _, t := range []struct{
+		log string
+		fn func(stop <-chan struct{}) error
+	}{
+		{
+			log: fmt.Sprintf("Waiting for Ready status of ClusterBucket %s", f.clusterBucket.name),
+			fn: f.clusterBucket.waitForStatusReady,
+		},
+		{
+			log: fmt.Sprintf("Waiting for Ready status of ClusterAsset %s", f.clusterAsset.name),
+			fn: f.clusterAsset.waitForStatusReady,
+		},
+		{
+			log: fmt.Sprintf("Waiting for Ready status of Bucket %s in namespace %s", f.bucket.name, f.namespace),
+			fn: f.bucket.waitForStatusReady,
+		},
+		{
+			log: fmt.Sprintf("Waiting for Ready status of Asset %s in namespace %s", f.asset.name, f.namespace),
+			fn: f.asset.waitForStatusReady,
+		},
+	}{
+		f.log.Infof(t.log)
+		err := t.fn(f.stop)
 		if err != nil {
 			return err
 		}
