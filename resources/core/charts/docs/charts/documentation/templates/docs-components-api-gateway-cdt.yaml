@@ -2,9 +2,8 @@ apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
 metadata:
   labels:
-    controller-tools.k8s.io: "1.0"
-    cms.kyma-project.io/viewContext: "docs-ui"
-    cms.kyma-project.io/groupName: "components"
+    cms.kyma-project.io/viewContext: docs-ui
+    cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "10"
   name: docs-components-api-gateway
 spec:
@@ -14,4 +13,4 @@ spec:
     markdown:
       mode: package
       url: https://github.com/kyma-project/kyma/archive/master.zip
-      filter: ^kyma-master/docs/api-gateway
+      filter: /docs/api-gateway/docs/(.*?)(md|svg|png|json|yaml|yml|jpg|jpeg|gif)$

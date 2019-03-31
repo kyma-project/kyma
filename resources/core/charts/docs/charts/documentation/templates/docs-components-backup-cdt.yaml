@@ -3,8 +3,8 @@ kind: ClusterDocsTopic
 metadata:
   labels:
     controller-tools.k8s.io: "1.0"
-    cms.kyma-project.io/viewContext: "docs-ui"
-    cms.kyma-project.io/groupName: "components"
+    cms.kyma-project.io/viewContext: docs-ui
+    cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "12"
   name: docs-components-backup
 spec:
@@ -14,4 +14,4 @@ spec:
     markdown:
       mode: package
       url: https://github.com/kyma-project/kyma/archive/master.zip
-      filter: ^kyma-master/docs/backup
+      filter: /docs/backup/docs/(.*?)(md|svg|png|json|yaml|yml|jpg|jpeg|gif)$
