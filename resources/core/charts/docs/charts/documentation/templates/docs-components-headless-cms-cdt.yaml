@@ -5,7 +5,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "15"
-  name: docs-components-headless-cms
+  name: components-headless-cms
 spec:
   displayName: "Headless CMS"
   description: "Overall documentation for Headless CMS"

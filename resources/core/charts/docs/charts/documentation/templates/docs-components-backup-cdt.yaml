@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "12"
-  name: docs-components-backup
+  name: components-backup
 spec:
   displayName: "Backup"
   description: "Overall documentation for Backup"

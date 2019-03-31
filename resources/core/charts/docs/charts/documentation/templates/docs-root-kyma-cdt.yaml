@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Root
     cms.kyma-project.io/order: "1"
-  name: docs-root-kyma
+  name: root-kyma
 spec:
   displayName: "Kyma"
   description: "Overall documentation for Kyma"

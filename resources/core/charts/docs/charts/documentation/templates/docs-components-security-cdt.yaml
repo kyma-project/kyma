@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "1"
-  name: docs-components-security
+  name: components-security
 spec:
   displayName: "Security"
   description: "Overall documentation for Security"

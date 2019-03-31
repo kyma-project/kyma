@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "3"
-  name: docs-components-helm-broker
+  name: components-helm-broker
 spec:
   displayName: "Helm Broker"
   description: "Overall documentation for the Helm Broker"

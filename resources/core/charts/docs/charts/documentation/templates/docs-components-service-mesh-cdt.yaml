@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "6"
-  name: docs-components-service-mesh
+  name: components-service-mesh
 spec:
   displayName: "Service Mesh"
   description: "Overall documentation for Service Mesh"

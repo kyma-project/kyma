@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "2"
-  name: docs-components-service-catalog
+  name: components-service-catalog
 spec:
   displayName: "Service Catalog"
   description: "Overall documentation for Service Catalog"

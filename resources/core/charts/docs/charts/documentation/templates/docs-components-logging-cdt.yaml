@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "11"
-  name: docs-components-logging
+  name: components-logging
 spec:
   displayName: "Logging"
   description: "Overall documentation for Logging"

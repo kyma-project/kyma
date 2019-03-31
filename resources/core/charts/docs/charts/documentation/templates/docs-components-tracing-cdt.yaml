@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "9"
-  name: docs-components-tracing
+  name: components-tracing
 spec:
   displayName: "Tracing"
   description: "Overall documentation for Tracing"

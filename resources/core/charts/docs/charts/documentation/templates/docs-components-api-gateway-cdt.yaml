@@ -5,7 +5,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "10"
-  name: docs-components-api-gateway
+  name: components-api-gateway
 spec:
   displayName: "API Gateway"
   description: "Overall documentation for API Gateway"

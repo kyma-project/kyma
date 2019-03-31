@@ -6,7 +6,7 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "14"
-  name: docs-components-asset-store
+  name: components-asset-store
 spec:
   displayName: "Asset Store"
   description: "Overall documentation for Asset Store"
