@@ -12,6 +12,7 @@ Start with the overarching [Kyma](kyma/docs) documentation where you can find th
 -   [Backup](./backup/docs/)
 -   [Console](./console/docs/)
 -   [Event Bus](./event-bus/docs/)
+-   [Headless CMS](./headless-cms/docs/)
 -   [Helm Broker](./helm-broker/docs/)
 -   [Logging](./logging/docs/)
 -   [Monitoring](./monitoring/docs/)
