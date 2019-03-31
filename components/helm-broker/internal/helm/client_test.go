@@ -3,6 +3,8 @@ package helm_test
 import (
 	"context"
 	"encoding/pem"
+	"fmt"
+	"io/ioutil"
 	"net"
 	"os"
 	"testing"
@@ -22,22 +24,52 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/services"
 )
 
-const (
-	keyFile  string = "/tmp/dummy.key"
-	certFile string = "/tmp/dummy.crt"
+var (
+	keyFile  string
+	certFile string
 )
 
 func TestMain(m *testing.M) {
-	err := createDummyKeyPair(keyFile, certFile)
+	setupCerts()
+	code := m.Run()
+	cleanupCerts()
+	os.Exit(code)
+}
+
+func setupCerts(){
+	certOut, err := ioutil.TempFile("/tmp/", "certFile")
 	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
-	os.Exit(m.Run())
+	keyOut, err := ioutil.TempFile("/tmp/", "keyFile")
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	err = createDummyKeyPair(keyOut, certOut)
+	keyOut.Close()
+	certOut.Close()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	keyFile = keyOut.Name()
+	certFile = certOut.Name()
+
+}
+func cleanupCerts(){
+	os.Remove(keyFile)
+	os.Remove(certFile)
 }
 
 func TestClientInstallSuccess(t *testing.T) {
 	// given
-	fakeTiller := &fakeTillerSvc{}
+	fakeTiller := &fakeTillerSvc{
+		certFile: certFile,
+		keyFile: keyFile,
+	}
 	fakeTiller.SetUp(t)
 
 	cVals := internal.ChartValues{
@@ -76,13 +108,11 @@ func TestClientInstallSuccess(t *testing.T) {
 }
 
 func TestClientDeleteSuccess(t *testing.T) {
-	// given
-	//err := createDummyKeyPair(keyFile, certFile)
-	//assert.NoError(t, err)
-
-	fakeTiller := &fakeTillerSvc{}
+	fakeTiller := &fakeTillerSvc{
+		certFile: certFile,
+		keyFile:  keyFile,
+	}
 	fakeTiller.SetUp(t)
-
 	hClient := helm.NewClient(helm.Config{
 		TillerHost:              fakeTiller.Host,
 		TillerConnectionTimeout: time.Second,
@@ -110,6 +140,9 @@ type fakeTillerSvc struct {
 
 	grpcSvc      *grpc.Server
 	Host         string
+	keyFile  	 string
+	certFile     string
+
 	serverErr    error
 	serverClosed chan struct{}
 }
@@ -120,10 +153,10 @@ func (s *fakeTillerSvc) SetUp(t *testing.T) {
 	require.NoError(t, err)
 
 	s.Host = lis.Addr().String()
-	creds, err := credentials.NewServerTLSFromFile(certFile, keyFile)
+	credentials, err := credentials.NewServerTLSFromFile(s.certFile, s.keyFile)
 	require.NoError(t, err)
 
-	s.grpcSvc = grpc.NewServer(grpc.Creds(creds))
+	s.grpcSvc = grpc.NewServer(grpc.Creds(credentials))
 	services.RegisterReleaseServiceServer(s.grpcSvc, s)
 
 	go func() {
@@ -169,24 +202,21 @@ func fixChart() *chart.Chart {
 	}
 }
 
-func createDummyKeyPair(keyFile, certFile string) error {
+func createDummyKeyPair(keyOut, certOut *os.File) error {
 	cert, priv, err := certs.NewCertificatePair("Kyma", "SAP", 12*time.Hour)
 	if err != nil {
 		return err
 	}
-	certOut, err := os.Create(certFile)
-	if err != nil {
-		return err
-	}
-	pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw})
-	certOut.Close()
 
-	keyOut, err := os.OpenFile(keyFile, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0600)
+	err = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw})
 	if err != nil {
 		return err
 	}
-	pem.Encode(keyOut, certs.PemBlockForKey(priv))
-	keyOut.Close()
+
+	err = pem.Encode(keyOut, certs.PemBlockForKey(priv))
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
