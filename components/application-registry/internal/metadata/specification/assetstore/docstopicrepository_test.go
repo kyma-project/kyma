@@ -26,10 +26,10 @@ func TestUpsertDocsTopic(t *testing.T) {
 
 		docsTopicEntry := createTestDocsTopicEntry()
 
-		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.UpdateOptions{}).
+		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 
-		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.CreateOptions{}).
+		resourceInterfaceMock.On("Create", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "")), metav1.CreateOptions{}).
 			Return(&unstructured.Unstructured{}, nil)
 
 		// when
@@ -45,13 +45,19 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
-		docsTopicEntry := createTestDocsTopicEntry()
+		dt := createK8sDocsTopic()
 
-		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry)), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
-		resourceInterfaceMock.On("Create", mock.Anything, metav1.CreateOptions{}).Return(&unstructured.Unstructured{}, nil).Return(nil)
+		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
+		require.NoError(t, err)
+
+		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+			Return(&unstructured.Unstructured{Object: object}, nil)
+
+		docsTopicEntry := createTestDocsTopicEntry()
+		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "1")), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
 
 		// when
-		err := repository.Upsert(docsTopicEntry)
+		err = repository.Upsert(docsTopicEntry)
 
 		// then
 		require.NoError(t, err)
@@ -59,12 +65,12 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Update", 1)
 	})
 
-	t.Run("Should fail if k8s client returned error on Update", func(t *testing.T) {
+	t.Run("Should fail if k8s client returned error on Get", func(t *testing.T) {
 		// given
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
-		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).
+		resourceInterfaceMock.On("Get", mock.Anything, metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
@@ -80,7 +86,7 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
-		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).
+		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{}, k8serrors.NewNotFound(schema.GroupResource{}, ""))
 		resourceInterfaceMock.On("Create", mock.Anything, metav1.CreateOptions{}).
 			Return(&unstructured.Unstructured{}, errors.New("some error"))
@@ -92,6 +98,31 @@ func TestUpsertDocsTopic(t *testing.T) {
 		require.Error(t, err)
 		resourceInterfaceMock.AssertExpectations(t)
 	})
+
+	t.Run("Should fail if k8s client returned error on Update", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
+
+		docsTopicEntry := createTestDocsTopicEntry()
+
+		dt := createK8sDocsTopic()
+		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
+		require.NoError(t, err)
+
+		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+			Return(&unstructured.Unstructured{Object: object}, nil)
+
+		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, errors.New("some error"))
+
+		// when
+		err = repository.Upsert(docsTopicEntry)
+
+		// then
+		require.Error(t, err)
+		resourceInterfaceMock.AssertNumberOfCalls(t, "Create", 0)
+		resourceInterfaceMock.AssertNumberOfCalls(t, "Update", 1)
+	})
 }
 
 func TestGetDocsTopic(t *testing.T) {
@@ -100,29 +131,9 @@ func TestGetDocsTopic(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewDocsTopicRepository(resourceInterfaceMock)
 		{
+			dt := createK8sDocsTopic()
 
-			dc := v1alpha1.DocsTopic{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      "id1",
-					Namespace: "kyma-integration",
-					Labels: map[string]string{
-						"key": "value",
-					},
-				},
-				Spec: v1alpha1.DocsTopicSpec{
-					CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
-						DisplayName: "Some display name",
-						Description: "Some description",
-						Sources: map[string]v1alpha1.Source{
-							"api": {
-								URL:  "www.somestorage.com/api",
-								Mode: v1alpha1.DocsTopicSingle,
-							},
-						},
-					},
-				}}
-
-			object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dc)
+			object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
 			require.NoError(t, err)
 
 			resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
@@ -158,6 +169,30 @@ func TestGetDocsTopic(t *testing.T) {
 		assert.Error(t, err)
 		assert.Equal(t, apperrors.CodeNotFound, err.Code())
 	})
+}
+
+func createK8sDocsTopic() v1alpha1.DocsTopic {
+	return v1alpha1.DocsTopic{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "id1",
+			Namespace: "kyma-integration",
+			Labels: map[string]string{
+				"key": "value",
+			},
+			ResourceVersion: "1",
+		},
+		Spec: v1alpha1.DocsTopicSpec{
+			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
+				DisplayName: "Some display name",
+				Description: "Some description",
+				Sources: map[string]v1alpha1.Source{
+					"api": {
+						URL:  "www.somestorage.com/api",
+						Mode: v1alpha1.DocsTopicSingle,
+					},
+				},
+			},
+		}}
 }
 
 func TestDeleteDocsTopic(t *testing.T) {
@@ -206,7 +241,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 	}
 }
 
-func createMatcherFunction(docsTopicEntry docstopic.Entry) func(*unstructured.Unstructured) bool {
+func createMatcherFunction(docsTopicEntry docstopic.Entry, expectedResourceVersion string) func(*unstructured.Unstructured) bool {
 	checkUrls := func(urls map[string]string, sources map[string]v1alpha1.Source) bool {
 		if len(urls) != len(sources) {
 			return false
@@ -223,20 +258,22 @@ func createMatcherFunction(docsTopicEntry docstopic.Entry) func(*unstructured.Un
 	}
 
 	return func(u *unstructured.Unstructured) bool {
-		dc := v1alpha1.DocsTopic{}
-		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &dc)
+		dt := v1alpha1.DocsTopic{}
+		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &dt)
 		if err != nil {
 			return false
 		}
 
-		objectMetadataMatch := dc.Name == docsTopicEntry.Id
+		resourceVersionMatch := dt.ResourceVersion == expectedResourceVersion
+		objectMetadataMatch := dt.Name == docsTopicEntry.Id
 
-		specBasicDataMatch := dc.Spec.DisplayName == docsTopicEntry.DisplayName &&
-			dc.Spec.Description == docsTopicEntry.Description
+		specBasicDataMatch := dt.Spec.DisplayName == docsTopicEntry.DisplayName &&
+			dt.Spec.Description == docsTopicEntry.Description
 
-		urlsMatch := checkUrls(docsTopicEntry.Urls, dc.Spec.Sources)
-		labelsMatch := reflect.DeepEqual(dc.Labels, docsTopicEntry.Labels)
+		urlsMatch := checkUrls(docsTopicEntry.Urls, dt.Spec.Sources)
+		labelsMatch := reflect.DeepEqual(dt.Labels, docsTopicEntry.Labels)
 
-		return objectMetadataMatch && specBasicDataMatch && urlsMatch && labelsMatch
+		return resourceVersionMatch && objectMetadataMatch &&
+			specBasicDataMatch && urlsMatch && labelsMatch
 	}
 }

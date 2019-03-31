@@ -143,11 +143,10 @@ func (uc uploadClient) unmarshal(r *http.Response) (Response, apperrors.AppError
 func (uc uploadClient) extract(fileName string, response Response) (UploadedFile, apperrors.AppError) {
 	if len(response.UploadedFiles) == 1 {
 		return response.UploadedFiles[0], nil
-	} else {
-		for _, e := range response.Errors {
-			log.Errorf("Failed to upload %s file with Upload Service, %s.", e.FileName, e.Message)
-		}
-
-		return UploadedFile{}, apperrors.Internal("Failed to extract %s file from response.", fileName)
 	}
+
+	for _, e := range response.Errors {
+		log.Errorf("Failed to upload %s file with Upload Service, %s.", e.FileName, e.Message)
+	}
+	return UploadedFile{}, apperrors.Internal("Failed to extract %s file from response.", fileName)
 }

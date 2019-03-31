@@ -43,7 +43,7 @@ func parseArgs() *options {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s"+
-		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --detailedErrorResponse=%t --uploadServiceURL=%s --insecureAssetDownload=%t",
+		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --detailedErrorResponse=%t --insecureAssetDownload=%t",
 		o.externalAPIPort, o.proxyPort, o.uploadServiceURL,
-		o.namespace, o.requestTimeout, o.requestLogging, o.detailedErrorResponse, o.uploadServiceURL, o.insecureAssetDownload)
+		o.namespace, o.requestTimeout, o.requestLogging, o.detailedErrorResponse, o.insecureAssetDownload)
 }

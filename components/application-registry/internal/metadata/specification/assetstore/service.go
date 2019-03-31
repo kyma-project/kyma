@@ -130,12 +130,12 @@ func getApiSpecFileNameAndKey(content []byte, apiType docstopic.ApiType) (fileNa
 	if apiType == docstopic.ODataApiType {
 		if isXML(content) {
 			return odataXMLSpecFileName, docstopic.KeyODataXMLSpec
-		} else {
-			return odataJSONSpecFileName, docstopic.KeyODataJSONSpec
 		}
-	} else {
-		return openApiSpecFileName, docstopic.KeyOpenApiSpec
+
+		return odataJSONSpecFileName, docstopic.KeyODataJSONSpec
 	}
+
+	return openApiSpecFileName, docstopic.KeyOpenApiSpec
 }
 
 func isXML(content []byte) bool {

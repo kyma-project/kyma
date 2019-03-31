@@ -124,9 +124,9 @@ func toApiSpecType(api *model.API) docstopic.ApiType {
 
 	if strings.ToLower(api.ApiType) == oDataSpecType {
 		return docstopic.ODataApiType
-	} else {
-		return docstopic.OpenApiType
 	}
+
+	return docstopic.OpenApiType
 }
 
 func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
