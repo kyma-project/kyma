@@ -18,7 +18,7 @@ paths:
           description: Identifier for the origin of the event. Either specify this or provide 'source-id' in the json payload.
           schema:
             type: string
-            pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+            pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
             example:
               - "stage.commerce.kyma.local"
           required: false
@@ -75,14 +75,14 @@ components:
         source-id:
           description: Identifier for the origin of the event. Either specify this or provide 'Source-Id' header value.
           type: string
-          pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
           example:
             - "stage.commerce.kyma.local"
         event-type:
           description: Type of the event.
           type: string
           format: hostname
-          pattern: '^[a-zA-Z]+([_\-\.]?[a-zA-Z0-9]+)*$'
+          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
           example:
             - "order.created"
         event-type-version:

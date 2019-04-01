@@ -75,7 +75,7 @@ if [[ $? != 0 ]]; then
 else echo -e "${GREEN}√ go test${NC}"
 fi
 
-goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
+goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|_*export_test.go")
 
 ##
 #  GO LINT

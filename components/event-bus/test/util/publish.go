@@ -24,7 +24,7 @@ const (
 	TestEventTimeInvalid        = "2012-11-01T22"
 	TestEventID                 = "4ea567cf-812b-49d9-a4b2-cb5ddf464094"
 	TestEventIDInvalid          = "4ea567cf"
-	TestSourceIdInvalid         = "invalid/sourceId"
+	TestSourceIdInvalid         = "source/Id"
 	TestData                    = "{'key':'value'}"
 	TestDataEmpty               = ""
 
