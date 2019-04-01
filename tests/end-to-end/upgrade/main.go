@@ -3,8 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
+	apicontroller "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	k8sclientset "k8s.io/client-go/kubernetes"
@@ -27,7 +28,7 @@ type Config struct {
 	Logger              logger.Config
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
-	DomainName			string `envconfig:""`
+	DomainName          string `envconfig:""`
 }
 
 const (
