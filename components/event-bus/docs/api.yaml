@@ -121,7 +121,7 @@ components:
           example: "31109198-4d69-4ae0-972d-76117f3748c8"
         status:
           type: string
-          description: Status of message publishng
+          description: Status of message publishing
           example: "PUBLISHED"
         reason:
           type: string

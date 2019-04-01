@@ -60,7 +60,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		case publisher.PUBLISHED:
 			reason = "Message successfully published to the channel"
 		case publisher.IGNORED:
-			reason = "There was no subscriptions to this event"
+			reason = "There were no subscriptions to this event"
 		case publisher.FAILED:
 			reason = "Some validation or internal error occurred"
 		}
