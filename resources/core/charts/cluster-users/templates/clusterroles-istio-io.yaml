@@ -3,11 +3,11 @@
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: kyma-view-istio
+  name: kyma-istio-view
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-view-istio: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-view: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
@@ -23,11 +23,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: kyma-admin-istio
+  name: kyma-istio-admin
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-istio: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-admin: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
@@ -42,11 +42,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: kyma-edit-istio
+  name: kyma-istio-edit
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-edit-istio: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-istio-edit: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:

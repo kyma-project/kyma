@@ -3,11 +3,11 @@
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: kyma-view-kubeless
+  name: kyma-kubeless-view
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-view-kubeless: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-view: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
@@ -23,11 +23,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: kyma-admin-kubeless
+  name: kyma-kubeless-admin
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-kubeless: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-admin: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
@@ -42,11 +42,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: kyma-edit-kubeless
+  name: kyma-kubeless-edit
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-edit-kubeless: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-kubeless-edit: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:

@@ -42,11 +42,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: kyma-crd
+  name: kyma-crd-edit
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-crd: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-edit: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
@@ -84,11 +84,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: kyma-view-k8s
+  name: kyma-k8s-view
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-view-k8s: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-view: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
@@ -105,11 +105,11 @@ rules:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
-  name: kyma-admin-k8s
+  name: kyma-k8s-admin
   labels:
     app: kyma
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-k8s: "true"
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-admin: "true"
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
