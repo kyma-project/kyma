@@ -40,7 +40,7 @@ func TestAssetHandler_Handle_OnAddOrUpdate(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -63,7 +63,7 @@ func TestAssetHandler_Handle_OnAddOrUpdate(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -87,7 +87,7 @@ func TestAssetHandler_Handle_Default(t *testing.T) {
 	defer mocks.AssertExpectations(t)
 
 	// When
-	status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+	status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 	// Then
 	g.Expect(err).ToNot(HaveOccurred())
@@ -110,7 +110,7 @@ func TestAssetHandler_Handle_OnReady(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -133,7 +133,7 @@ func TestAssetHandler_Handle_OnReady(t *testing.T) {
 		mocks.store.On("ContainsAllObjects", ctx, remoteBucketName, asset.Name, mock.AnythingOfType("[]string")).Return(true, nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -157,7 +157,7 @@ func TestAssetHandler_Handle_OnReady(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -181,7 +181,7 @@ func TestAssetHandler_Handle_OnReady(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -206,7 +206,7 @@ func TestAssetHandler_Handle_OnReady(t *testing.T) {
 		mocks.store.On("ContainsAllObjects", ctx, remoteBucketName, asset.Name, mock.AnythingOfType("[]string")).Return(false, nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -231,7 +231,7 @@ func TestAssetHandler_Handle_OnReady(t *testing.T) {
 		mocks.store.On("ContainsAllObjects", ctx, remoteBucketName, asset.Name, mock.AnythingOfType("[]string")).Return(false, errors.New("nope")).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -263,7 +263,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -293,7 +293,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -320,7 +320,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -348,7 +348,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(errors.New("nope")).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -377,7 +377,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, errors.New("nope")).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -406,7 +406,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -436,7 +436,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -459,7 +459,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -482,7 +482,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -507,7 +507,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -538,7 +538,7 @@ func TestAssetHandler_Handle_OnFailed(t *testing.T) {
 		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -562,7 +562,7 @@ func TestAssetHandler_Handle_OnFailed(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -584,7 +584,7 @@ func TestAssetHandler_Handle_OnFailed(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -608,7 +608,7 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -632,7 +632,7 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 		mocks.store.On("DeleteObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -654,7 +654,7 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, errors.New("nope")).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -678,7 +678,7 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 		mocks.store.On("DeleteObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(errors.New("nope")).Once()
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -699,7 +699,7 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -720,7 +720,7 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 		defer mocks.AssertExpectations(t)
 
 		// When
-		status, err := handler.Handle(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())

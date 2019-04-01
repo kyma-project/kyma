@@ -17,7 +17,7 @@ import (
 )
 
 type Handler interface {
-	Handle(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error)
+	Do(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error)
 }
 
 type MetaAccessor interface {
@@ -51,7 +51,7 @@ func New(log logr.Logger, recorder record.EventRecorder, store store.Store, exte
 	}
 }
 
-func (h *bucketHandler) Handle(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
+func (h *bucketHandler) Do(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
 	h.logInfof("Start common Bucket handling")
 	defer h.logInfof("Finish common Bucket handling")
 

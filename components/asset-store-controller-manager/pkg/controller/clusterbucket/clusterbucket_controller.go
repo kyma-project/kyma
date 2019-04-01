@@ -114,7 +114,7 @@ func (r *ReconcileClusterBucket) Reconcile(request reconcile.Request) (reconcile
 
 	bucketLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName())
 	commonHandler := bucket.New(bucketLogger, r.recorder, r.store, r.externalEndpoint, r.relistInterval)
-	commonStatus, err := commonHandler.Handle(ctx, time.Now(), instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
+	commonStatus, err := commonHandler.Do(ctx, time.Now(), instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
 	if updateErr := r.updateStatus(ctx, request.NamespacedName, commonStatus); updateErr != nil {
 		finalErr := updateErr
 		if err != nil {

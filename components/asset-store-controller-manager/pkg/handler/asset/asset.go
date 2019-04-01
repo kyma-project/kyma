@@ -19,7 +19,7 @@ import (
 )
 
 type Handler interface {
-	Handle(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonAssetSpec, status v1alpha2.CommonAssetStatus) (*v1alpha2.CommonAssetStatus, error)
+	Do(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonAssetSpec, status v1alpha2.CommonAssetStatus) (*v1alpha2.CommonAssetStatus, error)
 }
 
 type MetaAccessor interface {
@@ -61,7 +61,7 @@ func New(log logr.Logger, recorder record.EventRecorder, store store.Store, load
 	}
 }
 
-func (h *assetHandler) Handle(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonAssetSpec, status v1alpha2.CommonAssetStatus) (*v1alpha2.CommonAssetStatus, error) {
+func (h *assetHandler) Do(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonAssetSpec, status v1alpha2.CommonAssetStatus) (*v1alpha2.CommonAssetStatus, error) {
 	h.logInfof("Start common Asset handling")
 	defer h.logInfof("Finish common Asset handling")
 

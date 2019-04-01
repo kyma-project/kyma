@@ -34,7 +34,7 @@ func TestBucketHandler_Handle_Default(t *testing.T) {
 	handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 	// When
-	status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+	status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 	// Then
 	g.Expect(err).ToNot(HaveOccurred())
@@ -64,7 +64,7 @@ func TestBucketHandler_Handle_OnAddOrUpdate(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -94,7 +94,7 @@ func TestBucketHandler_Handle_OnAddOrUpdate(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, url, relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -124,7 +124,7 @@ func TestBucketHandler_Handle_OnAddOrUpdate(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, url, relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -154,7 +154,7 @@ func TestBucketHandler_Handle_OnAddOrUpdate(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, url, relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -185,7 +185,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -214,7 +214,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -244,7 +244,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -274,7 +274,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -306,7 +306,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -338,7 +338,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -369,7 +369,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())
@@ -403,7 +403,7 @@ func TestBucketHandler_Handle_OnFailed(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, url, relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -436,7 +436,7 @@ func TestBucketHandler_Handle_OnFailed(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -467,7 +467,7 @@ func TestBucketHandler_Handle_OnFailed(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -495,7 +495,7 @@ func TestBucketHandler_Handle_OnFailed(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -523,7 +523,7 @@ func TestBucketHandler_Handle_OnDelete(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -546,7 +546,7 @@ func TestBucketHandler_Handle_OnDelete(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -571,7 +571,7 @@ func TestBucketHandler_Handle_OnDelete(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
@@ -597,7 +597,7 @@ func TestBucketHandler_Handle_OnDelete(t *testing.T) {
 		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
 
 		// When
-		status, err := handler.Handle(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
+		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).To(HaveOccurred())

@@ -155,7 +155,7 @@ func (r *ReconcileAsset) Reconcile(request reconcile.Request) (reconcile.Result,
 
 	assetLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace())
 	commonHandler := asset.New(assetLogger, r.recorder, r.store, r.loader, r.findBucketFnc, r.validator, r.mutator, r.relistInterval)
-	commonStatus, err := commonHandler.Handle(ctx, time.Now(), instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
+	commonStatus, err := commonHandler.Do(ctx, time.Now(), instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
 	if updateErr := r.updateStatus(ctx, request.NamespacedName, commonStatus); updateErr != nil {
 		finalErr := updateErr
 		if err != nil {
