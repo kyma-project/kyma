@@ -62,7 +62,7 @@ func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 		return err
 	}
 
-	host := fmt.Sprintf("http://%s.%s:8080", namespace, namespace)
+	host := fmt.Sprintf("http://%s.%s:8080", f.functionName, namespace)
 
 	value, err := f.getFunctionOutput(host, 2*time.Minute)
 	if err != nil {
@@ -125,10 +125,11 @@ func (f *FunctionUpgradeTest) createFunction(log logrus.FieldLogger, namespace s
 			  }`,
 		},
 	}
-	function, err := f.kubelessClient.KubelessV1beta1().Functions(namespace).Create(function)
+	_, err := f.kubelessClient.KubelessV1beta1().Functions(namespace).Create(function)
 	if err != nil {
 		return nil, err
 	}
+
 	return function, nil
 }
 

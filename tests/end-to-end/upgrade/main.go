@@ -79,7 +79,7 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"FunctionUpgradeTest":          function.NewFunctionUpgradeTest(k8sConfig),
+		"FunctionUpgradeTest": function.NewFunctionUpgradeTest(k8sConfig),
 	}
 
 	// Execute requested action
