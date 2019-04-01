@@ -5,12 +5,12 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "11"
-  name: components-logging
+  name: logging
 spec:
   displayName: "Logging"
   description: "Overall documentation for Logging"
   sources:
     markdown:
       mode: package
-      url: https://github.com/kyma-project/kyma/archive/master.zip
+      url: https://github.com/kyma-project/kyma/archive/{{ .Values.clusterdocstopics.branch }}.zip
       filter: /docs/logging/docs/(.*?)(md|svg|png|json|yaml|yml|jpg|jpeg|gif)$

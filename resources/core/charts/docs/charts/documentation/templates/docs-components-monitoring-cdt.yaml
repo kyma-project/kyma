@@ -5,12 +5,12 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "8"
-  name: components-monitoring
+  name: monitoring
 spec:
   displayName: "Monitoring"
   description: "Overall documentation for Monitoring"
   sources:
     markdown:
       mode: package
-      url: https://github.com/kyma-project/kyma/archive/master.zip
+      url: https://github.com/kyma-project/kyma/archive/{{ .Values.clusterdocstopics.branch }}.zip
       filter: /docs/monitoring/docs/(.*?)(md|svg|png|json|yaml|yml|jpg|jpeg|gif)$

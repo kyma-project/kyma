@@ -5,12 +5,12 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "7"
-  name: components-serverless
+  name: serverless
 spec:
   displayName: "Serverless"
   description: "Overall documentation for Serverless"
   sources:
     markdown:
       mode: package
-      url: https://github.com/kyma-project/kyma/archive/master.zip
+      url: https://github.com/kyma-project/kyma/archive/{{ .Values.clusterdocstopics.branch }}.zip
       filter: /docs/serverless/docs/(.*?)(md|svg|png|json|yaml|yml|jpg|jpeg|gif)$

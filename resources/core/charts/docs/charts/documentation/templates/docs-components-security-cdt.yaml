@@ -5,12 +5,12 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Components
     cms.kyma-project.io/order: "1"
-  name: components-security
+  name: security
 spec:
   displayName: "Security"
   description: "Overall documentation for Security"
   sources:
     markdown:
       mode: package
-      url: https://github.com/kyma-project/kyma/archive/master.zip
+      url: https://github.com/kyma-project/kyma/archive/{{ .Values.clusterdocstopics.branch }}.zip
       filter: /docs/security/docs/(.*?)(md|svg|png|json|yaml|yml|jpg|jpeg|gif)$

@@ -5,12 +5,12 @@ metadata:
     cms.kyma-project.io/viewContext: docs-ui
     cms.kyma-project.io/groupName: Root
     cms.kyma-project.io/order: "1"
-  name: root-kyma
+  name: kyma
 spec:
   displayName: "Kyma"
   description: "Overall documentation for Kyma"
   sources:
     markdown:
       mode: package
-      url: https://github.com/kyma-project/kyma/archive/master.zip
+      url: https://github.com/kyma-project/kyma/archive/{{ .Values.clusterdocstopics.branch }}.zip
       filter: /docs/kyma/docs/(.*?)(md|svg|png|json|yaml|yml|jpg|jpeg|gif)$
