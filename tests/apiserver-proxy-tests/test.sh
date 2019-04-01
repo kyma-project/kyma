@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
-set -o errexit
+set -e
+
+if [[ -z "${POD_NAME}" ]]; then
+    echo "POD_NAME not provided"
+    echo "TEST FAILED"
+    exit 1
+fi
 
 AUTH_TOKEN=$(/root/app)
 
@@ -9,40 +15,35 @@ getConfigFile() {
 }
 
 test(){
+    local retry=$1
+    local maxRetries=$2
+    if [[ "$retry" -ge "$maxRetries" ]]; then
+    	echo "TEST FAILED"
+    	exit 1
+    fi
+    echo "Try $retry/$maxRetries"
 
-  if [[ -z "${POD_NAME}" ]]; then
-    echo "POD_NAME not provided"
-    echo "TEST FAILED"
-    exit 1
-  fi
+    UUID=$(cat /proc/sys/kernel/random/uuid)
+    echo "${UUID}" > "${PWD}/uuid"
 
-  UUID=$(cat /proc/sys/kernel/random/uuid)
-  echo ${UUID} > "${PWD}/uuid"
-  
-  set +e
-  KUBECTL_OUT=$(kubectl exec ${POD_NAME} cat ${PWD}/uuid)
-  KUBECTL_ERR=$((kubectl exec ${POD_NAME} cat ${PWD}/uuid) 2>&1 1>/dev/null)
-  set -e
+    local out
+    local status
+    set +e
+    out=$(kubectl exec "${POD_NAME}" cat ${PWD}/uuid 2>&1)
+    status=$?
+    set -e
 
-  if [[ -n "${KUBECTL_ERR}" ]]; then
-  echo "kubectl exec output:"
-  echo "${KUBECTL_OUT}"
-  echo "kubectl exec error:"
-  echo "${KUBECTL_ERR}"
-
-  echo "TEST FAILED"
-  exit 1
-  fi
-
-  if [[ "${UUID}" != "${KUBECTL_OUT}" ]]; then
-    echo "KUBECTL_OUT should be ${UUID}"
-    echo "KUBECTL_OUT is ${KUBECTL_OUT}"
-    echo "TEST FAILED"
-    exit 1
-  fi
-  echo "TEST SUCCEEDED"
+    if [[ "$status" -ne 0 ]] || [[ "${UUID}" != "${out}" ]]; then
+        echo "kubectl exec error ($status):"
+        echo "${out}"
+        echo "---"
+        echo "UUID: $(cat ${PWD}/uuid)"
+        test "$((retry+1))" "${maxRetries}"
+    else
+        echo "TEST SUCCEEDED"
+    fi
 }
 
 getConfigFile
 export KUBECONFIG="${PWD}/kubeconfig"
-test
+test 0 2

@@ -35,6 +35,7 @@ type Config struct {
 	Helm                     helm.Config      `valid:"required"`
 	ClusterServiceBrokerName string
 	HelmBrokerURL            string
+	DevelopMode              bool
 }
 
 // Load method has following strategy:

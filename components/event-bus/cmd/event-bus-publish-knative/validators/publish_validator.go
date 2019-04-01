@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 )
 
 const (
@@ -47,4 +48,11 @@ func ValidateRequest(r *http.Request) (*api.PublishRequest, *api.Error) {
 	}
 
 	return publishRequest, nil
+}
+
+func ValidateChannelNameLength(channelName *string, length int) *api.Error {
+	if len(*channelName) > length {
+		return util.ErrorInvalidChannelNameLength(length)
+	}
+	return nil
 }
