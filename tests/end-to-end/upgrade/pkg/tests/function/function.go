@@ -70,7 +70,7 @@ func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	}
 
 	if !strings.Contains(value, f.uuid) {
-		return fmt.Errorf("Could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
+		return fmt.Errorf("could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
 	}
 
 	return nil
@@ -100,7 +100,7 @@ func (f *FunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Durati
 			messages += fmt.Sprintf("%+v", err)
 
 		case <-timeout:
-			return "", fmt.Errorf("Could not get function output:\n %v", messages)
+			return "", fmt.Errorf("could not get function output:\n %v", messages)
 		}
 	}
 
@@ -144,7 +144,7 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 			if err != nil {
 				return err
 			}
-			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pods)
+			return fmt.Errorf("pod did not start within given time  %v: %+v", waitmax, pods)
 		case <-tick:
 			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
@@ -155,7 +155,7 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 			}
 
 			if len(pods.Items) > 1 {
-				return fmt.Errorf("Deployed 1 pod, got %v: %+v", len(pods.Items), pods)
+				return fmt.Errorf("deployed 1 pod, got %v: %+v", len(pods.Items), pods)
 			}
 
 			pod := pods.Items[0]
@@ -170,7 +170,7 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 			}
 
 			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
-				return fmt.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
+				return fmt.Errorf("function in state %v: \n%+v", pod.Status.Phase, pod)
 			}
 		}
 	}
