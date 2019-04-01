@@ -100,7 +100,7 @@ func (client *metadataServiceClient) DeleteService(t *testing.T, idToDelete stri
 }
 
 func (client *metadataServiceClient) GetService(t *testing.T, serviceId string) (int, *ServiceDetails, error) {
-	condition := andPredicate(statusNotServerError, getSpecsPredicate(t, true, true, true))
+	condition := getSpecsPredicate(t, true, true, true)
 	return client.getService(t, serviceId, condition)
 }
 
@@ -237,17 +237,17 @@ func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, 
 	}
 }
 
-func andPredicate(operand1 Predicate, operand2 Predicate) Predicate {
-	return func(response *http.Response, err error) bool {
-		return operand1(response, err) && operand2(response, err)
-	}
-}
-
 func logResponse(t *testing.T, resp *http.Response) {
 	dump, err := httputil.DumpResponse(resp, true)
 	if err != nil {
 		t.Logf("failed to dump response, %s", err)
 	} else {
 		t.Logf("\n--------------------------------\n%s\n--------------------------------", dump)
+	}
+
+	if resp != nil && resp.Body != nil {
+		if err = resp.Body.Close(); err != nil {
+			t.Logf("failed to close response body, %s", err)
+		}
 	}
 }
