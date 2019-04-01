@@ -14,6 +14,7 @@ import (
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
@@ -68,6 +69,9 @@ func main() {
 
 	appBrokerCli, err := ab.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Application Broker clientset")
+
+	gatewayCli, err := gateway.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Gateway clientset")
 
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
