@@ -1,4 +1,4 @@
-package api_controller
+package apicontroller
 
 import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"

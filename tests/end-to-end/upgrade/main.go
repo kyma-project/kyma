@@ -3,10 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
-	"os"
-
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	k8sclientset "k8s.io/client-go/kubernetes"
@@ -29,6 +27,7 @@ type Config struct {
 	Logger              logger.Config
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
+	DomainName			string `envconfig:""`
 }
 
 const (
@@ -79,8 +78,6 @@ func main() {
 	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kubeless clientset")
 
-	domainName, err := requireEnv("DOMAIN")
-	fatalOnError(err, "while getting DOMAIN")
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 	//
@@ -90,7 +87,7 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"ApiGatewayUpgradeTest":        api_controller.New(gatewayCli, k8sCli, kubelessCli, domainName),
+		"ApiGatewayUpgradeTest":        apicontroller.New(gatewayCli, k8sCli, kubelessCli, cfg.DomainName),
 	}
 
 	// Execute requested action
@@ -121,12 +118,4 @@ func newRestClientConfig(kubeConfigPath string) (*restclient.Config, error) {
 	}
 
 	return restclient.InClusterConfig()
-}
-
-func requireEnv(name string) (string, error) {
-	value := os.Getenv(name)
-	if value == "" {
-		return "", fmt.Errorf("missing required env: %s", name)
-	}
-	return value, nil
 }
