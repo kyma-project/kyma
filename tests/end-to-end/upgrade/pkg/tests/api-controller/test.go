@@ -10,21 +10,19 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type test struct {
+type Test struct {
 	upstream backupe2e.ApiControllerTest
 }
 
-func New(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) *test {
+func New(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) Test {
 	upstream := backupe2e.NewApiControllerTest(gatewayInterface, coreInterface, kubelessInterface, domainName)
-	return &test{upstream}
+	return Test{upstream}
 }
 
-func (t *test) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+func (t Test) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return t.upstream.CreateResourcesError(namespace)
 }
 
-func (t *test) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+func (t Test) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return t.upstream.TestResourcesError(namespace)
 }
-
-var _ runner.UpgradeTest = &test{}
