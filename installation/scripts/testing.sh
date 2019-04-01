@@ -28,7 +28,7 @@ metadata:
   name: ${suiteName}
 spec:
   maxRetries: 0
-  concurrency: 3
+  concurrency: 1
   count: 1
 EOF
 
