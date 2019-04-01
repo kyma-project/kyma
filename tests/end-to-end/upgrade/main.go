@@ -85,7 +85,7 @@ func main() {
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 		"AssetStoreUpgradeTest":        assetstore.NewAssetStoreUpgradeTest(dynamicCli),
-		"CmsUpgradeTest":               cms.NewCmsUpgradeTest(dynamicCli),
+		"CmsUpgradeTest":               cms.NewHeadlessCmsUpgradeTest(dynamicCli),
 	}
 
 	// Execute requested action

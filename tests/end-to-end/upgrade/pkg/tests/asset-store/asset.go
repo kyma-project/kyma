@@ -1,31 +1,31 @@
-package asset_store
+package assetstore
 
 import (
-	"k8s.io/client-go/dynamic"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/resource"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/dynamicresource"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
+	"github.com/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 )
 
 type asset struct {
-	resCli      *resource.Resource
-	name        string
-	namespace   string
+	resCli    *dynamicresource.DynamicResource
+	name      string
+	namespace string
 }
 
-func newAssetClient(dynamicCli dynamic.Interface, namespace string) *asset {
+func newAsset(dynamicCli dynamic.Interface, namespace string) *asset {
 	return &asset{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "assets",
 		}, namespace),
-		namespace:   namespace,
+		namespace: namespace,
 	}
 }
 
@@ -44,7 +44,7 @@ func (a *asset) create() error {
 		Spec: v1alpha2.AssetSpec{
 			CommonAssetSpec: v1alpha2.CommonAssetSpec{
 				BucketRef: v1alpha2.AssetBucketRef{
-					Name: BucketName,
+					Name: bucketName,
 				},
 				Source: v1alpha2.AssetSource{
 					Url:  assetData.url,
@@ -87,7 +87,6 @@ func (a *asset) delete() error {
 	return nil
 }
 
-
 func (a *asset) waitForStatusReady(stop <-chan struct{}) error {
 	err := waiter.WaitAtMost(func() (bool, error) {
 		res, err := a.get()
@@ -100,7 +99,7 @@ func (a *asset) waitForStatusReady(stop <-chan struct{}) error {
 		}
 
 		return true, nil
-	}, WaitTimeout, stop)
+	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for ready Asset %s in namespace %s", a.name, a.namespace)
 	}
@@ -120,7 +119,7 @@ func (a *asset) waitForRemove(stop <-chan struct{}) error {
 		}
 
 		return true, nil
-	}, WaitTimeout, stop)
+	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for delete Asset %s in namespace %s", a.name, a.namespace)
 	}

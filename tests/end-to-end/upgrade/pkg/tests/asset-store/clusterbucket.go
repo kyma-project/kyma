@@ -1,30 +1,30 @@
-package asset_store
+package assetstore
 
 import (
-	"k8s.io/client-go/dynamic"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/resource"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/dynamicresource"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
+	"github.com/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/dynamic"
 )
 
 type clusterBucket struct {
-	resCli      *resource.Resource
-	name        string
+	resCli *dynamicresource.DynamicResource
+	name   string
 }
 
-func newClusterBucketClient(dynamicCli dynamic.Interface) *clusterBucket {
+func newClusterBucket(dynamicCli dynamic.Interface) *clusterBucket {
 	return &clusterBucket{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha2.SchemeGroupVersion.Version,
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "clusterbuckets",
 		}, ""),
-		name: ClusterBucketName,
+		name: clusterBucketName,
 	}
 }
 
@@ -88,7 +88,7 @@ func (b *clusterBucket) waitForStatusReady(stop <-chan struct{}) error {
 		}
 
 		return true, nil
-	}, WaitTimeout, stop)
+	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for ready ClusterBucket %s", b.name)
 	}
@@ -108,7 +108,7 @@ func (b *clusterBucket) waitForRemove(stop <-chan struct{}) error {
 		}
 
 		return true, nil
-	}, WaitTimeout, stop)
+	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for delete ClusterBucket %s", b.name)
 	}

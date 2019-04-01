@@ -1,30 +1,30 @@
 package cms
 
 import (
-	"k8s.io/apimachinery/pkg/runtime/schema"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/pkg/errors"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/dynamicresource"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
+	"github.com/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
 
 type clusterDocsTopic struct {
-	resCli      *resource.Resource
-	name        string
+	resCli *dynamicresource.DynamicResource
+	name   string
 }
 
-func newClusterDocsTopicClient(dynamicCli dynamic.Interface) *clusterDocsTopic {
+func newClusterDocsTopic(dynamicCli dynamic.Interface) *clusterDocsTopic {
 	return &clusterDocsTopic{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha1.SchemeGroupVersion.Version,
 			Group:    v1alpha1.SchemeGroupVersion.Group,
 			Resource: "clusterdocstopics",
 		}, ""),
-		name: ClusterDocsTopicName,
+		name: clusterDocsTopicName,
 	}
 }
 
@@ -35,7 +35,7 @@ func (dt *clusterDocsTopic) create(spec v1alpha1.CommonDocsTopicSpec) error {
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      dt.name,
+			Name: dt.name,
 		},
 		Spec: v1alpha1.ClusterDocsTopicSpec{
 			CommonDocsTopicSpec: spec,
@@ -86,7 +86,7 @@ func (dt *clusterDocsTopic) waitForStatusReady(stop <-chan struct{}) error {
 		}
 
 		return true, nil
-	}, WaitTimeout, stop)
+	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for ready ClusterDocsTopic %s", dt.name)
 	}
@@ -106,7 +106,7 @@ func (dt *clusterDocsTopic) waitForRemove(stop <-chan struct{}) error {
 		}
 
 		return true, nil
-	}, WaitTimeout, stop)
+	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for delete ClusterDocsTopic %s", dt.name)
 	}

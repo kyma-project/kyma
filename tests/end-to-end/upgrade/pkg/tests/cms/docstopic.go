@@ -2,31 +2,31 @@ package cms
 
 import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-	"github.com/pkg/errors"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/resource"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/runtime"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/dynamicresource"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/waiter"
+	"github.com/pkg/errors"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/dynamic"
 )
 
 type docsTopic struct {
-	resCli      *resource.Resource
-	name        string
-	namespace   string
+	resCli    *dynamicresource.DynamicResource
+	name      string
+	namespace string
 }
 
-func newDocsTopic(dynamicCli dynamic.Interface, namespace string) *docsTopic {
+func newDocs(dynamicCli dynamic.Interface, namespace string) *docsTopic {
 	return &docsTopic{
-		resCli: resource.New(dynamicCli, schema.GroupVersionResource{
+		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha1.SchemeGroupVersion.Version,
 			Group:    v1alpha1.SchemeGroupVersion.Group,
 			Resource: "docstopics",
 		}, namespace),
 		namespace: namespace,
-		name: DocsTopicName,
+		name:      docsTopicName,
 	}
 }
 
@@ -89,7 +89,7 @@ func (dt *docsTopic) waitForStatusReady(stop <-chan struct{}) error {
 		}
 
 		return true, nil
-	}, WaitTimeout, stop)
+	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for ready DocsTopic %s in namespace %s", dt.name, dt.namespace)
 	}
@@ -109,7 +109,7 @@ func (dt *docsTopic) waitForRemove(stop <-chan struct{}) error {
 		}
 
 		return true, nil
-	}, WaitTimeout, stop)
+	}, waitTimeout, stop)
 	if err != nil {
 		return errors.Wrapf(err, "while waiting for delete DocsTopic %s in namespace %s", dt.name, dt.namespace)
 	}
