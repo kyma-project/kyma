@@ -1,0 +1,10 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: service-catalog-apiserver-mtls-disable
+spec:
+  targets:
+  - name: service-catalog-apiserver
+  peers:
+  - mtls:
+      mode: "PERMISSIVE"
