@@ -13,4 +13,4 @@ spec:
     markdown:
       mode: package
       url: https://github.com/kyma-project/kyma/archive/{{ .Values.clusterdocstopics.branch }}.zip
-      filter: /docs/kyma/docs/(.*?)(md|svg|png|json|yaml|yml|jpg|jpeg|gif)$
+      filter: /docs/kyma/docs/
