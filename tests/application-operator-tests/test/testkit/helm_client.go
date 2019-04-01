@@ -22,11 +22,11 @@ type helmClient struct {
 	retryWaitTime time.Duration
 }
 
-func NewHelmClient(host, tlsKeyFile, tlsCertFile string) (HelmClient, error) {
+func NewHelmClient(host, tlsKeyFile, tlsCertFile string, skipVerify bool) (HelmClient, error) {
 	tlsOpts := tlsutil.Options{
 		KeyFile:            tlsKeyFile,
 		CertFile:           tlsCertFile,
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: skipVerify,
 	}
 
 	tlsCfg, err := tlsutil.ClientConfig(tlsOpts)
