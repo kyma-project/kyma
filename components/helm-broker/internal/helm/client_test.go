@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func setupCerts(){
+func setupCerts() {
 	certOut, err := ioutil.TempFile("/tmp/", "certFile")
 	if err != nil {
 		log.Fatal(err)
@@ -56,7 +56,7 @@ func setupCerts(){
 	certFile = certOut.Name()
 
 }
-func cleanupCerts(){
+func cleanupCerts() {
 	os.Remove(keyFile)
 	os.Remove(certFile)
 }
@@ -65,7 +65,7 @@ func TestClientInstallSuccess(t *testing.T) {
 	// given
 	fakeTiller := &fakeTillerSvc{
 		certFile: certFile,
-		keyFile: keyFile,
+		keyFile:  keyFile,
 	}
 	fakeTiller.SetUp(t)
 
@@ -78,6 +78,7 @@ func TestClientInstallSuccess(t *testing.T) {
 		TillerConnectionTimeout: time.Second,
 		TillerTLSCrt:            certFile,
 		TillerTLSKey:            keyFile,
+		TillerTLSInsecure:       true,
 	}, spy.NewLogDummy())
 
 	// when
@@ -115,6 +116,7 @@ func TestClientDeleteSuccess(t *testing.T) {
 		TillerConnectionTimeout: time.Second,
 		TillerTLSCrt:            certFile,
 		TillerTLSKey:            keyFile,
+		TillerTLSInsecure:       true,
 	}, spy.NewLogDummy())
 
 	// when
@@ -135,10 +137,10 @@ type fakeTillerSvc struct {
 	GotInstReleaseReq *services.InstallReleaseRequest
 	GotDelReleaseReq  *services.UninstallReleaseRequest
 
-	grpcSvc      *grpc.Server
-	Host         string
-	keyFile  	 string
-	certFile     string
+	grpcSvc  *grpc.Server
+	Host     string
+	keyFile  string
+	certFile string
 
 	serverErr    error
 	serverClosed chan struct{}

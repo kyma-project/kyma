@@ -34,7 +34,8 @@ spec:
 
       containers:
       - name: {{ .Chart.Name }}
-        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
+        #image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
+        image: helm-broker:latest
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: APP_TMP_DIR
@@ -47,6 +48,8 @@ spec:
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
+          - name: APP_HELM_TILLER_TLS_INSECURE
+            value: "{{ .Values.config.tillerTLSInsecure }}"
           - name: APP_CLUSTER_SERVICE_BROKER_NAME
             value: {{ template "fullname" . }}
           - name: APP_HELM_BROKER_URL

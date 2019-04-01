@@ -8,4 +8,5 @@ type Config struct {
 	TillerConnectionTimeout time.Duration `envconfig:"default=5s"`
 	TillerTLSKey            string        `envconfig:"default=/etc/certs/tls.key"`
 	TillerTLSCrt            string        `envconfig:"default=/etc/certs/tls.crt"`
+	TillerTLSInsecure       bool          `envconfig:"default=false"`
 }

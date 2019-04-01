@@ -25,7 +25,7 @@ func NewClient(cfg Config, log *logrus.Entry) *Client {
 	tlsopts := tlsutil.Options{
 		KeyFile:            cfg.TillerTLSKey,
 		CertFile:           cfg.TillerTLSCrt,
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: cfg.TillerTLSInsecure,
 	}
 
 	tlscfg, err := tlsutil.ClientConfig(tlsopts)
