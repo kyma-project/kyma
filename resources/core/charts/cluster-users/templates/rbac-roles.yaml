@@ -107,7 +107,7 @@ rules:
 ---
 
 ################################################################################
-# Cluster viewer role
+# kyma-view = view permissions on kyma resources
 #  _                                     _
 # | | ___   _ _ __ ___   __ _     __   _(_) _____      __
 # | |/ / | | | '_ ` _ \ / _` |____\ \ / / |/ _ \ \ /\ / /
@@ -183,6 +183,7 @@ rules:
   verbs: ["get", "list"]
 
 ---
+#View access to kubeless resources
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
@@ -200,6 +201,7 @@ rules:
   verbs: ["get", "list"]
 
 ---
+#View access to core resources
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
@@ -232,6 +234,8 @@ aggregationRule:
   clusterRoleSelectors:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-view-kyma: "true"
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-view-core: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-view-istio: "true"
   - matchLabels:
