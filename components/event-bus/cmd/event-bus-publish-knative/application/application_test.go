@@ -87,6 +87,32 @@ func Test_PublishWithSourceIdInHeader_ShouldSucceed(t *testing.T) {
 	assert.Equal(t, test.TestEventID, publishResponse.EventID)
 }
 
+func Test_PublishWithChannelNameGreaterThanMaxChannelLength_ShouldFail(t *testing.T) {
+	// make the max channel name length to be very low
+	application.options.MaxChannelNameLength = 1
+
+	// prepare and send payload
+	payload := test.BuildDefaultTestPayload()
+	body, statusCode := test.PerformPublishRequest(t, server.URL, payload)
+
+	// assert
+	assert.NotNil(t, body)
+	assert.Equal(t, http.StatusBadRequest, statusCode)
+
+	// get the response
+	err := &api.Error{}
+	marshalErr := json.Unmarshal(body, &err)
+
+	// assert
+	assert.Nil(t, marshalErr)
+	assert.Equal(t, api.ErrorTypeValidationViolation, err.Type)
+	assert.Equal(t, api.ErrorTypeInvalidFieldLength, err.Details[0].Type)
+	assert.Equal(t, knative.FieldKnativeChannelName, err.Details[0].Field)
+
+	// restore the max channel name original length
+	application.options.MaxChannelNameLength = opts.DefaultMaxChannelNameLength
+}
+
 func Test_PublishWithBadPayload_ShouldFail(t *testing.T) {
 	// prepare and send payload
 	payload := test.BuildDefaultTestBadPayload()
