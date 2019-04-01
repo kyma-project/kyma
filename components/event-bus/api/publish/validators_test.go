@@ -128,7 +128,7 @@ func Test_ValidatePublish_Success(t *testing.T) {
 
 func Test_ValidatePublish_InvalidSourceIdLength(t *testing.T) {
 	publishRequest := buildTestPublishRequest()
-	publishRequest.SourceID = "this-is-a-long-source-id"
+	publishRequest.SourceID = "this-is-a-very-long-source-id"
 	err := ValidatePublish(&publishRequest)
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
@@ -138,7 +138,7 @@ func Test_ValidatePublish_InvalidSourceIdLength(t *testing.T) {
 
 func Test_ValidatePublish_InvalidEventTypeLength(t *testing.T) {
 	publishRequest := buildTestPublishRequest()
-	publishRequest.EventType = "this-is-a-long-event-type"
+	publishRequest.EventType = "this-is-a-very-long-event-type"
 	err := ValidatePublish(&publishRequest)
 	assert.NotEqual(t, len(err.Details), 0)
 	assert.Equal(t, http.StatusBadRequest, err.Status)
