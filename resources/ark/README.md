@@ -16,4 +16,4 @@ If Ark's functionality is not sufficient, you can extend it using [plugins](http
 
 ## End-to-end tests
 
-For details on end-to-end tests for backup and restore, see [this](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test) document.
+For details on end-to-end tests for backup and restore, see [this](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test/README.md) document.
