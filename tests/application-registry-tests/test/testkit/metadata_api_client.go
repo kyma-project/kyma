@@ -3,6 +3,7 @@ package testkit
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httputil"
 	"testing"
@@ -55,11 +56,6 @@ func (client *metadataServiceClient) CreateService(t *testing.T, serviceDetails 
 		return -1, nil, err
 	}
 
-	if postResponse == nil {
-		t.Logf("Nil response returned.")
-		return -1, nil, err
-	}
-
 	logResponse(t, postResponse)
 
 	postResponseData := PostServiceResponse{}
@@ -79,13 +75,8 @@ func (client *metadataServiceClient) UpdateService(t *testing.T, idToUpdate stri
 	}
 
 	putResponse, err := client.requestWithRetries(t, requestData, newServiceDetailsRetryRequest, statusNotServerError)
-	if err != nil || putResponse == nil {
+	if err != nil {
 		t.Log(err)
-		return -1, err
-	}
-
-	if putResponse == nil {
-		t.Logf("Nil response returned.")
 		return -1, err
 	}
 
@@ -104,11 +95,6 @@ func (client *metadataServiceClient) DeleteService(t *testing.T, idToDelete stri
 	deleteResponse, err := client.requestWithRetries(t, requestData, newEmptyRetryRequest, statusNotServerError)
 	if err != nil {
 		t.Log(err)
-		return -1, err
-	}
-
-	if deleteResponse == nil {
-		t.Logf("Nil response returned.")
 		return -1, err
 	}
 
@@ -135,11 +121,6 @@ func (client *metadataServiceClient) getService(t *testing.T, serviceId string, 
 		return -1, nil, err
 	}
 
-	if getResponse == nil {
-		t.Logf("Nil response returned.")
-		return -1, nil, err
-	}
-
 	logResponse(t, getResponse)
 
 	serviceDetails := ServiceDetails{}
@@ -161,11 +142,6 @@ func (client *metadataServiceClient) GetAllServices(t *testing.T) (int, []Servic
 	getAllResponse, err := client.requestWithRetries(t, requestData, newEmptyRetryRequest, statusNotServerError)
 	if err != nil {
 		t.Log(err)
-		return -1, nil, err
-	}
-
-	if getAllResponse == nil {
-		t.Logf("Nil response returned.")
 		return -1, nil, err
 	}
 
@@ -220,11 +196,16 @@ func (client *metadataServiceClient) requestWithRetries(t *testing.T, data reque
 			return nil, reqErr
 		}
 		response, err := client.httpClient.Do(request)
-		if condition(response, err) {
+
+		if response != nil && condition(response, err) {
 			return response, err
 		}
 
 		time.Sleep(retryDelay)
+	}
+
+	if response == nil {
+		return nil, errors.New("nil response returned once executing request")
 	}
 
 	return response, err
