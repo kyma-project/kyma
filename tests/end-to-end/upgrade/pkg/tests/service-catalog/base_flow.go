@@ -1,26 +1,25 @@
-package service_catalog
+package servicecatalog
 
 import (
-	"time"
+	"fmt"
 	"io/ioutil"
 	"strings"
-	"fmt"
+	"time"
 
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
-	appsTypes "k8s.io/api/apps/v1"
-	k8sCoreTypes "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/cli-runtime/pkg/genericclioptions/printers"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/runtime/schema"
-
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/sirupsen/logrus"
+	appsTypes "k8s.io/api/apps/v1"
+	k8sCoreTypes "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/cli-runtime/pkg/genericclioptions/printers"
+	"k8s.io/client-go/kubernetes"
 )
 
 type baseFlow struct {
@@ -39,7 +38,7 @@ func (f *baseFlow) createEnvTester(name, testedEnv string) error {
 		"app": name,
 	}
 	_, err := f.k8sInterface.AppsV1().Deployments(f.namespace).Create(f.envTesterDeployment(name, labels, testedEnv))
-    return err
+	return err
 }
 
 func (f *baseFlow) deleteDeployment(name string) error {
@@ -67,10 +66,10 @@ func (f *baseFlow) envTesterDeployment(name string, labels map[string]string, te
 				Spec: k8sCoreTypes.PodSpec{
 					Containers: []k8sCoreTypes.Container{
 						{
-							Name:  "app",
-							Image: "alpine:3.8",
+							Name:    "app",
+							Image:   "alpine:3.8",
 							Command: []string{"/bin/sh", "-c", "--"},
-							Args: []string{fmt.Sprintf("echo \"value=$%s\"; echo \"done\"; while true; do sleep 30; done;", testedEnv)},
+							Args:    []string{fmt.Sprintf("echo \"value=$%s\"; echo \"done\"; while true; do sleep 30; done;", testedEnv)},
 						},
 					},
 				},
@@ -196,7 +195,7 @@ func (f *baseFlow) waitForEnvTesterValue(svc, expectedEnvName, expectedEnvValue 
 		var podName string
 
 		// wait for running single env tester pod
-		err := f.wait(25 * time.Second, func() (bool, error) {
+		err := f.wait(25*time.Second, func() (bool, error) {
 			pods, err := f.k8sInterface.CoreV1().Pods(f.namespace).List(metav1.ListOptions{
 				LabelSelector: fmt.Sprintf("app=%s", svc),
 			})
@@ -295,36 +294,36 @@ func (f *baseFlow) waitForDeployment(name string) error {
 
 func (f *baseFlow) logK8SReport() {
 	deployments, err := f.k8sInterface.AppsV1().Deployments(f.namespace).List(metav1.ListOptions{})
-	f.report("Deployments", deployments , err)
+	f.report("Deployments", deployments, err)
 
 	pods, err := f.k8sInterface.CoreV1().Pods(f.namespace).List(metav1.ListOptions{})
-	f.report("Pods", pods , err)
+	f.report("Pods", pods, err)
 
 	secrets, err := f.k8sInterface.CoreV1().Secrets(f.namespace).List(metav1.ListOptions{})
-	f.report("Secrets", secrets , err)
+	f.report("Secrets", secrets, err)
 }
 
 func (f *baseFlow) logServiceCatalogAndBindingUsageReport() {
 	clusterServiceBrokers, err := f.scInterface.ServicecatalogV1beta1().ClusterServiceBrokers().List(metav1.ListOptions{})
-	f.report("ClusterServiceBrokers", clusterServiceBrokers , err)
+	f.report("ClusterServiceBrokers", clusterServiceBrokers, err)
 
 	serviceBrokers, err := f.scInterface.ServicecatalogV1beta1().ServiceBrokers(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceBrokers", serviceBrokers , err)
+	f.report("ServiceBrokers", serviceBrokers, err)
 
 	clusterServiceClass, err := f.scInterface.ServicecatalogV1beta1().ClusterServiceClasses().List(metav1.ListOptions{})
-	f.report("ClusterServiceClasses", clusterServiceClass , err)
+	f.report("ClusterServiceClasses", clusterServiceClass, err)
 
 	serviceClass, err := f.scInterface.ServicecatalogV1beta1().ServiceClasses(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceClasses", serviceClass , err)
+	f.report("ServiceClasses", serviceClass, err)
 
 	serviceInstances, err := f.scInterface.ServicecatalogV1beta1().ServiceInstances(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceInstances", serviceInstances , err)
+	f.report("ServiceInstances", serviceInstances, err)
 
 	serviceBindings, err := f.scInterface.ServicecatalogV1beta1().ServiceBindings(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceBindings", serviceBindings , err)
+	f.report("ServiceBindings", serviceBindings, err)
 
 	serviceBindingUsages, err := f.buInterface.ServicecatalogV1alpha1().ServiceBindingUsages(f.namespace).List(metav1.ListOptions{})
-	f.report("ServiceBindingUsages", serviceBindingUsages , err)
+	f.report("ServiceBindingUsages", serviceBindingUsages, err)
 }
 
 func (f *baseFlow) report(kind string, obj runtime.Object, err error) {
