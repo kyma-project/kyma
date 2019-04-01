@@ -50,11 +50,6 @@ func main() {
 
 	log := logger.New(&cfg.Logger)
 
-	err = cfg.ConfigureWorkMode()
-	if err != nil {
-		log.Infof("Could not configure work mode: %s", err)
-	}
-
 	storageConfig := storage.ConfigList(cfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	fatalOnError(err)

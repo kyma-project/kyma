@@ -188,7 +188,8 @@ func (c *RepositoryController) syncBundlesRepos(name string, namespace string) e
 	c.bundleSyncer.CleanProviders()
 	repositories, err := c.urlsToRepositories(existingURLs)
 	if err != nil {
-		return errors.Wrap(err, "while creating repository url")
+		c.log.Warnf("Cannot create repositories for %s/%s: %s", namespace, name, err)
+		return nil
 	}
 	for _, repoCfg := range repositories {
 		repoProvider := NewProvider(NewHTTPRepository(repoCfg), c.bundleLoader, c.log.WithField("URLs", repoCfg.URL))

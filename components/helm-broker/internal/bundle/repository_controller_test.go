@@ -199,7 +199,7 @@ func TestNewRepositoryController_UnsecuredRepositories(t *testing.T) {
 
 	// THEN
 	awaitForChanAtMost(t, asyncOpDone, time.Second)
-	logSink.AssertLogged(t, logrus.ErrorLevel, fmt.Sprintf("Error processing %q (giving up - to many retires): while creating repository url: All Repository URLs are incorrect or unsecured", mapName+"/"+mapNamespace))
+	logSink.AssertLogged(t, logrus.WarnLevel, fmt.Sprintf("Cannot create repositories for %s/%s: All Repository URLs are incorrect or unsecured", mapName, mapNamespace))
 }
 
 func TestNewRepositoryController_UnsecuredRepositoriesWithDevelopMode(t *testing.T) {

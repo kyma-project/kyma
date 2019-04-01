@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strconv"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/ghodss/yaml"
@@ -37,22 +36,6 @@ type Config struct {
 	ClusterServiceBrokerName string
 	HelmBrokerURL            string
 	DevelopMode              bool
-}
-
-// ConfigureWorkMode enables the developer mode that allows to
-//  - next to the https protocol to use the http protocol for bundles repository
-func (c *Config) ConfigureWorkMode() error {
-	cfgMode := os.Getenv("APP_DEVELOP_MODE")
-	mode, err := strconv.ParseBool(cfgMode)
-
-	if err != nil && cfgMode != "" {
-		return errors.Wrapf(err, "while parsing develope mode env variable: %q", cfgMode)
-	}
-	if mode {
-		c.DevelopMode = true
-	}
-
-	return nil
 }
 
 // Load method has following strategy:

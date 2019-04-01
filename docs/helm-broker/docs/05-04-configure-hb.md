@@ -15,11 +15,6 @@ By default, the Helm Broker fetches bundles listed in the `index.yaml` file from
     ```
     >**NOTE:** If you want to fetch bundles from many HTTP servers, use `\n` to separate the URLs.
     
-    >**CAUTION:** On remote cluster you can use only servers with enabled TLS. 
-    All incorrect or unsecured urls will be removed. Information about rejected url you can find in helm broker logs. 
-    To use urls without TLS set `APP_DEVELOP_MODE` environment variable in `resources/helm-broker/templates/deploy.yaml` to `true`.
-    On your local cluster unsecure url is allowed.
-
     If you use this method, you must label your ConfigMap with `helm-broker-repo=true`. To add the label to your ConfigMap, run:
     ```bash
     kubectl label configmap my-helm-repos-urls -n kyma-system helm-broker-repo=true
