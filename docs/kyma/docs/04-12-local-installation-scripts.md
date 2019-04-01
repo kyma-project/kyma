@@ -65,6 +65,8 @@ The `installation/scripts/installer.sh` script creates the default RBAC role, in
 
 The script applies the Installation custom resource and marks it with the `action=install` label, which triggers the Kyma installation.
 
+As part of installing Tiller, a set of TLS certificates is created, and placed within `HELM_HOME`, which secures the connection between client and server.
+
 >**NOTE:** The Kyma installation runs in the background. Execute the `./installation/scripts/is-installed.sh` script to follow the installation process.
 
 ## The is-installed.sh script

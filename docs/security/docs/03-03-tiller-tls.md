@@ -1,6 +1,6 @@
 ---
 title: TLS in Tiller
-type: Installation
+type: Details
 ---
 
 ## Secured by default
