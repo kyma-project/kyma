@@ -8,7 +8,6 @@ param (
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $SCRIPTS_DIR = "${CURRENT_DIR}\..\scripts"
 $DOMAIN = "kyma.local"
-$INSTALLER_EXTRA_ARGS = ""
 $CREATE_CR_EXTRA_ARGS = ""
 
 if ($SKIP_MINIKUBE_START -eq $false) {
