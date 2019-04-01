@@ -86,7 +86,7 @@ where {KUBECONFIG} is the path to the `kubeconfig` file.
 
 ### Verify the code
 
-Use the `before-commit.sh` script or the make build command to test your changes before each commit.
+Use the `before-commit.sh` script or the `make build` command to test your changes before each commit.
 
 ### Project structure
 
