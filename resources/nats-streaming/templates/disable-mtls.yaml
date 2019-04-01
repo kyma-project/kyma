@@ -1,0 +1,9 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: nats-streaming-mtls-disable
+spec:
+  host: nats-streaming.natss.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
