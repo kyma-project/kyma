@@ -249,7 +249,7 @@ func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, 
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
-	dump, err := httputil.DumpResponse(resp, false)
+	dump, err := httputil.DumpResponse(resp, true)
 
 	if err != nil {
 		t.Logf("failed to dump response, %s", err)
