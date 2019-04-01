@@ -17,8 +17,45 @@ func TestGraphQLLookupService(t *testing.T) {
 			Headers: headers,
 		}
 
-		config, _ := readConfigFromFile("testdata/config.json")
+		config, _ := readConfig("testdata/config.json")
 
 		assert.Equal(t, expectedConfig, config)
+	})
+
+	t.Run("Should get gatewayUrl from external service", func(t *testing.T) {
+		//given
+		expectedGatewayURL := "https://gateway.cool-cluster.cluster.extend.sap.cx"
+		exampleResponse := `{
+    "data": {
+        "applications": [
+            {
+                "name": "example app",
+                "account": {
+                    "id": "boo"
+                },
+                "groups": [
+                    {
+                        "id": "bar",
+                        "name": "cool-cluster",
+                        "clusters": [
+                            {
+                                "id": "baz",
+                                "name": "cool-cluster",
+                                "endpoints": {
+                                    "gateway": "https://gateway.cool-cluster.cluster.extend.sap.cx"
+                                }
+                            }
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+}`
+		//when
+		gatewayURL := getGatewayUrl([]byte(exampleResponse))
+
+		//then
+		assert.Equal(t, expectedGatewayURL, gatewayURL.String())
 	})
 }

@@ -1,12 +1,19 @@
 package middlewares
 
 import (
+	"bytes"
 	"encoding/json"
+	"fmt"
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"net/http"
 	"os"
+	"time"
 )
+
+const timeout = 30 * time.Second
 
 type LookupService interface {
 	Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error)
@@ -26,22 +33,22 @@ type LookUpConfig struct {
 type Headers map[string]string
 
 func (ls *GraphQLLookupService) Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error) {
-	return "", nil
-}
+	lookUpConfig, e := readConfig(configFilePath)
 
-func createRequest(context clientcontext.ApplicationContext, config LookUpConfig) {
-	request := &http.Request{}
-
-	setHeaders(request, config)
-}
-
-func setHeaders(request *http.Request, config LookUpConfig) {
-	for k, v := range config.Headers {
-		request.Header.Set(k, v)
+	if e != nil {
+		return "", apperrors.Internal("Error while reading config file: %s", e)
 	}
+
+	request, err := createRequest(context, lookUpConfig)
+
+	if err != nil {
+		return "", apperrors.Internal("Error while creating request: %s", e)
+	}
+
+	return sendRequest(request)
 }
 
-func readConfigFromFile(configFilePath string) (LookUpConfig, error) {
+func readConfig(configFilePath string) (LookUpConfig, error) {
 	jsonFile, e := os.Open(configFilePath)
 
 	if e != nil {
@@ -61,4 +68,75 @@ func readConfigFromFile(configFilePath string) (LookUpConfig, error) {
 	json.Unmarshal(bytesValue, &config)
 
 	return config, nil
+}
+
+func createRequest(context clientcontext.ApplicationContext, config LookUpConfig) (*http.Request, error) {
+	query := `query {
+    applications(where: {
+        accountId: %s
+        groupName: %s
+        appName: %s
+    }) {
+        name
+        account {
+            id
+        }
+        groups {
+            id
+            name
+            clusters {
+                id
+                name
+                endpoints {
+                    gateway
+                }
+            }
+        }
+    }
+}`
+
+	body := fmt.Sprintf(query, context.Tenant, context.Group, context.Application)
+
+	byteBody := []byte(body)
+
+	request, e := http.NewRequest("POST", config.URL, bytes.NewBuffer(byteBody))
+
+	if e != nil {
+		return nil, e
+	}
+
+	setHeaders(request, config)
+
+	return request, nil
+}
+
+func sendRequest(request *http.Request) (string, error) {
+	client := &http.Client{}
+	client.Timeout = timeout
+
+	response, err := client.Do(request)
+	if err != nil {
+		return "", nil
+	}
+	defer response.Body.Close()
+
+	body, e := ioutil.ReadAll(response.Body)
+
+	if e != nil {
+		return "", apperrors.Internal("Error reading response body: %s", e)
+	}
+
+	return getGatewayUrl(body).Str, nil
+}
+
+func getGatewayUrl(body []byte) gjson.Result {
+	stringBody := string(body)
+	gatewayUrl := gjson.Get(stringBody, "data.applications.0.groups.0.clusters.0.endpoints.gateway")
+	return gatewayUrl
+}
+
+func setHeaders(request *http.Request, config LookUpConfig) {
+	for k, v := range config.Headers {
+		request.Header.Set(k, v)
+	}
 }
