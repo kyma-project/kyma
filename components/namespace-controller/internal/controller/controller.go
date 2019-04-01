@@ -1,14 +1,12 @@
 package controller
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/kyma-project/kyma/components/namespace-controller/internal"
 	"github.com/kyma-project/kyma/components/namespace-controller/internal/limit_range"
 	"github.com/kyma-project/kyma/components/namespace-controller/internal/namespaces"
 	rq "github.com/kyma-project/kyma/components/namespace-controller/internal/resource-quota"
-	"github.com/kyma-project/kyma/components/namespace-controller/internal/roles"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -16,7 +14,6 @@ import (
 )
 
 const (
-	rolesAnnotName           = "kyma-roles"
 	labelSelector            = "env=true"
 	istioInjectionLabel      = "istio-injection"
 	istioInjectionLabelValue = "enabled"
@@ -29,7 +26,6 @@ var listOptions = metav1.ListOptions{LabelSelector: labelSelector}
 type controller struct {
 	Clientset           *kubernetes.Clientset
 	NamespacesClient    namespaces.NamespacesClientInterface
-	RolesClient         roles.RolesClientInterface
 	LimitRangeClient    limit_range.LimitRangesClientInterface
 	ResourceQuotaClient rq.ResourceQuotaClientInterface
 	Config              *NamespacesConfig
@@ -41,7 +37,6 @@ func NewController(clientset *kubernetes.Clientset, config *NamespacesConfig) (c
 		Clientset:           clientset,
 		Config:              config,
 		NamespacesClient:    &namespaces.NamespacesClient{Clientset: clientset},
-		RolesClient:         &roles.RolesClient{Clientset: clientset},
 		LimitRangeClient:    &limit_range.LimitRangeClient{Clientset: clientset},
 		ResourceQuotaClient: &rq.ResourceQuotaClient{Clientset: clientset},
 		ErrorHandlers:       &internal.ErrorHandlers{},
@@ -65,11 +60,7 @@ func (c *controller) onAdd(obj interface{}) {
 
 	log.Printf("[CONTROLLER] onAdd triggered for %s\n", namespace.Name)
 
-	err := c.AddRolesForNamespace(namespace)
-	if err != nil {
-		log.Printf("Cannot add roles for namespace '%s': %v", namespace, err)
-	}
-	err = c.LabelWithIstioInjection(namespace)
+	err := c.LabelWithIstioInjection(namespace)
 	if err != nil {
 		log.Printf("Cannot label namespace '%s' with istio injection: %v", namespace, err)
 	}
@@ -88,11 +79,7 @@ func (c *controller) onDelete(obj interface{}) {
 
 	log.Printf("[CONTROLLER] onDelete triggered for %s\n", namespace.Name)
 
-	err := c.RemoveRolesFromNamespace(namespace)
-	if err != nil {
-		log.Printf("Cannot remove roles for namespace '%s': %v", namespace, err)
-	}
-	err = c.RemoveIstioInjectionLabel(namespace)
+	err := c.RemoveIstioInjectionLabel(namespace)
 	if err != nil {
 		log.Printf("Cannot remove istio injection label from namespace '%s': %v", namespace, err)
 	}
@@ -104,45 +91,6 @@ func (c *controller) onDelete(obj interface{}) {
 	if err != nil {
 		log.Printf("Cannot delete resource quota for namespace '%s': %v", namespace, err)
 	}
-}
-
-func hasRoles(namespace *v1.Namespace) bool {
-	return contains(namespace.ObjectMeta.Annotations, rolesAnnotName)
-}
-
-func (c *controller) AddRolesForNamespace(namespace *v1.Namespace) error {
-	namespace, err := c.NamespacesClient.GetNamespace(namespace.Name)
-	if c.ErrorHandlers.CheckError("Error while getting namespace.", err) {
-		return err
-	}
-
-	if hasRoles(namespace) {
-		log.Println("Namespace already have default roles.")
-		return nil
-	}
-
-	rolesToBootstrap, err := c.RolesClient.GetList(c.Config.Namespace, listOptions)
-	if c.ErrorHandlers.CheckError("Error on fetching roles to bootstrap.", err) {
-		return err
-	}
-
-	for _, role := range rolesToBootstrap.Items {
-		roleCopy := role.DeepCopy()
-		roleCopy.ObjectMeta = metav1.ObjectMeta{
-			Name:      role.ObjectMeta.Name,
-			Namespace: namespace.Name,
-		}
-
-		_, err = c.RolesClient.CreateRole(roleCopy, namespace.Name)
-		c.ErrorHandlers.LogError(fmt.Sprintf("Error on creating %s role", roleCopy.ObjectMeta.Name), err)
-	}
-
-	err = c.annotateObject(namespace, rolesAnnotName)
-	if c.ErrorHandlers.CheckError("Error on updating namespace.", err) {
-		return err
-	}
-
-	return nil
 }
 
 func (c *controller) LabelWithIstioInjection(namespace *v1.Namespace) error {
@@ -240,35 +188,6 @@ func (c *controller) labelNamespace(namespace *v1.Namespace, labelName string, l
 	_, err := c.NamespacesClient.UpdateNamespace(namespaceCopy)
 	if c.ErrorHandlers.CheckError("Error labelling object", err) {
 		return err
-	}
-
-	return nil
-}
-
-func (c *controller) RemoveRolesFromNamespace(namespace *v1.Namespace) error {
-	namespace, err := c.NamespacesClient.GetNamespace(namespace.Name)
-
-	if c.ErrorHandlers.CheckError("Error while getting namespace.", err) {
-		return err
-	}
-
-	if !hasRoles(namespace) {
-		return nil
-	}
-
-	err = c.unannotateObject(namespace, rolesAnnotName)
-	if c.ErrorHandlers.CheckError("Error on updating namespace.", err) {
-		return err
-	}
-
-	rolesToDelete, err := c.RolesClient.GetList(c.Config.Namespace, listOptions)
-	if c.ErrorHandlers.CheckError("Error on fetching roles to delete.", err) {
-		return err
-	}
-
-	for _, role := range rolesToDelete.Items {
-		err = c.RolesClient.DeleteRole(role.ObjectMeta.Name, namespace.Name)
-		c.ErrorHandlers.LogError(fmt.Sprintf("Error on deleting %s role", role.ObjectMeta.Name), err)
 	}
 
 	return nil
