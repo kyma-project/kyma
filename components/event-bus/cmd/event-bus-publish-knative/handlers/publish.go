@@ -150,8 +150,6 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 		return message, &channelName, &defaultChannelNamespace, nil, status
 	}
 	if err != nil {
-		log.Printf("publish message failed: %v", err)
-		log.Printf("publish message status: %v", status)
 		_ = publish.SendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
 	}

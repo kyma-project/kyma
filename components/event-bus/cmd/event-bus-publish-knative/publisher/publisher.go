@@ -60,7 +60,7 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	channel, err := knativeLib.GetChannel(*channelName, *namespace)
 	if err != nil {
 		log.Printf("cannot find the knative channel '%v' in namespace '%v'", *channelName, *namespace)
-		return api.ErrorResponseInternalServer(), IGNORED
+		return nil, IGNORED
 	}
 
 	// send message to the knative channel
