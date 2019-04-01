@@ -11,16 +11,19 @@ import (
 
 const deployName = "hello-world-nginx"
 
+// HelloWorld shows the example hello world backup test
 type HelloWorld struct {
 	deployCli appsCli.DeploymentsGetter
 }
 
+// NewTest returns new instance of the HellowWord test
 func NewTest(deployCli appsCli.DeploymentsGetter) *HelloWorld {
 	return &HelloWorld{
 		deployCli: deployCli,
 	}
 }
 
+// CreateResources creates resources needed for e2e upgrade test
 func (h *HelloWorld) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	replicas := int32(1)
 	labels := map[string]string{
@@ -65,6 +68,7 @@ func (h *HelloWorld) CreateResources(stop <-chan struct{}, log logrus.FieldLogge
 	return nil
 }
 
+// TestResources tests resources after backup phase
 func (h *HelloWorld) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	_, err := h.deployCli.Deployments(namespace).Get(deployName, metav1.GetOptions{})
 	if err != nil {

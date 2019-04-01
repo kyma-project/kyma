@@ -71,7 +71,16 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
-	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest, myNamespaceControllerTest, apiControllerTest, myGrafanaTest, myMicrofrontendTest}
+	backupTests := []BackupTest{
+		myPrometheusTest,
+		myFunctionTest,
+		myDeploymentTest,
+		myStatefulSetTest,
+		myNamespaceControllerTest,
+		apiControllerTest,
+		myGrafanaTest,
+		myMicrofrontendTest,
+	}
 
 	e2eTests := make([]e2eTest, len(backupTests))
 
@@ -121,8 +130,10 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 
 		Convey("Check backup status", func() {
 			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 20*time.Minute)
+			myBackupClient.DescribeBackup(allBackupName)
 			So(err, ShouldBeNil)
 			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 20*time.Minute)
+			myBackupClient.DescribeBackup(systemBackupName)
 			So(err, ShouldBeNil)
 			Convey("Delete resources from cluster", func() {
 				for _, e2eTest := range e2eTests {
@@ -138,8 +149,10 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 					err = myBackupClient.RestoreBackup(systemBackupName)
 					So(err, ShouldBeNil)
 					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 15*time.Minute)
+					myBackupClient.DescribeRestore(allBackupName)
 					So(err, ShouldBeNil)
 					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 15*time.Minute)
+					myBackupClient.DescribeRestore(systemBackupName)
 					So(err, ShouldBeNil)
 					Convey("Test restored resources", func() {
 						for _, e2eTest := range e2eTests {
@@ -150,5 +163,4 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 			})
 		})
 	})
-
 }
