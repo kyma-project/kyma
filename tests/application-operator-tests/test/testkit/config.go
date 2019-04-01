@@ -13,6 +13,7 @@ const (
 	tillerHostEnvName             = "TILLER_HOST"
 	helmTLSKeyFileEnvName         = "HELM_TLS_KEY_FILE"
 	helmTLSCertificateFileEnvName = "HELM_TLS_CERTIFICATE_FILE"
+	tillerTLSSkipVerifyEnvName    = "TILLER_TLS_SKIP_VERIFY"
 
 	installationTimeoutEnvName = "INSTALLATION_TIMEOUT_SECONDS"
 
@@ -26,6 +27,7 @@ type TestConfig struct {
 	TillerHost                 string
 	TillerTLSKeyFile           string
 	TillerTLSCertificateFile   string
+	TillerTLSSkipVerify        bool
 	InstallationTimeoutSeconds int
 }
 
@@ -52,6 +54,12 @@ func ReadConfig() (TestConfig, error) {
 		helmTLSCertificateFile = defaultHelmTLSCertificateFile
 	}
 
+	tillerTLSSkipVerify := true
+	sv, found := os.LookupEnv(tillerTLSSkipVerifyEnvName)
+	if found {
+		tillerTLSSkipVerify, _ = strconv.ParseBool(sv)
+	}
+
 	var timeoutValue int
 	var err error
 	installationTimeout, found := os.LookupEnv(installationTimeoutEnvName)
@@ -69,6 +77,7 @@ func ReadConfig() (TestConfig, error) {
 		TillerHost:                 tillerHost,
 		TillerTLSKeyFile:           helmTLSKeyFile,
 		TillerTLSCertificateFile:   helmTLSCertificateFile,
+		TillerTLSSkipVerify:        tillerTLSSkipVerify,
 		InstallationTimeoutSeconds: timeoutValue,
 	}
 

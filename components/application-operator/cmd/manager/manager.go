@@ -88,7 +88,7 @@ func newReleaseManager(options *options, cfg *rest.Config) (appRelease.ReleaseMa
 		log.Fatal(err)
 	}
 
-	helmClient, err := kymahelm.NewClient(options.tillerUrl, options.helmTLSKeyFile, options.helmTLSCertificateFile, options.installationTimeout)
+	helmClient, err := kymahelm.NewClient(options.tillerUrl, options.helmTLSKeyFile, options.helmTLSCertificateFile, options.tillerTLSSkipVerify, options.installationTimeout)
 	if err != nil {
 		return nil, err
 	}

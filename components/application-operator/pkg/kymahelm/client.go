@@ -20,11 +20,11 @@ type helmClient struct {
 	installationTimeout int64
 }
 
-func NewClient(host, tlsKeyFile, tlsCertFile string, installationTimeout int64) (HelmClient, error) {
+func NewClient(host, tlsKeyFile, tlsCertFile string, skipVerify bool, installationTimeout int64) (HelmClient, error) {
 	tlsOpts := tlsutil.Options{
 		KeyFile:            tlsKeyFile,
 		CertFile:           tlsCertFile,
-		InsecureSkipVerify: true,
+		InsecureSkipVerify: skipVerify,
 	}
 
 	tlsCfg, err := tlsutil.ClientConfig(tlsOpts)
