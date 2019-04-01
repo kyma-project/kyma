@@ -35,7 +35,8 @@ rules:
   resources:
     - "selfsubjectrulesreviews"
     - "selfsubjectaccessreviews"
-  verbs: ["create"]
+  verbs:
+    - "create"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -53,7 +54,8 @@ rules:
     - "authorization.k8s.io"
   resources:
     - "subjectaccessreviews"
-  verbs: ["create"]
+  verbs:
+    - "create"
 
 ---
 #CRD management
@@ -68,9 +70,19 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
-- apiGroups: ["apiextensions.k8s.io"]
-  resources: ["customresourcedefinitions"]
-  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+- apiGroups:
+    - "apiextensions.k8s.io"
+  resources:
+    - "customresourcedefinitions"
+  verbs:
+    - "create"
+    - "delete"
+    - "deletecollection"
+    - "get"
+    - "list"
+    - "patch"
+    - "update"
+    - "watch"
 
 ---
 #View access to all non resource urls
@@ -85,8 +97,11 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
-- nonResourceURLs: ["*"]
-  verbs: ["get", "list"]
+- nonResourceURLs:
+    - "*"
+  verbs:
+    - "get"
+    - "list"
 
 ---
 #Full access to all non resource urls
@@ -101,8 +116,10 @@ metadata:
   annotations:
     "helm.sh/hook-weight": "0"
 rules:
-- nonResourceURLs: ["*"]
-  verbs: ["*"]
+- nonResourceURLs:
+    - "*"
+  verbs:
+    - "*"
 
 ---
 
@@ -138,8 +155,11 @@ rules:
     - "ui.kyma-project.io"
     - "kyma.cx"
     - "ui.kyma.cx"
-  resources: ["*"]
-  verbs: ["get", "list"]
+  resources:
+    - "*"
+  verbs:
+    - "get"
+    - "list"
 
 ---
 #View access to Istio resources
@@ -158,8 +178,11 @@ rules:
     - "authentication.istio.io"
     - "config.istio.io"
     - "networking.istio.io"
-  resources: ["*"]
-  verbs: ["get", "list"]
+  resources:
+    - "*"
+  verbs:
+    - "get"
+    - "list"
 
 ---
 #View access to K8s resources
@@ -179,8 +202,11 @@ rules:
     - "servicecatalog.k8s.io"
     - "settings.k8s.io"
     - "metrics.k8s.io"
-  resources: ["*"]
-  verbs: ["get", "list"]
+  resources:
+    - "*"
+  verbs:
+    - "get"
+    - "list"
 
 ---
 #View access to kubeless resources
@@ -197,8 +223,11 @@ metadata:
 rules:
 - apiGroups:
     - "kubeless.io"
-  resources: ["*"]
-  verbs: ["get", "list"]
+  resources:
+    - "*"
+  verbs:
+    - "get"
+    - "list"
 
 ---
 #View access to core resources
@@ -217,8 +246,11 @@ rules:
     - ""
     - "apps"
     - "extensions"
-  resources: ["*"]
-  verbs: ["get", "list"]
+  resources:
+    - "*"
+  verbs:
+    - "get"
+    - "list"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -314,8 +346,10 @@ rules:
     - "ui.kyma-project.io"
     - "kyma.cx"
     - "ui.kyma.cx"
-  resources: ["*"]
-  verbs: ["*"]
+  resources:
+    - "*"
+  verbs:
+    - "*"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -333,8 +367,10 @@ rules:
     - "authentication.istio.io"
     - "config.istio.io"
     - "networking.istio.io"
-  resources: ["*"]
-  verbs: ["*"]
+  resources:
+    - "*"
+  verbs:
+    - "*"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -353,8 +389,10 @@ rules:
     - "servicecatalog.k8s.io"
     - "settings.k8s.io"
     - "metrics.k8s.io"
-  resources: ["*"]
-  verbs: ["*"]
+  resources:
+    - "*"
+  verbs:
+    - "*"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -370,8 +408,10 @@ metadata:
 rules:
 - apiGroups:
     - "kubeless.io"
-  resources: ["*"]
-  verbs: ["*"]
+  resources:
+    - "*"
+  verbs:
+    - "*"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -391,8 +431,10 @@ rules:
     - "extensions"
     - "batch"
     - "autoscaling"
-  resources: ["*"]
-  verbs: ["*"]
+  resources:
+    - "*"
+  verbs:
+    - "*"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -486,8 +528,17 @@ rules:
     - "ui.kyma-project.io"
     - "kyma.cx"
     - "ui.kyma.cx"
-  resources: ["*"]
-  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+  resources:
+    - "*"
+  verbs:
+    - "create"
+    - "delete"
+    - "deletecollection"
+    - "get"
+    - "list"
+    - "patch"
+    - "update"
+    - "watch"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -505,8 +556,17 @@ rules:
     - "authentication.istio.io"
     - "config.istio.io"
     - "networking.istio.io"
-  resources: ["*"]
-  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+  resources:
+    - "*"
+  verbs:
+    - "create"
+    - "delete"
+    - "deletecollection"
+    - "get"
+    - "list"
+    - "patch"
+    - "update"
+    - "watch"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -522,8 +582,17 @@ metadata:
 rules:
 - apiGroups:
     - "kubeless.io"
-  resources: ["*"]
-  verbs: ["create", "delete", "deletecollection", "get", "list", "patch", "update", "watch"]
+  resources:
+    - "*"
+  verbs:
+    - "create"
+    - "delete"
+    - "deletecollection"
+    - "get"
+    - "list"
+    - "patch"
+    - "update"
+    - "watch"
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -587,20 +656,31 @@ rules:
     - authentication.kyma-project.io
     - rbac.authorization.k8s.io
     - gateway.kyma-project.io
-  resources: ["*"]
-  verbs: ["list"]
-- apiGroups: [""]
+  resources:
+    - "*"
+  verbs:
+    - "list"
+- apiGroups:
+    - ""
   resources:
     - namespaces
-  verbs: ["list"]
-- apiGroups: ["apiextensions.k8s.io"]
-  resources: ["customresourcedefinitions"]
-  verbs: ["list"]
-- apiGroups: ["authorization.k8s.io"]
+  verbs:
+    - "list"
+- apiGroups:
+    - "apiextensions.k8s.io"
+  resources:
+    - "customresourcedefinitions"
+  verbs:
+    - "list"
+- apiGroups:
+    - "authorization.k8s.io"
   resources:
     - selfsubjectrulesreviews
     - selfsubjectaccessreviews
     - subjectaccessreviews
-  verbs: ["create"]
-- nonResourceURLs: ["*"] #give access to all non resource urls
-  verbs: ["list"]
+  verbs:
+    - "create"
+- nonResourceURLs:
+    - "*" #give access to all non resource urls
+  verbs:
+    - "list"
