@@ -15,7 +15,7 @@ Error: transport is closing
 
 ## Add certificates to Helm Home
 
-To get the client certificate and key and the cluster CA and add them to [`HELM_HOME`](https://helm.sh/docs/glossary/#helm-home-helm-home), run these commands: 
+To get the client certificate and key and the cluster CA and add them to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home), run these commands: 
   ```bash
   kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 --decode > "$(helm home)/ca.pem"
   kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
