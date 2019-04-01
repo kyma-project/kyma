@@ -104,8 +104,6 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock := &mocks.ResourceInterface{}
 		repository := NewDocsTopicRepository(resourceInterfaceMock)
 
-		docsTopicEntry := createTestDocsTopicEntry()
-
 		dt := createK8sDocsTopic()
 		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
 		require.NoError(t, err)
@@ -116,10 +114,11 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
-		err = repository.Upsert(docsTopicEntry)
+		err = repository.Upsert(createTestDocsTopicEntry())
 
 		// then
 		require.Error(t, err)
+		resourceInterfaceMock.AssertNumberOfCalls(t, "Get", 1)
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Create", 0)
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Update", 1)
 	})

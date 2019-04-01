@@ -170,7 +170,6 @@ func (s service) processSpec(content []byte, filename, fileKey string, docsTopic
 }
 
 func (s service) getApiSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) {
-
 	url, found := entry.Urls[docstopic.KeyOpenApiSpec]
 	if found {
 		return s.downloadClient.Fetch(url)
@@ -190,7 +189,6 @@ func (s service) getApiSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) 
 }
 
 func (s service) getSpec(entry docstopic.Entry, key string) ([]byte, apperrors.AppError) {
-
 	url, found := entry.Urls[key]
 	if found {
 		return s.downloadClient.Fetch(url)
