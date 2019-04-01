@@ -1,0 +1,9 @@
+apiVersion: "networking.istio.io/v1alpha3"
+kind: "DestinationRule"
+metadata:
+  name: "helm-broker-etcd-stateful-client"
+spec:
+  host: helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
