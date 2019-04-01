@@ -6,9 +6,9 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 
 	"github.com/stretchr/testify/assert"

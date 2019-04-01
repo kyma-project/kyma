@@ -305,11 +305,11 @@ type ComplexityRoot struct {
 
 	Mutation struct {
 		CreateResource            func(childComplexity int, namespace string, resource JSON) int
-		CreateServiceInstance     func(childComplexity int, params ServiceInstanceCreateInput) int
+		CreateServiceInstance     func(childComplexity int, namespace string, params ServiceInstanceCreateInput) int
 		DeleteServiceInstance     func(childComplexity int, name string, namespace string) int
 		CreateServiceBinding      func(childComplexity int, serviceBindingName *string, serviceInstanceName string, namespace string, parameters *JSON) int
 		DeleteServiceBinding      func(childComplexity int, serviceBindingName string, namespace string) int
-		CreateServiceBindingUsage func(childComplexity int, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
+		CreateServiceBindingUsage func(childComplexity int, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) int
 		DeleteServiceBindingUsage func(childComplexity int, serviceBindingUsageName string, namespace string) int
 		CreateApplication         func(childComplexity int, name string, description *string, labels *Labels) int
 		UpdateApplication         func(childComplexity int, name string, description *string, labels *Labels) int
@@ -375,10 +375,10 @@ type ComplexityRoot struct {
 		Deployments           func(childComplexity int, namespace string, excludeFunctions *bool) int
 		Pod                   func(childComplexity int, name string, namespace string) int
 		Pods                  func(childComplexity int, namespace string, first *int, offset *int) int
-		ConfigMap             func(childComplexity int, name string, namespace string) int
-		ConfigMaps            func(childComplexity int, namespace string, first *int, offset *int) int
 		Service               func(childComplexity int, name string, namespace string) int
 		Services              func(childComplexity int, namespace string, first *int, offset *int) int
+		ConfigMap             func(childComplexity int, name string, namespace string) int
+		ConfigMaps            func(childComplexity int, namespace string, first *int, offset *int) int
 		ReplicaSet            func(childComplexity int, name string, namespace string) int
 		ReplicaSets           func(childComplexity int, namespace string, first *int, offset *int) int
 		ResourceQuotas        func(childComplexity int, namespace string) int
@@ -684,11 +684,11 @@ type EventActivationResolver interface {
 }
 type MutationResolver interface {
 	CreateResource(ctx context.Context, namespace string, resource JSON) (*JSON, error)
-	CreateServiceInstance(ctx context.Context, params ServiceInstanceCreateInput) (*ServiceInstance, error)
+	CreateServiceInstance(ctx context.Context, namespace string, params ServiceInstanceCreateInput) (*ServiceInstance, error)
 	DeleteServiceInstance(ctx context.Context, name string, namespace string) (*ServiceInstance, error)
 	CreateServiceBinding(ctx context.Context, serviceBindingName *string, serviceInstanceName string, namespace string, parameters *JSON) (*CreateServiceBindingOutput, error)
 	DeleteServiceBinding(ctx context.Context, serviceBindingName string, namespace string) (*DeleteServiceBindingOutput, error)
-	CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *CreateServiceBindingUsageInput) (*ServiceBindingUsage, error)
+	CreateServiceBindingUsage(ctx context.Context, namespace string, createServiceBindingUsageInput *CreateServiceBindingUsageInput) (*ServiceBindingUsage, error)
 	DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, namespace string) (*DeleteServiceBindingUsageOutput, error)
 	CreateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	UpdateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
@@ -734,10 +734,10 @@ type QueryResolver interface {
 	Deployments(ctx context.Context, namespace string, excludeFunctions *bool) ([]Deployment, error)
 	Pod(ctx context.Context, name string, namespace string) (*Pod, error)
 	Pods(ctx context.Context, namespace string, first *int, offset *int) ([]Pod, error)
-	ConfigMap(ctx context.Context, name string, namespace string) (*ConfigMap, error)
-	ConfigMaps(ctx context.Context, namespace string, first *int, offset *int) ([]ConfigMap, error)
 	Service(ctx context.Context, name string, namespace string) (*Service, error)
 	Services(ctx context.Context, namespace string, first *int, offset *int) ([]Service, error)
+	ConfigMap(ctx context.Context, name string, namespace string) (*ConfigMap, error)
+	ConfigMaps(ctx context.Context, namespace string, first *int, offset *int) ([]ConfigMap, error)
 	ReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
 	ReplicaSets(ctx context.Context, namespace string, first *int, offset *int) ([]ReplicaSet, error)
 	ResourceQuotas(ctx context.Context, namespace string) ([]ResourceQuota, error)
@@ -857,15 +857,24 @@ func field_Mutation_createResource_args(rawArgs map[string]interface{}) (map[str
 
 func field_Mutation_createServiceInstance_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 ServiceInstanceCreateInput
-	if tmp, ok := rawArgs["params"]; ok {
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
-		arg0, err = UnmarshalServiceInstanceCreateInput(tmp)
+		arg0, err = graphql.UnmarshalString(tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["params"] = arg0
+	args["namespace"] = arg0
+	var arg1 ServiceInstanceCreateInput
+	if tmp, ok := rawArgs["params"]; ok {
+		var err error
+		arg1, err = UnmarshalServiceInstanceCreateInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["params"] = arg1
 	return args, nil
 
 }
@@ -972,20 +981,29 @@ func field_Mutation_deleteServiceBinding_args(rawArgs map[string]interface{}) (m
 
 func field_Mutation_createServiceBindingUsage_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
-	var arg0 *CreateServiceBindingUsageInput
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *CreateServiceBindingUsageInput
 	if tmp, ok := rawArgs["createServiceBindingUsageInput"]; ok {
 		var err error
 		var ptr1 CreateServiceBindingUsageInput
 		if tmp != nil {
 			ptr1, err = UnmarshalCreateServiceBindingUsageInput(tmp)
-			arg0 = &ptr1
+			arg1 = &ptr1
 		}
 
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["createServiceBindingUsageInput"] = arg0
+	args["createServiceBindingUsageInput"] = arg1
 	return args, nil
 
 }
@@ -2143,7 +2161,7 @@ func field_Query_pods_args(rawArgs map[string]interface{}) (map[string]interface
 
 }
 
-func field_Query_configMap_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_service_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
@@ -2167,7 +2185,7 @@ func field_Query_configMap_args(rawArgs map[string]interface{}) (map[string]inte
 
 }
 
-func field_Query_configMaps_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_services_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
@@ -2210,7 +2228,7 @@ func field_Query_configMaps_args(rawArgs map[string]interface{}) (map[string]int
 
 }
 
-func field_Query_service_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_configMap_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
@@ -2234,7 +2252,7 @@ func field_Query_service_args(rawArgs map[string]interface{}) (map[string]interf
 
 }
 
-func field_Query_services_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_configMaps_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
@@ -3818,7 +3836,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateServiceInstance(childComplexity, args["params"].(ServiceInstanceCreateInput)), true
+		return e.complexity.Mutation.CreateServiceInstance(childComplexity, args["namespace"].(string), args["params"].(ServiceInstanceCreateInput)), true
 
 	case "Mutation.deleteServiceInstance":
 		if e.complexity.Mutation.DeleteServiceInstance == nil {
@@ -3866,7 +3884,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateServiceBindingUsage(childComplexity, args["createServiceBindingUsageInput"].(*CreateServiceBindingUsageInput)), true
+		return e.complexity.Mutation.CreateServiceBindingUsage(childComplexity, args["namespace"].(string), args["createServiceBindingUsageInput"].(*CreateServiceBindingUsageInput)), true
 
 	case "Mutation.deleteServiceBindingUsage":
 		if e.complexity.Mutation.DeleteServiceBindingUsage == nil {
@@ -4439,30 +4457,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Pods(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
-	case "Query.configMap":
-		if e.complexity.Query.ConfigMap == nil {
-			break
-		}
-
-		args, err := field_Query_configMap_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.ConfigMap(childComplexity, args["name"].(string), args["namespace"].(string)), true
-
-	case "Query.configMaps":
-		if e.complexity.Query.ConfigMaps == nil {
-			break
-		}
-
-		args, err := field_Query_configMaps_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.ConfigMaps(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
-
 	case "Query.service":
 		if e.complexity.Query.Service == nil {
 			break
@@ -4486,6 +4480,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Services(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
+
+	case "Query.configMap":
+		if e.complexity.Query.ConfigMap == nil {
+			break
+		}
+
+		args, err := field_Query_configMap_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ConfigMap(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.configMaps":
+		if e.complexity.Query.ConfigMaps == nil {
+			break
+		}
+
+		args, err := field_Query_configMaps_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.ConfigMaps(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "Query.replicaSet":
 		if e.complexity.Query.ReplicaSet == nil {
@@ -11834,7 +11852,7 @@ func (ec *executionContext) _Mutation_createServiceInstance(ctx context.Context,
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateServiceInstance(rctx, args["params"].(ServiceInstanceCreateInput))
+		return ec.resolvers.Mutation().CreateServiceInstance(rctx, args["namespace"].(string), args["params"].(ServiceInstanceCreateInput))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -11974,7 +11992,7 @@ func (ec *executionContext) _Mutation_createServiceBindingUsage(ctx context.Cont
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateServiceBindingUsage(rctx, args["createServiceBindingUsageInput"].(*CreateServiceBindingUsageInput))
+		return ec.resolvers.Mutation().CreateServiceBindingUsage(rctx, args["namespace"].(string), args["createServiceBindingUsageInput"].(*CreateServiceBindingUsageInput))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -13340,21 +13358,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
-		case "configMap":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_configMap(ctx, field)
-				wg.Done()
-			}(i, field)
-		case "configMaps":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_configMaps(ctx, field)
-				if out.Values[i] == graphql.Null {
-					invalid = true
-				}
-				wg.Done()
-			}(i, field)
 		case "service":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -13365,6 +13368,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_services(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "configMap":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_configMap(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "configMaps":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_configMaps(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -14638,107 +14656,6 @@ func (ec *executionContext) _Query_pods(ctx context.Context, field graphql.Colle
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_configMap(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_configMap_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ConfigMap(rctx, args["name"].(string), args["namespace"].(string))
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*ConfigMap)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-
-	return ec._ConfigMap(ctx, field.Selections, res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Query_configMaps(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_configMaps_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ConfigMaps(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]ConfigMap)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._ConfigMap(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
-}
-
-// nolint: vetshadow
 func (ec *executionContext) _Query_service(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -14826,6 +14743,107 @@ func (ec *executionContext) _Query_services(ctx context.Context, field graphql.C
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._Service(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_configMap(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_configMap_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ConfigMap(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ConfigMap)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ConfigMap(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_configMaps(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_configMaps_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().ConfigMaps(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ConfigMap)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ConfigMap(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -23485,12 +23503,6 @@ func UnmarshalCreateServiceBindingUsageInput(v interface{}) (CreateServiceBindin
 			if err != nil {
 				return it, err
 			}
-		case "namespace":
-			var err error
-			it.Namespace, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
 		case "serviceBindingRef":
 			var err error
 			it.ServiceBindingRef, err = UnmarshalServiceBindingRefInput(v)
@@ -23735,12 +23747,6 @@ func UnmarshalServiceInstanceCreateInput(v interface{}) (ServiceInstanceCreateIn
 			if err != nil {
 				return it, err
 			}
-		case "namespace":
-			var err error
-			it.Namespace, err = graphql.UnmarshalString(v)
-			if err != nil {
-				return it, err
-			}
 		case "classRef":
 			var err error
 			it.ClassRef, err = UnmarshalServiceInstanceCreateInputResourceRef(v)
@@ -23921,7 +23927,7 @@ type ServiceInstance {
     servicePlan: ServicePlan
     clusterServicePlan: ClusterServicePlan
     bindable: Boolean!
-    serviceBindings: ServiceBindings @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
+    serviceBindings: ServiceBindings
 
     # Depends on servicecatalogaddons domain
     serviceBindingUsages: [ServiceBindingUsage!]
@@ -23970,7 +23976,6 @@ enum SubscriptionEventType {
 
 input ServiceInstanceCreateInput {
     name: String!
-    namespace: String!
     classRef: ServiceInstanceCreateInputResourceRef!
     planRef: ServiceInstanceCreateInputResourceRef!
     labels: [String!]!
@@ -23997,8 +24002,8 @@ type ServiceClass {
     tags: [String!]!
     labels: Labels!
     plans: [ServicePlan!]!
-    activated: Boolean! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
-    instances: [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "Namespace", isChildResolver: true})
+    activated: Boolean!
+    instances: [ServiceInstance!]!
     apiSpec: JSON @deprecated(reason: "No longer supported")
     openApiSpec: JSON
     odataSpec: String
@@ -24020,8 +24025,8 @@ type ClusterServiceClass {
     tags: [String!]!
     labels: Labels!
     plans: [ClusterServicePlan!]!
-    activated(namespace: String): Boolean! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", isChildResolver: true})
-    instances(namespace: String): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", isChildResolver: true})
+    activated(namespace: String): Boolean!
+    instances(namespace: String): [ServiceInstance!]!
     apiSpec: JSON @deprecated(reason: "No longer supported")
     openApiSpec: JSON
     odataSpec: String
@@ -24205,7 +24210,6 @@ type ResourceType {
 
 input CreateServiceBindingUsageInput {
     name: String
-    namespace: String!
     serviceBindingRef: ServiceBindingRefInput!
     usedBy: LocalObjectReferenceInput!
     parameters: ServiceBindingUsageParametersInput
@@ -24547,56 +24551,56 @@ type Query {
     serviceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     serviceInstances(namespace: String!, first: Int, offset: Int, status: InstanceStatusType): [ServiceInstance!]! @HasAccess(attributes: {resource: "serviceinstances", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
-    clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]!
-    clusterServiceClass(name: String!): ClusterServiceClass
-    serviceClasses(namespace: String!, first: Int, offset: Int): [ServiceClass!]!
-    serviceClass(namespace: String!, name: String!): ServiceClass
+    clusterServiceClasses(first: Int, offset: Int): [ClusterServiceClass!]! @HasAccess(attributes: {resource: "clusterserviceclasses", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1"})
+    clusterServiceClass(name: String!): ClusterServiceClass @HasAccess(attributes: {resource: "clusterserviceclasses", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", nameArg: "name"})
+    serviceClasses(namespace: String!, first: Int, offset: Int): [ServiceClass!]! @HasAccess(attributes: {resource: "serviceclasses", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+    serviceClass(namespace: String!, name: String!): ServiceClass @HasAccess(attributes: {resource: "serviceclasses", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
 
-    clusterServiceBrokers(first: Int, offset: Int): [ClusterServiceBroker!]!
-    clusterServiceBroker(name: String!): ClusterServiceBroker
-    serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
-    serviceBroker(name: String!, namespace: String!): ServiceBroker
+    clusterServiceBrokers(first: Int, offset: Int): [ClusterServiceBroker!]! @HasAccess(attributes: {resource: "clusterservicebrokers", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1"})
+    clusterServiceBroker(name: String!): ClusterServiceBroker @HasAccess(attributes: {resource: "clusterservicebrokers", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", nameArg: "name"})
+    serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]! @HasAccess(attributes: {resource: "servicebrokers", verb: "list", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+    serviceBroker(name: String!, namespace: String!): ServiceBroker @HasAccess(attributes: {resource: "servicebrokers", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
 
-    serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
+    serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "get", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "name"})
     serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
-    usageKinds(first: Int, offset: Int): [UsageKind!]!
+    usageKinds(first: Int, offset: Int): [UsageKind!]! @HasAccess(attributes: {resource: "usagekinds", verb: "list", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1"})
 
     # The query returns all instance of the resources which could be bound (proper UsageKind exists).
-    bindableResources(namespace: String!): [BindableResourcesOutputItem!]!
+    bindableResources(namespace: String!): [BindableResourcesOutputItem!]! @HasAccess(attributes: {resource: "usagekinds", verb: "list", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
-    apis(namespace: String!, serviceName: String, hostname: String): [API!]!
+    apis(namespace: String!, serviceName: String, hostname: String): [API!]! @HasAccess(attributes: {resource: "apis", verb: "list", apiGroup: "gateway.kyma-project.io", apiVersion: "v1alpha2", namespaceArg: "namespace"})
 
-    application(name: String!): Application
-    applications(namespace: String, first: Int, offset: Int): [Application!]!
-    connectorService(application: String!): ConnectorService!
+    application(name: String!): Application @HasAccess(attributes: {resource: "applications", verb: "get", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    applications(namespace: String, first: Int, offset: Int): [Application!]! @HasAccess(attributes: {resource: "applicationmappings", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"}) @HasAccess(attributes: {resource: "applications", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
+    connectorService(application: String!): ConnectorService! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
 
     # Depends on 'application'
-    namespaces(application: String): [Namespace!]!
+    namespaces(application: String): [Namespace!]! @HasAccess(attributes: {resource: "namespaces", verb: "list", apiGroup: "", apiVersion: "v1"})
 
-    deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]!
-    pod(name: String!, namespace: String!): Pod
-    pods(namespace: String!, first: Int, offset: Int): [Pod!]!
+    deployments(namespace: String!, excludeFunctions: Boolean): [Deployment!]! @HasAccess(attributes: {resource: "deployments", verb: "list", apiGroup: "apps", apiVersion: "v1beta2", namespaceArg: "namespace"})
+    pod(name: String!, namespace: String!): Pod @HasAccess(attributes: {resource: "pods", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
+    pods(namespace: String!, first: Int, offset: Int): [Pod!]! @HasAccess(attributes: {resource: "pods", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
+    service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1"})
+    services(namespace: String!, first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1"})
     configMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "get", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     configMaps(namespace: String!, first: Int, offset: Int): [ConfigMap!]! @HasAccess(attributes: {resource: "configmaps", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1", isChildResolver: false})
-    services(namespace: String!, first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1", isChildResolver: false})
 
-    replicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "get", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+    replicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "get", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     replicaSets(namespace: String!, first: Int, offset: Int): [ReplicaSet!]! @HasAccess(attributes: {resource: "replicasets", verb: "list", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
 
-    resourceQuotas(namespace: String!): [ResourceQuota!]!
-    resourceQuotasStatus(namespace: String!): ResourceQuotasStatus!
+    resourceQuotas(namespace: String!): [ResourceQuota!]! @HasAccess(attributes: {resource: "resourcequotas", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    resourceQuotasStatus(namespace: String!): ResourceQuotasStatus! @HasAccess(attributes: {resource: "resourcequotas", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    functions(namespace: String!, first: Int, offset: Int): [Function!]!
+    functions(namespace: String!, first: Int, offset: Int): [Function!]! @HasAccess(attributes: {resource: "functions", verb: "list", apiGroup: "kubeless.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
-    content(contentType: String!, id: String!): JSON
-    topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!]
-    eventActivations(namespace: String!): [EventActivation!]!
+    content(contentType: String!, id: String!): JSON # TODO: TO BE REMOVED
+    topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!] # TODO: TO BE REMOVED
+    eventActivations(namespace: String!): [EventActivation!]! @HasAccess(attributes: {resource: "eventactivations", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
     limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    backendModules: [BackendModule!]!
+    backendModules: [BackendModule!]! @HasAccess(attributes: {resource: "backendmodules", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 
     secret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     secrets(namespace: String!, first: Int, offset: Int): [Secret!]!  @HasAccess(attributes: {resource: "secrets", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -24609,28 +24613,28 @@ type Query {
 
 type Mutation {
     createResource(namespace: String!, resource: JSON!): JSON @HasAccess(attributes: {verb: "create", resourceArg: "resource", namespaceArg: "namespace"})
-    createServiceInstance(params: ServiceInstanceCreateInput!): ServiceInstance
-    deleteServiceInstance(name: String!, namespace: String!): ServiceInstance
-    createServiceBinding(serviceBindingName: String, serviceInstanceName: String!, namespace: String!, parameters: JSON): CreateServiceBindingOutput
-    deleteServiceBinding(serviceBindingName: String!, namespace: String!): DeleteServiceBindingOutput
-    createServiceBindingUsage(createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage
-    deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput
+    createServiceInstance(namespace: String!, params: ServiceInstanceCreateInput!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "create", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+    deleteServiceInstance(name: String!, namespace: String!): ServiceInstance @HasAccess(attributes: {resource: "serviceinstances", verb: "delete", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
+    createServiceBinding(serviceBindingName: String, serviceInstanceName: String!, namespace: String!, parameters: JSON): CreateServiceBindingOutput @HasAccess(attributes: {resource: "servicebindings", verb: "create", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+    deleteServiceBinding(serviceBindingName: String!, namespace: String!): DeleteServiceBindingOutput @HasAccess(attributes: {resource: "servicebindings", verb: "delete", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "serviceBindingName"})
+    createServiceBindingUsage(namespace: String!, createServiceBindingUsageInput: CreateServiceBindingUsageInput): ServiceBindingUsage @HasAccess(attributes: {resource: "servicebindingusages", verb: "create", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    deleteServiceBindingUsage(serviceBindingUsageName: String!, namespace: String!): DeleteServiceBindingUsageOutput @HasAccess(attributes: {resource: "servicebindingusages", verb: "delete", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace", nameArg: "serviceBindingUsageName"})
 
-    createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
-    updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput!
-    deleteApplication(name: String!): DeleteApplicationOutput!
+    createApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
+    updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
+    deleteApplication(name: String!): DeleteApplicationOutput! @HasAccess(attributes: {resource: "applications", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
-    enableApplication(application: String!, namespace: String!): ApplicationMapping
-    disableApplication(application: String!, namespace: String!): ApplicationMapping
+    enableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    disableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "application", namespaceArg: "namespace"})
 
-    updatePod(name: String!, namespace: String!, pod: JSON!): Pod
-    deletePod(name: String!, namespace: String!): Pod
+    updatePod(name: String!, namespace: String!, pod: JSON!): Pod @HasAccess(attributes: {resource: "pods", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
+    deletePod(name: String!, namespace: String!): Pod @HasAccess(attributes: {resource: "pods", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     updateSecret(name: String!, namespace: String!, secret: JSON!): Secret @HasAccess(attributes: {resource: "secrets", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     deleteSecret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
-    updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
-    deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+    updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
+    deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
     updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
@@ -24638,22 +24642,22 @@ type Mutation {
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
-    updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
-    deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
+    deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 }
 
 # Subscriptions
 
 type Subscription {
-    serviceInstanceEvent(namespace: String!): ServiceInstanceEvent!
+    serviceInstanceEvent(namespace: String!): ServiceInstanceEvent! @HasAccess(attributes: {resource: "serviceinstances", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
     serviceBindingEvent(namespace: String!): ServiceBindingEvent! @HasAccess(attributes: {resource: "servicebindings", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
-    serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent!
-    serviceBrokerEvent(namespace: String!): ServiceBrokerEvent!
-    clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
-    applicationEvent: ApplicationEvent!,
-    podEvent(namespace: String!): PodEvent!
-    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}),
-    configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}),
+    serviceBindingUsageEvent(namespace: String!): ServiceBindingUsageEvent! @HasAccess(attributes: {resource: "servicebindingusages", verb: "watch", apiGroup: "servicecatalog.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    serviceBrokerEvent(namespace: String!): ServiceBrokerEvent! @HasAccess(attributes: {resource: "servicebrokers", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
+    clusterServiceBrokerEvent: ClusterServiceBrokerEvent! @HasAccess(attributes: {resource: "clusterservicebrokers", verb: "watch", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1"})
+    applicationEvent: ApplicationEvent! @HasAccess(attributes: {resource: "applications", verb: "watch", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1"})
+    podEvent(namespace: String!): PodEvent! @HasAccess(attributes: {resource: "pods", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
