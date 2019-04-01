@@ -8,8 +8,8 @@ import (
 const (
 	// event components max lengths
 	// todo make them all configurable
-	sourceIdMaxLength         = 15
-	eventTypeMaxLength        = 15
+	SourceIdMaxLength         = 28
+	EventTypeMaxLength        = 28
 	eventTypeVersionMaxLength = 2
 )
 
@@ -43,11 +43,11 @@ func ValidatePublish(r *PublishRequest) *Error {
 	}
 
 	//validate the event components lengths
-	if len(r.SourceID) > sourceIdMaxLength {
-		return errorInvalidSourceIDLength(sourceIdMaxLength)
+	if len(r.SourceID) > SourceIdMaxLength {
+		return errorInvalidSourceIDLength(SourceIdMaxLength)
 	}
-	if len(r.EventType) > eventTypeMaxLength {
-		return errorInvalidEventTypeLength(eventTypeMaxLength)
+	if len(r.EventType) > EventTypeMaxLength {
+		return errorInvalidEventTypeLength(EventTypeMaxLength)
 	}
 	if len(r.EventTypeVersion) > eventTypeVersionMaxLength {
 		return errorInvalidEventTypeVersionLength(eventTypeVersionMaxLength)

@@ -1,6 +1,7 @@
 package bundle
 
 import (
+	"net/url"
 	"strings"
 
 	"time"
@@ -43,6 +44,7 @@ type RepositoryController struct {
 	cfgMapInformer cache.SharedIndexInformer
 	queue          workqueue.RateLimitingInterface
 	maxRetires     int
+	developMode    bool
 
 	// testHookAsyncOpDone used only in unit tests
 	testHookAsyncOpDone func()
@@ -51,13 +53,14 @@ type RepositoryController struct {
 }
 
 // NewRepositoryController returns new RepositoryController instance.
-func NewRepositoryController(bundleSyncer bundleSyncer, bundleloader bundleLoader, brokerSyncer brokerSyncer, brokerName string, cfgMapInformer cache.SharedIndexInformer, log logrus.FieldLogger) *RepositoryController {
+func NewRepositoryController(bundleSyncer bundleSyncer, bundleloader bundleLoader, brokerSyncer brokerSyncer, brokerName string, cfgMapInformer cache.SharedIndexInformer, log logrus.FieldLogger, devMode bool) *RepositoryController {
 	c := &RepositoryController{
 		bundleSyncer:   bundleSyncer,
 		bundleLoader:   bundleloader,
 		brokerSyncer:   brokerSyncer,
 		brokerName:     brokerName,
 		cfgMapInformer: cfgMapInformer,
+		developMode:    devMode,
 
 		queue:      workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "ConfigMap"),
 		maxRetires: defaultMaxRetries,
@@ -183,7 +186,11 @@ func (c *RepositoryController) syncBundlesRepos(name string, namespace string) e
 	}
 
 	c.bundleSyncer.CleanProviders()
-	repositories := c.urlsToRepositories(existingURLs)
+	repositories, err := c.urlsToRepositories(existingURLs)
+	if err != nil {
+		c.log.Warnf("Cannot create repositories for %s/%s: %s", namespace, name, err)
+		return nil
+	}
 	for _, repoCfg := range repositories {
 		repoProvider := NewProvider(NewHTTPRepository(repoCfg), c.bundleLoader, c.log.WithField("URLs", repoCfg.URL))
 		c.bundleSyncer.AddProvider(repoCfg.URL, repoProvider)
@@ -199,16 +206,56 @@ func (c *RepositoryController) syncBundlesRepos(name string, namespace string) e
 	return nil
 }
 
-func (c *RepositoryController) urlsToRepositories(urlsList []string) []RepositoryConfig {
+func (c *RepositoryController) urlsToRepositories(urlsList []string) ([]RepositoryConfig, error) {
 	var cfgs []RepositoryConfig
+	var repositoryUrls []string
+	urlCounter := 0
+
+	if c.developMode {
+		c.log.Info("Sysyem works on developer mode, all unsecured repository URL are allowed")
+	}
+
 	for _, urls := range urlsList {
-		for _, url := range strings.Split(urls, "\n") {
-			if len(url) > 0 {
-				cfgs = append(cfgs, RepositoryConfig{
-					URL: url,
-				})
+		for _, repositoryURL := range strings.Split(urls, "\n") {
+			if len(repositoryURL) < 1 {
+				continue
 			}
+			urlCounter++
+			if c.developMode {
+				repositoryUrls = append(repositoryUrls, repositoryURL)
+				continue
+			}
+			secure, err := protocolHasTLS(repositoryURL, c.developMode)
+			if err != nil {
+				c.log.Infof("Repository URL %q is incorrect: %s", repositoryURL, err)
+				continue
+			}
+			if !secure {
+				c.log.Infof("Repository URL %s is unsecured", repositoryURL)
+				continue
+			}
+			repositoryUrls = append(repositoryUrls, repositoryURL)
 		}
 	}
-	return cfgs
+
+	if urlCounter > 0 && len(repositoryUrls) == 0 {
+		return cfgs, errors.New("All Repository URLs are incorrect or unsecured")
+	}
+
+	for _, u := range repositoryUrls {
+		cfgs = append(cfgs, RepositoryConfig{
+			URL: u,
+		})
+	}
+
+	return cfgs, nil
+}
+
+func protocolHasTLS(repositoryURL string, developMode bool) (bool, error) {
+	uri, err := url.Parse(repositoryURL)
+	if err != nil {
+		return false, errors.Wrap(err, "while parsing bundle repository url")
+	}
+
+	return uri.Scheme == "https", nil
 }
