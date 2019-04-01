@@ -1,0 +1,128 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-authorization-self
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-self: "true"
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups:
+    - "authorization.k8s.io"
+  resources:
+    - "selfsubjectrulesreviews"
+    - "selfsubjectaccessreviews"
+  verbs:
+    - "create"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-authorization-subject
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups:
+    - "authorization.k8s.io"
+  resources:
+    - "subjectaccessreviews"
+  verbs:
+    - "create"
+
+---
+#CRD management
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-crd
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-crd: "true"
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups:
+    - "apiextensions.k8s.io"
+  resources:
+    - "customresourcedefinitions"
+  verbs:
+    - "create"
+    - "delete"
+    - "deletecollection"
+    - "get"
+    - "list"
+    - "patch"
+    - "update"
+    - "watch"
+
+---
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-crd-list
+  labels:
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-list: "true"
+rules:
+- apiGroups:
+    - "apiextensions.k8s.io"
+  resources:
+    - "customresourcedefinitions"
+  verbs:
+    - "list"
+
+---
+#View access to K8s resources
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-view-k8s
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-view-k8s: "true"
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups:
+    - "rbac.authorization.k8s.io"
+    - "servicecatalog.k8s.io"
+    - "settings.k8s.io"
+    - "metrics.k8s.io"
+  resources:
+    - "*"
+  verbs:
+    - "get"
+    - "list"
+
+---
+#Admin access to K8s resources
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-admin-k8s
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-k8s: "true"
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups:
+    - "rbac.authorization.k8s.io"
+    - "servicecatalog.k8s.io"
+    - "settings.k8s.io"
+    - "metrics.k8s.io"
+  resources:
+    - "*"
+  verbs:
+    - "*"
+
