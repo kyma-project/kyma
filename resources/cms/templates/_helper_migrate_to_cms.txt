@@ -9,6 +9,8 @@ echo "#############################
 # Use a check-sleep-check loop to wait for Minio service to be available
 connectToMinio() {
   SCHEME=http
+  MINIO_ENDPOINT=assetstore-minio
+  MINIO_PORT=9000
   ATTEMPTS=0 ; LIMIT=29 ; # Allow 30 attempts
   set -e ; # fail if we can't read the keys.
   ACCESS=$(cat /config/accesskey) ; SECRET=$(cat /config/secretkey) ;

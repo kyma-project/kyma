@@ -79,11 +79,6 @@ spec:
         image: minio/mc:RELEASE.2019-03-28T20-43-56Z
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh", "/config/migrate"]
-        env:
-          - name: MINIO_ENDPOINT
-            value: assetstore-minio
-          - name: MINIO_PORT
-            value: 9000
         volumeMounts:
           - name: migration-script
             mountPath: /config
