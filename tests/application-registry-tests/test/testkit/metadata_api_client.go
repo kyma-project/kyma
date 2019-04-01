@@ -13,7 +13,7 @@ import (
 
 const (
 	retryCount             = 3
-	requestTimeout         = 7 * time.Second
+	requestTimeout         = 15 * time.Second
 	retryDelay             = 1 * time.Second
 	modifyIdentifierFormat = "%s-%d"
 )
@@ -54,6 +54,12 @@ func (client *metadataServiceClient) CreateService(t *testing.T, serviceDetails 
 		t.Log(err)
 		return -1, nil, err
 	}
+
+	if postResponse == nil {
+		t.Logf("Nil response returned.")
+		return -1, nil, err
+	}
+
 	logResponse(t, postResponse)
 
 	postResponseData := PostServiceResponse{}
@@ -73,10 +79,16 @@ func (client *metadataServiceClient) UpdateService(t *testing.T, idToUpdate stri
 	}
 
 	putResponse, err := client.requestWithRetries(t, requestData, newServiceDetailsRetryRequest, statusNotServerError)
-	if err != nil {
+	if err != nil || putResponse == nil {
 		t.Log(err)
 		return -1, err
 	}
+
+	if putResponse == nil {
+		t.Logf("Nil response returned.")
+		return -1, err
+	}
+
 	logResponse(t, putResponse)
 
 	return putResponse.StatusCode, nil
@@ -94,6 +106,12 @@ func (client *metadataServiceClient) DeleteService(t *testing.T, idToDelete stri
 		t.Log(err)
 		return -1, err
 	}
+
+	if deleteResponse == nil {
+		t.Logf("Nil response returned.")
+		return -1, err
+	}
+
 	logResponse(t, deleteResponse)
 
 	return deleteResponse.StatusCode, nil
@@ -116,6 +134,12 @@ func (client *metadataServiceClient) getService(t *testing.T, serviceId string, 
 		t.Log(err)
 		return -1, nil, err
 	}
+
+	if getResponse == nil {
+		t.Logf("Nil response returned.")
+		return -1, nil, err
+	}
+
 	logResponse(t, getResponse)
 
 	serviceDetails := ServiceDetails{}
@@ -139,6 +163,12 @@ func (client *metadataServiceClient) GetAllServices(t *testing.T) (int, []Servic
 		t.Log(err)
 		return -1, nil, err
 	}
+
+	if getAllResponse == nil {
+		t.Logf("Nil response returned.")
+		return -1, nil, err
+	}
+
 	logResponse(t, getAllResponse)
 
 	var existingServices []Service
@@ -238,7 +268,8 @@ func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, 
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
-	dump, err := httputil.DumpResponse(resp, true)
+	dump, err := httputil.DumpResponse(resp, false)
+
 	if err != nil {
 		t.Logf("failed to dump response, %s", err)
 	} else {
