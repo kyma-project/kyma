@@ -233,8 +233,10 @@ spec:
       serviceAccountName: kyma-installer
       containers:
       - name: kyma-installer-container
-        image: eu.gcr.io/kyma-project/develop/installer:19102bda
+        image: eu.gcr.io/kyma-project/develop/installer:0fdc80dd
         imagePullPolicy: IfNotPresent
+        args:
+          - -tillerTLSInsecureSkipVerify=true
         volumeMounts:
           - mountPath: /etc/certs
             name: helm-certs

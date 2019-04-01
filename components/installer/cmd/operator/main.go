@@ -45,6 +45,7 @@ func main() {
 	kymaDir := flag.String("kymadir", "/kyma", "Directory where kyma packages will be extracted")
 	tlsKey := flag.String("tillerTLSKey", "/etc/certs/tls.key", "Path to TLS key file")
 	tlsCrt := flag.String("tillerTLSCrt", "/etc/certs/tls.crt", "Path to TLS cert file")
+	TLSInsecureSkipVerify := flag.Bool("tillerTLSInsecureSkipVerify", false, "Disable verification of Tiller TLS cert")
 
 	flag.Parse()
 
@@ -64,7 +65,7 @@ func main() {
 		log.Fatalf("Unable to create internal client. Error: %v", err)
 	}
 
-	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt)
+	helmClient, err := kymahelm.NewClient(*helmHost, *tlsKey, *tlsCrt, *TLSInsecureSkipVerify)
 	if err != nil {
 		log.Fatalf("Unable create helm client. Error: %v", err)
 	}

@@ -17,12 +17,12 @@ import (
 
 const (
 	clusterID               = "kyma-nats-streaming"
-	eventType               = "test-publish-push-success"
+	eventType               = "order-created"
 	eventTypeVersion        = "v1"
-	sourceIDV1              = "test.local.kyma.commerce.ec"
-	eventDataV1             = "test-event-1"
-	sourceIDV2              = "test.local.kyma.commerce.ec"
-	eventDataV2             = "test-event-2"
+	sourceIDV1              = "ec-default"
+	eventDataV1             = "v1"
+	sourceIDV2              = "ec-default"
+	eventDataV2             = "v2"
 	publishServerStatusPath = "/v1/status/ready"
 	headerKymaTopic         = "kyma-topic"
 )

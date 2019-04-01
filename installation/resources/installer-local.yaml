@@ -234,6 +234,8 @@ spec:
       containers:
       - name: kyma-installer-container
         image: eu.gcr.io/kyma-project/develop/kyma-installer:63f27f76
+        args:
+          - -tillerTLSInsecureSkipVerify=true
         imagePullPolicy: IfNotPresent
         volumeMounts:
           - mountPath: /etc/certs
