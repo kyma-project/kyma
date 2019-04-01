@@ -50,7 +50,7 @@ Read the main [Kyma project README.md](../../README.md). By default, the system 
 
 #### Docker registry
 
- If you have access to an external Docker registry, build your Docker image, push it to the registry and modify the [4-deployment.yaml](../../resources/core/charts/namespace-controller/templates/4-deployment.yaml) file by swapping the image version. Follow the [instructions](../../docs/kyma/docs/04-02-local-installation-from-release.md) to run Kyma as usual.
+ If you have access to an external Docker registry, build your Docker image, push it to the registry and modify the [4-deployment.yaml](../../resources/core/charts/namespace-controller/templates/4-deployment.yaml) file by swapping the image version. Follow the [instructions](../../docs/kyma/docs/04-02-local-installation.md) to run Kyma as usual.
 
 #### Minikube built in Docker daemon
 
@@ -61,7 +61,7 @@ In case you have no access to a Docker registry, use Minikube’s built in Docke
 image: namespace-controller:my_tag
 ```
 
-2. [Start Kyma installation as usual](../../docs/kyma/docs/04-02-local-installation-from-release.md).
+2. [Start Kyma installation as usual](../../docs/kyma/docs/04-02-local-installation.md).
 
 3. Run the following command to set up the Docker environment variables so a Docker client can communicate with the Minikube Docker daemon:
 ```
