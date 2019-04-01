@@ -103,7 +103,7 @@ func TestClientInstallSuccess(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fakeTiller.GotInstReleaseReq.Values, &chart.Config{Raw: string(b)})
 
-	// Clean-up
+	// clean-up
 	fakeTiller.TearDown(t)
 }
 
@@ -129,7 +129,7 @@ func TestClientDeleteSuccess(t *testing.T) {
 	assert.NotNil(t, fakeTiller.GotDelReleaseReq)
 	assert.Equal(t, fakeTiller.GotDelReleaseReq.Name, "r-name")
 
-	// Clean-up
+	// clean-up
 	fakeTiller.TearDown(t)
 }
 
