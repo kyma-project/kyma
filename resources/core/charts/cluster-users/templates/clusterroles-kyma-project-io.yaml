@@ -12,14 +12,8 @@ metadata:
     "helm.sh/hook-weight": "0"
 rules:
 - apiGroups:
-    - "applicationconnector.kyma-project.io"
-    - "authentication.kyma-project.io"
     - "eventing.kyma-project.io"
-    - "gateway.kyma-project.io"
-    - "servicecatalog.kyma-project.io"
-    - "ui.kyma-project.io"
-    - "kyma.cx"
-    - "ui.kyma.cx"
+{{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
   resources:
     - "*"
   verbs:
@@ -39,16 +33,10 @@ metadata:
     "helm.sh/hook-weight": "0"
 rules:
 - apiGroups:
-    - "applicationconnector.kyma-project.io"
     - "assetstore.kyma-project.io"
-    - "authentication.kyma-project.io"
     - "cms.kyma-project.io"
     - "eventing.kyma-project.io"
-    - "gateway.kyma-project.io"
-    - "servicecatalog.kyma-project.io"
-    - "ui.kyma-project.io"
-    - "kyma.cx"
-    - "ui.kyma.cx"
+{{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
   resources:
     - "*"
   verbs:
@@ -67,13 +55,7 @@ metadata:
     "helm.sh/hook-weight": "0"
 rules:
 - apiGroups:
-    - "applicationconnector.kyma-project.io"
-    - "authentication.kyma-project.io"
-    - "gateway.kyma-project.io"
-    - "servicecatalog.kyma-project.io"
-    - "ui.kyma-project.io"
-    - "kyma.cx"
-    - "ui.kyma.cx"
+{{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
   resources:
     - "*"
   verbs:

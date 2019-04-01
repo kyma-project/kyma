@@ -362,7 +362,7 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-essentials-base: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-list: "true"
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-crd-view: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-authorization-subject: "true"
   - matchLabels:

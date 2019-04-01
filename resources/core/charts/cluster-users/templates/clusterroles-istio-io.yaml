@@ -12,9 +12,7 @@ metadata:
     "helm.sh/hook-weight": "0"
 rules:
 - apiGroups:
-    - "authentication.istio.io"
-    - "config.istio.io"
-    - "networking.istio.io"
+{{ toYaml .Values.clusterRoles.apiGroups.istio | indent 4 }}
   resources:
     - "*"
   verbs:
@@ -34,9 +32,7 @@ metadata:
     "helm.sh/hook-weight": "0"
 rules:
 - apiGroups:
-    - "authentication.istio.io"
-    - "config.istio.io"
-    - "networking.istio.io"
+{{ toYaml .Values.clusterRoles.apiGroups.istio | indent 4 }}
   resources:
     - "*"
   verbs:
@@ -55,9 +51,7 @@ metadata:
     "helm.sh/hook-weight": "0"
 rules:
 - apiGroups:
-    - "authentication.istio.io"
-    - "config.istio.io"
-    - "networking.istio.io"
+{{ toYaml .Values.clusterRoles.apiGroups.istio | indent 4 }}
   resources:
     - "*"
   verbs:
