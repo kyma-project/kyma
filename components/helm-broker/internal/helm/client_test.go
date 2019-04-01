@@ -3,8 +3,8 @@ package helm_test
 import (
 	"context"
 	"encoding/pem"
-	"fmt"
 	"io/ioutil"
+	"log"
 	"net"
 	"os"
 	"testing"
@@ -39,21 +39,18 @@ func TestMain(m *testing.M) {
 func setupCerts(){
 	certOut, err := ioutil.TempFile("/tmp/", "certFile")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	keyOut, err := ioutil.TempFile("/tmp/", "keyFile")
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 
 	err = createDummyKeyPair(keyOut, certOut)
 	keyOut.Close()
 	certOut.Close()
 	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		log.Fatal(err)
 	}
 	keyFile = keyOut.Name()
 	certFile = certOut.Name()
