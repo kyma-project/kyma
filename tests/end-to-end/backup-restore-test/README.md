@@ -7,7 +7,14 @@ This project contains end-to-end backup and restore tests for the Kyma installat
 
 ## Prerequisites
 
-Install [Ark](../../../resources/ark/README.md#details) and [configure](../../../docs/backup/docs/03-01-backup-configuration.md) it for a specific storage provider.
+To set up the project, use these tools:
+
+* Version 1.11 or higher of [Go](https://golang.org/dl/)
+* Version 0.5 or higher of [Dep](https://github.com/golang/dep)
+* The latest version of [Docker](https://www.docker.com/)
+* [Ark](../../../resources/ark/README.md#details)
+
+>**NOTE:** Use [these](../../../docs/backup/docs/03-01-backup-configuration.md) guidelines to configure Ark for a specific storage provider.
 
 
 ## Usage
@@ -56,11 +63,11 @@ Run tests:
 ```bash
 env KUBECONFIG={KUBECONFIG} go test ./... -count=1 -timeout=0
 ```
-where {KUBECONFIG} is the path to the `kubeconfig` file.
+where `{KUBECONFIG}` is the path to the `kubeconfig` file.
 
 ### Run tests using a Helm chart
 
-Run the application using Helm:
+Run the tests using Helm:
 
 1. Prepare the data:
 
@@ -82,7 +89,7 @@ helm test backup-test
 env KUBECONFIG={KUBECONFIG} telepresence --run go test ./... -count=1 -timeout=0
 
 ```
-where {KUBECONFIG} is the path to the `kubeconfig` file.
+where `{KUBECONFIG}` is the path to the `kubeconfig` file.
 
 ### Verify the code
 
@@ -93,11 +100,11 @@ Use the `before-commit.sh` script or the `make build` command to test your chang
 The repository has the following structure:
 
 ```
-├── deploy                 # The Helm chart for deploying the backup test application with configuration
-├── backupe2e              # The package where backup tests are defined. Put your test here.
-├── utils                  # The directory which contains all secondary Go packages.
-├── restore_cluster_backup_test.go   # The entrypoint for backup test runner
-├── Gopkg.toml              # A dep manifest
-└── Gopkg.lock              # A dep lock which is generated automatically. Do not edit it.
+├── deploy                          # The Helm chart for deploying the backup test application with configuration
+├── backupe2e                       # The package where backup tests are defined. Put your test here.
+├── utils                           # The directory which contains all secondary Go packages.
+├── restore_cluster_backup_test.go  # The entrypoint for backup test runner
+├── Gopkg.toml                      # A dep manifest
+└── Gopkg.lock                      # A dep lock which is generated automatically. Do not edit it.
 
 ```
