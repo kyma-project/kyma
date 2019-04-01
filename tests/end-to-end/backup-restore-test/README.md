@@ -87,7 +87,6 @@ helm test backup-test
 2. Run tests:
 ```bash
 env KUBECONFIG={KUBECONFIG} telepresence --run go test ./... -count=1 -timeout=0
-
 ```
 where `{KUBECONFIG}` is the path to the `kubeconfig` file.
 
