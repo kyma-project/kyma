@@ -34,36 +34,34 @@ EOF
 
 startTime=$(date +%s)
 
-
-
-
 while true
 do
     currTime=$(date +%s)
-    statusSucceeded=$(kubectl get cts ${suiteName}  -ojsonpath="{.status.conditions[?(@.type=='Succeeded')]}" | grep "True")
-    statusFailed=$(kubectl get cts ${suiteName}  -ojsonpath="{.status.conditions[?(@.type=='Failed')]}" | grep "True")
-    statusError=$(kubectl get cts  ${suiteName} -ojsonpath="{.status.conditions[?(@.type=='Error')]}" | grep "True")
+    statusSucceeded=$(kubectl get cts ${suiteName}  -ojsonpath="{.status.conditions[?(@.type=='Succeeded')]}")
+    statusFailed=$(kubectl get cts ${suiteName}  -ojsonpath="{.status.conditions[?(@.type=='Failed')]}")
+    statusError=$(kubectl get cts  ${suiteName} -ojsonpath="{.status.conditions[?(@.type=='Error')]}" )
 
-    if [[ "${statusSucceeded}" == "true" ]]; then
+    if [[ "${statusSucceeded}" == *"True"* ]]; then
         echo "Test succeeded"
         exit 0
     fi
 
-    if [[ "${statusFailed}" == "true" ]]; then
-        echo "Test failed"
-        kubectl get cts testsuite-all -oyaml
+    if [[ "${statusFailed}" == *"True"* ]]; then
+        echo "Test failed. Details: "
+        kubectl get cts ${suiteName} -oyaml
         exit 1
     fi
 
-    if [[ "${statusError}" == "true" ]]; then
-        echo "Test errored"
-        kubectl get cts testsuite-all -oyaml
+    if [[ "${statusError}" == *"True"* ]]; then
+        echo "Test errored. Details"
+        kubectl get cts ${suiteName} -oyaml
         exit 1
     fi
     sec=$((currTime-startTime))
     min=$((sec/60))
     if (( min > 60 )); then
-        echo "Timeout occurred"
+        echo "Timeout occurred. Current state of the test suite:"
+        kubectl get cts ${suiteName} -oyaml
         exit 1
     fi
     echo "ClusterTestSuite not finished. Waiting..."
