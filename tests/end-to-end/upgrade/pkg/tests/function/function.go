@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 	"strings"
 
@@ -13,11 +12,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
+
+	restclient "k8s.io/client-go/rest"
 )
 
 type FunctionUpgradeTest struct {
@@ -26,12 +25,7 @@ type FunctionUpgradeTest struct {
 	coreClient         *kubernetes.Clientset
 }
 
-func NewFunctionUpgradeTest() (*FunctionUpgradeTest) {
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		return &FunctionUpgradeTest{}
-	}
+func NewFunctionUpgradeTest(config *restclient.Config) (*FunctionUpgradeTest) {
 
 	kubelessClient, err := kubeless.NewForConfig(config)
 	if err != nil {
@@ -58,8 +52,6 @@ func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 		return err
 	}
 
-	<-stop
-
 	return nil
 }
 
@@ -80,8 +72,6 @@ func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	if !strings.Contains(value, f.uuid) {
 		return fmt.Errorf("Could not get expected function output:\n %v\n output:\n %v", f.uuid, value)
 	}
-
-	<-stop
 
 	return nil
 }
@@ -149,14 +139,12 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 	for {
 		select {
 		case <-timeout:
-			//log.Println("timeout")
 			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
 				return err
 			}
 			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pods)
 		case <-tick:
-			//log.Println("tick")
 			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
 				return err
