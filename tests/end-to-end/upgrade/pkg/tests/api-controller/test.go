@@ -2,7 +2,6 @@ package apicontroller
 
 import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	"github.com/sirupsen/logrus"
 
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
