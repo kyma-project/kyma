@@ -244,10 +244,16 @@ func andPredicate(operand1 Predicate, operand2 Predicate) Predicate {
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
-	dump, err := httputil.DumpResponse(resp, true)
-	if err != nil {
-		t.Logf("failed to dump response, %s", err)
-	} else {
-		t.Logf("\n--------------------------------\n%s\n--------------------------------", dump)
+	if resp != nil {
+		dump, err := httputil.DumpResponse(resp, true)
+		if err != nil {
+			t.Logf("failed to dump response, %s", err)
+		} else {
+			t.Logf("\n--------------------------------\n%s\n--------------------------------", dump)
+		}
+	}
+
+	if resp == nil {
+		t.Logf("failed to dump response, response is nil")
 	}
 }
