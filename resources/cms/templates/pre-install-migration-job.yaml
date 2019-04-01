@@ -27,7 +27,7 @@ metadata:
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "1"
 rules:
-- apiGroups: ["assetstore.kyma-project.io", "cms.kyma-project.io", "applicationconnector.kyma-project.io"]
+- apiGroups: ["assetstore.kyma-project.io", "cms.kyma-project.io"]
   resources: [ "*" ]
   verbs: ["*"]
 - apiGroups: ["applicationconnector.kyma-project.io"]
