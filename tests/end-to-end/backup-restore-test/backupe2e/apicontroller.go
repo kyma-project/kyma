@@ -60,10 +60,10 @@ func NewApiControllerTestFromEnv() (ApiControllerTest, error) {
 
 	domainName := os.Getenv("DOMAIN")
 
-	return NewApiControllerTest(gatewayClient, coreClient, kubelessClient, domainName)
+	return NewApiControllerTest(gatewayClient, coreClient, kubelessClient, domainName), nil
 }
 
-func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) (ApiControllerTest, error) {
+func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) ApiControllerTest {
 	functionName := "apicontroller"
 	return ApiControllerTest{
 		kubelessInterface: kubelessInterface,
@@ -73,7 +73,7 @@ func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kube
 		domainName:        domainName,
 		hostName:          functionName + "." + domainName,
 		uuid:              uuid.New().String(),
-	}, nil
+	}
 }
 
 func (t ApiControllerTest) CreateResources(namespace string) {
