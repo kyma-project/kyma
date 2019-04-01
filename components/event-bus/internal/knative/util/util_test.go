@@ -52,14 +52,14 @@ func Test_getChannelName(t *testing.T) {
 			sourceID:         "ec..default--test..1",
 			eventType:        "order--created..test--1",
 			eventTypeVersion: "v1",
-			expected:         "ec-p-pdefault-d-dtest-p-p1--order-d-dcreated-p-ptest-d-d1--v1",
+			expected:         "ec-p-pdefault-d-dtest-p-p1--order-d-dcreated-p-ptest-d-d--v1", // truncation applied on the event-type
 		},
 		{
 			name:             "test-case-6",
 			sourceID:         "ec--default..test--1",
 			eventType:        "order..created--test..1",
 			eventTypeVersion: "v1",
-			expected:         "ec-d-ddefault-p-ptest-d-d1--order-p-pcreated-d-dtest-p-p1--v1",
+			expected:         "ec-d-ddefault-p-ptest-d-d1--order-p-pcreated-d-dtest-p-p--v1", // truncation applied on the event-type
 		},
 		{
 			name:             "test-case-7",
