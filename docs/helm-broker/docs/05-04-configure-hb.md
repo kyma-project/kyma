@@ -42,8 +42,6 @@ By default, the Helm Broker fetches bundles listed in the `index.yaml` file from
 
   The default ConfigMap provided by the Helm Broker is the [`helm-repos-urls`](https://github.com/kyma-project/kyma/blob/master/resources/helm-broker/templates/cfg-repos-url.yaml) ConfigMap. Do not edit this ConfigMap. Create a separate one instead. Depending on your needs and preferences, you can create one or more ConfigMaps with URLs to different remote HTTPS servers.
 
-  >**CAUTION:** If you use your bundle in two different repositories simultaneously, the Helm Broker detects a conflict and does not display this bundle at all. You can see the details of the conflict in the Helm Broker application logs. If you need a given bundle in two or more repositories, do not use them at the same time.
-
 4. The Helm Broker triggers the Service Catalog synchronization automatically. New Service Classes appear after a few seconds.
 
 ## Configuration rules
