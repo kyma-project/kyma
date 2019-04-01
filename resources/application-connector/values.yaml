@@ -53,8 +53,8 @@ global:
     dir: develop/
     version: ec4b880b
   application_registry_tests:
-    dir: develop/
-    version: 0b828d1a
+    dir: pr/
+    version: PR-3463
   application_broker:
     dir: develop/
     version: e1af648f
