@@ -72,15 +72,15 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	}
 
 	backupTests := []BackupTest{
-        myPrometheusTest,
-        myFunctionTest,
-        myDeploymentTest,
-        myStatefulSetTest,
-        myNamespaceControllerTest,
-        apiControllerTest,
-        myGrafanaTest,
-        myMicrofrontendTest,
-    }
+		myPrometheusTest,
+		myFunctionTest,
+		myDeploymentTest,
+		myStatefulSetTest,
+		myNamespaceControllerTest,
+		apiControllerTest,
+		myGrafanaTest,
+		myMicrofrontendTest,
+	}
 
 	e2eTests := make([]e2eTest, len(backupTests))
 
@@ -163,5 +163,4 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 			})
 		})
 	})
-
 }
