@@ -15,7 +15,7 @@ import (
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	apiv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
-	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	. "github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1 "k8s.io/api/extensions/v1beta1"
@@ -25,80 +25,109 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-type apiControllerTest struct {
-	functionName   string
-	uuid           string
-	domainName     string
-	hostName       string
-	kubelessClient *kubeless.Clientset
-	coreClient     *kubernetes.Clientset
-	apiClient      *kyma.Clientset
+type ApiControllerTest struct {
+	functionName      string
+	uuid              string
+	domainName        string
+	hostName          string
+	kubelessInterface kubeless.Interface
+	coreInterface     kubernetes.Interface
+	apiInterface      gateway.Interface
 }
 
-func NewApiControllerTest() (apiControllerTest, error) {
+func NewApiControllerTestFromEnv() (ApiControllerTest, error) {
 
 	kubeconfig := os.Getenv("KUBECONFIG")
 	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
 	if err != nil {
-		return apiControllerTest{}, err
+		return ApiControllerTest{}, err
 	}
 
 	kubelessClient, err := kubeless.NewForConfig(config)
 	if err != nil {
-		return apiControllerTest{}, err
+		return ApiControllerTest{}, err
 	}
 
 	coreClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return apiControllerTest{}, err
+		return ApiControllerTest{}, err
 	}
 
-	apiClient, err := kyma.NewForConfig(config)
+	gatewayClient, err := gateway.NewForConfig(config)
 	if err != nil {
-		return apiControllerTest{}, err
+		return ApiControllerTest{}, err
 	}
 
-	functionName := "apicontroller"
 	domainName := os.Getenv("DOMAIN")
 
-	return apiControllerTest{
-		kubelessClient: kubelessClient,
-		coreClient:     coreClient,
-		apiClient:      apiClient,
-		functionName:   functionName,
-		domainName:     domainName,
-		hostName:       functionName + "." + domainName,
-		uuid:           uuid.New().String(),
+	return NewApiControllerTest(gatewayClient, coreClient, kubelessClient, domainName)
+}
+
+func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) (ApiControllerTest, error) {
+	functionName := "apicontroller"
+	return ApiControllerTest{
+		kubelessInterface: kubelessInterface,
+		coreInterface:     coreInterface,
+		apiInterface:      gatewayInterface,
+		functionName:      functionName,
+		domainName:        domainName,
+		hostName:          functionName + "." + domainName,
+		uuid:              uuid.New().String(),
 	}, nil
 }
 
-func (t apiControllerTest) CreateResources(namespace string) {
-
-	_, err := t.createFunction(namespace)
+func (t ApiControllerTest) CreateResources(namespace string) {
+	err := t.CreateResourcesError(namespace)
 	So(err, ShouldBeNil)
+}
+
+func (t ApiControllerTest) CreateResourcesError(namespace string) error {
+	_, err := t.createFunction(namespace)
+	if err != nil {
+		return err
+	}
 
 	_, err = t.createApi(namespace)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (t ApiControllerTest) TestResources(namespace string) {
+	err := t.TestResourcesError(namespace)
 	So(err, ShouldBeNil)
 }
 
-func (t apiControllerTest) TestResources(namespace string) {
+func (t ApiControllerTest) TestResourcesError(namespace string) error {
 	err := t.getFunctionPodStatus(namespace, 2*time.Minute)
-	So(err, ShouldBeNil)
+	if err != nil {
+		return err
+	}
 
 	err = t.callFunctionWithoutToken(2 * time.Minute)
-	So(err, ShouldBeNil)
+	if err != nil {
+		return err
+	}
 
 	token, err := fetchDexToken()
-	So(err, ShouldBeNil)
+	if err != nil {
+		return err
+	}
 
 	err = t.callFunctionWithToken(token, 2*time.Minute)
-	So(err, ShouldBeNil)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
-func (t apiControllerTest) callFunctionWithoutToken(waitmax time.Duration) error {
+func (t ApiControllerTest) callFunctionWithoutToken(waitMax time.Duration) error {
 
 	tick := time.Tick(2 * time.Second)
-	timeout := time.After(waitmax)
+	timeout := time.After(waitMax)
 	messages := ""
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
@@ -122,7 +151,7 @@ func (t apiControllerTest) callFunctionWithoutToken(waitmax time.Duration) error
 	}
 }
 
-func (t apiControllerTest) callFunctionWithToken(token string, waitmax time.Duration) error {
+func (t ApiControllerTest) callFunctionWithToken(token string, waitmax time.Duration) error {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -161,7 +190,7 @@ func (t apiControllerTest) callFunctionWithToken(token string, waitmax time.Dura
 	}
 }
 
-func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error) {
+func (t ApiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error) {
 	authEnabled := true
 	servicePort := 8080
 
@@ -176,7 +205,7 @@ func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error)
 					Type: apiv1alpha2.JwtType,
 					Jwt: apiv1alpha2.JwtAuthentication{
 						Issuer:  "https://dex." + t.domainName,
-						JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
+						JwksUri: "http://dex-service.gateway-system.svc.cluster.local:5556/keys",
 					},
 				},
 			},
@@ -188,10 +217,10 @@ func (t apiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error)
 		},
 	}
 
-	return t.apiClient.GatewayV1alpha2().Apis(namespace).Create(api)
+	return t.apiInterface.GatewayV1alpha2().Apis(namespace).Create(api)
 }
 
-func (t apiControllerTest) createFunction(namespace string) (*kubelessV1.Function, error) {
+func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Function, error) {
 	resources := make(map[corev1.ResourceName]resource.Quantity)
 	resources[corev1.ResourceCPU] = resource.MustParse("100m")
 	resources[corev1.ResourceMemory] = resource.MustParse("128Mi")
@@ -199,7 +228,7 @@ func (t apiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 	annotations := make(map[string]string)
 	annotations["function-size"] = "S"
 
-	podContainers := []corev1.Container{}
+	var podContainers []corev1.Container
 	podContainer := corev1.Container{
 		Name: t.functionName,
 		Resources: corev1.ResourceRequirements{
@@ -256,22 +285,22 @@ func (t apiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 			Deployment: functionDeployment,
 		},
 	}
-	return t.kubelessClient.KubelessV1beta1().Functions(namespace).Create(function)
+	return t.kubelessInterface.KubelessV1beta1().Functions(namespace).Create(function)
 }
 
-func (t apiControllerTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
+func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
 	timeout := time.After(waitmax)
 	tick := time.Tick(2 * time.Second)
 	for {
 		select {
 		case <-timeout:
-			pods, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
+			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
 			if err != nil {
 				return err
 			}
 			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pods)
 		case <-tick:
-			pods, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
+			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
 			if err != nil {
 				return err
 			}
@@ -280,7 +309,7 @@ func (t apiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 			}
 
 			if len(pods.Items) > 1 {
-				return fmt.Errorf("Deployed 1 pod, got %v: %+v", len(pods.Items), pods)
+				return fmt.Errorf("deployed 1 pod, got %v: %+v", len(pods.Items), pods)
 			}
 
 			pod := pods.Items[0]
@@ -307,6 +336,6 @@ func fetchDexToken() (string, error) {
 	return token, nil
 }
 
-func (t apiControllerTest) DeleteResources() {
+func (t ApiControllerTest) DeleteResources() {
 	// There is not need to be implemented for this test.
 }

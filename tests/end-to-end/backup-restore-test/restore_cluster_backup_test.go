@@ -53,7 +53,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 
-	apiControllerTest, err := NewApiControllerTest()
+	apiControllerTest, err := NewApiControllerTestFromEnv()
 
 	if err != nil {
 		t.Fatalf("%v", err)
