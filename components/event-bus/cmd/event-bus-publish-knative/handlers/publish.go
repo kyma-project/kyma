@@ -81,7 +81,6 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 					*channelName, *namespace)
 			}
 		}
-
 		// add span tags for the message properties
 		addSpanTagsForMessage(traceSpan, message)
 	}
