@@ -36,7 +36,7 @@ This section presents how to add and run a new test.
 
 ### Add a new test
 
-Add a new test under the `backup-restore/backupe2e/{domain-name}` directory and implement the following interface:
+Add a new test under the `backupe2e/{domain-name}` directory and implement the following interface:
 
 ```go
 type BackupTest interface {
