@@ -1,0 +1,147 @@
+#!/bin/sh
+set -e ; # Have script exit in the event of a failed command.
+
+echo "#############################
+# Migration to Headless CMS #
+#############################"
+
+# connectToMinio
+# Use a check-sleep-check loop to wait for Minio service to be available
+connectToMinio() {
+  SCHEME=http
+  ATTEMPTS=0 ; LIMIT=29 ; # Allow 30 attempts
+  set -e ; # fail if we can't read the keys.
+  ACCESS=$(cat /config/accesskey) ; SECRET=$(cat /config/secretkey) ;
+  set +e ; # The connections to minio are allowed to fail.
+  echo "Connecting to Minio server: $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT" ;
+  MC_COMMAND="mc config host add myminio $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT $ACCESS $SECRET" ;
+  $MC_COMMAND ;
+  STATUS=$? ;
+  until [ $STATUS = 0 ]
+  do
+    ATTEMPTS=`expr $ATTEMPTS + 1` ;
+    echo \"Failed attempts: $ATTEMPTS\" ;
+    if [ $ATTEMPTS -gt $LIMIT ]; then
+      exit 1 ;
+    fi ;
+    sleep 2 ; # 1 second intervals between attempts
+    $MC_COMMAND ;
+    STATUS=$? ;
+  done ;
+  set -e ; # reset `e` as active
+  return 0
+}
+
+installDeps(){
+    export KUBE_LATEST_VERSION="v1.14.0"
+    apk add --update ca-certificates \
+    && apk add --update -t deps curl \
+    && apk add libxml2-utils \
+    && curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
+    && chmod +x /usr/local/bin/kubectl
+}
+
+cleanupOfOldResources(){
+    echo "Deleting of old resources related to AssetStore and Headless CMS"
+    kubectl delete clusterdocstopics --all
+    kubectl delete docstopics --all --all-namespaces
+    kubectl delete clusterassets --all
+    kubectl delete assets --all --all-namespaces
+}
+
+createDocsTopic() {
+
+SC_ID=$1
+OLD_URL=$2
+FILE_NAME=$3
+
+
+SPEC_TYPE=$(getAssetType $FILE_NAME $OLD_URL)
+
+cat <<EOF | kubectl apply -f -
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: ClusterDocsTopic
+metadata:
+  name: $SC_ID
+  labels:
+    cms.kyma-project.io/viewContext: service-catalog
+spec:
+  sources:
+    $SPEC_TYPE:
+      mode: single
+      url: $OLD_URL
+EOF
+
+}
+
+
+getAppNames() {
+   echo $(kubectl get applications -o=jsonpath='{.items[*].metadata.name}')
+}
+
+getAssetType() {
+  FILE_NAME=$1
+  OLD_URL=$2
+
+  if [ $FILE_NAME == "apiSpec.json" ]; then
+
+     # xmllint throws error if unable to format invalid XML and then we know it is OpenAPI
+     # there is no other way to differenciate between OpenAPI or OData as they are always stored as apiSpec.json file
+     VALID_XML_CONTENT=$(curl -s -N $OLD_URL | xmllint --noout --format 2>/dev/null -)
+     if [ -n $VALID_XML_CONTENT ]; then
+        #Output of formating is an error so we know it is not OData
+        echo "openapi"
+        else
+        echo "odata"
+     fi
+   else
+     echo "asyncapi"
+  fi
+
+
+}
+
+getAppServiceIds() {
+    APP_NAME=$1
+    echo $(kubectl get application $APP_NAME -o=jsonpath='{.spec.services[*].id}')
+
+}
+
+createMigratedResources() {
+    APP_SERVICES_IDS_ARRAY=$1
+    APP_NAME=$2
+
+    for i in "${APP_SERVICES_IDS_ARRAY[@]}"
+    do
+      FILE_NAME=$(mc ls kymaminio/content/service-class/$i | awk '{print $5}')
+      SPEC_URL=$MINIO_DOMAIN/content/service-class/$i/$FILE_NAME
+      createDocsTopic $i $SPEC_URL $FILE_NAME
+    done
+}
+
+configureMinioClient
+installDeps
+cleanupOfOldResources
+APPS_NAMES_ARRAY=($(getAppNames))
+APP_SERVICES_IDS=($(getAppServiceIds "dupa"))
+
+for i in "${APPS_NAMES_ARRAY[@]}"
+do
+
+   APP_SERVICES_IDS_ARRAY=($(getAppServiceIds $i))
+
+   if [ ${#APP_SERVICES_IDS_ARRAY[@]} -eq 0 ]; then
+    echo "There are no specs for $i application to migrate to Headless CMS"
+    else
+
+    echo "Migration of specs for $i application started"
+
+    createMigratedResources $APP_SERVICES_IDS_ARRAY $i
+
+   fi
+
+done
+
+
+
+

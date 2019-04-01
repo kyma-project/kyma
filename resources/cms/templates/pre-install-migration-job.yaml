@@ -1,0 +1,89 @@
+---
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-migration-job-role-binding
+  namespace: kyma-system
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
+subjects:
+- kind: ServiceAccount
+  name: {{ .Release.Name }}-migration-job-sa
+  namespace: kyma-system
+roleRef:
+  kind: Role
+  name: {{ .Release.Name }}-migration-job-role
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ .Release.Name }}-migration-job-role
+  namespace: kyma-system
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
+rules:
+- apiGroups: ["assetstore.kyma-project.io", "cms.kyma-project.io", "applicationconnector.kyma-project.io"]
+  resources: [ "*" ]
+  verbs: ["*"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
+  resources: [ "*" ]
+  verbs: ["get", "list"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Release.Name }}-migration-job-sa
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "2"
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ .Release.Name }}-migration
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: {{ .Release.Name }}-migration-job-sa
+      volumes:
+        - name: migration-script
+          projected:
+            sources:
+            - configMap:
+                name: {{ .Release.Name }}-migration
+            - secret:
+                name: assetstore-minio
+      containers:
+      - name: minio-mc
+        image: minio/mc:RELEASE.2019-03-28T20-43-56Z
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "/config/migrate"]
+        env:
+          - name: MINIO_ENDPOINT
+            value: assetstore-minio
+          - name: MINIO_PORT
+            value: 9000
+        volumeMounts:
+          - name: migration-script
+            mountPath: /config
