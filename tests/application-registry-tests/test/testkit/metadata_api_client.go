@@ -233,7 +233,7 @@ func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, 
 			return apiSpecMatch && eventsSpecMatch && documentationMatch
 		}
 
-		return true
+		return err == nil && response.StatusCode < 500
 	}
 }
 
@@ -244,16 +244,10 @@ func andPredicate(operand1 Predicate, operand2 Predicate) Predicate {
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
-	if resp != nil {
-		dump, err := httputil.DumpResponse(resp, true)
-		if err != nil {
-			t.Logf("failed to dump response, %s", err)
-		} else {
-			t.Logf("\n--------------------------------\n%s\n--------------------------------", dump)
-		}
-	}
-
-	if resp == nil {
-		t.Logf("failed to dump response, response is nil")
+	dump, err := httputil.DumpResponse(resp, true)
+	if err != nil {
+		t.Logf("failed to dump response, %s", err)
+	} else {
+		t.Logf("\n--------------------------------\n%s\n--------------------------------", dump)
 	}
 }
