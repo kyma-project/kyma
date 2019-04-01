@@ -153,11 +153,7 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 			if len(pods.Items) == 0 {
 				break
 			}
-
-			if len(pods.Items) > 1 {
-				return fmt.Errorf("deployed 1 pod, got %v: %+v", len(pods.Items), pods)
-			}
-
+			
 			pod := pods.Items[0]
 			// If Pod condition is not ready the for will continue until timeout
 			if len(pod.Status.Conditions) > 0 {
