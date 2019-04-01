@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
+	"os"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/sirupsen/logrus"
@@ -11,10 +13,11 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
-	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
@@ -59,7 +62,7 @@ func main() {
 	fatalOnError(err, "while creating k8s clientset")
 
 	scCli, err := sc.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Service CAtalog clientset")
+	fatalOnError(err, "while creating Service Catalog clientset")
 
 	buCli, err := bu.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Binding Usage clientset")
@@ -73,6 +76,11 @@ func main() {
 	gatewayCli, err := gateway.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Gateway clientset")
 
+	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Kubeless clientset")
+
+	domainName, err := requireEnv("DOMAIN")
+	fatalOnError(err, "while getting DOMAIN")
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 	//
@@ -82,6 +90,7 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		"ApiGatewayUpgradeTest":        api_controller.New(gatewayCli, k8sCli, kubelessCli, domainName),
 	}
 
 	// Execute requested action
@@ -112,4 +121,12 @@ func newRestClientConfig(kubeConfigPath string) (*restclient.Config, error) {
 	}
 
 	return restclient.InClusterConfig()
+}
+
+func requireEnv(name string) (string, error) {
+	value := os.Getenv(name)
+	if value == "" {
+		return "", fmt.Errorf("missing required env: %s", name)
+	}
+	return value, nil
 }

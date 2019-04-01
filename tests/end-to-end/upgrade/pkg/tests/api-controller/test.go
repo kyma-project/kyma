@@ -14,9 +14,9 @@ type test struct {
 	upstream backupe2e.ApiControllerTest
 }
 
-func New(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) (*test, error) {
-	upstream, err := backupe2e.NewApiControllerTest(gatewayInterface, coreInterface, kubelessInterface, domainName)
-	return &test{upstream}, err
+func New(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) *test {
+	upstream := backupe2e.NewApiControllerTest(gatewayInterface, coreInterface, kubelessInterface, domainName)
+	return &test{upstream}
 }
 
 func (t *test) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
