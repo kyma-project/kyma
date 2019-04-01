@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"os"
 	"time"
 
 	backupv1 "github.com/heptio/ark/pkg/apis/ark/v1"
