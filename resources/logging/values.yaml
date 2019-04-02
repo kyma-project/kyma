@@ -94,7 +94,7 @@ loki:
     accessModes:
       - ReadWriteOnce
     size: 10Gi
-    storageClassName: default
+    storageClassName: ""
     # annotations: {}
     # subPath: ""
     # existingClaim:
@@ -196,7 +196,7 @@ promtail:
 global:
   ## to deploy console ui app
   uiapp:
-    create: true
+    create: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
