@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/usr/bin/env bash
 set -e ; # Have script exit in the event of a failed command.
 
 echo "#############################
 # Migration to Headless CMS #
 #############################"
 
-# connectToMinio
+# connect to Minio
 # Use a check-sleep-check loop to wait for Minio service to be available
 connectToMinio() {
   SCHEME=http
@@ -40,7 +40,9 @@ installDeps(){
     && apk add --update -t deps curl \
     && apk add libxml2-utils \
     && curl -L https://storage.googleapis.com/kubernetes-release/release/${KUBE_LATEST_VERSION}/bin/linux/amd64/kubectl -o /usr/local/bin/kubectl \
-    && chmod +x /usr/local/bin/kubectl
+    && chmod +x /usr/local/bin/kubectl \
+    && curl https://dl.minio.io/client/mc/release/linux-amd64/mc > /usr/bin/mc \
+    && chmod +x /usr/bin/mc
 }
 
 cleanupOfOldResources(){
@@ -106,7 +108,6 @@ getAssetType() {
 getAppServiceIds() {
     APP_NAME=$1
     echo $(kubectl get application $APP_NAME -o=jsonpath='{.spec.services[*].id}')
-
 }
 
 createMigratedResources() {
@@ -121,11 +122,10 @@ createMigratedResources() {
     done
 }
 
-configureMinioClient
 installDeps
+connectToMinio
 cleanupOfOldResources
 APPS_NAMES_ARRAY=($(getAppNames))
-APP_SERVICES_IDS=($(getAppServiceIds "dupa"))
 
 for i in "${APPS_NAMES_ARRAY[@]}"
 do

@@ -1,27 +1,42 @@
 ---
-kind: RoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
+apiVersion: v1
+kind: ConfigMap
 metadata:
-  name: {{ .Release.Name }}-migration-job-role-binding
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-migration
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "1"
-subjects:
-- kind: ServiceAccount
-  name: {{ .Release.Name }}-migration-job-sa
-  namespace: kyma-system
-roleRef:
-  kind: Role
-  name: {{ .Release.Name }}-migration-job-role
-  apiGroup: rbac.authorization.k8s.io
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  migrate: |-
+{{ include (print $.Template.BasePath "/_helper_migrate_to_cms.txt") . | indent 4 }}
 ---
-kind: Role
+kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: {{ .Release.Name }}-migration-job-role
+  name: {{ template "fullname" . }}-migration
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "2"
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}-migration
   namespace: kyma-system
+roleRef:
+  kind: ClusterRole
+  name: {{ template "fullname" . }}-migration
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-migration
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
@@ -37,16 +52,17 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Release.Name }}-migration-job-sa
+  name: {{ template "fullname" . }}-migration
+  namespace: kyma-system
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
-    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-weight": "1"
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ .Release.Name }}-migration
+  name: {{ template "fullname" . }}-migration
   labels:
     app: {{ template "name" . }}
     chart: {{ .Chart.Name }}
@@ -54,7 +70,8 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    #"helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "3"
 spec:
   template:
     metadata:
@@ -65,20 +82,20 @@ spec:
         release: {{ .Release.Name }}
     spec:
       restartPolicy: OnFailure
-      serviceAccountName: {{ .Release.Name }}-migration-job-sa
+      serviceAccountName: {{ template "fullname" . }}-migration
       volumes:
         - name: migration-script
           projected:
             sources:
             - configMap:
-                name: {{ .Release.Name }}-migration
+                name: {{ template "fullname" . }}-migration
             - secret:
                 name: assetstore-minio
       containers:
-      - name: minio-mc
-        image: minio/mc:RELEASE.2019-03-28T20-43-56Z
+      - name: bash
+        image: bash:5
         imagePullPolicy: IfNotPresent
-        command: ["/bin/sh", "/config/migrate"]
+        command: ["/usr/local/bin/bash", "/config/migrate"]
         volumeMounts:
           - name: migration-script
             mountPath: /config
