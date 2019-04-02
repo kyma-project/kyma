@@ -184,10 +184,11 @@ func createK8sDocsTopic() v1alpha1.DocsTopic {
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
 				DisplayName: "Some display name",
 				Description: "Some description",
-				Sources: map[string]v1alpha1.Source{
-					"api": {
+				Sources: []v1alpha1.Source{
+					{
 						URL:  "www.somestorage.com/api",
 						Mode: v1alpha1.DocsTopicSingle,
+						Type: "api",
 					},
 				},
 			},
@@ -256,13 +257,23 @@ func createTestDocsTopicEntry() docstopic.Entry {
 }
 
 func createMatcherFunction(docsTopicEntry docstopic.Entry, expectedResourceVersion string) func(*unstructured.Unstructured) bool {
-	checkUrls := func(urls map[string]string, sources map[string]v1alpha1.Source) bool {
+	findSource := func(sources []v1alpha1.Source, key string) (v1alpha1.Source, bool) {
+		for _, source := range sources {
+			if source.Type == key {
+				return source, true
+			}
+		}
+
+		return v1alpha1.Source{}, false
+	}
+
+	checkUrls := func(urls map[string]string, sources []v1alpha1.Source) bool {
 		if len(urls) != len(sources) {
 			return false
 		}
 
 		for key, value := range urls {
-			source, found := sources[key]
+			source, found := findSource(sources, key)
 			if !found || value != source.URL {
 				return false
 			}

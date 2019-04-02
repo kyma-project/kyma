@@ -244,16 +244,9 @@ func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, 
 
 func logResponse(t *testing.T, resp *http.Response) {
 	dump, err := httputil.DumpResponse(resp, true)
-
 	if err != nil {
 		t.Logf("failed to dump response, %s", err)
 	} else {
 		t.Logf("\n--------------------------------\n%s\n--------------------------------", dump)
-	}
-
-	if resp != nil && resp.Body != nil {
-		if err = resp.Body.Close(); err != nil {
-			t.Logf("failed to close response body, %s", err)
-		}
 	}
 }

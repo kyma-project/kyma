@@ -134,12 +134,14 @@ func toUstructured(docsTopic v1alpha1.DocsTopic) (*unstructured.Unstructured, ap
 }
 
 func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
-	sources := make(map[string]v1alpha1.Source)
+	sources := make([]v1alpha1.Source, 0, 3)
 	for key, url := range docsTopicEntry.Urls {
-		sources[key] = v1alpha1.Source{
+		source := v1alpha1.Source{
 			URL:  url,
 			Mode: DocsTopicModeSingle,
+			Type: key,
 		}
+		sources = append(sources, source)
 	}
 
 	return v1alpha1.DocsTopic{
@@ -163,8 +165,9 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 
 func fromK8sType(k8sDocsTopic v1alpha1.DocsTopic) docstopic.Entry {
 	urls := make(map[string]string)
-	for key, source := range k8sDocsTopic.Spec.Sources {
-		urls[key] = source.URL
+
+	for _, source := range k8sDocsTopic.Spec.Sources {
+		urls[source.Type] = source.URL
 	}
 
 	return docstopic.Entry{

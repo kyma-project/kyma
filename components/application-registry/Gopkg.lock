@@ -167,7 +167,7 @@
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1"
   ]
-  revision = "b47050577a88799e92888fbf4716b4e3b0f83ff8"
+  revision = "df58d5ba13fb350fae0faf963eb21b5603ee0c68"
 
 [[projects]]
   branch = "master"
@@ -586,6 +586,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "16e9a7b0a4980f26c14c69d9f29361f040623e2312d5667e0883428b1104c25e"
+  inputs-digest = "c99f55d981bb443b40c6084b5535ac0e7d1d2bdb8cf181f9b525f21204ffbb55"
   solver-name = "gps-cdcl"
   solver-version = 1
