@@ -20,7 +20,8 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type grafanaUpgradeTest struct {
+// GrafanaUpgradeTest will test if Grafana contains the same dashboards after an upgrade of Kyma
+type GrafanaUpgradeTest struct {
 	k8sCli    kubernetes.Interface
 	namespace string
 	log       logrus.FieldLogger
@@ -29,14 +30,14 @@ type grafanaUpgradeTest struct {
 
 type grafana struct {
 	url        string
-	oauthUrl   string
+	oAuthURL   string
 	loginForm  url.Values
 	httpClient *http.Client
 }
 
 type dashboard struct {
-	Title string `json:title`
-	URL   string `json:url`
+	Title string `json:"title"`
+	URL   string `json:"url"`
 }
 
 const (
@@ -52,14 +53,16 @@ const (
 	grafanaLabelSelector       = "app=monitoring-grafana"
 )
 
-func NewGrafanaUpgradeTest(k8sCli kubernetes.Interface) *grafanaUpgradeTest {
-	return &grafanaUpgradeTest{
+// NewGrafanaUpgradeTest returns new instance of the GrafanaUpgradeTest
+func NewGrafanaUpgradeTest(k8sCli kubernetes.Interface) *GrafanaUpgradeTest {
+	return &GrafanaUpgradeTest{
 		k8sCli:  k8sCli,
 		grafana: grafana{loginForm: url.Values{}},
 	}
 }
 
-func (ut *grafanaUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+// CreateResources retrieves all installed dashboards and stores this information in an config map
+func (ut *GrafanaUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	ut.namespace = namespace
 	ut.log = log
 	err := ut.getGrafana()
@@ -76,7 +79,8 @@ func (ut *grafanaUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	return err
 }
 
-func (ut *grafanaUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+// TestResources retrieves the previously stored list of installed dashboards and compares it to the current list
+func (ut *GrafanaUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	ut.namespace = namespace
 	ut.log = log
 
@@ -88,7 +92,7 @@ func (ut *grafanaUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	return ut.compareDashboards()
 }
 
-func (ut *grafanaUpgradeTest) getCredentials() error {
+func (ut *GrafanaUpgradeTest) getCredentials() error {
 	secret, err := ut.k8sCli.CoreV1().Secrets(grafanaNS).Get(grafanaAdminUserSecretName, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -124,7 +128,7 @@ func getHTTPClient(skipVerify bool) (*http.Client, error) {
 	return &http.Client{Timeout: 15 * time.Second, Transport: tr, Jar: cookieJar}, nil
 }
 
-func (ut *grafanaUpgradeTest) getGrafana() error {
+func (ut *GrafanaUpgradeTest) getGrafana() error {
 
 	pod, err := ut.k8sCli.CoreV1().Pods(grafanaNS).Get(grafanaPodName, metav1.GetOptions{})
 	if err != nil {
@@ -139,7 +143,7 @@ func (ut *grafanaUpgradeTest) getGrafana() error {
 			for _, envVar := range envs {
 				switch envVar.Name {
 				case "GF_AUTH_GENERIC_OAUTH_AUTH_URL":
-					ut.oauthUrl = envVar.Value
+					ut.oAuthURL = envVar.Value
 				case "GF_SERVER_ROOT_URL":
 					ut.url = strings.TrimSuffix(envVar.Value, "/")
 				}
@@ -160,7 +164,7 @@ func (ut *grafanaUpgradeTest) getGrafana() error {
 	return nil
 }
 
-func (ut *grafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) {
+func (ut *GrafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) {
 
 	dexAuthLocal, err := ut.getGrafanaAndDexAuth()
 	if err != nil {
@@ -211,7 +215,7 @@ func (ut *grafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) 
 	return dashboards, nil
 }
 
-func (ut *grafanaUpgradeTest) storeDashboards(dashboards map[string]dashboard) error {
+func (ut *GrafanaUpgradeTest) storeDashboards(dashboards map[string]dashboard) error {
 	dashboardJSON, err := json.Marshal(dashboards)
 	if err != nil {
 		return err
@@ -228,7 +232,7 @@ func (ut *grafanaUpgradeTest) storeDashboards(dashboards map[string]dashboard) e
 	return err
 }
 
-func (ut *grafanaUpgradeTest) retrievePreviousDashboards() (map[string]dashboard, error) {
+func (ut *GrafanaUpgradeTest) retrievePreviousDashboards() (map[string]dashboard, error) {
 
 	cm, err := ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Get(grafanaConfigMapName, metav1.GetOptions{})
 	if err != nil {
@@ -243,7 +247,7 @@ func (ut *grafanaUpgradeTest) retrievePreviousDashboards() (map[string]dashboard
 	return dashboards, nil
 }
 
-func (ut *grafanaUpgradeTest) compareDashboards() error {
+func (ut *GrafanaUpgradeTest) compareDashboards() error {
 	previous, err := ut.retrievePreviousDashboards()
 	if err != nil {
 		return err
@@ -257,7 +261,7 @@ func (ut *grafanaUpgradeTest) compareDashboards() error {
 	return nil
 }
 
-func (ut *grafanaUpgradeTest) getGrafanaAndDexAuth() (*http.Response, error) {
+func (ut *GrafanaUpgradeTest) getGrafanaAndDexAuth() (*http.Response, error) {
 
 	//  /login
 	domain := fmt.Sprintf("%s%s", ut.url, "/login")
@@ -331,7 +335,7 @@ func (g *grafana) requestToGrafana(domain, method string, params url.Values, for
 
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("http request to the url (%s) failed with '%s'\n", u, err)
+		return nil, fmt.Errorf("http request to the url (%s) failed with '%s'", u, err)
 	}
 	return resp, err
 }

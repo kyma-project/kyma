@@ -17,28 +17,31 @@ import (
 	"k8s.io/client-go/kubernetes"
 )
 
-type metricsUpgradeTest struct {
+// MetricsUpgradeTest compares metrics from before and after upgrade
+type MetricsUpgradeTest struct {
 	k8sCli        kubernetes.Interface
 	namespace     string
-	prometheusApi v1.API
+	prometheusAPI v1.API
 	log           logrus.FieldLogger
 }
 
-func NewMetricsUpgradeTest(k8sCli kubernetes.Interface) (*metricsUpgradeTest, error) {
+// NewMetricsUpgradeTest returns a new instance of the MetricsUpgradeTest
+func NewMetricsUpgradeTest(k8sCli kubernetes.Interface) (*MetricsUpgradeTest, error) {
 	client, err := prometheus.NewClient(prometheus.Config{Address: fmt.Sprintf("%v:%v", prometheusDomain, prometheusPort)})
 	if err != nil {
 		return nil, err
 	}
-	promApi := v1.NewAPI(client)
+	promAPI := v1.NewAPI(client)
 
-	return &metricsUpgradeTest{
-		prometheusApi: promApi,
+	return &MetricsUpgradeTest{
+		prometheusAPI: promAPI,
 		k8sCli:        k8sCli,
 	}, nil
 
 }
 
-func (ut *metricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+// CreateResources retrieves metrics and stores the value in an configmap
+func (ut *MetricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	ut.namespace = namespace
 	ut.log = log
 
@@ -55,7 +58,8 @@ func (ut *metricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	return err
 }
 
-func (ut *metricsUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+// TestResources retrieves previously installed metrics values and compares it to the metrics returned for the same query and the same time
+func (ut *MetricsUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	ut.namespace = namespace
 	ut.log = log
 	return ut.compareMetrics()
@@ -72,10 +76,10 @@ const (
 	metricsTimeField     = "collected_at"
 )
 
-func (ut *metricsUpgradeTest) collectMetrics(time time.Time) (model.Vector, error) {
+func (ut *MetricsUpgradeTest) collectMetrics(time time.Time) (model.Vector, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	result, err := ut.prometheusApi.Query(ctx, metricsQuery, time)
+	result, err := ut.prometheusAPI.Query(ctx, metricsQuery, time)
 	if err != nil {
 		return nil, err
 	}
@@ -86,7 +90,7 @@ func (ut *metricsUpgradeTest) collectMetrics(time time.Time) (model.Vector, erro
 	return nil, fmt.Errorf("%v should be of type vector but is of type %t", result, result)
 }
 
-func (ut *metricsUpgradeTest) storeMetrics(value model.Vector, time time.Time) error {
+func (ut *MetricsUpgradeTest) storeMetrics(value model.Vector, time time.Time) error {
 	promValue, err := json.Marshal(value)
 	if err != nil {
 		return err
@@ -108,7 +112,7 @@ func (ut *metricsUpgradeTest) storeMetrics(value model.Vector, time time.Time) e
 	return err
 }
 
-func (ut *metricsUpgradeTest) retrievePreviousMetrics() (time.Time, model.Vector, error) {
+func (ut *MetricsUpgradeTest) retrievePreviousMetrics() (time.Time, model.Vector, error) {
 
 	cm, err := ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Get(metricsConfigMapName, metav1.GetOptions{})
 	if err != nil {
@@ -129,7 +133,7 @@ func (ut *metricsUpgradeTest) retrievePreviousMetrics() (time.Time, model.Vector
 	return timeValue, value, nil
 }
 
-func (ut *metricsUpgradeTest) compareMetrics() error {
+func (ut *MetricsUpgradeTest) compareMetrics() error {
 	time, previous, err := ut.retrievePreviousMetrics()
 	if err != nil {
 		return err
