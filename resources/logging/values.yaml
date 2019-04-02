@@ -161,10 +161,13 @@ promtail:
       memory: 128Mi
 
   ## Pod Annotations
-  podAnnotations: {}
+  podAnnotations:
   #  prometheus.io/scrape: "true"
   #  prometheus.io/port: "http-metrics"
-
+  #For pods running sidecars w/o service there's a problem with envoy readiness probe.
+  #Details https://github.com/istio/istio/issues/9504#issuecomment-439432130
+    status.sidecar.istio.io/port: "0"
+    
   ## Deployment annotations
   annotations: {}
 
