@@ -21,7 +21,7 @@ console:
 global:
   isLocalEnv: false
   knative: false
-   # Change value below to your own organisation name or user name if you want point to clusterDocsTopics definition from your fork
+   # Change value below to your own GitHub user name if you want point to documentation sources from your fork
    # Example: kymaOrgName: "kyma-incubator"
   kymaOrgName: "kyma-project"
   containerRegistry:
@@ -51,7 +51,8 @@ global:
   docs:
     dir: develop/
     version: a54ac464
-    # If you want install Kyma with clusterDocsTopics version from appropriate branch from your fork, please change value below
+    # - Change value below to branch from your fork if you want point to documentation sources from your fork
+    # - Change value below to release branch during release
     # Example: clusterDocsTopicsVersion: "0.9.0"
     clusterDocsTopicsVersion: master
   namespace_controller:
