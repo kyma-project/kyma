@@ -74,9 +74,12 @@ The test creates a new Namespace called `restore-test-{UUID}`. This Namespace co
 
 Run tests:
 ```bash
-env KUBECONFIG={KUBECONFIG} go test ./... -count=1 -timeout=0
+env KUBECONFIG={KUBECONFIG} ALL_BACKUP_CONFIGURATION_FILE={ALL_BACKUP_PATH} SYSTEM_BACKUP_CONFIGURATION_FILE={SYSTEM_BACKUP_PATH} go test ./... -count=1 -timeout=0
 ```
-where `{KUBECONFIG}` is the path to the `kubeconfig` file.
+where:
+* `{KUBECONFIG}` is the path to the `kubeconfig` file.
+* `{ALL_BACKUP_PATH}` is the path to the `all-backup.yaml` file.
+* `{SYSTEM_BACKUP_PATH}` is the path to the `system-backup.yaml` file.
 
 ### Run tests using a Helm chart
 
@@ -99,9 +102,12 @@ helm test backup-test
 1. [Install Telepresence](https://www.telepresence.io/reference/install).
 2. Run tests:
 ```bash
-env KUBECONFIG={KUBECONFIG} telepresence --run go test ./... -count=1 -timeout=0
+env KUBECONFIG={KUBECONFIG} ALL_BACKUP_CONFIGURATION_FILE={ALL_BACKUP_PATH} SYSTEM_BACKUP_CONFIGURATION_FILE={SYSTEM_BACKUP_PATH} telepresence --run go test ./... -count=1 -timeout=0
 ```
-where `{KUBECONFIG}` is the path to the `kubeconfig` file.
+where:
+* `{KUBECONFIG}` is the path to the `kubeconfig` file.
+* `{ALL_BACKUP_PATH}` is the path to the `all-backup.yaml` file.
+* `{SYSTEM_BACKUP_PATH}` is the path to the `system-backup.yaml` file.
 
 ### Verify the code
 
