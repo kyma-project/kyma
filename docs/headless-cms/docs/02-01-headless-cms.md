@@ -15,7 +15,7 @@ The DocsTopic Controller also monitors the status of the Asset CR and updates th
 
 See the diagram for an overview of the basic Headless CMS workflow and the role of its components in this process.
 
->**NOTE:** Although this flow describes the DocsTopic resource, it also applies to the ClusterDocsTopic flow.
+>**NOTE:** This flow also applies to the ClusterDocsTopic CR.
 
 ![](./assets/headless-cms-architecture.svg)
 

@@ -52,7 +52,7 @@ This table lists all possible parameters of a given resource together with their
 
 | Parameter   |      Mandatory      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR. It also defines the respective **docs-topic** label that is added to the Asset CR that the DocsTopic CR defines. Because of label name limitations, DocTopic names can have a maximum length of 63 characters. |
+| **metadata.name** |    **YES**   | Specifies the name of the CR. It also defines the respective **cms.kyma-project.io/docs-topic** label that is added to the Asset CR that the DocsTopic CR defines. Because of label name limitations, DocTopic names can have a maximum length of 63 characters. |
 | **metadata.labels** |    **YES**   | Specifies how to filter and group Asset CRs that the DocsTopic CR defines. |
 | **spec.displayname** |    **YES**   | Specifies a human-readable name of the DocsTopic CR. |
 | **spec.description** |    **YES**   | Provides more details on the purpose of the DocsTopic CR. |

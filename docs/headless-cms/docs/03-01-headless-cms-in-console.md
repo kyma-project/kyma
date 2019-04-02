@@ -7,7 +7,7 @@ Headless CMS in Kyma is a separate component and does not provide templates or a
 
 You add a new documentation topic to the Console UI by creating a CR, while the [Asset Store](#asset-store-overview) handles the rest. You define the location, grouping, and order of the documents through these DocsTopic and ClusterDocsTopic labels:
 
-- **cms.kyma-project.io/view-context** that specifies the location in the Console UI where you want to render the given asset. This can be either `docs-ui` or `service-catalog`.
+- **cms.kyma-project.io/view-context** that specifies the location in the Console UI to render the given asset. This can be either `docs-ui` or `service-catalog`.
 - **cms.kyma-project.io/group-name** that defines the group, such as `components`, under which you want to render the given asset in the Console UI. The value cannot include spaces.
 - **cms.kyma-project.io/order** that specifies the position of the DocsTopic and ClusterDocsTopic in the Console UI view in relation to other DocsTopics. For example, this can be `4`.
 
