@@ -9,6 +9,7 @@ import (
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/validators"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
@@ -34,14 +35,14 @@ func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFun
 	}
 }
 
-func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer) http.HandlerFunc {
+func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer, opts *opts.Options) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// init the trace span and context
 		traceSpan, traceContext := initTrace(r, tracer)
 		defer trace.FinishSpan(traceSpan)
 
 		// handle the knativeLib publish request
-		message, channelName, namespace, err := handleKnativePublishRequest(w, r, knativeLib, knativePublisher, traceContext)
+		message, channelName, namespace, err := handleKnativePublishRequest(w, r, knativeLib, knativePublisher, traceContext, opts.MaxChannelNameLength)
 
 		// check if the publish request was successful
 		if err != nil {
@@ -65,7 +66,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 	}
 }
 
-func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, context *api.TraceContext) (*Message, *string, *string, *api.Error) {
+func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, context *api.TraceContext, channelNameMaxLength int) (*Message, *string, *string, *api.Error) {
 	// validate the http request
 	publishRequest, err := validators.ValidateRequest(r)
 	if err != nil {
@@ -95,7 +96,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 		if errEventID != nil {
 			err = api.ErrorResponseInternalServer()
 			log.Printf("EventID generation failed: %v", err)
-			publish.SendJSONError(w, err)
+			_ = publish.SendJSONError(w, err)
 			return nil, nil, nil, err
 		}
 		publishRequest.EventID = eventID
@@ -113,8 +114,15 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 		return nil, nil, nil, err
 	}
 
-	// publish the message
+	// get the channel name and validate its length
 	channelName := knative.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType, &publishRequest.EventTypeVersion)
+	if err = validators.ValidateChannelNameLength(&channelName, channelNameMaxLength); err != nil {
+		log.Printf("publish message failed: %v", err)
+		_ = publish.SendJSONError(w, err)
+		return nil, nil, nil, err
+	}
+
+	// publish the message
 	err = (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers, &messagePayload)
 	if err != nil {
 		log.Printf("publish message failed: %v", err)
@@ -152,8 +160,11 @@ func setSourceID(publishRequest *api.PublishRequest, header *http.Header) bool {
 }
 
 func generateEventID() (string, error) {
-	uid, err := uuid.NewV4()
-	return uid.String(), err
+	if uid, err := uuid.NewV4(); err != nil {
+		return "", err
+	} else {
+		return uid.String(), nil
+	}
 }
 
 func buildMessage(publishRequest *api.PublishRequest, traceContext *api.TraceContext) *Message {

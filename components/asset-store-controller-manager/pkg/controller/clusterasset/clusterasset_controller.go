@@ -11,7 +11,10 @@ import (
 	"github.com/minio/minio-go"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/util/retry"
 	"net/http"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"time"
 
 	assetstorev1alpha2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
@@ -52,12 +55,16 @@ func Add(mgr manager.Manager) error {
 	validator := engine.NewValidator(assethook, cfg.Webhook.ValidationTimeout)
 	mutator := engine.NewMutator(assethook, cfg.Webhook.MutationTimeout)
 
-	assetHandler := asset.New(mgr.GetRecorder("clusterasset-controller"), store, loader, findBucketFnc, validator, mutator, log)
-
 	reconciler := &ReconcileClusterAsset{
 		Client:         mgr.GetClient(),
+		cache:          mgr.GetCache(),
 		scheme:         mgr.GetScheme(),
-		handler:        assetHandler,
+		store:          store,
+		loader:         loader,
+		findBucketFnc:  findBucketFnc,
+		validator:      validator,
+		mutator:        mutator,
+		recorder:       mgr.GetRecorder("clusterasset-controller"),
 		relistInterval: cfg.ClusterAssetRelistInterval,
 		finalizer:      deleteFinalizer,
 	}
@@ -109,11 +116,17 @@ var _ reconcile.Reconciler = &ReconcileClusterAsset{}
 // ReconcileClusterAsset reconciles a ClusterAsset object
 type ReconcileClusterAsset struct {
 	client.Client
-	scheme *runtime.Scheme
+	cache    cache.Cache
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 
-	handler        asset.Handler
 	relistInterval time.Duration
+	store          store.Store
+	loader         loader.Loader
+	findBucketFnc  asset.FindBucketStatus
 	finalizer      finalizer.Finalizer
+	validator      engine.Validator
+	mutator        engine.Mutator
 }
 
 // Reconcile reads that state of the cluster for a ClusterAsset object and makes changes based on the state read
@@ -136,96 +149,105 @@ func (r *ReconcileClusterAsset) Reconcile(request reconcile.Request) (reconcile.
 		return reconcile.Result{}, err
 	}
 
-	switch {
-	case !r.handler.ShouldReconcile(instance, instance.Status.CommonAssetStatus, time.Now(), time.Minute):
-		return reconcile.Result{}, nil
-	case r.handler.IsOnDelete(instance):
-		return r.onDelete(ctx, instance)
-	case r.handler.IsOnAddOrUpdate(instance, instance.Status.CommonAssetStatus):
-		return r.onAddOrUpdate(ctx, instance)
-	case r.handler.IsOnPending(instance.Status.CommonAssetStatus):
-		return r.onPending(ctx, instance)
-	case r.handler.IsOnReady(instance.Status.CommonAssetStatus):
-		return r.onReady(ctx, instance)
-	case r.handler.IsOnFailed(instance.Status.CommonAssetStatus):
-		return r.onFailed(ctx, instance)
+	if err := r.appendFinalizer(ctx, request.NamespacedName); err != nil {
+		return reconcile.Result{}, errors.Wrap(err, "while appending finalizer")
 	}
 
-	return reconcile.Result{}, nil
-}
-
-func (r *ReconcileClusterAsset) onDelete(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
-	if !r.finalizer.IsDefinedIn(instance) {
-		return reconcile.Result{}, nil
+	assetLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName())
+	commonHandler := asset.New(assetLogger, r.recorder, r.store, r.loader, r.findBucketFnc, r.validator, r.mutator, r.relistInterval)
+	commonStatus, err := commonHandler.Do(ctx, time.Now(), instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
+	if updateErr := r.updateStatus(ctx, request.NamespacedName, commonStatus); updateErr != nil {
+		finalErr := updateErr
+		if err != nil {
+			finalErr = errors.Wrapf(err, "along with update error %s", updateErr.Error())
+		}
+		return reconcile.Result{}, finalErr
 	}
-
-	err := r.handler.OnDelete(ctx, instance, instance.Spec.CommonAssetSpec)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	r.finalizer.DeleteFrom(instance)
-	if err := r.Update(ctx, instance); err != nil {
-		return reconcile.Result{}, errors.Wrap(err, "while updating instance")
+	if err := r.removeFinalizer(ctx, request.NamespacedName); err != nil {
+		return reconcile.Result{}, errors.Wrap(err, "while removing finalizer")
 	}
 
-	return reconcile.Result{}, nil
+	return reconcile.Result{
+		RequeueAfter: r.relistInterval,
+	}, nil
 }
 
-func (r *ReconcileClusterAsset) onPending(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
-	status := r.handler.OnPending(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
+func (r *ReconcileClusterAsset) appendFinalizer(ctx context.Context, namespacedName types.NamespacedName) error {
+	updateFnc := func(instance *assetstorev1alpha2.ClusterAsset) error {
+		if !instance.DeletionTimestamp.IsZero() || r.finalizer.IsDefinedIn(instance) {
+			return nil
+		}
 
-	if err := r.updateStatus(ctx, instance, status); err != nil {
-		return reconcile.Result{}, err
+		copy := instance.DeepCopy()
+		r.finalizer.AddTo(copy)
+		return r.Update(ctx, copy)
 	}
 
-	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
+	return r.update(ctx, namespacedName, updateFnc)
 }
 
-func (r *ReconcileClusterAsset) onReady(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
-	status := r.handler.OnReady(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
+func (r *ReconcileClusterAsset) removeFinalizer(ctx context.Context, namespacedName types.NamespacedName) error {
+	updateFnc := func(instance *assetstorev1alpha2.ClusterAsset) error {
+		if instance.DeletionTimestamp.IsZero() {
+			return nil
+		}
 
-	if err := r.updateStatus(ctx, instance, status); err != nil {
-		return reconcile.Result{}, err
+		copy := instance.DeepCopy()
+		r.finalizer.DeleteFrom(copy)
+
+		return r.Update(ctx, copy)
 	}
 
-	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
+	return r.update(ctx, namespacedName, updateFnc)
 }
 
-func (r *ReconcileClusterAsset) onFailed(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
-	status, err := r.handler.OnFailed(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
-	if err != nil {
-		return reconcile.Result{}, err
+func (r *ReconcileClusterAsset) updateStatus(ctx context.Context, namespacedName types.NamespacedName, commonStatus *assetstorev1alpha2.CommonAssetStatus) error {
+	updateFnc := func(instance *assetstorev1alpha2.ClusterAsset) error {
+		if r.isStatusUnchanged(instance, commonStatus) {
+			return nil
+		}
+
+		copy := instance.DeepCopy()
+		copy.Status.CommonAssetStatus = *commonStatus
+
+		return r.Status().Update(ctx, copy)
 	}
 
-	if err := r.updateStatus(ctx, instance, *status); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
+	return r.update(ctx, namespacedName, updateFnc)
 }
 
-func (r *ReconcileClusterAsset) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset) (reconcile.Result, error) {
-	if !r.finalizer.IsDefinedIn(instance) {
-		r.finalizer.AddTo(instance)
-		return reconcile.Result{Requeue: true}, r.Update(ctx, instance)
-	}
-	status := r.handler.OnAddOrUpdate(ctx, instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
+func (r *ReconcileClusterAsset) isStatusUnchanged(instance *assetstorev1alpha2.ClusterAsset, newStatus *assetstorev1alpha2.CommonAssetStatus) bool {
+	currentStatus := instance.Status.CommonAssetStatus
 
-	if err := r.updateStatus(ctx, instance, status); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
+	return newStatus == nil ||
+		currentStatus.ObservedGeneration == newStatus.ObservedGeneration &&
+			currentStatus.Phase == newStatus.Phase &&
+			currentStatus.Reason == newStatus.Reason
 }
 
-func (r *ReconcileClusterAsset) updateStatus(ctx context.Context, instance *assetstorev1alpha2.ClusterAsset, commonStatus assetstorev1alpha2.CommonAssetStatus) error {
-	toUpdate := instance.DeepCopy()
-	toUpdate.Status.CommonAssetStatus = commonStatus
+func (r *ReconcileClusterAsset) update(ctx context.Context, namespacedName types.NamespacedName, updateFnc func(instance *assetstorev1alpha2.ClusterAsset) error) error {
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		instance := &assetstorev1alpha2.ClusterAsset{}
+		err := r.Get(ctx, namespacedName, instance)
+		if err != nil {
+			if apiErrors.IsNotFound(err) {
+				return nil
+			}
+			// Error reading the object - requeue the request.
+			return err
+		}
 
-	if err := r.Status().Update(ctx, toUpdate); err != nil {
-		return errors.Wrap(err, "while updating status")
-	}
+		err = updateFnc(instance)
+		if err != nil && apiErrors.IsConflict(err) {
+			r.cache.WaitForCacheSync(ctx.Done())
+		}
 
-	return nil
+		return err
+	})
+
+	return err
 }

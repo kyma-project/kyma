@@ -59,5 +59,7 @@ func (app *KnativePublishApplication) registerReadinessProbe() {
 }
 
 func (app *KnativePublishApplication) registerPublishHandler() {
-	app.serveMux.HandleFunc("/v1/events", handlers.WithRequestSizeLimiting(handlers.KnativePublishHandler(app.knativeLib, app.knativePublisher, app.tracer), app.options.MaxRequestSize))
+	knativePublishHandler := handlers.KnativePublishHandler(app.knativeLib, app.knativePublisher, app.tracer, app.options)
+	requestSizeLimitHandler := handlers.WithRequestSizeLimiting(knativePublishHandler, app.options.MaxRequestSize)
+	app.serveMux.HandleFunc("/v1/events", requestSizeLimitHandler)
 }
