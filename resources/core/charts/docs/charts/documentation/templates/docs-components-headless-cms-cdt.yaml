@@ -2,8 +2,8 @@ apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
 metadata:
   labels:
-    cms.kyma-project.io/viewContext: docs-ui
-    cms.kyma-project.io/groupName: Components
+    cms.kyma-project.io/view-context: docs-ui
+    cms.kyma-project.io/group-name: components
     cms.kyma-project.io/order: "15"
   name: headless-cms
 spec:
