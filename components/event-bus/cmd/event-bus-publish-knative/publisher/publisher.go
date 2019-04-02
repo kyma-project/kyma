@@ -14,7 +14,8 @@ PUBLISHED = "published"
 )
 
 type KnativePublisher interface {
-	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string]string, payload *[]byte) (*api.Error, string)
+	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string]string,
+		payload *[]byte) (*api.Error, string)
 }
 
 type DefaultKnativePublisher struct{}

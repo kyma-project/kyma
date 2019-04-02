@@ -60,7 +60,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		case publisher.PUBLISHED:
 			reason = "Message successfully published to the channel"
 		case publisher.IGNORED:
-			reason = "There were no subscriptions to this event"
+			reason = "Event was ignored as there are no subscriptions or consumers configured for this event"
 		case publisher.FAILED:
 			reason = "Some validation or internal error occurred"
 		}
@@ -72,14 +72,8 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		if err := json.NewEncoder(w).Encode(*publishResponse); err != nil {
 			log.Printf("failed to send response back: %v", err)
 		} else {
-			switch status {
-			case publisher.PUBLISHED:
-				log.Printf("publish to the knative channel '%v' succeeded in namespace '%v'",
-					*channelName, *namespace)
-			case publisher.IGNORED:
-				log.Printf("publish couldn't find a channel '%v' in namespace '%v', message ignored",
-					*channelName, *namespace)
-			}
+			log.Printf("publish to the knative channel status: '%v'\n namespace '%v'\n reason: %v",
+				*channelName, *namespace, publishResponse.Reason)
 		}
 		// add span tags for the message properties
 		addSpanTagsForMessage(traceSpan, message)
@@ -137,7 +131,8 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	}
 
 	// get the channel name and validate its length
-	channelName := knative.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType, &publishRequest.EventTypeVersion)
+	channelName := knative.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType,
+		&publishRequest.EventTypeVersion)
 	if err = validators.ValidateChannelNameLength(&channelName, channelNameMaxLength); err != nil {
 		log.Printf("publish message failed: %v", err)
 		_ = publish.SendJSONError(w, err)
@@ -145,16 +140,14 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	}
 
 	// publish the message
-	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers, &messagePayload)
-	if status == publisher.IGNORED {
-		return message, &channelName, &defaultChannelNamespace, nil, status
-	}
+	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers,
+		&messagePayload)
 	if err != nil {
 		_ = publish.SendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
 	}
-
-	return message, &channelName, &defaultChannelNamespace, nil, publisher.PUBLISHED
+	// Succeed if the Status is IGNORED | PUBLISHED
+	return message, &channelName, &defaultChannelNamespace, nil, status
 }
 
 func initTrace(r *http.Request, tracer *trace.Tracer) (span *opentracing.Span, context *api.TraceContext) {
