@@ -3,7 +3,6 @@
 # Declare variables to be passed into your templates.
 global:
   isLocalEnv: false
-  knative: false
 
 knative-provisioner-natss:
   controller:

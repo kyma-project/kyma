@@ -1,4 +1,3 @@
-#{{ if .Values.global.knative }}
 #---
 #apiVersion: v1
 #kind: Pod
@@ -21,4 +20,3 @@
 #    - name: TARGET
 #      value: {{ .Values.test.target }}
 #  restartPolicy: Never
-#{{ end }}
