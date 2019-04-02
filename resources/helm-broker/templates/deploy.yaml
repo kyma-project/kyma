@@ -47,6 +47,8 @@ spec:
             value: /etc/config/helm-broker/config.yaml
           - name: APP_HELM_TILLER_HOST
             value: "tiller-deploy.kube-system.svc.cluster.local:44134"
+          - name: APP_HELM_TILLER_TLS_INSECURE
+            value: "{{ .Values.config.tillerTLSInsecure }}"
           - name: APP_CLUSTER_SERVICE_BROKER_NAME
             value: {{ template "fullname" . }}
           - name: APP_HELM_BROKER_URL
@@ -59,6 +61,9 @@ spec:
         - mountPath: /etc/config/helm-broker
           name: config-volume
 
+        - mountPath: /etc/certs
+          name: helm-certs
+          readOnly: true
         ports:
         - containerPort: {{ .Values.service.internalPort }}
         # Temporary solution for readiness probe
@@ -89,3 +94,11 @@ spec:
       - name: config-volume
         configMap:
           name: helm-config-map
+      - name: helm-certs
+        secret:
+          secretName: helm-secret
+          items:
+          - key: tls.crt
+            path: tls.crt
+          - key: tls.key
+            path: tls.key
