@@ -11,7 +11,7 @@ $DOMAIN = "kyma.local"
 $CREATE_CR_EXTRA_ARGS = ""
 
 if ($SKIP_MINIKUBE_START -eq $false) {
-    Invoke-Expression -Command "${SCRIPTS_DIR}\minikube.ps1 -vm_driver ${VM_DRIVER} -domain ${DOMAIN}
+    Invoke-Expression -Command "${SCRIPTS_DIR}\minikube.ps1 -vm_driver ${VM_DRIVER} -domain ${DOMAIN}"
 
     if($LastExitCode -gt 0){
         exit
