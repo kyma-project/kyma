@@ -20,8 +20,8 @@ global:
     dir: develop/
     version: cc51f73a
   application_operator_tests:
-    dir: develop/
-    version: ac61deff
+    dir: pr/
+    version: PR-3507
   connector_service:
     dir: develop/
     version: f478b085
