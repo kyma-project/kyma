@@ -52,7 +52,7 @@ func (b *bucket) Create() error {
 
 	err := b.resCli.Create(bucket)
 	if err != nil {
-		return errors.Wrapf(err, "while creating bucket %s in namespace %s", b.name, b.namespace)
+		return errors.Wrapf(err, "while creating Bucket %s in namespace %s", b.name, b.namespace)
 	}
 
 	return err
@@ -96,7 +96,7 @@ func (b *bucket) Get(name string) (*v1alpha2.Bucket, error) {
 func (b *bucket) Delete() error {
 	err := b.resCli.Delete(b.name)
 	if err != nil {
-		return errors.Wrapf(err, "while deleting bucket %s in namespace %s", b.name, b.namespace)
+		return errors.Wrapf(err, "while deleting Bucket %s in namespace %s", b.name, b.namespace)
 	}
 
 	return nil
