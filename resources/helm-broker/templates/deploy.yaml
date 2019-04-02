@@ -34,8 +34,7 @@ spec:
 
       containers:
       - name: {{ .Chart.Name }}
-        #image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
-        image: helm-broker:latest
+        image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.helm_broker.dir }}helm-broker:{{ .Values.global.helm_broker.version }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         env:
           - name: APP_TMP_DIR
