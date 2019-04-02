@@ -2,15 +2,10 @@ package helm_test
 
 import (
 	"context"
-	"encoding/pem"
-	"io/ioutil"
-	"log"
 	"net"
-	"os"
 	"testing"
 	"time"
 
-	"github.com/SpectoLabs/hoverfly/core/certs"
 	"github.com/ghodss/yaml"
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
@@ -18,55 +13,14 @@ import (
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
 	"k8s.io/helm/pkg/proto/hapi/chart"
 	hapi_release5 "k8s.io/helm/pkg/proto/hapi/release"
 	"k8s.io/helm/pkg/proto/hapi/services"
 )
 
-var (
-	keyFile  string
-	certFile string
-)
-
-func TestMain(m *testing.M) {
-	setupCerts()
-	code := m.Run()
-	cleanupCerts()
-	os.Exit(code)
-}
-
-func setupCerts() {
-	certOut, err := ioutil.TempFile("/tmp/", "certFile")
-	if err != nil {
-		log.Fatal(err)
-	}
-	keyOut, err := ioutil.TempFile("/tmp/", "keyFile")
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = createDummyKeyPair(keyOut, certOut)
-	keyOut.Close()
-	certOut.Close()
-	if err != nil {
-		log.Fatal(err)
-	}
-	keyFile = keyOut.Name()
-	certFile = certOut.Name()
-
-}
-func cleanupCerts() {
-	os.Remove(keyFile)
-	os.Remove(certFile)
-}
-
 func TestClientInstallSuccess(t *testing.T) {
 	// given
-	fakeTiller := &fakeTillerSvc{
-		certFile: certFile,
-		keyFile:  keyFile,
-	}
+	fakeTiller := &fakeTillerSvc{}
 	fakeTiller.SetUp(t)
 
 	cVals := internal.ChartValues{
@@ -76,9 +30,6 @@ func TestClientInstallSuccess(t *testing.T) {
 	hClient := helm.NewClient(helm.Config{
 		TillerHost:              fakeTiller.Host,
 		TillerConnectionTimeout: time.Second,
-		TillerTLSCrt:            certFile,
-		TillerTLSKey:            keyFile,
-		TillerTLSInsecure:       true,
 	}, spy.NewLogDummy())
 
 	// when
@@ -101,22 +52,18 @@ func TestClientInstallSuccess(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fakeTiller.GotInstReleaseReq.Values, &chart.Config{Raw: string(b)})
 
-	// clean-up
+	// Clean-up
 	fakeTiller.TearDown(t)
 }
 
 func TestClientDeleteSuccess(t *testing.T) {
-	fakeTiller := &fakeTillerSvc{
-		certFile: certFile,
-		keyFile:  keyFile,
-	}
+	// given
+	fakeTiller := &fakeTillerSvc{}
 	fakeTiller.SetUp(t)
+
 	hClient := helm.NewClient(helm.Config{
 		TillerHost:              fakeTiller.Host,
 		TillerConnectionTimeout: time.Second,
-		TillerTLSCrt:            certFile,
-		TillerTLSKey:            keyFile,
-		TillerTLSInsecure:       true,
 	}, spy.NewLogDummy())
 
 	// when
@@ -128,7 +75,7 @@ func TestClientDeleteSuccess(t *testing.T) {
 	assert.NotNil(t, fakeTiller.GotDelReleaseReq)
 	assert.Equal(t, fakeTiller.GotDelReleaseReq.Name, "r-name")
 
-	// clean-up
+	// Clean-up
 	fakeTiller.TearDown(t)
 }
 
@@ -137,11 +84,8 @@ type fakeTillerSvc struct {
 	GotInstReleaseReq *services.InstallReleaseRequest
 	GotDelReleaseReq  *services.UninstallReleaseRequest
 
-	grpcSvc  *grpc.Server
-	Host     string
-	keyFile  string
-	certFile string
-
+	grpcSvc      *grpc.Server
+	Host         string
 	serverErr    error
 	serverClosed chan struct{}
 }
@@ -152,10 +96,8 @@ func (s *fakeTillerSvc) SetUp(t *testing.T) {
 	require.NoError(t, err)
 
 	s.Host = lis.Addr().String()
-	credentials, err := credentials.NewServerTLSFromFile(s.certFile, s.keyFile)
-	require.NoError(t, err)
 
-	s.grpcSvc = grpc.NewServer(grpc.Creds(credentials))
+	s.grpcSvc = grpc.NewServer()
 	services.RegisterReleaseServiceServer(s.grpcSvc, s)
 
 	go func() {
@@ -199,23 +141,4 @@ func fixChart() *chart.Chart {
 			Version: "1.0.0",
 		},
 	}
-}
-
-func createDummyKeyPair(keyOut, certOut *os.File) error {
-	cert, priv, err := certs.NewCertificatePair("Kyma", "SAP", 12*time.Hour)
-	if err != nil {
-		return err
-	}
-
-	err = pem.Encode(certOut, &pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw})
-	if err != nil {
-		return err
-	}
-
-	err = pem.Encode(keyOut, certs.PemBlockForKey(priv))
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
