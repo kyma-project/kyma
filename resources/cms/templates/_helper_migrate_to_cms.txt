@@ -11,12 +11,13 @@ connectToMinio() {
   SCHEME=http
   MINIO_ENDPOINT=assetstore-minio
   MINIO_PORT=9000
+  CONFIG_NAME=$1
   ATTEMPTS=0 ; LIMIT=29 ; # Allow 30 attempts
   set -e ; # fail if we can't read the keys.
   ACCESS=$(cat /config/accesskey) ; SECRET=$(cat /config/secretkey) ;
   set +e ; # The connections to minio are allowed to fail.
   echo "Connecting to Minio server: $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT" ;
-  MC_COMMAND="mc config host add myminio $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT $ACCESS $SECRET" ;
+  MC_COMMAND="mc config host add $CONFIG_NAME $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT $ACCESS $SECRET" ;
   $MC_COMMAND ;
   STATUS=$? ;
   until [ $STATUS = 0 ]
@@ -86,9 +87,8 @@ getAppNames() {
 getAssetType() {
   FILE_NAME=$1
   OLD_URL=$2
-
-  if [ $FILE_NAME == "apiSpec.json" ]; then
-
+  
+  if [ $FILE_NAME = "apiSpec.json" ]; then
      # xmllint throws error if unable to format invalid XML and then we know it is OpenAPI
      # there is no other way to differenciate between OpenAPI or OData as they are always stored as apiSpec.json file
      VALID_XML_CONTENT=$(curl -s -N $OLD_URL | xmllint --noout --format 2>/dev/null -)
@@ -113,17 +113,19 @@ getAppServiceIds() {
 createMigratedResources() {
     APP_SERVICES_IDS_ARRAY=$1
     APP_NAME=$2
+    CONFIG_NAME=$3
 
     for i in "${APP_SERVICES_IDS_ARRAY[@]}"
     do
-      FILE_NAME=$(mc ls kymaminio/content/service-class/$i | awk '{print $5}')
+      FILE_NAME=$(mc ls $CONFIG_NAME/content/service-class/$i | awk '{print $6}')
       SPEC_URL=$MINIO_DOMAIN/content/service-class/$i/$FILE_NAME
       createDocsTopic $i $SPEC_URL $FILE_NAME
     done
 }
 
 installDeps
-connectToMinio
+CONFIG_NAME="kymaminio"
+connectToMinio $CONFIG_NAME
 cleanupOfOldResources
 APPS_NAMES_ARRAY=($(getAppNames))
 
@@ -138,11 +140,12 @@ do
 
     echo "Migration of specs for $i application started"
 
-    createMigratedResources $APP_SERVICES_IDS_ARRAY $i
+    createMigratedResources $APP_SERVICES_IDS_ARRAY $i $CONFIG_NAME
 
    fi
 
 done
+b
 
 
 
