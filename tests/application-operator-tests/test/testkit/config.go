@@ -9,16 +9,25 @@ import (
 )
 
 const (
-	namespaceEnvName           = "NAMESPACE"
-	tillerHostEnvName          = "TILLER_HOST"
+	namespaceEnvName              = "NAMESPACE"
+	tillerHostEnvName             = "TILLER_HOST"
+	helmTLSKeyFileEnvName         = "HELM_TLS_KEY_FILE"
+	helmTLSCertificateFileEnvName = "HELM_TLS_CERTIFICATE_FILE"
+	tillerTLSSkipVerifyEnvName    = "TILLER_TLS_SKIP_VERIFY"
+
 	installationTimeoutEnvName = "INSTALLATION_TIMEOUT_SECONDS"
 
-	defaultInstallationTimeout = 180
+	defaultHelmTLSKeyFile         = "/etc/certs/tls.key"
+	defaultHelmTLSCertificateFile = "/etc/certs/tls.crt"
+	defaultInstallationTimeout    = 180
 )
 
 type TestConfig struct {
 	Namespace                  string
 	TillerHost                 string
+	TillerTLSKeyFile           string
+	TillerTLSCertificateFile   string
+	TillerTLSSkipVerify        bool
 	InstallationTimeoutSeconds int
 }
 
@@ -31,6 +40,24 @@ func ReadConfig() (TestConfig, error) {
 	tillerHost, found := os.LookupEnv(tillerHostEnvName)
 	if !found {
 		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", tillerHostEnvName))
+	}
+
+	helmTLSKeyFile, found := os.LookupEnv(helmTLSKeyFileEnvName)
+	if !found {
+		log.Printf("failed to read %s environment variable, using default value %s", helmTLSKeyFileEnvName, defaultHelmTLSKeyFile)
+		helmTLSKeyFile = defaultHelmTLSKeyFile
+	}
+
+	helmTLSCertificateFile, found := os.LookupEnv(helmTLSCertificateFileEnvName)
+	if !found {
+		log.Printf("failed to read %s environment variable, using default value %s", helmTLSCertificateFileEnvName, defaultHelmTLSCertificateFile)
+		helmTLSCertificateFile = defaultHelmTLSCertificateFile
+	}
+
+	tillerTLSSkipVerify := true
+	sv, found := os.LookupEnv(tillerTLSSkipVerifyEnvName)
+	if found {
+		tillerTLSSkipVerify, _ = strconv.ParseBool(sv)
 	}
 
 	var timeoutValue int
@@ -48,6 +75,9 @@ func ReadConfig() (TestConfig, error) {
 	config := TestConfig{
 		Namespace:                  namespace,
 		TillerHost:                 tillerHost,
+		TillerTLSKeyFile:           helmTLSKeyFile,
+		TillerTLSCertificateFile:   helmTLSCertificateFile,
+		TillerTLSSkipVerify:        tillerTLSSkipVerify,
 		InstallationTimeoutSeconds: timeoutValue,
 	}
 
