@@ -40,7 +40,8 @@ type dashboard struct {
 
 func NewGrafanaUpgradeTest(k8sCli kubernetes.Interface) *grafanaUpgradeTest {
 	return &grafanaUpgradeTest{
-		k8sCli: k8sCli,
+		k8sCli:  k8sCli,
+		grafana: grafana{loginForm: url.Values{}},
 	}
 
 }
@@ -48,32 +49,45 @@ func NewGrafanaUpgradeTest(k8sCli kubernetes.Interface) *grafanaUpgradeTest {
 func (ut *grafanaUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	ut.namespace = namespace
 	ut.log = log
+	err := ut.getGrafana()
+	if err != nil {
+		return err
+	}
 
-	ut.collectDashboards()
-	return nil
+	dashboards, err := ut.collectDashboards()
+	if err != nil {
+		return err
+	}
+
+	err = ut.storeDashboards(dashboards)
+	return err
 }
 
 func (ut *grafanaUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	ut.namespace = namespace
 	ut.log = log
+	err := ut.getGrafana()
+	if err != nil {
+		return err
+	}
 	return ut.compareDashboards()
 }
 
 const (
-	dataField = "dashboards"
-
-	adminUserSecretName    = "admin-user"
-	grafanaNS              = "kyma-system"
-	grafanaPodName         = "monitoring-grafana-0"
-	grafanaServiceName     = "monitoring-grafana"
-	grafanaStatefulsetName = "monitoring-grafana"
-	grafanaPvcName         = "monitoring-grafana"
-	containerName          = "grafana"
-	grafanaLabelSelector   = "app=monitoring-grafana"
+	grafanaDataField           = "dashboards"
+	grafanaAdminUserSecretName = "admin-user"
+	grafanaConfigMapName       = "grafana-upgrade-test"
+	grafanaNS                  = "kyma-system"
+	grafanaPodName             = "monitoring-grafana-0"
+	grafanaServiceName         = "monitoring-grafana"
+	grafanaStatefulsetName     = "monitoring-grafana"
+	grafanaPvcName             = "monitoring-grafana"
+	grafanaContainerName       = "grafana"
+	grafanaLabelSelector       = "app=monitoring-grafana"
 )
 
 func (ut *grafanaUpgradeTest) getCredentials() error {
-	secret, err := ut.k8sCli.CoreV1().Secrets(ut.namespace).Get(adminUserSecretName, metav1.GetOptions{})
+	secret, err := ut.k8sCli.CoreV1().Secrets(grafanaNS).Get(grafanaAdminUserSecretName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -82,12 +96,12 @@ func (ut *grafanaUpgradeTest) getCredentials() error {
 	if val, ok := data["email"]; ok {
 		ut.loginForm.Set("login", string(val))
 	} else {
-		return fmt.Errorf("no email found in secret '%s'", adminUserSecretName)
+		return fmt.Errorf("no email found in secret '%s'", grafanaAdminUserSecretName)
 	}
 	if val, ok := data["password"]; ok {
 		ut.loginForm.Set("password", string(val))
 	} else {
-		return fmt.Errorf("No password found in secret '%s'", adminUserSecretName)
+		return fmt.Errorf("No password found in secret '%s'", grafanaAdminUserSecretName)
 	}
 
 	return nil
@@ -117,7 +131,7 @@ func (ut *grafanaUpgradeTest) getGrafana() error {
 	spec := pod.Spec
 	containers := spec.Containers
 	for _, container := range containers {
-		if container.Name == containerName {
+		if container.Name == grafanaContainerName {
 			envs := container.Env
 			for _, envVar := range envs {
 				switch envVar.Name {
@@ -199,10 +213,10 @@ func (ut *grafanaUpgradeTest) storeDashboards(dashboards map[string]dashboard) e
 	}
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: configMapName,
+			Name: grafanaConfigMapName,
 		},
 		Data: map[string]string{
-			dataField: string(dashboardJSON),
+			grafanaDataField: string(dashboardJSON),
 		},
 	}
 	_, err = ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Create(cm)
@@ -211,12 +225,12 @@ func (ut *grafanaUpgradeTest) storeDashboards(dashboards map[string]dashboard) e
 
 func (ut *grafanaUpgradeTest) retrievePreviousDashboards() (map[string]dashboard, error) {
 
-	cm, err := ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Get(configMapName, metav1.GetOptions{})
+	cm, err := ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Get(grafanaConfigMapName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
 	}
 	dashboards := make(map[string]dashboard)
-	err = json.Unmarshal([]byte(cm.Data[dataField]), &dashboards)
+	err = json.Unmarshal([]byte(cm.Data[grafanaDataField]), &dashboards)
 	if err != nil {
 		return nil, err
 	}
@@ -230,7 +244,7 @@ func (ut *grafanaUpgradeTest) compareDashboards() error {
 		return err
 	}
 	current, err := ut.collectDashboards()
-	ut.log.Debugln(previous)
+
 	ut.log.Debugln(current)
 	if !cmp.Equal(previous, current) {
 		return fmt.Errorf("retrieved data not equal: before: %+v, after: %+v", previous, current)
@@ -243,7 +257,6 @@ func (ut *grafanaUpgradeTest) getGrafanaAndDexAuth() (*http.Response, error) {
 	//  /login
 	domain := fmt.Sprintf("%s%s", ut.url, "/login")
 	grafLogin, err := ut.requestToGrafana(domain, "GET", nil, nil, nil)
-	fmt.Println(grafLogin.StatusCode)
 	if grafLogin.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("login to grafana failed: StatusCode: %v", grafLogin.StatusCode)
 	}

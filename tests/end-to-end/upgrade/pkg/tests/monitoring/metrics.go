@@ -25,7 +25,7 @@ type metricsUpgradeTest struct {
 }
 
 func NewMetricsUpgradeTest(k8sCli kubernetes.Interface) (*metricsUpgradeTest, error) {
-	client, err := prometheus.NewClient(prometheus.Config{Address: fmt.Sprintf("%v:%v", domain, port)})
+	client, err := prometheus.NewClient(prometheus.Config{Address: fmt.Sprintf("%v:%v", prometheusDomain, prometheusPort)})
 	if err != nil {
 		return nil, err
 	}
@@ -62,14 +62,14 @@ func (ut *metricsUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 }
 
 const (
-	domain        = "http://monitoring-prometheus.kyma-system"
-	prometheusNS  = "kyma-system"
-	metricsQuery  = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
-	port          = "9090"
-	metricName    = "kube_pod_container_resource_requests_cpu_cores"
-	configMapName = "metrics-upgrade-test"
-	dataField     = "response"
-	timeField     = "collected_at"
+	prometheusDomain     = "http://monitoring-prometheus.kyma-system"
+	prometheusNS         = "kyma-system"
+	prometheusPort       = "9090"
+	metricsName          = "kube_pod_container_resource_requests_cpu_cores"
+	metricsQuery         = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
+	metricsConfigMapName = "metrics-upgrade-test"
+	metricsDataField     = "response"
+	metricsTimeField     = "collected_at"
 )
 
 func (ut *metricsUpgradeTest) collectMetrics(time time.Time) (model.Vector, error) {
@@ -97,11 +97,11 @@ func (ut *metricsUpgradeTest) storeMetrics(value model.Vector, time time.Time) e
 	}
 	cm := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: configMapName,
+			Name: metricsConfigMapName,
 		},
 		Data: map[string]string{
-			dataField: string(promValue),
-			timeField: string(timeValue),
+			metricsDataField: string(promValue),
+			metricsTimeField: string(timeValue),
 		},
 	}
 	_, err = ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Create(cm)
@@ -110,19 +110,19 @@ func (ut *metricsUpgradeTest) storeMetrics(value model.Vector, time time.Time) e
 
 func (ut *metricsUpgradeTest) retrievePreviousMetrics() (time.Time, model.Vector, error) {
 
-	cm, err := ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Get(configMapName, metav1.GetOptions{})
+	cm, err := ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Get(metricsConfigMapName, metav1.GetOptions{})
 	if err != nil {
 		return time.Time{}, nil, err
 	}
 
 	value := model.Vector{}
-	err = json.Unmarshal([]byte(cm.Data[dataField]), &value)
+	err = json.Unmarshal([]byte(cm.Data[metricsDataField]), &value)
 	if err != nil {
 		return time.Time{}, nil, err
 	}
 
 	timeValue := time.Time{}
-	err = json.Unmarshal([]byte(cm.Data[timeField]), &timeValue)
+	err = json.Unmarshal([]byte(cm.Data[metricsTimeField]), &timeValue)
 	if err != nil {
 		return time.Time{}, nil, err
 	}
