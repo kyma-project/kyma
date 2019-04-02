@@ -35,33 +35,33 @@ Follow these steps:
 
 2. Clone the fork to your `$GOPATH` workspace. Use this command to create the folder structure and clone the repository under the correct location:
 
-  ```
-  git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
-  ```
+    ```
+    git clone git@github.com:{GitHubUsername}/kyma.git $GOPATH/src/github.com/kyma-project/kyma
+    ```
 
-  Follow the steps described in the [`git-workflow.md`](https://github.com/kyma-project/community/blob/master/git-workflow.md#steps) document to configure your fork.
+    Follow the steps described in the [`git-workflow.md`](https://github.com/kyma-project/community/blob/master/git-workflow.md#steps) document to configure your fork.
 
 3. Install dependencies.
 
-  Go to the main directory of the project in your workspace location and install the required dependencies:
+    Go to the main directory of the project in your workspace location and install the required dependencies:
 
-  ```
-  $ cd components/console-backend-service
-  $ dep ensure -vendor-only
-  ```
+    ```
+    $ cd components/console-backend-service
+    $ dep ensure -vendor-only
+    ```
 
 4. Build the project.
 
-  Every project runs differently. Follow instructions in the main `README.md` document of the given project to build it.
+    Every project runs differently. Follow instructions in the main `README.md` document of the given project to build it.
 
 5. Create a branch and start to develop.
 
-  Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
-  Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](https://kyma-project.io/docs/root/kyma#tutorials-develop-a-service-locally-without-using-docker) document.
+    Do not forget about creating unit and acceptance tests if needed. For the unit tests, follow the instructions specified in the main `README.md` document of the given project. For the details concerning the acceptance tests, go to the corresponding directory inside the `tests` directory.
+    Find the information on how to run changes on the cluster without a Docker image in the [Develop a service locally without using Docker](https://kyma-project.io/docs/root/kyma#tutorials-develop-a-service-locally-without-using-docker) document.
 
 6. Test your changes.
 
-  >**NOTE:** For more details about testing, go to the [Testing Kyma](https://kyma-project.io/docs/root/kyma#details-testing-kyma) document.
+    >**NOTE:** For more details about testing, go to the [Testing Kyma](https://kyma-project.io/docs/root/kyma#details-testing-kyma) document.
 
 
 ### Project structure
