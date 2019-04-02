@@ -34,6 +34,18 @@ func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFun
 	}
 }
 
+func getPublishStatusReason(status *string) string {
+	var reason string
+	switch *status {
+	case publisher.PUBLISHED:
+		reason = "Message successfully published to the channel"
+	case publisher.IGNORED:
+		reason = "Event was ignored as there are no subscriptions or consumers configured for this event"
+	case publisher.FAILED:
+		reason = "Some validation or internal error occurred"
+	}
+	return reason
+}
 func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher,
 	tracer *trace.Tracer, opts *opts.Options) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -55,15 +67,8 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		// send success response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		var reason string
-		switch status {
-		case publisher.PUBLISHED:
-			reason = "Message successfully published to the channel"
-		case publisher.IGNORED:
-			reason = "Event was ignored as there are no subscriptions or consumers configured for this event"
-		case publisher.FAILED:
-			reason = "Some validation or internal error occurred"
-		}
+		reason := getPublishStatusReason(&status)
+
 		publishResponse := &api.PublishResponse{
 			EventID: message.Headers[trace.HeaderEventID],
 			Status:  status,
