@@ -29,6 +29,19 @@ The backup and restore [continuous integration flow](https://github.com/kyma-pro
 6. Restore the Namespace and its resources from the backup.
 7. Verify if the resources contained in the restored Namespace work.
 
+### Use environment variables
+
+Use the following environment variables to configure the tests:
+
+| Name | Required | Default | Description |
+|-----|:---------:|:--------:|------------|
+| **DOMAIN** | NO | `kyma.local` | The domain where Kyma runs. |
+| **USER_EMAIL** | YES | - | The email address for authentication in Dex. |
+| **USER_PASSWORD** | YES | - | The password for authentication in Dex. |
+| **KUBECONFIG** | NO | - | The path to the `kubeconfig` file needed to run tests outside the cluster. |
+| **ALL_BACKUP_CONFIGURATION_FILE** | NO | `/all-backup.yaml` | The path to the `all-backup` configuration file. |
+| **SYSTEM_BACKUP_CONFIGURATION_FILE** | NO | `/system-backup.yaml` | The path to the `system-backup` configuration file. |
+
 
 ## Development
 
