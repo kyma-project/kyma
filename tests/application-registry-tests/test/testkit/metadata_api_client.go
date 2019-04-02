@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"testing"
@@ -11,9 +13,9 @@ import (
 )
 
 const (
-	retryCount             = 3
+	retryCount             = 5
 	requestTimeout         = 15 * time.Second
-	retryDelay             = 1 * time.Second
+	retryDelay             = 10 * time.Second
 	modifyIdentifierFormat = "%s-%d"
 )
 
@@ -214,6 +216,15 @@ func statusNotServerError(response *http.Response, err error) bool {
 func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, expectDocumentation bool) Predicate {
 	return func(response *http.Response, err error) bool {
 		if err == nil && response.StatusCode == http.StatusOK {
+
+			save := response.Body
+			savecl := response.ContentLength
+
+			save, response.Body, err = drainBody(response.Body)
+			if err != nil {
+				return false
+			}
+
 			serviceDetails := ServiceDetails{}
 			err = json.NewDecoder(response.Body).Decode(&serviceDetails)
 			if err != nil {
@@ -235,11 +246,29 @@ func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, 
 				documentationMatch = serviceDetails.Documentation != nil
 			}
 
+			response.Body = save
+			response.ContentLength = savecl
+
 			return apiSpecMatch && eventsSpecMatch && documentationMatch
 		}
 
 		return err == nil && response.StatusCode < 500
 	}
+}
+
+func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
+	if b == http.NoBody {
+		// No copying needed. Preserve the magic sentinel meaning of NoBody.
+		return http.NoBody, http.NoBody, nil
+	}
+	var buf bytes.Buffer
+	if _, err = buf.ReadFrom(b); err != nil {
+		return nil, b, err
+	}
+	if err = b.Close(); err != nil {
+		return nil, b, err
+	}
+	return ioutil.NopCloser(&buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), nil
 }
 
 func logResponse(t *testing.T, resp *http.Response) {
