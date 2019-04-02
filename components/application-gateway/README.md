@@ -13,14 +13,15 @@ The Application Gateway requires Go 1.8 or higher.
 To install the Application Gateway, follow these steps:
 
 1. `git clone git@github.com:kyma-project/kyma.git`
-1. `cd kyma/components/application-gateway`
-1. `CGO_ENABLED=0 go build ./cmd/applicationgateway`
+2. `cd kyma/components/application-gateway`
+3. `CGO_ENABLED=0 go build ./cmd/applicationgateway`
 
 ## Usage
 
 This section explains how to use the Application Gateway.
 
 ### Start the Application Gateway
+
 To start the Application Gateway, run this command:
 
 ```
@@ -30,13 +31,13 @@ To start the Application Gateway, run this command:
 The Application Gateway has the following parameters:
 - **proxyPort** - This port acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
 - **externalAPIPort** - This port exposes the API allowing to check component status. The default port is `8081`.
-- **remoteEnvironment** - Remote Environment name used to write and read information about services. The default remote environment is `default-ec`.
-- **namespace** - Namespace where Application Gateway is deployed. The default namespace is `kyma-system`.
-- **requestTimeout** - A timeout for requests sent through the Application Gateway. It is provided in seconds. The default time-out is `1`.
+- **application** - Application name used to write and read information about services. The default Application is `default-ec`.
+- **namespace** - Namespace in which the Application Gateway is deployed. The default Namespace is `kyma-system`.
+- **requestTimeout** - A timeout for requests sent through the Application Gateway, expressed in seconds. The default time-out is `1`.
 - **skipVerify** - A flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
-- **proxyTimeout** - A timeout for request send through proxy in seconds. The default is `10`.
-- **proxyCacheTTL** - Time to live of Remote API information stored in proxy cache. The value is provided in seconds and the default is `120`.
+- **proxyTimeout** - A timeout for requests send through the proxy, expressed in seconds. The default is `10`.
+- **proxyCacheTTL** - Time to live of Remote API information stored in proxy cache, expressed in seconds. The default value is `120`.
 
 ## Development
 
@@ -48,9 +49,9 @@ To generate a mock, follow these steps:
 
 1. Go to the directory where the interface is located.
 2. Run this command:
-```sh
-mockery -name=Sender
-```
+  ```sh
+  mockery -name=Sender
+  ```
 
 ### Tests
 
@@ -78,10 +79,10 @@ See an example in `pkg/apis/istio/v1alpha2`.
 
 ### Contract between the Application Gateway and the Console Backend Service
 
-The Console Backend Service must check the status of the Application Gateway instance that represents the Remote Environment.
+The Console Backend Service must check the status of the Application Gateway instance that represents the Application.
 In the current solution, the Console Backend Service iterates through services to find those which match the criteria, and then uses the health endpoint to determine the status.
 The Console Backend Service has the following obligatory requirements:
-- The Kubernetes service uses the `application` key, with the value as the name of the remote environment.
+- The Kubernetes service uses the `application` key, with the value as the name of the Application.
 - The Kubernetes service contains one port with the `http-api-port` name. The system uses this port for the status check.
 - Find the Kubernetes service in the `kyma-integration` Namespace. You can change its location in the `console-backend-service` chart configuration.
 - The `/v1/health` endpoint returns a status of `HTTP 200`. Any other status code indicates the service is not healthy.
