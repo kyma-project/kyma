@@ -1,21 +1,24 @@
-package utils
+package backup
 
 import (
 	"fmt"
 	"io/ioutil"
-	"os"
+	"log"
 	"time"
 
 	backupv1 "github.com/heptio/ark/pkg/apis/ark/v1"
+	arkbackuppkg "github.com/heptio/ark/pkg/backup"
 	backup "github.com/heptio/ark/pkg/generated/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 	api "k8s.io/kubernetes/pkg/apis/core"
 
 	"github.com/ghodss/yaml"
+	"github.com/heptio/ark/pkg/cmd/util/output"
+	"github.com/heptio/ark/pkg/restic"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 )
 
 type backupClient struct {
@@ -32,12 +35,12 @@ type BackupClient interface {
 	WaitForNamespaceToBeDeleted(name string, waitmax time.Duration) error
 	WaitForBackupToBeCreated(name string, waitmax time.Duration) error
 	WaitForBackupToBeRestored(name string, waitmax time.Duration) error
+	DescribeBackup(name string) error
+	DescribeRestore(name string) error
 }
 
 func NewBackupClient() (BackupClient, error) {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := config.NewRestClientConfig()
 	if err != nil {
 		return nil, err
 	}
@@ -125,6 +128,48 @@ func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time
 			}
 		}
 	}
+}
+
+func (c *backupClient) DescribeBackup(backupName string) error {
+	backup, err := c.backupClient.ArkV1().Backups("heptio-ark").Get(backupName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	deleteRequestListOptions := arkbackuppkg.NewDeleteBackupRequestListOptions(backup.Name, string(backup.UID))
+	deleteRequestList, err := c.backupClient.ArkV1().DeleteBackupRequests("heptio-ark").List(deleteRequestListOptions)
+	if err != nil {
+		return err
+	}
+
+	opts := restic.NewPodVolumeBackupListOptions(backup.Name, string(backup.UID))
+	podVolumeBackupList, err := c.backupClient.ArkV1().PodVolumeBackups("heptio-ark").List(opts)
+	if err != nil {
+		return err
+	}
+
+	s := output.DescribeBackup(backup, deleteRequestList.Items, podVolumeBackupList.Items, true, c.backupClient)
+	log.Printf("========================== Begin Backup: %v ==========================\n", backupName)
+	log.Println(s)
+	log.Printf("========================== End Backup: %v ==========================\n", backupName)
+	return nil
+}
+
+func (c *backupClient) DescribeRestore(backupName string) error {
+	restore, err := c.backupClient.ArkV1().Restores("heptio-ark").Get(backupName, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	opts := restic.NewPodVolumeRestoreListOptions(restore.Name, string(restore.UID))
+	podvolumeRestoreList, err := c.backupClient.ArkV1().PodVolumeRestores("heptio-ark").List(opts)
+	if err != nil {
+		return err
+	}
+
+	s := output.DescribeRestore(restore, podvolumeRestoreList.Items, true, c.backupClient)
+	log.Printf("========================== Begin Restore: %v ==========================\n", backupName)
+	log.Println(s)
+	log.Printf("========================== End Restore: %v ==========================\n", backupName)
+	return nil
 }
 
 func (c *backupClient) GetBackupStatus(backupName string) string {

@@ -7,10 +7,10 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: develop/
-    version: 6b29de8c
+    version: c8aefbee
   event_bus_tests:
     dir: develop/
-    version: 0f985111
+    version: f4c58b01
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
@@ -23,6 +23,7 @@ global:
   publishKnative:
     maxRequests: 16
     maxRequestSize: 65536
+    maxChannelNameLength: 63
     resources:
       limits:
         memory: "32M"

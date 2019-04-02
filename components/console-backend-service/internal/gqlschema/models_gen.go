@@ -306,9 +306,19 @@ type ResourceValues struct {
 }
 
 type Secret struct {
-	Name      string `json:"name"`
-	Namespace string `json:"namespace"`
-	Data      JSON   `json:"data"`
+	Name         string    `json:"name"`
+	Namespace    string    `json:"namespace"`
+	Data         JSON      `json:"data"`
+	Type         string    `json:"type"`
+	CreationTime time.Time `json:"creationTime"`
+	Labels       JSON      `json:"labels"`
+	Annotations  JSON      `json:"annotations"`
+	JSON         JSON      `json:"json"`
+}
+
+type SecretEvent struct {
+	Type   SubscriptionEventType `json:"type"`
+	Secret Secret                `json:"secret"`
 }
 
 type Service struct {

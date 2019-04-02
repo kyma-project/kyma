@@ -318,6 +318,8 @@ type ComplexityRoot struct {
 		DisableApplication        func(childComplexity int, application string, namespace string) int
 		UpdatePod                 func(childComplexity int, name string, namespace string, pod JSON) int
 		DeletePod                 func(childComplexity int, name string, namespace string) int
+		UpdateSecret              func(childComplexity int, name string, namespace string, secret JSON) int
+		DeleteSecret              func(childComplexity int, name string, namespace string) int
 		UpdateReplicaSet          func(childComplexity int, name string, namespace string, replicaSet JSON) int
 		DeleteReplicaSet          func(childComplexity int, name string, namespace string) int
 		UpdateConfigMap           func(childComplexity int, name string, namespace string, configMap JSON) int
@@ -387,6 +389,8 @@ type ComplexityRoot struct {
 		EventActivations      func(childComplexity int, namespace string) int
 		LimitRanges           func(childComplexity int, namespace string) int
 		BackendModules        func(childComplexity int) int
+		Secret                func(childComplexity int, name string, namespace string) int
+		Secrets               func(childComplexity int, namespace string, first *int, offset *int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
 	}
@@ -424,9 +428,19 @@ type ComplexityRoot struct {
 	}
 
 	Secret struct {
-		Name      func(childComplexity int) int
-		Namespace func(childComplexity int) int
-		Data      func(childComplexity int) int
+		Name         func(childComplexity int) int
+		Namespace    func(childComplexity int) int
+		Data         func(childComplexity int) int
+		Type         func(childComplexity int) int
+		CreationTime func(childComplexity int) int
+		Labels       func(childComplexity int) int
+		Annotations  func(childComplexity int) int
+		Json         func(childComplexity int) int
+	}
+
+	SecretEvent struct {
+		Type   func(childComplexity int) int
+		Secret func(childComplexity int) int
 	}
 
 	Section struct {
@@ -619,6 +633,7 @@ type ComplexityRoot struct {
 		PodEvent                  func(childComplexity int, namespace string) int
 		ServiceEvent              func(childComplexity int, namespace string) int
 		ConfigMapEvent            func(childComplexity int, namespace string) int
+		SecretEvent               func(childComplexity int, namespace string) int
 	}
 
 	Title struct {
@@ -682,6 +697,8 @@ type MutationResolver interface {
 	DisableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
 	UpdatePod(ctx context.Context, name string, namespace string, pod JSON) (*Pod, error)
 	DeletePod(ctx context.Context, name string, namespace string) (*Pod, error)
+	UpdateSecret(ctx context.Context, name string, namespace string, secret JSON) (*Secret, error)
+	DeleteSecret(ctx context.Context, name string, namespace string) (*Secret, error)
 	UpdateReplicaSet(ctx context.Context, name string, namespace string, replicaSet JSON) (*ReplicaSet, error)
 	DeleteReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
 	UpdateConfigMap(ctx context.Context, name string, namespace string, configMap JSON) (*ConfigMap, error)
@@ -731,6 +748,8 @@ type QueryResolver interface {
 	EventActivations(ctx context.Context, namespace string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, namespace string) ([]LimitRange, error)
 	BackendModules(ctx context.Context) ([]BackendModule, error)
+	Secret(ctx context.Context, name string, namespace string) (*Secret, error)
+	Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]Secret, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
 }
@@ -769,6 +788,7 @@ type SubscriptionResolver interface {
 	PodEvent(ctx context.Context, namespace string) (<-chan PodEvent, error)
 	ServiceEvent(ctx context.Context, namespace string) (<-chan ServiceEvent, error)
 	ConfigMapEvent(ctx context.Context, namespace string) (<-chan ConfigMapEvent, error)
+	SecretEvent(ctx context.Context, namespace string) (<-chan SecretEvent, error)
 }
 
 func field_ClusterServiceClass_activated_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
@@ -1177,6 +1197,63 @@ func field_Mutation_updatePod_args(rawArgs map[string]interface{}) (map[string]i
 }
 
 func field_Mutation_deletePod_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_updateSecret_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 JSON
+	if tmp, ok := rawArgs["secret"]; ok {
+		var err error
+		err = (&arg2).UnmarshalGQL(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["secret"] = arg2
+	return args, nil
+
+}
+
+func field_Mutation_deleteSecret_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
@@ -2434,6 +2511,73 @@ func field_Query_limitRanges_args(rawArgs map[string]interface{}) (map[string]in
 
 }
 
+func field_Query_secret_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Query_secrets_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg2
+	return args, nil
+
+}
+
 func field_Query_IDPPreset_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -2589,6 +2733,21 @@ func field_Subscription_serviceEvent_args(rawArgs map[string]interface{}) (map[s
 }
 
 func field_Subscription_configMapEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
+func field_Subscription_secretEvent_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
@@ -3805,6 +3964,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeletePod(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
+	case "Mutation.updateSecret":
+		if e.complexity.Mutation.UpdateSecret == nil {
+			break
+		}
+
+		args, err := field_Mutation_updateSecret_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.UpdateSecret(childComplexity, args["name"].(string), args["namespace"].(string), args["secret"].(JSON)), true
+
+	case "Mutation.deleteSecret":
+		if e.complexity.Mutation.DeleteSecret == nil {
+			break
+		}
+
+		args, err := field_Mutation_deleteSecret_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.DeleteSecret(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
 	case "Mutation.updateReplicaSet":
 		if e.complexity.Mutation.UpdateReplicaSet == nil {
 			break
@@ -4419,6 +4602,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.BackendModules(childComplexity), true
 
+	case "Query.secret":
+		if e.complexity.Query.Secret == nil {
+			break
+		}
+
+		args, err := field_Query_secret_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Secret(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.secrets":
+		if e.complexity.Query.Secrets == nil {
+			break
+		}
+
+		args, err := field_Query_secrets_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Secrets(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
+
 	case "Query.IDPPreset":
 		if e.complexity.Query.Idppreset == nil {
 			break
@@ -4582,6 +4789,55 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Secret.Data(childComplexity), true
+
+	case "Secret.type":
+		if e.complexity.Secret.Type == nil {
+			break
+		}
+
+		return e.complexity.Secret.Type(childComplexity), true
+
+	case "Secret.creationTime":
+		if e.complexity.Secret.CreationTime == nil {
+			break
+		}
+
+		return e.complexity.Secret.CreationTime(childComplexity), true
+
+	case "Secret.labels":
+		if e.complexity.Secret.Labels == nil {
+			break
+		}
+
+		return e.complexity.Secret.Labels(childComplexity), true
+
+	case "Secret.annotations":
+		if e.complexity.Secret.Annotations == nil {
+			break
+		}
+
+		return e.complexity.Secret.Annotations(childComplexity), true
+
+	case "Secret.json":
+		if e.complexity.Secret.Json == nil {
+			break
+		}
+
+		return e.complexity.Secret.Json(childComplexity), true
+
+	case "SecretEvent.type":
+		if e.complexity.SecretEvent.Type == nil {
+			break
+		}
+
+		return e.complexity.SecretEvent.Type(childComplexity), true
+
+	case "SecretEvent.secret":
+		if e.complexity.SecretEvent.Secret == nil {
+			break
+		}
+
+		return e.complexity.SecretEvent.Secret(childComplexity), true
 
 	case "Section.name":
 		if e.complexity.Section.Name == nil {
@@ -5457,6 +5713,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.ConfigMapEvent(childComplexity, args["namespace"].(string)), true
+
+	case "Subscription.secretEvent":
+		if e.complexity.Subscription.SecretEvent == nil {
+			break
+		}
+
+		args, err := field_Subscription_secretEvent_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Subscription.SecretEvent(childComplexity, args["namespace"].(string)), true
 
 	case "Title.name":
 		if e.complexity.Title.Name == nil {
@@ -11482,6 +11750,10 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updatePod(ctx, field)
 		case "deletePod":
 			out.Values[i] = ec._Mutation_deletePod(ctx, field)
+		case "updateSecret":
+			out.Values[i] = ec._Mutation_updateSecret(ctx, field)
+		case "deleteSecret":
+			out.Values[i] = ec._Mutation_deleteSecret(ctx, field)
 		case "updateReplicaSet":
 			out.Values[i] = ec._Mutation_updateReplicaSet(ctx, field)
 		case "deleteReplicaSet":
@@ -11993,6 +12265,76 @@ func (ec *executionContext) _Mutation_deletePod(ctx context.Context, field graph
 	}
 
 	return ec._Pod(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_updateSecret(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_updateSecret_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().UpdateSecret(rctx, args["name"].(string), args["namespace"].(string), args["secret"].(JSON))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Secret)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Secret(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_deleteSecret(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_deleteSecret_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().DeleteSecret(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Secret)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Secret(ctx, field.Selections, res)
 }
 
 // nolint: vetshadow
@@ -13104,6 +13446,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_backendModules(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "secret":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_secret(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "secrets":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_secrets(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -15039,6 +15396,107 @@ func (ec *executionContext) _Query_backendModules(ctx context.Context, field gra
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_secret(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_secret_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Secret(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Secret)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Secret(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_secrets(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_secrets_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Secrets(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Secret)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Secret(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query_IDPPreset(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -15935,6 +16393,31 @@ func (ec *executionContext) _Secret(ctx context.Context, sel ast.SelectionSet, o
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "type":
+			out.Values[i] = ec._Secret_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "creationTime":
+			out.Values[i] = ec._Secret_creationTime(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "labels":
+			out.Values[i] = ec._Secret_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "annotations":
+			out.Values[i] = ec._Secret_annotations(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "json":
+			out.Values[i] = ec._Secret_json(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16025,6 +16508,231 @@ func (ec *executionContext) _Secret_data(ctx context.Context, field graphql.Coll
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Secret_type(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Secret",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Secret_creationTime(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Secret",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.CreationTime, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(time.Time)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return MarshalTimestamp(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Secret_labels(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Secret",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Secret_annotations(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Secret",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Annotations, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Secret_json(ctx context.Context, field graphql.CollectedField, obj *Secret) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Secret",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.JSON, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+var secretEventImplementors = []string{"SecretEvent"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _SecretEvent(ctx context.Context, sel ast.SelectionSet, obj *SecretEvent) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, secretEventImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("SecretEvent")
+		case "type":
+			out.Values[i] = ec._SecretEvent_type(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "secret":
+			out.Values[i] = ec._SecretEvent_secret(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _SecretEvent_type(ctx context.Context, field graphql.CollectedField, obj *SecretEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "SecretEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Type, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(SubscriptionEventType)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _SecretEvent_secret(ctx context.Context, field graphql.CollectedField, obj *SecretEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "SecretEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Secret, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Secret)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._Secret(ctx, field.Selections, &res)
 }
 
 var sectionImplementors = []string{"Section"}
@@ -20434,6 +21142,8 @@ func (ec *executionContext) _Subscription(ctx context.Context, sel ast.Selection
 		return ec._Subscription_serviceEvent(ctx, fields[0])
 	case "configMapEvent":
 		return ec._Subscription_configMapEvent(ctx, fields[0])
+	case "secretEvent":
+		return ec._Subscription_secretEvent(ctx, fields[0])
 	default:
 		panic("unknown field " + strconv.Quote(fields[0].Name))
 	}
@@ -20701,6 +21411,37 @@ func (ec *executionContext) _Subscription_configMapEvent(ctx context.Context, fi
 		var out graphql.OrderedMap
 		out.Add(field.Alias, func() graphql.Marshaler {
 			return ec._ConfigMapEvent(ctx, field.Selections, &res)
+		}())
+		return &out
+	}
+}
+
+func (ec *executionContext) _Subscription_secretEvent(ctx context.Context, field graphql.CollectedField) func() graphql.Marshaler {
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Subscription_secretEvent_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	ctx = graphql.WithResolverContext(ctx, &graphql.ResolverContext{
+		Field: field,
+	})
+	// FIXME: subscriptions are missing request middleware stack https://github.com/99designs/gqlgen/issues/259
+	//          and Tracer stack
+	rctx := ctx
+	results, err := ec.resolvers.Subscription().SecretEvent(rctx, args["namespace"].(string))
+	if err != nil {
+		ec.Error(ctx, err)
+		return nil
+	}
+	return func() graphql.Marshaler {
+		res, ok := <-results
+		if !ok {
+			return nil
+		}
+		var out graphql.OrderedMap
+		out.Add(field.Alias, func() graphql.Marshaler {
+			return ec._SecretEvent(ctx, field.Selections, &res)
 		}())
 		return &out
 	}
@@ -23131,15 +23872,15 @@ scalar Timestamp
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
 input ResourceAttributes {
-	verb: String!
-	apiGroup: String
-	apiVersion: String
-	resource: String
+    verb: String!
+    apiGroup: String
+    apiVersion: String
+    resource: String
     resourceArg: String
-	subresource: String! = ""
-	nameArg: String
-	namespaceArg: String
-	isChildResolver: Boolean! = false
+    subresource: String! = ""
+    nameArg: String
+    namespaceArg: String
+    isChildResolver: Boolean! = false
 }
 
 # Content
@@ -23383,6 +24124,11 @@ type Secret {
     name: String!
     namespace: String!
     data: JSON!
+    type: String!
+    creationTime: Timestamp!
+    labels: JSON!
+    annotations: JSON!
+    json: JSON!
 }
 
 type DeleteServiceBindingOutput {
@@ -23593,6 +24339,11 @@ type ServiceEvent {
     service: Service!
 }
 
+type SecretEvent {
+    type: SubscriptionEventType!
+    secret: Secret!
+}
+
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -23775,7 +24526,7 @@ type BackendModule {
     name: String!
 }
 
-# Config Maps 
+# Config Maps
 
 type ConfigMap {
     name: String!
@@ -23805,7 +24556,7 @@ type Query {
     clusterServiceBroker(name: String!): ClusterServiceBroker
     serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
     serviceBroker(name: String!, namespace: String!): ServiceBroker
-    
+
     serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
     serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
@@ -23847,6 +24598,9 @@ type Query {
 
     backendModules: [BackendModule!]!
 
+    secret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secrets(namespace: String!, first: Int, offset: Int): [Secret!]!  @HasAccess(attributes: {resource: "secrets", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 }
@@ -23871,6 +24625,9 @@ type Mutation {
 
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
+
+    updateSecret(name: String!, namespace: String!, secret: JSON!): Secret @HasAccess(attributes: {resource: "secrets", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    deleteSecret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
     deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
@@ -23897,6 +24654,7 @@ type Subscription {
     podEvent(namespace: String!): PodEvent!
     serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}),
     configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}),
+    secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
 # Schema

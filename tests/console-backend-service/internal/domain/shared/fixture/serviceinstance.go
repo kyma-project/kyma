@@ -4,24 +4,41 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 )
 
-func ServiceInstance(name string, namespace string) shared.ServiceInstance {
+func ServiceInstanceFromClusterServiceClass(name string, namespace string) shared.ServiceInstance {
 	return shared.ServiceInstance{
 		Name:      name,
 		Namespace: namespace,
 		Labels:    []string{"test", "test2"},
-		PlanSpec: map[string]interface{}{
-			"first": "1",
-			"second": map[string]interface{}{
-				"value": "2",
-			},
-		},
+		PlanSpec:  TestingBundleFullPlanSpec,
 		ClusterServicePlan: shared.ClusterServicePlan{
-			Name:         "86064792-7ea2-467b-af93-ac9694d96d52",
-			ExternalName: "default",
+			Name:         TestingBundleFullPlanName,
+			ExternalName: TestingBundleFullPlanExternalName,
 		},
 		ClusterServiceClass: shared.ClusterServiceClass{
-			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-			ExternalName: "user-provided-service",
+			Name:         TestingBundleClassName,
+			ExternalName: TestingBundleClassExternalName,
+		},
+		Status: shared.ServiceInstanceStatus{
+			Type: shared.ServiceInstanceStatusTypeRunning,
+		},
+		Bindable: true,
+	}
+}
+
+func ServiceInstanceFromServiceClass(name string, namespace string) shared.ServiceInstance {
+	return shared.ServiceInstance{
+		Name:      name,
+		Namespace: namespace,
+		Labels:    []string{"test", "test2"},
+		PlanSpec:  TestingBundleFullPlanSpec,
+		ServicePlan: shared.ServicePlan{
+			Name:         TestingBundleFullPlanName,
+			ExternalName: TestingBundleFullPlanExternalName,
+		},
+		ServiceClass: shared.ServiceClass{
+			Name:         TestingBundleClassName,
+			ExternalName: TestingBundleClassExternalName,
+			Namespace:    namespace,
 		},
 		Status: shared.ServiceInstanceStatus{
 			Type: shared.ServiceInstanceStatusTypeRunning,

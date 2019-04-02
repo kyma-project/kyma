@@ -40,7 +40,9 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient := testkit.NewHelmClient(config.TillerHost)
+	helmClient, err := testkit.NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile, config.TillerTLSSkipVerify)
+	require.NoError(t, err)
+
 	k8sResourcesChecker := testkit.NewK8sChecker(k8sResourcesClient, app)
 
 	return &TestSuite{
