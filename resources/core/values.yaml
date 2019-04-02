@@ -21,6 +21,7 @@ console:
 global:
   isLocalEnv: false
   knative: false
+   # Organisation/User name of clusterDocsTopics crs in core/docs/charts/documentation/templates
   kymaOrgName: "kyma-project"
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -49,6 +50,7 @@ global:
   docs:
     dir: develop/
     version: a54ac464
+    # Version of clusterDocsTopics crs in core/docs/charts/documentation/templates
     clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
