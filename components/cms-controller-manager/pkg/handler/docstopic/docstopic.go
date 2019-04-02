@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
+	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -26,10 +27,13 @@ type CommonAsset struct {
 }
 
 const (
-	docsTopicLabel              = "cms.kyma-project.io/docstopic"
-	accessLabel                 = "cms.kyma-project.io/access"
-	assetShortNameAnnotation    = "cms.kyma-project.io/assetshortname"
-	webHookServiceConfigMapName = "webhook-config-map"
+	docsTopicLabel           = "cms.kyma-project.io/docsTopic"
+	accessLabel              = "cms.kyma-project.io/access"
+	assetShortNameAnnotation = "cms.kyma-project.io/assetShortName"
+)
+
+var (
+	errInvalidAssetSpec = errors.New("invalid asset spec")
 )
 
 //go:generate mockery -name=AssetService -output=automock -outpkg=automock -case=underscore
@@ -78,6 +82,12 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 	h.logInfof("Start common DocsTopic handling")
 	defer h.logInfof("Finish common DocsTopic handling")
 
+	err := validateSpec(spec)
+	if err != nil {
+		h.recordWarningEventf(instance, pretty.AssetsSpecValidationFailed)
+		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsSpecValidationFailed), status), err
+	}
+
 	bucketName, err := h.ensureBucketExits(ctx, instance.GetNamespace())
 	if err != nil {
 		h.recordWarningEventf(instance, pretty.BucketError, err.Error())
@@ -91,7 +101,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 	}
 	commonAssetsMap := h.convertToAssetMap(commonAssets)
 
-	whsCfg, err := h.whsConfigSvc.Get(ctx, instance.GetNamespace(), webHookServiceConfigMapName)
+	whsCfg, err := h.whsConfigSvc.Get(ctx)
 	if err != nil {
 		h.recordWarningEventf(instance, pretty.AssetsWebHookGetFailed, err.Error())
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsWebHookGetFailed, err.Error()), status), err
@@ -106,6 +116,17 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 		h.logInfof("Instance is up-to-date, action not taken")
 		return nil, nil
 	}
+}
+
+func validateSpec(spec v1alpha1.CommonDocsTopicSpec) error {
+	names := map[string]struct{}{}
+	for _, src := range spec.Sources {
+		if _, exists := names[src.Name]; exists {
+			return errInvalidAssetSpec
+		}
+		names[src.Name] = struct{}{}
+	}
+	return nil
 }
 
 func (h *docstopicHandler) ensureBucketExits(ctx context.Context, namespace string) (string, error) {

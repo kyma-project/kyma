@@ -19,6 +19,11 @@ import (
 
 const timeout = time.Second * 5
 
+var (
+	webhookCfgMapName      = "test"
+	webhookCfgMapNamespace = "test"
+)
+
 func TestReconcile(t *testing.T) {
 	// Given
 	g := gomega.NewGomegaWithT(t)
@@ -29,7 +34,7 @@ func TestReconcile(t *testing.T) {
 	scheme := mgr.GetScheme()
 	assetService := newClusterAssetService(c, scheme)
 	bucketService := newClusterBucketService(c, scheme, "")
-	assetWhsConfigService := config.NewAssetWebHookService(c)
+	assetWhsConfigService := config.NewAssetWebHookService(c, webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileClusterDocsTopic{
 		relistInterval: time.Hour,

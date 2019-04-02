@@ -20,7 +20,9 @@ type AssetWebHookConfig struct {
 }
 
 type assetWebHookConfigService struct {
-	client Client
+	client                 Client
+	webhookCfgMapName      string
+	webhookCfgMapNamespace string
 }
 
 //go:generate mockery -name=Client -output=automock -outpkg=automock -case=underscore
@@ -30,23 +32,25 @@ type Client interface {
 
 //go:generate mockery -name=AssetWebHookConfigService -output=automock -outpkg=automock -case=underscore
 type AssetWebHookConfigService interface {
-	Get(ctx context.Context, namespace, name string) (AssetWebHookConfigMap, error)
+	Get(ctx context.Context) (AssetWebHookConfigMap, error)
 }
 
-func NewAssetWebHookService(client Client) *assetWebHookConfigService {
+func NewAssetWebHookService(client Client, webhookCfgMapName, webhookCfgMapNamespace string) *assetWebHookConfigService {
 	return &assetWebHookConfigService{
-		client: client,
+		client:                 client,
+		webhookCfgMapName:      webhookCfgMapName,
+		webhookCfgMapNamespace: webhookCfgMapNamespace,
 	}
 }
 
-func (r *assetWebHookConfigService) Get(ctx context.Context, namespace string, name string) (AssetWebHookConfigMap, error) {
+func (r *assetWebHookConfigService) Get(ctx context.Context) (AssetWebHookConfigMap, error) {
 	instance := &v1.ConfigMap{}
-	err := r.client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, instance)
+	err := r.client.Get(ctx, types.NamespacedName{Name: r.webhookCfgMapName, Namespace: r.webhookCfgMapNamespace}, instance)
 	if err != nil {
 		if apiErrors.IsNotFound(err) {
 			return nil, nil
 		}
-		return nil, errors.Wrapf(err, "while getting web hook configuration in namespace %s", namespace)
+		return nil, errors.Wrapf(err, "while getting web hook configuration in namespace %s", r.webhookCfgMapName)
 	}
 	return toAssetWhsConfig(*instance)
 }

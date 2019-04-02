@@ -12,6 +12,11 @@ import (
 	"testing"
 )
 
+var (
+	webhookCfgMapName      = "test"
+	webhookCfgMapNamespace = "test"
+)
+
 func Test_assetWhsConfigService(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
@@ -22,36 +27,33 @@ func Test_assetWhsConfigService(t *testing.T) {
 
 		t.Run("nil result", func(t *testing.T) {
 			call.Return(nil).Once()
-			service := config.NewAssetWebHookService(&client)
-			actual, err := service.Get(ctx, "", "")
+			service := config.NewAssetWebHookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			actual, err := service.Get(ctx)
 			g.Expect(err).To(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeEmpty())
 		})
 
 		t.Run("ok", func(t *testing.T) {
-			name := "markdown"
 			call.Run(mockValidConfigMap()).Return(nil).Once()
-			service := config.NewAssetWebHookService(&client)
-			actual, err := service.Get(ctx, "", name)
+			service := config.NewAssetWebHookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			actual, err := service.Get(ctx)
 			g.Expect(err).To(gomega.BeNil())
 			g.Expect(actual).To(gomega.Equal(actual))
 		})
 
 		t.Run("err", func(t *testing.T) {
-			name := "markdown"
 			testError := errors.New("test_error")
 			call.Return(testError).Once()
-			service := config.NewAssetWebHookService(&client)
-			actual, err := service.Get(ctx, "", name)
+			service := config.NewAssetWebHookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			actual, err := service.Get(ctx)
 			g.Expect(err).NotTo(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeNil())
 		})
 
 		t.Run("err-unmarshal", func(t *testing.T) {
-			name := "openapi"
 			call.Return(nil).Run(mockInvalidConfigMap()).Once()
-			service := config.NewAssetWebHookService(&client)
-			actual, err := service.Get(ctx, "", name)
+			service := config.NewAssetWebHookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			actual, err := service.Get(ctx)
 			g.Expect(err).NotTo(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeNil())
 		})

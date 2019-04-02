@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic"
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	"time"
 
@@ -35,6 +36,7 @@ func Add(mgr manager.Manager) error {
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(client, scheme)
 	bucketService := newBucketService(client, scheme, cfg.BucketRegion)
+	webhookCfgService := config.NewAssetWebHookService(client, cfg.WebHookCfgMapName, cfg.WebHookCfgMapNamespace)
 
 	reconciler := &ReconcileDocsTopic{
 		relistInterval: cfg.DocsTopicRelistInterval,
@@ -43,7 +45,7 @@ func Add(mgr manager.Manager) error {
 		recorder:       mgr.GetRecorder("docstopic-controller"),
 		assetSvc:       assetService,
 		bucketSvc:      bucketService,
-		//FIXME populate
+		whsConfigSvc:   webhookCfgService,
 	}
 
 	return add(mgr, reconciler)
@@ -53,6 +55,12 @@ func Add(mgr manager.Manager) error {
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
 	c, err := controller.New("docstopic-controller", mgr, controller.Options{Reconciler: r})
+	if err != nil {
+		return err
+	}
+
+	// Watch for changes to ConfigMap
+	err = c.Watch(&source.Kind{Type: &v1.ConfigMap{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}

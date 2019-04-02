@@ -11,13 +11,13 @@ type AssetWebHookConfigService struct {
 	mock.Mock
 }
 
-// Get provides a mock function with given fields: ctx, namespace, name
-func (_m *AssetWebHookConfigService) Get(ctx context.Context, namespace string, name string) (config.AssetWebHookConfigMap, error) {
-	ret := _m.Called(ctx, namespace, name)
+// Get provides a mock function with given fields: ctx
+func (_m *AssetWebHookConfigService) Get(ctx context.Context) (config.AssetWebHookConfigMap, error) {
+	ret := _m.Called(ctx)
 
 	var r0 config.AssetWebHookConfigMap
-	if rf, ok := ret.Get(0).(func(context.Context, string, string) config.AssetWebHookConfigMap); ok {
-		r0 = rf(ctx, namespace, name)
+	if rf, ok := ret.Get(0).(func(context.Context) config.AssetWebHookConfigMap); ok {
+		r0 = rf(ctx)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(config.AssetWebHookConfigMap)
@@ -25,8 +25,8 @@ func (_m *AssetWebHookConfigService) Get(ctx context.Context, namespace string, 
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
-		r1 = rf(ctx, namespace, name)
+	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
+		r1 = rf(ctx)
 	} else {
 		r1 = ret.Error(1)
 	}

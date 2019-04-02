@@ -17,6 +17,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
+var (
+	webhookCfgMapName      = "test"
+	webhookCfgMapNamespace = "test"
+)
+
 const timeout = time.Second * 5
 
 func TestReconcile(t *testing.T) {
@@ -29,7 +34,7 @@ func TestReconcile(t *testing.T) {
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(c, scheme)
 	bucketService := newBucketService(c, scheme, "")
-	assetWhsConfigService := config.NewAssetWebHookService(c)
+	assetWhsConfigService := config.NewAssetWebHookService(c, webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileDocsTopic{
 		Client:         c,
