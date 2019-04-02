@@ -64,7 +64,7 @@ func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
 
 func (r repository) Delete(id string) apperrors.AppError {
 	err := r.resourceInterface.Delete(id, &metav1.DeleteOptions{})
-	if err != nil {
+	if err != nil && !k8serrors.IsNotFound(err) {
 		return apperrors.Internal("Failed to delete DocsTopic: %s.", err)
 	}
 

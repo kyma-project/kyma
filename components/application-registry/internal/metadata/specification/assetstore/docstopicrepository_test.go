@@ -224,6 +224,21 @@ func TestDeleteDocsTopic(t *testing.T) {
 		require.Error(t, err)
 		resourceInterfaceMock.AssertExpectations(t)
 	})
+
+	t.Run("Should not fail if Docs Topic doesn't exist", func(t *testing.T) {
+		// given
+		resourceInterfaceMock := &mocks.ResourceInterface{}
+		repository := NewDocsTopicRepository(resourceInterfaceMock)
+
+		resourceInterfaceMock.On("Delete", "id1", &metav1.DeleteOptions{}).Return(k8serrors.NewNotFound(schema.GroupResource{}, ""))
+
+		// when
+		err := repository.Delete("id1")
+
+		// then
+		require.NoError(t, err)
+		resourceInterfaceMock.AssertExpectations(t)
+	})
 }
 
 func createTestDocsTopicEntry() docstopic.Entry {
