@@ -35,31 +35,33 @@ subjects:
   name: test-{{ template "fullname" . }}
   namespace: kyma-system
 ---
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}
-  labels:
-    helm-chart-test: "true"
-  annotations:
-    sidecar.istio.io/inject: "false"
-    helm.sh/hook: test-success
 spec:
-  serviceAccountName: test-{{ template "fullname" . }}
-  restartPolicy: Never
-  containers:
-  - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_logging.dir }}{{ .Values.test.image.name }}:{{ .Values.global.test_logging.version }}
-    imagePullPolicy: Always
-    command:
-      - "/bin/sh"
-    args:
-    - "-c"
-    - "./test-logging"
-  volumes:
-    - name: dex-config
-      configMap:
-        name: dex-config
-        items:
-          - key: config.yaml
-            path: config.yaml
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: test-{{ template "fullname" . }}
+      restartPolicy: Never
+      containers:
+      - name: test-{{ template "fullname" . }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_logging.dir }}/{{ .Values.test.image.name }}:{{ .Values.global.test_logging.version }}
+        imagePullPolicy: Always
+        command:
+          - "/bin/sh"
+        args:
+        - "-c"
+        - "./test-logging"
+      volumes:
+      - name: dex-config
+        configMap:
+            name: dex-config
+            items:
+                - key: config.yaml
+                  path: config.yaml
+{{- end}}

@@ -3,11 +3,15 @@ title: Testing Kyma
 type: Details
 ---
 
-For testing, the Kyma components use the Helm test concept. Place your test under the `templates` directory as a Pod definition that specifies a container with a given command to run.
+For testing, the Kyma components use the [Octopus](http://github.com/kyma-incubator/octopus). 
+Octopus is a testing framework that allows you to run tests defined as Docker images on a running cluster.
+Octopus uses two types of Custom Resource Definitions:
+- TestDefinition defines your test as a Pod specification.
+- ClusterTestSuite defines a suite of tests to execute and how to execute them.
+
+Place your TestDefinition in your chart.
 
 ## Add a new test
-
-The system bases tests on the Helm broker concept with one modification: adding a Pod label. Before you create a test, see the official [Chart Tests](https://github.com/kubernetes/helm/blob/release-2.10/docs/chart_tests.md) documentation. Then, add the `"helm-chart-test": "true"` label to your Pod template.
 
 See the following example of a test prepared for Dex:
 
@@ -33,48 +37,96 @@ The test adds a new **test-dex-connection.yaml** under the `templates/tests` dir
 This simple test calls the `Dex` endpoint with cURL, defined as follows:
 
 ```yaml
-apiVersion: v1
-kind: Pod
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: "test-{{ template "fullname" . }}-connection-dex"
-  annotations:
-    "helm.sh/hook": test-success
-  labels:
-      "helm-chart-test": "true" # ! Our customization
 spec:
-  hostNetwork: true
-  containers:
-  - name: "test-{{ template "fullname" . }}-connection-dex"
-    image: tutum/curl:alpine
-    command: ["/usr/bin/curl"]
-    args: [
-      "--fail",
-      "http://dex-service.{{ .Release.Namespace }}.svc.cluster.local:5556/.well-known/openid-configuration"
-    ]
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      containers:
+      - name: "test-{{ template "fullname" . }}-connection-dex"
+        image: tutum/curl:alpine
+        command: ["/usr/bin/curl"]
+        args: [
+          "--fail",
+          "--max-time", "10",
+          "--retry", "60",
+          "--retry-delay", "3",
+          "http://dex-service.{{ .Release.Namespace }}.svc.cluster.local:5556/.well-known/openid-configuration"
+        ]
+      restartPolicy: Never
+---
+
 ```
 
 ## Test execution
+To execute all tests, use the `testing.sh` script located in the `/installation/scripts/` directory. 
+Internally, `ClusterTestSuite` resource is defined, that fetches all `TestDefinitions` and executes them.
 
-All tests created for charts under `/resources/core/` run automatically after starting Kyma.
-If any of the tests fails, the system prints the Pod logs in the terminal, then deletes all the Pods.
-
->**NOTE:** If you run Kyma locally, by default, the system does not take into account the test's exit code. As a result, the system does not terminate Kyma Docker container, and you can still access it.
-To force a termination in case of failing tests, use `--exit-on-test-fail` flag when executing `run.sh` script.
-
-CI propagates the exit status of tests. If any test fails, the whole CI job fails as well.
-
-Follow the same guidelines to add a test which is not a part of any `core` component. However, for test execution, see the **Run a test manually** section in this document.
 
 ### Run a test manually
+To execute tests manually, create `ClusterTestSuite` on your own. See the following example:
 
-To run a test manually, use the `testing.sh` script located in the `/installation/scripts/` directory which runs all tests defined for `core` releases.
-If any of the tests fails, the system prints the Pod logs in the terminal, then deletes all the Pods.
-
-Another option is to run a Helm test directly on your release.
-
-```bash
-$ helm test {your_release_name}
+```yaml
+apiVersion: testing.kyma-project.io/v1alpha1
+kind: ClusterTestSuite
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: {my-suite}
+spec:
+  maxRetries: 0
+  concurrency: 1
+  count: 1
 ```
 
-You can also run your test on custom releases. If you do this, remember to always delete the Pods after a test ends.
+Creation of the suite triggers tests. Current progress of the tests is visible in a `ClusterTestSuite` status.
+```bash
+ kubectl get cts {my-suite} -oyaml
+ ```
+ 
+The sample output looks as follows:
+```
+apiVersion: testing.kyma-project.io/v1alpha1
+kind: ClusterTestSuite
+metadata:
+  name: {my-suite}
+spec:
+  concurrency: 1
+  count: 1
+  maxRetries: 0
+status:
+  conditions:
+  - status: "True"
+    type: Running
+  results:
+  - executions:
+    - completionTime: 2019-04-05T12:23:00Z
+      id: {my-suite}-test-dex-dex-connection-dex-0
+      podPhase: Succeeded
+      startTime: 2019-04-05T12:22:54Z
+    name: test-dex-dex-connection-dex
+    namespace: kyma-system
+    status: Succeeded
+  - executions:
+    - id: {my-suite}-test-core-core-ui-acceptance-0
+      podPhase: Running
+      startTime: 2019-04-05T12:37:53Z
+    name: test-core-core-ui-acceptance
+    namespace: kyma-system
+    status: Running
+  - executions: []
+    name: test-api-controller-acceptance
+    namespace: kyma-system
+    status: NotYetScheduled
+  startTime: 2019-04-05T12:22:53Z
+```
+
+The ID of the execution is the same as the ID of the testing Pod. The testing Pod is created in the same namespace as it's TestDefinition. To get logs for a specific test, execute the following command:
+```
+kubeclt logs {execution-id} -n {test-def-namespace}
+```
