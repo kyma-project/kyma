@@ -34,8 +34,7 @@ rules:
 - nonResourceURLs:
     - "*"
   verbs:
-    - "get"
-    - "list"
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
 #Full access to all non resource urls
@@ -86,8 +85,7 @@ rules:
   resources:
     - "*"
   verbs:
-    - "get"
-    - "list"
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
