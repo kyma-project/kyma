@@ -201,8 +201,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
-    dir: develop
-    version: 0f2d461a
+    dir:
+    version: 0.9.0-rc1
   ## to enable auth and authz set value to true
   rbac:
     create: true

@@ -69,7 +69,7 @@ spec:
   serviceAccount: {{ template "load-test.fullname" . }}
   containers:
   - name: load-test
-    image: {{ .Values.containerRegistry.path }}/develop/load-test:{{ .Values.image.tag }}
+    image: {{ .Values.containerRegistry.path }}/load-test:{{ .Values.image.tag }}
     imagePullPolicy: IfNotPresent
     env:
     - name: KUBELESS_CONFIG
