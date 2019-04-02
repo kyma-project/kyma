@@ -36,6 +36,8 @@ type AnyValue interface{}
 // PublishResponse represents a successful publish response
 type PublishResponse struct {
 	EventID string `json:"event-id"`
+	Status  string `json:"status"`
+	Reason  string `json:"reason"`
 }
 
 // CloudEvent represents the event to be persisted to NATS
