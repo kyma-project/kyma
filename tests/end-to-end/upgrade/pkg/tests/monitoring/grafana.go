@@ -33,17 +33,30 @@ type grafana struct {
 	loginForm  url.Values
 	httpClient *http.Client
 }
+
 type dashboard struct {
 	Title string `json:title`
 	URL   string `json:url`
 }
+
+const (
+	grafanaDataField           = "dashboards"
+	grafanaAdminUserSecretName = "admin-user"
+	grafanaConfigMapName       = "grafana-upgrade-test"
+	grafanaNS                  = "kyma-system"
+	grafanaPodName             = "monitoring-grafana-0"
+	grafanaServiceName         = "monitoring-grafana"
+	grafanaStatefulsetName     = "monitoring-grafana"
+	grafanaPvcName             = "monitoring-grafana"
+	grafanaContainerName       = "grafana"
+	grafanaLabelSelector       = "app=monitoring-grafana"
+)
 
 func NewGrafanaUpgradeTest(k8sCli kubernetes.Interface) *grafanaUpgradeTest {
 	return &grafanaUpgradeTest{
 		k8sCli:  k8sCli,
 		grafana: grafana{loginForm: url.Values{}},
 	}
-
 }
 
 func (ut *grafanaUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
@@ -66,25 +79,14 @@ func (ut *grafanaUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 func (ut *grafanaUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	ut.namespace = namespace
 	ut.log = log
+
 	err := ut.getGrafana()
 	if err != nil {
 		return err
 	}
+
 	return ut.compareDashboards()
 }
-
-const (
-	grafanaDataField           = "dashboards"
-	grafanaAdminUserSecretName = "admin-user"
-	grafanaConfigMapName       = "grafana-upgrade-test"
-	grafanaNS                  = "kyma-system"
-	grafanaPodName             = "monitoring-grafana-0"
-	grafanaServiceName         = "monitoring-grafana"
-	grafanaStatefulsetName     = "monitoring-grafana"
-	grafanaPvcName             = "monitoring-grafana"
-	grafanaContainerName       = "grafana"
-	grafanaLabelSelector       = "app=monitoring-grafana"
-)
 
 func (ut *grafanaUpgradeTest) getCredentials() error {
 	secret, err := ut.k8sCli.CoreV1().Secrets(grafanaNS).Get(grafanaAdminUserSecretName, metav1.GetOptions{})
@@ -98,6 +100,7 @@ func (ut *grafanaUpgradeTest) getCredentials() error {
 	} else {
 		return fmt.Errorf("no email found in secret '%s'", grafanaAdminUserSecretName)
 	}
+
 	if val, ok := data["password"]; ok {
 		ut.loginForm.Set("password", string(val))
 	} else {
@@ -163,6 +166,7 @@ func (ut *grafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	domain := fmt.Sprintf("%s%s", dexAuthLocal.Request.URL.String(), "api/search")
 	params := url.Values{}
 	params.Set("folderIds", "0")
@@ -171,6 +175,7 @@ func (ut *grafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) 
 	if err != nil {
 		return nil, err
 	}
+
 	if apiSearchFolders.StatusCode != http.StatusOK {
 		return nil, fmt.Errorf("request failed %v, %v", domain, apiSearchFolders.StatusCode)
 	}
