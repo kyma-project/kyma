@@ -68,7 +68,6 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		reason := getPublishStatusReason(&status)
-
 		publishResponse := &api.PublishResponse{
 			EventID: message.Headers[trace.HeaderEventID],
 			Status:  status,
@@ -77,8 +76,8 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		if err := json.NewEncoder(w).Encode(*publishResponse); err != nil {
 			log.Printf("failed to send response back: %v", err)
 		} else {
-			log.Printf("publish to the knative channel status: '%v'\n namespace '%v'\n reason: %v",
-				*channelName, *namespace, publishResponse.Reason)
+			log.Printf("publish to the knative channel: '%v'\nnamespace: '%v'\nstatus: '%v'\nreason: %v",
+				*channelName, *namespace, publishResponse.Status, publishResponse.Reason)
 		}
 		// add span tags for the message properties
 		addSpanTagsForMessage(traceSpan, message)
