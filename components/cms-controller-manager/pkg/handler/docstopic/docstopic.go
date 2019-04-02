@@ -27,9 +27,9 @@ type CommonAsset struct {
 }
 
 const (
-	docsTopicLabel           = "cms.kyma-project.io/docsTopic"
+	docsTopicLabel           = "cms.kyma-project.io/docs-topic"
 	accessLabel              = "cms.kyma-project.io/access"
-	assetShortNameAnnotation = "cms.kyma-project.io/assetShortName"
+	assetShortNameAnnotation = "cms.kyma-project.io/asset-short-name"
 )
 
 var (

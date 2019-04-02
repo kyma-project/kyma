@@ -40,7 +40,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{"test-bucket"}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(nil, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(nil, nil).Once()
 		assetSvc.On("Create", ctx, testData, mock.Anything).Return(nil).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
@@ -71,7 +71,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{"test-bucket"}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(nil, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(nil, nil).Once()
 		assetSvc.On("Create", ctx, testData, mock.Anything).Return(errors.New("test-data")).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
@@ -107,7 +107,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(existingAssets, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		assetSvc.On("Update", ctx, mock.Anything).Return(nil).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
@@ -172,7 +172,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(existingAssets, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		assetSvc.On("Update", ctx, mock.Anything).Return(errors.New("test-error")).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
@@ -209,7 +209,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(existingAssets, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		assetSvc.On("Delete", ctx, toRemove).Return(nil).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
@@ -246,7 +246,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(existingAssets, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		assetSvc.On("Delete", ctx, toRemove).Return(errors.New("test-error")).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
@@ -278,7 +278,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return(nil, nil).Once()
 		bucketSvc.On("Create", ctx, mock.Anything, false, map[string]string{"cms.kyma-project.io/access": "public"}).Return(nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(nil, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(nil, nil).Once()
 		assetSvc.On("Create", ctx, testData, mock.Anything).Return(nil).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
@@ -366,7 +366,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{"test-bucket"}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(nil, errors.New("test-error")).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(nil, errors.New("test-error")).Once()
 
 		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
 
@@ -406,7 +406,7 @@ func TestDocstopicHandler_Handle_Status(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(existingAssets, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
 		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
@@ -440,7 +440,7 @@ func TestDocstopicHandler_Handle_Status(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(existingAssets, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
 		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
@@ -476,7 +476,7 @@ func TestDocstopicHandler_Handle_Status(t *testing.T) {
 		defer whsConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
-		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docsTopic": testData.Name}).Return(existingAssets, nil).Once()
+		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
 
 		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
@@ -527,11 +527,11 @@ func commonAsset(name, assetType, docsName, bucketName string, source v1alpha1.S
 			Name:      name,
 			Namespace: "test",
 			Labels: map[string]string{
-				"cms.kyma-project.io/docsTopic": docsName,
+				"cms.kyma-project.io/docs-topic": docsName,
 				"type.cms.kyma-project.io":      assetType,
 			},
 			Annotations: map[string]string{
-				"cms.kyma-project.io/assetShortName": name,
+				"cms.kyma-project.io/asset-short-name": name,
 			},
 		},
 		Spec: v1alpha2.CommonAssetSpec{
