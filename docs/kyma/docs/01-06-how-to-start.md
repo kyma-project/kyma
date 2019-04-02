@@ -3,7 +3,7 @@ title: How to start
 type: Overview
 ---
 
-When you already know what Kyma is and what components it consists of, you can start using it. Minikube allows you to run Kyma locally, develop, and test your solutions on a small scale before you push them to a cluster. With the Installation and Getting Started guides in hand, you can start developing in a matter of minutes.
+Minikube allows you to run Kyma locally, develop, and test your solutions on a small scale before you push them to a cluster. With the Installation and Getting Started guides in hand, you can start developing in a matter of minutes.
 
 Read, learn, and try on your own to:
 

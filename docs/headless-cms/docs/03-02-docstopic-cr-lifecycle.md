@@ -2,7 +2,8 @@
 title: DocsTopic custom resource lifecycle
 type: Details
 ---
->**NOTE:** Although the document describes the DocsTopic resource, it also applies to the ClusterDocsTopic.
+
+>**NOTE:** This lifecycle also applies to the ClusterDocsTopic CR.
 
 ## Asset CR manual changes
 
