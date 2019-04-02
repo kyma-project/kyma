@@ -16,13 +16,13 @@ import (
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	apiv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 type apiControllerTest struct {
@@ -36,24 +36,22 @@ type apiControllerTest struct {
 }
 
 func NewApiControllerTest() (apiControllerTest, error) {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	restConfig, err := config.NewRestClientConfig()
 	if err != nil {
 		return apiControllerTest{}, err
 	}
 
-	kubelessClient, err := kubeless.NewForConfig(config)
+	kubelessClient, err := kubeless.NewForConfig(restConfig)
 	if err != nil {
 		return apiControllerTest{}, err
 	}
 
-	coreClient, err := kubernetes.NewForConfig(config)
+	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return apiControllerTest{}, err
 	}
 
-	apiClient, err := kyma.NewForConfig(config)
+	apiClient, err := kyma.NewForConfig(restConfig)
 	if err != nil {
 		return apiControllerTest{}, err
 	}
@@ -73,7 +71,6 @@ func NewApiControllerTest() (apiControllerTest, error) {
 }
 
 func (t apiControllerTest) CreateResources(namespace string) {
-
 	_, err := t.createFunction(namespace)
 	So(err, ShouldBeNil)
 
@@ -95,8 +92,11 @@ func (t apiControllerTest) TestResources(namespace string) {
 	So(err, ShouldBeNil)
 }
 
-func (t apiControllerTest) callFunctionWithoutToken(waitmax time.Duration) error {
+func (t apiControllerTest) DeleteResources(namespace string) {
+	// There is not need to be implemented for this test.
+}
 
+func (t apiControllerTest) callFunctionWithoutToken(waitmax time.Duration) error {
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
 	messages := ""
@@ -305,8 +305,4 @@ func fetchDexToken() (string, error) {
 		log.Fatal(err)
 	}
 	return token, nil
-}
-
-func (t apiControllerTest) DeleteResources() {
-	// There is not need to be implemented for this test.
 }

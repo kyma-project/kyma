@@ -1,18 +1,14 @@
+required = [
+  "golang.org/x/tools/cmd/goimports",
+]
+
 [[constraint]]
   name = "github.com/heptio/ark"
   version = "v0.10.1"
 
-[[override]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.11.1"
-
-[[override]]
-  name = "k8s.io/api"
-  version = "kubernetes-1.11.1"
-
-[[override]]
-  name = "k8s.io/apimachinery"
-  version = "kubernetes-1.11.1"
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  revision = "f09ca1a5a23a9704806fa9264d179979820ce26e"
 
 [[constraint]]
   name = "github.com/google/uuid"
@@ -26,6 +22,31 @@
   name = "github.com/Azure/go-autorest"
   version = "v10.14.0"
 
+[[constraint]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.11.3"
+
+[[constraint]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.11.3"
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.11.3"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.11.3"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.11.3"
+
+[[override]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.11.3"
+
 [prune]
   go-tests = true
   unused-packages = true
+  non-go = true
