@@ -25,7 +25,7 @@ func newAsset(dynamicCli dynamic.Interface, namespace string) *asset {
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "assets",
 		}, namespace),
-		name: fixSimpleAssetData().name,
+		name:      fixSimpleAssetData().name,
 		namespace: namespace,
 	}
 }
