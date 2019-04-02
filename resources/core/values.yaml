@@ -21,7 +21,8 @@ console:
 global:
   isLocalEnv: false
   knative: false
-   # Organisation/User name of clusterDocsTopics crs in core/docs/charts/documentation/templates
+   # Change value below to your own organisation name or user name if you want point to clusterDocsTopics definition from your fork
+   # Example: kymaOrgName: "kyma-incubator"
   kymaOrgName: "kyma-project"
   containerRegistry:
     path: eu.gcr.io/kyma-project
@@ -50,7 +51,8 @@ global:
   docs:
     dir: develop/
     version: a54ac464
-    # Version of clusterDocsTopics crs in core/docs/charts/documentation/templates
+    # If you want install Kyma with clusterDocsTopics version from appropriate branch from your fork, please change value below
+    # Example: clusterDocsTopicsVersion: "0.9.0"
     clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
