@@ -11,7 +11,7 @@ metadata:
 spec:
   rules:
   - services: ["logging.kyma-system.svc.cluster.local"]
-    methods: ["GET", "POST", "HEAD"]
+    methods: ["GET", "POST", "OPTIONS"]
 {{- end }}
 
 ---
@@ -29,23 +29,8 @@ spec:
   subjects:
   - user: "cluster.local/ns/kyma-system/sa/logging"
   - properties:
-      request.auth.claims[groups]: "kyma-admins"
+      request.auth.audiences: "kyma-client"
   roleRef:
     kind: ServiceRole
     name: loki-intern-role
-{{- end }}
----
-{{- if .Values.global.rbac.create }}
-apiVersion: rbac.istio.io/v1alpha1
-kind: RbacConfig
-metadata:
-  name: default
-  labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-spec:
-  mode: ON_WITH_INCLUSION
-  inclusion:
-    services: ["logging.kyma-system.svc.cluster.local"]
 {{- end }}
