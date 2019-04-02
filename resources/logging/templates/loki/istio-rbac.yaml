@@ -2,7 +2,7 @@
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRole
 metadata:
-  name: loki-intern-role
+  name: loki-role
   namespace: kyma-system
   labels:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -32,5 +32,5 @@ spec:
       request.auth.audiences: "kyma-client"
   roleRef:
     kind: ServiceRole
-    name: loki-intern-role
+    name: loki-role
 {{- end }}

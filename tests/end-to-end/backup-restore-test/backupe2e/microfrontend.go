@@ -2,19 +2,17 @@ package backupe2e
 
 import (
 	"fmt"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
 
+	. "github.com/smartystreets/goconvey/convey"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-
-	. "github.com/smartystreets/goconvey/convey"
 
 	uiV1alpha1v "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 )
 
 type microfrontendTest struct {
@@ -24,22 +22,21 @@ type microfrontendTest struct {
 }
 
 func NewMicrofrontendTest() (microfrontendTest, error) {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	restConfig, err := config.NewRestClientConfig()
 	if err != nil {
 		return microfrontendTest{}, err
 	}
 
-	mfClient, err := mfClient.NewForConfig(config)
+	mfClient, err := mfClient.NewForConfig(restConfig)
 	if err != nil {
 		return microfrontendTest{}, err
 	}
 
-	coreClient, err := kubernetes.NewForConfig(config)
+	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return microfrontendTest{}, err
 	}
+
 	return microfrontendTest{
 		mfClient:          mfClient,
 		coreClient:        coreClient,
@@ -69,10 +66,9 @@ func (t microfrontendTest) TestResources(namespace string) {
 	So(navNode.NavigationPath, ShouldEqual, "/test/path")
 	So(navNode.ViewURL, ShouldEqual, "/resourcePath")
 	So(navNode.ShowInNavigation, ShouldEqual, true)
-
 }
 
-func (t microfrontendTest) DeleteResources() {
+func (t microfrontendTest) DeleteResources(namespace string) {
 	// There is not need to be implemented for this test.
 }
 

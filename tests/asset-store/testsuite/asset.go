@@ -106,7 +106,7 @@ func (a *asset) WaitForDeletedResources(assets []assetData) error {
 		return true, nil
 	}, a.waitTimeout)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready ClusterAsset resources")
+		return errors.Wrapf(err, "while deleting Asset resources %s in namespace %s")
 	}
 
 	return nil

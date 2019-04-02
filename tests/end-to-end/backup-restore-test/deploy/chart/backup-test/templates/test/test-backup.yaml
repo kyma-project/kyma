@@ -45,6 +45,12 @@ rules:
 - apiGroups: [""]
   resources: ["secrets", "statefulsets", "pods", "persistentvolumeclaims", "persistentvolumes"]
   verbs: ["*"]
+- apiGroups: ["assetstore.kyma-project.io"]
+  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["*"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["*"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -94,5 +100,9 @@ spec:
       value: {{ .Values.global.adminEmail }}
     - name: USER_PASSWORD
       value: {{ .Values.global.adminPassword }}
+    - name: ALL_BACKUP_CONFIGURATION_FILE
+      value: "/all-backup.yaml"
+    - name: SYSTEM_BACKUP_CONFIGURATION_FILE
+      value: "/system-backup.yaml"
   restartPolicy: Never
 ---

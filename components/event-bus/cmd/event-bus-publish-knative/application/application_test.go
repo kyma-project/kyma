@@ -3,6 +3,7 @@ package application
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -228,4 +229,24 @@ func Test_PublishWithTooLargePayload_ShouldFail(t *testing.T) {
 
 	// assert
 	test.AssertExpectedError(t, body, statusCode, http.StatusRequestEntityTooLarge, nil, api.ErrorTypeRequestBodyTooLarge)
+}
+
+func Test_PublishResponseFields(t *testing.T) {
+	// prepare and send payload
+	payload := test.BuildDefaultTestPayloadWithoutSourceId()
+	body, statusCode := test.PerformPublishRequestWithHeaders(t, server.URL, payload, map[string]string{api.HeaderSourceId: test.TestSourceID})
+
+	// assert
+	assert.NotNil(t, body)
+	assert.Equal(t, http.StatusOK, statusCode)
+
+	// get the response
+	publishResponse := &api.PublishResponse{}
+	err := json.Unmarshal(body, &publishResponse)
+
+	// assert
+	assert.Nil(t, err)
+	assert.Equal(t, test.TestEventID, publishResponse.EventID)
+	assert.Equal(t, publisher.PUBLISHED, publishResponse.Status)
+	assert.Equal(t, "Message successfully published to the channel", publishResponse.Reason)
 }
