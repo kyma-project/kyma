@@ -25,9 +25,10 @@ type CommonAsset struct {
 }
 
 const (
-	docsTopicLabel = "docstopic.cms.kyma-project.io"
-	typeLabel      = "type.cms.kyma-project.io"
-	accessLabel    = "access.cms.kyma-project.io"
+	docsTopicLabel           = "docstopic.cms.kyma-project.io"
+	typeLabel                = "type.cms.kyma-project.io"
+	accessLabel              = "access.cms.kyma-project.io"
+	assetShortNameAnnotation = "assetshortname.cms.kyma-project.io"
 )
 
 //go:generate mockery -name=AssetService -output=automock -outpkg=automock -case=underscore
@@ -80,7 +81,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.BucketError, err.Error()), status), err
 	}
 
-	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabel(instance.GetName(), ""))
+	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabels(instance.GetName()))
 	if err != nil {
 		h.recordWarningEventf(instance, pretty.AssetsListingFailed, err.Error())
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed, err.Error()), status), err
@@ -134,8 +135,8 @@ func (h *docstopicHandler) isOnPhaseChange(existing map[string]CommonAsset, stat
 }
 
 func (h *docstopicHandler) shouldCreateAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) bool {
-	for key := range spec.Sources {
-		if _, exists := existing[key]; !exists {
+	for _, source := range spec.Sources {
+		if _, exists := existing[source.Name]; !exists {
 			return true
 		}
 	}
@@ -145,12 +146,12 @@ func (h *docstopicHandler) shouldCreateAssets(existing map[string]CommonAsset, s
 
 func (h *docstopicHandler) shouldUpdateAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string) bool {
 	for key, existingAsset := range existing {
-		expectedSpec, exists := spec.Sources[key]
-		if !exists {
+		expectedSpec := findSource(spec.Sources, key)
+		if expectedSpec == nil {
 			continue
 		}
 
-		expected := h.convertToCommonAssetSpec(expectedSpec, bucketName)
+		expected := h.convertToCommonAssetSpec(*expectedSpec, bucketName)
 		if !reflect.DeepEqual(expected, existingAsset.Spec) {
 			return true
 		}
@@ -161,7 +162,7 @@ func (h *docstopicHandler) shouldUpdateAssets(existing map[string]CommonAsset, s
 
 func (h *docstopicHandler) shouldDeleteAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) bool {
 	for key := range existing {
-		if _, exists := spec.Sources[key]; !exists {
+		if findSource(spec.Sources, key) == nil {
 			return true
 		}
 	}
@@ -200,12 +201,13 @@ func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAcce
 }
 
 func (h *docstopicHandler) createMissingAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string) error {
-	for key, spec := range spec.Sources {
-		if _, exists := existing[key]; exists {
+	for _, spec := range spec.Sources {
+		name := spec.Name
+		if _, exists := existing[name]; exists {
 			continue
 		}
 
-		if err := h.createAsset(ctx, instance, key, spec, bucketName); err != nil {
+		if err := h.createAsset(ctx, instance, spec, bucketName); err != nil {
 			return err
 		}
 	}
@@ -213,12 +215,13 @@ func (h *docstopicHandler) createMissingAssets(ctx context.Context, instance Obj
 	return nil
 }
 
-func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaAccessor, assetType string, assetSpec v1alpha1.Source, bucketName string) error {
+func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaAccessor, assetSpec v1alpha1.Source, bucketName string) error {
 	commonAsset := CommonAsset{
 		ObjectMeta: v1.ObjectMeta{
-			Name:      h.generateAssetName(instance.GetName(), assetType),
-			Namespace: instance.GetNamespace(),
-			Labels:    h.buildLabel(instance.GetName(), assetType),
+			Name:        h.generateFullAssetName(instance.GetName(), assetSpec.Name, assetSpec.Type),
+			Namespace:   instance.GetNamespace(),
+			Labels:      h.buildLabels(instance.GetName()),
+			Annotations: h.buildAnnotations(assetSpec.Name),
 		},
 		Spec: h.convertToCommonAssetSpec(assetSpec, bucketName),
 	}
@@ -236,13 +239,13 @@ func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaA
 
 func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string) error {
 	for key, existingAsset := range existing {
-		expectedSpec, exists := spec.Sources[key]
-		if !exists {
+		expectedSpec := findSource(spec.Sources, key)
+		if expectedSpec == nil {
 			continue
 		}
 
 		h.logInfof("Updating asset %s", existingAsset.Name)
-		expected := h.convertToCommonAssetSpec(expectedSpec, bucketName)
+		expected := h.convertToCommonAssetSpec(*expectedSpec, bucketName)
 		if reflect.DeepEqual(expected, existingAsset.Spec) {
 			h.logInfof("Asset %s is up-to-date", existingAsset.Name)
 			continue
@@ -260,9 +263,18 @@ func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance Ob
 	return nil
 }
 
+func findSource(slice []v1alpha1.Source, sourceName string) *v1alpha1.Source {
+	for _, source := range slice {
+		if source.Name == sourceName {
+			return &source
+		}
+	}
+	return nil
+}
+
 func (h *docstopicHandler) deleteNotExisting(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) error {
 	for key, commonAsset := range existing {
-		if _, exists := spec.Sources[key]; exists {
+		if findSource(spec.Sources, key) != nil {
 			continue
 		}
 
@@ -282,8 +294,8 @@ func (h *docstopicHandler) convertToAssetMap(assets []CommonAsset) map[string]Co
 	result := make(map[string]CommonAsset)
 
 	for _, asset := range assets {
-		sourceType := asset.Labels[typeLabel]
-		result[sourceType] = asset
+		assetShortName := asset.Annotations[assetShortNameAnnotation]
+		result[assetShortName] = asset
 	}
 
 	return result
@@ -302,15 +314,16 @@ func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucket
 	}
 }
 
-func (h *docstopicHandler) buildLabel(topicName, assetType string) map[string]string {
-	labels := make(map[string]string)
-
-	labels[docsTopicLabel] = topicName
-	if len(assetType) > 0 {
-		labels[typeLabel] = assetType
+func (h *docstopicHandler) buildLabels(topicName string) map[string]string {
+	return map[string]string{
+		docsTopicLabel: topicName,
 	}
+}
 
-	return labels
+func (h *docstopicHandler) buildAnnotations(assetShortName string) map[string]string {
+	return map[string]string{
+		assetShortNameAnnotation: assetShortName,
+	}
 }
 
 func (h *docstopicHandler) convertToAssetMode(mode v1alpha1.DocsTopicMode) v1alpha2.AssetMode {
@@ -367,9 +380,10 @@ func (h *docstopicHandler) recordEventf(object ObjectMetaAccessor, eventType str
 	h.recorder.Eventf(object, eventType, reason.String(), reason.Message(), args...)
 }
 
-func (h *docstopicHandler) generateAssetName(docsTopicName, assetType string) string {
+func (h *docstopicHandler) generateFullAssetName(docsTopicName, assetShortName, assetType string) string {
 	assetTypeLower := strings.ToLower(assetType)
-	return h.appendSuffix(fmt.Sprintf("%s-%s", docsTopicName, assetTypeLower))
+	assetShortNameLower := strings.ToLower(assetShortName)
+	return h.appendSuffix(fmt.Sprintf("%s-%s-%s", docsTopicName, assetShortNameLower, assetTypeLower))
 }
 
 func (h *docstopicHandler) generateBucketName(private bool) string {
