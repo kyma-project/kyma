@@ -23,7 +23,7 @@ deployment:
     province: Waldorf
   externalClusterLookup:
     enabled: false
-    path: "/etc/config/configmap"
+    path: "/etc/config/config.json"
     lookupConfigMapName: "lookup-config"
 
 service:
