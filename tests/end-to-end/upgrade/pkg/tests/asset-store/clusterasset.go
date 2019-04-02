@@ -24,6 +24,7 @@ func newClusterAsset(dynamicCli dynamic.Interface) *clusterAsset {
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "clusterassets",
 		}, ""),
+		name: fixSimpleAssetData().name,
 	}
 }
 
@@ -56,7 +57,6 @@ func (a *clusterAsset) create() error {
 		return errors.Wrapf(err, "while creating ClusterAsset %s", asset.Name)
 	}
 
-	a.name = asset.Name
 	return nil
 }
 

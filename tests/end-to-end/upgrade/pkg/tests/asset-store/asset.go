@@ -25,6 +25,7 @@ func newAsset(dynamicCli dynamic.Interface, namespace string) *asset {
 			Group:    v1alpha2.SchemeGroupVersion.Group,
 			Resource: "assets",
 		}, namespace),
+		name: fixSimpleAssetData().name,
 		namespace: namespace,
 	}
 }
@@ -59,7 +60,6 @@ func (a *asset) create() error {
 		return errors.Wrapf(err, "while creating Asset %s in namespace %s", asset.Name, a.namespace)
 	}
 
-	a.name = asset.Name
 	return nil
 }
 
