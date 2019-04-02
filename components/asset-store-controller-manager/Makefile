@@ -15,7 +15,7 @@ setup:
 
 # Run tests
 test: generate fmt vet manifests
-	go test ./pkg/... ./cmd/... -coverprofile cover.out
+	go test ./pkg/... ./cmd/... -coverprofile cover.out -p=1
 
 # Build manager binary
 manager: generate fmt vet
