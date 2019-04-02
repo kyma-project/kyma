@@ -121,14 +121,22 @@ func TestReconcileBucketCreationFailed(t *testing.T) {
 
 	// Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
-	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 
 	bucket := &assetstorev1alpha2.ClusterBucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketFailed))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal("BucketCreationFailure"))
+
 	// Now creating bucket and setting policy will pass
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+
+	bucket = &assetstorev1alpha2.ClusterBucket{}
+	err = c.Get(context.TODO(), exp.Key, bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketReady))
+	g.Expect(bucket.Status.Reason).To(gomega.Equal("BucketPolicyUpdated"))
+
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 }
 
@@ -249,13 +257,21 @@ func TestReconcileBucketUpdatePolicyFailed(t *testing.T) {
 
 	// Then
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
-	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 
 	bucket := &assetstorev1alpha2.ClusterBucket{}
 	err = c.Get(context.TODO(), exp.Key, bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketFailed))
 	g.Expect(bucket.Status.Reason).To(gomega.Equal(pretty.BucketPolicyUpdateFailed.String()))
+
+	// Now setting policy will pass
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+
+	bucket = &assetstorev1alpha2.ClusterBucket{}
+	err = c.Get(context.TODO(), exp.Key, bucket)
+	g.Expect(err).NotTo(gomega.HaveOccurred())
+	g.Expect(bucket.Status.Phase).To(gomega.Equal(assetstorev1alpha2.BucketReady))
+	g.Expect(bucket.Status.Reason).To(gomega.Equal("BucketPolicyUpdated"))
 
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(expectedRequest)))
 }
@@ -272,7 +288,6 @@ func TestReconcileBucketDeletedRemotely(t *testing.T) {
 	store.On("BucketExists", exp.BucketName).Return(false, nil).Once()
 	store.On("CreateBucket", "", name, regionName).Return(exp.BucketName, nil).Once()
 	store.On("SetBucketPolicy", exp.BucketName, bucket.Spec.Policy).Return(nil).Once()
-	store.On("DeleteBucket", mock.Anything, exp.BucketName).Return(nil).Once()
 	defer store.AssertExpectations(t)
 
 	cfg := prepareReconcilerTest(t, store)

@@ -74,12 +74,12 @@ func TestReconcileAssetCreationSuccess(t *testing.T) {
 	testData := newTestData(name)
 
 	mocks := newMocks()
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.URL, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.validator.On("Validate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
 	mocks.mutator.On("Mutate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(nil).Once()
 	mocks.store.On("PutObjects", mock.Anything, testData.bucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
-	mocks.store.On("DeleteObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil).Once()
+	mocks.store.On("ListObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil, nil).Twice()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -107,7 +107,7 @@ func TestReconcileAssetCreationSuccess(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	g.Expect(asset.Status.AssetRef.BaseUrl).To(gomega.Equal(testData.assetUrl))
+	g.Expect(asset.Status.AssetRef.BaseURL).To(gomega.Equal(testData.assetUrl))
 	g.Expect(asset.Status.AssetRef.Assets).To(gomega.Equal(testData.files))
 	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteClusterAssetFinalizerName))
 }
@@ -118,10 +118,10 @@ func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 	testData := newTestData(name)
 
 	mocks := newMocks()
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.URL, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.mutator.On("Mutate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(errors.New("surprise!")).Once()
-	mocks.store.On("DeleteObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil).Once()
+	mocks.store.On("ListObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil, nil).Twice()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -158,11 +158,11 @@ func TestReconcileAssetCreationSuccessValidationFailed(t *testing.T) {
 	testData := newTestData(name)
 
 	mocks := newMocks()
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.URL, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.validator.On("Validate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, nil).Once()
 	mocks.mutator.On("Mutate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(nil).Once()
-	mocks.store.On("DeleteObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil).Once()
+	mocks.store.On("ListObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil, nil).Twice()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -201,10 +201,10 @@ func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
 	testData.asset.Spec.Source.ValidationWebhookService = nil
 
 	mocks := newMocks()
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.URL, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.store.On("PutObjects", mock.Anything, testData.bucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
-	mocks.store.On("DeleteObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil).Once()
+	mocks.store.On("ListObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil, nil).Twice()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -232,7 +232,7 @@ func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	g.Expect(asset.Status.AssetRef.BaseUrl).To(gomega.Equal(testData.assetUrl))
+	g.Expect(asset.Status.AssetRef.BaseURL).To(gomega.Equal(testData.assetUrl))
 	g.Expect(asset.Status.AssetRef.Assets).To(gomega.Equal(testData.files))
 	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteClusterAssetFinalizerName))
 }
@@ -309,10 +309,11 @@ func TestReconcileAssetReadyLostFiles(t *testing.T) {
 	testData.asset.Status.LastHeartbeatTime = v1.NewTime(time.Now().Add(-365 * time.Hour))
 
 	mocks := newMocks()
-	mocks.loader.On("Load", testData.asset.Spec.Source.Url, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
+	mocks.loader.On("Load", testData.asset.Spec.Source.URL, testData.assetName, testData.asset.Spec.Source.Mode, testData.asset.Spec.Source.Filter).Return(testData.tmpBaseDir, testData.files, nil).Once()
 	mocks.loader.On("Clean", testData.tmpBaseDir).Return(nil).Once()
 	mocks.store.On("PutObjects", mock.Anything, testData.bucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Once()
 	mocks.store.On("ContainsAllObjects", mock.Anything, testData.bucketName, testData.assetName, testData.files).Return(false, nil).Once()
+	mocks.store.On("ListObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil, nil).Twice()
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)
@@ -416,7 +417,7 @@ func newTestData(name string) *testData {
 		Status: v1alpha2.ClusterBucketStatus{CommonBucketStatus: v1alpha2.CommonBucketStatus{
 			Phase:             v1alpha2.BucketReady,
 			RemoteName:        bucketName,
-			Url:               bucketUrl,
+			URL:               bucketUrl,
 			LastHeartbeatTime: v1.Now(),
 		}},
 	}
@@ -428,7 +429,7 @@ func newTestData(name string) *testData {
 		Spec: v1alpha2.ClusterAssetSpec{CommonAssetSpec: v1alpha2.CommonAssetSpec{
 			BucketRef: v1alpha2.AssetBucketRef{Name: bucketName},
 			Source: v1alpha2.AssetSource{
-				Url:  sourceUrl,
+				URL:  sourceUrl,
 				Mode: v1alpha2.AssetSingle,
 				ValidationWebhookService: []v1alpha2.AssetWebhookService{
 					{
@@ -460,7 +461,7 @@ func newTestData(name string) *testData {
 			ObservedGeneration: int64(1),
 			Phase:              v1alpha2.AssetReady,
 			AssetRef: v1alpha2.AssetStatusRef{
-				BaseUrl: assetUrl,
+				BaseURL: assetUrl,
 				Assets:  files,
 			},
 			LastHeartbeatTime: v1.Now(),
