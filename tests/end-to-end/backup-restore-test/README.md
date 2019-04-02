@@ -66,7 +66,7 @@ The functions work as follows:
 
 After the pipeline executes the backup and restore processes on the cluster, the `TestResources` function validates if the restore worked as expected.
 
-The test creates a new Namespace called `restore-test-{UUID}`. This Namespace contains all resources created during the test.
+The test creates a new Namespace per test called `{TestName}-{UUID}`. This Namespace should contain all resources created during the test. If required resources can be created in other namespaces as well.
 
 ### Run end-to-end tests locally
 
