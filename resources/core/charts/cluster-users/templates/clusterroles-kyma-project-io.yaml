@@ -17,8 +17,7 @@ rules:
   resources:
     - "*"
   verbs:
-    - "get"
-    - "list"
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1beta1
@@ -59,12 +58,5 @@ rules:
   resources:
     - "*"
   verbs:
-    - "create"
-    - "delete"
-    - "deletecollection"
-    - "get"
-    - "list"
-    - "patch"
-    - "update"
-    - "watch"
+{{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 

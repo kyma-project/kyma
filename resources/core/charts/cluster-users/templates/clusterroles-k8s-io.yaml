@@ -55,16 +55,10 @@ rules:
   resources:
     - "customresourcedefinitions"
   verbs:
-    - "create"
-    - "delete"
-    - "deletecollection"
-    - "get"
-    - "list"
-    - "patch"
-    - "update"
-    - "watch"
+{{ toYaml .Values.clusterRoles.verbs.edit | indent 4 }}
 
 ---
+#CRD view
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
@@ -97,8 +91,7 @@ rules:
   resources:
     - "*"
   verbs:
-    - "get"
-    - "list"
+{{ toYaml .Values.clusterRoles.verbs.list | indent 4 }}
 
 ---
 #Admin access to K8s resources

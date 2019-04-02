@@ -23,3 +23,17 @@ clusterRoles:
       - "ui.kyma-project.io"
       - "kyma.cx"
       - "ui.kyma.cx"
+  verbs:
+    edit:
+      - "create"
+      - "delete"
+      - "deletecollection"
+      - "get"
+      - "list"
+      - "patch"
+      - "update"
+      - "watch"
+    view:
+      - "get"
+      - "list"
+
