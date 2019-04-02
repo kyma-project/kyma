@@ -213,7 +213,7 @@ func statusNotServerError(response *http.Response, err error) bool {
 
 func getSpecsPredicate(t *testing.T, expectApiSpec bool, expectEventsSpec bool, expectDocumentation bool) Predicate {
 	return func(response *http.Response, err error) bool {
-		if response.StatusCode == http.StatusOK {
+		if err == nil && response.StatusCode == http.StatusOK {
 			serviceDetails := ServiceDetails{}
 			err = json.NewDecoder(response.Body).Decode(&serviceDetails)
 			if err != nil {
