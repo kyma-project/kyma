@@ -61,7 +61,7 @@ OLD_URL=$2
 FILE_NAME=$3
 
 
-SPEC_TYPE=$(getAssetType $FILE_NAME $OLD_URL)
+SPEC_TYPE=$(getAssetType "$FILE_NAME" "$OLD_URL")
 
 cat <<EOF | kubectl apply -f -
 apiVersion: cms.kyma-project.io/v1alpha1
@@ -81,18 +81,18 @@ EOF
 
 
 getAppNames() {
-   echo $(kubectl get applications -o=jsonpath='{.items[*].metadata.name}')
+   echo "$(kubectl get applications -o=jsonpath='{.items[*].metadata.name}')"
 }
 
 getAssetType() {
   FILE_NAME=$1
   OLD_URL=$2
   
-  if [ $FILE_NAME = "apiSpec.json" ]; then
+  if [ "$FILE_NAME" = "apiSpec.json" ]; then
      # xmllint throws error if unable to format invalid XML and then we know it is OpenAPI
      # there is no other way to differenciate between OpenAPI or OData as they are always stored as apiSpec.json file
-     VALID_XML_CONTENT=$(curl -s -N $OLD_URL | xmllint --noout --format 2>/dev/null -)
-     if [ -n $VALID_XML_CONTENT ]; then
+     VALID_XML_CONTENT=$(curl -s -N "$OLD_URL" | xmllint --noout --format 2>/dev/null -)
+     if [ -n "$VALID_XML_CONTENT" ]; then
         #Output of formating is an error so we know it is not OData
         echo "openapi"
         else
@@ -101,13 +101,11 @@ getAssetType() {
    else
      echo "asyncapi"
   fi
-
-
 }
 
 getAppServiceIds() {
     APP_NAME=$1
-    echo $(kubectl get application $APP_NAME -o=jsonpath='{.spec.services[*].id}')
+    echo $(kubectl get application "$APP_NAME" -o=jsonpath='{.spec.services[*].id}')
 }
 
 createMigratedResources() {
@@ -117,16 +115,17 @@ createMigratedResources() {
 
     for i in "${APP_SERVICES_IDS_ARRAY[@]}"
     do
-      FILE_NAME=$(mc ls $CONFIG_NAME/content/service-class/$i | awk '{print $6}')
-      SPEC_URL=$MINIO_DOMAIN/content/service-class/$i/$FILE_NAME
-      createDocsTopic $i $SPEC_URL $FILE_NAME
+      FILE_NAME=$(mc ls "$CONFIG_NAME"/content/service-class/"$i" | awk '{print $6}')
+      SPEC_URL="$MINIO_DOMAIN"/content/service-class/"$i"/"$FILE_NAME"
+      createDocsTopic "$i" "$SPEC_URL" "$FILE_NAME"
     done
 }
 
 installDeps
 CONFIG_NAME="kymaminio"
-connectToMinio $CONFIG_NAME
+connectToMinio "$CONFIG_NAME"
 cleanupOfOldResources
+
 APPS_NAMES_ARRAY=($(getAppNames))
 
 if [ ${#APPS_NAMES_ARRAY[@]} -eq 0 ]; then
@@ -135,7 +134,7 @@ else
   for i in "${APPS_NAMES_ARRAY[@]}"
   do
 
-    APP_SERVICES_IDS_ARRAY=($(getAppServiceIds $i))
+    APP_SERVICES_IDS_ARRAY=($(getAppServiceIds "$i"))
 
     if [ ${#APP_SERVICES_IDS_ARRAY[@]} -eq 0 ]; then
       echo "There are no specs for $i application to migrate to Headless CMS"
@@ -143,7 +142,7 @@ else
 
       echo "Migration of specs for $i application started"
 
-      createMigratedResources $APP_SERVICES_IDS_ARRAY $i $CONFIG_NAME
+      createMigratedResources "$APP_SERVICES_IDS_ARRAY" "$i" "$CONFIG_NAME"
 
     fi
 
