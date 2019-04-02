@@ -32,48 +32,51 @@ func NewServiceBroker(cfg ServiceBrokerConfig, svcatCli *clientset.Clientset) *S
 	}
 }
 
-func (t *ServiceBrokerConfigurer) Create() error {
+func (c *ServiceBrokerConfigurer) Create() error {
 	broker := &v1beta1.ServiceBroker{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      t.cfg.Name,
-			Namespace: t.cfg.Namespace,
+			Name:      c.cfg.Name,
+			Namespace: c.cfg.Namespace,
+			Labels: map[string]string{
+				tester.TestLabelKey: tester.TestLabelValue,
+			},
 		},
 		Spec: v1beta1.ServiceBrokerSpec{
 			CommonServiceBrokerSpec: v1beta1.CommonServiceBrokerSpec{
-				URL: t.cfg.URL,
+				URL: c.cfg.URL,
 			},
 		},
 	}
-	_, err := t.svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.cfg.Namespace).Create(broker)
+	_, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Create(broker)
 	return err
 }
 
-func (t *ServiceBrokerConfigurer) Delete() error {
-	return t.svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.cfg.Namespace).Delete(t.cfg.Name, nil)
+func (c *ServiceBrokerConfigurer) Delete() error {
+	return c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Delete(c.cfg.Name, nil)
 }
 
-func (t *ServiceBrokerConfigurer) WaitForReady() error {
-	err := t.waitForServiceBrokerReady()
+func (c *ServiceBrokerConfigurer) WaitForReady() error {
+	err := c.waitForServiceBrokerReady()
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ServiceBroker %s/%s ready", t.cfg.Namespace, t.cfg.Name)
+		return errors.Wrapf(err, "while waiting for ServiceBroker %s/%s ready", c.cfg.Namespace, c.cfg.Name)
 	}
 
-	err = t.waitForServiceClass()
+	err = c.waitForServiceClass()
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ServiceClass with externalName %s", t.cfg.ServiceClassExternalName)
+		return errors.Wrapf(err, "while waiting for ServiceClass with externalName %s", c.cfg.ServiceClassExternalName)
 	}
 
-	err = t.waitForServicePlans()
+	err = c.waitForServicePlans()
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ServicePlans for ServiceClass with externalName %s", t.cfg.ServiceClassExternalName)
+		return errors.Wrapf(err, "while waiting for ServicePlans for ServiceClass with externalName %s", c.cfg.ServiceClassExternalName)
 	}
 
 	return nil
 }
 
-func (t *ServiceBrokerConfigurer) waitForServiceBrokerReady() error {
-	return waiter.WaitAtMost(func() (bool, error) {
-		broker, err := t.svcatCli.ServicecatalogV1beta1().ServiceBrokers(t.cfg.Namespace).Get(t.cfg.Name, metav1.GetOptions{})
+func (c *ServiceBrokerConfigurer) waitForServiceBrokerReady() error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+		broker, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Get(c.cfg.Name, metav1.GetOptions{})
 
 		if err != nil || broker == nil {
 			return false, err
@@ -86,10 +89,15 @@ func (t *ServiceBrokerConfigurer) waitForServiceBrokerReady() error {
 
 		return false, nil
 	}, tester.DefaultReadyTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ServiceBroker ready")
+	}
+
+	return nil
 }
 
 func (c *ServiceBrokerConfigurer) waitForServiceClass() error {
-	return waiter.WaitAtMost(func() (bool, error) {
+	err := waiter.WaitAtMost(func() (bool, error) {
 		classesList, err := c.svcatCli.ServicecatalogV1beta1().ServiceClasses(c.cfg.Namespace).List(metav1.ListOptions{})
 		if err != nil {
 			return false, err
@@ -101,8 +109,13 @@ func (c *ServiceBrokerConfigurer) waitForServiceClass() error {
 			}
 		}
 
-		return true, nil
+		return false, nil
 	}, tester.DefaultReadyTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ServiceClass")
+	}
+
+	return nil
 }
 
 func (c *ServiceBrokerConfigurer) waitForServicePlans() error {
@@ -128,10 +141,12 @@ func (c *ServiceBrokerConfigurer) waitForServicePlans() error {
 
 		for _, value := range plansFound {
 			if !value {
+				// one of required plans hasn't been found
 				return false, nil
 			}
 		}
 
+		// all required plans are ready
 		return true, nil
 	}, tester.DefaultReadyTimeout)
 	if err != nil {

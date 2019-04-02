@@ -1,6 +1,7 @@
 package configurer
 
 import (
+	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	v1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -21,6 +22,9 @@ func (c *NamespaceConfigurer) Create() error {
 	_, err := c.coreCli.Namespaces().Create(&v1.Namespace{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: c.Name,
+			Labels: map[string]string{
+				tester.TestLabelKey: tester.TestLabelValue,
+			},
 		},
 	})
 

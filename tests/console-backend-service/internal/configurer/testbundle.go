@@ -51,6 +51,7 @@ func (c *TestBundleConfigurer) Configure() error {
 				Namespace: cfg.ConfigMap.Namespace,
 				Labels: map[string]string{
 					cfg.ConfigMap.LabelKey: cfg.ConfigMap.LabelValue,
+					tester.TestLabelKey:    tester.TestLabelValue,
 				},
 			},
 			Data: map[string]string{
@@ -90,7 +91,7 @@ func (c *TestBundleConfigurer) WaitForTestBundleReady() error {
 }
 
 func (c *TestBundleConfigurer) waitForClusterServiceBrokerReady() error {
-	return waiter.WaitAtMost(func() (bool, error) {
+	err := waiter.WaitAtMost(func() (bool, error) {
 		broker, err := c.svcatCli.ServicecatalogV1beta1().ClusterServiceBrokers().Get(c.cfg.ClusterServiceBrokerName, metav1.GetOptions{})
 		if err != nil || broker == nil {
 			return false, err
@@ -104,10 +105,15 @@ func (c *TestBundleConfigurer) waitForClusterServiceBrokerReady() error {
 
 		return false, nil
 	}, tester.DefaultReadyTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ClusterServiceBroker ready")
+	}
+
+	return nil
 }
 
 func (c *TestBundleConfigurer) waitForClusterServiceClass() error {
-	return waiter.WaitAtMost(func() (bool, error) {
+	err := waiter.WaitAtMost(func() (bool, error) {
 		classesList, err := c.svcatCli.ServicecatalogV1beta1().ClusterServiceClasses().List(metav1.ListOptions{})
 		if err != nil {
 			return false, err
@@ -119,8 +125,13 @@ func (c *TestBundleConfigurer) waitForClusterServiceClass() error {
 			}
 		}
 
-		return true, nil
+		return false, nil
 	}, tester.DefaultReadyTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for ClusterServiceClass")
+	}
+
+	return nil
 }
 
 func (c *TestBundleConfigurer) waitForClusterServicePlans() error {
@@ -146,10 +157,12 @@ func (c *TestBundleConfigurer) waitForClusterServicePlans() error {
 
 		for _, value := range plansFound {
 			if !value {
+				// one of required plans hasn't been found
 				return false, nil
 			}
 		}
 
+		// all required plans are ready
 		return true, nil
 	}, tester.DefaultReadyTimeout)
 	if err != nil {
