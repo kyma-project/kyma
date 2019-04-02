@@ -28,7 +28,7 @@ cat <<EOF | kubectl -n kyma-integration apply -f -
 apiVersion: v1
 kind: Pod
 metadata:
-  name: application-operator-tests-2
+  name: application-operator-tests
   annotations:
    sidecar.istio.io/inject: “false”
 spec:
