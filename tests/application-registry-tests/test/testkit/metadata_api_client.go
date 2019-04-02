@@ -3,13 +3,11 @@ package testkit
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"testing"
 	"time"
-
-	"fmt"
 )
 
 const (
@@ -195,17 +193,13 @@ func (client *metadataServiceClient) requestWithRetries(t *testing.T, data reque
 			t.Log(reqErr)
 			return nil, reqErr
 		}
-		response, err := client.httpClient.Do(request)
+		response, err = client.httpClient.Do(request)
 
-		if response != nil && condition(response, err) {
+		if condition(response, err) {
 			return response, err
 		}
 
 		time.Sleep(retryDelay)
-	}
-
-	if response == nil {
-		return nil, errors.New("nil response returned once executing request")
 	}
 
 	return response, err
