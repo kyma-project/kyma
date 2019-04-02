@@ -515,21 +515,23 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
   </details>
 </div>
 
-### Establish a secure connection with Helm (optional)
-Kyma comes with a TLS secured Tiller server by default. Because of that any connection without the proper TLS certificates is rejected. In order to establish a secure connection it s required to download the certificates from the cluster and place them within `HELM_HOME`. 
-This can be done in two ways:
+## Access Tiller (optional)
 
-**Automated script** - we provide a script which will download the certificates for You. To use it checkout our repository and call `./installation/scripts/tiller-tls.sh`
+If you need to use Helm, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home). 
 
-**Manual** - this operation can be also done manually by executing the following commands:
+Additionally, you must add the `--tls` flag to every Helm command you run.
 
+>**NOTE:** Read [this](#details-tls-in-tiller) document to learn more about TLS in Tiller.
+
+Run these commands to save the client certificate, key, and CA to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home):
+
+```bash
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 --decode > "$(helm home)/ca.pem";
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 --decode > "$(helm home)/cert.pem";
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 --decode > "$(helm home)/key.pem";
 ```
-    kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 --decode > "$(helm home)/ca.pem"
-    kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
-    kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 --decode > "$(helm home)/key.pem"
-```
 
-### Access the cluster
+## Access the cluster
 
 1. To get the address of the cluster's Console, check the name of the Console's virtual service. The name of this virtual service corresponds to the Console URL. To get the virtual service name, run:
 
