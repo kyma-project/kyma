@@ -65,7 +65,7 @@ Additionally, those secrets are also available as overrides during Kyma installa
 
 | Override | Description |
 | --- | --- | 
-| global.helm.ca.crt | Certificate Authority for the Helm client |
-| global.helm.tls.crt | Client certificate for the Helm client | 
-| global.helm.tls.key | Client certificate key for the Helm client | 
+| **global.helm.ca.crt** | Certificate Authority for the Helm client |
+| **global.helm.tls.crt** | Client certificate for the Helm client | 
+| **global.helm.tls.key** | Client certificate key for the Helm client | 
 
