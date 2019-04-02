@@ -91,7 +91,7 @@ rules:
   resources:
     - "*"
   verbs:
-{{ toYaml .Values.clusterRoles.verbs.list | indent 4 }}
+{{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
 ---
 #Admin access to K8s resources
