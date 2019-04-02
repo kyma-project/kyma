@@ -1,4 +1,4 @@
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: {{ template "promtail.fullname" . }}
@@ -7,17 +7,14 @@ metadata:
     chart: {{ template "promtail.chart" . }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
-{{- with .Values.promtail.annotations }}
   annotations:
-{{ toYaml . | indent 4 }}
-{{- end }}
+    {{- toYaml .Values.promtail.annotations | nindent 4 }}
 spec:
-  replicas: {{ .Values.promtail.replicas }}
   selector:
     matchLabels:
       app: {{ template "promtail.name" . }}
       release: {{ .Release.Name }}
-  strategy:
+  updateStrategy:
     type: {{ .Values.promtail.deploymentStrategy }}
   {{- if ne .Values.promtail.deploymentStrategy "RollingUpdate" }}
     rollingUpdate: null
@@ -27,30 +24,26 @@ spec:
       labels:
         app: {{ template "promtail.name" . }}
         release: {{ .Release.Name }}
-{{- with .Values.promtail.podAnnotations }}
       annotations:
-{{ toYaml . | indent 8 }}
-{{- end }}
+        {{ toYaml .Values.promtail.podAnnotations | nindent 8 }}
     spec:
       serviceAccountName: {{ template "promtail.serviceAccountName" . }}
-{{- if .Values.promtail.priorityClassName }}
+    {{- if .Values.promtail.priorityClassName }}
       priorityClassName: {{ .Values.promtail.priorityClassName }}
-{{- end }}
+    {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: promtail
           image: "{{ .Values.promtail.image.repository }}:{{ .Values.promtail.image.tag }}"
           imagePullPolicy: {{ .Values.promtail.image.pullPolicy }}
-          args: 
+          args:
             - "-config.file=/etc/promtail/promtail.yaml"
             - "-client.url=http://{{ template "loki.fullname" . }}:{{ .Values.loki.service.port }}/api/prom/push"
           volumeMounts:
             - name: config
               mountPath: /etc/promtail
-            - name: varlog
-              mountPath: /var/log
-            - name: varlibdockercontainers
-              mountPath: /var/lib/docker/containers
-              readOnly: true
+            {{- with .Values.promtail.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
           env:
           - name: HOSTNAME
             valueFrom:
@@ -62,37 +55,24 @@ spec:
           securityContext:
             privileged: true
             runAsUser: 0
-{{- with .Values.promtail.livenessProbe }}
           livenessProbe:
-{{ toYaml . | indent 12 }}
-{{- end }}
-{{- with .Values.promtail.readinessProbe }}
+            {{- toYaml .Values.promtail.livenessProbe | nindent 12 }}
           readinessProbe:
-{{ toYaml . | indent 12 }}
-{{- end }}
-{{- with .Values.promtail.resources }}
+            {{- toYaml .Values.promtail.readinessProbe | nindent 12 }}
           resources:
-{{ toYaml . | indent 12 }}
-{{- end }}
-    {{- with .Values.promtail.nodeSelector }}
+            {{- toYaml .Values.promtail.resources | nindent 12 }}
       nodeSelector:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.promtail.affinity }}
+        {{- toYaml .Values.promtail.nodeSelector | nindent 8 }}
       affinity:
-{{ toYaml . | indent 8 }}
-    {{- end }}
-    {{- with .Values.promtail.tolerations }}
+        {{- toYaml .Values.promtail.affinity | nindent 8 }}
       tolerations:
-{{ toYaml . | indent 8 }}
-    {{- end }}
+        {{- toYaml .Values.promtail.tolerations | nindent 8 }}
       volumes:
         - name: config
           configMap:
             name: {{ template "promtail.fullname" . }}
-        - name: varlog
-          hostPath:
-            path: /var/log
-        - name: varlibdockercontainers
-          hostPath:
-            path: /var/lib/docker/containers
+        {{- with .Values.promtail.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+
+

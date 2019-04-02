@@ -11,7 +11,7 @@ excludedNamespaces:
 includedResources:
 - '*'
 excludedResources: null
-includeClusterResources: null
+includeClusterResources: true
 labelSelector: null
 storageLocation: default
 volumeSnapshotLocations: null

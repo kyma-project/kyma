@@ -51,7 +51,7 @@ func (b *clusterBucket) Create() error {
 
 	err := b.resCli.Create(clusterBucket)
 	if err != nil {
-		return errors.Wrapf(err, "while creating ClusterBucket %s in namespace %s", b.name, b.namespace)
+		return errors.Wrapf(err, "while creating ClusterBucket %s", b.name)
 	}
 
 	return nil
@@ -96,7 +96,7 @@ func (b *clusterBucket) Get(name string) (*v1alpha2.ClusterBucket, error) {
 func (b *clusterBucket) Delete() error {
 	err := b.resCli.Delete(b.name)
 	if err != nil {
-		return errors.Wrapf(err, "while deleting ClusterBucket %s in namespace %s", b.name, b.namespace)
+		return errors.Wrapf(err, "while deleting ClusterBucket %s", b.name)
 	}
 
 	return nil

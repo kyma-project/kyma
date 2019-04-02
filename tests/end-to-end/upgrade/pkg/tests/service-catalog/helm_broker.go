@@ -1,18 +1,17 @@
-package service_catalog
+package servicecatalog
 
 import (
-	"time"
 	"fmt"
+	"time"
 
-	"github.com/pkg/errors"
+	"github.com/go-redis/redis"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/kubernetes"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/go-redis/redis"
-
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -26,17 +25,19 @@ const (
 	sampleVal = "val-001"
 )
 
+// HelmBrokerUpgradeTest tests the Helm Broker business logic after Kyma upgrade phase
 type HelmBrokerUpgradeTest struct {
 	ServiceCatalogInterface clientset.Interface
 	K8sInterface            kubernetes.Interface
 	BUInterface             bu.Interface
 }
 
+// NewHelmBrokerTest returns new instance of the HelmBrokerUpgradeTest
 func NewHelmBrokerTest(k8sCli kubernetes.Interface, scCli clientset.Interface, buCli bu.Interface) *HelmBrokerUpgradeTest {
 	return &HelmBrokerUpgradeTest{
-		K8sInterface: k8sCli,
+		K8sInterface:            k8sCli,
 		ServiceCatalogInterface: scCli,
-		BUInterface: buCli,
+		BUInterface:             buCli,
 	}
 }
 
@@ -47,10 +48,12 @@ type helmBrokerFlow struct {
 	buInterface bu.Interface
 }
 
+// CreateResources creates resources needed for e2e upgrade test
 func (ut *HelmBrokerUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return ut.newFlow(stop, log, namespace).CreateResources()
 }
 
+// TestResources tests resources after backup phase
 func (ut *HelmBrokerUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return ut.newFlow(stop, log, namespace).TestResources()
 }
@@ -69,10 +72,6 @@ func (ut *HelmBrokerUpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldL
 		scInterface: ut.ServiceCatalogInterface,
 		buInterface: ut.BUInterface,
 	}
-}
-
-func (ut *HelmBrokerUpgradeTest) Name() string {
-	return "Service Catalog"
 }
 
 func (f *helmBrokerFlow) CreateResources() error {
@@ -162,7 +161,7 @@ func (f *helmBrokerFlow) saveValueInRedis() error {
 		return err
 	}
 
-	err = f.wait(30 * time.Second, func() (done bool, err error) {
+	err = f.wait(30*time.Second, func() (done bool, err error) {
 		if client.Ping().Val() == "PONG" {
 			return true, nil
 		}
@@ -176,7 +175,7 @@ func (f *helmBrokerFlow) saveValueInRedis() error {
 
 	var redisErr error
 	// if the redis connection fails, do retry
-	err = f.wait(5 * time.Second, func() (done bool, err error) {
+	err = f.wait(5*time.Second, func() (done bool, err error) {
 		// Zero expiration means the key has no expiration time.
 		_, redisErr = client.Set(sampleKey, sampleVal, 0).Result()
 
@@ -213,7 +212,7 @@ func (f *helmBrokerFlow) verifyKeyInRedisExists() error {
 
 	var redisErr error
 	// if the redis connection fails, do retry
-	err = f.wait(5 * time.Second, func() (done bool, err error) {
+	err = f.wait(5*time.Second, func() (done bool, err error) {
 		// Zero expiration means the key has no expiration time.
 		_, redisErr = client.Set(sampleKey, sampleVal, 0).Result()
 		val, redisErr := client.Get(sampleKey).Result()
@@ -243,7 +242,7 @@ func (f *helmBrokerFlow) redisClient() (*redis.Client, error) {
 	client := redis.NewClient(&redis.Options{
 		Addr:     fmt.Sprintf("%s:%s", creds.host, creds.port),
 		Password: creds.password,
-		DB:       0,  // use default DB
+		DB:       0, // use default DB
 	})
 	return client, nil
 }
@@ -256,8 +255,8 @@ func (f *helmBrokerFlow) redisCredentials() (*credentials, error) {
 	}
 	data := secret.Data
 	return &credentials{
-		host: string(data["HOST"]),
-		port: string(data["PORT"]),
+		host:     string(data["HOST"]),
+		port:     string(data["PORT"]),
 		password: string(data["REDIS_PASSWORD"]),
 	}, nil
 }

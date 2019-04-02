@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
@@ -26,6 +28,7 @@ func TestServiceClassesQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedResource := serviceClass()
+
 	resourceDetailsQuery := `
 		name
 		namespace
@@ -152,16 +155,22 @@ func assertPlanExistsAndEqual(t *testing.T, arr []shared.ServicePlan, expectedEl
 }
 
 func serviceClass() shared.ServiceClass {
+	className := fixture.TestingBundleClassName
 	return shared.ServiceClass{
-		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
+		Name:         className,
 		Namespace:    TestNamespace,
-		ExternalName: "user-provided-service",
+		ExternalName: fixture.TestingBundleClassExternalName,
 		Activated:    false,
 		Plans: []shared.ServicePlan{
 			{
-				Name:                    "86064792-7ea2-467b-af93-ac9694d96d52",
-				ExternalName:            "default",
-				RelatedServiceClassName: "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
+				Name:                    fixture.TestingBundleMinimalPlanName,
+				ExternalName:            fixture.TestingBundleMinimalPlanExternalName,
+				RelatedServiceClassName: className,
+			},
+			{
+				Name:                    fixture.TestingBundleFullPlanName,
+				ExternalName:            fixture.TestingBundleFullPlanExternalName,
+				RelatedServiceClassName: className,
 			},
 		},
 	}
