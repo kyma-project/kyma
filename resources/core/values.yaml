@@ -70,8 +70,8 @@ global:
     dir: develop/
     version: 55dc3511
   console_backend_service_test:
-    dir: pr/ #TODO: Change it
-    version: PR-3415 #TODO: Change it
+    dir: develop/
+    version: fc68a5c6
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
