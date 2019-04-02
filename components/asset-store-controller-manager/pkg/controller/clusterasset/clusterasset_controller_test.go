@@ -110,6 +110,8 @@ func TestReconcileAssetCreationSuccess(t *testing.T) {
 	g.Expect(asset.Status.AssetRef.BaseURL).To(gomega.Equal(testData.assetUrl))
 	g.Expect(asset.Status.AssetRef.Assets).To(gomega.Equal(testData.files))
 	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteClusterAssetFinalizerName))
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 }
 
 func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
@@ -150,6 +152,8 @@ func TestReconcileAssetCreationSuccessMutationFailed(t *testing.T) {
 
 	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.MutationFailed.String()))
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 }
 
 func TestReconcileAssetCreationSuccessValidationFailed(t *testing.T) {
@@ -191,6 +195,8 @@ func TestReconcileAssetCreationSuccessValidationFailed(t *testing.T) {
 
 	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
 	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.ValidationFailed.String()))
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 }
 
 func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
@@ -235,6 +241,8 @@ func TestReconcileAssetCreationSuccessNoWebhooks(t *testing.T) {
 	g.Expect(asset.Status.AssetRef.BaseURL).To(gomega.Equal(testData.assetUrl))
 	g.Expect(asset.Status.AssetRef.Assets).To(gomega.Equal(testData.files))
 	g.Expect(asset.Finalizers).To(gomega.ContainElement(deleteClusterAssetFinalizerName))
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 }
 
 func TestReconcileAssetCreationNoBucket(t *testing.T) {
@@ -265,6 +273,8 @@ func TestReconcileAssetCreationNoBucket(t *testing.T) {
 
 	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetPending))
 	g.Expect(asset.Status.Reason).To(gomega.Equal(pretty.BucketNotReady.String()))
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 }
 
 func TestReconcileAssetReadyLostBucket(t *testing.T) {
@@ -351,6 +361,8 @@ func TestReconcileAssetReadyLostFiles(t *testing.T) {
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
 	g.Expect(asset.Status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 }
 
 type mocks struct {
@@ -502,4 +514,5 @@ func deleteAndExpectSuccess(cfg *testSuite, testData *testData) {
 		err := c.Get(context.TODO(), testData.key, instance)
 		return apierrors.IsNotFound(err)
 	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 }

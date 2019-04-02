@@ -173,6 +173,8 @@ func TestReconcileBucketCheckFailed(t *testing.T) {
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 	// should retry checking bucket
 	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 }
 
 func TestReconcileBucketPolicyUpdateSuccess(t *testing.T) {
@@ -367,6 +369,8 @@ func TestReconcileBucketDeleteFailed(t *testing.T) {
 		err := c.Get(context.TODO(), exp.Key, bucket)
 		return apierrors.IsNotFound(err)
 	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())
+
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 }
 
 func fixInitialBucket(name, namespace, region string, policy assetstorev1alpha2.BucketPolicy) *assetstorev1alpha2.Bucket {
@@ -423,13 +427,6 @@ func expectedFor(name, namespace string) expected {
 	}
 }
 
-func deleteWithoutReconcile(cfg *testSuite, instance *assetstorev1alpha2.Bucket) {
-	g := cfg.g
-	c := cfg.c
-	err := c.Delete(context.TODO(), instance)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-}
-
 func deleteAndExpectSuccess(cfg *testSuite, exp expected, instance *assetstorev1alpha2.Bucket) {
 	g := cfg.g
 	c := cfg.c
@@ -441,4 +438,5 @@ func deleteAndExpectSuccess(cfg *testSuite, exp expected, instance *assetstorev1
 		err := c.Get(context.TODO(), exp.Key, instance)
 		return apierrors.IsNotFound(err)
 	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())
+	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(exp.Request)))
 }
