@@ -28,7 +28,7 @@ spec:
       - name: HELM_TLS_CERTIFICATE_FILE
         value: {{ .Values.controller.args.helmTLSCertificateFile }}
       - name: TILLER_TLS_SKIP_VERIFY
-        value: "{{ .Values.controller.args.tillerTLSSkipVerify }}"
+        value: "{{ .Values.controller.args.tillerTLSInsecure }}"
       volumeMounts:
         - mountPath: /etc/certs
           name: helm-certs

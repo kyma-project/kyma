@@ -6,7 +6,7 @@ controller:
     tillerUrl: tiller-deploy.kube-system.svc.cluster.local:44134
     helmTLSKeyFile: /etc/certs/tls.key
     helmTLSCertificateFile: /etc/certs/tls.crt
-    tillerTLSSkipVerify: true
+    tillerTLSInsecure: true
     syncPeriod: 30
     installationTimeout: 240
 
