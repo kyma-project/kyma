@@ -137,6 +137,7 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 	sources := make([]v1alpha1.Source, 0, 3)
 	for key, url := range docsTopicEntry.Urls {
 		source := v1alpha1.Source{
+			Name: key,
 			URL:  url,
 			Mode: DocsTopicModeSingle,
 			Type: key,

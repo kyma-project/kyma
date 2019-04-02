@@ -85,7 +85,6 @@ func TestApiMetadata(t *testing.T) {
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
-			//require.NotNil(t, postResponseData)
 			require.NotEmpty(t, postResponseData.ID)
 
 			// when

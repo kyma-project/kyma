@@ -259,7 +259,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 func createMatcherFunction(docsTopicEntry docstopic.Entry, expectedResourceVersion string) func(*unstructured.Unstructured) bool {
 	findSource := func(sources []v1alpha1.Source, key string) (v1alpha1.Source, bool) {
 		for _, source := range sources {
-			if source.Type == key {
+			if source.Type == key && source.Name == key {
 				return source, true
 			}
 		}
