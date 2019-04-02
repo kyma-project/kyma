@@ -1,8 +1,8 @@
 package automock
 
 import (
-	"strings"
 	"io"
+	"strings"
 
 	"k8s.io/helm/pkg/proto/hapi/chart"
 
