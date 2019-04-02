@@ -20,6 +20,8 @@ console:
 
 global:
   isLocalEnv: false
+  knative: false
+  kymaOrgName: "kyma-project"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -47,6 +49,7 @@ global:
   docs:
     dir: develop/
     version: a54ac464
+    clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
     version: 429bfbcc

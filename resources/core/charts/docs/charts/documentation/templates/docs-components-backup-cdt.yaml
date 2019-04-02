@@ -12,5 +12,5 @@ spec:
   sources:
     markdown:
       mode: package
-      url: https://github.com/kyma-project/kyma/archive/{{ .Values.clusterdocstopics.branch }}.zip
+      url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterDocsTopicsVersion }}.zip
       filter: /docs/backup/docs/
