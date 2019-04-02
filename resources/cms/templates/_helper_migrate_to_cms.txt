@@ -129,24 +129,27 @@ connectToMinio $CONFIG_NAME
 cleanupOfOldResources
 APPS_NAMES_ARRAY=($(getAppNames))
 
-for i in "${APPS_NAMES_ARRAY[@]}"
-do
+if [ ${#APPS_NAMES_ARRAY[@]} -eq 0 ]; then
+  echo "There are no applications to migrate to Headless CMS"
+else
+  for i in "${APPS_NAMES_ARRAY[@]}"
+  do
 
-   APP_SERVICES_IDS_ARRAY=($(getAppServiceIds $i))
+    APP_SERVICES_IDS_ARRAY=($(getAppServiceIds $i))
 
-   if [ ${#APP_SERVICES_IDS_ARRAY[@]} -eq 0 ]; then
-    echo "There are no specs for $i application to migrate to Headless CMS"
-    else
+    if [ ${#APP_SERVICES_IDS_ARRAY[@]} -eq 0 ]; then
+      echo "There are no specs for $i application to migrate to Headless CMS"
+      else
 
-    echo "Migration of specs for $i application started"
+      echo "Migration of specs for $i application started"
 
-    createMigratedResources $APP_SERVICES_IDS_ARRAY $i $CONFIG_NAME
+      createMigratedResources $APP_SERVICES_IDS_ARRAY $i $CONFIG_NAME
 
-   fi
+    fi
 
-done
-b
-
+  done
+fi
+exit 0
 
 
 
