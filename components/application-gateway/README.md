@@ -13,8 +13,8 @@ The Application Gateway requires Go 1.8 or higher.
 To install the Application Gateway, follow these steps:
 
 1. `git clone git@github.com:kyma-project/kyma.git`
-1. `cd kyma/components/application-gateway`
-1. `CGO_ENABLED=0 go build ./cmd/applicationgateway`
+2. `cd kyma/components/application-gateway`
+3. `CGO_ENABLED=0 go build ./cmd/applicationgateway`
 
 ## Usage
 
@@ -32,7 +32,7 @@ The Application Gateway has the following parameters:
 - **proxyPort** - This port acts as a proxy for the calls from services and lambdas to an external solution. The default port is `8080`.
 - **externalAPIPort** - This port exposes the API allowing to check component status. The default port is `8081`.
 - **application** - Application name used to write and read information about services. The default Application is `default-ec`.
-- **namespace** - Namespace in which Application Gateway is deployed. The default Namespace is `kyma-system`.
+- **namespace** - Namespace in which the Application Gateway is deployed. The default Namespace is `kyma-system`.
 - **requestTimeout** - A timeout for requests sent through the Application Gateway. It is provided in seconds. The default time-out is `1`.
 - **skipVerify** - A flag for skipping the verification of certificates for the proxy targets. The default value is `false`.
 - **requestLogging** - A flag for logging incoming requests. The default value is `false`.
@@ -49,9 +49,9 @@ To generate a mock, follow these steps:
 
 1. Go to the directory where the interface is located.
 2. Run this command:
-```sh
-mockery -name=Sender
-```
+  ```sh
+  mockery -name=Sender
+  ```
 
 ### Tests
 
