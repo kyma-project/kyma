@@ -21,6 +21,10 @@ deployment:
     organizationalunit: OrgUnit
     locality: Waldorf
     province: Waldorf
+  externalClusterLookup:
+    enabled: false
+    path: "/etc/config/configmap"
+    lookupConfigMapName: "lookup-config"
 
 service:
   externalapi:

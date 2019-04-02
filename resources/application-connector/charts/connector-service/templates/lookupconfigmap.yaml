@@ -1,0 +1,16 @@
+  {{if .Values.deployment.externalClusterLookup.enabled }}
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+    namespace: {{ .Values.global.namespace }}
+    labels:
+      app: {{ template "name" . }}
+      chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+      release: {{ .Release.Name }}
+      heritage: {{ .Release.Service }}
+  data:
+    config.json: |
+      { url: https://faros.test.graph.ql, headers: { faros-xf-user: connector-service, faros-xf-groups: kyma-admins } }
+
+    {{end}}
