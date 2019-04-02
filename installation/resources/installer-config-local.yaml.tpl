@@ -77,6 +77,18 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
+  name: helm-broker-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: helm-broker
+    kyma-project.io/installation: ""
+data:
+  config.isDevelopMode: "true"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
   name: knative-serving-overrides
   namespace: kyma-installer
   labels:

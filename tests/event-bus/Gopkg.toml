@@ -7,13 +7,13 @@ required = [
   name = "github.com/kyma-project/kyma"
   branch = "master"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.11.3"
 
-[[constraint]]
+[[override]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.11.3"
 
 [prune]
   go-tests = true

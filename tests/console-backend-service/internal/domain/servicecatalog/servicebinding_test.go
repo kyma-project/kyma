@@ -57,7 +57,7 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	instanceName := "binding-test-instance"
-	instance := fixture.ServiceInstance(instanceName, TestNamespace)
+	instance := fixture.ServiceInstanceFromClusterServiceClass(instanceName, TestNamespace)
 
 	bindingName := "test-binding"
 	binding := fixture.ServiceBinding(bindingName, instanceName, TestNamespace)
