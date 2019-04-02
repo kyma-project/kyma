@@ -97,7 +97,7 @@ Run the application without building a binary file. To do so:
   env APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action executeTests
   ```
 
-For the description of the available environment variables, see [this](#use-environment-variables] section.
+For the description of the available environment variables, see [this](#use-environment-variables) section.
 
 ### Run tests using a Helm chart
 

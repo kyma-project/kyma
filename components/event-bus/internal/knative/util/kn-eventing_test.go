@@ -126,8 +126,10 @@ func Test_SendMessage(t *testing.T) {
 	ch.Status.SetAddress(u.Hostname() + ":" + u.Port())
 
 	// send a message to the channel
-	m := "message 1"
-	err = k.SendMessage(ch, &m)
+	p := "message 1"
+	h := make(map[string]string)
+	h["test"] = "test"
+	err = k.SendMessage(ch, &h, &p)
 	assert.Nil(t, err)
 }
 

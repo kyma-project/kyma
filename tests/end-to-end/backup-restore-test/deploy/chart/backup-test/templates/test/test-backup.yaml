@@ -16,6 +16,9 @@ rules:
   resources: ["namespaces"]
   verbs: ["*"]
 - apiGroups: [""]
+  resources: ["resourcequotas"]
+  verbs: ["*"]
+- apiGroups: [""]
   resources: ["services", "services/proxy", "configmaps", "pods/log", "replicationcontrollers"]
   verbs: ["*"]
 - apiGroups: ["ark.heptio.com"]
@@ -33,6 +36,21 @@ rules:
 - apiGroups: ["autoscaling"]
   resources: ["horizontalpodautoscalers"]
   verbs: ["get", "list"]
+- apiGroups: ["ui.kyma-project.io"]
+  resources: ["microfrontends"]
+  verbs: ["*"]
+- apiGroups: ["gateway.kyma-project.io"]
+  resources: ["apis"]
+  verbs: ["create"]
+- apiGroups: [""]
+  resources: ["secrets", "statefulsets", "pods", "persistentvolumeclaims", "persistentvolumes"]
+  verbs: ["*"]
+- apiGroups: ["assetstore.kyma-project.io"]
+  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["*"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["*"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -75,6 +93,16 @@ spec:
   - name: backup-test
     image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
     imagePullPolicy: Always
-    #command: ["sleep", "6000"]
+    env:
+    - name: DOMAIN
+      value: {{ .Values.global.ingress.domainName | default "kyma.local" }}
+    - name: USER_EMAIL
+      value: {{ .Values.global.adminEmail }}
+    - name: USER_PASSWORD
+      value: {{ .Values.global.adminPassword }}
+    - name: ALL_BACKUP_CONFIGURATION_FILE
+      value: "/all-backup.yaml"
+    - name: SYSTEM_BACKUP_CONFIGURATION_FILE
+      value: "/system-backup.yaml"
   restartPolicy: Never
 ---

@@ -11,15 +11,15 @@ import (
 const (
 	namespaceEnvName           = "NAMESPACE"
 	tillerHostEnvName          = "TILLER_HOST"
-	installationTimeoutEnvName = "INSTALLATION_TIMEOUT"
+	installationTimeoutEnvName = "INSTALLATION_TIMEOUT_SECONDS"
 
 	defaultInstallationTimeout = 180
 )
 
 type TestConfig struct {
-	Namespace           string
-	TillerHost          string
-	ProvisioningTimeout int
+	Namespace                  string
+	TillerHost                 string
+	InstallationTimeoutSeconds int
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -46,9 +46,9 @@ func ReadConfig() (TestConfig, error) {
 	}
 
 	config := TestConfig{
-		Namespace:           namespace,
-		TillerHost:          tillerHost,
-		ProvisioningTimeout: timeoutValue,
+		Namespace:                  namespace,
+		TillerHost:                 tillerHost,
+		InstallationTimeoutSeconds: timeoutValue,
 	}
 
 	log.Printf("Read configuration: %+v", config)

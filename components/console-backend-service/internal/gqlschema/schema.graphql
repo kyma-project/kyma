@@ -11,15 +11,15 @@ scalar Timestamp
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
 
 input ResourceAttributes {
-	verb: String!
-	apiGroup: String
-	apiVersion: String
-	resource: String
+    verb: String!
+    apiGroup: String
+    apiVersion: String
+    resource: String
     resourceArg: String
-	subresource: String! = ""
-	nameArg: String
-	namespaceArg: String
-	isChildResolver: Boolean! = false
+    subresource: String! = ""
+    nameArg: String
+    namespaceArg: String
+    isChildResolver: Boolean! = false
 }
 
 # Content
@@ -263,6 +263,11 @@ type Secret {
     name: String!
     namespace: String!
     data: JSON!
+    type: String!
+    creationTime: Timestamp!
+    labels: JSON!
+    annotations: JSON!
+    json: JSON!
 }
 
 type DeleteServiceBindingOutput {
@@ -473,6 +478,11 @@ type ServiceEvent {
     service: Service!
 }
 
+type SecretEvent {
+    type: SubscriptionEventType!
+    secret: Secret!
+}
+
 type ContainerState {
     state: ContainerStateType!
     reason: String!
@@ -655,6 +665,21 @@ type BackendModule {
     name: String!
 }
 
+# Config Maps
+
+type ConfigMap {
+    name: String!
+    namespace: String!
+    creationTimestamp: Timestamp!
+    labels: Labels!
+    json: JSON!
+}
+
+type ConfigMapEvent {
+    type: SubscriptionEventType!
+    configMap: ConfigMap!
+}
+
 # Queries
 
 type Query {
@@ -670,7 +695,7 @@ type Query {
     clusterServiceBroker(name: String!): ClusterServiceBroker
     serviceBrokers(namespace: String!, first: Int, offset: Int): [ServiceBroker!]!
     serviceBroker(name: String!, namespace: String!): ServiceBroker
-    
+
     serviceBindingUsage(name: String!, namespace: String!): ServiceBindingUsage
     serviceBinding(name: String!, namespace: String!): ServiceBinding @HasAccess(attributes: {resource: "servicebindings", verb: "get", apiGroup: "servicecatalog.k8s.io", apiVersion: "v1beta1", namespaceArg: "namespace", nameArg: "name"})
     usageKinds(first: Int, offset: Int): [UsageKind!]!
@@ -691,6 +716,8 @@ type Query {
     pod(name: String!, namespace: String!): Pod
     pods(namespace: String!, first: Int, offset: Int): [Pod!]!
 
+    configMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "get", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
+    configMaps(namespace: String!, first: Int, offset: Int): [ConfigMap!]! @HasAccess(attributes: {resource: "configmaps", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
     service(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "get", apiGroup: "", apiVersion: "v1", isChildResolver: false})
     services(namespace: String!, first: Int, offset: Int): [Service!]! @HasAccess(attributes: {resource: "services", verb: "list", apiGroup: "", apiVersion: "v1", isChildResolver: false})
 
@@ -709,6 +736,9 @@ type Query {
     limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     backendModules: [BackendModule!]!
+
+    secret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "get", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    secrets(namespace: String!, first: Int, offset: Int): [Secret!]!  @HasAccess(attributes: {resource: "secrets", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
@@ -735,8 +765,14 @@ type Mutation {
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod
     deletePod(name: String!, namespace: String!): Pod
 
+    updateSecret(name: String!, namespace: String!, secret: JSON!): Secret @HasAccess(attributes: {resource: "secrets", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    deleteSecret(name: String!, namespace: String!): Secret @HasAccess(attributes: {resource: "secrets", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
     updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
     deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace"})
+
+    updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
+    deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
 
     createIDPPreset(name: String!, issuer: String!, jwksUri: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "create", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     deleteIDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "delete", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
@@ -755,7 +791,9 @@ type Subscription {
     clusterServiceBrokerEvent: ClusterServiceBrokerEvent!,
     applicationEvent: ApplicationEvent!,
     podEvent(namespace: String!): PodEvent!
-    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+    serviceEvent(namespace: String!): ServiceEvent! @HasAccess(attributes: {resource: "services", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}),
+    configMapEvent(namespace: String!): ConfigMapEvent! @HasAccess(attributes: {resource: "configmaps", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"}),
+    secretEvent(namespace: String!): SecretEvent!  @HasAccess(attributes: {resource: "secrets", verb: "watch", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 }
 
 # Schema

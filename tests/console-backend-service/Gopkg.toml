@@ -37,7 +37,8 @@ required = [
 
 [[constraint]]
   name = "github.com/vrischmann/envconfig"
-  version = "1.1.0"
+  # revision with support of slices default values
+  revision = "d647766a494a7182c05fa4ddd1702c2c307a770d"
 
 [[override]]
   name = "k8s.io/api"

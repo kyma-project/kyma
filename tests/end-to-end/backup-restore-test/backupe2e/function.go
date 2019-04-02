@@ -5,19 +5,17 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/google/uuid"
+	. "github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-
-	. "github.com/smartystreets/goconvey/convey"
 
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 )
 
 type functionTest struct {
@@ -27,22 +25,21 @@ type functionTest struct {
 }
 
 func NewFunctionTest() (functionTest, error) {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	restConfig, err := config.NewRestClientConfig()
 	if err != nil {
 		return functionTest{}, err
 	}
 
-	kubelessClient, err := kubeless.NewForConfig(config)
+	kubelessClient, err := kubeless.NewForConfig(restConfig)
 	if err != nil {
 		return functionTest{}, err
 	}
 
-	coreClient, err := kubernetes.NewForConfig(config)
+	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return functionTest{}, err
 	}
+
 	return functionTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
@@ -66,8 +63,11 @@ func (f functionTest) TestResources(namespace string) {
 	So(value, ShouldContainSubstring, f.uuid)
 }
 
-func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (string, error) {
+func (f functionTest) DeleteResources(namespace string) {
+	// There is not need to be implemented for this test.
+}
 
+func (f *functionTest) getFunctionOutput(host string, waitmax time.Duration) (string, error) {
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
 	messages := ""

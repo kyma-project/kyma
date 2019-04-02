@@ -123,6 +123,29 @@ func (_m *Store) DeleteObjects(ctx context.Context, bucketName string, prefix st
 	return r0
 }
 
+// ListObjects provides a mock function with given fields: ctx, bucketName, prefix
+func (_m *Store) ListObjects(ctx context.Context, bucketName string, prefix string) ([]string, error) {
+	ret := _m.Called(ctx, bucketName, prefix)
+
+	var r0 []string
+	if rf, ok := ret.Get(0).(func(context.Context, string, string) []string); ok {
+		r0 = rf(ctx, bucketName, prefix)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]string)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(context.Context, string, string) error); ok {
+		r1 = rf(ctx, bucketName, prefix)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // PutObjects provides a mock function with given fields: ctx, bucketName, assetName, sourceBasePath, files
 func (_m *Store) PutObjects(ctx context.Context, bucketName string, assetName string, sourceBasePath string, files []string) error {
 	ret := _m.Called(ctx, bucketName, assetName, sourceBasePath, files)

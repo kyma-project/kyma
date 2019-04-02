@@ -6,6 +6,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/application-gateway/internal/httpconsts"
+
 	"github.com/kyma-project/kyma/components/application-gateway/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-gateway/internal/authorization"
 	authMock "github.com/kyma-project/kyma/components/application-gateway/internal/authorization/mocks"
@@ -21,6 +23,58 @@ import (
 func TestProxy(t *testing.T) {
 
 	proxyTimeout := 10
+
+	t.Run("should proxy and remove headers", func(t *testing.T) {
+		// given
+		ts := NewTestServer(func(req *http.Request) {
+			assert.Equal(t, "", req.Header.Get(httpconsts.HeaderXForwardedClientCert))
+			assert.Equal(t, "", req.Header.Get(httpconsts.HeaderXForwardedFor))
+			assert.Equal(t, "", req.Header.Get(httpconsts.HeaderXForwardedProto))
+			assert.Equal(t, "", req.Header.Get(httpconsts.HeaderXForwardedHost))
+		})
+		defer ts.Close()
+
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+		req.Header.Set(httpconsts.HeaderXForwardedClientCert, "C=US;O=Example Organisation;CN=Test User 1")
+		req.Header.Set(httpconsts.HeaderXForwardedFor, "client")
+		req.Header.Set(httpconsts.HeaderXForwardedProto, "http")
+		req.Header.Set(httpconsts.HeaderXForwardedHost, "demo.example.com")
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil).
+			Once()
+
+		credentials := &metadatamodel.Credentials{}
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+
+		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
+			TargetUrl:   ts.URL,
+			Credentials: credentials,
+		}, nil).Once()
+
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
+	})
 
 	t.Run("should proxy and use internal cache", func(t *testing.T) {
 		// given

@@ -14,10 +14,10 @@ import (
 	"time"
 
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
+	subApis "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
 	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/components/event-bus/test/util"
-	_ "github.com/satori/go.uuid"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -25,11 +25,10 @@ import (
 )
 
 const (
-	eventType           = "test-e2e-event-bus"
-	testerName          = "test-core-event-bus-tester"
+	eventType           = "test-e2e"
 	subscriptionName    = "test-sub"
 	eventActivationName = "test-ea"
-	srcID               = "test.local.kyma.commerce"
+	srcID               = "test.local"
 
 	success = 0
 	fail    = 1
@@ -37,6 +36,7 @@ const (
 )
 
 var (
+	subscriberNamespace           *string
 	subscriberEventEndpointURL    *string
 	subscriberResultsEndpointURL  *string
 	subscriberStatusEndpointURL   *string
@@ -56,10 +56,15 @@ func main() {
 	publishStatusEndpointURL = flags.String("publish-status-uri", "http://event-bus-publish:8080/v1/status/ready", "publish service status endpoint `URL`")
 	namespace = flags.String("ns", "kyma-system", "k8s `namespace` in which test app is running")
 	subscriberImage := flags.String("subscriber-image", "", "subscriber Docker `image` name")
-	subscriberEventEndpointURL = flags.String("subscriber-events-uri", "http://"+util.SubscriberName+":9000/v1/events", "subscriber service events endpoint `URL`")
-	subscriberResultsEndpointURL = flags.String("subscriber-results-uri", "http://"+util.SubscriberName+":9000/v1/results", "subscriber service results endpoint `URL`")
-	subscriberStatusEndpointURL = flags.String("subscriber-status-uri", "http://"+util.SubscriberName+":9000/v1/status", "subscriber service status endpoint `URL`")
-	subscriberShutdownEndpointURL = flags.String("subscriber-shutdown-uri", "http://"+util.SubscriberName+":9000/v1/shutdown", "subscriber service shutdown endpoint `URL`")
+	subscriberNamespace = flags.String("subscriber-ns", "default", "k8s `namespace` in which subscriber test app is running")
+	subscriberEventEndpointURL = flags.String("subscriber-events-uri",
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/events", "subscriber service events endpoint `URL`")
+	subscriberResultsEndpointURL = flags.String("subscriber-results-uri",
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/results", "subscriber service results endpoint `URL`")
+	subscriberStatusEndpointURL = flags.String("subscriber-status-uri",
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/status", "subscriber service status endpoint `URL`")
+	subscriberShutdownEndpointURL = flags.String("subscriber-shutdown-uri",
+		"http://"+util.SubscriberName+"."+*subscriberNamespace+":9000/v1/shutdown", "subscriber service shutdown endpoint `URL`")
 
 	flags.Parse(os.Args[1:])
 
@@ -83,39 +88,34 @@ func main() {
 		shutdown(fail)
 	}
 
-	log.Println("Create an event activation")
+	log.Println("Create a test event activation")
 	eaClient, err = eaClientSet.NewForConfig(config)
 	if err != nil {
 		log.Printf("Error in creating event activation client: %v\n", err)
 		shutdown(fail)
 	}
-
-	if !createEventActivation(namespace, retries) {
+	if !createEventActivation(*subscriberNamespace, retries) {
 		log.Println("Error: Cannot create the event activation")
 		shutdown(fail)
 	}
 	time.Sleep(5 * time.Second)
 
-	log.Println("Create a subscription")
+	log.Println("Create a test subscription")
 	subClient, err = subscriptionClientSet.NewForConfig(config)
 	if err != nil {
 		log.Printf("Error in creating subscription client: %v\n", err)
 		shutdown(fail)
 	}
-	_, err = subClient.EventingV1alpha1().Subscriptions(*namespace).Create(util.NewSubscription(subscriptionName, *namespace, *subscriberEventEndpointURL, eventType, "v1", srcID))
-	if err != nil {
-		if !strings.Contains(err.Error(), "already exists") {
-			log.Printf("Error in creating subscription: %v\n", err)
-			shutdown(fail)
-		}
+	if !createSubscription(*subscriberNamespace) {
+		log.Println("Error: Cannot create Kyma subscription")
+		shutdown(fail)
 	}
 	time.Sleep(5 * time.Second)
 
 	log.Println("Create Subscriber")
-	if err := createSubscriber(namespace, util.SubscriberName, *subscriberImage); err != nil {
+	if err := createSubscriber(util.SubscriberName, *subscriberNamespace, *subscriberImage); err != nil {
 		log.Printf("Create Subscriber failed: %v\n", err)
 	}
-
 	log.Println("Check Subscriber Status")
 	if !checkSubscriberStatus(retries) {
 		log.Println("Error: Cannot connect to Subscriber")
@@ -125,6 +125,12 @@ func main() {
 	log.Println("Check Publisher Status")
 	if !checkPublisherStatus(retries) {
 		log.Println("Error: Cannot connect to Publisher")
+		shutdown(fail)
+	}
+
+	log.Println("Check Kyma subscription ready Status")
+	if !checkSubscriptionReady(*subscriberNamespace, retries) {
+		log.Println("Error: Kyma Subscription not ready")
 		shutdown(fail)
 	}
 
@@ -163,24 +169,24 @@ func shutdown(code int) {
 	log.Println("Delete Subscriber deployment")
 	deletePolicy := metav1.DeletePropagationForeground
 	gracePeriodSeconds := int64(0)
-	if err := clientK8S.AppsV1().Deployments(*namespace).Delete(util.SubscriberName,
+	if err := clientK8S.AppsV1().Deployments(*subscriberNamespace).Delete(util.SubscriberName,
 		&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds, PropagationPolicy: &deletePolicy}); err != nil {
 		log.Printf("Warning: Delete Subscriber Deployment falied: %v", err)
 	}
 	log.Println("Delete Subscriber service")
-	if err := clientK8S.CoreV1().Services(*namespace).Delete(util.SubscriberName,
+	if err := clientK8S.CoreV1().Services(*subscriberNamespace).Delete(util.SubscriberName,
 		&metav1.DeleteOptions{GracePeriodSeconds: &gracePeriodSeconds}); err != nil {
 		log.Printf("Warning: Delete Subscriber Service falied: %v", err)
 	}
 	if subClient != nil {
 		log.Printf("Delete test subscription: %v\n", subscriptionName)
-		if err := subClient.EventingV1alpha1().Subscriptions(*namespace).Delete(subscriptionName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+		if err := subClient.EventingV1alpha1().Subscriptions(*subscriberNamespace).Delete(subscriptionName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 			log.Printf("Warning: Delete Subscription falied: %v", err)
 		}
 	}
 	if eaClient != nil {
 		log.Printf("Delete test event activation: %v\n", eventActivationName)
-		if err := eaClient.ApplicationconnectorV1alpha1().EventActivations(*namespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
+		if err := eaClient.ApplicationconnectorV1alpha1().EventActivations(*subscriberNamespace).Delete(eventActivationName, &metav1.DeleteOptions{PropagationPolicy: &deletePolicy}); err != nil {
 			log.Printf("Warning: Delete Event Activation falied: %v", err)
 		}
 	}
@@ -304,18 +310,22 @@ func isPodReady(pod *apiv1.Pod) bool {
 	return true
 }
 
-func createSubscriber(namespace *string, subscriberName string, sbscrImg string) error {
-	if _, err := clientK8S.AppsV1().Deployments(*namespace).Get(subscriberName, metav1.GetOptions{}); err != nil {
+func createSubscriber(subscriberName string, subscriberNamespace string, sbscrImg string) error {
+	if _, err := clientK8S.AppsV1().Deployments(subscriberNamespace).Get(subscriberName, metav1.GetOptions{}); err != nil {
 		log.Println("Create Subscriber deployment")
-		if _, err := clientK8S.AppsV1().Deployments(*namespace).Create(util.NewSubscriberDeployment(sbscrImg)); err != nil {
+		if _, err := clientK8S.AppsV1().Deployments(subscriberNamespace).Create(util.NewSubscriberDeployment(sbscrImg)); err != nil {
 			log.Printf("Create Subscriber deployment: %v\n", err)
 			return err
+		}
+		log.Println("Create Subscriber service")
+		if _, err := clientK8S.CoreV1().Services(subscriberNamespace).Create(util.NewSubscriberService()); err != nil {
+			log.Printf("Create Subscriber service failed: %v\n", err)
 		}
 		time.Sleep(30 * time.Second)
 
 		for i := 0; i < 60; i++ {
 			var podReady bool
-			if pods, err := clientK8S.CoreV1().Pods(*namespace).List(metav1.ListOptions{LabelSelector: "app=" + util.SubscriberName}); err != nil {
+			if pods, err := clientK8S.CoreV1().Pods(subscriberNamespace).List(metav1.ListOptions{LabelSelector: "app=" + util.SubscriberName}); err != nil {
 				log.Printf("List Pods failed: %v\n", err)
 			} else {
 				for _, pod := range pods.Items {
@@ -332,23 +342,16 @@ func createSubscriber(namespace *string, subscriberName string, sbscrImg string)
 				time.Sleep(1 * time.Second)
 			}
 		}
-
-		log.Println("Create Subscriber service")
-		if _, err := clientK8S.CoreV1().Services(*namespace).Create(util.NewSubscriberService()); err != nil {
-			log.Printf("Create Subscriber service failed: %v\n", err)
-		}
-		time.Sleep(30 * time.Second)
-
-		log.Println("Subscriber recreated")
+		log.Println("Subscriber created")
 	}
 	return nil
 }
 
-func createEventActivation(namespace *string, noOfRetries int) bool {
+func createEventActivation(subscriberNamespace string, noOfRetries int) bool {
 	var eventActivationOK bool
 	var err error
 	for i := 0; i < noOfRetries; i++ {
-		_, err = eaClient.ApplicationconnectorV1alpha1().EventActivations(*namespace).Create(util.NewEventActivation(eventActivationName, *namespace, srcID))
+		_, err = eaClient.ApplicationconnectorV1alpha1().EventActivations(subscriberNamespace).Create(util.NewEventActivation(eventActivationName, subscriberNamespace, srcID))
 		if err == nil {
 			eventActivationOK = true
 			break
@@ -362,6 +365,17 @@ func createEventActivation(namespace *string, noOfRetries int) bool {
 		}
 	}
 	return eventActivationOK
+}
+
+func createSubscription(subscriberNamespace string) bool {
+	_, err := subClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Create(util.NewSubscription(subscriptionName, subscriberNamespace, *subscriberEventEndpointURL, eventType, "v1", srcID))
+	if err != nil {
+		if !strings.Contains(err.Error(), "already exists") {
+			log.Printf("Error in creating subscription: %v\n", err)
+			return false
+		}
+	}
+	return true
 }
 
 func checkSubscriberStatus(noOfRetries int) bool {
@@ -393,4 +407,21 @@ func checkPublisherStatus(noOfRetries int) bool {
 		}
 	}
 	return publishOK
+}
+
+func checkSubscriptionReady(subscriberNamespace string, noOfRetries int) bool {
+	var isReady bool
+	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
+	for i := 0; i < noOfRetries && !isReady; i++ {
+		kySub, err := subClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Get(subscriptionName, metav1.GetOptions{})
+		if err != nil {
+			log.Printf("Cannot get Kyma subscription, name: %v; namespace: %v", subscriptionName, subscriberNamespace)
+			break
+		} else {
+			if isReady = kySub.HasCondition(activatedCondition); !isReady {
+				time.Sleep(1 * time.Second)
+			}
+		}
+	}
+	return isReady
 }

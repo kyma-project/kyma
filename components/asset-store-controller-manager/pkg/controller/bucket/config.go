@@ -8,7 +8,7 @@ import (
 
 type Config struct {
 	Store                 store.Config
-	BucketRequeueInterval time.Duration `envconfig:"default=5m"`
+	BucketRequeueInterval time.Duration `envconfig:"default=30s"`
 }
 
 func loadConfig(prefix string) (Config, error) {

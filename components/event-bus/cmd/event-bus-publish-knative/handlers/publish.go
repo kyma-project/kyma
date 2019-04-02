@@ -9,6 +9,7 @@ import (
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/validators"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/publish/opts"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
@@ -20,6 +21,12 @@ var (
 	defaultChannelNamespace = knative.GetDefaultChannelNamespace()
 )
 
+type Message struct {
+	Headers map[string]string `json:"headers,omitempty"`
+
+	Payload api.AnyValue `json:"payload,omitempty"`
+}
+
 // WithRequestSizeLimiting creates a new request size limiting HandlerFunc
 func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
@@ -28,14 +35,14 @@ func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFun
 	}
 }
 
-func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer) http.HandlerFunc {
+func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, tracer *trace.Tracer, opts *opts.Options) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// init the trace span and context
 		traceSpan, traceContext := initTrace(r, tracer)
 		defer trace.FinishSpan(traceSpan)
 
 		// handle the knativeLib publish request
-		cloudEvent, channelName, namespace, err := handleKnativePublishRequest(w, r, knativeLib, knativePublisher, traceContext)
+		message, channelName, namespace, err := handleKnativePublishRequest(w, r, knativeLib, knativePublisher, traceContext, opts.MaxChannelNameLength)
 
 		// check if the publish request was successful
 		if err != nil {
@@ -47,19 +54,19 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		// send success response
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
-		publishResponse := &api.PublishResponse{EventID: cloudEvent.EventID}
+		publishResponse := &api.PublishResponse{EventID: message.Headers[trace.HeaderEventID]}
 		if err := json.NewEncoder(w).Encode(*publishResponse); err != nil {
 			log.Printf("failed to send response back: %v", err)
 		} else {
 			log.Printf("publish success to the knative channel '%v' in namespace '%v'", *channelName, *namespace)
 		}
 
-		// add span tags for the cloud-event properties
-		addSpanTagsForCloudEvent(traceSpan, cloudEvent)
+		// add span tags for the message properties
+		addSpanTagsForMessage(traceSpan, message)
 	}
 }
 
-func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, context *api.TraceContext) (*api.CloudEvent, *string, *string, *api.Error) {
+func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher, context *api.TraceContext, channelNameMaxLength int) (*Message, *string, *string, *api.Error) {
 	// validate the http request
 	publishRequest, err := validators.ValidateRequest(r)
 	if err != nil {
@@ -89,34 +96,41 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 		if errEventID != nil {
 			err = api.ErrorResponseInternalServer()
 			log.Printf("EventID generation failed: %v", err)
-			publish.SendJSONError(w, err)
+			_ = publish.SendJSONError(w, err)
 			return nil, nil, nil, err
 		}
 		publishRequest.EventID = eventID
 	}
 
-	// build the cloud-event from the publish-request and the trace-context
-	cloudEvent := buildCloudEvent(publishRequest, context)
+	// build the message from the publish-request and the trace-context
+	message := buildMessage(publishRequest, context)
 
-	// marshal cloud-event
-	cloudEventPayload, errMarshal := json.Marshal(cloudEvent)
+	// marshal the message
+	messagePayload, errMarshal := json.Marshal(message.Payload)
 	if errMarshal != nil {
-		log.Printf("marshal cloud-event failed: %v", errMarshal.Error())
+		log.Printf("marshal message failed: %v", errMarshal.Error())
 		err = api.ErrorResponseInternalServer()
 		_ = publish.SendJSONError(w, err)
 		return nil, nil, nil, err
 	}
 
-	// publish cloud-event
+	// get the channel name and validate its length
 	channelName := knative.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType, &publishRequest.EventTypeVersion)
-	err = (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &cloudEventPayload)
-	if err != nil {
-		log.Printf("publish cloud-event failed: %v", err)
+	if err = validators.ValidateChannelNameLength(&channelName, channelNameMaxLength); err != nil {
+		log.Printf("publish message failed: %v", err)
 		_ = publish.SendJSONError(w, err)
 		return nil, nil, nil, err
 	}
 
-	return cloudEvent, &channelName, &defaultChannelNamespace, nil
+	// publish the message
+	err = (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers, &messagePayload)
+	if err != nil {
+		log.Printf("publish message failed: %v", err)
+		_ = publish.SendJSONError(w, err)
+		return nil, nil, nil, err
+	}
+
+	return message, &channelName, &defaultChannelNamespace, nil
 }
 
 func initTrace(r *http.Request, tracer *trace.Tracer) (span *opentracing.Span, context *api.TraceContext) {
@@ -146,21 +160,36 @@ func setSourceID(publishRequest *api.PublishRequest, header *http.Header) bool {
 }
 
 func generateEventID() (string, error) {
-	uid, err := uuid.NewV4()
-	return uid.String(), err
-}
-
-func buildCloudEvent(publishRequest *api.PublishRequest, traceContext *api.TraceContext) *api.CloudEvent {
-	cloudEvent := &api.CloudEvent{}
-	cloudEvent.PublishRequest = *publishRequest
-	if traceContext != nil {
-		cloudEvent.Extensions = make(api.Extensions)
-		cloudEvent.Extensions[api.FieldTraceContext] = *traceContext
+	if uid, err := uuid.NewV4(); err != nil {
+		return "", err
+	} else {
+		return uid.String(), nil
 	}
-	return cloudEvent
 }
 
-func addSpanTagsForCloudEvent(publishSpan *opentracing.Span, cloudEvent *api.CloudEvent) {
-	tags := trace.CreateTraceTagsFromCloudEvent(cloudEvent)
+func buildMessage(publishRequest *api.PublishRequest, traceContext *api.TraceContext) *Message {
+
+	headers := make(map[string]string)
+	headers[trace.HeaderSourceID] = publishRequest.SourceID
+	headers[trace.HeaderEventType] = publishRequest.EventType
+	headers[trace.HeaderEventTypeVersion] = publishRequest.EventTypeVersion
+	headers[trace.HeaderEventID] = publishRequest.EventID
+	headers[trace.HeaderEventTime] = publishRequest.EventTime
+	if traceContext != nil {
+		for k, v := range *traceContext {
+			headers[k] = v
+		}
+	}
+
+	message := &Message{
+		Headers: headers,
+		Payload: publishRequest.Data,
+	}
+
+	return message
+}
+
+func addSpanTagsForMessage(publishSpan *opentracing.Span, message *Message) {
+	tags := trace.CreateTraceTagsFromMessageHeader(message.Headers)
 	trace.SetSpanTags(publishSpan, &tags)
 }

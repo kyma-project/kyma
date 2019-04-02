@@ -3,6 +3,7 @@ package testkit
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -14,9 +15,15 @@ type K8sResourcesClient interface {
 	GetIngress(name string, options v1.GetOptions) (interface{}, error)
 	GetRole(name string, options v1.GetOptions) (interface{}, error)
 	GetRoleBinding(name string, options v1.GetOptions) (interface{}, error)
+	GetClusterRole(name string, options v1.GetOptions) (interface{}, error)
+	GetClusterRoleBinding(name string, options v1.GetOptions) (interface{}, error)
+	GetServiceAccount(name string, options v1.GetOptions) (interface{}, error)
 	CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error)
 	DeleteApplication(name string, options *v1.DeleteOptions) error
 	GetApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error)
+	ListPods(options v1.ListOptions) (*corev1.PodList, error)
+	DeletePod(name string, options *v1.DeleteOptions) error
+	GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request
 }
 
 type k8sResourcesClient struct {
@@ -68,6 +75,18 @@ func (c *k8sResourcesClient) GetRoleBinding(name string, options v1.GetOptions) 
 	return c.coreClient.RbacV1().RoleBindings(c.namespace).Get(name, options)
 }
 
+func (c *k8sResourcesClient) GetClusterRole(name string, options v1.GetOptions) (interface{}, error) {
+	return c.coreClient.RbacV1().ClusterRoles().Get(name, options)
+}
+
+func (c *k8sResourcesClient) GetClusterRoleBinding(name string, options v1.GetOptions) (interface{}, error) {
+	return c.coreClient.RbacV1().ClusterRoleBindings().Get(name, options)
+}
+
+func (c *k8sResourcesClient) GetServiceAccount(name string, options v1.GetOptions) (interface{}, error) {
+	return c.coreClient.CoreV1().ServiceAccounts(c.namespace).Get(name, options)
+}
+
 func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.CoreV1().Services(c.namespace).Get(name, options)
 }
@@ -94,4 +113,16 @@ func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOp
 
 func (c *k8sResourcesClient) GetApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
 	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Get(name, options)
+}
+
+func (c *k8sResourcesClient) ListPods(options v1.ListOptions) (*corev1.PodList, error) {
+	return c.coreClient.CoreV1().Pods(c.namespace).List(options)
+}
+
+func (c *k8sResourcesClient) DeletePod(name string, options *v1.DeleteOptions) error {
+	return c.coreClient.CoreV1().Pods(c.namespace).Delete(name, options)
+}
+
+func (c *k8sResourcesClient) GetLogs(podName string, options *corev1.PodLogOptions) *restclient.Request {
+	return c.coreClient.CoreV1().Pods(c.namespace).GetLogs(podName, options)
 }

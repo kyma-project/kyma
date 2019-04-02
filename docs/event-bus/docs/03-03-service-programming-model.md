@@ -23,11 +23,11 @@ The following HTTP Headers provide information about the Event Metadata.
 
 |Header| Description|
 |------|--------|
-| **kyma-event-id** | Business Event's ID delivered to the microservice. |
-| **kyma-event-time** | Business Event's time delivered to the microservice. |
-| **kyma-event-type** | Business Event's type delivered to the microservice. |
-| **kyma-event-type-version** | Business Event's version delivered to the microservice. |
-| **kyma-source-id** | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events. |
+| **ce-event-id** | Business Event's ID delivered to the microservice. |
+| **ce-event-time** | Business Event's time delivered to the microservice. |
+| **ce-event-type** | Business Event's type delivered to the microservice. |
+| **ce-event-type-version** | Business Event's version delivered to the microservice. |
+| **ce-source-id** | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events. |
 | **kyma-subscription** | Subscription name defined in the subscription contract, or in a CRD. This business Event is published to its subscribers. |
 | **x-b3-flags** | Header used by the Zipkin tracer in Envoy. It encodes one or more options. See more on Zipkin tracing [here](https://github.com/openzipkin/b3-propagation). |
 | **x-b3-parentspanid** | Header used by the Zipkin tracer in Envoy. The **ParentSpanId** is 64-bit in length and indicates the position of the parent operation in the trace tree. When the span is the root of the trace tree, the **ParentSpanId** is absent. |

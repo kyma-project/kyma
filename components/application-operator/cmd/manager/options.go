@@ -6,15 +6,16 @@ import (
 )
 
 type options struct {
-	appName                 string
-	domainName              string
-	namespace               string
-	tillerUrl               string
-	syncPeriod              int
-	installationTimeout     int64
-	applicationGatewayImage string
-	eventServiceImage       string
-	eventServiceTestsImage  string
+	appName                      string
+	domainName                   string
+	namespace                    string
+	tillerUrl                    string
+	syncPeriod                   int
+	installationTimeout          int64
+	applicationGatewayImage      string
+	applicationGatewayTestsImage string
+	eventServiceImage            string
+	eventServiceTestsImage       string
 }
 
 func parseArgs() *options {
@@ -26,27 +27,29 @@ func parseArgs() *options {
 	installationTimeout := flag.Int64("installationTimeout", 240, "Time after the release installation will time out")
 
 	applicationGatewayImage := flag.String("applicationGatewayImage", "", "The image of the Application Gateway to use")
+	applicationGatewayTestsImage := flag.String("applicationGatewayTestsImage", "", "The image of the Application Gateway Tests to use")
 	eventServiceImage := flag.String("eventServiceImage", "", "The image of the Event Service to use")
 	eventServiceTestsImage := flag.String("eventServiceTestsImage", "", "The image of the Event Service Tests to use")
 
 	flag.Parse()
 
 	return &options{
-		appName:                 *appName,
-		domainName:              *domainName,
-		namespace:               *namespace,
-		tillerUrl:               *tillerUrl,
-		syncPeriod:              *syncPeriod,
-		installationTimeout:     *installationTimeout,
-		applicationGatewayImage: *applicationGatewayImage,
-		eventServiceImage:       *eventServiceImage,
-		eventServiceTestsImage:  *eventServiceTestsImage,
+		appName:                      *appName,
+		domainName:                   *domainName,
+		namespace:                    *namespace,
+		tillerUrl:                    *tillerUrl,
+		syncPeriod:                   *syncPeriod,
+		installationTimeout:          *installationTimeout,
+		applicationGatewayImage:      *applicationGatewayImage,
+		applicationGatewayTestsImage: *applicationGatewayTestsImage,
+		eventServiceImage:            *eventServiceImage,
+		eventServiceTestsImage:       *eventServiceTestsImage,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --domainName=%s --namespace=%s --tillerUrl=%s --syncPeriod=%d --installationTimeout=%d "+
-		"--applicationGatewayImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s",
+		"--applicationGatewayImage=%s --applicationGatewayTestsImage=%s --eventServiceImage=%s --eventServiceTestsImage=%s",
 		o.appName, o.domainName, o.namespace, o.tillerUrl, o.syncPeriod, o.installationTimeout,
-		o.applicationGatewayImage, o.eventServiceImage, o.eventServiceTestsImage)
+		o.applicationGatewayImage, o.applicationGatewayTestsImage, o.eventServiceImage, o.eventServiceTestsImage)
 }

@@ -13,6 +13,8 @@ const (
 	Pods
 	ReplicaSet
 	ReplicaSets
+	ConfigMap
+	ConfigMaps
 	Resource
 	Resources
 	StatefulSets
@@ -21,6 +23,7 @@ const (
 	ResourceQuotaStatus
 	ResourceQuotaStatuses
 	Secret
+	Secrets
 	Service
 	Services
 )
@@ -47,6 +50,10 @@ func (k Kind) String() string {
 		return "Replica Set"
 	case ReplicaSets:
 		return "Replica Sets"
+	case ConfigMap:
+		return "ConfigMap"
+	case ConfigMaps:
+		return "ConfigMaps"
 	case Resource:
 		return "Resource"
 	case Resources:
@@ -63,6 +70,8 @@ func (k Kind) String() string {
 		return "Resource Quota Statuses"
 	case Secret:
 		return "Secret"
+	case Secrets:
+		return "Secrets"
 	case Service:
 		return "Service"
 	case Services:
