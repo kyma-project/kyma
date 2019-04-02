@@ -16,6 +16,7 @@ loki:
   terminationGracePeriodSeconds: 30
   deploymentStrategy: RollingUpdate
   port: 3100
+  fullnameOverride: logging
 
   image:
     repository: grafana/loki

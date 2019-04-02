@@ -53,10 +53,7 @@ spec:
             - name: http
               containerPort: {{ .Values.loki.port }}
               protocol: TCP
-          livenessProbe:
-            {{- toYaml .Values.loki.livenessProbe | nindent 12 }}
-          readinessProbe:
-            {{- toYaml .Values.loki.readinessProbe | nindent 12 }}
+
           resources:
             {{- toYaml .Values.loki.resources | nindent 12 }}
       nodeSelector:
