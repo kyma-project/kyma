@@ -21,8 +21,8 @@ const (
 
 type Source struct {
 	// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
-	// +kubebuilder:validation:Maximum=253
 	Name string `json:"name"`
+	// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
 	Type string `json:"type"`
 	URL  string `json:"url"`
 	// +kubebuilder:validation:Enum=single,package,index

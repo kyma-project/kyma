@@ -81,7 +81,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.BucketError, err.Error()), status), err
 	}
 
-	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabel(instance.GetName()))
+	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabels(instance.GetName()))
 	if err != nil {
 		h.recordWarningEventf(instance, pretty.AssetsListingFailed, err.Error())
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed, err.Error()), status), err
@@ -220,7 +220,7 @@ func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaA
 		ObjectMeta: v1.ObjectMeta{
 			Name:        h.generateFullAssetName(instance.GetName(), assetSpec.Name, assetSpec.Type),
 			Namespace:   instance.GetNamespace(),
-			Labels:      h.buildLabel(instance.GetName()),
+			Labels:      h.buildLabels(instance.GetName()),
 			Annotations: h.buildAnnotations(assetSpec.Name),
 		},
 		Spec: h.convertToCommonAssetSpec(assetSpec, bucketName),
@@ -314,7 +314,7 @@ func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucket
 	}
 }
 
-func (h *docstopicHandler) buildLabel(topicName string) map[string]string {
+func (h *docstopicHandler) buildLabels(topicName string) map[string]string {
 	return map[string]string{
 		docsTopicLabel: topicName,
 	}

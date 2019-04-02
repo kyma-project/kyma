@@ -5,6 +5,7 @@ import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/source"
 	"github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -95,8 +96,8 @@ func TestReconcile(t *testing.T) {
 
 	// Update DocsTopic spec
 	// When
-	currentTopic.Spec.Sources = filter(currentTopic.Spec.Sources, "dita")
-	markdownIndex := firstIndex(currentTopic.Spec.Sources, "markdown")
+	currentTopic.Spec.Sources = source.FilterByType(currentTopic.Spec.Sources, "dita")
+	markdownIndex := source.IndexByType(currentTopic.Spec.Sources, "markdown")
 	g.Expect(markdownIndex).NotTo(gomega.Equal(-1))
 	currentTopic.Spec.Sources[markdownIndex].Filter = "zyx"
 	err = c.Update(context.TODO(), currentTopic)
@@ -105,12 +106,18 @@ func TestReconcile(t *testing.T) {
 	// Then
 	// Update Assets
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
 
 	assets = &v1alpha2.AssetList{}
 	err = c.List(context.TODO(), nil, assets)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	g.Expect(assets.Items).To(gomega.HaveLen(len(currentTopic.Spec.Sources)))
+	for _, a := range assets.Items {
+		if a.Annotations["assetshortname.cms.kyma-project.io"] != "source-two" {
+			continue
+		}
+		g.Expect(a.Spec.Source.Filter).To(gomega.Equal("zyx"))
+	}
+
 }
 
 func fixDocsTopic() *v1alpha1.DocsTopic {
@@ -160,28 +167,4 @@ func fixRequest(topic *v1alpha1.DocsTopic) reconcile.Request {
 	return reconcile.Request{
 		NamespacedName: types.NamespacedName{Name: topic.Name, Namespace: topic.Namespace},
 	}
-}
-
-// returns index to the first source object from given slice with given source type
-// or -1 if not found
-func firstIndex(slice []v1alpha1.Source, sourceType string) int {
-	for i, source := range slice {
-		if source.Type != sourceType {
-			continue
-		}
-		return i
-	}
-	return -1
-}
-
-// returns a copy of given slice that will not contain sources with given source type
-func filter(sources []v1alpha1.Source, sourceType string) []v1alpha1.Source {
-	var result []v1alpha1.Source
-	for _, source := range sources {
-		if source.Type == sourceType {
-			continue
-		}
-		result = append(result, source)
-	}
-	return result
 }
