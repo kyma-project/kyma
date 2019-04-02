@@ -55,7 +55,7 @@ Add a new test under the `backupe2e/{domain-name}` directory and implement the f
 type BackupTest interface {
     CreateResources(namespace string)
     TestResources(namespace string)
-    DeleteResources()
+    DeleteResources(namespace string)
 }
 ```
 The functions work as follows:
