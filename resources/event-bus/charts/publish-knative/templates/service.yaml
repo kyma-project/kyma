@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ template "publish-knative.name" . }}
+  name: "event-bus-publish"
   labels:
 {{ include "publish-knative.labels.standard" . | indent 4 }}
 spec:
@@ -9,5 +9,5 @@ spec:
   ports:
     - port: {{ .Values.port }}
   selector:
-    app: {{ template "publish-knative.name" . }}
+    app: {{ template "publish-knative.fullname" . }}
     release: {{ .Release.Name }}
