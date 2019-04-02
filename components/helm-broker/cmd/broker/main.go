@@ -68,7 +68,7 @@ func main() {
 		options.LabelSelector = fmt.Sprintf("%s=%s", mapLabelKey, mapLabelValue)
 	})
 
-	repositoryWatcher := bundle.NewRepositoryController(bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log)
+	repositoryWatcher := bundle.NewRepositoryController(bundleSyncer, bLoader, brokerSyncer, cfg.ClusterServiceBrokerName, cfgMapInformer, log, cfg.DevelopMode)
 	go repositoryWatcher.Run(stopCh)
 	go cfgMapInformer.Run(stopCh)
 

@@ -1,0 +1,32 @@
+# Refer to https://github.com/golang/dep/blob/master/docs/Gopkg.toml.md
+# for detailed Gopkg.toml documentation.
+
+required = [
+  "golang.org/x/tools/cmd/goimports",
+]
+
+[prune]
+  non-go = true
+  go-tests = true
+  unused-packages = true
+
+[[constraint]]
+  name = "k8s.io/client-go"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/api"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/apimachinery"
+  version = "kubernetes-1.10.1"
+
+[[override]]
+  name = "k8s.io/gengo"
+  revision = "01a732e01d00cb9a81bb0ca050d3e6d2b947927b"
+
+[[override]]
+  name = "k8s.io/kubernetes"
+  branch = "release-1.10"
+

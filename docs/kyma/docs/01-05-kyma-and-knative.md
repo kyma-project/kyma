@@ -11,4 +11,4 @@ The diagram shows dependencies between the components:
 
 ![kyma-knative](./assets/kyma-knative.svg)
 
-The nearest plan for Kyma and Knative cooperation is to replace Serverless in Kyma with the Knative technology. Other planned changes concerning Kyma and Knative cooperation involve providing configuration options to allow Istio deployed with Knative to work on Kyma, and extracting Kyma eventing to fully integrate it with Knative eventing. The eventing integration will provide more flexibility on deciding which messaging implementation to use (NATS, Kafka, or any other).
+Kyma and Knative cooperation focuses on replacing Kyma eventing with Knative eventing, and Kyma Serverless with Knative serving.

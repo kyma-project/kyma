@@ -85,7 +85,7 @@
 /resources/core/charts/istio-rbac/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `namespace-controller` subchart
-/resources/core/charts/namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
+/resources/core/charts/namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
 # The `etcd-operator` subchart
 /resources/core/charts/etcd-operator/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @mwieczorek @jasiu001 @adamwalach
@@ -196,6 +196,9 @@
 # Asset Upload Service
 /components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
+# Asset Metadata Service
+/components/asset-metadata-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+
 # CMS Controller Manager Component
 /components/cms-controller-manager/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
 
@@ -209,7 +212,7 @@
 /components/configurations-generator/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Namespace controller Component
-/components/namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
+/components/namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
 # Istio Extensions Component
 /components/istio-kyma-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
@@ -265,7 +268,7 @@
 /tests/acceptance/dex @sjanota @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # test-namespace-controller
-/tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
+/tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 
 # monitoring tests
 /tests/monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
@@ -290,6 +293,9 @@
 
 # Application Registry Tests
 /tests/application-registry-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
+
+# Application Gateway Tests
+/tests/application-gateway-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Application Operator Tests
 /tests/application-operator-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree

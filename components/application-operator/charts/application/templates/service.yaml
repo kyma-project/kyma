@@ -7,8 +7,8 @@ metadata:
   labels:
     application: {{ .Release.Name }}
     app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}-application-gateway
-    heritage: {{ .Release.Service }}-application-gateway
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   type: ClusterIP
   ports:

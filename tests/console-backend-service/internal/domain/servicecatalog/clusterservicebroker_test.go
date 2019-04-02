@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	tester "github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -39,6 +40,7 @@ func TestClusterServiceBrokerQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedResource := clusterBroker()
+
 	resourceDetailsQuery := `
 		name
 		creationTimestamp
@@ -90,13 +92,8 @@ func checkClusterBroker(t *testing.T, expected, actual ClusterServiceBroker) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
-	// Url
-	assert.Contains(t, actual.Url, expected.Name)
-
 	// Status
 	assert.Equal(t, expected.Status.Ready, actual.Status.Ready)
-	assert.NotEmpty(t, actual.Status.Message)
-	assert.NotEmpty(t, actual.Status.Reason)
 }
 
 func assertClusterBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker, expectedElement ClusterServiceBroker) {
@@ -114,7 +111,7 @@ func assertClusterBrokerExistsAndEqual(t *testing.T, arr []ClusterServiceBroker,
 
 func clusterBroker() ClusterServiceBroker {
 	return ClusterServiceBroker{
-		Name: tester.ClusterBrokerReleaseName,
+		Name: fixture.TestingBrokerName,
 		Status: ClusterServiceBrokerStatus{
 			Ready: true,
 		},

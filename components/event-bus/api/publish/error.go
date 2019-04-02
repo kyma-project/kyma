@@ -1,6 +1,9 @@
 package publish
 
-import "net/http"
+import (
+	"fmt"
+	"net/http"
+)
 
 const (
 	/*ErrorTypeBadPayload The request payload has incorrect syntax according to the sent Content-Type.
@@ -23,8 +26,9 @@ const (
 	- A type incompatibility, such as a field modeled to be an integer, but a non-numeric expression was found instead.
 	- A range under or over flow validation violation cause.
 	*/
-	ErrorTypeInvalidField  = "invalid_field"
-	ErrorTypeInvalidHeader = "invalid_header"
+	ErrorTypeInvalidField       = "invalid_field"
+	ErrorTypeInvalidHeader      = "invalid_header"
+	ErrorTypeInvalidFieldLength = "invalid_field_length"
 	// ErrorTypeRequestBodyTooLarge is error type code for error responses where request body is too large
 	ErrorTypeRequestBodyTooLarge = "request_body_too_large"
 	// ErrorMessageRequestBodyTooLarge is error message for error responses where request body is too large
@@ -45,6 +49,8 @@ const (
 	ErrorMessageMissingField = "We need all required fields complete to keep you moving."
 	// ErrorMessageInvalidField represents the error message for `ErrorTypeInvalidField`
 	ErrorMessageInvalidField = "We need all your entries to be correct to keep you moving."
+	// ErrorMessageInvalidFieldLength represents the error message for `ErrorTypeInvalidFieldLength`
+	ErrorMessageInvalidFieldLength = "Field length must be at max: %d"
 
 	ErrorMessageMissingSourceId = "Either provide 'Source-Id' header or specify 'source-id' in the json payload"
 )
@@ -86,6 +92,36 @@ func ErrorResponseRequestBodyTooLarge() (response *Error) {
 		MoreInfo: "",
 	}
 	return apiError
+}
+
+func errorInvalidSourceIDLength(sourceIdMaxLength int) *Error {
+	return ErrorInvalidFieldLength(FieldSourceId, sourceIdMaxLength)
+}
+
+func errorInvalidEventTypeLength(eventTypeMaxLength int) *Error {
+	return ErrorInvalidFieldLength(FieldEventType, eventTypeMaxLength)
+}
+
+func errorInvalidEventTypeVersionLength(eventTypeVersionMaxLength int) *Error {
+	return ErrorInvalidFieldLength(FieldEventTypeVersion, eventTypeVersionMaxLength)
+}
+
+func ErrorInvalidFieldLength(field string, length int) *Error {
+	apiErrorDetail := ErrorDetail{
+		Field:    field,
+		Type:     ErrorTypeInvalidFieldLength,
+		Message:  ErrorMessageInvalidField,
+		MoreInfo: fmt.Sprintf(ErrorMessageInvalidFieldLength, length),
+	}
+	details := []ErrorDetail{apiErrorDetail}
+	apiError := Error{
+		Status:   http.StatusBadRequest,
+		Type:     ErrorTypeValidationViolation,
+		Message:  ErrorMessageInvalidField,
+		MoreInfo: "",
+		Details:  details,
+	}
+	return &apiError
 }
 
 func ErrorResponseBadRequest() (response *Error) {

@@ -29,6 +29,7 @@ type Resolver struct {
 	*podResolver
 	*serviceResolver
 	*replicaSetResolver
+	*configMapResolver
 	informerFactory informers.SharedInformerFactory
 }
 
@@ -51,19 +52,22 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		return nil, errors.Wrap(err, "while creating deployment service")
 	}
 	limitRangeService := newLimitRangeService(informerFactory.Core().V1().LimitRanges().Informer())
+
 	podService := newPodService(informerFactory.Core().V1().Pods().Informer(), client)
 	resourceService := newResourceService(clientset.Discovery())
+	secretService := newSecretService(informerFactory.Core().V1().Secrets().Informer(), client)
+
 	replicaSetService := newReplicaSetService(informerFactory.Apps().V1().ReplicaSets().Informer(), clientset.AppsV1())
 	resourceQuotaService := newResourceQuotaService(informerFactory.Core().V1().ResourceQuotas().Informer(),
 		informerFactory.Apps().V1().ReplicaSets().Informer(), informerFactory.Apps().V1().StatefulSets().Informer(), client)
 	resourceQuotaStatusService := newResourceQuotaStatusService(resourceQuotaService, resourceQuotaService, resourceQuotaService, limitRangeService)
-
+	configMapService := newConfigMapService(informerFactory.Core().V1().ConfigMaps().Informer(), clientset.CoreV1())
 	serviceSvc := newServiceService(informerFactory.Core().V1().Services().Informer(), client)
 
 	return &Resolver{
 		resourceResolver:            newResourceResolver(resourceService),
 		namespaceResolver:           newNamespaceResolver(namespaceService, applicationRetriever),
-		secretResolver:              newSecretResolver(client),
+		secretResolver:              newSecretResolver(*secretService),
 		deploymentResolver:          newDeploymentResolver(deploymentService, scRetriever, scaRetriever),
 		podResolver:                 newPodResolver(podService),
 		serviceResolver:             newServiceResolver(serviceSvc),
@@ -71,6 +75,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, applicatio
 		limitRangeResolver:          newLimitRangeResolver(limitRangeService),
 		resourceQuotaResolver:       newResourceQuotaResolver(resourceQuotaService),
 		resourceQuotaStatusResolver: newResourceQuotaStatusResolver(resourceQuotaStatusService),
+		configMapResolver:           newConfigMapResolver(configMapService),
 		informerFactory:             informerFactory,
 	}, nil
 }

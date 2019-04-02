@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"time"
 
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -15,10 +14,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/google/uuid"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
+	"k8s.io/client-go/kubernetes"
 )
 
 type deploymentTest struct {
@@ -27,22 +25,29 @@ type deploymentTest struct {
 }
 
 func NewDeploymentTest() (deploymentTest, error) {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	restConfig, err := config.NewRestClientConfig()
 	if err != nil {
 		return deploymentTest{}, err
 	}
 
-	coreClient, err := kubernetes.NewForConfig(config)
+	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return deploymentTest{}, err
 	}
+
 	return deploymentTest{
 		coreClient:     coreClient,
 		deploymentName: "hello",
 		uuid:           uuid.New().String(),
 	}, nil
+}
+
+func (d deploymentTest) CreateResources(namespace string) {
+	replicas := int32(2)
+	err := d.createDeployment(namespace, replicas)
+	So(err, ShouldBeNil)
+	err = d.createService(namespace)
+	So(err, ShouldBeNil)
 }
 
 func (d deploymentTest) TestResources(namespace string) {
@@ -55,8 +60,11 @@ func (d deploymentTest) TestResources(namespace string) {
 	So(value, ShouldContainSubstring, "Welcome to nginx!")
 }
 
-func (d deploymentTest) getOutput(host string, waitmax time.Duration) (string, error) {
+func (d deploymentTest) DeleteResources(namespace string) {
+	// There is not need to be implemented for this test.
+}
 
+func (d deploymentTest) getOutput(host string, waitmax time.Duration) (string, error) {
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
 	messages := ""
@@ -83,14 +91,6 @@ func (d deploymentTest) getOutput(host string, waitmax time.Duration) (string, e
 		}
 	}
 
-}
-
-func (d deploymentTest) CreateResources(namespace string) {
-	replicas := int32(2)
-	err := d.createDeployment(namespace, replicas)
-	So(err, ShouldBeNil)
-	err = d.createService(namespace)
-	So(err, ShouldBeNil)
 }
 
 func (d deploymentTest) createDeployment(namespace string, replicas int32) error {
@@ -194,8 +194,8 @@ func (d deploymentTest) waitForPodDeployment(namespace string, replicas int32, w
 			if err != nil {
 				return err
 			}
-			if deployment.Status.AvailableReplicas != replicas {
-				return fmt.Errorf("Number of pods %v different from available replicas %v", len(pods.Items), replicas)
+			if deployment.Status.ReadyReplicas != replicas {
+				break
 			}
 			return nil
 		}
@@ -203,7 +203,3 @@ func (d deploymentTest) waitForPodDeployment(namespace string, replicas int32, w
 }
 
 func int32Ptr(i int32) *int32 { return &i }
-
-func (d deploymentTest) DeleteResources() {
-	// There is not need to be implemented for this test.
-}

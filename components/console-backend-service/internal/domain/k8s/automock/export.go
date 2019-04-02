@@ -32,8 +32,16 @@ func NewPodSvc() *podSvc {
 	return new(podSvc)
 }
 
+func NewSecretSvc() *secretSvc {
+	return new(secretSvc)
+}
+
 func NewGQLPodConverter() *gqlPodConverter {
 	return new(gqlPodConverter)
+}
+
+func NewGQLSecretConverter() *gqlSecretConverter {
+	return new(gqlSecretConverter)
 }
 
 func NewResourceSvc() *resourceSvc {
@@ -58,4 +66,12 @@ func NewGqlServiceConverter() *gqlServiceConverter {
 
 func NewServiceSvc() *serviceSvc {
 	return new(serviceSvc)
+}
+
+func NewGqlConfigMapConverter() *gqlConfigMapConverter {
+	return new(gqlConfigMapConverter)
+}
+
+func NewConfigMapSvc() *configMapSvc {
+	return new(configMapSvc)
 }

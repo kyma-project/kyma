@@ -65,12 +65,12 @@ if [ $? != 0 ]; then
 else echo -e "${GREEN}√ go test${NC}"
 fi
 
-goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|/pkg\/|_*export_test.go")
+goFilesToCheck=$(find . -type f -name "*.go" | egrep -v "\/vendor\/|_*/automock/|_*/testdata/|_*export_test.go")
 
 #
 # GO FMT
 #
-goFmtResult=$(echo "${filesToCheck}" | xargs -L1 go fmt)
+goFmtResult=$(echo "${goFilesToCheck}" | xargs -L1 go fmt)
 if [ $(echo ${#goFmtResult}) != 0 ]
 	then
     	echo -e "${RED}✗ go fmt${NC}\n$goFmtResult${NC}"

@@ -3,6 +3,7 @@ package application
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -85,6 +86,32 @@ func Test_PublishWithSourceIdInHeader_ShouldSucceed(t *testing.T) {
 	// assert
 	assert.Nil(t, err)
 	assert.Equal(t, test.TestEventID, publishResponse.EventID)
+}
+
+func Test_PublishWithChannelNameGreaterThanMaxChannelLength_ShouldFail(t *testing.T) {
+	// make the max channel name length to be very low
+	application.options.MaxChannelNameLength = 1
+
+	// prepare and send payload
+	payload := test.BuildDefaultTestPayload()
+	body, statusCode := test.PerformPublishRequest(t, server.URL, payload)
+
+	// assert
+	assert.NotNil(t, body)
+	assert.Equal(t, http.StatusBadRequest, statusCode)
+
+	// get the response
+	err := &api.Error{}
+	marshalErr := json.Unmarshal(body, &err)
+
+	// assert
+	assert.Nil(t, marshalErr)
+	assert.Equal(t, api.ErrorTypeValidationViolation, err.Type)
+	assert.Equal(t, api.ErrorTypeInvalidFieldLength, err.Details[0].Type)
+	assert.Equal(t, knative.FieldKnativeChannelName, err.Details[0].Field)
+
+	// restore the max channel name original length
+	application.options.MaxChannelNameLength = opts.DefaultMaxChannelNameLength
 }
 
 func Test_PublishWithBadPayload_ShouldFail(t *testing.T) {
@@ -202,4 +229,24 @@ func Test_PublishWithTooLargePayload_ShouldFail(t *testing.T) {
 
 	// assert
 	test.AssertExpectedError(t, body, statusCode, http.StatusRequestEntityTooLarge, nil, api.ErrorTypeRequestBodyTooLarge)
+}
+
+func Test_PublishResponseFields(t *testing.T) {
+	// prepare and send payload
+	payload := test.BuildDefaultTestPayloadWithoutSourceId()
+	body, statusCode := test.PerformPublishRequestWithHeaders(t, server.URL, payload, map[string]string{api.HeaderSourceId: test.TestSourceID})
+
+	// assert
+	assert.NotNil(t, body)
+	assert.Equal(t, http.StatusOK, statusCode)
+
+	// get the response
+	publishResponse := &api.PublishResponse{}
+	err := json.Unmarshal(body, &publishResponse)
+
+	// assert
+	assert.Nil(t, err)
+	assert.Equal(t, test.TestEventID, publishResponse.EventID)
+	assert.Equal(t, publisher.PUBLISHED, publishResponse.Status)
+	assert.Equal(t, "Message successfully published to the channel", publishResponse.Reason)
 }
