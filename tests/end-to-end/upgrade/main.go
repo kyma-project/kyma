@@ -17,8 +17,11 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
-	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+  "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
+  assetstore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
+  cms "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
+  servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+	"k8s.io/client-go/dynamic"
 )
 
 // Config holds application configuration
@@ -70,6 +73,9 @@ func main() {
 	appBrokerCli, err := ab.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Application Broker clientset")
 
+	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating K8s dynamic clientset")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 	//
@@ -79,7 +85,9 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"FunctionUpgradeTest":          function.NewFunctionUpgradeTest(k8sConfig),
+    "AssetStoreUpgradeTest":        assetstore.NewAssetStoreUpgradeTest(dynamicCli),
+		"CmsUpgradeTest":               cms.NewHeadlessCmsUpgradeTest(dynamicCli),
+    "FunctionUpgradeTest":          function.NewFunctionUpgradeTest(k8sConfig),
 	}
 
 	// Execute requested action

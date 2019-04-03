@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine"
-	automock3 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine/automock"
+	engineMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine/automock"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/asset/pretty"
-	automock2 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/loader/automock"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store/automock"
-	"github.com/onsi/gomega"
+	loaderMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/loader/automock"
+	storeMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store/automock"
+	. "github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -23,1005 +23,708 @@ import (
 
 var log = logf.Log.WithName("asset-test")
 
-func TestAssetHandler_IsOnAddOrUpdate(t *testing.T) {
-	t.Run("New", func(t *testing.T) {
-		// Given
-		g := gomega.NewGomegaWithT(t)
+const (
+	remoteBucketName = "bucket-name"
+)
 
-		testData := new(v1alpha2.Asset)
-		testData.ObjectMeta.Generation = int64(1)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+func TestAssetHandler_Handle_OnAddOrUpdate(t *testing.T) {
+	t.Run("OnAdd", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
 
 		// When
-		result := assetHandler.IsOnAddOrUpdate(testData, testData.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetPending))
+		g.Expect(status.Reason).To(Equal(pretty.Scheduled.String()))
 	})
 
-	t.Run("Updated", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
+	t.Run("OnUpdate", func(t *testing.T) {
 		// Given
-		testData := new(v1alpha2.Asset)
-		testData.ObjectMeta.Generation = int64(10)
-		testData.Status.CommonAssetStatus.ObservedGeneration = int64(8)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.ObjectMeta.Generation = int64(2)
+		asset.Status.ObservedGeneration = int64(1)
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
 
 		// When
-		result := assetHandler.IsOnAddOrUpdate(testData, testData.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetPending))
+		g.Expect(status.Reason).To(Equal(pretty.Scheduled.String()))
+	})
+}
+
+func TestAssetHandler_Handle_Default(t *testing.T) {
+	// Given
+	g := NewGomegaWithT(t)
+	ctx := context.TODO()
+	relistInterval := time.Minute
+	now := time.Now()
+	asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+	asset.ObjectMeta.Generation = int64(1)
+	asset.Status.ObservedGeneration = int64(1)
+
+	handler, mocks := newHandler(relistInterval)
+	defer mocks.AssertExpectations(t)
+
+	// When
+	status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+	// Then
+	g.Expect(err).ToNot(HaveOccurred())
+	g.Expect(status).To(BeZero())
+}
+
+func TestAssetHandler_Handle_OnReady(t *testing.T) {
+	t.Run("NotTaken", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
+		asset.Status.CommonAssetStatus.LastHeartbeatTime = v1.NewTime(now)
+		asset.Status.CommonAssetStatus.ObservedGeneration = asset.Generation
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).To(BeZero())
 	})
 
 	t.Run("NotChanged", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha2.Asset)
-		testData.ObjectMeta.Generation = int64(10)
-		testData.Status.CommonAssetStatus.ObservedGeneration = int64(10)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnAddOrUpdate(testData, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeFalse())
-	})
-}
-
-func TestAssetHandler_IsOnDelete(t *testing.T) {
-	t.Run("True", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		now := v1.Now()
-		testData.ObjectMeta.DeletionTimestamp = &now
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnDelete(testData)
-
-		// Then
-		g.Expect(result).To(gomega.BeTrue())
-	})
-
-	t.Run("False", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnDelete(testData)
-
-		// Then
-		g.Expect(result).To(gomega.BeFalse())
-	})
-}
-
-func TestAssetHandler_IsOnFailed(t *testing.T) {
-	t.Run("New", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnFailed(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeFalse())
-	})
-
-	t.Run("Ready", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnFailed(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeFalse())
-	})
-
-	t.Run("True", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetFailed
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnFailed(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeTrue())
-	})
-}
-
-func TestAssetHandler_IsOnPending(t *testing.T) {
-	t.Run("New", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnPending(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeFalse())
-	})
-
-	t.Run("Ready", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnPending(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeFalse())
-	})
-
-	t.Run("True", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnPending(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeTrue())
-	})
-}
-
-func TestAssetHandler_IsOnReady(t *testing.T) {
-	t.Run("New", func(t *testing.T) {
-		// Given
-		g := gomega.NewGomegaWithT(t)
-		testData := new(v1alpha2.Asset)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnReady(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeFalse())
-	})
-
-	t.Run("Pending", func(t *testing.T) {
-		// Given
-		g := gomega.NewGomegaWithT(t)
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnReady(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeFalse())
-	})
-
-	t.Run("True", func(t *testing.T) {
-		// Given
-		g := gomega.NewGomegaWithT(t)
-
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
-
-		// When
-		result := assetHandler.IsOnReady(testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(result).To(gomega.BeTrue())
-	})
-}
-
-func TestAssetHandler_OnAddOrUpdate(t *testing.T) {
-	t.Run("New", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
+		g := NewGomegaWithT(t)
 		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
+		asset.Status.CommonAssetStatus.LastHeartbeatTime = v1.NewTime(now.Add(-2 * relistInterval))
+		asset.Status.CommonAssetStatus.ObservedGeneration = asset.Generation
 
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("PutObjects", ctx, testData.Spec.BucketRef.Name, testData.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
-		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+		mocks.store.On("ContainsAllObjects", ctx, remoteBucketName, asset.Name, mock.AnythingOfType("[]string")).Return(true, nil).Once()
 
 		// When
-		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	})
-
-	t.Run("SuccessUpdate", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.CommonAssetStatus.AssetRef.Assets = make([]string, 10)
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("DeleteObjects", ctx, testData.Spec.BucketRef.Name, fmt.Sprintf("/%s", testData.Name)).Return(nil).Once()
-		store.On("PutObjects", ctx, testData.Spec.BucketRef.Name, testData.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
-		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	})
-
-	t.Run("CleanupError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.CommonAssetStatus.AssetRef.Assets = make([]string, 10)
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("DeleteObjects", ctx, testData.Spec.BucketRef.Name, fmt.Sprintf("/%s", testData.Name)).Return(errors.New("test")).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnAddOrUpdate(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.CleanupError.String()))
-	})
-}
-
-func TestAssetHandler_OnDelete(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		store.On("DeleteObjects", ctx, "bucket-name", fmt.Sprintf("/%s", testData.Name)).Return(nil).Once()
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
-
-		// When
-		err := assetHandler.OnDelete(ctx, testData, testData.Spec.CommonAssetSpec)
-
-		// Then
-		g.Expect(err).ToNot(gomega.HaveOccurred())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetReady))
+		g.Expect(status.Reason).To(Equal(pretty.Uploaded.String()))
 	})
 
 	t.Run("BucketNotReady", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
-		testData.Spec.CommonAssetSpec.BucketRef.Name = "notReady"
+		g := NewGomegaWithT(t)
 		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "notReady", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
+		asset.Status.CommonAssetStatus.LastHeartbeatTime = v1.NewTime(now.Add(-2 * relistInterval))
+		asset.Status.CommonAssetStatus.ObservedGeneration = asset.Generation
 
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
 
 		// When
-		err := assetHandler.OnDelete(ctx, testData, testData.Spec.CommonAssetSpec)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(err).ToNot(gomega.HaveOccurred())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetPending))
+		g.Expect(status.Reason).To(Equal(pretty.BucketNotReady.String()))
 	})
 
 	t.Run("BucketError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
-		testData.Spec.CommonAssetSpec.BucketRef.Name = "error"
+		g := NewGomegaWithT(t)
 		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "error", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
+		asset.Status.CommonAssetStatus.LastHeartbeatTime = v1.NewTime(now.Add(-2 * relistInterval))
+		asset.Status.CommonAssetStatus.ObservedGeneration = asset.Generation
 
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
 
 		// When
-		err := assetHandler.OnDelete(ctx, testData, testData.Spec.CommonAssetSpec)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(err).To(gomega.HaveOccurred())
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.BucketError.String()))
 	})
 
-	t.Run("DeleteError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
+	t.Run("MissingFiles", func(t *testing.T) {
 		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
+		g := NewGomegaWithT(t)
 		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
+		asset.Status.CommonAssetStatus.LastHeartbeatTime = v1.NewTime(now.Add(-2 * relistInterval))
+		asset.Status.CommonAssetStatus.ObservedGeneration = asset.Generation
 
-		store := new(automock.Store)
-		store.On("DeleteObjects", ctx, "bucket-name", fmt.Sprintf("/%s", testData.Name)).Return(errors.New("test")).Once()
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+		mocks.store.On("ContainsAllObjects", ctx, remoteBucketName, asset.Name, mock.AnythingOfType("[]string")).Return(false, nil).Once()
 
 		// When
-		err := assetHandler.OnDelete(ctx, testData, testData.Spec.CommonAssetSpec)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(err).To(gomega.HaveOccurred())
-	})
-}
-
-func TestAssetHandler_OnFailed(t *testing.T) {
-	t.Run("Default", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("PutObjects", ctx, testData.Spec.BucketRef.Name, testData.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
-		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status, err := assetHandler.OnFailed(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(err).ToNot(gomega.HaveOccurred())
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	})
-
-	t.Run("CleanupError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.Reason = pretty.CleanupError.String()
-		testData.Status.AssetRef.Assets = make([]string, 10)
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("DeleteObjects", ctx, testData.Spec.BucketRef.Name, fmt.Sprintf("/%s", testData.Name)).Return(nil).Once()
-		store.On("PutObjects", ctx, testData.Spec.BucketRef.Name, testData.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
-		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status, err := assetHandler.OnFailed(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(err).ToNot(gomega.HaveOccurred())
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	})
-
-	t.Run("StillFailingWithSameReason", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.Reason = pretty.CleanupError.String()
-		testData.Status.Phase = v1alpha2.AssetFailed
-		testData.Status.AssetRef.Assets = make([]string, 10)
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("DeleteObjects", ctx, testData.Spec.BucketRef.Name, fmt.Sprintf("/%s", testData.Name)).Return(errors.New("test")).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		_, err := assetHandler.OnFailed(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(err).To(gomega.HaveOccurred())
-	})
-}
-
-func TestAssetHandler_OnPending(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("PutObjects", ctx, testData.Spec.BucketRef.Name, testData.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
-		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	})
-
-	t.Run("SuccessNoWebhooks", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Spec.CommonAssetSpec.Source.MutationWebhookService = nil
-		testData.Spec.CommonAssetSpec.Source.ValidationWebhookService = nil
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("PutObjects", ctx, testData.Spec.BucketRef.Name, testData.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	})
-
-	t.Run("LoadError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, errors.New("err")).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.PullingFailed.String()))
-	})
-
-	t.Run("MutationError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(errors.New("err")).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.MutationFailed.String()))
-	})
-
-	t.Run("ValidationFailed", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
-		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.ValidationFailed.String()))
-	})
-
-	t.Run("ValidationError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
-		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, errors.New("test")).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.ValidationError.String()))
-	})
-
-	t.Run("UploadError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-		loader := new(automock2.Loader)
-		defer loader.AssertExpectations(t)
-		mutator := new(automock3.Mutator)
-		defer mutator.AssertExpectations(t)
-		validator := new(automock3.Validator)
-		defer validator.AssertExpectations(t)
-
-		store.On("PutObjects", ctx, testData.Spec.BucketRef.Name, testData.Name, "/tmp", mock.AnythingOfType("[]string")).Return(errors.New("test")).Once()
-		loader.On("Load", testData.Spec.Source.Url, testData.Name, testData.Spec.Source.Mode, testData.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
-		loader.On("Clean", "/tmp").Return(nil).Once()
-		mutator.On("Mutate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.MutationWebhookService).Return(nil).Once()
-		validator.On("Validate", ctx, testData, "/tmp", mock.AnythingOfType("[]string"), testData.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
-		assetHandler := asset.New(fakeRecorder(), store, loader, bucketStatusFinder, validator, mutator, log)
-
-		// When
-		status := assetHandler.OnPending(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.UploadFailed.String()))
-	})
-}
-
-func TestAssetHandler_OnReady(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		store.On("ContainsAllObjects", ctx, "bucket-name", testData.Name, mock.AnythingOfType("[]string")).Return(true, nil).Once()
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
-
-		// When
-		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetReady))
-	})
-
-	t.Run("BucketNotReady", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
-		testData.Spec.CommonAssetSpec.BucketRef.Name = "notReady"
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
-
-		// When
-		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetPending))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketNotReady.String()))
-	})
-
-	t.Run("BucketError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
-		testData.Spec.CommonAssetSpec.BucketRef.Name = "error"
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
-
-		// When
-		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.BucketError.String()))
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.MissingContent.String()))
 	})
 
 	t.Run("ContainsError", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
 		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
+		g := NewGomegaWithT(t)
 		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
+		asset.Status.CommonAssetStatus.LastHeartbeatTime = v1.NewTime(now.Add(-2 * relistInterval))
+		asset.Status.CommonAssetStatus.ObservedGeneration = asset.Generation
 
-		store := new(automock.Store)
-		store.On("ContainsAllObjects", ctx, "bucket-name", testData.Name, mock.AnythingOfType("[]string")).Return(false, errors.New("error")).Once()
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+		mocks.store.On("ContainsAllObjects", ctx, remoteBucketName, asset.Name, mock.AnythingOfType("[]string")).Return(false, errors.New("nope")).Once()
 
 		// When
-		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.RemoteContentVerificationError.String()))
-	})
-
-	t.Run("Missing", func(t *testing.T) {
-		g := gomega.NewGomegaWithT(t)
-		// Given
-		testData := new(v1alpha2.Asset)
-		testData.Status.CommonAssetStatus.Phase = v1alpha2.AssetReady
-		testData.ObjectMeta.Name = "test"
-		ctx := context.TODO()
-
-		store := new(automock.Store)
-		store.On("ContainsAllObjects", ctx, "bucket-name", testData.Name, mock.AnythingOfType("[]string")).Return(false, nil).Once()
-		defer store.AssertExpectations(t)
-
-		assetHandler := asset.New(fakeRecorder(), store, nil, bucketStatusFinder, nil, nil, log)
-
-		// When
-		status := assetHandler.OnReady(ctx, testData, testData.Spec.CommonAssetSpec, testData.Status.CommonAssetStatus)
-
-		// Then
-		g.Expect(status.Phase).To(gomega.Equal(v1alpha2.AssetFailed))
-		g.Expect(status.Reason).To(gomega.Equal(pretty.MissingContent.String()))
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.RemoteContentVerificationError.String()))
 	})
 }
 
-func TestAssetHandler_ShouldReconcile(t *testing.T) {
-	t.Run("New", func(t *testing.T) {
+func TestAssetHandler_Handle_OnPending(t *testing.T) {
+	t.Run("WithWebhooks", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
+		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
+		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetReady))
+		g.Expect(status.Reason).To(Equal(pretty.Uploaded.String()))
 	})
 
-	t.Run("Updated", func(t *testing.T) {
+	t.Run("WithoutWebhooks", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
+		asset.Spec.Source.ValidationWebhookService = nil
+		asset.Spec.Source.MutationWebhookService = nil
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.ObjectMeta.Generation = int64(2)
-		testData.Status.ObservedGeneration = int64(1)
-		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetReady))
+		g.Expect(status.Reason).To(Equal(pretty.Uploaded.String()))
 	})
 
-	t.Run("BeingDeleted", func(t *testing.T) {
+	t.Run("LoadError", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		deletion := v1.Now()
-		testData.ObjectMeta.DeletionTimestamp = &deletion
-		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, errors.New("nope")).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.PullingFailed.String()))
 	})
 
-	t.Run("OnReady", func(t *testing.T) {
+	t.Run("MutationFailed", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha2.AssetReady
-		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(-10 * relistInterval))
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
+		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(errors.New("nope")).Once()
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.MutationFailed.String()))
 	})
 
-	t.Run("OnReadySkip", func(t *testing.T) {
+	t.Run("ValidationError", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha2.AssetReady
-		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
+		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
+		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, errors.New("nope")).Once()
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeFalse())
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.ValidationError.String()))
 	})
 
-	t.Run("OnPendingBucketNotReady", func(t *testing.T) {
+	t.Run("ValidationFailed", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha2.AssetPending
-		testData.Status.Reason = pretty.BucketNotReady.String()
-		testData.Status.LastHeartbeatTime = v1.NewTime(now.Add(-10 * relistInterval))
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
+		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
+		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: false}, nil).Once()
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.ValidationFailed.String()))
 	})
 
-	t.Run("OnPending", func(t *testing.T) {
+	t.Run("UploadError", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha2.AssetPending
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(errors.New("nope")).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
+		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
+		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.UploadFailed.String()))
 	})
 
-	t.Run("OnPendingBucketNotReadySkip", func(t *testing.T) {
+	t.Run("BucketNotReady", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "notReady", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha2.AssetPending
-		testData.Status.Reason = pretty.BucketNotReady.String()
-		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeFalse())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetPending))
+		g.Expect(status.Reason).To(Equal(pretty.BucketNotReady.String()))
 	})
 
-	t.Run("OnFailedValidationFail", func(t *testing.T) {
+	t.Run("BucketStatusError", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "error", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha2.AssetFailed
-		testData.Status.Reason = pretty.ValidationFailed.String()
-		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeFalse())
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.BucketError.String()))
 	})
 
-	t.Run("OnFailedMutationFail", func(t *testing.T) {
+	t.Run("OnBucketNotReadyBeforeTime", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "error", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.CommonAssetStatus.Reason = pretty.BucketNotReady.String()
+		asset.Status.CommonAssetStatus.LastHeartbeatTime = v1.Now()
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha2.AssetFailed
-		testData.Status.Reason = pretty.MutationFailed.String()
-		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeFalse())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).To(BeZero())
+	})
+}
+
+func TestAssetHandler_Handle_OnFailed(t *testing.T) {
+	t.Run("ShouldHandle", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetFailed
+		asset.Status.CommonAssetStatus.Reason = pretty.BucketError.String()
+		asset.Status.ObservedGeneration = asset.Generation
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
+		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
+		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetReady))
+		g.Expect(status.Reason).To(Equal(pretty.Uploaded.String()))
 	})
 
-	t.Run("OnFailedBucketError", func(t *testing.T) {
+	t.Run("ValidationFailed", func(t *testing.T) {
 		// Given
-		g := gomega.NewGomegaWithT(t)
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
 		now := time.Now()
-		relistInterval := time.Second
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetFailed
+		asset.Status.CommonAssetStatus.Reason = pretty.ValidationFailed.String()
+		asset.Status.ObservedGeneration = asset.Generation
 
-		testData := testData("test", "bucket-name", "https://test.com/file.txt")
-		testData.Status.ObservedGeneration = testData.ObjectMeta.Generation
-		testData.Status.Phase = v1alpha2.AssetFailed
-		testData.Status.Reason = pretty.BucketError.String()
-		testData.Status.LastHeartbeatTime = v1.NewTime(now)
-		assetHandler := asset.New(nil, nil, nil, nil, nil, nil, log)
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
 
 		// When
-		result := assetHandler.ShouldReconcile(testData, testData.Status.CommonAssetStatus, now, relistInterval)
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
 
 		// Then
-		g.Expect(result).To(gomega.BeTrue())
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).To(BeZero())
+	})
+
+	t.Run("MutationFailed", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetFailed
+		asset.Status.CommonAssetStatus.Reason = pretty.MutationFailed.String()
+		asset.Status.ObservedGeneration = asset.Generation
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).To(BeZero())
+	})
+}
+
+func TestAssetHandler_Handle_OnDelete(t *testing.T) {
+	t.Run("NoFiles", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		nowMeta := v1.Now()
+		asset.ObjectMeta.DeletionTimestamp = &nowMeta
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).To(BeZero())
+	})
+
+	t.Run("MultipleFiles", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		nowMeta := v1.Now()
+		asset.ObjectMeta.DeletionTimestamp = &nowMeta
+		files := []string{"test/a.txt", "test/b.txt"}
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(files, nil).Once()
+		mocks.store.On("DeleteObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil).Once()
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).To(BeZero())
+	})
+
+	t.Run("ListError", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		nowMeta := v1.Now()
+		asset.ObjectMeta.DeletionTimestamp = &nowMeta
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, errors.New("nope")).Once()
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).To(BeZero())
+	})
+
+	t.Run("Error", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		nowMeta := v1.Now()
+		asset.ObjectMeta.DeletionTimestamp = &nowMeta
+		files := []string{"test/a.txt", "test/b.txt"}
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(files, nil).Once()
+		mocks.store.On("DeleteObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(errors.New("nope")).Once()
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).To(BeZero())
+	})
+
+	t.Run("BucketNotReady", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "notReady", "https://localhost/test.md")
+		nowMeta := v1.Now()
+		asset.ObjectMeta.DeletionTimestamp = &nowMeta
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(status).To(BeZero())
+	})
+
+	t.Run("BucketStatusError", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "error", "https://localhost/test.md")
+		nowMeta := v1.Now()
+		asset.ObjectMeta.DeletionTimestamp = &nowMeta
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).To(BeZero())
 	})
 }
 
@@ -1034,10 +737,37 @@ func bucketStatusFinder(ctx context.Context, namespace, name string) (*v1alpha2.
 	default:
 		return &v1alpha2.CommonBucketStatus{
 			Phase:      v1alpha2.BucketReady,
-			Url:        "http://test-url.com/bucket-name",
-			RemoteName: "bucket-name",
+			URL:        "http://test-url.com/bucket-name",
+			RemoteName: remoteBucketName,
 		}, true, nil
 	}
+}
+
+type mocks struct {
+	store     *storeMock.Store
+	loader    *loaderMock.Loader
+	validator *engineMock.Validator
+	mutator   *engineMock.Mutator
+}
+
+func (m *mocks) AssertExpectations(t *testing.T) {
+	m.store.AssertExpectations(t)
+	m.loader.AssertExpectations(t)
+	m.validator.AssertExpectations(t)
+	m.mutator.AssertExpectations(t)
+}
+
+func newHandler(relistInterval time.Duration) (asset.Handler, mocks) {
+	mocks := mocks{
+		store:     new(storeMock.Store),
+		loader:    new(loaderMock.Loader),
+		validator: new(engineMock.Validator),
+		mutator:   new(engineMock.Mutator),
+	}
+
+	handler := asset.New(log, fakeRecorder(), mocks.store, mocks.loader, bucketStatusFinder, mocks.validator, mocks.mutator, relistInterval)
+
+	return handler, mocks
 }
 
 func fakeRecorder() record.EventRecorder {
@@ -1054,7 +784,7 @@ func testData(assetName, bucketName, url string) *v1alpha2.Asset {
 			CommonAssetSpec: v1alpha2.CommonAssetSpec{
 				BucketRef: v1alpha2.AssetBucketRef{Name: bucketName},
 				Source: v1alpha2.AssetSource{
-					Url:                      url,
+					URL:                      url,
 					Mode:                     v1alpha2.AssetSingle,
 					ValidationWebhookService: make([]v1alpha2.AssetWebhookService, 3),
 					MutationWebhookService:   make([]v1alpha2.AssetWebhookService, 3),
