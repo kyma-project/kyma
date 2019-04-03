@@ -43,56 +43,38 @@ Prometheus uses the  **spec.ruleSelector** label selector to identify ConfigMaps
 ```
 Follow the steps to create an alert rule:
 
-1. Use the [ConfigMap template](./templates/alert-rules-configmap.yaml) which contains the sample configuration for an alert rule.
+1. Use the [prometheusRule template](./templates/kyma-rules.yaml) which contains the sample configuration for an alert rule.
 
 
 ```yaml
-apiVersion: v1
-kind: ConfigMap
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
 metadata:
+  name: kyma.rules
   labels:
-    app: "Kyma"
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     heritage: {{ .Release.Service }}
     prometheus: {{ .Release.Name }}
     release: {{ .Release.Name }}
     role: alert-rules
-  name: {{ template "alert-rules.fullname" . }}
-data:
-{{- if .Values.prometheusRules }}
-{{- $root := . }}
-{{- range $key, $val := .Values.prometheusRules }}
-  {{ $key }}: |-
-{{ $val | indent 4}}
-{{- end }}
-{{ else }}
-  alert.rules: |-
-    {{- include "kyma-rules.yaml.tpl" . | indent 4}}
-{{ end }}
+    app: kyma.rules
+spec:
+  groups:
+  - name: pod-not-running-rule
+    rules:
+    - alert: SystemPodNotRunning
+      expr: sum(kube_pod_container_status_running { namespace=~"kyma-.*|kube-.*|istio-.*|natss", pod!~"(test.*)|((dummy|sample)-.*)|(.*(docs|backup|test)-.*)|(.*-(tests|dummy))" } == 0 )by (pod,namespace) * on(pod, namespace) (kube_pod_status_phase{phase="Succeeded"} != 1)
+      for: 60s
+      labels:
+        severity: critical
+      annotations:
+        description: "{{`{{ $labels.namespace }}`}}/{{`{{ $labels.pod }}`}} is not running"
+        summary: "{{`{{ $labels.pod }}`}} is not running"
 ```
 
-2. Label the ConfigMap with `role: alert-rules`.
+2. Label the PrometheusRule with `role: alert-rules`.
 3. Add the name of a Prometheus object in `prometheus: {{ .Release.Name }}`.
-3. Configure the **data. alert.rules** parameter in the [kyma-rules.yaml](templates/kyma-rules.yaml) file. 
 
-
-The example shows a sample configuration for an alert rule. This rule activates the alarm when a Pod is not running.
-
-```yaml
-{{ define "unhealthy-pods-rules.yaml.tpl" }}
-groups:
-- name: pod-not-running-rule
-  rules:
-  - alert: PodNotRunning
-    expr: absent(kube_pod_container_status_running{namespace="default",pod="sample-metrics"})
-    for: 15s
-    labels:
-      severity: critical
-    annotations:
-      description: "{{`{{$labels.namespace}}`}}/{{`{{$labels.pod}}`}} is not running"
-      summary: "{{`{{$labels.pod}}`}} is not running"
-{{ end }}
-```
 The rule definition includes the following parameters:
 
 - **alert:** is the valid metric name of the alert.
@@ -105,4 +87,3 @@ The rule definition includes the following parameters:
 ### Configure Alertmanager
 
 You can configure the Alertmanager using the [alertmanager](../alertmanager/README.md) chart.
-
