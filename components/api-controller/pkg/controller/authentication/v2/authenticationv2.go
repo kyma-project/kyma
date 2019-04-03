@@ -15,16 +15,16 @@ import (
 )
 
 type istioImpl struct {
-	istioAuthInterface istioAuth.Interface
-	jwtDefaultConfig   JwtDefaultConfig
-	enableMtls         bool
+	istioAuthInterface        istioAuth.Interface
+	jwtDefaultConfig          JwtDefaultConfig
+	enableIstioAuthPolicyMTLS bool
 }
 
-func New(a istioAuth.Interface, c JwtDefaultConfig, mtls bool) Interface {
+func New(a istioAuth.Interface, c JwtDefaultConfig, enableIstioAuthPolicyMTLS bool) Interface {
 	return &istioImpl{
-		istioAuthInterface: a,
-		jwtDefaultConfig:   c,
-		enableMtls:         mtls,
+		istioAuthInterface:        a,
+		jwtDefaultConfig:          c,
+		enableIstioAuthPolicyMTLS: enableIstioAuthPolicyMTLS,
 	}
 }
 
@@ -34,7 +34,7 @@ func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
 		return nil, nil
 	}
 
-	istioAuthPolicy := toIstioAuthPolicy(dto, a.jwtDefaultConfig, a.enableMtls)
+	istioAuthPolicy := toIstioAuthPolicy(dto, a.jwtDefaultConfig, a.enableIstioAuthPolicyMTLS)
 
 	log.Infof("Creating authentication policy: %+v", istioAuthPolicy)
 
@@ -60,7 +60,7 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 	}
 
 	// there is an authentication policy to update / create
-	newIstioAuthPolicy := toIstioAuthPolicy(newDto, a.jwtDefaultConfig, a.enableMtls)
+	newIstioAuthPolicy := toIstioAuthPolicy(newDto, a.jwtDefaultConfig, a.enableIstioAuthPolicyMTLS)
 
 	log.Infof("Authentication enabled. Trying to create or update authentication policy with: %v", newIstioAuthPolicy)
 
@@ -80,7 +80,7 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 		return createdResource, nil
 	}
 
-	oldIstioAuthPolicy := toIstioAuthPolicy(oldDto, a.jwtDefaultConfig, a.enableMtls)
+	oldIstioAuthPolicy := toIstioAuthPolicy(oldDto, a.jwtDefaultConfig, a.enableIstioAuthPolicyMTLS)
 
 	if a.isEqual(oldIstioAuthPolicy, newIstioAuthPolicy) {
 
@@ -140,7 +140,7 @@ func (a *istioImpl) isEqual(oldRule *istioAuthApi.Policy, newRule *istioAuthApi.
 	return reflect.DeepEqual(oldRule.Spec, newRule.Spec)
 }
 
-func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig, enableMtls bool) *istioAuthApi.Policy {
+func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig, enableIstioAuthPolicyMtls bool) *istioAuthApi.Policy {
 
 	objectMetadata := k8sMeta.ObjectMeta{
 		Name:            dto.MetaDto.Name,
@@ -152,7 +152,8 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig, enableMtls bool
 
 	var optionalPeers []*istioAuthApi.Peer = nil
 
-	if enableMtls == true && !dto.DisablePolicyPeersMTLS {
+	//For backward compatibility controlled by global enableIstioAuthPolicyMtls flag and api-specific DisablePolicyPeersMTLS override.
+	if enableIstioAuthPolicyMtls == true && !dto.DisablePolicyPeersMTLS {
 		optionalPeers = []*istioAuthApi.Peer{&istioAuthApi.Peer{}}
 	}
 
