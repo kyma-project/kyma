@@ -69,9 +69,6 @@ func main() {
 	appBrokerCli, err := ab.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Application Broker clientset")
 
-	//dynamicCli, err := dynamic.NewForConfig(k8sConfig)
-	//fatalOnError(err, "while creating K8s dynamic clientset")
-
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 	//
@@ -81,8 +78,6 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		//"AssetStoreUpgradeTest":        assetstore.NewAssetStoreUpgradeTest(dynamicCli),
-		//"CmsUpgradeTest":               cms.NewHeadlessCmsUpgradeTest(dynamicCli),
 	}
 
 	// Execute requested action
