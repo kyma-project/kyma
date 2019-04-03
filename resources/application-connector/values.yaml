@@ -50,11 +50,11 @@ global:
     dir: develop/
     version: cc51f73a
   application_registry:
-    dir: pr/
-    version: PR-3254
+    dir: develop/
+    version: 4c614be5
   application_registry_tests:
-    dir: pr/
-    version: PR-3254
+    dir: develop/
+    version: 4c614be5
   application_broker:
     dir: develop/
     version: e1af648f
