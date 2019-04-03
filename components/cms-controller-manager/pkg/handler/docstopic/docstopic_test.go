@@ -92,7 +92,10 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
 		bucketName := "test-bucket"
-		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{
+			testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle),
+			testSource(sourceName, "markdown", "https://dummy.url", v1alpha1.DocsTopicSingle),
+		}
 		testData := testData("halo", sources)
 		source, _ := getSourceByType(sources, sourceName)
 		existingAsset := commonAsset(sourceName, assetType, testData.Name, bucketName, *source, v1alpha2.AssetPending)
@@ -528,7 +531,7 @@ func commonAsset(name, assetType, docsName, bucketName string, source v1alpha1.S
 			Namespace: "test",
 			Labels: map[string]string{
 				"cms.kyma-project.io/docs-topic": docsName,
-				"type.cms.kyma-project.io":      assetType,
+				"type.cms.kyma-project.io":       assetType,
 			},
 			Annotations: map[string]string{
 				"cms.kyma-project.io/asset-short-name": name,

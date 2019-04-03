@@ -119,12 +119,17 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 }
 
 func validateSpec(spec v1alpha1.CommonDocsTopicSpec) error {
-	names := map[string]struct{}{}
+	names := map[string]map[string]struct{}{}
 	for _, src := range spec.Sources {
-		if _, exists := names[src.Name]; exists {
-			return errInvalidAssetSpec
+		if nameTypes, exists := names[src.Name]; exists {
+			if _, exists := nameTypes[src.Type]; exists {
+				return errInvalidAssetSpec
+			}
+			names[src.Name][src.Type] = struct{}{}
+			continue
 		}
-		names[src.Name] = struct{}{}
+		names[src.Name] = map[string]struct{}{}
+		names[src.Name][src.Type] = struct{}{}
 	}
 	return nil
 }
