@@ -50,10 +50,10 @@ global:
     version: cc51f73a
   application_registry:
     dir: develop/
-    version: ec4b880b
+    version: 4c614be5
   application_registry_tests:
     dir: develop/
-    version: 0b828d1a
+    version: 4c614be5
   application_broker:
     dir: develop/
     version: e1af648f

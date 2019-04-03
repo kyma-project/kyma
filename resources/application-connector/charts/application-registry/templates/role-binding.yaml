@@ -17,6 +17,10 @@ rules:
 - apiGroups: ["config.istio.io"]
   resources: ["rules", "deniers", "checknothings", "egressrules"]
   verbs: ["get", "update", "list", "create", "delete"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "assets"]
+  verbs: ["get", "update", "list", "create", "delete"]
+
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
