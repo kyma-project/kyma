@@ -78,7 +78,7 @@ spec:
     - name: DOMAIN_NAME
       value: {{ .Values.global.ingress.domainName }}
     command: ["/bin/sh"]
-    args: ["-c", "/kubeless-tests; exit_code=$?; pkill -INT pilot-agent; sleep 6; exit $exit_code;"]
+    args: ["-c", "sleep 10; /kubeless-tests; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
   restartPolicy: Never
 ---
 {{- if not .Values.global.isLocalEnv }}
