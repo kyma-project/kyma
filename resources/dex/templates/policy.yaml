@@ -1,0 +1,10 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: dex-service-mtls-disable
+spec:
+  targets:
+  - name: dex-service
+  peers:
+  - mtls:
+      mode: "PERMISSIVE"
