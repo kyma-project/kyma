@@ -17,12 +17,12 @@ Error: transport is closing
 
 To get the client certificate, key, and the cluster CA and add them to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home), run these commands: 
   ```bash
-  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 --decode > "$(helm home)/ca.pem"
-  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 --decode > "$(helm home)/cert.pem"
-  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 --decode > "$(helm home)/key.pem"
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 --decode > "$(helm home)/ca.pem";
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 --decode > "$(helm home)/cert.pem";
+  kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 --decode > "$(helm home)/key.pem";
   ```
 
-> **NOTE:** By default, those certificates are valid for 1 year since Kyma is installed. 
+> **CAUTION:** All certificates are saved to Helm Home under the same, default path. When you save certificates of multiple clusters to Helm Home, one set of certificates overwrites the ones that already exist in Helm Home. As a result, you must save the cluster certificate set to Helm Home every time you switch the cluster context you work in. 
 
 ## Development
 
