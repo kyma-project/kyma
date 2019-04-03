@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"fmt"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 
@@ -23,7 +22,7 @@ const (
 )
 
 type CSRProvider interface {
-	CreateCSR(plainSubject string) (string, error)
+	CreateCSR(subject pkix.Name) (string, error)
 }
 
 type csrProvider struct {
@@ -40,13 +39,13 @@ func NewCSRProvider(clusterCertSecret, caCRTSecret string, secretRepository secr
 	}
 }
 
-func (cp *csrProvider) CreateCSR(plainSubject string) (string, error) {
+func (cp *csrProvider) CreateCSR(subject pkix.Name) (string, error) {
 	clusterPrivateKey, err := cp.provideClusterPrivateKey()
 	if err != nil {
 		return "", err
 	}
 
-	csr, err := createCSR(plainSubject, clusterPrivateKey)
+	csr, err := createCSR(subject, clusterPrivateKey)
 	if err != nil {
 		return "", err
 	}
@@ -54,9 +53,7 @@ func (cp *csrProvider) CreateCSR(plainSubject string) (string, error) {
 	return base64.StdEncoding.EncodeToString(csr), nil
 }
 
-func createCSR(plainSubject string, key *rsa.PrivateKey) ([]byte, error) {
-	subject := parseSubject(plainSubject)
-
+func createCSR(subject pkix.Name, key *rsa.PrivateKey) ([]byte, error) {
 	csrTemplate := x509.CertificateRequest{
 		Subject: subject,
 	}
@@ -71,32 +68,6 @@ func createCSR(plainSubject string, key *rsa.PrivateKey) ([]byte, error) {
 	})
 
 	return pemEncodedCSR, nil
-}
-
-func parseSubject(plainSubject string) pkix.Name {
-	subjectInfo := extractSubject(plainSubject)
-
-	return pkix.Name{
-		CommonName:         subjectInfo["CN"],
-		Country:            []string{subjectInfo["C"]},
-		Organization:       []string{subjectInfo["O"]},
-		OrganizationalUnit: []string{subjectInfo["OU"]},
-		Locality:           []string{subjectInfo["L"]},
-		Province:           []string{subjectInfo["ST"]},
-	}
-}
-
-func extractSubject(plainSubject string) map[string]string {
-	result := map[string]string{}
-
-	segments := strings.Split(plainSubject, ",")
-
-	for _, segment := range segments {
-		parts := strings.Split(segment, "=")
-		result[parts[0]] = parts[1]
-	}
-
-	return result
 }
 
 func (cp *csrProvider) provideClusterPrivateKey() (*rsa.PrivateKey, error) {

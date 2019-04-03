@@ -29,7 +29,7 @@ func NewCertificatePreserver(clusterCertSecretName string, caCRTSecretName strin
 }
 
 func (cp *certificatePreserver) PreserveCertificates(certificates Certificates) error {
-	err := cp.saveClusterCertificate(certificates.CRTChain)
+	err := cp.saveClusterCertificate(certificates.ClientCRT)
 	if err != nil {
 		return err
 	}

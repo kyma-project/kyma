@@ -2,6 +2,7 @@ package certificates
 
 import (
 	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
@@ -19,10 +20,18 @@ import (
 
 const (
 	clusterSecretName = "cluster-cert-secret"
-	plainSubject      = "OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE,CN=ec-default"
 )
 
 func TestCsrProvider_CreateCSR(t *testing.T) {
+
+	subject := pkix.Name{
+		OrganizationalUnit: []string{"OrgUnit"},
+		Organization:       []string{"Organization"},
+		Locality:           []string{"Waldorf"},
+		Province:           []string{"Waldorf"},
+		Country:            []string{"DE"},
+		CommonName:         "ec-default",
+	}
 
 	t.Run("should create CSR when key exists in secret", func(t *testing.T) {
 		// given
@@ -64,7 +73,7 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
 
 		// when
-		csr, err := csrProvider.CreateCSR(plainSubject)
+		csr, err := csrProvider.CreateCSR(subject)
 
 		// then
 		require.NoError(t, err)
@@ -91,7 +100,7 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
 
 		// when
-		csr, err := csrProvider.CreateCSR(plainSubject)
+		csr, err := csrProvider.CreateCSR(subject)
 
 		// then
 		require.NoError(t, err)
@@ -118,7 +127,7 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
 
 		// when
-		csr, err := csrProvider.CreateCSR(plainSubject)
+		csr, err := csrProvider.CreateCSR(subject)
 
 		// then
 		require.NoError(t, err)
@@ -149,7 +158,7 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
 
 		// when
-		csr, err := csrProvider.CreateCSR(plainSubject)
+		csr, err := csrProvider.CreateCSR(subject)
 
 		// then
 		require.NoError(t, err)
@@ -171,7 +180,7 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
 
 		// when
-		_, err := csrProvider.CreateCSR(plainSubject)
+		_, err := csrProvider.CreateCSR(subject)
 
 		// then
 		require.Error(t, err)
@@ -186,7 +195,7 @@ AZwS8JvJu+rnTnjRcfcvrPYjIigwMzgB1vun3zJz1h4J9s9uCWjZ
 		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
 
 		// when
-		_, err := csrProvider.CreateCSR(plainSubject)
+		_, err := csrProvider.CreateCSR(subject)
 
 		// then
 		require.Error(t, err)

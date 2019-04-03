@@ -2,12 +2,14 @@ package connectorservice
 
 import (
 	"bytes"
+	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates"
 
@@ -36,7 +38,9 @@ func (cc *connectorClient) ConnectToCentralConnector(csrInfoURL string) (Establi
 		return EstablishedConnection{}, errors.Wrap(err, "Failed while requesting CSR info")
 	}
 
-	encodedCSR, err := cc.csrProvider.CreateCSR(infoResponse.CertificateInfo.Subject)
+	subject := parseSubject(infoResponse.CertificateInfo.Subject)
+
+	encodedCSR, err := cc.csrProvider.CreateCSR(subject)
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed while creating CSR")
 	}
@@ -105,30 +109,37 @@ func (cc *connectorClient) requestCertificates(csrURL string, encodedCSR string)
 }
 
 func composeConnectionData(certificateResponse CertificatesResponse, managementInfoURL string) (EstablishedConnection, error) {
-	crtChain, err := base64.StdEncoding.DecodeString(certificateResponse.CRTChain)
+	certs, err := decodeCertificateResponse(certificateResponse)
 	if err != nil {
-		return EstablishedConnection{}, errors.Wrap(err, "Failed to decode certificate chain")
-	}
-
-	clientCRT, err := base64.StdEncoding.DecodeString(certificateResponse.ClientCRT)
-	if err != nil {
-		return EstablishedConnection{}, errors.Wrap(err, "Failed to decode client certificate")
-	}
-
-	caCRT, err := base64.StdEncoding.DecodeString(certificateResponse.CaCRT)
-	if err != nil {
-		return EstablishedConnection{}, errors.Wrap(err, "Failed to decode CA certificate")
-	}
-
-	certs := certificates.Certificates{
-		CRTChain:  crtChain,
-		ClientCRT: clientCRT,
-		CaCRT:     caCRT,
+		return EstablishedConnection{}, err
 	}
 
 	return EstablishedConnection{
 		Certificates:      certs,
 		ManagementInfoURL: managementInfoURL,
+	}, nil
+}
+
+func decodeCertificateResponse(certificateResponse CertificatesResponse) (certificates.Certificates, error) {
+	crtChain, err := base64.StdEncoding.DecodeString(certificateResponse.CRTChain)
+	if err != nil {
+		return certificates.Certificates{}, errors.Wrap(err, "Failed to decode certificate chain")
+	}
+
+	clientCRT, err := base64.StdEncoding.DecodeString(certificateResponse.ClientCRT)
+	if err != nil {
+		return certificates.Certificates{}, errors.Wrap(err, "Failed to decode client certificate")
+	}
+
+	caCRT, err := base64.StdEncoding.DecodeString(certificateResponse.CaCRT)
+	if err != nil {
+		return certificates.Certificates{}, errors.Wrap(err, "Failed to decode CA certificate")
+	}
+
+	return certificates.Certificates{
+		CRTChain:  crtChain,
+		ClientCRT: clientCRT,
+		CaCRT:     caCRT,
 	}, nil
 }
 
@@ -155,4 +166,30 @@ func readResponseBody(body io.ReadCloser, model interface{}) error {
 	}
 
 	return nil
+}
+
+func parseSubject(plainSubject string) pkix.Name {
+	subjectInfo := extractSubject(plainSubject)
+
+	return pkix.Name{
+		CommonName:         subjectInfo["CN"],
+		Country:            []string{subjectInfo["C"]},
+		Organization:       []string{subjectInfo["O"]},
+		OrganizationalUnit: []string{subjectInfo["OU"]},
+		Locality:           []string{subjectInfo["L"]},
+		Province:           []string{subjectInfo["ST"]},
+	}
+}
+
+func extractSubject(plainSubject string) map[string]string {
+	result := map[string]string{}
+
+	segments := strings.Split(plainSubject, ",")
+
+	for _, segment := range segments {
+		parts := strings.Split(segment, "=")
+		result[parts[0]] = parts[1]
+	}
+
+	return result
 }
