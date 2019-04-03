@@ -3,11 +3,12 @@ kind: Pod
 metadata:
   name: test-{{ template "fullname" . }}-acceptance
   annotations:
-    sidecar.istio.io/inject: "false"
+    sidecar.istio.io/inject: "true"
     "helm.sh/hook": test-success
   labels:
     "helm-chart-test": "true"
 spec:
+  shareProcessNamespace: true
   serviceAccountName:  test-{{ template "fullname" . }}-acceptance
   containers:
     - name: test-{{ template "fullname" . }}-acceptance
@@ -45,4 +46,9 @@ spec:
         value: {{ .Values.test.acceptance.core.application.disabled | quote }}
       - name: TEAR_DOWN_TIMEOUT_PER_STEP
         value: {{ .Values.test.acceptance.core.application.tearDownTimeoutPerStep | quote }}
+      command:
+      - "/bin/sh"
+      args:
+      - "-c"
+      - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; exit $exit_code;"
   restartPolicy: Never
