@@ -198,6 +198,11 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/scheme",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
+    "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
+    "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
   ]
   pruneopts = "UT"
   revision = "2b7998ba0b38e133a5df17e2a2d8b93603b79aed"
@@ -573,6 +578,8 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
+    "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "github.com/pkg/errors",
     "github.com/sirupsen/logrus",
     "github.com/vrischmann/envconfig",

@@ -1,12 +1,13 @@
 package function
 
 import (
-	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 	"strings"
+	"os"
+	"bytes"
 
 	"github.com/google/uuid"
 	corev1 "k8s.io/api/core/v1"
@@ -15,15 +16,24 @@ import (
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
-
+	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	restclient "k8s.io/client-go/rest"
+	"k8s.io/apimachinery/pkg/api/resource"
+	extensionsv1 "k8s.io/api/extensions/v1beta1"
+	instr "k8s.io/apimachinery/pkg/util/intstr"
 )
 
 type FunctionUpgradeTest struct {
 	functionName, uuid string
 	kubelessClient     *kubeless.Clientset
 	coreClient         *kubernetes.Clientset
+	apiClient          *kyma.Clientset
+	nSpace             string
+	hostName           string
 }
+
+func int32Ptr(i int32) *int32 { return &i }
 
 func NewFunctionUpgradeTest(config *restclient.Config) (*FunctionUpgradeTest) {
 
@@ -37,18 +47,42 @@ func NewFunctionUpgradeTest(config *restclient.Config) (*FunctionUpgradeTest) {
 		return &FunctionUpgradeTest{}
 	}
 
+	apiClient, err := kyma.NewForConfig(config)
+	if err != nil {
+		return &FunctionUpgradeTest{}
+	}
+
+	domainName := os.Getenv("DOMAIN")
+	if len(domainName) == 0 {
+		domainName = "kyma.local"
+	}
+
+	nSpace := strings.ToLower("FunctionUpgradeTest")
+	functionName := "hello"
+	hostName := fmt.Sprintf("%s-%s.%s", functionName, nSpace, domainName)
 	return &FunctionUpgradeTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
-		functionName:   "hello",
+		functionName:   functionName,
 		uuid:           uuid.New().String(),
+		nSpace:         nSpace,
+		hostName:       hostName,
+		apiClient:      apiClient,
 	}
 }
 
 func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest creating resources")
-	_, err := f.createFunction(log, namespace)
+	f.nSpace = namespace
+
+	err := f.createFunction()
 	if err != nil {
+		return err
+	}
+
+	err = f.createApi()
+	if err != nil {
+		log.Printf("create api %v", err)
 		return err
 	}
 
@@ -57,14 +91,14 @@ func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 
 func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest testing resources")
-	err := f.getFunctionPodStatus(namespace, 10*time.Minute)
+	err := f.getFunctionPodStatus(10 * time.Minute)
 	if err != nil {
 		return err
 	}
 
-	host := fmt.Sprintf("http://%s.%s:8080", f.functionName, namespace)
+	host := fmt.Sprintf("https://%s", f.hostName)
 
-	value, err := f.getFunctionOutput(host, 2*time.Minute)
+	value, err := f.getFunctionOutput(host, 2*time.Minute, log)
 	if err != nil {
 		return err
 	}
@@ -76,7 +110,9 @@ func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	return nil
 }
 
-func (f *FunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Duration) (string, error) {
+func (f *FunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Duration, log logrus.FieldLogger) (string, error) {
+	log.Println("FunctionUpgradeTest function output")
+	log.Printf("\nHost: %s", host)
 
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
@@ -106,54 +142,95 @@ func (f *FunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Durati
 
 }
 
-func (f *FunctionUpgradeTest) createFunction(log logrus.FieldLogger, namespace string) (*kubelessV1.Function, error) {
-	log.Println("FunctionUpgradeTest creating function")
-	function := &kubelessV1.Function{
+func (f *FunctionUpgradeTest) createFunction() (error) {
+	resources := make(map[corev1.ResourceName]resource.Quantity)
+	resources[corev1.ResourceCPU] = resource.MustParse("100m")
+	resources[corev1.ResourceMemory] = resource.MustParse("128Mi")
+
+	annotations := make(map[string]string)
+	annotations["function-size"] = "S"
+
+	podContainers := []corev1.Container{}
+	podContainer := corev1.Container{
+		Name: f.functionName,
+		Resources: corev1.ResourceRequirements{
+			Limits:   resources,
+			Requests: resources,
+		},
+	}
+
+	podContainers = append(podContainers, podContainer)
+
+	functionDeployment := extensionsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: f.functionName,
 			Labels: map[string]string{
 				"function": f.functionName,
 			},
 		},
-		Spec: kubelessV1.FunctionSpec{
-			Handler: "handler.hello",
-			Runtime: "nodejs8",
-			Function: `module.exports = {
-				hello: function(event, context) {
-				  return(event.data)
-				}
-			  }`,
+		Spec: extensionsv1.DeploymentSpec{
+			Replicas: int32Ptr(1),
+			Template: corev1.PodTemplateSpec{
+				Spec: corev1.PodSpec{
+					Containers: podContainers,
+				},
+			},
 		},
 	}
-	_, err := f.kubelessClient.KubelessV1beta1().Functions(namespace).Create(function)
-	if err != nil {
-		return nil, err
-	}
 
-	return function, nil
+	serviceSelector := make(map[string]string)
+	serviceSelector["created-by"] = "kubeless"
+	serviceSelector["function"] = f.functionName
+
+	function := &kubelessV1.Function{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        f.functionName,
+			Annotations: annotations,
+		},
+		Spec: kubelessV1.FunctionSpec{
+			Handler:             "handler.main",
+			Runtime:             "nodejs8",
+			Function:            `module.exports = { main: function(event, context) { return(event.data) } }`,
+			FunctionContentType: "text",
+			ServiceSpec: corev1.ServiceSpec{
+				Ports: []corev1.ServicePort{
+					{
+						Name:       "http-function-port",
+						Port:       8080,
+						Protocol:   corev1.ProtocolTCP,
+						TargetPort: instr.FromInt(8080),
+					},
+				},
+				Selector: serviceSelector,
+			},
+			Deployment: functionDeployment,
+		},
+	}
+	_, err := f.kubelessClient.KubelessV1beta1().Functions(f.nSpace).Create(function)
+	return err
 }
 
-func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
+func (f *FunctionUpgradeTest) getFunctionPodStatus(waitmax time.Duration) error {
 
 	timeout := time.After(waitmax)
 	tick := time.Tick(2 * time.Second)
 	for {
 		select {
 		case <-timeout:
-			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
+			pods, err := f.coreClient.CoreV1().Pods(f.nSpace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
 				return err
 			}
 			return fmt.Errorf("pod did not start within given time  %v: %+v", waitmax, pods)
 		case <-tick:
-			pods, err := f.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
+			pods, err := f.coreClient.CoreV1().Pods(f.nSpace).List(metav1.ListOptions{LabelSelector: "function=" + f.functionName})
 			if err != nil {
 				return err
 			}
 			if len(pods.Items) == 0 {
 				break
 			}
-			
+
 			pod := pods.Items[0]
 			// If Pod condition is not ready the for will continue until timeout
 			if len(pod.Status.Conditions) > 0 {
@@ -170,4 +247,27 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(namespace string, waitmax tim
 			}
 		}
 	}
+}
+
+func (f *FunctionUpgradeTest) createApi() (error) {
+	authEnabled := false
+	servicePort := 8080
+
+	api := &kymaApi.Api{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: f.functionName,
+		},
+		Spec: kymaApi.ApiSpec{
+			AuthenticationEnabled: &authEnabled,
+			Authentication:        []kymaApi.AuthenticationRule{},
+			Hostname:              f.hostName,
+			Service: kymaApi.Service{
+				Name: f.functionName,
+				Port: servicePort,
+			},
+		},
+	}
+
+	_, err := f.apiClient.GatewayV1alpha2().Apis(f.nSpace).Create(api)
+	return err
 }

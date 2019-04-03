@@ -45,9 +45,21 @@ rules:
   verbs: ["create", "delete", "get", "list"]
 
 # Kubeless
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["delete", "get", "list"]
+- apiGroups: [""]
+  resources: ["namespaces"]
+  verbs: ["create", "delete", "get", "list", "patch"]
+- apiGroups: [""]
+  resources: ["services", "services/proxy", "pods/log"]
+  verbs: ["get", "list"]
 - apiGroups: ["kubeless.io"]
   resources: ["functions", "httptriggers", "cronjobtriggers"]
   verbs: ["get", "list", "watch", "update", "create", "delete"]
+- apiGroups: ["gateway.kyma-project.io"]
+  resources: ["apis"]
+  verbs: ["create", "delete", "get", "list"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
