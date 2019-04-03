@@ -96,6 +96,8 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: DEFAULT_CLUSTER_ID
+            value: kyma-nats-streaming
 
 ---
 
@@ -175,3 +177,5 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: DEFAULT_CLUSTER_ID
+            value: kyma-nats-streaming

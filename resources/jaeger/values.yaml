@@ -4,7 +4,6 @@
 
 global:
   isLocalEnv: false
-  knative: false
   istio:
     gateway:
       name: kyma-gateway

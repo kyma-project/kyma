@@ -67,7 +67,6 @@ prometheus:
 
 global:
   isLocalEnv: false
-  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   ark_plugin:
