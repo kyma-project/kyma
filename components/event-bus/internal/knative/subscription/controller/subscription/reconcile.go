@@ -152,7 +152,15 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
 		} else if errors.IsNotFound(err) {
-			knativeChannel, err := r.knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName, knativeSubsNamespace, timeout)
+
+			//Adding the event-metadata as channel labels
+			knativeChannelLabels := make(map[string]string)
+			knativeChannelLabels["source_id"] = subscription.SourceID
+			knativeChannelLabels["event_id"] = subscription.EventType
+			knativeChannelLabels["event_type_version"] = subscription.EventTypeVersion
+
+			knativeChannel, err := r.knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName,
+				knativeSubsNamespace, &knativeChannelLabels, timeout)
 			if err != nil {
 				return false, err
 			}
