@@ -53,6 +53,8 @@ func NewHttpClient(skipVerify bool) *http.Client {
 func (cc connectorClient) CreateToken(t *testing.T) TokenResponse {
 	response, err := cc.httpClient.Do(cc.tokenRequest)
 	require.NoError(t, err)
+	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusCreated {
 		logResponse(t, response)
 	}
@@ -73,10 +75,13 @@ func (cc connectorClient) RevokeCertificate(t *testing.T, revocationUrl, hash st
 
 	request, err := http.NewRequest(http.MethodPost, revocationUrl, bytes.NewBuffer(body))
 	require.NoError(t, err)
+	request.Close = true
 	request.Header.Add("Content-Type", "application/json")
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
+	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusCreated {
 		return parseErrorResponse(t, response)
 	}
@@ -91,6 +96,8 @@ func (cc connectorClient) GetInfo(t *testing.T, url string, headers map[string]s
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
+	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusOK {
 		return nil, parseErrorResponse(t, response)
 	}
@@ -111,11 +118,13 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 
 	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer(body))
 	require.NoError(t, err)
-
+	request.Close = true
 	request.Header.Add("Content-Type", "application/json")
 
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
+	defer response.Body.Close()
+
 	if response.StatusCode != http.StatusCreated {
 		return nil, parseErrorResponse(t, response)
 	}
@@ -133,6 +142,8 @@ func (cc connectorClient) CreateCertChain(t *testing.T, csr, url string) (*CrtRe
 func getRequestWithHeaders(t *testing.T, url string, headers map[string]string) *http.Request {
 	request, err := http.NewRequest(http.MethodGet, url, nil)
 	require.NoError(t, err)
+
+	request.Close = true
 
 	if headers != nil {
 		for k, v := range headers {

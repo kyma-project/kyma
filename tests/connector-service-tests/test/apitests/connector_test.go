@@ -79,6 +79,8 @@ func createTokenRequest(t *testing.T, tokenURL string, config testkit.TestConfig
 	request, err := http.NewRequest(http.MethodPost, tokenURL, nil)
 	require.NoError(t, err)
 
+	request.Close = true
+
 	if config.Central {
 		request.Header.Set(testkit.GroupHeader, testkit.Group)
 		request.Header.Set(testkit.TenantHeader, testkit.Tenant)

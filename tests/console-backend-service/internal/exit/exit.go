@@ -7,7 +7,7 @@ import (
 )
 
 func OnError(err error, context string, args ...interface{}) {
-	if err != nil {
+	if err == nil {
 		return
 	}
 

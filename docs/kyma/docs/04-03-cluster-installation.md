@@ -26,7 +26,7 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
     ```
     gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.12.5" --machine-type "n1-standard-2" \
+    --cluster-version "1.12.5" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
     ```
 
@@ -515,7 +515,23 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
   </details>
 </div>
 
-### Access the cluster
+## Access Tiller (optional)
+
+If you need to use Helm, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home). 
+
+Additionally, you must add the `--tls` flag to every Helm command you run.
+
+>**NOTE:** Read [this](#details-tls-in-tiller) document to learn more about TLS in Tiller.
+
+Run these commands to save the client certificate, key, and CA to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home):
+
+```bash
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 --decode > "$(helm home)/ca.pem";
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 --decode > "$(helm home)/cert.pem";
+kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 --decode > "$(helm home)/key.pem";
+```
+
+## Access the cluster
 
 1. To get the address of the cluster's Console, check the name of the Console's virtual service. The name of this virtual service corresponds to the Console URL. To get the virtual service name, run:
 
