@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 
@@ -159,6 +161,16 @@ func TestSecret(t *testing.T) {
 	t.Log("Checking subscription for deleted secret...")
 	expectedEvent = secretEvent("DELETE", secret{Name: secretName})
 	assert.NoError(t, checkSecretEvent(expectedEvent, subscription))
+
+	t.Log("Checking authorization directives...")
+	as := auth.New()
+	ops := &auth.OperationsInput{
+		auth.Get:    {fixSecretQuery()},
+		auth.List:   {fixSecretsQuery()},
+		auth.Update: {fixUpdateSecretMutation("{\"\":\"\"}")},
+		auth.Delete: {fixDeleteSecretMutation()},
+	}
+	as.Run(t, ops)
 }
 
 func fixSecret(name, namespace string) *v1.Secret {

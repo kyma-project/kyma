@@ -90,19 +90,17 @@ func TestApplicationMutations(t *testing.T) {
 	assert.NoError(t, err)
 	checkApplicationEvent(t, expectedEvent, event)
 
-	defer func() {
-		t.Log("Delete Application")
-		deleteResp, err := deleteApplicationMutation(c, fixName)
-		require.NoError(t, err)
-		assert.Equal(t, fixName, deleteResp.ApplicationDeleteMutation.Name)
-	}()
-
 	t.Log("Update Application")
 	fixApp = fixApplication(fixName, "desc2", map[string]string{"lab": "fix"})
 
 	updateResp, err := updateApplicationMutation(c, fixApp)
 	require.NoError(t, err)
 	checkApplicationMutationOutput(t, fixApp, updateResp.AppUpdateMutation)
+
+	t.Log("Delete Application")
+	deleteResp, err := deleteApplicationMutation(c, fixName)
+	require.NoError(t, err)
+	assert.Equal(t, fixName, deleteResp.ApplicationDeleteMutation.Name)
 
 	t.Log("Checking authorization directives...")
 	as := auth.New()
