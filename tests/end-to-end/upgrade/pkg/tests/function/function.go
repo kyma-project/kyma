@@ -1,30 +1,31 @@
 package function
 
 import (
+	"bytes"
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"time"
-	"strings"
 	"os"
-	"bytes"
+	"strings"
+	"time"
 
 	"github.com/google/uuid"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	"github.com/sirupsen/logrus"
 	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
-	restclient "k8s.io/client-go/rest"
-	"k8s.io/apimachinery/pkg/api/resource"
+	"github.com/sirupsen/logrus"
+	corev1 "k8s.io/api/core/v1"
 	extensionsv1 "k8s.io/api/extensions/v1beta1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
+	"k8s.io/client-go/kubernetes"
+	restclient "k8s.io/client-go/rest"
 )
 
-type FunctionUpgradeTest struct {
+// LambdaFunctionUpgradeTest tests the creation of a kubeless function and execute a http request to the exposed api of the function after Kyma upgrade phase
+type LambdaFunctionUpgradeTest struct {
 	functionName, uuid string
 	kubelessClient     *kubeless.Clientset
 	coreClient         *kubernetes.Clientset
@@ -35,21 +36,22 @@ type FunctionUpgradeTest struct {
 
 func int32Ptr(i int32) *int32 { return &i }
 
-func NewFunctionUpgradeTest(config *restclient.Config) (*FunctionUpgradeTest) {
+// NewLambdaFunctionUpgradeTest returns new instance of the FunctionUpgradeTest
+func NewLambdaFunctionUpgradeTest(config *restclient.Config) *LambdaFunctionUpgradeTest {
 
 	kubelessClient, err := kubeless.NewForConfig(config)
 	if err != nil {
-		return &FunctionUpgradeTest{}
+		return &LambdaFunctionUpgradeTest{}
 	}
 
 	coreClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return &FunctionUpgradeTest{}
+		return &LambdaFunctionUpgradeTest{}
 	}
 
 	apiClient, err := kyma.NewForConfig(config)
 	if err != nil {
-		return &FunctionUpgradeTest{}
+		return &LambdaFunctionUpgradeTest{}
 	}
 
 	domainName := os.Getenv("DOMAIN")
@@ -57,10 +59,10 @@ func NewFunctionUpgradeTest(config *restclient.Config) (*FunctionUpgradeTest) {
 		domainName = "kyma.local"
 	}
 
-	nSpace := strings.ToLower("FunctionUpgradeTest")
+	nSpace := strings.ToLower("LambdaFunctionUpgradeTest")
 	functionName := "hello"
 	hostName := fmt.Sprintf("%s-%s.%s", functionName, nSpace, domainName)
-	return &FunctionUpgradeTest{
+	return &LambdaFunctionUpgradeTest{
 		kubelessClient: kubelessClient,
 		coreClient:     coreClient,
 		functionName:   functionName,
@@ -71,7 +73,8 @@ func NewFunctionUpgradeTest(config *restclient.Config) (*FunctionUpgradeTest) {
 	}
 }
 
-func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+// CreateResources creates resources needed for e2e upgrade test
+func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest creating resources")
 	f.nSpace = namespace
 
@@ -80,7 +83,7 @@ func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 		return err
 	}
 
-	err = f.createApi()
+	err = f.createAPI()
 	if err != nil {
 		log.Printf("create api %v", err)
 		return err
@@ -89,7 +92,8 @@ func (f *FunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	return nil
 }
 
-func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
+// TestResources tests resources after the upgrade test
+func (f *LambdaFunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest testing resources")
 	err := f.getFunctionPodStatus(10 * time.Minute)
 	if err != nil {
@@ -110,7 +114,7 @@ func (f *FunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.Fie
 	return nil
 }
 
-func (f *FunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Duration, log logrus.FieldLogger) (string, error) {
+func (f *LambdaFunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Duration, log logrus.FieldLogger) (string, error) {
 	log.Println("FunctionUpgradeTest function output")
 	log.Printf("\nHost: %s", host)
 
@@ -142,7 +146,7 @@ func (f *FunctionUpgradeTest) getFunctionOutput(host string, waitmax time.Durati
 
 }
 
-func (f *FunctionUpgradeTest) createFunction() (error) {
+func (f *LambdaFunctionUpgradeTest) createFunction() error {
 	resources := make(map[corev1.ResourceName]resource.Quantity)
 	resources[corev1.ResourceCPU] = resource.MustParse("100m")
 	resources[corev1.ResourceMemory] = resource.MustParse("128Mi")
@@ -210,7 +214,7 @@ func (f *FunctionUpgradeTest) createFunction() (error) {
 	return err
 }
 
-func (f *FunctionUpgradeTest) getFunctionPodStatus(waitmax time.Duration) error {
+func (f *LambdaFunctionUpgradeTest) getFunctionPodStatus(waitmax time.Duration) error {
 
 	timeout := time.After(waitmax)
 	tick := time.Tick(2 * time.Second)
@@ -249,7 +253,7 @@ func (f *FunctionUpgradeTest) getFunctionPodStatus(waitmax time.Duration) error 
 	}
 }
 
-func (f *FunctionUpgradeTest) createApi() (error) {
+func (f *LambdaFunctionUpgradeTest) createAPI() error {
 	authEnabled := false
 	servicePort := 8080
 
