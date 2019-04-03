@@ -4,7 +4,6 @@ required = [
   "k8s.io/code-generator/cmd/client-gen",
   "k8s.io/code-generator/cmd/lister-gen",
   "k8s.io/code-generator/cmd/informer-gen",
-  "k8s.io/apimachinery/pkg/apimachinery/registered",
 ]
 
 [prune]
@@ -22,11 +21,11 @@ required = [
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "k8s.io/code-generator"
-  branch = "release-1.10"
+  branch = "release-1.12"
 
 [[constraint]]
   name = "github.com/prometheus/client_golang"
@@ -34,11 +33,11 @@ required = [
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[override]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[override]]
   name = "k8s.io/gengo"
@@ -46,12 +45,8 @@ required = [
 
 [[override]]
   name = "k8s.io/kubernetes"
-  branch = "release-1.10"
+  branch = "release-1.12"
 
-
-[[constraint]]
-  name = "github.com/minio/minio-go"
-  version = "5.0.0"
 
 [[override]]
   name = "github.com/docker/distribution"
@@ -59,5 +54,5 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "b47050577a88799e92888fbf4716b4e3b0f83ff8"
+  revision = "df58d5ba13fb350fae0faf963eb21b5603ee0c68"
 

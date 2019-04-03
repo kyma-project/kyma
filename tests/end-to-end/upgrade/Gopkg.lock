@@ -207,7 +207,7 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "cf2d11e4c3552a5d1775a8a1e8351f9365087e16"
+  revision = "5b1676c0dafd170a4f7de3164a230bb559bcb671"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"

@@ -34,6 +34,7 @@ rules:
   - prometheuses
   - service-monitor
   - servicemonitors
+  - prometheusrules
   verbs:
   - "*"
 - apiGroups:
@@ -62,5 +63,5 @@ rules:
 - apiGroups: [""]
   resources:
   - namespaces
-  verbs: ["list"]
+  verbs: ["get", "list", "watch"]
 {{- end }}
