@@ -66,13 +66,11 @@ func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log lo
 
 	err := f.createFunction()
 	if err != nil {
-		<-f.stop
 		return err
 	}
 
 	err = f.createAPI()
 	if err != nil {
-		<-f.stop
 		log.Printf("create api %v", err)
 		return err
 	}
@@ -80,7 +78,6 @@ func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log lo
 	// Ensure resources works
 	f.TestResources(stop, log, namespace)
 	if err != nil {
-		<-f.stop
 		log.Printf("First call to TestResources() failed %v", err)
 		return err
 	}
@@ -90,9 +87,9 @@ func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log lo
 // TestResources tests resources after the upgrade test
 func (f *LambdaFunctionUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest testing resources")
+	f.stop = stop
 	err := f.getFunctionPodStatus(10 * time.Minute)
 	if err != nil {
-		<-f.stop
 		return err
 	}
 
@@ -100,7 +97,6 @@ func (f *LambdaFunctionUpgradeTest) TestResources(stop <-chan struct{}, log logr
 
 	value, err := f.getFunctionOutput(host, 1*time.Minute, log)
 	if err != nil {
-		<-f.stop
 		return err
 	}
 
