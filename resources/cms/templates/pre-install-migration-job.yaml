@@ -5,7 +5,7 @@ metadata:
   name: {{ template "fullname" . }}-migration
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "1"
   labels:
     app: {{ template "name" . }}
@@ -22,7 +22,7 @@ metadata:
   name: {{ template "fullname" . }}-migration
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "2"
 subjects:
 - kind: ServiceAccount
@@ -39,7 +39,7 @@ metadata:
   name: {{ template "fullname" . }}-migration
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "1"
 rules:
 - apiGroups: ["assetstore.kyma-project.io", "cms.kyma-project.io"]
@@ -56,7 +56,7 @@ metadata:
   namespace: kyma-system
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": before-hook-creation
+    "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "1"
 ---
 apiVersion: batch/v1
@@ -70,7 +70,7 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
+    "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "3"
 spec:
   template:
