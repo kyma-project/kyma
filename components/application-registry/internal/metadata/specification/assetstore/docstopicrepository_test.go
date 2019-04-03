@@ -2,6 +2,7 @@ package assetstore
 
 import (
 	"errors"
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
@@ -259,7 +260,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 func createMatcherFunction(docsTopicEntry docstopic.Entry, expectedResourceVersion string) func(*unstructured.Unstructured) bool {
 	findSource := func(sources []v1alpha1.Source, key string) (v1alpha1.Source, bool) {
 		for _, source := range sources {
-			if source.Type == key && source.Name == key {
+			if source.Type == key && source.Name == fmt.Sprintf(DocsTopicNameFormat, key, docsTopicEntry.Id) {
 				return source, true
 			}
 		}
@@ -283,7 +284,7 @@ func createMatcherFunction(docsTopicEntry docstopic.Entry, expectedResourceVersi
 	}
 
 	return func(u *unstructured.Unstructured) bool {
-		dt := v1alpha1.DocsTopic{}
+		dt := v1alpha1.ClusterDocsTopic{}
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &dt)
 		if err != nil {
 			return false

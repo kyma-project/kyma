@@ -81,7 +81,7 @@ func (s service) Get(id string) (documentation []byte, apiSpec []byte, eventsSpe
 		return nil, nil, nil, err
 	}
 
-	eventsSpec, err = s.getSpec(docsTopic, docstopic.KeyEventsSpec)
+	eventsSpec, err = s.getSpec(docsTopic, docstopic.KeyAsyncApiSpec)
 	if err != nil {
 		return nil, nil, nil, err
 	}
@@ -113,7 +113,7 @@ func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, 
 		return docstopic.Entry{}, err
 	}
 
-	err = s.processSpec(eventsSpec, eventsSpecFileName, docstopic.KeyEventsSpec, &docsTopic)
+	err = s.processSpec(eventsSpec, eventsSpecFileName, docstopic.KeyAsyncApiSpec, &docsTopic)
 	if err != nil {
 		return docstopic.Entry{}, err
 	}
@@ -129,10 +129,10 @@ func (s service) createDocumentationTopic(id string, apiType docstopic.ApiType, 
 func getApiSpecFileNameAndKey(content []byte, apiType docstopic.ApiType) (fileName, key string) {
 	if apiType == docstopic.ODataApiType {
 		if isXML(content) {
-			return odataXMLSpecFileName, docstopic.KeyODataXMLSpec
+			return odataXMLSpecFileName, docstopic.KeyODataSpec
 		}
 
-		return odataJSONSpecFileName, docstopic.KeyODataJSONSpec
+		return odataJSONSpecFileName, docstopic.KeyODataSpec
 	}
 
 	return openApiSpecFileName, docstopic.KeyOpenApiSpec
@@ -175,12 +175,7 @@ func (s service) getApiSpec(entry docstopic.Entry) ([]byte, apperrors.AppError) 
 		return s.downloadClient.Fetch(url)
 	}
 
-	url, found = entry.Urls[docstopic.KeyODataJSONSpec]
-	if found {
-		return s.downloadClient.Fetch(url)
-	}
-
-	url, found = entry.Urls[docstopic.KeyODataXMLSpec]
+	url, found = entry.Urls[docstopic.KeyODataSpec]
 	if found {
 		return s.downloadClient.Fetch(url)
 	}
