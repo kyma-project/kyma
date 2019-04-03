@@ -147,6 +147,8 @@ func (f *LambdaFunctionUpgradeTest) getFunctionOutput(host string, waitmax time.
 
 		case <-timeout:
 			return "", fmt.Errorf("could not get function output:\n %v", messages)
+		case <-f.stop:
+			return "Stopping the channel", nil
 		}
 	}
 
@@ -255,6 +257,8 @@ func (f *LambdaFunctionUpgradeTest) getFunctionPodStatus(waitmax time.Duration) 
 			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
 				return fmt.Errorf("function in state %v: \n%+v", pod.Status.Phase, pod)
 			}
+		case <-f.stop:
+			return nil
 		}
 	}
 }
