@@ -50,7 +50,7 @@ func (r *assetWebHookConfigService) Get(ctx context.Context) (AssetWebHookConfig
 		if apiErrors.IsNotFound(err) {
 			return nil, nil
 		}
-		return nil, errors.Wrapf(err, "while getting web hook configuration in namespace %s", r.webhookCfgMapName)
+		return nil, errors.Wrapf(err, "while getting web hook configuration in namespace %s", r.webhookCfgMapNamespace)
 	}
 	return toAssetWhsConfig(*instance)
 }
