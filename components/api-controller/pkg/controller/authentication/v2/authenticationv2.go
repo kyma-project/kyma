@@ -148,10 +148,21 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig) *istioAuthApi.P
 		ResourceVersion: dto.Status.Resource.Version,
 	}
 
+	var optionalPeers []*istioAuthApi.Peer = nil
+	//TODO: Handle conditional!
+	//Conditional:
+	//- Global env on service that completely disables this mechanism.
+	//- "disablePolicyMTLS" flag in API definition.
+	//if someCondition {
+	var peer = istioAuthApi.Peer{}
+	optionalPeers = []*istioAuthApi.Peer{&peer}
+	//}
+
 	spec := &istioAuthApi.PolicySpec{
 		Targets: []*istioAuthApi.Target{
 			{Name: dto.ServiceName},
 		},
+		Peers: optionalPeers,
 	}
 
 	origins := make(istioAuthApi.Origins, 0, 1)
