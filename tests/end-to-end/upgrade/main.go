@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	apicontroller "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
@@ -28,7 +29,7 @@ type Config struct {
 	Logger              logger.Config
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
-	DomainName          string `envconfig:""`
+	DomainName          string
 }
 
 const (
@@ -79,6 +80,9 @@ func main() {
 	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kubeless clientset")
 
+	cfg.DomainName, err = getDomainNameFromCluster(k8sCli)
+	fatalOnError(err, "while reading domain name from cluster")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 	//
@@ -88,7 +92,7 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"ApiGatewayUpgradeTest":        apicontroller.New(gatewayCli, k8sCli, kubelessCli, cfg.DomainName),
+		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, cfg.DomainName),
 	}
 
 	// Execute requested action
@@ -119,4 +123,21 @@ func newRestClientConfig(kubeConfigPath string) (*restclient.Config, error) {
 	}
 
 	return restclient.InClusterConfig()
+}
+
+func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
+	overridesData := overrides.New(k8sCli)
+
+	coreOverridesYaml, err := overridesData.ForRelease("core")
+	if err != nil {
+		return "", err
+	}
+
+	coreOverridesMap, err := overrides.ToMap(coreOverridesYaml)
+	if err != nil {
+		return "", err
+	}
+
+	value, _ := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
+	return value, nil
 }
