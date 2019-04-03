@@ -17,7 +17,7 @@ func TestCreateAuthentication(t *testing.T) {
 		Issuer:  "https://accounts.google.com",
 		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
-	authentication := New(fakeIstioAuth, fakeJwtDefaultConfig)
+	authentication := New(fakeIstioAuth, fakeJwtDefaultConfig, false)
 
 	t.Run("Should create policy with custom auth configuration", func(t *testing.T) {
 
@@ -101,7 +101,7 @@ func TestUpdateAuthentication(t *testing.T) {
 		Issuer:  "https://accounts.google.com",
 		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
-	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig, false)
 
 	oldDto := &Dto{
 		AuthenticationEnabled: false,
@@ -237,7 +237,7 @@ func TestDeleteAuthentication(t *testing.T) {
 		Issuer:  "https://accounts.google.com",
 		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
-	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig, false)
 
 	t.Run("Should delete Policy if exists", func(t *testing.T) {
 		dto := &Dto{

@@ -152,9 +152,8 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig, enableMtls bool
 
 	var optionalPeers []*istioAuthApi.Peer = nil
 
-	if enableMtls == true {
-		var peer = istioAuthApi.Peer{}
-		optionalPeers = []*istioAuthApi.Peer{&peer}
+	if enableMtls == true && !dto.DisablePolicyPeersMTLS {
+		optionalPeers = []*istioAuthApi.Peer{&istioAuthApi.Peer{}}
 	}
 
 	spec := &istioAuthApi.PolicySpec{
