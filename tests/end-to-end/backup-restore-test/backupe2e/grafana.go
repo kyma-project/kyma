@@ -18,23 +18,24 @@
 package backupe2e
 
 import (
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/kubernetes"
-	"github.com/google/uuid"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"os"
-	"fmt"
-	"net/url"
-	"net/http"
-	"net/http/cookiejar"
-	"time"
-	"strings"
 	"crypto/tls"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"net/http/cookiejar"
+	"net/url"
+	"strings"
+	"time"
+
+	"github.com/google/uuid"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
+	"github.com/pkg/errors"
 	. "github.com/smartystreets/goconvey/convey"
+	corev1 "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
@@ -73,14 +74,12 @@ type dashboard struct {
 }
 
 func NewGrafanaTest() (*grafanaTest, error) {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	restConfig, err := config.NewRestClientConfig()
 	if err != nil {
 		return &grafanaTest{}, err
 	}
 
-	coreClient, err := kubernetes.NewForConfig(config)
+	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return &grafanaTest{}, err
 	}
@@ -98,8 +97,7 @@ func (t *grafanaTest) CreateResources(namespace string) {
 	// There is not need to be implemented for this test.
 }
 
-func (t *grafanaTest) DeleteResources() {
-
+func (t *grafanaTest) DeleteResources(namespace string) {
 	// It needs to be implemented for this test.
 	err := t.waitForPodGrafana(1 * time.Minute)
 	So(err, ShouldBeNil)
@@ -122,7 +120,6 @@ func (t *grafanaTest) DeleteResources() {
 }
 
 func (t *grafanaTest) TestResources(namespace string) {
-
 	err := t.waitForPodGrafana(5 * time.Minute)
 	So(err, ShouldBeNil)
 
@@ -141,7 +138,10 @@ func (t *grafanaTest) TestResources(namespace string) {
 	So(err, ShouldBeNil)
 	So(apiSearchFolders.StatusCode, ShouldEqual, http.StatusOK)
 
-	defer apiSearchFolders.Body.Close()
+	defer func() {
+		err := apiSearchFolders.Body.Close()
+		So(err, ShouldBeNil)
+	}()
 	dataBody, err := ioutil.ReadAll(apiSearchFolders.Body)
 	So(err, ShouldBeNil)
 
@@ -175,10 +175,9 @@ func (t *grafanaTest) TestResources(namespace string) {
 }
 
 func (t *grafanaTest) deleteServices(namespace, serviceName, labelSelector string) error {
-
 	deletePolicy := metav1.DeletePropagationForeground
 
-	serviceList, err := t.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	serviceList, err := t.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
 		return err
 	}
@@ -199,7 +198,6 @@ func (t *grafanaTest) deleteServices(namespace, serviceName, labelSelector strin
 }
 
 func (t *grafanaTest) deleteStatefulset(namespace, statefulsetName string) error {
-
 	deletePolicy := metav1.DeletePropagationForeground
 
 	collection := t.coreClient.AppsV1().StatefulSets(namespace)
@@ -214,8 +212,7 @@ func (t *grafanaTest) deleteStatefulset(namespace, statefulsetName string) error
 }
 
 func (t *grafanaTest) deletePod(namespace, podName, labelSelector string) error {
-
-	podList, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	podList, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
 		return err
 	}
@@ -234,8 +231,7 @@ func (t *grafanaTest) deletePod(namespace, podName, labelSelector string) error 
 }
 
 func (t *grafanaTest) deletePVC(namespace, pvcName, labelSelector string) error {
-
-	pvcList, err := t.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector,})
+	pvcList, err := t.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
 		return err
 	}
@@ -253,7 +249,7 @@ func (t *grafanaTest) deletePVC(namespace, pvcName, labelSelector string) error 
 
 }
 
-func (t *grafanaTest) getGrafanaAndDexAuth() (*http.Response) {
+func (t *grafanaTest) getGrafanaAndDexAuth() *http.Response {
 	//  /login
 	domain := fmt.Sprintf("%s%s", t.url, "/login")
 	grafLogin, err := t.requestToGrafana(domain, "GET", nil, nil, nil)
@@ -283,12 +279,18 @@ func (t *grafanaTest) getGrafanaAndDexAuth() (*http.Response) {
 }
 
 func (g *grafana) requestToGrafana(domain, method string, params url.Values, formData io.Reader, cookies []*http.Cookie) (*http.Response, error) {
-	u, _ := url.Parse(domain)
+	u, err := url.Parse(domain)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while parsing domain: %s", domain)
+	}
 
 	if params != nil {
 		u.RawQuery = params.Encode()
 	}
 	req, err := http.NewRequest(method, u.String(), formData)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while creating new request")
+	}
 
 	// Cookies
 	if len(cookies) > 0 {
@@ -321,7 +323,6 @@ func (g *grafana) requestToGrafana(domain, method string, params url.Values, for
 }
 
 func (t *grafanaTest) getGrafana() error {
-
 	pod, err := t.coreClient.CoreV1().Pods(grafanaNS).Get(grafanaPodName, metav1.GetOptions{})
 	So(strings.TrimSpace(string(pod.Status.Phase)), ShouldEqual, corev1.PodRunning)
 
@@ -352,7 +353,6 @@ func (t *grafanaTest) getGrafana() error {
 }
 
 func (t *grafanaTest) getCredentials() error {
-
 	secret, err := t.coreClient.CoreV1().Secrets(grafanaNS).Get(adminUserSecretName, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -379,15 +379,15 @@ func (t *grafanaTest) getCredentials() error {
 
 }
 
-func getHttpClient(skipVerify bool) (*http.Client) {
-
+func getHttpClient(skipVerify bool) *http.Client {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 	}
 
-	cookieJar, _ := cookiejar.New(nil)
+	cookieJar, err := cookiejar.New(nil)
+	So(err, ShouldBeNil)
 
-	return &http.Client{Timeout: 15 * time.Second, Transport: tr, Jar: cookieJar,}
+	return &http.Client{Timeout: 15 * time.Second, Transport: tr, Jar: cookieJar}
 }
 
 func (t *grafanaTest) waitForPodGrafana(waitmax time.Duration) error {

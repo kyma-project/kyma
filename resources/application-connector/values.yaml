@@ -6,7 +6,6 @@ connection_token_handler:
 
 global:
   isLocalEnv: false
-  knative: false
   namespace: kyma-integration
   istio:
     tls:

@@ -6,6 +6,16 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: clusterassets.assetstore.kyma-project.io
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    name: Phase
+    type: string
+  - JSONPath: .status.assetRef.baseUrl
+    name: Base URL
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: assetstore.kyma-project.io
   names:
     kind: ClusterAsset

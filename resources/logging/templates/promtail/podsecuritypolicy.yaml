@@ -1,5 +1,5 @@
 {{- if .Values.rbac.pspEnabled }}
-apiVersion: extensions/v1beta1
+apiVersion: policy/v1beta1
 kind: PodSecurityPolicy
 metadata:
   name: {{ template "promtail.fullname" . }}
@@ -27,4 +27,4 @@ spec:
   fsGroup:
     rule: 'RunAsAny'
   readOnlyRootFilesystem: false
-  {{- end }}
+{{- end }}

@@ -11,6 +11,9 @@ import (
 // ClusterAsset is the Schema for the clusterassets API
 // +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Phase",type="string",JSONPath=".status.phase"
+// +kubebuilder:printcolumn:name="Base URL",type="string",JSONPath=".status.assetRef.baseUrl"
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=".metadata.creationTimestamp"
 type ClusterAsset struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

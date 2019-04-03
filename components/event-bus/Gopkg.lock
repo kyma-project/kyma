@@ -27,7 +27,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1b2208b11ad707c7fce6bb4d093b507dd3dfe378dfd88fdf5097cf26ad5beff4"
+  digest = "1:e95de5c830369d6592224de57a31cd87a2ba1cec2abaf050d06a63ee8f7babd8"
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   pruneopts = "UT"
@@ -374,7 +374,7 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:7efb90db9895e498312c13862ad6dff0f6ed76237726e31ba568d138dd9bc920"
+  digest = "1:78386a699972468c7218f0879cc7b1a6018bc1214c92584b80c5b3f46aa3d195"
   name = "github.com/knative/eventing"
   packages = [
     "pkg/apis/duck/v1alpha1",

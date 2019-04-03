@@ -2,7 +2,6 @@ package clusterbucket
 
 import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/finalizer"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/bucket"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store"
 	stdlog "log"
 	"os"
@@ -81,13 +80,15 @@ func prepareReconcilerTest(t *testing.T, store store.Store) *testSuite {
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())
 
-	handler := bucket.New(mgr.GetRecorder("clusterasset-controller"), store, "https://minio.kyma.local", log)
 	reconciler := &ReconcileClusterBucket{
-		Client:         mgr.GetClient(),
-		scheme:         mgr.GetScheme(),
-		handler:        handler,
-		relistInterval: 60 * time.Hour,
-		finalizer:      finalizer.New(deleteBucketFinalizerName),
+		Client:           mgr.GetClient(),
+		cache:            mgr.GetCache(),
+		scheme:           mgr.GetScheme(),
+		relistInterval:   60 * time.Hour,
+		finalizer:        finalizer.New(deleteBucketFinalizerName),
+		recorder:         mgr.GetRecorder("clusterasset-controller"),
+		store:            store,
+		externalEndpoint: "https://minio.kyma.local",
 	}
 
 	g.Expect(err).NotTo(gomega.HaveOccurred())

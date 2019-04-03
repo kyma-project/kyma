@@ -18,8 +18,10 @@ func TestStorageClusterDocsTopic(t *testing.T) {
 		},
 		Spec: ClusterDocsTopicSpec{
 			CommonDocsTopicSpec: CommonDocsTopicSpec{
-				Sources: map[string]Source{
-					"swag": {
+				Sources: []Source{
+					{
+						Name: "source-one",
+						Type: "swag",
 						Mode: DocsTopicSingle,
 						URL:  "dummy",
 					},

@@ -30,7 +30,7 @@ const (
 )
 
 type AssetStatusRef struct {
-	BaseUrl string   `json:"baseUrl"`
+	BaseURL string   `json:"baseUrl"`
 	Assets  []string `json:"assets,omitempty"`
 }
 
@@ -56,7 +56,7 @@ type AssetBucketRef struct {
 type AssetSource struct {
 	// +kubebuilder:validation:Enum=single,package,index
 	Mode AssetMode `json:"mode"`
-	Url  string    `json:"url"`
+	URL  string    `json:"url"`
 	// +optional
 	Filter string `json:"filter,omitempty"`
 
