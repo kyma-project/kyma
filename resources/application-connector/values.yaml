@@ -38,7 +38,7 @@ global:
     version: 2dc766a0
   event_service:
     dir: develop/
-    version: 74a78ec9
+    version: dea44bd4
   gateway_tests:
     dir: develop/
     version: e1af648f
