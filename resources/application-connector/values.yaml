@@ -6,7 +6,6 @@ connection_token_handler:
 
 global:
   isLocalEnv: false
-  knative: false
   namespace: kyma-integration
   istio:
     tls:
@@ -18,7 +17,7 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: cc51f73a
+    version: ee38fb8f
   application_operator_tests:
     dir: pr/
     version: PR-3507

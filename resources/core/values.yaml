@@ -20,7 +20,6 @@ console:
 
 global:
   isLocalEnv: false
-  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -71,7 +70,7 @@ global:
     version: fb988e9e
   console_backend_service_test:
     dir: develop/
-    version: fb988e9e
+    version: 917c1b97
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

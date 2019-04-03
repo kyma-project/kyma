@@ -1,13 +1,14 @@
 package specification
 
 import (
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/minio/mocks"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -30,10 +31,10 @@ func TestSpecService_PutSpec(t *testing.T) {
 
 	t.Run("should save inline spec", func(t *testing.T) {
 		// given
-		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: baseApiSpec})
+		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: baseApiSpec, ApiType: ""})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -50,7 +51,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: swaggerApiSpec})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -67,7 +68,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: swaggerApiSpec, ApiType: oDataSpecType})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, swaggerApiSpec, baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.ODataApiType, baseDocs, swaggerApiSpec, baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -89,7 +90,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -111,7 +112,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: []byte("null"), SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -133,7 +134,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -173,7 +174,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(&model.API{TargetUrl: specServer.URL, ApiType: oDataSpecType})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.ODataApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -190,7 +191,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(&model.API{})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, []byte(nil), baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, []byte(nil), baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -207,7 +208,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(nil)
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, []byte(nil), baseEventSpec).Return(nil)
+		minioSvc.On("Put", serviceId, docstopic.NoneApiType, baseDocs, []byte(nil), baseEventSpec).Return(nil)
 
 		specService := NewSpecService(minioSvc)
 
@@ -224,7 +225,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: baseApiSpec})
 
 		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, baseDocs, baseApiSpec, baseEventSpec).Return(apperrors.Internal("Error"))
+		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(apperrors.Internal("Error"))
 
 		specService := NewSpecService(minioSvc)
 

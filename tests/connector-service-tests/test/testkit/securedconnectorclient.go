@@ -76,6 +76,7 @@ func (cc securedConnectorClient) RenewCertificate(t *testing.T, url string, csr 
 func (cc securedConnectorClient) RevokeCertificate(t *testing.T, url string) *Error {
 	request, err := http.NewRequest(http.MethodPost, url, bytes.NewBuffer([]byte{}))
 	require.NoError(t, err)
+	request.Close = true
 
 	errorResponse := cc.secureConnectorRequest(t, request, nil, http.StatusCreated)
 
@@ -85,6 +86,8 @@ func (cc securedConnectorClient) RevokeCertificate(t *testing.T, url string) *Er
 func (cc securedConnectorClient) secureConnectorRequest(t *testing.T, request *http.Request, data interface{}, expectedStatus int) *Error {
 	response, err := cc.httpClient.Do(request)
 	require.NoError(t, err)
+	defer response.Body.Close()
+
 	if response.StatusCode != expectedStatus {
 		return parseErrorResponse(t, response)
 	}
