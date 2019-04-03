@@ -52,7 +52,7 @@ func (ut *UpgradeTest) newFlow(stop <-chan struct{}, log logrus.FieldLogger, nam
 		log:              log,
 		stop:             stop,
 		clusterDocsTopic: newClusterDocsTopic(ut.dynamicInterface),
-		docsTopic:        newDocs(ut.dynamicInterface, namespace),
+		docsTopic:        newDocsTopic(ut.dynamicInterface, namespace),
 	}
 }
 
@@ -150,8 +150,10 @@ func fixCommonDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
 	return v1alpha1.CommonDocsTopicSpec{
 		DisplayName: "Docs Topic Sample",
 		Description: "Docs Topic Description",
-		Sources: map[string]v1alpha1.Source{
-			"openapi": {
+		Sources: []v1alpha1.Source{
+			{
+				Name: "openapi",
+				Type: "openapi",
 				Mode: v1alpha1.DocsTopicSingle,
 				URL:  "https://petstore.swagger.io/v2/swagger.json",
 			},

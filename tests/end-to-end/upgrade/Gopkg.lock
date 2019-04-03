@@ -159,7 +159,7 @@
   version = "v0.1.42"
 
 [[projects]]
-  digest = "1:a5ef5427ead762f66762c5b1150967754937fdc41e5af4453228f801e5831993"
+  digest = "1:71b591a1d00c29dbc30a6e662d7185501a6117cab31da4be085280d59aa6cce3"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
@@ -180,7 +180,7 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "cf2d11e4c3552a5d1775a8a1e8351f9365087e16"
+  revision = "5b1676c0dafd170a4f7de3164a230bb559bcb671"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
