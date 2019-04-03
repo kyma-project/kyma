@@ -33,7 +33,7 @@ const (
 )
 
 var (
-	errInvalidAssetSpec = errors.New("invalid asset spec")
+	errDuplicatedAssetName = errors.New("duplicated asset name")
 )
 
 //go:generate mockery -name=AssetService -output=automock -outpkg=automock -case=underscore
@@ -85,7 +85,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 	err := validateSpec(spec)
 	if err != nil {
 		h.recordWarningEventf(instance, pretty.AssetsSpecValidationFailed)
-		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsSpecValidationFailed), status), err
+		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsSpecValidationFailed, err.Error()), status), err
 	}
 
 	bucketName, err := h.ensureBucketExits(ctx, instance.GetNamespace())
@@ -123,7 +123,7 @@ func validateSpec(spec v1alpha1.CommonDocsTopicSpec) error {
 	for _, src := range spec.Sources {
 		if nameTypes, exists := names[src.Name]; exists {
 			if _, exists := nameTypes[src.Type]; exists {
-				return errInvalidAssetSpec
+				return errDuplicatedAssetName
 			}
 			names[src.Name][src.Type] = struct{}{}
 			continue

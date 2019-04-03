@@ -55,7 +55,7 @@ func (r Reason) Message() string {
 	case AssetsWebHookGetFailed:
 		return "Unable to get web hook configuration %s"
 	case AssetsSpecValidationFailed:
-		return "Invalid asset specification"
+		return "Invalid asset specification, %s"
 	default:
 		return ""
 	}
