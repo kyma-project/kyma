@@ -11,7 +11,7 @@ global:
 ##
 prometheusConfigReloader:
   repository: quay.io/coreos/prometheus-config-reloader
-  tag: v0.0.3
+  tag: v0.29.0
 
 ## Configmap-reload image to use for reloading configmaps
 ##
@@ -23,7 +23,7 @@ configmapReload:
 ##
 image:
   repository: quay.io/coreos/prometheus-operator
-  tag: v0.18.0
+  tag: v0.29.0
   pullPolicy: IfNotPresent
 
 ## If enabled, prometheus-operator will create a service for scraping kubelets
@@ -49,8 +49,19 @@ rbacEnable: true
 ## Prometheus-operator resource limits & requests
 ## Ref: https://kubernetes.io/docs/user-guide/compute-resources/
 ##
-resources:
-  requests:
-    memory: 50Mi
+container:
+  resources:
+    requests:
+      memory: 100Mi
+      cpu: 100m
+    limits:
+      memory: 200Mi
+      cpu: 200m
+  securityContext:
+    allowPrivilegeEscalation: false
+    readOnlyRootFilesystem: true
+securityContext:
+  runAsNonRoot: true
+  runAsUser: 65534
 
 jobLabel: prometheus-operator

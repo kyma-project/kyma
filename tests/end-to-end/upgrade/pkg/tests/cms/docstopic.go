@@ -18,7 +18,7 @@ type docsTopic struct {
 	namespace string
 }
 
-func newDocs(dynamicCli dynamic.Interface, namespace string) *docsTopic {
+func newDocsTopic(dynamicCli dynamic.Interface, namespace string) *docsTopic {
 	return &docsTopic{
 		resCli: dynamicresource.NewClient(dynamicCli, schema.GroupVersionResource{
 			Version:  v1alpha1.SchemeGroupVersion.Version,

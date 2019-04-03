@@ -48,7 +48,7 @@ func (a *asset) create() error {
 					Name: bucketName,
 				},
 				Source: v1alpha2.AssetSource{
-					Url:  assetData.url,
+					URL:  assetData.url,
 					Mode: assetData.mode,
 				},
 			},
