@@ -77,6 +77,13 @@ func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log lo
 		return err
 	}
 
+	// Ensure resources works
+	f.TestResources(stop, log, namespace)
+	if err != nil {
+		<-f.stop
+		log.Printf("First call to TestResources() failed %v", err)
+		return err
+	}
 	return nil
 }
 
