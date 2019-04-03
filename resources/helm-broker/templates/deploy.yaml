@@ -51,6 +51,8 @@ spec:
             value: {{ template "fullname" . }}
           - name: APP_HELM_BROKER_URL
             value: http://{{ template "fullname" . }}
+          - name: APP_DEVELOP_MODE
+            value: "{{ .Values.config.isDevelopMode }}"
 
         volumeMounts:
         - mountPath: /tmp

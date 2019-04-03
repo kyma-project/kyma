@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
@@ -144,15 +146,21 @@ func assertClusterPlanExistsAndEqual(t *testing.T, arr []shared.ClusterServicePl
 }
 
 func clusterServiceClass() shared.ClusterServiceClass {
+	className := fixture.TestingBundleClassName
 	return shared.ClusterServiceClass{
-		Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-		ExternalName: "user-provided-service",
+		Name:         className,
+		ExternalName: fixture.TestingBundleClassExternalName,
 		Activated:    false,
 		Plans: []shared.ClusterServicePlan{
 			{
-				Name:                           "86064792-7ea2-467b-af93-ac9694d96d52",
-				ExternalName:                   "default",
-				RelatedClusterServiceClassName: "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
+				Name:                           fixture.TestingBundleMinimalPlanName,
+				ExternalName:                   fixture.TestingBundleMinimalPlanExternalName,
+				RelatedClusterServiceClassName: className,
+			},
+			{
+				Name:                           fixture.TestingBundleFullPlanName,
+				ExternalName:                   fixture.TestingBundleFullPlanExternalName,
+				RelatedClusterServiceClassName: className,
 			},
 		},
 	}

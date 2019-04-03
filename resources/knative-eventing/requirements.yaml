@@ -1,3 +1,2 @@
 dependencies:
   - name: knative-eventing
-    condition: global.knative

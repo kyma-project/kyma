@@ -8,7 +8,7 @@ type CommonDocsTopicSpec struct {
 	DisplayName string `json:"displayName,omitempty"`
 	Description string `json:"description,omitempty"`
 	// +kubebuilder:validation:MinItems=1
-	Sources map[string]Source `json:"sources"`
+	Sources []Source `json:"sources"`
 }
 
 type DocsTopicMode string
@@ -20,7 +20,11 @@ const (
 )
 
 type Source struct {
-	URL string `json:"url"`
+	// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9-]*[a-zA-Z0-9]$
+	Name string `json:"name"`
+	// +kubebuilder:validation:Pattern=^[a-z][a-zA-Z0-9\._-]*[a-zA-Z0-9]$
+	Type string `json:"type"`
+	URL  string `json:"url"`
 	// +kubebuilder:validation:Enum=single,package,index
 	Mode   DocsTopicMode `json:"mode"`
 	Filter string        `json:"filter,omitempty"`

@@ -6,7 +6,8 @@ import (
 	"fmt"
 	"testing"
 
-	tester "github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -40,6 +41,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedResource := broker()
+
 	resourceDetailsQuery := `
 		name
 		namespace
@@ -95,16 +97,8 @@ func checkBroker(t *testing.T, expected, actual ServiceBroker) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
-	// Url
-	assert.Contains(t, actual.Url, expected.Name)
-
 	// Namespace
 	assert.Equal(t, expected.Namespace, actual.Namespace)
-
-	// Status
-	assert.Equal(t, expected.Status.Ready, actual.Status.Ready)
-	assert.NotEmpty(t, actual.Status.Message)
-	assert.NotEmpty(t, actual.Status.Reason)
 }
 
 func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedElement ServiceBroker) {
@@ -122,10 +116,7 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedEleme
 
 func broker() ServiceBroker {
 	return ServiceBroker{
-		Name:      tester.BrokerReleaseName,
+		Name:      fmt.Sprintf("ns-%s", fixture.TestingBrokerName),
 		Namespace: TestNamespace,
-		Status: ServiceBrokerStatus{
-			Ready: true,
-		},
 	}
 }
