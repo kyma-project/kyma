@@ -4,4 +4,6 @@ kind: ClusterRbacConfig
 metadata:
   name: default
 spec:
-  mode: 'OFF'
+  mode: {{ .Values.global.cluster.rbac.mode }}
+  inclusion:
+    services: {{ .Values.global.cluster.rbac.inclusion.services }}
