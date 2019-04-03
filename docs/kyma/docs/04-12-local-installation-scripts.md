@@ -22,7 +22,7 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash $SCRIPTS_DIR/installer.sh --local --cr "$CR_PATH" "$KNATIVE" --password "$ADMIN_PASSWORD"
+bash $SCRIPTS_DIR/installer.sh --local --cr "$CR_PATH" --password "$ADMIN_PASSWORD"
 rm -rf $TMPDIR
 ```
 Subsequent sections provide details of all involved subscripts, in the order in which the `run.sh` script triggers them.
