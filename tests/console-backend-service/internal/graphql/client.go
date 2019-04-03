@@ -23,6 +23,7 @@ type Client struct {
 	cachedTokens map[User]string
 	endpoint     string
 	logs         []string
+	logging      bool
 	Config       config
 }
 
@@ -44,6 +45,7 @@ func New() (*Client, error) {
 		gqlClient: gqlClient,
 		token:     token,
 		endpoint:  config.GraphQLEndpoint,
+		logging:   true,
 		logs:      []string{},
 		Config:    config,
 	}
@@ -142,7 +144,15 @@ func (c *Client) ChangeUser(user User) error {
 	return nil
 }
 
+func (c *Client) DisableLogging() {
+	c.logging = false
+}
+
 func (c *Client) addLog(log string) {
+	if !c.logging {
+		return
+	}
+
 	c.logs = append(c.logs, log)
 }
 

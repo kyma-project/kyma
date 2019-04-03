@@ -67,6 +67,8 @@ func New() *TestSuite {
 		log.Fatal(errors.Wrap(err, "while GraphQL client setup"))
 	}
 
+	c.DisableLogging()
+
 	return &TestSuite{
 		client: c,
 	}
