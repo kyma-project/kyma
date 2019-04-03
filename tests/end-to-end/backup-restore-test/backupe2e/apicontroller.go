@@ -207,7 +207,7 @@ func (t ApiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error)
 					Type: apiv1alpha2.JwtType,
 					Jwt: apiv1alpha2.JwtAuthentication{
 						Issuer:  "https://dex." + t.domainName,
-						JwksUri: "http://dex-service.gateway-system.svc.cluster.local:5556/keys",
+						JwksUri: "http://dex-service.kyma-system.svc.cluster.local:5556/keys",
 					},
 				},
 			},
