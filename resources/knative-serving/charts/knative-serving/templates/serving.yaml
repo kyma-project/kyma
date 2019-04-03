@@ -1,3 +1,7 @@
+# Knative Serving v0.5.0, https://github.com/knative/serving/releases/download/v0.4.1/serving.yaml
+
+# Namespace knative-serving removed as is already created by Kyma installer
+
 ---
 aggregationRule:
   clusterRoleSelectors:
@@ -161,6 +165,8 @@ rules:
   resources:
   - clusteringresses
   - clusteringresses/status
+  - serverlessservices
+  - serverlessservices/status
   verbs:
   - get
   - list
@@ -170,10 +176,21 @@ rules:
   - deletecollection
   - patch
   - watch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    networking.knative.dev/ingress-provider: istio
+    serving.knative.dev/controller: "true"
+    serving.knative.dev/release: devel
+  name: knative-serving-istio
+rules:
 - apiGroups:
   - networking.istio.io
   resources:
   - virtualservices
+  - gateways
   verbs:
   - get
   - list
@@ -208,13 +225,16 @@ subjects:
   name: controller
   namespace: knative-serving
 
+# Gateways removed, the Kyma Istio Ingress Gateway will be used instead
 ---
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
+    knative.dev/crd-install: "true"
     serving.knative.dev/release: devel
-  name: clusteringresses.networking.internal.knative.dev
+  name: certificates.networking.internal.knative.dev
+  # Added helm annotation
   annotations:
     "helm.sh/hook": "crd-install"
 spec:
@@ -223,6 +243,41 @@ spec:
     name: Ready
     type: string
   - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+    name: Reason
+    type: string
+  group: networking.internal.knative.dev
+  names:
+    categories:
+    - all
+    - knative-internal
+    - networking
+    kind: Certificate
+    plural: certificates
+    shortNames:
+    - kcert
+    singular: certificate
+  scope: Namespaced
+  subresources:
+    status: {}
+  version: v1alpha1
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    knative.dev/crd-install: "true"
+    serving.knative.dev/release: devel
+  name: clusteringresses.networking.internal.knative.dev
+  # Added helm annotation
+  annotations:
+    "helm.sh/hook": "crd-install"
+spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.conditions[?(@.type=='Ready')].status
+    name: Ready
+    type: string
+  - JSONPath: .status.conditions[?(@.type=='Ready')].reason
     name: Reason
     type: string
   group: networking.internal.knative.dev
@@ -244,8 +299,10 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
+    knative.dev/crd-install: "true"
     serving.knative.dev/release: devel
   name: configurations.serving.knative.dev
+  # Added helm annotation
   annotations:
     "helm.sh/hook": "crd-install"
 spec:
@@ -256,10 +313,10 @@ spec:
   - JSONPath: .status.latestReadyRevisionName
     name: LatestReady
     type: string
-  - JSONPath: .status.conditions[?(@.type=="Ready")].status
+  - JSONPath: .status.conditions[?(@.type=='Ready')].status
     name: Ready
     type: string
-  - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+  - JSONPath: .status.conditions[?(@.type=='Ready')].reason
     name: Reason
     type: string
   group: serving.knative.dev
@@ -283,7 +340,10 @@ spec:
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
+  labels:
+    knative.dev/crd-install: "true"
   name: images.caching.internal.knative.dev
+  # Added helm annotation
   annotations:
     "helm.sh/hook": "crd-install"
 spec:
@@ -308,16 +368,18 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
+    knative.dev/crd-install: "true"
     serving.knative.dev/release: devel
   name: podautoscalers.autoscaling.internal.knative.dev
+  # Added helm annotation
   annotations:
     "helm.sh/hook": "crd-install"
 spec:
   additionalPrinterColumns:
-  - JSONPath: .status.conditions[?(@.type=="Ready")].status
+  - JSONPath: .status.conditions[?(@.type=='Ready')].status
     name: Ready
     type: string
-  - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+  - JSONPath: .status.conditions[?(@.type=='Ready')].reason
     name: Reason
     type: string
   group: autoscaling.internal.knative.dev
@@ -341,8 +403,10 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
+    knative.dev/crd-install: "true"
     serving.knative.dev/release: devel
   name: revisions.serving.knative.dev
+  # Added helm annotation
   annotations:
     "helm.sh/hook": "crd-install"
 spec:
@@ -350,13 +414,13 @@ spec:
   - JSONPath: .status.serviceName
     name: Service Name
     type: string
-  - JSONPath: .metadata.creationTimestamp
-    name: Age
-    type: date
-  - JSONPath: .status.conditions[?(@.type=="Ready")].status
+  - JSONPath: .metadata.labels['serving\.knative\.dev/configurationGeneration']
+    name: Generation
+    type: string
+  - JSONPath: .status.conditions[?(@.type=='Ready')].status
     name: Ready
     type: string
-  - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+  - JSONPath: .status.conditions[?(@.type=='Ready')].reason
     name: Reason
     type: string
   group: serving.knative.dev
@@ -380,8 +444,10 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
+    knative.dev/crd-install: "true"
     serving.knative.dev/release: devel
   name: routes.serving.knative.dev
+  # Added helm annotation
   annotations:
     "helm.sh/hook": "crd-install"
 spec:
@@ -389,10 +455,10 @@ spec:
   - JSONPath: .status.domain
     name: Domain
     type: string
-  - JSONPath: .status.conditions[?(@.type=="Ready")].status
+  - JSONPath: .status.conditions[?(@.type=='Ready')].status
     name: Ready
     type: string
-  - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+  - JSONPath: .status.conditions[?(@.type=='Ready')].reason
     name: Reason
     type: string
   group: serving.knative.dev
@@ -416,8 +482,10 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   labels:
+    knative.dev/crd-install: "true"
     serving.knative.dev/release: devel
   name: services.serving.knative.dev
+  # Added helm annotation
   annotations:
     "helm.sh/hook": "crd-install"
 spec:
@@ -431,10 +499,10 @@ spec:
   - JSONPath: .status.latestReadyRevisionName
     name: LatestReady
     type: string
-  - JSONPath: .status.conditions[?(@.type=="Ready")].status
+  - JSONPath: .status.conditions[?(@.type=='Ready')].status
     name: Ready
     type: string
-  - JSONPath: .status.conditions[?(@.type=="Ready")].reason
+  - JSONPath: .status.conditions[?(@.type=='Ready')].reason
     name: Reason
     type: string
   group: serving.knative.dev
@@ -449,6 +517,34 @@ spec:
     - kservice
     - ksvc
     singular: service
+  scope: Namespaced
+  subresources:
+    status: {}
+  version: v1alpha1
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  labels:
+    knative.dev/crd-install: "true"
+    serving.knative.dev/release: devel
+  name: serverlessservices.networking.internal.knative.dev
+  # Added helm annotation
+  annotations:
+    "helm.sh/hook": "crd-install"
+spec:
+  group: networking.internal.knative.dev
+  names:
+    categories:
+    - all
+    - knative-internal
+    - networking
+    kind: ServerlessService
+    plural: serverlessservices
+    shortNames:
+    - sks
+    singular: serverlessservice
   scope: Namespaced
   subresources:
     status: {}
@@ -526,7 +622,8 @@ metadata:
   name: queue-proxy
   namespace: knative-serving
 spec:
-  image: gcr.io/knative-releases/github.com/knative/serving/cmd/queue:v0.4.1
+  # Changed image versions to use the release tag
+  image: gcr.io/knative-releases/github.com/knative/serving/cmd/queue:v0.5.0
 
 ---
 apiVersion: apps/v1
@@ -563,7 +660,14 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: gcr.io/knative-releases/github.com/knative/serving/cmd/activator:v0.4.1
+        - name: CONFIG_LOGGING_NAME
+          value: config-logging
+        # Changed image versions to use the release tag
+        image: gcr.io/knative-releases/github.com/knative/serving/cmd/activator:v0.5.0
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
         name: activator
         ports:
         - containerPort: 8080
@@ -572,6 +676,10 @@ spec:
           name: h2c-port
         - containerPort: 9090
           name: metrics-port
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: 8080
         resources:
           limits:
             cpu: 200m
@@ -641,7 +749,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: gcr.io/knative-releases/github.com/knative/serving/cmd/autoscaler:v0.4.1
+        - name: CONFIG_LOGGING_NAME
+          value: config-logging
+        # Changed image versions to use the release tag
+        image: gcr.io/knative-releases/github.com/knative/serving/cmd/autoscaler:v0.5.0
         name: autoscaler
         ports:
         - containerPort: 8080
@@ -703,8 +814,11 @@ data:
     container-concurrency-target-percentage: "1.0"
 
     # The container concurrency target default is what the Autoscaler will
-    # try to maintain when the Revision specifies unlimited concurrency. A
-    # value of 100 is chosen because it's enough to allow vertical pod
+    # try to maintain when the Revision specifies unlimited concurrency.
+    # Even when specifying unlimited concurrency, the autoscaler will
+    # horizontally scale the application based on this target concurrency.
+    #
+    # A value of 100 is chosen because it's enough to allow vertical pod
     # autoscaling to tune resource requests. E.g. maintaining 1 concurrent
     # "hello world" request doesn't consume enough resources to allow VPA
     # to achieve efficient resource usage (VPA CPU minimum is 300m).
@@ -763,7 +877,8 @@ data:
 
     # List of repositories for which tag to digest resolving should be skipped
     registriesSkippingTagResolving: "ko.local,dev.local"
-  queueSidecarImage: gcr.io/knative-releases/github.com/knative/serving/cmd/queue@sha256:e19ca17d2b729904d2662a30b6c5c27cf4b62fd64baef2da4125525a4f9346e5
+  # Changed image versions to use the release tag
+  queueSidecarImage: gcr.io/knative-releases/github.com/knative/serving/cmd/queue:v0.5.0
 kind: ConfigMap
 metadata:
   labels:
@@ -825,39 +940,12 @@ metadata:
 ---
 apiVersion: v1
 data:
+  # Referenced Kyma Istio Ingress gateway, removed example configuration
   gateway.{{ .Values.gateway.name }}: {{ .Values.gateway.serviceUrl }}
-  _example: |
-    ################################
-    #                              #
-    #    EXAMPLE CONFIGURATION     #
-    #                              #
-    ################################
-
-    # This block is not actually functional configuration,
-    # but serves to illustrate the available configuration
-    # options and document them in a way that is accessible
-    # to users that `kubectl edit` this config map.
-    #
-    # These sample configuration options may be copied out of
-    # this block and unindented to actually change the configuration.
-
-    # Default Knative Gateway after v0.3. It points to the Istio
-    # standard istio-ingressgateway, instead of a custom one that we
-    # used pre-0.3.
-    gateway.knative-ingress-gateway: "istio-ingressgateway.istio-system.svc.cluster.local"
-
-    # A cluster local gateway to allow pods outside of the mesh to access
-    # Services and Routes not exposing through an ingress.  If the users
-    # do have a service mesh setup, this isn't required and can be removed.
-    #
-    # An example use case is when users want to use Istio without any
-    # sidecar injection (like Knative's istio-lean.yaml).  Since every pod
-    # is outside of the service mesh in that case, a cluster-local  service
-    # will need to be exposed to a cluster-local gateway to be accessible.
-    local-gateway.cluster-local-gateway: "cluster-local-gateway.istio-system.svc.cluster.local"
 kind: ConfigMap
 metadata:
   labels:
+    networking.knative.dev/ingress-provider: istio
     serving.knative.dev/release: devel
   name: config-istio
   namespace: knative-serving
@@ -1072,15 +1160,56 @@ data:
     logging.revision-url-template: |
       http://localhost:8001/api/v1/namespaces/knative-monitoring/services/kibana-logging/proxy/app/kibana#/discover?_a=(query:(match:(kubernetes.labels.knative-dev%2FrevisionUID:(query:'${REVISION_UID}',type:phrase))))
 
+    # If non-empty, this enables queue proxy writing request logs to stdout.
+    # The value determines the shape of the request logs and it must be a valid go text/template.
+    # It is important to keep this as a single line. Multiple lines are parsed as separate entities
+    # by most collection agents and will split the request logs into multiple records.
+    #
+    # The following fields and functions are available to the template:
+    #
+    # Request: An http.Request (see https://golang.org/pkg/net/http/#Request)
+    # representing an HTTP request received by the server.
+    #
+    # Response:
+    # struct {
+    #   Code    int       // HTTP status code (see https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml)
+    #   Size    int       // An int representing the size of the response.
+    #   Latency float64   // A float64 representing the latency of the response in seconds.
+    # }
+    #
+    # Revision:
+    # struct {
+    #   Name          string  // Knative revision name
+    #   Namespace     string  // Knative revision namespace
+    #   Service       string  // Knative service name
+    #   Configuration string  // Knative configuration name
+    #   PodName       string  // Name of the pod hosting the revision
+    #   PodIP         string  // IP of the pod hosting the revision
+    # }
+    #
+    logging.request-log-template: '{"httpRequest": {"requestMethod": "{{.Request.Method}}", "requestUrl": "{{js .Request.RequestURI}}", "requestSize": "{{.Request.ContentLength}}", "status": {{.Response.Code}}, "responseSize": "{{.Response.Size}}", "userAgent": "{{js .Request.UserAgent}}", "remoteIp": "{{js .Request.RemoteAddr}}", "serverIp": "{{.Revision.PodIP}}", "referer": "{{js .Request.Referer}}", "latency": "{{.Response.Latency}}s", "protocol": "{{.Request.Proto}}"}, "traceId": "{{index .Request.Header "X-B3-Traceid"}}"}'
+
     # metrics.backend-destination field specifies the system metrics destination.
     # It supports either prometheus (the default) or stackdriver.
     # Note: Using stackdriver will incur additional charges
     metrics.backend-destination: prometheus
 
+    # metrics.request-metrics-backend-destination specifies the request metrics
+    # destination. If non-empty, it enables queue proxy to send request metrics.
+    # Currently supported values: prometheus, stackdriver.
+    metrics.request-metrics-backend-destination: prometheus
+
     # metrics.stackdriver-project-id field specifies the stackdriver project ID. This
     # field is optional. When running on GCE, application default credentials will be
     # used if this field is not provided.
     metrics.stackdriver-project-id: "<your stackdriver project id>"
+
+    # metrics.allow-stackdriver-custom-metrics indicates whether it is allowed to send metrics to
+    # Stackdriver using "global" resource type and custom metric type if the
+    # metrics are not supported by "knative_revision" resource type. Setting this
+    # flag to "true" could cause extra Stackdriver charge.
+    # If metrics.backend-destination is not Stackdriver, this is ignored.
+    metrics.allow-stackdriver-custom-metrics: "false"
 kind: ConfigMap
 metadata:
   labels:
@@ -1114,7 +1243,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: gcr.io/knative-releases/github.com/knative/serving/cmd/controller:v0.4.1
+        - name: CONFIG_LOGGING_NAME
+          value: config-logging
+        # Changed image versions to use the release tag
+        image: gcr.io/knative-releases/github.com/knative/serving/cmd/controller:v0.5.0
         name: controller
         ports:
         - containerPort: 9090
@@ -1163,7 +1295,10 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
-        image: gcr.io/knative-releases/github.com/knative/serving/cmd/webhook:v0.4.1
+        - name: CONFIG_LOGGING_NAME
+          value: config-logging
+        # Changed image versions to use the release tag
+        image: gcr.io/knative-releases/github.com/knative/serving/cmd/webhook:v0.5.0
         name: webhook
         resources:
           limits:
