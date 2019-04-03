@@ -21,15 +21,14 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
-	restclient "k8s.io/client-go/rest"
 )
 
 // LambdaFunctionUpgradeTest tests the creation of a kubeless function and execute a http request to the exposed api of the function after Kyma upgrade phase
 type LambdaFunctionUpgradeTest struct {
 	functionName, uuid string
-	kubelessClient     *kubeless.Clientset
-	coreClient         *kubernetes.Clientset
-	apiClient          *kyma.Clientset
+	kubelessClient     kubeless.Interface
+	coreClient         kubernetes.Interface
+	apiClient          kyma.Interface
 	nSpace             string
 	hostName           string
 	stop               <-chan struct{}
@@ -38,22 +37,7 @@ type LambdaFunctionUpgradeTest struct {
 func int32Ptr(i int32) *int32 { return &i }
 
 // NewLambdaFunctionUpgradeTest returns new instance of the FunctionUpgradeTest
-func NewLambdaFunctionUpgradeTest(config *restclient.Config) *LambdaFunctionUpgradeTest {
-
-	kubelessClient, err := kubeless.NewForConfig(config)
-	if err != nil {
-		return &LambdaFunctionUpgradeTest{}
-	}
-
-	coreClient, err := kubernetes.NewForConfig(config)
-	if err != nil {
-		return &LambdaFunctionUpgradeTest{}
-	}
-
-	apiClient, err := kyma.NewForConfig(config)
-	if err != nil {
-		return &LambdaFunctionUpgradeTest{}
-	}
+func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kubernetes.Interface, kymaAPI kyma.Interface) *LambdaFunctionUpgradeTest {
 
 	domainName := os.Getenv("DOMAIN")
 	if len(domainName) == 0 {
@@ -64,13 +48,13 @@ func NewLambdaFunctionUpgradeTest(config *restclient.Config) *LambdaFunctionUpgr
 	functionName := "hello"
 	hostName := fmt.Sprintf("%s-%s.%s", functionName, nSpace, domainName)
 	return &LambdaFunctionUpgradeTest{
-		kubelessClient: kubelessClient,
-		coreClient:     coreClient,
+		kubelessClient: kubelessCli,
+		coreClient:     k8sCli,
 		functionName:   functionName,
 		uuid:           uuid.New().String(),
 		nSpace:         nSpace,
 		hostName:       hostName,
-		apiClient:      apiClient,
+		apiClient:      kymaAPI,
 	}
 }
 

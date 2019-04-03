@@ -11,6 +11,8 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
+	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
@@ -18,7 +20,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	assetstore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
-	cms "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 	"k8s.io/client-go/dynamic"
@@ -76,6 +78,12 @@ func main() {
 	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating K8s dynamic clientset")
 
+	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Kubeless clientset")
+
+	kymaAPI, err := kyma.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Kyma Api clientset")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 	//
@@ -87,7 +95,7 @@ func main() {
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 		"AssetStoreUpgradeTest":        assetstore.NewAssetStoreUpgradeTest(dynamicCli),
 		"CmsUpgradeTest":               cms.NewHeadlessCmsUpgradeTest(dynamicCli),
-		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(k8sConfig),
+		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
 	}
 
 	// Execute requested action
