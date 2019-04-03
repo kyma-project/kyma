@@ -32,6 +32,7 @@ type LambdaFunctionUpgradeTest struct {
 	apiClient          *kyma.Clientset
 	nSpace             string
 	hostName           string
+	stop               <-chan struct{}
 }
 
 func int32Ptr(i int32) *int32 { return &i }
@@ -77,14 +78,17 @@ func NewLambdaFunctionUpgradeTest(config *restclient.Config) *LambdaFunctionUpgr
 func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("FunctionUpgradeTest creating resources")
 	f.nSpace = namespace
+	f.stop = stop
 
 	err := f.createFunction()
 	if err != nil {
+		<-f.stop
 		return err
 	}
 
 	err = f.createAPI()
 	if err != nil {
+		<-f.stop
 		log.Printf("create api %v", err)
 		return err
 	}
@@ -97,13 +101,15 @@ func (f *LambdaFunctionUpgradeTest) TestResources(stop <-chan struct{}, log logr
 	log.Println("FunctionUpgradeTest testing resources")
 	err := f.getFunctionPodStatus(10 * time.Minute)
 	if err != nil {
+		<-f.stop
 		return err
 	}
 
 	host := fmt.Sprintf("https://%s", f.hostName)
 
-	value, err := f.getFunctionOutput(host, 2*time.Minute, log)
+	value, err := f.getFunctionOutput(host, 1*time.Minute, log)
 	if err != nil {
+		<-f.stop
 		return err
 	}
 
