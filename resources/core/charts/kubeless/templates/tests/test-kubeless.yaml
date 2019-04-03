@@ -62,9 +62,10 @@ metadata:
   labels:
     helm-chart-test: "true"
   annotations:
-    sidecar.istio.io/inject: "false"
+    sidecar.istio.io/inject: "true"
     helm.sh/hook: test-success
 spec:
+  shareProcessNamespace: true
   serviceAccount: "test-{{ template "fullname" . }}"
   containers:
   - name: test-{{ template "fullname" . }}
@@ -76,6 +77,8 @@ spec:
       value: {{ template "fullname" . }}-config
     - name: DOMAIN_NAME
       value: {{ .Values.global.ingress.domainName }}
+    command: ["/bin/sh"]
+    args: ["-c", "/kubeless-tests; exit_code=$?; pkill -INT pilot-agent; sleep 6; exit $exit_code;"]
   restartPolicy: Never
 ---
 {{- if not .Values.global.isLocalEnv }}
