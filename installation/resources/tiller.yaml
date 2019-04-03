@@ -60,8 +60,6 @@ spec:
         env:
         - name: TILLER_NAMESPACE
           value: kube-system
-        - name: TILLER_HISTORY_MAX
-          value: "0"
         - name: TILLER_TLS_VERIFY
           value: "1"
         - name: TILLER_TLS_ENABLE
@@ -114,11 +112,6 @@ spec:
     port: 44134
     targetPort: tiller
   type: ClusterIP
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: kyma-installer
 ---
 apiVersion: v1
 kind: ServiceAccount
