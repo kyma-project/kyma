@@ -20,11 +20,14 @@ import (
 var log = logf.Log.WithName("docstopic-test")
 
 func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
+	sourceName := "t1"
+	assetType := "swag"
+
 	t.Run("Create", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 
 		assetSvc := new(automock.AssetService)
@@ -52,7 +55,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 
 		assetSvc := new(automock.AssetService)
@@ -81,10 +84,10 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
 		bucketName := "test-bucket"
-		sourceName := "swag"
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
-		existingAsset := commonAsset(sourceName, testData.Name, bucketName, sources[sourceName], v1alpha2.AssetPending)
+		source, _ := getSourceByType(sources, sourceName)
+		existingAsset := commonAsset(sourceName, assetType, testData.Name, bucketName, *source, v1alpha2.AssetPending)
 		existingAsset.Spec.Source.Filter = "xyz"
 		existingAssets := []docstopic.CommonAsset{existingAsset}
 
@@ -114,10 +117,10 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
 		bucketName := "test-bucket"
-		sourceName := "swag"
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
-		existingAsset := commonAsset(sourceName, testData.Name, bucketName, sources[sourceName], v1alpha2.AssetPending)
+		source, _ := getSourceByType(sources, sourceName)
+		existingAsset := commonAsset(sourceName, assetType, testData.Name, bucketName, *source, v1alpha2.AssetPending)
 		existingAsset.Spec.Source.Filter = "xyz"
 		existingAssets := []docstopic.CommonAsset{existingAsset}
 
@@ -147,11 +150,12 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
 		bucketName := "test-bucket"
-		sourceName := "swag"
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
-		existingAsset := commonAsset(sourceName, testData.Name, bucketName, sources[sourceName], v1alpha2.AssetPending)
-		toRemove := commonAsset("papa", testData.Name, bucketName, sources[sourceName], v1alpha2.AssetPending)
+		source, ok := getSourceByType(sources, sourceName)
+		g.Expect(ok, true)
+		existingAsset := commonAsset(sourceName, assetType, testData.Name, bucketName, *source, v1alpha2.AssetPending)
+		toRemove := commonAsset("papa", assetType, testData.Name, bucketName, *source, v1alpha2.AssetPending)
 		existingAssets := []docstopic.CommonAsset{existingAsset, toRemove}
 
 		assetSvc := new(automock.AssetService)
@@ -180,11 +184,12 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
 		bucketName := "test-bucket"
-		sourceName := "swag"
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
-		existingAsset := commonAsset(sourceName, testData.Name, bucketName, sources[sourceName], v1alpha2.AssetPending)
-		toRemove := commonAsset("papa", testData.Name, bucketName, sources[sourceName], v1alpha2.AssetPending)
+		source, ok := getSourceByType(sources, sourceName)
+		g.Expect(ok, true)
+		existingAsset := commonAsset(sourceName, assetType, testData.Name, bucketName, *source, v1alpha2.AssetPending)
+		toRemove := commonAsset("papa", assetType, testData.Name, bucketName, *source, v1alpha2.AssetPending)
 		existingAssets := []docstopic.CommonAsset{existingAsset, toRemove}
 
 		assetSvc := new(automock.AssetService)
@@ -212,7 +217,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 
 		assetSvc := new(automock.AssetService)
@@ -241,7 +246,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 
 		assetSvc := new(automock.AssetService)
@@ -268,7 +273,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 
 		assetSvc := new(automock.AssetService)
@@ -294,7 +299,7 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 
 		assetSvc := new(automock.AssetService)
@@ -319,16 +324,20 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 }
 
 func TestDocstopicHandler_Handle_Status(t *testing.T) {
+	sourceName := "t1"
+	assetType := "swag"
+
 	t.Run("NotChanged", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
 		bucketName := "test-bucket"
-		sourceName := "swag"
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 		testData.Status.Phase = v1alpha1.DocsTopicPending
-		existingAsset := commonAsset(sourceName, testData.Name, bucketName, sources[sourceName], v1alpha2.AssetPending)
+		source, ok := getSourceByType(sources, sourceName)
+		g.Expect(ok, true)
+		existingAsset := commonAsset(sourceName, assetType, testData.Name, bucketName, *source, v1alpha2.AssetPending)
 		existingAssets := []docstopic.CommonAsset{existingAsset}
 
 		assetSvc := new(automock.AssetService)
@@ -354,11 +363,12 @@ func TestDocstopicHandler_Handle_Status(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
 		bucketName := "test-bucket"
-		sourceName := "swag"
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 		testData.Status.Phase = v1alpha1.DocsTopicPending
-		existingAsset := commonAsset(sourceName, testData.Name, bucketName, sources[sourceName], v1alpha2.AssetReady)
+		source, ok := getSourceByType(sources, sourceName)
+		g.Expect(ok, true)
+		existingAsset := commonAsset(sourceName, assetType, testData.Name, bucketName, *source, v1alpha2.AssetReady)
 		existingAssets := []docstopic.CommonAsset{existingAsset}
 
 		assetSvc := new(automock.AssetService)
@@ -386,11 +396,12 @@ func TestDocstopicHandler_Handle_Status(t *testing.T) {
 		g := gomega.NewGomegaWithT(t)
 		ctx := context.TODO()
 		bucketName := "test-bucket"
-		sourceName := "swag"
-		sources := map[string]v1alpha1.Source{"swag": testSource("https://dummy.url", v1alpha1.DocsTopicSingle)}
+		sources := []v1alpha1.Source{testSource(sourceName, assetType, "https://dummy.url", v1alpha1.DocsTopicSingle)}
 		testData := testData("halo", sources)
 		testData.Status.Phase = v1alpha1.DocsTopicReady
-		existingAsset := commonAsset(sourceName, testData.Name, bucketName, sources[sourceName], v1alpha2.AssetFailed)
+		source, ok := getSourceByType(sources, sourceName)
+		g.Expect(ok, true)
+		existingAsset := commonAsset(sourceName, assetType, testData.Name, bucketName, *source, v1alpha2.AssetFailed)
 		existingAssets := []docstopic.CommonAsset{existingAsset}
 
 		assetSvc := new(automock.AssetService)
@@ -418,14 +429,16 @@ func fakeRecorder() record.EventRecorder {
 	return record.NewFakeRecorder(20)
 }
 
-func testSource(url string, mode v1alpha1.DocsTopicMode) v1alpha1.Source {
+func testSource(sourceName string, sourceType string, url string, mode v1alpha1.DocsTopicMode) v1alpha1.Source {
 	return v1alpha1.Source{
+		Name: sourceName,
+		Type: sourceType,
 		URL:  url,
 		Mode: mode,
 	}
 }
 
-func testData(name string, sources map[string]v1alpha1.Source) *v1alpha1.DocsTopic {
+func testData(name string, sources []v1alpha1.Source) *v1alpha1.DocsTopic {
 	return &v1alpha1.DocsTopic{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
@@ -441,14 +454,17 @@ func testData(name string, sources map[string]v1alpha1.Source) *v1alpha1.DocsTop
 	}
 }
 
-func commonAsset(name, docsName, bucketName string, source v1alpha1.Source, phase v1alpha2.AssetPhase) docstopic.CommonAsset {
+func commonAsset(name, assetType, docsName, bucketName string, source v1alpha1.Source, phase v1alpha2.AssetPhase) docstopic.CommonAsset {
 	return docstopic.CommonAsset{
 		ObjectMeta: v1.ObjectMeta{
 			Name:      name,
 			Namespace: "test",
 			Labels: map[string]string{
 				"docstopic.cms.kyma-project.io": docsName,
-				"type.cms.kyma-project.io":      name,
+				"type.cms.kyma-project.io":      assetType,
+			},
+			Annotations: map[string]string{
+				"assetshortname.cms.kyma-project.io": name,
 			},
 		},
 		Spec: v1alpha2.CommonAssetSpec{
@@ -465,4 +481,14 @@ func commonAsset(name, docsName, bucketName string, source v1alpha1.Source, phas
 			Phase: phase,
 		},
 	}
+}
+
+func getSourceByType(slice []v1alpha1.Source, sourceName string) (*v1alpha1.Source, bool) {
+	for _, source := range slice {
+		if source.Name != sourceName {
+			continue
+		}
+		return &source, true
+	}
+	return nil, false
 }

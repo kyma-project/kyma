@@ -43,7 +43,15 @@ spec:
       value: kyma-integration
     - name: INSTALLATION_TIMEOUT_SECONDS
       value: "180"
+    volumeMounts:
+    - mountPath: /etc/certs
+      name: helm-certs
+      readOnly: true
   restartPolicy: Never
+  volumes:
+  - name: helm-certs
+    secret:
+      secretName: helm-secret
 EOF
 
 cat <<EOF | kubectl -n kyma-integration apply -f -

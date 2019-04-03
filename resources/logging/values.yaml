@@ -2,42 +2,61 @@ rbac:
   create: true
   pspEnabled: true
 
+networkPolicy:
+  enabled: false
+
 serviceAccount:
   create: true
+  name:
 
-loki: 
+loki:
+  nameOverride: loki
   replicas: 1
+  minReadySeconds: 0
+  terminationGracePeriodSeconds: 30
   deploymentStrategy: RollingUpdate
+  port: 3100
+  fullnameOverride: logging
 
   image:
     repository: grafana/loki
-    tag: master-3e6a75e
-    pullPolicy: Always
+    tag: master-ed94502
+    pullPolicy: Always # Always pull while in BETA
 
   service:
     port: 3100
     annotations:
       auth.istio.io/3100: NONE
+    #  prometheus.io/scrape: "true"
+    #  prometheus.io/port: "http-metrics"
     labels: {}
 
-  readinessProbe: {}
+  readinessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 45
 
-  livenessProbe: {}
+  livenessProbe:
+    httpGet:
+      path: /ready
+      port: http
+    initialDelaySeconds: 45
 
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    limits:
+      cpu: 200m
+      memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
   ## Pod Annotations
   podAnnotations:
     sidecar.istio.io/inject: "true"
 
   ## Deployment annotations
-  # annotations: {}
+  annotations: {}
 
   ## Assign a PriorityClassName to pods if set
   # priorityClassName:
@@ -56,12 +75,36 @@ loki:
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ##
   affinity: {}
+    # podAntiAffinity:
+    #   requiredDuringSchedulingIgnoredDuringExecution:
+    #   - labelSelector:
+    #       matchExpressions:
+    #       - key: app
+    #         operator: In
+    #         values:
+    #         - loki
+  #     topologyKey: "kubernetes.io/hostname"
 
+  ## Enable persistence using Persistent Volume Claims
+  ## ref: http://kubernetes.io/docs/user-guide/persistent-volumes/
+  ## If you set enabled as "True", you need :
+  ## - create a pv which above 10Gi and has same namespace with loki
+  ## - keep storageClassName same with below setting
+  persistence:
+    enabled: true
+    accessModes:
+      - ReadWriteOnce
+    size: 10Gi
+    storageClassName: ""
+    # annotations: {}
+    # subPath: ""
+    # existingClaim:
 
   config:
     auth_enabled: false
     ingester:
       lifecycler:
+        address: 127.0.0.1
         ring:
           store: inmemory
           replication_factor: 1
@@ -73,48 +116,62 @@ loki:
         index:
           prefix: index_
           period: 168h
-    storage_configs:
-      - name: boltdb
-        directory: /tmp/loki/index
-      - name: filesystem
-        directory: /tmp/loki/chunks
+    storage_config:
+      boltdb:
+        directory: /data/loki/index
+      filesystem:
+        directory: /data/loki/chunks
 
 promtail:
+
   nameOverride: promtail
-  replicas: 1
   deploymentStrategy: RollingUpdate
+
+  entryParser: docker
 
   image:
     repository: grafana/promtail
-    tag: master-3e6a75e
-    pullPolicy: Always
+    tag: master-0d4131c
+    pullPolicy: Always # Always pull while in BETA
 
-  service:
-    port: 3100
-    annotations: {}
-    labels: {}
+  volumes:
+    - name: varlog
+      hostPath:
+        path: /var/log
+    - name: varlibdockercontainers
+      hostPath:
+        path: /var/lib/docker/containers
 
-  readinessProbe: {}
+  volumeMounts:
+    - name: varlog
+      mountPath: /var/log
+    - name: varlibdockercontainers
+      mountPath: /var/lib/docker/containers
+      readOnly: true
 
-  livenessProbe: {}
+  readinessProbe: null
 
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  livenessProbe: null
+
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
   ## Pod Annotations
-  #podAnnotations:
-
-  ## Deployment annotations
-  # annotations: {}
   podAnnotations:
-    #For pods running sidecars w/o service there's a problem with envoy readiness probe.
-    #Details https://github.com/istio/istio/issues/9504#issuecomment-439432130
+  #  prometheus.io/scrape: "true"
+  #  prometheus.io/port: "http-metrics"
+  #For pods running sidecars w/o service there's a problem with envoy readiness probe.
+  #Details https://github.com/istio/istio/issues/9504#issuecomment-439432130
     status.sidecar.istio.io/port: "0"
+    
+  ## Deployment annotations
+  annotations: {}
+
   ## Assign a PriorityClassName to pods if set
   # priorityClassName:
 
@@ -130,16 +187,17 @@ promtail:
     - key: node-role.kubernetes.io/master
       effect: NoSchedule
 
-
   ## Affinity for pod assignment
   ## ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   ##
   affinity: {}
 
+
+
 global:
   ## to deploy console ui app
   uiapp:
-    create: false
+    create: true
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
@@ -147,7 +205,7 @@ global:
     version: 0f2d461a
   ## to enable auth and authz set value to true
   rbac:
-    create: false
+    create: true
 test:
   image:
     name: test-logging

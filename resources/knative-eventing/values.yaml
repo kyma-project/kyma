@@ -1,3 +1,2 @@
 global:
   isLocalEnv: false
-  knative: false

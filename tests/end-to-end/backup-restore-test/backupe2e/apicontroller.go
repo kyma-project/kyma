@@ -16,13 +16,13 @@ import (
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	apiv1alpha2 "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1 "k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 type ApiControllerTest struct {
@@ -37,23 +37,22 @@ type ApiControllerTest struct {
 
 func NewApiControllerTestFromEnv() (ApiControllerTest, error) {
 
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	restConfig, err := config.NewRestClientConfig()
 	if err != nil {
 		return ApiControllerTest{}, err
 	}
 
-	kubelessClient, err := kubeless.NewForConfig(config)
+	kubelessClient, err := kubeless.NewForConfig(restConfig)
 	if err != nil {
 		return ApiControllerTest{}, err
 	}
 
-	coreClient, err := kubernetes.NewForConfig(config)
+	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return ApiControllerTest{}, err
 	}
 
-	gatewayClient, err := gateway.NewForConfig(config)
+	gatewayClient, err := gateway.NewForConfig(restConfig)
 	if err != nil {
 		return ApiControllerTest{}, err
 	}
@@ -124,8 +123,11 @@ func (t ApiControllerTest) TestResourcesError(namespace string) error {
 	return nil
 }
 
-func (t ApiControllerTest) callFunctionWithoutToken(waitMax time.Duration) error {
+func (t ApiControllerTest) DeleteResources(namespace string) {
+	// There is not need to be implemented for this test.
+}
 
+func (t ApiControllerTest) callFunctionWithoutToken(waitMax time.Duration) error {
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitMax)
 	messages := ""
@@ -334,8 +336,4 @@ func fetchDexToken() (string, error) {
 		log.Fatal(err)
 	}
 	return token, nil
-}
-
-func (t ApiControllerTest) DeleteResources() {
-	// There is not need to be implemented for this test.
 }

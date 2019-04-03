@@ -64,3 +64,5 @@ spec:
             name: http-api-port
           - containerPort: 9090
             name: metrics-port
+        securityContext:
+          runAsUser: {{ .Values.deployment.runAsUser }}

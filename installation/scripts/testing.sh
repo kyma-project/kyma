@@ -57,14 +57,14 @@ monitoringTestErr=$?
 fi
 
 # execute logging tests if 'logging' is installed
-if helm ${KUBE_CONTEXT_ARG} list | grep -q "logging"; then
-echo "- Logging module is installed. Running tests for same"
-helm ${KUBE_CONTEXT_ARG} test logging --timeout 600
-loggingTestErr=$?
-fi
+#if helm ${KUBE_CONTEXT_ARG} list | grep -q "logging"; then
+#echo "- Logging module is installed. Running tests for same"
+#helm ${KUBE_CONTEXT_ARG} test logging --timeout 600
+#loggingTestErr=$?
+#fi
 
-# run event-bus tests if Knative is not installed
-if ! kubectl -n knative-eventing get deployments.apps | grep -q "webhook"; then
+# run event-bus tests if Knative is installed
+if kubectl -n knative-eventing get deployments.apps | grep -q "webhook"; then
     echo "- Testing Event-Bus..."
     helm ${KUBE_CONTEXT_ARG} test event-bus --timeout 600
     eventBusTestErr=$?

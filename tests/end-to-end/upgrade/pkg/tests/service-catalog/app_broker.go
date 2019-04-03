@@ -1,31 +1,31 @@
-package service_catalog
+package servicecatalog
 
 import (
 	"time"
 
-	"k8s.io/client-go/kubernetes"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	appConnectorApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	appBroker "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	appConnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-
-	appBroker "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	appConnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
-	appConnectorApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	"k8s.io/client-go/kubernetes"
 )
 
 const (
 	appEnvTester        = "app-env-tester"
 	applicationName     = "application-for-testing"
-	apiServiceId        = "api-service-id"
-	eventsServiceId     = "events-service-id"
+	apiServiceID        = "api-service-id"
+	eventsServiceID     = "events-service-id"
 	apiBindingName      = "app-binding"
 	apiBindingUsageName = "app-binding"
-	gatewayUrl          = "https://gateway.local"
+	gatewayURL          = "https://gateway.local"
 )
 
+// AppBrokerUpgradeTest tests the Helm Broker business logic after Kyma upgrade phase
 type AppBrokerUpgradeTest struct {
 	ServiceCatalogInterface clientset.Interface
 	K8sInterface            kubernetes.Interface
@@ -34,6 +34,7 @@ type AppBrokerUpgradeTest struct {
 	AppConnectorInterface   appConnector.Interface
 }
 
+// NewAppBrokerUpgradeTest returns new instance of the AppBrokerUpgradeTest
 func NewAppBrokerUpgradeTest(scCli clientset.Interface,
 	k8sCli kubernetes.Interface,
 	buCli bu.Interface,
@@ -58,10 +59,12 @@ type appBrokerFlow struct {
 	appConnectorInterface appConnector.Interface
 }
 
+// CreateResources creates resources needed for e2e upgrade test
 func (ut *AppBrokerUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return ut.newFlow(stop, log, namespace).CreateResources()
 }
 
+// TestResources tests resources after backup phase
 func (ut *AppBrokerUpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	return ut.newFlow(stop, log, namespace).TestResources()
 }
@@ -157,8 +160,8 @@ func (f *appBrokerFlow) createApplication() error {
 			SkipInstallation: true,
 			Services: []v1alpha1.Service{
 				{
-					ID:   apiServiceId,
-					Name: apiServiceId,
+					ID:   apiServiceID,
+					Name: apiServiceID,
 					Labels: map[string]string{
 						"connected-app": "app-name",
 					},
@@ -170,13 +173,13 @@ func (f *appBrokerFlow) createApplication() error {
 						{
 							Type:        "API",
 							AccessLabel: "accessLabel",
-							GatewayUrl:  gatewayUrl,
+							GatewayUrl:  gatewayURL,
 						},
 					},
 				},
 				{
-					ID:   eventsServiceId,
-					Name: eventsServiceId,
+					ID:   eventsServiceID,
+					Name: eventsServiceID,
 					Labels: map[string]string{
 						"connected-app": "app-name",
 					},
@@ -222,11 +225,11 @@ func (f *appBrokerFlow) createAPIServiceInstance() error {
 			APIVersion: "servicecatalog.k8s.io/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: apiServiceId,
+			Name: apiServiceID,
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{
-				ServiceClassExternalName: apiServiceId,
+				ServiceClassExternalName: apiServiceID,
 				ServicePlanExternalName:  "default",
 			},
 		},
@@ -242,11 +245,11 @@ func (f *appBrokerFlow) createEventsServiceInstance() error {
 			APIVersion: "servicecatalog.k8s.io/v1beta1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: eventsServiceId,
+			Name: eventsServiceID,
 		},
 		Spec: v1beta1.ServiceInstanceSpec{
 			PlanReference: v1beta1.PlanReference{
-				ServiceClassExternalName: eventsServiceId,
+				ServiceClassExternalName: eventsServiceID,
 				ServicePlanExternalName:  "default",
 			},
 		},
@@ -255,7 +258,7 @@ func (f *appBrokerFlow) createEventsServiceInstance() error {
 }
 
 func (f *appBrokerFlow) createAPIServiceBinding() error {
-	return f.createBindingAndWaitForReadiness(apiBindingName, apiServiceId)
+	return f.createBindingAndWaitForReadiness(apiBindingName, apiServiceID)
 }
 
 func (f *appBrokerFlow) createAPIServiceBindingUsage() error {
@@ -264,13 +267,13 @@ func (f *appBrokerFlow) createAPIServiceBindingUsage() error {
 
 func (f *appBrokerFlow) verifyEventActivation() error {
 	f.log.Infof("Waiting for the event activation")
-	_, err := f.appBrokerInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Get(eventsServiceId, metav1.GetOptions{})
+	_, err := f.appBrokerInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Get(eventsServiceID, metav1.GetOptions{})
 	return err
 }
 
 func (f *appBrokerFlow) verifyEnvTesterHasGatewayInjected() error {
 	f.log.Info("Waiting for GATEWAY_URL env injected")
-	return f.waitForEnvInjected(appEnvTester, "GATEWAY_URL", gatewayUrl)
+	return f.waitForEnvInjected(appEnvTester, "GATEWAY_URL", gatewayURL)
 }
 
 func (f *appBrokerFlow) verifyDeploymentDoesNotContainGatewayEnvs() error {
@@ -287,11 +290,11 @@ func (f *appBrokerFlow) deleteAPIServiceBinding() error {
 }
 
 func (f *appBrokerFlow) deleteAPIServiceInstance() error {
-	return f.deleteServiceInstance(apiServiceId)
+	return f.deleteServiceInstance(apiServiceID)
 }
 
 func (f *appBrokerFlow) deleteEventsServiceInstance() error {
-	return f.deleteServiceInstance(eventsServiceId)
+	return f.deleteServiceInstance(eventsServiceID)
 }
 
 func (f *appBrokerFlow) deleteApplicationMapping() error {
@@ -300,11 +303,11 @@ func (f *appBrokerFlow) deleteApplicationMapping() error {
 
 func (f *appBrokerFlow) waitForInstances() error {
 	f.log.Infof("Waiting for instances to be ready")
-	err := f.waitForInstance(apiServiceId)
+	err := f.waitForInstance(apiServiceID)
 	if err != nil {
 		return err
 	}
-	err = f.waitForInstance(eventsServiceId)
+	err = f.waitForInstance(eventsServiceID)
 
 	return err
 }
@@ -326,8 +329,8 @@ func (f *appBrokerFlow) waitForClassAndPlans() error {
 	f.log.Infof("Waiting for classes")
 	err := f.wait(45*time.Second, func() (bool, error) {
 		expectedClasses := map[string]struct{}{
-			apiServiceId:    {},
-			eventsServiceId: {},
+			apiServiceID:    {},
+			eventsServiceID: {},
 		}
 		classes, err := f.scInterface.ServicecatalogV1beta1().ServiceClasses(f.namespace).List(metav1.ListOptions{})
 		if err != nil {
@@ -347,8 +350,8 @@ func (f *appBrokerFlow) waitForClassAndPlans() error {
 	f.log.Infof("Waiting for plans")
 	return f.wait(10*time.Second, func() (bool, error) {
 		expectedPlans := map[string]struct{}{
-			apiServiceId:    {},
-			eventsServiceId: {},
+			apiServiceID:    {},
+			eventsServiceID: {},
 		}
 		plans, err := f.scInterface.ServicecatalogV1beta1().ServicePlans(f.namespace).List(metav1.ListOptions{})
 		if err != nil {
@@ -368,8 +371,8 @@ func (f *appBrokerFlow) waitForClassAndPlans() error {
 func (f *appBrokerFlow) waitForClasses() error {
 	return f.wait(2*time.Minute, func() (bool, error) {
 		expectedClasses := map[string]struct{}{
-			apiServiceId:    {},
-			eventsServiceId: {},
+			apiServiceID:    {},
+			eventsServiceID: {},
 		}
 		classes, err := f.scInterface.ServicecatalogV1beta1().ServiceClasses(f.namespace).List(metav1.ListOptions{})
 		if err != nil {
@@ -386,11 +389,11 @@ func (f *appBrokerFlow) waitForClasses() error {
 }
 
 func (f *appBrokerFlow) waitForInstancesDeleted() error {
-	err := f.waitForInstanceRemoved(apiServiceId)
+	err := f.waitForInstanceRemoved(apiServiceID)
 	if err != nil {
 		return err
 	}
-	return f.waitForInstanceRemoved(eventsServiceId)
+	return f.waitForInstanceRemoved(eventsServiceID)
 }
 
 func (f *appBrokerFlow) waitForEnvTester() error {
@@ -400,11 +403,11 @@ func (f *appBrokerFlow) waitForEnvTester() error {
 
 func (f *appBrokerFlow) logApplicationReport() {
 	appMappings, err := f.appBrokerInterface.ApplicationconnectorV1alpha1().ApplicationMappings(f.namespace).List(metav1.ListOptions{})
-	f.report("ApplicationMappings", appMappings , err)
+	f.report("ApplicationMappings", appMappings, err)
 
 	eventActivations, err := f.appBrokerInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).List(metav1.ListOptions{})
-	f.report("EventActivations", eventActivations , err)
+	f.report("EventActivations", eventActivations, err)
 
 	applications, err := f.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().List(metav1.ListOptions{})
-	f.report("Applications", applications , err)
+	f.report("Applications", applications, err)
 }
