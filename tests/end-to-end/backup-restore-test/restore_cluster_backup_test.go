@@ -45,7 +45,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	myPrometheusTest, err := NewPrometheusTest()
 	fatalOnError(t, err, "while creating structure for Prometheus test")
 
-	myNamespaceControllerTest, err := NewNamespaceControllerTest()
+	myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
 	fatalOnError(t, err, "while creating structure for NamespaceController test")
 
 	apiControllerTest, err := NewApiControllerTest()
