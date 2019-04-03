@@ -25,3 +25,8 @@ clusterBucket:
 
 bucket:
   region: us-east-1
+
+webhookConfigMap:
+  name: webhook-config-map
+  namespace: kyma-system
+

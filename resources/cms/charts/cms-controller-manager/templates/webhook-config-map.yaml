@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "webhookcfgmap" . }}
+  namespace: {{ .Values.webhookConfigMap.namespace }}
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+data:
+  "markdown": |-
+    {
+      "validations":[],
+      "mutations":[]
+    }
+  "openapi": |-
+    {
+      "validations":[],
+      "mutations":[]
+    }
