@@ -43,6 +43,12 @@ rules:
 - apiGroups: [""]
   resources: ["pods", "pods/log", "secrets"]
   verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["gateway.kyma-project.io"]
+  resources: ["apis"]
+  verbs: ["create"]
+- apiGroups: ["kubeless.io"]
+  resources: ["functions"]
+  verbs: ["*"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
