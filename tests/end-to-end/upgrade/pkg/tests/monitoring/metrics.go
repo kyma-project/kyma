@@ -46,15 +46,11 @@ func (ut *MetricsUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 	ut.log = log
 
 	time := time.Now().Add(-time.Minute)
-	log.Debugln("before collect")
 	result, err := ut.collectMetrics(time)
 	if err != nil {
 		return err
 	}
-	log.Debugln("after collect")
-	log.Debugln("before store")
 	err = ut.storeMetrics(result, time)
-	log.Debugln("after store")
 	return err
 }
 
@@ -139,6 +135,9 @@ func (ut *MetricsUpgradeTest) compareMetrics() error {
 		return err
 	}
 	current, err := ut.collectMetrics(time)
+	if err != nil {
+		return err
+	}
 	ut.log.Debugln(previous)
 	ut.log.Debugln(current)
 	if !cmp.Equal(previous, current) {

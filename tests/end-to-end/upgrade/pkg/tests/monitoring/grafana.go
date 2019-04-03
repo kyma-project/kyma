@@ -12,6 +12,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/pkg/errors"
+
 	"github.com/google/go-cmp/cmp"
 
 	"github.com/sirupsen/logrus"
@@ -75,8 +77,7 @@ func (ut *GrafanaUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.F
 		return err
 	}
 
-	err = ut.storeDashboards(dashboards)
-	return err
+	return ut.storeDashboards(dashboards)
 }
 
 // TestResources retrieves the previously stored list of installed dashboards and compares it to the current list
@@ -115,7 +116,6 @@ func (ut *GrafanaUpgradeTest) getCredentials() error {
 }
 
 func getHTTPClient(skipVerify bool) (*http.Client, error) {
-
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
 	}
@@ -129,7 +129,6 @@ func getHTTPClient(skipVerify bool) (*http.Client, error) {
 }
 
 func (ut *GrafanaUpgradeTest) getGrafana() error {
-
 	pod, err := ut.k8sCli.CoreV1().Pods(grafanaNS).Get(grafanaPodName, metav1.GetOptions{})
 	if err != nil {
 		return err
@@ -165,7 +164,6 @@ func (ut *GrafanaUpgradeTest) getGrafana() error {
 }
 
 func (ut *GrafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) {
-
 	dexAuthLocal, err := ut.getGrafanaAndDexAuth()
 	if err != nil {
 		return nil, err
@@ -177,11 +175,7 @@ func (ut *GrafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) 
 	cookie := dexAuthLocal.Request.Cookies()
 	apiSearchFolders, err := ut.requestToGrafana(domain, "GET", params, nil, cookie)
 	if err != nil {
-		return nil, err
-	}
-
-	if apiSearchFolders.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request failed %v, %v", domain, apiSearchFolders.StatusCode)
+		return nil, errors.Wrap(err, "could not get dashboard list")
 	}
 
 	defer apiSearchFolders.Body.Close()
@@ -201,12 +195,9 @@ func (ut *GrafanaUpgradeTest) collectDashboards() (map[string]dashboard, error) 
 	for _, folder := range dashboardFolders {
 		// http request to every dashboard
 		domain = fmt.Sprintf("%s%s", ut.url, folder["url"])
-		dashResp, err := ut.requestToGrafana(domain, "GET", nil, strings.NewReader(ut.loginForm.Encode()), cookie)
+		_, err := ut.requestToGrafana(domain, "GET", nil, strings.NewReader(ut.loginForm.Encode()), cookie)
 		if err != nil {
-
-		}
-		if dashResp.StatusCode != http.StatusOK {
-			return nil, fmt.Errorf("request failed %v, %v", domain, dashResp.StatusCode)
+			return nil, errors.Wrap(err, "could not open dashboard")
 		}
 		title := fmt.Sprintf("%s", folder["title"])
 		dashboards[title] = dashboard{Title: title, URL: fmt.Sprintf("%s", folder["url"])}
@@ -233,7 +224,6 @@ func (ut *GrafanaUpgradeTest) storeDashboards(dashboards map[string]dashboard) e
 }
 
 func (ut *GrafanaUpgradeTest) retrievePreviousDashboards() (map[string]dashboard, error) {
-
 	cm, err := ut.k8sCli.CoreV1().ConfigMaps(ut.namespace).Get(grafanaConfigMapName, metav1.GetOptions{})
 	if err != nil {
 		return nil, err
@@ -262,42 +252,31 @@ func (ut *GrafanaUpgradeTest) compareDashboards() error {
 }
 
 func (ut *GrafanaUpgradeTest) getGrafanaAndDexAuth() (*http.Response, error) {
-
 	//  /login
 	domain := fmt.Sprintf("%s%s", ut.url, "/login")
-	grafLogin, err := ut.requestToGrafana(domain, "GET", nil, nil, nil)
-	if grafLogin.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("login to grafana failed: StatusCode: %v", grafLogin.StatusCode)
+	_, err := ut.requestToGrafana(domain, "GET", nil, nil, nil)
+	if err != nil {
+		return nil, errors.Wrap(err, "login failed")
 	}
 
 	//  /login/generic_oauth
 	domain = fmt.Sprintf("%s%s", domain, "/generic_oauth")
 	genericOauth, err := ut.requestToGrafana(domain, "GET", nil, nil, nil)
 	if err != nil {
-		return nil, err
-	}
-	if genericOauth.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("login to grafana failed (oauth): StatusCode: %v", genericOauth.StatusCode)
+		return nil, errors.Wrap(err, "oauth failed")
 	}
 
 	// /auth
 	domain = genericOauth.Request.Referer()
 	dexAuth, err := ut.requestToGrafana(domain, "GET", nil, nil, nil)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "oauth referrer failed")
 	}
-	if dexAuth.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("Dex auth failed: StatusCode %v", dexAuth.StatusCode)
-	}
-
 	// /auth/local
 	domain = dexAuth.Request.URL.String()
 	dexAuthLocal, err := ut.requestToGrafana(domain, "POST", nil, strings.NewReader(ut.loginForm.Encode()), nil)
 	if err != nil {
-		return nil, err
-	}
-	if dexAuthLocal.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("request to %v failed: StatusCode %v", domain, dexAuthLocal.StatusCode)
+		return nil, errors.Wrap(err, "during dex auth")
 	}
 	return dexAuthLocal, nil
 }
@@ -336,6 +315,9 @@ func (g *grafana) requestToGrafana(domain, method string, params url.Values, for
 	resp, err := g.httpClient.Do(req)
 	if err != nil {
 		return nil, fmt.Errorf("http request to the url (%s) failed with '%s'", u, err)
+	}
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("StatusCode not OK: %v", resp.StatusCode)
 	}
 	return resp, err
 }
