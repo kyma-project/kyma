@@ -2,6 +2,7 @@ package certificaterequest
 
 import (
 	"context"
+	"time"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
@@ -11,6 +12,7 @@ import (
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/pkg/apis/applicationconnector/v1alpha1"
 	log "github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -102,9 +104,11 @@ func (c *Controller) manageResources(connectionName string, connection connector
 		ObjectMeta: v1.ObjectMeta{Name: connectionName}, // TODO - figure out some naming - same as request??
 		Spec: v1alpha1.CentralConnectionSpec{
 			ManagementInfoURL: connection.ManagementInfoURL,
+			EstablishedAt:     metav1.NewTime(time.Now()),
 			// TODO - secret names?
 		},
 	}
+	// TODO - should we check connection by calling Management Info ???
 
 	_, err := c.connectionClient.Create(masterConnection)
 	if err != nil {
@@ -135,12 +139,7 @@ func (c *Controller) setRequestErrorStatus(instance *v1alpha1.CertificateRequest
 		Error: statusError.Error(),
 	}
 
-	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		return c.certificateRequestClient.Update(context.Background(), instance)
 	})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

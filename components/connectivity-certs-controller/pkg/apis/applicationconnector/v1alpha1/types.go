@@ -36,7 +36,6 @@ type CertificateRequestList struct {
 // +genclient:nonNamespaced
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// TODO - think of better name
 type CentralConnection struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
@@ -45,13 +44,25 @@ type CentralConnection struct {
 }
 
 type CentralConnectionSpec struct {
-	ManagementInfoURL string `json:"managementInfoUrl"`
+	ManagementInfoURL string      `json:"managementInfoUrl"`
+	EstablishedAt     metav1.Time `json:"establishedAt"` // TODO - should it be a part of Spec or Status
+	RenewNow          bool        `json:"renewNow"`
 }
 
 type CentralConnectionStatus struct {
-	LastSync           int64                   `json:"lastSync"`
-	CertificateValidTo int64                   `json:"certificateValidTo"`
-	Error              *CentralConnectionError `json:"error,omitempty"`
+	SynchronizationStatus SynchronizationStatus   `json:"synchronizationStatus"`
+	CertificateStatus     CertificateStatus       `json:"certificateStatus"`
+	Error                 *CentralConnectionError `json:"error,omitempty"`
+}
+
+type SynchronizationStatus struct {
+	LastSync    metav1.Time `json:"lastSync"`
+	LastSuccess metav1.Time `json:"lastSuccess"`
+}
+
+type CertificateStatus struct {
+	IssuedAt metav1.Time `json:"issuedAt"`
+	ValidTo  metav1.Time `json:"validTo"`
 }
 
 type CentralConnectionError struct {

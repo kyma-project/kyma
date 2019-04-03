@@ -3,8 +3,8 @@ package connectorservice
 import (
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/json"
 	"encoding/pem"
+	"fmt"
 	"net/http"
 	"testing"
 
@@ -90,9 +90,7 @@ func TestMutualTLSConnectorClient_GetManagementInfo(t *testing.T) {
 				},
 			}
 
-			w.WriteHeader(http.StatusOK)
-			err := json.NewEncoder(w).Encode(managementInfo)
-			require.NoError(t, err)
+			respond(t, w, http.StatusOK, managementInfo)
 		})
 
 		mutualTLSClient := NewMutualTLSConnectorClient(loadPrivateKey(t, []byte(clientKey)), loadCertificates(t, []byte(clientCertificate)))
@@ -133,6 +131,75 @@ func TestMutualTLSConnectorClient_GetManagementInfo(t *testing.T) {
 		require.Error(t, err)
 	})
 
+}
+
+func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
+
+	encodedCSR := "encodedCSR"
+	renewalEndpoint := "/v1/application/certificates/renewals"
+
+	t.Run("should renew certificate", func(t *testing.T) {
+		// given
+		server, router := createTestServer()
+		defer server.Close()
+
+		router.HandleFunc(renewalEndpoint, func(w http.ResponseWriter, r *http.Request) {
+			var certRequest CertificateRequest
+			err := readResponseBody(r.Body, &certRequest)
+			require.NoError(t, err)
+			assert.Equal(t, encodedCSR, certRequest.CSR)
+
+			crtResponse := CertificatesResponse{
+				CRTChain:  crtChainBase64,
+				ClientCRT: clientCRTBase64,
+				CaCRT:     caCRTBase64,
+			}
+
+			respond(t, w, http.StatusCreated, crtResponse)
+		})
+
+		renewalURL := fmt.Sprintf("%s%s", server.URL, renewalEndpoint)
+
+		mutualTLSClient := NewMutualTLSConnectorClient(loadPrivateKey(t, []byte(clientKey)), loadCertificates(t, []byte(clientCertificate)))
+
+		// when
+		certificates, err := mutualTLSClient.RenewCertificate(renewalURL, encodedCSR)
+		require.NoError(t, err)
+
+		// then
+		assert.Equal(t, clientCRT, certificates.ClientCRT)
+		assert.Equal(t, caCRT, certificates.CaCRT)
+		assert.Equal(t, crtChain, certificates.CRTChain)
+	})
+
+	t.Run("should return error when request failed", func(t *testing.T) {
+		// given
+		mutualTLSClient := NewMutualTLSConnectorClient(loadPrivateKey(t, []byte(clientKey)), loadCertificates(t, []byte(clientCertificate)))
+
+		// when
+		_, err := mutualTLSClient.RenewCertificate("https://invalid.url.kyma.cx", encodedCSR)
+
+		// then
+		require.Error(t, err)
+	})
+
+	t.Run("should return error when server responded with error", func(t *testing.T) {
+		// given
+		server, router := createTestServer()
+		defer server.Close()
+
+		router.HandleFunc(renewalEndpoint, errorHandler(t))
+
+		renewalURL := fmt.Sprintf("%s%s", server.URL, renewalEndpoint)
+
+		mutualTLSClient := NewMutualTLSConnectorClient(loadPrivateKey(t, []byte(clientKey)), loadCertificates(t, []byte(clientCertificate)))
+
+		// when
+		_, err := mutualTLSClient.RenewCertificate(renewalURL, encodedCSR)
+
+		// then
+		require.Error(t, err)
+	})
 }
 
 func loadPrivateKey(t *testing.T, key []byte) *rsa.PrivateKey {

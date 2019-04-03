@@ -92,7 +92,7 @@ func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string, csr stri
 		return certificates.Certificates{}, errors.Wrap(err, "Failed to request Management Info.")
 	}
 
-	if response.StatusCode != http.StatusOK {
+	if response.StatusCode != http.StatusCreated {
 		message := fmt.Sprintf("Connector Service renewal endpoint responded with status %d", response.StatusCode)
 		return certificates.Certificates{}, errors.Wrap(extractErrorResponse(response), message)
 	}

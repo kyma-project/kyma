@@ -2,12 +2,19 @@ package centralconnection
 
 import (
 	"context"
+	"crypto/x509"
+	"time"
+
+	"github.com/pkg/errors"
+
+	"k8s.io/client-go/util/retry"
 
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates"
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/connectorservice"
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/pkg/apis/applicationconnector/v1alpha1"
 
 	log "github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
@@ -25,21 +32,12 @@ type ResourceClient interface {
 	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error
 }
 
-//type CentralConnectionManager interface {
-//	Create(*v1alpha1.CentralConnection) (*v1alpha1.CentralConnection, error)
-//	//Update(*v1alpha1.CentralConnection) (*v1alpha1.CentralConnection, error)
-//	//UpdateStatus(*v1alpha1.CentralConnection) (*v1alpha1.CentralConnection, error)
-//	//Delete(name string, options *v1.DeleteOptions) error
-//	//DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
-//	//Get(name string, options v1.GetOptions) (*v1alpha1.CentralConnection, error)
-//	//List(opts v1.ListOptions) (*v1alpha1.CentralConnectionList, error)
-//	//Watch(opts v1.ListOptions) (watch.Interface, error)
-//}
-
 type Controller struct {
 	masterConnectionClient ResourceClient
 	connectorClient        connectorservice.Client
 	certificatePreserver   certificates.Preserver
+	certificateProvider    certificates.CertificateProvider
+	csrProvider            certificates.CSRProvider
 }
 
 func InitMasterConnectionsController(mgr manager.Manager, appName string, connectorClient connectorservice.Client, certPreserver certificates.Preserver) error {
@@ -65,14 +63,10 @@ func newMasterConnectionController(client ResourceClient, connectorClient connec
 	}
 }
 
-// Status.EstablishedAt
-// Status.LastCheck
-// Status.CertificateValidTo
-
 func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.CentralConnection{}
 
-	log.Infof("Processing %s central connection", request.Name)
+	log.Infof("Processing %s Central Connection", request.Name)
 
 	err := c.masterConnectionClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
@@ -80,40 +74,38 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 	}
 
 	if instance.Status.Error != nil {
-		// TODO - consider some retry
+		// TODO - what to do in case of error?
 		//log.Infof("Certificate Request %s has an error status, certificate will not be fetched", instance.Name)
 		return reconcile.Result{}, nil
 	}
 
-	// read certificates - and check how long they are valid
-	// call management info
-	//// if error set status
-	//// set status
-	// if need to renew
-	// renew certificate
-	//// reuse subject?
+	key, certificate, err := c.certificateProvider.GetClientCredentials()
+	if err != nil {
+		log.Errorf("Failed to read client certificate: %s", err.Error())
+		return reconcile.Result{}, c.setErrorStatus(instance, err)
+	}
 
-	//certs, err := c.connectorClient.RequestCertificates(instance.Spec.CSRInfoURL)
-	//if err != nil {
-	//	log.Errorf("Error while requesting certificates from Connector Service: %s", err.Error())
-	//	return reconcile.Result{}, c.setRequestErrorStatus(instance, err)
-	//}
-	//log.Infoln("Certificates fetched successfully")
-	//
-	//err = c.certificatePreserver.PreserveCertificates(certs)
-	//if err != nil {
-	//	log.Errorf("Error while saving certificates to secrets: %s", err.Error())
-	//	return reconcile.Result{}, c.setRequestErrorStatus(instance, err)
-	//}
-	//log.Infoln("Certificates saved successfully")
-	//
-	//err = c.masterConnectionClient.Delete(context.Background(), instance)
-	//if err != nil {
-	//	return reconcile.Result{}, err
-	//}
-	//log.Infof("CertificatesRequest %s successfully deleted", instance.Name)
+	tlsConnectorClient := connectorservice.NewMutualTLSConnectorClient(key, []*x509.Certificate{certificate})
 
-	return reconcile.Result{}, nil
+	managementInfo, err := tlsConnectorClient.GetManagementInfo(instance.Spec.ManagementInfoURL)
+	if err != nil {
+		log.Errorf("Failed to request Management Info from URL %s: %s", instance.Spec.ManagementInfoURL, err.Error())
+		return reconcile.Result{}, c.setErrorStatus(instance, err)
+	}
+
+	if c.shouldRenew() {
+		err = c.renewCertificate(tlsConnectorClient, managementInfo, certificate)
+		if err != nil {
+			log.Error(err)
+			return reconcile.Result{}, c.setErrorStatus(instance, err)
+		}
+
+		c.setRenewalStatus(instance, certificate)
+	}
+
+	c.setSynchronizationStatus(instance)
+
+	return reconcile.Result{}, c.updateCentralConnectionCR(instance)
 }
 
 func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
@@ -121,21 +113,74 @@ func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcil
 		log.Infof("Connection %s has been deleted", request.Name)
 		return reconcile.Result{}, nil
 	}
-	log.Errorf("Error while getting instance, %s", err.Error())
+	log.Errorf("Error while getting instance: %s", err.Error())
 	return reconcile.Result{}, err
 }
 
-func (c *Controller) setRequestErrorStatus(instance *v1alpha1.CertificateRequest, statusError error) error {
-	//instance.Status = v1alpha1.CertificateRequestStatus{
-	//	Error: statusError.Error(),
-	//}
-	//
-	//err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-	//	return c.masterConnectionClient.Update(context.Background(), instance)
-	//})
-	//if err != nil {
-	//	return err
-	//}
+func (c *Controller) shouldRenew() bool {
+	// TODO - renew only if needed
+	// TODO - how do we decide if it is time to renew?plan
+	return true
+}
+
+func (c *Controller) renewCertificate(tlsConnectorClient connectorservice.MutualTLSConnectorClient, managementInfo connectorservice.ManagementInfo, certificate *x509.Certificate) error {
+	// TODO: Subject should be returned from Management Info in the future
+	subject := certificate.Subject
+
+	csr, err := c.csrProvider.CreateCSR(subject)
+	if err != nil {
+		return errors.Wrap(err, "Failed to create CSR")
+	}
+
+	renewedCerts, err := tlsConnectorClient.RenewCertificate(managementInfo.ManagementURLs.RenewalURL, csr)
+	if err != nil {
+		return errors.Wrap(err, "Failed to renew client certificate")
+	}
+
+	err = c.certificatePreserver.PreserveCertificates(renewedCerts)
+	if err != nil {
+		return errors.Wrap(err, "Failed to save certificates to secrets")
+	}
+
+	return nil
+}
+
+func (c *Controller) setRenewalStatus(connection *v1alpha1.CentralConnection, certificate *x509.Certificate) {
+	connection.Status.CertificateStatus = v1alpha1.CertificateStatus{
+		ValidTo:  metav1.NewTime(certificate.NotAfter),
+		IssuedAt: metav1.NewTime(time.Now()),
+	}
+}
+
+func (c *Controller) setSynchronizationStatus(connection *v1alpha1.CentralConnection) {
+	syncTime := metav1.NewTime(time.Now())
+
+	connection.Status.SynchronizationStatus = v1alpha1.SynchronizationStatus{
+		LastSync:    syncTime,
+		LastSuccess: syncTime,
+	}
+
+	connection.Status.Error = nil
+}
+
+func (c *Controller) setErrorStatus(connection *v1alpha1.CentralConnection, err error) error {
+	syncTime := metav1.NewTime(time.Now())
+
+	connection.Status.Error.Message = err.Error()
+	connection.Status.SynchronizationStatus.LastSync = syncTime
+	// TODO - remove cert status?
+
+	return c.updateCentralConnectionCR(connection)
+}
+
+func (r *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConnection) error {
+	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		return r.masterConnectionClient.Update(context.Background(), connection)
+	})
+
+	if err != nil {
+		return errors.Wrap(err, "Failed to update Central Connection")
+	}
 
 	return nil
 }
