@@ -4,7 +4,7 @@
 replicaCount: 1
 image:
   name: log-ui
-  tag: 97fae53a
+  tag: 65e42b2a
   pullPolicy: Always
 service:
   name: nginx
