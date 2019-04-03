@@ -153,7 +153,7 @@ func toIstioAuthPolicy(dto *Dto, defaultConfig JwtDefaultConfig, enableIstioAuth
 	var optionalPeers []*istioAuthApi.Peer = nil
 
 	//For backward compatibility controlled by global enableIstioAuthPolicyMtls flag and api-specific DisablePolicyPeersMTLS override.
-	if enableIstioAuthPolicyMtls == true && !dto.DisablePolicyPeersMTLS {
+	if enableIstioAuthPolicyMtls && !dto.DisablePolicyPeersMTLS {
 		optionalPeers = []*istioAuthApi.Peer{&istioAuthApi.Peer{}}
 	}
 
