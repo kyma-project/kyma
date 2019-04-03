@@ -14,30 +14,23 @@ kubectl get crd clusterdocstopics.cms.kyma-project.io -o yaml
 This is a sample ClusterDocsTopic custom resource (CR) that provides details of the ClusterAsset CRs for the **redis**, **asyncapi**, **markdown**, and **openapi** source types.
 
 ```
-piVersion: cms.kyma-project.io/v1alpha1
+apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
 metadata:
-  name: service-catalog
+  name: service-mesh
   labels:
-    cms.kyma-project.io/view-context: service-catalog
+    cms.kyma-project.io/view-context: docs-ui
     cms.kyma-project.io/group-name: components
-    cms.kyma-project.io/order: "2"
+    cms.kyma-project.io/order: "6"
 spec:
-  displayName: Slack
-  description: Slack documentation
+  displayName: "Service Mesh"
+  description: "Overall documentation for Service Mesh"
   sources:
     - type: markdown
-      name: slack
-      mode: single
-      url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/README.md
-    - type: asyncapi
-      name: slack
-      mode: single
-      url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/events-api/slack_events_api_async_v1.json
-    - type: openapi
-      name: slack
-      mode: single
-      url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/web-api/slack_web_openapi_v2.json
+      name: docs
+      mode: package
+      url: https://github.com/kyma-project/kyma/archive/master.zip
+      filter: /docs/service-mesh/docs/
 status:
   lastHeartbeatTime: "2019-03-18T13:42:55Z"
   message: Assets are ready to use
@@ -59,9 +52,10 @@ This table lists all possible parameters of a given resource together with their
 | **spec.description** |    **YES**   | Provides more details on the purpose of the ClusterDocsTopic CR. |
 | **spec.sources** |    **YES**   | Defines the type of the asset and a **type** label added to the ClusterAsset CR.  |
 | **spec.sources.type** |    **YES**   | Specifies the type of the assets included in the ClusterDocsTopic CR. |
-| **spec.sources.name** |    **NO**   | Unifies assets of different types. |
+| **spec.sources.name** |    **NO**   | Defines a unique identifier of a given asset. |
 | **spec.sources.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files.  |
 | **spec.sources.url** |    **YES**   | Specifies the location of a single file or a package. |
+| **spec.sources.filter** |    **YES**   | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant. |
 | **status.lastheartbeattime** |    **Not applicable**   | Provides the last time when the DocsTopic Controller processed the ClusterDocsTopic CR. |
 | **status.message** |    **Not applicable**   | Describes a human-readable message on the CR processing progress, success, or failure. |
 | **status.phase** |    **Not applicable**   | The DocsTopic Controller adds it to the DocsTopic CR. It describes the status of processing the ClusterDocsTopic CR by the DocsTopic Controller. It can be `Ready`, `Pending`, or `Failed`. |

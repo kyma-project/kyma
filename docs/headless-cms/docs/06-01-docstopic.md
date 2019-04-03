@@ -14,28 +14,26 @@ kubectl get crd docstopics.cms.kyma-project.io -o yaml
 This is a sample DocsTopic custom resource (CR) that provides details of the Asset CRs for the **redis**, **asyncapi**, **markdown**, and **openapi** source types.
 
 ```
-piVersion: cms.kyma-project.io/v1alpha1
-kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: DocsTopic
 metadata:
-  name: service-catalog
+  name: slack
   labels:
     cms.kyma-project.io/view-context: service-catalog
-    cms.kyma-project.io/group-name: components
-    cms.kyma-project.io/order: "2"
 spec:
   displayName: Slack
-  description: Slack documentation
+  description: "Slack documentation"
   sources:
     - type: markdown
-      name: slack
+      name: markdown-slack
       mode: single
       url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/README.md
     - type: asyncapi
-      name: slack
+      name: asyncapi-slack
       mode: single
       url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/events-api/slack_events_api_async_v1.json
     - type: openapi
-      name: slack
+      name: openapi-slack
       mode: single
       url: https://raw.githubusercontent.com/slackapi/slack-api-specs/master/web-api/slack_web_openapi_v2.json
 status:
@@ -58,7 +56,7 @@ This table lists all possible parameters of a given resource together with their
 | **spec.description** |    **YES**   | Provides more details on the purpose of the DocsTopic CR. |
 | **spec.sources** |    **YES**   | Defines the type of the asset and a **type** label added to the Asset CR.  |
 | **spec.sources.type** |    **YES**   | Specifies the type of the assets included in the DocsTopic CR. |
-| **spec.sources.name** |    **NO**   | Unifies assets of different types. |
+| **spec.sources.name** |    **NO**   | Defines a unique identifier of a given asset. |
 | **spec.sources.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files.  |
 | **spec.sources.url** |    **YES**   | Specifies the location of a single file or a package. |
 | **status.lastheartbeattime** |    **Not applicable**   | Provides the last time when the DocsTopic Controller processed the DocsTopic CR. |
