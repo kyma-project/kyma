@@ -148,7 +148,7 @@ func (f *LambdaFunctionUpgradeTest) getFunctionOutput(host string, waitmax time.
 		case <-timeout:
 			return "", fmt.Errorf("could not get function output:\n %v", messages)
 		case <-f.stop:
-			return "Stopping the channel", nil
+			return "", fmt.Errorf("Can't be possible to get a response from the http request to the function")
 		}
 	}
 
@@ -258,7 +258,7 @@ func (f *LambdaFunctionUpgradeTest) getFunctionPodStatus(waitmax time.Duration) 
 				return fmt.Errorf("function in state %v: \n%+v", pod.Status.Phase, pod)
 			}
 		case <-f.stop:
-			return nil
+			return fmt.Errorf("Can't be possible to get the status of the function pod")
 		}
 	}
 }
