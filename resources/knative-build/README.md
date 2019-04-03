@@ -5,8 +5,8 @@
 This chart packs the [Knative build](https://github.com/knative/build) release files.
 
 Included releases:
- * https://github.com/knative/build/releases/download/v0.4.0/build.yaml
- * https://raw.githubusercontent.com/knative/serving/v0.4.1/third_party/config/build/clusterrole.yaml
+ * https://github.com/knative/build/releases/download/v0.5.0/build.yaml
+ * https://raw.githubusercontent.com/knative/serving/v0.5.1/third_party/config/build/clusterrole.yaml
 
 Kyma-specific changes:
  * Every CRD has the `helm.sh/hook: crd-install` annotation set. This forces Helm to install the CRDs before other resources.

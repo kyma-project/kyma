@@ -1,4 +1,4 @@
-# https://raw.githubusercontent.com/knative/serving/v0.4.1/third_party/config/build/clusterrole.yaml
+# https://raw.githubusercontent.com/knative/serving/v0.5.1/third_party/config/build/clusterrole.yaml
 
 # This ClusterRole enables the aggregated ClusterRole used by the
 # knative/serving controller to interact with Build resources.
