@@ -72,7 +72,8 @@ metadata:
     cms.kyma-project.io/viewContext: service-catalog
 spec:
   sources:
-    $SPEC_TYPE:
+    - type: $SPEC_TYPE
+      name: $SPEC_TYPE-spec
       mode: single
       url: $OLD_URL
 EOF
@@ -89,14 +90,14 @@ getAssetType() {
   OLD_URL=$2
   
   if [ "$FILE_NAME" = "apiSpec.json" ]; then
-     # xmllint throws error if unable to format invalid XML and then we know it is OpenAPI
+     # xmllint throws error if unable to format invalid XML and then variable is empty
+     # in case of successful formatting grep specific for OData edmx files checks if such basic tag is in place
      # there is no other way to differenciate between OpenAPI or OData as they are always stored as apiSpec.json file
-     VALID_XML_CONTENT=$(curl -s -N "$OLD_URL" | xmllint --noout --format 2>/dev/null -)
-     if [ -n "$VALID_XML_CONTENT" ]; then
-        #Output of formating is an error so we know it is not OData
-        echo "openapi"
-        else
+     VALID_XML_CONTENT=$(curl -s -N "$OLD_URL" | xmllint --format - | grep /edmx:Edmx)
+     if [ "$VALID_XML_CONTENT" = "</edmx:Edmx>" ]; then
         echo "odata"
+        else
+        echo "openapi"
      fi
    else
      echo "asyncapi"

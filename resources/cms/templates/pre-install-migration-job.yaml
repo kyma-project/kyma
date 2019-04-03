@@ -96,6 +96,9 @@ spec:
         image: bash:5
         imagePullPolicy: IfNotPresent
         command: ["/usr/local/bin/bash", "/config/migrate"]
+        env:
+          - name: MINIO_DOMAIN
+            value: https://minio.{{ .Values.global.ingress.domainName }}
         volumeMounts:
           - name: migration-script
             mountPath: /config
