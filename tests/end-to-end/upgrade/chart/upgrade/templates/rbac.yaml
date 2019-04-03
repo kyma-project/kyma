@@ -41,7 +41,7 @@ rules:
   resources: ["applications", "applicationmappings","eventactivations"]
   verbs: ["create", "delete", "list", "get"]
 - apiGroups: [""]
-  resources: ["pods", "pods/log", "secrets"]
+  resources: ["pods", "pods/log", "secrets", "configmaps"]
   verbs: ["create", "delete", "get", "list"]
 - apiGroups: ["gateway.kyma-project.io"]
   resources: ["apis"]
