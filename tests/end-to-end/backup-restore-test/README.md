@@ -66,7 +66,7 @@ The functions work as follows:
 
 After the pipeline executes the backup and restore processes on the cluster, the `TestResources` function validates if the restore worked as expected.
 
-The test creates a new Namespace per test called `{TestName}-{UUID}`. This Namespace should contain all resources created during the test. If required resources can be created in other namespaces as well.
+The test creates a new Namespace called `{TestName}-{UUID}`. This Namespace should contain all resources created during the test. If required, the resources can be created in other Namespaces as well.
 
 ### Run end-to-end tests locally
 
@@ -88,12 +88,12 @@ Run the tests using Helm:
 1. Prepare the data:
 
 ```bash
-helm install deploy/chart/backup-test --namespace end-to-end --name backup-test
+helm install deploy/chart/backup-test/ --name "backup-test" --namespace end-to-end --set global.ingress.domainName="$CLUSTER_DOMAIN" --set-file global.adminEmail=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode) --set-file global.adminPassword=<(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
 ```
 2. Run tests:
 
 ```bash
-helm test backup-test
+helm test backup-test --timeout=0
 ```
 
 ### Run tests using Telepresence
