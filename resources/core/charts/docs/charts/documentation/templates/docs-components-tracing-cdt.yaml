@@ -10,7 +10,8 @@ spec:
   displayName: "Tracing"
   description: "Overall documentation for Tracing"
   sources:
-    markdown:
+    - type: markdown
+      name: docs
       mode: package
       url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterDocsTopicsVersion }}.zip
       filter: /docs/tracing/docs/
