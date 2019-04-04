@@ -60,3 +60,5 @@ spec:
       namespace: "kyma-system"
     - name: "monitoring"
       namespace: "kyma-system"
+    - name: "kubeless"
+      namespace: "kyma-system"

@@ -48,6 +48,8 @@ spec:
       namespace: "kyma-system"
     - name: "application-connector-ingress"
       namespace: "kyma-system"
+    - name: "kubeless"
+      namespace: "kyma-system"
     - name: "application-connector-helper"
       namespace: "kyma-integration"
     - name: "application-connector"

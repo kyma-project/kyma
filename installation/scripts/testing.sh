@@ -63,6 +63,13 @@ fi
 #loggingTestErr=$?
 #fi
 
+# execute kubeless tests if 'monitoring' is installed
+if helm ${KUBE_CONTEXT_ARG} list --tls | grep -q "kubeless"; then
+    echo "- Testing Kubeless"
+    helm ${KUBE_CONTEXT_ARG} test kubeless --timeout 600 --tls
+    kubelessTestErr=$?
+fi
+
 # run event-bus tests if Knative is installed
 if kubectl -n knative-eventing get deployments.apps | grep -q "webhook"; then
     echo "- Testing Event-Bus..."
@@ -91,13 +98,14 @@ echo "- Testing Application Connector"
 helm ${KUBE_CONTEXT_ARG} test application-connector --timeout 600 --tls
 acTestErr=$?
 
+
 checkAndCleanupTest kyma-integration
 testCheckGateway=$?
 
 printImagesWithLatestTag
 latestTagsErr=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ] || [ ${assetstoreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ] || [ ${loggingTestErr} -ne 0 ] || [ ${monitoringTestErr} -ne 0 ] || [ ${knativeServingTestErr} -ne 0 ] || [ ${eventBusTestErr} -ne 0 ]
+if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ] || [ ${assetstoreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ] || [ ${loggingTestErr} -ne 0 ] || [ ${monitoringTestErr} -ne 0 ] || [ ${knativeServingTestErr} -ne 0 ] || [ ${eventBusTestErr} -ne 0 ] || [ ${kubelessTestErr} -ne 0 ]
 then
     exit 1
 else
