@@ -22,7 +22,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 )
 
 // Config holds application configuration
