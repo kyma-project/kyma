@@ -120,7 +120,7 @@ func handlePublishRequest(w http.ResponseWriter, r *http.Request, publisher *con
 		setSourceIdFromHeader(publishRequest, &r.Header)
 	}
 
-	errResponse := api.ValidatePublish(publishRequest)
+	errResponse := api.ValidatePublish(publishRequest, api.GetDefaultEventOptions())
 	if errResponse != nil {
 		log.Printf("PublishHandler :: handlePublishRequest :: Request validation failed. :: Error: %v", *errResponse)
 		publish.SendJSONError(w, errResponse)

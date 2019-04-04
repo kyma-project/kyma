@@ -12,18 +12,19 @@ import (
 )
 
 const (
-	DefaultTraceAPIURL        = ""
+	DefaultTraceDebug         = false
+	DefaultTraceAPIURL        = "http://localhost:9411/api/v1/spans"
 	DefaultTraceHostPort      = "0.0.0.0:0"
 	DefaultTraceServiceName   = "trace-service"
 	DefaultTraceOperationName = "trace-operation"
 )
 
 type Options struct {
+	Debug         bool
 	APIURL        string
 	HostPort      string
 	ServiceName   string
 	OperationName string
-	Debug         bool
 }
 
 type Tracer interface {
@@ -35,6 +36,17 @@ type Tracer interface {
 type OpenTracer struct {
 	opts      Options
 	collector zipkin.Collector
+}
+
+func GetDefaultTraceOptions() *Options {
+	options := Options{
+		DefaultTraceDebug,
+		DefaultTraceAPIURL,
+		DefaultTraceHostPort,
+		DefaultTraceServiceName,
+		DefaultTraceOperationName,
+	}
+	return &options
 }
 
 func StartNewTracer(opts *Options) Tracer {

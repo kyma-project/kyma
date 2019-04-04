@@ -3,11 +3,12 @@ package application
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/publisher"
 
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
 	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/test/fake"
@@ -26,7 +27,7 @@ var (
 
 func TestMain(m *testing.M) {
 	// init and start the knative publish application
-	options := opts.DefaultOptions()
+	options := opts.GetDefaultOptions()
 	knativeLib = &knative.KnativeLib{}
 	mockPublisher := fake.NewMockKnativePublisher()
 	tracer := trace.StartNewTracer(options.TraceOptions)
@@ -111,7 +112,7 @@ func Test_PublishWithChannelNameGreaterThanMaxChannelLength_ShouldFail(t *testin
 	assert.Equal(t, knative.FieldKnativeChannelName, err.Details[0].Field)
 
 	// restore the max channel name original length
-	application.options.MaxChannelNameLength = opts.DefaultMaxChannelNameLength
+	application.options.MaxChannelNameLength = opts.GetDefaultOptions().MaxChannelNameLength
 }
 
 func Test_PublishWithBadPayload_ShouldFail(t *testing.T) {
@@ -224,7 +225,7 @@ func Test_PublishWithInvalidSourceIdInHeader_ShouldFail(t *testing.T) {
 
 func Test_PublishWithTooLargePayload_ShouldFail(t *testing.T) {
 	// prepare and send payload
-	payload := string(make([]byte, opts.DefaultOptions().MaxRequestSize+1))
+	payload := string(make([]byte, opts.GetDefaultOptions().MaxRequestSize+1))
 	body, statusCode := test.PerformPublishRequest(t, server.URL, payload)
 
 	// assert
