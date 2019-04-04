@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	k8sclientset "k8s.io/client-go/kubernetes"
@@ -17,6 +18,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
+	monitoring "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 )
 
@@ -71,13 +73,21 @@ func main() {
 
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
-	//
+
 	// Using map is on purpose - we ensure that test name will not be duplicated.
 	// Test name is sanitized and used for creating dedicated namespace for given test,
 	// so it cannot overlap with others.
+
+	grafanaUpgradeTest := monitoring.NewGrafanaUpgradeTest(k8sCli)
+
+	metricUpgradeTest, err := monitoring.NewMetricsUpgradeTest(k8sCli)
+	fatalOnError(err, "while creating Metrics Upgrade Test")
+
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		"GrafanaUpgradeTest":           grafanaUpgradeTest,
+		"MetricsUpgradeTest":           metricUpgradeTest,
 	}
 
 	// Execute requested action

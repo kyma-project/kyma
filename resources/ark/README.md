@@ -14,24 +14,6 @@ All Kubernetes resources in the user Namespaces are backed up by default. Howeve
 
 If Ark's functionality is not sufficient, you can extend it using [plugins](https://heptio.github.io/velero/v0.10.0/plugins) and [hooks](https://heptio.github.io/velero/v0.10.0/hooks). Ark plugins are stored in [`tools`](tools/ark-plugins) directory, and extend Ark without being a part of the binary. Hooks are commands executed inside containers and Pods during the backup process. You can define them in your backup configuration.
 
-## E2E tests
+## End-to-end tests
 
-The [E2E test for backup](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test) runs daily on Prow and validates if the restore process works for all components.
-
-To add components to the backup pipeline, implement the following go interface:
-
-```go
-type BackupTest interface {
-    CreateResources(namespace string)
-    TestResources(namespace string)
-    DeleteResources()
-}
-```
-The functions work as follows:
-
-- The `TestResources` function validates if the test data works as expected. 
-- The `CreateResources` function installs the required test data before the backup process starts.
-- The `DeleteResources` function deletes the resources that are a part of the cluster before executing the test. The resources need to be deleted to test the restore process.
-- After the pipeline executes the backup and restore processes on the cluster, the `TestResources` function validates if the restore worked as expected.
-
-Add the test in the [E2E tests](https://github.com/kyma-project/kyma/tree/master/tests/end-to-end/backup-restore-test).
+For details on end-to-end tests for backup and restore, see [this](../../tests/end-to-end/backup-restore-test/README.md) document.

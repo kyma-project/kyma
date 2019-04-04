@@ -1456,8 +1456,8 @@
       {
         "allValue": null,
         "current": {
-          "text": "core-lambdas-ui",
-          "value": "core-lambdas-ui"
+          "text": "core-console",
+          "value": "core-console"
         },
         "datasource": "Prometheus",
         "hide": 0,

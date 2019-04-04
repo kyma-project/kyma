@@ -87,4 +87,3 @@ The rule definition includes the following parameters:
 ### Configure Alertmanager
 
 You can configure the Alertmanager using the [alertmanager](../alertmanager/README.md) chart.
-

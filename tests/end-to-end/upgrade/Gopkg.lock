@@ -86,6 +86,19 @@
   version = "v1.0.0"
 
 [[projects]]
+  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "UT"
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
+
+[[projects]]
   branch = "master"
   digest = "1:3ee90c0d94da31b442dde97c99635aaafec68d0b8a3c12ee2075c6bdabeec6bb"
   name = "github.com/google/gofuzz"
@@ -221,6 +234,25 @@
   pruneopts = "UT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
+
+[[projects]]
+  digest = "1:2d32e501db06ad1b0df11dbad16e9af769aeadf47e1724b2221aa5ecc317ed26"
+  name = "github.com/prometheus/client_golang"
+  packages = [
+    "api",
+    "api/prometheus/v1",
+  ]
+  pruneopts = "UT"
+  revision = "505eaef017263e299324067d40ca2c48f6a2cf50"
+  version = "v0.9.2"
+
+[[projects]]
+  digest = "1:eae0ba7dae229f7daf584f2cd4c774fecefdbe0440c79e3de9cd67048055d51f"
+  name = "github.com/prometheus/common"
+  packages = ["model"]
+  pruneopts = "UT"
+  revision = "cfeb6f9992ffa54aaa4f2170ade4067ee478b250"
+  version = "v0.2.0"
 
 [[projects]]
   digest = "1:e4c72127d910a96daf869a44f3dd563b86dbe6931a172863a0e99c5ff04b59e4"
@@ -550,6 +582,7 @@
     "github.com/go-redis/redis",
     "github.com/gofrs/uuid",
     "github.com/golang/lint/golint",
+    "github.com/google/go-cmp/cmp",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
@@ -561,6 +594,9 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/pkg/errors",
+    "github.com/prometheus/client_golang/api",
+    "github.com/prometheus/client_golang/api/prometheus/v1",
+    "github.com/prometheus/common/model",
     "github.com/sirupsen/logrus",
     "github.com/vrischmann/envconfig",
     "golang.org/x/tools/cmd/goimports",
