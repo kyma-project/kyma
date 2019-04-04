@@ -40,6 +40,10 @@ var (
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: testNS,
 			Name:      channelName,
+			Labels: map[string]string{
+				"l1": "v1",
+				"l2": "v2",
+			},
 		},
 		Spec: evapisv1alpha1.ChannelSpec{
 			Provisioner: &corev1.ObjectReference{
@@ -55,7 +59,17 @@ var (
 			},
 		},
 	}
+	labels = map[string]string {
+		"l1": "v1",
+		"l2": "v2",
+	}
+	labels2 = map[string]string {
+		"l1": "v13",
+		"l2": "v23",
+	}
 )
+
+
 
 func Test_CreateChannel(t *testing.T) {
 	log.Print("Test_CreateChannel")
@@ -68,13 +82,38 @@ func Test_CreateChannel(t *testing.T) {
 	k := &KnativeLib{
 		evClient: client.EventingV1alpha1(),
 	}
-	ch, err := k.CreateChannel(provisioner, channelName, testNS, 10*time.Second)
+	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 10*time.Second)
 	assert.Nil(t, err)
 	log.Printf("Channel created: %v", ch)
 
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
 	if diff := cmp.Diff(testChannel, ch, ignore); diff != "" {
 		t.Errorf("%s (-want, +got) = %v", "Test_CreateChannel", diff)
+	}
+}
+
+func Test_CreateChannelWithError(t *testing.T) {
+	log.Print("Test_CreateChannel")
+	client := evclientsetfake.NewSimpleClientset()
+	client.Fake.ReactionChain = nil
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+		tc := testChannel.DeepCopy()
+		tc.Labels = labels2
+		return true, tc, nil
+	})
+
+	k := &KnativeLib{
+		evClient: client.EventingV1alpha1(),
+	}
+	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 10*time.Second)
+	assert.Nil(t, err)
+	log.Printf("Channel created: %v", ch)
+
+	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
+	if diff := cmp.Diff(testChannel, ch, ignore); diff != "" {
+		t.Logf("%s (-want, +got) = %v;\n want should be: %v;\n got should be: %v", "Test_CreateChannel", diff, labels, labels2)
+	} else {
+		t.Error("Test_CreateChannelWithError should return different labels")
 	}
 }
 
@@ -92,7 +131,7 @@ func Test_CreateChannelTimeout(t *testing.T) {
 	k := &KnativeLib{
 		evClient: client.EventingV1alpha1(),
 	}
-	_, err := k.CreateChannel(provisioner, channelName, testNS, 1*time.Second)
+	_, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 1*time.Second)
 	assert.NotNil(t, err)
 	log.Printf("Test_CreateChannelTimeout: %v", err)
 }
@@ -119,7 +158,7 @@ func Test_SendMessage(t *testing.T) {
 	})
 	k := &KnativeLib{}
 	k.InjectClient(client.EventingV1alpha1())
-	ch, err := k.CreateChannel(provisioner, channelName, testNS, 10*time.Second)
+	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 10*time.Second)
 	assert.Nil(t, err)
 	u, err := url.Parse(srv.URL)
 	assert.Nil(t, err)
@@ -159,7 +198,7 @@ func Test_CreateDeleteChannel(t *testing.T) {
 	})
 	k := &KnativeLib{}
 	k.InjectClient(client.EventingV1alpha1())
-	ch, err := k.CreateChannel(provisioner, channelName, testNS, 1*time.Second)
+	ch, err := k.CreateChannel(provisioner, channelName, testNS, &labels, 1*time.Second)
 	assert.Nil(t, err)
 	err = k.DeleteChannel(ch.Name, ch.Namespace)
 	assert.Nil(t, err)

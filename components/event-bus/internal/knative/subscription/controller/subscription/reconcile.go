@@ -155,9 +155,9 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 
 			//Adding the event-metadata as channel labels
 			knativeChannelLabels := make(map[string]string)
-			knativeChannelLabels["source_id"] = subscription.SourceID
-			knativeChannelLabels["event_id"] = subscription.EventType
-			knativeChannelLabels["event_type_version"] = subscription.EventTypeVersion
+			knativeChannelLabels["kyma-source-id"] = subscription.SourceID
+			knativeChannelLabels["kyma-event-type"] = subscription.EventType
+			knativeChannelLabels["kyma-event-type-version"] = subscription.EventTypeVersion
 
 			knativeChannel, err := r.knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName,
 				knativeSubsNamespace, &knativeChannelLabels, timeout)
