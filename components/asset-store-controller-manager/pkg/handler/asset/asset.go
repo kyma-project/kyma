@@ -256,7 +256,7 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 		h.recordNormalEventf(object, pretty.Validated)
 	}
 
-	files := h.buildFiles(filenames)
+	files := h.populateFiles(filenames)
 	if len(spec.Source.MetadataWebhookService) > 0 {
 		h.logInfof("Extracting metadata from Assets content")
 		result, err := h.metadataExtractor.Extract(ctx, object, basePath, filenames, spec.Source.MetadataWebhookService)
@@ -282,7 +282,7 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 	return h.getReadyStatus(object, h.getBaseUrl(bucketStatus.URL, object.GetName()), files, pretty.Uploaded), nil
 }
 
-func (h *assetHandler) buildFiles(filenames []string) []v1alpha2.AssetFile {
+func (h *assetHandler) populateFiles(filenames []string) []v1alpha2.AssetFile {
 	result := make([]v1alpha2.AssetFile, 0, len(filenames))
 
 	for _, filename := range filenames {
