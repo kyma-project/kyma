@@ -19,8 +19,8 @@ global:
     dir: develop/
     version: ee38fb8f
   application_operator_tests:
-    dir: pr/
-    version: PR-3507
+    dir: develop/
+    version: 2b4eed1c
   connector_service:
     dir: develop/
     version: f478b085
@@ -46,8 +46,8 @@ global:
     dir: develop/
     version: 78b98274
   application_gateway_tests:
-    dir: pr/
-    version: PR-3507
+    dir: develop/
+    version: 2b4eed1c
   application_registry:
     dir: develop/
     version: 4c614be5
