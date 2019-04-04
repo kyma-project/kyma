@@ -27,6 +27,6 @@ By default, there are 5 roles used to manage permissions in every Kyma cluster. 
   - **kyma-developer**
   - **kyma-admin**
 
-For more details about roles, read [this](/root/kyma#details-roles-in-kyma) document.
+For more details about roles, read [this](#details-roles-in-kyma) document.
 
->**NOTE:** The **Global permissions** section in the **Settings** section of the Kyma Console UI allows you to manage bindings between user groups and roles.
+>**NOTE:** The **Global permissions** view in the **Settings** section of the Kyma Console UI allows you to manage bindings between user groups and roles.
