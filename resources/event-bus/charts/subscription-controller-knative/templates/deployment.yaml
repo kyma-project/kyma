@@ -6,6 +6,10 @@ metadata:
 {{ include "subscription-controller-knative.labels.standard" . | indent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ template "subscription-controller-knative.fullname" . }}
+      release: {{ .Release.Name }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -32,15 +36,19 @@ spec:
             - name: http
               containerPort: {{ .Values.port }}
           livenessProbe:
-            httpGet:
-              path: /v1/status/live
-              port: http
+            exec:
+              command:
+              - curl
+              - -f
+              - http://localhost:{{ .Values.port }}/v1/status/live
             initialDelaySeconds: 60
             periodSeconds: 5
           readinessProbe:
-            httpGet:
-              path: /v1/status/ready
-              port: http
+            exec:
+              command:
+              - curl
+              - -f
+              - http://localhost:{{ .Values.port }}/v1/status/ready
             initialDelaySeconds: 60
             periodSeconds: 5
           resources:
