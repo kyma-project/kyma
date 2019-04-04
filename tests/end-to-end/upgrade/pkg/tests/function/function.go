@@ -22,6 +22,8 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
+	"crypto/tls"
+	"net/http/cookiejar"
 )
 
 // LambdaFunctionUpgradeTest tests the creation of a kubeless function and execute a http request to the exposed api of the function after Kyma upgrade phase
@@ -33,6 +35,7 @@ type LambdaFunctionUpgradeTest struct {
 	nSpace             string
 	hostName           string
 	stop               <-chan struct{}
+	httpClient         *http.Client
 }
 
 // NewLambdaFunctionUpgradeTest returns new instance of the FunctionUpgradeTest
@@ -43,6 +46,10 @@ func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kuberne
 	}
 	nSpace := strings.ToLower("LambdaFunctionUpgradeTest")
 	hostName := fmt.Sprintf("%s-%s.%s", "hello", nSpace, domainName)
+	httpCli, err := getHTTPClient(true)
+	if err != nil {
+		logrus.Fatal(errors.Wrap(err, "failed on getting the http client."))
+	}
 	return &LambdaFunctionUpgradeTest{
 		kubelessClient: kubelessCli,
 		coreClient:     k8sCli,
@@ -51,6 +58,7 @@ func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kuberne
 		nSpace:         nSpace,
 		hostName:       hostName,
 		apiClient:      kymaAPI,
+		httpClient:     httpCli,
 	}
 }
 
@@ -73,7 +81,7 @@ func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log lo
 	// Ensure resources works
 	err = f.TestResources(stop, log, namespace)
 	if err != nil {
-		return errors.Wrap(err, "First call to TestResources() failed.")
+		return errors.Wrap(err, "first call to TestResources() failed.")
 	}
 	return nil
 }
@@ -84,14 +92,14 @@ func (f *LambdaFunctionUpgradeTest) TestResources(stop <-chan struct{}, log logr
 	f.stop = stop
 	err := f.getFunctionPodStatus(10 * time.Minute)
 	if err != nil {
-		return errors.Wrap(err, "First call to TestResources() failed.")
+		return errors.Wrap(err, "first call to TestResources() failed.")
 	}
 
 	host := fmt.Sprintf("https://%s", f.hostName)
 
 	value, err := f.getFunctionOutput(host, 1*time.Minute, log)
 	if err != nil {
-		return errors.Wrapf(err, "Failed request to host %s.", host)
+		return errors.Wrapf(err, "failed request to host %s.", host)
 	}
 
 	if !strings.Contains(value, f.uuid) {
@@ -112,7 +120,8 @@ func (f *LambdaFunctionUpgradeTest) getFunctionOutput(host string, waitmax time.
 	for {
 		select {
 		case <-tick:
-			resp, err := http.Post(host, "text/plain", bytes.NewBufferString(f.uuid))
+
+			resp, err := f.httpClient.Post(host, "text/plain", bytes.NewBufferString(f.uuid))
 			if err != nil {
 				messages += fmt.Sprintf("%+v\n", err)
 				break
@@ -129,7 +138,7 @@ func (f *LambdaFunctionUpgradeTest) getFunctionOutput(host string, waitmax time.
 		case <-timeout:
 			return "", fmt.Errorf("could not get function output:\n %v", messages)
 		case <-f.stop:
-			return "", fmt.Errorf("Can't be possible to get a response from the http request to the function")
+			return "", fmt.Errorf("can't be possible to get a response from the http request to the function")
 		}
 	}
 
@@ -243,7 +252,7 @@ func (f *LambdaFunctionUpgradeTest) getFunctionPodStatus(waitmax time.Duration) 
 				return fmt.Errorf("function in state %v: \n%+v", pod.Status.Phase, pod)
 			}
 		case <-f.stop:
-			return fmt.Errorf("Can't be possible to get the status of the function pod")
+			return fmt.Errorf("can't be possible to get the status of the function pod")
 		}
 	}
 }
@@ -269,6 +278,19 @@ func (f *LambdaFunctionUpgradeTest) createAPI() error {
 
 	_, err := f.apiClient.GatewayV1alpha2().Apis(f.nSpace).Create(api)
 	return err
+}
+
+func getHTTPClient(skipVerify bool) (*http.Client, error) {
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
+	}
+
+	cookieJar, err := cookiejar.New(nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return &http.Client{Timeout: 15 * time.Second, Transport: tr, Jar: cookieJar}, nil
 }
 
 func int32Ptr(i int32) *int32 { return &i }
