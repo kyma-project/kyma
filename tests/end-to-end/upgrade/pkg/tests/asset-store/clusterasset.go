@@ -45,7 +45,7 @@ func (a *clusterAsset) create() error {
 					Name: clusterBucketName,
 				},
 				Source: v1alpha2.AssetSource{
-					Url:  assetData.url,
+					URL:  assetData.url,
 					Mode: assetData.mode,
 				},
 			},
