@@ -38,8 +38,10 @@ func int32Ptr(i int32) *int32 { return &i }
 
 // NewLambdaFunctionUpgradeTest returns new instance of the FunctionUpgradeTest
 func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kubernetes.Interface, kymaAPI kyma.Interface) *LambdaFunctionUpgradeTest {
-
-	domainName := os.Getenv("DOMAIN_NAME")
+	domainName := os.Getenv("DOMAIN")
+	if len(domainName) == 0 {
+		logrus.Fatal()
+	}
 	nSpace := strings.ToLower("LambdaFunctionUpgradeTest")
 	hostName := fmt.Sprintf("%s-%s.%s", "hello", nSpace, domainName)
 	return &LambdaFunctionUpgradeTest{
