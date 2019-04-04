@@ -9,6 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"crypto/tls"
+	"net/http/cookiejar"
+
 	"github.com/google/uuid"
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
@@ -22,8 +25,6 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	instr "k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/kubernetes"
-	"crypto/tls"
-	"net/http/cookiejar"
 )
 
 // LambdaFunctionUpgradeTest tests the creation of a kubeless function and execute a http request to the exposed api of the function after Kyma upgrade phase
