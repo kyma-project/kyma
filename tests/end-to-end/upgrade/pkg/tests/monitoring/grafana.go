@@ -63,8 +63,7 @@ func NewGrafanaUpgradeTest(k8sCli kubernetes.Interface) *GrafanaUpgradeTest {
 func (ut *GrafanaUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	ut.namespace = namespace
 	ut.log = log
-	err := ut.getGrafana()
-	if err != nil {
+	if err := ut.getGrafana(); err != nil {
 		return err
 	}
 
