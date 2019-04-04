@@ -68,13 +68,17 @@ func readConfig(configFilePath string) (LookUpConfig, error) {
 
 	var config LookUpConfig
 
-	json.Unmarshal(bytesValue, &config)
+	unmarshalErr := json.Unmarshal(bytesValue, &config)
+
+	if unmarshalErr != nil {
+		return LookUpConfig{}, unmarshalErr
+	}
 
 	return config, nil
 }
 
 func createRequest(context clientcontext.ApplicationContext, config LookUpConfig) (*http.Request, error) {
-	query := `{"query":"{ applications(where: { accountId: \"%s\", groupName: \"%s\", appName: \"%s\"}) {name account { id } groups { id name clusters { id name endpoints { gateway } } } } } "}`
+	query := `{"query":"{ applications(where: { accountId: "%s", groupName: "%s", appName: "%s"}) {name account { id } groups { id name clusters { id name endpoints { gateway } } } } } "}`
 
 	body := fmt.Sprintf(query, context.Tenant, context.Group, context.Application)
 
