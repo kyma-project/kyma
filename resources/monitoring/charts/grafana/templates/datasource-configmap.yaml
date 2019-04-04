@@ -35,3 +35,9 @@ data:
 
       # <bool> allow users to edit datasources from the UI.
       editable: true
+
+    - name: Loki
+      type: loki
+      access: direct
+      url: http://logging:3100
+      editable: true

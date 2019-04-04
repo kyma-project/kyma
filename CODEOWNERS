@@ -105,6 +105,9 @@
 # The `logging` subchart
 /resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
+# The `log-ui` subchart
+/resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
+
 # The `event-bus` chart
 /resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 

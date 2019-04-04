@@ -40,7 +40,7 @@ spec:
         {{- end }}
         env:
         - name: ENABLE_BA
-          value: "{{ .Values.global.kymaEventBus }}"
+          value: "false"
         - name: STAN_USERNAME
           valueFrom:
             secretKeyRef:
@@ -105,16 +105,11 @@ spec:
         - --stan_config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/stan.conf
         {{- end }}
         - --max_inactivity={{ .Values.global.natsStreaming.channel.maxInactivity }}
-        {{ if .Values.global.kymaEventBus }}
-        - --user=$(STAN_USERNAME)
-        - --pass=$(STAN_PASSWD)
-        {{ end }}
         env:
         - name: POD_NAME
           valueFrom:
             fieldRef:
               fieldPath: metadata.name
-        {{ if .Values.global.kymaEventBus }}
         - name: STAN_USERNAME
           valueFrom:
             secretKeyRef:
@@ -125,7 +120,6 @@ spec:
             secretKeyRef:
               name: nats-user-stan
               key: password
-        {{ end }}
         ports:
         {{- range $key, $value := .Values.global.natsStreaming.ports }}
         - name: {{ $key }}

@@ -70,6 +70,7 @@ rules:
   verbs:
   - get
   - list
+  - delete
 - apiGroups:
   - '*'
   resources:
