@@ -20,7 +20,7 @@ spec:
             sourceId:
               type: string
               minLength: 1
-              maxLength: 28
+              maxLength: 253
               pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
             displayName:
               type: string
