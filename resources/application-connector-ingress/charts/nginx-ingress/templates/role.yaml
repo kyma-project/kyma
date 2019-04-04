@@ -79,5 +79,12 @@ rules:
       - events
     verbs:
       - create
-      - patch
+{{- if .Values.podSecurityPolicy.enabled }}
+  - apiGroups:      ['extensions']
+    resources:      ['podsecuritypolicies']
+    verbs:          ['use']
+    resourceNames:  [{{ template "nginx-ingress.fullname" . }}]
+{{- end }}- patch
+
+
 {{- end -}}
