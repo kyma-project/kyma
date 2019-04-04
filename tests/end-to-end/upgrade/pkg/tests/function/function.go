@@ -39,18 +39,13 @@ func int32Ptr(i int32) *int32 { return &i }
 // NewLambdaFunctionUpgradeTest returns new instance of the FunctionUpgradeTest
 func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kubernetes.Interface, kymaAPI kyma.Interface) *LambdaFunctionUpgradeTest {
 
-	domainName := os.Getenv("DOMAIN")
-	if len(domainName) == 0 {
-		domainName = "kyma.local"
-	}
-
+	domainName := os.Getenv("DOMAIN_NAME")
 	nSpace := strings.ToLower("LambdaFunctionUpgradeTest")
-	functionName := "hello"
-	hostName := fmt.Sprintf("%s-%s.%s", functionName, nSpace, domainName)
+	hostName := fmt.Sprintf("%s-%s.%s", "hello", nSpace, domainName)
 	return &LambdaFunctionUpgradeTest{
 		kubelessClient: kubelessCli,
 		coreClient:     k8sCli,
-		functionName:   functionName,
+		functionName:   "hello",
 		uuid:           uuid.New().String(),
 		nSpace:         nSpace,
 		hostName:       hostName,
@@ -187,9 +182,13 @@ func (f *LambdaFunctionUpgradeTest) createFunction() error {
 			Annotations: annotations,
 		},
 		Spec: kubelessV1.FunctionSpec{
-			Handler:             "handler.main",
-			Runtime:             "nodejs8",
-			Function:            `module.exports = { main: function(event, context) { return(event.data) } }`,
+			Handler: "handler.hello",
+			Runtime: "nodejs8",
+			Function: `module.exports = {
+				hello: function(event, context) {
+				  return(event.data)
+				}
+			  }`,
 			FunctionContentType: "text",
 			ServiceSpec: corev1.ServiceSpec{
 				Ports: []corev1.ServicePort{

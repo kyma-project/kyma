@@ -21,4 +21,6 @@ spec:
       value: "1"
     - name: APP_LOGGER_LEVEL
       value: "info"
+    - name: DOMAIN_NAME
+      value: {{ .Values.global.ingress.domainName }}
   restartPolicy: Never
