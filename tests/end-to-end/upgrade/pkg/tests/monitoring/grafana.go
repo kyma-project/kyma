@@ -51,6 +51,10 @@ const (
 	grafanaContainerName       = "grafana"
 )
 
+var (
+	dashboardsToCheck = []string{"Lambda Dashboard"}
+)
+
 // NewGrafanaUpgradeTest returns new instance of the GrafanaUpgradeTest
 func NewGrafanaUpgradeTest(k8sCli kubernetes.Interface) *GrafanaUpgradeTest {
 	return &GrafanaUpgradeTest{
@@ -232,16 +236,49 @@ func (ut *GrafanaUpgradeTest) retrievePreviousDashboards() (map[string]dashboard
 	return dashboards, nil
 }
 
+func filter(input map[string]dashboard, f func(string) bool) map[string]dashboard {
+	dashboards := make(map[string]dashboard)
+	for title, dashboard := range input {
+		if f(title) {
+			dashboards[title] = dashboard
+		}
+	}
+	return dashboards
+}
+
 func (ut *GrafanaUpgradeTest) compareDashboards() error {
 	previous, err := ut.retrievePreviousDashboards()
 	if err != nil {
 		return err
 	}
-	current, err := ut.collectDashboards()
 
-	ut.log.Debugln(current)
-	if !cmp.Equal(previous, current) {
-		return fmt.Errorf("retrieved data not equal: before: %+v, after: %+v", previous, current)
+	previousFiltered := filter(previous, func(title string) bool {
+		for _, t := range dashboardsToCheck {
+			if t == title {
+				return true
+			}
+		}
+		return false
+	})
+	ut.log.Println(previousFiltered)
+
+	current, err := ut.collectDashboards()
+	if err != nil {
+		ut.log.Println("hallo")
+		return err
+	}
+	currentFiltered := filter(current, func(title string) bool {
+		for _, t := range dashboardsToCheck {
+			if t == title {
+				return true
+			}
+		}
+		return false
+	})
+	ut.log.Println(currentFiltered)
+
+	if !cmp.Equal(previousFiltered, currentFiltered) {
+		return fmt.Errorf("retrieved data not equal: before: \n%+v \nafter: \n%+v", previousFiltered, currentFiltered)
 	}
 	return nil
 }
