@@ -5,7 +5,6 @@ import (
 	"fmt"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
@@ -19,7 +18,11 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
+	assetstore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
+	cms "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
+	monitoring "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+	"k8s.io/client-go/dynamic"
 )
 
 // Config holds application configuration
@@ -70,6 +73,9 @@ func main() {
 
 	appBrokerCli, err := ab.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Application Broker clientset")
+
+	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating K8s dynamic clientset")
 
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
