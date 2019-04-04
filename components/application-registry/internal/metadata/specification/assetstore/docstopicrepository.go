@@ -9,6 +9,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
@@ -116,7 +117,10 @@ func (r repository) update(docsTopic v1alpha1.ClusterDocsTopic) apperrors.AppErr
 	}
 
 	{
-		_, err := r.resourceInterface.Update(u, metav1.UpdateOptions{})
+		err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+			_, e := r.resourceInterface.Update(u, metav1.UpdateOptions{})
+			return e
+		})
 
 		if err != nil {
 			return apperrors.Internal("Failed to update Documentation Topic, %s.", err)
