@@ -68,4 +68,4 @@ spec:
         image: bitnami/kubectl
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh","-c"]
-        args: ["kubectl delete crd clusterassets.assetstore.kyma-project.io; kubectl delete crd assets.assetstore.kyma-project.io; kubectl delete crd bucket.assetstore.kyma-project.io; kubectl delete crd clusterbucket.assetstore.kyma-project.io"]
+        args: ["kubectl delete crd clusterassets.assetstore.kyma-project.io assets.assetstore.kyma-project.io buckets.assetstore.kyma-project.io clusterbuckets.assetstore.kyma-project.io"]
