@@ -42,10 +42,10 @@ metadata:
   labels:
     helm-chart-test: "true"
   annotations:
-    sidecar.istio.io/inject: "false"
+    sidecar.istio.io/inject: "true"
     helm.sh/hook: test-success
 spec:
-  serviceAccount: test-{{ template "fullname" . }}
+  serviceAccountName: test-{{ template "fullname" . }}
   restartPolicy: Never
   containers:
   - name: test-{{ template "fullname" . }}
