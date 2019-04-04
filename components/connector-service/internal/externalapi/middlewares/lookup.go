@@ -13,7 +13,10 @@ import (
 	"time"
 )
 
-const timeout = 30 * time.Second
+const (
+	timeout  = 30 * time.Second
+	filename = "config.json"
+)
 
 type LookupService interface {
 	Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error)
@@ -33,7 +36,7 @@ type LookUpConfig struct {
 type Headers map[string]string
 
 func (ls *GraphQLLookupService) Fetch(context clientcontext.ApplicationContext, configFilePath string) (string, error) {
-	lookUpConfig, e := readConfig(configFilePath)
+	lookUpConfig, e := readConfig(configFilePath + filename)
 
 	if e != nil {
 		return "", apperrors.Internal("Error while reading config file: %s", e)
@@ -94,7 +97,7 @@ func sendRequest(request *http.Request) (string, error) {
 
 	response, err := client.Do(request)
 	if err != nil {
-		return "", nil
+		return "", apperrors.Internal("Error sending request: %s", err)
 	}
 	defer response.Body.Close()
 
