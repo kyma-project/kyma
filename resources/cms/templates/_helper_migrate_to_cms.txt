@@ -69,7 +69,7 @@ kind: ClusterDocsTopic
 metadata:
   name: $SC_ID
   labels:
-    cms.kyma-project.io/viewContext: service-catalog
+    cms.kyma-project.io/view-context: service-catalog
 spec:
   sources:
     - type: $SPEC_TYPE
