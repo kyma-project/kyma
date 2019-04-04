@@ -25,4 +25,4 @@ spec:
     - name: APP_LOGGER_LEVEL
       value: "info"
     - name: DOMAIN
-      value: {{ .Values.global.domainName }}
+      value: "{{ .Values.global.domainName }}"
