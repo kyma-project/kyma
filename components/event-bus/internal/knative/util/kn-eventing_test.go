@@ -59,23 +59,22 @@ var (
 			},
 		},
 	}
-	labels = map[string]string {
+	labels = map[string]string{
 		"l1": "v1",
 		"l2": "v2",
 	}
-	labels2 = map[string]string {
+	labels2 = map[string]string{
 		"l1": "v13",
 		"l2": "v23",
 	}
 )
 
-
-
 func Test_CreateChannel(t *testing.T) {
 	log.Print("Test_CreateChannel")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
+		ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
 
@@ -96,7 +95,8 @@ func Test_CreateChannelWithError(t *testing.T) {
 	log.Print("Test_CreateChannel")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
+		ret runtime.Object, err error) {
 		tc := testChannel.DeepCopy()
 		tc.Labels = labels2
 		return true, tc, nil
@@ -111,7 +111,8 @@ func Test_CreateChannelWithError(t *testing.T) {
 
 	ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
 	if diff := cmp.Diff(testChannel, ch, ignore); diff != "" {
-		t.Logf("%s (-want, +got) = %v;\n want should be: %v;\n got should be: %v", "Test_CreateChannel", diff, labels, labels2)
+		t.Logf("%s (-want, +got) = %v;\n want should be: %v;\n got should be: %v", "Test_CreateChannel",
+			diff, labels, labels2)
 	} else {
 		t.Error("Test_CreateChannelWithError should return different labels")
 	}
@@ -121,8 +122,10 @@ func Test_CreateChannelTimeout(t *testing.T) {
 	log.Print("Test_CreateChannelTimeout")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
-		notReadyCondition := duckv1alpha1.Condition{Type: evapisv1alpha1.ChannelConditionReady, Status: corev1.ConditionFalse}
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
+		ret runtime.Object, err error) {
+		notReadyCondition := duckv1alpha1.Condition{
+			Type: evapisv1alpha1.ChannelConditionReady, Status: corev1.ConditionFalse}
 		tc := testChannel.DeepCopy()
 		tc.Status.Conditions[0] = notReadyCondition
 		return true, tc, nil
@@ -153,7 +156,8 @@ func Test_SendMessage(t *testing.T) {
 	// create a KN channel to connect to test http server
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
+		ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
 	k := &KnativeLib{}
@@ -193,7 +197,8 @@ func Test_CreateDeleteChannel(t *testing.T) {
 	log.Print("Test_CreateDeleteChannel")
 	client := evclientsetfake.NewSimpleClientset()
 	client.Fake.ReactionChain = nil
-	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool, ret runtime.Object, err error) {
+	client.Fake.AddReactor("create", "channels", func(action k8stesting.Action) (handled bool,
+		ret runtime.Object, err error) {
 		return true, testChannel, nil
 	})
 	k := &KnativeLib{}

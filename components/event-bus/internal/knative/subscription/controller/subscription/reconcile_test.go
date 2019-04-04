@@ -318,6 +318,10 @@ func (m *MockCurrentTime) GetCurrentTime() metav1.Time {
 // Mock KnativeLib
 var knSubscriptions = make(map[string]*evapisv1alpha1.Subscription)
 var knChannels = make(map[string]*evapisv1alpha1.Channel)
+var labels = map[string]string{
+	"l1": "v1",
+	"l2": "v2",
+}
 
 type MockKnativeLib struct{}
 
@@ -332,7 +336,8 @@ func (k *MockKnativeLib) GetChannel(name string, namespace string) (*evapisv1alp
 	}
 	return channel, nil
 }
-func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
+func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
+	timeout time.Duration) (*evapisv1alpha1.Channel, error) {
 	channel := makeKnChannel(provisioner, namespace, name)
 	knChannels[channel.Name] = channel
 	return channel, nil
@@ -406,7 +411,8 @@ func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
 }
 
 func makeKnativeLibChannel() *evapisv1alpha1.Channel {
-	channel, _ := knativeLib.CreateChannel(provisioner, makeKnChannelName(makeEventsActivatedSubscription()), "kyma-system", time.Second)
+	channel, _ := knativeLib.CreateChannel(provisioner, makeKnChannelName(makeEventsActivatedSubscription()),
+		"kyma-system", &labels, time.Second)
 	channel.SetClusterName("fake-channel") // use it as a marker
 	knChannels[channel.Name] = channel
 	return channel

@@ -117,7 +117,6 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
 func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
 	timeout time.Duration)(*evapisv1alpha1.Channel, error) {
-	//TODO Add labels
 	c := makeChannel(provisioner, name, namespace, labels)
 	if channel, err := k.evClient.Channels(namespace).Create(c); err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
