@@ -81,12 +81,7 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
-			defer func() {
-				// clean up
-				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
+			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -133,12 +128,7 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
-			defer func() {
-				// clean up
-				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
+			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -185,12 +175,7 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
-			defer func() {
-				// clean up
-				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
+			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -250,12 +235,7 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
-			defer func() {
-				// clean up
-				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
+			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -339,12 +319,7 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
-			defer func() {
-				// clean up
-				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
+			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
@@ -384,13 +359,7 @@ func TestApiMetadata(t *testing.T) {
 			statusCode, postResponseData, err := metadataServiceClient.CreateService(t, initialServiceDefinition)
 			require.NoError(t, err)
 
-			defer func() {
-				// clean up
-				statusCode, err = metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
-
+			defer deleteService(t, metadataServiceClient, postResponseData)
 			// then
 			require.Equal(t, http.StatusOK, statusCode)
 			require.NotEmpty(t, postResponseData.ID)
@@ -429,12 +398,7 @@ func TestApiMetadata(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
 
-			defer func() {
-				// clean up
-				statusCode, err := metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
+			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			updatedServiceDefinition := testkit.ServiceDetails{
 				Name:        "updated test service",
@@ -503,12 +467,7 @@ func TestApiMetadata(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
 
-			defer func() {
-				// clean up
-				statusCode, err := metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
+			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			updatedServiceDefinition := testkit.ServiceDetails{
 				Name:        "updated test service",
@@ -646,12 +605,7 @@ func TestApiMetadata(t *testing.T) {
 			require.NoError(t, err)
 			require.Equal(t, http.StatusOK, postStatusCode)
 
-			defer func() {
-				// clean up
-				statusCode, err := metadataServiceClient.DeleteService(t, postResponseData.ID)
-				require.NoError(t, err)
-				require.Equal(t, http.StatusNoContent, statusCode)
-			}()
+			defer deleteService(t, metadataServiceClient, postResponseData)
 
 			// when
 			statusCode, receivedServiceDefinition, err := metadataServiceClient.GetService(t, postResponseData.ID)
@@ -915,5 +869,13 @@ func newCertGenAPI() *testkit.API {
 			},
 		},
 		Spec: testkit.ApiRawSpec,
+	}
+}
+
+func deleteService(t *testing.T, metadataServiceClient testkit.MetadataServiceClient, postResponse *testkit.PostServiceResponse) {
+	if postResponse != nil {
+		statusCode, err := metadataServiceClient.DeleteService(t, postResponse.ID)
+		require.NoError(t, err)
+		require.Equal(t, http.StatusNoContent, statusCode)
 	}
 }

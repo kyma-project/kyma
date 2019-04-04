@@ -16,6 +16,7 @@ loki:
   terminationGracePeriodSeconds: 30
   deploymentStrategy: RollingUpdate
   port: 3100
+  fullnameOverride: logging
 
   image:
     repository: grafana/loki
@@ -196,7 +197,7 @@ promtail:
 global:
   ## to deploy console ui app
   uiapp:
-    create: false
+    create: true
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
@@ -204,7 +205,7 @@ global:
     version: 0f2d461a
   ## to enable auth and authz set value to true
   rbac:
-    create: false
+    create: true
 test:
   image:
     name: test-logging

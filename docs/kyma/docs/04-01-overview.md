@@ -34,7 +34,6 @@ Follow these installation guides to install Kyma locally or on a cluster:
 - [Install Kyma on a cluster](#installation-install-kyma-on-a-cluster)
 
 Read rest of the installation documents to learn how to:
-- [Install Kyma with Knative](#installation-installation-with-knative)
 - [Disable the selected components' installation or install them separately](#installation-custom-component-installation)
 - [Update Kyma](#installation-update-kyma)
 - [Reinstall Kyma](#installation-reinstall-kyma)

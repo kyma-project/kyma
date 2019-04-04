@@ -17,9 +17,6 @@ items:
         heritage: {{ $releaseService }}
         prometheus: {{ $.Values.prometheusLabelValue | default $releaseName | quote }}
         release: {{ $releaseName }}
-        {{- if .serviceMonitorSelectorLabels }}
-{{ toYaml .serviceMonitorSelectorLabels | indent 8 }}
-        {{- end }}
       name: {{ .name }}
     spec:
       endpoints:
