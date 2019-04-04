@@ -41,7 +41,7 @@ This table explains the placeholders used in the template:
 
 ## Configure authorization rules
 
-To bind Github groups to the default roles added to every Kyma Namespace, add the **bindings** section to [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/values.yaml) file. Follow this template:
+To bind Github groups to default Kyma roles, add the **bindings** section to [this](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/cluster-users/values.yaml) file. Follow this template:
 
 ```
 bindings:
@@ -53,10 +53,12 @@ bindings:
     - "{GITHUB_ORGANIZATION}:{GITHUB_TEAM_B}"
 ```
 
+>**TIP:** You can bind GitHub teams to any of the 5 predefined Kyma roles. Use these aliases: `kymaAdmin`, `kymaView`, `kymaDeveloper`, `kymaEdit` or `kymaEssentials`. To learn more about the predefined roles, read [this](#details-roles-in-kyma) document.
+
 This table explains the placeholders used in the template:
 
 |Placeholder | Description |
 |---|---|
 | GITHUB_ORGANIZATION | Specifies the name of the GitHub organization. |
-| GITHUB_TEAM_A | Specifies the name of GitHub team to bind to the `kyma-admin-role` role. |
-| GITHUB_TEAM_B | Specifies the name of GitHub team to bind to the `kyma-reader-role` role. |
+| GITHUB_TEAM_A | Specifies the name of GitHub team to bind to the `kyma-admin` role. |
+| GITHUB_TEAM_B | Specifies the name of GitHub team to bind to the `kyma-view` role. |

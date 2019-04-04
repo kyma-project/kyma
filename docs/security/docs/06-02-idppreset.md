@@ -29,15 +29,15 @@ spec:
 
 This table lists all the possible parameters of a given resource together with their descriptions:
 
-| Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR. |
+| Parameter   |  Mandatory  |  Description |
+|----------|:-------------:|------|
+| **metadata.name** | **YES** | Specifies the name of the CR. |
 | **spec.issuer** | **YES** | Specifies the issuer of the JWT tokens used to access the services. |
 | **spec.jwksUri** | **YES** | Specifies the URL of the OpenID Provider’s public key set to validate the signature of the JWT token. |
 
 ## Usage in the UI
 
-**issuer** and **jwksUri** are some of the API CR specification fields. In most cases, these values are reused many times. IDPPresets usage is a solution to reuse them in a convenient way. It allows you to choose a proper preset from the dropdown menu instead of entering them manually every time you expose a secured API. Apart from consuming the IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, go to the **Administration** tab and then to **IDP Presets**.
+The **issuer** and **jwksUri** fields originate from the [Api CR](/components/api-gateway/#custom-resource-custom-resource) specification. In most cases, these values are reused many times. The IDPPreset CR allows to store these details in a single object and reuse them in a convenient way. In the UI, the IDPPreset CR allows you to choose a preset with details of a specific identity provider from the dropdown menu instead of entering them manually every time you expose a secured API. Apart from consuming the IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, select **IDP Presets** from the **Integration** section.
 
 ## Related resources and components
 
@@ -45,5 +45,5 @@ These components use this CR:
 
 | Name   |   Description |
 |:----------:|:------|
-| IDP Preset |  Generates Go client which allows components and tests to create, delete, or get IDP Preset resources. |
+| IDP Preset |  Generates a Go client which allows components and tests to create, delete, or get IDP Preset resources. |
 | Console Backend Service |  Enables the IDP Preset management with GraphQL API. |

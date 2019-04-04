@@ -20,7 +20,7 @@ See [this](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) docume
 
 >**NOTE:** You cannot define groups for the static user store. Instead, bind the user directly to a role or a cluster role by setting the user as the subject of a RoleBinding or ClusterRoleBinding.
 
-By default, there are 5 roles roles used to manage authorizations on every Kyma cluster. These roles are:
+By default, there are 5 roles used to manage permissions in every Kyma cluster. These roles are:
   - **kyma-essentials**
   - **kyma-view**
   - **kyma-edit**
@@ -29,4 +29,4 @@ By default, there are 5 roles roles used to manage authorizations on every Kyma 
 
 For more details about roles, read [this](/root/kyma#details-roles-in-kyma) document.
 
->**NOTE:** The **Global permissions** section in the **Administration** view of the Kyma Console UI allows you to manage user-group bindings.
+>**NOTE:** The **Global permissions** section in the **Settings** section of the Kyma Console UI allows you to manage bindings between user groups and roles.
