@@ -30,6 +30,7 @@ const (
 	docsTopicLabel           = "cms.kyma-project.io/docs-topic"
 	accessLabel              = "cms.kyma-project.io/access"
 	assetShortNameAnnotation = "cms.kyma-project.io/asset-short-name"
+	typeLabel                = "cms.kyma-project.io/type"
 )
 
 var (
@@ -94,7 +95,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.BucketError, err.Error()), status), err
 	}
 
-	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabels(instance.GetName()))
+	commonAssets, err := h.assetSvc.List(ctx, instance.GetNamespace(), h.buildLabels(instance.GetName(), ""))
 	if err != nil {
 		h.recordWarningEventf(instance, pretty.AssetsListingFailed, err.Error())
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed, err.Error()), status), err
@@ -181,7 +182,7 @@ func (h *docstopicHandler) shouldCreateAssets(existing map[string]CommonAsset, s
 
 func (h *docstopicHandler) shouldUpdateAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config config.AssetWebHookConfigMap) bool {
 	for key, existingAsset := range existing {
-		expectedSpec := findSource(spec.Sources, key)
+		expectedSpec := findSource(spec.Sources, key, existingAsset.Labels[typeLabel])
 		if expectedSpec == nil {
 			continue
 		}
@@ -197,8 +198,8 @@ func (h *docstopicHandler) shouldUpdateAssets(existing map[string]CommonAsset, s
 }
 
 func (h *docstopicHandler) shouldDeleteAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) bool {
-	for key := range existing {
-		if findSource(spec.Sources, key) == nil {
+	for key, existingAsset := range existing {
+		if findSource(spec.Sources, key, existingAsset.Labels[typeLabel]) == nil {
 			return true
 		}
 	}
@@ -256,7 +257,7 @@ func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaA
 		ObjectMeta: v1.ObjectMeta{
 			Name:        h.generateFullAssetName(instance.GetName(), assetSpec.Name, assetSpec.Type),
 			Namespace:   instance.GetNamespace(),
-			Labels:      h.buildLabels(instance.GetName()),
+			Labels:      h.buildLabels(instance.GetName(), assetSpec.Type),
 			Annotations: h.buildAnnotations(assetSpec.Name),
 		},
 		Spec: h.convertToCommonAssetSpec(assetSpec, bucketName, cfg),
@@ -275,7 +276,7 @@ func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaA
 
 func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg config.AssetWebHookConfigMap) error {
 	for key, existingAsset := range existing {
-		expectedSpec := findSource(spec.Sources, key)
+		expectedSpec := findSource(spec.Sources, key, existingAsset.Labels[typeLabel])
 		if expectedSpec == nil {
 			continue
 		}
@@ -299,9 +300,9 @@ func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance Ob
 	return nil
 }
 
-func findSource(slice []v1alpha1.Source, sourceName string) *v1alpha1.Source {
+func findSource(slice []v1alpha1.Source, sourceName, sourceType string) *v1alpha1.Source {
 	for _, source := range slice {
-		if source.Name == sourceName {
+		if source.Name == sourceName && source.Type == sourceType {
 			return &source
 		}
 	}
@@ -310,7 +311,7 @@ func findSource(slice []v1alpha1.Source, sourceName string) *v1alpha1.Source {
 
 func (h *docstopicHandler) deleteNotExisting(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec) error {
 	for key, commonAsset := range existing {
-		if findSource(spec.Sources, key) != nil {
+		if findSource(spec.Sources, key, commonAsset.Labels[typeLabel]) != nil {
 			continue
 		}
 
@@ -354,7 +355,8 @@ func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucket
 }
 
 func convertToWebhookService(services []config.WebhookService) []v1alpha2.WebhookService {
-	if services == nil {
+	servicesLen := len(services)
+	if servicesLen < 1 {
 		return nil
 	}
 	result := make([]v1alpha2.WebhookService, len(services))
@@ -370,7 +372,8 @@ func convertToWebhookService(services []config.WebhookService) []v1alpha2.Webhoo
 }
 
 func convertToAssetWebhookServices(services []config.AssetWebhookService) []v1alpha2.AssetWebhookService {
-	if services == nil {
+	servicesLen := len(services)
+	if servicesLen < 1 {
 		return nil
 	}
 	result := make([]v1alpha2.AssetWebhookService, len(services))
@@ -388,10 +391,16 @@ func convertToAssetWebhookServices(services []config.AssetWebhookService) []v1al
 	return result
 }
 
-func (h *docstopicHandler) buildLabels(topicName string) map[string]string {
-	return map[string]string{
-		docsTopicLabel: topicName,
+func (h *docstopicHandler) buildLabels(topicName, assetType string) map[string]string {
+	labels := make(map[string]string)
+
+	labels[docsTopicLabel] = topicName
+	if len(assetType) > 0 {
+		labels[typeLabel] = assetType
 	}
+
+	return labels
+
 }
 
 func (h *docstopicHandler) buildAnnotations(assetShortName string) map[string]string {

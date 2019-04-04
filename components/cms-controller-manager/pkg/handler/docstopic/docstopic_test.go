@@ -531,7 +531,7 @@ func commonAsset(name, assetType, docsName, bucketName string, source v1alpha1.S
 			Namespace: "test",
 			Labels: map[string]string{
 				"cms.kyma-project.io/docs-topic": docsName,
-				"type.cms.kyma-project.io":       assetType,
+				"cms.kyma-project.io/type":       assetType,
 			},
 			Annotations: map[string]string{
 				"cms.kyma-project.io/asset-short-name": name,
