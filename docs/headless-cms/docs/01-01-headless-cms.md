@@ -6,12 +6,12 @@ The Headless CMS is a new breed of traditional Content Management Systems (CMS) 
 
 ## Headless CMS in Kyma
 
-Kyma provides a Kubernetes-based solution that relies on the custom resource (CR) extensibility feature and the backend mechanism in the form of the [Asset Store](/components/asset-store/#overview-overview). The Headless CMS ensures the upload of multiple and grouped data for a given documentation topic and storing them as Asset CRs in respective Minio buckets. You specify all topic details, such as documentation sources, in a DocsTopic CR or a ClusterDocsTopic, and later apply it to a given Namespace or a cluster, respectively. The CR supports various documentation formats, including images, Markdown documents, [AsyncAPI](https://www.asyncapi.com/), [OData](https://www.odata.org/), and [OpenAPI](https://www.openapis.org/) specification files. You can upload them both as single and packed assets, as direct file URLs or in the ZIP and TAR formats, respectively.
+Kyma provides a Kubernetes-based solution that relies on the custom resource (CR) extensibility feature and the backend mechanism in the form of the [Asset Store](/components/asset-store/#overview-overview). The Headless CMS in Kyma allows you to upload multiple and grouped data for a given documentation topic and store them as Asset CRs in Minio buckets. All you need to do is to specify all topic details, such as documentation sources, in a DocsTopic CR or a ClusterDocsTopic CR and apply it to a given Namespace or a cluster. The CR supports various documentation formats, including images, Markdown documents, [AsyncAPI](https://www.asyncapi.com/), [OData](https://www.odata.org/), and [OpenAPI](https://www.openapis.org/) specification files. You can upload them as single (direct file URLs) and packed assets (ZIP or TAR).
 
 ## Benefits
 
 The Headless CMS brings a number of benefits:
 
-- It provides a unified way of uploading different documentation types on a Kyma cluster.
-- It fits in the Kyma modularity concept as you load onto a cluster only documentation for the installed components. This is possible as the DocsTopic CR and code for a given component go together in the `kyma` repository.
-- It supports baked-in documentation. Apart from the default documentation, you can add your own and group it as you like, the same way you personalize views in the Console UI with micro frontends. For example, you can add contextual help for a given Service Broker in the Service Catalog.
+- It provides a unified way of uploading different documentation types to a Kyma cluster.
+- It fits into the Kyma modularity concept as you load onto a cluster only documentation for the installed components. This is possible as the DocsTopic CR and the code for a given component are located in the same place in the `kyma` repository.
+- It supports baked-in documentation. Apart from the default documentation, you can add your own and group it as you like, the same way you use micro frontends to personalize views in the Console UI. For example, you can add contextual help for a given Service Broker in the Service Catalog.

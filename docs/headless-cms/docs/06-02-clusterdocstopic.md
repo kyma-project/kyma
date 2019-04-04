@@ -47,12 +47,12 @@ This table lists all possible parameters of a given resource together with their
 | Parameter   |      Mandatory      |  Description |
 |----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. It also defines the respective **cms.kyma-project.io/docs-topic** label that is added to the Asset CR that the ClusterDocsTopic CR defines. Because of label name limitations, ClusterDocTopic names can have a maximum length of 63 characters. |
-| **metadata.labels** |    **YES**   | Specifies how to filter and group ClusterAsset CRs that the ClusterDocsTopic CR defines. See [this](#details-headless-cms-in-console) document for more details. |
+| **metadata.labels** |    **NO**   | Specifies how to filter and group ClusterAsset CRs that the ClusterDocsTopic CR defines. See [this](#details-headless-cms-in-console) document for more details. |
 | **spec.displayname** |    **YES**   | Specifies a human-readable name of the ClusterDocsTopic CR. |
 | **spec.description** |    **YES**   | Provides more details on the purpose of the ClusterDocsTopic CR. |
 | **spec.sources** |    **YES**   | Defines the type of the asset and a **type** label added to the ClusterAsset CR.  |
-| **spec.sources.type** |    **YES**   | Specifies the type of the assets included in the ClusterDocsTopic CR. |
-| **spec.sources.name** |    **YES**   | Defines a unique identifier of a given asset. |
+| **spec.sources.type** |    **YES**   | Specifies the type of assets included in the ClusterDocsTopic CR. |
+| **spec.sources.name** |    **YES**   | Defines a unique identifier of a given asset. It must be unique if there is more than one asset of a given type in a ClusterDocsTopic CR. |
 | **spec.sources.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files.  |
 | **spec.sources.url** |    **YES**   | Specifies the location of a single file or a package. |
 | **spec.sources.filter** |    **NO**   | Specifies a set of assets from the package to upload. The regex used in the filter must be [RE2](https://golang.org/s/re2syntax)-compliant. |

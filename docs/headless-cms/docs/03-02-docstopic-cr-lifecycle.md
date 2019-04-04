@@ -7,9 +7,9 @@ type: Details
 
 ## Asset CR manual changes
 
-The DocsTopic custom resource (CR) coordinates Asset CR creation, deletion, and changes. The DocsTopic Controller verifies DocsTopic definition on a regular basis and adds, removes, or modifies the Assets CRs accordingly.
+The DocsTopic custom resource (CR) coordinates Asset CR creation, deletion, and modifications. The DocsTopic Controller verifies DocsTopic definition on a regular basis and creates, deletes, or modifies the Assets CRs accordingly.
 
-The DocsTopic CR acts as the only source of truth for the Asset CRs it orchestrates. If you modify or remove any of them manually, DocsTopic Controller automatically overwrites it or updates it based on the DocsTopic CR definition.
+The DocsTopic CR acts as the only source of truth for the Asset CRs it orchestrates. If you modify or remove any of them manually, DocsTopic Controller automatically overwrites such an Asset CR or updates it based on the DocsTopic CR definition.
 
 ##  DocsTopic CR and Asset CR dependencies
 
@@ -27,15 +27,15 @@ The full name of such an Asset CR following the **{docsTopic-name}-{asset-source
 
 ### Labels
 
-There are two labels in every Asset CR created from DocsTopic CRs that are based on these DocsTopic CRs definitions:
+There are two labels in every Asset CR created from DocsTopic CRs. Both of them are based on DocsTopic CRs definitions:
 
-- the **cms.kyma-project.io/type** label that equals a given **type** parameter from the DocsTopic CR. For example, that is `asyncapi`.
+- **cms.kyma-project.io/type** equals a given **type** parameter from the DocsTopic CR, such as `asyncapi`.
 
-- the **cms.kyma-project.io/docs-topic** label equals the **name** metadata from the DocsTopic CR. For example, that is `service-catalog`.
+- **cms.kyma-project.io/docs-topic** equals the **name** metadata from the DocsTopic CR, such as `service-catalog`.
 
 ### Statuses
 
-The status of the DocsTopic CR heavily depends on the status phase of all Asset CRs it creates. It is:
+The status of the DocsTopic CR depends heavily on the status phase of all Asset CRs it creates. It is:
 
 - `Ready` when all related Asset CRs already are in the `Ready` phase.
 - `Pending` when it awaits the confirmation that all related Asset CRs are in the `Ready` status. If any Asset CR is in the `Failed` status, the status of the DocsTopic CR remains `Pending`.
