@@ -35,6 +35,6 @@ This diagram provides an overview of the basic Asset Store workflow and the role
 5. The AC listens for new Events and acts upon receiving the Asset CR creation Event.
 6. The AC reads the CR definition, checks if the Bucket CR is available, and if its name matches the bucket name referenced in the Asset CR. It also verifies if the Bucket CR is in the `Ready` phase.
 7. If the Bucket CR is available, the AC fetches the asset from the source location provided in the CR. If the asset is a ZIP or TAR file, the AC unpacks and optionally filters the asset before uploading it into the bucket.
-8. Optionally, the AC validates or modifies the asset, or extracts asset's metadata if such a requirement is defined in the Asset CR. The AC communicates with the validation, mutation, and metadata services and validates or modifies the asset, or extracts asset's metadata according to the specification defined in the Asset CR.
+8. Optionally, the AC validates, modifies the asset, or extracts asset's metadata if such a requirement is defined in the Asset CR. The AC communicates with the validation, mutation, and metadata services to validate, modify the asset, or extract asset's metadata according to the specification defined in the Asset CR.
 9. The AC uploads the asset to Minio Gateway, into the bucket specified in the Asset CR.
 10. The AC updates the status of the Asset CR with the storage location of the file in the bucket.
