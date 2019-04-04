@@ -102,7 +102,7 @@ func TestServiceBindingUsageMutationsAndQueries(t *testing.T) {
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
 		auth.Get:    {suite.fixServiceBindingUsageRequest()},
-		auth.Create: {suite.fixCreateServiceBindingUsageRequest()},
+		auth.Create: {suite.fixCreateServiceBindingUsageRequest("")},
 		auth.Delete: {suite.fixDeleteServiceBindingUsageRequest()},
 	}
 	AuthSuite.Run(t, ops)
@@ -207,7 +207,7 @@ func (s *bindingUsageTestSuite) deleteBinding() error {
 	return s.svcatCli.ServicecatalogV1beta1().ServiceBindings(TestNamespace).Delete(s.givenBinding.Name, &metav1.DeleteOptions{})
 }
 
-func (s *bindingUsageTestSuite) fixCreateServiceBindingUsageRequest() *graphql.Request {
+func (s *bindingUsageTestSuite) fixCreateServiceBindingUsageRequest(name string) *graphql.Request {
 	query := fmt.Sprintf(`
 		mutation ($name: String!, $namespace: String!, $serviceBindingRefName: String!, $usedByName: String!, $usedByKind: String!) {
 			createServiceBindingUsage(namespace: $namespace, createServiceBindingUsageInput: {
@@ -225,7 +225,7 @@ func (s *bindingUsageTestSuite) fixCreateServiceBindingUsageRequest() *graphql.R
 		}
 	`, s.bindingUsageDetailsFields())
 	req := graphql.NewRequest(query)
-	req.SetVar("name", s.givenBindingUsage.Name)
+	req.SetVar("name", name)
 	req.SetVar("namespace", s.givenBindingUsage.Namespace)
 	req.SetVar("serviceBindingRefName", s.givenBindingUsage.ServiceBinding.Name)
 	req.SetVar("usedByName", s.givenBindingUsage.UsedBy.Name)
@@ -235,7 +235,7 @@ func (s *bindingUsageTestSuite) fixCreateServiceBindingUsageRequest() *graphql.R
 }
 
 func (s *bindingUsageTestSuite) createBindingUsage() (bindingUsageCreateMutationResponse, error) {
-	req := s.fixCreateServiceBindingUsageRequest()
+	req := s.fixCreateServiceBindingUsageRequest(s.givenBindingUsage.Name)
 
 	var res bindingUsageCreateMutationResponse
 	err := s.gqlCli.Do(req, &res)

@@ -24,7 +24,7 @@ import (
 
 const (
 	configMapName      = "test-config-map"
-	configMapNamespace = "console-backend-service-onfig-map"
+	configMapNamespace = "console-backend-service-config-map"
 )
 
 type ConfigMapEvent struct {

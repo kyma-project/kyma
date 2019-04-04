@@ -6,14 +6,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -143,8 +143,8 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 			fixServiceInstancesWithStatusRequest(resourceDetailsQuery, expectedResourceFromServiceClass.Namespace),
 		},
 		auth.Create: {
-			fixCreateServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromClusterServiceClass, true),
-			fixCreateServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass, false),
+			fixCreateServiceInstanceRequest(resourceDetailsQuery, fixture.ServiceInstanceFromClusterServiceClass("", TestNamespace), true),
+			fixCreateServiceInstanceRequest(resourceDetailsQuery, fixture.ServiceInstanceFromServiceClass("", TestNamespace), false),
 		},
 		auth.Delete: {fixDeleteServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass)},
 	}

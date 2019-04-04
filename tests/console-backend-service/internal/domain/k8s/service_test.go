@@ -26,7 +26,7 @@ import (
 
 const (
 	serviceName = "test-service"
-	namespace   = "ui-api-acceptance-service"
+	namespace   = "console-backend-service-service"
 )
 
 type ServiceEvent struct {

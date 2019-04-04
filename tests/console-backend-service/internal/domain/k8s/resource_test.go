@@ -22,7 +22,7 @@ const (
 	resourceName       = "test-resource"
 	resourceKind       = "Pod"
 	resourceAPIVersion = "v1"
-	resourceNamespace  = "ui-api-acceptance-resource"
+	resourceNamespace  = "console-backend-service-resource"
 )
 
 type createResourceMutationResponse struct {

@@ -105,7 +105,7 @@ func TestApplicationMutations(t *testing.T) {
 	t.Log("Checking authorization directives...")
 	as := auth.New()
 	ops := &auth.OperationsInput{
-		auth.Create: {fixCreateApplicationMutation(fixApp)},
+		auth.Create: {fixCreateApplicationMutation(fixApplication("", "", map[string]string{}))},
 		auth.Update: {fixUpdateApplicationMutation(fixApp)},
 		auth.Delete: {fixDeleteApplicationMutation(fixName)},
 	}

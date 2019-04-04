@@ -68,7 +68,7 @@ func TestIDPPresetQueriesAndMutations(t *testing.T) {
 	ops := &auth.OperationsInput{
 		auth.Get:    {singleResourceQueryRequest(resourceDetailsQuery, expectedResource)},
 		auth.List:   {multipleResourcesQueryRequest(resourceDetailsQuery, expectedResource)},
-		auth.Create: {fixCreateIDPPresetRequest(resourceDetailsQuery, expectedResource)},
+		auth.Create: {fixCreateIDPPresetRequest(resourceDetailsQuery, idpPreset("", "", ""))},
 		auth.Delete: {fixDeleteIDPPresetRequest(resourceDetailsQuery, expectedResource)},
 	}
 	as.Run(t, ops)

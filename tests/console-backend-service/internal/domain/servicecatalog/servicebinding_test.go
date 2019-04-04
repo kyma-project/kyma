@@ -6,15 +6,14 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
-
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -63,8 +62,8 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 
 	bindingName := "test-binding"
 	binding := fixture.ServiceBinding(bindingName, instanceName, TestNamespace)
-	createBindingOutput := createBindingOutput(bindingName, instanceName)
-	deleteBindingOutput := deleteBindingOutput(bindingName)
+	createBindingOutput := fixCreateBindingOutput(bindingName, instanceName)
+	deleteBindingOutput := fixDeleteBindingOutput(bindingName)
 
 	t.Log("Subscribe bindings")
 	subscription := subscribeBinding(c, bindingEventDetailsFields(), binding.Namespace)
@@ -150,7 +149,7 @@ func TestServiceBindingMutationsAndQueries(t *testing.T) {
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
 		auth.Get:    {fixQueryBindingRequest(binding)},
-		auth.Create: {fixCreateBingindRequest(createBindingOutput)},
+		auth.Create: {fixCreateBingindRequest(fixCreateBindingOutput("", ""))},
 		auth.Delete: {fixDeleteBindingRequest(deleteBindingOutput)},
 	}
 	AuthSuite.Run(t, ops)
@@ -298,7 +297,7 @@ func bindingEvent(eventType string, binding shared.ServiceBinding) ServiceBindin
 	}
 }
 
-func createBindingOutput(bindingName, instanceName string) CreateServiceBindingOutput {
+func fixCreateBindingOutput(bindingName, instanceName string) CreateServiceBindingOutput {
 	return CreateServiceBindingOutput{
 		Name:                bindingName,
 		Namespace:           TestNamespace,
@@ -306,7 +305,7 @@ func createBindingOutput(bindingName, instanceName string) CreateServiceBindingO
 	}
 }
 
-func deleteBindingOutput(bindingName string) DeleteServiceBindingOutput {
+func fixDeleteBindingOutput(bindingName string) DeleteServiceBindingOutput {
 	return DeleteServiceBindingOutput{
 		Name:      bindingName,
 		Namespace: TestNamespace,
