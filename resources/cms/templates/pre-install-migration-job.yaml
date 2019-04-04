@@ -42,7 +42,7 @@ metadata:
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "1"
 rules:
-- apiGroups: ["assetstore.kyma-project.io", "cms.kyma-project.io"]
+- apiGroups: ["cms.kyma-project.io"]
   resources: [ "*" ]
   verbs: ["*"]
 - apiGroups: ["applicationconnector.kyma-project.io"]
@@ -172,7 +172,4 @@ spec:
         image: bitnami/kubectl
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh","-c"]
-        args: ["kubectl delete crd clusterassets.assetstore.kyma-project.io; kubectl delete crd assets.assetstore.kyma-project.io"]
-        #command: [ "/bin/sh",
-        #  "-ce",
-        #  "kubectl get crd clusterassets.assetstore.kyma-project.io && kubectl get crd assets.assetstore.kyma-project.io" ]
+        args: ["kubectl delete crd clusterassets.assetstore.kyma-project.io; kubectl delete crd assets.assetstore.kyma-project.io; kubectl delete crd bucket.assetstore.kyma-project.io; kubectl delete crd clusterbucket.assetstore.kyma-project.io"]
