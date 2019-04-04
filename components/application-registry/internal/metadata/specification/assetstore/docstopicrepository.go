@@ -41,7 +41,7 @@ func NewDocsTopicRepository(resourceInterface ResourceInterface) DocsTopicReposi
 }
 
 func (r repository) Upsert(docsTopicEntry docstopic.Entry) apperrors.AppError {
-	existingDocsTopic, err := r.get(docsTopicEntry.Id)
+	_, err := r.get(docsTopicEntry.Id)
 	if err != nil && err.Code() == apperrors.CodeNotFound {
 		return r.create(toK8sType(docsTopicEntry))
 	}
@@ -51,9 +51,8 @@ func (r repository) Upsert(docsTopicEntry docstopic.Entry) apperrors.AppError {
 	}
 
 	k8sDocsTopic := toK8sType(docsTopicEntry)
-	k8sDocsTopic.ResourceVersion = existingDocsTopic.ResourceVersion
 
-	return r.update(k8sDocsTopic)
+	return r.update(docsTopicEntry.Id, k8sDocsTopic)
 }
 
 func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
@@ -96,47 +95,78 @@ func (r repository) get(id string) (v1alpha1.ClusterDocsTopic, apperrors.AppErro
 func (r repository) create(docsTopic v1alpha1.ClusterDocsTopic) apperrors.AppError {
 	u, err := toUstructured(docsTopic)
 	if err != nil {
-		return err
+		return apperrors.Internal("Failed to create Documentation Topic, %s.", err)
 	}
 
-	{
-		_, err := r.resourceInterface.Create(u, metav1.CreateOptions{})
-
-		if err != nil {
-			return apperrors.Internal("Failed to create Documentation Topic, %s.", err)
-		}
-	}
-
-	return nil
-}
-
-func (r repository) update(docsTopic v1alpha1.ClusterDocsTopic) apperrors.AppError {
-	u, err := toUstructured(docsTopic)
+	_, err = r.resourceInterface.Create(u, metav1.CreateOptions{})
 	if err != nil {
-		return err
-	}
-
-	{
-		err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-			_, e := r.resourceInterface.Update(u, metav1.UpdateOptions{})
-			return e
-		})
-
-		if err != nil {
-			return apperrors.Internal("Failed to update Documentation Topic, %s.", err)
-		}
+		return apperrors.Internal("Failed to create Documentation Topic, %s.", err)
 	}
 
 	return nil
 }
 
-func toUstructured(docsTopic v1alpha1.ClusterDocsTopic) (*unstructured.Unstructured, apperrors.AppError) {
+func (r repository) update(id string, docsTopic v1alpha1.ClusterDocsTopic) apperrors.AppError {
+
+	getRefreshedDocsTopic := func(id string, docsTopic v1alpha1.ClusterDocsTopic) (v1alpha1.ClusterDocsTopic, error) {
+		newUnstructured, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+		if err != nil {
+			return v1alpha1.ClusterDocsTopic{}, err
+		}
+
+		newDocsTopic, err := fromUnstructured(newUnstructured)
+		if err != nil {
+			return v1alpha1.ClusterDocsTopic{}, err
+		}
+
+		newDocsTopic.Spec = docsTopic.Spec
+
+		return newDocsTopic, nil
+	}
+
+	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		newDocsTopic, err := getRefreshedDocsTopic(id, docsTopic)
+		if err != nil {
+			return err
+		}
+
+		u, err := toUstructured(newDocsTopic)
+		if err != nil {
+			return err
+		}
+
+		_, err = r.resourceInterface.Update(u, metav1.UpdateOptions{})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return apperrors.Internal("Failed to update Documentation Topic, %s.", err)
+	}
+
+	return nil
+}
+
+func toUstructured(docsTopic v1alpha1.ClusterDocsTopic) (*unstructured.Unstructured, error) {
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&docsTopic)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to convert Docs Topic object, %s.", err)
+		return nil, err
 	}
 
 	return &unstructured.Unstructured{Object: obj}, nil
+}
+
+func fromUnstructured(u *unstructured.Unstructured) (v1alpha1.ClusterDocsTopic, error) {
+	var docsTopic v1alpha1.ClusterDocsTopic
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &docsTopic)
+	if err != nil {
+		return v1alpha1.ClusterDocsTopic{}, err
+	}
+
+	return docsTopic, nil
 }
 
 func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.ClusterDocsTopic {

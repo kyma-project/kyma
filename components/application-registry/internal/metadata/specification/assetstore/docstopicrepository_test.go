@@ -54,6 +54,9 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
+		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+			Return(&unstructured.Unstructured{Object: object}, nil)
+
 		docsTopicEntry := createTestDocsTopicEntry()
 		resourceInterfaceMock.On("Update", mock.MatchedBy(createMatcherFunction(docsTopicEntry, "1")), metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, nil)
 
@@ -112,6 +115,9 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
+		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+			Return(&unstructured.Unstructured{Object: object}, nil)
+
 		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
@@ -119,7 +125,7 @@ func TestUpsertDocsTopic(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		resourceInterfaceMock.AssertNumberOfCalls(t, "Get", 1)
+		resourceInterfaceMock.AssertNumberOfCalls(t, "Get", 2)
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Create", 0)
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Update", 1)
 	})
