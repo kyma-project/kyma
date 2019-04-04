@@ -12,6 +12,11 @@ spec:
   - jwt:
       issuer: https://dex.{{ .Values.global.ingress.domainName }}
       jwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+      trigger_rules:
+      - excluded_paths:
+        - exact: /health
+        - exact: /ready
+        - exact: /metrics
   principalBinding: USE_ORIGIN
   targets:
   - name: {{ template "loki.fullname" . }}

@@ -122,3 +122,16 @@ metadata:
     kyma-project.io/installation: ""
 data:
   test.acceptance.ui.minikubeIP: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-connector-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: application-connector
+    kyma-project.io/installation: ""
+data:
+   application-registry.minikubeIP: ""
+---

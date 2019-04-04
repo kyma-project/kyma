@@ -12,6 +12,7 @@ spec:
   rules:
   - services: ["logging.kyma-system.svc.cluster.local"]
     methods: ["GET", "POST", "OPTIONS"]
+    paths: ["/api/*"]
 {{- end }}
 
 ---
@@ -19,7 +20,7 @@ spec:
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRoleBinding
 metadata:
-  name: bind-loki-intern-role
+  name: bind-loki-role
   namespace: kyma-system
   labels:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -29,7 +30,7 @@ spec:
   subjects:
   - user: "cluster.local/ns/kyma-system/sa/logging"
   - properties:
-      request.auth.claims[groups]: "kyma-admins"
+      request.auth.audiences: "kyma-client"
   roleRef:
     kind: ServiceRole
     name: loki-role
