@@ -57,19 +57,16 @@ global:
     clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
-    version: 8a10f0ed
-  kubeless_integration_tests:
-    dir: develop/tests/
-    version: 50d9482b
-  kubeless_tests:
+    version: 429bfbcc
+  etcd_backup_job:
     dir: develop/
-    version: a9bfa9fc
+    version: 6e0a7fe2
   test_apiserver_proxy:
     dir: develop/
     version: "eb39c791"
   test_namespace_controller:
     dir: develop/
-    version: 6b4c356f
+    version: 429bfbcc
   console_backend_service:
     dir: develop/
     version: '9ecc0bcc'
@@ -82,19 +79,7 @@ global:
   xip_patch:
     dir: develop/
     version: "d20b1c29"
-  kubeless_images:
-    runtime:
-      node6:
-        dir: develop/
-        version: "ddf6f99f"
-      node8:
-        dir: develop/
-        version: "ddf6f99f"
-    installation:
-      node6:
-        image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
-      node8:
-        image: "kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7"
+  
 
 test:
   acceptance:

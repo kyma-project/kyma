@@ -99,9 +99,6 @@
 # The `monitoring` subchart
 /resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
-# The `kubeless` subchart
-/resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
-
 # The `logging` subchart
 /resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
@@ -113,6 +110,9 @@
 
 # The `nats-streaming` chart
 /resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+
+# The `kubeless` and `lambda-ui` chart
+/resources/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The `knative-provisioner-natss` chart
 /resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91

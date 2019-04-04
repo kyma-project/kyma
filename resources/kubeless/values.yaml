@@ -1,3 +1,29 @@
+global:
+  containerRegistry:
+    path: eu.gcr.io/kyma-project
+  istio:
+    gateway:
+      name: kyma-gateway
+  kubeless_integration_tests:
+    dir: develop/tests/
+    version: 50d9482b
+  kubeless_tests:
+    dir: develop/
+    version: a9bfa9fc
+  kubeless_images:
+    runtime:
+      node6:
+        dir: develop/
+        version: "ddf6f99f"
+      node8:
+        dir: develop/
+        version: "ddf6f99f"
+    installation:
+      node6:
+        image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
+      node8:
+        image: "kubeless/nodejs@sha256:5c3c21cf29231f25a0d7d2669c6f18c686894bf44e975fcbbbb420c6d045f7e7"
+
 controller:
   deployment:
     replicaCount: 1
@@ -13,3 +39,4 @@ config:
   provision:
     image: kubeless/unzip@sha256:f162c062973cca05459834de6ed14c039d45df8cdb76097f50b028a1621b3697
     secret: ""
+

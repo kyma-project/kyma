@@ -7,8 +7,6 @@ dependencies:
     condition: namespace-controller.enabled
   - name: cluster-users
     condition: cluster-users.enabled
-  - name: kubeless
-    condition: kubeless.enabled
   - name: console-backend-service
     condition: console-backend-service.enabled
   - name: docs
