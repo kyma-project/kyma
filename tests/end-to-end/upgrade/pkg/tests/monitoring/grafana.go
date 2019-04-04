@@ -48,11 +48,7 @@ const (
 	grafanaConfigMapName       = "grafana-upgrade-test"
 	grafanaNS                  = "kyma-system"
 	grafanaPodName             = "monitoring-grafana-0"
-	grafanaServiceName         = "monitoring-grafana"
-	grafanaStatefulsetName     = "monitoring-grafana"
-	grafanaPvcName             = "monitoring-grafana"
 	grafanaContainerName       = "grafana"
-	grafanaLabelSelector       = "app=monitoring-grafana"
 )
 
 // NewGrafanaUpgradeTest returns new instance of the GrafanaUpgradeTest
