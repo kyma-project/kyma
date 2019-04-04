@@ -343,14 +343,49 @@ func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucket
 			Mode:                     h.convertToAssetMode(spec.Mode),
 			URL:                      spec.URL,
 			Filter:                   spec.Filter,
-			ValidationWebhookService: cfg.Validations,
-			MutationWebhookService:   cfg.Mutations,
-			MetadataWebhookService:   cfg.MetadataExtractors,
+			ValidationWebhookService: convertToAssetWebhookServices(cfg.Validations),
+			MutationWebhookService:   convertToAssetWebhookServices(cfg.Mutations),
+			MetadataWebhookService:   convertToWebhookService(cfg.MetadataExtractors),
 		},
 		BucketRef: v1alpha2.AssetBucketRef{
 			Name: bucketName,
 		},
 	}
+}
+
+func convertToWebhookService(services []config.WebhookService) []v1alpha2.WebhookService {
+	if services == nil {
+		return nil
+	}
+	result := make([]v1alpha2.WebhookService, len(services))
+	for i, service := range services {
+		result[i] = v1alpha2.WebhookService{
+			Name:      service.Name,
+			Namespace: service.Namespace,
+			Endpoint:  service.Endpoint,
+			Filter:    service.Filter,
+		}
+	}
+	return result
+}
+
+func convertToAssetWebhookServices(services []config.AssetWebhookService) []v1alpha2.AssetWebhookService {
+	if services == nil {
+		return nil
+	}
+	result := make([]v1alpha2.AssetWebhookService, len(services))
+	for i, s := range services {
+		result[i] = v1alpha2.AssetWebhookService{
+			WebhookService: v1alpha2.WebhookService{
+				Name:      s.Name,
+				Namespace: s.Namespace,
+				Endpoint:  s.Endpoint,
+				Filter:    s.Filter,
+			},
+			Metadata: s.Metadata,
+		}
+	}
+	return result
 }
 
 func (h *docstopicHandler) buildLabels(topicName string) map[string]string {

@@ -103,6 +103,7 @@ type ReconcileDocsTopic struct {
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets/status,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;list;update;patch
+// +kubebuilder:rbac:resources=configmaps,verbs=get;watch
 func (r *ReconcileDocsTopic) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()

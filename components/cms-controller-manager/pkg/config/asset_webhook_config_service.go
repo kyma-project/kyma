@@ -3,7 +3,6 @@ package config
 import (
 	"context"
 	"encoding/json"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -13,11 +12,26 @@ import (
 )
 
 type AssetWebHookConfigMap map[string]AssetWebHookConfig
-//FIXME remove dependency to assetstore by implementing types
+
+type WebhookService struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+
+	// +optional
+	Endpoint string `json:"endpoint,omitempty"`
+	// +optional
+	Filter string `json:"filter,omitempty"`
+}
+
+type AssetWebhookService struct {
+	WebhookService `json:",inline"`
+	Metadata       *runtime.RawExtension `json:"metadata,omitempty"`
+}
+
 type AssetWebHookConfig struct {
-	Validations        []v1alpha2.AssetWebhookService `json:"validations,omitempty"`
-	Mutations          []v1alpha2.AssetWebhookService `json:"mutations,omitempty"`
-	MetadataExtractors []v1alpha2.WebhookService      `json:"metadataExtractors,omitempty"`
+	Validations        []AssetWebhookService `json:"validations,omitempty"`
+	Mutations          []AssetWebhookService `json:"mutations,omitempty"`
+	MetadataExtractors []WebhookService      `json:"metadataExtractors,omitempty"`
 }
 
 type assetWebHookConfigService struct {

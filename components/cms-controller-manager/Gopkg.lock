@@ -218,7 +218,7 @@
   name = "github.com/kyma-project/kyma"
   packages = ["components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"]
   pruneopts = "NUT"
-  revision = "aae78fc8e4fa93134e6996a103a4f34ccb1ec55e"
+  revision = "a78ab0459f488707613a2284c9fb86b9d3d130d3"
   source = "https://github.com/michal-hudy/kyma.git"
 
 [[projects]]
