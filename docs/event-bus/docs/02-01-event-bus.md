@@ -4,25 +4,32 @@ title: Architecture
 
 See the diagram and steps for an overview of the basic Event Bus flow:
 
-![Event Bus architecture](./assets/event-bus-architecture.png)
+![Event Bus architecture](./assets/event-bus-architecture.svg)
 
 ## Event flow
 
-1. The external solution integrated with Kyma makes a REST API call to the Application Connector to indicate that a new Event is available.
+### Configuration
 
+1. A user configures a lambda or a serverless application to be triggered by an Event from an external solution.
+> **NOTE**: While the system automatically creates a Kyma subscription resource for a lambda, the user must create one manually for a microservice.
+2. The subscription-controller-knative reacts on the creation of Kyma Subscription. After verifying that the Event was activated, it creates a KnativeChannel CR and a KnativeSubscription CR.
+3. The NATS controller reacts on the creation of KnativeChannel CR and creates the required Kubernetes and Istio services.
+4. The NATS dispatcher reacts on the creation of KnativeSubscription CR and creates the NATS Streaming subscription. 
+
+
+### Runtime
+
+1. The external solution integrated with Kyma makes a REST API call to the Application Connector to indicate that a new Event is available.
 2. The Application Connector enriches the Event with the details of its source.
 
 > **NOTE:** There is always one dedicated instance of the Application Connector for every instance of an external solution connected to Kyma.
 
-3. The Application Connector makes a REST API call to `publish` and sends the enriched Event.
-
-4. `publish` saves the information in the NATS Streaming database.
-
-5. NATS Streaming stores the Event details in the Persistence storage volume to ensure the data is not lost if the NATS Streaming crashes.
-
-6. If the Subscription [validation process](#architecture-architecture-event-validation) completes successfully, `push` consumes the Event from NATS Streaming.
-
-7. `push` delivers the Event to the lambda or the service.
+3. The Application Connector makes a REST API call to PublishKnative and sends the enriched Event.
+4. PublishKnative forwards the Event to the relevant knative-channel service URL which is inferred based on **source id** , **event type** and **event type version** parameters.
+5. Istio forwards the Event further to the natss-dispatcher.
+6. natss-dispatchr stores the Event in NATS Streaming.
+7. NATS Streaming stores the Event details in the Persistence storage volume to ensure the data is not lost if the NATS Streaming crashes.
+8. The nats-dispatcher picks the Event and dispatches it to the configured lambda or the microservice URL as an HTTP POST request.
 
 ## Event validation
 
@@ -40,10 +47,10 @@ Before the Event Bus forwards the Event to the receiver, the sub-validator perfo
 
 See the diagram and a step-by-step description of the Event verification process.
 
-![Event validation process](./assets/event-validation.png)
+![Event validation process](./assets/event-validation.svg)
 
 1. The Kyma user defines a lambda or a service.
 2. The Kyma user creates a Subscription custom resource.
-3. The sub-validator reads the new Subscription.
-4. The sub-validator refers to the EventActivation resource to check if the Event in the Subscription is activated for the given Namespace.
-5. The sub-validator updates the Subscription resource accordingly.
+3. The SubscriptionController reads the new Subscription.
+4. The SubscriptionController refers to the EventActivation resource to check if the Event in the Subscription is activated for the given Namespace.
+5. The SubscriptionController updates the Subscription resource accordingly.
