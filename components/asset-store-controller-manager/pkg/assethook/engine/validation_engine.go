@@ -109,16 +109,13 @@ func (e *validationEngine) parseResponse(response *webhookv1alpha1.ValidationRes
 }
 
 func (e *validationEngine) validate(ctx context.Context, service v1alpha2.AssetWebhookService, request *webhookv1alpha1.ValidationRequest) (*webhookv1alpha1.ValidationResponse, error) {
-	context, cancel := context.WithTimeout(ctx, e.timeout)
-	defer cancel()
-
 	jsonBytes, err := json.Marshal(request)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting request to JSON")
 	}
 
 	response := new(webhookv1alpha1.ValidationResponse)
-	err = e.webhook.Do(context, "application/json", service.WebhookService, bytes.NewBuffer(jsonBytes), response)
+	err = e.webhook.Do(ctx, "application/json", service.WebhookService, bytes.NewBuffer(jsonBytes), response, e.timeout)
 	if err != nil {
 		return nil, errors.Wrap(err, "while sending validation request")
 	}

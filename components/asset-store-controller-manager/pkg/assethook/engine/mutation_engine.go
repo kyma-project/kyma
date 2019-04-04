@@ -70,16 +70,13 @@ func (e *mutationEngine) Mutate(ctx context.Context, object Accessor, basePath s
 }
 
 func (e *mutationEngine) mutate(ctx context.Context, service v1alpha2.AssetWebhookService, request *assethookv1alpha1.MutationRequest) (*assethookv1alpha1.MutationResponse, error) {
-	context, cancel := context.WithTimeout(ctx, e.timeout)
-	defer cancel()
-
 	jsonBytes, err := json.Marshal(request)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while converting request to JSON")
 	}
 
 	response := new(assethookv1alpha1.MutationResponse)
-	err = e.webhook.Do(context, "application/json", service.WebhookService, bytes.NewBuffer(jsonBytes), response)
+	err = e.webhook.Do(ctx, "application/json", service.WebhookService, bytes.NewBuffer(jsonBytes), response, e.timeout)
 	if err != nil {
 		return nil, errors.Wrap(err, "while sending mutation request")
 	}

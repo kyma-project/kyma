@@ -33,7 +33,7 @@ func TestWebhook_Call(t *testing.T) {
 		defer httpClient.AssertExpectations(t)
 
 		// When
-		err := webhook.Do(ctx, "text/plain", service, request, response)
+		err := webhook.Do(ctx, "text/plain", service, request, response, time.Hour)
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -66,7 +66,7 @@ func TestWebhook_Call(t *testing.T) {
 		defer httpClient.AssertExpectations(t)
 
 		// When
-		err := webhook.Do(ctx, "text/plain", service, request, response)
+		err := webhook.Do(ctx, "text/plain", service, request, response, time.Hour)
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -88,7 +88,7 @@ func TestWebhook_Call(t *testing.T) {
 		defer httpClient.AssertExpectations(t)
 
 		// When
-		err := webhook.Do(ctx, "text/plain", service, request, response)
+		err := webhook.Do(ctx, "text/plain", service, request, response, time.Hour)
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -110,7 +110,7 @@ func TestWebhook_Call(t *testing.T) {
 		defer httpClient.AssertExpectations(t)
 
 		// When
-		err := webhook.Do(ctx, "text/plain", service, request, response)
+		err := webhook.Do(ctx, "text/plain", service, request, response, time.Hour)
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())

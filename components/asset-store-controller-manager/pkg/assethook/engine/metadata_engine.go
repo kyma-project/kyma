@@ -55,7 +55,7 @@ func (e *metadataEngine) Extract(ctx context.Context, object Accessor, basePath 
 		}
 
 		response := &v1alpha1.MetadataResponse{}
-		err = e.webhook.Do(ctx, contentType, service, body, response)
+		err = e.webhook.Do(ctx, contentType, service, body, response, e.timeout)
 		if err != nil {
 			return nil, errors.Wrap(err, "while sending request to metadata webhook")
 		}

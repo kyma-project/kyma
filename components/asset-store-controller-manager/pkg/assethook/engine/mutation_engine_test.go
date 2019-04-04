@@ -31,7 +31,7 @@ func TestMutationEngine_Mutate(t *testing.T) {
 		defer accessor.AssertExpectations(t)
 
 		webhook := new(hookMock.Webhook)
-		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything).Return(nil)
+		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything, time.Minute).Return(nil)
 		defer webhook.AssertExpectations(t)
 
 		mutator := engine.NewTestMutator(webhook, time.Minute, fileReader, fileWriter)
@@ -80,7 +80,7 @@ func TestMutationEngine_Mutate(t *testing.T) {
 		defer accessor.AssertExpectations(t)
 
 		webhook := new(hookMock.Webhook)
-		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything).Return(nil)
+		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything, time.Minute).Return(nil)
 		defer webhook.AssertExpectations(t)
 
 		mutator := engine.NewTestMutator(webhook, time.Minute, fileReader, fileWriter)
@@ -131,7 +131,7 @@ func TestMutationEngine_Mutate(t *testing.T) {
 		defer accessor.AssertExpectations(t)
 
 		webhook := new(hookMock.Webhook)
-		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything).Return(errors.New("test"))
+		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything, time.Minute).Return(errors.New("test"))
 		defer webhook.AssertExpectations(t)
 
 		mutator := engine.NewTestMutator(webhook, time.Minute, fileReader, fileWriter)

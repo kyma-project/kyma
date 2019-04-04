@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type webhook struct {
@@ -22,7 +23,7 @@ type HttpClient interface {
 
 //go:generate mockery -name=Webhook -output=automock -outpkg=automock -case=underscore
 type Webhook interface {
-	Do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}) error
+	Do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}, timeout time.Duration) error
 }
 
 func New(httpClient HttpClient) Webhook {
@@ -31,14 +32,17 @@ func New(httpClient HttpClient) Webhook {
 	}
 }
 
-func (w *webhook) Do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}) error {
+func (w *webhook) Do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}, timeout time.Duration) error {
+	context, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
 	req, err := http.NewRequest("POST", w.getWebhookUrl(webhook), body)
 	if err != nil {
 		return err
 	}
 
 	req.Header.Set("Content-Type", contentType)
-	req.WithContext(ctx)
+	req.WithContext(context)
 
 	rsp, err := w.httpClient.Do(req)
 	if err != nil {
