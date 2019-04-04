@@ -25,7 +25,7 @@ global:
     dir: pr/
     version: PR-3437
   connector_service_tests:
-    dir: develop/
+    dir: pr/
     version: PR-3437
   connection_token_handler:
     dir: develop/

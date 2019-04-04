@@ -49,7 +49,9 @@ spec:
           - "--revocationConfigMapName={{ .Values.deployment.args.revocationConfigMapName }}"
           - "--lookupEnabled={{ .Values.deployment.externalClusterLookup.enabled }}"
           - "--lookupConfigMapPath={{ .Values.deployment.externalClusterLookup.path }}"
-
+        volumeMounts:
+        - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+          mountPath: {{ .Values.deployment.externalClusterLookup.path }}
         env:
           - name: COUNTRY
             value: "{{ .Values.deployment.envvars.country }}"
@@ -70,11 +72,8 @@ spec:
             name: metrics-port
         securityContext:
           runAsUser: {{ .Values.deployment.runAsUser }}
-        voulumeMounts:
-        - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
-          mountPath: {{ .Values.deployment.externalClusterLookup.path }}
-    volumes:
-    - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
-      configMap:
-        name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+      volumes:
+      - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+        configMap:
+          name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
 
