@@ -11,7 +11,7 @@ kubectl get crd clusterdocstopics.cms.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample ClusterDocsTopic custom resource (CR) that provides details of the ClusterAsset CRs for the **redis**, **asyncapi**, **markdown**, and **openapi** source types.
+This is a sample ClusterDocsTopic custom resource (CR) that provides details of the ClusterAsset CRs for the **markdown** source type.
 
 ```
 apiVersion: cms.kyma-project.io/v1alpha1
@@ -46,11 +46,11 @@ This table lists all possible parameters of a given resource together with their
 
 | Parameter   |      Mandatory      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR. It also defines the respective **cms.kyma-project.io/docs-topic** label that is added to the Asset CR that the ClusterDocsTopic CR defines. Because of label name limitations, ClusterDocTopic names can have a maximum length of 63 characters. |
+| **metadata.name** |    **YES**   | Specifies the name of the CR. It also defines the **cms.kyma-project.io/docs-topic** label added to the Asset CR that the ClusterDocsTopic CR defines. Because of label name limitations, ClusterDocsTopic CR names can have a maximum length of 63 characters. |
 | **metadata.labels** |    **NO**   | Specifies how to filter and group ClusterAsset CRs that the ClusterDocsTopic CR defines. See [this](#details-headless-cms-in-console) document for more details. |
 | **spec.displayname** |    **YES**   | Specifies a human-readable name of the ClusterDocsTopic CR. |
 | **spec.description** |    **YES**   | Provides more details on the purpose of the ClusterDocsTopic CR. |
-| **spec.sources** |    **YES**   | Defines the type of the asset and a **type** label added to the ClusterAsset CR.  |
+| **spec.sources** |    **YES**   | Defines the type of the asset and the **cms.kyma-project.io/type** label added to the ClusterAsset CR.  |
 | **spec.sources.type** |    **YES**   | Specifies the type of assets included in the ClusterDocsTopic CR. |
 | **spec.sources.name** |    **YES**   | Defines a unique identifier of a given asset. It must be unique if there is more than one asset of a given type in a ClusterDocsTopic CR. |
 | **spec.sources.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files.  |
@@ -75,4 +75,4 @@ These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Asset Store |  Manages ClusterAsset CRs created based on the definition in the ClusterDocsTopic CRs. |
+| Asset Store |  Manages ClusterAsset CRs created based on the definition in the ClusterDocsTopic CR. |

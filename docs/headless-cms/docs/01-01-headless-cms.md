@@ -2,7 +2,7 @@
 title: Overview
 ---
 
-The Headless CMS is a new breed of traditional Content Management Systems (CMS) that provides a way of storing and managing raw content, and exposing it through an API. It allows you to pull this content into your own application and tailor it to your needs, delivering it in any format, on any device. Contrary to the traditional CMS, such as WordPress, the Headless CMS does not provide a display layer and ready-to-use templates. Instead, it only ensures the backend in the form of a database and gives flexibility on the choice of the frontend, thus cutting the default "head" off the traditional CMS solutions.
+The Headless CMS is a new breed of traditional Content Management Systems (CMS) that provides a way of storing and managing raw content, and exposing it through an API. It allows you to pull the content into your own application and tailor it to your needs, delivering it in any format, on any device. Contrary to the traditional CMS, such as WordPress, the Headless CMS does not provide a display layer and ready-to-use templates. Instead, it only ensures the backend in the form of a database. It gives flexibility on the choice of the frontend, thus cutting the default "head" off the traditional CMS solutions.
 
 ## Headless CMS in Kyma
 

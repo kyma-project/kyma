@@ -7,7 +7,7 @@ type: Details
 
 ## Asset CR manual changes
 
-The DocsTopic custom resource (CR) coordinates Asset CR creation, deletion, and modifications. The DocsTopic Controller verifies DocsTopic definition on a regular basis and creates, deletes, or modifies the Assets CRs accordingly.
+The DocsTopic custom resource (CR) coordinates Asset CR creation, deletion, and modifications. The DocsTopic Controller verifies DocsTopic definition on a regular basis and creates, deletes, or modifies Assets CRs accordingly.
 
 The DocsTopic CR acts as the only source of truth for the Asset CRs it orchestrates. If you modify or remove any of them manually, DocsTopic Controller automatically overwrites such an Asset CR or updates it based on the DocsTopic CR definition.
 
@@ -21,9 +21,9 @@ The name of every Asset CR created by the DocsTopic Controller consists of these
 
 - the name of the DocsTopic CR, such as `service-catalog`.
 - the source type of the given asset in the DocsTopic CR, such as `asyncapi`.
-- randomly generated string, such as `1b38grj5vcu1l`.
+- a randomly generated string, such as `1b38grj5vcu1l`.
 
-The full name of such an Asset CR following the **{docsTopic-name}-{asset-source}-{suffix}** pattern is **service-catalog-asyncapi-1b38grj5vcu1l**.
+The full name of such an Asset CR that follows the **{docsTopic-name}-{asset-source}-{suffix}** pattern is **service-catalog-asyncapi-1b38grj5vcu1l**.
 
 ### Labels
 

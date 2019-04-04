@@ -11,7 +11,7 @@ kubectl get crd docstopics.cms.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample DocsTopic custom resource (CR) that provides details of the Asset CRs for the **redis**, **asyncapi**, **markdown**, and **openapi** source types.
+This is a sample DocsTopic custom resource (CR) that provides details of the Asset CRs for the **markdown**, **asyncapi**, and **openapi** source types.
 
 ```
 apiVersion: cms.kyma-project.io/v1alpha1
@@ -50,11 +50,11 @@ This table lists all possible parameters of a given resource together with their
 
 | Parameter   |      Mandatory      |  Description |
 |----------|:-------------:|------|
-| **metadata.name** |    **YES**   | Specifies the name of the CR. It also defines the respective **cms.kyma-project.io/docs-topic** label that is added to the Asset CR that the DocsTopic CR defines. Because of label name limitations, DocTopic names can have a maximum length of 63 characters. |
+| **metadata.name** |    **YES**   | Specifies the name of the CR. It also defines the **cms.kyma-project.io/docs-topic** label added to the Asset CR that the DocsTopic CR defines. Because of label name limitations, DocsTopic CR names can have a maximum length of 63 characters. |
 | **metadata.labels** |    **NO**   | Specifies how to filter and group Asset CRs that the DocsTopic CR defines. See [this](#details-headless-cms-in-console) document for more details. |
 | **spec.displayname** |    **YES**   | Specifies a human-readable name of the DocsTopic CR. |
 | **spec.description** |    **YES**   | Provides more details on the purpose of the DocsTopic CR. |
-| **spec.sources** |    **YES**   | Defines the type of the asset and a **type** label added to the Asset CR.  |
+| **spec.sources** |    **YES**   | Defines the type of the asset and the **cms.kyma-project.io/type** label added to the Asset CR.  |
 | **spec.sources.type** |    **YES**   | Specifies the type of assets included in the DocsTopic CR. |
 | **spec.sources.name** |    **YES**   | Defines an identifier of a given asset. It must be unique if there is more than one asset of a given type in a DocsTopic CR. |
 | **spec.sources.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files.  |
@@ -79,4 +79,4 @@ These components use this CR:
 
 | Component   |   Description |
 |:----------:|:------|
-| Asset Store | Manages Asset CRs created based on the definition in the DocsTopic CRs. |
+| Asset Store | Manages Asset CRs created based on the definition in the DocsTopic CR. |
