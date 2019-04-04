@@ -59,7 +59,7 @@ receivers:
     icon_emoji: ":ghost:"
     title: '{{`{{ template "__subject" . }}`}} ({{ .Values.global.ingress.domainName }})'
     title_link: 'https://console.{{ .Values.global.ingress.domainName }}'
-    text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.description }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
+    text: '{{`{{ range .Alerts }}`}}<!channel>{{`{{- "\n" -}}`}}{{`{{ .Annotations.message }}`}}{{`{{- "\n" -}}`}}{{`{{ end }}`}}'
 {{- end }}
 {{- end }}
 {{- if .Values.webhook }}

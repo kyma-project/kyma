@@ -22,14 +22,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
 	defaultCheckInterval           = 2 * time.Second
 	appGatewayHealthCheckTimeout   = 15 * time.Second
-	accessServiceConnectionTimeout = 45 * time.Second
+	accessServiceConnectionTimeout = 60 * time.Second
 	apiServerAccessTimeout         = 60 * time.Second
-	dnsWaitTime                    = 35 * time.Second
+	dnsWaitTime                    = 30 * time.Second
 
 	mockServiceNameFormat     = "%s-gateway-test-mock-service"
 	testExecutorPodNameFormat = "%s-tests-test-executor"
@@ -134,8 +135,7 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 	url := fmt.Sprintf("http://app-%s-%s/%s", ts.config.Application, apiId, path)
 
 	t.Log("Waiting for DNS in Istio Proxy...")
-	// Sometimes Istio Proxy has problems with DNS
-	// this wait prevents random failures
+	// Wait for Istio Pilot to propagate DNS
 	time.Sleep(dnsWaitTime)
 
 	var resp *http.Response
@@ -215,6 +215,10 @@ func (ts *TestSuite) AddDenierLabel(t *testing.T, apiId string) {
 
 	pod.Labels[serviceName] = "true"
 
-	_, err = ts.podClient.Update(pod)
+	err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		_, err = ts.podClient.Update(pod)
+		return err
+	})
+
 	require.NoError(t, err)
 }
