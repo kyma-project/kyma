@@ -78,7 +78,7 @@ func readConfig(configFilePath string) (LookUpConfig, error) {
 }
 
 func createRequest(context clientcontext.ApplicationContext, config LookUpConfig) (*http.Request, error) {
-	query := `{"query":"{ applications(where: { accountId: "%s", groupName: "%s", appName: "%s"}) {name account { id } groups { id name clusters { id name endpoints { gateway } } } } } "}`
+	query := `query:{ applications(where: { accountId: "%s", groupName: "%s", appName: "%s"}) {name account { id } groups { id name clusters { id name endpoints { gateway } } } } }`
 
 	body := fmt.Sprintf(query, context.Tenant, context.Group, context.Application)
 
@@ -90,7 +90,11 @@ func createRequest(context clientcontext.ApplicationContext, config LookUpConfig
 		return nil, e
 	}
 
-	setHeaders(request, config)
+	for k, v := range config.Headers {
+		request.Header.Set(k, v)
+	}
+
+	log.Info("Request:", request)
 
 	return request, nil
 }
@@ -118,10 +122,4 @@ func getGatewayUrl(body []byte) gjson.Result {
 	stringBody := string(body)
 	gatewayUrl := gjson.Get(stringBody, "data.applications.0.groups.0.clusters.0.endpoints.gateway")
 	return gatewayUrl
-}
-
-func setHeaders(request *http.Request, config LookUpConfig) {
-	for k, v := range config.Headers {
-		request.Header.Set(k, v)
-	}
 }
