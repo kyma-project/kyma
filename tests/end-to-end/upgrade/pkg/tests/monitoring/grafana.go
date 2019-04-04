@@ -264,7 +264,6 @@ func (ut *GrafanaUpgradeTest) compareDashboards() error {
 
 	current, err := ut.collectDashboards()
 	if err != nil {
-		ut.log.Println("hallo")
 		return err
 	}
 	currentFiltered := filter(current, func(title string) bool {
