@@ -18,7 +18,7 @@ The whole concept of the Asset Store relies on the following components:
 
 - **Mutation Service** is an optional service which ensures that the asset is modified according to the mutation specification defined in the Asset CR before it is uploaded to the bucket. The service returns the modified asset to the AC.
 
-- [**Metadata Service**](#details-asset-metadata-service) is an optional service which enables extracting metadata from assets.
+- [**Metadata Service**](#details-asset-metadata-service) is an optional service which extracts metadata from assets. The metadata information is stored in the CR status. The service returns the asset metadata to the AC.
 
 - **Minio Gateway** is a Minio cluster mode which is a production-scalable storage solution. It ensures flexibility of using asset storage services from major cloud providers, including Azure Blob Storage, Amazon S3, and Google Cloud Storage.
 
