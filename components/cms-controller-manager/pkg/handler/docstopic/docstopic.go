@@ -345,6 +345,7 @@ func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucket
 			Filter:                   spec.Filter,
 			ValidationWebhookService: cfg.Validations,
 			MutationWebhookService:   cfg.Mutations,
+			MetadataWebhookService:   cfg.MetadataExtractors,
 		},
 		BucketRef: v1alpha2.AssetBucketRef{
 			Name: bucketName,

@@ -13,10 +13,11 @@ import (
 )
 
 type AssetWebHookConfigMap map[string]AssetWebHookConfig
-
+//FIXME remove dependency to assetstore by implementing types
 type AssetWebHookConfig struct {
-	Validations []v1alpha2.AssetWebhookService `json:"validations,omitempty"`
-	Mutations   []v1alpha2.AssetWebhookService `json:"mutations,omitempty"`
+	Validations        []v1alpha2.AssetWebhookService `json:"validations,omitempty"`
+	Mutations          []v1alpha2.AssetWebhookService `json:"mutations,omitempty"`
+	MetadataExtractors []v1alpha2.WebhookService      `json:"metadataExtractors,omitempty"`
 }
 
 type assetWebHookConfigService struct {
