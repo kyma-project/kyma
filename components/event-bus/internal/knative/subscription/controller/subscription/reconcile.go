@@ -20,6 +20,9 @@ const (
 
 	// Finalizer for deleting Knative Subscriptions
 	finalizerName = "subscription.finalizers.kyma-project.io"
+	subscriptionSourceID = "kyma-source-id"
+	subscriptionEventType = "kyma-event-type"
+	subscriptionEventTypeVersion = "kyma-event-type-version"
 )
 
 type reconciler struct {
@@ -155,9 +158,9 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 
 			//Adding the event-metadata as channel labels
 			knativeChannelLabels := make(map[string]string)
-			knativeChannelLabels["kyma-source-id"] = subscription.SourceID
-			knativeChannelLabels["kyma-event-type"] = subscription.EventType
-			knativeChannelLabels["kyma-event-type-version"] = subscription.EventTypeVersion
+			knativeChannelLabels[subscriptionSourceID] = subscription.SourceID
+			knativeChannelLabels[subscriptionEventType] = subscription.EventType
+			knativeChannelLabels[subscriptionEventTypeVersion] = subscription.EventTypeVersion
 
 			knativeChannel, err := r.knativeLib.CreateChannel(knativeChannelProvisioner, knativeChannelName,
 				knativeSubsNamespace, &knativeChannelLabels, timeout)
