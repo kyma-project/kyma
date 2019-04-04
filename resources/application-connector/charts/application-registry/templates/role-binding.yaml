@@ -18,7 +18,7 @@ rules:
   resources: ["rules", "deniers", "checknothings", "egressrules"]
   verbs: ["get", "update", "list", "create", "delete"]
 - apiGroups: ["cms.kyma-project.io"]
-  resources: ["docstopics", "assets"]
+  resources: ["clusterdocstopics", "assets"]
   verbs: ["get", "update", "list", "create", "delete"]
 
 ---
