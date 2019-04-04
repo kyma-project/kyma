@@ -14,6 +14,7 @@ import (
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	kymaApi "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	corev1 "k8s.io/api/core/v1"
 	extensionsv1 "k8s.io/api/extensions/v1beta1"
@@ -33,8 +34,6 @@ type LambdaFunctionUpgradeTest struct {
 	hostName           string
 	stop               <-chan struct{}
 }
-
-func int32Ptr(i int32) *int32 { return &i }
 
 // NewLambdaFunctionUpgradeTest returns new instance of the FunctionUpgradeTest
 func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kubernetes.Interface, kymaAPI kyma.Interface) *LambdaFunctionUpgradeTest {
@@ -68,15 +67,13 @@ func (f *LambdaFunctionUpgradeTest) CreateResources(stop <-chan struct{}, log lo
 
 	err = f.createAPI()
 	if err != nil {
-		log.Printf("create api %v", err)
-		return err
+		return errors.Wrap(err, "could not create api.")
 	}
 
 	// Ensure resources works
-	f.TestResources(stop, log, namespace)
+	err = f.TestResources(stop, log, namespace)
 	if err != nil {
-		log.Printf("First call to TestResources() failed %v", err)
-		return err
+		return errors.Wrap(err, "First call to TestResources() failed.")
 	}
 	return nil
 }
@@ -87,14 +84,14 @@ func (f *LambdaFunctionUpgradeTest) TestResources(stop <-chan struct{}, log logr
 	f.stop = stop
 	err := f.getFunctionPodStatus(10 * time.Minute)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "First call to TestResources() failed.")
 	}
 
 	host := fmt.Sprintf("https://%s", f.hostName)
 
 	value, err := f.getFunctionOutput(host, 1*time.Minute, log)
 	if err != nil {
-		return err
+		return errors.Wrapf(err, "Failed request to host %s.", host)
 	}
 
 	if !strings.Contains(value, f.uuid) {
@@ -273,3 +270,5 @@ func (f *LambdaFunctionUpgradeTest) createAPI() error {
 	_, err := f.apiClient.GatewayV1alpha2().Apis(f.nSpace).Create(api)
 	return err
 }
+
+func int32Ptr(i int32) *int32 { return &i }
