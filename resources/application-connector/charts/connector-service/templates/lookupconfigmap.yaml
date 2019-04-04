@@ -11,5 +11,5 @@ metadata:
     heritage: {{ .Release.Service }}
 data:
   config.json: |
-    { url: localhost:8080/v1/graphql, headers: { faros-xf-user: connector-service, faros-xf-groups: kyma-admins } }
+    { "url": "http://localhost:8080/v1/graphql", "headers": { "faros-xf-user": "connector-service", "faros-xf-groups": "kyma-admins" } }
   {{ end }}
