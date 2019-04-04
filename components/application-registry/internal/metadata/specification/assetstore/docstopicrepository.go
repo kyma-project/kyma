@@ -153,7 +153,7 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.ClusterDocsTopic {
 
 	return v1alpha1.ClusterDocsTopic{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "DocsTopic",
+			Kind:       "ClusterDocsTopic",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{

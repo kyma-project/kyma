@@ -171,8 +171,8 @@ func TestGetDocsTopic(t *testing.T) {
 	})
 }
 
-func createK8sDocsTopic() v1alpha1.DocsTopic {
-	return v1alpha1.DocsTopic{
+func createK8sDocsTopic() v1alpha1.ClusterDocsTopic {
+	return v1alpha1.ClusterDocsTopic{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "id1",
 			Namespace: "kyma-integration",
@@ -181,7 +181,7 @@ func createK8sDocsTopic() v1alpha1.DocsTopic {
 			},
 			ResourceVersion: "1",
 		},
-		Spec: v1alpha1.DocsTopicSpec{
+		Spec: v1alpha1.ClusterDocsTopicSpec{
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
 				DisplayName: "Some display name",
 				Description: "Some description",
