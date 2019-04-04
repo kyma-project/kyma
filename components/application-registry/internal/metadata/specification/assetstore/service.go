@@ -24,7 +24,7 @@ const (
 	eventsSpecFileName    = "asyncApiSpec.json"
 	odataXMLSpecFileName  = "odata.xml"
 	odataJSONSpecFileName = "odata.json"
-	docsTopicLabelKey     = "cms.kyma-project.io/viewContext"
+	docsTopicLabelKey     = "cms.kyma-project.io/view-context"
 	docsTopicLabelValue   = "service-catalog"
 )
 
