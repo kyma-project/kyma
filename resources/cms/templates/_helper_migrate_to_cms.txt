@@ -46,14 +46,6 @@ installDeps(){
     && chmod +x /usr/bin/mc
 }
 
-cleanupOfOldResources(){
-    echo "Deleting of old resources related to AssetStore and Headless CMS"
-    kubectl delete clusterdocstopics --all
-    kubectl delete docstopics --all --all-namespaces
-    kubectl delete clusterassets --all
-    kubectl delete assets --all --all-namespaces
-}
-
 createDocsTopic() {
 
 SC_ID=$1
@@ -125,7 +117,6 @@ createMigratedResources() {
 installDeps
 CONFIG_NAME="kymaminio"
 connectToMinio "$CONFIG_NAME"
-cleanupOfOldResources
 
 APPS_NAMES_ARRAY=($(getAppNames))
 
