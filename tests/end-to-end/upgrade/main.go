@@ -21,9 +21,8 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
-	monitoring "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
-	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
-	"k8s.io/client-go/dynamic"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 )
 
 // Config holds application configuration
@@ -74,9 +73,6 @@ func main() {
 
 	appBrokerCli, err := ab.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Application Broker clientset")
-
-	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating K8s dynamic clientset")
 
 	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kubeless clientset")
