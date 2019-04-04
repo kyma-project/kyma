@@ -7,7 +7,8 @@ The Application Registry allows you to register the APIs and Event catalogs of t
 
 The Application Registry stores the data of all registered services in:
 - Application custom resource (CR), which stores the metadata of the service.
-- Minio bucket, which stores the API specification, Event catalog and documentation.
+- Docs Topic Custom Resource (CR), which stores the links to API specification, Event catalog, and documentation.
+- Upload Service, which stores the files containing API specification, Event catalog, and documentation in an Asset Store bucket.
 - Kubernetes secrets, which stores sensitive data, such as OAuth credentials.
 
 ## Kubernetes APIs interaction
