@@ -74,11 +74,11 @@ global:
     dir: develop/
     version: 429bfbcc
   console_backend_service:
-    dir: develop/
-    version: fb988e9e
+    dir: pr/
+    version: PR-3611
   console_backend_service_test:
-    dir: develop/
-    version: 917c1b97
+    dir: pr/
+    version: PR-3611
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

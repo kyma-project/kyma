@@ -2,5 +2,5 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   cms_controller_manager:
-    dir: develop/
-    version: df58d5ba
+    dir: pr/
+    version: PR-3455
