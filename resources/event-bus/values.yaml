@@ -7,7 +7,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: develop/
-    version: c157195c
+    version: a4acd811
   event_bus_tests:
     dir: develop/
     version: f4c58b01
