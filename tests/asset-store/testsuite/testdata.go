@@ -138,7 +138,7 @@ func uploadedFiles(ref v1alpha2.AssetStatusRef, ownerName, ownerKind string) []u
 	var files []uploadedFile
 
 	for _, singleAsset := range ref.Files {
-		url := fmt.Sprintf("%s/%s", ref.BaseURL, singleAsset)
+		url := fmt.Sprintf("%s/%s", ref.BaseURL, singleAsset.Name)
 		files = append(files, uploadedFile{
 			AssetPath: singleAsset.Name,
 			URL:       url,
