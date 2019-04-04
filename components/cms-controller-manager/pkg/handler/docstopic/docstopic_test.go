@@ -539,7 +539,7 @@ func commonAsset(name, assetType, docsName, bucketName string, source v1alpha1.S
 		},
 		Spec: v1alpha2.CommonAssetSpec{
 			Source: v1alpha2.AssetSource{
-				Url:    source.URL,
+				URL:    source.URL,
 				Mode:   v1alpha2.AssetMode(source.Mode),
 				Filter: source.Filter,
 			},

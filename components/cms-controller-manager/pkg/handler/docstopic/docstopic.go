@@ -341,7 +341,7 @@ func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucket
 	return v1alpha2.CommonAssetSpec{
 		Source: v1alpha2.AssetSource{
 			Mode:                     h.convertToAssetMode(spec.Mode),
-			Url:                      spec.URL,
+			URL:                      spec.URL,
 			Filter:                   spec.Filter,
 			ValidationWebhookService: cfg.Validations,
 			MutationWebhookService:   cfg.Mutations,

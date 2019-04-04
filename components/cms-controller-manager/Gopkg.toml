@@ -26,7 +26,9 @@ required = [
 
 [[constraint]]
   name="github.com/kyma-project/kyma"
-  revision="cbd820fd14c70f6e6426312a01442fa62b659bd8"
+#  revision="cbd820fd14c70f6e6426312a01442fa62b659bd8"
+  source = "https://github.com/michal-hudy/kyma.git" # TODO: change before merge
+  revision = "aae78fc8e4fa93134e6996a103a4f34ccb1ec55e" # TODO: change before merge
 
 [[constraint]]
   name = "github.com/pkg/errors"
