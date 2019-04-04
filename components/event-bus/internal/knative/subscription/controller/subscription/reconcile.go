@@ -20,6 +20,7 @@ const (
 
 	// Finalizer for deleting Knative Subscriptions
 	finalizerName = "subscription.finalizers.kyma-project.io"
+	
 	subscriptionSourceID = "kyma-source-id"
 	subscriptionEventType = "kyma-event-type"
 	subscriptionEventTypeVersion = "kyma-event-type-version"
