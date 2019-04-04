@@ -34,15 +34,15 @@ func (cc *runtimeURLsMiddleware) Middleware(handler http.Handler) http.Handler {
 		}
 
 		if cc.lookupEnabled {
-			appCtx, err := cc.applicationContextExtractor(r.Context())
-			if err != nil {
-				httphelpers.RespondWithError(w, apperrors.Internal("Could not read Application Context. %s", err))
+			appCtx, appError := cc.applicationContextExtractor(r.Context())
+			if appError != nil {
+				httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Could not read Application Context. %s", appError))
 				return
 			}
 			fetchedGatewayHost, appErr := cc.lookupService.Fetch(appCtx, cc.lookupConfigPath)
 
 			if appErr != nil {
-				httphelpers.RespondWithError(w, apperrors.Internal("Could not fetch gateway URL. %s", err))
+				httphelpers.RespondWithErrorAndLog(w, apperrors.Internal("Could not fetch gateway URL. %s", appErr))
 			}
 			runtimeURLs.EventsHost = fetchedGatewayHost
 			runtimeURLs.MetadataHost = fetchedGatewayHost

@@ -58,7 +58,7 @@ func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.
 func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider,
 	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository) http.Handler {
 
-	lookupEnabled := clientcontext.LookupEnabledType(opts.central)
+	lookupEnabled := clientcontext.LookupEnabledType(opts.lookupEnabled)
 
 	lookupService := middlewares.NewGraphQLLookupService()
 
