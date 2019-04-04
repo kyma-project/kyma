@@ -9,7 +9,7 @@ Included releases:
 
 Kyma-specific changes:
 
-* The images are changed to custom ones created from `kyma-incubator/eventing`.
-* New environment variables: `EB_USER` and `EB_PASS` added for authentication.
-* Environment variables `DEFAULT_CLUSTER_ID` and `DEFAULT_NATSS_URL` are set for Kyma-specific needs.
+* The images changed to custom ones created from `kyma-incubator/eventing`.
+* New environment variables: **{EB_USER}** and **{EB_PASS}** added for authentication.
+* Environment variables **{DEFAULT_CLUSTER_ID}** and **{DEFAULT_NATSS_URL}** set for Kyma-specific needs.
 * A new label `rand` added to Deployments to force Pod restart during the upgrade.
