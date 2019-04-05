@@ -56,3 +56,4 @@ rules:
   verbs:
   - get
   - watch
+  - list

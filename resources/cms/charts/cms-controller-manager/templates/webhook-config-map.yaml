@@ -9,8 +9,6 @@ metadata:
 data:
   "markdown": |-
     {
-      "validations":[],
-      "mutations":[]
       "metadataExtractors":[
           {
               "name": "assetstore-asset-metadata-service",
