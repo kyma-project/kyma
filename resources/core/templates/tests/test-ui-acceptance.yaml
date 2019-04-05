@@ -57,6 +57,23 @@ spec:
       volumeMounts:
         - name: dex-config
           mountPath: /etc/dex/cfg
+    - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+      name: manager
+      command:
+        - bin/sh
+        - -c
+        - |
+          SERVICE="npm"
+          while true; do
+          if pgrep -x "${SERVICE}"; then
+            echo "---> ${SERVICE} is running."
+              sleep 10
+            else
+              echo "---> ${SERVICE} has stopped, stopping istio"
+              pkill -TERM pilot-agent
+              break
+            fi
+          done
   # Needed for detecting if static user is disabled
   volumes:
     - name: dex-config
