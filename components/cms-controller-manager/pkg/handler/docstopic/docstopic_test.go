@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/automock"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
 	"github.com/onsi/gomega"
+	"github.com/onsi/gomega/types"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -20,6 +21,77 @@ import (
 )
 
 var log = logf.Log.WithName("docstopic-test")
+
+func Test_findSource(t *testing.T) {
+	findSource := docstopic.FindSource()
+	g := gomega.NewGomegaWithT(t)
+	testSource1 := v1alpha1.Source{
+		Name:   "test",
+		Type:   "me",
+		URL:    "test.it",
+		Mode:   "mode1",
+		Filter: "*",
+	}
+
+	tests := []struct {
+		name     string
+		srcSlice []v1alpha1.Source
+		srcName  string
+		srcType  string
+		matcher  types.GomegaMatcher
+	}{
+		{
+			name:     "empty slice",
+			srcSlice: []v1alpha1.Source{},
+			srcName:  "name",
+			srcType:  "type",
+			matcher:  gomega.BeNil(),
+		},
+		{
+			name:     "nil slice",
+			srcSlice: nil,
+			srcName:  "name",
+			srcType:  "type",
+			matcher:  gomega.BeNil(),
+		},
+		{
+			name:     "found",
+			srcSlice: []v1alpha1.Source{testSource1},
+			srcName:  "test",
+			srcType:  "me",
+			matcher:  gomega.Equal(&testSource1),
+		},
+		{
+			name:     "not found",
+			srcSlice: []v1alpha1.Source{},
+			srcName:  "test",
+			srcType:  "me",
+			matcher:  gomega.BeNil(),
+		},
+		{
+			name: "found2",
+			srcSlice: []v1alpha1.Source{
+				v1alpha1.Source{
+					Name:   "test",
+					Type:   "me2",
+					URL:    "test.it",
+					Mode:   "mode1",
+					Filter: "*",
+				},
+				testSource1,
+			},
+			srcName: "test",
+			srcType: "me",
+			matcher: gomega.Equal(&testSource1),
+		},
+	}
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual := findSource(test.srcSlice, test.srcName, test.srcType)
+			g.Expect(actual).To(test.matcher)
+		})
+	}
+}
 
 func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 	sourceName := "t1"
