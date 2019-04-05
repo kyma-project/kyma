@@ -25,7 +25,9 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "b8d7d2a88572aa88d2d496d0666e23a807331aff"
+#  branch = "master" # TODO: change before merge
+  source = "https://github.com/michal-hudy/kyma.git" # TODO: change before merge
+  revision = "a78ab0459f488707613a2284c9fb86b9d3d130d3" # TODO: change before merge
 
 [[constraint]]
   name = "github.com/gorilla/websocket"
