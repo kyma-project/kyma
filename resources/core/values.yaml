@@ -50,9 +50,9 @@ global:
     version: aabedc33
   docs:
     dir: develop/
-    version: a54ac464
-    # - Change value below to branch from your fork if you want point to documentation sources from your fork
-    # - Change value below to release branch during release
+    version: f885434d
+    # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
+    # - Change the value below to the release branch during release
     # Example: clusterDocsTopicsVersion: "0.9.0"
     clusterDocsTopicsVersion: master
   namespace_controller:
