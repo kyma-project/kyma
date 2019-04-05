@@ -3,19 +3,27 @@ kind: Deployment
 metadata:
   name: {{ template "fullname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: core-{{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: core-{{ template "name" . }}
+      release: {{ .Release.Name }}
+      kyma-alerts: enabled
+      kyma-component: ui
+      kyma-grafana: enabled
   template:
     metadata:
-      annotations:
-        sidecar.istio.io/inject: "false"
       labels:
-        app: {{ template "name" . }}
+        app: core-{{ template "name" . }}
         release: {{ .Release.Name }}
+        kyma-alerts: enabled
+        kyma-component: ui
+        kyma-grafana: enabled
     spec:
       containers:
         - name: {{ .Chart.Name }}

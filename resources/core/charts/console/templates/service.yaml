@@ -5,7 +5,7 @@ metadata:
   annotations:
     "auth.istio.io/{{ .Values.service.externalPort }}": NONE  
   labels:
-    app: {{ template "name" . }}
+    app: core-{{ template "name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -15,6 +15,6 @@ spec:
       name: http2
       targetPort: {{ .Values.service.internalPort }}      
   selector:
-    app: {{ template "name" . }}
+    app: core-{{ template "name" . }}
     release: {{ .Release.Name }}
 

@@ -17,7 +17,10 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -a -o manager github.com/kyma
 # Copy the controller-manager into a thin image
 FROM alpine:3.7
 LABEL source=git@github.com:kyma-project/kyma.git
+
 WORKDIR /root/
+RUN apk --no-cache upgrade && apk --no-cache add curl
+
 COPY --from=builder /go/src/github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-subscription-controller-knative/manager .
 
 EXPOSE 8080

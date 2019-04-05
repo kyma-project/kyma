@@ -33,51 +33,51 @@ func TestSpecService_PutSpec(t *testing.T) {
 		// given
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: baseApiSpec, ApiType: ""})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should modify and save inline swagger spec", func(t *testing.T) {
 		// given
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: swaggerApiSpec})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should not modify spec if ApiType set to oData", func(t *testing.T) {
 		// given
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: swaggerApiSpec, ApiType: oDataSpecType})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.ODataApiType, baseDocs, swaggerApiSpec, baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.ODataApiType, baseDocs, swaggerApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should fetch and save spec", func(t *testing.T) {
@@ -89,17 +89,17 @@ func TestSpecService_PutSpec(t *testing.T) {
 
 		serviceDef := defaultServiceDefWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should fetch spec if spec equal to null", func(t *testing.T) {
@@ -111,17 +111,17 @@ func TestSpecService_PutSpec(t *testing.T) {
 
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: []byte("null"), SpecificationUrl: specServer.URL + "/path"})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should fetch, modify and save spec", func(t *testing.T) {
@@ -133,17 +133,17 @@ func TestSpecService_PutSpec(t *testing.T) {
 
 		serviceDef := defaultServiceDefWithAPI(&model.API{SpecificationUrl: specServer.URL + "/path"})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should return UpstreamServerCallFailed error when failed to fetch spec", func(t *testing.T) {
@@ -152,9 +152,9 @@ func TestSpecService_PutSpec(t *testing.T) {
 
 		serviceDef := defaultServiceDefWithAPI(&model.API{SpecificationUrl: specServer.URL})
 
-		minioSvc := &mocks.Service{}
+		assetStoreSvc := &mocks.Service{}
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -173,61 +173,61 @@ func TestSpecService_PutSpec(t *testing.T) {
 
 		serviceDef := defaultServiceDefWithAPI(&model.API{TargetUrl: specServer.URL, ApiType: oDataSpecType})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.ODataApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.ODataApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should save empty spec when no spec url provided and api type is not OData", func(t *testing.T) {
 		// given
 		serviceDef := defaultServiceDefWithAPI(&model.API{})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, []byte(nil), baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, []byte(nil), baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should skip processing api spec if api not specified", func(t *testing.T) {
 		// given
 		serviceDef := defaultServiceDefWithAPI(nil)
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.NoneApiType, baseDocs, []byte(nil), baseEventSpec).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.NoneApiType, baseDocs, []byte(nil), baseEventSpec).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
 
 		// then
 		require.NoError(t, err)
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 
 	t.Run("should return error when saving to Minio failed", func(t *testing.T) {
 		// given
 		serviceDef := defaultServiceDefWithAPI(&model.API{Spec: baseApiSpec})
 
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(apperrors.Internal("Error"))
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(apperrors.Internal("Error"))
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -235,7 +235,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		// then
 		require.Error(t, err)
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
-		minioSvc.AssertExpectations(t)
+		assetStoreSvc.AssertExpectations(t)
 	})
 }
 
@@ -243,10 +243,10 @@ func TestSpecService_GetSpec(t *testing.T) {
 
 	t.Run("should get spec", func(t *testing.T) {
 		// given
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Get", serviceId).Return(baseDocs, baseApiSpec, baseEventSpec, nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Get", serviceId).Return(baseDocs, baseApiSpec, baseEventSpec, nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		docs, apiSpec, eventsSpec, err := specService.GetSpec(serviceId)
@@ -260,10 +260,10 @@ func TestSpecService_GetSpec(t *testing.T) {
 
 	t.Run("should return error if getting speec failed", func(t *testing.T) {
 		// given
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Get", serviceId).Return(nil, nil, nil, apperrors.Internal("Error"))
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Get", serviceId).Return(nil, nil, nil, apperrors.Internal("Error"))
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		docs, apiSpec, eventsSpec, err := specService.GetSpec(serviceId)
@@ -281,10 +281,10 @@ func TestSpecService_RemoveSpec(t *testing.T) {
 
 	t.Run("should delete spec", func(t *testing.T) {
 		// given
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Remove", serviceId).Return(nil)
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Remove", serviceId).Return(nil)
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.RemoveSpec(serviceId)
@@ -295,10 +295,10 @@ func TestSpecService_RemoveSpec(t *testing.T) {
 
 	t.Run("should return error when failed to remove spec", func(t *testing.T) {
 		// given
-		minioSvc := &mocks.Service{}
-		minioSvc.On("Remove", serviceId).Return(apperrors.Internal("Error"))
+		assetStoreSvc := &mocks.Service{}
+		assetStoreSvc.On("Remove", serviceId).Return(apperrors.Internal("Error"))
 
-		specService := NewSpecService(minioSvc)
+		specService := NewSpecService(assetStoreSvc)
 
 		// when
 		err := specService.RemoveSpec(serviceId)

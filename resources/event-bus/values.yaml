@@ -7,7 +7,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: develop/
-    version: 24302b4a
+    version: c157195c
   event_bus_tests:
     dir: develop/
     version: f4c58b01
@@ -23,7 +23,10 @@ global:
   publishKnative:
     maxRequests: 16
     maxRequestSize: 65536
-    maxChannelNameLength: 63
+    maxChannelNameLength: 32
+    maxSourceIDLength: 253
+    maxEventTypeLength: 253
+    maxEventTypeVersionLength: 4
     resources:
       limits:
         memory: "32M"
