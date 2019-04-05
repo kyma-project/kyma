@@ -359,7 +359,7 @@ func convertToWebhookService(services []config.WebhookService) []v1alpha2.Webhoo
 	if servicesLen < 1 {
 		return nil
 	}
-	result := make([]v1alpha2.WebhookService, len(services))
+	result := make([]v1alpha2.WebhookService, 0, len(services))
 	for i, service := range services {
 		result[i] = v1alpha2.WebhookService{
 			Name:      service.Name,
@@ -376,7 +376,7 @@ func convertToAssetWebhookServices(services []config.AssetWebhookService) []v1al
 	if servicesLen < 1 {
 		return nil
 	}
-	result := make([]v1alpha2.AssetWebhookService, len(services))
+	result := make([]v1alpha2.AssetWebhookService, 0, len(services))
 	for i, s := range services {
 		result[i] = v1alpha2.AssetWebhookService{
 			WebhookService: v1alpha2.WebhookService{

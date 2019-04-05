@@ -3,11 +3,11 @@ package config
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -35,7 +35,7 @@ type AssetWebhookConfig struct {
 }
 
 type assetWebhookConfigService struct {
-	client                 Client
+	indexer                Indexer
 	webhookCfgMapName      string
 	webhookCfgMapNamespace string
 }
@@ -50,24 +50,33 @@ type AssetWebhookConfigService interface {
 	Get(ctx context.Context) (AssetWebhookConfigMap, error)
 }
 
-func NewAssetWebhookService(client Client, webhookCfgMapName, webhookCfgMapNamespace string) *assetWebhookConfigService {
+//go:generate mockery -name=Indexer -output=automock -outpkg=automock -case=underscore
+type Indexer interface {
+	GetByKey(key string) (item interface{}, exists bool, err error)
+}
+
+func New(indexer Indexer, webhookCfgMapName, webhookCfgMapNamespace string) *assetWebhookConfigService {
 	return &assetWebhookConfigService{
-		client:                 client,
+		indexer:                indexer,
 		webhookCfgMapName:      webhookCfgMapName,
 		webhookCfgMapNamespace: webhookCfgMapNamespace,
 	}
 }
 
 func (r *assetWebhookConfigService) Get(ctx context.Context) (AssetWebhookConfigMap, error) {
-	instance := &v1.ConfigMap{}
-	err := r.client.Get(ctx, types.NamespacedName{Name: r.webhookCfgMapName, Namespace: r.webhookCfgMapNamespace}, instance)
-	if err != nil {
+	key := fmt.Sprintf("%s/%s", r.webhookCfgMapNamespace, r.webhookCfgMapName)
+	item, exists, err := r.indexer.GetByKey(key)
+	if err != nil || !exists {
 		if apiErrors.IsNotFound(err) {
 			return nil, nil
 		}
-		return nil, errors.Wrapf(err, "while getting web hook configuration in namespace %s", r.webhookCfgMapNamespace)
+		return nil, errors.Wrapf(err, "while getting webhook configuration in namespace %s", r.webhookCfgMapNamespace)
 	}
-	return toAssetWhsConfig(*instance)
+	cfgMap, ok := item.(*v1.ConfigMap)
+	if !ok {
+		return nil, fmt.Errorf("incorrect item type: %T, should be: *v1.ConfigMap", item)
+	}
+	return toAssetWhsConfig(*cfgMap)
 }
 
 func toAssetWhsConfig(configMap v1.ConfigMap) (AssetWebhookConfigMap, error) {

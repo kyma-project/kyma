@@ -8,6 +8,7 @@ import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/source"
 	"github.com/onsi/gomega"
+	coreV1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
@@ -31,10 +32,12 @@ func TestReconcile(t *testing.T) {
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	c := mgr.GetClient()
+	informer, err := mgr.GetCache().GetInformer(&coreV1.ConfigMap{})
+	g.Expect(err).To(gomega.BeNil())
 	scheme := mgr.GetScheme()
 	assetService := newClusterAssetService(c, scheme)
 	bucketService := newClusterBucketService(c, scheme, "")
-	assetWhsConfigService := config.NewAssetWebhookService(c, webhookCfgMapName, webhookCfgMapNamespace)
+	assetWhsConfigService := config.New(informer.GetIndexer(), webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileClusterDocsTopic{
 		relistInterval: time.Hour,

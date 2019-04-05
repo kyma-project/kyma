@@ -36,7 +36,11 @@ func Add(mgr manager.Manager) error {
 	scheme := mgr.GetScheme()
 	assetService := newClusterAssetService(client, scheme)
 	bucketService := newClusterBucketService(client, scheme, cfg.ClusterBucketRegion)
-	webhookCfgService := config.NewAssetWebhookService(client, cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
+	informer, err := mgr.GetCache().GetInformer(&v1.ConfigMap{})
+	if err != nil {
+		return errors.Wrapf(err, "while getting informer for ConfigMap")
+	}
+	webhookCfgService := config.New(informer.GetIndexer(), cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
 
 	reconciler := &ReconcileClusterDocsTopic{
 		relistInterval: cfg.ClusterDocsTopicRelistInterval,

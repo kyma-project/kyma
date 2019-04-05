@@ -31,12 +31,15 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return errors.Wrapf(err, "while loading configuration")
 	}
-
 	client := mgr.GetClient()
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(client, scheme)
 	bucketService := newBucketService(client, scheme, cfg.BucketRegion)
-	webhookCfgService := config.NewAssetWebhookService(client, cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
+	informer, err := mgr.GetCache().GetInformer(&v1.ConfigMap{})
+	if err != nil {
+		return errors.Wrapf(err, "while getting informer for ConfigMap")
+	}
+	webhookCfgService := config.New(informer.GetIndexer(), cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
 
 	reconciler := &ReconcileDocsTopic{
 		relistInterval:   cfg.DocsTopicRelistInterval,

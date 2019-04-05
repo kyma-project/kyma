@@ -17,42 +17,50 @@ var (
 	webhookCfgMapNamespace = "test"
 )
 
-func Test_assetWhsConfigService(t *testing.T) {
+func TestAssetWebhookConfigService_Get(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	t.Run("Get", func(t *testing.T) {
-		client := automock.Client{}
+		indexer := automock.Indexer{}
+		defer indexer.AssertExpectations(t)
+
 		ctx := context.TODO()
-		call := client.On("Get", ctx, mock.Anything, &v1.ConfigMap{})
+		call := indexer.On("GetByKey", mock.AnythingOfType("string"))
 
 		t.Run("nil result", func(t *testing.T) {
-			call.Return(nil).Once()
-			service := config.NewAssetWebhookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			call.Return(nil, false, nil).Once()
+			service := config.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).To(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeEmpty())
 		})
 
 		t.Run("ok", func(t *testing.T) {
-			call.Run(mockValidConfigMap()).Return(nil).Once()
-			service := config.NewAssetWebhookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
-			actual, err := service.Get(ctx)
+			call.Return(mockConfigMap(map[string]string{
+				"markdown": `{"validations":[{"name":"markdown-validation"}],"mutations":[{"name":"markdown-mutation"}]}`,
+				"openapi":  `{"validations":[{"name":"openapi-validation"}],"mutations":[{"name":"openapi-mutation"}]}`,
+				"unknow":   `{"test": ["me"]}`,
+			}), true, nil).Once()
+			service := config.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
+			_, err := service.Get(ctx)
 			g.Expect(err).To(gomega.BeNil())
-			g.Expect(actual).To(gomega.Equal(actual))
 		})
 
 		t.Run("err", func(t *testing.T) {
 			testError := errors.New("test_error")
-			call.Return(testError).Once()
-			service := config.NewAssetWebhookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			call.Return(nil, false, testError).Once()
+			service := config.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).NotTo(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeNil())
 		})
 
 		t.Run("err-unmarshal", func(t *testing.T) {
-			call.Return(nil).Run(mockInvalidConfigMap()).Once()
-			service := config.NewAssetWebhookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			call.Return(mockConfigMap(map[string]string{
+				"openapi": `{"validations":[{"name":"openapi-validation"}],"mutations":[{"name":"openapi-mutation"}]}`,
+				"watch":   "me explode",
+			}), true, nil).Once()
+			service := config.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).NotTo(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeNil())
@@ -60,24 +68,8 @@ func Test_assetWhsConfigService(t *testing.T) {
 	})
 }
 
-func mockConfigMap(cfgMapContent map[string]string) func(mock.Arguments) {
-	return func(args mock.Arguments) {
-		cm := args[2].(*v1.ConfigMap)
-		cm.Data = cfgMapContent
+func mockConfigMap(cfgMapContent map[string]string) *v1.ConfigMap {
+	return &v1.ConfigMap{
+		Data: cfgMapContent,
 	}
-}
-
-func mockValidConfigMap() func(args mock.Arguments) {
-	return mockConfigMap(map[string]string{
-		"markdown": `{"validations":[{"name":"markdown-validation"}],"mutations":[{"name":"markdown-mutation"}]}`,
-		"openapi":  `{"validations":[{"name":"openapi-validation"}],"mutations":[{"name":"openapi-mutation"}]}`,
-		"unknow":   `{"test": ["me"]}`,
-	})
-}
-
-func mockInvalidConfigMap() func(args mock.Arguments) {
-	return mockConfigMap(map[string]string{
-		"openapi": `{"validations":[{"name":"openapi-validation"}],"mutations":[{"name":"openapi-mutation"}]}`,
-		"watch":   "me explode",
-	})
 }
