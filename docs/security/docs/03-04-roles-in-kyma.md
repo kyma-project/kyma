@@ -17,7 +17,7 @@ The predefined roles, arranged in the order of increasing access level, are:
 | Role | Description |
 | --- | --- |
 | **kyma-essentials** | The basic role required to allow the users to see the Console UI of the cluster. This role doesn't give the user rights to modify any resources. |
-| **kyma-view** | The role allowing to get and list Kubernetes resources and Kyma-specific resources. |
+| **kyma-view** | The role allowing to list Kubernetes and Kyma-specific resources. |
 | **kyma-edit** | The role allowing to edit Kyma-specific resources.  |
 | **kyma-developer** | The role created for developers who build implementations using Kyma. It allows you to list and edit Kubernetes and Kyma-specific resources. |
 | **kyma-admin** | The role with the highest permission level allowing to access all Kubernetes and Kyma resources and components with administrative rights. |
