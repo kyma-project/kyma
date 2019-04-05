@@ -43,7 +43,7 @@ type LambdaFunctionUpgradeTest struct {
 func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kubernetes.Interface, kymaAPI kyma.Interface) *LambdaFunctionUpgradeTest {
 	domainName := os.Getenv("DOMAIN")
 	if len(domainName) == 0 {
-		logrus.Fatal()
+		logrus.Fatal("Environment variable DOMAIN is not found.")
 	}
 	nSpace := strings.ToLower("LambdaFunctionUpgradeTest")
 	hostName := fmt.Sprintf("%s-%s.%s", "hello", nSpace, domainName)
