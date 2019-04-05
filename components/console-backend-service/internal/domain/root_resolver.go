@@ -215,8 +215,8 @@ func (r *mutationResolver) DeleteConfigMap(ctx context.Context, name string, nam
 	return r.k8s.DeleteConfigMapMutation(ctx, name, namespace)
 }
 
-func (r *mutationResolver) CreateServiceInstance(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
-	return r.sc.Resolver.CreateServiceInstanceMutation(ctx, params)
+func (r *mutationResolver) CreateServiceInstance(ctx context.Context, namespace string, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
+	return r.sc.Resolver.CreateServiceInstanceMutation(ctx, namespace, params)
 }
 
 func (r *mutationResolver) DeleteServiceInstance(ctx context.Context, name string, namespace string) (*gqlschema.ServiceInstance, error) {
@@ -231,8 +231,8 @@ func (r *mutationResolver) DeleteServiceBinding(ctx context.Context, serviceBind
 	return r.sc.Resolver.DeleteServiceBindingMutation(ctx, serviceBindingName, ns)
 }
 
-func (r *mutationResolver) CreateServiceBindingUsage(ctx context.Context, createServiceBindingUsageInput *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
-	return r.sca.Resolver.CreateServiceBindingUsageMutation(ctx, createServiceBindingUsageInput)
+func (r *mutationResolver) CreateServiceBindingUsage(ctx context.Context, namespace string, createServiceBindingUsageInput *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
+	return r.sca.Resolver.CreateServiceBindingUsageMutation(ctx, namespace, createServiceBindingUsageInput)
 }
 
 func (r *mutationResolver) DeleteServiceBindingUsage(ctx context.Context, serviceBindingUsageName string, ns string) (*gqlschema.DeleteServiceBindingUsageOutput, error) {

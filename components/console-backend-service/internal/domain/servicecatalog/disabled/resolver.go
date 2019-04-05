@@ -141,8 +141,8 @@ func (_m *Resolver) CreateServiceBindingMutation(ctx context.Context, serviceBin
 	return r0, r1
 }
 
-// CreateServiceInstanceMutation provides a failing mock function with given fields: ctx, params
-func (_m *Resolver) CreateServiceInstanceMutation(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
+// CreateServiceInstanceMutation provides a failing mock function with given fields: ctx, namespace, params
+func (_m *Resolver) CreateServiceInstanceMutation(ctx context.Context, namespace string, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
 	var r0 *gqlschema.ServiceInstance
 	var r1 error
 	r1 = _m.err

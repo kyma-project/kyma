@@ -6,11 +6,11 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
-
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -62,31 +62,17 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query {
-				clusterServiceClasses {
-					%s
-				}
-			}	
-		`, resourceDetailsQuery)
+		req := fixClusterServiceClassesRequest(resourceDetailsQuery)
 
 		var res clusterServiceClassesQueryResponse
-		err = c.DoQuery(query, &res)
+		err = c.Do(req, &res)
 
 		require.NoError(t, err)
 		assertClusterClassExistsAndEqual(t, res.ClusterServiceClasses, expectedResource)
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query ($name: String!) {
-				clusterServiceClass(name: $name) {
-					%s
-				}
-			}	
-		`, resourceDetailsQuery)
-		req := graphql.NewRequest(query)
-		req.SetVar("name", expectedResource.Name)
+		req := fixClusterServiceClassRequest(resourceDetailsQuery, expectedResource.Name)
 
 		var res clusterServiceClassQueryResponse
 		err = c.Do(req, &res)
@@ -94,6 +80,13 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 		require.NoError(t, err)
 		checkClusterClass(t, expectedResource, res.ClusterServiceClass)
 	})
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:  {fixClusterServiceClassRequest(resourceDetailsQuery, "test")},
+		auth.List: {fixClusterServiceClassesRequest(resourceDetailsQuery)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func checkClusterClass(t *testing.T, expected, actual shared.ClusterServiceClass) {
@@ -164,4 +157,30 @@ func clusterServiceClass() shared.ClusterServiceClass {
 			},
 		},
 	}
+}
+
+func fixClusterServiceClassRequest(resourceDetailsQuery, name string) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($name: String!) {
+				clusterServiceClass(name: $name) {
+					%s
+				}
+			}	
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("name", name)
+
+	return req
+}
+
+func fixClusterServiceClassesRequest(resourceDetailsQuery string) *graphql.Request {
+	query := fmt.Sprintf(`
+			query {
+				clusterServiceClasses {
+					%s
+				}
+			}	
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	return req
 }

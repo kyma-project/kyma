@@ -18,11 +18,13 @@ const (
 )
 
 type Client struct {
-	gqlClient *graphql.Client
-	token     string
-	endpoint  string
-	logs      []string
-	Config    config
+	gqlClient    *graphql.Client
+	token        string
+	cachedTokens map[User]string
+	endpoint     string
+	logs         []string
+	logging      bool
+	Config       config
 }
 
 func New() (*Client, error) {
@@ -43,14 +45,17 @@ func New() (*Client, error) {
 		gqlClient: gqlClient,
 		token:     token,
 		endpoint:  config.GraphQLEndpoint,
+		logging:   true,
 		logs:      []string{},
 		Config:    config,
 	}
 
 	client.gqlClient.Log = client.addLog
 
-	return client, nil
+	client.cachedTokens = make(map[User]string)
+	client.cachedTokens[AdminUser] = token
 
+	return client, nil
 }
 
 func (c *Client) DoQuery(q string, res interface{}) error {
@@ -115,9 +120,14 @@ func (c *Client) ChangeUser(user User) error {
 	}
 
 	if user != NoUser {
-		token, err = authenticate(config.IdProviderConfig)
-		if err != nil {
-			return err
+		if c.cachedTokens[user] != "" {
+			token = c.cachedTokens[user]
+		} else {
+			token, err = authenticate(config.IdProviderConfig)
+			if err != nil {
+				return err
+			}
+			c.cachedTokens[user] = token
 		}
 	} else {
 		token = ""
@@ -134,7 +144,15 @@ func (c *Client) ChangeUser(user User) error {
 	return nil
 }
 
+func (c *Client) DisableLogging() {
+	c.logging = false
+}
+
 func (c *Client) addLog(log string) {
+	if !c.logging {
+		return
+	}
+
 	c.logs = append(c.logs, log)
 }
 
