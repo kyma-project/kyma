@@ -56,6 +56,27 @@ VsfqyMGcgeIrI2mzI8oDAHb0xkrKiQpOAGoq9ejBujwDI3L2g2MToHhB0aataCmC
 oiCU2Sf1LDG70bnyd0eLKshNEFjHEsVHJkzPwxeOFsM7xuKCZQ4uvnFBZyyQmuyY
 QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 -----END CERTIFICATE-----`
+
+	caCertificate = `-----BEGIN CERTIFICATE-----
+MIIDOjCCAiICCQDUf/5116L7fTANBgkqhkiG9w0BAQsFADBfMQ8wDQYDVQQLDAZD
+NGNvcmUxDDAKBgNVBAoMA1NBUDEQMA4GA1UEBwwHV2FsZG9yZjEQMA4GA1UECAwH
+V2FsZG9yZjELMAkGA1UEBhMCREUxDTALBgNVBAMMBEt5bWEwHhcNMTgwNzEzMDk1
+MjUxWhcNMTkwNzEzMDk1MjUxWjBfMQ8wDQYDVQQLDAZDNGNvcmUxDDAKBgNVBAoM
+A1NBUDEQMA4GA1UEBwwHV2FsZG9yZjEQMA4GA1UECAwHV2FsZG9yZjELMAkGA1UE
+BhMCREUxDTALBgNVBAMMBEt5bWEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+AoIBAQD49IZuqogcaqAVSV79L7xKMI36NMy6ig+jTquecN9LRhQcalKDKxJ0BRet
+bSUhftr8qcE3SaxOtPPvTLoiixjlMFaQ46ZfAx8HgGBEevb/jYoBtATXLD1K/RP/
+XXmbh7moy0mxhPA5em2LU8s22EGjN9L0VjbmqER6xWlRccZ8BmAGQVOgILK98IGD
+EN7EQSf6ZzLzClBS3AxGr62suP81yuXQLytNLY9xbNRPsQ7WnpPHrZM13CCb4wqb
+4G5MXyLj077RdVFZV8l7P6DQ0Bb2AYWf2egYv1iEMRun2v3bzN4DX6Oup2vRD/RC
+sKd/QyqWV1U9FSTgbRKAIKb1I1tZAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAMXo
+tY+WqHGVXhrStebknCJ5dd8bLQwqEqCBBLDzsjP43Q1g3yXT7fTl1zIdUNYhD/x9
+y02YCDJnRXR5vRivR47TXtdXJFL8d2jSBGF7q2J4qDNdHLNsEzmWYHzNYUYqBB+5
+XkiqUKgKvdbaGCsHkhlmwUS3IdtxVQGtPDOzZ3/ZRwMqlhiPayFHGCpk7aGvSHA6
+rU4XYOp88sPhuqmy7zafUNNlmt2XSWaNrS/Nf1WNH1GtH92uUaLh53BSP/MB5//a
+u/1tNUOn8VJWVtOHtVdmMOkSf1+H3g4JOD+nq+AD2ZTgB+KRkUQph6V0bc1H9CnW
+KtvlOZ1W3/EFj1Hwouw=
+-----END CERTIFICATE-----`
 )
 
 func TestMutualTLSClientProvider_CreateClient(t *testing.T) {
@@ -64,10 +85,12 @@ func TestMutualTLSClientProvider_CreateClient(t *testing.T) {
 		// given
 		key := loadPrivateKey(t, []byte(clientKey))
 		cert := loadCertificates(t, []byte(clientCertificate))
+		caCert := loadCertificates(t, []byte(caCertificate))
 
 		csrProvider := &mocks.CSRProvider{}
 		certProvider := &mocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(key, cert, nil)
+		certProvider.On("GetCACertificate").Return(caCert, nil)
 
 		clientProvider := NewMutualTLSClientProvider(csrProvider, certProvider)
 
@@ -84,6 +107,26 @@ func TestMutualTLSClientProvider_CreateClient(t *testing.T) {
 		csrProvider := &mocks.CSRProvider{}
 		certProvider := &mocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(nil, nil, errors.New("error"))
+
+		clientProvider := NewMutualTLSClientProvider(csrProvider, certProvider)
+
+		// when
+		client, err := clientProvider.CreateClient()
+
+		// then
+		require.Error(t, err)
+		require.Nil(t, client)
+	})
+
+	t.Run("should return error when failed to read client certificate and key", func(t *testing.T) {
+		// given
+		key := loadPrivateKey(t, []byte(clientKey))
+		cert := loadCertificates(t, []byte(clientCertificate))
+
+		csrProvider := &mocks.CSRProvider{}
+		certProvider := &mocks.Provider{}
+		certProvider.On("GetClientCredentials").Return(key, cert, nil)
+		certProvider.On("GetCACertificate").Return(nil, errors.New("error"))
 
 		clientProvider := NewMutualTLSClientProvider(csrProvider, certProvider)
 

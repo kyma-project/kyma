@@ -12,11 +12,9 @@ import (
 
 const (
 	clusterCertSecretName = "cluster-certificate"
-)
+	caCertSecretName      = "ca-cert"
 
-func TestCertificateProvider_GetClientCertificates(t *testing.T) {
-
-	pemCertificate := `-----BEGIN CERTIFICATE-----
+	pemCertificate = `-----BEGIN CERTIFICATE-----
 MIIEcDCCA1igAwIBAgIBAjANBgkqhkiG9w0BAQsFADBfMQ8wDQYDVQQLDAZDNGNv
 cmUxDDAKBgNVBAoMA1NBUDEQMA4GA1UEBwwHV2FsZG9yZjEQMA4GA1UECAwHV2Fs
 ZG9yZjELMAkGA1UEBhMCREUxDTALBgNVBAMMBEt5bWEwHhcNMTkwMjEyMTIwNDM4
@@ -42,6 +40,78 @@ bnJlJkQ9Uv2OZSfRxc6irVmefC/u97KJPzmGjAlG/KrTVPm/gZtn46szwKKepMqd
 7iQJK/xxgHd2kKuOcSVDf2g2ygHbIE7mwofRZLM3VsfaFqIvWBmT1mbC6pzZs30C
 m0BmlwDa5ONBGAqjBP9TTm42f4ufzsGF/eFLXZ8lAbpJmLqx
 -----END CERTIFICATE-----`
+)
+
+func TestCertificateProvider_GetCACertificate(t *testing.T) {
+	t.Run("should get ca certificate", func(t *testing.T) {
+		// given
+		secretData := map[string][]byte{
+			caCertificateSecretKey: []byte(pemCertificate),
+		}
+
+		secretRepository := &mocks.Repository{}
+		secretRepository.On("Get", caCertSecretName).Return(secretData, nil)
+
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+
+		// when
+		cert, err := certificateProvider.GetCACertificate()
+
+		// then
+		require.NoError(t, err)
+		require.NotNil(t, cert)
+	})
+
+	t.Run("should return error when failed to read secret", func(t *testing.T) {
+		// given
+		secretRepository := &mocks.Repository{}
+		secretRepository.On("Get", caCertSecretName).Return(nil, errors.New("error"))
+
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+
+		// when
+		_, err := certificateProvider.GetCACertificate()
+
+		// then
+		require.Error(t, err)
+	})
+
+	t.Run("should return error when no data in secret", func(t *testing.T) {
+		// given
+		secretData := map[string][]byte{}
+
+		secretRepository := &mocks.Repository{}
+		secretRepository.On("Get", caCertSecretName).Return(secretData, nil)
+
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+
+		// when
+		_, err := certificateProvider.GetCACertificate()
+
+		// then
+		require.Error(t, err)
+	})
+
+	t.Run("should return error when failed to decode cert", func(t *testing.T) {
+		// given
+		secretData := map[string][]byte{
+			caCertificateSecretKey: []byte("invalid pem"),
+		}
+
+		secretRepository := &mocks.Repository{}
+		secretRepository.On("Get", caCertSecretName).Return(secretData, nil)
+
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
+
+		// when
+		_, err := certificateProvider.GetCACertificate()
+
+		// then
+		require.Error(t, err)
+	})
+}
+
+func TestCertificateProvider_GetClientCertificates(t *testing.T) {
 
 	pemPrivateKey := `-----BEGIN RSA PRIVATE KEY-----
 MIIJKQIBAAKCAgEAq4TMGWybHjvhF9RSSZJG8zfp73RJlRhPj3e4EJgrz0Ai/PmH
@@ -95,7 +165,7 @@ IRzJpedP8Od8opOnrPaydtPE+RU+MPPVRp73xPzjihQwpAGqnxwjg98Ln+YYUfyP
 MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 -----END RSA PRIVATE KEY-----`
 
-	t.Run("should get client certificate", func(t *testing.T) {
+	t.Run("should get client certificate and key", func(t *testing.T) {
 		// given
 		secretData := map[string][]byte{
 			clusterCertificateSecretKey: []byte(pemCertificate),
@@ -105,7 +175,7 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
 		key, cert, err := certificateProvider.GetClientCredentials()
@@ -121,7 +191,7 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterCertSecretName).Return(nil, errors.New("error"))
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
@@ -139,7 +209,7 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
@@ -157,7 +227,7 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
@@ -175,7 +245,7 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()
@@ -194,7 +264,7 @@ MSQKrvrJLtY4kG8qTByW629n09aSZrZ4n1AY8LNbEPDEiGjzwF51psiDxBIx
 		secretRepository := &mocks.Repository{}
 		secretRepository.On("Get", clusterCertSecretName).Return(secretData, nil)
 
-		certificateProvider := NewCertificateProvider(clusterCertSecretName, secretRepository)
+		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
 		_, _, err := certificateProvider.GetClientCredentials()

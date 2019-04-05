@@ -25,15 +25,20 @@ func NewMutualTLSClientProvider(csrProvider certificates.CSRProvider, certProvid
 }
 
 func (cp *mutualTLSClientProvider) CreateClient() (MutualTLSConnectorClient, error) {
-	key, certificate, err := cp.certificateProvider.GetClientCredentials()
+	key, clientCert, err := cp.certificateProvider.GetClientCredentials()
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to read client certificate and key")
+	}
+
+	caCert, err := cp.certificateProvider.GetCACertificate()
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to read ca certificate")
 	}
 
 	certs := []tls.Certificate{
 		{
 			PrivateKey:  key,
-			Certificate: [][]byte{certificate.Raw},
+			Certificate: [][]byte{clientCert.Raw, caCert.Raw},
 		},
 	}
 
@@ -41,5 +46,5 @@ func (cp *mutualTLSClientProvider) CreateClient() (MutualTLSConnectorClient, err
 		Certificates: certs,
 	}
 
-	return NewMutualTLSConnectorClient(tlsConfig, cp.csrProvider, certificate.Subject), nil
+	return NewMutualTLSConnectorClient(tlsConfig, cp.csrProvider, clientCert.Subject), nil
 }

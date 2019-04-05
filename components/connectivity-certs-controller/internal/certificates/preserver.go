@@ -16,14 +16,14 @@ type Preserver interface {
 
 type certificatePreserver struct {
 	clusterCertSecretName string
-	caCRTSecretName       string
+	caCertSecretName      string
 	secretsRepository     secrets.Repository
 }
 
-func NewCertificatePreserver(clusterCertSecretName string, caCRTSecretName string, secretsRepository secrets.Repository) *certificatePreserver {
+func NewCertificatePreserver(clusterCertSecretName string, caCertSecretName string, secretsRepository secrets.Repository) *certificatePreserver {
 	return &certificatePreserver{
 		clusterCertSecretName: clusterCertSecretName,
-		caCRTSecretName:       caCRTSecretName,
+		caCertSecretName:      caCertSecretName,
 		secretsRepository:     secretsRepository,
 	}
 }
@@ -55,7 +55,7 @@ func (cp *certificatePreserver) saveCACertificate(caCertificate []byte) error {
 		caCertificateSecretKey: caCertificate,
 	}
 
-	err := cp.secretsRepository.UpsertWithMerge(cp.caCRTSecretName, caSecretData)
+	err := cp.secretsRepository.UpsertWithMerge(cp.caCertSecretName, caSecretData)
 	if err != nil {
 		return errors.Wrap(err, "Failed to preserve CA certificate in secret")
 	}
