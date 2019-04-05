@@ -45,13 +45,13 @@ type CentralConnection struct {
 
 type CentralConnectionSpec struct {
 	ManagementInfoURL string      `json:"managementInfoUrl"`
-	EstablishedAt     metav1.Time `json:"establishedAt"` // TODO - should it be a part of Spec or Status
-	RenewNow          bool        `json:"renewNow"`
+	EstablishedAt     metav1.Time `json:"establishedAt"`
+	RenewNow          bool        `json:"renewNow,omitempty"`
 }
 
 type CentralConnectionStatus struct {
 	SynchronizationStatus SynchronizationStatus   `json:"synchronizationStatus"`
-	CertificateStatus     CertificateStatus       `json:"certificateStatus"`
+	CertificateStatus     *CertificateStatus      `json:"certificateStatus,omitempty"`
 	Error                 *CentralConnectionError `json:"error,omitempty"`
 }
 
@@ -61,8 +61,8 @@ type SynchronizationStatus struct {
 }
 
 type CertificateStatus struct {
-	IssuedAt metav1.Time `json:"issuedAt"`
-	ValidTo  metav1.Time `json:"validTo"`
+	NotBefore metav1.Time `json:"notBefore"`
+	NotAfter  metav1.Time `json:"notAfter"`
 }
 
 type CentralConnectionError struct {

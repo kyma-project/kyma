@@ -2,9 +2,8 @@ package connectorservice
 
 import (
 	"bytes"
-	"crypto/rsa"
 	"crypto/tls"
-	"crypto/x509"
+	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -16,38 +15,26 @@ import (
 
 type MutualTLSConnectorClient interface {
 	GetManagementInfo(managementInfoURL string) (ManagementInfo, error)
-	RenewCertificate(renewalURL string, csr string) (certificates.Certificates, error)
+	RenewCertificate(renewalURL string) (certificates.Certificates, error)
 }
 
 type mutualTLSConnectorClient struct {
-	httpClient *http.Client
+	httpClient  *http.Client
+	csrProvider certificates.CSRProvider
+	subject     pkix.Name
 }
 
 // TODO - is CA cert required while making the call?
-func NewMutualTLSConnectorClient(key *rsa.PrivateKey, certificates []*x509.Certificate) MutualTLSConnectorClient {
-	var rawCerts [][]byte
-
-	for _, c := range certificates {
-		rawCerts = append(rawCerts, c.Raw)
-	}
-
-	certs := []tls.Certificate{
-		{
-			PrivateKey:  key,
-			Certificate: rawCerts,
-		},
-	}
-
-	tlsConfig := &tls.Config{
-		Certificates: certs,
-	}
+func NewMutualTLSConnectorClient(config *tls.Config, csrProvider certificates.CSRProvider, subject pkix.Name) MutualTLSConnectorClient {
 
 	return &mutualTLSConnectorClient{
 		httpClient: &http.Client{
 			Transport: &http.Transport{
-				TLSClientConfig: tlsConfig,
+				TLSClientConfig: config,
 			},
 		},
+		csrProvider: csrProvider,
+		subject:     subject,
 	}
 }
 
@@ -76,7 +63,13 @@ func (cc *mutualTLSConnectorClient) GetManagementInfo(managementInfoURL string) 
 	return managementInfoResponse, nil
 }
 
-func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string, csr string) (certificates.Certificates, error) {
+func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string) (certificates.Certificates, error) {
+	// TODO: Subject should be returned from Management Info in the future
+	csr, err := cc.csrProvider.CreateCSR(cc.subject)
+	if err != nil {
+		return certificates.Certificates{}, errors.Wrap(err, "Failed to create CSR")
+	}
+
 	reqBody, err := json.Marshal(CertificateRequest{CSR: csr})
 	if err != nil {
 		return certificates.Certificates{}, errors.Wrap(err, "Failed to marshal certificate request")

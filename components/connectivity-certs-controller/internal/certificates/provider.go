@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type CertificateProvider interface { // TODO - consider moving to the same component as preserver
+type Provider interface {// TODO - consider moving to the same component as preserver
 	GetClientCredentials() (*rsa.PrivateKey, *x509.Certificate, error)
 }
 
@@ -21,7 +21,7 @@ type certificateProvider struct {
 	secretsRepository secrets.Repository
 }
 
-func NewCertificateProvider(clusterCertSecretName string, secretsRepository secrets.Repository) CertificateProvider {
+func NewCertificateProvider(clusterCertSecretName string, secretsRepository secrets.Repository) Provider {
 	return &certificateProvider{
 		secretsRepository:     secretsRepository,
 		clusterCertSecretName: clusterCertSecretName,

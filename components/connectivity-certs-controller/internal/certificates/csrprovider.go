@@ -70,6 +70,7 @@ func createCSR(subject pkix.Name, key *rsa.PrivateKey) ([]byte, error) {
 	return pemEncodedCSR, nil
 }
 
+// TODO - always create new key
 func (cp *csrProvider) provideClusterPrivateKey() (*rsa.PrivateKey, error) {
 	secret, err := cp.secretRepository.Get(cp.clusterCertSecretName)
 	if err != nil {
