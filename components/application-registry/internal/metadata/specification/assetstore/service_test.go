@@ -32,7 +32,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		{
 			urls := map[string]string{
 				docstopic.KeyOpenApiSpec:       "www.somestorage.com/apiSpec.json",
-				docstopic.KeyEventsSpec:        "www.somestorage.com/asyncApiSpec.json",
+				docstopic.KeyAsyncApiSpec:      "www.somestorage.com/asyncApiSpec.json",
 				docstopic.KeyDocumentationSpec: "www.somestorage.com/content.json",
 			}
 			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
@@ -68,7 +68,7 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		{
 			urls := map[string]string{
-				docstopic.KeyODataXMLSpec: "www.somestorage.com/odata.xml",
+				docstopic.KeyODataSpec: "www.somestorage.com/odata.xml",
 			}
 			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
 
@@ -95,7 +95,7 @@ func TestAddingToAssetStore(t *testing.T) {
 
 		{
 			urls := map[string]string{
-				docstopic.KeyODataJSONSpec: "www.somestorage.com/odata.xml",
+				docstopic.KeyODataSpec: "www.somestorage.com/odata.xml",
 			}
 			docsTopic := createDocsTopic("id1", urls, docstopic.StatusNone)
 
@@ -189,7 +189,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 		{
 			urls := map[string]string{
 				docstopic.KeyOpenApiSpec:       apiTestServer.URL,
-				docstopic.KeyEventsSpec:        eventTestServer.URL,
+				docstopic.KeyAsyncApiSpec:      eventTestServer.URL,
 				docstopic.KeyDocumentationSpec: documentationServer.URL,
 			}
 
