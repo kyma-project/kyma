@@ -3,7 +3,7 @@ kind: Pod
 metadata:
   name: "test-{{ template "fullname" . }}-integration"
   annotations:
-    sidecar.istio.io/inject: "false"
+    sidecar.istio.io/inject: "true"
     "helm.sh/hook": test-success
   labels:
     "helm-chart-test": "true"
@@ -14,11 +14,14 @@ spec:
      hostnames:
       - "minio.{{ .Values.global.ingress.domainName }}"
   {{ end }}
+  shareProcessNamespace: true
   serviceAccountName:  "test-{{ template "fullname" . }}-integration"
   restartPolicy: Never
   containers:
     - name: "test-{{ template "fullname" . }}-integration"
       image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.asset_store_test.dir }}asset-store-test:{{ .Values.global.asset_store_test.version }}
+      command: ["/bin/sh"]
+      args: ["-c", "sleep 10; /app/main.test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
       env:
         - name: APP_TEST_UPLOAD_SERVICE_URL
           value: "http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000/v1/upload"
