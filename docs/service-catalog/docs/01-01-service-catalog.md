@@ -11,3 +11,25 @@ You can perform the following operations in the Service Catalog:
 - Expose the consumable services by listing them with all the details, including the documentation and the consumption plans.
 - Consume the services by provisioning them in a given Namespace.
 - Bind the services to the applications through Secrets.
+
+There are two versions of Service Catalog that you can use:
+
+- mainstream (official) version that uses its own instance of apiserver and etcd - this is the default choice
+- experimental version that uses Custom Resource Definitions
+
+To enable the experimental version you have to override parameters `service-catalog-apiserver.enabled` and `service-catalog-crds.enabled`
+in the installer-config file. Modify or add the `service-catalog-overrides` config map:  
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-catalog-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: service-catalog
+    kyma-project.io/installation: ""
+data:
+  service-catalog-apiserver.enabled: "false"
+  service-catalog-crds.enabled: "true"
+```
