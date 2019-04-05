@@ -101,7 +101,8 @@ func (a *TestSuite) Run(t *testing.T, ops *OperationsInput) {
 			case Delete:
 				a.testDelete(t, req)
 			default:
-				log.Println("unknown operation type")
+				t.Log("unknown operation type")
+				t.Fail()
 			}
 		}
 	}
