@@ -175,7 +175,30 @@ rules: []
 # Kyma Admin role
 # kyma-admin = k8s admin + kyma-specific resources admin
 ##########################################################################################
+#
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: ClusterRole
+metadata:
+  name: kyma-admin-base
+  labels:
+    app: kyma
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+    rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
+  annotations:
+    "helm.sh/hook-weight": "0"
+rules:
+- apiGroups:
+    - ""
+    - "apps"
+    - "extensions"
+    - "batch"
+    - "autoscaling"
+  resources:
+    - "*"
+  verbs:
+    - "*"
 
+---
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRole
 metadata:
@@ -187,6 +210,8 @@ metadata:
     "helm.sh/hook-weight": "0"
 aggregationRule:
   clusterRoleSelectors:
+  - matchLabels:
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:
       rbac.authorization.k8s.io/aggregate-to-admin: "true"
   - matchLabels:
