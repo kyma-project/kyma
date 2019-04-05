@@ -142,7 +142,7 @@ func TestController_Reconcile(t *testing.T) {
 		// given
 		client := &mocks.Client{}
 		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CertificateRequest")).
-			Run(setupCertificateRequestInstance).Return(nil)
+			Run(setupCertificateRequestInstance).Return(nil).Twice()
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CertificateRequest")).
 			Run(assertErrorStatus).Return(nil)
 		connectorClient := &connectorMocks.Client{}
@@ -165,7 +165,7 @@ func TestController_Reconcile(t *testing.T) {
 		// given
 		client := &mocks.Client{}
 		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CertificateRequest")).
-			Run(setupCertificateRequestInstance).Return(nil)
+			Run(setupCertificateRequestInstance).Return(nil).Twice()
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CertificateRequest")).
 			Run(assertErrorStatus).Return(nil)
 		connectorClient := &connectorMocks.Client{}

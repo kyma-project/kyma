@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 
@@ -135,12 +137,24 @@ func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcil
 }
 
 func (c *Controller) setRequestErrorStatus(instance *v1alpha1.CertificateRequest, statusError error) error {
-	instance.Status = v1alpha1.CertificateRequestStatus{
-		Error: statusError.Error(),
+	name := types.NamespacedName{
+		Name:      instance.Name,
+		Namespace: instance.Namespace,
 	}
 
-	// TODO - fix RetryOnConflict
+	upToDateInstance := &v1alpha1.CertificateRequest{}
+
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		return c.certificateRequestClient.Update(context.Background(), instance)
+		err := c.certificateRequestClient.Get(context.Background(), name, upToDateInstance)
+		if err != nil {
+			log.Errorf("Failed to get up to date resource: %s", err.Error())
+			return err
+		}
+
+		upToDateInstance.Status = v1alpha1.CertificateRequestStatus{
+			Error: statusError.Error(),
+		}
+
+		return c.certificateRequestClient.Update(context.Background(), upToDateInstance)
 	})
 }
