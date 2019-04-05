@@ -4,13 +4,14 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
-	"github.com/tidwall/gjson"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/tidwall/gjson"
 )
 
 const (
@@ -94,7 +95,7 @@ func createRequest(context clientcontext.ApplicationContext, config LookUpConfig
 		request.Header.Set(k, v)
 	}
 
-	log.Info("Request:", request)
+	//log.Info("Request:", request)
 
 	return request, nil
 }
