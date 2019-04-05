@@ -1,15 +1,15 @@
 package clusterdocstopic
 
 import (
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/vrischmann/envconfig"
 	"time"
 )
 
 type Config struct {
+	webhookconfig.Config
 	ClusterDocsTopicRelistInterval time.Duration `envconfig:"default=5m"`
 	ClusterBucketRegion            string        `envconfig:"optional"`
-	WebhookCfgMapName              string        `envconfig:"default=webhook-config-map"`
-	WebhookCfgMapNamespace         string        `envconfig:"default=kyma-system"`
 }
 
 func loadConfig(prefix string) (Config, error) {

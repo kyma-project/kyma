@@ -2,7 +2,7 @@ package clusterdocstopic
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
@@ -40,7 +40,7 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return errors.Wrapf(err, "while getting informer for ConfigMap")
 	}
-	webhookCfgService := config.New(informer.GetIndexer(), cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
+	webhookCfgService := webhookconfig.New(informer.GetIndexer(), cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
 
 	reconciler := &ReconcileClusterDocsTopic{
 		relistInterval: cfg.ClusterDocsTopicRelistInterval,
@@ -96,7 +96,7 @@ type ReconcileClusterDocsTopic struct {
 	recorder       record.EventRecorder
 	assetSvc       docstopic.AssetService
 	bucketSvc      docstopic.BucketService
-	webhookCfgSvc  config.AssetWebhookConfigService
+	webhookCfgSvc  webhookconfig.AssetWebhookConfigService
 }
 
 // Reconcile reads that state of the cluster for a DocsTopic object and makes changes based on the state read

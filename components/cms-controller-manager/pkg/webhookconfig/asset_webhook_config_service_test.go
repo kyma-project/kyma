@@ -1,10 +1,10 @@
-package config_test
+package webhookconfig_test
 
 import (
 	"context"
 	"errors"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config/automock"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig/automock"
 	"github.com/onsi/gomega"
 	_ "github.com/onsi/gomega"
 	"github.com/stretchr/testify/mock"
@@ -29,7 +29,7 @@ func TestAssetWebhookConfigService_Get(t *testing.T) {
 
 		t.Run("nil result", func(t *testing.T) {
 			call.Return(nil, false, nil).Once()
-			service := config.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
+			service := webhookconfig.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).To(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeEmpty())
@@ -41,7 +41,7 @@ func TestAssetWebhookConfigService_Get(t *testing.T) {
 				"openapi":  `{"validations":[{"name":"openapi-validation"}],"mutations":[{"name":"openapi-mutation"}]}`,
 				"unknow":   `{"test": ["me"]}`,
 			}), true, nil).Once()
-			service := config.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
+			service := webhookconfig.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
 			_, err := service.Get(ctx)
 			g.Expect(err).To(gomega.BeNil())
 		})
@@ -49,7 +49,7 @@ func TestAssetWebhookConfigService_Get(t *testing.T) {
 		t.Run("err", func(t *testing.T) {
 			testError := errors.New("test_error")
 			call.Return(nil, false, testError).Once()
-			service := config.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
+			service := webhookconfig.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).NotTo(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeNil())
@@ -60,7 +60,7 @@ func TestAssetWebhookConfigService_Get(t *testing.T) {
 				"openapi": `{"validations":[{"name":"openapi-validation"}],"mutations":[{"name":"openapi-mutation"}]}`,
 				"watch":   "me explode",
 			}), true, nil).Once()
-			service := config.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
+			service := webhookconfig.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).NotTo(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeNil())

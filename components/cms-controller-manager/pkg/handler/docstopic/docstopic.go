@@ -6,7 +6,7 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -66,10 +66,10 @@ type docstopicHandler struct {
 	recorder         record.EventRecorder
 	assetSvc         AssetService
 	bucketSvc        BucketService
-	webhookConfigSvc config.AssetWebhookConfigService
+	webhookConfigSvc webhookconfig.AssetWebhookConfigService
 }
 
-func New(log logr.Logger, recorder record.EventRecorder, assetSvc AssetService, bucketSvc BucketService, webhookConfigSvc config.AssetWebhookConfigService) Handler {
+func New(log logr.Logger, recorder record.EventRecorder, assetSvc AssetService, bucketSvc BucketService, webhookConfigSvc webhookconfig.AssetWebhookConfigService) Handler {
 	return &docstopicHandler{
 		log:              log,
 		recorder:         recorder,
@@ -162,7 +162,7 @@ func (h *docstopicHandler) ensureBucketExits(ctx context.Context, namespace stri
 	return name, nil
 }
 
-func (h *docstopicHandler) isOnChange(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config config.AssetWebhookConfigMap) bool {
+func (h *docstopicHandler) isOnChange(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config webhookconfig.AssetWebhookConfigMap) bool {
 	return h.shouldCreateAssets(existing, spec) || h.shouldDeleteAssets(existing, spec) || h.shouldUpdateAssets(existing, spec, bucketName, config)
 }
 
@@ -180,7 +180,7 @@ func (h *docstopicHandler) shouldCreateAssets(existing map[string]CommonAsset, s
 	return false
 }
 
-func (h *docstopicHandler) shouldUpdateAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config config.AssetWebhookConfigMap) bool {
+func (h *docstopicHandler) shouldUpdateAssets(existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, config webhookconfig.AssetWebhookConfigMap) bool {
 	for key, existingAsset := range existing {
 		expectedSpec := findSource(spec.Sources, key, existingAsset.Labels[typeLabel])
 		if expectedSpec == nil {
@@ -220,7 +220,7 @@ func (h *docstopicHandler) onPhaseChange(instance ObjectMetaAccessor, status v1a
 	return h.buildStatus(phase, pretty.AssetsReady), nil
 }
 
-func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAccessor, spec v1alpha1.CommonDocsTopicSpec, status v1alpha1.CommonDocsTopicStatus, existing map[string]CommonAsset, bucketName string, cfg config.AssetWebhookConfigMap) (*v1alpha1.CommonDocsTopicStatus, error) {
+func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAccessor, spec v1alpha1.CommonDocsTopicSpec, status v1alpha1.CommonDocsTopicStatus, existing map[string]CommonAsset, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) (*v1alpha1.CommonDocsTopicStatus, error) {
 	if err := h.createMissingAssets(ctx, instance, existing, spec, bucketName, cfg); err != nil {
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsCreationFailed, err.Error()), status), err
 	}
@@ -237,7 +237,7 @@ func (h *docstopicHandler) onChange(ctx context.Context, instance ObjectMetaAcce
 	return h.buildStatus(v1alpha1.DocsTopicPending, pretty.WaitingForAssets), nil
 }
 
-func (h *docstopicHandler) createMissingAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg config.AssetWebhookConfigMap) error {
+func (h *docstopicHandler) createMissingAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) error {
 	for _, spec := range spec.Sources {
 		name := spec.Name
 		if _, exists := existing[name]; exists {
@@ -252,7 +252,7 @@ func (h *docstopicHandler) createMissingAssets(ctx context.Context, instance Obj
 	return nil
 }
 
-func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaAccessor, assetSpec v1alpha1.Source, bucketName string, cfg config.AssetWebhookConfig) error {
+func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaAccessor, assetSpec v1alpha1.Source, bucketName string, cfg webhookconfig.AssetWebhookConfig) error {
 	commonAsset := CommonAsset{
 		ObjectMeta: v1.ObjectMeta{
 			Name:        h.generateFullAssetName(instance.GetName(), assetSpec.Name, assetSpec.Type),
@@ -274,7 +274,7 @@ func (h *docstopicHandler) createAsset(ctx context.Context, instance ObjectMetaA
 	return nil
 }
 
-func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg config.AssetWebhookConfigMap) error {
+func (h *docstopicHandler) updateOutdatedAssets(ctx context.Context, instance ObjectMetaAccessor, existing map[string]CommonAsset, spec v1alpha1.CommonDocsTopicSpec, bucketName string, cfg webhookconfig.AssetWebhookConfigMap) error {
 	for key, existingAsset := range existing {
 		expectedSpec := findSource(spec.Sources, key, existingAsset.Labels[typeLabel])
 		if expectedSpec == nil {
@@ -338,7 +338,7 @@ func (h *docstopicHandler) convertToAssetMap(assets []CommonAsset) map[string]Co
 	return result
 }
 
-func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucketName string, cfg config.AssetWebhookConfig) v1alpha2.CommonAssetSpec {
+func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucketName string, cfg webhookconfig.AssetWebhookConfig) v1alpha2.CommonAssetSpec {
 	return v1alpha2.CommonAssetSpec{
 		Source: v1alpha2.AssetSource{
 			Mode:                     h.convertToAssetMode(spec.Mode),
@@ -354,7 +354,7 @@ func (h *docstopicHandler) convertToCommonAssetSpec(spec v1alpha1.Source, bucket
 	}
 }
 
-func convertToWebhookService(services []config.WebhookService) []v1alpha2.WebhookService {
+func convertToWebhookService(services []webhookconfig.WebhookService) []v1alpha2.WebhookService {
 	servicesLen := len(services)
 	if servicesLen < 1 {
 		return nil
@@ -371,7 +371,7 @@ func convertToWebhookService(services []config.WebhookService) []v1alpha2.Webhoo
 	return result
 }
 
-func convertToAssetWebhookServices(services []config.AssetWebhookService) []v1alpha2.AssetWebhookService {
+func convertToAssetWebhookServices(services []webhookconfig.AssetWebhookService) []v1alpha2.AssetWebhookService {
 	servicesLen := len(services)
 	if servicesLen < 1 {
 		return nil

@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/source"
 	"github.com/onsi/gomega"
@@ -37,7 +37,7 @@ func TestReconcile(t *testing.T) {
 	bucketService := newBucketService(c, scheme, "")
 	informer, err := mgr.GetCache().GetInformer(&coreV1.ConfigMap{})
 	g.Expect(err).To(gomega.BeNil())
-	assetWhsConfigService := config.New(informer.GetIndexer(), webhookCfgMapName, webhookCfgMapNamespace)
+	assetWhsConfigService := webhookconfig.New(informer.GetIndexer(), webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileDocsTopic{
 		Client:           c,

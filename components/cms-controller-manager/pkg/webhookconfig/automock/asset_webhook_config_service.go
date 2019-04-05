@@ -2,7 +2,7 @@
 
 package automock
 
-import config "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/config"
+import config "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 import context "context"
 import mock "github.com/stretchr/testify/mock"
 
