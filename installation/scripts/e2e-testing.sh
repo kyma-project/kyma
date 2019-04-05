@@ -11,14 +11,19 @@ fi
 cleanupHelmE2ERelease () {
     local release=$1
     log 'Running cleanup'
-    helm del --purge "${release}"
+
+    set +o errexit
+    if [  -f "$(helm home)/ca.pem" ]; then
+        local HELM_ARGS="--tls"
+    fi
+    helm del --purge "${release}" ${HELM_ARGS}
     local deleteErr=$?
     if [ ${deleteErr} -ne 0 ]
     then
       log "FAILED cleaning release.\n" red
       return 1
     fi
-    while helm list --deleting 2>/dev/null | grep "${release}" ; do
+    while helm list --deleting ${HELM_ARGS} 2>/dev/null | grep "${release}" ; do
         sleep 1
         echo .
     done
@@ -52,8 +57,13 @@ cleanupHelmE2ERelease "${release}"
 ADMIN_EMAIL=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.email}" | base64 --decode)
 ADMIN_PASSWORD=$(kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode)
 
-helm install "$testcase" --name "${release}" --namespace end-to-end --set global.ingress.domainName="${DOMAIN}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}")
-helm test "${release}" --timeout 10000
+set +o errexit
+if [  -f "$(helm home)/ca.pem" ]; then
+    local HELM_ARGS="--tls"
+fi
+
+helm install "$testcase" --name "${release}" --namespace end-to-end --set global.ingress.domainName="${DOMAIN}" --set-file global.adminEmail=<(echo -n "${ADMIN_EMAIL}") --set-file global.adminPassword=<(echo -n "${ADMIN_PASSWORD}") ${HELM_ARGS}
+helm test "${release}" --timeout 10000 ${HELM_ARGS}
 testResult=$?
 if [ $testResult -eq 0 ]
 then
