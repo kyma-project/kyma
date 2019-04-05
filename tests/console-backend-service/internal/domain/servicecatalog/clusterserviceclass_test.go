@@ -9,10 +9,16 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 
+
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/resource"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type clusterServiceClassesQueryResponse struct {
@@ -28,6 +34,20 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedResource := clusterServiceClass()
+
+	cmsCli, _, err := client.NewDynamicClientWithConfig()
+	require.NoError(t, err)
+
+	clusterDocsTopicClient := resource.NewClusterDocsTopic(cmsCli, t.Logf)
+
+	t.Log(fmt.Sprintf("Create clusterDocsTopic %s", expectedResource.ExternalName))
+	err = clusterDocsTopicClient.Create(fixClusterDocsTopicMeta(expectedResource.ExternalName), fixCommonClusterDocsTopicSpec())
+	require.NoError(t, err)
+
+	t.Log(fmt.Sprintf("Wait for clusterDocsTopic %s Ready", expectedResource.ExternalName))
+	err = wait.ForClusterDocsTopicReady(expectedResource.ExternalName, clusterDocsTopicClient.Get)
+	require.NoError(t, err)
+
 	resourceDetailsQuery := `
 		name
 		externalName
@@ -59,6 +79,20 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 		odataSpec
 		asyncApiSpec
 		content
+		clusterDocsTopic {
+			name
+    		groupName
+    		assets {
+				name
+				type
+				files {
+					url
+					metadata
+				}
+			}
+    		displayName
+    		description
+		}
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
@@ -99,6 +133,10 @@ func checkClusterClass(t *testing.T, expected, actual shared.ClusterServiceClass
 	// Plans
 	require.NotEmpty(t, actual.Plans)
 	assertClusterPlanExistsAndEqual(t, actual.Plans, expected.Plans[0])
+
+	// ClusterDocsTopic
+	require.NotEmpty(t, actual.ClusterDocsTopic)
+	checkClusterDocsTopic(t, fixture.ClusterDocsTopic(expected.ExternalName), actual.ClusterDocsTopic)
 }
 
 func checkClusterPlan(t *testing.T, expected, actual shared.ClusterServicePlan) {
@@ -110,6 +148,17 @@ func checkClusterPlan(t *testing.T, expected, actual shared.ClusterServicePlan) 
 
 	// RelatedClusterServiceClassName
 	assert.Equal(t, expected.RelatedClusterServiceClassName, actual.RelatedClusterServiceClassName)
+}
+
+func checkClusterDocsTopic(t *testing.T, expected, actual shared.ClusterDocsTopic) {
+	// Name
+	assert.Equal(t, expected.Name, actual.Name)
+
+	// DisplayName
+	assert.Equal(t, expected.DisplayName, actual.DisplayName)
+
+	// Description
+	assert.Equal(t, expected.Description, actual.Description)
 }
 
 func assertClusterClassExistsAndEqual(t *testing.T, arr []shared.ClusterServiceClass, expectedElement shared.ClusterServiceClass) {
@@ -183,4 +232,23 @@ func fixClusterServiceClassesRequest(resourceDetailsQuery string) *graphql.Reque
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	return req
+}
+
+func fixClusterDocsTopicMeta(name string) metav1.ObjectMeta {
+	return metav1.ObjectMeta{
+		Name: name,
+	}
+}
+
+func fixCommonClusterDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
+	return v1alpha1.CommonDocsTopicSpec{
+		DisplayName: "Docs Topic Sample",
+		Description: "Docs Topic Description",
+		Sources: map[string]v1alpha1.Source{
+			"openapi": {
+				Mode: v1alpha1.DocsTopicSingle,
+				URL:  "https://petstore.swagger.io/v2/swagger.json",
+			},
+		},
+	}
 }
