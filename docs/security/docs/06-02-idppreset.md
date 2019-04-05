@@ -37,7 +37,7 @@ This table lists all the possible parameters of a given resource together with t
 
 ## Usage in the UI
 
-The **issuer** and **jwksUri** fields originate from the [Api CR](/components/api-gateway/#custom-resource-custom-resource) specification. In most cases, these values are reused many times. The IDPPreset CR allows you to store these details in a single object and reuse them in a convenient way. In the UI, the IDPPreset CR allows you to choose a preset with details of a specific identity provider from the drop-down menu instead of entering them manually every time you expose a secured API. Apart from consuming IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, select **IDP Presets** from the **Integration** section.
+The **issuer** and **jwksUri** fields originate from the [Api CR](/components/api-gateway/#custom-resource-custom-resource) specification. In most cases, these values are reused many times. Use the IDPPreset CR to store these details in a single object and reuse them in a convenient way. In the UI, the IDPPreset CR allows you to choose a preset with details of a specific identity provider from the drop-down menu instead of entering them manually every time you expose a secured API. Apart from consuming IDPPresets, you can also manage them in the Console UI. To create and delete IDPPresets, select **IDP Presets** from the **Integration** section.
 
 ## Related resources and components
 
