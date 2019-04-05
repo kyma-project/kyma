@@ -80,10 +80,10 @@ A message delivered to a subscriber is considered successfully consumed if the s
     "reason": "Message successfully published to the channel"
 }
 ```
-If the status code is not `2xx` (< 200 or >= 300), it means that a message consumption is not successful and
-that the message delivery is re-tried. This implies **At-least-once** delivery guarantee.
-Note: If there were no subscriptions or consumers to this `event-type`, the message will be ignored and the response
-would be like:
+If the status code is not `2xx` (< `200` or >= `300`), it means that the message was not consumed successfully and
+that the Event Bus will try to deliver it again. This implies **At-least-once** delivery guarantee.
+>**NOTE**: If there were no subscriptions or consumers to this `event-type`, the message is ignored and the response
+will look like this:
 ```json
 {
     "event-id": "22ae22a4-f5b7-4fa1-ada9-558a10a96f3d",
