@@ -1,4 +1,3 @@
-{{ if .Values.global.isLocalEnv }}
 ---
 apiVersion: v1
 kind: Service
@@ -14,4 +13,3 @@ spec:
     targetPort: {{ .Values.service.port }}
   selector:
     app: {{ template "name" . }}
-{{ end }}
