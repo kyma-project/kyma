@@ -1,0 +1,29 @@
+{{- if .Values.podSecurityPolicy.enabled}}
+apiVersion: extensions/v1beta1
+kind: PodSecurityPolicy
+metadata:
+  name: {{ .Release.Name }}-psp
+spec:
+  allowPrivilegeEscalation: false
+  privileged: false
+  hostNetwork: false
+  hostIPC: false
+  hostPID: false
+  allowedCapabilities:
+  - NET_ADMIN
+  fsGroup:
+    rule: RunAsNonRoot
+  seLinux:
+    rule: RunAsNonRoot
+  supplementalGroups:
+    rule: RunAsNonRoot
+  runAsUser:
+    rule: RunAsNonRoot
+  volumes:
+  - configMap
+  - downwardAPI
+  - emptyDir
+  - persistentVolumeClaim
+  - projected
+  - secret
+{{- end }}
