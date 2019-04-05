@@ -32,6 +32,7 @@ fi
 monitoringTestErr=0
 loggingTestErr=0
 eventBusTestErr=0
+kubelessTestErr=0
 
 echo "----------------------------"
 echo "- Testing Kyma..."
