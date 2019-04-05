@@ -11,11 +11,9 @@ import (
 	backup "github.com/heptio/ark/pkg/generated/clientset/versioned"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/client-go/kubernetes"
-	api "k8s.io/kubernetes/pkg/apis/core"
-
 	"github.com/ghodss/yaml"
+	"k8s.io/apimachinery/pkg/api/errors"
 	"github.com/heptio/ark/pkg/cmd/util/output"
 	"github.com/heptio/ark/pkg/restic"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
@@ -187,6 +185,8 @@ func (c *backupClient) RestoreBackup(backupName string) error {
 		},
 		Spec: backupv1.RestoreSpec{
 			BackupName: backupName,
+			IncludeClusterResources: c.ptrBool(true),
+			RestorePVs: c.ptrBool(true),
 		},
 	}
 	_, err := c.backupClient.ArkV1().Restores("heptio-ark").Create(restore)
@@ -213,26 +213,21 @@ func (c *backupClient) DeleteNamespace(name string) error {
 }
 
 func (c *backupClient) WaitForNamespaceToBeDeleted(name string, waitmax time.Duration) error {
-	mywatch, err := c.coreClient.CoreV1().Namespaces().Watch(metav1.ListOptions{
-		FieldSelector: fields.OneTermEqualSelector(api.ObjectNameField, name).String(),
-	})
-	if err != nil {
-		return err
-	}
-
 	timeout := time.After(waitmax)
+	tick := time.Tick(1 * time.Second)
 
 	for {
 		select {
 		case <-timeout:
 			return fmt.Errorf("Namespace not deleted within given time  %v", waitmax)
-		case event := <-mywatch.ResultChan():
-			if event.Type == "ERROR" {
-				return fmt.Errorf("Could not delete namespace")
-			}
-			if event.Type == "DELETED" {
+		case <-tick:
+			if _, err := c.coreClient.CoreV1().Namespaces().Get(name, metav1.GetOptions{}); errors.IsNotFound(err) {
 				return nil
 			}
 		}
 	}
+}
+
+func (*backupClient) ptrBool(b bool) *bool {
+	return &b
 }
