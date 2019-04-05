@@ -7,13 +7,10 @@ import (
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/pem"
-	"fmt"
 
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
 
 	"github.com/pkg/errors"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 const (
@@ -40,7 +37,7 @@ func NewCSRProvider(clusterCertSecret, caCRTSecret string, secretRepository secr
 }
 
 func (cp *csrProvider) CreateCSR(subject pkix.Name) (string, error) {
-	clusterPrivateKey, err := cp.provideClusterPrivateKey()
+	clusterPrivateKey, err := cp.createClusterKeySecret()
 	if err != nil {
 		return "", err
 	}
@@ -68,33 +65,6 @@ func createCSR(subject pkix.Name, key *rsa.PrivateKey) ([]byte, error) {
 	})
 
 	return pemEncodedCSR, nil
-}
-
-// TODO - always create new key
-func (cp *csrProvider) provideClusterPrivateKey() (*rsa.PrivateKey, error) {
-	secret, err := cp.secretRepository.Get(cp.clusterCertSecretName)
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return cp.createClusterKeySecret()
-		}
-		return nil, errors.Wrapf(err, fmt.Sprintf("Failed to read cluster %s secret", cp.clusterCertSecretName))
-	}
-
-	block, _ := pem.Decode(secret[clusterKeySecretKey])
-	if block == nil {
-		return cp.createClusterKeySecret()
-	}
-
-	if privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes); err == nil {
-		return privateKey, nil
-	}
-
-	privateKey, err := x509.ParsePKCS8PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, errors.Wrap(err, "Error while parsing private key")
-	}
-
-	return privateKey.(*rsa.PrivateKey), nil
 }
 
 func (cp *csrProvider) createClusterKeySecret() (*rsa.PrivateKey, error) {

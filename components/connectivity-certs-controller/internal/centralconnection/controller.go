@@ -104,7 +104,7 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 	managementInfo, err := tlsConnectorClient.GetManagementInfo(instance.Spec.ManagementInfoURL)
 	if err != nil {
 		log.Errorf("Failed to request Management Info from URL %s: %s", instance.Spec.ManagementInfoURL, err.Error())
-		return reconcile.Result{}, c.setErrorStatus(instance, err) // TODO - I am not sure if it will work properly
+		return reconcile.Result{}, c.setErrorStatus(instance, err)
 	}
 
 	if c.shouldRenew() {
@@ -205,7 +205,7 @@ func (c *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConne
 	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		err := c.masterConnectionClient.Get(context.Background(), name, existingConnection)
 		if err != nil {
-			// TODO
+			return errors.Wrap(err, "Failed to get up to date resource")
 		}
 
 		existingConnection.Status = connection.Status
