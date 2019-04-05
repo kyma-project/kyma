@@ -4,7 +4,7 @@ type: Details
 ---
 
 Kyma uses roles and groups to manage access in the cluster. Every cluster comes with five predefined roles which give the assigned users different level of permissions suitable for different purposes.
-These roles are defined as ClusterRoles and use the Kubernetes mechanism of aggregation, which allows to combine multiple ClusterRoles into a single ClusterRole. Using the aggregation mechanism allows to efficiently manage access to Kubernetes resources and Kyma-specific resources.
+These roles are defined as ClusterRoles and use the Kubernetes mechanism of aggregation which allows you to combine multiple ClusterRoles into a single ClusterRole. Use the aggregation mechanism to efficiently manage access to Kubernetes and Kyma-specific resources.
 
 >**NOTE:** Read [this](https://kubernetes.io/docs/reference/access-authn-authz/rbac/#aggregated-clusterroles) Kubernetes documentation to learn more about the aggregation mechanism used to define Kyma roles.
 
