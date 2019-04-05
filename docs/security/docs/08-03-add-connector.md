@@ -53,7 +53,7 @@ bindings:
     - "{GITHUB_ORGANIZATION}:{GITHUB_TEAM_B}"
 ```
 
->**TIP:** You can bind GitHub teams to any of the 5 predefined Kyma roles. Use these aliases: `kymaAdmin`, `kymaView`, `kymaDeveloper`, `kymaEdit` or `kymaEssentials`. To learn more about the predefined roles, read [this](#details-roles-in-kyma) document.
+>**TIP:** You can bind GitHub teams to any of the five predefined Kyma roles. Use these aliases: `kymaAdmin`, `kymaView`, `kymaDeveloper`, `kymaEdit` or `kymaEssentials`. To learn more about the predefined roles, read [this](#details-roles-in-kyma) document.
 
 This table explains the placeholders used in the template:
 
