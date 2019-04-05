@@ -335,7 +335,7 @@
 /tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # kubeless-integration tests directory
-/tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # kubeless tests
 /tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
