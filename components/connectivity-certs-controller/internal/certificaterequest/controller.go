@@ -105,11 +105,11 @@ func (c *Controller) manageResources(connectionName string, connection connector
 		Spec: v1alpha1.CentralConnectionSpec{
 			ManagementInfoURL: connection.ManagementInfoURL,
 			EstablishedAt:     metav1.NewTime(time.Now()),
-			// TODO - secret names?
 		},
 	}
 	// TODO - should we check connection by calling Management Info ???
 
+	// TODO - consider upsert
 	_, err := c.connectionClient.Create(masterConnection)
 	if err != nil {
 		log.Errorf("Error while creating Central Connection resource: %s", err.Error())
@@ -139,6 +139,7 @@ func (c *Controller) setRequestErrorStatus(instance *v1alpha1.CertificateRequest
 		Error: statusError.Error(),
 	}
 
+	// TODO - fix RetryOnConflict
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		return c.certificateRequestClient.Update(context.Background(), instance)
 	})

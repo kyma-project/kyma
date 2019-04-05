@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Provider interface {// TODO - consider moving to the same component as preserver
+type Provider interface { // TODO - consider moving to the same component as preserver
 	GetClientCredentials() (*rsa.PrivateKey, *x509.Certificate, error)
 }
 

@@ -6,6 +6,8 @@ import (
 	"encoding/pem"
 	"time"
 
+	"k8s.io/apimachinery/pkg/types"
+
 	"github.com/pkg/errors"
 
 	"k8s.io/client-go/util/retry"
@@ -91,12 +93,6 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return c.handleErrorWhileGettingInstance(err, request)
 	}
 
-	//if instance.Status.Error != nil {
-	//	// TODO - what to do in case of error?
-	//	//log.Infof("Certificate Request %s has an error status, certificate will not be fetched", instance.Name)
-	//	return reconcile.Result{}, nil
-	//}
-
 	key, certificate, err := c.certificateProvider.GetClientCredentials()
 	if err != nil {
 		log.Errorf("Failed to read client certificate: %s", err.Error())
@@ -108,7 +104,7 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 	managementInfo, err := tlsConnectorClient.GetManagementInfo(instance.Spec.ManagementInfoURL)
 	if err != nil {
 		log.Errorf("Failed to request Management Info from URL %s: %s", instance.Spec.ManagementInfoURL, err.Error())
-		return reconcile.Result{}, c.setErrorStatus(instance, err)
+		return reconcile.Result{}, c.setErrorStatus(instance, err) // TODO - I am not sure if it will work properly
 	}
 
 	if c.shouldRenew() {
@@ -117,7 +113,6 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 			log.Error(err)
 			return reconcile.Result{}, c.setErrorStatus(instance, err)
 		}
-
 	}
 
 	c.setSynchronizationStatus(instance)
@@ -127,6 +122,7 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
+		// TODO - should delete certs?
 		log.Infof("Connection %s has been deleted", request.Name)
 		return reconcile.Result{}, nil
 	}
@@ -187,19 +183,35 @@ func (c *Controller) setSynchronizationStatus(connection *v1alpha1.CentralConnec
 func (c *Controller) setErrorStatus(connection *v1alpha1.CentralConnection, err error) error {
 	syncTime := metav1.NewTime(time.Now())
 
-	connection.Status.Error.Message = err.Error()
+	connection.Status.Error = &v1alpha1.CentralConnectionError{Message: err.Error()}
 	connection.Status.SynchronizationStatus.LastSync = syncTime
 	connection.Status.CertificateStatus = nil
 
-	return c.updateCentralConnectionCR(connection)
+	updateError := c.updateCentralConnectionCR(connection)
+	if updateError != nil {
+		log.Errorf("Failed to set error status on %s Connection", connection.Name)
+		return updateError
+	}
+
+	return err
 }
 
-// TODO - fix retryOnConflict
-func (r *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConnection) error {
-	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		return r.masterConnectionClient.Update(context.Background(), connection)
-	})
+// TODO - fix retryOnConflict - consider proper client
+func (c *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConnection) error {
+	name := types.NamespacedName{Name: connection.Name, Namespace: connection.Namespace}
 
+	existingConnection := &v1alpha1.CentralConnection{}
+
+	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		err := c.masterConnectionClient.Get(context.Background(), name, existingConnection)
+		if err != nil {
+			// TODO
+		}
+
+		existingConnection.Status = connection.Status
+
+		return c.masterConnectionClient.Update(context.Background(), existingConnection)
+	})
 	if err != nil {
 		return errors.Wrap(err, "Failed to update Central Connection")
 	}
