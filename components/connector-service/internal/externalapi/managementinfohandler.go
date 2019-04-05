@@ -17,14 +17,14 @@ const (
 type managementInfoHandler struct {
 	connectorClientExtractor    clientcontext.ConnectorClientExtractor
 	certificateProtectedBaseURL string
-	csrSubject certificates.CSRSubject
+	csrSubject                  certificates.CSRSubject
 }
 
 func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, certProtectedBaseURL string, subjectValues certificates.CSRSubject) *managementInfoHandler {
 	return &managementInfoHandler{
 		connectorClientExtractor:    connectorClientExtractor,
 		certificateProtectedBaseURL: certProtectedBaseURL,
-		csrSubject: subjectValues,
+		csrSubject:                  subjectValues,
 	}
 }
 
