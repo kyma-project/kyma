@@ -38,7 +38,6 @@ type ResourceClient interface {
 type Controller struct {
 	masterConnectionClient  ResourceClient
 	certificatePreserver    certificates.Preserver
-	certificateProvider     certificates.Provider
 	mutualTLSClientProvider connectorservice.MutualTLSClientProvider
 }
 
@@ -46,20 +45,18 @@ func InitCentralConnectionsController(
 	mgr manager.Manager,
 	appName string,
 	certPreserver certificates.Preserver,
-	certProvider certificates.Provider,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) error {
 
-	return startController(appName, mgr, certPreserver, certProvider, mTLSClientProvider)
+	return startController(appName, mgr, certPreserver, mTLSClientProvider)
 }
 
 func startController(
 	appName string,
 	mgr manager.Manager,
 	certPreserver certificates.Preserver,
-	certProvider certificates.Provider,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) error {
 
-	certRequestController := newCentralConnectionController(mgr.GetClient(), certPreserver, certProvider, mTLSClientProvider)
+	certRequestController := newCentralConnectionController(mgr.GetClient(), certPreserver, mTLSClientProvider)
 
 	c, err := controller.New(appName, mgr, controller.Options{Reconciler: certRequestController})
 	if err != nil {
@@ -72,13 +69,11 @@ func startController(
 func newCentralConnectionController(
 	client ResourceClient,
 	certPreserver certificates.Preserver,
-	certProvider certificates.Provider,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) *Controller {
 
 	return &Controller{
 		masterConnectionClient:  client,
 		certificatePreserver:    certPreserver,
-		certificateProvider:     certProvider,
 		mutualTLSClientProvider: mTLSClientProvider,
 	}
 }
@@ -93,13 +88,13 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return c.handleErrorWhileGettingInstance(err, request)
 	}
 
-	key, certificate, err := c.certificateProvider.GetClientCredentials()
+	// TODO - if error set some retry time
+
+	tlsConnectorClient, err := c.mutualTLSClientProvider.CreateClient()
 	if err != nil {
-		log.Errorf("Failed to read client certificate: %s", err.Error())
+		log.Errorf("Failed to create mutual TLS Connector Client: %s", err.Error())
 		return reconcile.Result{}, c.setErrorStatus(instance, err)
 	}
-
-	tlsConnectorClient := c.mutualTLSClientProvider.CreateClient(key, certificate)
 
 	managementInfo, err := tlsConnectorClient.GetManagementInfo(instance.Spec.ManagementInfoURL)
 	if err != nil {

@@ -6,6 +6,8 @@ import (
 	"encoding/pem"
 	"testing"
 
+	"github.com/pkg/errors"
+
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates/mocks"
 
 	"github.com/stretchr/testify/require"
@@ -60,18 +62,37 @@ func TestMutualTLSClientProvider_CreateClient(t *testing.T) {
 
 	t.Run("should create Mutual TLS Connector Client", func(t *testing.T) {
 		// given
-		csrProvider := &mocks.CSRProvider{}
-
 		key := loadPrivateKey(t, []byte(clientKey))
 		cert := loadCertificates(t, []byte(clientCertificate))
 
-		clientProvider := NewMutualTLSClientProvider(csrProvider)
+		csrProvider := &mocks.CSRProvider{}
+		certProvider := &mocks.Provider{}
+		certProvider.On("GetClientCredentials").Return(key, cert, nil)
+
+		clientProvider := NewMutualTLSClientProvider(csrProvider, certProvider)
 
 		// when
-		client := clientProvider.CreateClient(key, cert)
+		client, err := clientProvider.CreateClient()
 
 		// then
+		require.NoError(t, err)
 		require.NotNil(t, client)
+	})
+
+	t.Run("should return error when failed to read client certificate and key", func(t *testing.T) {
+		// given
+		csrProvider := &mocks.CSRProvider{}
+		certProvider := &mocks.Provider{}
+		certProvider.On("GetClientCredentials").Return(nil, nil, errors.New("error"))
+
+		clientProvider := NewMutualTLSClientProvider(csrProvider, certProvider)
+
+		// when
+		client, err := clientProvider.CreateClient()
+
+		// then
+		require.Error(t, err)
+		require.Nil(t, client)
 	})
 
 }

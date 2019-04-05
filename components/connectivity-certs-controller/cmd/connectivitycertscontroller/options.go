@@ -18,7 +18,7 @@ func parseArgs() *options {
 	namespace := flag.String("namespace", "kyma-integration", "Namespace in which secrets are created")
 	clusterCertificatesSecret := flag.String("clusterCertificatesSecret", "cluster-client-certificates", "Secret name where cluster client certificate and key are kept")
 	caCertificatesSecret := flag.String("caCertificatesSecret", "ca-certificates", "Secret name where CA certificate is kept")
-	syncPeriod := flag.Int("syncPeriod", 300, "Time period between resyncing existing resources") // TODO - consider allowing different units
+	syncPeriod := flag.Int("syncPeriod", 300, "Time period between resyncing existing resources")
 
 	flag.Parse()
 

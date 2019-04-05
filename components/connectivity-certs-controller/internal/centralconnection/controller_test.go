@@ -2,8 +2,6 @@ package centralconnection
 
 import (
 	"context"
-	"crypto/rsa"
-	"crypto/x509"
 	"testing"
 	"time"
 
@@ -41,8 +39,11 @@ const (
 
 var (
 	connectionTime = time.Now()
+)
 
-	clientCert = []byte(`-----BEGIN CERTIFICATE-----
+func TestController_Reconcile(t *testing.T) {
+
+	clientCert := []byte(`-----BEGIN CERTIFICATE-----
 MIICIzCCAYwCCQDDkk/CKHDcZjANBgkqhkiG9w0BAQUFADASMRAwDgYDVQQKEwdB
 Y21lIENvMCAXDTE5MDMyOTEzMjU1M1oYDzIxMTkwMzA1MTMyNTUzWjAUMRIwEAYD
 VQQDDAlsb2NhbGhvc3QwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEKAoIBAQDr
@@ -56,11 +57,8 @@ VsfqyMGcgeIrI2mzI8oDAHb0xkrKiQpOAGoq9ejBujwDI3L2g2MToHhB0aataCmC
 oiCU2Sf1LDG70bnyd0eLKshNEFjHEsVHJkzPwxeOFsM7xuKCZQ4uvnFBZyyQmuyY
 QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 -----END CERTIFICATE-----`)
-	caCert    = []byte("ca-cert")
-	certChain = []byte("cert-chain")
-)
-
-func TestController_Reconcile(t *testing.T) {
+	caCert := []byte("ca-cert")
+	certChain := []byte("cert-chain")
 
 	namespacedName := types.NamespacedName{
 		Name: centralConnectionName,
@@ -69,9 +67,6 @@ func TestController_Reconcile(t *testing.T) {
 	request := reconcile.Request{
 		NamespacedName: namespacedName,
 	}
-
-	privateKey := &rsa.PrivateKey{}
-	certificate := &x509.Certificate{}
 
 	renewedCertificates := certificates.Certificates{
 		ClientCRT: clientCert,
@@ -102,9 +97,6 @@ func TestController_Reconcile(t *testing.T) {
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CentralConnection")).
 			Run(checkStatus).Return(nil)
 
-		certProvider := &certMocks.Provider{}
-		certProvider.On("GetClientCredentials").Return(privateKey, certificate, nil)
-
 		certPreserver := &certMocks.Preserver{}
 		certPreserver.On("PreserveCertificates", renewedCertificates).Return(nil)
 
@@ -113,16 +105,16 @@ func TestController_Reconcile(t *testing.T) {
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
 
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
-		mTLSClientProvider.On("CreateClient", privateKey, certificate).Return(mutualTLSClient)
+		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, certProvider, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
 
 		// then
 		require.NoError(t, err)
-		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
 	})
 
 	t.Run("should not take action if connection deleted", func(t *testing.T) {
@@ -135,7 +127,7 @@ func TestController_Reconcile(t *testing.T) {
 		certPreserver := &certMocks.Preserver{}
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 
-		connectionController := newCentralConnectionController(client, certPreserver, certProvider, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
@@ -145,7 +137,7 @@ func TestController_Reconcile(t *testing.T) {
 		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock)
 	})
 
-	t.Run("should set error status when failed to read client certificate", func(t *testing.T) {
+	t.Run("should set error status when failed to create mutual TLS Connector client", func(t *testing.T) {
 		// given
 		client := &mocks.Client{}
 		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CentralConnection")).
@@ -153,20 +145,18 @@ func TestController_Reconcile(t *testing.T) {
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CentralConnection")).
 			Run(assertErrorStatus(t)).Return(nil)
 
-		certProvider := &certMocks.Provider{}
-		certProvider.On("GetClientCredentials").Return(nil, nil, errors.New("error"))
-
 		certPreserver := &certMocks.Preserver{}
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider.On("CreateClient").Return(nil, errors.New("error"))
 
-		connectionController := newCentralConnectionController(client, certPreserver, certProvider, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock)
+		assertExpectations(t, client.Mock, certPreserver.Mock)
 	})
 
 	t.Run("should set error status when failed to get management info", func(t *testing.T) {
@@ -177,9 +167,6 @@ func TestController_Reconcile(t *testing.T) {
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CentralConnection")).
 			Run(assertErrorStatus(t)).Return(nil)
 
-		certProvider := &certMocks.Provider{}
-		certProvider.On("GetClientCredentials").Return(privateKey, certificate, nil)
-
 		certPreserver := &certMocks.Preserver{}
 
 		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
@@ -187,16 +174,16 @@ func TestController_Reconcile(t *testing.T) {
 			Return(connectorservice.ManagementInfo{}, errors.New("error"))
 
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
-		mTLSClientProvider.On("CreateClient", privateKey, certificate).Return(mutualTLSClient)
+		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, certProvider, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
 	})
 
 	t.Run("should set error status when failed to renew certificate", func(t *testing.T) {
@@ -207,9 +194,6 @@ func TestController_Reconcile(t *testing.T) {
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CentralConnection")).
 			Run(assertErrorStatus(t)).Return(nil)
 
-		certProvider := &certMocks.Provider{}
-		certProvider.On("GetClientCredentials").Return(privateKey, certificate, nil)
-
 		certPreserver := &certMocks.Preserver{}
 
 		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
@@ -217,16 +201,16 @@ func TestController_Reconcile(t *testing.T) {
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(certificates.Certificates{}, errors.New("error"))
 
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
-		mTLSClientProvider.On("CreateClient", privateKey, certificate).Return(mutualTLSClient)
+		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, certProvider, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
 	})
 
 	t.Run("should set error status when failed to preserve certificates", func(t *testing.T) {
@@ -237,9 +221,6 @@ func TestController_Reconcile(t *testing.T) {
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CentralConnection")).
 			Run(assertErrorStatus(t)).Return(nil)
 
-		certProvider := &certMocks.Provider{}
-		certProvider.On("GetClientCredentials").Return(privateKey, certificate, nil)
-
 		certPreserver := &certMocks.Preserver{}
 		certPreserver.On("PreserveCertificates", renewedCertificates).Return(errors.New("error"))
 
@@ -248,16 +229,16 @@ func TestController_Reconcile(t *testing.T) {
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
 
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
-		mTLSClientProvider.On("CreateClient", privateKey, certificate).Return(mutualTLSClient)
+		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, certProvider, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
 	})
 
 	t.Run("should set error status when failed to decode pem", func(t *testing.T) {
@@ -272,9 +253,6 @@ func TestController_Reconcile(t *testing.T) {
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CentralConnection")).
 			Run(assertErrorStatus(t)).Return(nil)
 
-		certProvider := &certMocks.Provider{}
-		certProvider.On("GetClientCredentials").Return(privateKey, certificate, nil)
-
 		certPreserver := &certMocks.Preserver{}
 		certPreserver.On("PreserveCertificates", invalidCerts).Return(nil)
 
@@ -283,16 +261,16 @@ func TestController_Reconcile(t *testing.T) {
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(invalidCerts, nil)
 
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
-		mTLSClientProvider.On("CreateClient", privateKey, certificate).Return(mutualTLSClient)
+		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, certProvider, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
 
 		// then
 		require.Error(t, err)
-		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
 	})
 }
 

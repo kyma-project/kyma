@@ -103,7 +103,7 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 func (c *Controller) manageResources(connectionName string, connection connectorservice.EstablishedConnection) error {
 	masterConnection := &v1alpha1.CentralConnection{
-		ObjectMeta: v1.ObjectMeta{Name: connectionName}, // TODO - figure out some naming - same as request??
+		ObjectMeta: v1.ObjectMeta{Name: connectionName},
 		Spec: v1alpha1.CentralConnectionSpec{
 			ManagementInfoURL: connection.ManagementInfoURL,
 			EstablishedAt:     metav1.NewTime(time.Now()),
@@ -115,6 +115,7 @@ func (c *Controller) manageResources(connectionName string, connection connector
 	_, err := c.connectionClient.Create(masterConnection)
 	if err != nil {
 		log.Errorf("Error while creating Central Connection resource: %s", err.Error())
+		return err
 	}
 
 	err = c.certificatePreserver.PreserveCertificates(connection.Certificates)
