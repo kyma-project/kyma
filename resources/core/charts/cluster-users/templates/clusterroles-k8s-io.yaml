@@ -93,23 +93,3 @@ rules:
   verbs:
 {{ toYaml .Values.clusterRoles.verbs.view | indent 4 }}
 
----
-#Admin access to K8s resources
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRole
-metadata:
-  name: kyma-k8s-admin
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-admin: "true"
-  annotations:
-    "helm.sh/hook-weight": "0"
-rules:
-- apiGroups:
-{{ toYaml .Values.clusterRoles.apiGroups.k8s | indent 4 }}
-  resources:
-    - "*"
-  verbs:
-    - "*"
-
