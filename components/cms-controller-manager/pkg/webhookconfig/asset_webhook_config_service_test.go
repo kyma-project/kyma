@@ -21,13 +21,12 @@ func TestAssetWebhookConfigService_Get(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	t.Run("Get", func(t *testing.T) {
-		indexer := automock.Indexer{}
-		defer indexer.AssertExpectations(t)
-
-		ctx := context.TODO()
-		call := indexer.On("GetByKey", mock.AnythingOfType("string"))
 
 		t.Run("nil result", func(t *testing.T) {
+			indexer := automock.Indexer{}
+			defer indexer.AssertExpectations(t)
+			ctx := context.TODO()
+			call := indexer.On("GetByKey", mock.AnythingOfType("string"))
 			call.Return(nil, false, nil).Once()
 			service := webhookconfig.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
@@ -36,6 +35,10 @@ func TestAssetWebhookConfigService_Get(t *testing.T) {
 		})
 
 		t.Run("ok", func(t *testing.T) {
+			indexer := automock.Indexer{}
+			defer indexer.AssertExpectations(t)
+			ctx := context.TODO()
+			call := indexer.On("GetByKey", mock.AnythingOfType("string"))
 			call.Return(mockConfigMap(map[string]string{
 				"markdown": `{"validations":[{"name":"markdown-validation"}],"mutations":[{"name":"markdown-mutation"}]}`,
 				"openapi":  `{"validations":[{"name":"openapi-validation"}],"mutations":[{"name":"openapi-mutation"}]}`,
@@ -47,6 +50,10 @@ func TestAssetWebhookConfigService_Get(t *testing.T) {
 		})
 
 		t.Run("err", func(t *testing.T) {
+			indexer := automock.Indexer{}
+			defer indexer.AssertExpectations(t)
+			ctx := context.TODO()
+			call := indexer.On("GetByKey", mock.AnythingOfType("string"))
 			testError := errors.New("test_error")
 			call.Return(nil, false, testError).Once()
 			service := webhookconfig.New(&indexer, webhookCfgMapName, webhookCfgMapNamespace)
@@ -56,6 +63,10 @@ func TestAssetWebhookConfigService_Get(t *testing.T) {
 		})
 
 		t.Run("err-unmarshal", func(t *testing.T) {
+			indexer := automock.Indexer{}
+			defer indexer.AssertExpectations(t)
+			ctx := context.TODO()
+			call := indexer.On("GetByKey", mock.AnythingOfType("string"))
 			call.Return(mockConfigMap(map[string]string{
 				"openapi": `{"validations":[{"name":"openapi-validation"}],"mutations":[{"name":"openapi-mutation"}]}`,
 				"watch":   "me explode",

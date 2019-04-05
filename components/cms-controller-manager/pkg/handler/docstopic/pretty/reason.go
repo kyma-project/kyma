@@ -53,7 +53,7 @@ func (r Reason) Message() string {
 	case BucketError:
 		return "Couldn't ensure if bucket exist due to error %s"
 	case AssetsWebhookGetFailed:
-		return "Unable to get web hook configuration %s"
+		return "Unable to get webhook configuration %s"
 	case AssetsSpecValidationFailed:
 		return "Invalid asset specification, %s"
 	default:

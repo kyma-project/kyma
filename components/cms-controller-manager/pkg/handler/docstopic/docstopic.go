@@ -6,8 +6,8 @@ import (
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -83,11 +83,12 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 	h.logInfof("Start common DocsTopic handling")
 	defer h.logInfof("Finish common DocsTopic handling")
 
-	err := validateSpec(spec)
+	err := h.validateSpec(spec)
 	if err != nil {
 		h.recordWarningEventf(instance, pretty.AssetsSpecValidationFailed)
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsSpecValidationFailed, err.Error()), status), err
 	}
+	h.logInfof("CommonDocsTopicSpec validated")
 
 	bucketName, err := h.ensureBucketExits(ctx, instance.GetNamespace())
 	if err != nil {
@@ -100,6 +101,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 		h.recordWarningEventf(instance, pretty.AssetsListingFailed, err.Error())
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsListingFailed, err.Error()), status), err
 	}
+
 	commonAssetsMap := h.convertToAssetMap(commonAssets)
 
 	webhookCfg, err := h.webhookConfigSvc.Get(ctx)
@@ -107,6 +109,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 		h.recordWarningEventf(instance, pretty.AssetsWebhookGetFailed, err.Error())
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsWebhookGetFailed, err.Error()), status), err
 	}
+	h.logInfof("Webhook configuration loaded")
 
 	switch {
 	case h.isOnChange(commonAssetsMap, spec, bucketName, webhookCfg):
@@ -119,7 +122,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 	}
 }
 
-func validateSpec(spec v1alpha1.CommonDocsTopicSpec) error {
+func (h *docstopicHandler) validateSpec(spec v1alpha1.CommonDocsTopicSpec) error {
 	names := map[string]map[string]struct{}{}
 	for _, src := range spec.Sources {
 		if nameTypes, exists := names[src.Name]; exists {
@@ -359,14 +362,14 @@ func convertToWebhookService(services []webhookconfig.WebhookService) []v1alpha2
 	if servicesLen < 1 {
 		return nil
 	}
-	result := make([]v1alpha2.WebhookService, 0, len(services))
-	for i, service := range services {
-		result[i] = v1alpha2.WebhookService{
+	result := make([]v1alpha2.WebhookService, 0, servicesLen)
+	for _, service := range services {
+		result = append(result, v1alpha2.WebhookService{
 			Name:      service.Name,
 			Namespace: service.Namespace,
 			Endpoint:  service.Endpoint,
 			Filter:    service.Filter,
-		}
+		})
 	}
 	return result
 }
