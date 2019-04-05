@@ -1,5 +1,5 @@
 ---
-title: Headless CMS in Console
+title: Headless CMS in the Console
 type: Details
 ---
 
