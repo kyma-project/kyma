@@ -6,11 +6,11 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: develop/
-    version: c157195c
+    dir:
+    version: 0.9.0-rc2
   event_bus_tests:
-    dir: develop/
-    version: f4c58b01
+    dir:
+    version: 0.9.0-rc2
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
