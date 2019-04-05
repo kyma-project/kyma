@@ -49,8 +49,8 @@ global:
     dir: develop/
     version: 2b4eed1c
   application_registry:
-    dir: pr/
-    version: PR-3549
+    dir: develop/
+    version: 7433b9cc
   application_registry_tests:
     dir: develop/
     version: 4c614be5
