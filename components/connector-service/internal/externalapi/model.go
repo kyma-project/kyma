@@ -24,6 +24,7 @@ type csrInfoResponse struct {
 type mgmtInfoReponse struct {
 	ClientIdentity interface{} `json:"clientIdentity"`
 	URLs           mgmtURLs    `json:"urls"`
+	CertificateInfo certInfo `json:"certificate"`
 }
 
 type mgmtURLs struct {

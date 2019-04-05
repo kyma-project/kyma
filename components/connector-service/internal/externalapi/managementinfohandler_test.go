@@ -3,6 +3,7 @@ package externalapi
 import (
 	"context"
 	"encoding/json"
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
@@ -49,6 +50,14 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			},
 		}
 
+		subjectValues := certificates.CSRSubject{
+			Country:            country,
+			Organization:       organization,
+			OrganizationalUnit: organizationalUnit,
+			Locality:           locality,
+			Province:           province,
+		}
+
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
 			return *extApplicationCtx, nil
 		}
@@ -56,7 +65,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL, subjectValues)
 
 		rr := httptest.NewRecorder()
 
@@ -93,10 +102,18 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			}, nil
 		}
 
+		subjectValues := certificates.CSRSubject{
+			Country:            country,
+			Organization:       organization,
+			OrganizationalUnit: organizationalUnit,
+			Locality:           locality,
+			Province:           province,
+		}
+
 		req, err := http.NewRequest(http.MethodGet, "/v1/runtimes/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL, subjectValues)
 
 		rr := httptest.NewRecorder()
 
@@ -127,10 +144,18 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			return nil, apperrors.Internal("error")
 		}
 
+		subjectValues := certificates.CSRSubject{
+			Country:            country,
+			Organization:       organization,
+			OrganizationalUnit: organizationalUnit,
+			Locality:           locality,
+			Province:           province,
+		}
+
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL, subjectValues)
 
 		rr := httptest.NewRecorder()
 
