@@ -62,12 +62,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to ConfigMap
-	err = c.Watch(&source.Kind{Type: &v1.ConfigMap{}}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		return err
-	}
-
 	// Watch for changes to DocsTopic
 	err = c.Watch(&source.Kind{Type: &cmsv1alpha1.DocsTopic{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {

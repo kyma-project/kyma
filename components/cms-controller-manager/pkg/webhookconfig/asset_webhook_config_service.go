@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
-	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
@@ -66,12 +65,15 @@ func New(indexer Indexer, webhookCfgMapName, webhookCfgMapNamespace string) *ass
 func (r *assetWebhookConfigService) Get(ctx context.Context) (AssetWebhookConfigMap, error) {
 	key := fmt.Sprintf("%s/%s", r.webhookCfgMapNamespace, r.webhookCfgMapName)
 	item, exists, err := r.indexer.GetByKey(key)
-	if err != nil || !exists {
-		if apiErrors.IsNotFound(err) {
-			return nil, nil
-		}
+
+	if !exists {
+		return nil, nil
+	}
+	
+	if err != nil {
 		return nil, errors.Wrapf(err, "while getting webhook configuration in namespace %s", r.webhookCfgMapNamespace)
 	}
+
 	cfgMap, ok := item.(*v1.ConfigMap)
 	if !ok {
 		return nil, fmt.Errorf("incorrect item type: %T, should be: *v1.ConfigMap", item)
