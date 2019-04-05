@@ -229,8 +229,10 @@ func fixCommonClusterDocsTopicSpec() v1alpha1.CommonDocsTopicSpec {
 	return v1alpha1.CommonDocsTopicSpec{
 		DisplayName: fixture.DocsTopicDisplayName,
 		Description: fixture.DocsTopicDescription,
-		Sources: map[string]v1alpha1.Source{
-			"openapi": {
+		Sources: []v1alpha1.Source{
+			{
+				Type: "openapi",
+				Name: "openapi",
 				Mode: v1alpha1.DocsTopicSingle,
 				URL:  "https://petstore.swagger.io/v2/swagger.json",
 			},
