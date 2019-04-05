@@ -11,10 +11,10 @@ See the diagram and steps for an overview of the basic Event Bus flow:
 ### Configuration
 
 1. A user configures a lambda or a serverless application to be triggered by an Event from an external solution.
-> **NOTE**: While the system automatically creates a Kyma subscription resource for a lambda, the user must create one manually for a microservice.
-2. The subscription-controller-knative reacts on the creation of Kyma Subscription. After verifying that the Event was activated, it creates a KnativeChannel CR and a KnativeSubscription CR.
-3. The NATS controller reacts on the creation of KnativeChannel CR and creates the required Kubernetes and Istio services.
-4. The NATS dispatcher reacts on the creation of KnativeSubscription CR and creates the NATS Streaming subscription. 
+> **NOTE**: While the system automatically creates a KymaSubscription resource for a lambda, the user must create one manually for a microservice.
+2. The `subscription-controller-knative` reacts on the creation of the KymaSubscription. After verifying that the Event was activated, it creates a KnativeChannel and a KnativeSubscription.
+3. The NATS controller reacts on the creation of a Knative Channel and creates the required Kubernetes and Istio services.
+4. The NATS dispatcher reacts on the creation of a KnativeSubscription and creates the NATS Streaming subscription. 
 
 
 ### Runtime
@@ -27,7 +27,7 @@ See the diagram and steps for an overview of the basic Event Bus flow:
 3. The Application Connector makes a REST API call to PublishKnative and sends the enriched Event.
 4. PublishKnative forwards the Event to the relevant knative-channel service URL which is inferred based on **source id** , **event type** and **event type version** parameters.
 5. Istio forwards the Event further to the natss-dispatcher.
-6. natss-dispatchr stores the Event in NATS Streaming.
+6. The NATS dispatcher stores the Event in NATS Streaming.
 7. NATS Streaming stores the Event details in the Persistence storage volume to ensure the data is not lost if the NATS Streaming crashes.
 8. The nats-dispatcher picks the Event and dispatches it to the configured lambda or the microservice URL as an HTTP POST request.
 
