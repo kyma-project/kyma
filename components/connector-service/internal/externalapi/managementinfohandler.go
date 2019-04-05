@@ -2,9 +2,9 @@ package externalapi
 
 import (
 	"fmt"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"net/http"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 )

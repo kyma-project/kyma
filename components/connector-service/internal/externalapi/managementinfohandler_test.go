@@ -4,16 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -225,7 +224,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 		commonName := clusterContext.GetCommonName()
 		expectedCertInfo := certInfo{
-			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName), //TODO: CommonName will be different!
+			Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),
 			Extensions:   "",
 			KeyAlgorithm: "rsa2048",
 		}
