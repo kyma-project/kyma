@@ -7,7 +7,6 @@ import (
 	"github.com/pkg/errors"
 	"k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 type AssetWebhookConfigMap map[string]AssetWebhookConfig
@@ -39,11 +38,6 @@ type assetWebhookConfigService struct {
 	webhookCfgMapNamespace string
 }
 
-//go:generate mockery -name=Client -output=automock -outpkg=automock -case=underscore
-type Client interface {
-	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
-}
-
 //go:generate mockery -name=AssetWebhookConfigService -output=automock -outpkg=automock -case=underscore
 type AssetWebhookConfigService interface {
 	Get(ctx context.Context) (AssetWebhookConfigMap, error)
@@ -66,12 +60,12 @@ func (r *assetWebhookConfigService) Get(ctx context.Context) (AssetWebhookConfig
 	key := fmt.Sprintf("%s/%s", r.webhookCfgMapNamespace, r.webhookCfgMapName)
 	item, exists, err := r.indexer.GetByKey(key)
 
-	if !exists {
-		return nil, nil
-	}
-	
 	if err != nil {
 		return nil, errors.Wrapf(err, "while getting webhook configuration in namespace %s", r.webhookCfgMapNamespace)
+	}
+
+	if !exists {
+		return nil, nil
 	}
 
 	cfgMap, ok := item.(*v1.ConfigMap)

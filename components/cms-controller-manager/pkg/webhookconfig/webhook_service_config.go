@@ -1,6 +1,6 @@
 package webhookconfig
 
 type Config struct {
-	WebhookCfgMapName      string `envconfig:"default=webhook-configmap"`
-	WebhookCfgMapNamespace string `envconfig:"default=kyma-system"`
+	CfgMapName      string `envconfig:"default=webhook-configmap"`
+	CfgMapNamespace string `envconfig:"default=kyma-system"`
 }

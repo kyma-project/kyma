@@ -85,10 +85,9 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 
 	err := h.validateSpec(spec)
 	if err != nil {
-		h.recordWarningEventf(instance, pretty.AssetsSpecValidationFailed)
+		h.recordWarningEventf(instance, pretty.AssetsSpecValidationFailed, err.Error())
 		return h.onFailedStatus(h.buildStatus(v1alpha1.DocsTopicFailed, pretty.AssetsSpecValidationFailed, err.Error()), status), err
 	}
-	h.logInfof("CommonDocsTopicSpec validated")
 
 	bucketName, err := h.ensureBucketExits(ctx, instance.GetNamespace())
 	if err != nil {
@@ -123,6 +122,7 @@ func (h *docstopicHandler) Handle(ctx context.Context, instance ObjectMetaAccess
 }
 
 func (h *docstopicHandler) validateSpec(spec v1alpha1.CommonDocsTopicSpec) error {
+	h.logInfof("validating CommonDocsTopicSpec")
 	names := map[string]map[string]struct{}{}
 	for _, src := range spec.Sources {
 		if nameTypes, exists := names[src.Name]; exists {
@@ -135,6 +135,8 @@ func (h *docstopicHandler) validateSpec(spec v1alpha1.CommonDocsTopicSpec) error
 		names[src.Name] = map[string]struct{}{}
 		names[src.Name][src.Type] = struct{}{}
 	}
+	h.logInfof("CommonDocsTopicSpec validated")
+
 	return nil
 }
 
@@ -379,9 +381,9 @@ func convertToAssetWebhookServices(services []webhookconfig.AssetWebhookService)
 	if servicesLen < 1 {
 		return nil
 	}
-	result := make([]v1alpha2.AssetWebhookService, 0, len(services))
-	for i, s := range services {
-		result[i] = v1alpha2.AssetWebhookService{
+	result := make([]v1alpha2.AssetWebhookService, 0, servicesLen)
+	for _, s := range services {
+		result = append(result, v1alpha2.AssetWebhookService{
 			WebhookService: v1alpha2.WebhookService{
 				Name:      s.Name,
 				Namespace: s.Namespace,
@@ -389,7 +391,7 @@ func convertToAssetWebhookServices(services []webhookconfig.AssetWebhookService)
 				Filter:    s.Filter,
 			},
 			Metadata: s.Metadata,
-		}
+		})
 	}
 	return result
 }
@@ -398,7 +400,7 @@ func (h *docstopicHandler) buildLabels(topicName, assetType string) map[string]s
 	labels := make(map[string]string)
 
 	labels[docsTopicLabel] = topicName
-	if len(assetType) > 0 {
+	if assetType != "" {
 		labels[typeLabel] = assetType
 	}
 

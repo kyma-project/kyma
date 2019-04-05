@@ -17,7 +17,7 @@ var (
 	webhookCfgMapNamespace = "test"
 )
 
-func TestAssetWebhookConfigService_Get(t *testing.T) {
+func TestAssetWebhookConfigService(t *testing.T) {
 	g := gomega.NewGomegaWithT(t)
 
 	t.Run("Get", func(t *testing.T) {

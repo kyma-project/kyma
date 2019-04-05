@@ -39,7 +39,7 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return errors.Wrapf(err, "while getting informer for ConfigMap")
 	}
-	webhookCfgService := webhookconfig.New(informer.GetIndexer(), cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
+	webhookCfgService := webhookconfig.New(informer.GetIndexer(), cfg.Webhook.CfgMapName, cfg.Webhook.CfgMapNamespace)
 
 	reconciler := &ReconcileDocsTopic{
 		relistInterval:   cfg.DocsTopicRelistInterval,

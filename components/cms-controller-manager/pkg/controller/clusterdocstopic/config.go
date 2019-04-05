@@ -7,9 +7,9 @@ import (
 )
 
 type Config struct {
-	webhookconfig.Config
 	ClusterDocsTopicRelistInterval time.Duration `envconfig:"default=5m"`
 	ClusterBucketRegion            string        `envconfig:"optional"`
+	Webhook                        webhookconfig.Config
 }
 
 func loadConfig(prefix string) (Config, error) {

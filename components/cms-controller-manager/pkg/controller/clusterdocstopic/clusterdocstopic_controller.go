@@ -40,7 +40,7 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return errors.Wrapf(err, "while getting informer for ConfigMap")
 	}
-	webhookCfgService := webhookconfig.New(informer.GetIndexer(), cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
+	webhookCfgService := webhookconfig.New(informer.GetIndexer(), cfg.Webhook.CfgMapName, cfg.Webhook.CfgMapNamespace)
 
 	reconciler := &ReconcileClusterDocsTopic{
 		relistInterval: cfg.ClusterDocsTopicRelistInterval,
@@ -59,12 +59,6 @@ func Add(mgr manager.Manager) error {
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
 	c, err := controller.New("clusterdocstopic-controller", mgr, controller.Options{Reconciler: r})
-	if err != nil {
-		return err
-	}
-
-	// Watch for changes to ConfigMap
-	err = c.Watch(&source.Kind{Type: &v1.ConfigMap{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}

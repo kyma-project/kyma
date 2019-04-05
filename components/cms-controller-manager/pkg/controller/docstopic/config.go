@@ -9,7 +9,7 @@ import (
 type Config struct {
 	DocsTopicRelistInterval time.Duration `envconfig:"default=5m"`
 	BucketRegion            string        `envconfig:"optional"`
-	webhookconfig.Config
+	Webhook                 webhookconfig.Config
 }
 
 func loadConfig(prefix string) (Config, error) {
