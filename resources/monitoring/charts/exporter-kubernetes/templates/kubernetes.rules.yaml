@@ -81,7 +81,7 @@ spec:
       labels:
         severity: warning
       annotations:
-        message: API server returns errors for {{`{{ $value }}`}}% of requests
+        message: API server returns errors for {{`{{ $value }}`}}% of requests for job `{{`{{$labels.job}}`}}`/HTTP `{{`{{$labels.verb}}`}}`
         summary: API server request errors
     - alert: APIServerErrorsHigh
       expr: rate(apiserver_request_count{code=~"^(?:5..)$"}[5m]) / rate(apiserver_request_count[5m])
@@ -90,7 +90,7 @@ spec:
       labels:
         severity: critical
       annotations:
-        message: API server returns errors for {{`{{ $value }}`}}% of requests
+        message: API server returns errors for {{`{{ $value }}`}}% of requests for job `{{`{{$labels.job}}`}}`/HTTP `{{`{{$labels.verb}}`}}`
     - alert: K8SApiserverDown
       expr: absent(up{job="apiserver"} == 1)
       for: 20m

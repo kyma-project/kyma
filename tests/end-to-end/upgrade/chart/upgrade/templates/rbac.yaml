@@ -20,6 +20,9 @@ metadata:
     heritage: "{{ .Release.Service }}"
 rules:
 - apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["create", "get", "delete", "list"]
+- apiGroups: [""]
   resources: ["", "namespaces"]
   verbs: ["create"]
 - apiGroups: ["apps"]

@@ -2,7 +2,7 @@
   "spec":{
     "id":"monitoring",
     "displayName":"Monitoring",
-    "description":"Overal documentation for Monitoring",
+    "description":"Overall documentation for Monitoring",
     "type":"Components"
   }
 }

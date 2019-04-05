@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/event-bus/api/publish"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/hash"
 )
 
 const (
@@ -20,30 +20,27 @@ var (
 //  * In case there was a '-' or more in any of the argument values, each occurrence of the '-' will be escaped by '-d'.
 //  * In case there was a '.' or more in any of the argument values, each occurrence of the '.' will be replaced by the '-p' character sequence,
 //    because of a limitation in the current knative version, if the channel name has a '.', the corresponding istio-virtualservice will not be created.
-func escapeHyphensAndPeriods(str *string) *string {
-	out := replacer.Replace(*str)
-	return &out
+func escapeHyphensAndPeriods(str *string) string {
+	return replacer.Replace(*str)
 }
 
-func truncate(str *string, length int) *string {
-	if len(*str) > length {
-		out := (*str)[:length]
-		return &out
-	}
-	return str
-}
-
-// GetChannelName function joins the sourceID, eventType and eventTypeVersion respectively with a '--' as a delimiter.
-func GetChannelName(sourceID, eventType, eventTypeVersion *string) string {
+// encodeChannelName function encodes and joins the given event components to construct the encoded channel name
+func encodeChannelName(sourceID, eventType, eventTypeVersion *string) string {
 	return fmt.Sprintf("%s%s%s%s%s",
-		*truncate(escapeHyphensAndPeriods(sourceID), publish.SourceIdMaxLength), delimiter,
-		*truncate(escapeHyphensAndPeriods(eventType), publish.EventTypeMaxLength), delimiter,
-		*escapeHyphensAndPeriods(eventTypeVersion))
+		escapeHyphensAndPeriods(sourceID), delimiter,
+		escapeHyphensAndPeriods(eventType), delimiter,
+		escapeHyphensAndPeriods(eventTypeVersion))
+}
+
+// GetChannelName function returns a unique hash for the knative channel name from the given event components
+func GetChannelName(sourceID, eventType, eventTypeVersion *string) string {
+	channelName := encodeChannelName(sourceID, eventType, eventTypeVersion)
+	return hash.ComputeHash(&channelName)
 }
 
 // GetKnSubscriptionName joins the kySubscriptionName and kySubscriptionNamespace
 func GetKnSubscriptionName(kySubscriptionName, kySubscriptionNamespace *string) string {
-	return fmt.Sprintf("%s%s%s", *kySubscriptionName, delimiter, *escapeHyphensAndPeriods(kySubscriptionNamespace))
+	return fmt.Sprintf("%s%s%s", *kySubscriptionName, delimiter, escapeHyphensAndPeriods(kySubscriptionNamespace))
 }
 
 // GetDefaultChannelNamespace() returns the default namespace of Knative/Eventing channels and subscriptions
