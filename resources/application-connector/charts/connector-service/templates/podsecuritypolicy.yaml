@@ -12,13 +12,13 @@ spec:
   allowedCapabilities:
   - NET_ADMIN
   fsGroup:
-    rule: RunAsNonRoot
+    rule: RunAsAny
   seLinux:
-    rule: RunAsNonRoot
+    rule: RunAsAny
   supplementalGroups:
-    rule: RunAsNonRoot
+    rule: RunAsAny
   runAsUser:
-    rule: RunAsNonRoot
+    rule: RunAsAny
   volumes:
   - configMap
   - downwardAPI
