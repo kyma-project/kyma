@@ -19,6 +19,8 @@ const (
 	MetadataHostHeader = "MetadataHost"
 	Tenant             = "testkit-tenant"
 	Group              = "testkit-group"
+	Extensions         = ""
+	KeyAlgorithm       = "rsa2048"
 )
 
 type ConnectorClient interface {
