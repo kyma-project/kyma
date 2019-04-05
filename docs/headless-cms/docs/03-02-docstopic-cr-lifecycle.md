@@ -19,9 +19,9 @@ Asset CRs and DocsTopic CRs are also interdependent in terms of names, definitio
 
 The name of every Asset CR created by the DocsTopic Controller consists of these three elements:
 
-- the name of the DocsTopic CR, such as `service-catalog`.
-- the source type of the given asset in the DocsTopic CR, such as `asyncapi`.
-- a randomly generated string, such as `1b38grj5vcu1l`.
+- The name of the DocsTopic CR, such as `service-catalog`.
+- The source type of the given asset in the DocsTopic CR, such as `asyncapi`.
+- A randomly generated string, such as `1b38grj5vcu1l`.
 
 The full name of such an Asset CR that follows the **{docsTopic-name}-{asset-source}-{suffix}** pattern is **service-catalog-asyncapi-1b38grj5vcu1l**.
 
@@ -37,6 +37,6 @@ There are two labels in every Asset CR created from DocsTopic CRs. Both of them 
 
 The status of the DocsTopic CR depends heavily on the status phase of all Asset CRs it creates. It is:
 
-- `Ready` when all related Asset CRs already are in the `Ready` phase.
-- `Pending` when it awaits the confirmation that all related Asset CRs are in the `Ready` status. If any Asset CR is in the `Failed` status, the status of the DocsTopic CR remains `Pending`.
+- `Ready` when all related Asset CRs are already in the `Ready` phase.
+- `Pending` when it awaits the confirmation that all related Asset CRs are in the `Ready` phase. If any Asset CR is in the `Failed` phase, the status of the DocsTopic CR remains `Pending`.
 - `Failed` when processing of the DocsTopic CR fails. For example, the DocsTopic CR can fail if you provide incorrect or duplicated data in its specification.

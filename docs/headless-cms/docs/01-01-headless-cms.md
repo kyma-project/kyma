@@ -12,6 +12,6 @@ Kyma provides a Kubernetes-based solution that relies on the custom resource (CR
 
 The Headless CMS brings a number of benefits:
 
-- It provides a unified way of uploading different documentation types to a Kyma cluster.
+- It provides a unified way of uploading different document types to a Kyma cluster.
 - It fits into the Kyma modularity concept as you load onto a cluster only documentation for the installed components. This is possible as the DocsTopic CR and the code for a given component are located in the same place in the `kyma` repository.
 - It supports baked-in documentation. Apart from the default documentation, you can add your own and group it as you like, the same way you use micro frontends to personalize views in the Console UI. For example, you can add contextual help for a given Service Broker in the Service Catalog.
