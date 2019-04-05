@@ -10,6 +10,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | Component | Kyma | Kyma Lite |
 |----------------|------|------|
 | `core` | ✅ | ✅ |
+| `cms` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
 | `ark` | ✅ | ⛔️ |
