@@ -73,8 +73,6 @@ metadata:
 data:
   etcd-stateful.etcd.resources.limits.memory: 256Mi
   etcd-stateful.replicaCount: "1"
-  #service-catalog-apiserver: "true"
-  #service-catalog-crds: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
