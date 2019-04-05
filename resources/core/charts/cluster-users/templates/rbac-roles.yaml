@@ -213,9 +213,9 @@ aggregationRule:
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:
-      rbac.authorization.k8s.io/aggregate-to-admin: "true"
-  - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-admin: "true"
+#  - matchLabels:
+#      rbac.authorization.k8s.io/aggregate-to-admin: "true"
   - matchLabels:
       rbac.authorization.kyma-project.io/aggregate-to-kyma-edit: "true"
   - matchLabels:
@@ -334,31 +334,6 @@ subjects:
 apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
-  name: kyma-edit-binding
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-  annotations:
-    "helm.sh/hook-weight": "1"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: kyma-edit
-subjects:
-- kind: User
-  name: user3@kyma.cx
-  apiGroup: rbac.authorization.k8s.io
-{{- range .Values.bindings.kymaEdit.groups }}
-- kind: Group
-  name: {{ . }}
-  apiGroup: rbac.authorization.k8s.io
-{{- end }}
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
   name: kyma-admin-binding
   namespace: {{ .Release.Namespace }}
   labels:
@@ -380,31 +355,6 @@ subjects:
   apiGroup: rbac.authorization.k8s.io
 {{ end }}
 {{- range .Values.bindings.kymaAdmin.groups }}
-- kind: Group
-  name: {{ . }}
-  apiGroup: rbac.authorization.k8s.io
-{{- end }}
-
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: kyma-developer-binding
-  namespace: {{ .Release.Namespace }}
-  labels:
-    app: kyma
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-  annotations:
-    "helm.sh/hook-weight": "1"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: kyma-edit
-subjects:
-- kind: User
-  name: developer@kyma.cx
-  apiGroup: rbac.authorization.k8s.io
-{{- range .Values.bindings.kymaDeveloper.groups }}
 - kind: Group
   name: {{ . }}
   apiGroup: rbac.authorization.k8s.io
