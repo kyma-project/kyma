@@ -11,7 +11,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
-type AssetWebHookConfigMap map[string]AssetWebHookConfig
+type AssetWebhookConfigMap map[string]AssetWebhookConfig
 
 type WebhookService struct {
 	Name      string `json:"name"`
@@ -28,13 +28,13 @@ type AssetWebhookService struct {
 	Metadata       *runtime.RawExtension `json:"metadata,omitempty"`
 }
 
-type AssetWebHookConfig struct {
+type AssetWebhookConfig struct {
 	Validations        []AssetWebhookService `json:"validations,omitempty"`
 	Mutations          []AssetWebhookService `json:"mutations,omitempty"`
 	MetadataExtractors []WebhookService      `json:"metadataExtractors,omitempty"`
 }
 
-type assetWebHookConfigService struct {
+type assetWebhookConfigService struct {
 	client                 Client
 	webhookCfgMapName      string
 	webhookCfgMapNamespace string
@@ -45,20 +45,20 @@ type Client interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
 }
 
-//go:generate mockery -name=AssetWebHookConfigService -output=automock -outpkg=automock -case=underscore
-type AssetWebHookConfigService interface {
-	Get(ctx context.Context) (AssetWebHookConfigMap, error)
+//go:generate mockery -name=AssetWebhookConfigService -output=automock -outpkg=automock -case=underscore
+type AssetWebhookConfigService interface {
+	Get(ctx context.Context) (AssetWebhookConfigMap, error)
 }
 
-func NewAssetWebHookService(client Client, webhookCfgMapName, webhookCfgMapNamespace string) *assetWebHookConfigService {
-	return &assetWebHookConfigService{
+func NewAssetWebhookService(client Client, webhookCfgMapName, webhookCfgMapNamespace string) *assetWebhookConfigService {
+	return &assetWebhookConfigService{
 		client:                 client,
 		webhookCfgMapName:      webhookCfgMapName,
 		webhookCfgMapNamespace: webhookCfgMapNamespace,
 	}
 }
 
-func (r *assetWebHookConfigService) Get(ctx context.Context) (AssetWebHookConfigMap, error) {
+func (r *assetWebhookConfigService) Get(ctx context.Context) (AssetWebhookConfigMap, error) {
 	instance := &v1.ConfigMap{}
 	err := r.client.Get(ctx, types.NamespacedName{Name: r.webhookCfgMapName, Namespace: r.webhookCfgMapNamespace}, instance)
 	if err != nil {
@@ -70,10 +70,10 @@ func (r *assetWebHookConfigService) Get(ctx context.Context) (AssetWebHookConfig
 	return toAssetWhsConfig(*instance)
 }
 
-func toAssetWhsConfig(configMap v1.ConfigMap) (AssetWebHookConfigMap, error) {
-	result := AssetWebHookConfigMap{}
+func toAssetWhsConfig(configMap v1.ConfigMap) (AssetWebhookConfigMap, error) {
+	result := AssetWebhookConfigMap{}
 	for k, v := range configMap.Data {
-		var assetWhMap AssetWebHookConfig
+		var assetWhMap AssetWebhookConfig
 		if err := json.Unmarshal([]byte(v), &assetWhMap); err != nil {
 			return nil, errors.Wrapf(err, "invalid content for source type type: %s", k)
 		}

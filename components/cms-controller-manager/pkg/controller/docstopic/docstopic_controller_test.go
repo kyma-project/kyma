@@ -34,16 +34,16 @@ func TestReconcile(t *testing.T) {
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(c, scheme)
 	bucketService := newBucketService(c, scheme, "")
-	assetWhsConfigService := config.NewAssetWebHookService(c, webhookCfgMapName, webhookCfgMapNamespace)
+	assetWhsConfigService := config.NewAssetWebhookService(c, webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileDocsTopic{
-		Client:         c,
-		scheme:         scheme,
-		relistInterval: time.Hour,
-		recorder:       mgr.GetRecorder("docstopic-controller"),
-		assetSvc:       assetService,
-		bucketSvc:      bucketService,
-		whsConfigSvc:   assetWhsConfigService,
+		Client:           c,
+		scheme:           scheme,
+		relistInterval:   time.Hour,
+		recorder:         mgr.GetRecorder("docstopic-controller"),
+		assetSvc:         assetService,
+		bucketSvc:        bucketService,
+		webhookConfigSvc: assetWhsConfigService,
 	}
 
 	recFn, requests := SetupTestReconcile(r)

@@ -108,15 +108,15 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{"test-bucket"}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(nil, nil).Once()
 		assetSvc.On("Create", ctx, testData, mock.Anything).Return(nil).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -139,15 +139,15 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{"test-bucket"}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(nil, nil).Once()
 		assetSvc.On("Create", ctx, testData, mock.Anything).Return(errors.New("test-data")).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -178,15 +178,15 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		assetSvc.On("Update", ctx, mock.Anything).Return(nil).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -212,10 +212,10 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -243,15 +243,15 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		assetSvc.On("Update", ctx, mock.Anything).Return(errors.New("test-error")).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -280,15 +280,15 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		assetSvc.On("Delete", ctx, toRemove).Return(nil).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -317,15 +317,15 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
 		assetSvc.On("Delete", ctx, toRemove).Return(errors.New("test-error")).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -348,16 +348,16 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return(nil, nil).Once()
 		bucketSvc.On("Create", ctx, mock.Anything, false, map[string]string{"cms.kyma-project.io/access": "public"}).Return(nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(nil, nil).Once()
 		assetSvc.On("Create", ctx, testData, mock.Anything).Return(nil).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -380,13 +380,13 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return(nil, nil).Once()
 		bucketSvc.On("Create", ctx, mock.Anything, false, map[string]string{"cms.kyma-project.io/access": "public"}).Return(errors.New("test-error")).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -409,12 +409,12 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return(nil, errors.New("test-error")).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -437,13 +437,13 @@ func TestDocstopicHandler_Handle_AddOrUpdate(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{"test-bucket"}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(nil, errors.New("test-error")).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -477,14 +477,14 @@ func TestDocstopicHandler_Handle_Status(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -511,14 +511,14 @@ func TestDocstopicHandler_Handle_Status(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)
@@ -547,14 +547,14 @@ func TestDocstopicHandler_Handle_Status(t *testing.T) {
 		defer assetSvc.AssertExpectations(t)
 		bucketSvc := new(automock.BucketService)
 		defer bucketSvc.AssertExpectations(t)
-		whsConfSvc := new(amcfg.AssetWebHookConfigService)
-		defer whsConfSvc.AssertExpectations(t)
+		webhookConfSvc := new(amcfg.AssetWebhookConfigService)
+		defer webhookConfSvc.AssertExpectations(t)
 
 		bucketSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/access": "public"}).Return([]string{bucketName}, nil).Once()
 		assetSvc.On("List", ctx, testData.Namespace, map[string]string{"cms.kyma-project.io/docs-topic": testData.Name}).Return(existingAssets, nil).Once()
-		whsConfSvc.On("Get", ctx).Return(config.AssetWebHookConfigMap{}, nil).Once()
+		webhookConfSvc.On("Get", ctx).Return(config.AssetWebhookConfigMap{}, nil).Once()
 
-		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, whsConfSvc)
+		handler := docstopic.New(log, fakeRecorder(), assetSvc, bucketSvc, webhookConfSvc)
 
 		// When
 		status, err := handler.Handle(ctx, testData, testData.Spec.CommonDocsTopicSpec, testData.Status.CommonDocsTopicStatus)

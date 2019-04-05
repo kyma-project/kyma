@@ -36,7 +36,7 @@ func Add(mgr manager.Manager) error {
 	scheme := mgr.GetScheme()
 	assetService := newClusterAssetService(client, scheme)
 	bucketService := newClusterBucketService(client, scheme, cfg.ClusterBucketRegion)
-	webhookCfgService := config.NewAssetWebHookService(client, cfg.WebHookCfgMapName, cfg.WebHookCfgMapNamespace)
+	webhookCfgService := config.NewAssetWebhookService(client, cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
 
 	reconciler := &ReconcileClusterDocsTopic{
 		relistInterval: cfg.ClusterDocsTopicRelistInterval,
@@ -45,7 +45,7 @@ func Add(mgr manager.Manager) error {
 		recorder:       mgr.GetRecorder("clusterdocstopic-controller"),
 		assetSvc:       assetService,
 		bucketSvc:      bucketService,
-		whsCfgSvc:      webhookCfgService,
+		webhookCfgSvc:  webhookCfgService,
 	}
 
 	return add(mgr, reconciler)
@@ -92,7 +92,7 @@ type ReconcileClusterDocsTopic struct {
 	recorder       record.EventRecorder
 	assetSvc       docstopic.AssetService
 	bucketSvc      docstopic.BucketService
-	whsCfgSvc      config.AssetWebHookConfigService
+	webhookCfgSvc  config.AssetWebhookConfigService
 }
 
 // Reconcile reads that state of the cluster for a DocsTopic object and makes changes based on the state read
@@ -119,7 +119,7 @@ func (r *ReconcileClusterDocsTopic) Reconcile(request reconcile.Request) (reconc
 	}
 
 	docsTopicLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName())
-	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc, r.whsCfgSvc)
+	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc, r.webhookCfgSvc)
 	commonStatus, err := commonHandler.Handle(ctx, instance, instance.Spec.CommonDocsTopicSpec, instance.Status.CommonDocsTopicStatus)
 	if updateErr := r.updateStatus(ctx, instance, commonStatus); updateErr != nil {
 		finalErr := updateErr

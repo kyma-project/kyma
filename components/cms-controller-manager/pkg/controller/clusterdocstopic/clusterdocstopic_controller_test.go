@@ -34,7 +34,7 @@ func TestReconcile(t *testing.T) {
 	scheme := mgr.GetScheme()
 	assetService := newClusterAssetService(c, scheme)
 	bucketService := newClusterBucketService(c, scheme, "")
-	assetWhsConfigService := config.NewAssetWebHookService(c, webhookCfgMapName, webhookCfgMapNamespace)
+	assetWhsConfigService := config.NewAssetWebhookService(c, webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileClusterDocsTopic{
 		relistInterval: time.Hour,
@@ -43,7 +43,7 @@ func TestReconcile(t *testing.T) {
 		recorder:       mgr.GetRecorder("clusterdocstopic-controller"),
 		assetSvc:       assetService,
 		bucketSvc:      bucketService,
-		whsCfgSvc:      assetWhsConfigService,
+		webhookCfgSvc:  assetWhsConfigService,
 	}
 
 	recFn, requests := SetupTestReconcile(r)

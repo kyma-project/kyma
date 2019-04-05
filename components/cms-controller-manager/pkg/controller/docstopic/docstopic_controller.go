@@ -36,16 +36,16 @@ func Add(mgr manager.Manager) error {
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(client, scheme)
 	bucketService := newBucketService(client, scheme, cfg.BucketRegion)
-	webhookCfgService := config.NewAssetWebHookService(client, cfg.WebHookCfgMapName, cfg.WebHookCfgMapNamespace)
+	webhookCfgService := config.NewAssetWebhookService(client, cfg.WebhookCfgMapName, cfg.WebhookCfgMapNamespace)
 
 	reconciler := &ReconcileDocsTopic{
-		relistInterval: cfg.DocsTopicRelistInterval,
-		Client:         mgr.GetClient(),
-		scheme:         mgr.GetScheme(),
-		recorder:       mgr.GetRecorder("docstopic-controller"),
-		assetSvc:       assetService,
-		bucketSvc:      bucketService,
-		whsConfigSvc:   webhookCfgService,
+		relistInterval:   cfg.DocsTopicRelistInterval,
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		recorder:         mgr.GetRecorder("docstopic-controller"),
+		assetSvc:         assetService,
+		bucketSvc:        bucketService,
+		webhookConfigSvc: webhookCfgService,
 	}
 
 	return add(mgr, reconciler)
@@ -87,12 +87,12 @@ var _ reconcile.Reconciler = &ReconcileDocsTopic{}
 // ReconcileDocsTopic reconciles a DocsTopic object
 type ReconcileDocsTopic struct {
 	client.Client
-	scheme         *runtime.Scheme
-	relistInterval time.Duration
-	recorder       record.EventRecorder
-	assetSvc       docstopic.AssetService
-	bucketSvc      docstopic.BucketService
-	whsConfigSvc   config.AssetWebHookConfigService
+	scheme           *runtime.Scheme
+	relistInterval   time.Duration
+	recorder         record.EventRecorder
+	assetSvc         docstopic.AssetService
+	bucketSvc        docstopic.BucketService
+	webhookConfigSvc config.AssetWebhookConfigService
 }
 
 // Reconcile reads that state of the cluster for a DocsTopic object and makes changes based on the state read
@@ -119,7 +119,7 @@ func (r *ReconcileDocsTopic) Reconcile(request reconcile.Request) (reconcile.Res
 	}
 
 	docsTopicLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "namespace", instance.GetNamespace(), "name", instance.GetName())
-	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc, r.whsConfigSvc)
+	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc, r.webhookConfigSvc)
 	commonStatus, err := commonHandler.Handle(ctx, instance, instance.Spec.CommonDocsTopicSpec, instance.Status.CommonDocsTopicStatus)
 	if updateErr := r.updateStatus(ctx, instance, commonStatus); updateErr != nil {
 		finalErr := updateErr

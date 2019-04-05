@@ -27,7 +27,7 @@ func Test_assetWhsConfigService(t *testing.T) {
 
 		t.Run("nil result", func(t *testing.T) {
 			call.Return(nil).Once()
-			service := config.NewAssetWebHookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			service := config.NewAssetWebhookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).To(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeEmpty())
@@ -35,7 +35,7 @@ func Test_assetWhsConfigService(t *testing.T) {
 
 		t.Run("ok", func(t *testing.T) {
 			call.Run(mockValidConfigMap()).Return(nil).Once()
-			service := config.NewAssetWebHookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			service := config.NewAssetWebhookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).To(gomega.BeNil())
 			g.Expect(actual).To(gomega.Equal(actual))
@@ -44,7 +44,7 @@ func Test_assetWhsConfigService(t *testing.T) {
 		t.Run("err", func(t *testing.T) {
 			testError := errors.New("test_error")
 			call.Return(testError).Once()
-			service := config.NewAssetWebHookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			service := config.NewAssetWebhookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).NotTo(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeNil())
@@ -52,7 +52,7 @@ func Test_assetWhsConfigService(t *testing.T) {
 
 		t.Run("err-unmarshal", func(t *testing.T) {
 			call.Return(nil).Run(mockInvalidConfigMap()).Once()
-			service := config.NewAssetWebHookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
+			service := config.NewAssetWebhookService(&client, webhookCfgMapName, webhookCfgMapNamespace)
 			actual, err := service.Get(ctx)
 			g.Expect(err).NotTo(gomega.BeNil())
 			g.Expect(actual).To(gomega.BeNil())

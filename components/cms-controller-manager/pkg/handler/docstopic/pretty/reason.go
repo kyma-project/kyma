@@ -16,7 +16,7 @@ const (
 	AssetsReady                Reason = "AssetsReady"
 	WaitingForAssets           Reason = "WaitingForAssets"
 	BucketError                Reason = "BucketError"
-	AssetsWebHookGetFailed     Reason = "AssetsWebHookGetFailed"
+	AssetsWebhookGetFailed     Reason = "AssetsWebhookGetFailed"
 	AssetsSpecValidationFailed Reason = "AssetsSpecValidationFailed"
 )
 
@@ -52,7 +52,7 @@ func (r Reason) Message() string {
 		return "Waiting for assets to be in Ready phase"
 	case BucketError:
 		return "Couldn't ensure if bucket exist due to error %s"
-	case AssetsWebHookGetFailed:
+	case AssetsWebhookGetFailed:
 		return "Unable to get web hook configuration %s"
 	case AssetsSpecValidationFailed:
 		return "Invalid asset specification, %s"
