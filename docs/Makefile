@@ -17,5 +17,5 @@ build-and-push-images:
 	go run main.go
 
 publish-website:
-	make -C "../../website" prepare-git
+	make -C "../../website" prepare-content
 	make -C "../../website" publish-website
