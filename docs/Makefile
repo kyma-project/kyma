@@ -3,8 +3,8 @@ TAG = $(DOCKER_TAG)
 DOCS_BUILDER_PATH=../tools/docsbuilder
 
 ci-pr: resolve-tool build-and-push-images
-ci-master: resolve-tool build-and-push-images prepare-content
-ci-release: resolve-tool build-and-push-images prepare-content
+ci-master: resolve-tool build-and-push-images publish-website
+ci-release: resolve-tool build-and-push-images publish-website
 
 resolve-tool:
 	cd ${DOCS_BUILDER_PATH} && \
@@ -16,5 +16,6 @@ build-and-push-images:
 	APP_DOCKER_IMAGE_TAG=${TAG} \
 	go run main.go
 
-prepare-content:
-	make -C "../../website" prepare-content
+publish-website:
+	make -C "../../website" prepare-git
+	make -C "../../website" publish-website
