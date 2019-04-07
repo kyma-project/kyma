@@ -299,7 +299,7 @@
   version = "v0.4.0"
 
 [[projects]]
-  digest = "1:7e9ebd1ff077012ac35fc7c822bd62370cbc0854d9dbcd7752af41f87bdba96b"
+  digest = "1:1069a7ee451253ba038ab9c1031ff1a3de731b825e573d774284a159639d814a"
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
@@ -324,11 +324,11 @@
     "pkg/filter",
   ]
   pruneopts = "NUT"
-  revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
-  version = "v0.1.28"
+  revision = "58b88f4d33cb708e4b22c39ccbe498b00738488e"
+  version = "v0.1.36"
 
 [[projects]]
-  digest = "1:33f0e3623b9e5110ecb58b05aca94fdba7fa7addcdadd6e056c4b8817b85eb62"
+  digest = "1:45efec0a59ce421ab70e297521fc0e6813a2c99953bd151d8738185832e2fa4d"
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
@@ -365,6 +365,8 @@
     "components/application-operator/pkg/client/informers/externalversions/applicationconnector/v1alpha1",
     "components/application-operator/pkg/client/informers/externalversions/internalinterfaces",
     "components/application-operator/pkg/client/listers/applicationconnector/v1alpha1",
+    "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
+    "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "components/idppreset/pkg/apis/authentication/v1alpha1",
     "components/idppreset/pkg/client/clientset/versioned",
     "components/idppreset/pkg/client/clientset/versioned/fake",
@@ -396,7 +398,7 @@
     "tools/failery",
   ]
   pruneopts = "NUT"
-  revision = "26578a4d8414cf9c888dbec1bf2460d56cbfde2f"
+  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
 
 [[projects]]
   branch = "master"
@@ -734,7 +736,7 @@
   version = "v2.2.2"
 
 [[projects]]
-  digest = "1:66dba704ec98aef0d6485f4fcfe544c906a7319fb2b20e0de4181b46a3b24c8a"
+  digest = "1:4485f6050feae6844efd79bce3f5b35e5ed4a21dd79ef6a2dbbee263531cea09"
   name = "k8s.io/api"
   packages = [
     "admissionregistration/v1alpha1",
@@ -748,10 +750,12 @@
     "authorization/v1beta1",
     "autoscaling/v1",
     "autoscaling/v2beta1",
+    "autoscaling/v2beta2",
     "batch/v1",
     "batch/v1beta1",
     "batch/v2alpha1",
     "certificates/v1beta1",
+    "coordination/v1beta1",
     "core/v1",
     "events/v1beta1",
     "extensions/v1beta1",
@@ -768,11 +772,11 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "4e7be11eab3ffcfc1876898b8272df53785a9504"
-  version = "kubernetes-1.11.3"
+  revision = "b503174bad5991eb66f18247f52e41c3258f6348"
+  version = "kubernetes-1.12.3"
 
 [[projects]]
-  digest = "1:42c247037945abe2a9ba701712098a05f3ee0fa549c4733b801f66919df41d45"
+  digest = "1:ada25b0fc2dab44cead6649ce86f1592e3a34b82f934a598223806a876a744eb"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/errors",
@@ -804,6 +808,7 @@
     "pkg/util/intstr",
     "pkg/util/json",
     "pkg/util/mergepatch",
+    "pkg/util/naming",
     "pkg/util/net",
     "pkg/util/runtime",
     "pkg/util/sets",
@@ -818,11 +823,11 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "def12e63c512da17043b4f0293f52d1006603d9f"
-  version = "kubernetes-1.11.3"
+  revision = "eddba98df674a16931d2d4ba75edc3a389bf633a"
+  version = "kubernetes-1.12.3"
 
 [[projects]]
-  digest = "1:872ab2abbd4d05901f8c6ab819aeb47b8b16a662d15089383be940b0217f4556"
+  digest = "1:562c59c2b47fecfe461fac96bbb25dcfbcd9c38fab857de58ae4c1fcbe86614b"
   name = "k8s.io/apiserver"
   packages = [
     "pkg/authentication/authenticator",
@@ -835,11 +840,11 @@
     "plugin/pkg/authorizer/webhook",
   ]
   pruneopts = "NUT"
-  revision = "386115dd78fde3efc2366cb381420a4dd0157348"
-  version = "kubernetes-1.11.3"
+  revision = "92fdef3a232a23afb9644f6151119b5961b9feab"
+  version = "kubernetes-1.12.3"
 
 [[projects]]
-  digest = "1:97e4f6d0e5b475ed09dc524b87b224224fc83e0a446a5cc56a7a710bbe9ceddf"
+  digest = "1:908dbccfffc73f69daabac462565cf2f4c52c4c9b2f77d230d9de3aa4485ddc7"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -857,12 +862,15 @@
     "informers/autoscaling",
     "informers/autoscaling/v1",
     "informers/autoscaling/v2beta1",
+    "informers/autoscaling/v2beta2",
     "informers/batch",
     "informers/batch/v1",
     "informers/batch/v1beta1",
     "informers/batch/v2alpha1",
     "informers/certificates",
     "informers/certificates/v1beta1",
+    "informers/coordination",
+    "informers/coordination/v1beta1",
     "informers/core",
     "informers/core/v1",
     "informers/events",
@@ -912,6 +920,8 @@
     "kubernetes/typed/autoscaling/v1/fake",
     "kubernetes/typed/autoscaling/v2beta1",
     "kubernetes/typed/autoscaling/v2beta1/fake",
+    "kubernetes/typed/autoscaling/v2beta2",
+    "kubernetes/typed/autoscaling/v2beta2/fake",
     "kubernetes/typed/batch/v1",
     "kubernetes/typed/batch/v1/fake",
     "kubernetes/typed/batch/v1beta1",
@@ -920,6 +930,8 @@
     "kubernetes/typed/batch/v2alpha1/fake",
     "kubernetes/typed/certificates/v1beta1",
     "kubernetes/typed/certificates/v1beta1/fake",
+    "kubernetes/typed/coordination/v1beta1",
+    "kubernetes/typed/coordination/v1beta1/fake",
     "kubernetes/typed/core/v1",
     "kubernetes/typed/core/v1/fake",
     "kubernetes/typed/events/v1beta1",
@@ -955,10 +967,12 @@
     "listers/apps/v1beta2",
     "listers/autoscaling/v1",
     "listers/autoscaling/v2beta1",
+    "listers/autoscaling/v2beta2",
     "listers/batch/v1",
     "listers/batch/v1beta1",
     "listers/batch/v2alpha1",
     "listers/certificates/v1beta1",
+    "listers/coordination/v1beta1",
     "listers/core/v1",
     "listers/events/v1beta1",
     "listers/extensions/v1beta1",
@@ -1001,8 +1015,8 @@
     "util/retry",
   ]
   pruneopts = "NUT"
-  revision = "2cefa64ff137e128daeddbd1775cd775708a05bf"
-  version = "kubernetes-1.11.3"
+  revision = "d082d5923d3cc0bfbb066ee5fbdea3d0ca79acf8"
+  version = "kubernetes-1.12.3"
 
 [[projects]]
   branch = "release-1.11"
@@ -1077,6 +1091,14 @@
   pruneopts = "NUT"
   revision = "0317810137be915b9cf888946c6e115c1bfac693"
 
+[[projects]]
+  digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
+  name = "sigs.k8s.io/controller-runtime"
+  packages = ["pkg/runtime/scheme"]
+  pruneopts = "NUT"
+  revision = "12d98582e72927b6cd0123e2b4e819f9341ce62c"
+  version = "v0.1.10"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
@@ -1115,6 +1137,8 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions",
+    "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
+    "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/apis/authentication/v1alpha1",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned/fake",

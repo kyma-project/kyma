@@ -51,7 +51,6 @@ func New() (*Client, error) {
 	}
 
 	client.gqlClient.Log = client.addLog
-
 	client.cachedTokens = make(map[User]string)
 	client.cachedTokens[AdminUser] = token
 
@@ -111,7 +110,6 @@ func (c *Client) Subscribe(req *Request) *Subscription {
 }
 
 func (c *Client) ChangeUser(user User) error {
-
 	var token string
 
 	config, err := loadConfig(user)

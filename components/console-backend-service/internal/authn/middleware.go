@@ -3,9 +3,10 @@ package authn
 import (
 	"context"
 	"net/http"
-	"strings"
 
 	"github.com/pkg/errors"
+
+	"strings"
 
 	"github.com/golang/glog"
 	"k8s.io/apiserver/pkg/authentication/authenticator"
@@ -21,7 +22,6 @@ type contextKey struct {
 func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-
 			wsProtocolHeader := r.Header.Get("sec-websocket-protocol")
 			if wsProtocolHeader != "" {
 				wsProtocolParts := strings.Split(wsProtocolHeader, ",")
