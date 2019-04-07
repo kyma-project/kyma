@@ -1,4 +1,4 @@
-white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$LATEST", "http://xip.io"]
+white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "http://xip.io"]
 black-list: ["/vendor/", "/testdata/"]
 black-list-internal: ["./kyma/docs/"]
 timeout: 60
