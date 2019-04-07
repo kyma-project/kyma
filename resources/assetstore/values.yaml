@@ -5,17 +5,17 @@ global:
     gateway:
       name: kyma-gateway
   asset_store_controller_manager:
-    dir: pr/
-    version: 'PR-3558'
+    dir: develop/
+    version: '1c4c7390'
   asset_upload_service:
     dir: develop/
     version: '84af083b'
   asset_metadata_service:
-    dir: pr/
-    version: 'PR-3558'
+    dir: develop/
+    version: '1c4c7390'
   asset_store_test:
-    dir: pr/
-    version: 'PR-3559'
+    dir: develop/
+    version: 'Pa804f409'
 
 minio:
   mode: standalone
