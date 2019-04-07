@@ -14,6 +14,17 @@ Follow these installation guides to install Kyma on a cluster depending on the s
 
 This Installation guide shows developers how to quickly deploy Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster.
 
+## Prerequisites
+- [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
+- [Docker](https://www.docker.com/)
+- [Docker Hub](https://hub.docker.com/) account
+- [gcloud](https://cloud.google.com/sdk/gcloud/)
+- [wget](https://www.gnu.org/software/wget/)
+- A domain for your GKE cluster (optional)
+
+>**TIP:** Get a free domain for your cluster using services like [freenom.com](https://www.freenom.com) or similar.
+
 ## Prepare the GKE cluster
 
 1. Select a name for your cluster. Set the cluster name and the name of your GCP project as environment variables. Run:
@@ -43,7 +54,7 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
 
 ## DNS setup and TLS certificate generation (optional)
 
->**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-cluster-prepare-the-installation-configuration-file) section.
+>**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to **Prepare the installation configuration file** section.
 
 ### Delegate the management of your domain to Google Cloud DNS
 
@@ -277,9 +288,61 @@ After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-sign
 
 This Installation guide shows developers how to quickly deploy Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster.
 
+## Prerequisites
+- [Microsoft Azure](https://azure.microsoft.com)
+- [Kubernetes](https://kubernetes.io/) 1.12
+- Tiller 2.10.0 or higher
+- [Docker](https://www.docker.com/)
+- [Docker Hub](https://hub.docker.com/) account
+- [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
+- A domain for your AKS cluster (optional)
+
+>**TIP:** Get a free domain for your cluster using services like [freenom.com](https://www.freenom.com) or similar.
+
+## Prepare the AKS cluster
+
+Set the following environment variables:
+1. Select a name for your cluster. Set the cluster name, the resource group and region as environment variables. Run:
+  ```
+  export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
+  export CLUSTER_NAME={YOUR_CLUSTER_NAME}
+  export REGION={YOUR_REGION} #westeurope
+  ```
+
+2. Create a resource group that will contain all your resources:
+   ```
+   az group create --name $RS_GROUP --location $REGION
+   ```
+
+3. Create an AKS cluster. Run:
+    ```
+    az aks create \
+      --resource-group $RS_GROUP \
+      --name $CLUSTER_NAME \
+      --node-vm-size "Standard_DS2_v2" \
+      --kubernetes-version 1.10.9 \
+      --enable-addons "monitoring,http_application_routing" \
+      --generate-ssh-keys
+    ```
+4. To configure kubectl to use your new cluster, run:
+    ```
+    az aks get-credentials --resource-group $RS_GROUP --name $CLUSTER_NAME
+    ```
+
+5. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
+    * Installation from release
+    ```
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/tiller.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/azure-crb-for-healthz.yaml
+    ```
+    * If you install Kyma from sources, check out [kyma-project](https://github.com/kyma-project/kyma) and enter the root folder. Run:
+    ```
+    kubectl apply -f installation/resources/tiller.yaml
+    kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
+    
 ## DNS setup and TLS certificate generation (optional)
 
->**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to [this](#installation-install-kyma-on-a-gke-cluster-prepare-the-installation-configuration-file-1) section.
+>**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to **Prepare the installation configuration file** section.
 
 ### Delegate the management of your domain to Azure DNS
 
