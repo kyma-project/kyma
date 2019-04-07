@@ -15,7 +15,7 @@ global:
     version: '1c4c7390'
   asset_store_test:
     dir: develop/
-    version: 'Pa804f409'
+    version: 'a804f409'
 
 minio:
   mode: standalone
