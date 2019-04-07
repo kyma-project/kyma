@@ -210,10 +210,10 @@ metadata:
     "helm.sh/hook-weight": "0"
 aggregationRule:
   clusterRoleSelectors:
-# - matchLabels:
-#     rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
   - matchLabels:
-      rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-admin: "true"
+      rbac.authorization.kyma-project.io/aggregate-to-kyma-admin-base: "true"
+# - matchLabels:
+#     rbac.authorization.kyma-project.io/aggregate-to-kyma-k8s-admin: "true"
   - matchLabels:
       rbac.authorization.k8s.io/aggregate-to-admin: "true"
   - matchLabels:
