@@ -51,7 +51,7 @@ func (a *asset) CreateMany(assets []assetData) error {
 						Name: a.BucketName,
 					},
 					Source: v1alpha2.AssetSource{
-						Url:  asset.URL,
+						URL:  asset.URL,
 						Mode: asset.Mode,
 					},
 				},
