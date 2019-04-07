@@ -261,6 +261,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
 		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
+		mocks.metadataExtractor.On("Extract", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -283,6 +284,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		asset.Status.ObservedGeneration = asset.Generation
 		asset.Spec.Source.ValidationWebhookService = nil
 		asset.Spec.Source.MutationWebhookService = nil
+		asset.Spec.Source.MetadataWebhookService = nil
 
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
@@ -355,6 +357,36 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		g.Expect(status).ToNot(BeZero())
 		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
 		g.Expect(status.Reason).To(Equal(pretty.MutationFailed.String()))
+	})
+
+	t.Run("MetadataExtractionFailed", func(t *testing.T) {
+		// Given
+		g := NewGomegaWithT(t)
+		ctx := context.TODO()
+		relistInterval := time.Minute
+		now := time.Now()
+		asset := testData("test-asset", "test-bucket", "https://localhost/test.md")
+		asset.Status.CommonAssetStatus.Phase = v1alpha2.AssetPending
+		asset.Status.ObservedGeneration = asset.Generation
+
+		handler, mocks := newHandler(relistInterval)
+		defer mocks.AssertExpectations(t)
+
+		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
+		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
+		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
+		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
+		mocks.metadataExtractor.On("Extract", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, errors.New("nope")).Once()
+
+		// When
+		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
+
+		// Then
+		g.Expect(err).To(HaveOccurred())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.AssetFailed))
+		g.Expect(status.Reason).To(Equal(pretty.MetadataExtractionFailed.String()))
 	})
 
 	t.Run("ValidationError", func(t *testing.T) {
@@ -434,6 +466,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
 		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
+		mocks.metadataExtractor.On("Extract", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -536,6 +569,7 @@ func TestAssetHandler_Handle_OnFailed(t *testing.T) {
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
 		mocks.validator.On("Validate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Once()
+		mocks.metadataExtractor.On("Extract", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MetadataWebhookService).Return(nil, nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -744,10 +778,11 @@ func bucketStatusFinder(ctx context.Context, namespace, name string) (*v1alpha2.
 }
 
 type mocks struct {
-	store     *storeMock.Store
-	loader    *loaderMock.Loader
-	validator *engineMock.Validator
-	mutator   *engineMock.Mutator
+	store             *storeMock.Store
+	loader            *loaderMock.Loader
+	validator         *engineMock.Validator
+	mutator           *engineMock.Mutator
+	metadataExtractor *engineMock.MetadataExtractor
 }
 
 func (m *mocks) AssertExpectations(t *testing.T) {
@@ -755,17 +790,19 @@ func (m *mocks) AssertExpectations(t *testing.T) {
 	m.loader.AssertExpectations(t)
 	m.validator.AssertExpectations(t)
 	m.mutator.AssertExpectations(t)
+	m.metadataExtractor.AssertExpectations(t)
 }
 
 func newHandler(relistInterval time.Duration) (asset.Handler, mocks) {
 	mocks := mocks{
-		store:     new(storeMock.Store),
-		loader:    new(loaderMock.Loader),
-		validator: new(engineMock.Validator),
-		mutator:   new(engineMock.Mutator),
+		store:             new(storeMock.Store),
+		loader:            new(loaderMock.Loader),
+		validator:         new(engineMock.Validator),
+		mutator:           new(engineMock.Mutator),
+		metadataExtractor: new(engineMock.MetadataExtractor),
 	}
 
-	handler := asset.New(log, fakeRecorder(), mocks.store, mocks.loader, bucketStatusFinder, mocks.validator, mocks.mutator, relistInterval)
+	handler := asset.New(log, fakeRecorder(), mocks.store, mocks.loader, bucketStatusFinder, mocks.validator, mocks.mutator, mocks.metadataExtractor, relistInterval)
 
 	return handler, mocks
 }
@@ -788,6 +825,7 @@ func testData(assetName, bucketName, url string) *v1alpha2.Asset {
 					Mode:                     v1alpha2.AssetSingle,
 					ValidationWebhookService: make([]v1alpha2.AssetWebhookService, 3),
 					MutationWebhookService:   make([]v1alpha2.AssetWebhookService, 3),
+					MetadataWebhookService:   make([]v1alpha2.WebhookService, 3),
 				},
 			},
 		},

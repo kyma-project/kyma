@@ -19,7 +19,7 @@ func TestValidationEngine_Validate(t *testing.T) {
 
 		ctx := context.TODO()
 		services := []v1alpha2.AssetWebhookService{
-			{Name: "test", Namespace: "test-ns", Endpoint: "/test"},
+			{WebhookService: v1alpha2.WebhookService{Name: "test", Namespace: "test-ns", Endpoint: "/test"}},
 		}
 		files := []string{"test/a.txt", "test/b/c.txt"}
 
@@ -27,7 +27,7 @@ func TestValidationEngine_Validate(t *testing.T) {
 		defer accessor.AssertExpectations(t)
 
 		webhook := new(hookMock.Webhook)
-		webhook.On("Call", mock.Anything, "http://test.test-ns.svc.cluster.local/test", mock.Anything, mock.Anything).Return(nil)
+		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything, time.Minute).Return(nil)
 		defer webhook.AssertExpectations(t)
 
 		validator := engine.NewTestValidator(webhook, time.Minute, fileReader)
@@ -70,7 +70,7 @@ func TestValidationEngine_Validate(t *testing.T) {
 
 		ctx := context.TODO()
 		services := []v1alpha2.AssetWebhookService{
-			{Name: "test", Namespace: "test-ns", Endpoint: "/test"},
+			{WebhookService: v1alpha2.WebhookService{Name: "test", Namespace: "test-ns", Endpoint: "/test"}},
 		}
 		files := make([]string, 0)
 
@@ -78,7 +78,7 @@ func TestValidationEngine_Validate(t *testing.T) {
 		defer accessor.AssertExpectations(t)
 
 		webhook := new(hookMock.Webhook)
-		webhook.On("Call", mock.Anything, "http://test.test-ns.svc.cluster.local/test", mock.Anything, mock.Anything).Return(nil)
+		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything, time.Minute).Return(nil)
 		defer webhook.AssertExpectations(t)
 
 		validator := engine.NewTestValidator(webhook, time.Minute, fileReader)
@@ -97,7 +97,7 @@ func TestValidationEngine_Validate(t *testing.T) {
 
 		ctx := context.TODO()
 		services := []v1alpha2.AssetWebhookService{
-			{Name: "test", Namespace: "test-ns", Endpoint: "/test"},
+			{WebhookService: v1alpha2.WebhookService{Name: "test", Namespace: "test-ns", Endpoint: "/test"}},
 		}
 		files := []string{"test/a.txt", "test/b/rError.txt"}
 
@@ -123,7 +123,7 @@ func TestValidationEngine_Validate(t *testing.T) {
 
 		ctx := context.TODO()
 		services := []v1alpha2.AssetWebhookService{
-			{Name: "test", Namespace: "test-ns", Endpoint: "/test"},
+			{WebhookService: v1alpha2.WebhookService{Name: "test", Namespace: "test-ns", Endpoint: "/test"}},
 		}
 		files := []string{"test/a.txt", "test/b/c.txt"}
 
@@ -131,7 +131,7 @@ func TestValidationEngine_Validate(t *testing.T) {
 		defer accessor.AssertExpectations(t)
 
 		webhook := new(hookMock.Webhook)
-		webhook.On("Call", mock.Anything, "http://test.test-ns.svc.cluster.local/test", mock.Anything, mock.Anything).Return(errors.New("test"))
+		webhook.On("Do", mock.Anything, "application/json", services[0].WebhookService, mock.Anything, mock.Anything, time.Minute).Return(errors.New("test"))
 		defer webhook.AssertExpectations(t)
 
 		validator := engine.NewTestValidator(webhook, time.Minute, fileReader)
