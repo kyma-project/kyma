@@ -14,6 +14,19 @@ rules:
 - apiGroups: ["*"]
   resources: ["configmaps"]
   verbs: ["get", "update"]
+{{- if .Values.podSecurityPolicy.enabled }}
+- apiGroups: ["extensions"]
+  resources: ["podsecuritypolicies"]
+  verbs: ["use"]
+  resourceNames:  
+  - {{ .Release.Name }}
+{{- end }}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
 ---
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
@@ -25,9 +38,9 @@ metadata:
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
 subjects:
-- kind: User
-  name: system:serviceaccount:{{ .Values.global.namespace }}:default
-  apiGroup: rbac.authorization.k8s.io
+- kind: ServiceAccount
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
 roleRef:
   kind: Role
   name: {{ .Chart.Name }}-role
