@@ -305,7 +305,7 @@
 
 # Tools
 # Etcd backup Component
-/tools/etcd-backup/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/components/etcd-backup-job/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The alpine-net directory
 /tools/alpine-net/ @suleymanakbas91 @clebs @a-thaler @lilitgh
