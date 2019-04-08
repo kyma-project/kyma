@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
@@ -88,19 +90,26 @@ func TestApplicationMutations(t *testing.T) {
 	assert.NoError(t, err)
 	checkApplicationEvent(t, expectedEvent, event)
 
-	defer func() {
-		t.Log("Delete Application")
-		deleteResp, err := deleteApplicationMutation(c, fixName)
-		require.NoError(t, err)
-		assert.Equal(t, fixName, deleteResp.ApplicationDeleteMutation.Name)
-	}()
-
 	t.Log("Update Application")
 	fixApp = fixApplication(fixName, "desc2", map[string]string{"lab": "fix"})
 
 	updateResp, err := updateApplicationMutation(c, fixApp)
 	require.NoError(t, err)
 	checkApplicationMutationOutput(t, fixApp, updateResp.AppUpdateMutation)
+
+	t.Log("Delete Application")
+	deleteResp, err := deleteApplicationMutation(c, fixName)
+	require.NoError(t, err)
+	assert.Equal(t, fixName, deleteResp.ApplicationDeleteMutation.Name)
+
+	t.Log("Checking authorization directives...")
+	as := auth.New()
+	ops := &auth.OperationsInput{
+		auth.Create: {fixCreateApplicationMutation(fixApplication("", "", map[string]string{}))},
+		auth.Update: {fixUpdateApplicationMutation(fixApp)},
+		auth.Delete: {fixDeleteApplicationMutation(fixName)},
+	}
+	as.Run(t, ops)
 }
 
 func readApplicationEvent(sub *graphql.Subscription) (applicationEvent, error) {
@@ -176,18 +185,7 @@ func checkApplicationMutationOutput(t *testing.T, app *application, appMutation 
 }
 
 func createApplicationMutation(c *graphql.Client, given *application) (appCreateMutationResponse, error) {
-	query := fmt.Sprintf(`
-			mutation ($name: String!, $description: String!, $labels: Labels!) {
-				createApplication(name: $name, description: $description, labels: $labels) {
-					%s
-				}
-			}
-	`, appMutationOutputFields())
-
-	req := graphql.NewRequest(query)
-	req.SetVar("name", given.Name)
-	req.SetVar("description", given.Description)
-	req.SetVar("labels", given.Labels)
+	req := fixCreateApplicationMutation(given)
 	var response appCreateMutationResponse
 	err := c.Do(req, &response)
 
@@ -195,18 +193,7 @@ func createApplicationMutation(c *graphql.Client, given *application) (appCreate
 }
 
 func updateApplicationMutation(c *graphql.Client, app *application) (appUpdateMutationResponse, error) {
-	query := fmt.Sprintf(`
-			mutation ($name: String!, $description: String!, $labels: Labels!) {
-				updateApplication(name: $name, description: $description, labels: $labels) {
-					%s
-				}
-			}
-	`, appMutationOutputFields())
-
-	req := graphql.NewRequest(query)
-	req.SetVar("name", app.Name)
-	req.SetVar("description", app.Description)
-	req.SetVar("labels", app.Labels)
+	req := fixUpdateApplicationMutation(app)
 	var response appUpdateMutationResponse
 	err := c.Do(req, &response)
 
@@ -214,15 +201,8 @@ func updateApplicationMutation(c *graphql.Client, app *application) (appUpdateMu
 }
 
 func deleteApplicationMutation(c *graphql.Client, appName string) (appDeleteMutationResponse, error) {
-	query := `
-			mutation ($name: String!) {
-				deleteApplication(name: $name) {
-					name
-				}
-			}
-	`
-	req := graphql.NewRequest(query)
-	req.SetVar("name", appName)
+	req := fixDeleteApplicationMutation(appName)
+
 	var response appDeleteMutationResponse
 	err := c.Do(req, &response)
 
@@ -242,4 +222,52 @@ func fixApplicationEvent(eventType string, app *application) applicationEvent {
 		Type:        eventType,
 		Application: *app,
 	}
+}
+
+func fixCreateApplicationMutation(app *application) *graphql.Request {
+	query := fmt.Sprintf(`
+			mutation ($name: String!, $description: String!, $labels: Labels!) {
+				createApplication(name: $name, description: $description, labels: $labels) {
+					%s
+				}
+			}
+	`, appMutationOutputFields())
+
+	req := graphql.NewRequest(query)
+	req.SetVar("name", app.Name)
+	req.SetVar("description", app.Description)
+	req.SetVar("labels", app.Labels)
+
+	return req
+}
+
+func fixUpdateApplicationMutation(app *application) *graphql.Request {
+	query := fmt.Sprintf(`
+			mutation ($name: String!, $description: String!, $labels: Labels!) {
+				updateApplication(name: $name, description: $description, labels: $labels) {
+					%s
+				}
+			}
+	`, appMutationOutputFields())
+
+	req := graphql.NewRequest(query)
+	req.SetVar("name", app.Name)
+	req.SetVar("description", app.Description)
+	req.SetVar("labels", app.Labels)
+
+	return req
+}
+
+func fixDeleteApplicationMutation(appName string) *graphql.Request {
+	query := `
+			mutation ($name: String!) {
+				deleteApplication(name: $name) {
+					name
+				}
+			}
+	`
+	req := graphql.NewRequest(query)
+	req.SetVar("name", appName)
+
+	return req
 }

@@ -3,19 +3,21 @@ package pretty
 type Reason string
 
 const (
-	AssetCreated         Reason = "AssetCreated"
-	AssetCreationFailed  Reason = "AssetCreationFailed"
-	AssetsCreationFailed Reason = "AssetsCreationFailed"
-	AssetsListingFailed  Reason = "AssetsListingFailed"
-	AssetDeleted         Reason = "AssetDeleted"
-	AssetDeletionFailed  Reason = "AssetDeletionFailed"
-	AssetsDeletionFailed Reason = "AssetsDeletionFailed"
-	AssetUpdated         Reason = "AssetUpdated"
-	AssetUpdateFailed    Reason = "AssetUpdateFailed"
-	AssetsUpdateFailed   Reason = "AssetsUpdateFailed"
-	AssetsReady          Reason = "AssetsReady"
-	WaitingForAssets     Reason = "WaitingForAssets"
-	BucketError          Reason = "BucketError"
+	AssetCreated               Reason = "AssetCreated"
+	AssetCreationFailed        Reason = "AssetCreationFailed"
+	AssetsCreationFailed       Reason = "AssetsCreationFailed"
+	AssetsListingFailed        Reason = "AssetsListingFailed"
+	AssetDeleted               Reason = "AssetDeleted"
+	AssetDeletionFailed        Reason = "AssetDeletionFailed"
+	AssetsDeletionFailed       Reason = "AssetsDeletionFailed"
+	AssetUpdated               Reason = "AssetUpdated"
+	AssetUpdateFailed          Reason = "AssetUpdateFailed"
+	AssetsUpdateFailed         Reason = "AssetsUpdateFailed"
+	AssetsReady                Reason = "AssetsReady"
+	WaitingForAssets           Reason = "WaitingForAssets"
+	BucketError                Reason = "BucketError"
+	AssetsWebhookGetFailed     Reason = "AssetsWebhookGetFailed"
+	AssetsSpecValidationFailed Reason = "AssetsSpecValidationFailed"
 )
 
 func (r Reason) String() string {
@@ -50,6 +52,10 @@ func (r Reason) Message() string {
 		return "Waiting for assets to be in Ready phase"
 	case BucketError:
 		return "Couldn't ensure if bucket exist due to error %s"
+	case AssetsWebhookGetFailed:
+		return "Unable to get webhook configuration %s"
+	case AssetsSpecValidationFailed:
+		return "Invalid asset specification, %s"
 	default:
 		return ""
 	}

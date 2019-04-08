@@ -1,12 +1,15 @@
 package assethook
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/pkg/errors"
+	"io"
 	"io/ioutil"
 	"net/http"
+	"time"
 )
 
 type webhook struct {
@@ -20,7 +23,7 @@ type HttpClient interface {
 
 //go:generate mockery -name=Webhook -output=automock -outpkg=automock -case=underscore
 type Webhook interface {
-	Call(ctx context.Context, url string, request interface{}, response interface{}) error
+	Do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}, timeout time.Duration) error
 }
 
 func New(httpClient HttpClient) Webhook {
@@ -29,27 +32,29 @@ func New(httpClient HttpClient) Webhook {
 	}
 }
 
-func (w *webhook) Call(ctx context.Context, url string, request interface{}, response interface{}) error {
-	jsonBytes, err := json.Marshal(request)
+func (w *webhook) Do(ctx context.Context, contentType string, webhook v1alpha2.WebhookService, body io.Reader, response interface{}, timeout time.Duration) error {
+	context, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	req, err := http.NewRequest("POST", w.getWebhookUrl(webhook), body)
 	if err != nil {
-		return errors.Wrapf(err, "while converting request to JSON")
+		return err
 	}
 
-	httpRequest, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBytes))
-	httpRequest.Header.Set("Content-Type", "application/json")
-	httpRequest.WithContext(ctx)
+	req.Header.Set("Content-Type", contentType)
+	req.WithContext(context)
 
-	httpResponse, err := w.httpClient.Do(httpRequest)
+	rsp, err := w.httpClient.Do(req)
 	if err != nil {
 		return errors.Wrapf(err, "while sending request to webhook")
 	}
-	defer httpResponse.Body.Close()
+	defer rsp.Body.Close()
 
-	if httpResponse.StatusCode < 200 || httpResponse.StatusCode > 299 {
-		return errors.New(httpResponse.Status)
+	if rsp.StatusCode != http.StatusOK {
+		return fmt.Errorf("invalid response from %s, code: %d", req.URL, rsp.StatusCode)
 	}
 
-	responseBytes, err := ioutil.ReadAll(httpResponse.Body)
+	responseBytes, err := ioutil.ReadAll(rsp.Body)
 	if err != nil {
 		return errors.Wrapf(err, "while reading response body")
 	}
@@ -60,4 +65,8 @@ func (w *webhook) Call(ctx context.Context, url string, request interface{}, res
 	}
 
 	return nil
+}
+
+func (*webhook) getWebhookUrl(service v1alpha2.WebhookService) string {
+	return fmt.Sprintf("http://%s.%s.svc.cluster.local%s", service.Name, service.Namespace, service.Endpoint)
 }

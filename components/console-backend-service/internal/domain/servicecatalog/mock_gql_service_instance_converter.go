@@ -12,13 +12,13 @@ type mockGqlServiceInstanceConverter struct {
 	mock.Mock
 }
 
-// GQLCreateInputToInstanceCreateParameters provides a mock function with given fields: in
-func (_m *mockGqlServiceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput) *serviceInstanceCreateParameters {
-	ret := _m.Called(in)
+// GQLCreateInputToInstanceCreateParameters provides a mock function with given fields: in, namespace
+func (_m *mockGqlServiceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput, namespace string) *serviceInstanceCreateParameters {
+	ret := _m.Called(in, namespace)
 
 	var r0 *serviceInstanceCreateParameters
-	if rf, ok := ret.Get(0).(func(*gqlschema.ServiceInstanceCreateInput) *serviceInstanceCreateParameters); ok {
-		r0 = rf(in)
+	if rf, ok := ret.Get(0).(func(*gqlschema.ServiceInstanceCreateInput, string) *serviceInstanceCreateParameters); ok {
+		r0 = rf(in, namespace)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*serviceInstanceCreateParameters)

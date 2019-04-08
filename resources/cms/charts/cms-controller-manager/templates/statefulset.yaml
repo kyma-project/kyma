@@ -41,6 +41,10 @@ spec:
             value: {{ .Values.clusterBucket.region }}
           - name: APP_BUCKET_REGION
             value: {{ .Values.bucket.region }}
+          - name: APP_WEBHOOK_CFG_MAP_NAME
+            value: {{ template "webhookcfgmap" . }}
+          - name: APP_WEBHOOK_CFG_MAP_NAMESPACE
+            value: {{ .Values.webhookConfigMap.namespace }}
         resources:
 {{ toYaml .Values.resources | indent 10 }}
         ports:

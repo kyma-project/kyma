@@ -54,19 +54,21 @@ func Add(mgr manager.Manager) error {
 	assethook := assethook.New(&http.Client{})
 	validator := engine.NewValidator(assethook, cfg.Webhook.ValidationTimeout)
 	mutator := engine.NewMutator(assethook, cfg.Webhook.MutationTimeout)
+	metadataExtractor := engine.NewMetadataExtractor(assethook, cfg.Webhook.MetadataExtractionTimeout)
 
 	reconciler := &ReconcileAsset{
-		Client:         mgr.GetClient(),
-		cache:          mgr.GetCache(),
-		scheme:         mgr.GetScheme(),
-		store:          store,
-		loader:         loader,
-		findBucketFnc:  findBucketFnc,
-		validator:      validator,
-		mutator:        mutator,
-		recorder:       mgr.GetRecorder("asset-controller"),
-		relistInterval: cfg.AssetRelistInterval,
-		finalizer:      deleteFinalizer,
+		Client:            mgr.GetClient(),
+		cache:             mgr.GetCache(),
+		scheme:            mgr.GetScheme(),
+		store:             store,
+		loader:            loader,
+		findBucketFnc:     findBucketFnc,
+		validator:         validator,
+		mutator:           mutator,
+		recorder:          mgr.GetRecorder("asset-controller"),
+		relistInterval:    cfg.AssetRelistInterval,
+		finalizer:         deleteFinalizer,
+		metadataExtractor: metadataExtractor,
 	}
 
 	return add(mgr, reconciler)
@@ -120,13 +122,14 @@ type ReconcileAsset struct {
 	scheme   *runtime.Scheme
 	recorder record.EventRecorder
 
-	relistInterval time.Duration
-	store          store.Store
-	loader         loader.Loader
-	findBucketFnc  asset.FindBucketStatus
-	finalizer      finalizer.Finalizer
-	validator      engine.Validator
-	mutator        engine.Mutator
+	relistInterval    time.Duration
+	store             store.Store
+	loader            loader.Loader
+	findBucketFnc     asset.FindBucketStatus
+	finalizer         finalizer.Finalizer
+	validator         engine.Validator
+	mutator           engine.Mutator
+	metadataExtractor engine.MetadataExtractor
 }
 
 // Reconcile reads that state of the cluster for a Asset object and makes changes based on the state read
@@ -154,7 +157,7 @@ func (r *ReconcileAsset) Reconcile(request reconcile.Request) (reconcile.Result,
 	}
 
 	assetLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace())
-	commonHandler := asset.New(assetLogger, r.recorder, r.store, r.loader, r.findBucketFnc, r.validator, r.mutator, r.relistInterval)
+	commonHandler := asset.New(assetLogger, r.recorder, r.store, r.loader, r.findBucketFnc, r.validator, r.mutator, r.metadataExtractor, r.relistInterval)
 	commonStatus, err := commonHandler.Do(ctx, time.Now(), instance, instance.Spec.CommonAssetSpec, instance.Status.CommonAssetStatus)
 	if updateErr := r.updateStatus(ctx, request.NamespacedName, commonStatus); updateErr != nil {
 		finalErr := updateErr

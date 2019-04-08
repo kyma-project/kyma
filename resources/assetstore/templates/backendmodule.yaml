@@ -1,4 +1,4 @@
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
-  name: content # consider changing to assetstore after fully migration of UI API to Asset Store
+  name: assetstore
