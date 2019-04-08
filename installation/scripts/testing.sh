@@ -64,7 +64,7 @@ fi
 #loggingTestErr=$?
 #fi
 
-# execute kubeless tests if 'monitoring' is installed
+# execute kubeless tests if 'kubeless' is installed
 if helm ${KUBE_CONTEXT_ARG} list --tls | grep -q "kubeless"; then
     echo "- Testing Kubeless"
     helm ${KUBE_CONTEXT_ARG} test kubeless --timeout 600 --tls
