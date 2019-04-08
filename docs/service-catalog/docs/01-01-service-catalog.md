@@ -13,6 +13,6 @@ You can perform the following operations in the Service Catalog:
 - Bind the services to the applications through Secrets.
 
 Service Catalog in Kyma is based on Service Catalog provided by [Kubernetes](https://github.com/kubernetes-incubator/service-catalog).
-Kyma also supports an experimental feature of ServiceCatalog where you can run it without api-server and etcd. You can read more about that [here](#experimental-features)
+Kyma supports an experimental feature of ServiceCatalog where you can run it without api-server and etcd. You can read more about that [here](#experimental-features)
 
 
