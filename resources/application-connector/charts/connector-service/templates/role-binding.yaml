@@ -19,13 +19,13 @@ rules:
   resources: ["podsecuritypolicies"]
   verbs: ["use"]
   resourceNames:  
-  - {{ .Release.Name }}-psp
+  - {{ .Release.Name }}
 {{- end }}
 ---
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: {{ .Chart.Name }}-sa
+  name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
 ---
 kind: RoleBinding
@@ -39,7 +39,7 @@ metadata:
     heritage: {{ .Release.Service }}
 subjects:
 - kind: ServiceAccount
-  name: {{ .Chart.Name }}-sa
+  name: {{ .Chart.Name }}
   namespace: {{ .Values.global.namespace }}
 roleRef:
   kind: Role

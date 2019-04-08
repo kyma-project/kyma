@@ -2,7 +2,7 @@
 apiVersion: extensions/v1beta1
 kind: PodSecurityPolicy
 metadata:
-  name: {{ .Release.Name }}-psp
+  name: {{ .Release.Name }}
 spec:
   allowPrivilegeEscalation: true
   privileged: false
