@@ -4,7 +4,7 @@ kind: PodSecurityPolicy
 metadata:
   name: {{ .Release.Name }}-psp
 spec:
-  allowPrivilegeEscalation: false
+  allowPrivilegeEscalation: true
   privileged: false
   hostNetwork: false
   hostIPC: false
