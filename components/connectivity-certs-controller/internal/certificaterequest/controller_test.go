@@ -15,6 +15,7 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
+	ccMocks "github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/centralconnection/mocks"
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificaterequest/mocks"
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates"
 	certMocks "github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates/mocks"
@@ -64,10 +65,10 @@ func TestController_Reconcile(t *testing.T) {
 		connectorClient.On("ConnectToCentralConnector", csrInfoURL).Return(establishedConnection, nil)
 		preserver := &certMocks.Preserver{}
 		preserver.On("PreserveCertificates", certs).Return(nil)
-		connectionManager := &mocks.CentralConnectionManager{}
-		connectionManager.On("Create", mock.AnythingOfType("*v1alpha1.CentralConnection")).Return(nil, nil)
+		centralConnectionClient := &ccMocks.Client{}
+		centralConnectionClient.On("Upsert", mock.AnythingOfType("*v1alpha1.CentralConnection")).Return(nil, nil)
 
-		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, connectionManager)
+		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, centralConnectionClient)
 
 		// when
 		result, err := certificateRequestController.Reconcile(request)
@@ -85,9 +86,9 @@ func TestController_Reconcile(t *testing.T) {
 			Run(setupCertificateRequestWithErrorStatus).Return(nil)
 		connectorClient := &connectorMocks.Client{}
 		preserver := &certMocks.Preserver{}
-		connectionManager := &mocks.CentralConnectionManager{}
+		centralConnectionClient := &ccMocks.Client{}
 
-		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, connectionManager)
+		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, centralConnectionClient)
 
 		// when
 		result, err := certificateRequestController.Reconcile(request)
@@ -105,9 +106,9 @@ func TestController_Reconcile(t *testing.T) {
 			Return(k8sErrors.NewNotFound(schema.GroupResource{}, "error"))
 		connectorClient := &connectorMocks.Client{}
 		preserver := &certMocks.Preserver{}
-		connectionManager := &mocks.CentralConnectionManager{}
+		centralConnectionClient := &ccMocks.Client{}
 
-		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, connectionManager)
+		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, centralConnectionClient)
 
 		// when
 		result, err := certificateRequestController.Reconcile(request)
@@ -125,9 +126,9 @@ func TestController_Reconcile(t *testing.T) {
 			Return(errors.New("error"))
 		connectorClient := &connectorMocks.Client{}
 		preserver := &certMocks.Preserver{}
-		connectionManager := &mocks.CentralConnectionManager{}
+		centralConnectionClient := &ccMocks.Client{}
 
-		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, connectionManager)
+		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, centralConnectionClient)
 
 		// when
 		result, err := certificateRequestController.Reconcile(request)
@@ -148,9 +149,9 @@ func TestController_Reconcile(t *testing.T) {
 		connectorClient := &connectorMocks.Client{}
 		connectorClient.On("ConnectToCentralConnector", csrInfoURL).Return(emptyConnection, errors.New("error"))
 		preserver := &certMocks.Preserver{}
-		connectionManager := &mocks.CentralConnectionManager{}
+		centralConnectionClient := &ccMocks.Client{}
 
-		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, connectionManager)
+		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, centralConnectionClient)
 
 		// when
 		result, err := certificateRequestController.Reconcile(request)
@@ -172,10 +173,10 @@ func TestController_Reconcile(t *testing.T) {
 		connectorClient.On("ConnectToCentralConnector", csrInfoURL).Return(establishedConnection, nil)
 		preserver := &certMocks.Preserver{}
 		preserver.On("PreserveCertificates", certs).Return(errors.New("error"))
-		connectionManager := &mocks.CentralConnectionManager{}
-		connectionManager.On("Create", mock.AnythingOfType("*v1alpha1.CentralConnection")).Return(nil, nil)
+		centralConnectionClient := &ccMocks.Client{}
+		centralConnectionClient.On("Upsert", mock.AnythingOfType("*v1alpha1.CentralConnection")).Return(nil, nil)
 
-		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, connectionManager)
+		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, centralConnectionClient)
 
 		// when
 		result, err := certificateRequestController.Reconcile(request)

@@ -24,7 +24,6 @@ type mutualTLSConnectorClient struct {
 	subject     pkix.Name
 }
 
-// TODO - is CA cert required while making the call?
 func NewMutualTLSConnectorClient(config *tls.Config, csrProvider certificates.CSRProvider, subject pkix.Name) MutualTLSConnectorClient {
 
 	return &mutualTLSConnectorClient{

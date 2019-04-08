@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/centralconnection"
+
 	"k8s.io/apimachinery/pkg/types"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -30,24 +32,20 @@ type Client interface {
 	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error
 }
 
-type CentralConnectionManager interface {
-	Create(*v1alpha1.CentralConnection) (*v1alpha1.CentralConnection, error)
-}
-
 type Controller struct {
 	certificateRequestClient Client
 	connectorClient          connectorservice.Client
 	certificatePreserver     certificates.Preserver
-	connectionClient         CentralConnectionManager
+	connectionClient         centralconnection.Client
 	logger                   *log.Entry
 }
 
-func InitCertificatesRequestController(mgr manager.Manager, appName string, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager CentralConnectionManager) error {
-	return startController(appName, mgr, connectorClient, certPreserver, connectionManager)
+func InitCertificatesRequestController(mgr manager.Manager, appName string, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionClient centralconnection.Client) error {
+	return startController(appName, mgr, connectorClient, certPreserver, connectionClient)
 }
 
-func startController(appName string, mgr manager.Manager, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager CentralConnectionManager) error {
-	certRequestController := newCertificatesRequestController(mgr.GetClient(), connectorClient, certPreserver, connectionManager)
+func startController(appName string, mgr manager.Manager, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionClient centralconnection.Client) error {
+	certRequestController := newCertificatesRequestController(mgr.GetClient(), connectorClient, certPreserver, connectionClient)
 
 	c, err := controller.New(appName, mgr, controller.Options{Reconciler: certRequestController})
 	if err != nil {
@@ -57,7 +55,7 @@ func startController(appName string, mgr manager.Manager, connectorClient connec
 	return c.Watch(&source.Kind{Type: &v1alpha1.CertificateRequest{}}, &handler.EnqueueRequestForObject{})
 }
 
-func newCertificatesRequestController(client Client, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager CentralConnectionManager) *Controller {
+func newCertificatesRequestController(client Client, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager centralconnection.Client) *Controller {
 	return &Controller{
 		certificateRequestClient: client,
 		connectorClient:          connectorClient,
@@ -118,12 +116,10 @@ func (c *Controller) manageResources(connectionName string, connection connector
 			EstablishedAt:     metav1.NewTime(time.Now()),
 		},
 	}
-	// TODO - should we check connection by calling Management Info ???
 
-	// TODO - consider upsert
-	_, err = c.connectionClient.Create(masterConnection)
+	_, err = c.connectionClient.Upsert(masterConnection)
 	if err != nil {
-		c.logger.Errorf("Error while creating Central Connection resource: %s", err.Error())
+		c.logger.Errorf("Error while upserting Central Connection resource: %s", err.Error())
 		return err
 	}
 

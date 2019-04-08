@@ -120,11 +120,11 @@ func newSecretsRepository(k8sConfig *restclient.Config, namespace string) (secre
 	return secrets.NewRepository(sei), nil
 }
 
-func newConnectionManager(k8sConfig *restclient.Config) (certificaterequest.CentralConnectionManager, error) {
+func newConnectionManager(k8sConfig *restclient.Config) (centralconnection.Client, error) {
 	clientset, err := versioned.NewForConfig(k8sConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	return clientset.ApplicationconnectorV1alpha1().CentralConnections(), nil
+	return centralconnection.NewCentralConnectionClient(clientset.ApplicationconnectorV1alpha1().CentralConnections()), nil
 }

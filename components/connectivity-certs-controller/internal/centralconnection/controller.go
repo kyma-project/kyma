@@ -131,7 +131,6 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
-		// TODO - should delete certs?
 		c.logger.Infof("Connection %s has been deleted", request.Name)
 		return reconcile.Result{}, nil
 	}
@@ -141,8 +140,6 @@ func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcil
 
 func (c *Controller) shouldSynchronizeConnection(connection *v1alpha1.CentralConnection) bool {
 	timeFromLastSync := time.Since(connection.Status.SynchronizationStatus.LastSync.Time)
-	c.logger.Infof("Time from last sync: %v", timeFromLastSync)
-
 	return timeFromLastSync > c.minimalSyncTime
 }
 
@@ -211,7 +208,6 @@ func (c *Controller) setErrorStatus(connection *v1alpha1.CentralConnection, err 
 	return err
 }
 
-// TODO - fix retryOnConflict - consider proper client
 func (c *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConnection) error {
 	name := types.NamespacedName{Name: connection.Name, Namespace: connection.Namespace}
 
