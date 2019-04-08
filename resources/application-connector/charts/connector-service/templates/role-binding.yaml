@@ -41,7 +41,6 @@ subjects:
 - kind: ServiceAccount
   name: {{ .Chart.Name }}-sa
   namespace: {{ .Values.global.namespace }}
-  apiGroup: rbac.authorization.k8s.io
 roleRef:
   kind: Role
   name: {{ .Chart.Name }}-role
