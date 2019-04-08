@@ -64,8 +64,7 @@ function printLogsFromPod() {
     local tailLimit=2000 bytesLimit=500000
     log "Fetching logs from '${pod}' with options tailLimit=${tailLimit} and bytesLimit=${bytesLimit}" nc bold
     testPod=$(getContainerFromPod ${namespace} ${pod})
-    echo "testPod = $testPod"
-    result=$(kubectl $(context_arg)  logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} ${testPod})
+    result=$(kubectl $(context_arg)  logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} -c ${testPod} ${pod})
     if [ "${#result}" -eq 0 ]; then
         log "FAILED" red
         return 1
