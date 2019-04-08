@@ -3,11 +3,11 @@ package service_catalog
 import (
 	"os"
 
-	"k8s.io/client-go/tools/clientcmd"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/tools/clientcmd"
 
-	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	sbu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 )

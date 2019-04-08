@@ -2,22 +2,20 @@ package service_catalog
 
 import (
 	"fmt"
-	"time"
 	"os"
+	"time"
 
-	"github.com/sirupsen/logrus"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
-	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	. "github.com/smartystreets/goconvey/convey"
 	"github.com/go-redis/redis"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
+	"github.com/sirupsen/logrus"
+	. "github.com/smartystreets/goconvey/convey"
 
-	//api "k8s.io/kubernetes/staging/src/k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset/typed/apiregistration/v1beta1"
-
-	"k8s.io/client-go/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
@@ -126,6 +124,8 @@ func (f *helmBrokerFlow) testResources() {
 		f.verifyDeploymentContainsRedisEvns,
 		f.deleteRedisBindingUsage,
 		f.verifyDeploymentDoesNotContainRedisEnvs,
+
+		// we create RedisBindingUsage to restore it after the tests
 		f.createRedisBindingUsage,
 	} {
 		err := fn()
@@ -195,14 +195,14 @@ func (f *helmBrokerFlow) storeKeyInRedis() error {
 		return err
 	}
 
-	err = f.wait(time.Minute, func() (done bool, err error) {
-		if client.Ping().Val() == "PONG" {
+	if err = f.wait(time.Minute, func() (done bool, err error) {
+		resp := client.Ping().Val()
+		if resp == "PONG" {
 			return true, nil
 		}
-		f.log.Info("Redis does not answer. Retry.")
+		f.log.Infof("Redis does not answer. Response: %s. Retry.", resp)
 		return false, nil
-	})
-	if err != nil {
+	}); err != nil {
 		return err
 	}
 
@@ -232,7 +232,7 @@ func (f *helmBrokerFlow) verifyKeyInRedisExists() error {
 	}
 
 	// wait is required after restore
-	f.wait(time.Minute*2, func() (done bool, err error) {
+	return f.wait(time.Minute*2, func() (done bool, err error) {
 		val, err := client.Get(sampleKey).Result()
 		if err != nil {
 			return false, errors.Wrap(err, "while getting value stored in the redis")
@@ -242,7 +242,6 @@ func (f *helmBrokerFlow) verifyKeyInRedisExists() error {
 		}
 		return true, nil
 	})
-	return nil
 }
 
 func (f *helmBrokerFlow) redisClient() (*redis.Client, error) {
@@ -304,10 +303,12 @@ func (f *helmBrokerFlow) removeHelmBrokerEtcd() error {
 	if err != nil {
 		return errors.Wrap(err, "while getting HB etcd stateful set")
 	}
+	if etcd.Spec.Replicas == nil || *etcd.Spec.Replicas > 1 {
+		return errors.Errorf("etcd has many members")
+	}
 	if len(etcd.Spec.VolumeClaimTemplates) == 0 {
 		return errors.Errorf("etcd doesn't provide volumes")
 	}
-
 	if err := statefulSets.Delete(etcdName, &metav1.DeleteOptions{}); err != nil {
 		return errors.Wrapf(err, "while deleting etcd statefulset")
 	}

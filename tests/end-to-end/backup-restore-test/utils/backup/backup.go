@@ -6,17 +6,17 @@ import (
 	"log"
 	"time"
 
+	"github.com/ghodss/yaml"
 	backupv1 "github.com/heptio/ark/pkg/apis/ark/v1"
 	arkbackuppkg "github.com/heptio/ark/pkg/backup"
-	backup "github.com/heptio/ark/pkg/generated/clientset/versioned"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"github.com/ghodss/yaml"
-	"k8s.io/apimachinery/pkg/api/errors"
 	"github.com/heptio/ark/pkg/cmd/util/output"
+	backup "github.com/heptio/ark/pkg/generated/clientset/versioned"
 	"github.com/heptio/ark/pkg/restic"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 )
 
 type backupClient struct {
@@ -184,9 +184,9 @@ func (c *backupClient) RestoreBackup(backupName string) error {
 			Name: backupName,
 		},
 		Spec: backupv1.RestoreSpec{
-			BackupName: backupName,
+			BackupName:              backupName,
 			IncludeClusterResources: c.ptrBool(true),
-			RestorePVs: c.ptrBool(true),
+			RestorePVs:              c.ptrBool(true),
 		},
 	}
 	_, err := c.backupClient.ArkV1().Restores("heptio-ark").Create(restore)

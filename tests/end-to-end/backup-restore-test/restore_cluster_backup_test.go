@@ -8,9 +8,11 @@ import (
 
 	"github.com/google/uuid"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
-	"github.com/sirupsen/logrus"
 	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
+	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/vrischmann/envconfig"
 )
@@ -20,8 +22,8 @@ var backupName = "test-" + testUUID.String()
 var log = logrus.WithField("test", "backup-restore")
 
 type config struct {
-	AllBackupConfigurationFile    string `envconfig:"default=./all-backup.yaml"`
-	SystemBackupConfigurationFile string `envconfig:"default=./system-backup.yaml"`
+	AllBackupConfigurationFile    string `envconfig:"default=/all-backup.yaml"`
+	SystemBackupConfigurationFile string `envconfig:"default=/system-backup.yaml"`
 }
 
 type e2eTest struct {
@@ -34,59 +36,59 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	cfg, err := loadConfig()
 	fatalOnError(t, err, "while reading configuration from environment variables")
 
-	//myFunctionTest, err := NewFunctionTest()
-	//fatalOnError(t, err, "while creating structure for Function test")
-	//
-	//myStatefulSetTest, err := NewStatefulSetTest()
-	//fatalOnError(t, err, "while creating structure for StatefulSet test")
-	//
-	//myDeploymentTest, err := NewDeploymentTest()
-	//fatalOnError(t, err, "while creating structure for Deployment test")
-	//
-	//myPrometheusTest, err := NewPrometheusTest()
-	//fatalOnError(t, err, "while creating structure for Prometheus test")
+	myFunctionTest, err := NewFunctionTest()
+	fatalOnError(t, err, "while creating structure for Function test")
 
-	appBrokerTest, err := NewAppBrokerTest()
+	myStatefulSetTest, err := NewStatefulSetTest()
+	fatalOnError(t, err, "while creating structure for StatefulSet test")
+
+	myDeploymentTest, err := NewDeploymentTest()
+	fatalOnError(t, err, "while creating structure for Deployment test")
+
+	myPrometheusTest, err := NewPrometheusTest()
+	fatalOnError(t, err, "while creating structure for Prometheus test")
+
+	myAppBrokerTest, err := NewAppBrokerTest()
 	fatalOnError(t, err, "while creating structure for AppBroker test")
 
-	helmBrokerTest, err := NewHelmBrokerTest()
+	myHelmBrokerTest, err := NewHelmBrokerTest()
 	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
-	scAddonsTest, err := NewServiceCatalogAddonsTest()
+	myScAddonsTest, err := NewServiceCatalogAddonsTest()
 	fatalOnError(t, err, "while creating structure for ScAddons test")
 
-	//myNamespaceControllerTest, err := NewNamespaceControllerTest()
-	//fatalOnError(t, err, "while creating structure for NamespaceController test")
-	//
-	//apiControllerTest, err := NewApiControllerTest()
-	//fatalOnError(t, err, "while creating structure for ApiController test")
-	//
-	//myGrafanaTest, err := NewGrafanaTest()
-	//fatalOnError(t, err, "while creating structure for Grafana test")
-	//
-	//myMicroFrontendTest, err := NewMicrofrontendTest()
-	//fatalOnError(t, err, "while creating structure for MicroFrontend test")
-	//
-	//myAssetStoreTest, err := NewAssetStoreTest(t)
-	//fatalOnError(t, err, "while creating structure for AssetStore test")
-	//
-	//myCmsTest, err := NewCmsTest(t)
-	//fatalOnError(t, err, "while creating structure for Cms test")
+	myNamespaceControllerTest, err := NewNamespaceControllerTest()
+	fatalOnError(t, err, "while creating structure for NamespaceController test")
+
+	apiControllerTest, err := NewApiControllerTest()
+	fatalOnError(t, err, "while creating structure for ApiController test")
+
+	myGrafanaTest, err := NewGrafanaTest()
+	fatalOnError(t, err, "while creating structure for Grafana test")
+
+	myMicroFrontendTest, err := NewMicrofrontendTest()
+	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+
+	myAssetStoreTest, err := NewAssetStoreTest(t)
+	fatalOnError(t, err, "while creating structure for AssetStore test")
+
+	myCmsTest, err := NewCmsTest(t)
+	fatalOnError(t, err, "while creating structure for Cms test")
 
 	backupTests := []BackupTest{
-		//myPrometheusTest,
-		//myFunctionTest,
-		//myDeploymentTest,
-		//myStatefulSetTest,
-		helmBrokerTest,
-		appBrokerTest,
-		scAddonsTest,
-		//myNamespaceControllerTest,
-		//apiControllerTest,
-		//myGrafanaTest,
-		//myMicroFrontendTest,
-		//myAssetStoreTest,
-		//myCmsTest,
+		myPrometheusTest,
+		myFunctionTest,
+		myDeploymentTest,
+		myStatefulSetTest,
+		myHelmBrokerTest,
+		myAppBrokerTest,
+		myScAddonsTest,
+		myNamespaceControllerTest,
+		apiControllerTest,
+		myGrafanaTest,
+		myMicroFrontendTest,
+		myAssetStoreTest,
+		myCmsTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 

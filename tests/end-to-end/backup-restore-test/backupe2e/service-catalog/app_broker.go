@@ -4,22 +4,23 @@ import (
 	"os"
 	"time"
 
-	"k8s.io/client-go/kubernetes"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
-	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	appBroker "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
-	appConnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	abApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	abApi "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
+	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	appBroker "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
+	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	appConnector "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
+	errors "github.com/pkg/errors"
 )
 
 const (
@@ -143,6 +144,8 @@ func (f *appBrokerFlow) testResources() {
 		f.verifyEnvTesterHasGatewayInjected,
 		f.deleteAPIServiceBindingUsage,
 		f.verifyEnvTesterHasGatewayNotInjected,
+
+		// we create APIServiceBindingUsage to restore it after the tests
 		f.createAPIServiceBindingUsage,
 	} {
 		err := fn()
@@ -361,7 +364,7 @@ func (f *appBrokerFlow) waitForAppInstances() error {
 
 func (f *appBrokerFlow) waitForClassAndPlans() error {
 	f.log.Infof("Waiting for classes")
-	err := f.wait(2*time.Minute, func() (bool, error) {
+	if err := f.wait(2*time.Minute, func() (bool, error) {
 		expectedClasses := map[string]struct{}{
 			apiServiceId:    {},
 			eventsServiceId: {},
@@ -370,17 +373,19 @@ func (f *appBrokerFlow) waitForClassAndPlans() error {
 		if err != nil {
 			return false, err
 		}
+		if len(classes.Items) != 2 {
+			return false, errors.Errorf("should have 2 classes not %v", len(classes.Items))
+		}
 		for _, class := range classes.Items {
-			delete(expectedClasses, class.Spec.ExternalName)
+			if _, ok := expectedClasses[class.Spec.ExternalName]; !ok {
+				return false, errors.Errorf("following class is not defined: %s", class.Spec.ExternalName)
+			}
 		}
-		if len(expectedClasses) == 0 {
-			return true, nil
-		}
-		return false, nil
-	})
-	if err != nil {
+		return true, nil
+	}); err != nil {
 		return err
 	}
+
 	f.log.Infof("Waiting for plans")
 	return f.wait(15*time.Second, func() (bool, error) {
 		expectedPlans := map[string]struct{}{
@@ -391,14 +396,17 @@ func (f *appBrokerFlow) waitForClassAndPlans() error {
 		if err != nil {
 			return false, err
 		}
-		for _, plan := range plans.Items {
-			delete(expectedPlans, plan.Spec.ServiceClassRef.Name)
+
+		if len(plans.Items) != 2 {
+			return false, errors.Errorf("should have 2 plan not %v", len(plans.Items))
 		}
-		if len(expectedPlans) == 0 {
-			return true, nil
+		for _, plan := range plans.Items {
+			if _, ok := expectedPlans[plan.Spec.ServiceClassRef.Name]; !ok {
+				return false, errors.Errorf("following class is not defined: %s", plan.Spec.ServiceClassRef.Name)
+			}
 		}
 
-		return false, nil
+		return true, nil
 	})
 }
 
