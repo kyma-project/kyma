@@ -58,9 +58,6 @@ global:
   namespace_controller:
     dir: develop/
     version: 429bfbcc
-  etcd_backup_job:
-    dir: develop/
-    version: 6e0a7fe2
   test_apiserver_proxy:
     dir: develop/
     version: "eb39c791"
@@ -79,7 +76,6 @@ global:
   xip_patch:
     dir: develop/
     version: "d20b1c29"
-  
 
 test:
   acceptance:
