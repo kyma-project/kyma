@@ -1,0 +1,13 @@
+name: add-ons
+replicaCount: 1
+image:
+  name: add-ons-ui
+  tag: 6ec6f6b9
+  pullPolicy: IfNotPresent
+service:
+  internalPort: 80
+  externalPort: 80
+  protocol: TCP
+virtualservice:
+  enabled: true
+  annotations: {}
