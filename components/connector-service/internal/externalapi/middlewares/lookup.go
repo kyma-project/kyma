@@ -9,6 +9,8 @@ import (
 	"os"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/tidwall/gjson"
@@ -95,7 +97,7 @@ func createRequest(context clientcontext.ApplicationContext, config LookUpConfig
 		request.Header.Set(k, v)
 	}
 
-	//log.Info("Request:", request)
+	logrus.Info("Request:", request)
 
 	return request, nil
 }
@@ -121,6 +123,7 @@ func sendRequest(request *http.Request) (string, error) {
 
 func getGatewayUrl(body []byte) gjson.Result {
 	stringBody := string(body)
+	logrus.Info(stringBody)
 	gatewayUrl := gjson.Get(stringBody, "data.applications.0.groups.0.clusters.0.endpoints.gateway")
 	return gatewayUrl
 }
