@@ -12,6 +12,6 @@ spec:
   viewBaseUrl: 'https://add-ons.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
     - label: "Add-Ons Config"
-      navigationPath: add-ons
+      navigationPath: add-ons-config
       viewUrl: ''
       order: 3
