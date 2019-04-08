@@ -15,11 +15,11 @@ rules:
   resources: ["configmaps"]
   verbs: ["get", "update"]
 {{- if .Values.podSecurityPolicy.enabled }}
-  - apiGroups:      ['extensions']
-    resources:      ['podsecuritypolicies']
-    verbs:          ['use']
-    resourceNames:  
-    - {{ .Release.Name }}-psp
+- apiGroups:      ['extensions']
+  resources:      ['podsecuritypolicies']
+  verbs:          ['use']
+  resourceNames:  
+  - {{ .Release.Name }}-psp
 {{- end }}
 ---
 apiVersion: v1
