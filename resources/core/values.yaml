@@ -54,7 +54,7 @@ global:
     dir: 
     version: 0.9.0
     # Example: clusterDocsTopicsVersion: "0.9.0"
-    clusterDocsTopicsVersion: 0.9.0
+    clusterDocsTopicsVersion: release-0.9
   namespace_controller:
     dir: 
     version: 0.9.0
