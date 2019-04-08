@@ -43,10 +43,10 @@
 /resources/core/charts/configurations-generator @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # The `assetstore` chart
-/resources/assetstore/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/resources/assetstore/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # The `cms` chart
-/resources/cms/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/resources/cms/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # The `application-connector` chart
 /resources/application-connector/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -130,25 +130,25 @@
 /resources/service-catalog-addons/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `brokers-ui` subchart
-/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # The `catalog-ui` subchart
-/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # The `instances-ui` subchart
-/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # The `docs` subchart
-/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `console-backend-service` subchart
-/resources/core/charts/console-backend-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/resources/core/charts/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `templates` chart
 /resources/core/templates/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `templates` chart
-/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001 @adamwalach
+/resources/core/templates/tests/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld @jasiu001 @adamwalach
 
 # The `messaging` subdirectory
 /resources/examples/lambda-messages/ @pbochynski @PK85
@@ -194,16 +194,16 @@
 /components/api-controller/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Asset Store Controller Manager Component
-/components/asset-store-controller-manager/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/components/asset-store-controller-manager/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # Asset Upload Service
-/components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/components/asset-upload-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # Asset Metadata Service
-/components/asset-metadata-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/components/asset-metadata-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # CMS Controller Manager Component
-/components/cms-controller-manager/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/components/cms-controller-manager/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # Binding usage controller Component
 /components/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -227,7 +227,7 @@
 /components/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Console Backend Service Component
-/components/console-backend-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/components/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # IDPPreset Component
 /components/idppreset/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
@@ -286,10 +286,10 @@
 /tests/apiserver-proxy-tests/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Console Backend Service tests
-/tests/console-backend-service/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/tests/console-backend-service/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Asset Store tests
-/tests/asset-store/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/tests/asset-store/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # Connector Service Tests
 /tests/connector-service-tests/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
@@ -317,10 +317,10 @@
 /tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The docsbuilder directory
-/tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # The failery directory
-/tools/failery/ @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+/tools/failery/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # The static-users-generator directory
 /tools/static-users-generator/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
@@ -335,7 +335,7 @@
 /tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # kubeless-integration tests directory
-/tests/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # kubeless tests
 /tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
@@ -362,4 +362,4 @@
 /docs/ @kazydek @klaudiagrz @tomekpapiernik @bszwarc @mmitoraj
 
 # Config file for MILV - milv.config.yaml
-milv.config.yaml @akucharska @michal-hudy @pkosiec @mjasinski5 @aerfio @tgorgol @magicmatatjahu
+milv.config.yaml @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu

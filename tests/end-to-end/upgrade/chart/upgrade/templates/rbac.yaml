@@ -20,8 +20,8 @@ metadata:
     heritage: "{{ .Release.Service }}"
 rules:
 - apiGroups: [""]
-  resources: ["", "namespaces"]
-  verbs: ["create"]
+  resources: ["","namespaces"]
+  verbs: ["create", "delete", "get", "list", "patch"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["create", "get", "delete", "list"]
@@ -41,7 +41,24 @@ rules:
   resources: ["applications", "applicationmappings","eventactivations"]
   verbs: ["create", "delete", "list", "get"]
 - apiGroups: [""]
-  resources: ["pods", "pods/log", "secrets"]
+  resources: ["pods", "pods/log", "secrets", "configmaps"]
+  verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["assetstore.kyma-project.io"]
+  resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
+  verbs: ["create", "delete", "get"]
+- apiGroups: ["cms.kyma-project.io"]
+  resources: ["docstopics", "clusterdocstopics"]
+  verbs: ["create", "delete", "get"]
+- apiGroups: [""]
+  resources: ["services", "services/proxy"]
+  verbs: ["get", "list"]
+
+# Kubeless
+- apiGroups: ["kubeless.io"]
+  resources: ["functions", "httptriggers", "cronjobtriggers"]
+  verbs: ["get", "list", "watch", "update", "create", "delete"]
+- apiGroups: ["gateway.kyma-project.io"]
+  resources: ["apis"]
   verbs: ["create", "delete", "get", "list"]
 ---
 kind: ClusterRoleBinding

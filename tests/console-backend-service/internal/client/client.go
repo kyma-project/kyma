@@ -6,6 +6,7 @@ import (
 	uiClientset "github.com/kyma-project/kyma/components/console-backend-service/pkg/client/clientset/versioned"
 	idpClientset "github.com/kyma-project/kyma/components/idppreset/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
+	"k8s.io/client-go/dynamic"
 	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -93,4 +94,18 @@ func NewAppsClientWithConfig() (*appsv1.AppsV1Client, *rest.Config, error) {
 	}
 
 	return appsCli, k8sConfig, nil
+}
+
+func NewDynamicClientWithConfig() (dynamic.Interface, *rest.Config, error) {
+	k8sConfig, err := NewRestClientConfigFromEnv()
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "while creating new client with config")
+	}
+
+	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, nil, errors.Wrap(err, "while creating new dynamic client with config")
+	}
+
+	return dynamicCli, k8sConfig, nil
 }

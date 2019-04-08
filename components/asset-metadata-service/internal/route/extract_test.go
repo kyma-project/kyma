@@ -32,9 +32,34 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 				FieldName: "/testdata/success.yaml",
 				Path:      "./testdata/success.yaml",
 			},
+			{
+				FieldName: "/testdata/nometa.md",
+				Path:      "./testdata/nometa.md",
+			},
+			{
+				FieldName: "/testdata/nometa.yaml",
+				Path:      "./testdata/nometa.yaml",
+			},
+
+			{
+				FieldName: "/testdata/empty.md",
+				Path:      "./testdata/empty.md",
+			},
+			{
+				FieldName: "/testdata/empty.yaml",
+				Path:      "./testdata/empty.yaml",
+			},
 		}
 
 		expectedSuccess := []ExpectedSuccess{
+			{
+				FilePath:     files[3].FieldName,
+				MetadataKeys: nil,
+			},
+			{
+				FilePath:     files[2].FieldName,
+				MetadataKeys: nil,
+			},
 			{
 				FilePath: files[1].FieldName,
 				MetadataKeys: gstruct.Keys{
@@ -105,7 +130,7 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 			},
 		}
 		expectedErrors := []route.ResultError{
-			{Message: "Error while processing file `/testdata/error.md`: while reading metadata from file error.md: front: unknown delim", FilePath: "/testdata/error.md"},
+			{Message: "Error while processing file `/testdata/error.md`: while reading metadata from file error.md: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into map[string]interface {}", FilePath: "/testdata/error.md"},
 		}
 
 		// When
@@ -136,8 +161,8 @@ func TestRequestHandler_ServeHTTP(t *testing.T) {
 			},
 		}
 		expectedResult := []route.ResultError{
-			{Message: "Error while processing file `sample/error.md`: while reading metadata from file error.md: front: unknown delim", FilePath: files[0].FieldName},
-			{Message: "Error while processing file `sample/error.yaml`: while reading metadata from file error.yaml: front: unknown delim", FilePath: files[1].FieldName},
+			{Message: "Error while processing file `sample/error.md`: while reading metadata from file error.md: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into map[string]interface {}", FilePath: files[0].FieldName},
+			{Message: "Error while processing file `sample/error.yaml`: while reading metadata from file error.yaml: yaml: unmarshal errors:\n  line 1: cannot unmarshal !!seq into map[string]interface {}", FilePath: files[1].FieldName},
 		}
 
 		// When

@@ -4,6 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/google/go-cmp/cmp"
+	"github.com/google/go-cmp/cmp/cmpopts"
+	"github.com/knative/pkg/apis"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"testing"
 	"time"
@@ -52,6 +55,11 @@ var (
 	}
 
 	knativeLib = NewMockKnativeLib()
+
+	labels = map[string]string{
+		"l1": "v1",
+		"l2": "v2",
+	}
 )
 
 func init() {
@@ -139,8 +147,14 @@ var testCases = []controllertesting.TestCase{
 				if _, ok := knSubscriptions[makeKnSubscriptionName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative subscription was NOT created")
 				}
-				if _, ok := knChannels[makeKnChannelName(makeEventsActivatedSubscription())]; !ok {
+				if ch, ok := knChannels[makeKnChannelName(makeEventsActivatedSubscription())]; !ok {
 					t.Errorf("Knative channel was NOT created")
+				} else {
+					chLabels := ch.Labels
+					ignore := cmpopts.IgnoreTypes(apis.VolatileTime{})
+					if diff := cmp.Diff(labels, chLabels, ignore); diff != "" {
+						t.Errorf("%s (-want, +got) = %v", "Activated kyma subscription creates a new channel and a new knative subscription", diff)
+					}
 				}
 			},
 		},
@@ -332,8 +346,8 @@ func (k *MockKnativeLib) GetChannel(name string, namespace string) (*evapisv1alp
 	}
 	return channel, nil
 }
-func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
-	channel := makeKnChannel(provisioner, namespace, name)
+func (k *MockKnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
+	channel := makeKnChannel(provisioner, namespace, name, labels)
 	knChannels[channel.Name] = channel
 	return channel, nil
 }
@@ -369,7 +383,7 @@ func (k *MockKnativeLib) InjectClient(c eventingclientset.EventingV1alpha1Interf
 }
 
 //  make channels
-func makeKnChannel(provisioner string, namespace string, name string) *evapisv1alpha1.Channel {
+func makeKnChannel(provisioner string, namespace string, name string, labels *map[string]string) *evapisv1alpha1.Channel {
 	c := &evapisv1alpha1.Channel{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
@@ -378,6 +392,7 @@ func makeKnChannel(provisioner string, namespace string, name string) *evapisv1a
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
+			Labels:    *labels,
 			UID:       chanUid,
 		},
 		Spec: evapisv1alpha1.ChannelSpec{
@@ -406,7 +421,7 @@ func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
 }
 
 func makeKnativeLibChannel() *evapisv1alpha1.Channel {
-	channel, _ := knativeLib.CreateChannel(provisioner, makeKnChannelName(makeEventsActivatedSubscription()), "kyma-system", time.Second)
+	channel, _ := knativeLib.CreateChannel(provisioner, makeKnChannelName(makeEventsActivatedSubscription()), "kyma-system", &labels, time.Second)
 	channel.SetClusterName("fake-channel") // use it as a marker
 	knChannels[channel.Name] = channel
 	return channel

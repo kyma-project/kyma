@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/apis/ui/v1alpha1"
@@ -59,6 +61,13 @@ func TestBackendModule(t *testing.T) {
 
 		err = deleteBackendModules(moduleNames, uiCli)
 		require.NoError(t, err)
+
+		t.Log("Checking authorization directives...")
+		as := auth.New()
+		ops := &auth.OperationsInput{
+			auth.List: {fixBackendModulesRequest()},
+		}
+		as.Run(t, ops)
 	})
 }
 
@@ -89,7 +98,7 @@ func deleteBackendModules(moduleNames []string, uiCli *versioned.Clientset) erro
 	return nil
 }
 
-func queryBackendModules(c *graphql.Client) (backendModuleQueryResponse, error) {
+func fixBackendModulesRequest() *graphql.Request {
 	query := `
 			query {
 				backendModules {
@@ -98,6 +107,12 @@ func queryBackendModules(c *graphql.Client) (backendModuleQueryResponse, error) 
 			}	
 		`
 	req := graphql.NewRequest(query)
+
+	return req
+}
+
+func queryBackendModules(c *graphql.Client) (backendModuleQueryResponse, error) {
+	req := fixBackendModulesRequest()
 
 	var res backendModuleQueryResponse
 	err := c.Do(req, &res)

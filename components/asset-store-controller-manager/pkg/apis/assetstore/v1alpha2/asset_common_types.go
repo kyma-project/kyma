@@ -30,15 +30,28 @@ const (
 )
 
 type AssetStatusRef struct {
-	BaseURL string   `json:"baseUrl"`
-	Assets  []string `json:"assets,omitempty"`
+	BaseURL string      `json:"baseUrl"`
+	Files   []AssetFile `json:"files,omitempty"`
+}
+
+type AssetFile struct {
+	Name     string                `json:"name"`
+	Metadata *runtime.RawExtension `json:"metadata,omitempty"`
+}
+
+type WebhookService struct {
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+
+	// +optional
+	Endpoint string `json:"endpoint,omitempty"`
+	// +optional
+	Filter string `json:"filter,omitempty"`
 }
 
 type AssetWebhookService struct {
-	Name      string                `json:"name,omitempty"`
-	Namespace string                `json:"namespace,omitempty"`
-	Endpoint  string                `json:"endpoint,omitempty"`
-	Metadata  *runtime.RawExtension `json:"metadata,omitempty"`
+	WebhookService `json:",inline"`
+	Metadata       *runtime.RawExtension `json:"metadata,omitempty"`
 }
 
 type AssetMode string
@@ -65,4 +78,7 @@ type AssetSource struct {
 
 	// +optional
 	MutationWebhookService []AssetWebhookService `json:"mutationWebhookService,omitempty"`
+
+	// +optional
+	MetadataWebhookService []WebhookService `json:"metadataWebhookService,omitempty"`
 }

@@ -90,7 +90,7 @@ func NewSpecificationService(dynamicClient dynamic.Interface, opt *options) spec
 	groupVersionResource := schema.GroupVersionResource{
 		Version:  v1alpha1.SchemeGroupVersion.Version,
 		Group:    v1alpha1.SchemeGroupVersion.Group,
-		Resource: "docstopics",
+		Resource: "clusterdocstopics",
 	}
 	resourceInterface := dynamicClient.Resource(groupVersionResource).Namespace(opt.namespace)
 
