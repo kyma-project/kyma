@@ -28,6 +28,9 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
+	assetstore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
+	"k8s.io/client-go/dynamic"
 )
 
 // Config holds application configuration
@@ -94,6 +97,9 @@ func main() {
 	mfCli, err := mfClient.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Microfrontends clientset")
 
+	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating K8s Dynamic client")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 
@@ -115,6 +121,8 @@ func main() {
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 		"EventBusUpgradeTest":             eventbus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
+		"AssetStoreUpgradeTest":           assetstore.NewAssetStoreUpgradeTest(dynamicCli),
+		"HeadlessCMSUpgradeTest":          cms.NewHeadlessCmsUpgradeTest(dynamicCli),
 	}
 
 	// Execute requested action
