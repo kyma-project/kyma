@@ -533,44 +533,9 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 	t.Run("should renew client certificate", func(t *testing.T) {
 		// when
 		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
-
-		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
 		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
-
-		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
-
-		// when
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
-
-		// then
-		require.Nil(t, errorResponse)
-		require.NotEmpty(t, mgmInfoResponse.URLs.RenewCertUrl)
-
-		// when
-		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
-		csrBase64 := testkit.EncodeBase64(csr)
-
-		certificateResponse, errorResponse := client.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
-
-		// then
-		require.Nil(t, errorResponse)
-
-		// when
-		certificates = testkit.DecodeAndParseCerts(t, certificateResponse)
-		clientWithRenewedCert := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
-
-		// then
-		mgmInfoResponse, errorResponse = clientWithRenewedCert.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
-		require.Nil(t, errorResponse)
-	})
-
-	t.Run("should renew client certificate using information from management info endpoint", func(t *testing.T) {
-		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
-		require.NotEmpty(t, crtResponse.CRTChain)
-		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
+		require.NotEmpty(t, infoResponse.Certificate)
 
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
@@ -578,6 +543,8 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
 		require.Nil(t, errorResponse)
 		require.NotEmpty(t, mgmInfoResponse.URLs.RenewCertUrl)
+		require.NotEmpty(t, mgmInfoResponse.Certificate)
+		require.Equal(t, infoResponse.Certificate, mgmInfoResponse.Certificate)
 
 		csr := testkit.CreateCsr(t, mgmInfoResponse.Certificate, clientKey)
 		csrBase64 := testkit.EncodeBase64(csr)
