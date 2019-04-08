@@ -4,7 +4,8 @@ type: Details
 ---
 
 Currently Service Catalog requires its own instance of api-server and etcd. This adds additional complexity to the cluster configuration and increases
-maintenance costs. 
+maintenance costs. Kyma developers are contributing to the Service Catalog project to remove dependency to these external components and replace them 
+with native K8S solution - Custom Resource Definition.
 
 ### Enable CRDs
 
