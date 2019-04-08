@@ -99,7 +99,6 @@ echo "- Testing Application Connector"
 helm ${KUBE_CONTEXT_ARG} test application-connector --timeout 600 --tls
 acTestErr=$?
 
-
 checkAndCleanupTest kyma-integration
 testCheckGateway=$?
 
