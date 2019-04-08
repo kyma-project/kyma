@@ -1,4 +1,4 @@
-white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$LATEST", "http://xip.io"]
+white-list-external: ["localhost", "kyma.local", "CLUSTER_NAME.kyma.cluster.cx", "$yourClusterDomain", "svc.cluster.local:8081", "https://goreportcard.com", "orders.com", "azure.microsoft.com", "$KYMA_RELEASE_VERSION", "$DOMAIN", "$LATEST", "http://xip.io"]
 black-list: ["/vendor/", "/testdata/"]
 black-list-internal: ["./kyma/docs/"]
 timeout: 60
@@ -48,3 +48,6 @@ files:
   - path: "./kyma/resources/istio/README.md"
     config:
       white-list-external: ["https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection"]
+  - path: "./kyma/docs/migration-guides/0.8-0.9.md"
+    config:
+      white-list-external: ["https://github.com/kyma-project/kyma/releases/tag/0.9.0"]
