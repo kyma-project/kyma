@@ -39,24 +39,28 @@ type Controller struct {
 	masterConnectionClient  ResourceClient
 	certificatePreserver    certificates.Preserver
 	mutualTLSClientProvider connectorservice.MutualTLSClientProvider
+	minimalSyncTime         time.Duration
+	logger                  *log.Entry
 }
 
 func InitCentralConnectionsController(
 	mgr manager.Manager,
 	appName string,
+	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) error {
 
-	return startController(appName, mgr, certPreserver, mTLSClientProvider)
+	return startController(appName, mgr, minimalSyncTime, certPreserver, mTLSClientProvider)
 }
 
 func startController(
 	appName string,
 	mgr manager.Manager,
+	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) error {
 
-	certRequestController := newCentralConnectionController(mgr.GetClient(), certPreserver, mTLSClientProvider)
+	certRequestController := newCentralConnectionController(mgr.GetClient(), minimalSyncTime, certPreserver, mTLSClientProvider)
 
 	c, err := controller.New(appName, mgr, controller.Options{Reconciler: certRequestController})
 	if err != nil {
@@ -68,46 +72,56 @@ func startController(
 
 func newCentralConnectionController(
 	client ResourceClient,
+	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) *Controller {
 
 	return &Controller{
 		masterConnectionClient:  client,
+		minimalSyncTime:         minimalSyncTime,
 		certificatePreserver:    certPreserver,
 		mutualTLSClientProvider: mTLSClientProvider,
+		logger:                  log.WithField("Controller", "Central Connection"),
 	}
 }
 
 func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.CentralConnection{}
 
-	log.Infof("Processing %s Central Connection", request.Name)
+	c.logger.Infof("Processing %s Central Connection", request.Name)
 
 	err := c.masterConnectionClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		return c.handleErrorWhileGettingInstance(err, request)
 	}
 
-	// TODO - if error set some retry time
+	if !c.shouldSynchronizeConnection(instance) {
+		c.logger.Infof("Skipping synchronization of %s Central Connection. Last sync: %v", instance.Name, instance.Status.SynchronizationStatus.LastSync)
+		return reconcile.Result{}, nil
+	}
 
 	tlsConnectorClient, err := c.mutualTLSClientProvider.CreateClient()
 	if err != nil {
-		log.Errorf("Failed to create mutual TLS Connector Client: %s", err.Error())
+		c.logger.Errorf("Failed to create mutual TLS Connector Client: %s", err.Error())
 		return reconcile.Result{}, c.setErrorStatus(instance, err)
 	}
 
+	c.logger.Infof("Trying to access Management Info for %s Central Connection...", instance.Name)
 	managementInfo, err := tlsConnectorClient.GetManagementInfo(instance.Spec.ManagementInfoURL)
 	if err != nil {
-		log.Errorf("Failed to request Management Info from URL %s: %s", instance.Spec.ManagementInfoURL, err.Error())
+		c.logger.Errorf("Failed to request Management Info from URL %s: %s", instance.Spec.ManagementInfoURL, err.Error())
 		return reconcile.Result{}, c.setErrorStatus(instance, err)
 	}
+	c.logger.Infof("Successfully fetched Management Info for %s Central Connection", instance.Name)
 
-	if c.shouldRenew() {
+	if c.shouldRenew(instance) {
+		c.logger.Infof("Trying to renew client certificate for %s Central Connection...", instance.Name)
 		err = c.renewCertificate(instance, tlsConnectorClient, managementInfo)
 		if err != nil {
-			log.Error(err)
+			c.logger.Error(err)
 			return reconcile.Result{}, c.setErrorStatus(instance, err)
 		}
+		c.logger.Infof("Successfully renewed Certificate for %s Central Connection", instance.Name)
 	}
 
 	c.setSynchronizationStatus(instance)
@@ -118,16 +132,22 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
 		// TODO - should delete certs?
-		log.Infof("Connection %s has been deleted", request.Name)
+		c.logger.Infof("Connection %s has been deleted", request.Name)
 		return reconcile.Result{}, nil
 	}
-	log.Errorf("Error while getting instance: %s", err.Error())
+	c.logger.Errorf("Error while getting instance: %s", err.Error())
 	return reconcile.Result{}, err
 }
 
-func (c *Controller) shouldRenew() bool {
-	// TODO - renew only if needed
-	// TODO - how do we decide if it is time to renew?plan
+func (c *Controller) shouldSynchronizeConnection(connection *v1alpha1.CentralConnection) bool {
+	timeFromLastSync := time.Since(connection.Status.SynchronizationStatus.LastSync.Time)
+	c.logger.Infof("Time from last sync: %v", timeFromLastSync)
+
+	return timeFromLastSync > c.minimalSyncTime
+}
+
+func (c *Controller) shouldRenew(connection *v1alpha1.CentralConnection) bool {
+	//return connection.Status.CertificateStatus.NotAfter.Time.Second() < (time.Now() + c.minimalSyncTime)
 	return true
 }
 
@@ -184,7 +204,7 @@ func (c *Controller) setErrorStatus(connection *v1alpha1.CentralConnection, err 
 
 	updateError := c.updateCentralConnectionCR(connection)
 	if updateError != nil {
-		log.Errorf("Failed to set error status on %s Connection", connection.Name)
+		c.logger.Errorf("Failed to set error status on %s Connection", connection.Name)
 		return updateError
 	}
 

@@ -39,6 +39,7 @@ type Controller struct {
 	connectorClient          connectorservice.Client
 	certificatePreserver     certificates.Preserver
 	connectionClient         CentralConnectionManager
+	logger                   *log.Entry
 }
 
 func InitCertificatesRequestController(mgr manager.Manager, appName string, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager CentralConnectionManager) error {
@@ -62,13 +63,14 @@ func newCertificatesRequestController(client Client, connectorClient connectorse
 		connectorClient:          connectorClient,
 		certificatePreserver:     certPreserver,
 		connectionClient:         connectionManager,
+		logger:                   log.WithField("Controller", "Certificate Request"),
 	}
 }
 
 func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	instance := &v1alpha1.CertificateRequest{}
 
-	log.Infof("Processing %s request", request.Name)
+	c.logger.Infof("Processing %s request", request.Name)
 
 	err := c.certificateRequestClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
@@ -76,16 +78,16 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 	}
 
 	if instance.Status.Error != "" {
-		log.Infof("Certificate Request %s has an error status, certificate will not be fetched", instance.Name)
+		c.logger.Infof("Certificate Request %s has an error status, certificate will not be fetched", instance.Name)
 		return reconcile.Result{}, nil
 	}
 
 	establishedConnection, err := c.connectorClient.ConnectToCentralConnector(instance.Spec.CSRInfoURL)
 	if err != nil {
-		log.Errorf("Error while requesting certificates from Connector Service: %s", err.Error())
+		c.logger.Errorf("Error while requesting certificates from Connector Service: %s", err.Error())
 		return reconcile.Result{}, c.setRequestErrorStatus(instance, err)
 	}
-	log.Infoln("Certificates fetched successfully")
+	c.logger.Infoln("Certificates fetched successfully")
 
 	err = c.manageResources(instance.Name, establishedConnection)
 	if err != nil {
@@ -96,12 +98,19 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	log.Infof("CertificatesRequest %s successfully deleted", instance.Name)
+	c.logger.Infof("CertificatesRequest %s successfully deleted", instance.Name)
 
 	return reconcile.Result{}, nil
 }
 
 func (c *Controller) manageResources(connectionName string, connection connectorservice.EstablishedConnection) error {
+	err := c.certificatePreserver.PreserveCertificates(connection.Certificates)
+	if err != nil {
+		c.logger.Errorf("Error while saving certificates to secrets: %s", err.Error())
+		return err
+	}
+	c.logger.Infoln("Certificates saved successfully")
+
 	masterConnection := &v1alpha1.CentralConnection{
 		ObjectMeta: v1.ObjectMeta{Name: connectionName},
 		Spec: v1alpha1.CentralConnectionSpec{
@@ -112,28 +121,21 @@ func (c *Controller) manageResources(connectionName string, connection connector
 	// TODO - should we check connection by calling Management Info ???
 
 	// TODO - consider upsert
-	_, err := c.connectionClient.Create(masterConnection)
+	_, err = c.connectionClient.Create(masterConnection)
 	if err != nil {
-		log.Errorf("Error while creating Central Connection resource: %s", err.Error())
+		c.logger.Errorf("Error while creating Central Connection resource: %s", err.Error())
 		return err
 	}
-
-	err = c.certificatePreserver.PreserveCertificates(connection.Certificates)
-	if err != nil {
-		log.Errorf("Error while saving certificates to secrets: %s", err.Error())
-		return err
-	}
-	log.Infoln("Certificates saved successfully")
 
 	return nil
 }
 
 func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcile.Request) (reconcile.Result, error) {
 	if k8sErrors.IsNotFound(err) {
-		log.Infof("Request %s has been deleted", request.Name)
+		c.logger.Infof("Request %s has been deleted", request.Name)
 		return reconcile.Result{}, nil
 	}
-	log.Errorf("Error while getting instance, %s", err.Error())
+	c.logger.Errorf("Error while getting instance, %s", err.Error())
 	return reconcile.Result{}, err
 }
 
@@ -148,7 +150,7 @@ func (c *Controller) setRequestErrorStatus(instance *v1alpha1.CertificateRequest
 	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
 		err := c.certificateRequestClient.Get(context.Background(), name, upToDateInstance)
 		if err != nil {
-			log.Errorf("Failed to get up to date resource: %s", err.Error())
+			c.logger.Errorf("Failed to get up to date resource: %s", err.Error())
 			return err
 		}
 

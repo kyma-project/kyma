@@ -60,6 +60,8 @@ QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 	caCert := []byte("ca-cert")
 	certChain := []byte("cert-chain")
 
+	minimalSyncTime := 300 * time.Second
+
 	namespacedName := types.NamespacedName{
 		Name: centralConnectionName,
 	}
@@ -107,7 +109,7 @@ QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
@@ -127,7 +129,37 @@ QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 		certPreserver := &certMocks.Preserver{}
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 
-		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, mTLSClientProvider)
+
+		// when
+		_, err := connectionController.Reconcile(request)
+
+		// then
+		require.NoError(t, err)
+		assertExpectations(t, client.Mock, certProvider.Mock, certPreserver.Mock)
+	})
+
+	t.Run("should skip synchronization when not enough time passed", func(t *testing.T) {
+		// given
+		setupConnectionWithLastSync := func(args mock.Arguments) {
+			centralConnection := getCentralConnectionFromArgs(args)
+			setupCentralConnectionInstance(args)
+
+			centralConnection.Status.SynchronizationStatus = v1alpha1.SynchronizationStatus{
+				LastSync:    metav1.Now(),
+				LastSuccess: metav1.Now(),
+			}
+		}
+
+		client := &mocks.Client{}
+		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CentralConnection")).
+			Run(setupConnectionWithLastSync).Return(nil)
+
+		certProvider := &certMocks.Provider{}
+		certPreserver := &certMocks.Preserver{}
+		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
@@ -149,7 +181,7 @@ QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 		mTLSClientProvider.On("CreateClient").Return(nil, errors.New("error"))
 
-		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
@@ -176,7 +208,7 @@ QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
@@ -203,7 +235,7 @@ QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
@@ -231,7 +263,7 @@ QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)
@@ -263,7 +295,7 @@ QbIjsJhuMRQuka2NB6eGq4qFaHHbkzc=
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 		mTLSClientProvider.On("CreateClient").Return(mutualTLSClient, nil)
 
-		connectionController := newCentralConnectionController(client, certPreserver, mTLSClientProvider)
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, mTLSClientProvider)
 
 		// when
 		_, err := connectionController.Reconcile(request)

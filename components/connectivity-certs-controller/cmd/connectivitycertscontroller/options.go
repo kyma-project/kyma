@@ -11,6 +11,7 @@ type options struct {
 	clusterCertificatesSecret string
 	caCertificatesSecret      string
 	syncPeriod                int
+	minimalSyncTime           int
 }
 
 func parseArgs() *options {
@@ -19,6 +20,7 @@ func parseArgs() *options {
 	clusterCertificatesSecret := flag.String("clusterCertificatesSecret", "cluster-client-certificates", "Secret name where cluster client certificate and key are kept")
 	caCertificatesSecret := flag.String("caCertificatesSecret", "ca-certificates", "Secret name where CA certificate is kept")
 	syncPeriod := flag.Int("syncPeriod", 300, "Time period between resyncing existing resources")
+	minimalSyncTime := flag.Int("minimalRetryTime", 300, "Minimal sync time between trying to synchronize with Central Connector Service")
 
 	flag.Parse()
 
@@ -28,12 +30,15 @@ func parseArgs() *options {
 		clusterCertificatesSecret: *clusterCertificatesSecret,
 		caCertificatesSecret:      *caCertificatesSecret,
 		syncPeriod:                *syncPeriod,
+		minimalSyncTime:           *minimalSyncTime,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --namespace=%s"+
-		"--clusterCertificatesSecret=%s --caCertificatesSecret=%s --syncPeriod=%d",
+		"--clusterCertificatesSecret=%s --caCertificatesSecret=%s "+
+		"--syncPeriod=%d --minimalSyncTime=%d",
 		o.appName, o.namespace,
-		o.clusterCertificatesSecret, o.caCertificatesSecret, o.syncPeriod)
+		o.clusterCertificatesSecret, o.caCertificatesSecret,
+		o.syncPeriod, o.minimalSyncTime)
 }

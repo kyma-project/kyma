@@ -33,7 +33,7 @@ func TestCsrProvider_CreateCSR(t *testing.T) {
 	t.Run("should create CSR with new key", func(t *testing.T) {
 		// given
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("UpsertWithReplace", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(nil).
+		secretRepository.On("UpsertWithMerge", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(nil).
 			Run(func(args mock.Arguments) {
 				secretData, ok := args[1].(map[string][]byte)
 				require.True(t, ok)
@@ -59,7 +59,7 @@ func TestCsrProvider_CreateCSR(t *testing.T) {
 	t.Run("should return error when failed to override secret", func(t *testing.T) {
 		// given
 		secretRepository := &mocks.Repository{}
-		secretRepository.On("UpsertWithReplace", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(errors.New("error"))
+		secretRepository.On("UpsertWithMerge", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(errors.New("error"))
 
 		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
 
