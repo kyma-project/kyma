@@ -88,17 +88,22 @@ Follow these instructions to install Kyma from a release or from local sources:
       kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-local.yaml
       ```
 
-  7. Configure the Kyma installation using the local configuration file from the `$LATEST` release:
+  7. Download the configuration file for local Kyma installation from the `$LATEST` release:
       ```
-      kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
+      wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
       ```
 
-  8. To trigger the installation process, label the `kyma-installation` custom resource:
+  8. Configure the Kyma installation using the local configuration file from the `$LATEST` release:
+      ```
+      cat kyma-config-local.yaml | sed "s/minikubeIP: \"\"/minikubeIP: \"$(minikube ip)\"/g" | kubectl apply -f -
+      ```
+
+  9. To trigger the installation process, label the `kyma-installation` custom resource:
       ```
       kubectl label installation/kyma-installation action=install
       ```
 
-  9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
+  10. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
       ```
       ./scripts/is-installed.sh
       ```
@@ -202,7 +207,7 @@ kubectl get pods --all-namespaces
    scripts/is-installed.sh --verbose
    ```
 
-2. If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:  
+2. If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:
    ```
    kubectl get pods --all-namespaces
    ```
@@ -211,7 +216,7 @@ kubectl get pods --all-namespaces
 
    If the problem persists, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
 
-3. If you put your local running cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run: 
+3. If you put your local running cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run:
    ```
    minikube ssh -- docker run -i --rm --privileged --pid=host debian nsenter -t 1 -m -u -n -i date -u $(date -u +%m%d%H%M%Y)
    ```
