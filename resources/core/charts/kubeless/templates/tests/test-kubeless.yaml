@@ -62,7 +62,7 @@ metadata:
   labels:
     helm-chart-test: "true"
   annotations:
-    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/inject: true
     helm.sh/hook: test-success
 spec:
   shareProcessNamespace: true
