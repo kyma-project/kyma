@@ -94,13 +94,12 @@ func main() {
 	fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
-		"GrafanaUpgradeTest":              grafanaUpgradeTest,
-		"MetricsUpgradeTest":              metricUpgradeTest,
-		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(k8sCli),
-		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(k8sCli),
+		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
+		"GrafanaUpgradeTest":           grafanaUpgradeTest,
+		"MetricsUpgradeTest":           metricUpgradeTest,
+		"MicrofrontendUpgradeTest":     ui.NewMicrofrontendUpgradeTest(k8sCli),
 	}
 
 	// Execute requested action
