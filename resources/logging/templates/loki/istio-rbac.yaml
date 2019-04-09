@@ -29,7 +29,6 @@ metadata:
 spec:
   subjects:
   - user: "cluster.local/ns/kyma-system/sa/logging"
-  - user: "cluster.local/ns/kyma-system/sa/test-logging"
   - properties:
       request.auth.audiences: "kyma-client"
   roleRef:
