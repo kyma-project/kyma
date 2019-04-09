@@ -84,7 +84,7 @@ func main() {
 	certPreserver := certificates.NewCertificatePreserver(options.clusterCertificatesSecret, options.caCertificatesSecret, secretsRepository)
 	connectorClient := connectorservice.NewConnectorClient(csrProvider)
 	certProvider := certificates.NewCertificateProvider(options.clusterCertificatesSecret, options.caCertificatesSecret, secretsRepository)
-	mTLSClientProvider := connectorservice.NewMutualTLSClientProvider(csrProvider, certProvider)
+	mTLSClientProvider := connectorservice.NewMutualTLSClientProvider(csrProvider)
 	minimalSyncTime := time.Duration(options.minimalSyncTime) * time.Second
 
 	// Setup Certificate Request Controller
@@ -96,7 +96,7 @@ func main() {
 
 	// Setup Central Connection Controller
 	log.Info("Setting up Central Connection controller")
-	if err := centralconnection.InitCentralConnectionsController(mgr, options.appName, minimalSyncTime, certPreserver, mTLSClientProvider); err != nil {
+	if err := centralconnection.InitCentralConnectionsController(mgr, options.appName, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider); err != nil {
 		log.Error(err, "Unable to register controllers to the manager")
 		os.Exit(1)
 	}

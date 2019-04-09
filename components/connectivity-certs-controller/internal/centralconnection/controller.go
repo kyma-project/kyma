@@ -29,6 +29,10 @@ import (
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
+const (
+	certValidityRenewalThreshold = 0.3
+)
+
 type ResourceClient interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
 	Update(ctx context.Context, obj runtime.Object) error
@@ -38,6 +42,7 @@ type ResourceClient interface {
 type Controller struct {
 	masterConnectionClient  ResourceClient
 	certificatePreserver    certificates.Preserver
+	certificateProvider     certificates.Provider
 	mutualTLSClientProvider connectorservice.MutualTLSClientProvider
 	minimalSyncTime         time.Duration
 	logger                  *log.Entry
@@ -48,9 +53,10 @@ func InitCentralConnectionsController(
 	appName string,
 	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
+	certProvider certificates.Provider,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) error {
 
-	return startController(appName, mgr, minimalSyncTime, certPreserver, mTLSClientProvider)
+	return startController(appName, mgr, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
 }
 
 func startController(
@@ -58,9 +64,10 @@ func startController(
 	mgr manager.Manager,
 	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
+	certProvider certificates.Provider,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) error {
 
-	certRequestController := newCentralConnectionController(mgr.GetClient(), minimalSyncTime, certPreserver, mTLSClientProvider)
+	certRequestController := newCentralConnectionController(mgr.GetClient(), minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
 
 	c, err := controller.New(appName, mgr, controller.Options{Reconciler: certRequestController})
 	if err != nil {
@@ -74,12 +81,14 @@ func newCentralConnectionController(
 	client ResourceClient,
 	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
+	certProvider certificates.Provider,
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) *Controller {
 
 	return &Controller{
 		masterConnectionClient:  client,
 		minimalSyncTime:         minimalSyncTime,
 		certificatePreserver:    certPreserver,
+		certificateProvider:     certProvider,
 		mutualTLSClientProvider: mTLSClientProvider,
 		logger:                  log.WithField("Controller", "Central Connection"),
 	}
@@ -100,28 +109,21 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, nil
 	}
 
-	tlsConnectorClient, err := c.mutualTLSClientProvider.CreateClient()
+	certCredentials, err := c.getCertificateCredentials()
 	if err != nil {
-		c.logger.Errorf("Failed to create mutual TLS Connector Client: %s", err.Error())
+		log.Infof("Failed to get certificates for %s Central Connection: %s", instance.Name, err.Error())
 		return reconcile.Result{}, c.setErrorStatus(instance, err)
 	}
 
-	c.logger.Infof("Trying to access Management Info for %s Central Connection...", instance.Name)
-	managementInfo, err := tlsConnectorClient.GetManagementInfo(instance.Spec.ManagementInfoURL)
-	if err != nil {
-		c.logger.Errorf("Failed to request Management Info from URL %s: %s", instance.Spec.ManagementInfoURL, err.Error())
-		return reconcile.Result{}, c.setErrorStatus(instance, err)
+	if !instance.HasErrorStatus() && !instance.HasCertStatus() {
+		log.Infof("Certificate status not set on %s Central Connection", instance.Name)
+		c.setCertificateStatus(instance, certCredentials.ClientCert)
 	}
-	c.logger.Infof("Successfully fetched Management Info for %s Central Connection", instance.Name)
 
-	if c.shouldRenew(instance) {
-		c.logger.Infof("Trying to renew client certificate for %s Central Connection...", instance.Name)
-		err = c.renewCertificate(instance, tlsConnectorClient, managementInfo)
-		if err != nil {
-			c.logger.Error(err)
-			return reconcile.Result{}, c.setErrorStatus(instance, err)
-		}
-		c.logger.Infof("Successfully renewed Certificate for %s Central Connection", instance.Name)
+	err = c.synchronizeWithConnector(instance, certCredentials)
+	if err != nil {
+		log.Infof("Failed to synchronize %s Central Connection with Connector Service: %s", instance.Name, err.Error())
+		return reconcile.Result{}, c.setErrorStatus(instance, err)
 	}
 
 	c.setSynchronizationStatus(instance)
@@ -143,9 +145,61 @@ func (c *Controller) shouldSynchronizeConnection(connection *v1alpha1.CentralCon
 	return timeFromLastSync > c.minimalSyncTime
 }
 
-func (c *Controller) shouldRenew(connection *v1alpha1.CentralConnection) bool {
-	//return connection.Status.CertificateStatus.NotAfter.Time.Second() < (time.Now() + c.minimalSyncTime)
-	return true
+func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnection, certCredentials connectorservice.CertificateCredentials) error {
+	tlsConnectorClient := c.mutualTLSClientProvider.CreateClient(certCredentials)
+
+	c.logger.Infof("Trying to access Management Info for %s Central Connection...", connection.Name)
+	managementInfo, err := tlsConnectorClient.GetManagementInfo(connection.Spec.ManagementInfoURL)
+	if err != nil {
+		c.logger.Errorf("Failed to request Management Info from URL %s for %s Central Connection: %s", connection.Spec.ManagementInfoURL, connection.Name, err.Error())
+		return errors.Wrap(err, "Failed to access Management Info")
+	}
+	c.logger.Infof("Successfully fetched Management Info for %s Central Connection", connection.Name)
+
+	if !shouldRenew(connection, c.minimalSyncTime) {
+		c.logger.Infof("Skipping certificate renewal for %s Central Connection", connection.Name)
+		return nil
+	}
+
+	c.logger.Infof("Trying to renew client certificate for %s Central Connection...", connection.Name)
+	err = c.renewCertificate(connection, tlsConnectorClient, managementInfo)
+	if err != nil {
+		c.logger.Errorf("Failed to renew certificate for %s Central Connection: %s", connection.Name, err.Error())
+		return errors.Wrap(err, "Failed to renew certificate")
+	}
+	c.logger.Infof("Successfully renewed Certificate for %s Central Connection", connection.Name)
+
+	return nil
+}
+
+// Certificate should be renewed when less than 30% of validity time is left or if time left is less than 2 times minimal Sync Time
+func shouldRenew(connection *v1alpha1.CentralConnection, minimalSyncTime time.Duration) bool {
+	notBefore := connection.Status.CertificateStatus.NotBefore.Unix()
+	notAfter := connection.Status.CertificateStatus.NotAfter.Unix()
+
+	certValidity := notAfter - notBefore
+
+	timeLeft := float64(notAfter - time.Now().Unix())
+
+	return timeLeft < float64(certValidity)*certValidityRenewalThreshold || timeLeft < 2*minimalSyncTime.Seconds()
+}
+
+func (c *Controller) getCertificateCredentials() (connectorservice.CertificateCredentials, error) {
+	clientKey, clientCert, err := c.certificateProvider.GetClientCredentials()
+	if err != nil {
+		return connectorservice.CertificateCredentials{}, errors.Wrap(err, "Failed to get client key and certificate")
+	}
+
+	caCertificate, err := c.certificateProvider.GetCACertificate()
+	if err != nil {
+		return connectorservice.CertificateCredentials{}, errors.Wrap(err, "Failed to get CA certificate")
+	}
+
+	return connectorservice.CertificateCredentials{
+		ClientKey:  clientKey,
+		ClientCert: clientCert,
+		CACert:     caCertificate,
+	}, nil
 }
 
 func (c *Controller) renewCertificate(connection *v1alpha1.CentralConnection, tlsConnectorClient connectorservice.MutualTLSConnectorClient, managementInfo connectorservice.ManagementInfo) error {
@@ -159,12 +213,7 @@ func (c *Controller) renewCertificate(connection *v1alpha1.CentralConnection, tl
 		return errors.Wrap(err, "Failed to save certificates to secrets")
 	}
 
-	pemBlock, _ := pem.Decode(renewedCerts.ClientCRT)
-	if pemBlock == nil {
-		return errors.New("Failed to decode client certificate pem")
-	}
-
-	clientCert, err := x509.ParseCertificate(pemBlock.Bytes)
+	clientCert, err := parseCertificate(renewedCerts.ClientCRT)
 	if err != nil {
 		return errors.Wrap(err, "Failed to parse client certificate")
 	}
@@ -172,6 +221,15 @@ func (c *Controller) renewCertificate(connection *v1alpha1.CentralConnection, tl
 	c.setCertificateStatus(connection, clientCert)
 
 	return nil
+}
+
+func parseCertificate(rawPem []byte) (*x509.Certificate, error) {
+	pemBlock, _ := pem.Decode(rawPem)
+	if pemBlock == nil {
+		return nil, errors.New("Failed to decode client certificate pem")
+	}
+
+	return x509.ParseCertificate(pemBlock.Bytes)
 }
 
 func (c *Controller) setCertificateStatus(connection *v1alpha1.CentralConnection, certificate *x509.Certificate) {

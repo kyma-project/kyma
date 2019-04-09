@@ -77,3 +77,11 @@ type CentralConnectionList struct {
 
 	Items []CentralConnection `json:"items"`
 }
+
+func (cc CentralConnection) HasErrorStatus() bool {
+	return cc.Status.Error != nil && cc.Status.Error.Message != ""
+}
+
+func (cc CentralConnection) HasCertStatus() bool {
+	return cc.Status.CertificateStatus != nil && !cc.Status.CertificateStatus.NotAfter.IsZero() && !cc.Status.CertificateStatus.NotBefore.IsZero()
+}

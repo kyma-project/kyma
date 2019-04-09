@@ -9,6 +9,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates"
@@ -65,7 +66,7 @@ func (cc *connectorClient) requestCSRInfo(csrInfoURL string) (InfoResponse, erro
 	}
 
 	if response.StatusCode != http.StatusOK {
-		message := fmt.Sprintf("Connector Service CSR info responded with status %d", response.StatusCode)
+		message := fmt.Sprintf("Connector Service CSR info responded with unexpected status %d", response.StatusCode)
 		return InfoResponse{}, errors.Wrap(extractErrorResponse(response), message)
 	}
 
@@ -95,7 +96,7 @@ func (cc *connectorClient) requestCertificates(csrURL string, encodedCSR string)
 	}
 
 	if response.StatusCode != http.StatusCreated {
-		message := fmt.Sprintf("Connector Service Certificates responded with status %d", response.StatusCode)
+		message := fmt.Sprintf("Connector Service Certificates responded with unexpected status %d", response.StatusCode)
 		return CertificatesResponse{}, errors.Wrap(extractErrorResponse(response), message)
 	}
 
@@ -144,10 +145,18 @@ func decodeCertificateResponse(certificateResponse CertificatesResponse) (certif
 }
 
 func extractErrorResponse(response *http.Response) error {
+	defer response.Body.Close()
+
 	var errorResponse ErrorResponse
-	err := readResponseBody(response.Body, &errorResponse)
+	err := unmarshalFromReader(response.Body, &errorResponse)
 	if err != nil {
-		return errors.Wrap(err, "Failed to unmarshal error response")
+		dump, err := httputil.DumpResponse(response, true)
+		if err != nil {
+			return errors.Wrap(err, "Failed to dump error response")
+		}
+
+		errorDump := fmt.Sprintf("Error response: %s", string(dump))
+		return errors.New(errorDump)
 	}
 
 	return errors.New(errorResponse.Error)
@@ -155,17 +164,16 @@ func extractErrorResponse(response *http.Response) error {
 
 func readResponseBody(body io.ReadCloser, model interface{}) error {
 	defer body.Close()
+	return unmarshalFromReader(body, model)
+}
+
+func unmarshalFromReader(body io.Reader, model interface{}) error {
 	rawData, err := ioutil.ReadAll(body)
 	if err != nil {
 		return err
 	}
 
-	err = json.Unmarshal(rawData, &model)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return json.Unmarshal(rawData, &model)
 }
 
 func parseSubject(plainSubject string) pkix.Name {

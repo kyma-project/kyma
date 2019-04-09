@@ -20,7 +20,7 @@ func parseArgs() *options {
 	clusterCertificatesSecret := flag.String("clusterCertificatesSecret", "cluster-client-certificates", "Secret name where cluster client certificate and key are kept")
 	caCertificatesSecret := flag.String("caCertificatesSecret", "ca-certificates", "Secret name where CA certificate is kept")
 	syncPeriod := flag.Int("syncPeriod", 300, "Time period between resyncing existing resources")
-	minimalSyncTime := flag.Int("minimalRetryTime", 300, "Minimal sync time between trying to synchronize with Central Connector Service")
+	minimalSyncTime := flag.Int("minimalSyncTime", 300, "Minimal time between trying to synchronize with Central Connector Service")
 
 	flag.Parse()
 
