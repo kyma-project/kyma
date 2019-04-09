@@ -95,12 +95,12 @@
   revision = "dbc4da98389f9d0c42eb314c2b346bf1d2a27310"
 
 [[projects]]
-  branch = "master"
-  digest = "1:3ee90c0d94da31b442dde97c99635aaafec68d0b8a3c12ee2075c6bdabeec6bb"
+  digest = "1:a6181aca1fd5e27103f9a920876f29ac72854df7345a39f3b01e61c8c94cc8af"
   name = "github.com/google/gofuzz"
   packages = ["."]
   pruneopts = "UT"
-  revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
+  revision = "f140a6486e521aad38f5917de355cbf147cc0496"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:65c4414eeb350c47b8de71110150d0ea8a281835b1f386eacaa3ad7325929c21"
@@ -165,7 +165,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:65ec8538028a85c7a76cec70afc11307981bb5328b83de2393ca70f260b77edd"
+  digest = "1:cd3f92fe2ca31248e213783227162f253b9113be24d0048507b7c1748b8fbc69"
   name = "github.com/knative/pkg"
   packages = [
     "apis",
@@ -176,7 +176,7 @@
     "kmp",
   ]
   pruneopts = "UT"
-  revision = "4993c57ea30d3999b4a5eba899b4ee547f858739"
+  revision = "f55c11c3ce2dbeb895307455e56e5dba9573243e"
 
 [[projects]]
   digest = "1:1f7ea394cc83ad6aabf3c61c6faeeed3043744ba094b92f8bc52d22273f7a34c"
@@ -193,8 +193,8 @@
     "pkg/client/clientset/versioned/typed/serving/v1alpha1",
   ]
   pruneopts = "UT"
-  revision = "ca4fffb4743924c58e98badcf5bd3f17a3634d43"
-  version = "v0.5.0"
+  revision = "de51b2cd890649e2081dcafbc50afa8b07b54704"
+  version = "v0.5.1"
 
 [[projects]]
   branch = "master"
@@ -202,7 +202,7 @@
   name = "github.com/kyma-project/kyma"
   packages = ["common/ingressgateway"]
   pruneopts = "UT"
-  revision = "6d27e5177140292da6d0632944b5211e3d9bcc19"
+  revision = "d394365971d5c1caae84cc42e57751378913c38d"
 
 [[projects]]
   branch = "master"
