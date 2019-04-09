@@ -1,61 +1,22 @@
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: knative-serving-test
-  labels:
-    helm-chart-test: "true"
-rules:
-- apiGroups: ["serving.knative.dev"]
-  resources: ["services"]
-  verbs: ["*"]
----
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: knative-serving-test
-  namespace: knative-serving
-  labels:
-    helm-chart-test: "true"
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: knative-serving-test
-  namespace: knative-serving
-  labels:
-    helm-chart-test: "true"
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: knative-serving-test
-subjects:
-- kind: ServiceAccount
-  name: knative-serving-test
-  namespace: knative-serving
----
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test-knative-serving-acceptance
-  namespace: knative-serving
-  annotations:
-    "sidecar.istio.io/inject": "false"
-    "helm.sh/hook": test-success
-  labels:
-    "helm-chart-test": "true"
-spec:
-  serviceAccount: knative-serving-test
-  containers:
-  - name: test 
-    #image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}" 
-    image: "knative-serving-acceptance-tests:latest" 
-    imagePullPolicy: IfNotPresent
-    env:
-    - name: INGRESSGATEWAY_ADDRESS
-      value: knative-ingressgateway.istio-system.svc.cluster.local
-    - name: DOMAIN_NAME
-      value: {{ .Values.global.ingress.domainName }}
-    - name: TARGET
-      value: {{ .Values.test.target }}
-  restartPolicy: Never
+#---
+#apiVersion: v1
+#kind: Pod
+#metadata:
+#  name: test-knative-serving-acceptance
+#  namespace: knative-serving
+#  annotations:
+#    "helm.sh/hook": test-success
+#  labels:
+#    "helm-chart-test": "true"
+#spec:
+#  containers:
+#  - name: test
+#    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}
+#    env:
+#    - name: INGRESSGATEWAY_ADDRESS
+#      value: knative-ingressgateway.istio-system.svc.cluster.local
+#    - name: DOMAIN_NAME
+#      value: {{ .Values.global.ingress.domainName }}
+#    - name: TARGET
+#      value: {{ .Values.test.target }}
+#  restartPolicy: Never
