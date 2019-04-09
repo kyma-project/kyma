@@ -37,7 +37,7 @@ spec:
           image: "{{ .Values.promtail.image.repository }}:{{ .Values.promtail.image.tag }}"
           imagePullPolicy: {{ .Values.promtail.image.pullPolicy }}
           args:
-            - "-config.file=/etc/promtail/{{$configFileName}}"
+            - "-config.file=/etc/promtail/{{ $configFileName }}"
             - "-client.url=http://{{ template "loki.fullname" . }}:{{ .Values.loki.service.port }}/api/prom/push"
           volumeMounts:
             - name: config
