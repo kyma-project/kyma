@@ -37,7 +37,7 @@ spec:
            cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
       env:
         - name: LOGGING_ENABLED
-          value: true
+          value: {{ .Values.global.logging.deployment.enabled | default true}}
         - name: DOMAIN
           value: {{ .Values.global.ingress.domainName }}
         - name: LOGIN

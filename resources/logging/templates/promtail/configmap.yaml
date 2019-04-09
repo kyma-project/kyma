@@ -250,8 +250,10 @@ data:
           - __meta_kubernetes_pod_uid
           - __meta_kubernetes_pod_container_name
           target_label: __path__
+  promtail-gke.yaml: |
+    scrape_configs:
       - entry_parser: '{{ .Values.promtail.entryParser }}'
-        job_name: kubernetes-pods-name-gke
+        job_name: kubernetes-pods-name
         kubernetes_sd_configs:
         - role: pod
         relabel_configs:
@@ -286,12 +288,6 @@ data:
           target_label: container_name
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
-        - replacement: /var/log/pods/$1/*.log
-          separator: /
-          source_labels:
-          - __pod_log_root_dir__
-          - __meta_kubernetes_pod_container_name
-          target_label: __path__
         - replacement: $1
           separator: _
           source_labels:
@@ -299,8 +295,14 @@ data:
           - __meta_kubernetes_pod_name
           - __meta_kubernetes_pod_uid
           target_label: __pod_log_root_dir__
+        - replacement: /var/log/pods/$1/*.log
+          separator: /
+          source_labels:
+          - __pod_log_root_dir__
+          - __meta_kubernetes_pod_container_name
+          target_label: __path__
       - entry_parser: '{{ .Values.promtail.entryParser }}'
-        job_name: kubernetes-pods-app-gke
+        job_name: kubernetes-pods-app
         kubernetes_sd_configs:
         - role: pod
         relabel_configs:
@@ -339,12 +341,6 @@ data:
           target_label: container_name
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
-        - replacement: /var/log/pods/$1/*.log
-          separator: /
-          source_labels:
-          - __pod_log_root_dir__
-          - __meta_kubernetes_pod_container_name
-          target_label: __path__
         - replacement: $1
           separator: _
           source_labels:
@@ -352,8 +348,14 @@ data:
           - __meta_kubernetes_pod_name
           - __meta_kubernetes_pod_uid
           target_label: __pod_log_root_dir__
+        - replacement: /var/log/pods/$1/*.log
+          separator: /
+          source_labels:
+          - __pod_log_root_dir__
+          - __meta_kubernetes_pod_container_name
+          target_label: __path__
       - entry_parser: '{{ .Values.promtail.entryParser }}'
-        job_name: kubernetes-pods-function-gke
+        job_name: kubernetes-pods-function
         kubernetes_sd_configs:
         - role: pod
         relabel_configs:
@@ -392,12 +394,6 @@ data:
           target_label: container_name
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
-        - replacement: /var/log/pods/$1/*.log
-          separator: /
-          source_labels:
-          - __pod_log_root_dir__
-          - __meta_kubernetes_pod_container_name
-          target_label: __path__
         - replacement: $1
           separator: _
           source_labels:
@@ -405,8 +401,14 @@ data:
           - __meta_kubernetes_pod_name
           - __meta_kubernetes_pod_uid
           target_label: __pod_log_root_dir__
+        - replacement: /var/log/pods/$1/*.log
+          separator: /
+          source_labels:
+          - __pod_log_root_dir__
+          - __meta_kubernetes_pod_container_name
+          target_label: __path__
       - entry_parser: '{{ .Values.promtail.entryParser }}'
-        job_name: kubernetes-pods-direct-controllers-gke
+        job_name: kubernetes-pods-direct-controllers
         kubernetes_sd_configs:
         - role: pod
         relabel_configs:
@@ -451,12 +453,6 @@ data:
           target_label: container_name
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
-        - replacement: /var/log/pods/$1/*.log
-          separator: /
-          source_labels:
-          - __pod_log_root_dir__
-          - __meta_kubernetes_pod_container_name
-          target_label: __path__
         - replacement: $1
           separator: _
           source_labels:
@@ -464,8 +460,14 @@ data:
           - __meta_kubernetes_pod_name
           - __meta_kubernetes_pod_uid
           target_label: __pod_log_root_dir__
+        - replacement: /var/log/pods/$1/*.log
+          separator: /
+          source_labels:
+          - __pod_log_root_dir__
+          - __meta_kubernetes_pod_container_name
+          target_label: __path__
       - entry_parser: '{{ .Values.promtail.entryParser }}'
-        job_name: kubernetes-pods-indirect-controller-gke
+        job_name: kubernetes-pods-indirect-controller
         kubernetes_sd_configs:
         - role: pod
         relabel_configs:
@@ -512,12 +514,6 @@ data:
           target_label: container_name
         - action: labelmap
           regex: __meta_kubernetes_pod_label_(.+)
-        - replacement: /var/log/pods/$1/*.log
-          separator: /
-          source_labels:
-          - __pod_log_root_dir__
-          - __meta_kubernetes_pod_container_name
-          target_label: __path__
         - replacement: $1
           separator: _
           source_labels:
@@ -525,3 +521,9 @@ data:
           - __meta_kubernetes_pod_name
           - __meta_kubernetes_pod_uid
           target_label: __pod_log_root_dir__
+        - replacement: /var/log/pods/$1/*.log
+          separator: /
+          source_labels:
+          - __pod_log_root_dir__
+          - __meta_kubernetes_pod_container_name
+          target_label: __path__
