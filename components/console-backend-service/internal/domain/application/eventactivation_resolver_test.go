@@ -28,7 +28,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		}, nil)
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil)
+		resolver := application.NewEventActivationResolver(svc, nil, nil)
 		result, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.NoError(t, err)
@@ -42,7 +42,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		svc.On("List", "test").Return([]*v1alpha1.EventActivation{}, nil)
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil)
+		resolver := application.NewEventActivationResolver(svc, nil, nil)
 		result, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.NoError(t, err)
@@ -54,7 +54,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		svc.On("List", "test").Return(nil, errors.New("trol"))
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil)
+		resolver := application.NewEventActivationResolver(svc, nil, nil)
 		_, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.Error(t, err)
@@ -89,7 +89,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(contentMock.ContentRetriever)
 		retriever.On("AsyncApiSpec").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever)
+		resolver := application.NewEventActivationResolver(nil, retriever, nil)
 		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.NoError(t, err)
@@ -99,14 +99,23 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 	})
 
 	t.Run("Not found", func(t *testing.T) {
-		getter := new(contentMock.AsyncApiSpecGetter)
-		getter.On("Find", "service-class", "test").Return(nil, nil)
-		defer getter.AssertExpectations(t)
+		types := []string{"asyncapi", "asyncApi", "asyncapispec", "asyncApiSpec", "events"}
 
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("AsyncApiSpec").Return(getter)
+		asyncApiSpecGetter := new(contentMock.AsyncApiSpecGetter)
+		asyncApiSpecGetter.On("Find", "service-class", "test").Return(nil, nil)
+		defer asyncApiSpecGetter.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(nil, retriever)
+		contentRetriever := new(contentMock.ContentRetriever)
+		contentRetriever.On("AsyncApiSpec").Return(asyncApiSpecGetter)
+
+		clusterAssetGetter := new(contentMock.ClusterAssetGetter)
+		clusterAssetGetter.On("ListForDocsTopicByType", "test", types).Return(nil, nil)
+		defer asyncApiSpecGetter.AssertExpectations(t)
+
+		assetStoreRetriever := new(contentMock.AssetStoreRetriever)
+		assetStoreRetriever.On("ClusterAsset").Return(clusterAssetGetter)
+
+		resolver := application.NewEventActivationResolver(nil, contentRetriever, assetStoreRetriever)
 		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.NoError(t, err)
@@ -127,7 +136,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(contentMock.ContentRetriever)
 		retriever.On("AsyncApiSpec").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever)
+		resolver := application.NewEventActivationResolver(nil, retriever, nil)
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.Error(t, err)
@@ -140,7 +149,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(contentMock.ContentRetriever)
 		retriever.On("AsyncApiSpec").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever)
+		resolver := application.NewEventActivationResolver(nil, retriever, nil)
 		_, err := resolver.EventActivationEventsField(nil, nil)
 
 		require.Error(t, err)
@@ -155,7 +164,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(contentMock.ContentRetriever)
 		retriever.On("AsyncApiSpec").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever)
+		resolver := application.NewEventActivationResolver(nil, retriever, nil)
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.Error(t, err)

@@ -3,7 +3,9 @@ package clusterdocstopic
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/pkg/errors"
+	"k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	"time"
 
@@ -34,6 +36,11 @@ func Add(mgr manager.Manager) error {
 	scheme := mgr.GetScheme()
 	assetService := newClusterAssetService(client, scheme)
 	bucketService := newClusterBucketService(client, scheme, cfg.ClusterBucketRegion)
+	informer, err := mgr.GetCache().GetInformer(&v1.ConfigMap{})
+	if err != nil {
+		return errors.Wrapf(err, "while getting informer for ConfigMap")
+	}
+	webhookCfgService := webhookconfig.New(informer.GetIndexer(), cfg.Webhook.CfgMapName, cfg.Webhook.CfgMapNamespace)
 
 	reconciler := &ReconcileClusterDocsTopic{
 		relistInterval: cfg.ClusterDocsTopicRelistInterval,
@@ -42,6 +49,7 @@ func Add(mgr manager.Manager) error {
 		recorder:       mgr.GetRecorder("clusterdocstopic-controller"),
 		assetSvc:       assetService,
 		bucketSvc:      bucketService,
+		webhookCfgSvc:  webhookCfgService,
 	}
 
 	return add(mgr, reconciler)
@@ -82,6 +90,7 @@ type ReconcileClusterDocsTopic struct {
 	recorder       record.EventRecorder
 	assetSvc       docstopic.AssetService
 	bucketSvc      docstopic.BucketService
+	webhookCfgSvc  webhookconfig.AssetWebhookConfigService
 }
 
 // Reconcile reads that state of the cluster for a DocsTopic object and makes changes based on the state read
@@ -92,6 +101,7 @@ type ReconcileClusterDocsTopic struct {
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterassets/status,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterbuckets,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=clusterbuckets/status,verbs=get;list;update;patch
+// +kubebuilder:rbac:resources=configmaps,verbs=get;watch
 func (r *ReconcileClusterDocsTopic) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
@@ -107,7 +117,7 @@ func (r *ReconcileClusterDocsTopic) Reconcile(request reconcile.Request) (reconc
 	}
 
 	docsTopicLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName())
-	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc)
+	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc, r.webhookCfgSvc)
 	commonStatus, err := commonHandler.Handle(ctx, instance, instance.Spec.CommonDocsTopicSpec, instance.Status.CommonDocsTopicStatus)
 	if updateErr := r.updateStatus(ctx, instance, commonStatus); updateErr != nil {
 		finalErr := updateErr

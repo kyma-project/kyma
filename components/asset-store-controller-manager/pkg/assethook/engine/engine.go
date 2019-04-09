@@ -2,8 +2,6 @@ package engine
 
 import (
 	"encoding/json"
-	"fmt"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	"os"
@@ -53,8 +51,4 @@ func (*baseEngine) writeFiles(basePath string, content map[string]string, writer
 	}
 
 	return nil
-}
-
-func (*baseEngine) getWebhookUrl(service v1alpha2.AssetWebhookService) string {
-	return fmt.Sprintf("http://%s.%s.svc.cluster.local%s", service.Name, service.Namespace, service.Endpoint)
 }

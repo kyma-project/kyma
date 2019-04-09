@@ -14,7 +14,7 @@ const (
 	defaultPort                 = 8080
 	defaultMaxRequests          = 100
 	defaultMaxRequestSize       = 65536
-	defaultMaxChannelNameLength = 45
+	defaultMaxChannelNameLength = 33
 
 	// option names
 	port                      = "port"

@@ -2,6 +2,7 @@ package asset
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -38,26 +39,28 @@ var _ Handler = &assetHandler{}
 type FindBucketStatus func(ctx context.Context, namespace, name string) (*v1alpha2.CommonBucketStatus, bool, error)
 
 type assetHandler struct {
-	recorder         record.EventRecorder
-	findBucketStatus FindBucketStatus
-	store            store.Store
-	loader           loader.Loader
-	validator        engine.Validator
-	mutator          engine.Mutator
-	log              logr.Logger
-	relistInterval   time.Duration
+	recorder          record.EventRecorder
+	findBucketStatus  FindBucketStatus
+	store             store.Store
+	loader            loader.Loader
+	validator         engine.Validator
+	mutator           engine.Mutator
+	metadataExtractor engine.MetadataExtractor
+	log               logr.Logger
+	relistInterval    time.Duration
 }
 
-func New(log logr.Logger, recorder record.EventRecorder, store store.Store, loader loader.Loader, findBucketFnc FindBucketStatus, validator engine.Validator, mutator engine.Mutator, relistInterval time.Duration) Handler {
+func New(log logr.Logger, recorder record.EventRecorder, store store.Store, loader loader.Loader, findBucketFnc FindBucketStatus, validator engine.Validator, mutator engine.Mutator, metadataExtractor engine.MetadataExtractor, relistInterval time.Duration) Handler {
 	return &assetHandler{
-		recorder:         recorder,
-		store:            store,
-		loader:           loader,
-		findBucketStatus: findBucketFnc,
-		validator:        validator,
-		mutator:          mutator,
-		log:              log,
-		relistInterval:   relistInterval,
+		recorder:          recorder,
+		store:             store,
+		loader:            loader,
+		findBucketStatus:  findBucketFnc,
+		validator:         validator,
+		mutator:           mutator,
+		metadataExtractor: metadataExtractor,
+		log:               log,
+		relistInterval:    relistInterval,
 	}
 }
 
@@ -174,7 +177,7 @@ func (h *assetHandler) onReady(ctx context.Context, object MetaAccessor, spec v1
 	h.logInfof("Bucket %s is ready", spec.BucketRef.Name)
 
 	h.logInfof("Checking if store contains all files")
-	exists, err := h.store.ContainsAllObjects(ctx, bucketStatus.RemoteName, object.GetName(), status.AssetRef.Assets)
+	exists, err := h.store.ContainsAllObjects(ctx, bucketStatus.RemoteName, object.GetName(), h.extractNames(status.AssetRef.Files))
 	if err != nil {
 		h.recordWarningEventf(object, pretty.RemoteContentVerificationError, err.Error())
 		return h.getStatus(object, v1alpha2.AssetFailed, pretty.RemoteContentVerificationError, err.Error()), err
@@ -186,7 +189,17 @@ func (h *assetHandler) onReady(ctx context.Context, object MetaAccessor, spec v1
 
 	h.logInfof("Asset is up-to-date")
 
-	return h.getReadyStatus(object, status.AssetRef.BaseURL, status.AssetRef.Assets, pretty.Uploaded), nil
+	return h.getReadyStatus(object, status.AssetRef.BaseURL, status.AssetRef.Files, pretty.Uploaded), nil
+}
+
+func (h *assetHandler) extractNames(files []v1alpha2.AssetFile) []string {
+	names := make([]string, 0, len(files))
+
+	for _, file := range files {
+		names = append(names, file.Name)
+	}
+
+	return names
 }
 
 func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec v1alpha2.CommonAssetSpec, status v1alpha2.CommonAssetStatus) (*v1alpha2.CommonAssetStatus, error) {
@@ -209,7 +222,7 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 	}
 
 	h.logInfof("Loading files from %s", spec.Source.URL)
-	basePath, files, err := h.loader.Load(spec.Source.URL, object.GetName(), spec.Source.Mode, spec.Source.Filter)
+	basePath, filenames, err := h.loader.Load(spec.Source.URL, object.GetName(), spec.Source.Mode, spec.Source.Filter)
 	defer h.loader.Clean(basePath)
 	if err != nil {
 		h.recordWarningEventf(object, pretty.PullingFailed, err.Error())
@@ -220,7 +233,7 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 
 	if len(spec.Source.MutationWebhookService) > 0 {
 		h.logInfof("Mutating Asset content")
-		if err := h.mutator.Mutate(ctx, object, basePath, files, spec.Source.MutationWebhookService); err != nil {
+		if err := h.mutator.Mutate(ctx, object, basePath, filenames, spec.Source.MutationWebhookService); err != nil {
 			h.recordWarningEventf(object, pretty.MutationFailed, err.Error())
 			return h.getStatus(object, v1alpha2.AssetFailed, pretty.MutationFailed, err.Error()), err
 		}
@@ -230,7 +243,7 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 
 	if len(spec.Source.ValidationWebhookService) > 0 {
 		h.logInfof("Validating Asset content")
-		result, err := h.validator.Validate(ctx, object, basePath, files, spec.Source.ValidationWebhookService)
+		result, err := h.validator.Validate(ctx, object, basePath, filenames, spec.Source.ValidationWebhookService)
 		if err != nil {
 			h.recordWarningEventf(object, pretty.ValidationError, err.Error())
 			return h.getStatus(object, v1alpha2.AssetFailed, pretty.ValidationError, err.Error()), err
@@ -243,8 +256,23 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 		h.recordNormalEventf(object, pretty.Validated)
 	}
 
+	files := h.populateFiles(filenames)
+	if len(spec.Source.MetadataWebhookService) > 0 {
+		h.logInfof("Extracting metadata from Assets content")
+		result, err := h.metadataExtractor.Extract(ctx, object, basePath, filenames, spec.Source.MetadataWebhookService)
+		if err != nil {
+			h.recordWarningEventf(object, pretty.MetadataExtractionFailed, err.Error())
+			return h.getStatus(object, v1alpha2.AssetFailed, pretty.MetadataExtractionFailed, err.Error()), err
+		}
+
+		files = h.mergeMetadata(files, result)
+
+		h.logInfof("Metadata extracted")
+		h.recordNormalEventf(object, pretty.MetadataExtracted)
+	}
+
 	h.logInfof("Uploading Asset content to Minio")
-	if err := h.store.PutObjects(ctx, bucketStatus.RemoteName, object.GetName(), basePath, files); err != nil {
+	if err := h.store.PutObjects(ctx, bucketStatus.RemoteName, object.GetName(), basePath, filenames); err != nil {
 		h.recordWarningEventf(object, pretty.UploadFailed, err.Error())
 		return h.getStatus(object, v1alpha2.AssetFailed, pretty.UploadFailed, err.Error()), err
 	}
@@ -252,6 +280,40 @@ func (h *assetHandler) onPending(ctx context.Context, object MetaAccessor, spec 
 	h.recordNormalEventf(object, pretty.Uploaded)
 
 	return h.getReadyStatus(object, h.getBaseUrl(bucketStatus.URL, object.GetName()), files, pretty.Uploaded), nil
+}
+
+func (h *assetHandler) populateFiles(filenames []string) []v1alpha2.AssetFile {
+	result := make([]v1alpha2.AssetFile, 0, len(filenames))
+
+	for _, filename := range filenames {
+		result = append(result, v1alpha2.AssetFile{Name: filename})
+	}
+
+	return result
+}
+
+func (h *assetHandler) mergeMetadata(files []v1alpha2.AssetFile, metadatas []engine.File) []v1alpha2.AssetFile {
+	metadataMap := make(map[string]*json.RawMessage)
+	for _, metadata := range metadatas {
+		metadataMap[metadata.Name] = metadata.Metadata
+	}
+
+	result := make([]v1alpha2.AssetFile, 0, len(files))
+	for _, file := range files {
+		metadata := h.toRawExtension(metadataMap[file.Name])
+
+		result = append(result, v1alpha2.AssetFile{Name: file.Name, Metadata: metadata})
+	}
+
+	return result
+}
+
+func (h *assetHandler) toRawExtension(message *json.RawMessage) *runtime.RawExtension {
+	if message == nil {
+		return nil
+	}
+
+	return &runtime.RawExtension{Raw: *message}
 }
 
 func (h *assetHandler) getBaseUrl(bucketUrl, assetName string) string {
@@ -274,10 +336,10 @@ func (h *assetHandler) recordEventf(object MetaAccessor, eventType string, reaso
 	h.recorder.Eventf(object, eventType, reason.String(), reason.Message(), args...)
 }
 
-func (h *assetHandler) getReadyStatus(object MetaAccessor, baseUrl string, files []string, reason pretty.Reason, args ...interface{}) *v1alpha2.CommonAssetStatus {
+func (h *assetHandler) getReadyStatus(object MetaAccessor, baseUrl string, files []v1alpha2.AssetFile, reason pretty.Reason, args ...interface{}) *v1alpha2.CommonAssetStatus {
 	status := h.getStatus(object, v1alpha2.AssetReady, reason, args...)
 	status.AssetRef.BaseURL = baseUrl
-	status.AssetRef.Assets = files
+	status.AssetRef.Files = files
 	return status
 }
 

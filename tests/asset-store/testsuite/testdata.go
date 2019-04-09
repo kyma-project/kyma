@@ -137,10 +137,10 @@ type uploadedFile struct {
 func uploadedFiles(ref v1alpha2.AssetStatusRef, ownerName, ownerKind string) []uploadedFile {
 	var files []uploadedFile
 
-	for _, singleAsset := range ref.Assets {
-		url := fmt.Sprintf("%s/%s", ref.BaseUrl, singleAsset)
+	for _, file := range ref.Files {
+		url := fmt.Sprintf("%s/%s", ref.BaseURL, file.Name)
 		files = append(files, uploadedFile{
-			AssetPath: singleAsset,
+			AssetPath: file.Name,
 			URL:       url,
 			Owner: uploadedFileOwner{
 				Name: ownerName,

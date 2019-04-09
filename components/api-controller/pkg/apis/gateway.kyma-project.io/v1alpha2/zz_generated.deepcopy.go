@@ -73,6 +73,11 @@ func (in *ApiList) DeepCopyObject() runtime.Object {
 func (in *ApiSpec) DeepCopyInto(out *ApiSpec) {
 	*out = *in
 	out.Service = in.Service
+	if in.DisableIstioAuthPolicyMTLS != nil {
+		in, out := &in.DisableIstioAuthPolicyMTLS, &out.DisableIstioAuthPolicyMTLS
+		*out = new(bool)
+		**out = **in
+	}
 	if in.AuthenticationEnabled != nil {
 		in, out := &in.AuthenticationEnabled, &out.AuthenticationEnabled
 		*out = new(bool)

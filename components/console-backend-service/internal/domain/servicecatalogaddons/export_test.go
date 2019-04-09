@@ -6,6 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 	fakeDynamic "k8s.io/client-go/dynamic/fake"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 // Binding usage
@@ -24,5 +25,5 @@ func NewServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBi
 
 func (r *PluggableContainer) SetFakeClient() {
 	r.cfg.serviceBindingUsageClient = fakeSbu.NewSimpleClientset()
-	r.cfg.dynamicClient = fakeDynamic.NewSimpleDynamicClient(nil)
+	r.cfg.dynamicClient = fakeDynamic.NewSimpleDynamicClient(runtime.NewScheme())
 }
