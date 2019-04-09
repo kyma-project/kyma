@@ -1,4 +1,4 @@
-FROM golang:1.9-alpine3.7 as builder
+FROM golang:1.10-alpine as builder
 
 ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/knative-serving-acceptance/
 WORKDIR ${SRC_DIR}
@@ -8,7 +8,7 @@ COPY ./vendor ${SRC_DIR}/vendor/
 
 RUN go test -c ./ -o /knative_serving.test
 
-FROM alpine:3.7
+FROM alpine:3.8
 
 LABEL source = git@github.com:kyma-project/kyma.git
 
