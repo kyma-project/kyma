@@ -53,7 +53,7 @@ spec:
     imagePullPolicy: IfNotPresent
     env:
     - name: INGRESSGATEWAY_ADDRESS
-      value: istio-ingressgateway.istio-system.svc.cluster.local
+      value: knative-ingressgateway.istio-system.svc.cluster.local
     - name: DOMAIN_NAME
       value: {{ .Values.global.ingress.domainName }}
     - name: TARGET
