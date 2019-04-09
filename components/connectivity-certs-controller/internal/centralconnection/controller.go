@@ -104,6 +104,10 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return c.handleErrorWhileGettingInstance(err, request)
 	}
 
+	if instance.HasErrorStatus() {
+		c.logger.Infof("Central Connection %s has an error status: %s", instance.Name, instance.Status.Error.Message)
+	}
+
 	if !c.shouldSynchronizeConnection(instance) {
 		c.logger.Infof("Skipping synchronization of %s Central Connection. Last sync: %v", instance.Name, instance.Status.SynchronizationStatus.LastSync)
 		return reconcile.Result{}, nil
@@ -115,7 +119,7 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, c.setErrorStatus(instance, err)
 	}
 
-	if !instance.HasErrorStatus() && !instance.HasCertStatus() {
+	if !instance.HasCertStatus() {
 		log.Infof("Certificate status not set on %s Central Connection", instance.Name)
 		c.setCertificateStatus(instance, certCredentials.ClientCert)
 	}
