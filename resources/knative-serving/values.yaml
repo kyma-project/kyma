@@ -10,8 +10,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
-    dir: develop/
-    version: 4a2b51ec
+    dir: pr/
+    version: PR-3657
 
 test:
   target: "Test Target"
