@@ -167,6 +167,7 @@ metadata:
     sidecar.istio.io/inject: "true"
     helm.sh/hook: test-success
 spec:
+  shareProcessNamespace: true
   serviceAccount: "test-{{ template "fullname" . }}-int"
   containers:
   - name: test-{{ template "fullname" . }}
