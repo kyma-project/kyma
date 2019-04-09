@@ -7,11 +7,11 @@ metadata:
     helm-chart-test: "true"
 rules:
 - apiGroups: [""]
-  resources: ["pods", "configmaps", "namespaces"]
+  resources: ["pods"]
   verbs: ["watch", "get", "list", "create", "delete"]
 - apiGroups: [""]
-  resources: ["nodes", "pods/log", "pods", "configmaps", "namespaces"]
-  verbs: ["watch", "get", "list", "create", "delete"]
+  resources: ["nodes", "pods/log"]
+  verbs: ["get", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -42,7 +42,7 @@ metadata:
   labels:
     helm-chart-test: "true"
   annotations:
-    sidecar.istio.io/inject: "true"
+    sidecar.istio.io/inject: "false"
     helm.sh/hook: test-success
 spec:
   serviceAccountName: test-{{ template "fullname" . }}

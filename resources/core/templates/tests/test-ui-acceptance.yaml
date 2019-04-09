@@ -1,4 +1,4 @@
-{{- $uiDeploymentEnabled :=  .Values.global.logging.deployment.enabled | default false -}}
+{{- $uiDeploymentEnabled :=  .Values.test.acceptance.ui.logging.enabled | default false -}}
 apiVersion: v1
 kind: Pod
 metadata:

@@ -122,6 +122,7 @@ metadata:
     kyma-project.io/installation: ""
 data:
   test.acceptance.ui.minikubeIP: ""
+  test.acceptance.ui.logging.enabled: ""
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -135,3 +136,14 @@ metadata:
 data:
    application-registry.minikubeIP: ""
 ---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intallation-logging-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: logging
+    kyma-project.io/installation: ""
+data:
+  global.logging.promtail.config.name: ""
