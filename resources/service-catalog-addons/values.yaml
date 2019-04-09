@@ -6,4 +6,4 @@ global:
       name: kyma-gateway
   service_binding_usage_controller:
     dir: develop/
-    version: d1930a3d
+    version: 7cacbc23
