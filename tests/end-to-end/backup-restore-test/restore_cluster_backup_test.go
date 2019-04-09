@@ -48,13 +48,13 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	myPrometheusTest, err := NewPrometheusTest()
 	fatalOnError(t, err, "while creating structure for Prometheus test")
 
-	myAppBrokerTest, err := NewAppBrokerTest()
+	appBrokerTest, err := NewAppBrokerTest()
 	fatalOnError(t, err, "while creating structure for AppBroker test")
 
-	myHelmBrokerTest, err := NewHelmBrokerTest()
+	helmBrokerTest, err := NewHelmBrokerTest()
 	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
-	myScAddonsTest, err := NewServiceCatalogAddonsTest()
+	scAddonsTest, err := NewServiceCatalogAddonsTest()
 	fatalOnError(t, err, "while creating structure for ScAddons test")
 
 	myNamespaceControllerTest, err := NewNamespaceControllerTest()
@@ -80,9 +80,9 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		myFunctionTest,
 		myDeploymentTest,
 		myStatefulSetTest,
-		myHelmBrokerTest,
-		myAppBrokerTest,
-		myScAddonsTest,
+		helmBrokerTest,
+		appBrokerTest,
+		scAddonsTest,
 		myNamespaceControllerTest,
 		apiControllerTest,
 		myGrafanaTest,

@@ -20,7 +20,6 @@ import (
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
-	errors "github.com/pkg/errors"
 )
 
 const (
@@ -145,7 +144,7 @@ func (f *appBrokerFlow) testResources() {
 		f.deleteAPIServiceBindingUsage,
 		f.verifyEnvTesterHasGatewayNotInjected,
 
-		// we create APIServiceBindingUsage to restore it after the tests
+		// we create again APIServiceBindingUsage to restore it after the tests
 		f.createAPIServiceBindingUsage,
 	} {
 		err := fn()
@@ -374,11 +373,13 @@ func (f *appBrokerFlow) waitForClassAndPlans() error {
 			return false, err
 		}
 		if len(classes.Items) != 2 {
-			return false, errors.Errorf("should have 2 classes not %v", len(classes.Items))
+			f.log.Warnf("should have 2 classes not %v", len(classes.Items))
+			return false, nil
 		}
 		for _, class := range classes.Items {
 			if _, ok := expectedClasses[class.Spec.ExternalName]; !ok {
-				return false, errors.Errorf("following class is not defined: %s", class.Spec.ExternalName)
+				f.log.Warnf("following class is not defined: %s", class.Spec.ExternalName)
+				return false, nil
 			}
 		}
 		return true, nil
@@ -398,11 +399,13 @@ func (f *appBrokerFlow) waitForClassAndPlans() error {
 		}
 
 		if len(plans.Items) != 2 {
-			return false, errors.Errorf("should have 2 plan not %v", len(plans.Items))
+			f.log.Warnf("should have 2 plan not %v", len(plans.Items))
+			return false, nil
 		}
 		for _, plan := range plans.Items {
 			if _, ok := expectedPlans[plan.Spec.ServiceClassRef.Name]; !ok {
-				return false, errors.Errorf("following class is not defined: %s", plan.Spec.ServiceClassRef.Name)
+				f.log.Warnf("following class is not defined: %s", plan.Spec.ServiceClassRef.Name)
+				return false, nil
 			}
 		}
 

@@ -125,7 +125,7 @@ func (f *helmBrokerFlow) testResources() {
 		f.deleteRedisBindingUsage,
 		f.verifyDeploymentDoesNotContainRedisEnvs,
 
-		// we create RedisBindingUsage to restore it after the tests
+		// we create again RedisBindingUsage to restore it after the tests
 		f.createRedisBindingUsage,
 	} {
 		err := fn()
@@ -196,7 +196,11 @@ func (f *helmBrokerFlow) storeKeyInRedis() error {
 	}
 
 	if err = f.wait(time.Minute, func() (done bool, err error) {
-		resp := client.Ping().Val()
+		resp, err := client.Ping().Result()
+		if err != nil {
+			f.log.Warnf("while calling redis: %v", err)
+			return false, nil
+		}
 		if resp == "PONG" {
 			return true, nil
 		}
@@ -208,9 +212,13 @@ func (f *helmBrokerFlow) storeKeyInRedis() error {
 
 	f.log.Info("Saving a value in the Redis DB")
 	// Zero expiration means the key has no expiration time.
-	_, err = client.Set(sampleKey, sampleVal, 0).Result()
-
-	return err
+	if _, err = client.Set(sampleKey, sampleVal, 0).Result(); err != nil {
+		return err
+	}
+	if err := client.Save(); err.Err() != nil {
+		return err.Err()
+	}
+	return nil
 }
 func (f *helmBrokerFlow) verifyDeploymentContainsRedisEvns() error {
 	f.log.Info("Testing environment variable injection")
@@ -235,10 +243,11 @@ func (f *helmBrokerFlow) verifyKeyInRedisExists() error {
 	return f.wait(time.Minute*2, func() (done bool, err error) {
 		val, err := client.Get(sampleKey).Result()
 		if err != nil {
-			return false, errors.Wrap(err, "while getting value stored in the redis")
+			f.log.Warnf("while getting value stored in the redis: %v", err)
+			return false, nil
 		}
 		if val != sampleVal {
-			return false, fmt.Errorf("the existing value in redis is '%s' but should be '%s'", val, sampleVal)
+			return false, nil
 		}
 		return true, nil
 	})
@@ -315,26 +324,7 @@ func (f *helmBrokerFlow) removeHelmBrokerEtcd() error {
 
 	pvcName := fmt.Sprintf("%s-%s-0", etcd.Spec.VolumeClaimTemplates[0].Name, etcdName)
 
-	pvc, err := f.k8sInterface.CoreV1().PersistentVolumeClaims(systemNsName).Get(pvcName, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "while getting HB etcd pvc %s", pvcName)
-	}
-
-	if err := f.k8sInterface.CoreV1().PersistentVolumes().Delete(pvc.Spec.VolumeName, &metav1.DeleteOptions{}); err != nil {
-		return errors.Wrapf(err, "while deleting pv %s", pvc.Spec.VolumeName)
-	}
-
-	// delete finalizer from PV
-	pv, err := f.k8sInterface.CoreV1().PersistentVolumes().Get(pvc.Spec.VolumeName, metav1.GetOptions{})
-	if err != nil {
-		return errors.Wrapf(err, "while getting HB etcd pv %s", pvc.Spec.VolumeName)
-	}
-	pv.Finalizers = []string{}
-	if _, err := f.k8sInterface.CoreV1().PersistentVolumes().Update(pv); err != nil {
-		return errors.Wrap(err, "while deleting finalizer from pv")
-	}
-
-	return nil
+	return f.k8sInterface.CoreV1().PersistentVolumeClaims(systemNsName).Delete(pvcName, &metav1.DeleteOptions{})
 }
 
 func (f *helmBrokerFlow) verifyRedisInstanceRemoved() error {
