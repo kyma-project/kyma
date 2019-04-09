@@ -86,7 +86,7 @@ metadata:
   namespace: kyma-installer
   labels:
     installer: overrides
-    component: knative-serving
+    component: logging
     kyma-project.io/installation: ""
 data:
   global.logging.promtail.config.name: "__PROMTAIL_CONFIG_NAME__"

@@ -250,7 +250,7 @@ data:
           - __meta_kubernetes_pod_uid
           - __meta_kubernetes_pod_container_name
           target_label: __path__
-  promtail-gke.yaml: |
+  promtail-k8s-1-14.yaml: |
     scrape_configs:
       - entry_parser: '{{ .Values.promtail.entryParser }}'
         job_name: kubernetes-pods-name
