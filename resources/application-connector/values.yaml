@@ -34,8 +34,8 @@ global:
     dir: develop/
     version: 00d7f520
   connectivity_certs_controller:
-    dir: develop/
-    version: 2dc766a0
+    dir: pr/
+    version: PR-3650
   event_service:
     dir: develop/
     version: dea44bd4

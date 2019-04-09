@@ -4,3 +4,5 @@ deployment:
   args:
     clusterCertificatesSecret: cluster-client-certificates
     caCertificatesSecret: nginx-auth-ca
+    syncPeriod: 300
+    minimalSyncTime: 300
