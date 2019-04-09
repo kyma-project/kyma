@@ -23,6 +23,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
 )
 
 // Config holds application configuration
@@ -93,11 +94,13 @@ func main() {
 	fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
-		"GrafanaUpgradeTest":           grafanaUpgradeTest,
-		"MetricsUpgradeTest":           metricUpgradeTest,
+		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
+		"GrafanaUpgradeTest":              grafanaUpgradeTest,
+		"MetricsUpgradeTest":              metricUpgradeTest,
+		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(k8sCli),
+		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(k8sCli),
 	}
 
 	// Execute requested action
