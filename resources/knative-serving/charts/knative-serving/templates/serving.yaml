@@ -825,6 +825,7 @@ metadata:
 ---
 apiVersion: v1
 data:
+  gateway.{{ .Values.gateway.name }}: {{ .Values.gateway.serviceUrl }}
   _example: |
     ################################
     #                              #
