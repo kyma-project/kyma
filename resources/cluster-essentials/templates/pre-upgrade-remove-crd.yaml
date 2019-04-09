@@ -1,4 +1,21 @@
 ---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-old-cr-remove
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "2"
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}-old-cr-remove
+  namespace: kyma-system
+roleRef:
+  kind: ClusterRole
+  name: {{ template "fullname" . }}-old-cr-remove
+  apiGroup: rbac.authorization.k8s.io
+---
 kind: ClusterRole
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
@@ -21,29 +38,16 @@ metadata:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "1"
----
-kind: ClusterRoleBinding
-apiVersion: rbac.authorization.k8s.io/v1
-metadata:
-  name: {{ template "fullname" . }}-old-cr-remove
-  annotations:
-    "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
-    "helm.sh/hook-weight": "2"
-subjects:
-- kind: ServiceAccount
-  name: {{ template "fullname" . }}-old-cr-remove
-  namespace: kyma-system
-roleRef:
-  kind: ClusterRole
-  name: {{ template "fullname" . }}-old-cr-remove
-  apiGroup: rbac.authorization.k8s.io
----
+--- 
 apiVersion: batch/v1
 kind: Job
 metadata:
   name: {{ template "fullname" . }}-old-cr-remove
-  namespace: kyma-system
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
@@ -51,22 +55,17 @@ metadata:
 spec:
   template:
     metadata:
-      name: {{ .Release.Name }}-job
-      namespace: kyma-system
+      annotations:
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
-      annotations:
-        sidecar.istio.io/inject: “false”
     spec:
-      serviceAccountName: {{ template "fullname" . }}-old-cr-remove
       restartPolicy: OnFailure
+      serviceAccountName: {{ template "fullname" . }}-old-cr-remove
       containers:
-      - name: pre-upgrade-kubeless
+      - name: asset-store-domain-cr-cleanup
         image: bitnami/kubectl
         imagePullPolicy: IfNotPresent
-        command:
-          - bash
-          - -c
-          - |
-            kubectl delete crd functions.kubeless.io
+        command: ["/bin/sh","-c"]
+        args: ["kubectl delete crd clusterassets.assetstore.kyma-project.io assets.assetstore.kyma-project.io buckets.assetstore.kyma-project.io clusterbuckets.assetstore.kyma-project.io functions.kubeless.io"]
