@@ -17,6 +17,10 @@ type Application struct {
 	Status            ApplicationStatus `json:"status,omitempty"`
 }
 
+func (app Application) ShouldSkipInstallation() bool {
+	return app.Spec.SkipInstallation == true
+}
+
 type ApplicationStatus struct {
 	// Represents the status of Application release installation
 	InstallationStatus InstallationStatus `json:"installationStatus"`

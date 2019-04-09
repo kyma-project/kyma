@@ -115,7 +115,7 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 	}
 
 	if !releaseExist {
-		if shouldSkipInstallation(application) {
+		if application.ShouldSkipInstallation() == true {
 			return installationSkippedStatus, "Installation will not be performed", nil
 		}
 
@@ -127,10 +127,6 @@ func (r *applicationReconciler) manageInstallation(application *v1alpha1.Applica
 
 func shouldBeRemoved(application *v1alpha1.Application) bool {
 	return application.DeletionTimestamp != nil
-}
-
-func shouldSkipInstallation(application *v1alpha1.Application) bool {
-	return application.Spec.SkipInstallation == true
 }
 
 func (r *applicationReconciler) installApplication(application *v1alpha1.Application) (string, string, error) {
