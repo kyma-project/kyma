@@ -48,9 +48,7 @@ spec:
   serviceAccount: knative-serving-test
   containers:
   - name: test 
-    #image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}" 
-    image: "knative-serving-acceptance-tests:latest" 
-    imagePullPolicy: IfNotPresent
+    image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}" 
     env:
     - name: INGRESSGATEWAY_ADDRESS
       value: istio-ingressgateway.istio-system.svc.cluster.local
