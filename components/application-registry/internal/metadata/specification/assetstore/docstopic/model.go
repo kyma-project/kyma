@@ -2,9 +2,8 @@ package docstopic
 
 const (
 	KeyOpenApiSpec       = "openapi"
-	KeyODataXMLSpec      = "odataxml"
-	KeyODataJSONSpec     = "odatajson"
-	KeyEventsSpec        = "events"
+	KeyODataSpec         = "odata"
+	KeyAsyncApiSpec      = "asyncapi"
 	KeyDocumentationSpec = "docs"
 )
 

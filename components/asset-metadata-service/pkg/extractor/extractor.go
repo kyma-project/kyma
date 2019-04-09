@@ -41,7 +41,7 @@ func (e *extractor) ReadMetadata(fileHeader fileheader.FileHeader) (map[string]i
 	}()
 
 	metadata, _, err := e.frontMatter.Parse(f)
-	if err != nil {
+	if err != nil && front.ErrIsEmpty != err && front.ErrUnknownDelim != err {
 		return nil, errors.Wrapf(err, "while reading metadata from file %s", fileHeader.Filename())
 	}
 

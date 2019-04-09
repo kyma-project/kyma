@@ -2,7 +2,7 @@
   "spec":{
     "id":"security",
     "displayName":"Security",
-    "description":"Security in Kyma",
+    "description":"Overall documentation for Security",
     "type":"Components"
   }
 }

@@ -45,6 +45,8 @@ Use the following environment variables to configure the application:
 | **APP_CLUSTER_BUCKET_REGION** | No |  | Specifies the location of the region in which the controller creates a ClusterBucket CR. If the field is empty, the controller creates the bucket under the default location. |
 | **APP_DOCS_TOPIC_RELIST_INTERVALL** | No | `5m` | The period of time after which the controller refreshes the status of a DocsTopic CR |
 | **APP_BUCKET_REGION** | No |  | Specifies the location of the region in which the controller creates a Bucket CR. If the field is empty, the controller creates the bucket under the default location. |
+| **APP_WEBHOOK_CFG_MAP_NAME** | No | webhook-configmap | The name of the ConfigMap that contains webhook definitions. |
+| **APP_WEBHOOK_CFG_MAP_NAMESPACE** | No | webhook-configmap | The namespace of the ConfigMap that contains webhook definitions. |
 
 ## Development
 

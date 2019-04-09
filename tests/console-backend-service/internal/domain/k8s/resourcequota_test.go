@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
@@ -83,6 +85,11 @@ func TestResourceQuotaQuery(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, statusResult.Exceeded)
 
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.List: {fixListResourceQuotasQuery(), fixResourceQuotasStatusQuery()},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func fixListResourceQuotasQuery() *graphql.Request {

@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -22,7 +24,7 @@ import (
 
 const (
 	configMapName      = "test-config-map"
-	configMapNamespace = "console-backend-service-onfig-map"
+	configMapNamespace = "console-backend-service-config-map"
 )
 
 type ConfigMapEvent struct {
@@ -146,6 +148,16 @@ func TestConfigMap(t *testing.T) {
 	t.Log("Checking subscription for deleted config map...")
 	expectedEvent = configMapEvent("DELETE", configMap{Name: configMapName})
 	assert.NoError(t, checkConfigMapEvent(expectedEvent, subscription))
+
+	t.Log("Checking authorization directives...")
+	as := auth.New()
+	ops := &auth.OperationsInput{
+		auth.Get:    {fixConfigMapQuery()},
+		auth.List:   {fixConfigMapsQuery()},
+		auth.Update: {fixUpdateConfigMapMutation("{\"\":\"\"}")},
+		auth.Delete: {fixDeleteConfigMapMutation()},
+	}
+	as.Run(t, ops)
 }
 
 func fixConfigMap(name, namespace string) *v1.ConfigMap {

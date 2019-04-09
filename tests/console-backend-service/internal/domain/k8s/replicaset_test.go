@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
@@ -130,6 +132,15 @@ func TestReplicaSet(t *testing.T) {
 		return false, nil
 	}, time.Minute)
 	require.NoError(t, err)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:    {fixReplicaSetQuery()},
+		auth.List:   {fixReplicaSetsQuery()},
+		auth.Update: {fixUpdateReplicaSetMutation("{\"\":\"\"}")},
+		auth.Delete: {fixDeleteReplicaSetMutation()},
+	}
+	AuthSuite.Run(t, ops)
 
 }
 

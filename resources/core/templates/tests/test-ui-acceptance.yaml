@@ -26,7 +26,7 @@ spec:
   serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
   containers:
     - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:1fb907f7
+      image: {{ .Values.global.containerRegistry.path }}/ui-tests:5859bb17
       imagePullPolicy: IfNotPresent
       resources:
          requests:
@@ -36,8 +36,6 @@ spec:
            memory: {{ .Values.test.acceptance.ui.limits.memory }}
            cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
       env:
-        - name: LOGGING_ENABLED
-          value: true
         - name: DOMAIN
           value: {{ .Values.global.ingress.domainName }}
         - name: LOGIN

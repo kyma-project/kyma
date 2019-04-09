@@ -29,6 +29,7 @@ metadata:
 spec:
   subjects:
   - user: "cluster.local/ns/kyma-system/sa/logging"
+  - user: "cluster.local/ns/kyma-system/sa/monitoring-grafana-loki"
   - properties:
       request.auth.audiences: "kyma-client"
   roleRef:

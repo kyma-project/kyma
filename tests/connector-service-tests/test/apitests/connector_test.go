@@ -415,6 +415,9 @@ func appMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request,
 		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
 		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
 		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
+		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
+		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
+		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
 	})
 
 	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
@@ -442,6 +445,9 @@ func appMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request,
 		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
 		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
 		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
+		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
+		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
+		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
 	})
 }
 
@@ -481,6 +487,9 @@ func appMgmInfoEndpointForStandaloneSuite(t *testing.T, tokenRequest *http.Reque
 		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
 		assert.Empty(t, mgmInfoResponse.ClientIdentity.Group)
 		assert.Empty(t, mgmInfoResponse.ClientIdentity.Tenant)
+		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
+		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
+		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
 	})
 }
 
@@ -509,6 +518,9 @@ func runtimeMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 		assert.Nil(t, mgmInfoResponse.URLs.RuntimeURLs)
 		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
 		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
+		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
+		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
+		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
 	})
 
 }
@@ -521,23 +533,20 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 	t.Run("should renew client certificate", func(t *testing.T) {
 		// when
 		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
-
-		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
 		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
+		require.NotEmpty(t, infoResponse.Certificate)
 
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
-		// when
 		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
-
-		// then
 		require.Nil(t, errorResponse)
 		require.NotEmpty(t, mgmInfoResponse.URLs.RenewCertUrl)
+		require.NotEmpty(t, mgmInfoResponse.Certificate)
+		require.Equal(t, infoResponse.Certificate, mgmInfoResponse.Certificate)
 
-		// when
-		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
+		csr := testkit.CreateCsr(t, mgmInfoResponse.Certificate, clientKey)
 		csrBase64 := testkit.EncodeBase64(csr)
 
 		certificateResponse, errorResponse := client.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
@@ -545,15 +554,12 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 		// then
 		require.Nil(t, errorResponse)
 
-		// when
 		certificates = testkit.DecodeAndParseCerts(t, certificateResponse)
 		clientWithRenewedCert := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
-		// then
 		mgmInfoResponse, errorResponse = clientWithRenewedCert.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
 		require.Nil(t, errorResponse)
 	})
-
 }
 
 func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, internalRevocationUrl string) {

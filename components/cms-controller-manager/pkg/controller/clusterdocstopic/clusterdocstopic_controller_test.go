@@ -6,7 +6,9 @@ import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/source"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/onsi/gomega"
+	coreV1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
@@ -18,6 +20,11 @@ import (
 
 const timeout = time.Second * 5
 
+var (
+	webhookCfgMapName      = "test"
+	webhookCfgMapNamespace = "test"
+)
+
 func TestReconcile(t *testing.T) {
 	// Given
 	g := gomega.NewGomegaWithT(t)
@@ -25,9 +32,12 @@ func TestReconcile(t *testing.T) {
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	c := mgr.GetClient()
+	informer, err := mgr.GetCache().GetInformer(&coreV1.ConfigMap{})
+	g.Expect(err).To(gomega.BeNil())
 	scheme := mgr.GetScheme()
 	assetService := newClusterAssetService(c, scheme)
 	bucketService := newClusterBucketService(c, scheme, "")
+	assetWhsConfigService := webhookconfig.New(informer.GetIndexer(), webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileClusterDocsTopic{
 		relistInterval: time.Hour,
@@ -36,6 +46,7 @@ func TestReconcile(t *testing.T) {
 		recorder:       mgr.GetRecorder("clusterdocstopic-controller"),
 		assetSvc:       assetService,
 		bucketSvc:      bucketService,
+		webhookCfgSvc:  assetWhsConfigService,
 	}
 
 	recFn, requests := SetupTestReconcile(r)
