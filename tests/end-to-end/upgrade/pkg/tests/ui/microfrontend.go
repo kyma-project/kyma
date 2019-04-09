@@ -33,7 +33,7 @@ type MicrofrontendUpgradeTest struct {
 }
 
 // NewMicrofrontendUpgradeTest returns new instance of the MicrofrontendUpgradeTest
-func NewMicrofrontendUpgradeTest(k8sCli kubernetes.Interface) *MicrofrontendUpgradeTest {
+func NewMicrofrontendUpgradeTest(k8sCli kubernetes.Interface, mfClient *mfClient.Clientset) *MicrofrontendUpgradeTest {
 	domainName := os.Getenv("DOMAIN")
 	if len(domainName) == 0 {
 		logrus.Fatal("Environment variable DOMAIN is not found.")
@@ -51,6 +51,7 @@ func NewMicrofrontendUpgradeTest(k8sCli kubernetes.Interface) *MicrofrontendUpgr
 		namespace:         namespace,
 		httpClient:        httpCli,
 		hostName:          hostName,
+		mfClient:          mfClient,
 	}
 }
 

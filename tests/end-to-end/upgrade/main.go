@@ -13,6 +13,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -81,6 +82,9 @@ func main() {
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
+	mfCli, err := mfClient.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Microfrontends clientset")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
 
@@ -99,7 +103,7 @@ func main() {
 		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
 		"GrafanaUpgradeTest":           grafanaUpgradeTest,
 		"MetricsUpgradeTest":           metricUpgradeTest,
-		"MicrofrontendUpgradeTest":     ui.NewMicrofrontendUpgradeTest(k8sCli),
+		"MicrofrontendUpgradeTest":     ui.NewMicrofrontendUpgradeTest(k8sCli, mfCli),
 	}
 
 	// Execute requested action
