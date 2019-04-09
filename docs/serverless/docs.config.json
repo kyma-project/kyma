@@ -2,7 +2,7 @@
   "spec":{
     "id":"serverless",
     "displayName":"Serverless",
-    "description":"Overal documentation for Serverless",
+    "description":"Overall documentation for Serverless",
     "type":"Components"
   }
 }

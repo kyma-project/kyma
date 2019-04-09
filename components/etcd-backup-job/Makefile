@@ -31,5 +31,4 @@ clean:
 
 .PHONY: path-to-referenced-charts
 path-to-referenced-charts:
-	@echo "resources/core"
 	@echo "resources/service-catalog"

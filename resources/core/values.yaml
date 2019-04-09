@@ -21,6 +21,9 @@ console:
 global:
   isLocalEnv: false
   knative: false
+   # Change value below to your own GitHub user name if you want point to documentation sources from your fork
+   # Example: kymaOrgName: "kyma-incubator"
+  kymaOrgName: "kyma-project"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -47,13 +50,14 @@ global:
     version: aabedc33
   docs:
     dir: develop/
-    version: a54ac464
+    version: 98a43f0c
+    # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
+    # - Change the value below to the release branch during the release
+    # Example: clusterDocsTopicsVersion: "0.9.0"
+    clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
     version: 429bfbcc
-  etcd_backup_job:
-    dir: develop/
-    version: 6e0a7fe2
   kubeless_integration_tests:
     dir: develop/tests/
     version: 50d9482b
@@ -68,10 +72,10 @@ global:
     version: 429bfbcc
   console_backend_service:
     dir: develop/
-    version: fbf6fcf1
+    version: '9ecc0bcc'
   console_backend_service_test:
     dir: develop/
-    version: fbf6fcf1
+    version: '9ecc0bcc'
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

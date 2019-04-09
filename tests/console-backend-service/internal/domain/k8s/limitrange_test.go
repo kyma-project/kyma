@@ -5,6 +5,8 @@ package k8s
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 
 	"time"
@@ -61,6 +63,12 @@ func TestLimitRangeQuery(t *testing.T) {
 	require.NoError(t, err)
 
 	assert.Equal(t, fixLimitRangeQueryResponse(), res)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.List: {fixLimitRangeQuery()},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 type limitRangeQueryResponse struct {

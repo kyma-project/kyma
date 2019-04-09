@@ -3,32 +3,46 @@ package externalapi
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
-
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
+	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
+const (
+	applicationKey = "application"
+	tenantKey      = "tenant"
+	groupKey       = "group"
+
+	tenant = "test-tenant"
+	group  = "test-group"
+
+	protectedBaseURL      = "https://gateway.kyma.local/v1/applications"
+	expectedRenewalsURL   = "https://gateway.kyma.local/v1/applications/certificates/renewals"
+	expectedRevocationURL = "https://gateway.kyma.local/v1/applications/certificates/revocations"
+
+	expectedExtensions   = ""
+	expectedKeyAlgorithm = "rsa2048"
+)
+
 func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
-	applicationKey := "application"
-	tenantKey := "tenant"
-	groupKey := "group"
+	subjectValues := certificates.CSRSubject{
+		Country:            country,
+		Organization:       organization,
+		OrganizationalUnit: organizationalUnit,
+		Locality:           locality,
+		Province:           province,
+	}
 
-	tenant := "test-tenant"
-	group := "test-group"
-
-	protectedBaseURL := "https://gateway.kyma.local/v1/applications"
-	expectedRenewalsURL := "https://gateway.kyma.local/v1/applications/certificates/renewals"
-	expectedRevocationURL := "https://gateway.kyma.local/v1/applications/certificates/revocations"
-
-	t.Run("should successfully get management info urls for application", func(t *testing.T) {
+	t.Run("should successfully get management info response for application", func(t *testing.T) {
 		//given
 		expectedMetadataURL := "https://metadata.base.path/application/v1/metadata/services"
 		expectedEventsURL := "https://events.base.path/application/v1/events"
@@ -53,10 +67,13 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			return *extApplicationCtx, nil
 		}
 
+		commonName := extApplicationCtx.GetCommonName()
+		expectedSubject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName)
+
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL, subjectValues)
 
 		rr := httptest.NewRecorder()
 
@@ -74,29 +91,38 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 		urls := infoResponse.URLs
 		receivedContext := infoResponse.ClientIdentity.(map[string]interface{})
+		certificateInfo := infoResponse.CertificateInfo
 
 		assert.Equal(t, expectedMetadataURL, urls.MetadataURL)
 		assert.Equal(t, expectedEventsURL, urls.EventsURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
+		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
 		assert.Equal(t, appName, receivedContext[applicationKey])
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])
-		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
+		assert.Equal(t, expectedSubject, certificateInfo.Subject)
+		assert.Equal(t, expectedExtensions, certificateInfo.Extensions)
+		assert.Equal(t, expectedKeyAlgorithm, certificateInfo.KeyAlgorithm)
 	})
 
-	t.Run("should successfully get management info urls for runtime", func(t *testing.T) {
+	t.Run("should successfully get management info response for runtime", func(t *testing.T) {
 		//given
-		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return &clientcontext.ClusterContext{
-				Tenant: tenant,
-				Group:  group,
-			}, nil
+		clusterContext := &clientcontext.ClusterContext{
+			Tenant: tenant,
+			Group:  group,
 		}
+
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+			return *clusterContext, nil
+		}
+
+		commonName := clusterContext.GetCommonName()
+		expectedSubject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName)
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/runtimes/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL, subjectValues)
 
 		rr := httptest.NewRecorder()
 
@@ -114,11 +140,15 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 		urls := infoResponse.URLs
 		receivedContext := infoResponse.ClientIdentity.(map[string]interface{})
+		certificateInfo := infoResponse.CertificateInfo
 
+		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])
-		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
+		assert.Equal(t, expectedSubject, certificateInfo.Subject)
+		assert.Equal(t, expectedExtensions, certificateInfo.Extensions)
+		assert.Equal(t, expectedKeyAlgorithm, certificateInfo.KeyAlgorithm)
 	})
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
@@ -130,7 +160,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL)
+		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL, subjectValues)
 
 		rr := httptest.NewRecorder()
 

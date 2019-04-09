@@ -69,6 +69,15 @@ func (_m *Resolver) ClusterServiceClassAsyncApiSpecField(ctx context.Context, ob
 	return r0, r1
 }
 
+// ClusterServiceClassClusterDocsTopicField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ClusterServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterDocsTopic, error) {
+	var r0 *gqlschema.ClusterDocsTopic
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ClusterServiceClassContentField provides a failing mock function with given fields: ctx, obj
 func (_m *Resolver) ClusterServiceClassContentField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
 	var r0 *gqlschema.JSON
@@ -141,8 +150,8 @@ func (_m *Resolver) CreateServiceBindingMutation(ctx context.Context, serviceBin
 	return r0, r1
 }
 
-// CreateServiceInstanceMutation provides a failing mock function with given fields: ctx, params
-func (_m *Resolver) CreateServiceInstanceMutation(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
+// CreateServiceInstanceMutation provides a failing mock function with given fields: ctx, namespace, params
+func (_m *Resolver) CreateServiceInstanceMutation(ctx context.Context, namespace string, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
 	var r0 *gqlschema.ServiceInstance
 	var r1 error
 	r1 = _m.err
@@ -249,9 +258,27 @@ func (_m *Resolver) ServiceClassAsyncApiSpecField(ctx context.Context, obj *gqls
 	return r0, r1
 }
 
+// ServiceClassClusterDocsTopicField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterDocsTopic, error) {
+	var r0 *gqlschema.ClusterDocsTopic
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ServiceClassContentField provides a failing mock function with given fields: ctx, obj
 func (_m *Resolver) ServiceClassContentField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
 	var r0 *gqlschema.JSON
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// ServiceClassDocsTopicField provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ServiceClassDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.DocsTopic, error) {
+	var r0 *gqlschema.DocsTopic
 	var r1 error
 	r1 = _m.err
 

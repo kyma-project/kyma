@@ -9,6 +9,7 @@ service:
   internalPort: 8080
 
 config:
+  tillerTLSInsecure: true
   isDevelopMode: "false"
   storage:
     - driver: etcd
@@ -30,7 +31,7 @@ global:
     path: eu.gcr.io/kyma-project
   helm_broker:
     dir: develop/
-    version: 5e3fedb6
+    version: 66bf2070
   alpine_net:
     dir: develop/
-    version: ed568f0f
+    version: 149967d0

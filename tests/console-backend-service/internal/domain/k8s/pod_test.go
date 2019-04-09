@@ -6,12 +6,13 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 
 	"k8s.io/apimachinery/pkg/api/errors"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
 	"github.com/stretchr/testify/assert"
@@ -85,8 +86,6 @@ const (
 )
 
 func TestPod(t *testing.T) {
-	dex.SkipTestIfSCIEnabled(t)
-
 	c, err := graphql.New()
 	require.NoError(t, err)
 
@@ -176,6 +175,15 @@ func TestPod(t *testing.T) {
 	t.Log("Checking subscription for deleted pod...")
 	expectedEvent = podEvent("DELETE", pod{Name: podName})
 	assert.NoError(t, checkPodEvent(expectedEvent, subscription))
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:    {fixPodQuery()},
+		auth.List:   {fixPodsQuery()},
+		auth.Delete: {fixDeletePodMutation()},
+		auth.Update: {fixUpdatePodMutation("{\"\":\"\"}")},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func fixPod(name, namespace string) *v1.Pod {

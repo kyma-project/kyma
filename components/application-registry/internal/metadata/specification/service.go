@@ -3,7 +3,9 @@ package specification
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
+	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/download"
 	"net/http"
 	"net/url"
 	"strings"
@@ -12,7 +14,6 @@ import (
 	"github.com/go-openapi/spec"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/model"
-	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/minio"
 )
 
 const (
@@ -30,25 +31,25 @@ type Service interface {
 }
 
 type specService struct {
-	minioService minio.Service
-	httpClient   http.Client
+	assetStoreService assetstore.Service
+	downloadClient    download.Client
 }
 
-func NewSpecService(minioService minio.Service) Service {
+func NewSpecService(assetStoreService assetstore.Service) Service {
 	return &specService{
-		minioService: minioService,
-		httpClient: http.Client{
+		assetStoreService: assetStoreService,
+		downloadClient: download.NewClient(&http.Client{
 			Timeout: specRequestTimeout,
-		},
+		}),
 	}
 }
 
 func (svc *specService) GetSpec(id string) ([]byte, []byte, []byte, apperrors.AppError) {
-	return svc.minioService.Get(id)
+	return svc.assetStoreService.Get(id)
 }
 
 func (svc *specService) RemoveSpec(id string) apperrors.AppError {
-	return svc.minioService.Remove(id)
+	return svc.assetStoreService.Remove(id)
 }
 
 func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl string) apperrors.AppError {
@@ -62,17 +63,19 @@ func (svc *specService) PutSpec(serviceDef *model.ServiceDefinition, gatewayUrl 
 		}
 	}
 
-	return svc.insertSpecs(serviceDef.ID, serviceDef.Documentation, apiSpec, serviceDef.Events)
+	apiType := toApiSpecType(serviceDef.Api)
+
+	return svc.insertSpecs(serviceDef.ID, apiType, serviceDef.Documentation, apiSpec, serviceDef.Events)
 }
 
-func (svc *specService) insertSpecs(id string, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
+func (svc *specService) insertSpecs(id string, apiType docstopic.ApiType, docs []byte, apiSpec []byte, events *model.Events) apperrors.AppError {
 	var eventsSpec []byte
 
 	if events != nil {
 		eventsSpec = events.Spec
 	}
 
-	err := svc.minioService.Put(id, docs, apiSpec, eventsSpec)
+	err := svc.assetStoreService.Put(id, apiType, docs, apiSpec, eventsSpec)
 	if err != nil {
 		return apperrors.Internal("Inserting specs failed, %s", err.Error())
 	}
@@ -114,23 +117,25 @@ func isNilOrEmpty(array []byte) bool {
 	return array == nil || len(array) == 0 || string(array) == "null"
 }
 
+func toApiSpecType(api *model.API) docstopic.ApiType {
+	if api == nil {
+		return docstopic.NoneApiType
+	}
+
+	if strings.ToLower(api.ApiType) == oDataSpecType {
+		return docstopic.ODataApiType
+	}
+
+	return docstopic.OpenApiType
+}
+
 func (svc *specService) fetchSpec(api *model.API) ([]byte, apperrors.AppError) {
 	specUrl, apperr := determineSpecUrl(api)
 	if apperr != nil {
 		return nil, apperr
 	}
 
-	response, apperr := svc.requestAPISpec(specUrl)
-	if apperr != nil {
-		return nil, apperr
-	}
-
-	apiSpec, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return nil, apperrors.Internal("Reading API spec response body failed, %s", err.Error())
-	}
-
-	return apiSpec, nil
+	return svc.downloadClient.Fetch(specUrl)
 }
 
 func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
@@ -151,24 +156,6 @@ func determineSpecUrl(api *model.API) (string, apperrors.AppError) {
 	}
 
 	return specUrl.String(), nil
-}
-
-func (svc *specService) requestAPISpec(specUrl string) (*http.Response, apperrors.AppError) {
-	req, err := http.NewRequest(http.MethodGet, specUrl, nil)
-	if err != nil {
-		return nil, apperrors.Internal("Creating request for fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	response, err := svc.httpClient.Do(req)
-	if err != nil {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed, %s", specUrl, err.Error())
-	}
-
-	if response.StatusCode != http.StatusOK {
-		return nil, apperrors.UpstreamServerCallFailed("Fetching API spec from %s failed with status %s", specUrl, response.Status)
-	}
-
-	return response, nil
 }
 
 func modifyAPISpec(rawApiSpec []byte, gatewayUrl string) ([]byte, apperrors.AppError) {

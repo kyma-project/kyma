@@ -54,7 +54,7 @@ data:
   gateways.istio-ingressgateway.type: "NodePort"
 
   pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 100m
+  pilot.resources.limits.cpu: 200m
   pilot.resources.requests.memory: 256Mi
   pilot.resources.requests.cpu: 100m
 
@@ -122,3 +122,16 @@ metadata:
     kyma-project.io/installation: ""
 data:
   test.acceptance.ui.minikubeIP: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-connector-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: application-connector
+    kyma-project.io/installation: ""
+data:
+   application-registry.minikubeIP: ""
+---

@@ -500,6 +500,8 @@ components:
           $ref: '#/components/schemas/applicationClientIdentity'
         urls:
           $ref: '#/components/schemas/applicationInfoResponseUrls'
+        certificate:
+          $ref: '#/components/schemas/cert'
     runtimeClientIdentity:
       type: 'object'
       properties:
@@ -525,6 +527,8 @@ components:
           $ref: '#/components/schemas/runtimeClientIdentity'
         urls:
           $ref: '#/components/schemas/runtimeInfoResponseUrls'
+        certificate:
+          $ref: '#/components/schemas/runtimeCert'
     csrRuntimeApiURLs:
       type: 'object'
       properties:

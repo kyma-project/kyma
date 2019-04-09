@@ -65,6 +65,11 @@ rules:
   - list
   - update
   - patch
+- resources:
+  - configmaps
+  verbs:
+  - get
+  - watch
 - apiGroups:
   - cms.kyma-project.io
   resources:
@@ -126,6 +131,11 @@ rules:
   - list
   - update
   - patch
+- resources:
+  - configmaps
+  verbs:
+  - get
+  - watch
 - apiGroups:
   - admissionregistration.k8s.io
   resources:

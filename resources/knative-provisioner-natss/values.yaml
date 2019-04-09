@@ -3,7 +3,8 @@
 # Declare variables to be passed into your templates.
 global:
   isLocalEnv: false
-  knative: false
+  natsStreaming:
+    url: "nats-streaming.natss:4222"
 
 knative-provisioner-natss:
   controller:

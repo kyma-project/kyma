@@ -54,12 +54,12 @@ func newServiceInstanceResolver(instanceSvc serviceInstanceSvc, clusterServicePl
 	}
 }
 
-func (r *serviceInstanceResolver) CreateServiceInstanceMutation(ctx context.Context, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
-	parameters := r.instanceConverter.GQLCreateInputToInstanceCreateParameters(&params)
+func (r *serviceInstanceResolver) CreateServiceInstanceMutation(ctx context.Context, namespace string, params gqlschema.ServiceInstanceCreateInput) (*gqlschema.ServiceInstance, error) {
+	parameters := r.instanceConverter.GQLCreateInputToInstanceCreateParameters(&params, namespace)
 	item, err := r.instanceSvc.Create(*parameters)
 	if err != nil {
-		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.ServiceInstance, params.Name, params.Namespace))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithNamespace(params.Namespace))
+		glog.Error(errors.Wrapf(err, "while creating %s `%s` in namespace `%s`", pretty.ServiceInstance, params.Name, namespace))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithNamespace(namespace))
 	}
 
 	// ServicePlan and ServiceClass references are empty just after the resource has been created
@@ -140,7 +140,7 @@ func (r *serviceInstanceResolver) CreateServiceInstanceMutation(ctx context.Cont
 	instance, err := r.instanceConverter.ToGQL(instanceCopy)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceInstance))
-		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithNamespace(params.Namespace))
+		return nil, gqlerror.New(err, pretty.ServiceInstance, gqlerror.WithName(params.Name), gqlerror.WithNamespace(namespace))
 	}
 
 	return instance, nil

@@ -36,22 +36,22 @@ func newServiceBindingUsageResolver(op serviceBindingUsageOperations) *serviceBi
 	}
 }
 
-func (r *serviceBindingUsageResolver) CreateServiceBindingUsageMutation(ctx context.Context, input *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
+func (r *serviceBindingUsageResolver) CreateServiceBindingUsageMutation(ctx context.Context, namespace string, input *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
 	inBindingUsage, err := r.converter.InputToK8s(input)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s from input [%+v]", pretty.ServiceBindingUsage, input))
 		return nil, gqlerror.New(err, pretty.ServiceBindingUsage)
 	}
-	bu, err := r.operations.Create(input.Namespace, inBindingUsage)
+	bu, err := r.operations.Create(namespace, inBindingUsage)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s from input [%v]", pretty.ServiceBindingUsage, input))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithNamespace(input.Namespace))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithNamespace(namespace))
 	}
 
 	out, err := r.converter.ToGQL(bu)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while converting %s", pretty.ServiceBindingUsage))
-		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithNamespace(input.Namespace))
+		return nil, gqlerror.New(err, pretty.ServiceBindingUsage, gqlerror.WithName(*input.Name), gqlerror.WithNamespace(namespace))
 	}
 
 	return out, nil

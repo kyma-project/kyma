@@ -2,7 +2,7 @@
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRole
 metadata:
-  name: loki-intern-role
+  name: loki-role
   namespace: kyma-system
   labels:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -11,7 +11,8 @@ metadata:
 spec:
   rules:
   - services: ["logging.kyma-system.svc.cluster.local"]
-    methods: ["GET", "POST", "HEAD"]
+    methods: ["GET", "POST", "OPTIONS"]
+    paths: ["/api/*"]
 {{- end }}
 
 ---
@@ -19,7 +20,7 @@ spec:
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRoleBinding
 metadata:
-  name: bind-loki-intern-role
+  name: bind-loki-role
   namespace: kyma-system
   labels:
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
@@ -28,24 +29,10 @@ metadata:
 spec:
   subjects:
   - user: "cluster.local/ns/kyma-system/sa/logging"
+  - user: "cluster.local/ns/kyma-system/sa/monitoring-grafana-loki"
   - properties:
-      request.auth.claims[groups]: "kyma-admins"
+      request.auth.audiences: "kyma-client"
   roleRef:
     kind: ServiceRole
-    name: loki-intern-role
-{{- end }}
----
-{{- if .Values.global.rbac.create }}
-apiVersion: rbac.istio.io/v1alpha1
-kind: RbacConfig
-metadata:
-  name: default
-  labels:
-    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
-    heritage: {{ .Release.Service }}
-    release: {{ .Release.Name }}
-spec:
-  mode: ON_WITH_INCLUSION
-  inclusion:
-    services: ["logging.kyma-system.svc.cluster.local"]
+    name: loki-role
 {{- end }}

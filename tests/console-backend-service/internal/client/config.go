@@ -19,6 +19,7 @@ func NewRestClientConfig(kubeconfigPath string) (*rest.Config, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return config, nil
 }
 

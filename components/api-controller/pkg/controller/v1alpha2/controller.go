@@ -545,12 +545,16 @@ func toAuthenticationDto(metaDto meta.Dto, api *kymaApi.Api) *authentication.Dto
 		}
 	}
 
+	//true only if explicitly defined by the user, false otherwise
+	disablePolicyPeersMTLS := (api.Spec.DisableIstioAuthPolicyMTLS != nil && *api.Spec.DisableIstioAuthPolicyMTLS)
+
 	// authentication enabled
 	dto := &authentication.Dto{
-		MetaDto:               metaDto,
-		ServiceName:           api.Spec.Service.Name,
-		Status:                api.Status.AuthenticationStatus,
-		AuthenticationEnabled: true,
+		MetaDto:                metaDto,
+		ServiceName:            api.Spec.Service.Name,
+		Status:                 api.Status.AuthenticationStatus,
+		AuthenticationEnabled:  true,
+		DisablePolicyPeersMTLS: disablePolicyPeersMTLS,
 	}
 
 	dtoRules := make(authentication.Rules, len(api.Spec.Authentication))

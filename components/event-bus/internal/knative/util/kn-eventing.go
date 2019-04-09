@@ -58,7 +58,8 @@ return
 // Use it cause it should be mocked
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
-	CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*evapisv1alpha1.Channel, error)
+	CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
+		timeout time.Duration)(*evapisv1alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
 	DeleteSubscription(name string, namespace string) error
@@ -114,8 +115,9 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 }
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
-func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, timeout time.Duration) (*evapisv1alpha1.Channel, error) {
-	c := makeChannel(provisioner, name, namespace)
+func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
+	timeout time.Duration)(*evapisv1alpha1.Channel, error) {
+	c := makeChannel(provisioner, name, namespace, labels)
 	if channel, err := k.evClient.Channels(namespace).Create(c); err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
 		return nil, err
@@ -269,7 +271,7 @@ func resendMessage(httpClient *http.Client, channel *evapisv1alpha1.Channel, hea
 	return nil
 }
 
-func makeChannel(provisioner string, name string, namespace string) *evapisv1alpha1.Channel {
+func makeChannel(provisioner string, name string, namespace string, labels *map[string]string) *evapisv1alpha1.Channel {
 	c := &evapisv1alpha1.Channel{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
@@ -278,6 +280,7 @@ func makeChannel(provisioner string, name string, namespace string) *evapisv1alp
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: namespace,
 			Name:      name,
+			Labels:    *labels,
 		},
 		Spec: evapisv1alpha1.ChannelSpec{
 			Provisioner: &corev1.ObjectReference{
