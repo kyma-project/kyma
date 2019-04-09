@@ -103,7 +103,7 @@ func main() {
 		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
 		"GrafanaUpgradeTest":           grafanaUpgradeTest,
 		"MetricsUpgradeTest":           metricUpgradeTest,
-		"MicrofrontendUpgradeTest":     ui.NewMicrofrontendUpgradeTest(k8sCli, mfCli),
+		"MicrofrontendUpgradeTest":     ui.NewMicrofrontendUpgradeTest(mfCli),
 	}
 
 	// Execute requested action

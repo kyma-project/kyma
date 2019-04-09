@@ -1,56 +1,40 @@
 package ui
 
 import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
 	"crypto/tls"
 	"net/http/cookiejar"
 
-	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
 )
 
 // MicrofrontendUpgradeTest tests the creation of a kubeless microfrontend and execute a http request to the exposed api of the microfrontend after Kyma upgrade phase
 type MicrofrontendUpgradeTest struct {
-	microfrontendName, uuid string
-	coreClient              kubernetes.Interface
-	namespace               string
-	stop                    <-chan struct{}
-	httpClient              *http.Client
-	mfClient                *mfClient.Clientset
-	hostName                string
+	microfrontendName string
+	namespace         string
+	stop              <-chan struct{}
+	httpClient        *http.Client
+	mfClient          *mfClient.Clientset
 }
 
 // NewMicrofrontendUpgradeTest returns new instance of the MicrofrontendUpgradeTest
-func NewMicrofrontendUpgradeTest(k8sCli kubernetes.Interface, mfClient *mfClient.Clientset) *MicrofrontendUpgradeTest {
-	domainName := os.Getenv("DOMAIN")
-	if len(domainName) == 0 {
-		logrus.Fatal("Environment variable DOMAIN is not found.")
-	}
+func NewMicrofrontendUpgradeTest(mfClient *mfClient.Clientset) *MicrofrontendUpgradeTest {
 	namespace := strings.ToLower("MicrofrontendUpgradeTest")
-	hostName := fmt.Sprintf("%s-%s.%s", "hello", namespace, domainName)
 	httpCli, err := getHTTPClient(true)
 	if err != nil {
 		logrus.Fatal(errors.Wrap(err, "failed on getting the http client."))
 	}
 	return &MicrofrontendUpgradeTest{
-		coreClient:        k8sCli,
-		microfrontendName: "hello",
-		uuid:              uuid.New().String(),
+		microfrontendName: "mf-name",
 		namespace:         namespace,
 		httpClient:        httpCli,
-		hostName:          hostName,
 		mfClient:          mfClient,
 	}
 }
@@ -79,53 +63,13 @@ func (t *MicrofrontendUpgradeTest) TestResources(stop <-chan struct{}, log logru
 	log.Println("MicrofrontendUpgradeTest testing resources")
 	t.stop = stop
 
-	host := fmt.Sprintf("https://%s", t.hostName)
+	_, err := t.mfClient.UiV1alpha1().MicroFrontends(t.namespace).Get(t.microfrontendName, metav1.GetOptions{})
 
-	value, err := t.getMicrofrontendOutput(host, 1*time.Minute, log)
 	if err != nil {
-		return errors.Wrapf(err, "failed request to host %s.", host)
-	}
-
-	if !strings.Contains(value, t.uuid) {
-		return fmt.Errorf("could not get expected microfrontend output:\n %v\n output:\n %v", t.uuid, value)
+		return errors.Wrapf(err, "while checking if microfrontend %q still exists", t.microfrontendName)
 	}
 
 	return nil
-}
-
-func (t *MicrofrontendUpgradeTest) getMicrofrontendOutput(host string, waitmax time.Duration, log logrus.FieldLogger) (string, error) {
-	log.Println("MicrofrontendUpgradeTest microfrontend output")
-	log.Printf("\nHost: %s", host)
-
-	tick := time.Tick(2 * time.Second)
-	timeout := time.After(waitmax)
-	messages := ""
-
-	for {
-		select {
-		case <-tick:
-
-			resp, err := t.httpClient.Post(host, "text/plain", bytes.NewBufferString(t.uuid))
-			if err != nil {
-				messages += fmt.Sprintf("%+v\n", err)
-				break
-			}
-			if resp.StatusCode == http.StatusOK {
-				bodyBytes, err := ioutil.ReadAll(resp.Body)
-				if err != nil {
-					return "", err
-				}
-				return string(bodyBytes), nil
-			}
-			messages += fmt.Sprintf("%+v", err)
-
-		case <-timeout:
-			return "", fmt.Errorf("could not get microfrontend output:\n %v", messages)
-		case <-t.stop:
-			return "", fmt.Errorf("can't be possible to get a response from the http request to the microfrontend")
-		}
-	}
-
 }
 
 func (t MicrofrontendUpgradeTest) createMicrofrontend() error {
