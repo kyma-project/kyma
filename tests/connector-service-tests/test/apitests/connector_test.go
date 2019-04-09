@@ -365,7 +365,7 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 
 		if central {
 			assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
-			assert.Empty(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
+			assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
 		} else {
 			assert.Empty(t, mgmInfoResponse.ClientIdentity.Group)
 			assert.Empty(t, mgmInfoResponse.ClientIdentity.Tenant)
