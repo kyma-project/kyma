@@ -16,6 +16,7 @@ Additionally, download these tools:
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
 - [Helm](https://github.com/kubernetes/helm) 2.10.0
 - [jq](https://stedolan.github.io/jq/)
+- [wget](https://www.gnu.org/software/wget/)
 
 Virtualization:
 
