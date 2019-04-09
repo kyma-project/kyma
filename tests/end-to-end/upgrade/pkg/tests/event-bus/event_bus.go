@@ -35,8 +35,8 @@ const (
 
 	subscriberName           = "test-core-event-bus-subscriber"
 	subscriberImage          = "eu.gcr.io/kyma-project/event-bus-e2e-subscriber:0.9.0"
-	publishEventEndpointURL  = "http://event-bus-publish:8080/v1/events"
-	publishStatusEndpointURL = "http://event-bus-publish:8080/v1/status/ready"
+	publishEventEndpointURL  = "http://event-bus-publish.kyma-system:8080/v1/events"
+	publishStatusEndpointURL = "http://event-bus-publish.kyma-system:8080/v1/status/ready"
 )
 
 // UpgradeTest tests the Event Bus business logic after Kyma upgrade phase
@@ -165,6 +165,7 @@ func (f *eventBusFlow) createSubscriber() error {
 }
 
 func (f *eventBusFlow) createEventActivation() error {
+	log.Println("Create Event Activation")
 	var err error
 	for i := 0; i < noOfRetries; i++ {
 		_, err = f.eaInterface.ApplicationconnectorV1alpha1().EventActivations(f.namespace).Create(util.NewEventActivation(eventActivationName, f.namespace, srcID))
@@ -182,6 +183,7 @@ func (f *eventBusFlow) createEventActivation() error {
 }
 
 func (f *eventBusFlow) createSubscription() error {
+	log.Println("Create Subscription")
 	subscriberEventEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/events"
 	_, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Create(util.NewSubscription(subscriptionName, f.namespace, subscriberEventEndpointURL, eventType, "v1", srcID))
 	if err != nil {
@@ -194,6 +196,7 @@ func (f *eventBusFlow) createSubscription() error {
 }
 
 func (f *eventBusFlow) checkSubscriberStatus() error {
+	log.Println("Check Subscriber status")
 	subscriberStatusEndpointURL := "http://" + subscriberName + "." + f.namespace + ":9000/v1/status"
 	var err error
 	for i := 0; i < noOfRetries; i++ {
@@ -211,6 +214,7 @@ func (f *eventBusFlow) checkSubscriberStatus() error {
 }
 
 func (f *eventBusFlow) checkPublisherStatus() error {
+	log.Println("Check Publisher status")
 	var err error
 	for i := 0; i < noOfRetries; i++ {
 		if err = checkStatus(publishStatusEndpointURL); err != nil {
@@ -224,6 +228,7 @@ func (f *eventBusFlow) checkPublisherStatus() error {
 }
 
 func (f *eventBusFlow) checkSubscriptionReady() error {
+	log.Println("Check Subscription ready status")
 	var err error
 	activatedCondition := subApis.SubscriptionCondition{Type: subApis.Ready, Status: subApis.ConditionTrue}
 	for i := 0; i < noOfRetries; i++ {
@@ -242,6 +247,7 @@ func (f *eventBusFlow) checkSubscriptionReady() error {
 }
 
 func (f *eventBusFlow) publishTestEvent() error {
+	log.Println("Publish test event")
 	var eventSent bool
 	var err error
 	for i := 0; i < noOfRetries; i++ {
