@@ -41,7 +41,7 @@ spec:
       volumes:
         - name: config
           configMap:
-            name: {{ .Chart.Name }}-config
+            name: {{ template "fullname" . }}-lambda-ui-config
             items:
             - key: config.js
               path: config.js
