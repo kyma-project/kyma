@@ -3,10 +3,10 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-lambda-ui
   namespace: kyma-system
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "fullname" . }}-lambda-ui
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -23,4 +23,4 @@ spec:
     - destination:
         port:
           number: {{ $servicePort }}
-        host: {{ $serviceName }}
+        host: {{ $serviceName }}-lambda-ui

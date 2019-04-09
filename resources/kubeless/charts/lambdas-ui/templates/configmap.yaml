@@ -4,7 +4,7 @@ metadata:
   name: {{ .Chart.Name }}-config
   namespace: {{ .Release.Namespace }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "name" . }}-lambda-ui
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
   config.js: |

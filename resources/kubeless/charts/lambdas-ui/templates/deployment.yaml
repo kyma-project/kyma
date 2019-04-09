@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "fullname" . }}-lambda-ui
   labels:
-    app: core-{{ template "name" . }}
+    app: {{ template "fullname" . }}-lambda-ui
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -11,7 +11,7 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: core-{{ template "name" . }}
+      app: {{ template "fullname" . }}-lambda-ui
       release: {{ .Release.Name }}
       kyma-alerts: enabled
       kyma-component: ui
@@ -23,7 +23,7 @@ spec:
   template:
     metadata:
       labels:
-        app: core-{{ template "name" . }}
+        app: {{ template "fullname" . }}-lambda-ui
         release: {{ .Release.Name }}
         kyma-alerts: enabled
         kyma-component: ui
