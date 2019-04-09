@@ -2,20 +2,21 @@ package knative_serving_acceptance
 
 import (
 	"fmt"
-	"github.com/avast/retry-go"
-	serving_api "github.com/knative/serving/pkg/apis/serving/v1alpha1"
-	serving "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
-	"github.com/kyma-project/kyma/common/ingressgateway"
 	"io/ioutil"
-	core_api "k8s.io/api/core/v1"
-	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 	"log"
 	"net/http"
 	"os"
 	"strings"
 	"testing"
+
+	retry "github.com/avast/retry-go"
+	serving_api "github.com/knative/serving/pkg/apis/serving/v1alpha1"
+	serving "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
+	"github.com/kyma-project/kyma/common/ingressgateway"
+	core_api "k8s.io/api/core/v1"
+	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/rest"
+	"k8s.io/client-go/tools/clientcmd"
 )
 
 func TestKnativeServing_Acceptance(t *testing.T) {
@@ -44,7 +45,7 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 								Image: "gcr.io/knative-samples/helloworld-go",
 								Env: []core_api.EnvVar{
 									{
-										Name:  "TAREGT",
+										Name:  "TARGET",
 										Value: target,
 									},
 								},
@@ -85,7 +86,8 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 		return nil
 	}, retry.OnRetry(func(n uint, err error) {
 		log.Printf("[%v] try failed: %s", n, err)
-	}))
+	}), retry.Attempts(20),
+	)
 
 	if err != nil {
 		t.Fatalf("cannot get test service response: %s", err)
