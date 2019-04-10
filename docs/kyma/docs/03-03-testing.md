@@ -10,8 +10,8 @@ Octopus uses two Custom Resource Definitions (CRDs):
 - ClusterTestSuite, which defines a suite of tests to execute and how to execute them.
 
 ## Add a new test
-To add a new test, create a yaml file with `TestDefinition` in your chart. By convention, place it under tests directory.
-See the exemplary test directory prepared for Dex:
+To add a new test, create a yaml file with TestDefinition CR in your chart. By convention, place it under tests directory.
+See the exemplary chart structure for Dex:
 
 ```
 # Chart tree
@@ -64,7 +64,7 @@ spec:
 
 ## Tests execution
 To run all tests, use the `testing.sh` script located in the `/installation/scripts/` directory. 
-Internally, `ClusterTestSuite` resource is defined, that fetches all `TestDefinitions` and executes them.
+Internally, ClusterTestSuite resource is defined, that fetches all TestDefinitions and executes them.
 
 
 ### Run tests manually
