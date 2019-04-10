@@ -6,23 +6,23 @@ import (
 	"github.com/pkg/errors"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/fields"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 func ServiceClassByExternalID(scClient v1beta1.ServicecatalogV1beta1Interface, namespace, externalID string) (*catalog.ServiceClass, error) {
-	sc, err := scClient.ServiceClasses(namespace).List(metav1.ListOptions{})
+	fieldSet := fields.Set{
+		catalog.FilterSpecExternalID: externalID,
+	}
+	fieldSelector := fields.SelectorFromSet(fieldSet).String()
+	listOpts := metav1.ListOptions{FieldSelector: fieldSelector}
+
+	sc, err := scClient.ServiceClasses(namespace).List(listOpts)
 	if err != nil {
-		return nil, errors.Wrap(err, "while getting service classes")
+		return nil, errors.Wrap(err, "while getting service class")
 	}
 
-	var items []catalog.ServiceClass
-	for _, item := range sc.Items {
-		if item.Spec.ExternalID == externalID {
-			items = append(items, item)
-		}
-	}
-
-	noItems := len(items)
+	noItems := len(sc.Items)
 	if noItems == 0 { // using apierrors to simplify assertion in test code
 		return nil, apierrors.NewNotFound(schema.GroupResource{}, externalID)
 	}
@@ -31,5 +31,5 @@ func ServiceClassByExternalID(scClient v1beta1.ServicecatalogV1beta1Interface, n
 		return nil, errors.Errorf("Expect one ServiceClassByExternalID with %s:%s. Found %d", catalog.FilterSpecExternalID, externalID, noItems)
 	}
 
-	return &items[0], nil
+	return &sc.Items[0], nil
 }
