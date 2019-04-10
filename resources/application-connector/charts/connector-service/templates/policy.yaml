@@ -9,3 +9,15 @@ spec:
   peers:
     - mtls:
         mode: "PERMISSIVE"
+---
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ .Chart.Name }}-external-api-policy
+  namespace: {{ .Values.global.namespace }}
+spec:
+  targets:
+    - name: {{ .Chart.Name }}-external-api
+  peers:
+    - mtls:
+        mode: "PERMISSIVE"
