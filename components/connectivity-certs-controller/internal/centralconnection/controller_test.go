@@ -202,6 +202,54 @@ func TestController_Reconcile(t *testing.T) {
 		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
 	})
 
+	t.Run("should not skip connection if RenewNow set to true", func(t *testing.T) {
+		// given
+		checkStatus := func(args mock.Arguments) {
+			connection := args.Get(1).(*v1alpha1.CentralConnection)
+
+			assert.NotEmpty(t, connection.Status.CertificateStatus.NotBefore)
+			assert.NotEmpty(t, connection.Status.CertificateStatus.NotAfter)
+
+			assert.Equal(t, connection.Status.SynchronizationStatus.LastSync, connection.Status.SynchronizationStatus.LastSuccess)
+		}
+
+		setupConnectionWithRenewNow := func(args mock.Arguments) {
+			connection := getCentralConnectionFromArgs(args)
+			setupCentralConnectionToSkip(args)
+
+			connection.Spec.RenewNow = true
+		}
+
+		client := &mocks.Client{}
+		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CentralConnection")).
+			Run(setupConnectionWithRenewNow).Return(nil).Twice()
+		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CentralConnection")).
+			Run(checkStatus).Return(nil)
+
+		certPreserver := &certMocks.Preserver{}
+		certPreserver.On("PreserveCertificates", renewedCertificates).Return(nil)
+
+		certProvider := &certMocks.Provider{}
+		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
+		certProvider.On("GetCACertificate").Return(caCert, nil)
+
+		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
+		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
+		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
+
+		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider.On("CreateClient", certificateCredentials).Return(mutualTLSClient, nil)
+
+		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
+
+		// when
+		_, err := connectionController.Reconcile(request)
+
+		// then
+		require.NoError(t, err)
+		assertExpectations(t, client.Mock, certPreserver.Mock, mutualTLSClient.Mock, mTLSClientProvider.Mock)
+	})
+
 	t.Run("should check connection and skip renewal", func(t *testing.T) {
 		// given
 		checkStatus := func(args mock.Arguments) {
@@ -263,19 +311,9 @@ func TestController_Reconcile(t *testing.T) {
 
 	t.Run("should skip synchronization when not enough time passed", func(t *testing.T) {
 		// given
-		setupConnectionWithLastSync := func(args mock.Arguments) {
-			centralConnection := getCentralConnectionFromArgs(args)
-			setupCentralConnectionInstance(args)
-
-			centralConnection.Status.SynchronizationStatus = v1alpha1.SynchronizationStatus{
-				LastSync:    metav1.Now(),
-				LastSuccess: metav1.Now(),
-			}
-		}
-
 		client := &mocks.Client{}
 		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CentralConnection")).
-			Run(setupConnectionWithLastSync).Return(nil)
+			Run(setupCentralConnectionToSkip).Return(nil)
 
 		certPreserver := &certMocks.Preserver{}
 		certProvider := &certMocks.Provider{}
@@ -474,6 +512,7 @@ func TestController_Reconcile(t *testing.T) {
 func TestController_shouldRenew(t *testing.T) {
 
 	testCases := []struct {
+		renewNow        bool
 		certStatus      *v1alpha1.CertificateStatus
 		minimalSyncTime time.Duration
 		shouldRenew     bool
@@ -510,12 +549,21 @@ func TestController_shouldRenew(t *testing.T) {
 			minimalSyncTime: 20 * time.Minute,
 			shouldRenew:     true,
 		},
+		{
+			renewNow: true,
+			certStatus: &v1alpha1.CertificateStatus{
+				NotBefore: metav1.Now(),
+				NotAfter:  metav1.NewTime(time.Now().Add(2000 * time.Hour)),
+			},
+			minimalSyncTime: 10 * time.Minute,
+			shouldRenew:     true,
+		},
 	}
 
 	for _, testCase := range testCases {
 		connection := &v1alpha1.CentralConnection{
 			ObjectMeta: metav1.ObjectMeta{Name: "test"},
-			Spec:       v1alpha1.CentralConnectionSpec{ManagementInfoURL: "url"},
+			Spec:       v1alpha1.CentralConnectionSpec{ManagementInfoURL: "url", RenewNow: testCase.renewNow},
 			Status: v1alpha1.CentralConnectionStatus{
 				CertificateStatus: testCase.certStatus,
 			},
@@ -559,6 +607,16 @@ func setupCentralConnectionToRenew(args mock.Arguments) {
 	centralConnection.Status.CertificateStatus = &v1alpha1.CertificateStatus{
 		NotBefore: metav1.NewTime(time.Date(1970, 1, 1, 0, 0, 0, 0, time.Local)),
 		NotAfter:  metav1.NewTime(time.Now().Add(5 * time.Minute)),
+	}
+}
+
+func setupCentralConnectionToSkip(args mock.Arguments) {
+	centralConnection := getCentralConnectionFromArgs(args)
+	setupCentralConnectionInstance(args)
+
+	centralConnection.Status.SynchronizationStatus = v1alpha1.SynchronizationStatus{
+		LastSync:    metav1.Now(),
+		LastSuccess: metav1.Now(),
 	}
 }
 

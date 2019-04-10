@@ -145,6 +145,10 @@ func (c *Controller) handleErrorWhileGettingInstance(err error, request reconcil
 }
 
 func (c *Controller) shouldSynchronizeConnection(connection *v1alpha1.CentralConnection) bool {
+	if connection.Spec.RenewNow {
+		return true
+	}
+
 	timeFromLastSync := time.Since(connection.Status.SynchronizationStatus.LastSync.Time)
 	return timeFromLastSync > c.minimalSyncTime
 }
@@ -178,6 +182,10 @@ func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnec
 
 // Certificate should be renewed when less than 30% of validity time is left or if time left is less than 2 times minimal Sync Time
 func shouldRenew(connection *v1alpha1.CentralConnection, minimalSyncTime time.Duration) bool {
+	if connection.Spec.RenewNow {
+		return true
+	}
+
 	notBefore := connection.Status.CertificateStatus.NotBefore.Unix()
 	notAfter := connection.Status.CertificateStatus.NotAfter.Unix()
 
@@ -223,6 +231,7 @@ func (c *Controller) renewCertificate(connection *v1alpha1.CentralConnection, tl
 	}
 
 	c.setCertificateStatus(connection, clientCert)
+	connection.Spec.RenewNow = false
 
 	return nil
 }
@@ -282,6 +291,7 @@ func (c *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConne
 		}
 
 		existingConnection.Status = connection.Status
+		existingConnection.Spec.RenewNow = connection.Spec.RenewNow
 
 		return c.masterConnectionClient.Update(context.Background(), existingConnection)
 	})
