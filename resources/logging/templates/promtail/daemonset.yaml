@@ -1,7 +1,4 @@
-{{- $configFileName := "promtail.yaml" -}}
-{{- if .Values.global.logging.promtail.config.name }}
-    {{- $configFileName :=  .Values.global.logging.promtail.config.name | default "promtail.yaml" -}}
-{{- end }}
+{{- $configFileName :=  .Values.global.logging.promtail.config.name | default "promtail.yaml" -}}
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:

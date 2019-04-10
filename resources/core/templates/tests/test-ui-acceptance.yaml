@@ -1,7 +1,4 @@
-{{- $uiDeploymentEnabled := "false" -}}
-{{- if .Values.test.acceptance.ui.logging.enabled }}
-    {{- $uiDeploymentEnabled :=  .Values.test.acceptance.ui.logging.enabled | default "false" -}}
-{{- end }}
+{{- $uiDeploymentEnabled :=  .Values.test.acceptance.ui.logging.enabled | default "false" -}}
 apiVersion: v1
 kind: Pod
 metadata:

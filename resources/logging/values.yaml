@@ -200,6 +200,10 @@ global:
   test_logging:
     dir: develop
     version: 0f2d461a
+  logging:
+    promtail:
+      config:
+        name:
 test:
   image:
     name: test-logging
