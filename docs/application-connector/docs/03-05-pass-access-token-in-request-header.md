@@ -12,4 +12,3 @@ If the user is already authenticated to the target API, the access token can be 
 ## Example
 
 Find the example of passing the EC access token to the Application Connector using lambda in the [`examples`](https://github.com/kyma-project/examples/tree/master/call-ec) repository.
-
