@@ -145,11 +145,15 @@ func decodeCertificateResponse(certificateResponse CertificatesResponse) (certif
 }
 
 func extractErrorResponse(response *http.Response) error {
-	defer response.Body.Close()
+	bodyReader1, bodyReader2, err := drainBody(response.Body)
+	if err != nil {
+		return errors.New("Failed to read error response")
+	}
 
 	var errorResponse ErrorResponse
-	err := unmarshalFromReader(response.Body, &errorResponse)
+	err = unmarshalFromReader(bodyReader1, &errorResponse)
 	if err != nil {
+		response.Body = bodyReader2
 		dump, err := httputil.DumpResponse(response, true)
 		if err != nil {
 			return errors.Wrap(err, "Failed to dump error response")
@@ -165,6 +169,21 @@ func extractErrorResponse(response *http.Response) error {
 func readResponseBody(body io.ReadCloser, model interface{}) error {
 	defer body.Close()
 	return unmarshalFromReader(body, model)
+}
+
+func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
+	if b == http.NoBody {
+		// No copying needed. Preserve the magic sentinel meaning of NoBody.
+		return http.NoBody, http.NoBody, nil
+	}
+	var buf bytes.Buffer
+	if _, err = buf.ReadFrom(b); err != nil {
+		return nil, b, err
+	}
+	if err = b.Close(); err != nil {
+		return nil, b, err
+	}
+	return ioutil.NopCloser(&buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), nil
 }
 
 func unmarshalFromReader(body io.Reader, model interface{}) error {
