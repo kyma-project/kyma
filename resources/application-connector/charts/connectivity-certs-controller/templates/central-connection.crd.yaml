@@ -20,6 +20,8 @@ spec:
           properties:
             managementInfoUrl:
               type: string
+            renewNow:
+              type: boolean
           required:
             - managementInfoUrl
           type: object
