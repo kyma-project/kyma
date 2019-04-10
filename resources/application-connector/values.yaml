@@ -59,4 +59,4 @@ global:
     version: e1af648f
 
 connectivity_certs_controller:
-  enabled: false
+  enabled: true

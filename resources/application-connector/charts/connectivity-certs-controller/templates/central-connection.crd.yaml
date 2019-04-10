@@ -6,6 +6,7 @@ metadata:
   name: centralconnections.applicationconnector.kyma-project.io
 spec:
   group: applicationconnector.kyma-project.io
+  version: v1alpha1
   names:
     kind: CentralConnection
     listKind: CentralConnectionList
