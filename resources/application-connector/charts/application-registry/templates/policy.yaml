@@ -8,4 +8,4 @@ spec:
     - name: {{ .Chart.Name }}-external-api
   peers:
     - mtls:
-      mode: "PERMISSIVE"
+        mode: "PERMISSIVE"
