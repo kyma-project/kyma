@@ -127,7 +127,7 @@ func fixNamespace(name string) *corev1.Namespace {
 	}
 }
 
-func serviceClassesReport(t *testing.T, services []osb.Service, ns string) {
+func testDetailsReport(t *testing.T, services []osb.Service, ns string) {
 	t.Log("##### Start test report #####")
 
 	cs, err := clientset.NewForConfig(kubeConfig(t))

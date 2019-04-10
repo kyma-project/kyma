@@ -82,7 +82,7 @@ func TestServiceCatalogContainsABServiceClasses(t *testing.T) {
 
 	defer func() {
 		if t.Failed() {
-			serviceClassesReport(t, brokerServices, broker.namespace)
+			testDetailsReport(t, brokerServices, broker.namespace)
 		}
 		err = k8sClient.Namespaces().Delete(broker.namespace, &metav1.DeleteOptions{})
 		assert.NoError(t, err)
