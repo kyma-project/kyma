@@ -28,7 +28,7 @@ func TestConnector(t *testing.T) {
 		appName := "test-app"
 		appTokenRequest := createApplicationTokenRequest(t, config, appName)
 		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
-		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
+		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.Central, config.GatewayUrl, appName)
 		appCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
 		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
 
@@ -325,7 +325,7 @@ func runtimeCsrInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 	})
 }
 
-func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, central bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
@@ -359,11 +359,17 @@ func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerif
 		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
 		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
-		assert.Empty(t, mgmInfoResponse.ClientIdentity.Group)
-		assert.Empty(t, mgmInfoResponse.ClientIdentity.Tenant)
 		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
 		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
 		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
+
+		if central {
+			assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
+			assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
+		} else {
+			assert.Empty(t, mgmInfoResponse.ClientIdentity.Group)
+			assert.Empty(t, mgmInfoResponse.ClientIdentity.Tenant)
+		}
 	})
 }
 
