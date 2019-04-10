@@ -2,3 +2,5 @@ apiVersion: ui.kyma-project.io/v1alpha1
 kind: BackendModule
 metadata:
   name: kubeless
+  labels:
+{{ include "labels.standard" . | indent 4 }}

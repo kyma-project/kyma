@@ -5,7 +5,7 @@ metadata:
   name: {{ template "fullname" . }}-old-cr-remove
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    # "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
     "helm.sh/hook-weight": "2"
 subjects:
 - kind: ServiceAccount
@@ -22,12 +22,29 @@ metadata:
   name: {{ template "fullname" . }}-old-cr-remove
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    # "helm.sh/hook-delete-policy": hook-succeeded
     "helm.sh/hook-weight": "1"
 rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: [ "customresourcedefinitions" ]
   verbs: ["delete"]
+- apiGroups: [""]
+  resources: [ "deployments", "services", "configmaps", "serviceaccounts" ]
+  verbs: ["delete"]
+- apiGroups: ["rbac.authorization.k8s.io"]
+  resources: [ "clusterroles", "clusterrolebindings" ]
+  verbs: ["delete"]
+- apiGroups: ["ui.kyma-project.io"]
+  resources: [ "clustermicrofrontends", "backendmodules" ]
+  verbs: ["delete"]
+- apiGroups: ["extensions", "apps"]
+  resources: [ "deployments" ]
+  verbs: ["delete"]
+- apiGroups: ["networking.istio.io"]
+  resources: [ "virtualservices" ]
+  verbs: ["delete"]
+
+
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -36,7 +53,7 @@ metadata:
   namespace: kyma-system
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    # "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
     "helm.sh/hook-weight": "1"
 --- 
 apiVersion: batch/v1
@@ -50,7 +67,7 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    # "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
     "helm.sh/hook-weight": "3"
 spec:
   template:
@@ -64,8 +81,8 @@ spec:
       restartPolicy: OnFailure
       serviceAccountName: {{ template "fullname" . }}-old-cr-remove
       containers:
-      - name: asset-store-domain-cr-cleanup
-        image: bitnami/kubectl
+      - name: preupgrade-kubeless
+        image: bitnami/kubectl:1.12
         imagePullPolicy: IfNotPresent
         command: ["/bin/sh","-c"]
-        args: ["kubectl delete crd functions.kubeless.io"]
+        args: ["kubectl delete crd/functions.kubeless.io deploy/core-kubeless-controller-manager cm/core-kubeless-config clusterrole/kyma-kubeless-admin clusterrole/kyma-kubeless-edit clusterrole/kyma-kubeless-view clusterrole/core-kubeless-controller-deployer clusterrolebinding/core-kubeless-controller-deployer sa/core-kubeless-controller-acct deploy/core-lambdas-ui virtualservice.networking.istio.io/core-lambdas-ui service/core-lambdas-ui cm/lambdas-ui-config clustermicrofrontend/lambdasmicrofrontend backendmodule/kubeless --force --grace-period=0 --ignore-not-found -n kyma-system"]
