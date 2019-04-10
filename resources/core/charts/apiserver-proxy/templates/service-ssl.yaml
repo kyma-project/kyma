@@ -17,16 +17,3 @@ spec:
     targetPort: {{ .Values.port.secure }}
   selector:
     app: {{ template "name" . }}
----
-apiVersion: authentication.istio.io/v1alpha1
-kind: Policy
-metadata:
-  name: {{ template "name" . }}-ssl-mtls-disable
-  namespace: {{ .Release.Namespace }}
-spec:
-  peers:
-    - mtls:
-        mode: PERMISSIVE
-  targets:
-    - name: {{ template "name" . }}-ssl
-

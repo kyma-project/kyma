@@ -1,7 +1,7 @@
 apiVersion: "networking.istio.io/v1alpha3"
 kind: "DestinationRule"
 metadata:
-  name: {{ template "fullname" . }}-mtls-disable
+  name: {{ template "fullname" . }}
 spec:
   host: {{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
