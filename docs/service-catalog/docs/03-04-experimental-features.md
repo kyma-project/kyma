@@ -4,7 +4,7 @@ type: Details
 ---
 
 The Service Catalog requires its own instance of api-server and etcd, which increases the complexity of the cluster configuration and maintenance costs.
-In case of api-server downtime, all Service Catalog resources are unavailable. What is more, even the simple Pod restart can result in such behavior.
+In case of api-server downtime, all Service Catalog resources are unavailable.
 For this reason, Kyma developers contribute to the Service Catalog project to remove the dependency on these external components and replace them 
 with a native Kubernetes solution - CustomResourceDefinitions (CRDs).
 
