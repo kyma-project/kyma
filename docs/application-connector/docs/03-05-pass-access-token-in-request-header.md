@@ -7,7 +7,7 @@ The Application Connector supports passing the access token directly in the requ
 
 ## Passing the access token
 
-If the user is already authenticated to the service deployed on Kyma, the access token can be passed in a custom `Access-token` header. If the Application Connector detects that the custom header is present, instead of obtaining a new token, it passes the received one as a `Bearer` token in the `Authorization` header.
+If the user is already authenticated to the target API, the access token can be passed in a custom `Access-token` header. The value of  the header is of the form `Bearer {token}`. If the Application Connector detects that the custom header is present, instead of performing authorization steps, it removes `Access-token` header, and passes the received value in the `Authorization` header.
 
 ## Example
 
