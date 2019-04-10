@@ -4,7 +4,7 @@ test:
   image:
     name: monitoring
     dir: tests/
-    version: 0.9.0
+    version: 0.9.1
 global:
   isLocalEnv: false
   containerRegistry:

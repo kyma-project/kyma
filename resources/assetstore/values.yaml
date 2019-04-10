@@ -6,16 +6,16 @@ global:
       name: kyma-gateway
   asset_store_controller_manager:
     dir: 
-    version: 0.9.0
+    version: 0.9.1
   asset_upload_service:
     dir: 
-    version: 0.9.0
+    version: 0.9.1
   asset_metadata_service:
     dir: 
-    version: 0.9.0
+    version: 0.9.1
   asset_store_test:
     dir: 
-    version: 0.9.0
+    version: 0.9.1
 
 minio:
   mode: standalone
