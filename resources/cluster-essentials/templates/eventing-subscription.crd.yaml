@@ -12,6 +12,8 @@ spec:
     kind: Subscription
     shortNames:
     - sub
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
