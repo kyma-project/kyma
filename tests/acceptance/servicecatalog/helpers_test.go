@@ -124,3 +124,33 @@ func fixNamespace(name string) *corev1.Namespace {
 		},
 	}
 }
+
+func serviceClassesReport(t *testing.T, services []osb.Service, ns string) {
+	t.Log("##### Start test report #####")
+
+	cs, err := clientset.NewForConfig(kubeConfig(t))
+	if err != nil {
+		t.Errorf("Cannot get clientset during creating a report: %s", err)
+	}
+
+	scs, err := cs.ServicecatalogV1beta1().ServiceClasses(ns).List(v1.ListOptions{})
+	if err != nil {
+		t.Errorf("Cannot fetch ClusterServiceClasses list during creating a report: %s", err)
+	}
+
+	t.Logf("Available Classes from Service broker (amount: %d)", len(services))
+	for _, service := range services {
+		t.Logf(" - ServiceId: %q - Service name: %q \n", service.ID, service.Name)
+	}
+
+	t.Logf("Status of ClusterServiceClasses (amount: %d)", len(scs.Items))
+	for _, sc := range scs.Items {
+		t.Logf(" - Name: %q (ExternalName: %s, ExternalId: %q) \n",
+			sc.Name,
+			sc.GetExternalName(),
+			sc.Spec.ExternalID)
+		t.Logf("   Is removed from catalog: %t", sc.Status.CommonServiceClassStatus.RemovedFromBrokerCatalog)
+	}
+
+	t.Log("#####  End test report  #####")
+}
