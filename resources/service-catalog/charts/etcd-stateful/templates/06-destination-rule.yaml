@@ -1,10 +1,9 @@
-apiVersion: "networking.istio.io/v1alpha3"
-kind: "DestinationRule"
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
 metadata:
-  name: "service-catalog-etcd-stateful-client"
-  namespace: "{{ .Release.Namespace }}"
+  name: {{ template "etcd-fullname" . }}-client
 spec:
-  host: service-catalog-etcd-stateful-client.kyma-system.svc.cluster.local
+  host: {{ template "etcd-fullname" . }}-client.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE

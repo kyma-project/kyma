@@ -38,7 +38,7 @@ spec:
         - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway_tests.dir }}gateway-tests:{{ .Values.global.gateway_tests.version }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
-        image: eu.gcr.io/kyma-project/pr/application-operator:PR-3666
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator.dir }}application-operator:{{ .Values.global.application_operator.version }}
         imagePullPolicy: {{ .Values.controller.image.pullPolicy }}
         resources:
           limits:

@@ -1,9 +1,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: {{ template "fullname" . }}
+  name: knative-eventing
 spec:
-  host: {{ template "fullname" . }}.kyma-system.svc.cluster.local
+  host: "*.knative-eventing.svc.cluster.local"
   trafficPolicy:
     tls:
       mode: DISABLE

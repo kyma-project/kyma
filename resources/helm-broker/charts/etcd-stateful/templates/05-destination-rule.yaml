@@ -1,9 +1,9 @@
-apiVersion: "networking.istio.io/v1alpha3"
-kind: "DestinationRule"
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
 metadata:
-  name: "helm-broker-etcd-stateful-client"
+  name: {{ template "etcd-hb-fullname" . }}-client
 spec:
-  host: helm-broker-etcd-stateful-client.kyma-system.svc.cluster.local
+  host: {{ template "etcd-hb-fullname" . }}-client.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE

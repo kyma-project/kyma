@@ -1,9 +1,9 @@
-apiVersion: "networking.istio.io/v1alpha3"
-kind: "DestinationRule"
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
 metadata:
-  name: "service-catalog-apiserver"
+  name: {{ template "fullname" . }}-apiserver
 spec:
-  host: service-catalog-apiserver.kyma-system.svc.cluster.local
+  host: {{ template "fullname" . }}-apiserver.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE

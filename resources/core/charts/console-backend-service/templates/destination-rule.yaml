@@ -2,9 +2,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: console-backend-mtls-disable
+  name: {{ template "fullname" . }}
 spec:
-  host: core-console-backend-service.kyma-system.svc.cluster.local
+  host: {{ template "fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE

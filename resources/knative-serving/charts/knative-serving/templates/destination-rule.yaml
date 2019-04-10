@@ -1,9 +1,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: istio-ingressgateway-mtls-disable
+  name: knative-serving
 spec:
-  host: istio-ingressgateway.istio-system.svc.cluster.local
+  host: "*.knative-serving.svc.cluster.local"
   trafficPolicy:
     tls:
       mode: DISABLE
