@@ -16,7 +16,7 @@ spec:
   serviceAccountName: {{ .Chart.Name }}-tests
   containers:
     - name: {{ .Chart.Name }}-tests
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator_tests.dir }}application-operator-tests:{{ .Values.global.application_operator_tests.version }}
+      image: eu.gcr.io/kyma-project/pr/application-operator-tests:PR-3666
       imagePullPolicy: {{ .Values.tests.pullPolicy }}
       env:
       - name: NAMESPACE
