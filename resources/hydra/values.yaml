@@ -1,55 +1,12 @@
+---
+global:
+  isLocalEnv: false
+  gateway:
+    name: kyma-gateway
+
 image: demonsthere/hydra
 imageTag: foo
 imagePullPolicy: IfNotPresent
-
-# More options here: https://www.ory.sh/docs/hydra/configuration
-config:
-  # Whitelist one or multiple CIDR address ranges and allow them to terminate TLS connections.
-  # Be aware that the X-Forwarded-Proto header must be set and must never be modifiable by anyone but your proxy / gateway / load balancer. Supports ipv4 and ipv6.
-  # Hydra serves http instead of https when this option is set.
-  serve:
-    tls:
-      allow_termination_from:
-        - 0.0.0.0/0
-
-  log:
-    level: info
-    format: json
-
-  urls:
-    self:
-      # The issuer is used for identification in all OAuth2 tokens. Should be the public url of the server.
-      issuer: https://localhost:4444/
-      public: https://localhost:4444/
-    login: https://oath.kyma.local/login
-    # The URL of the consent endpoint.
-    consent: https://oath.kyma.local/consent
-    error: https://oath.kyma.local/error
-    post_logout_redirect: https://my-example.app/logout-successful
-
-  oauth2:
-    ttl:
-      # Lifespan of OAuth2 consent tokens. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-      login_consent_request: 1h
-      # Lifespan of OAuth2 access tokens. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-      access_token: 1h
-      refresh_token: 720h
-      # Lifespan of OpenID Connect ID Tokens. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-      id_token: 1h
-      # Lifespan of OAuth2 authorize codes. Valid time units are "ns", "us" (or "µs"), "ms", "s", "m", "h".
-      auth_code: 10m
-    expose_internal_errors: true
-    hashers:
-      bcrypt:
-        cost: 10
-
-  secrets:
-    # A secret that is at least 16 characters long.
-    system:
-      - this-is-the-primary-secret
-    # A secret that is used to encrypt cookie sessions.
-    cookie:
-      - this-is-the-primary-secret
 
 environment:
   inline: {}

@@ -42,6 +42,7 @@ spec:
         - serve
         - all
         - --config=/hydra/config.yaml
+        - --dangerous-force-http
         ports:
         - name: service
           containerPort: 4444
