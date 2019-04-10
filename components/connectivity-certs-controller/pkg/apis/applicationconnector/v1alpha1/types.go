@@ -66,7 +66,7 @@ type CertificateStatus struct {
 }
 
 type CentralConnectionError struct {
-	Message string
+	Message string `json:"message"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

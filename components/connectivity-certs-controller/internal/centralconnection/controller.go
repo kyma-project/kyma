@@ -270,6 +270,8 @@ func (c *Controller) setErrorStatus(connection *v1alpha1.CentralConnection, err 
 	connection.Status.SynchronizationStatus.LastSync = syncTime
 	connection.Status.CertificateStatus = nil
 
+	connection.Spec.RenewNow = false
+
 	updateError := c.updateCentralConnectionCR(connection)
 	if updateError != nil {
 		c.logger.Errorf("Failed to set error status on %s Connection", connection.Name)
