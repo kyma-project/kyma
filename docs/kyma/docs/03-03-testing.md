@@ -3,17 +3,15 @@ title: Testing Kyma
 type: Details
 ---
 
-For testing, the Kyma components use the [Octopus](http://github.com/kyma-incubator/octopus). 
+Kyma components use [Octopus](http://github.com/kyma-incubator/octopus) for testing. 
 Octopus is a testing framework that allows you to run tests defined as Docker images on a running cluster.
-Octopus uses two types of Custom Resource Definitions:
-- TestDefinition defines your test as a Pod specification.
-- ClusterTestSuite defines a suite of tests to execute and how to execute them.
-
-Place your TestDefinition in your chart.
+Octopus uses two Custom Resource Definitions (CRDs):
+- TestDefinition, which defines your test as a Pod specification.
+- ClusterTestSuite, which defines a suite of tests to execute and how to execute them.
 
 ## Add a new test
-
-See the following example of a test prepared for Dex:
+To add a new test, create a yaml file with `TestDefinition` in your chart. By convention, place it under tests directory.
+See the exemplary test directory prepared for Dex:
 
 ```
 # Chart tree
@@ -34,7 +32,9 @@ dex
 ```
 
 The test adds a new **test-dex-connection.yaml** under the `templates/tests` directory.
-This simple test calls the `Dex` endpoint with cURL, defined as follows:
+Detailed TestDefinition description can be found in [Octopus documentation](https://github.com/kyma-incubator/octopus/blob/master/docs/crd-test-definition.md) 
+In the simplest example, define just `spec.template` which is of type `PodTemplateSpec`.
+In the example below, there is a container that calls the `Dex` endpoint with cURL.
 
 ```yaml
 apiVersion: "testing.kyma-project.io/v1alpha1"
@@ -59,17 +59,16 @@ spec:
           "http://dex-service.{{ .Release.Namespace }}.svc.cluster.local:5556/.well-known/openid-configuration"
         ]
       restartPolicy: Never
----
 
 ```
 
-## Test execution
-To execute all tests, use the `testing.sh` script located in the `/installation/scripts/` directory. 
+## Tests execution
+To run all tests, use the `testing.sh` script located in the `/installation/scripts/` directory. 
 Internally, `ClusterTestSuite` resource is defined, that fetches all `TestDefinitions` and executes them.
 
 
-### Run a test manually
-To execute tests manually, create `ClusterTestSuite` on your own. See the following example:
+### Run tests manually
+To run tests manually, create your own ClusterTestSuite resource. See the following example:
 
 ```yaml
 apiVersion: testing.kyma-project.io/v1alpha1
@@ -84,7 +83,7 @@ spec:
   count: 1
 ```
 
-Creation of the suite triggers tests. Current progress of the tests is visible in a `ClusterTestSuite` status.
+Creation of the suite triggers tests execution. See the current progress of the tests in the ClusterTestSuite status. Run:
 ```bash
  kubectl get cts {my-suite} -oyaml
  ```
@@ -126,7 +125,7 @@ status:
   startTime: 2019-04-05T12:22:53Z
 ```
 
-The ID of the execution is the same as the ID of the testing Pod. The testing Pod is created in the same namespace as it's TestDefinition. To get logs for a specific test, execute the following command:
+The ID of the test execution is the same as the ID of the testing Pod. The testing Pod is created in the same Namespace as its TestDefinition. To get logs for a specific test, run the following command:
 ```
-kubeclt logs {execution-id} -n {test-def-namespace}
+kubectl logs {execution-id} -n {test-def-namespace}
 ```
