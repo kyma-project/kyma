@@ -1,12 +1,7 @@
 package ui
 
 import (
-	"net/http"
 	"strings"
-	"time"
-
-	"crypto/tls"
-	"net/http/cookiejar"
 
 	"github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
@@ -15,26 +10,20 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// MicrofrontendUpgradeTest tests the creation of a kubeless microfrontend and execute a http request to the exposed api of the microfrontend after Kyma upgrade phase
+// MicrofrontendUpgradeTest tests the creation of a microfrontend
 type MicrofrontendUpgradeTest struct {
 	microfrontendName string
 	namespace         string
 	stop              <-chan struct{}
-	httpClient        *http.Client
 	mfClient          *mfClient.Clientset
 }
 
 // NewMicrofrontendUpgradeTest returns new instance of the MicrofrontendUpgradeTest
 func NewMicrofrontendUpgradeTest(mfClient *mfClient.Clientset) *MicrofrontendUpgradeTest {
 	namespace := strings.ToLower("MicrofrontendUpgradeTest")
-	httpCli, err := getHTTPClient(true)
-	if err != nil {
-		logrus.Fatal(errors.Wrap(err, "failed on getting the http client."))
-	}
 	return &MicrofrontendUpgradeTest{
 		microfrontendName: "mf-name",
 		namespace:         namespace,
-		httpClient:        httpCli,
 		mfClient:          mfClient,
 	}
 }
@@ -100,18 +89,3 @@ func (t MicrofrontendUpgradeTest) createMicrofrontend() error {
 	_, err := t.mfClient.UiV1alpha1().MicroFrontends(t.namespace).Create(microfrontend)
 	return err
 }
-
-func getHTTPClient(skipVerify bool) (*http.Client, error) {
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipVerify},
-	}
-
-	cookieJar, err := cookiejar.New(nil)
-	if err != nil {
-		return nil, err
-	}
-
-	return &http.Client{Timeout: 15 * time.Second, Transport: tr, Jar: cookieJar}, nil
-}
-
-func int32Ptr(i int32) *int32 { return &i }
