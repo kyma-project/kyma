@@ -4,9 +4,6 @@
 
 This controller injects limit ranges and resource quotas into each Namespace that you create. In addition, it enables Istio injection for the Namespace by labeling it with the `istio-injection` label.
 
-Developers create default roles from a roles template that they first define in a Namespace inside the Kubernetes cluster.
-At the time of cluster provisioning, developers might define the roles in the `3-bootstrap-roles.yaml` file. The controller looks for roles labeled as `env=true` at the creation of the new Namespace. Next, the controller copies the roles to the new Namespace.
-
 Limit range configuration is required. These environment variables provide the configuration:
 * `APP_LIMIT_RANGE_MEMORY_DEFAULT_REQUEST`
 * `APP_LIMIT_RANGE_MEMORY_DEFAULT`
