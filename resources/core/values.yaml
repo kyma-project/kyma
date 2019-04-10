@@ -57,7 +57,7 @@ global:
     clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
-    version: 429bfbcc
+    version: 8a10f0ed
   kubeless_integration_tests:
     dir: develop/tests/
     version: 50d9482b
@@ -69,7 +69,7 @@ global:
     version: "eb39c791"
   test_namespace_controller:
     dir: develop/
-    version: 429bfbcc
+    version: 6b4c356f
   console_backend_service:
     dir: develop/
     version: '9ecc0bcc'
