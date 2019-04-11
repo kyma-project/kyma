@@ -12,13 +12,16 @@ metadata:
   labels:
     app: {{ template "name" . }}
 rules:
+  - apiGroups: ["cms.kyma-project.io"]
+    resources: ["clusterdocstopics", "docstopics"]
+    verbs: ["create", "get", "delete"]
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["servicebrokers", "serviceinstances", "servicebindings"]
     verbs: ["create", "get", "delete"]
     nonResourceURLs: []
   - apiGroups: ["servicecatalog.k8s.io"]
     resources: ["clusterservicebrokers", "serviceclasses", "clusterserviceclasses", "serviceplans", "clusterserviceplans"]
-    verbs: [get", "list"]
+    verbs: ["get", "list"]
   - apiGroups: ["servicecatalog.kyma-project.io"]
     resources: ["usagekinds"]
     verbs: ["create", "delete"]
