@@ -10,5 +10,6 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  config.json: {{ .Values.deployment.externalClusterLookup.lookupConfig }}
+  config.json: |
+    {{ .Values.deployment.externalClusterLookup.lookupConfig }}
 {{- end }}
