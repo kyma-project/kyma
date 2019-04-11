@@ -1,8 +1,6 @@
 package wait
 
 import (
-	"fmt"
-
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
@@ -19,7 +17,6 @@ func ForServiceInstanceReady(instanceName, namespace string, svcatCli *clientset
 		}
 
 		conditions := instance.Status.Conditions
-		fmt.Printf("conditions: %v\n", conditions) // TODO: Remove when random timeouts stop happening
 		for _, cond := range conditions {
 			if cond.Type == v1beta1.ServiceInstanceConditionReady {
 				return cond.Status == v1beta1.ConditionTrue, nil
