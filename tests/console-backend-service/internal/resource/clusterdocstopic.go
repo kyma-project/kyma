@@ -57,3 +57,12 @@ func (dt *ClusterDocsTopic) Get(name string) (*v1alpha1.ClusterDocsTopic, error)
 
 	return &res, nil
 }
+
+func (dt *ClusterDocsTopic) Delete(name string) error {
+	err := dt.resCli.Delete(name)
+	if err != nil {
+		return errors.Wrapf(err, "while deleting ClusterDocsTopic %s", name)
+	}
+
+	return nil
+}
