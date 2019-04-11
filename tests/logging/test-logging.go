@@ -259,7 +259,7 @@ func main() {
 	testLokiLabel()
 	log.Println("Test if Promtail is able to find Loki")
 	testPromtail()
-	log.Println("Test if logs from a dummy Pod are streamed by promtail")
-	testLogStream()
+	//log.Println("Test if logs from a dummy Pod are streamed by promtail")
+	//testLogStream()
 	cleanup()
 }

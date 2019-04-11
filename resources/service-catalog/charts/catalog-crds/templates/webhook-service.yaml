@@ -1,0 +1,26 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ template "fullname" . }}-webhook
+  labels:
+    app: {{ template "fullname" . }}-webhook
+    chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+    release: "{{ .Release.Name }}"
+    heritage: "{{ .Release.Service }}"
+spec:
+  type: {{ .Values.webhook.service.type }}
+  {{- if eq .Values.webhook.service.type "ClusterIP" }}
+  {{- if .Values.webhook.service.clusterIP }}
+  clusterIP: {{ .Values.webhook.service.clusterIP }}
+  {{- end }}
+  {{- end }}
+  selector:
+    app: {{ template "fullname" . }}-webhook
+  ports:
+  - name: secure
+    protocol: TCP
+    port: 443
+    targetPort: 8443
+    {{- if eq .Values.webhook.service.type "NodePort" }}
+    nodePort: {{ .Values.webhook.service.nodePort.securePort }}
+    {{- end }}
