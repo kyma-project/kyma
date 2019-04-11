@@ -10,15 +10,15 @@ type MutualTLSClientProvider struct {
 }
 
 // CreateClient provides a mock function with given fields: credentials
-func (_m *MutualTLSClientProvider) CreateClient(credentials connectorservice.CertificateCredentials) connectorservice.MutualTLSConnectorClient {
+func (_m *MutualTLSClientProvider) CreateClient(credentials connectorservice.CertificateCredentials) connectorservice.MutualTLSClient {
 	ret := _m.Called(credentials)
 
-	var r0 connectorservice.MutualTLSConnectorClient
-	if rf, ok := ret.Get(0).(func(connectorservice.CertificateCredentials) connectorservice.MutualTLSConnectorClient); ok {
+	var r0 connectorservice.MutualTLSClient
+	if rf, ok := ret.Get(0).(func(connectorservice.CertificateCredentials) connectorservice.MutualTLSClient); ok {
 		r0 = rf(credentials)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(connectorservice.MutualTLSConnectorClient)
+			r0 = ret.Get(0).(connectorservice.MutualTLSClient)
 		}
 	}
 

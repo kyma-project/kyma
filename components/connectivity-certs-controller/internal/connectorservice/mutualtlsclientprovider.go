@@ -15,7 +15,7 @@ type CertificateCredentials struct {
 }
 
 type MutualTLSClientProvider interface {
-	CreateClient(credentials CertificateCredentials) MutualTLSConnectorClient
+	CreateClient(credentials CertificateCredentials) MutualTLSClient
 }
 
 type mutualTLSClientProvider struct {
@@ -28,7 +28,7 @@ func NewMutualTLSClientProvider(csrProvider certificates.CSRProvider) MutualTLSC
 	}
 }
 
-func (cp *mutualTLSClientProvider) CreateClient(credentials CertificateCredentials) MutualTLSConnectorClient {
+func (cp *mutualTLSClientProvider) CreateClient(credentials CertificateCredentials) MutualTLSClient {
 
 	certs := []tls.Certificate{
 		{

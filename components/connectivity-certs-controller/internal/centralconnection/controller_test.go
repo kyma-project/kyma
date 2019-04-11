@@ -185,7 +185,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificate").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
+		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
 
@@ -233,7 +233,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificate").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
+		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
 
@@ -273,7 +273,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificate").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
+		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
@@ -392,7 +392,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificate").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
+		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).
 			Return(connectorservice.ManagementInfo{}, errors.New("error"))
 
@@ -423,7 +423,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificate").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
+		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(certificates.Certificates{}, errors.New("error"))
 
@@ -455,7 +455,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificate").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
+		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
 
@@ -491,7 +491,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificate").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSConnectorClient{}
+		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(invalidCerts, nil)
 

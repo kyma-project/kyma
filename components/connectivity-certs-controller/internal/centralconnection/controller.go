@@ -36,7 +36,6 @@ const (
 type ResourceClient interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
 	Update(ctx context.Context, obj runtime.Object) error
-	Delete(ctx context.Context, obj runtime.Object, opts ...client.DeleteOptionFunc) error
 }
 
 type Controller struct {
@@ -104,10 +103,6 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return c.handleErrorWhileGettingInstance(err, request)
 	}
 
-	if instance.HasErrorStatus() {
-		c.logger.Infof("Central Connection %s has an error status: %s", instance.Name, instance.Status.Error.Message)
-	}
-
 	if !c.shouldSynchronizeConnection(instance) {
 		c.logger.Infof("Skipping synchronization of %s Central Connection. Last sync: %v", instance.Name, instance.Status.SynchronizationStatus.LastSync)
 		return reconcile.Result{}, nil
@@ -120,7 +115,6 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 	}
 
 	if !instance.HasCertStatus() {
-		log.Infof("Certificate status not set on %s Central Connection", instance.Name)
 		c.setCertificateStatus(instance, certCredentials.ClientCert)
 	}
 
@@ -129,8 +123,6 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		log.Infof("Failed to synchronize %s Central Connection with Connector Service: %s", instance.Name, err.Error())
 		return reconcile.Result{}, c.setErrorStatus(instance, err)
 	}
-
-	c.setSynchronizationStatus(instance)
 
 	return reconcile.Result{}, c.updateCentralConnectionCR(instance)
 }
@@ -177,10 +169,12 @@ func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnec
 	}
 	c.logger.Infof("Successfully renewed Certificate for %s Central Connection", connection.Name)
 
+	c.setSynchronizationStatus(connection)
+
 	return nil
 }
 
-// Certificate should be renewed when less than 30% of validity time is left or if time left is less than 2 times minimal Sync Time
+// Certificate should be renewed when less than 30% of validity time is left or if time left is less than 2 times minimalSyncTime
 func shouldRenew(connection *v1alpha1.CentralConnection, minimalSyncTime time.Duration) bool {
 	if connection.Spec.RenewNow {
 		return true
@@ -214,7 +208,7 @@ func (c *Controller) getCertificateCredentials() (connectorservice.CertificateCr
 	}, nil
 }
 
-func (c *Controller) renewCertificate(connection *v1alpha1.CentralConnection, tlsConnectorClient connectorservice.MutualTLSConnectorClient, managementInfo connectorservice.ManagementInfo) error {
+func (c *Controller) renewCertificate(connection *v1alpha1.CentralConnection, tlsConnectorClient connectorservice.MutualTLSClient, managementInfo connectorservice.ManagementInfo) error {
 	renewedCerts, err := tlsConnectorClient.RenewCertificate(managementInfo.ManagementURLs.RenewalURL)
 	if err != nil {
 		return errors.Wrap(err, "Failed to renew client certificate")

@@ -63,14 +63,14 @@ func (cp *certificateProvider) GetClientCredentials() (*rsa.PrivateKey, *x509.Ce
 	return clientKey, clientCert, nil
 }
 
-func decodeCertificate(clusterCert []byte) (*x509.Certificate, error) {
-	if clusterCert == nil {
-		return nil, errors.New("Cluster certificate data not found")
+func decodeCertificate(certificate []byte) (*x509.Certificate, error) {
+	if certificate == nil {
+		return nil, errors.New("Certificate data is empty")
 	}
 
-	block, _ := pem.Decode(clusterCert)
+	block, _ := pem.Decode(certificate)
 	if block == nil {
-		return nil, errors.New("Failed to decode client certificate pem")
+		return nil, errors.New("Failed to decode certificate pem")
 	}
 
 	return x509.ParseCertificate(block.Bytes)
@@ -78,7 +78,7 @@ func decodeCertificate(clusterCert []byte) (*x509.Certificate, error) {
 
 func getClientPrivateKey(clusterKey []byte) (*rsa.PrivateKey, error) {
 	if clusterKey == nil {
-		return nil, errors.New("Client key data not found")
+		return nil, errors.New("Private key data is empty")
 	}
 
 	block, _ := pem.Decode(clusterKey)

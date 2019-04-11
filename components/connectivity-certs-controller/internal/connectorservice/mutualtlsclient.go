@@ -13,7 +13,7 @@ import (
 	"github.com/pkg/errors"
 )
 
-type MutualTLSConnectorClient interface {
+type MutualTLSClient interface {
 	GetManagementInfo(managementInfoURL string) (ManagementInfo, error)
 	RenewCertificate(renewalURL string) (certificates.Certificates, error)
 }
@@ -24,7 +24,7 @@ type mutualTLSConnectorClient struct {
 	subject     pkix.Name
 }
 
-func NewMutualTLSConnectorClient(config *tls.Config, csrProvider certificates.CSRProvider, subject pkix.Name) MutualTLSConnectorClient {
+func NewMutualTLSConnectorClient(config *tls.Config, csrProvider certificates.CSRProvider, subject pkix.Name) MutualTLSClient {
 
 	return &mutualTLSConnectorClient{
 		httpClient: &http.Client{
@@ -68,12 +68,7 @@ func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string) (certifi
 		return certificates.Certificates{}, errors.Wrap(err, "Failed to create CSR")
 	}
 
-	request, err := cc.prepareRenewalRequest(renewalURL, csr)
-	if err != nil {
-		return certificates.Certificates{}, errors.Wrap(err, "Failed to create renewal request")
-	}
-
-	response, err := cc.httpClient.Do(request)
+	response, err := cc.requestCertificateRenewal(renewalURL, csr)
 	if err != nil {
 		return certificates.Certificates{}, errors.Wrap(err, "Failed to request certificate renewal")
 	}
@@ -92,11 +87,16 @@ func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string) (certifi
 	return decodeCertificateResponse(clientKey, certificateResponse)
 }
 
-func (cc *mutualTLSConnectorClient) prepareRenewalRequest(renewalURL, csr string) (*http.Request, error) {
+func (cc *mutualTLSConnectorClient) requestCertificateRenewal(renewalURL, csr string) (*http.Response, error) {
 	reqBody, err := json.Marshal(CertificateRequest{CSR: csr})
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to marshal certificate request")
 	}
 
-	return http.NewRequest(http.MethodPost, renewalURL, bytes.NewBuffer(reqBody))
+	request, err := http.NewRequest(http.MethodPost, renewalURL, bytes.NewBuffer(reqBody))
+	if err != nil {
+		return nil, errors.Wrap(err, "Failed to create renewal request")
+	}
+
+	return cc.httpClient.Do(request)
 }

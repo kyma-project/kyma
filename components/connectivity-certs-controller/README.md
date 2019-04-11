@@ -14,7 +14,7 @@ cat <<EOF | kubectl apply -f -
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: CertificateRequest
 metadata:
-  name: certificate-request
+  name: {CERTIFICATE_REQUEST_NAME}
 spec:
   csrInfoUrl: "{CSR_INFO_URL_WITH_TOKEN}"
 EOF
@@ -26,7 +26,14 @@ After a successful exchange of certificates, the controller creates new Secrets 
 ## Connection status
 
 When certificates are fetched successfully the `CentralConnection` CR is created.
-It contains the `ManagementInfoURL`, status of a connection with central Connector Service.
+It contains the `ManagementInfoURL`, status of a connection with central the Connector Service and the certificate validity period.
+
+
+The `CentralConnection` CR is created with the same name as a name of `CertificateRequest` for which connection was established.
+To get `CentralConnection` run:
+```
+kubectl get centralconnections.applicationconnector.kyma-project.io {CENTRAL_CONNECTION_NAME} -oyaml
+```
 
 The example resource looks like that:
 ```
@@ -46,13 +53,12 @@ status:
     lastSync: "2019-04-10T09:01:06Z"
 ```
 
-The Connectivity Certs Controller check a status of the connection by calling `ManagementInfoURL` stored in `CentralConnection` CR.
-If the Management Info call will fail, the `CentralConnection` will contain an error status.
+The Connectivity Certs Controller checks a status of the connection by calling `ManagementInfoURL` stored in `CentralConnection` CR.
 
 
 ## Certificate renewal
 
-Connectivity Certs Controller renews client certificate when it is getting close to the expiration time. Renewed certificate will replace the previous one in the Secret together with new private key.
+Connectivity Certs Controller renews client certificate when it is getting close to its expiration time. Renewed certificate will replace the previous one in the Secret together with new private key.
 
 To renew the certificate immediately `spec.RenewNow` field on `CentralConnection` should be set to `true`. 
 
