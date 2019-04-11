@@ -48,6 +48,8 @@ A successful call returns the following response:
     url: https://connector-service.kyma.local/v1/applications/signingRequests/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
   ```
 
+
+
 ## Get the CSR information and configuration details from Kyma
 
 Use the link you got in the previous step to fetch the CSR information and configuration details required to connect your external solution. Run:
@@ -64,7 +66,7 @@ A successful call returns the following response:
     "api":{
         "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
         "eventsUrl":        "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
-        "infoUrl":          "https://connector-service.kyma.local/v1/applications/management/info",
+        "infoUrl":          "https://gateway.{CLUSTER_DOMAIN}/v1/applications/management/info",
         "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/certificates",
     },
     "certificate":{
@@ -74,6 +76,8 @@ A successful call returns the following response:
     }
 }
 ```
+
+> **NOTE:** The response contains URLs to Application Registry and Events API, however, it is not recommeded to use those. You should call metadata endpoint, which is provided in infoUrl property, to fetch correct URLs to Metadata and Events API.
 
 ## Generate a CSR and send it to Kyma
 
@@ -100,7 +104,45 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 
 After you receive the certificate, decode it and use it in your application. Register the services of your external solution through the Application Registry.
 
-## Call the Metadata and Event services on local deployment
+## Call metadata endpoint
+
+You must call the metadata endpoint with the generated certificate to get URLS to the following:
+
+- Application Registry API
+- Events Service API
+- Certificate renewal endpoint
+- Certificate revocation endpoint
+
+Use the link you got in the second step to fetch the metadata information. Run:
+
+```
+curl {METADATA_ENDPOINT_URL} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key
+```
+
+```
+{
+  "clientIdentity": {
+    "application": "APP_NAME"
+  },
+  "urls": {
+    "metadataUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
+    "eventsUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
+    "renewCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewal",
+    "revokeCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
+  },
+  "certificate": {
+    "subject": "OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
+    "extensions": "string",
+    "key-algorithm": "rsa2048"
+  }
+}
+```
+
+> **NOTE:** Follow [this](#tutorials-renew-the-client-certificate) tutorial to learn how to renew a certificate.
+
+> **NOTE:** Follow [this](#tutorials-revoke-the-client-certificate) tutorial to learn how to revoke a certificate.
+
+## Call the Application Registry and Event services on local deployment
 
 When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-ingress-nginx-ingress-controller` to successfully call the Metadata Service and the Event Service.
 
