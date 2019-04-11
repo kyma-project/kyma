@@ -10,6 +10,5 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 data:
-  config.json: |
-    { "url": "http://localhost:8080/graphql", "headers": { } }
+  config.json: {{ .Values.deployment.externalClusterLookup.lookupConfig }}
 {{- end }}
