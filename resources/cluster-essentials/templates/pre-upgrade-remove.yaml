@@ -38,7 +38,7 @@ metadata:
   name: {{ template "fullname" . }}-pre-upgrade-remove
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-delete-policy": "hook-succeeded,before-hook-creation"
     "helm.sh/hook-weight": "1"
 rules:
 - apiGroups: [""]
@@ -114,7 +114,7 @@ spec:
       volumes:
         - name: installation-kubeless-overrides
           configMap:
-            name: kubeless-pre-upgrade-remove
+            name: {{ template "fullname" . }}-pre-upgrade-remove
             items:
               - key: installation-kubeless-overrides-yaml
                 path: installation-kubeless-overrides.yaml
