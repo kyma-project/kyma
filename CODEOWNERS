@@ -271,7 +271,7 @@
 /tests/acceptance/dex @sjanota @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Knative Serving Acceptance
-/tests/knative-serving-acceptance/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+/tests/knative-serving/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # test-namespace-controller
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere

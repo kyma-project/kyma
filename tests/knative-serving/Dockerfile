@@ -1,6 +1,6 @@
 FROM golang:1.10-alpine as builder
 
-ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/knative-serving-acceptance/
+ENV SRC_DIR /go/src/github.com/kyma-project/kyma/tests/knative-serving/
 WORKDIR ${SRC_DIR}
 
 COPY ./knative_serving_test.go ${SRC_DIR}/
