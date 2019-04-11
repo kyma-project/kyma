@@ -63,9 +63,14 @@ func (cc *mutualTLSConnectorClient) GetManagementInfo(managementInfoURL string) 
 }
 
 func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string) (certificates.Certificates, error) {
-	request, err := cc.prepareRenewalRequest(renewalURL)
+	csr, clientKey, err := cc.csrProvider.CreateCSR(cc.subject)
 	if err != nil {
-		return certificates.Certificates{}, errors.Wrap(err, " Failed to create certificate renewal request")
+		return certificates.Certificates{}, errors.Wrap(err, "Failed to create CSR")
+	}
+
+	request, err := cc.prepareRenewalRequest(renewalURL, csr)
+	if err != nil {
+		return certificates.Certificates{}, errors.Wrap(err, "Failed to create renewal request")
 	}
 
 	response, err := cc.httpClient.Do(request)
@@ -84,16 +89,10 @@ func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string) (certifi
 		return certificates.Certificates{}, errors.Wrap(err, "Failed to read response body")
 	}
 
-	return decodeCertificateResponse(certificateResponse)
+	return decodeCertificateResponse(clientKey, certificateResponse)
 }
 
-func (cc *mutualTLSConnectorClient) prepareRenewalRequest(renewalURL string) (*http.Request, error) {
-	// TODO: Subject should be returned from Management Info in the future
-	csr, err := cc.csrProvider.CreateCSR(cc.subject)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to create CSR")
-	}
-
+func (cc *mutualTLSConnectorClient) prepareRenewalRequest(renewalURL, csr string) (*http.Request, error) {
 	reqBody, err := json.Marshal(CertificateRequest{CSR: csr})
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to marshal certificate request")

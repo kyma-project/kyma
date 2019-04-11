@@ -80,7 +80,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	csrProvider := certificates.NewCSRProvider(options.clusterCertificatesSecret, options.caCertificatesSecret, secretsRepository)
+	csrProvider := certificates.NewCSRProvider()
 	certPreserver := certificates.NewCertificatePreserver(options.clusterCertificatesSecret, options.caCertificatesSecret, secretsRepository)
 	connectorClient := connectorservice.NewConnectorClient(csrProvider)
 	certProvider := certificates.NewCertificateProvider(options.clusterCertificatesSecret, options.caCertificatesSecret, secretsRepository)

@@ -5,18 +5,10 @@ import (
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/pem"
-	"errors"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets/mocks"
-
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-)
-
-const (
-	clusterSecretName = "cluster-cert-secret"
 )
 
 func TestCsrProvider_CreateCSR(t *testing.T) {
@@ -32,43 +24,20 @@ func TestCsrProvider_CreateCSR(t *testing.T) {
 
 	t.Run("should create CSR with new key", func(t *testing.T) {
 		// given
-		secretRepository := &mocks.Repository{}
-		secretRepository.On("UpsertWithMerge", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(nil).
-			Run(func(args mock.Arguments) {
-				secretData, ok := args[1].(map[string][]byte)
-				require.True(t, ok)
-				assert.NotEmpty(t, secretData[clusterKeySecretKey])
-			})
-
-		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
+		csrProvider := NewCSRProvider()
 
 		// when
-		csr, err := csrProvider.CreateCSR(subject)
+		csr, key, err := csrProvider.CreateCSR(subject)
 
 		// then
 		require.NoError(t, err)
 		require.NotEmpty(t, csr)
+		require.NotEmpty(t, key)
 
 		receivedCSR := decodeCSR(t, csr)
 
 		require.NotNil(t, receivedCSR)
 		assertSubject(t, receivedCSR)
-		secretRepository.AssertExpectations(t)
-	})
-
-	t.Run("should return error when failed to override secret", func(t *testing.T) {
-		// given
-		secretRepository := &mocks.Repository{}
-		secretRepository.On("UpsertWithMerge", clusterSecretName, mock.AnythingOfType("map[string][]uint8")).Return(errors.New("error"))
-
-		csrProvider := NewCSRProvider(clusterSecretName, "", secretRepository)
-
-		// when
-		_, err := csrProvider.CreateCSR(subject)
-
-		// then
-		require.Error(t, err)
-		secretRepository.AssertExpectations(t)
 	})
 
 }

@@ -19,7 +19,7 @@ const (
 )
 
 type CSRProvider interface {
-	CreateCSR(subject pkix.Name) (string, error)
+	CreateCSR(subject pkix.Name) (string, *rsa.PrivateKey, error)
 }
 
 type csrProvider struct {
@@ -28,26 +28,22 @@ type csrProvider struct {
 	secretRepository      secrets.Repository
 }
 
-func NewCSRProvider(clusterCertSecret, caCRTSecret string, secretRepository secrets.Repository) CSRProvider {
-	return &csrProvider{
-		clusterCertSecretName: clusterCertSecret,
-		caCRTSecretName:       caCRTSecret,
-		secretRepository:      secretRepository,
-	}
+func NewCSRProvider() CSRProvider {
+	return &csrProvider{}
 }
 
-func (cp *csrProvider) CreateCSR(subject pkix.Name) (string, error) {
-	clusterPrivateKey, err := cp.createClusterKeySecret()
+func (cp *csrProvider) CreateCSR(subject pkix.Name) (string, *rsa.PrivateKey, error) {
+	clusterPrivateKey, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
 	csr, err := createCSR(subject, clusterPrivateKey)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return base64.StdEncoding.EncodeToString(csr), nil
+	return base64.StdEncoding.EncodeToString(csr), clusterPrivateKey, nil
 }
 
 func createCSR(subject pkix.Name, key *rsa.PrivateKey) ([]byte, error) {
@@ -65,22 +61,4 @@ func createCSR(subject pkix.Name, key *rsa.PrivateKey) ([]byte, error) {
 	})
 
 	return pemEncodedCSR, nil
-}
-
-func (cp *csrProvider) createClusterKeySecret() (*rsa.PrivateKey, error) {
-	key, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
-	if err != nil {
-		return nil, err
-	}
-
-	secretData := map[string][]byte{
-		clusterKeySecretKey: pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)}),
-	}
-
-	err = cp.secretRepository.UpsertWithMerge(cp.clusterCertSecretName, secretData)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to override cluster key secret")
-	}
-
-	return key, nil
 }

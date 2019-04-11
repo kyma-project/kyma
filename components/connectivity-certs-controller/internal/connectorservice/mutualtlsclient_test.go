@@ -1,6 +1,8 @@
 package connectorservice
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/tls"
 	"crypto/x509/pkix"
 	"fmt"
@@ -107,10 +109,13 @@ func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
 	encodedCSR := "encodedCSR"
 	renewalEndpoint := "/v1/application/certificates/renewals"
 
+	clientKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
+
 	t.Run("should renew certificate", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", subject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		server, router := createTestServer()
 		defer server.Close()
@@ -147,7 +152,7 @@ func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
 	t.Run("should return error when failed to create CSR", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", subject).Return("", errors.New("error"))
+		csrProvider.On("CreateCSR", subject).Return("", nil, errors.New("error"))
 
 		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
 
@@ -161,7 +166,7 @@ func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
 	t.Run("should return error when request failed", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", subject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
 
@@ -175,7 +180,7 @@ func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
 	t.Run("should return error when server responded with error", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", subject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		server, router := createTestServer()
 		defer server.Close()

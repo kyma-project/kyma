@@ -1,6 +1,8 @@
 package connectorservice
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
 	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
@@ -47,11 +49,13 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 	}
 
 	encodedCSR := "encodedCSR"
+	clientKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
 
 	t.Run("should receive certificates", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", subject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		testServer, router := createTestServer()
 		connectorURL := testServer.URL
@@ -112,7 +116,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 	t.Run("should return error when failed to create CSR", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", subject).Return("", errors.New("Error"))
+		csrProvider.On("CreateCSR", subject).Return("", nil, errors.New("Error"))
 
 		testServer, router := createTestServer()
 		connectorURL := testServer.URL
@@ -135,7 +139,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 	t.Run("should return error when failed get certificate response", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", subject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		testServer, router := createTestServer()
 		connectorURL := testServer.URL
@@ -173,7 +177,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 	t.Run("should return error when Certificate URL is incorrect", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", subject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		testServer, router := createTestServer()
 		connectorURL := testServer.URL
@@ -211,7 +215,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 			t.Run("should return error when failed to decode certificate", func(t *testing.T) {
 				// given
 				csrProvider := &mocks.CSRProvider{}
-				csrProvider.On("CreateCSR", subject).Return(encodedCSR, nil)
+				csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 				testServer, router := createTestServer()
 				connectorURL := testServer.URL

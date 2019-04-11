@@ -2,9 +2,12 @@ package connectorservice
 
 import (
 	"bytes"
+	"crypto/rsa"
+	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -41,7 +44,7 @@ func (cc *connectorClient) ConnectToCentralConnector(csrInfoURL string) (Establi
 
 	subject := parseSubject(infoResponse.CertificateInfo.Subject)
 
-	encodedCSR, err := cc.csrProvider.CreateCSR(subject)
+	encodedCSR, clientKey, err := cc.csrProvider.CreateCSR(subject)
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed while creating CSR")
 	}
@@ -51,7 +54,7 @@ func (cc *connectorClient) ConnectToCentralConnector(csrInfoURL string) (Establi
 		return EstablishedConnection{}, errors.Wrap(err, "Failed while requesting certificate")
 	}
 
-	return composeConnectionData(certificateResponse, infoResponse.Api.InfoURL)
+	return composeConnectionData(clientKey, certificateResponse, infoResponse.Api.InfoURL)
 }
 
 func (cc *connectorClient) requestCSRInfo(csrInfoURL string) (InfoResponse, error) {
@@ -109,8 +112,8 @@ func (cc *connectorClient) requestCertificates(csrURL string, encodedCSR string)
 	return certificateResponse, nil
 }
 
-func composeConnectionData(certificateResponse CertificatesResponse, managementInfoURL string) (EstablishedConnection, error) {
-	certs, err := decodeCertificateResponse(certificateResponse)
+func composeConnectionData(clientKey *rsa.PrivateKey, certificateResponse CertificatesResponse, managementInfoURL string) (EstablishedConnection, error) {
+	certs, err := decodeCertificateResponse(clientKey, certificateResponse)
 	if err != nil {
 		return EstablishedConnection{}, err
 	}
@@ -121,7 +124,7 @@ func composeConnectionData(certificateResponse CertificatesResponse, managementI
 	}, nil
 }
 
-func decodeCertificateResponse(certificateResponse CertificatesResponse) (certificates.Certificates, error) {
+func decodeCertificateResponse(clientKey *rsa.PrivateKey, certificateResponse CertificatesResponse) (certificates.Certificates, error) {
 	crtChain, err := base64.StdEncoding.DecodeString(certificateResponse.CRTChain)
 	if err != nil {
 		return certificates.Certificates{}, errors.Wrap(err, "Failed to decode certificate chain")
@@ -138,6 +141,7 @@ func decodeCertificateResponse(certificateResponse CertificatesResponse) (certif
 	}
 
 	return certificates.Certificates{
+		ClientKey: pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(clientKey)}),
 		CRTChain:  crtChain,
 		ClientCRT: clientCRT,
 		CaCRT:     caCRT,
