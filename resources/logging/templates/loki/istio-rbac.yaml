@@ -1,4 +1,3 @@
-{{- if .Values.global.rbac.create }}
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRole
 metadata:
@@ -13,10 +12,7 @@ spec:
   - services: ["logging.kyma-system.svc.cluster.local"]
     methods: ["GET", "POST", "OPTIONS"]
     paths: ["/api/*"]
-{{- end }}
-
 ---
-{{- if .Values.global.rbac.create }}
 apiVersion: rbac.istio.io/v1alpha1
 kind: ServiceRoleBinding
 metadata:
@@ -35,4 +31,3 @@ spec:
   roleRef:
     kind: ServiceRole
     name: loki-role
-{{- end }}

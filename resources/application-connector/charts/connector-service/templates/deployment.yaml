@@ -30,7 +30,7 @@ spec:
         imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
         args:
           - "/connectorservice"
-          - '--appName={{ .Chart.Name }}'
+          - "--appName={{ .Chart.Name }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
           - "--internalAPIPort={{ .Values.deployment.args.internalAPIPort }}"
           - "--namespace={{ .Values.global.namespace }}"
@@ -47,6 +47,13 @@ spec:
           - "--runtimeCertificateValidityTime={{ .Values.deployment.args.runtimeValidityTime }}"
           - "--central={{ .Values.deployment.args.central }}"
           - "--revocationConfigMapName={{ .Values.deployment.args.revocationConfigMapName }}"
+          - "--lookupEnabled={{ .Values.deployment.externalClusterLookup.enabled }}"
+          - "--lookupConfigMapPath={{ .Values.deployment.externalClusterLookup.path }}"
+        {{- if .Values.deployment.externalClusterLookup.enabled }}
+        volumeMounts:
+        - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+          mountPath: {{ .Values.deployment.externalClusterLookup.path }}
+        {{- end }}
         env:
           - name: COUNTRY
             value: "{{ .Values.deployment.envvars.country }}"
@@ -67,3 +74,10 @@ spec:
             name: metrics-port
         securityContext:
           runAsUser: {{ .Values.deployment.runAsUser }}
+      {{- if .Values.deployment.externalClusterLookup.enabled }}
+      volumes:
+      - name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+        configMap:
+          name: {{ .Values.deployment.externalClusterLookup.lookupConfigMapName }}
+      {{- end }}
+
