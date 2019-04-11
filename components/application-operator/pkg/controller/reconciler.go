@@ -10,6 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	k8sErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/util/retry"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -49,12 +50,12 @@ func (r *applicationReconciler) Reconcile(request reconcile.Request) (reconcile.
 		return r.handleErrorWhileGettingInstance(err, request)
 	}
 
-	err = r.enforceDesiredState(instance)
+	updateFunc, err := r.enforceDesiredState(instance)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	err = r.updateApplicationCR(instance)
+	err = r.updateApplicationCR(request.NamespacedName, updateFunc)
 	if err != nil {
 		return reconcile.Result{}, logAndError(err, "Error while updating Application %s", instance.Name)
 	}
@@ -77,35 +78,35 @@ func (r *applicationReconciler) handleErrorWhileGettingInstance(err error, reque
 	return reconcile.Result{}, logAndError(err, "Error getting %s Application", request.Name)
 }
 
-func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Application) error {
+func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Application) (func(application *v1alpha1.Application), error) {
 	if shouldBeRemoved(application) {
 		return r.removeApplicationWithResources(application)
 	}
 
 	appStatus, statusDescription, err := r.manageInstallation(application)
 	if err != nil {
-		return logAndError(err, "Error managing Helm release for %s Application", application.Name)
+		return nil, logAndError(err, "Error managing Helm release for %s Application", application.Name)
 	}
 	log.Infof("Release status for %s Application: %s", application.Name, appStatus)
-
-	application.SetFinalizer(applicationFinalizer)
-	application.SetAccessLabel()
-	r.setCurrentStatus(application, appStatus, statusDescription)
-
-	return nil
+	return func(application *v1alpha1.Application) {
+		application.SetFinalizer(applicationFinalizer)
+		application.SetAccessLabel()
+		r.setCurrentStatus(application, appStatus, statusDescription)
+	}, nil
 }
 
-func (r *applicationReconciler) removeApplicationWithResources(application *v1alpha1.Application) error {
+func (r *applicationReconciler) removeApplicationWithResources(application *v1alpha1.Application) (func(application *v1alpha1.Application), error) {
 	log.Infof("Removing %s Application with all resources...", application.Name)
 
 	err := r.releaseManager.DeleteReleaseIfExists(application.Name)
 	if err != nil {
-		return errors.Wrapf(err, "Error removing %s Application with all resources", application.Name)
+		return nil, errors.Wrapf(err, "Error removing %s Application with all resources", application.Name)
 	}
 	log.Infof("Release %s successfully deleted", application.Name)
 
-	application.RemoveFinalizer(applicationFinalizer)
-	return nil
+	return func(application *v1alpha1.Application) {
+		application.RemoveFinalizer(applicationFinalizer)
+	}, nil
 }
 
 func (r *applicationReconciler) manageInstallation(application *v1alpha1.Application) (string, string, error) {
@@ -150,19 +151,23 @@ func (r *applicationReconciler) checkApplicationStatus(application *v1alpha1.App
 	return status.String(), description, err
 }
 
-func (r *applicationReconciler) updateApplicationCR(application *v1alpha1.Application) error {
-	if application.Spec.Services == nil {
-		application.Spec.Services = []v1alpha1.Service{}
-	}
+func (r *applicationReconciler) updateApplicationCR(namespacedName types.NamespacedName, updateFunc func(application *v1alpha1.Application)) error {
+	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		instance := &v1alpha1.Application{}
 
-	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		return r.applicationMgrClient.Update(context.Background(), application)
+		err := r.applicationMgrClient.Get(context.Background(), namespacedName, instance)
+		if err != nil {
+			return logAndError(err, "Error getting %s Application", namespacedName)
+		}
+
+		if instance.Spec.Services == nil {
+			instance.Spec.Services = []v1alpha1.Service{}
+		}
+
+		updateFunc(instance)
+
+		return r.applicationMgrClient.Update(context.Background(), instance)
 	})
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (r *applicationReconciler) setCurrentStatus(application *v1alpha1.Application, status string, description string) {
