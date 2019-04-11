@@ -12,7 +12,7 @@ metadata:
 spec:
   shareProcessNamespace: true
   containers:
-    - name: test-{{.Release.Name }}-event-service-acceptance
+    - name: {{.Release.Name }}-event-service-acceptance
       image: {{ .Values.global.eventServiceTestsImage }}
       command: ["/bin/sh"]
       args: ["-c", "sleep 10; ./entrypoint.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
