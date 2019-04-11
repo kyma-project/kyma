@@ -1,4 +1,6 @@
 global:
+  install:
+    functionsCrd: true
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
