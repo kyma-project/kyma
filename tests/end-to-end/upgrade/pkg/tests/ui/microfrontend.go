@@ -1,8 +1,6 @@
 package ui
 
 import (
-	"strings"
-
 	"github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	"github.com/pkg/errors"
@@ -20,10 +18,8 @@ type MicrofrontendUpgradeTest struct {
 
 // NewMicrofrontendUpgradeTest returns new instance of the MicrofrontendUpgradeTest
 func NewMicrofrontendUpgradeTest(mfClient *mfClient.Clientset) *MicrofrontendUpgradeTest {
-	namespace := strings.ToLower("MicrofrontendUpgradeTest")
 	return &MicrofrontendUpgradeTest{
 		microfrontendName: "mf-name",
-		namespace:         namespace,
 		mfClient:          mfClient,
 	}
 }
@@ -31,10 +27,9 @@ func NewMicrofrontendUpgradeTest(mfClient *mfClient.Clientset) *MicrofrontendUpg
 // CreateResources creates resources needed for e2e upgrade test
 func (t *MicrofrontendUpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Println("MicrofrontendUpgradeTest creating resources")
-	t.namespace = namespace
 	t.stop = stop
 
-	err := t.createMicrofrontend()
+	err := t.createMicrofrontend(namespace)
 	if err != nil {
 		return err
 	}
@@ -52,7 +47,7 @@ func (t *MicrofrontendUpgradeTest) TestResources(stop <-chan struct{}, log logru
 	log.Println("MicrofrontendUpgradeTest testing resources")
 	t.stop = stop
 
-	_, err := t.mfClient.UiV1alpha1().MicroFrontends(t.namespace).Get(t.microfrontendName, metav1.GetOptions{})
+	_, err := t.mfClient.UiV1alpha1().MicroFrontends(namespace).Get(t.microfrontendName, metav1.GetOptions{})
 
 	if err != nil {
 		return errors.Wrapf(err, "while checking if microfrontend %q still exists", t.microfrontendName)
@@ -61,7 +56,7 @@ func (t *MicrofrontendUpgradeTest) TestResources(stop <-chan struct{}, log logru
 	return nil
 }
 
-func (t MicrofrontendUpgradeTest) createMicrofrontend() error {
+func (t *MicrofrontendUpgradeTest) createMicrofrontend(namespace string) error {
 	microfrontend := &v1alpha1.MicroFrontend{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "ui.kyma-project.io/v1alpha1",
@@ -86,6 +81,6 @@ func (t MicrofrontendUpgradeTest) createMicrofrontend() error {
 			},
 		},
 	}
-	_, err := t.mfClient.UiV1alpha1().MicroFrontends(t.namespace).Create(microfrontend)
+	_, err := t.mfClient.UiV1alpha1().MicroFrontends(namespace).Create(microfrontend)
 	return err
 }

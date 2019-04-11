@@ -55,7 +55,7 @@ func (t *ClusterMicrofrontendUpgradeTest) TestResources(stop <-chan struct{}, lo
 	return nil
 }
 
-func (t ClusterMicrofrontendUpgradeTest) createClusterMicrofrontend() error {
+func (t *ClusterMicrofrontendUpgradeTest) createClusterMicrofrontend() error {
 	clusterMicrofrontend := &v1alpha1.ClusterMicroFrontend{
 		TypeMeta: metav1.TypeMeta{
 			APIVersion: "ui.kyma-project.io/v1alpha1",
