@@ -44,20 +44,16 @@ spec:
         - --config=/hydra/config.yaml
         - --dangerous-force-http
         ports:
-        - name: service
+        - name: public
           containerPort: 4444
+        - name: private
+          containerPort: 4445
         env:
 {{ include "database" . | indent 8 }}
 {{ include "settings" . | indent 8 }}
         volumeMounts:
           - name: config
             mountPath: /hydra
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 4444
-          initialDelaySeconds: 3
-          periodSeconds: 3
         resources:
 {{ toYaml .Values.resources | indent 10 }}
       volumes:

@@ -17,7 +17,7 @@ spec:
     route:
     - destination:
         port:
-          number: {{ .Values.service.port }}
+          number: {{ .Values.service.ports.private }}
         host: {{ include "hydra.fullname" . }}
     corsPolicy:
       allowOrigin:

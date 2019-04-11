@@ -31,7 +31,9 @@ postgresql:
 
 service:
   type: ClusterIP
-  port: 4444
+  ports:
+    public: 4444
+    private: 4445
   annotations: {}
 
 ingress:
