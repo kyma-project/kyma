@@ -21,6 +21,8 @@ const (
 	applicationFinalizer      = "finalizer.applicationconnector.kyma-project.io"
 )
 
+type updateApplicationFunc func(application *v1alpha1.Application)
+
 type ApplicationManagerClient interface {
 	Get(ctx context.Context, key client.ObjectKey, obj runtime.Object) error
 	Update(ctx context.Context, obj runtime.Object) error
@@ -78,7 +80,7 @@ func (r *applicationReconciler) handleErrorWhileGettingInstance(err error, reque
 	return reconcile.Result{}, logAndError(err, "Error getting %s Application", request.Name)
 }
 
-func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Application) (func(application *v1alpha1.Application), error) {
+func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Application) (updateApplicationFunc, error) {
 	if shouldBeRemoved(application) {
 		return r.removeApplicationWithResources(application)
 	}
@@ -95,7 +97,7 @@ func (r *applicationReconciler) enforceDesiredState(application *v1alpha1.Applic
 	}, nil
 }
 
-func (r *applicationReconciler) removeApplicationWithResources(application *v1alpha1.Application) (func(application *v1alpha1.Application), error) {
+func (r *applicationReconciler) removeApplicationWithResources(application *v1alpha1.Application) (updateApplicationFunc, error) {
 	log.Infof("Removing %s Application with all resources...", application.Name)
 
 	err := r.releaseManager.DeleteReleaseIfExists(application.Name)
@@ -151,7 +153,7 @@ func (r *applicationReconciler) checkApplicationStatus(application *v1alpha1.App
 	return status.String(), description, err
 }
 
-func (r *applicationReconciler) updateApplicationCR(namespacedName types.NamespacedName, updateFunc func(application *v1alpha1.Application)) error {
+func (r *applicationReconciler) updateApplicationCR(namespacedName types.NamespacedName, updateFunc updateApplicationFunc) error {
 	return retry.RetryOnConflict(retry.DefaultRetry, func() error {
 		instance := &v1alpha1.Application{}
 
