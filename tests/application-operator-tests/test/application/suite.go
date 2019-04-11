@@ -150,7 +150,7 @@ func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
 
 	var testContainer string
 	for _, c := range pod.Spec.Containers {
-		if strings.HasPrefix(c.Name, ts.application) {
+		if strings.Contains(c.Name, ts.application) {
 			testContainer = c.Name
 		}
 	}
