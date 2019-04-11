@@ -148,8 +148,6 @@ func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {
 
 func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
 
-	t.Log("abcd", ts.application)
-	t.Log("def", testAppName)
 	var testContainer string
 	for _, c := range pod.Spec.Containers {
 		if strings.HasPrefix(c.Name, ts.application) {
