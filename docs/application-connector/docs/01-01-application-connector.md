@@ -20,7 +20,7 @@ All of the AC components scale independently, which allows to adjust it to fit t
 
 >**NOTE:** To learn more about the concept of Namespaces in Kyma, read [this](/root/kyma#details-namespaces) document.
 
-## APIs exposed by the external solution
+## Supported APIs
 
 The Application Connector allows you to register secured REST APIs exposed by the connected external solution. The Application Connector supports a variety of authentication methods to ensure smooth integration with a wide range of APIs. 
 
