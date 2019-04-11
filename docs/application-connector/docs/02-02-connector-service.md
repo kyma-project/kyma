@@ -11,16 +11,22 @@ This diagram illustrates the client certificate generation flow in details:
 ![Client certificate generation operation flow](./assets/002-automatic-configuration.svg)
 
 1. The administrator requests for a token using the CLI or the UI and receives a link with the token, which is valid for a limited period of time.
+
 2. The administrator passes the token to the external system, which requests for information regarding the Kyma installation. In the response, it receives the following information:
     - the URL to which a third-party solution sends its Certificate Signing Request (CSR)
     - the URL of the metadata endpoint
     - information required to generate a CSR
+
 3. The external system generates a CSR based on the information provided by Kyma and sends the CSR to the designated URL. In the response, the external system receives a signed certificate. It can use the certificate to authenticate and safely communicate with Kyma.
+
 4. The external system calls metadata endpoint which contains the following information:
     - the URL of the Application Registry API
     - the URL of the Event Service API
-    - the certificate renewal endpoint URL which can be used to generate a new certificate
-    - the certificate revocation endpoint which can be used to revoke compromised certificates
-    - Identity information  
+    - the certificate renewal URL that should be used to generate a new certificate
+    - the certificate revocation URL that should be used to revoke compromised certificates
+    - information uniquely identyfying the certificate (Application name) 
+
+
+>**NOTE:** The external application shouldn't hardcode any URLs. The information returned from metadata endpoint should be stored by the external application along with the certificate. This approach implicates less coupling and offers a great deal of flexibility. 
 
 >**NOTE:** Follow [this](#tutorials-get-the-client-certificate) tutorial to learn how to get a client certificate for your implementation.
