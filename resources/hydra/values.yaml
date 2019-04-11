@@ -3,6 +3,8 @@ global:
   isLocalEnv: false
   gateway:
     name: kyma-gateway
+  ingress:
+    domainName: kyma.local
 
 image: demonsthere/hydra
 imageTag: foo
@@ -30,7 +32,7 @@ postgresql:
     size: "10Gi"
 
 service:
-  type: ClusterIP
+  type: NodePort
   ports:
     public: 4444
     private: 4445

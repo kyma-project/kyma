@@ -1,26 +1,24 @@
+---
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ include "hydra.fullname" . }}
-  labels:
-    app.kubernetes.io/name: {{ include "hydra.name" . }}
-    app.kubernetes.io/instance: {{ .Release.Name }}
-    app.kubernetes.io/managed-by: {{ .Release.Service }}
-    helm.sh/chart: {{ include "hydra.chart" . }}
-{{- if .Values.serviceAnnotations }}
-  annotations:
-{{ toYaml .Values.serviceAnnotations | indent 4}}
-{{- end }}
+  name: {{ include "hydra.name" . }}
 spec:
-  type: {{ .Values.service.type }}
   selector:
-    app.kubernetes.io/name: {{ include "hydra.name" . }}
+    app: {{ include "hydra.name" . }}
+  type: {{ .Values.service.type }}
   ports:
-    - name: public
-      port: {{ .Values.service.ports.public }}
-      targetPort: 4444
-      protocol: TCP
-    - name: private
-      port: {{ .Values.service.ports.private }}
-      targetPort: 4445
-      protocol: TCP
+  - name: hydra-public
+    protocol: TCP
+    port: {{ .Values.service.ports.public }}
+    targetPort: {{ .Values.service.ports.public }}
+    {{- if eq .Values.service.type "NodePort" }}
+    nodePort: 31444
+    {{- end }}
+  - name: hydra-admin
+    protocol: TCP
+    port: {{ .Values.service.ports.private }}
+    targetPort: {{ .Values.service.ports.private }}
+    {{- if eq .Values.service.type "NodePort" }}
+    nodePort: 31445
+    {{- end }}

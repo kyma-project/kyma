@@ -27,8 +27,8 @@ data:
     urls:
       self:
       # The issuer is used for identification in all OAuth2 tokens. Should be the public url of the server.
-        issuer: https://oauth.{{ .Values.global.ingress.domainName }}
-        # public: https://localhost:4444/
+        issuer: http://localhost:4444
+        # public: http://localhost:4444
       # login: https://my-login.app/login
       # The URL of the consent endpoint.
       # consent: https://my-consent.app/consent
