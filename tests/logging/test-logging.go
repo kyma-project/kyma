@@ -1,9 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
 	"log"
-	"net/http"
 	"os/exec"
 	"regexp"
 	"strings"
@@ -101,21 +99,6 @@ func testPodsAreReady() {
 	}
 }
 
-func testLokiLabel() {
-	resp, err := http.Get("http://logging:3100/api/prom/label")
-
-	if err != nil {
-		log.Fatalf("Test Check Loki Label Failed: error is: %v and response is: %v", err, resp)
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		body, _ := ioutil.ReadAll(resp.Body)
-		log.Fatalf("Test Check Loki Label Failed: Unable to fetch labels. Response code is: %v and response test is: %v", resp.StatusCode, string(body))
-	}
-	log.Printf("Test Check Loki Label Passed. Response code is: %v", resp.StatusCode)
-}
-
 func getPromtailPods() []string {
 	cmd := exec.Command("kubectl", "-n", namespace, "get", "pods", "-l", "app=promtail", "-ojsonpath={range .items[*]}{.metadata.name}\n{end}")
 
@@ -170,76 +153,6 @@ func testPromtail() {
 	}
 }
 
-func deployDummyPod() {
-	cmd := exec.Command("kubectl", "-n", namespace, "create", "-f", yamlFile)
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Fatal("Unable to deploy:\n", string(stdoutStderr))
-	}
-}
-
-func waitForDummyPodToRun() {
-	timeout := time.After(10 * time.Minute)
-	tick := time.Tick(30 * time.Second)
-
-	for {
-		select {
-		case <-timeout:
-			log.Println("Test LogStreaming: result: Timed out!!")
-			cmd := exec.Command("kubectl", "describe", "pods", "-l", "component=test-counter-pod", "-n", namespace)
-			stdoutStderr, _ := cmd.CombinedOutput()
-			log.Fatal("Test LogStreaming: result: Timed out!! Current state is", ":\n", string(stdoutStderr))
-		case <-tick:
-			cmd := exec.Command("kubectl", "-n", namespace, "get", "pod", "test-counter-pod", "-ojsonpath={.status.phase}")
-			stdoutStderr, err := cmd.CombinedOutput()
-
-			if err == nil && strings.Contains(string(stdoutStderr), "Running") {
-				log.Printf("test-counter-pod is running!")
-				return
-			}
-			log.Printf("Waiting for the test-counter-pod to be Running!")
-		}
-	}
-}
-
-func testLogs() {
-	c := &http.Client{
-		Timeout: 45 * time.Second,
-	}
-
-	res, err := c.Get("http://logging:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-")
-	if err != nil {
-		log.Fatalf("Error in HTTP GET to http://logging:3100/api/prom/query?query={namespace=\"kyma-system\"}&regexp=logTest-: %v\n", err)
-	}
-	defer res.Body.Close()
-	log.Printf("Log request response status : %v", res.Status)
-
-	var testDataRegex = regexp.MustCompile(`(?m)logTest-*`)
-
-	buffer, err := ioutil.ReadAll(res.Body)
-
-	if err != nil {
-		log.Fatalf("Error in reading from log stream: %v and op is: %v", err, string(buffer))
-		return
-	}
-	submatches := testDataRegex.FindStringSubmatch(string(buffer))
-	if submatches != nil {
-		log.Printf("The string 'logtest-' is present in logs: %v", string(buffer))
-		return
-	} else {
-		log.Fatalf("The string 'logtest-' is not present in logs: %v", string(buffer))
-	}
-
-}
-
-func testLogStream() {
-	log.Println("Deploying test-counter-pod Pod")
-	deployDummyPod()
-	waitForDummyPodToRun()
-	testLogs()
-	log.Println("Test Logging Succeeded!")
-}
-
 func cleanup() {
 	cmd := exec.Command("kubectl", "-n", namespace, "delete", "-f", yamlFile, "--force", "--grace-period=0")
 	stdoutStderr, err := cmd.CombinedOutput()
@@ -255,11 +168,7 @@ func main() {
 	cleanup()
 	log.Println("Test if all the Loki pods are ready")
 	testPodsAreReady()
-	//log.Println("Test if all the Loki Label is reachable")
-	//testLokiLabel()
 	log.Println("Test if Promtail is able to find Loki")
 	testPromtail()
-	//log.Println("Test if logs from a dummy Pod are streamed by promtail")
-	//testLogStream()
 	cleanup()
 }
