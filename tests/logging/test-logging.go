@@ -151,7 +151,7 @@ func testPromtail() {
 		case <-tick:
 			matchesCount := 0
 			for _, pod := range pods {
-				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "logging")
+				cmd := exec.Command("kubectl", "-n", namespace, "log", pod, "-c", "promtail")
 				stdoutStderr, err := cmd.CombinedOutput()
 				if err != nil {
 					log.Fatalf("Unable to obtain log for pod[%s]:\n%s\n", pod, string(stdoutStderr))
@@ -255,8 +255,8 @@ func main() {
 	cleanup()
 	log.Println("Test if all the Loki pods are ready")
 	testPodsAreReady()
-	log.Println("Test if all the Loki Label is reachable")
-	testLokiLabel()
+	//log.Println("Test if all the Loki Label is reachable")
+	//testLokiLabel()
 	log.Println("Test if Promtail is able to find Loki")
 	testPromtail()
 	//log.Println("Test if logs from a dummy Pod are streamed by promtail")
