@@ -4,11 +4,8 @@ description: Kubernetes Native Serverless Framework
 kind: CustomResourceDefinition
 metadata:
   name: functions.kubeless.io
-  labels:
-{{ include "labels.standard" . | indent 4 }}
   annotations:
     kubeless.io/namespace: {{ .Release.Namespace }}
-    kubeless.io/config: {{ template "fullname" . }}-config
 spec:
   group: kubeless.io
   names:
