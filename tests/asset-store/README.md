@@ -48,7 +48,7 @@ Use the following environment variables to configure the application:
 |------|----------|---------|-------------|
 | **APP_KUBECONFIG_PATH** | No |  | The path to the `kubeconfig` file, needed for running an application outside of the cluster |
 | **APP_TEST_UPLOAD_SERVICE_URL** | No | `http://localhost:3000/v1/upload` | The address of the Asset Upload Service |
-| **APP_TEST_WAIT_TIMEOUT** | No | `3m` | The period of time for which the application waits for the resources to meet defined conditions |
+| **APP_TEST_WAIT_TIMEOUT** | No | `2m` | The period of time for which the application waits for the resources to meet defined conditions |
 | **APP_TEST_NAMESPACE** | No | `test-asset-store` | The name of the Namespace created and deleted during integration tests |
 | **APP_TEST_CLUSTER_BUCKET_NAME** | No | `test-cluster-bucket` | The ClusterBucket resource name |
 | **APP_TEST_BUCKET_NAME** | No | `test-bucket` | The Bucket resource name |
