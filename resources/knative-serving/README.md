@@ -14,5 +14,6 @@ Kyma-specific changes:
  * The `config-domain` is made configurable by specifying the `.Values.domainName` as the helm template.
  * The `knative-serving` Namespace is no longer created. This happens during the installation process.
  * The image versions are changed to use the release tag.
+ * Knative Serving uses the Kyma Istio Ingress gateway.
 
 > **NOTE:** The Knative build component is not installed.

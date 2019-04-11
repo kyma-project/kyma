@@ -12,7 +12,7 @@ The authorization in GraphQL uses RBAC, which means that:
 The implementation assigns GraphQL actions to specific Kubernetes verbs:
 
 | GraphQL action | Kubernetes verb(s) |
-|:---|:---|
+|---|---|
 | **query** | get (for a single resource) <br> list (for multiple resources) |
 | **mutation** | create, delete |
 | **subscription** | watch |

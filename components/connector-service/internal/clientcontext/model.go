@@ -11,8 +11,8 @@ type clientContextKey string
 // CtxRequiredType type defines if context is mandatory
 type CtxRequiredType bool
 
-// HeadersRequiredType type defines if headers must be specified
-type HeadersRequiredType bool
+// LookupEnabledType type defines if headers must be specified
+type LookupEnabledType bool
 
 const (
 	TenantPlaceholder      = "{TENANT}"
@@ -58,11 +58,11 @@ const (
 	// CtxNotRequired represents value for not required context
 	CtxNotRequired CtxRequiredType = false
 
-	// HeadersRequired represents value for required headers
-	HeadersRequired HeadersRequiredType = true
+	// LookupEnabled represents value for required fetch from Runtime
+	LookupEnabled LookupEnabledType = true
 
-	// HeadersNotRequired represents value for not required headers
-	HeadersNotRequired HeadersRequiredType = false
+	// LookupDisabled represents value for not required fetch from Runtime
+	LookupDisabled LookupEnabledType = false
 )
 
 type ClientContextService interface {

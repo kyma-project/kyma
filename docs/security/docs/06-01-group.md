@@ -28,7 +28,7 @@ This table analyses the elements of the sample CR and the information it contain
 
 
 | Field   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
+|----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.name** | **YES** | Specifies the name of the group. |
 | **spec.idpName** | **YES** | Specifies the name of the ID provider in which the group exists. |
