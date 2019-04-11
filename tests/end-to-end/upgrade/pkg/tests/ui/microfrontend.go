@@ -11,7 +11,6 @@ import (
 // MicrofrontendUpgradeTest tests the creation of a microfrontend
 type MicrofrontendUpgradeTest struct {
 	microfrontendName string
-	namespace         string
 	stop              <-chan struct{}
 	mfClient          *mfClient.Clientset
 }
