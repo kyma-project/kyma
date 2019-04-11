@@ -86,8 +86,9 @@ metadata:
     heritage: "{{ .Release.Service }}"
   annotations:
     "helm.sh/hook": test-success
-    "sidecar.istio.io/inject": "false"
+    "sidecar.istio.io/inject": "true"
 spec:
+  shareProcessNamespace: true
   serviceAccount: {{ template "backup-test.fullname" . }}
   containers:
   - name: backup-test
@@ -104,5 +105,23 @@ spec:
       value: "/all-backup.yaml"
     - name: SYSTEM_BACKUP_CONFIGURATION_FILE
       value: "/system-backup.yaml"
+  - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+    name: manager
+    command:
+      - bin/sh
+      - -c
+      - |
+        SERVICE="e2e-upgrade-test"
+        sleep 10
+        while true; do
+        if pgrep -x "${SERVICE}"; then
+          echo "---> ${SERVICE} is running."
+          sleep 10
+        else
+          echo "---> ${SERVICE} has stopped, stopping istio"
+          pkill -TERM pilot-agent
+          break
+        fi
+        done
   restartPolicy: Never
 ---
