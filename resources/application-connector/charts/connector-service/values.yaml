@@ -26,7 +26,7 @@ deployment:
     path: "/etc/config/"
     lookupConfigMapName: "lookup-config"
     lookupConfig: |
-      { "url": "http://localhost:8080/graphql", "headers": { } }
+      { "url": "http://example.com/graphql", "headers": { } }
 
 service:
   externalapi:
