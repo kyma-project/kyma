@@ -65,8 +65,8 @@ global:
     dir: develop/
     version: a9bfa9fc
   test_apiserver_proxy:
-    dir: pr/
-    version: "PR-3644"
+    dir: develop/
+    version: 311ed23b
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
