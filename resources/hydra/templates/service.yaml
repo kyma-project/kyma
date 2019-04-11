@@ -3,6 +3,9 @@ kind: Service
 apiVersion: v1
 metadata:
   name: {{ include "hydra.name" . }}
+  annotations:
+    "auth.istio.io/{{ .Values.service.ports.public }}": NONE
+    "auth.istio.io/{{ .Values.service.ports.private }}": NONE
 spec:
   selector:
     app: {{ include "hydra.name" . }}

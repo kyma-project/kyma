@@ -9,8 +9,6 @@ spec:
       labels:
         name: {{ include "hydra.name" . }}
         app: {{ include "hydra.name" . }}
-      annotations:
-        sidecar.istio.io/inject: "false"
     spec:
       containers:
       - name: hydra-server
