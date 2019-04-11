@@ -64,6 +64,7 @@ spec:
         - -c
         - |
           SERVICE="npm"
+          sleep 10
           while true; do
           if pgrep -x "${SERVICE}"; then
             echo "---> ${SERVICE} is running."
