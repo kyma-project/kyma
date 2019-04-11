@@ -24,7 +24,7 @@ See the diagram overview of the Event flow configuration and Event cons
 
 ![Publish Events](./assets/publish-events.svg)
 
-1. The external application integrated with Kyma makes a REST API request to the Application Connector to indicate that a new Event is available. The request provides the Application Connector with the Event metadata. 
+1. The external application integrated with Kyma makes a REST API request to the Application Connector's Events Gateway to indicate that a new Event is available. The request provides the Application Connector with the Event metadata. 
 2. The Application Connector enriches the Event with the details of its source.
 
 > **NOTE:** There is always one dedicated instance of the Application Connector for every instance of an external solution connected to Kyma.
