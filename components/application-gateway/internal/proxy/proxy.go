@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"time"
 
@@ -76,7 +75,10 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.addModifyResponseHandler(newRequest, id, cacheEntry)
+	if err := p.addModifyResponseHandler(newRequest, id, cacheEntry); err != nil {
+		handleErrors(w, err)
+		return
+	}
 
 	p.executeRequest(w, newRequest, cacheEntry)
 }
@@ -142,24 +144,31 @@ func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperr
 	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
 }
 
-func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) {
-	cacheEntry.Proxy.ModifyResponse = p.createModifyResponseFunction(id, r)
+func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) apperrors.AppError {
+	modifyResponseFunction, err := p.createModifyResponseFunction(id, r)
+	if err != nil {
+		return err
+	}
+
+	cacheEntry.Proxy.ModifyResponse = modifyResponseFunction
+	return nil
 }
 
-func (p *proxy) createModifyResponseFunction(id string, r *http.Request) func(*http.Response) error {
+func (p *proxy) createModifyResponseFunction(id string, r *http.Request) (func(*http.Response) error, apperrors.AppError) {
 	// Handle the case when credentials has been changed or OAuth token has expired
 	body1, body2, err := drainBody(r.Body)
 	if err != nil {
-		log.Fatal(err)
+		return nil, apperrors.Internal("failed to drain request body, %s", err)
 	}
 
 	r.Body = body1
 
-	return func(response *http.Response) error {
+	modifyResponseFunction := func(response *http.Response) error {
 		retrier := newUnauthorizedResponseRetrier(id, r, body2, p.proxyTimeout, p.createCacheEntry)
-
 		return retrier.RetryIfFailedToAuthorize(response)
 	}
+
+	return modifyResponseFunction, nil
 }
 
 func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
