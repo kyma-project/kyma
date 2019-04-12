@@ -502,7 +502,7 @@ Follow these steps:
     
     > **NOTE:** If you deploy Kyma with Kubernetes version 1.14 and above, follow these steps to prepare the deployment file. 
         
-    - Run this command if you use the `xip.io` default domain:
+    - If you use the `xip.io` default domain, run:
     ```
     cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
