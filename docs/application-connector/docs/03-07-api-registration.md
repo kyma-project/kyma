@@ -11,12 +11,11 @@ The Application Registry supports API Specification in the following formats:
 
 ### Registration methods
 
-Application Regisry supports two ways of passing API spec:
+Application Registry supports two ways of passing API spec:
 - in JSON format
 - by `SpecificationUrl`
 
 >**NOTE:** Specification passed directly as a JSON has a higher priority than `SpecificationUrl`, which in such case will be ignored
-
 
 For OpenAPI format both methods are supported.
 OData APIs can only be registered with `SpecificationUrl`.

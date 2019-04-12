@@ -148,14 +148,14 @@ To register API with specification URL replace `api.spec` with `api.specificatio
 }
 ```
 
->**NOTE:** Fetching specification from URL is supported only for API Spec. It can not be done for Events and Documentation.
+The Application Registry will fetch the specification from provided URL but it will not use any credentials, therefor the endpoint can not be secured by any authentication mechanism.
 
-The Application Registry will not use the provided credentials to fetch the API specification, therefor the endpoint can not be secured by any authentication mechanism.
+>**NOTE:** Fetching specification from URL is supported only for API Spec. It can not be done for Events and Documentation.
 
 
 ## Registering OData API
 
-If no `api.spec` or `api.specificationUrl` are specified and `api.type` is set to `OData`, the Application Registry will try to fetch the specification from target URL with the `$metadata` path.
+If no `api.spec` or `api.specificationUrl` are specified and `api.type` is set to `OData`, the Application Registry will try to fetch the specification from the target URL with the `$metadata` path.
 
 For service with the following api:
 ```
