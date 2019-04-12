@@ -92,7 +92,26 @@ spec:
   serviceAccount: {{ template "backup-test.fullname" . }}
   containers:
   - name: backup-test
-    image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
+    command:
+    - "/bin/sh"
+    args:
+    - "-c"
+    - |
+      sleep 10
+
+      while ! curl -Ik https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS >/dev/null 2>/dev/null
+      do
+          sleep 1
+      done
+
+      /restore.test -test.v
+      exit_code=$?
+
+      pkill -TERM pilot-agent
+      sleep 4
+
+      exit $exit_code
+    image: kubagoryl/backup-restore-test:test2
     imagePullPolicy: Always
     env:
     - name: DOMAIN
@@ -104,24 +123,6 @@ spec:
     - name: ALL_BACKUP_CONFIGURATION_FILE
       value: "/all-backup.yaml"
     - name: SYSTEM_BACKUP_CONFIGURATION_FILE
-      value: "/system-backup.yaml"
-  - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-    name: manager
-    command:
-      - bin/sh
-      - -c
-      - |
-        SERVICE="restore.test"
-        sleep 10
-        while true; do
-        if pgrep -x "${SERVICE}"; then
-          echo "---> ${SERVICE} is running."
-          sleep 10
-        else
-          echo "---> ${SERVICE} has stopped, stopping istio"
-          pkill -TERM pilot-agent
-          break
-        fi
-        done
+      value: /system-backup.yaml
   restartPolicy: Never
 ---
