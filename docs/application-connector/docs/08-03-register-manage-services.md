@@ -128,3 +128,46 @@ A successful response returns the ID of the registered service:
     ```
     curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services/{YOUR_SERVICE_ID} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
     ```
+
+
+## Register API with specification URL
+
+Application Registry allows you to pass API specification in form of specification URL.
+
+To register API with specification URL replace `api.spec` with `api.specificationUrl`. Be aware that `api.spec` has higher priority than `api.specificationUrl`.
+
+```
+"api": {
+  "targetUrl": "https://services.odata.org/OData/OData.svc",
+  "specificationUrl": "https://services.odata.org/OData/OData.svc/$metadata",
+  "credentials": {
+    "basic": {
+      "username": "{USERNAME}",
+      "password": "{PASSWORD}"
+    }
+}
+```
+
+>**NOTE:** Fetching specification from URL is supported only for API Spec. It can not be done for Events and Documentation.
+
+The Application Registry will not use the provided credentials to fetch the API specification, therefor the endpoint can not be secured by any authentication mechanism.
+
+
+## Registering OData API
+
+If no `api.spec` or `api.specificationUrl` are specified and `api.type` is set to `OData`, the Application Registry will try to fetch the specification from target URL with the `$metadata` path.
+
+For service with the following api:
+```
+"api": {
+  "targetUrl": "https://services.odata.org/OData/OData.svc",
+  "apiType": "OData"
+  "credentials": {
+    "basic": {
+      "username": "{USERNAME}",
+      "password": "{PASSWORD}"
+    }
+}
+```
+
+Application Registry will try to fetch API Spec from `https://services.odata.org/OData/OData.svc/$metadata`.
