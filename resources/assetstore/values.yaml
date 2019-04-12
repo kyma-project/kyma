@@ -14,8 +14,8 @@ global:
     dir: develop/
     version: '1c4c7390'
   asset_store_test:
-    dir: develop/
-    version: 'a804f409'
+    dir: pr/ # TEMP
+    version: 'PR-3694' # TEMP
 
 minio:
   mode: standalone

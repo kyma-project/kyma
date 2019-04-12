@@ -23,7 +23,7 @@ spec:
         - name: APP_TEST_UPLOAD_SERVICE_URL
           value: "http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000/v1/upload"
         - name: APP_TEST_WAIT_TIMEOUT
-          value: "12m"
+          value: "5m"
         - name: APP_TEST_NAMESPACE
           value: "test-asset-store"
         - name: APP_TEST_MINIO_ENDPOINT

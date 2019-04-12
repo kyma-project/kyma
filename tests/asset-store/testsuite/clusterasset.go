@@ -1,6 +1,7 @@
 package testsuite
 
 import (
+	"log"
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
@@ -74,6 +75,7 @@ func (a *clusterAsset) WaitForStatusesReady(assets []assetData) error {
 			}
 
 			if res.Status.Phase != v1alpha2.AssetReady {
+				log.Printf("ClusterAsset %s status: %+v", res.Name, res.Status)
 				return false, nil
 			}
 		}
