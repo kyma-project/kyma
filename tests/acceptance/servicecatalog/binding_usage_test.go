@@ -3,11 +3,12 @@ package servicecatalog_test
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog"
 	"net"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog"
 
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/retriever"
 

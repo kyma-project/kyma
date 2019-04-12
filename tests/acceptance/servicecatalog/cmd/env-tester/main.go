@@ -2,11 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog"
 	"log"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog"
 )
 
 func main() {
