@@ -4,7 +4,7 @@ metadata:
   name: {{ template "grafana.fullname" . }}-policy
 spec:
   targets:
-    - name: {{ template "grafana.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+    - name: {{ template "grafana.fullname" . }}
   peers:
     - mtls:
         mode: "PERMISSIVE"
