@@ -1,0 +1,10 @@
+apiVersion: authentication.istio.io/v1alpha1
+kind: Policy
+metadata:
+  name: {{ template "grafana.fullname" . }}-policy
+spec:
+  targets:
+    - name: {{ template "grafana.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  peers:
+    - mtls:
+        mode: "PERMISSIVE"
