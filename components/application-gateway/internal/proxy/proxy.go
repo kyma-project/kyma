@@ -1,8 +1,12 @@
 package proxy
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"time"
 
@@ -144,11 +148,32 @@ func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry 
 
 func (p *proxy) createModifyResponseFunction(id string, r *http.Request) func(*http.Response) error {
 	// Handle the case when credentials has been changed or OAuth token has expired
+	body1, body2, err := drainBody(r.Body)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	r.Body = body1
+
 	return func(response *http.Response) error {
-		retrier := newUnauthorizedResponseRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
+		retrier := newUnauthorizedResponseRetrier(id, r, body2, p.proxyTimeout, p.createCacheEntry)
 
 		return retrier.RetryIfFailedToAuthorize(response)
 	}
+}
+
+func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
+	if b == http.NoBody {
+		return http.NoBody, http.NoBody, nil
+	}
+	var buf bytes.Buffer
+	if _, err = buf.ReadFrom(b); err != nil {
+		return nil, b, err
+	}
+	if err = b.Close(); err != nil {
+		return nil, b, err
+	}
+	return ioutil.NopCloser(&buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), nil
 }
 
 func (p *proxy) executeRequest(w http.ResponseWriter, r *http.Request, cacheEntry *CacheEntry) {
