@@ -111,7 +111,7 @@ spec:
       sleep 4
 
       exit $exit_code
-    image: kubagoryl/backup-restore-test:test2
+    image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
     imagePullPolicy: Always
     env:
     - name: DOMAIN
