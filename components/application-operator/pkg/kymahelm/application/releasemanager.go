@@ -133,7 +133,7 @@ func (r *releaseManager) CheckReleaseExistence(name string) (bool, error) {
 }
 
 func (r *releaseManager) checkExistence(name string) (bool, error) {
-	listResponse, err := r.helmClient.ListReleases()
+	listResponse, err := r.helmClient.ListReleases(r.namespace)
 	if err != nil {
 		return false, err
 	}

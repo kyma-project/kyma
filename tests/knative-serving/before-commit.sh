@@ -36,7 +36,7 @@ fi
 #
 # GO FMT
 #
-goFmtResult=$(echo "${filesToCheck}" | xargs -L1 go fmt)
+goFmtResult=$(go fmt)
 if [ $(echo ${#goFmtResult}) != 0 ]
 	then
     	echo -e "${RED}✗ go fmt${NC}\n$goFmtResult${NC}"

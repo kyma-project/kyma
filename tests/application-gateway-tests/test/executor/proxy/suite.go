@@ -36,6 +36,8 @@ const (
 	testExecutorPodNameFormat = "%s-tests-test-executor"
 )
 
+type updatePodFunc func(pod *v1.Pod)
+
 type TestSuite struct {
 	httpClient      *http.Client
 	k8sClient       *kubernetes.Clientset
@@ -204,21 +206,30 @@ func (ts *TestSuite) deleteMockService(t *testing.T) {
 }
 
 func (ts *TestSuite) AddDenierLabel(t *testing.T, apiId string) {
-	pod, err := ts.podClient.Get(fmt.Sprintf(testExecutorPodNameFormat, ts.config.Application), metav1.GetOptions{})
-	require.NoError(t, err)
-
+	podName := fmt.Sprintf(testExecutorPodNameFormat, ts.config.Application)
 	serviceName := fmt.Sprintf("app-%s-%s", ts.config.Application, apiId)
 
-	if pod.Labels == nil {
-		pod.Labels = map[string]string{}
+	updateFunc := func(pod *v1.Pod) {
+		if pod.Labels == nil {
+			pod.Labels = map[string]string{}
+		}
+
+		pod.Labels[serviceName] = "true"
 	}
 
-	pod.Labels[serviceName] = "true"
+	err := ts.updatePod(podName, updateFunc)
+	require.NoError(t, err)
+}
 
-	err = retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		_, err = ts.podClient.Update(pod)
+func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
+	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		newPod, err := ts.podClient.Get(podName, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		updateFunc(newPod)
+		_, err = ts.podClient.Update(newPod)
 		return err
 	})
-
-	require.NoError(t, err)
 }
