@@ -1,7 +1,6 @@
 package testkit
 
 import (
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -16,9 +15,6 @@ type K8sResourcesClient interface {
 	GetIngress(name string, options v1.GetOptions) (interface{}, error)
 	GetRole(name string, options v1.GetOptions) (interface{}, error)
 	GetRoleBinding(name string, options v1.GetOptions) (interface{}, error)
-	CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error)
-	DeleteApplication(name string, options *v1.DeleteOptions) error
-	GetApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
 type k8sResourcesClient struct {
@@ -74,28 +70,4 @@ func (c *k8sResourcesClient) GetRoleBinding(name string, options v1.GetOptions) 
 
 func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.CoreV1().Services(c.namespace).Get(name, options)
-}
-
-func (c *k8sResourcesClient) CreateDummyApplication(name string, accessLabel string, skipInstallation bool) (*v1alpha1.Application, error) {
-	spec := v1alpha1.ApplicationSpec{
-		Services:         []v1alpha1.Service{},
-		AccessLabel:      accessLabel,
-		SkipInstallation: skipInstallation,
-	}
-
-	dummyApp := &v1alpha1.Application{
-		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{Name: name, Namespace: c.namespace},
-		Spec:       spec,
-	}
-
-	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Create(dummyApp)
-}
-
-func (c *k8sResourcesClient) DeleteApplication(name string, options *v1.DeleteOptions) error {
-	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Delete(name, options)
-}
-
-func (c *k8sResourcesClient) GetApplication(name string, options v1.GetOptions) (*v1alpha1.Application, error) {
-	return c.applicationClient.ApplicationconnectorV1alpha1().Applications().Get(name, options)
 }

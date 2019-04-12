@@ -6,8 +6,7 @@ import (
 	subscriptionV1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	subscription "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/clientcmd"
-	"os"
+	"k8s.io/client-go/rest"
 )
 
 type EventingClient interface {
@@ -25,14 +24,7 @@ type eventingClient struct {
 	namespace             string
 }
 
-func NewEventingClient(namespace string) (EventingClient, error) {
-	kubeconfig := os.Getenv("KUBECONFIG")
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		return nil, err
-	}
-
+func NewEventingClient(config *rest.Config, namespace string) (EventingClient, error) {
 	subscriptionClientSet, err := subscription.NewForConfig(config)
 	if err != nil {
 		return nil, err

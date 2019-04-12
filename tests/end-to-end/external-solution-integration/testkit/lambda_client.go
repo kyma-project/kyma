@@ -7,8 +7,7 @@ import (
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"k8s.io/client-go/tools/clientcmd"
-	"os"
+	"k8s.io/client-go/rest"
 )
 
 type LambdaClient interface {
@@ -21,14 +20,7 @@ type lambdaClient struct {
 	namespace         string
 }
 
-func NewLambdaClient(namespace string) (LambdaClient, error) {
-	kubeconfig := os.Getenv("KUBECONFIG")
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		return nil, err
-	}
-
+func NewLambdaClient(config *rest.Config, namespace string) (LambdaClient, error) {
 	kubelessClientSet, err := kubeless.NewForConfig(config)
 	if err != nil {
 		return nil, err
