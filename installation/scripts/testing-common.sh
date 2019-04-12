@@ -59,8 +59,7 @@ function printLogsFromFailedTests() {
             printLogsFromPod ${namespace} ${pod}
         ;;
         "Succeeded")
-            echo "Test of '${pod}' was successful"
-            echo "Logs are not displayed after success"
+            # do nothing
         ;;
         *)
             log "Unknown status of '${pod}' - ${phase}" red

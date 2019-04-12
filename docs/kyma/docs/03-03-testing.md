@@ -32,7 +32,8 @@ dex
 ```
 
 The test adds a new **test-dex-connection.yaml** under the `templates/tests` directory.
-Detailed TestDefinition description can be found in [Octopus documentation](https://github.com/kyma-incubator/octopus/blob/master/docs/crd-test-definition.md) 
+Detailed TestDefinition description can be found in [Octopus documentation](https://github.com/kyma-incubator/octopus/blob/master/docs/crd-test-definition.md).
+
 In the simplest example, define just `spec.template` which is of type `PodTemplateSpec`.
 In the example below, there is a container that calls the `Dex` endpoint with cURL.
 
