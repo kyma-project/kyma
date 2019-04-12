@@ -1,7 +1,9 @@
 package servicecatalog_test
 
 import (
+	"encoding/json"
 	"fmt"
+	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog"
 	"net"
 	"net/http"
 	"testing"
@@ -81,8 +83,10 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts.createBindingUsageForInstanceBWithPrefix(timeoutPerStep)
 
 	// then
-	ts.assertInjectedEnvVariable(baseEnvName, ts.gatewayUrl, timeoutPerAssert)
-	ts.assertInjectedEnvVariable(ts.envPrefix+baseEnvName, ts.gatewayUrl, timeoutPerAssert)
+	ts.assertInjectedEnvVariables([]servicecatalog.Variable{
+		{Name: ts.envPrefix + baseEnvName, Value: ts.gatewayUrl},
+		{Name: baseEnvName, Value: ts.gatewayUrl},
+	}, timeoutPerAssert)
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
@@ -461,7 +465,7 @@ func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Dur
 		switch {
 		case err == nil:
 			return fmt.Errorf(
-				"ServiceInstance %q still exists. [%s].",
+				"serviceInstance %q still exists [%s]",
 				instanceName,
 				prettyInstanceResourceStatus(instance.Status.Conditions))
 		case apiErrors.IsNotFound(err):
@@ -639,8 +643,8 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 	}
 }
 
-func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
-	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
+func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []servicecatalog.Variable, timeout time.Duration) {
+	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs", ts.namespace)
 
 	repeat.FuncAtMost(ts.t, func() error {
 		client := http.Client{
@@ -669,9 +673,32 @@ func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, 
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("while checking if proper env is injected [%s=%s], received unexpected status code [got: %d, expected: %d]", envName, envValue, resp.StatusCode, http.StatusOK)
+			return fmt.Errorf("while getting envs from [%s], received unexpected status code [got: %d, expected: %d]", url, resp.StatusCode, http.StatusOK)
 		}
 
+		decoder := json.NewDecoder(resp.Body)
+		var data []servicecatalog.Variable
+		err = decoder.Decode(&data)
+		if err != nil {
+			return err
+		}
+
+		var missing []servicecatalog.Variable
+		for _, req := range requiredVariables {
+			found := false
+			for _, act := range data {
+				if req.Value == act.Value && req.Name == act.Name {
+					found = true
+				}
+			}
+			if !found {
+				missing = append(missing, req)
+			}
+		}
+
+		if len(missing) > 0 {
+			return fmt.Errorf("environment variables were not injected: [%v]", missing)
+		}
 		err = resp.Body.Close()
 		if err != nil {
 			return err
@@ -679,7 +706,7 @@ func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, 
 
 		return nil
 	}, timeout)
-	ts.t.Logf("Environment variable [%s=%s] is injected", envName, envValue)
+	ts.t.Logf("Environment variables are injected [%v]", requiredVariables)
 }
 
 func prettyBindingResourceStatus(conditions []scTypes.ServiceBindingCondition) string {

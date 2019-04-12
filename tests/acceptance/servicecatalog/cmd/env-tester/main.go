@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
+	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -12,21 +15,20 @@ func main() {
 }
 
 func envChecker(w http.ResponseWriter, r *http.Request) {
-	var (
-		envName     = r.URL.Query().Get("name")
-		expEnvValue = r.URL.Query().Get("value")
-	)
+	w.Header().Set("Content-Type", "application/json")
 
-	if envName == "" {
-		http.Error(w, "Missing 'name' query param", http.StatusBadRequest)
-		return
+	envVariables := os.Environ()
+	out := make([]servicecatalog.Variable, len(envVariables))
+	for i, line := range envVariables {
+		splitted := strings.SplitN(line, "=", 1)
+		out[i] = servicecatalog.Variable{Name: splitted[0], Value: splitted[1]}
 	}
 
-	if !isEnvVariableSetInOS(envName, expEnvValue) {
-		w.WriteHeader(http.StatusNotFound)
+	err := json.NewEncoder(w).Encode(out)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
-
 	w.WriteHeader(http.StatusOK)
 }
 
