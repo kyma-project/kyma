@@ -16,7 +16,7 @@ This diagram illustrates the client certificate generation flow in details:
     - the URL of the metadata endpoint
     - information required to generate a CSR
 3. The external system generates a CSR based on the information provided by Kyma and sends the CSR to the designated URL. In the response, the external system receives a signed certificate. It can use the certificate to authenticate and safely communicate with Kyma.
-4. The external system calls metadata endpoint which contains the following information:
+4. The external system calls the metadata endpoint that contains the following information:
     - the URL of the Application Registry API
     - the URL of the Event Service API
     - the certificate renewal URL that should be used to rotate certificate
@@ -24,8 +24,8 @@ This diagram illustrates the client certificate generation flow in details:
     - information uniquely identyfying the certificate (Application name)
     - information required to generate a CSR  
 
->**NOTE:** The external application shouldn't hardcode any URLs. The information returned from metadata endpoint should be stored by the external application along with the certificate. This approach implicates less coupling and offers a great deal of flexibility. 
+>**NOTE:** The external application should not hardcode any URLs. The information returned from metadata endpoint should be stored by the external application along with the certificate. This approach implicates less coupling and offers a great deal of flexibility. 
 
->**NOTE:**  The external application can call metadata endpoint to fetch information required to generate a CSR prior to certificate renewal. This approach makes certificate rotation process convenient and flexible, since the external application doesn't need to store information required to generate a CSR in its data model.     
+>**NOTE:**  The external application can call the metadata endpoint to fetch information required to generate a CSR prior to certificate renewal. This approach makes certificate rotation process convenient and flexible, since the external application does not need to store information required to generate a CSR in its data model.     
 
 >**NOTE:** Follow [this](#tutorials-get-the-client-certificate) tutorial to learn how to get a client certificate for your implementation.

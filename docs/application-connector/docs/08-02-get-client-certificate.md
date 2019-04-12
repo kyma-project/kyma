@@ -1,5 +1,5 @@
 ---
-URLS totitle: Get the client certificate
+title: Get the client certificate
 type: Tutorials
 ---
 
@@ -12,7 +12,7 @@ You can also revoke the client certificate, which prevents it from being renewed
 
 ## Prerequisites
 
-- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which fulfil high security standards.
+- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which fulfil high security standards
 
 ## Get the configuration URL with a token
 
@@ -47,8 +47,6 @@ A successful call returns the following response:
     token: h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
     url: https://connector-service.kyma.local/v1/applications/signingRequests/info?token=h31IwJiLNjnbqIwTPnzLuNmFYsCZeUtVbUvYL2hVNh6kOqFlW9zkHnzxYFCpCExBZ_voGzUo6IVS_ExlZd4muQ==
   ```
-
-
 
 ## Get the CSR information and configuration details from Kyma
 
