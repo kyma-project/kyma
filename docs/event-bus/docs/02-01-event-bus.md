@@ -7,7 +7,7 @@ See the diagram overview of the Event flow configuration and Event cons
 ![Configure and Consume Events](./assets/configure-consume-events.svg)
 
 
-## Event flow configuration 
+## Eventing configuration 
 
 1. A user configures a lambda or a serverless application to be triggered by an Event from an external solution. 
 >**NOTE**: For a serverless application the user must create a Kyma Subscription resource manually. For a lambda, the it is created automatically.
@@ -34,6 +34,7 @@ See the diagram overview of the Event flow configuration and Event cons
 5. Istio Virtual Service forwards the Event further to the `nats-dispatcher` service served by the `nats-dispatcher` Pod.
 6. The NATS dispatcher stores the Event in NATS Streaming.
 7. NATS Streaming stores the Event details in the Persistence storage volume to ensure the data is not lost if the NATS Streaming crashes.
+
 
 
 ## Event validation 
