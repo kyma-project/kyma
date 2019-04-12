@@ -10,7 +10,7 @@ metadata:
 spec:
   {{ if .Values.global.isLocalEnv }}
   hostAliases:
-   - ip: {{ .Values.test.integration.minikubeIP }}
+   - ip: {{ .Values.test.integration.minikubeIP | default "127.0.0.1" }}
      hostnames:
       - "minio.{{ .Values.global.ingress.domainName }}"
   {{ end }}

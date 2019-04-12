@@ -11,7 +11,7 @@ metadata:
 spec:
   {{ if .Values.global.isLocalEnv }}
   hostAliases:
-   - ip: {{ .Values.test.acceptance.ui.minikubeIP }}
+   - ip: {{ .Values.test.acceptance.ui.minikubeIP | default "127.0.0.1" }}
      hostnames:
       - "apiserver.{{ .Values.global.ingress.domainName }}"
       - "console.{{ .Values.global.ingress.domainName }}"

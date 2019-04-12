@@ -49,11 +49,8 @@ helm ${KUBE_CONTEXT_ARG} test assetstore --timeout 600 --tls
 assetstoreTestErr=$?
 
 echo "=== CLUSTER DOCS TOPIKI CTRL MANAGER LOGS === "
-kubectl logs -n assetstore-asset-store-controller-manager-0 -n kyma-system
-echo "========================="
-echo "=== CLUSTER DOCS TOPICS === "
-kubectl get clusterdocstopics -oyaml
-echo "========================="
+kubectl logs assetstore-asset-store-controller-manager-0 -n kyma-system
+echo "==="
 fi
 
 # execute monitoring tests if 'monitoring' is installed
