@@ -6,6 +6,6 @@ Logging in Kyma uses [Loki](https://github.com/grafana/loki) which is a Promethe
 
 > **NOTE:** At the moment, Kyma provides an alpha version of the Logging component.
 
-> **NOTE:** Loki default pod log tailing configuration will not work with kubernetes version 1.14 (for GKE version 1.12.6-gke.X) and above. For setup and preparation of deployment please consult Install Kyma on a cluster guide.
+> **NOTE:** At the moment, Kyma provides an **alpha** version of the Logging component. The default Loki Pod log tailing configuration does not work with Kubernetes version 1.14 (for GKE version 1.12.6-gke.X) and above. For setup and preparation of deployment see the [cluster installation](/root/kyma/#installation-install-kyma-on-a-cluster) guide.
 
 > **NOTE:** Loki designed for application logging, be careful to not log any sensitive information like passwords, credit card numbers and etc.
