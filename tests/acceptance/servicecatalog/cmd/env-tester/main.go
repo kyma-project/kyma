@@ -21,7 +21,7 @@ func envChecker(w http.ResponseWriter, r *http.Request) {
 	envVariables := os.Environ()
 	out := make([]servicecatalog.Variable, len(envVariables))
 	for i, line := range envVariables {
-		splitted := strings.SplitN(line, "=", 1)
+		splitted := strings.SplitN(line, "=", 2)
 		out[i] = servicecatalog.Variable{Name: splitted[0], Value: splitted[1]}
 	}
 
