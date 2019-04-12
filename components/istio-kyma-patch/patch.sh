@@ -124,10 +124,10 @@ function restart_sidecar_injector() {
 
 function check_requirements() {
   while read crd; do
-    echo "    Require CRD crd $crd"
-    kubectl get crd ${crd}
+    echo "Require CRD ${crd}"
+    kubectl get customresourcedefinitions "${crd}"
     if [[ $? -ne 0 ]]; then
-        echo "Cannot find required CRD $crd"
+        echo "Cannot find required CRD ${crd}"
     fi
   done <${CONFIG_DIR}/required-crds
 }
