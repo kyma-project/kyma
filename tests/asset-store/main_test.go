@@ -27,6 +27,7 @@ func TestAssetStore(t *testing.T) {
 
 	testSuite, err := testsuite.New(restConfig, cfg.Test, t, g)
 	failOnError(g, err)
+
 	testSuite.Run()
 
 	testSuite.Cleanup()
