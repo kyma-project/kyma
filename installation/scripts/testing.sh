@@ -59,7 +59,7 @@ fi
 # execute logging tests if 'logging' is installed
 if helm ${KUBE_CONTEXT_ARG} list --tls | grep -q "logging"; then
 echo "- Logging module is installed. Running tests for same"
-helm ${KUBE_CONTEXT_ARG} test logging --timeout 600
+helm ${KUBE_CONTEXT_ARG} test logging --timeout 600 --tls
 loggingTestErr=$?
 fi
 
