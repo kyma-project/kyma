@@ -7,7 +7,9 @@ const (
     applicationGatewayTestsImage: {{ .ApplicationGatewayTestsImage }}
     eventServiceImage: {{ .EventServiceImage }}
     eventServiceTestsImage: {{ .EventServiceTestsImage }}
-    subjectCN: {{ .SubjectCN }}`
+    subjectCN: {{ .SubjectCN }}
+	subjectOrganization: {{ .SubjectOrganization }}
+	subjectOrganizationUnit : {{ .SubjectOrganizationUnit }}`
 )
 
 type OverridesData struct {
@@ -17,4 +19,6 @@ type OverridesData struct {
 	EventServiceImage            string
 	EventServiceTestsImage       string
 	SubjectCN                    string
+	SubjectOrganization          string
+	SubjectOrganizationUnit      string
 }

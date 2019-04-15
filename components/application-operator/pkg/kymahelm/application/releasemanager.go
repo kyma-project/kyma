@@ -1,13 +1,11 @@
 package application
 
 import (
-	"fmt"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )
@@ -104,10 +102,10 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
 	overridesData := r.overridesDefaults
 	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
-		overridesData.SubjectCN = fmt.Sprintf("%s\\\\\\;%s\\\\\\;%s", application.Spec.Tenant, application.Spec.Group, application.Name)
-	} else {
-		overridesData.SubjectCN = application.Name
+		overridesData.SubjectOrganization = application.Spec.Tenant
+		overridesData.SubjectOrganizationUnit = application.Spec.Group
 	}
+	overridesData.SubjectCN = application.Name
 
 	return kymahelm.ParseOverrides(overridesData, overridesTemplate)
 }
