@@ -98,12 +98,14 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	fatalOnError(t, err, "while creating custom client for Backup")
 
 	Convey("Create resources", t, func() {
-		for _, e2eTest := range e2eTests {
+		for testName, e2eTest := range e2eTests {
+			t.Logf("Creating resources: %v\n", testName)
 			err := myBackupClient.CreateNamespace(e2eTest.namespace)
 			So(err, ShouldBeNil)
 			e2eTest.backupTest.CreateResources(e2eTest.namespace)
 		}
-		for _, e2eTest := range e2eTests {
+		for testName, e2eTest := range e2eTests {
+			t.Logf("Testing resources: %v\n", testName)
 			e2eTest.backupTest.TestResources(e2eTest.namespace)
 		}
 	})
@@ -129,7 +131,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 			So(err, ShouldBeNil)
 
 			Convey("Delete resources from cluster", func() {
-				for _, e2eTest := range e2eTests {
+				for testName, e2eTest := range e2eTests {
+					t.Logf("Deleting resources: %v\n", testName)
 					e2eTest.backupTest.DeleteResources(e2eTest.namespace)
 					err := myBackupClient.DeleteNamespace(e2eTest.namespace)
 					So(err, ShouldBeNil)
@@ -151,7 +154,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 					So(err, ShouldBeNil)
 
 					Convey("Test restored resources", func() {
-						for _, e2eTest := range e2eTests {
+						for testName, e2eTest := range e2eTests {
+							t.Logf("Testing resources: %v\n", testName)
 							e2eTest.backupTest.TestResources(e2eTest.namespace)
 						}
 					})
