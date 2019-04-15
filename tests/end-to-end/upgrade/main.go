@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
 
@@ -28,6 +29,7 @@ import (
 // Config holds application configuration
 type Config struct {
 	Logger              logger.Config
+	Dex                 dex.Config
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
 }
@@ -92,7 +94,7 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName),
+		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, cfg.Dex.IdProviderConfig()),
 	}
 
 	// Execute requested action

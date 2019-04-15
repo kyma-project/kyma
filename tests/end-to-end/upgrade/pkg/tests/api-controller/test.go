@@ -2,6 +2,7 @@ package apicontroller
 
 import (
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
+	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 	"github.com/sirupsen/logrus"
 
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
@@ -15,8 +16,8 @@ type Test struct {
 }
 
 // New creates new instance of Test
-func New(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) Test {
-	upstream := backupe2e.NewApiControllerTest(gatewayInterface, coreInterface, kubelessInterface, domainName)
+func New(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string, dexConfig dex.IdProviderConfig) Test {
+	upstream := backupe2e.NewApiControllerTest(gatewayInterface, coreInterface, kubelessInterface, domainName, dexConfig)
 	return Test{upstream}
 }
 
