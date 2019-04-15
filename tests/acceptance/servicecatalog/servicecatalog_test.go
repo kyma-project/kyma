@@ -29,6 +29,7 @@ const (
 )
 
 func TestServiceCatalogContainsClusterServiceClasses(t *testing.T) {
+	t.SkipNow()
 	for testName, brokerURL := range map[string]string{
 		"Helm Broker": os.Getenv(helmBrokerURLEnvName),
 		// "<next broker>": os.Getenv("<broker url env name>"),
@@ -54,6 +55,7 @@ func TestServiceCatalogContainsClusterServiceClasses(t *testing.T) {
 }
 
 func TestServiceCatalogContainsABServiceClasses(t *testing.T) {
+	t.SkipNow()
 	// given
 	k8sConfig, err := restclient.InClusterConfig()
 	require.NoError(t, err)
