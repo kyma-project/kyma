@@ -5,3 +5,7 @@ image:
   dir: pr/tests/
   version: "PR-3478"
   pullPolicy: "Always"
+
+dex:
+  namespace: kyma-system
+  userEmail: admin@kyma.cx
