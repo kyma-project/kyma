@@ -11,11 +11,12 @@ metadata:
 spec:
   serviceAccountName:  test-{{ template "fullname" . }}
   shareProcessNamespace: true
+  restartPolicy: Never
   containers:
   - name: runner
     image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}e2e-upgrade-test:{{ .Values.image.version }}"
     imagePullPolicy: "{{ .Values.image.pullPolicy}}"
-    command: [ "bin/sh"]
+    command: [ "/bin/sh"]
     args: ["-c", "sleep 10; e2e-upgrade-test --action executeTests"]
     env:
     - name: APP_MAX_CONCURRENCY_LEVEL
@@ -27,7 +28,7 @@ spec:
   - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
     name: manager
     command:
-      - bin/sh
+      - /bin/sh
       - -c
       - |
         SERVICE="e2e-upgrade-test"
@@ -42,4 +43,3 @@ spec:
             break
           fi
         done
-  restartPolicy: Never

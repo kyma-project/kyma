@@ -11,6 +11,7 @@ metadata:
   annotations:
     sidecar.istio.io/inject: "true"
 spec:
+  shareProcessNamespace: true
   serviceAccountName: test-{{ template "fullname" . }}
   restartPolicy: Never
   containers:
@@ -26,3 +27,21 @@ spec:
       value: "info"
     - name: DOMAIN
       value: "{{ .Values.global.domainName }}"
+  - name: manager
+    image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+    command:
+      - /bin/sh
+      - -c
+      - |
+        SERVICE="e2e-upgrade-test"
+        sleep 10
+        while true; do
+        if pgrep -x "${SERVICE}"; then
+          echo "---> ${SERVICE} is running."
+            sleep 10
+          else
+            echo "---> ${SERVICE} has stopped, stopping istio"
+            pkill -TERM pilot-agent
+            break
+          fi
+        done
