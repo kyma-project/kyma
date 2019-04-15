@@ -1,11 +1,8 @@
 package main
 
 import (
-	"bytes"
-	"encoding/base64"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"strings"
 
 	"github.com/pkg/errors"
@@ -103,6 +100,8 @@ func main() {
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
+	logrus.Infof("Password: '%s'", userPassword)
+
 	dexConfig := dex.Config{
 		Domain:       domainName,
 		UserEmail:    cfg.DexUserEmail,
@@ -187,12 +186,6 @@ func getUserPasswordFromCluster(k8sCli *k8sclientset.Clientset, userEmail, dexNa
 		return "", errors.Errorf("Invalid number of secrets for user email %s in namespace %s: %v", userEmail, dexNamespace, len(secretList.Items))
 	}
 
-	passwordEncoded := secretList.Items[0].Data["password"]
-	decoder := base64.NewDecoder(base64.StdEncoding, bytes.NewReader(passwordEncoded))
-	password, err := ioutil.ReadAll(decoder)
-	if err != nil {
-		return "", err
-	}
-
+	password := secretList.Items[0].Data["password"]
 	return string(password), nil
 }
