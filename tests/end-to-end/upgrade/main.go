@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
