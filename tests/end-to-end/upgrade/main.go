@@ -94,18 +94,20 @@ func main() {
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
-	userPassword, err := getUserPasswordFromCluster(k8sCli, cfg.DexUserEmail, cfg.DexNamespace)
-	fatalOnError(err, "while reading user password from cluster")
-
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
-	dexConfig := dex.Config{
-		Domain:       domainName,
-		UserEmail:    cfg.DexUserEmail,
-		UserPassword: userPassword,
-	}
+	dexConfig := dex.Config{}
+	if action == executeTestsActionName {
+		userPassword, err := getUserPasswordFromCluster(k8sCli, cfg.DexUserEmail, cfg.DexNamespace)
+		fatalOnError(err, "while reading user password from cluster")
 
+		dexConfig = dex.Config{
+			Domain:       domainName,
+			UserEmail:    cfg.DexUserEmail,
+			UserPassword: userPassword,
+		}
+	}
 
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
