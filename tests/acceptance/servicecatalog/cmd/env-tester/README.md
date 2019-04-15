@@ -1,4 +1,4 @@
 # Env Tester
 
 ## Overview
-The Env Tester exposes the HTTP Endpoint which responds with all environment variables.
+The Env Tester exposes the HTTP endpoint which returns all environment variables.
