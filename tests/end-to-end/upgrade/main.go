@@ -97,7 +97,7 @@ func main() {
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
-	userPassword, err := getPasswordForUserFromCluster(k8sCli, cfg.DexUserEmail, cfg.DexNamespace)
+	userPassword, err := getUserPasswordFromCluster(k8sCli, cfg.DexUserEmail, cfg.DexNamespace)
 	fatalOnError(err, "while reading user password from cluster")
 
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
@@ -125,7 +125,7 @@ func main() {
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
-		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
+		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
 		"GrafanaUpgradeTest":           grafanaUpgradeTest,
 		"MetricsUpgradeTest":           metricUpgradeTest,
 	}
@@ -177,7 +177,7 @@ func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
 	return value, nil
 }
 
-func getPasswordForUserFromCluster(k8sCli *k8sclientset.Clientset, userEmail, dexNamespace string) (string, error) {
+func getUserPasswordFromCluster(k8sCli *k8sclientset.Clientset, userEmail, dexNamespace string) (string, error) {
 	userEmailLabel := strings.Replace(userEmail, "@", ".", -1)
 	secretList, err := k8sCli.CoreV1().Secrets(dexNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("user-email=%s", userEmailLabel)})
 	if err != nil {
