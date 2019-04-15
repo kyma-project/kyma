@@ -11,9 +11,9 @@ ADD env-tester.bin /go/bin/env-tester.bin
 
 WORKDIR $SRC_DIR
 
-#RUN go test -c ./application
+RUN go test -c ./application
 RUN go test -c ./servicecatalog
-#RUN go test -c ./dex
+RUN go test -c ./dex
 
 LABEL source=git@github.com:kyma-project/kyma.git
 
