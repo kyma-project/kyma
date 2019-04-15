@@ -1,8 +1,14 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"flag"
 	"fmt"
+	"io/ioutil"
+
+	"github.com/pkg/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 
@@ -33,7 +39,8 @@ import (
 // Config holds application configuration
 type Config struct {
 	Logger              logger.Config
-	Dex                 dex.Config
+	DexUserEmail        string
+	DexNamespace        string
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
 }
@@ -89,8 +96,17 @@ func main() {
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
+	userPassword, err := getPasswordForUserFromCluster(k8sCli, cfg.DexUserEmail, cfg.DexNamespace)
+	fatalOnError(err, "while reading user password from cluster")
+
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
+
+	dexConfig := dex.Config{
+		Domain:       domainName,
+		UserEmail:    cfg.DexUserEmail,
+		UserPassword: userPassword,
+	}
 
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
@@ -107,7 +123,7 @@ func main() {
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, cfg.Dex.IdProviderConfig()),
+		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
 		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
 		"GrafanaUpgradeTest":           grafanaUpgradeTest,
 		"MetricsUpgradeTest":           metricUpgradeTest,
@@ -158,4 +174,23 @@ func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
 
 	value, _ := overrides.FindOverrideStringValue(coreOverridesMap, "global.ingress.domainName")
 	return value, nil
+}
+
+func getPasswordForUserFromCluster(k8sCli *k8sclientset.Clientset, userEmail, dexNamespace string) (string, error) {
+	secretList, err := k8sCli.CoreV1().Secrets(dexNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("user-email=%s", userEmail)})
+	if err != nil {
+		return "", err
+	}
+	if len(secretList.Items) != 1 {
+		return "", errors.Errorf("Invalid number of secrets for user email %s in namespace %s: %v", userEmail, dexNamespace, len(secretList.Items))
+	}
+
+	passwordEncoded := secretList.Items[0].Data["password"]
+	decoder := base64.NewDecoder(base64.StdEncoding, bytes.NewReader(passwordEncoded))
+	password, err := ioutil.ReadAll(decoder)
+	if err != nil {
+		return "", err
+	}
+
+	return string(password), nil
 }
