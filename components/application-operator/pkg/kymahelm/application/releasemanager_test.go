@@ -21,6 +21,8 @@ import (
 
 const (
 	appName                 = "default-app"
+	appOrganization         = "default-organization"
+	appOrganizationUnit     = "default-organization-unit"
 	namespace               = "integration"
 	expectedOverridesFormat = `global:
     domainName: 
@@ -28,7 +30,9 @@ const (
     applicationGatewayTestsImage: 
     eventServiceImage: 
     eventServiceTestsImage: 
-    subjectCN: %s`
+    subjectCN: %s
+    subjectOrganization: %s
+    subjectOrganizationUnit: %s`
 )
 
 var (
@@ -61,7 +65,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, appName)
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, appName, appOrganization, appOrganizationUnit)
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
@@ -96,7 +100,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			Spec:       v1alpha1.ApplicationSpec{Tenant: "tenant", Group: "group"},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "tenant\\\\\\;group\\\\\\;default-app")
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "default-app", "tenant", "group")
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
