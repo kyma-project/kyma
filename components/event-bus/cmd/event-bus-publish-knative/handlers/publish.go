@@ -34,18 +34,6 @@ func WithRequestSizeLimiting(next http.HandlerFunc, limit int64) http.HandlerFun
 	}
 }
 
-func getPublishStatusReason(status *string) string {
-	var reason string
-	switch *status {
-	case publisher.PUBLISHED:
-		reason = "Message successfully published to the channel"
-	case publisher.IGNORED:
-		reason = "Event was ignored as there are no subscriptions or consumers configured for this event"
-	case publisher.FAILED:
-		reason = "Some validation or internal error occurred"
-	}
-	return reason
-}
 func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *publisher.KnativePublisher,
 	tracer *trace.Tracer, opts *opts.Options) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +43,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 
 		// handle the knativeLib publish request
 		message, channelName, namespace, err, status := handleKnativePublishRequest(w, r, knativeLib, knativePublisher,
-			traceContext, opts.MaxChannelNameLength)
+			traceContext, opts)
 
 		// check if the publish request was successful
 		if err != nil {
@@ -76,16 +64,17 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		if err := json.NewEncoder(w).Encode(*publishResponse); err != nil {
 			log.Printf("failed to send response back: %v", err)
 		} else {
-			log.Printf("publish to the knative channel: '%v'\nnamespace: '%v'\nstatus: '%v'\nreason: %v",
+			log.Printf("publish to the knative channel: '%v' namespace: '%v' status: '%v' reason: '%v'",
 				*channelName, *namespace, publishResponse.Status, publishResponse.Reason)
 		}
+
 		// add span tags for the message properties
 		addSpanTagsForMessage(traceSpan, message)
 	}
 }
 
 func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib,
-	knativePublisher *publisher.KnativePublisher, context *api.TraceContext, channelNameMaxLength int) (*Message,
+	knativePublisher *publisher.KnativePublisher, context *api.TraceContext, opts *opts.Options) (*Message,
 	*string, *string, *api.Error, string) {
 	// validate the http request
 	publishRequest, err := validators.ValidateRequest(r)
@@ -104,7 +93,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	}
 
 	// validate the publish request
-	if err = api.ValidatePublish(publishRequest); err != nil {
+	if err = api.ValidatePublish(publishRequest, opts.EventOptions); err != nil {
 		log.Printf("validate publish failed: %v", err)
 		_ = publish.SendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
@@ -137,7 +126,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	// get the channel name and validate its length
 	channelName := knative.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType,
 		&publishRequest.EventTypeVersion)
-	if err = validators.ValidateChannelNameLength(&channelName, channelNameMaxLength); err != nil {
+	if err = validators.ValidateChannelNameLength(&channelName, opts.MaxChannelNameLength); err != nil {
 		log.Printf("publish message failed: %v", err)
 		_ = publish.SendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
@@ -208,6 +197,19 @@ func buildMessage(publishRequest *api.PublishRequest, traceContext *api.TraceCon
 	}
 
 	return message
+}
+
+func getPublishStatusReason(status *string) string {
+	var reason string
+	switch *status {
+	case publisher.PUBLISHED:
+		reason = "Message successfully published to the channel"
+	case publisher.IGNORED:
+		reason = "Event was ignored as there are no subscriptions or consumers configured for this event"
+	case publisher.FAILED:
+		reason = "Some validation or internal error occurred"
+	}
+	return reason
 }
 
 func addSpanTagsForMessage(publishSpan *opentracing.Span, message *Message) {

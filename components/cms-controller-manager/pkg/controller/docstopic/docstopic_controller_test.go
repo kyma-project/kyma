@@ -6,7 +6,9 @@ import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/source"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/onsi/gomega"
+	coreV1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
@@ -14,6 +16,11 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+)
+
+var (
+	webhookCfgMapName      = "test"
+	webhookCfgMapNamespace = "test"
 )
 
 const timeout = time.Second * 5
@@ -28,14 +35,18 @@ func TestReconcile(t *testing.T) {
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(c, scheme)
 	bucketService := newBucketService(c, scheme, "")
+	informer, err := mgr.GetCache().GetInformer(&coreV1.ConfigMap{})
+	g.Expect(err).To(gomega.BeNil())
+	assetWhsConfigService := webhookconfig.New(informer.GetIndexer(), webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileDocsTopic{
-		relistInterval: time.Hour,
-		Client:         c,
-		scheme:         scheme,
-		recorder:       mgr.GetRecorder("docstopic-controller"),
-		assetSvc:       assetService,
-		bucketSvc:      bucketService,
+		Client:           c,
+		scheme:           scheme,
+		relistInterval:   time.Hour,
+		recorder:         mgr.GetRecorder("docstopic-controller"),
+		assetSvc:         assetService,
+		bucketSvc:        bucketService,
+		webhookConfigSvc: assetWhsConfigService,
 	}
 
 	recFn, requests := SetupTestReconcile(r)

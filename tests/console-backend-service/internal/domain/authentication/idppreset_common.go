@@ -55,7 +55,7 @@ func idpPresetDetailsFields() string {
 	`
 }
 
-func createIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetCreateMutationResponse, error) {
+func fixCreateIDPPresetRequest(resourceDetailsQuery string, idpPreset IDPPreset) *graphql.Request {
 	query := fmt.Sprintf(`
 		mutation ($name: String!, $issuer: String!, $jwksUri: String!) {
 			createIDPPreset(
@@ -68,9 +68,15 @@ func createIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedRes
 		}
 	`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
-	req.SetVar("name", expectedResource.Name)
-	req.SetVar("issuer", expectedResource.Issuer)
-	req.SetVar("jwksUri", expectedResource.JwksUri)
+	req.SetVar("name", idpPreset.Name)
+	req.SetVar("issuer", idpPreset.Issuer)
+	req.SetVar("jwksUri", idpPreset.JwksUri)
+
+	return req
+}
+
+func createIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetCreateMutationResponse, error) {
+	req := fixCreateIDPPresetRequest(resourceDetailsQuery, expectedResource)
 
 	var res idpPresetCreateMutationResponse
 	err := c.Do(req, &res)
@@ -135,7 +141,7 @@ func multipleResourcesQueryRequest(resourceDetailsQuery string, expectedResource
 	return req
 }
 
-func deleteIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetDeleteMutationResponse, error) {
+func fixDeleteIDPPresetRequest(resourceDetailsQuery string, expectedResource IDPPreset) *graphql.Request {
 	query := fmt.Sprintf(`
 			mutation ($name: String!) {
 				deleteIDPPreset(name: $name) {
@@ -145,6 +151,12 @@ func deleteIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedRes
 		`, resourceDetailsQuery)
 	req := graphql.NewRequest(query)
 	req.SetVar("name", expectedResource.Name)
+
+	return req
+}
+
+func deleteIDPPreset(c *graphql.Client, resourceDetailsQuery string, expectedResource IDPPreset) (idpPresetDeleteMutationResponse, error) {
+	req := fixDeleteIDPPresetRequest(resourceDetailsQuery, expectedResource)
 
 	var res idpPresetDeleteMutationResponse
 	err := c.Do(req, &res)

@@ -16,11 +16,12 @@ type Interface interface {
 type JwtDefaultConfig Jwt
 
 type Dto struct {
-	MetaDto               meta.Dto
-	ServiceName           string
-	AuthenticationEnabled bool
-	Rules                 Rules
-	Status                kymaMeta.GatewayResourceStatus
+	MetaDto                meta.Dto
+	ServiceName            string
+	DisablePolicyPeersMTLS bool
+	AuthenticationEnabled  bool
+	Rules                  Rules
+	Status                 kymaMeta.GatewayResourceStatus
 }
 
 type Rules []Rule

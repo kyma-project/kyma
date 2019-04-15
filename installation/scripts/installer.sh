@@ -97,5 +97,8 @@ kubectl apply -f - <<<"$COMBO_YAML"
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh
 
+echo -e "\nGetting Helm secrets"
+bash ${CURRENT_DIR}/tiller-tls.sh
+
 echo -e "\nTriggering installation"
 kubectl label installation/kyma-installation action=install

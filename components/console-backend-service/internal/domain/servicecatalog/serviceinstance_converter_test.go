@@ -207,7 +207,6 @@ func TestServiceInstanceConverter_GQLCreateInputToInstanceCreateParameters(t *te
 		}
 		input := gqlschema.ServiceInstanceCreateInput{
 			Name:            "name",
-			Namespace:       "ns",
 			Labels:          []string{"test", "label"},
 			ParameterSchema: &JSON,
 			ClassRef: gqlschema.ServiceInstanceCreateInputResourceRef{
@@ -235,21 +234,21 @@ func TestServiceInstanceConverter_GQLCreateInputToInstanceCreateParameters(t *te
 		}
 		converter := serviceInstanceConverter{}
 
-		result := converter.GQLCreateInputToInstanceCreateParameters(&input)
+		result := converter.GQLCreateInputToInstanceCreateParameters(&input, "ns")
 
 		assert.Equal(t, expected, result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		converter := serviceInstanceConverter{}
-		result := converter.GQLCreateInputToInstanceCreateParameters(&gqlschema.ServiceInstanceCreateInput{})
+		result := converter.GQLCreateInputToInstanceCreateParameters(&gqlschema.ServiceInstanceCreateInput{}, "")
 
 		assert.Empty(t, result)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
 		converter := serviceInstanceConverter{}
-		result := converter.GQLCreateInputToInstanceCreateParameters(nil)
+		result := converter.GQLCreateInputToInstanceCreateParameters(nil, "")
 
 		assert.Nil(t, result)
 	})

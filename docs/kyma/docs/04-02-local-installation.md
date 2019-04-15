@@ -16,6 +16,7 @@ Additionally, download these tools:
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
 - [Helm](https://github.com/kubernetes/helm) 2.10.0
 - [jq](https://stedolan.github.io/jq/)
+- [wget](https://www.gnu.org/software/wget/)
 
 Virtualization:
 
@@ -90,7 +91,7 @@ Follow these instructions to install Kyma from a release or from local sources:
 
   7. Configure the Kyma installation using the local configuration file from the `$LATEST` release:
       ```
-      kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml
+      wget -qO- https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml | sed "s/minikubeIP: \"\"/minikubeIP: \"$(minikube ip)\"/g" | kubectl apply -f -
       ```
 
   8. To trigger the installation process, label the `kyma-installation` custom resource:
@@ -125,7 +126,6 @@ You can execute the `installation/cmd/run.sh` script with the following paramete
 - `--vm-driver` which points to either `virtualbox` or `hyperkit`, depending on your operating system.
   </details>
 </div>
-
 
 Read [this](#installation-reinstall-kyma) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 To learn how to test Kyma, see [this](#details-testing-kyma) document.
@@ -203,7 +203,7 @@ kubectl get pods --all-namespaces
    scripts/is-installed.sh --verbose
    ```
 
-2. If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:  
+2. If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:
    ```
    kubectl get pods --all-namespaces
    ```
@@ -212,7 +212,7 @@ kubectl get pods --all-namespaces
 
    If the problem persists, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
 
-3. If you put your local running cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run: 
+3. If you put your local running cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run:
    ```
    minikube ssh -- docker run -i --rm --privileged --pid=host debian nsenter -t 1 -m -u -n -i date -u $(date -u +%m%d%H%M%Y)
    ```

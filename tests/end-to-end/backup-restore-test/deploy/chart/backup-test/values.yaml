@@ -3,4 +3,4 @@ containerRegistry:
 
 image:
   dir: develop/
-  tag: 0470da8a
+  tag: 4c0db8ce

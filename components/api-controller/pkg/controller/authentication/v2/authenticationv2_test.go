@@ -11,13 +11,18 @@ import (
 )
 
 func TestCreateAuthentication(t *testing.T) {
+	createAuthenticationTest(false, t)
+	createAuthenticationTest(true, t)
+}
+
+func createAuthenticationTest(enableIstioAuthPolicyMTLS bool, t *testing.T) {
 
 	fakeIstioAuth := istioFakes.NewSimpleClientset()
 	fakeJwtDefaultConfig := JwtDefaultConfig{
 		Issuer:  "https://accounts.google.com",
 		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
-	authentication := New(fakeIstioAuth, fakeJwtDefaultConfig)
+	authentication := New(fakeIstioAuth, fakeJwtDefaultConfig, enableIstioAuthPolicyMTLS)
 
 	t.Run("Should create policy with custom auth configuration", func(t *testing.T) {
 
@@ -101,7 +106,7 @@ func TestUpdateAuthentication(t *testing.T) {
 		Issuer:  "https://accounts.google.com",
 		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
-	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig, false)
 
 	oldDto := &Dto{
 		AuthenticationEnabled: false,
@@ -237,7 +242,7 @@ func TestDeleteAuthentication(t *testing.T) {
 		Issuer:  "https://accounts.google.com",
 		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
-	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig)
+	authentication := New(fakeIstioConfig, fakeJwtDefaultConfig, false)
 
 	t.Run("Should delete Policy if exists", func(t *testing.T) {
 		dto := &Dto{
@@ -285,6 +290,83 @@ func TestDeleteAuthentication(t *testing.T) {
 
 		if err != nil {
 			t.Errorf("Unexpected error: %s", err)
+		}
+	})
+}
+
+func TestToIstioAuthPolicy(t *testing.T) {
+
+	fakeJwtDefaultConfig := JwtDefaultConfig{
+		Issuer:  "https://accounts.google.com",
+		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
+	}
+
+	metaDto := meta.Dto{
+		Namespace: "test-namepsace",
+	}
+
+	t.Run("Should create Policy without peers.mtls if disabled globally", func(t *testing.T) {
+
+		dto := &Dto{
+			MetaDto:                metaDto,
+			AuthenticationEnabled:  true,
+			DisablePolicyPeersMTLS: false,
+		}
+
+		res := toIstioAuthPolicy(dto, fakeJwtDefaultConfig, false)
+
+		if res == nil {
+			t.Error("Result is nil")
+		}
+
+		if res.Spec.Peers != nil {
+			t.Error("Policy Spec.Peers should be nil")
+		}
+	})
+
+	t.Run("Should create Policy with peers.mtls if enabled globally and not disabled in API", func(t *testing.T) {
+
+		dto := &Dto{
+			MetaDto:                metaDto,
+			AuthenticationEnabled:  true,
+			DisablePolicyPeersMTLS: false,
+		}
+
+		res := toIstioAuthPolicy(dto, fakeJwtDefaultConfig, true)
+
+		if res == nil {
+			t.Error("Result is nil")
+		}
+
+		if res.Spec.Peers == nil {
+			t.Error("Policy Spec.Peers should not be nil")
+		}
+
+		if len(res.Spec.Peers) != 1 {
+			t.Error("Policy Spec.Peers should have length of 1")
+		}
+
+		if res.Spec.Peers[0] == nil {
+			t.Error("Policy Spec.Peers[0] should not be nil")
+		}
+	})
+
+	t.Run("Should create Policy without peers.mtls if enabled globally and disabled in API", func(t *testing.T) {
+
+		dto := &Dto{
+			MetaDto:                metaDto,
+			AuthenticationEnabled:  true,
+			DisablePolicyPeersMTLS: true,
+		}
+
+		res := toIstioAuthPolicy(dto, fakeJwtDefaultConfig, true)
+
+		if res == nil {
+			t.Error("Result is nil")
+		}
+
+		if res.Spec.Peers != nil {
+			t.Error("Policy Spec.Peers should be nil")
 		}
 	})
 }

@@ -1,6 +1,7 @@
 package assetstore
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
@@ -8,10 +9,12 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
 	DocsTopicModeSingle = "single"
+	DocsTopicNameFormat = "%s-%s"
 )
 
 type ResourceInterface interface {
@@ -38,7 +41,7 @@ func NewDocsTopicRepository(resourceInterface ResourceInterface) DocsTopicReposi
 }
 
 func (r repository) Upsert(docsTopicEntry docstopic.Entry) apperrors.AppError {
-	existingDocsTopic, err := r.get(docsTopicEntry.Id)
+	_, err := r.get(docsTopicEntry.Id)
 	if err != nil && err.Code() == apperrors.CodeNotFound {
 		return r.create(toK8sType(docsTopicEntry))
 	}
@@ -48,9 +51,8 @@ func (r repository) Upsert(docsTopicEntry docstopic.Entry) apperrors.AppError {
 	}
 
 	k8sDocsTopic := toK8sType(docsTopicEntry)
-	k8sDocsTopic.ResourceVersion = existingDocsTopic.ResourceVersion
 
-	return r.update(k8sDocsTopic)
+	return r.update(docsTopicEntry.Id, k8sDocsTopic)
 }
 
 func (r repository) Get(id string) (docstopic.Entry, apperrors.AppError) {
@@ -71,73 +73,107 @@ func (r repository) Delete(id string) apperrors.AppError {
 	return nil
 }
 
-func (r repository) get(id string) (v1alpha1.DocsTopic, apperrors.AppError) {
+func (r repository) get(id string) (v1alpha1.ClusterDocsTopic, apperrors.AppError) {
 	u, err := r.resourceInterface.Get(id, metav1.GetOptions{})
 	if err != nil {
 		if k8serrors.IsNotFound(err) {
-			return v1alpha1.DocsTopic{}, apperrors.NotFound("Docs Topic with %s id not found.", id)
+			return v1alpha1.ClusterDocsTopic{}, apperrors.NotFound("Docs Topic with %s id not found.", id)
 		}
 
-		return v1alpha1.DocsTopic{}, apperrors.Internal("Failed to get Docs Topic, %s.", err)
+		return v1alpha1.ClusterDocsTopic{}, apperrors.Internal("Failed to get Docs Topic, %s.", err)
 	}
 
-	var docsTopic v1alpha1.DocsTopic
+	var docsTopic v1alpha1.ClusterDocsTopic
 	err = runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &docsTopic)
 	if err != nil {
-		return v1alpha1.DocsTopic{}, apperrors.Internal("Failed to convert from unstructured object, %s.", err)
+		return v1alpha1.ClusterDocsTopic{}, apperrors.Internal("Failed to convert from unstructured object, %s.", err)
 	}
 
 	return docsTopic, nil
 }
 
-func (r repository) create(docsTopic v1alpha1.DocsTopic) apperrors.AppError {
+func (r repository) create(docsTopic v1alpha1.ClusterDocsTopic) apperrors.AppError {
 	u, err := toUstructured(docsTopic)
 	if err != nil {
-		return err
+		return apperrors.Internal("Failed to create Documentation Topic, %s.", err)
 	}
 
-	{
-		_, err := r.resourceInterface.Create(u, metav1.CreateOptions{})
-
-		if err != nil {
-			return apperrors.Internal("Failed to create Documentation Topic, %s.", err)
-		}
+	_, err = r.resourceInterface.Create(u, metav1.CreateOptions{})
+	if err != nil {
+		return apperrors.Internal("Failed to create Documentation Topic, %s.", err)
 	}
 
 	return nil
 }
 
-func (r repository) update(docsTopic v1alpha1.DocsTopic) apperrors.AppError {
-	u, err := toUstructured(docsTopic)
-	if err != nil {
-		return err
+func (r repository) update(id string, docsTopic v1alpha1.ClusterDocsTopic) apperrors.AppError {
+
+	getRefreshedDocsTopic := func(id string, docsTopic v1alpha1.ClusterDocsTopic) (v1alpha1.ClusterDocsTopic, error) {
+		newUnstructured, err := r.resourceInterface.Get(id, metav1.GetOptions{})
+		if err != nil {
+			return v1alpha1.ClusterDocsTopic{}, err
+		}
+
+		newDocsTopic, err := fromUnstructured(newUnstructured)
+		if err != nil {
+			return v1alpha1.ClusterDocsTopic{}, err
+		}
+
+		newDocsTopic.Spec = docsTopic.Spec
+
+		return newDocsTopic, nil
 	}
 
-	{
-		_, err := r.resourceInterface.Update(u, metav1.UpdateOptions{})
-
+	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		newDocsTopic, err := getRefreshedDocsTopic(id, docsTopic)
 		if err != nil {
-			return apperrors.Internal("Failed to update Documentation Topic, %s.", err)
+			return err
 		}
+
+		u, err := toUstructured(newDocsTopic)
+		if err != nil {
+			return err
+		}
+
+		_, err = r.resourceInterface.Update(u, metav1.UpdateOptions{})
+		if err != nil {
+			return err
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return apperrors.Internal("Failed to update Documentation Topic, %s.", err)
 	}
 
 	return nil
 }
 
-func toUstructured(docsTopic v1alpha1.DocsTopic) (*unstructured.Unstructured, apperrors.AppError) {
+func toUstructured(docsTopic v1alpha1.ClusterDocsTopic) (*unstructured.Unstructured, error) {
 	obj, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&docsTopic)
 	if err != nil {
-		return nil, apperrors.Internal("Failed to convert Docs Topic object, %s.", err)
+		return nil, err
 	}
 
 	return &unstructured.Unstructured{Object: obj}, nil
 }
 
-func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
+func fromUnstructured(u *unstructured.Unstructured) (v1alpha1.ClusterDocsTopic, error) {
+	var docsTopic v1alpha1.ClusterDocsTopic
+	err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &docsTopic)
+	if err != nil {
+		return v1alpha1.ClusterDocsTopic{}, err
+	}
+
+	return docsTopic, nil
+}
+
+func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.ClusterDocsTopic {
 	sources := make([]v1alpha1.Source, 0, 3)
 	for key, url := range docsTopicEntry.Urls {
 		source := v1alpha1.Source{
-			Name: key,
+			Name: fmt.Sprintf(DocsTopicNameFormat, key, docsTopicEntry.Id),
 			URL:  url,
 			Mode: DocsTopicModeSingle,
 			Type: key,
@@ -145,9 +181,9 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 		sources = append(sources, source)
 	}
 
-	return v1alpha1.DocsTopic{
+	return v1alpha1.ClusterDocsTopic{
 		TypeMeta: metav1.TypeMeta{
-			Kind:       "DocsTopic",
+			Kind:       "ClusterDocsTopic",
 			APIVersion: v1alpha1.SchemeGroupVersion.String(),
 		},
 		ObjectMeta: metav1.ObjectMeta{
@@ -155,7 +191,7 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 			Namespace: "kyma-integration",
 			Labels:    docsTopicEntry.Labels,
 		},
-		Spec: v1alpha1.DocsTopicSpec{
+		Spec: v1alpha1.ClusterDocsTopicSpec{
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
 				DisplayName: "Some display name",
 				Description: "Some description",
@@ -164,7 +200,7 @@ func toK8sType(docsTopicEntry docstopic.Entry) v1alpha1.DocsTopic {
 		}}
 }
 
-func fromK8sType(k8sDocsTopic v1alpha1.DocsTopic) docstopic.Entry {
+func fromK8sType(k8sDocsTopic v1alpha1.ClusterDocsTopic) docstopic.Entry {
 	urls := make(map[string]string)
 
 	for _, source := range k8sDocsTopic.Spec.Sources {
