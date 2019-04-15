@@ -15,7 +15,7 @@ func main() {
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
-func envChecker(w http.ResponseWriter, r *http.Request) {
+func envChecker(w http.ResponseWriter, _ *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	envVariables := os.Environ()
@@ -31,17 +31,4 @@ func envChecker(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusOK)
-}
-
-func isEnvVariableSetInOS(envName, expEnvValue string) bool {
-	osEnvValue, found := os.LookupEnv(envName)
-	if !found {
-		return false
-	}
-
-	if osEnvValue != expEnvValue {
-		return false
-	}
-
-	return true
 }
