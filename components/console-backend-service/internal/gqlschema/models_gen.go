@@ -52,6 +52,17 @@ type ApplicationService struct {
 	Entries             []ApplicationEntry `json:"entries"`
 }
 
+type AssetEvent struct {
+	Type  SubscriptionEventType `json:"type"`
+	Asset Asset                 `json:"asset"`
+}
+
+type AssetStatus struct {
+	Phase   AssetPhaseType `json:"phase"`
+	Reason  string         `json:"reason"`
+	Message string         `json:"message"`
+}
+
 type AuthenticationPolicy struct {
 	Type    AuthenticationPolicyType `json:"type"`
 	Issuer  string                   `json:"issuer"`
@@ -66,6 +77,16 @@ type BindableResourcesOutputItem struct {
 	Kind        string              `json:"kind"`
 	DisplayName string              `json:"displayName"`
 	Resources   []UsageKindResource `json:"resources"`
+}
+
+type ClusterAssetEvent struct {
+	Type         SubscriptionEventType `json:"type"`
+	ClusterAsset ClusterAsset          `json:"clusterAsset"`
+}
+
+type ClusterDocsTopicEvent struct {
+	Type             SubscriptionEventType `json:"type"`
+	ClusterDocsTopic ClusterDocsTopic      `json:"clusterDocsTopic"`
 }
 
 type ClusterServiceBroker struct {
@@ -127,7 +148,6 @@ type CreateServiceBindingOutput struct {
 
 type CreateServiceBindingUsageInput struct {
 	Name              *string                             `json:"name"`
-	Namespace         string                              `json:"namespace"`
 	ServiceBindingRef ServiceBindingRefInput              `json:"serviceBindingRef"`
 	UsedBy            LocalObjectReferenceInput           `json:"usedBy"`
 	Parameters        *ServiceBindingUsageParametersInput `json:"parameters"`
@@ -174,6 +194,17 @@ type DeploymentStatus struct {
 	Conditions        []DeploymentCondition `json:"conditions"`
 }
 
+type DocsTopicEvent struct {
+	Type      SubscriptionEventType `json:"type"`
+	DocsTopic DocsTopic             `json:"docsTopic"`
+}
+
+type DocsTopicStatus struct {
+	Phase   DocsTopicPhaseType `json:"phase"`
+	Reason  string             `json:"reason"`
+	Message string             `json:"message"`
+}
+
 type EnvPrefix struct {
 	Name string `json:"name"`
 }
@@ -192,6 +223,11 @@ type ExceededQuota struct {
 	QuotaName         string   `json:"quotaName"`
 	ResourceName      string   `json:"resourceName"`
 	AffectedResources []string `json:"affectedResources"`
+}
+
+type File struct {
+	URL      string `json:"url"`
+	Metadata JSON   `json:"metadata"`
 }
 
 type Function struct {
@@ -404,7 +440,6 @@ type ServiceEvent struct {
 
 type ServiceInstanceCreateInput struct {
 	Name            string                                `json:"name"`
-	Namespace       string                                `json:"namespace"`
 	ClassRef        ServiceInstanceCreateInputResourceRef `json:"classRef"`
 	PlanRef         ServiceInstanceCreateInputResourceRef `json:"planRef"`
 	Labels          []string                              `json:"labels"`
@@ -506,6 +541,43 @@ func (e ApplicationStatus) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 
+type AssetPhaseType string
+
+const (
+	AssetPhaseTypeReady   AssetPhaseType = "READY"
+	AssetPhaseTypePending AssetPhaseType = "PENDING"
+	AssetPhaseTypeFailed  AssetPhaseType = "FAILED"
+)
+
+func (e AssetPhaseType) IsValid() bool {
+	switch e {
+	case AssetPhaseTypeReady, AssetPhaseTypePending, AssetPhaseTypeFailed:
+		return true
+	}
+	return false
+}
+
+func (e AssetPhaseType) String() string {
+	return string(e)
+}
+
+func (e *AssetPhaseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = AssetPhaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid AssetPhaseType", str)
+	}
+	return nil
+}
+
+func (e AssetPhaseType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
 type AuthenticationPolicyType string
 
 const (
@@ -575,6 +647,43 @@ func (e *ContainerStateType) UnmarshalGQL(v interface{}) error {
 }
 
 func (e ContainerStateType) MarshalGQL(w io.Writer) {
+	fmt.Fprint(w, strconv.Quote(e.String()))
+}
+
+type DocsTopicPhaseType string
+
+const (
+	DocsTopicPhaseTypeReady   DocsTopicPhaseType = "READY"
+	DocsTopicPhaseTypePending DocsTopicPhaseType = "PENDING"
+	DocsTopicPhaseTypeFailed  DocsTopicPhaseType = "FAILED"
+)
+
+func (e DocsTopicPhaseType) IsValid() bool {
+	switch e {
+	case DocsTopicPhaseTypeReady, DocsTopicPhaseTypePending, DocsTopicPhaseTypeFailed:
+		return true
+	}
+	return false
+}
+
+func (e DocsTopicPhaseType) String() string {
+	return string(e)
+}
+
+func (e *DocsTopicPhaseType) UnmarshalGQL(v interface{}) error {
+	str, ok := v.(string)
+	if !ok {
+		return fmt.Errorf("enums must be strings")
+	}
+
+	*e = DocsTopicPhaseType(str)
+	if !e.IsValid() {
+		return fmt.Errorf("%s is not a valid DocsTopicPhaseType", str)
+	}
+	return nil
+}
+
+func (e DocsTopicPhaseType) MarshalGQL(w io.Writer) {
 	fmt.Fprint(w, strconv.Quote(e.String()))
 }
 

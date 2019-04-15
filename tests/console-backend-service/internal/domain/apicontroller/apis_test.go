@@ -1,16 +1,18 @@
 // +build acceptance
 
-package k8s
+package apicontroller
 
 import (
 	"fmt"
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
 	"github.com/stretchr/testify/assert"
@@ -97,6 +99,13 @@ func TestApisQuery(t *testing.T) {
 	assert.Equal(t, string(api.Spec.Authentication[0].Type), apisRes.Apis[0].AuthenticationPolicies[0].AuthType)
 	assert.Equal(t, api.Spec.Authentication[0].Jwt.Issuer, apisRes.Apis[0].AuthenticationPolicies[0].Issuer)
 	assert.Equal(t, api.Spec.Authentication[0].Jwt.JwksUri, apisRes.Apis[0].AuthenticationPolicies[0].JwksURI)
+
+	t.Log("Checking authorization directives...")
+	as := auth.New()
+	ops := &auth.OperationsInput{
+		auth.List: {fixAPIQuery()},
+	}
+	as.Run(t, ops)
 }
 
 func fixNamespace() *v1.Namespace {

@@ -1,7 +1,13 @@
 bindings:
-  kymaAdmin:
+  kymaEssentials:
     groups: []
   kymaView:
+    groups: []
+  kymaEdit:
+    groups: []
+  kymaAdmin:
+    groups: []
+  kymaDeveloper:
     groups: []
 namespace: default
 clusterRoles:

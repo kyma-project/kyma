@@ -81,6 +81,9 @@ func TestServiceCatalogContainsABServiceClasses(t *testing.T) {
 	require.NoError(t, err)
 
 	defer func() {
+		if t.Failed() {
+			testDetailsReport(t, brokerServices, broker.namespace)
+		}
 		err = k8sClient.Namespaces().Delete(broker.namespace, &metav1.DeleteOptions{})
 		assert.NoError(t, err)
 		err = aClient.ApplicationconnectorV1alpha1().Applications().Delete(app.Name, &metav1.DeleteOptions{

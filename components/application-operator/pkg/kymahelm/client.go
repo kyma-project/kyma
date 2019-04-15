@@ -8,7 +8,7 @@ import (
 )
 
 type HelmClient interface {
-	ListReleases() (*rls.ListReleasesResponse, error)
+	ListReleases(ns string) (*rls.ListReleasesResponse, error)
 	InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
 	UpdateReleaseFromChart(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
@@ -38,7 +38,7 @@ func NewClient(host, tlsKeyFile, tlsCertFile string, skipVerify bool, installati
 	}, nil
 }
 
-func (hc *helmClient) ListReleases() (*rls.ListReleasesResponse, error) {
+func (hc *helmClient) ListReleases(ns string) (*rls.ListReleasesResponse, error) {
 	statuses := []release.Status_Code{
 		release.Status_DELETED,
 		release.Status_DELETING,
@@ -47,11 +47,13 @@ func (hc *helmClient) ListReleases() (*rls.ListReleasesResponse, error) {
 		release.Status_PENDING_INSTALL,
 		release.Status_PENDING_ROLLBACK,
 		release.Status_PENDING_UPGRADE,
-		release.Status_SUPERSEDED,
 		release.Status_UNKNOWN,
 	}
 
-	return hc.helm.ListReleases(helm.ReleaseListStatuses(statuses))
+	return hc.helm.ListReleases(
+		helm.ReleaseListStatuses(statuses),
+		helm.ReleaseListNamespace(ns),
+	)
 }
 
 func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {

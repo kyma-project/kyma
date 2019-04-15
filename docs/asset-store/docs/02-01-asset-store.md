@@ -18,6 +18,8 @@ The whole concept of the Asset Store relies on the following components:
 
 - **Mutation Service** is an optional service which ensures that the asset is modified according to the mutation specification defined in the Asset CR before it is uploaded to the bucket. The service returns the modified asset to the AC.
 
+- [**Metadata Service**](#details-asset-metadata-service) is an optional service which extracts metadata from assets. The metadata information is stored in the CR status. The service returns the asset metadata to the AC.
+
 - **Minio Gateway** is a Minio cluster mode which is a production-scalable storage solution. It ensures flexibility of using asset storage services from major cloud providers, including Azure Blob Storage, Amazon S3, and Google Cloud Storage.
 
 ## Asset flow
@@ -33,6 +35,6 @@ This diagram provides an overview of the basic Asset Store workflow and the role
 5. The AC listens for new Events and acts upon receiving the Asset CR creation Event.
 6. The AC reads the CR definition, checks if the Bucket CR is available, and if its name matches the bucket name referenced in the Asset CR. It also verifies if the Bucket CR is in the `Ready` phase.
 7. If the Bucket CR is available, the AC fetches the asset from the source location provided in the CR. If the asset is a ZIP or TAR file, the AC unpacks and optionally filters the asset before uploading it into the bucket.
-8. Optionally, the AC validates or modifies the asset if such a requirement is defined in the Asset CR. The AC communicates with the validation and mutation services and validates or modifies the asset according to the specification defined in the Asset CR.
+8. Optionally, the AC validates, modifies the asset, or extracts asset's metadata if such a requirement is defined in the Asset CR. The AC communicates with the validation, mutation, and metadata services to validate, modify the asset, or extract asset's metadata according to the specification defined in the Asset CR.
 9. The AC uploads the asset to Minio Gateway, into the bucket specified in the Asset CR.
 10. The AC updates the status of the Asset CR with the storage location of the file in the bucket.

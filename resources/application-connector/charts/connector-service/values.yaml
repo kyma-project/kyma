@@ -21,6 +21,12 @@ deployment:
     organizationalunit: OrgUnit
     locality: Waldorf
     province: Waldorf
+  externalClusterLookup:
+    enabled: false
+    path: "/etc/config/"
+    lookupConfigMapName: "lookup-config"
+    lookupConfig: |
+      { "url": "http://example.com/graphql", "headers": { } }
 
 service:
   externalapi:
@@ -43,3 +49,5 @@ tests:
   image:
     pullPolicy: IfNotPresent
 
+podSecurityPolicy:
+  enabled: false

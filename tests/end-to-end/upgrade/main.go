@@ -17,12 +17,15 @@ import (
 
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
+	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 )
 
@@ -85,16 +88,28 @@ func main() {
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
 
+	kymaAPI, err := kyma.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Kyma Api clientset")
+
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
-	//
+
 	// Using map is on purpose - we ensure that test name will not be duplicated.
 	// Test name is sanitized and used for creating dedicated namespace for given test,
 	// so it cannot overlap with others.
+
+	grafanaUpgradeTest := monitoring.NewGrafanaUpgradeTest(k8sCli)
+
+	metricUpgradeTest, err := monitoring.NewMetricsUpgradeTest(k8sCli)
+	fatalOnError(err, "while creating Metrics Upgrade Test")
+
 	tests := map[string]runner.UpgradeTest{
 		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
 		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, cfg.Dex.IdProviderConfig()),
+		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI),
+		"GrafanaUpgradeTest":           grafanaUpgradeTest,
+		"MetricsUpgradeTest":           metricUpgradeTest,
 	}
 
 	// Execute requested action

@@ -62,9 +62,9 @@ Additionally, the Application Gateway supports cross-site request forgery (CSRF)
 
 The Access Service exposes the Application Gateway and manages the access from the Lambda functions and services deployed in Kyma to the external APIs over the Application Gateway.
 
-## Minio bucket
+## Asset Store
 
-The Minio bucket stores the documentation of the connected external solution's registered APIs and Event catalogs.
+The Asset Store stores the documentation of the connected external solution's registered APIs and Event catalogs.
 
 ## Kubernetes Secret
 

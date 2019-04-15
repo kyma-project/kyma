@@ -6,9 +6,10 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -56,15 +57,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query ($namespace: String!) {
-				serviceBrokers(namespace: $namespace) {
-					%s
-				}
-			}	
-		`, resourceDetailsQuery)
-		req := graphql.NewRequest(query)
-		req.SetVar("namespace", expectedResource.Namespace)
+		req := fixServiceBrokersRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceBrokersQueryResponse
 		err = c.Do(req, &res)
@@ -74,16 +67,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query ($name: String!, $namespace: String!) {
-				serviceBroker(name: $name, namespace: $namespace) {
-					%s
-				}
-			}
-		`, resourceDetailsQuery)
-		req := graphql.NewRequest(query)
-		req.SetVar("name", expectedResource.Name)
-		req.SetVar("namespace", expectedResource.Namespace)
+		req := fixServiceBrokerRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceBrokerQueryResponse
 		err = c.Do(req, &res)
@@ -91,6 +75,13 @@ func TestServiceBrokerQueries(t *testing.T) {
 		require.NoError(t, err)
 		checkBroker(t, expectedResource, res.ServiceBroker)
 	})
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:  {fixServiceBrokerRequest(resourceDetailsQuery, expectedResource)},
+		auth.List: {fixServiceBrokersRequest(resourceDetailsQuery, expectedResource)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func checkBroker(t *testing.T, expected, actual ServiceBroker) {
@@ -119,4 +110,33 @@ func broker() ServiceBroker {
 		Name:      fmt.Sprintf("ns-%s", fixture.TestingBrokerName),
 		Namespace: TestNamespace,
 	}
+}
+
+func fixServiceBrokerRequest(resourceDetailsQuery string, expectedResource ServiceBroker) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($name: String!, $namespace: String!) {
+				serviceBroker(name: $name, namespace: $namespace) {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("name", expectedResource.Name)
+	req.SetVar("namespace", expectedResource.Namespace)
+
+	return req
+}
+
+func fixServiceBrokersRequest(resourceDetailsQuery string, expectedResource ServiceBroker) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($namespace: String!) {
+				serviceBrokers(namespace: $namespace) {
+					%s
+				}
+			}	
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("namespace", expectedResource.Namespace)
+
+	return req
 }

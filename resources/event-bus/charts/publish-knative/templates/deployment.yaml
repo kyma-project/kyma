@@ -40,6 +40,9 @@ spec:
             - --trace_api_url={{ .Values.global.trace.apiURL }}
             - --trace_service_name={{ .Values.trace.serviceName }}
             - --trace_operation_name={{ .Values.trace.operationName }}
+            - --max_source_id_length={{ .Values.global.publishKnative.maxSourceIDLength }}
+            - --max_event_type_length={{ .Values.global.publishKnative.maxEventTypeLength }}
+            - --max_event_type_version_length={{ .Values.global.publishKnative.maxEventTypeVersionLength }}
           ports:
             - name: http
               containerPort: {{ .Values.port }}

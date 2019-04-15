@@ -56,6 +56,9 @@ func Crd(domainName string) *k8sApiExtensions.CustomResourceDefinition {
 									MinLength: itoi64(3),
 									MaxLength: itoi64(256),
 								},
+								"disableIstioAuthPolicyMTLS": {
+									Type: "boolean",
+								},
 								"authenticationEnabled": {
 									Type: "boolean",
 								},

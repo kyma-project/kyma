@@ -20,4 +20,5 @@ type ServiceClass struct {
 	odataSpec           string
 	asyncApiSpec        map[string]interface{}
 	content             map[string]interface{}
+	DocsTopic           DocsTopic
 }

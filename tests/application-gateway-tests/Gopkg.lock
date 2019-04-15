@@ -322,7 +322,8 @@
     "transport",
     "util/cert",
     "util/flowcontrol",
-    "util/integer"
+    "util/integer",
+    "util/retry"
   ]
   revision = "989be4278f353e42f26c416c53757d16fcff77db"
   version = "kubernetes-1.10.1"
@@ -330,6 +331,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d96514d46c4c2455bd439f5b040eb183c2c6742815e43a17b1164f5c4a00ceb4"
+  inputs-digest = "e48ef3950e99bfc19c38da351deefb0b972df71e129eded016a5b3ae4f6d658d"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -38,6 +38,6 @@ data:
 
     - name: Loki
       type: loki
-      access: direct
+      access: proxy
       url: http://logging:3100
       editable: true
