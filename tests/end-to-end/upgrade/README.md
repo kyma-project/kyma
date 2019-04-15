@@ -119,7 +119,7 @@ Run the application using Helm:
 1. [Install Telepresence](https://www.telepresence.io/reference/install).
 2. Run tests:
 ```bash
-env APP_KUBECONFIG_PATH=/Users/$User/.kube/config  telepresence --run go run main.go  --action executeTests --verbose
+env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config  telepresence --run go run main.go  --action executeTests --verbose
 ```
 
 ### Verify the code

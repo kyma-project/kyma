@@ -22,7 +22,7 @@ rules:
 - apiGroups: [""]
   resources: ["", "namespaces"]
   verbs: ["create"]
-- apiGRoups: [""]
+- apiGroups: [""]
   resources: ["configmaps"]
   verbs: ["list", "get"]
 - apiGroups: ["apps"]
