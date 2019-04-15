@@ -99,9 +99,7 @@ func main() {
 
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
-
-	logrus.Infof("Password: '%s'", userPassword)
-
+	
 	dexConfig := dex.Config{
 		Domain:       domainName,
 		UserEmail:    cfg.DexUserEmail,
