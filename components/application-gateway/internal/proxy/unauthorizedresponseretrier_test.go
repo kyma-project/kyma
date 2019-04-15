@@ -55,7 +55,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, req.Body, 10, updateCacheEntryFunction)
+		secondRequestBody, err := createSecondRequestBody(req)
+		require.NoError(t, err)
+
+		rr := newUnauthorizedResponseRetrier("id1", req, secondRequestBody, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: 401}
 
 		// when
@@ -90,7 +93,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, req.Body, 10, updateCacheEntryFunction)
+		secondRequestBody, err := createSecondRequestBody(req)
+		require.NoError(t, err)
+
+		rr := newUnauthorizedResponseRetrier("id1", req, secondRequestBody, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
 		// when
@@ -159,7 +165,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, req.Body, 10, updateCacheEntryFunction)
+		secondRequestBody, err := createSecondRequestBody(req)
+		require.NoError(t, err)
+
+		rr := newUnauthorizedResponseRetrier("id1", req, secondRequestBody, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -194,7 +203,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, req.Body, 10, updateCacheEntryFunction)
+		secondRequestBody, err := createSecondRequestBody(req)
+		require.NoError(t, err)
+
+		rr := newUnauthorizedResponseRetrier("id1", req, secondRequestBody, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
 		// when
@@ -214,7 +226,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, req.Body, 10, updateCacheEntryFunction)
+		secondRequestBody, err := createSecondRequestBody(req)
+		require.NoError(t, err)
+
+		rr := newUnauthorizedResponseRetrier("id1", req, secondRequestBody, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -243,7 +258,10 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, req.Body, 10, updateCacheEntryFunction)
+		secondRequestBody, err := createSecondRequestBody(req)
+		require.NoError(t, err)
+
+		rr := newUnauthorizedResponseRetrier("id1", req, secondRequestBody, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -263,7 +281,7 @@ func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorizatio
 		require.NoError(t, err)
 
 		return &CacheEntry{
-			Proxy:                 proxy,
+			Proxy: proxy,
 			AuthorizationStrategy: &authorizationStrategyWrapper{strategy, proxy},
 			CSRFTokenStrategy:     csrfTokenStrategy,
 		}, nil
