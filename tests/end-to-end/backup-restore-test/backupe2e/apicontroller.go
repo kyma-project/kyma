@@ -32,7 +32,7 @@ type ApiControllerTest struct {
 	kubelessInterface kubeless.Interface
 	coreInterface     kubernetes.Interface
 	apiInterface      gateway.Interface
-	dexConfig         dex.Config
+	idpConfig         dex.IdProviderConfig
 }
 
 func NewApiControllerTestFromEnv() (ApiControllerTest, error) {
@@ -64,10 +64,10 @@ func NewApiControllerTestFromEnv() (ApiControllerTest, error) {
 
 	domainName := os.Getenv("DOMAIN")
 
-	return NewApiControllerTest(gatewayClient, coreClient, kubelessClient, domainName, dexConfig), nil
+	return NewApiControllerTest(gatewayClient, coreClient, kubelessClient, domainName, dexConfig.IdProviderConfig()), nil
 }
 
-func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string, dexConfig dex.Config) ApiControllerTest {
+func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string, dexConfig dex.IdProviderConfig) ApiControllerTest {
 	functionName := "apicontroller"
 	return ApiControllerTest{
 		kubelessInterface: kubelessInterface,
@@ -77,7 +77,7 @@ func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kube
 		domainName:        domainName,
 		hostName:          functionName + "." + domainName,
 		uuid:              uuid.New().String(),
-		dexConfig:         dexConfig,
+		idpConfig:         dexConfig,
 	}
 }
 
@@ -332,7 +332,7 @@ func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 }
 
 func (t ApiControllerTest) fetchDexToken() (string, error) {
-	token, err := dex.Authenticate(t.dexConfig.IdProviderConfig)
+	token, err := dex.Authenticate(t.idpConfig)
 	if err != nil {
 		return "", err
 	}
