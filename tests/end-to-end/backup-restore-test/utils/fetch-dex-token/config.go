@@ -6,6 +6,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/vrischmann/envconfig"
 )
+
 type Config struct {
 	Domain       string `envconfig:"default=kyma.local"`
 	UserEmail    string
