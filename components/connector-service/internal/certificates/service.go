@@ -15,18 +15,20 @@ type Service interface {
 }
 
 type certificateService struct {
-	secretsRepository secrets.Repository
-	certUtil          CertificateUtility
-	caSecretName      string
-	csrSubject        CSRSubject
+	secretsRepository           secrets.Repository
+	certUtil                    CertificateUtility
+	caSecretName                string
+	rootCACertificateSecretName string
+	csrSubject                  CSRSubject
 }
 
-func NewCertificateService(secretRepository secrets.Repository, certUtil CertificateUtility, caSecretName string, csrSubject CSRSubject) Service {
+func NewCertificateService(secretRepository secrets.Repository, certUtil CertificateUtility, caSecretName, rootCACertificateSecretName string, csrSubject CSRSubject) Service {
 	return &certificateService{
-		secretsRepository: secretRepository,
-		certUtil:          certUtil,
-		caSecretName:      caSecretName,
-		csrSubject:        csrSubject,
+		secretsRepository:           secretRepository,
+		certUtil:                    certUtil,
+		caSecretName:                caSecretName,
+		rootCACertificateSecretName: rootCACertificateSecretName,
+		csrSubject:                  csrSubject,
 	}
 }
 
@@ -65,11 +67,39 @@ func (svc *certificateService) signCSR(csr *x509.CertificateRequest) (EncodedCer
 		return EncodedCertificateChain{}, err
 	}
 
-	caCrtBytes := svc.certUtil.AddCertificateHeaderAndFooter(caCrt.Raw)
-	signedCrtBytes := svc.certUtil.AddCertificateHeaderAndFooter(signedCrt)
+	return svc.encodeCertificates(caCrt.Raw, signedCrt)
+}
+
+func (svc *certificateService) encodeCertificates(rawCaCertificate, rawClientCertificate []byte) (EncodedCertificateChain, apperrors.AppError) {
+	caCrtBytes := svc.certUtil.AddCertificateHeaderAndFooter(rawCaCertificate)
+	signedCrtBytes := svc.certUtil.AddCertificateHeaderAndFooter(rawClientCertificate)
+
+	if svc.rootCACertificateSecretName != "" {
+		rootCABytes, err := svc.loadRootCACert()
+		if err != nil {
+			return EncodedCertificateChain{}, err
+		}
+
+		caCrtBytes = svc.createCertChain(rootCABytes, caCrtBytes)
+	}
+
 	certChain := svc.createCertChain(signedCrtBytes, caCrtBytes)
 
-	return encodeCertificateChain(certChain, signedCrtBytes, caCrtBytes), nil
+	return encodeCertificateBase64(certChain, signedCrtBytes, caCrtBytes), nil
+}
+
+func (svc *certificateService) loadRootCACert() ([]byte, apperrors.AppError) {
+	rootCACertEncoded, _, err := svc.secretsRepository.Get(svc.rootCACertificateSecretName)
+	if err != nil {
+		return nil, err
+	}
+
+	rootCACrt, err := svc.certUtil.LoadCert(rootCACertEncoded)
+	if err != nil {
+		return nil, err
+	}
+
+	return svc.certUtil.AddCertificateHeaderAndFooter(rootCACrt.Raw), nil
 }
 
 func (svc *certificateService) checkCSR(csr *x509.CertificateRequest, commonName string) apperrors.AppError {
@@ -90,7 +120,7 @@ func (svc *certificateService) createCertChain(clientCrt, caCrt []byte) []byte {
 	return append(clientCrt, caCrt...)
 }
 
-func encodeCertificateChain(certChain, clientCRT, caCRT []byte) EncodedCertificateChain {
+func encodeCertificateBase64(certChain, clientCRT, caCRT []byte) EncodedCertificateChain {
 	return EncodedCertificateChain{
 		CertificateChain:  encodeStringBase64(certChain),
 		ClientCertificate: encodeStringBase64(clientCRT),
