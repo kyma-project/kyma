@@ -9,7 +9,7 @@ const (
     eventServiceTestsImage: {{ .EventServiceTestsImage }}
     subjectCN: {{ .SubjectCN }}
     subjectOrganization: {{ .SubjectOrganization }}
-    subjectOrganizationUnit : {{ .SubjectOrganizationUnit }}`
+    subjectOrganizationUnit: {{ .SubjectOrganizationUnit }}`
 )
 
 type OverridesData struct {

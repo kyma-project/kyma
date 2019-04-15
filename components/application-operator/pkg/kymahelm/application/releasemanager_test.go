@@ -21,8 +21,6 @@ import (
 
 const (
 	appName                 = "default-app"
-	appOrganization         = "default-organization"
-	appOrganizationUnit     = "default-organization-unit"
 	namespace               = "integration"
 	expectedOverridesFormat = `global:
     domainName: 
@@ -65,7 +63,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, appName, appOrganization, appOrganizationUnit)
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, appName, "", "")
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
@@ -82,7 +80,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 		helmClient.AssertExpectations(t)
 	})
 
-	t.Run("should install release with CN equal to app name", func(t *testing.T) {
+	t.Run("should install release with CN equal to app name, O equal to tenant and OU equal to group", func(t *testing.T) {
 		// given
 		installationResponse := &rls.InstallReleaseResponse{
 			Release: &hapi_release5.Release{
