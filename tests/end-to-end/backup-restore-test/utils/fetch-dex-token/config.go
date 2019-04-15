@@ -14,11 +14,10 @@ type envConfig struct {
 }
 
 type Config struct {
-	IdProviderConfig idProviderConfig
 	EnvConfig        envConfig
 }
 
-type idProviderConfig struct {
+type IdProviderConfig struct {
 	DexConfig       dexConfig
 	ClientConfig    clientConfig
 	UserCredentials userCredentials
@@ -49,22 +48,23 @@ func LoadConfig() (Config, error) {
 
 	config := Config{EnvConfig: env}
 
-	config.IdProviderConfig = idProviderConfig{
+	return config, nil
+}
+
+func (c *Config) IdProviderConfig() IdProviderConfig {
+	return IdProviderConfig{
 		DexConfig: dexConfig{
-			BaseUrl:           fmt.Sprintf("https://dex.%s", env.Domain),
-			AuthorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", env.Domain),
-			TokenEndpoint:     fmt.Sprintf("https://dex.%s/token", env.Domain),
+			BaseUrl:           fmt.Sprintf("https://dex.%s", c.EnvConfig.Domain),
+			AuthorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", c.EnvConfig.Domain),
+			TokenEndpoint:     fmt.Sprintf("https://dex.%s/token", c.EnvConfig.Domain),
 		},
 		ClientConfig: clientConfig{
 			ID:          "kyma-client",
 			RedirectUri: "http://127.0.0.1:5555/callback",
 		},
+		UserCredentials: userCredentials{
+			Username: c.EnvConfig.UserEmail,
+			Password: c.EnvConfig.UserPassword,
+		},
 	}
-
-	config.IdProviderConfig.UserCredentials = userCredentials{
-		Username: env.UserEmail,
-		Password: env.UserPassword,
-	}
-
-	return config, nil
 }

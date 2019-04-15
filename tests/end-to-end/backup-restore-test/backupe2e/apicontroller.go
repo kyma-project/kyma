@@ -3,7 +3,6 @@ package backupe2e
 import (
 	"crypto/tls"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"time"
@@ -33,6 +32,7 @@ type ApiControllerTest struct {
 	kubelessInterface kubeless.Interface
 	coreInterface     kubernetes.Interface
 	apiInterface      gateway.Interface
+	dexConfig         dex.Config
 }
 
 func NewApiControllerTestFromEnv() (ApiControllerTest, error) {
@@ -57,12 +57,17 @@ func NewApiControllerTestFromEnv() (ApiControllerTest, error) {
 		return ApiControllerTest{}, err
 	}
 
+	dexConfig, err := dex.LoadConfig()
+	if err != nil {
+		return ApiControllerTest{}, err
+	}
+
 	domainName := os.Getenv("DOMAIN")
 
-	return NewApiControllerTest(gatewayClient, coreClient, kubelessClient, domainName), nil
+	return NewApiControllerTest(gatewayClient, coreClient, kubelessClient, domainName, dexConfig), nil
 }
 
-func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) ApiControllerTest {
+func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string, dexConfig dex.Config) ApiControllerTest {
 	functionName := "apicontroller"
 	return ApiControllerTest{
 		kubelessInterface: kubelessInterface,
@@ -72,6 +77,7 @@ func NewApiControllerTest(gatewayInterface gateway.Interface, coreInterface kube
 		domainName:        domainName,
 		hostName:          functionName + "." + domainName,
 		uuid:              uuid.New().String(),
+		dexConfig:         dexConfig,
 	}
 }
 
@@ -110,7 +116,7 @@ func (t ApiControllerTest) TestResourcesError(namespace string) error {
 		return err
 	}
 
-	token, err := fetchDexToken()
+	token, err := t.fetchDexToken()
 	if err != nil {
 		return err
 	}
@@ -325,15 +331,11 @@ func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 	}
 }
 
-func fetchDexToken() (string, error) {
-	config, err := dex.LoadConfig()
+func (t ApiControllerTest) fetchDexToken() (string, error) {
+	token, err := dex.Authenticate(t.dexConfig.IdProviderConfig)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	token, err := dex.Authenticate(config.IdProviderConfig)
-	if err != nil {
-		log.Fatal(err)
-	}
 	return token, nil
 }
