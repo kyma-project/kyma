@@ -1,4 +1,4 @@
-package testkit
+package resourceskit
 
 import (
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"

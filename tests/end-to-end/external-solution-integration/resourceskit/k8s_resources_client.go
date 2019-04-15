@@ -1,4 +1,4 @@
-package testkit
+package resourceskit
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"

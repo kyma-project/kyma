@@ -1,4 +1,4 @@
-package testkit
+package resourceskit
 
 import (
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"

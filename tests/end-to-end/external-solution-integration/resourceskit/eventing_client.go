@@ -1,4 +1,4 @@
-package testkit
+package resourceskit
 
 import (
 	acV1 "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"

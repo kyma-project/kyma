@@ -1,4 +1,4 @@
-package testkit
+package resourceskit
 
 type ConnectRequest struct {
 	URL                string `json:"url"`
@@ -18,4 +18,13 @@ type API struct {
 	Provider    string `json:"provider"`
 	Name        string `json:"name"`
 	Description string `json:"description"`
+}
+
+type Subject struct {
+	CommonName string
+	Country string
+	Organization string
+	OrganizationalUnit string
+	Locality string
+	Province string
 }

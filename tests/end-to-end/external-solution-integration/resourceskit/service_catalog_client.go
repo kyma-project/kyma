@@ -1,4 +1,4 @@
-package testkit
+package resourceskit
 
 import (
 	scv1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
