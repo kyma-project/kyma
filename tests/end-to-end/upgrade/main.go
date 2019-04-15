@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"strings"
 
 	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -177,7 +178,8 @@ func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
 }
 
 func getPasswordForUserFromCluster(k8sCli *k8sclientset.Clientset, userEmail, dexNamespace string) (string, error) {
-	secretList, err := k8sCli.CoreV1().Secrets(dexNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("user-email=%s", userEmail)})
+	userEmailLabel := strings.Replace(userEmail, "@", ".", -1)
+	secretList, err := k8sCli.CoreV1().Secrets(dexNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("user-email=%s", userEmailLabel)})
 	if err != nil {
 		return "", err
 	}
