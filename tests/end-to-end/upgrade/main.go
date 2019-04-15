@@ -37,8 +37,8 @@ import (
 // Config holds application configuration
 type Config struct {
 	Logger              logger.Config
-	DexUserEmail        string
-	DexNamespace        string
+	DexUserEmail        string `envconfig:"default=admin@kyma.cx"`
+	DexNamespace        string `envconfig:"default=kyma-system"`
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
 }
@@ -99,12 +99,13 @@ func main() {
 
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
-	
+
 	dexConfig := dex.Config{
 		Domain:       domainName,
 		UserEmail:    cfg.DexUserEmail,
 		UserPassword: userPassword,
 	}
+
 
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
