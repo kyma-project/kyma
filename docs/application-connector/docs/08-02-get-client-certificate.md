@@ -106,27 +106,27 @@ After you receive the certificate, decode it and use it in your application. Reg
 
 You must call the metadata endpoint with the generated certificate to get URLs to the following:
 
-- Application Registry API
-- Events Service API
-- Certificate renewal endpoint
-- Certificate revocation endpoint
+- the Application Registry API
+- the Events Service API
+- the `certificate renewal` endpoint
+- the `certificate revocation` endpoint
 
 Use the link you got in the second step to fetch the metadata information. Run:
 
 ```
-curl {METADATA_ENDPOINT_URL} --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key
+curl {CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key
 ```
 
 ```
 {
   "clientIdentity": {
-    "application": "APP_NAME"
+    "application": "{APP_NAME}"
   },
   "urls": {
     "metadataUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
     "eventsUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
-    "renewCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals",
-    "revokeCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
+    "renewCertURL": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals",
+    "revocationCertURL": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
   },
   "certificate": {
     "subject": "OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
