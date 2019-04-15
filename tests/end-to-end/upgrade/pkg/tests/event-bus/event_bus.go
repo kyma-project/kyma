@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -34,7 +33,7 @@ const (
 	noOfRetries = 20
 
 	subscriberName           = "test-core-event-bus-subscriber"
-	subscriberImage          = "eu.gcr.io/kyma-project/event-bus-e2e-subscriber:0.9.0"
+	subscriberImage          = "eu.gcr.io/kyma-project/event-bus-e2e-subscriber:0.9.1"
 	publishEventEndpointURL  = "http://event-bus-publish.kyma-system:8080/v1/events"
 	publishStatusEndpointURL = "http://event-bus-publish.kyma-system:8080/v1/status/ready"
 )
@@ -203,7 +202,7 @@ func (f *eventBusFlow) checkSubscriberStatus() error {
 		if res, err := http.Get(subscriberStatusEndpointURL); err != nil {
 			f.log.Warnf("Subscriber Status request failed: %v; Retrying (%d/%d)", err, i, noOfRetries)
 			time.Sleep(time.Duration(i) * time.Second)
-		} else if !checkStatusCode(res, http.StatusOK) {
+		} else if !f.checkStatusCode(res, http.StatusOK) {
 			f.log.Warnf("Subscriber Server Status request returns: %v; Retrying (%d/%d)\n", res, i, noOfRetries)
 			time.Sleep(time.Duration(i) * time.Second)
 		} else {
@@ -234,7 +233,7 @@ func (f *eventBusFlow) checkSubscriptionReady() error {
 	for i := 0; i < noOfRetries; i++ {
 		kySub, err := f.subsInterface.EventingV1alpha1().Subscriptions(f.namespace).Get(subscriptionName, metav1.GetOptions{})
 		if err != nil {
-			f.log.Errorf("Cannot get Kyma subscription, name: %v; namespace: %v", subscriptionName, f.namespace)
+			f.log.Errorf("Cannot get Kyma subscription: %v; name: %v; namespace: %v", err, subscriptionName, f.namespace)
 			return err
 		}
 		if kySub.HasCondition(activatedCondition) {
@@ -261,7 +260,7 @@ func (f *eventBusFlow) publishTestEvent() error {
 	}
 
 	if !eventSent {
-		f.log.Errorf("Error: Cannot send test event")
+		f.log.Errorf("Cannot send test event: %v", err)
 		return err
 	}
 	return nil
@@ -276,7 +275,7 @@ func (f *eventBusFlow) publish(publishEventURL string) (*api.PublishResponse, er
 		f.log.Errorf("Post request failed: %v\n", err)
 		return nil, err
 	}
-	dumpResponse(res)
+	f.dumpResponse(res)
 	if err := verifyStatusCode(res, 200); err != nil {
 		return nil, err
 	}
@@ -305,7 +304,7 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 			f.log.Errorf("Get request failed: %v\n", err)
 			return err
 		}
-		dumpResponse(res)
+		f.dumpResponse(res)
 		if err := verifyStatusCode(res, 200); err != nil {
 			f.log.Errorf("Get request failed: %v", err)
 			return err
@@ -366,18 +365,18 @@ func checkStatus(statusEndpointURL string) error {
 	return verifyStatusCode(res, http.StatusOK)
 }
 
-func dumpResponse(resp *http.Response) {
+func (f *eventBusFlow) dumpResponse(resp *http.Response) {
 	defer resp.Body.Close()
 	dump, err := httputil.DumpResponse(resp, true)
 	if err != nil {
-		log.Fatal(err)
+		f.log.Error(err)
 	}
-	log.Printf("%q", dump)
+	f.log.Infof("%q", dump)
 }
 
-func checkStatusCode(res *http.Response, expectedStatusCode int) bool {
+func (f *eventBusFlow) checkStatusCode(res *http.Response, expectedStatusCode int) bool {
 	if res.StatusCode != expectedStatusCode {
-		log.Printf("Status code is wrong, have: %d, want: %d\n", res.StatusCode, expectedStatusCode)
+		f.log.Warnf("Status code is wrong, have: %d, want: %d\n", res.StatusCode, expectedStatusCode)
 		return false
 	}
 	return true
