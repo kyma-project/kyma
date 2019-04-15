@@ -9,8 +9,9 @@ The TLS certificate is a vital security element. Follow this tutorial to update 
 period of time.
 
 ## Prerequisites
- * New TLS certificates
- * Kyma administrator access
+
+ - New TLS certificates
+ - Kyma administrator access
 
 ## Steps
 

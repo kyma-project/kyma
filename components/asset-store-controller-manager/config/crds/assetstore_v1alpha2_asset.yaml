@@ -6,6 +6,16 @@ metadata:
     controller-tools.k8s.io: "1.0"
   name: assets.assetstore.kyma-project.io
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.phase
+    name: Phase
+    type: string
+  - JSONPath: .status.assetRef.baseUrl
+    name: Base URL
+    type: string
+  - JSONPath: .metadata.creationTimestamp
+    name: Age
+    type: date
   group: assetstore.kyma-project.io
   names:
     kind: Asset
@@ -41,6 +51,22 @@ spec:
               properties:
                 filter:
                   type: string
+                metadataWebhookService:
+                  items:
+                    properties:
+                      endpoint:
+                        type: string
+                      filter:
+                        type: string
+                      name:
+                        type: string
+                      namespace:
+                        type: string
+                    required:
+                    - name
+                    - namespace
+                    type: object
+                  type: array
                 mode:
                   enum:
                   - single
@@ -52,12 +78,17 @@ spec:
                     properties:
                       endpoint:
                         type: string
+                      filter:
+                        type: string
                       metadata:
                         type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                    required:
+                    - name
+                    - namespace
                     type: object
                   type: array
                 url:
@@ -67,12 +98,17 @@ spec:
                     properties:
                       endpoint:
                         type: string
+                      filter:
+                        type: string
                       metadata:
                         type: object
                       name:
                         type: string
                       namespace:
                         type: string
+                    required:
+                    - name
+                    - namespace
                     type: object
                   type: array
               required:
@@ -86,12 +122,19 @@ spec:
           properties:
             assetRef:
               properties:
-                assets:
-                  items:
-                    type: string
-                  type: array
                 baseUrl:
                   type: string
+                files:
+                  items:
+                    properties:
+                      metadata:
+                        type: object
+                      name:
+                        type: string
+                    required:
+                    - name
+                    type: object
+                  type: array
               required:
               - baseUrl
               type: object

@@ -31,6 +31,8 @@ func main() {
 
 	jwtDefaultConfig := initJwtDefaultConfig()
 
+	mTLSOptionEnabled := isAuthPolicyMTLSEnabled()
+
 	istioGateway := getIstioGateway()
 
 	kubeConfig := initKubeConfig()
@@ -49,7 +51,7 @@ func main() {
 	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, k8sClientSet, istioGateway)
 
 	istioAuthenticationClientSet := istioAuthenticationClient.NewForConfigOrDie(kubeConfig)
-	authenticationV2Interface := authenticationV2.New(istioAuthenticationClientSet, jwtDefaultConfig)
+	authenticationV2Interface := authenticationV2.New(istioAuthenticationClientSet, jwtDefaultConfig, mTLSOptionEnabled)
 
 	kymaClientSet := kyma.NewForConfigOrDie(kubeConfig)
 
@@ -120,4 +122,8 @@ func initDomainName() string {
 	}
 
 	return domainName
+}
+
+func isAuthPolicyMTLSEnabled() bool {
+	return os.Getenv("ENABLE_MTLS") == "true"
 }

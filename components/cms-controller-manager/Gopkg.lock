@@ -214,11 +214,11 @@
   version = "v1.1.5"
 
 [[projects]]
-  digest = "1:43317c8683b0784ef3694cf5bd0dab0fe4d946f7d4d1b0ac50c75edce0ad737e"
+  digest = "1:409e443e32f784fe4f45844286d60a6c676a94dc4c0f1bcbb5ac16dccfff55ca"
   name = "github.com/kyma-project/kyma"
   packages = ["components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"]
   pruneopts = "NUT"
-  revision = "cbd820fd14c70f6e6426312a01442fa62b659bd8"
+  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
 
 [[projects]]
   digest = "1:3804a3a02964db8e6db3e5e7960ac1c1a9b12835642dd4f4ac4e56c749ec73eb"
@@ -983,9 +983,11 @@
     "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/onsi/ginkgo",
     "github.com/onsi/gomega",
+    "github.com/onsi/gomega/types",
     "github.com/pkg/errors",
     "github.com/stretchr/testify/mock",
     "github.com/vrischmann/envconfig",
+    "k8s.io/api/core/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",

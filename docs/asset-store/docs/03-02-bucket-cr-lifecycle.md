@@ -5,6 +5,7 @@ type: Details
 
 Learn about the lifecycle of the Bucket custom resource (CR) and how its creation and removal affect other Asset Store components.
 
+>**NOTE:** This lifecycle also applies to the ClusterBucket CR.
 
 ## Create a Bucket CR
 

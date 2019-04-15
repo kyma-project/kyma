@@ -6,7 +6,6 @@ connection_token_handler:
 
 global:
   isLocalEnv: false
-  knative: false
   namespace: kyma-integration
   istio:
     tls:
@@ -18,16 +17,16 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: cc51f73a
+    version: 4e8a354a
   application_operator_tests:
     dir: develop/
-    version: ac61deff
+    version: 68a39bb5
   connector_service:
     dir: develop/
-    version: f478b085
+    version: 3ead571b
   connector_service_tests:
     dir: develop/
-    version: f478b085
+    version: 9f878a38
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
@@ -39,7 +38,7 @@ global:
     version: 2dc766a0
   event_service:
     dir: develop/
-    version: 74a78ec9
+    version: dea44bd4
   gateway_tests:
     dir: develop/
     version: e1af648f
@@ -48,13 +47,13 @@ global:
     version: 78b98274
   application_gateway_tests:
     dir: develop/
-    version: cc51f73a
+    version: 4b28ce69
   application_registry:
     dir: develop/
-    version: ec4b880b
+    version: 7433b9cc
   application_registry_tests:
     dir: develop/
-    version: 0b828d1a
+    version: 4c614be5
   application_broker:
     dir: develop/
     version: e1af648f

@@ -40,7 +40,9 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	k8sResourcesClient, err := testkit.NewK8sResourcesClient(config.Namespace)
 	require.NoError(t, err)
 
-	helmClient := testkit.NewHelmClient(config.TillerHost)
+	helmClient, err := testkit.NewHelmClient(config.TillerHost, config.TillerTLSKeyFile, config.TillerTLSCertificateFile, config.TillerTLSSkipVerify)
+	require.NoError(t, err)
+
 	k8sResourcesChecker := testkit.NewK8sChecker(k8sResourcesClient, app)
 
 	return &TestSuite{
@@ -107,11 +109,20 @@ func (ts *TestSuite) helmReleaseNotExist() bool {
 	return !ts.helmClient.IsInstalled(ts.application)
 }
 
-func (ts *TestSuite) checkResourceDeployed(t *testing.T, resource interface{}, err error, failMessage string) {
-	require.NoError(t, err, failMessage)
+func (ts *TestSuite) checkResourceDeployed(resource interface{}, err error) bool {
+	if err != nil {
+		return false
+	}
+
+	return true
 }
 
-func (ts *TestSuite) checkResourceRemoved(t *testing.T, _ interface{}, err error, failMessage string) {
-	require.Error(t, err, failMessage)
-	require.True(t, k8serrors.IsNotFound(err), failMessage)
+func (ts *TestSuite) checkResourceRemoved(_ interface{}, err error) bool {
+	if err != nil {
+		if k8serrors.IsNotFound(err) {
+			return true
+		}
+	}
+
+	return false
 }

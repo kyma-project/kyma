@@ -57,7 +57,7 @@ spec:
 ## Test execution
 
 All tests created for charts under `/resources/core/` run automatically after starting Kyma.
-If any of the tests fail, the system prints the Pod logs in the terminal, then deletes all the Pods.
+If any of the tests fails, the system prints the Pod logs in the terminal, then deletes all the Pods.
 
 >**NOTE:** If you run Kyma locally, by default, the system does not take into account the test's exit code. As a result, the system does not terminate Kyma Docker container, and you can still access it.
 To force a termination in case of failing tests, use `--exit-on-test-fail` flag when executing `run.sh` script.
@@ -69,7 +69,7 @@ Follow the same guidelines to add a test which is not a part of any `core` compo
 ### Run a test manually
 
 To run a test manually, use the `testing.sh` script located in the `/installation/scripts/` directory which runs all tests defined for `core` releases.
-If any of the tests fail, the system prints the Pod logs in the terminal, then deletes all the Pods.
+If any of the tests fails, the system prints the Pod logs in the terminal, then deletes all the Pods.
 
 Another option is to run a Helm test directly on your release.
 

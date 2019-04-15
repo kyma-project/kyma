@@ -774,7 +774,9 @@ metadata:
 ---
 apiVersion: v1
 data:
+  {{ if (ne "" .Values.domainName) }}
   {{ .Values.domainName }}: ""
+  {{ end }}
 kind: ConfigMap
 metadata:
   labels:
@@ -823,6 +825,7 @@ metadata:
 ---
 apiVersion: v1
 data:
+  gateway.{{ .Values.gateway.name }}: {{ .Values.gateway.serviceUrl }}
   _example: |
     ################################
     #                              #

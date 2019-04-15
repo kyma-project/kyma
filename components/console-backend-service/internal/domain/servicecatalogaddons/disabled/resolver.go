@@ -15,8 +15,8 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
-// CreateServiceBindingUsageMutation provides a failing mock function with given fields: ctx, input
-func (_m *Resolver) CreateServiceBindingUsageMutation(ctx context.Context, input *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
+// CreateServiceBindingUsageMutation provides a failing mock function with given fields: ctx, namespace, input
+func (_m *Resolver) CreateServiceBindingUsageMutation(ctx context.Context, namespace string, input *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
 	var r0 *gqlschema.ServiceBindingUsage
 	var r1 error
 	r1 = _m.err

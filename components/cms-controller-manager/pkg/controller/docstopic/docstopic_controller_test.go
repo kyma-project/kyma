@@ -5,18 +5,23 @@ import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/source"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/onsi/gomega"
+	coreV1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
 	"time"
 
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-var c client.Client
+var (
+	webhookCfgMapName      = "test"
+	webhookCfgMapNamespace = "test"
+)
 
 const timeout = time.Second * 5
 
@@ -30,14 +35,18 @@ func TestReconcile(t *testing.T) {
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(c, scheme)
 	bucketService := newBucketService(c, scheme, "")
+	informer, err := mgr.GetCache().GetInformer(&coreV1.ConfigMap{})
+	g.Expect(err).To(gomega.BeNil())
+	assetWhsConfigService := webhookconfig.New(informer.GetIndexer(), webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileDocsTopic{
-		relistInterval: time.Hour,
-		Client:         c,
-		scheme:         scheme,
-		recorder:       mgr.GetRecorder("docstopic-controller"),
-		assetSvc:       assetService,
-		bucketSvc:      bucketService,
+		Client:           c,
+		scheme:           scheme,
+		relistInterval:   time.Hour,
+		recorder:         mgr.GetRecorder("docstopic-controller"),
+		assetSvc:         assetService,
+		bucketSvc:        bucketService,
+		webhookConfigSvc: assetWhsConfigService,
 	}
 
 	recFn, requests := SetupTestReconcile(r)
@@ -98,22 +107,28 @@ func TestReconcile(t *testing.T) {
 
 	// Update DocsTopic spec
 	// When
-	delete(currentTopic.Spec.Sources, "dita")
-	markdown := currentTopic.Spec.Sources["markdown"]
-	markdown.Filter = "zyx"
-	currentTopic.Spec.Sources["markdown"] = markdown
+	currentTopic.Spec.Sources = source.FilterByType(currentTopic.Spec.Sources, "dita")
+	markdownIndex := source.IndexByType(currentTopic.Spec.Sources, "markdown")
+	g.Expect(markdownIndex).NotTo(gomega.Equal(-1))
+	currentTopic.Spec.Sources[markdownIndex].Filter = "zyx"
 	err = c.Update(context.TODO(), currentTopic)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
 	// Then
 	// Update Assets
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
-	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
 
 	assets = &v1alpha2.AssetList{}
 	err = c.List(context.TODO(), nil, assets)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	g.Expect(assets.Items).To(gomega.HaveLen(len(currentTopic.Spec.Sources)))
+	for _, a := range assets.Items {
+		if a.Annotations["assetshortname.cms.kyma-project.io"] != "source-two" {
+			continue
+		}
+		g.Expect(a.Spec.Source.Filter).To(gomega.Equal("zyx"))
+	}
+
 }
 
 func fixDocsTopic() *v1alpha1.DocsTopic {
@@ -126,20 +141,32 @@ func fixDocsTopic() *v1alpha1.DocsTopic {
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
 				Description: "Test topic, have fun",
 				DisplayName: "Test Topic",
-				Sources: map[string]v1alpha1.Source{
-					"openapi": v1alpha1.Source{
+				Sources: []v1alpha1.Source{
+					{
+						Name: "source-one",
+						Type: "openapi",
 						Mode: v1alpha1.DocsTopicSingle,
 						URL:  "https://dummy.url/single",
 					},
-					"markdown": v1alpha1.Source{
+					{
+						Name:   "source-two",
+						Type:   "markdown",
 						Filter: "xyz",
 						Mode:   v1alpha1.DocsTopicPackage,
 						URL:    "https://dummy.url/package",
 					},
-					"dita": v1alpha1.Source{
+					{
+						Name:   "source-three",
+						Type:   "dita",
 						Filter: "xyz",
 						Mode:   v1alpha1.DocsTopicIndex,
 						URL:    "https://dummy.url/index",
+					},
+					{
+						Name: "source-four",
+						Type: "openapi",
+						Mode: v1alpha1.DocsTopicPackage,
+						URL:  "https://dummy.url/single",
 					},
 				},
 			},

@@ -1,14 +1,18 @@
 package engine
 
 import (
+	"bytes"
 	"context"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
-	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
-	assethookv1alpha1 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/api/v1alpha1"
-	"github.com/pkg/errors"
+	"encoding/json"
 	"io/ioutil"
 	"os"
 	"time"
+
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
+	assethookv1alpha1 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/api/v1alpha1"
+	pkgPath "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/path"
+	"github.com/pkg/errors"
 )
 
 //go:generate mockery -name=Mutator -output=automock -outpkg=automock -case=underscore
@@ -39,7 +43,8 @@ func (e *mutationEngine) Mutate(ctx context.Context, object Accessor, basePath s
 
 	for _, service := range services {
 		metadata := e.parseMetadata(service.Metadata)
-		assets, err := e.readFiles(basePath, files, e.fileReader)
+		filtered, err := pkgPath.Filter(files, service.Filter)
+		assets, err := e.readFiles(basePath, filtered, e.fileReader)
 		if err != nil {
 			return err
 		}
@@ -50,9 +55,8 @@ func (e *mutationEngine) Mutate(ctx context.Context, object Accessor, basePath s
 			Assets:    assets,
 			Metadata:  metadata,
 		}
-		url := e.getWebhookUrl(service)
 
-		response, err := e.mutate(ctx, url, request)
+		response, err := e.mutate(ctx, service, request)
 		if err != nil {
 			return err
 		}
@@ -65,12 +69,14 @@ func (e *mutationEngine) Mutate(ctx context.Context, object Accessor, basePath s
 	return nil
 }
 
-func (e *mutationEngine) mutate(ctx context.Context, url string, request *assethookv1alpha1.MutationRequest) (*assethookv1alpha1.MutationResponse, error) {
-	context, cancel := context.WithTimeout(ctx, e.timeout)
-	defer cancel()
+func (e *mutationEngine) mutate(ctx context.Context, service v1alpha2.AssetWebhookService, request *assethookv1alpha1.MutationRequest) (*assethookv1alpha1.MutationResponse, error) {
+	jsonBytes, err := json.Marshal(request)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting request to JSON")
+	}
 
 	response := new(assethookv1alpha1.MutationResponse)
-	err := e.webhook.Call(context, url, request, response)
+	err = e.webhook.Do(ctx, "application/json", service.WebhookService, bytes.NewBuffer(jsonBytes), response, e.timeout)
 	if err != nil {
 		return nil, errors.Wrap(err, "while sending mutation request")
 	}

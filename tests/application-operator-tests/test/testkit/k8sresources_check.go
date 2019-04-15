@@ -3,6 +3,9 @@ package testkit
 import (
 	"fmt"
 	"testing"
+	"time"
+
+	"github.com/stretchr/testify/require"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -18,6 +21,9 @@ const (
 	applicationGatewayServiceAccountFormat     = "%s-application-gateway"
 	eventServiceDeploymentFormat               = "%s-event-service"
 	eventServiceSvcFormat                      = "%s-event-service-external-api"
+
+	resourceCheckInterval = 1 * time.Second
+	resourceCheckTimeout  = 10 * time.Second
 )
 
 type k8sResource struct {
@@ -50,9 +56,9 @@ func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecke
 		newResource(fmt.Sprintf(applicationGatewayClusterRoleFormat, appName), "clusterrole", client.GetClusterRole),
 		newResource(fmt.Sprintf(applicationGatewayClusterRoleBindingFormat, appName), "clusterrolebinding", client.GetClusterRoleBinding),
 		newResource(fmt.Sprintf(applicationGatewayServiceAccountFormat, appName), "serviceaccount", client.GetServiceAccount),
-		newResource(fmt.Sprintf(applicationGatewaySvcFormat, appName), "ingress", client.GetService),
-		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "ingress", client.GetDeployment),
-		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "ingress", client.GetService),
+		newResource(fmt.Sprintf(applicationGatewaySvcFormat, appName), "service", client.GetService),
+		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "deployment", client.GetDeployment),
+		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "service", client.GetService),
 	}
 
 	return &K8sResourceChecker{
@@ -62,10 +68,15 @@ func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecke
 	}
 }
 
-func (c *K8sResourceChecker) CheckK8sResources(t *testing.T, checkFunc func(t *testing.T, resource interface{}, err error, failMessage string)) {
+func (c *K8sResourceChecker) CheckK8sResources(t *testing.T, checkFunc func(resource interface{}, err error) bool) {
 	for _, r := range c.resources {
 		failMessage := fmt.Sprintf("%s resource %s not handled properly", r.kind, r.name)
-		resource, err := r.getFunction(r.name, v1.GetOptions{})
-		checkFunc(t, resource, err, failMessage)
+
+		err := WaitForFunction(resourceCheckInterval, resourceCheckTimeout, func() bool {
+			resource, err := r.getFunction(r.name, v1.GetOptions{})
+			return checkFunc(resource, err)
+		})
+
+		require.NoError(t, err, failMessage)
 	}
 }

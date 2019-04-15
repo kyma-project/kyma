@@ -54,7 +54,7 @@ data:
   gateways.istio-ingressgateway.type: "NodePort"
 
   pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 100m
+  pilot.resources.limits.cpu: 200m
   pilot.resources.requests.memory: 256Mi
   pilot.resources.requests.cpu: 100m
 
@@ -73,6 +73,18 @@ metadata:
 data:
   etcd-stateful.etcd.resources.limits.memory: 256Mi
   etcd-stateful.replicaCount: "1"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: helm-broker-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: helm-broker
+    kyma-project.io/installation: ""
+data:
+  config.isDevelopMode: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -110,3 +122,28 @@ metadata:
     kyma-project.io/installation: ""
 data:
   test.acceptance.ui.minikubeIP: ""
+  test.acceptance.ui.logging.enabled: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: application-connector-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: application-connector
+    kyma-project.io/installation: ""
+data:
+   application-registry.minikubeIP: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intallation-logging-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: logging
+    kyma-project.io/installation: ""
+data:
+  global.logging.promtail.config.name: ""

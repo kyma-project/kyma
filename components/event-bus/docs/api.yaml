@@ -31,7 +31,7 @@ paths:
               $ref: '#/components/schemas/PublishRequest'
       responses:
         '200':
-          description: The event was successfully published
+          description: The event was successfully acknowledged
           content:
             application/json:
               schema:
@@ -76,6 +76,7 @@ components:
           description: Identifier for the origin of the event. Either specify this or provide 'Source-Id' header value.
           type: string
           pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+          maxLength: 253
           example:
             - "stage.commerce.kyma.local"
         event-type:
@@ -83,12 +84,14 @@ components:
           type: string
           format: hostname
           pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+          maxLength: 253
           example:
             - "order.created"
         event-type-version:
           description: The version of the event-type. This is applicable to the data payload alone.
           type: string
-          pattern: '^[a-zA-Z0-9]+$'
+          pattern: '^[a-z0-9]+$'
+          maxLength: 4
           example:
             - "v1"
         event-id:
@@ -119,6 +122,14 @@ components:
           description: ID of the published event
           pattern: "^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"
           example: "31109198-4d69-4ae0-972d-76117f3748c8"
+        status:
+          type: string
+          description: Status of message publishing
+          example: "PUBLISHED"
+        reason:
+          type: string
+          description: reason behind the message publishing status
+          example: "Event was ignored as there are no subscriptions or consumers configured for this event"
       required:
         - event-id
     AnyValue:

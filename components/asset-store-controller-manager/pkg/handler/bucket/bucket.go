@@ -3,28 +3,21 @@ package bucket
 import (
 	"context"
 	"fmt"
+	"github.com/pkg/errors"
+	"time"
+
 	"github.com/go-logr/logr"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/handler/bucket/pretty"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store"
-	"github.com/pkg/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/record"
-	"time"
 )
 
 type Handler interface {
-	ShouldReconcile(object MetaAccessor, status v1alpha2.CommonBucketStatus, now time.Time, relistInterval time.Duration) bool
-	IsOnAddOrUpdate(object MetaAccessor, status v1alpha2.CommonBucketStatus) bool
-	IsOnDelete(object MetaAccessor) bool
-	IsOnReady(status v1alpha2.CommonBucketStatus) bool
-	IsOnFailed(status v1alpha2.CommonBucketStatus) bool
-	OnAddOrUpdate(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus
-	OnDelete(ctx context.Context, object MetaAccessor, status v1alpha2.CommonBucketStatus) error
-	OnReady(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus
-	OnFailed(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error)
+	Do(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error)
 }
 
 type MetaAccessor interface {
@@ -45,134 +38,146 @@ type bucketHandler struct {
 	store            store.Store
 	externalEndpoint string
 	log              logr.Logger
+	relistInterval   time.Duration
 }
 
-func New(recorder record.EventRecorder, store store.Store, externalEndpoint string, log logr.Logger) *bucketHandler {
+func New(log logr.Logger, recorder record.EventRecorder, store store.Store, externalEndpoint string, relistInterval time.Duration) Handler {
 	return &bucketHandler{
 		recorder:         recorder,
 		store:            store,
 		externalEndpoint: externalEndpoint,
 		log:              log,
+		relistInterval:   relistInterval,
 	}
 }
 
-func (h *bucketHandler) ShouldReconcile(object MetaAccessor, status v1alpha2.CommonBucketStatus, now time.Time, relistInterval time.Duration) bool {
-	if h.IsOnDelete(object) {
-		return true
-	}
+func (h *bucketHandler) Do(ctx context.Context, now time.Time, instance MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
+	h.logInfof("Start common Bucket handling")
+	defer h.logInfof("Finish common Bucket handling")
 
-	if h.IsOnAddOrUpdate(object, status) {
-		return true
+	switch {
+	case h.isOnDelete(instance):
+		return h.onDelete(ctx, instance, status)
+	case h.isOnAddOrUpdate(instance, status):
+		return h.onAddOrUpdate(instance, spec, status)
+	case h.isOnReady(status, now):
+		return h.onReady(instance, spec, status)
+	case h.isOnFailed(status):
+		return h.onFailed(instance, spec, status)
+	default:
+		h.logInfof("Action not taken")
+		return nil, nil
 	}
-
-	if h.IsOnReady(status) && now.Before(status.LastHeartbeatTime.Add(relistInterval)) {
-		return false
-	}
-
-	return true
 }
 
-func (*bucketHandler) IsOnReady(status v1alpha2.CommonBucketStatus) bool {
-	return status.Phase == v1alpha2.BucketReady
+func (h *bucketHandler) isOnReady(status v1alpha2.CommonBucketStatus, now time.Time) bool {
+	return status.Phase == v1alpha2.BucketReady && now.After(status.LastHeartbeatTime.Add(h.relistInterval))
 }
 
-func (*bucketHandler) IsOnAddOrUpdate(object MetaAccessor, status v1alpha2.CommonBucketStatus) bool {
+func (*bucketHandler) isOnAddOrUpdate(object MetaAccessor, status v1alpha2.CommonBucketStatus) bool {
 	return status.ObservedGeneration != object.GetGeneration()
 }
 
-func (*bucketHandler) IsOnFailed(status v1alpha2.CommonBucketStatus) bool {
-	return status.Phase == v1alpha2.BucketFailed && status.Reason != pretty.NotFoundReason.String()
+func (*bucketHandler) isOnFailed(status v1alpha2.CommonBucketStatus) bool {
+	return status.Phase == v1alpha2.BucketFailed && status.Reason != pretty.BucketNotFound.String()
 }
 
-func (*bucketHandler) IsOnDelete(object MetaAccessor) bool {
+func (*bucketHandler) isOnDelete(object MetaAccessor) bool {
 	return !object.GetDeletionTimestamp().IsZero()
 }
 
-func (h *bucketHandler) OnFailed(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
-	newStatus := status
-
+func (h *bucketHandler) onFailed(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
 	switch status.Reason {
 	case pretty.BucketCreationFailure.String():
-		newStatus = h.OnAddOrUpdate(object, spec, status)
+		return h.onAddOrUpdate(object, spec, status)
 	case pretty.BucketVerificationFailure.String():
-		newStatus = h.OnReady(object, spec, status)
+		return h.onReady(object, spec, status)
 	case pretty.BucketPolicyUpdateFailed.String():
-		newStatus = h.OnReady(object, spec, status)
+		return h.onReady(object, spec, status)
 	}
 
-	if status.Phase == newStatus.Phase && status.Reason == newStatus.Reason {
-		return nil, errors.New(status.Message)
-	}
-
-	return &newStatus, nil
+	return nil, nil
 }
 
-func (h *bucketHandler) OnReady(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus {
+func (h *bucketHandler) onReady(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
+	h.logInfof("Checking if bucket exists")
 	exists, err := h.store.BucketExists(status.RemoteName)
 	if err != nil {
 		h.recordWarningEventf(object, pretty.BucketVerificationFailure, err.Error())
-		return h.getStatus(object, status, v1alpha2.BucketFailed, withReasonStatus(pretty.BucketVerificationFailure, err.Error()))
+		return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketFailed, pretty.BucketVerificationFailure, err.Error()), err
 	}
 	if !exists {
-		h.recordWarningEventf(object, pretty.NotFoundReason, status.RemoteName)
-		return h.getStatus(object, status, v1alpha2.BucketFailed, withReasonStatus(pretty.NotFoundReason, status.RemoteName))
+		h.logInfof("Remote bucket %s has been removed", status.RemoteName)
+		h.recordWarningEventf(object, pretty.BucketNotFound, status.RemoteName)
+		return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketFailed, pretty.BucketNotFound, status.RemoteName), nil
 	}
+	h.logInfof("Bucket exists")
 
+	h.logInfof("Comparing bucket policy")
 	equal, err := h.store.CompareBucketPolicy(status.RemoteName, spec.Policy)
 	if err != nil {
 		h.recordWarningEventf(object, pretty.BucketPolicyVerificationFailed, err.Error())
-		return h.getStatus(object, status, v1alpha2.BucketFailed, withReasonStatus(pretty.BucketPolicyVerificationFailed, status.RemoteName))
+		return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketFailed, pretty.BucketPolicyVerificationFailed, status.RemoteName), err
 	}
-	if !equal {
-		h.recordWarningEventf(object, pretty.BucketPolicyHasBeenChanged)
-		if err := h.store.SetBucketPolicy(status.RemoteName, spec.Policy); err != nil {
-			h.recordWarningEventf(object, pretty.BucketPolicyUpdateFailed, err.Error())
-			return h.getStatus(object, status, v1alpha2.BucketFailed, withReasonStatus(pretty.BucketPolicyUpdateFailed, err.Error()), withBucketNameStatus(status.RemoteName), withUrlStatus(status.Url))
-		}
-		h.recordNormalEventf(object, pretty.BucketPolicyUpdated)
-		return h.getStatus(object, status, v1alpha2.BucketReady, withReasonStatus(pretty.BucketPolicyUpdated))
+	if equal {
+		h.logInfof("Bucket is up-to-date")
+		return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketReady, pretty.BucketPolicyUpdated), nil
 	}
 
-	h.logInfof(object, "Bucket is up-to-date")
-	return h.getStatus(object, status, v1alpha2.BucketReady, withReasonStatus(pretty.BucketPolicyUpdated))
-}
-
-func (h *bucketHandler) OnAddOrUpdate(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus {
-	bucketName := status.RemoteName
-	if len(bucketName) > 0 {
-		return h.OnReady(object, spec, status)
-	}
-
-	bucketName, err := h.store.CreateBucket(object.GetNamespace(), object.GetName(), string(spec.Region))
-	if err != nil {
-		h.recordWarningEventf(object, pretty.BucketCreationFailure, err.Error())
-		return h.getStatus(object, status, v1alpha2.BucketFailed, withReasonStatus(pretty.BucketCreationFailure, err.Error()))
-	}
-	h.recordNormalEventf(object, pretty.BucketCreated)
-
-	externalUrl := h.getBucketUrl(bucketName)
-	if err := h.store.SetBucketPolicy(bucketName, spec.Policy); err != nil {
+	h.logInfof("Updating bucket policy")
+	h.recordWarningEventf(object, pretty.BucketPolicyHasBeenChanged)
+	if err := h.store.SetBucketPolicy(status.RemoteName, spec.Policy); err != nil {
 		h.recordWarningEventf(object, pretty.BucketPolicyUpdateFailed, err.Error())
-		return h.getStatus(object, status, v1alpha2.BucketFailed, withReasonStatus(pretty.BucketPolicyUpdateFailed, err.Error()), withBucketNameStatus(bucketName), withUrlStatus(externalUrl))
+		return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketFailed, pretty.BucketPolicyUpdateFailed, err.Error()), err
 	}
 	h.recordNormalEventf(object, pretty.BucketPolicyUpdated)
+	h.logInfof("Bucket policy updated")
 
-	return h.getStatus(object, status, v1alpha2.BucketReady, withReasonStatus(pretty.BucketPolicyUpdated), withBucketNameStatus(bucketName), withUrlStatus(externalUrl))
+	return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketReady, pretty.BucketPolicyUpdated), nil
 }
 
-func (h *bucketHandler) OnDelete(ctx context.Context, object MetaAccessor, status v1alpha2.CommonBucketStatus) error {
-	h.logInfof(object, "Deleting Bucket")
-	if len(status.RemoteName) == 0 {
-		h.logInfof(object, "Nothing to delete, there is no remote bucket")
-		return nil
+func (h *bucketHandler) onAddOrUpdate(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
+	h.logInfof("Checking if bucket was previously created")
+	if status.RemoteName != "" {
+		h.logInfof("Bucket was created")
+		return h.onReady(object, spec, status)
+	}
+
+	h.logInfof("Creating bucket")
+	remoteName, err := h.store.CreateBucket(object.GetNamespace(), object.GetName(), string(spec.Region))
+	if err != nil {
+		h.recordWarningEventf(object, pretty.BucketCreationFailure, err.Error())
+		return h.getStatus(object, "", "", v1alpha2.BucketFailed, pretty.BucketCreationFailure, err.Error()), err
+	}
+	h.recordNormalEventf(object, pretty.BucketCreated)
+	h.logInfof("Bucket created")
+
+	externalUrl := h.getBucketUrl(remoteName)
+
+	h.logInfof("Updating bucket policy")
+	if err := h.store.SetBucketPolicy(remoteName, spec.Policy); err != nil {
+		h.recordWarningEventf(object, pretty.BucketPolicyUpdateFailed, err.Error())
+		return h.getStatus(object, remoteName, externalUrl, v1alpha2.BucketFailed, pretty.BucketPolicyUpdateFailed, err.Error()), err
+	}
+	h.recordNormalEventf(object, pretty.BucketPolicyUpdated)
+	h.logInfof("Bucket policy updated")
+
+	return h.getStatus(object, remoteName, externalUrl, v1alpha2.BucketReady, pretty.BucketPolicyUpdated), nil
+}
+
+func (h *bucketHandler) onDelete(ctx context.Context, object MetaAccessor, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
+	h.logInfof("Deleting Bucket")
+	if status.RemoteName == "" || status.Reason == pretty.BucketNotFound.String() {
+		h.logInfof("Nothing to delete, there is no remote bucket")
+		return nil, nil
 	}
 
 	if err := h.store.DeleteBucket(ctx, status.RemoteName); err != nil {
-		return err
+		return nil, errors.Wrap(err, "while deleting remote bucket")
 	}
-	h.logInfof(object, "Remote bucket %s deleted", status.RemoteName)
+	h.logInfof("Remote bucket %s deleted", status.RemoteName)
 
-	return nil
+	return nil, nil
 }
 
 func (h *bucketHandler) getBucketUrl(name string) string {
@@ -180,59 +185,29 @@ func (h *bucketHandler) getBucketUrl(name string) string {
 }
 
 func (h *bucketHandler) recordNormalEventf(object MetaAccessor, reason pretty.Reason, args ...interface{}) {
-	h.logInfof(object, reason.Message(), args...)
 	h.recordEventf(object, "Normal", reason, args...)
 }
 
 func (h *bucketHandler) recordWarningEventf(object MetaAccessor, reason pretty.Reason, args ...interface{}) {
-	h.logInfof(object, reason.Message(), args...)
 	h.recordEventf(object, "Warning", reason, args...)
 }
 
-//TODO: move logger values initialization to controller
-func (h *bucketHandler) logInfof(object MetaAccessor, message string, args ...interface{}) {
-	h.log.WithValues("kind", object.GetObjectKind().GroupVersionKind().Kind, "namespace", object.GetNamespace(), "name", object.GetName()).Info(fmt.Sprintf(message, args...))
+func (h *bucketHandler) logInfof(message string, args ...interface{}) {
+	h.log.Info(fmt.Sprintf(message, args...))
 }
 
 func (h *bucketHandler) recordEventf(object MetaAccessor, eventType string, reason pretty.Reason, args ...interface{}) {
 	h.recorder.Eventf(object, eventType, reason.String(), reason.Message(), args...)
 }
 
-type statusOption func(v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus
-
-func (*bucketHandler) getStatus(object MetaAccessor, status v1alpha2.CommonBucketStatus, phase v1alpha2.BucketPhase, options ...statusOption) v1alpha2.CommonBucketStatus {
-	status.LastHeartbeatTime = v1.Now()
-	status.ObservedGeneration = object.GetGeneration()
-	status.Phase = phase
-
-	for _, option := range options {
-		status = option(status)
-	}
-
-	return status
-}
-
-func withUrlStatus(url string) func(v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus {
-	return func(status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus {
-		status.Url = url
-		return status
-	}
-}
-
-func withReasonStatus(reason pretty.Reason, args ...interface{}) func(v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus {
-	return func(status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus {
-		status.Reason = reason.String()
-		if len(reason.Message()) > 0 {
-			status.Message = fmt.Sprintf(reason.Message(), args...)
-		}
-
-		return status
-	}
-}
-
-func withBucketNameStatus(bucketName string) func(v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus {
-	return func(status v1alpha2.CommonBucketStatus) v1alpha2.CommonBucketStatus {
-		status.RemoteName = bucketName
-		return status
+func (*bucketHandler) getStatus(object MetaAccessor, remoteName, url string, phase v1alpha2.BucketPhase, reason pretty.Reason, args ...interface{}) *v1alpha2.CommonBucketStatus {
+	return &v1alpha2.CommonBucketStatus{
+		LastHeartbeatTime:  v1.Now(),
+		ObservedGeneration: object.GetGeneration(),
+		Phase:              phase,
+		RemoteName:         remoteName,
+		URL:                url,
+		Reason:             reason.String(),
+		Message:            fmt.Sprintf(reason.Message(), args...),
 	}
 }

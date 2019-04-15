@@ -69,8 +69,8 @@ func NewServiceClassService(informer cache.SharedIndexInformer) (*serviceClassSe
 	return newServiceClassService(informer)
 }
 
-func NewServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, contentRetriever shared.ContentRetriever) *serviceClassResolver {
-	return newServiceClassResolver(classLister, planLister, instanceLister, contentRetriever)
+func NewServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, contentRetriever shared.ContentRetriever, cmsRetriever shared.CmsRetriever) *serviceClassResolver {
+	return newServiceClassResolver(classLister, planLister, instanceLister, contentRetriever, cmsRetriever)
 }
 
 func (r *serviceClassResolver) SetClassConverter(converter gqlServiceClassConverter) {
@@ -87,8 +87,8 @@ func NewClusterServiceClassService(informer cache.SharedIndexInformer) (*cluster
 	return newClusterServiceClassService(informer)
 }
 
-func NewClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, contentRetriever shared.ContentRetriever) *clusterServiceClassResolver {
-	return newClusterServiceClassResolver(classLister, planLister, instanceLister, contentRetriever)
+func NewClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, contentRetriever shared.ContentRetriever, cmsRetriever shared.CmsRetriever) *clusterServiceClassResolver {
+	return newClusterServiceClassResolver(classLister, planLister, instanceLister, contentRetriever, cmsRetriever)
 }
 
 func (r *clusterServiceClassResolver) SetClassConverter(converter gqlClusterServiceClassConverter) {

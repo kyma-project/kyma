@@ -1,4 +1,7 @@
 knative-serving:
+  gateway:
+    name: kyma-gateway.kyma-system.svc.cluster.local
+    serviceUrl: istio-ingressgateway.istio-system.svc.cluster.local
   domainName: example.com
 
 global:
