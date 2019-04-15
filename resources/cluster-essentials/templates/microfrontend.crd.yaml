@@ -50,3 +50,7 @@ spec:
                     type: string
                   showInNavigation:
                     type: boolean
+                  requiredPermissions:
+                    type: array
+                    items:
+                      type: object
