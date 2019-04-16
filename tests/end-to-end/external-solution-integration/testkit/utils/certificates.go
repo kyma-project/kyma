@@ -8,6 +8,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -23,7 +24,7 @@ func createKey(t *testing.T) *rsa.PrivateKey {
 	return key
 }
 
-func createCSR(t *testing.T, subject Subject, key *rsa.PrivateKey) []byte {
+func createCSR(t *testing.T, subject testkit.Subject, key *rsa.PrivateKey) []byte {
 	sub := pkix.Name{
 		CommonName:         subject.CommonName,
 		Country:            []string{subject.Country},

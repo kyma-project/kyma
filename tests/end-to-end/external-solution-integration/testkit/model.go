@@ -1,4 +1,4 @@
-package utils
+package testkit
 
 type Subject struct {
 	CommonName         string

@@ -1,4 +1,4 @@
-package utils
+package testkit
 
 import (
 	"bytes"
@@ -7,22 +7,28 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
+	"time"
 )
 
 type ConnectorClient interface {
+	GetToken(appName string) (string, error)
 	GetInfo(url string) (*InfoResponse, error)
 	GetCertificate(url string, csr *x509.CertificateRequest) ([]*x509.Certificate, error)
 }
 
 type connectorClient struct {
+	trClient   resourceskit.TokenRequestClient
 	httpClient *http.Client
 	logger     logrus.FieldLogger
 }
 
-func NewConnectorClient(skipVerify bool, logger logrus.FieldLogger) ConnectorClient {
+func NewConnectorClient(trClient resourceskit.TokenRequestClient, skipVerify bool, logger logrus.FieldLogger) ConnectorClient {
 	return &connectorClient{
+		trClient:   trClient,
 		httpClient: newHttpClient(skipVerify),
 		logger:     logger,
 	}
@@ -34,6 +40,23 @@ func newHttpClient(skipVerify bool) *http.Client {
 	}
 	client := &http.Client{Transport: tr}
 	return client
+}
+
+func (cc *connectorClient) GetToken(appName string) (string, error) {
+	_, err := cc.trClient.CreateTokenRequest(appName)
+	if err != nil {
+		return "", err
+	}
+
+	//TODO: Polling of tokenrequest
+	time.Sleep(5 * time.Second)
+
+	tr, err := cc.trClient.GetTokenRequest(appName, v1.GetOptions{})
+	if err != nil {
+		return "", err
+	}
+
+	return tr.Status.URL, nil
 }
 
 func (cc *connectorClient) GetInfo(url string) (*InfoResponse, error) {
