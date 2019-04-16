@@ -25,8 +25,8 @@ spec:
       value: "info"
     - name: APP_DEX_NAMESPACE
       value: "{{ .Values.dex.namespace }}"
-    - name: APP_DEX_USER_EMAIL
-      value: "{{ .Values.dex.userEmail }}"
+    - name: APP_DEX_USER_SECRET
+      value: "{{ .Values.dex.userSecret }}"
   - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
     name: manager
     command:

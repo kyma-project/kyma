@@ -8,4 +8,4 @@ image:
 
 dex:
   namespace: kyma-system
-  userEmail: admin@kyma.cx
+  userSecret: admin-user
