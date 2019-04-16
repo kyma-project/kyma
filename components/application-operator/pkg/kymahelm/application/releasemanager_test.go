@@ -61,7 +61,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, fmt.Sprintf("%s%s%s", "'(.*(CN=", appName, "(,|]|$)).*)'"))
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "'(.*(CN="+appName+"(,|]|$)).*)'")
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
@@ -91,12 +91,17 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			},
 		}
 
+		const (
+			appTenant = "tenant"
+			appGroup  = "group"
+		)
+
 		appWithGroupAndTenant := &v1alpha1.Application{
 			ObjectMeta: v1.ObjectMeta{Name: appName},
-			Spec:       v1alpha1.ApplicationSpec{Tenant: "tenant", Group: "group"},
+			Spec:       v1alpha1.ApplicationSpec{Tenant: appTenant, Group: appGroup},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, fmt.Sprintf("%s%s%s%s%s%s%s", "'(.*(OU=", "group", "(,|]|$)).*(O=", "tenant", "((,|]|$)).*(CN=", appName, "(,|]|$)).*)'"))
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "'(.*(OU="+appGroup+"(,|]|$)).*(O="+appTenant+"((,|]|$)).*(CN="+appName+"(,|]|$)).*)'")
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
