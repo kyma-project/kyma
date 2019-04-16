@@ -2,14 +2,16 @@ package resilient
 
 import (
 	"errors"
-	"github.com/avast/retry-go"
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
 	"time"
+
+	retry "github.com/avast/retry-go"
+	"github.com/stretchr/testify/assert"
 )
 
 type mockHttpClientFirstSuccess struct{}
+
 func (mockHttpClientFirstSuccess) Do(req *http.Request) (*http.Response, error) {
 	return &http.Response{StatusCode: http.StatusTeapot}, nil
 }
@@ -22,10 +24,11 @@ func TestHttpClientFirstSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusTeapot, resp.StatusCode)
 }
 
-type mockHttpClientLateSuccess struct{
-	calls int
+type mockHttpClientLateSuccess struct {
+	calls        int
 	successAfter int
 }
+
 func (c *mockHttpClientLateSuccess) Do(req *http.Request) (*http.Response, error) {
 	if c.calls == c.successAfter {
 		return &http.Response{StatusCode: http.StatusTeapot}, nil
@@ -43,10 +46,10 @@ func TestHttpClientLateSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusTeapot, resp.StatusCode)
 }
 
-
-type mockHttpClientError struct{
+type mockHttpClientError struct {
 	calls int
 }
+
 func (c *mockHttpClientError) Do(req *http.Request) (*http.Response, error) {
 	c.calls++
 	return nil, errors.New("some connection error")

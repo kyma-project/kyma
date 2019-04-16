@@ -1,11 +1,12 @@
 package resilient
 
 import (
-	"github.com/avast/retry-go"
 	"io"
 	"net/http"
 	"net/url"
 	"strings"
+
+	retry "github.com/avast/retry-go"
 )
 
 type WrappedHttpClient struct {
