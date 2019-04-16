@@ -174,7 +174,7 @@ spec:
       serviceAccount: "test-{{ template "fullname" . }}-int"
       containers:
       - name: test-{{ template "fullname" . }}
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration:{{ .Values.global.kubeless_integration_tests.version }}
+        image: eu.gcr.io/kyma-project/pr/tests/kubeless-integration:PR-3743
         command: ["/bin/sh"]
         args: ["-c", "sleep 10; /test-kubeless; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
         volumeMounts:
