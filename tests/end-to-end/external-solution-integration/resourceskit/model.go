@@ -19,12 +19,3 @@ type API struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 }
-
-type Subject struct {
-	CommonName string
-	Country string
-	Organization string
-	OrganizationalUnit string
-	Locality string
-	Province string
-}
