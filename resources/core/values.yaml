@@ -33,8 +33,8 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: pr/
-    version: PR-3702
+    dir: develop/
+    version: ff50edcf
   api_controller:
     dir: develop/
     version: "1323f962"
