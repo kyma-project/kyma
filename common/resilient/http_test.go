@@ -23,19 +23,19 @@ func TestHttpClientFirstSuccess(t *testing.T) {
 }
 
 type mockHttpClientLateSuccess struct{
-	mockHttpClientFirstSuccess
-	*mockHttpClientError
+	calls int
 	successAfter int
 }
 func (c *mockHttpClientLateSuccess) Do(req *http.Request) (*http.Response, error) {
 	if c.calls == c.successAfter {
-		return c.mockHttpClientFirstSuccess.Do(req)
+		return &http.Response{StatusCode: http.StatusTeapot}, nil
 	}
-	return c.mockHttpClientError.Do(req)
+	c.calls++
+	return nil, errors.New("some connection error")
 }
 
 func TestHttpClientLateSuccess(t *testing.T) {
-	mock := &mockHttpClientLateSuccess{successAfter: 3, mockHttpClientError: &mockHttpClientError{}}
+	mock := &mockHttpClientLateSuccess{successAfter: 3}
 	wrapped := WrapHttpClient(mock, retry.Delay(time.Millisecond), retry.Attempts(5))
 	resp, err := wrapped.Get("http://example.com/")
 	assert.Nil(t, err)
