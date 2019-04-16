@@ -3,5 +3,5 @@ containerRegistry:
 
 image:
   dir: develop/tests/
-  version: 33e7bc77
+  version: 3afdffef
   pullPolicy: "IfNotPresent"

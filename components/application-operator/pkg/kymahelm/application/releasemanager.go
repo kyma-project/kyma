@@ -2,11 +2,12 @@ package application
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 	hapi_4 "k8s.io/helm/pkg/proto/hapi/release"
 )
@@ -65,6 +66,9 @@ func (r *releaseManager) UpgradeReleases() error {
 	}
 
 	for _, app := range appList.Items {
+		if app.ShouldSkipInstallation() == true {
+			continue
+		}
 
 		status, description, err := r.upgradeChart(&app)
 		if err != nil {
@@ -129,7 +133,7 @@ func (r *releaseManager) CheckReleaseExistence(name string) (bool, error) {
 }
 
 func (r *releaseManager) checkExistence(name string) (bool, error) {
-	listResponse, err := r.helmClient.ListReleases()
+	listResponse, err := r.helmClient.ListReleases(r.namespace)
 	if err != nil {
 		return false, err
 	}

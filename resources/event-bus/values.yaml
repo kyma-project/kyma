@@ -1,16 +1,16 @@
 # Default values for event-bus.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-# Update .global.event_bus.version and .global.kymaEventBus also in nasts-streaming chart
+# Update .global.event_bus.version also in nats-streaming chart
 global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir: develop/
-    version: 218b96c9
+    version: 016e87ef
   event_bus_tests:
     dir: develop/
-    version: 0c471dd3
+    version: f4c58b01
   natsStreaming:
     url: "nats-streaming.natss:4222"
     clusterID: "kyma-nats-streaming"
@@ -23,6 +23,10 @@ global:
   publishKnative:
     maxRequests: 16
     maxRequestSize: 65536
+    maxChannelNameLength: 33
+    maxSourceIDLength: 253
+    maxEventTypeLength: 253
+    maxEventTypeVersionLength: 4
     resources:
       limits:
         memory: "32M"
@@ -47,8 +51,6 @@ global:
     apiURL: http://zipkin.kyma-system:9411/api/v1/spans
   eventBusVersion: "0.2.34"
   isLocalEnv: false
-  knative: false
-  kymaEventBus: true
 e2eTests:
   nameTester: "test-event-bus-tester"
   nameSubscriber: "test-event-bus-subscriber"    

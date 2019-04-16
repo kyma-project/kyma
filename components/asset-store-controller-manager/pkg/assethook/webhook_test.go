@@ -3,7 +3,7 @@ package assethook_test
 import (
 	"bytes"
 	"context"
-	"encoding/json"
+	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/api/v1alpha1"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/automock"
@@ -22,17 +22,10 @@ func TestWebhook_Call(t *testing.T) {
 
 		httpClient := new(automock.HttpClient)
 		webhook := assethook.New(httpClient)
-		url := "https://test.page.io/endpoint"
+		service := v1alpha2.WebhookService{Name: "tester", Namespace: "test", Endpoint: "/dummy"}
 		ctx := context.TODO()
 
-		metadata := json.RawMessage("{}")
-		request := &v1alpha1.ValidationRequest{
-			Name: "test",
-			Assets: map[string]string{
-				"whololo": "ololohw",
-			},
-			Metadata: &metadata,
-		}
+		request := bytes.NewBuffer([]byte("test-call"))
 		response := &v1alpha1.ValidationResponse{}
 		responseString := "{\"status\":{\"name1\":{\"status\":\"Failure\",\"message\":\"much more details of the failure\"},\"name2\":{\"status\":\"Success\",\"message\":\"much more details\"}}}"
 
@@ -40,7 +33,7 @@ func TestWebhook_Call(t *testing.T) {
 		defer httpClient.AssertExpectations(t)
 
 		// When
-		err := webhook.Call(ctx, url, request, response)
+		err := webhook.Do(ctx, "text/plain", service, request, response, time.Hour)
 
 		// Then
 		g.Expect(err).NotTo(gomega.HaveOccurred())
@@ -62,18 +55,18 @@ func TestWebhook_Call(t *testing.T) {
 
 		httpClient := new(automock.HttpClient)
 		webhook := assethook.New(httpClient)
-		url := "https://test.page.io/endpoint"
+		service := v1alpha2.WebhookService{Name: "tester", Namespace: "test", Endpoint: "/dummy"}
 		ctx, cancel := context.WithDeadline(context.Background(), time.Now().Add(-20*time.Hour))
 		defer cancel()
 
-		request := &v1alpha1.ValidationRequest{}
+		request := bytes.NewBuffer([]byte("test-call"))
 		response := &v1alpha1.ValidationResponse{}
 
 		httpClient.On("Do", mock.Anything).Return(httpResponse(408, "{}"), ctx.Err()).Once()
 		defer httpClient.AssertExpectations(t)
 
 		// When
-		err := webhook.Call(ctx, url, request, response)
+		err := webhook.Do(ctx, "text/plain", service, request, response, time.Hour)
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -85,17 +78,17 @@ func TestWebhook_Call(t *testing.T) {
 
 		httpClient := new(automock.HttpClient)
 		webhook := assethook.New(httpClient)
-		url := "https://test.page.io/endpoint"
+		service := v1alpha2.WebhookService{Name: "tester", Namespace: "test", Endpoint: "/dummy"}
 		ctx := context.TODO()
 
-		request := &v1alpha1.ValidationRequest{}
+		request := bytes.NewBuffer([]byte("test-call"))
 		response := &v1alpha1.ValidationResponse{}
 
 		httpClient.On("Do", mock.Anything).Return(httpResponse(404, "{}"), nil).Once()
 		defer httpClient.AssertExpectations(t)
 
 		// When
-		err := webhook.Call(ctx, url, request, response)
+		err := webhook.Do(ctx, "text/plain", service, request, response, time.Hour)
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())
@@ -107,17 +100,17 @@ func TestWebhook_Call(t *testing.T) {
 
 		httpClient := new(automock.HttpClient)
 		webhook := assethook.New(httpClient)
-		url := "https://test.page.io/endpoint"
+		service := v1alpha2.WebhookService{Name: "tester", Namespace: "test", Endpoint: "/dummy"}
 		ctx := context.TODO()
 
-		request := &v1alpha1.ValidationRequest{}
+		request := bytes.NewBuffer([]byte("test-call"))
 		response := &v1alpha1.ValidationResponse{}
 
 		httpClient.On("Do", mock.Anything).Return(httpResponse(200, "ala"), nil).Once()
 		defer httpClient.AssertExpectations(t)
 
 		// When
-		err := webhook.Call(ctx, url, request, response)
+		err := webhook.Do(ctx, "text/plain", service, request, response, time.Hour)
 
 		// Then
 		g.Expect(err).To(gomega.HaveOccurred())

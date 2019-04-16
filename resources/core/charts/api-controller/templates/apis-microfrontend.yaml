@@ -13,19 +13,19 @@ spec:
   navigationNodes:
     - label: APIs
       navigationPath: apis
-      viewUrl: '/home/namespaces/:environmentId/apis'
+      viewUrl: '/home/namespaces/:namespaceId/apis'
       order: -1
     - label: API Details
       navigationPath: apis/details
-      viewUrl: '/home/namespaces/:environmentId/apis'
+      viewUrl: '/home/namespaces/:namespaceId/apis'
       showInNavigation: false
     - label: API Details
       navigationPath: apis/details/:name
-      viewUrl: '/home/namespaces/:environmentId/apis/details/:name'
+      viewUrl: '/home/namespaces/:namespaceId/apis/details/:name'
       showInNavigation: false
     - label: Create API
       navigationPath: apis/create
-      viewUrl: '/home/namespaces/:environmentId/apis/create'
+      viewUrl: '/home/namespaces/:namespaceId/apis/create'
       showInNavigation: false
 ---
 apiVersion: "ui.kyma-project.io/v1alpha1"

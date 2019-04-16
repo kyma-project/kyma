@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"net/http"
+	"time"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
@@ -18,8 +21,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
-	"net/http"
-	"time"
 )
 
 const (
@@ -58,7 +59,9 @@ func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.
 func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider,
 	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository) http.Handler {
 
-	headersRequired := clientcontext.HeadersRequiredType(opts.central)
+	lookupEnabled := clientcontext.LookupEnabledType(opts.lookupEnabled)
+
+	lookupService := middlewares.NewGraphQLLookupService()
 
 	subjectValues := certificates.CSRSubject{
 		Country:            env.country,
@@ -68,11 +71,11 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		Province:           env.province,
 	}
 
-	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, subjectValues)
+	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName, subjectValues)
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
-	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayHost, headersRequired)
+	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayHost, opts.lookupConfigMapPath, lookupEnabled, clientcontext.ExtractApplicationContext, lookupService)
 	appContextFromSubjMiddleware := clientcontextmiddlewares.NewAppContextFromSubjMiddleware()
 	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository)
 
@@ -102,7 +105,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	handlerBuilder.WithApps(appHandlerConfig)
 
 	if opts.central {
-		runtimeCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.runtimeCertificateValidityTime), opts.caSecretName, subjectValues)
+		runtimeCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.runtimeCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName, subjectValues)
 		runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
 
 		runtimeHandlerConfig := externalapi.Config{

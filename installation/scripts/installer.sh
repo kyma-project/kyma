@@ -27,10 +27,6 @@ do
             shift # past argument
             shift # past value
             ;;
-        --knative)
-            KNATIVE=true
-            shift
-            ;;
         --password)
             ADMIN_PASSWORD="$2"
             shift
@@ -98,12 +94,11 @@ fi
 
 kubectl apply -f - <<<"$COMBO_YAML"
 
-if [ $KNATIVE ]; then
-    kubectl -n kyma-installer patch configmap installation-config-overrides -p '{"data": {"global.knative": "true", "global.kymaEventBus": "false", "global.natsStreaming.clusterID": "knative-nats-streaming"}}'
-fi
-
 echo -e "\nConfiguring sub-components"
 bash ${CURRENT_DIR}/configure-components.sh
+
+echo -e "\nGetting Helm secrets"
+bash ${CURRENT_DIR}/tiller-tls.sh
 
 echo -e "\nTriggering installation"
 kubectl label installation/kyma-installation action=install

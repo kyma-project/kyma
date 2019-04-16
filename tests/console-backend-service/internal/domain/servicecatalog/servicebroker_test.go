@@ -6,8 +6,10 @@ import (
 	"fmt"
 	"testing"
 
-	tester "github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -40,6 +42,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	require.NoError(t, err)
 
 	expectedResource := broker()
+
 	resourceDetailsQuery := `
 		name
 		namespace
@@ -54,15 +57,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	`
 
 	t.Run("MultipleResources", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query ($namespace: String!) {
-				serviceBrokers(namespace: $namespace) {
-					%s
-				}
-			}	
-		`, resourceDetailsQuery)
-		req := graphql.NewRequest(query)
-		req.SetVar("namespace", expectedResource.Namespace)
+		req := fixServiceBrokersRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceBrokersQueryResponse
 		err = c.Do(req, &res)
@@ -72,16 +67,7 @@ func TestServiceBrokerQueries(t *testing.T) {
 	})
 
 	t.Run("SingleResource", func(t *testing.T) {
-		query := fmt.Sprintf(`
-			query ($name: String!, $namespace: String!) {
-				serviceBroker(name: $name, namespace: $namespace) {
-					%s
-				}
-			}
-		`, resourceDetailsQuery)
-		req := graphql.NewRequest(query)
-		req.SetVar("name", expectedResource.Name)
-		req.SetVar("namespace", expectedResource.Namespace)
+		req := fixServiceBrokerRequest(resourceDetailsQuery, expectedResource)
 
 		var res serviceBrokerQueryResponse
 		err = c.Do(req, &res)
@@ -89,22 +75,21 @@ func TestServiceBrokerQueries(t *testing.T) {
 		require.NoError(t, err)
 		checkBroker(t, expectedResource, res.ServiceBroker)
 	})
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:  {fixServiceBrokerRequest(resourceDetailsQuery, expectedResource)},
+		auth.List: {fixServiceBrokersRequest(resourceDetailsQuery, expectedResource)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func checkBroker(t *testing.T, expected, actual ServiceBroker) {
 	// Name
 	assert.Equal(t, expected.Name, actual.Name)
 
-	// Url
-	assert.Contains(t, actual.Url, expected.Name)
-
 	// Namespace
 	assert.Equal(t, expected.Namespace, actual.Namespace)
-
-	// Status
-	assert.Equal(t, expected.Status.Ready, actual.Status.Ready)
-	assert.NotEmpty(t, actual.Status.Message)
-	assert.NotEmpty(t, actual.Status.Reason)
 }
 
 func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedElement ServiceBroker) {
@@ -122,10 +107,36 @@ func assertBrokerExistsAndEqual(t *testing.T, arr []ServiceBroker, expectedEleme
 
 func broker() ServiceBroker {
 	return ServiceBroker{
-		Name:      tester.BrokerReleaseName,
+		Name:      fmt.Sprintf("ns-%s", fixture.TestingBrokerName),
 		Namespace: TestNamespace,
-		Status: ServiceBrokerStatus{
-			Ready: true,
-		},
 	}
+}
+
+func fixServiceBrokerRequest(resourceDetailsQuery string, expectedResource ServiceBroker) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($name: String!, $namespace: String!) {
+				serviceBroker(name: $name, namespace: $namespace) {
+					%s
+				}
+			}
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("name", expectedResource.Name)
+	req.SetVar("namespace", expectedResource.Namespace)
+
+	return req
+}
+
+func fixServiceBrokersRequest(resourceDetailsQuery string, expectedResource ServiceBroker) *graphql.Request {
+	query := fmt.Sprintf(`
+			query ($namespace: String!) {
+				serviceBrokers(namespace: $namespace) {
+					%s
+				}
+			}	
+		`, resourceDetailsQuery)
+	req := graphql.NewRequest(query)
+	req.SetVar("namespace", expectedResource.Namespace)
+
+	return req
 }

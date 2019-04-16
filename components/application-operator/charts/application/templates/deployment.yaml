@@ -4,8 +4,8 @@ metadata:
   name: {{ .Release.Name }}-application-gateway
   labels:
     app: {{ .Release.Name }}-application-gateway
-    release: {{ .Release.Name }}-application-gateway
-    heritage: {{ .Release.Service }}-application-gateway
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   replicas: 1
   strategy:
@@ -20,6 +20,7 @@ spec:
         app: {{ .Release.Name }}-application-gateway
         release: {{ .Release.Name }}-application-gateway
     spec:
+      serviceAccountName: {{.Release.Name }}-application-gateway
       containers:
       - name: {{ .Release.Name }}-application-gateway
         image: {{ .Values.global.applicationGatewayImage }}
@@ -59,8 +60,8 @@ metadata:
   name: {{ .Release.Name }}-event-service
   labels:
     app: {{ .Release.Name }}-event-service
-    release: {{ .Release.Name }}-event-service
-    heritage: {{ .Release.Service }}-event-service
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   replicas: 1
   strategy:

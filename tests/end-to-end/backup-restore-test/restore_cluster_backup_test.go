@@ -8,12 +8,23 @@ import (
 
 	"github.com/google/uuid"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
-	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
+	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
+	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/vrischmann/envconfig"
 )
 
 var testUUID = uuid.New()
 var backupName = "test-" + testUUID.String()
+var log = logrus.WithField("test", "backup-restore")
+
+type config struct {
+	AllBackupConfigurationFile    string `envconfig:"default=/all-backup.yaml"`
+	SystemBackupConfigurationFile string `envconfig:"default=/system-backup.yaml"`
+}
 
 type e2eTest struct {
 	backupTest BackupTest
@@ -22,37 +33,63 @@ type e2eTest struct {
 }
 
 func TestBackupAndRestoreCluster(t *testing.T) {
+	cfg, err := loadConfig()
+	fatalOnError(t, err, "while reading configuration from environment variables")
+
 	myFunctionTest, err := NewFunctionTest()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	fatalOnError(t, err, "while creating structure for Function test")
 
 	myStatefulSetTest, err := NewStatefulSetTest()
-
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	fatalOnError(t, err, "while creating structure for StatefulSet test")
 
 	myDeploymentTest, err := NewDeploymentTest()
-
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	fatalOnError(t, err, "while creating structure for Deployment test")
 
 	myPrometheusTest, err := NewPrometheusTest()
+	fatalOnError(t, err, "while creating structure for Prometheus test")
 
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	appBrokerTest, err := NewAppBrokerTest()
+	fatalOnError(t, err, "while creating structure for AppBroker test")
+
+	helmBrokerTest, err := NewHelmBrokerTest()
+	fatalOnError(t, err, "while creating structure for HelmBroker test")
+
+	scAddonsTest, err := NewServiceCatalogAddonsTest()
+	fatalOnError(t, err, "while creating structure for ScAddons test")
 
 	myNamespaceControllerTest, err := NewNamespaceControllerTest()
+	fatalOnError(t, err, "while creating structure for NamespaceController test")
 
-	if err != nil {
-		t.Fatalf("%v", err)
+	apiControllerTest, err := NewApiControllerTest()
+	fatalOnError(t, err, "while creating structure for ApiController test")
+
+	myGrafanaTest, err := NewGrafanaTest()
+	fatalOnError(t, err, "while creating structure for Grafana test")
+
+	myMicroFrontendTest, err := NewMicrofrontendTest()
+	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+
+	myAssetStoreTest, err := NewAssetStoreTest(t)
+	fatalOnError(t, err, "while creating structure for AssetStore test")
+
+	myCmsTest, err := NewCmsTest(t)
+	fatalOnError(t, err, "while creating structure for Cms test")
+
+	backupTests := []BackupTest{
+		myPrometheusTest,
+		myFunctionTest,
+		myDeploymentTest,
+		myStatefulSetTest,
+		helmBrokerTest,
+		appBrokerTest,
+		scAddonsTest,
+		myNamespaceControllerTest,
+		apiControllerTest,
+		myGrafanaTest,
+		myMicroFrontendTest,
+		myAssetStoreTest,
+		myCmsTest,
 	}
-
-	backupTests := []BackupTest{myPrometheusTest, myFunctionTest, myDeploymentTest, myStatefulSetTest, myNamespaceControllerTest}
-
 	e2eTests := make([]e2eTest, len(backupTests))
 
 	for idx, backupTest := range backupTests {
@@ -72,55 +109,70 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		}
 	}
 
-	myBackupClient, err := utils.NewBackupClient()
-	if err != nil {
-		t.Fatalf("%v", err)
-	}
+	myBackupClient, err := backupClient.NewBackupClient()
+	fatalOnError(t, err, "while creating custom client for Backup")
 
-	Convey("Create resources", t, func() {
+	Convey("Create resources\n", t, func() {
 		for _, e2eTest := range e2eTests {
-
+			log.Infof("Creating Namespace: %s", e2eTest.namespace)
 			err := myBackupClient.CreateNamespace(e2eTest.namespace)
 			So(err, ShouldBeNil)
 			e2eTest.backupTest.CreateResources(e2eTest.namespace)
 		}
 		for _, e2eTest := range e2eTests {
+			log.Infof("Testing resources in namespace: %s", e2eTest.namespace)
 			e2eTest.backupTest.TestResources(e2eTest.namespace)
 		}
 	})
 
 	Convey("Backup Cluster", t, func() {
-		systemBackupSpecFile := "/system-backup.yaml"
-		allBackupSpecFile := "/all-backup.yaml"
+		allBackupSpecFile := cfg.AllBackupConfigurationFile
 		allBackupName := "all-" + backupName
+
+		systemBackupSpecFile := cfg.SystemBackupConfigurationFile
 		systemBackupName := "system-" + backupName
-		err := myBackupClient.CreateBackup(allBackupName, allBackupSpecFile)
-		So(err, ShouldBeNil)
+
 		err = myBackupClient.CreateBackup(systemBackupName, systemBackupSpecFile)
+		So(err, ShouldBeNil)
+		err := myBackupClient.CreateBackup(allBackupName, allBackupSpecFile)
 		So(err, ShouldBeNil)
 
 		Convey("Check backup status", func() {
-			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 15*time.Minute)
+
+			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 20*time.Minute)
+			myBackupClient.DescribeBackup(systemBackupName)
 			So(err, ShouldBeNil)
-			err = myBackupClient.WaitForBackupToBeCreated(systemBackupName, 15*time.Minute)
+
+			err := myBackupClient.WaitForBackupToBeCreated(allBackupName, 20*time.Minute)
+			myBackupClient.DescribeBackup(allBackupName)
 			So(err, ShouldBeNil)
-			Convey("Delete resources from cluster", func() {
+
+			Convey("Delete resources from cluster\n", func() {
 				for _, e2eTest := range e2eTests {
+					e2eTest.backupTest.DeleteResources(e2eTest.namespace)
+
 					err := myBackupClient.DeleteNamespace(e2eTest.namespace)
 					So(err, ShouldBeNil)
+
 					err = myBackupClient.WaitForNamespaceToBeDeleted(e2eTest.namespace, 2*time.Minute)
 					So(err, ShouldBeNil)
 				}
+
 				Convey("Restore Cluster", func() {
-					err := myBackupClient.RestoreBackup(allBackupName)
-					So(err, ShouldBeNil)
 					err = myBackupClient.RestoreBackup(systemBackupName)
 					So(err, ShouldBeNil)
-					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 15*time.Minute)
+					err := myBackupClient.RestoreBackup(allBackupName)
 					So(err, ShouldBeNil)
+
 					err = myBackupClient.WaitForBackupToBeRestored(systemBackupName, 15*time.Minute)
+					myBackupClient.DescribeRestore(systemBackupName)
 					So(err, ShouldBeNil)
-					Convey("Test restored resources", func() {
+
+					err = myBackupClient.WaitForBackupToBeRestored(allBackupName, 15*time.Minute)
+					myBackupClient.DescribeRestore(allBackupName)
+					So(err, ShouldBeNil)
+
+					Convey("Test restored resources\n", func() {
 						for _, e2eTest := range e2eTests {
 							e2eTest.backupTest.TestResources(e2eTest.namespace)
 						}
@@ -129,5 +181,20 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 			})
 		})
 	})
+}
 
+func loadConfig() (config, error) {
+	var cfg config
+	err := envconfig.Init(&cfg)
+	if err != nil {
+		return config{}, err
+	}
+
+	return cfg, nil
+}
+
+func fatalOnError(t *testing.T, err error, context string) {
+	if err != nil {
+		t.Fatalf("%s: %v", context, err)
+	}
 }

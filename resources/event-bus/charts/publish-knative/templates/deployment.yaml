@@ -1,7 +1,7 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "publish-knative.name" . }}
+  name: {{ template "publish-knative.fullname" . }}
   labels:
 {{ include "publish-knative.labels.standard" . | indent 4 }}
 spec:
@@ -10,6 +10,10 @@ spec:
   {{ else }}
   replicas: {{ .Values.replicaCount }}
   {{ end }}
+  selector:
+    matchLabels:
+      app: {{ template "publish-knative.fullname" . }}
+      release: {{ .Release.Name }}
   strategy:
     type: RollingUpdate
     rollingUpdate:
@@ -19,7 +23,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ template "publish-knative.name" . }}
+        app: {{ template "publish-knative.fullname" . }}
         release: {{ .Release.Name }}
         kyma-grafana: {{ .Values.monitoring.grafana}}
         kyma-alerts: {{ .Values.monitoring.alerts}}
@@ -32,9 +36,13 @@ spec:
             - --port={{ .Values.port }}
             - --max_requests={{ .Values.global.publishKnative.maxRequests }}
             - --max_request_size={{ .Values.global.publishKnative.maxRequestSize }}
+            - --max_channel_name_length={{ .Values.global.publishKnative.maxChannelNameLength }}
             - --trace_api_url={{ .Values.global.trace.apiURL }}
             - --trace_service_name={{ .Values.trace.serviceName }}
             - --trace_operation_name={{ .Values.trace.operationName }}
+            - --max_source_id_length={{ .Values.global.publishKnative.maxSourceIDLength }}
+            - --max_event_type_length={{ .Values.global.publishKnative.maxEventTypeLength }}
+            - --max_event_type_version_length={{ .Values.global.publishKnative.maxEventTypeVersionLength }}
           ports:
             - name: http
               containerPort: {{ .Values.port }}

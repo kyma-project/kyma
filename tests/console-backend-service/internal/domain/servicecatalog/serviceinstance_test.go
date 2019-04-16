@@ -9,9 +9,11 @@ import (
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/fixture"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/wait"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -44,47 +46,47 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	svcatCli, _, err := client.NewServiceCatalogClientWithConfig()
 	require.NoError(t, err)
 
-	expectedResourceFromClusterServiceClass := fixture.ServiceInstance("cluster-test-instance", TestNamespace)
-	expectedResourceFromServiceClass := instanceFromServiceClass("test-instance")
+	expectedResourceFromClusterServiceClass := fixture.ServiceInstanceFromClusterServiceClass("cluster-test-instance", TestNamespace)
+	expectedResourceFromServiceClass := fixture.ServiceInstanceFromServiceClass("test-instance", TestNamespace)
 	resourceDetailsQuery := instanceDetailsFields()
 
-	t.Log(fmt.Sprintf("Subscribe instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Subscribe instance created by %s", ClusterServiceBrokerKind))
 	subscription := subscribeInstance(c, instanceEventDetailsFields(), expectedResourceFromClusterServiceClass.Namespace)
 	defer subscription.Close()
 
-	t.Log(fmt.Sprintf("Create instance from %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Create instance from %s", ClusterServiceBrokerKind))
 	createRes, err := createInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass, true)
 
 	require.NoError(t, err)
 	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, createRes.CreateServiceInstance)
 
-	t.Log(fmt.Sprintf("Check subscription event of instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Check subscription event of instance created by %s", ClusterServiceBrokerKind))
 	expectedEvent := instanceEvent("ADD", expectedResourceFromClusterServiceClass)
 	event, err := readInstanceEvent(subscription)
 	assert.NoError(t, err)
 	checkInstanceEvent(t, expectedEvent, event)
 
-	t.Log(("Wait for instance Ready created by %s"), tester.ClusterServiceBroker)
+	t.Log(("Wait for instance Ready created by %s"), ClusterServiceBrokerKind)
 	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Create instance from %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Create instance from %s", ServiceBrokerKind))
 	createRes, err = createInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass, false)
 
 	require.NoError(t, err)
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, createRes.CreateServiceInstance)
 
-	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", ClusterServiceBrokerKind))
 	res, err := querySingleInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass)
 
 	assert.NoError(t, err)
 	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, res.ServiceInstance)
 
-	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Query Single Resource - instance created by %s", ServiceBrokerKind))
 	res, err = querySingleInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass)
 
 	assert.NoError(t, err)
@@ -98,11 +100,11 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	assertInstanceFromServiceClassExistsAndEqual(t, expectedResourceFromServiceClass, multipleRes.ServiceInstances)
 
 	// We must again wait for RUNNING status of created instances, because sometimes Kubernetess change status from RUNNING to PROVISIONING at the first queries - Query Single Resource
-	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ClusterServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Wait for instance Ready created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceReady(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
@@ -113,33 +115,47 @@ func TestServiceInstanceMutationsAndQueries(t *testing.T) {
 	assertInstanceFromClusterServiceClassExistsAndEqual(t, expectedResourceFromClusterServiceClass, multipleResWithStatus.ServiceInstances)
 	assertInstanceFromServiceClassExistsAndEqual(t, expectedResourceFromServiceClass, multipleRes.ServiceInstances)
 
-	t.Log(fmt.Sprintf("Delete instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Delete instance created by %s", ClusterServiceBrokerKind))
 	deleteRes, err := deleteInstance(c, resourceDetailsQuery, expectedResourceFromClusterServiceClass)
 
 	assert.NoError(t, err)
 	checkInstanceFromClusterServiceClass(t, expectedResourceFromClusterServiceClass, deleteRes.DeleteServiceInstance)
 
-	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ClusterServiceBroker))
+	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", ClusterServiceBrokerKind))
 	err = wait.ForServiceInstanceDeletion(expectedResourceFromClusterServiceClass.Name, expectedResourceFromClusterServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Delete instance created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Delete instance created by %s", ServiceBrokerKind))
 	deleteRes, err = deleteInstance(c, resourceDetailsQuery, expectedResourceFromServiceClass)
 
 	assert.NoError(t, err)
 	checkInstanceFromServiceClass(t, expectedResourceFromServiceClass, deleteRes.DeleteServiceInstance)
 
-	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", tester.ServiceBroker))
+	t.Log(fmt.Sprintf("Wait for deletion of instance created by %s", ServiceBrokerKind))
 	err = wait.ForServiceInstanceDeletion(expectedResourceFromServiceClass.Name, expectedResourceFromServiceClass.Namespace, svcatCli)
 	assert.NoError(t, err)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get: {fixServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass)},
+		auth.List: {
+			fixServiceInstancesRequest(resourceDetailsQuery, expectedResourceFromServiceClass.Namespace),
+			fixServiceInstancesWithStatusRequest(resourceDetailsQuery, expectedResourceFromServiceClass.Namespace),
+		},
+		auth.Create: {
+			fixCreateServiceInstanceRequest(resourceDetailsQuery, fixture.ServiceInstanceFromClusterServiceClass("", TestNamespace), true),
+			fixCreateServiceInstanceRequest(resourceDetailsQuery, fixture.ServiceInstanceFromServiceClass("", TestNamespace), false),
+		},
+		auth.Delete: {fixDeleteServiceInstanceRequest(resourceDetailsQuery, expectedResourceFromServiceClass)},
+	}
+	AuthSuite.Run(t, ops)
 }
 
-func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance, clusterWide bool) (instanceCreateMutationResponse, error) {
+func fixCreateServiceInstanceRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance, clusterWide bool) *graphql.Request {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $namespace: String!, $externalPlanName: String!, $externalServiceClassName: String!, $labels: [String!]!, $parameterSchema: JSON) {
-				createServiceInstance(params: {
+				createServiceInstance(namespace: $namespace, params: {
     				name: $name,
-    				namespace: $namespace,
 					classRef: {
 						externalName: $externalServiceClassName,
 						clusterWide: %v,
@@ -168,6 +184,12 @@ func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	req.SetVar("labels", expectedResource.Labels)
 	req.SetVar("parameterSchema", expectedResource.PlanSpec)
 
+	return req
+}
+
+func createInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance, clusterWide bool) (instanceCreateMutationResponse, error) {
+	req := fixCreateServiceInstanceRequest(resourceDetailsQuery, expectedResource, clusterWide)
+
 	var res instanceCreateMutationResponse
 	err := c.Do(req, &res)
 
@@ -189,7 +211,7 @@ func subscribeInstance(c *graphql.Client, resourceDetailsQuery string, namespace
 }
 
 func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceQueryResponse, error) {
-	req := singleResourceQueryRequest(resourceDetailsQuery, expectedResource)
+	req := fixServiceInstanceRequest(resourceDetailsQuery, expectedResource)
 
 	var res instanceQueryResponse
 	err := c.Do(req, &res)
@@ -197,7 +219,7 @@ func querySingleInstance(c *graphql.Client, resourceDetailsQuery string, expecte
 	return res, err
 }
 
-func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
+func fixServiceInstancesRequest(resourceDetailsQuery, namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 			query ($namespace: String!) {
 				serviceInstances(namespace: $namespace) {
@@ -208,13 +230,19 @@ func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, namespace s
 	req := graphql.NewRequest(query)
 	req.SetVar("namespace", namespace)
 
+	return req
+}
+
+func queryMultipleInstances(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
+	req := fixServiceInstancesRequest(resourceDetailsQuery, namespace)
+
 	var res instancesQueryResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
+func fixServiceInstancesWithStatusRequest(resourceDetailsQuery, namespace string) *graphql.Request {
 	query := fmt.Sprintf(`
 			query ($namespace: String!, $status: InstanceStatusType) {
 				serviceInstances(namespace: $namespace, status: $status) {
@@ -226,13 +254,19 @@ func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, n
 	req.SetVar("namespace", namespace)
 	req.SetVar("status", shared.ServiceInstanceStatusTypeRunning)
 
+	return req
+}
+
+func queryMultipleInstancesWithStatus(c *graphql.Client, resourceDetailsQuery, namespace string) (instancesQueryResponse, error) {
+	req := fixServiceInstancesWithStatusRequest(resourceDetailsQuery, namespace)
+
 	var res instancesQueryResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceDeleteMutationResponse, error) {
+func fixDeleteServiceInstanceRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
 	query := fmt.Sprintf(`
 			mutation ($name: String!, $namespace: String!) {
 				deleteServiceInstance(name: $name, namespace: $namespace) {
@@ -244,13 +278,19 @@ func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedReso
 	req.SetVar("name", expectedResource.Name)
 	req.SetVar("namespace", expectedResource.Namespace)
 
+	return req
+}
+
+func deleteInstance(c *graphql.Client, resourceDetailsQuery string, expectedResource shared.ServiceInstance) (instanceDeleteMutationResponse, error) {
+	req := fixDeleteServiceInstanceRequest(resourceDetailsQuery, expectedResource)
+
 	var res instanceDeleteMutationResponse
 	err := c.Do(req, &res)
 
 	return res, err
 }
 
-func singleResourceQueryRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
+func fixServiceInstanceRequest(resourceDetailsQuery string, expectedResource shared.ServiceInstance) *graphql.Request {
 	query := fmt.Sprintf(`
 			query ($name: String!, $namespace: String!) {
 				serviceInstance(name: $name, namespace: $namespace) {
@@ -429,33 +469,6 @@ func assertInstanceFromServiceClassExistsAndEqual(t *testing.T, expectedElement 
 
 		return false
 	}, "Resource does not exist")
-}
-
-func instanceFromServiceClass(name string) shared.ServiceInstance {
-	return shared.ServiceInstance{
-		Name:      name,
-		Namespace: TestNamespace,
-		Labels:    []string{"test", "test2"},
-		PlanSpec: map[string]interface{}{
-			"first": "1",
-			"second": map[string]interface{}{
-				"value": "2",
-			},
-		},
-		ServicePlan: shared.ServicePlan{
-			Name:         "86064792-7ea2-467b-af93-ac9694d96d52",
-			ExternalName: "default",
-		},
-		ServiceClass: shared.ServiceClass{
-			Name:         "4f6e6cf6-ffdd-425f-a2c7-3c9258ad2468",
-			ExternalName: "user-provided-service",
-			Namespace:    TestNamespace,
-		},
-		Status: shared.ServiceInstanceStatus{
-			Type: shared.ServiceInstanceStatusTypeRunning,
-		},
-		Bindable: true,
-	}
 }
 
 func instanceEvent(eventType string, serviceInstance shared.ServiceInstance) ServiceInstanceEvent {

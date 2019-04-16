@@ -1,6 +1,45 @@
 bindings:
-  kymaAdmin:
+  kymaEssentials:
     groups: []
   kymaView:
     groups: []
+  kymaEdit:
+    groups: []
+  kymaAdmin:
+    groups: []
+  kymaDeveloper:
+    groups: []
 namespace: default
+clusterRoles:
+  apiGroups:
+    k8s:
+      - "rbac.authorization.k8s.io"
+      - "servicecatalog.k8s.io"
+      - "settings.k8s.io"
+      - "metrics.k8s.io"
+    istio:
+      - "authentication.istio.io"
+      - "config.istio.io"
+      - "networking.istio.io"
+    kyma:
+      - "applicationconnector.kyma-project.io"
+      - "authentication.kyma-project.io"
+      - "gateway.kyma-project.io"
+      - "servicecatalog.kyma-project.io"
+      - "ui.kyma-project.io"
+      - "kyma.cx"
+      - "ui.kyma.cx"
+  verbs:
+    edit:
+      - "create"
+      - "delete"
+      - "deletecollection"
+      - "get"
+      - "list"
+      - "patch"
+      - "update"
+      - "watch"
+    view:
+      - "get"
+      - "list"
+

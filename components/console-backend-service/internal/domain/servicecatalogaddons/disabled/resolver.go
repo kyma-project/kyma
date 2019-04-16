@@ -15,9 +15,54 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
-// CreateServiceBindingUsageMutation provides a failing mock function with given fields: ctx, input
-func (_m *Resolver) CreateServiceBindingUsageMutation(ctx context.Context, input *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
+// AddAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, urls
+func (_m *Resolver) AddAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// AddonsConfigurationEventSubscription provides a failing mock function with given fields: ctx
+func (_m *Resolver) AddonsConfigurationEventSubscription(ctx context.Context) (<-chan gqlschema.AddonsConfigurationEvent, error) {
+	var r0 <-chan gqlschema.AddonsConfigurationEvent
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// AddonsConfigurationsQuery provides a failing mock function with given fields: ctx, first, offset
+func (_m *Resolver) AddonsConfigurationsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error) {
+	var r0 []gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// CreateAddonsConfiguration provides a failing mock function with given fields: ctx, name, urls, labels
+func (_m *Resolver) CreateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// CreateServiceBindingUsageMutation provides a failing mock function with given fields: ctx, namespace, input
+func (_m *Resolver) CreateServiceBindingUsageMutation(ctx context.Context, namespace string, input *gqlschema.CreateServiceBindingUsageInput) (*gqlschema.ServiceBindingUsage, error) {
 	var r0 *gqlschema.ServiceBindingUsage
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// DeleteAddonsConfiguration provides a failing mock function with given fields: ctx, name
+func (_m *Resolver) DeleteAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
 	var r1 error
 	r1 = _m.err
 
@@ -51,6 +96,15 @@ func (_m *Resolver) ListUsageKinds(ctx context.Context, first *int, offset *int)
 	return r0, r1
 }
 
+// RemoveAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, urls
+func (_m *Resolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ServiceBindingUsageEventSubscription provides a failing mock function with given fields: ctx, namespace
 func (_m *Resolver) ServiceBindingUsageEventSubscription(ctx context.Context, namespace string) (<-chan gqlschema.ServiceBindingUsageEvent, error) {
 	var r0 <-chan gqlschema.ServiceBindingUsageEvent
@@ -72,6 +126,15 @@ func (_m *Resolver) ServiceBindingUsageQuery(ctx context.Context, name string, n
 // ServiceBindingUsagesOfInstanceQuery provides a failing mock function with given fields: ctx, instanceName, env
 func (_m *Resolver) ServiceBindingUsagesOfInstanceQuery(ctx context.Context, instanceName string, env string) ([]gqlschema.ServiceBindingUsage, error) {
 	var r0 []gqlschema.ServiceBindingUsage
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// UpdateAddonsConfiguration provides a failing mock function with given fields: ctx, name, urls, labels
+func (_m *Resolver) UpdateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
 	var r1 error
 	r1 = _m.err
 

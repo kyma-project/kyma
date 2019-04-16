@@ -1,11 +1,10 @@
 global:
   isLocalEnv: false
-  knative: false
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio_webhook:
     dir: develop/
     version: 84219cbc
   istio_kyma_patch:
-    dir: pr/
-    version: PR-3301
+    dir: develop/
+    version: e0e414f1

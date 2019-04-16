@@ -4,15 +4,14 @@ deployment:
   args:
     proxyPort: &proxyPort 8080
     externalAPIPort: &externalAPIPort 8081
-    minioURL: assetstore-minio.kyma-system.svc.cluster.local:9000
+    uploadServiceURL:  http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000
     requestTimeout: 10
     requestLogging: false
+    insecureAssetDownload: true
 
 service:
   externalapi:
     port: *externalAPIPort
-
-minioUserSecretName: applications-minio-user
 
 tests:
   image:

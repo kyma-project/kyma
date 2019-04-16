@@ -22,6 +22,26 @@ models:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Labels"
   Timestamp:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Timestamp"
+  DocsTopic:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.DocsTopic"
+    fields:
+      assets:
+        resolver: true
+  ClusterDocsTopic:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterDocsTopic"
+    fields:
+      assets:
+        resolver: true
+  Asset:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Asset"
+    fields:
+      files:
+        resolver: true
+  ClusterAsset:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterAsset"
+    fields:
+      files:
+        resolver: true
   ServiceInstance:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ServiceInstance"
     fields:
@@ -58,6 +78,10 @@ models:
         resolver: true
       content:
         resolver: true
+      clusterDocsTopic:
+        resolver: true
+      docsTopic:
+        resolver: true
   ClusterServiceClass:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ClusterServiceClass"
     fields:
@@ -76,6 +100,8 @@ models:
       asyncApiSpec:
         resolver: true
       content:
+        resolver: true
+      clusterDocsTopic:
         resolver: true
   Application:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Application"

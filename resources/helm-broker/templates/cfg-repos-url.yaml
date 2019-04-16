@@ -8,4 +8,4 @@ metadata:
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     helm-broker-repo: "true"
 data:
-  URLs: "https://github.com/kyma-project/bundles/releases/download/0.3.0/"
+  URLs: "https://github.com/kyma-project/bundles/releases/download/0.4.0/"

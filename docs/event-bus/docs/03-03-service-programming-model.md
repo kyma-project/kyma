@@ -23,11 +23,11 @@ The following HTTP Headers provide information about the Event Metadata.
 
 |Header| Description|
 |------|--------|
-| **kyma-event-id** | Business Event's ID delivered to the microservice. |
-| **kyma-event-time** | Business Event's time delivered to the microservice. |
-| **kyma-event-type** | Business Event's type delivered to the microservice. |
-| **kyma-event-type-version** | Business Event's version delivered to the microservice. |
-| **kyma-source-id** | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events. |
+| **ce-event-id** | Business Event's ID delivered to the microservice. |
+| **ce-event-time** | Business Event's time delivered to the microservice. |
+| **ce-event-type** | Business Event's type delivered to the microservice. |
+| **ce-event-type-version** | Business Event's version delivered to the microservice. |
+| **ce-source-id** | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events. |
 | **kyma-subscription** | Subscription name defined in the subscription contract, or in a CRD. This business Event is published to its subscribers. |
 | **x-b3-flags** | Header used by the Zipkin tracer in Envoy. It encodes one or more options. See more on Zipkin tracing [here](https://github.com/openzipkin/b3-propagation). |
 | **x-b3-parentspanid** | Header used by the Zipkin tracer in Envoy. The **ParentSpanId** is 64-bit in length and indicates the position of the parent operation in the trace tree. When the span is the root of the trace tree, the **ParentSpanId** is absent. |
@@ -71,7 +71,26 @@ The HTTP POST request payload is a JSON object:
 
 ## Successful Delivery
 
-A message delivered to a subscriber is considered successfully consumed if the service's HTTP response status code is `2xx`. If the status code is not `2xx` (< 200 or >= 300), it means that a message consumption is not successful and that the message delivery is re-tried. This implies **At-least-once** delivery guarantee.
+A message delivered to a subscriber is considered successfully consumed if the service's HTTP response status code is
+`2xx`, for example:
+```json
+{
+    "event-id": "22ae22a4-f5b7-4fa1-ada9-558a10a96f3d",
+    "status": "published",
+    "reason": "Message successfully published to the channel"
+}
+```
+If the status code is not `2xx` (< `200` or >= `300`), it means that the message was not consumed successfully and
+that the Event Bus will try to deliver it again. This implies **At-least-once** delivery guarantee.
+>**NOTE**: If there were no subscriptions or consumers to this `event-type`, the message is ignored and the response
+will look like this:
+```json
+{
+    "event-id": "22ae22a4-f5b7-4fa1-ada9-558a10a96f3d",
+    "status": "ignored",
+    "reason": "Event was ignored as there are no subscriptions or consumers configured for this event"
+}
+```
 
 ## Event Subscription Service Example
 

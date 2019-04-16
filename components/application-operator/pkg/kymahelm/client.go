@@ -4,10 +4,11 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"k8s.io/helm/pkg/tlsutil"
 )
 
 type HelmClient interface {
-	ListReleases() (*rls.ListReleasesResponse, error)
+	ListReleases(ns string) (*rls.ListReleasesResponse, error)
 	InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error)
 	UpdateReleaseFromChart(chartDir, releaseName, overrides string) (*rls.UpdateReleaseResponse, error)
 	DeleteRelease(releaseName string) (*rls.UninstallReleaseResponse, error)
@@ -19,14 +20,25 @@ type helmClient struct {
 	installationTimeout int64
 }
 
-func NewClient(host string, installationTimeout int64) HelmClient {
-	return &helmClient{
-		helm:                helm.NewClient(helm.Host(host)),
-		installationTimeout: installationTimeout,
+func NewClient(host, tlsKeyFile, tlsCertFile string, skipVerify bool, installationTimeout int64) (HelmClient, error) {
+	tlsOpts := tlsutil.Options{
+		KeyFile:            tlsKeyFile,
+		CertFile:           tlsCertFile,
+		InsecureSkipVerify: skipVerify,
 	}
+
+	tlsCfg, err := tlsutil.ClientConfig(tlsOpts)
+	if err != nil {
+		return nil, err
+	}
+
+	return &helmClient{
+		helm:                helm.NewClient(helm.Host(host), helm.WithTLS(tlsCfg)),
+		installationTimeout: installationTimeout,
+	}, nil
 }
 
-func (hc *helmClient) ListReleases() (*rls.ListReleasesResponse, error) {
+func (hc *helmClient) ListReleases(ns string) (*rls.ListReleasesResponse, error) {
 	statuses := []release.Status_Code{
 		release.Status_DELETED,
 		release.Status_DELETING,
@@ -35,11 +47,13 @@ func (hc *helmClient) ListReleases() (*rls.ListReleasesResponse, error) {
 		release.Status_PENDING_INSTALL,
 		release.Status_PENDING_ROLLBACK,
 		release.Status_PENDING_UPGRADE,
-		release.Status_SUPERSEDED,
 		release.Status_UNKNOWN,
 	}
 
-	return hc.helm.ListReleases(helm.ReleaseListStatuses(statuses))
+	return hc.helm.ListReleases(
+		helm.ReleaseListStatuses(statuses),
+		helm.ReleaseListNamespace(ns),
+	)
 }
 
 func (hc *helmClient) InstallReleaseFromChart(chartDir, ns, releaseName, overrides string) (*rls.InstallReleaseResponse, error) {

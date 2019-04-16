@@ -1,6 +1,7 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
+  runAsUser: 1000
   args:
     internalAPIPort: &internalAPIPort 8080
     externalAPIPort: &externalAPIPort 8081
@@ -8,6 +9,7 @@ deployment:
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
     caSecretName: connector-service-app-ca
+    rootCACertificateSecretName: ""
     appsInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/applications/management/info
     runtimesInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/runtimes/management/info
     appValidityTime: "92d"
@@ -20,6 +22,12 @@ deployment:
     organizationalunit: OrgUnit
     locality: Waldorf
     province: Waldorf
+  externalClusterLookup:
+    enabled: false
+    path: "/etc/config/"
+    lookupConfigMapName: "lookup-config"
+    lookupConfig: |
+      { "url": "http://example.com/graphql", "headers": { } }
 
 service:
   externalapi:
@@ -42,3 +50,5 @@ tests:
   image:
     pullPolicy: IfNotPresent
 
+podSecurityPolicy:
+  enabled: false

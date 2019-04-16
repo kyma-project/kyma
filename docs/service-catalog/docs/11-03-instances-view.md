@@ -15,8 +15,8 @@ These are the OSBA fields used in the main Instances page:
 | (2)    | **metadata.displayName**      | **name***, **id***           | If not provided, UI does not display this information.                       |
 | (3)    | **plan.metadata.displayName** | **plan.name***, **plan.id***| If not provided, UI does not display this information.                       |
 | (4)    | not related to OSBA       | -                    |                                                                              |
-| (5)    | not related to OSBA       | -                    |                                                                              |
-|        |
+| (5)    | not related to OSBA       | -   | |                                                                             |
+
 
 \*Fields with an asterisk are required OSBA attributes.
 

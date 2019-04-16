@@ -8,15 +8,14 @@ import (
 var (
 	isValidEventID = regexp.MustCompile(AllowedEventIDChars).MatchString
 
-	// fully-qualified topic name components
+	// channel name components
+	isValidSourceId         = regexp.MustCompile(AllowedSourceIdChars).MatchString
 	isValidEventType        = regexp.MustCompile(AllowedEventTypeChars).MatchString
 	isValidEventTypeVersion = regexp.MustCompile(AllowedEventTypeVersionChars).MatchString
-
-	isValidSourceId = regexp.MustCompile(AllowedSourceIdChars).MatchString
 )
 
 //ValidatePublish validates a publish POST request
-func ValidatePublish(r *PublishRequest) *Error {
+func ValidatePublish(r *PublishRequest, opts *EventOptions) *Error {
 	if len(r.SourceID) == 0 {
 		return ErrorResponseMissingFieldSourceId()
 	}
@@ -35,8 +34,19 @@ func ValidatePublish(r *PublishRequest) *Error {
 		return ErrorResponseMissingFieldData()
 	}
 
+	//validate the event components lengths
+	if len(r.SourceID) > opts.MaxSourceIDLength {
+		return errorInvalidSourceIDLength(opts.MaxSourceIDLength)
+	}
+	if len(r.EventType) > opts.MaxEventTypeLength {
+		return errorInvalidEventTypeLength(opts.MaxEventTypeLength)
+	}
+	if len(r.EventTypeVersion) > opts.MaxEventTypeVersionLength {
+		return errorInvalidEventTypeVersionLength(opts.MaxEventTypeVersionLength)
+	}
+
 	// validate the fully-qualified topic name components
-	if !isValidSourceId(r.SourceID){
+	if !isValidSourceId(r.SourceID) {
 		return ErrorResponseWrongSourceId(r.SourceIdFromHeader)
 	}
 	if !isValidEventType(r.EventType) {

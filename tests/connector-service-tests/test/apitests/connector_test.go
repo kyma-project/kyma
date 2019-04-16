@@ -2,8 +2,6 @@ package apitests
 
 import (
 	"crypto/rsa"
-	"crypto/sha256"
-	"encoding/hex"
 	"net/http"
 	"net/url"
 	"testing"
@@ -30,15 +28,8 @@ func TestConnector(t *testing.T) {
 		appName := "test-app"
 		appTokenRequest := createApplicationTokenRequest(t, config, appName)
 		certificateGenerationSuite(t, appTokenRequest, config.SkipSslVerify)
-
-		if config.Central {
-			appCsrInfoEndpointForCentralSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
-			appMgmInfoEndpointForCentralSuite(t, appTokenRequest, config.SkipSslVerify, appName)
-		} else {
-			appCsrInfoEndpointForStandaloneSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
-			appMgmInfoEndpointForStandaloneSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
-		}
-
+		appMgmInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.Central, config.GatewayUrl, appName)
+		appCsrInfoEndpointSuite(t, appTokenRequest, config.SkipSslVerify, config.GatewayUrl, appName)
 		certificateRotationSuite(t, appTokenRequest, config.SkipSslVerify)
 
 		internalRevocationUrl := createApplicationRevocationUrl(config)
@@ -80,6 +71,8 @@ func createRuntimeTokenRequest(t *testing.T, config testkit.TestConfig) *http.Re
 func createTokenRequest(t *testing.T, tokenURL string, config testkit.TestConfig) *http.Request {
 	request, err := http.NewRequest(http.MethodPost, tokenURL, nil)
 	require.NoError(t, err)
+
+	request.Close = true
 
 	if config.Central {
 		request.Header.Set(testkit.GroupHeader, testkit.Group)
@@ -277,61 +270,11 @@ func certificateGenerationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 }
 
-func appCsrInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+func appCsrInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
-	t.Run("should use headers to build CSR info response", func(t *testing.T) {
-		// given
-		metadataHost := "metadata.kyma.test.cx"
-		eventsHost := "events.kyma.test.cx"
-
-		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
-		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
-
-		// when
-		tokenResponse := client.CreateToken(t)
-
-		// then
-		require.NotEmpty(t, tokenResponse.Token)
-		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
-
-		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, createHostsHeaders(metadataHost, eventsHost))
-
-		// then
-		require.Nil(t, errorResponse)
-		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
-		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
-	})
-
-	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
-		// given
-		expectedMetadataURL := ""
-		expectedEventsURL := ""
-
-		// when
-		tokenResponse := client.CreateToken(t)
-
-		// then
-		require.NotEmpty(t, tokenResponse.Token)
-		require.Contains(t, tokenResponse.URL, "token="+tokenResponse.Token)
-
-		// when
-		infoResponse, errorResponse := client.GetInfo(t, tokenResponse.URL, createHostsHeaders("", ""))
-
-		// then
-		require.Nil(t, errorResponse)
-		assert.Equal(t, expectedEventsURL, infoResponse.Api.RuntimeURLs.EventsUrl)
-		assert.Equal(t, expectedMetadataURL, infoResponse.Api.RuntimeURLs.MetadataUrl)
-	})
-}
-
-func appCsrInfoEndpointForStandaloneSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
-
-	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
-
-	t.Run("should use default values to build CSR info response when headers are not given", func(t *testing.T) {
+	t.Run("should use default values to build CSR info response", func(t *testing.T) {
 		// given
 		expectedMetadataURL := defaultGatewayUrl
 		expectedEventsURL := defaultGatewayUrl
@@ -382,76 +325,13 @@ func runtimeCsrInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 	})
 }
 
-func appMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, appName string) {
-	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
-
-	clientKey := testkit.CreateKey(t)
-
-	t.Run("should use headers to build management info response", func(t *testing.T) {
-		// given
-		metadataHost := "metadata.kyma.test.cx"
-		eventsHost := "events.kyma.test.cx"
-
-		expectedMetadataURL := "https://metadata.kyma.test.cx/" + appName + "/v1/metadata/services"
-		expectedEventsURL := "https://events.kyma.test.cx/" + appName + "/v1/events"
-
-		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders(metadataHost, eventsHost))
-
-		// then
-		require.NotEmpty(t, crtResponse.CRTChain)
-		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
-
-		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
-
-		// when
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders(metadataHost, eventsHost))
-		require.Nil(t, errorResponse)
-
-		// then
-		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
-		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
-		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
-		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
-		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
-	})
-
-	t.Run("should use empty values when headers are set, but empty", func(t *testing.T) {
-		// given
-		expectedMetadataURL := ""
-		expectedEventsURL := ""
-
-		// when
-		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
-
-		// then
-		require.NotEmpty(t, crtResponse.CRTChain)
-		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
-
-		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
-		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
-
-		// when
-		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
-		require.Nil(t, errorResponse)
-
-		// then
-		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
-		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
-		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
-		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
-		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
-	})
-}
-
-func appMgmInfoEndpointForStandaloneSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, defaultGatewayUrl string, appName string) {
+func appMgmInfoEndpointSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, central bool, defaultGatewayUrl string, appName string) {
 
 	client := testkit.NewConnectorClient(tokenRequest, skipVerify)
 
 	clientKey := testkit.CreateKey(t)
 
-	t.Run("should use default values to build management info response when headers are not given", func(t *testing.T) {
+	t.Run("should use default values to build management info", func(t *testing.T) {
 		// given
 		expectedMetadataURL := defaultGatewayUrl
 		expectedEventsURL := defaultGatewayUrl
@@ -479,8 +359,17 @@ func appMgmInfoEndpointForStandaloneSuite(t *testing.T, tokenRequest *http.Reque
 		assert.Equal(t, expectedMetadataURL, mgmInfoResponse.URLs.MetadataUrl)
 		assert.Equal(t, expectedEventsURL, mgmInfoResponse.URLs.EventsUrl)
 		assert.Equal(t, appName, mgmInfoResponse.ClientIdentity.Application)
-		assert.Empty(t, mgmInfoResponse.ClientIdentity.Group)
-		assert.Empty(t, mgmInfoResponse.ClientIdentity.Tenant)
+		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
+		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
+		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
+
+		if central {
+			assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
+			assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
+		} else {
+			assert.Empty(t, mgmInfoResponse.ClientIdentity.Group)
+			assert.Empty(t, mgmInfoResponse.ClientIdentity.Tenant)
+		}
 	})
 }
 
@@ -509,6 +398,9 @@ func runtimeMgmInfoEndpointForCentralSuite(t *testing.T, tokenRequest *http.Requ
 		assert.Nil(t, mgmInfoResponse.URLs.RuntimeURLs)
 		assert.Equal(t, testkit.Group, mgmInfoResponse.ClientIdentity.Group)
 		assert.Equal(t, testkit.Tenant, mgmInfoResponse.ClientIdentity.Tenant)
+		assert.NotEmpty(t, mgmInfoResponse.Certificate.Subject)
+		assert.Equal(t, testkit.Extensions, mgmInfoResponse.Certificate.Extensions)
+		assert.Equal(t, testkit.KeyAlgorithm, mgmInfoResponse.Certificate.KeyAlgorithm)
 	})
 
 }
@@ -521,23 +413,20 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 	t.Run("should renew client certificate", func(t *testing.T) {
 		// when
 		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
-
-		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
 		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
+		require.NotEmpty(t, infoResponse.Certificate)
 
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
-		// when
 		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
-
-		// then
 		require.Nil(t, errorResponse)
 		require.NotEmpty(t, mgmInfoResponse.URLs.RenewCertUrl)
+		require.NotEmpty(t, mgmInfoResponse.Certificate)
+		require.Equal(t, infoResponse.Certificate, mgmInfoResponse.Certificate)
 
-		// when
-		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
+		csr := testkit.CreateCsr(t, mgmInfoResponse.Certificate, clientKey)
 		csrBase64 := testkit.EncodeBase64(csr)
 
 		certificateResponse, errorResponse := client.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
@@ -545,15 +434,12 @@ func certificateRotationSuite(t *testing.T, tokenRequest *http.Request, skipVeri
 		// then
 		require.Nil(t, errorResponse)
 
-		// when
 		certificates = testkit.DecodeAndParseCerts(t, certificateResponse)
 		clientWithRenewedCert := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
-		// then
 		mgmInfoResponse, errorResponse = clientWithRenewedCert.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
 		require.Nil(t, errorResponse)
 	})
-
 }
 
 func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVerify bool, internalRevocationUrl string) {
@@ -562,65 +448,73 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 	clientKey := testkit.CreateKey(t)
 
 	t.Run("should revoke client certificate with external API", func(t *testing.T) {
-		// given
+		// when
 		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
 
+		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
 		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
 
+		// when
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 		client := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
 		mgmInfoResponse, errorResponse := client.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
 
+		// then
 		require.Nil(t, errorResponse)
 		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
 
 		// when
 		errorResponse = client.RevokeCertificate(t, mgmInfoResponse.URLs.RevocationCertURL)
 
+		// then
 		require.Nil(t, errorResponse)
 
-		// then
+		// when
 		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
 		csrBase64 := testkit.EncodeBase64(csr)
 
 		_, errorResponse = client.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
 
+		// then
 		require.NotNil(t, errorResponse)
 		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
 	})
 
 	t.Run("should revoke client certificate with internal API", func(t *testing.T) {
-		// given
+		// when
 		crtResponse, infoResponse := createCertificateChain(t, client, clientKey, createHostsHeaders("", ""))
 
+		// then
 		require.NotEmpty(t, crtResponse.CRTChain)
 		require.NotEmpty(t, infoResponse.Api.ManagementInfoURL)
 
+		// when
 		certificates := testkit.DecodeAndParseCerts(t, crtResponse)
 		securedClient := testkit.NewSecuredConnectorClient(skipVerify, clientKey, certificates.ClientCRT.Raw)
 
 		mgmInfoResponse, errorResponse := securedClient.GetMgmInfo(t, infoResponse.Api.ManagementInfoURL, createHostsHeaders("", ""))
 
+		// then
 		require.Nil(t, errorResponse)
 		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
 
 		// when
-		input := testkit.EncodeCertToPem(t, certificates.ClientCRT)
-		sha := sha256.Sum256(input)
-		hash := hex.EncodeToString(sha[:])
+		sha256Fingerprint := testkit.CertificateSHA256Fingerprint(t, certificates.ClientCRT)
 
-		errorResponse = client.RevokeCertificate(t, internalRevocationUrl, hash)
-
-		require.Nil(t, errorResponse)
+		errorResponse = client.RevokeCertificate(t, internalRevocationUrl, sha256Fingerprint)
 
 		// then
+		require.Nil(t, errorResponse)
+
+		// when
 		csr := testkit.CreateCsr(t, infoResponse.Certificate, clientKey)
 		csrBase64 := testkit.EncodeBase64(csr)
 
 		_, errorResponse = securedClient.RenewCertificate(t, mgmInfoResponse.URLs.RenewCertUrl, csrBase64)
 
+		// then
 		require.NotNil(t, errorResponse)
 		require.Equal(t, http.StatusForbidden, errorResponse.StatusCode)
 	})

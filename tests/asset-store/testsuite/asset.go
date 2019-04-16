@@ -51,7 +51,7 @@ func (a *asset) CreateMany(assets []assetData) error {
 						Name: a.BucketName,
 					},
 					Source: v1alpha2.AssetSource{
-						Url:  asset.URL,
+						URL:  asset.URL,
 						Mode: asset.Mode,
 					},
 				},
@@ -106,7 +106,7 @@ func (a *asset) WaitForDeletedResources(assets []assetData) error {
 		return true, nil
 	}, a.waitTimeout)
 	if err != nil {
-		return errors.Wrapf(err, "while waiting for ready ClusterAsset resources")
+		return errors.Wrapf(err, "while deleting Asset resources %s in namespace %s")
 	}
 
 	return nil

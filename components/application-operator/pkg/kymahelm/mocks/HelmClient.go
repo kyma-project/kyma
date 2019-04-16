@@ -56,13 +56,13 @@ func (_m *HelmClient) InstallReleaseFromChart(chartDir string, ns string, releas
 	return r0, r1
 }
 
-// ListReleases provides a mock function with given fields:
-func (_m *HelmClient) ListReleases() (*services.ListReleasesResponse, error) {
-	ret := _m.Called()
+// ListReleases provides a mock function with given fields: ns
+func (_m *HelmClient) ListReleases(ns string) (*services.ListReleasesResponse, error) {
+	ret := _m.Called(ns)
 
 	var r0 *services.ListReleasesResponse
-	if rf, ok := ret.Get(0).(func() *services.ListReleasesResponse); ok {
-		r0 = rf()
+	if rf, ok := ret.Get(0).(func(string) *services.ListReleasesResponse); ok {
+		r0 = rf(ns)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*services.ListReleasesResponse)
@@ -70,8 +70,8 @@ func (_m *HelmClient) ListReleases() (*services.ListReleasesResponse, error) {
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func() error); ok {
-		r1 = rf()
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(ns)
 	} else {
 		r1 = ret.Error(1)
 	}

@@ -5,20 +5,25 @@ import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic/pretty"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/source"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/onsi/gomega"
+	coreV1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"testing"
 	"time"
 
 	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
-var c client.Client
-
 const timeout = time.Second * 5
+
+var (
+	webhookCfgMapName      = "test"
+	webhookCfgMapNamespace = "test"
+)
 
 func TestReconcile(t *testing.T) {
 	// Given
@@ -27,9 +32,12 @@ func TestReconcile(t *testing.T) {
 	mgr, err := manager.New(cfg, manager.Options{})
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 	c := mgr.GetClient()
+	informer, err := mgr.GetCache().GetInformer(&coreV1.ConfigMap{})
+	g.Expect(err).To(gomega.BeNil())
 	scheme := mgr.GetScheme()
 	assetService := newClusterAssetService(c, scheme)
 	bucketService := newClusterBucketService(c, scheme, "")
+	assetWhsConfigService := webhookconfig.New(informer.GetIndexer(), webhookCfgMapName, webhookCfgMapNamespace)
 
 	r := &ReconcileClusterDocsTopic{
 		relistInterval: time.Hour,
@@ -38,6 +46,7 @@ func TestReconcile(t *testing.T) {
 		recorder:       mgr.GetRecorder("clusterdocstopic-controller"),
 		assetSvc:       assetService,
 		bucketSvc:      bucketService,
+		webhookCfgSvc:  assetWhsConfigService,
 	}
 
 	recFn, requests := SetupTestReconcile(r)
@@ -96,17 +105,17 @@ func TestReconcile(t *testing.T) {
 	g.Expect(currentTopic.Status.Phase).To(gomega.Equal(v1alpha1.DocsTopicReady))
 	g.Expect(currentTopic.Status.Reason).To(gomega.Equal(pretty.AssetsReady.String()))
 
-	// Update DocsTopic spec
+	// Delete DocsTopic spec
 	// When
-	delete(currentTopic.Spec.Sources, "dita")
-	markdown := currentTopic.Spec.Sources["markdown"]
-	markdown.Filter = "zyx"
-	currentTopic.Spec.Sources["markdown"] = markdown
+	currentTopic.Spec.Sources = source.FilterByType(currentTopic.Spec.Sources, "dita")
+	markdownIndex := source.IndexByType(currentTopic.Spec.Sources, "markdown")
+	g.Expect(markdownIndex).NotTo(gomega.Equal(-1))
+	currentTopic.Spec.Sources[markdownIndex].Filter = "zyx"
 	err = c.Update(context.TODO(), currentTopic)
 	g.Expect(err).ToNot(gomega.HaveOccurred())
 
+	// Delete DocsTopic spec
 	// Then
-	// Update Assets
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
 	g.Eventually(requests, timeout).Should(gomega.Receive(gomega.Equal(request)))
 
@@ -125,17 +134,23 @@ func fixClusterDocsTopic() *v1alpha1.ClusterDocsTopic {
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
 				Description: "Test topic, have fun",
 				DisplayName: "Test Topic",
-				Sources: map[string]v1alpha1.Source{
-					"openapi": v1alpha1.Source{
+				Sources: []v1alpha1.Source{
+					{
+						Name: "source-one",
+						Type: "openapi",
 						Mode: v1alpha1.DocsTopicSingle,
 						URL:  "https://dummy.url/single",
 					},
-					"markdown": v1alpha1.Source{
+					{
+						Name:   "source-two",
+						Type:   "markdown",
 						Filter: "xyz",
 						Mode:   v1alpha1.DocsTopicPackage,
 						URL:    "https://dummy.url/package",
 					},
-					"dita": v1alpha1.Source{
+					{
+						Name:   "source-three",
+						Type:   "dita",
 						Filter: "xyz",
 						Mode:   v1alpha1.DocsTopicIndex,
 						URL:    "https://dummy.url/index",
