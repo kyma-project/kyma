@@ -53,7 +53,7 @@ func TestSpec(t *testing.T) {
 			authorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", cfg.DomainName),
 			tokenEndpoint:     fmt.Sprintf("https://dex.%s/token", cfg.DomainName),
 		},
-		
+
 		clientConfig: clientConfig{
 			id:          clientId,
 			redirectUri: "http://127.0.0.1:5555/callback",
