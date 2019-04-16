@@ -29,3 +29,6 @@ spec:
           value: http://dex-service.kyma-system.svc.cluster.local:5556/keys
         - name: GATEWAY_FQDN
           value: {{ .Values.global.istio.gateway.name }}.{{ .Release.Namespace }}.svc.cluster.local
+        - name: ENABLE_MTLS
+          value: "true"
+

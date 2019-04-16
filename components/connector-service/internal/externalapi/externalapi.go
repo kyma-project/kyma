@@ -1,9 +1,10 @@
 package externalapi
 
 import (
+	"net/http"
+
 	loggingMiddlewares "github.com/kyma-project/kyma/components/connector-service/internal/logging/middlewares"
 	"github.com/kyma-project/kyma/components/connector-service/internal/revocation"
-	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
@@ -114,8 +115,8 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 	mngmtApplicationRouter.HandleFunc("/info", applicationManagementInfoHandler.GetManagementInfo).Methods(http.MethodGet)
 	httphelpers.WithMiddlewares(
 		mngmtApplicationRouter,
-		hb.funcMiddlwares.RuntimeURLsMiddleware,
-		hb.funcMiddlwares.AppContextFromSubjectMiddleware)
+		hb.funcMiddlwares.AppContextFromSubjectMiddleware,
+		hb.funcMiddlwares.RuntimeURLsMiddleware)
 }
 
 func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {

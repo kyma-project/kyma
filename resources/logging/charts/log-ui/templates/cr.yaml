@@ -1,4 +1,3 @@
-{{- if .Values.global.uiapp.create }}
 apiVersion: ui.kyma-project.io/v1alpha1
 kind: ClusterMicroFrontend
 metadata:
@@ -12,4 +11,3 @@ spec:
     - label: Logs
       viewUrl: "/?function={nodeParams.function}&pod={nodeParams.pod}&namespace={nodeParams.namespace}"
       navigationPath: logs
-{{- end }}

@@ -18,8 +18,10 @@ spec:
         chart: {{ .Chart.Name }}-{{ .Chart.Version }}
     spec:
       {{ if .Values.global.isLocalEnv }}
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
+      hostAliases:
+      - ip: {{ .Values.minikubeIP }}
+        hostnames:
+          - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.configurations_generator.dir }}configurations-generator:{{ .Values.global.configurations_generator.version }}

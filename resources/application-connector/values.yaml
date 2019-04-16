@@ -17,16 +17,16 @@ global:
     path: eu.gcr.io/kyma-project
   application_operator:
     dir: develop/
-    version: ee38fb8f
+    version: a832ab41
   application_operator_tests:
     dir: develop/
-    version: 2b4eed1c
+    version: 68a39bb5
   connector_service:
     dir: develop/
-    version: f478b085
+    version: 3ead571b
   connector_service_tests:
     dir: develop/
-    version: bc52d15b
+    version: 9f878a38
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
@@ -47,7 +47,7 @@ global:
     version: 78b98274
   application_gateway_tests:
     dir: develop/
-    version: 2b4eed1c
+    version: 4b28ce69
   application_registry:
     dir: develop/
     version: 7433b9cc

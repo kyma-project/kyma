@@ -825,6 +825,7 @@ metadata:
 ---
 apiVersion: v1
 data:
+  gateway.{{ .Values.gateway.name }}: {{ .Values.gateway.serviceUrl }}
   _example: |
     ################################
     #                              #
@@ -1103,7 +1104,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/inject: "true"
       labels:
         app: controller
     spec:
@@ -1151,7 +1152,7 @@ spec:
   template:
     metadata:
       annotations:
-        sidecar.istio.io/inject: "false"
+        sidecar.istio.io/inject: "true"
       labels:
         app: webhook
         role: webhook
