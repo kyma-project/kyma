@@ -16,7 +16,7 @@ const (
 	RuntimeDefaultCommonName = "Runtime"
 )
 
-type ConnectorClientExtractor func(ctx context.Context) (ClientContextService, apperrors.AppError)
+type ConnectorClientExtractor func(ctx context.Context) (ClientCertContextService, apperrors.AppError)
 
 type ApplicationContextExtractor func(ctx context.Context) (ApplicationContext, apperrors.AppError)
 
@@ -30,7 +30,7 @@ func NewContextExtractor(subjectDefaults certificates.CSRSubject) *ContextExtrac
 	}
 }
 
-func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.Context) (ClientContextService, apperrors.AppError) {
+func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.Context) (ClientCertContextService, apperrors.AppError) {
 	appCtx, err := ExtractApplicationContext(ctx)
 	if err != nil {
 		return nil, err
@@ -43,6 +43,15 @@ func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.C
 		return newClientCertificateContext(appCtx, subject), nil
 	}
 
+	extendedCtx := &ExtendedApplicationContext{
+		ApplicationContext: appCtx,
+		RuntimeURLs:        prepareRuntimeURLs(appCtx, apiHosts),
+	}
+
+	return newClientCertificateContext(extendedCtx, subject), nil
+}
+
+func prepareRuntimeURLs(appCtx ApplicationContext, apiHosts APIHosts) RuntimeURLs {
 	metadataURL := ""
 	eventsURL := ""
 
@@ -53,15 +62,10 @@ func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.C
 		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
 	}
 
-	extendedCtx := &ExtendedApplicationContext{
-		ApplicationContext: appCtx,
-		RuntimeURLs: RuntimeURLs{
-			MetadataURL: metadataURL,
-			EventsURL:   eventsURL,
-		},
+	return RuntimeURLs{
+		MetadataURL: metadataURL,
+		EventsURL:   eventsURL,
 	}
-
-	return newClientCertificateContext(extendedCtx, subject), nil
 }
 
 func (ext *ContextExtractor) prepareSubject(org, orgUnit, commonName string) certificates.CSRSubject {
@@ -86,7 +90,7 @@ func (ext *ContextExtractor) prepareSubject(org, orgUnit, commonName string) cer
 	}
 }
 
-func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Context) (ClientContextService, apperrors.AppError) {
+func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Context) (ClientCertContextService, apperrors.AppError) {
 	clusterCtx, ok := ctx.Value(ClusterContextKey).(ClusterContext)
 	if !ok {
 		return nil, apperrors.Internal("Failed to create params when reading ClusterContext")

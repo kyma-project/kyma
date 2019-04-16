@@ -30,20 +30,16 @@ const (
 	dummyCtxValue = "dummyValue"
 )
 
-type appClientContext struct {
-	clientcontext.ApplicationContext
+type dummyClientCertsContext struct {
+	clientcontext.ClientContextService
 }
 
-func (ctx appClientContext) GetSubject() certificates.CSRSubject {
+func (ctx dummyClientCertsContext) GetSubject() certificates.CSRSubject {
 	return certificates.CSRSubject{}
 }
 
-type clusterClientContext struct {
-	clientcontext.ClusterContext
-}
-
-func (ctx clusterClientContext) GetSubject() certificates.CSRSubject {
-	return certificates.CSRSubject{}
+func (ctx dummyClientCertsContext) ClientContext() clientcontext.ClientContextService {
+	return ctx.ClientContextService
 }
 
 func TestTokenHandler_CreateToken(t *testing.T) {
@@ -53,14 +49,16 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		Group:  group,
 	}
 
-	clusterClientContext := clusterClientContext{clusterContext}
+	clusterClientContext := dummyClientCertsContext{clusterContext}
 
-	applicationClientContext := appClientContext{clientcontext.ApplicationContext{
+	applicationContext := clientcontext.ApplicationContext{
 		ClusterContext: clusterContext,
 		Application:    appName,
-	}}
+	}
 
-	connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+	applicationClientContext := dummyClientCertsContext{applicationContext}
+
+	connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 		assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
 		return applicationClientContext, nil
 	}
@@ -76,7 +74,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		}
 
 		tokenCreator := &mocks.Creator{}
-		tokenCreator.On("Save", applicationClientContext).Return(token, nil)
+		tokenCreator.On("Save", applicationContext).Return(token, nil)
 
 		tokenHandler := NewTokenHandler(tokenCreator, csrURL, connectorClientExtractor)
 
@@ -103,7 +101,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should create token for cluster context", func(t *testing.T) {
 		// given
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 			assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
 			return clusterClientContext, nil
 		}
@@ -115,7 +113,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		}
 
 		tokenCreator := &mocks.Creator{}
-		tokenCreator.On("Save", clusterClientContext).Return(token, nil)
+		tokenCreator.On("Save", clusterContext).Return(token, nil)
 
 		tokenHandler := NewTokenHandler(tokenCreator, csrURL, connectorClientExtractor)
 
@@ -142,7 +140,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should return 500 when failed to parse context", func(t *testing.T) {
 		// given
-		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
@@ -171,7 +169,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 	t.Run("should return 500 when failed to save", func(t *testing.T) {
 		// given
 		tokenCreator := &mocks.Creator{}
-		tokenCreator.On("Save", applicationClientContext).Return("", apperrors.Internal("error"))
+		tokenCreator.On("Save", applicationContext).Return("", apperrors.Internal("error"))
 
 		tokenHandler := NewTokenHandler(tokenCreator, "", connectorClientExtractor)
 

@@ -16,10 +16,6 @@ type CtxRequiredType bool
 type LookupEnabledType bool
 
 const (
-	TenantPlaceholder      = "{TENANT}"
-	GroupPlaceholder       = "{GROUP}"
-	ApplicationPlaceholder = "{APPLICATION}"
-
 	// ApplicationHeader is key representing Application in headers
 	ApplicationHeader = "Application"
 
@@ -66,13 +62,14 @@ const (
 	LookupDisabled LookupEnabledType = false
 )
 
-type clientContextService interface {
+type ClientContextService interface {
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
 }
 
-type ClientContextService interface {
-	clientContextService
+type ClientCertContextService interface {
+	ClientContextService
+	ClientContext() ClientContextService
 	GetSubject() certificates.CSRSubject
 }
 

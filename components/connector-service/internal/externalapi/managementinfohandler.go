@@ -36,10 +36,10 @@ func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 
 	certInfo := makeCertInfo(clientContextService.GetSubject().ToString())
 
-	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls, ClientIdentity: clientContextService, CertificateInfo: certInfo})
+	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls, ClientIdentity: clientContextService.ClientContext(), CertificateInfo: certInfo})
 }
 
-func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.ClientContextService) mgmtURLs {
+func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.ClientCertContextService) mgmtURLs {
 	return mgmtURLs{
 		RuntimeURLs:       clientContextService.GetRuntimeUrls(),
 		RenewCertURL:      fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),

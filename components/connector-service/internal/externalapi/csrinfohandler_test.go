@@ -23,10 +23,6 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-const (
-	commonName = "commonName"
-)
-
 var (
 	subject = certificates.CSRSubject{
 		Organization:       "Org",
@@ -54,10 +50,6 @@ func (dc dummyClientContextService) GetLogger() *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{})
 }
 
-func (dc dummyClientContextService) GetSubject() certificates.CSRSubject {
-	return subject
-}
-
 type dummyClientContextServiceWithEmptyURLs struct {
 	dummyClientContextService
 }
@@ -69,20 +61,16 @@ func (dc dummyClientContextServiceWithEmptyURLs) GetRuntimeUrls() *clientcontext
 	}
 }
 
-type appClientCertCtx struct {
-	*clientcontext.ExtendedApplicationContext
+type dummyClientCertCtx struct {
+	clientcontext.ClientContextService
 }
 
-func (cc appClientCertCtx) GetSubject() certificates.CSRSubject {
+func (cc dummyClientCertCtx) GetSubject() certificates.CSRSubject {
 	return subject
 }
 
-type runtimeClientCertCtx struct {
-	*clientcontext.ClusterContext
-}
-
-func (cc runtimeClientCertCtx) GetSubject() certificates.CSRSubject {
-	return subject
+func (cc dummyClientCertCtx) ClientContext() clientcontext.ClientContextService {
+	return cc.ClientContextService
 }
 
 func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
@@ -94,8 +82,8 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 	urlApps := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
 
 	dummyClientContextService := dummyClientContextService{}
-	clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-		return dummyClientContextService, nil
+	clientContextService := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
+		return dummyClientCertCtx{dummyClientContextService}, nil
 	}
 
 	expectedSignUrl := fmt.Sprintf("%s/certificates?token=%s", baseURL, newToken)
@@ -151,8 +139,8 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		}
 
 		dummyClientContextServiceWithEmptyURLs := &dummyClientContextServiceWithEmptyURLs{dummyClientContextService: dummyClientContextService}
-		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return dummyClientContextServiceWithEmptyURLs, nil
+		clientContextService := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
+			return dummyClientCertCtx{dummyClientContextServiceWithEmptyURLs}, nil
 		}
 
 		tokenCreator := &tokenMocks.Creator{}
@@ -217,7 +205,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		// given
 		tokenCreator := &tokenMocks.Creator{}
 
-		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
@@ -281,14 +269,12 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			},
 		}
 
-		clientCertCtx := appClientCertCtx{ExtendedApplicationContext: extendedCtx}
-
-		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return clientCertCtx, nil
+		clientContextService := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
+			return dummyClientCertCtx{extendedCtx}, nil
 		}
 
 		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Save", clientCertCtx).Return(newToken, nil)
+		tokenCreator.On("Save", extendedCtx).Return(newToken, nil)
 
 		req, err := http.NewRequest(http.MethodGet, urlApps, nil)
 		require.NoError(t, err)

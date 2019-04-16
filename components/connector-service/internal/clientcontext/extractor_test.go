@@ -33,6 +33,15 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 
 	t.Run("should return ApplicationContext", func(t *testing.T) {
 		// given
+		expectedSubject := certificates.CSRSubject{
+			Country:            "PL",
+			Organization:       tenant,
+			OrganizationalUnit: group,
+			Province:           "Province",
+			Locality:           "Gliwice",
+			CommonName:         appName,
+		}
+
 		appCtxPayload := ApplicationContext{
 			Application:    appName,
 			ClusterContext: ClusterContext{Group: group, Tenant: tenant},
@@ -50,7 +59,9 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 		certContext, ok := clientCtx.(*clientCertificateContext)
 		require.True(t, ok)
 
-		extractedAppCtx, ok := certContext.clientContextService.(ApplicationContext)
+		assert.Equal(t, expectedSubject, certContext.GetSubject())
+
+		extractedAppCtx, ok := certContext.ClientContextService.(ApplicationContext)
 		require.True(t, ok)
 
 		assert.Equal(t, appCtxPayload, extractedAppCtx)
@@ -72,6 +83,15 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 func Test_ExtractSerializableClusterContext(t *testing.T) {
 	t.Run("should return ClusterToken", func(t *testing.T) {
 		// given
+		expectedSubject := certificates.CSRSubject{
+			Country:            "PL",
+			Organization:       tenant,
+			OrganizationalUnit: group,
+			Province:           "Province",
+			Locality:           "Gliwice",
+			CommonName:         RuntimeDefaultCommonName,
+		}
+
 		clusterCtxPayload := ClusterContext{Group: group, Tenant: tenant}
 
 		ctx := clusterCtxPayload.ExtendContext(context.Background())
@@ -86,7 +106,9 @@ func Test_ExtractSerializableClusterContext(t *testing.T) {
 		certContext, ok := clientCtx.(*clientCertificateContext)
 		require.True(t, ok)
 
-		extractedClusterCtx, ok := certContext.clientContextService.(ClusterContext)
+		assert.Equal(t, expectedSubject, certContext.GetSubject())
+
+		extractedClusterCtx, ok := certContext.ClientContextService.(ClusterContext)
 		require.True(t, ok)
 
 		assert.Equal(t, clusterCtxPayload, extractedClusterCtx)

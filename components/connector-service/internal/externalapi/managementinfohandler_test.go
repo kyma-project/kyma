@@ -54,10 +54,8 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			},
 		}
 
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return appClientCertCtx{
-				ExtendedApplicationContext: extApplicationCtx,
-			}, nil
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
+			return dummyClientCertCtx{extApplicationCtx}, nil
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
@@ -102,10 +100,8 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			Group:  group,
 		}
 
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return runtimeClientCertCtx{
-				ClusterContext: clusterContext,
-			}, nil
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
+			return dummyClientCertCtx{clusterContext}, nil
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/runtimes/management/info", nil)
@@ -142,7 +138,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		//given
-		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+		clientContextService := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
