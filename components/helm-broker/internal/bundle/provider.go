@@ -10,6 +10,13 @@ import (
 	"k8s.io/helm/pkg/proto/hapi/chart"
 )
 
+//go:generate mockery -name=Provider -output=automock -outpkg=automock -case=underscore
+
+// Provider contains method which provides CompleteBundle items.
+type Provider interface {
+	ProvideBundles() ([]CompleteBundle, error)
+}
+
 // CompleteBundleProvider provides CompleteBundles from a repository.
 type CompleteBundleProvider struct {
 	log          *logrus.Entry
@@ -33,7 +40,7 @@ func NewProvider(repo repository, bundleLoader bundleLoader, log logrus.FieldLog
 	return &CompleteBundleProvider{
 		repo:         repo,
 		bundleLoader: bundleLoader,
-		log:          log.WithField("service", "bundle-CompleteBundleProvider"),
+		log:          log.WithField("service", "bundle:CompleteBundleProvider"),
 	}
 }
 
@@ -45,18 +52,16 @@ func (l *CompleteBundleProvider) ProvideBundles() ([]CompleteBundle, error) {
 		return nil, err
 	}
 
-	var allBundles []*internal.Bundle
-	var allCharts []*chart.Chart
 	var items []CompleteBundle
 	for entryName, versions := range idx.Entries {
 		for _, v := range versions {
-			bundle, charts, err := l.loadBundlesAndCharts(entryName, v.Version)
+			bundle, charts, err := l.loadBundleAndCharts(entryName, v.Version)
 			if err != nil {
 				l.log.Warnf("Could not load bundle: %s", err.Error())
 				continue
 			}
-			allBundles = append(allBundles, bundle)
-			allCharts = append(allCharts, charts...)
+			bundle.RemoteRepositoryURL = l.repo.URLForBundle(entryName, v.Version)
+
 			items = append(items, CompleteBundle{
 				Bundle: bundle,
 				Charts: charts,
@@ -68,11 +73,11 @@ func (l *CompleteBundleProvider) ProvideBundles() ([]CompleteBundle, error) {
 }
 
 func (l *CompleteBundleProvider) getIndex() (*indexDTO, error) {
-	idxReader, idxCloser, err := l.repo.IndexReader()
+	idxReader, err := l.repo.IndexReader()
 	if err != nil {
 		return nil, errors.Wrap(err, "while getting index file")
 	}
-	defer idxCloser()
+	defer idxReader.Close()
 
 	bytes, err := ioutil.ReadAll(idxReader)
 	if err != nil {
@@ -85,12 +90,12 @@ func (l *CompleteBundleProvider) getIndex() (*indexDTO, error) {
 	return &idx, nil
 }
 
-func (l *CompleteBundleProvider) loadBundlesAndCharts(entryName Name, version Version) (*internal.Bundle, []*chart.Chart, error) {
-	bundleReader, bundleCloser, err := l.repo.BundleReader(entryName, version)
+func (l *CompleteBundleProvider) loadBundleAndCharts(entryName Name, version Version) (*internal.Bundle, []*chart.Chart, error) {
+	bundleReader, err := l.repo.BundleReader(entryName, version)
 	if err != nil {
 		return nil, nil, errors.Wrapf(err, "while reading bundle archive for name [%s] and version [%v]", entryName, version)
 	}
-	defer bundleCloser()
+	defer bundleReader.Close()
 
 	bundle, charts, err := l.bundleLoader.Load(bundleReader)
 	if err != nil {
