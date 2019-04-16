@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/common/ingressgateway"
+	"github.com/kyma-project/kyma/common/resilient"
 	. "github.com/smartystreets/goconvey/convey"
 	"github.com/vrischmann/envconfig"
 )
@@ -35,14 +36,16 @@ func TestSpec(t *testing.T) {
 		t.Skip("Test is enabled on in local env")
 	}
 
-	client, err := ingressgateway.FromEnv().Client()
+	ingressClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
 		t.Errorf("Error while creating ingress gateway client: %s", err)
 	}
 
-	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+	ingressClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse
 	}
+
+	client := resilient.WrapHttpClient(ingressClient)
 
 	idProviderConfig := idProviderConfig{
 		dexConfig: dexConfig{
@@ -50,6 +53,7 @@ func TestSpec(t *testing.T) {
 			authorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", cfg.DomainName),
 			tokenEndpoint:     fmt.Sprintf("https://dex.%s/token", cfg.DomainName),
 		},
+		
 		clientConfig: clientConfig{
 			id:          clientId,
 			redirectUri: "http://127.0.0.1:5555/callback",
