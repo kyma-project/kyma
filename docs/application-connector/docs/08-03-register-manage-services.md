@@ -31,6 +31,7 @@ Valid certificate signed by the Kyma Certificate Authority.
           "username": "{USERNAME}",
           "password": "{PASSWORD}"
         }
+      }
     },
     "events": {
       "spec": {
