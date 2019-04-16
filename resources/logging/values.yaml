@@ -199,11 +199,7 @@ global:
     path: eu.gcr.io/kyma-project
   test_logging:
     dir: develop
-<<<<<<< HEAD
     version: 1.0.0-rc1
-=======
-    version: 9013db49
->>>>>>> 5434e688... Enable logging helm chart test (#3705)
   logging:
     promtail:
       config:
