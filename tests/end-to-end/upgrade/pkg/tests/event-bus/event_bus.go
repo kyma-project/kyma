@@ -28,8 +28,6 @@ const (
 	eventActivationName = "test-ea"
 	srcID               = "test.local"
 
-	success     = 0
-	fail        = 1
 	noOfRetries = 20
 
 	subscriberName           = "test-core-event-bus-subscriber"
