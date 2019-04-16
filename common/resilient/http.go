@@ -8,31 +8,27 @@ import (
 	"strings"
 )
 
-type wrappedHttpClient struct {
+type WrappedHttpClient struct {
 	underlying HttpClient
 	opts       []retry.Option
 }
 
 type HttpClient interface {
 	Do(req *http.Request) (*http.Response, error)
-	Get(url string) (resp *http.Response, err error)
-	Post(url, contentType string, body io.Reader) (resp *http.Response, err error)
-	PostForm(url string, data url.Values) (resp *http.Response, err error)
-	Head(url string) (resp *http.Response, err error)
 }
 
-func NewHttpClient(opts ...retry.Option) HttpClient {
+func NewHttpClient(opts ...retry.Option) *WrappedHttpClient {
 	return WrapHttpClient(&http.Client{}, opts...)
 }
 
-func WrapHttpClient(client HttpClient, opts ...retry.Option) HttpClient {
-	return &wrappedHttpClient{
+func WrapHttpClient(client HttpClient, opts ...retry.Option) *WrappedHttpClient {
+	return &WrappedHttpClient{
 		underlying: client,
 		opts:       opts,
 	}
 }
 
-func (c *wrappedHttpClient) Do(req *http.Request) (*http.Response, error) {
+func (c *WrappedHttpClient) Do(req *http.Request) (*http.Response, error) {
 	var resp *http.Response
 	var err error
 	err = retry.Do(func() error {
@@ -45,7 +41,7 @@ func (c *wrappedHttpClient) Do(req *http.Request) (*http.Response, error) {
 	return resp, err
 }
 
-func (c *wrappedHttpClient) Get(url string) (resp *http.Response, err error) {
+func (c *WrappedHttpClient) Get(url string) (resp *http.Response, err error) {
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
@@ -53,7 +49,7 @@ func (c *wrappedHttpClient) Get(url string) (resp *http.Response, err error) {
 	return c.Do(req)
 }
 
-func (c *wrappedHttpClient) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
+func (c *WrappedHttpClient) Post(url, contentType string, body io.Reader) (resp *http.Response, err error) {
 	req, err := http.NewRequest("POST", url, body)
 	if err != nil {
 		return nil, err
@@ -62,11 +58,11 @@ func (c *wrappedHttpClient) Post(url, contentType string, body io.Reader) (resp 
 	return c.Do(req)
 }
 
-func (c *wrappedHttpClient) PostForm(url string, data url.Values) (resp *http.Response, err error) {
+func (c *WrappedHttpClient) PostForm(url string, data url.Values) (resp *http.Response, err error) {
 	return c.Post(url, "application/x-www-form-urlencoded", strings.NewReader(data.Encode()))
 }
 
-func (c *wrappedHttpClient) Head(url string) (resp *http.Response, err error) {
+func (c *WrappedHttpClient) Head(url string) (resp *http.Response, err error) {
 	req, err := http.NewRequest("HEAD", url, nil)
 	if err != nil {
 		return nil, err
