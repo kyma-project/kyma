@@ -37,7 +37,7 @@ global:
     version: ff50edcf
   api_controller:
     dir: develop/
-    version: "0bcf18a4"
+    version: "1323f962"
   api_controller_acceptance_tests:
     dir: develop/
     version: 736988df
@@ -66,7 +66,7 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: "eb39c791"
+    version: 311ed23b
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f

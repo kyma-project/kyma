@@ -62,7 +62,11 @@ func TestConvertService(t *testing.T) {
 
 		expectedService func() osb.Service
 	}{
-		"simpleAPIBasedService": {
+		"should convert simple api service": {
+			givenService:    fixAPIBasedService,
+			expectedService: fixOsbService,
+		},
+		"should support special characters on DisplayName field": {
 			givenService: func() internal.Service {
 				svc := fixAPIBasedService()
 				svc.DisplayName = "*Service Name\ną-'#$\tÜ"
@@ -71,6 +75,32 @@ func TestConvertService(t *testing.T) {
 			expectedService: func() osb.Service {
 				svc := fixOsbService()
 				svc.Metadata["displayName"] = "*Service Name\ną-'#$\tÜ"
+				return svc
+			},
+		},
+		"should override provisionOnlyOnce label to true": {
+			givenService: func() internal.Service {
+				svc := fixAPIBasedService()
+				svc.Labels["provisionOnlyOnce"] = "false"
+				return svc
+			},
+			expectedService: func() osb.Service {
+				svc := fixOsbService()
+				l := svc.Metadata["labels"].(map[string]string)
+				l["provisionOnlyOnce"] = "true"
+				return svc
+			},
+		},
+		"should always add provisionOnlyOnce label set to true": {
+			givenService: func() internal.Service {
+				svc := fixAPIBasedService()
+				delete(svc.Labels, "provisionOnlyOnce")
+				return svc
+			},
+			expectedService: func() osb.Service {
+				svc := fixOsbService()
+				l := svc.Metadata["labels"].(map[string]string)
+				l["provisionOnlyOnce"] = "true"
 				return svc
 			},
 		},
@@ -169,14 +199,15 @@ func fixOsbService() osb.Service {
 		Tags: []string{"tag1", "tag2"},
 		Metadata: map[string]interface{}{
 			"providerDisplayName":  "HakunaMatata",
-			"displayName":          "service-name",
+			"displayName":          "Service Name",
 			"longDescription":      "long description",
 			"applicationServiceId": "0023-abcd-2098",
 			"bindingLabels": map[string]string{
 				"access-label-1": "true",
 			},
 			"labels": map[string]string{
-				"connected-app": "ec-prod",
+				"connected-app":     "ec-prod",
+				"provisionOnlyOnce": "true",
 			},
 		},
 	}

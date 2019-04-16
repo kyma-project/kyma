@@ -87,7 +87,7 @@ func (c *appToServiceConverter) osbMetadata(name internal.ApplicationName, svc i
 		"providerDisplayName":  svc.ProviderDisplayName,
 		"longDescription":      svc.LongDescription,
 		"applicationServiceId": string(svc.ID),
-		"labels":               svc.Labels,
+		"labels":               c.applyOverridesOnLabels(svc.Labels),
 	}
 
 	// TODO(entry-simplification): this is an accepted simplification until
@@ -133,4 +133,14 @@ func (*appToServiceConverter) buildBindingLabels(accLabel string) (map[string]st
 	bindingLabels[accLabel] = "true"
 
 	return bindingLabels, nil
+}
+
+func (*appToServiceConverter) applyOverridesOnLabels(labels map[string]string) map[string]string {
+	if labels == nil {
+		labels = map[string]string{}
+	}
+	// business requirement that services can be always provisioned only once
+	labels["provisionOnlyOnce"] = "true"
+
+	return labels
 }
