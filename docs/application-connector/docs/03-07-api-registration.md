@@ -9,9 +9,9 @@ The Application Registry supports the following formats of the API specification
 
 You can pass the API specification in two ways:
 - JSON format
-- by `SpecificationUrl`
+- `SpecificationUrl`
 
->**NOTE:** Specification passed directly as a JSON has a higher priority than `SpecificationUrl`, which in such case will be ignored.
+>**NOTE:** Specification passed directly as a JSON has a higher priority than `SpecificationUrl`.  If you use these two methods at once, `SpecificationUrl` is ignored.
 
-For OpenAPI format both methods are supported.
-OData APIs can only be registered with `SpecificationUrl`.
+For the OpenAPI format, both methods are supported.
+You can register OData APIs only with `SpecificationUrl`.

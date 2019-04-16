@@ -130,9 +130,9 @@ A successful response returns the ID of the registered service:
     ```
 
 
-## Register API with specification URL
+## Register API with a specification URL
 
-Application Registry allows you to pass API specification in form of specification URL.
+The Application Registry allows you to pass API specifications in a form of specification URLs.
 
 To register API with specification URL replace `api.spec` with `api.specificationUrl`. If both are provided `api.spec` will be used due to its higher priority.
 
