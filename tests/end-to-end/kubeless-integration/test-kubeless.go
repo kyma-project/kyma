@@ -35,7 +35,7 @@ func deleteK8s(yamlFile string) {
 }
 
 func printContentsOfNamespace(namespace string) {
-	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation")
+	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "all,serviceinstance,servicebinding,servicebindingusage,function,subscriptions.eventing.kyma-project.io,api,eventactivation")
 	stdoutStderr, err := getResourcesCmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil {
