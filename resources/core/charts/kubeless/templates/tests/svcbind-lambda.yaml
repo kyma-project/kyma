@@ -28,22 +28,41 @@ spec:
       "name": "svcbind",
       "version": "1.0.0",
       "dependencies": {
-        "redis":  "2.8.0"
+        "async-redis":  "1.1.4"
       }
     }
   function: |
-      const redis = require('redis');
+      const asyncRedis = require("async-redis");
       module.exports = {
-          handler: (event, context) => {
-              const client = redis.createClient({host: process.env.HOST, port: process.env.PORT, password: process.env.REDIS_PASSWORD});
-              client.info(function (err, reply) {
-                  if (err) {
-                      return `Error occurred while connecting to redis: ${err}\n`;
-                  }
-                  console.log(`OK ${event.data}`)
-              });
-              return "OK";
-          },
+        handler: async (event, context) => {
+        try {
+           const client = asyncRedis.createClient({
+             host: process.env.HOST,
+             port: process.env.PORT,
+             password: process.env.REDIS_PASSWORD,
+             retry_strategy: function (options) {
+               if (options.error && options.error.code === 'ECONNREFUSED') {
+                 return new Error('The server refused the connection');
+               }
+               if (options.total_retry_time > 1000*60*60) {
+                 return new Error('Retry time exhausted');
+               }
+               if (options.attempt > 10) {
+                 return undefined;
+               }
+               // reconnect after
+               return Math.min(options.attempt * 100, 3000);
+             }
+           });
+
+           const value = await client.info();
+           console.log(`OK ${event.data}`);
+           return "OK";
+        } catch (err) {
+          console.log(`Got error ${err}`);
+          return "FAIL";
+          }
+        }
       };
 ---
 apiVersion: servicecatalog.kyma-project.io/v1alpha1

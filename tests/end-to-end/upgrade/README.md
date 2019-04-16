@@ -89,15 +89,15 @@ Run the application without building a binary file. To do so:
 
 1. Prepare the upgrade data:
   ```bash
-  env APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action prepareData
+  env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action prepareData
   ```
 
 2. Run tests:
   ```bash
-  env APP_KUBECONFIG_PATH=/Users/$User/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action executeTests
+  env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config APP_LOGGER_LEVEL=debug go run main.go --action executeTests
   ```
 
-For the description of the available environment variables, see [this](#use-environment-variables] section.
+For the description of the available environment variables, see [this](#use-environment-variables) section.
 
 ### Run tests using a Helm chart
 
@@ -119,7 +119,7 @@ Run the application using Helm:
 1. [Install Telepresence](https://www.telepresence.io/reference/install).
 2. Run tests:
 ```bash
-env APP_KUBECONFIG_PATH=/Users/$User/.kube/config  telepresence --run go run main.go  --action executeTests --verbose
+env APP_KUBECONFIG_PATH=/Users/$USER/.kube/config telepresence --run go run main.go  --action executeTests --verbose
 ```
 
 ### Verify the code

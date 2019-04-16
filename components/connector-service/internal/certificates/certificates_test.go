@@ -43,6 +43,58 @@ xwfuqKS+KeByw2+7ac53rRZ806IMjZNHiX+N9HakgqdQdM8XwNG2GIpPQ2VOMCu0
 iEWRwvmD+/sYdSyhdEAZYoAndA==
 -----END PRIVATE KEY-----`
 
+	privateRSAKey = `-----BEGIN RSA PRIVATE KEY-----
+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
+-----END RSA PRIVATE KEY-----`
+
 	cert = `-----BEGIN CERTIFICATE-----
 MIIDhDCCAmwCCQCCgClWcqHk4DANBgkqhkiG9w0BAQsFADCBgzELMAkGA1UEBhMC
 VVMxDjAMBgNVBAgMBXN0YXRlMQ0wCwYDVQQHDARjaXR5MRAwDgYDVQQKDAdjb21w
@@ -166,6 +218,7 @@ fWXUGZObOGD246zwfHLHP3AwzFKU0bfIvqckcw23I+ZUMIbdajw9eg==
 
 var (
 	encodedKey         = []byte(privateKey)
+	encodedRSAKey      = []byte(privateRSAKey)
 	encodedCert        = []byte(cert)
 	encodedInvalidCert = []byte(invalidCert)
 	encodedInvalidKey  = []byte(invalidKey)
@@ -220,6 +273,18 @@ func TestCertificateUtility_LoadCert(t *testing.T) {
 }
 
 func TestCertificateUtility_LoadKey(t *testing.T) {
+
+	t.Run("should load RSA key", func(t *testing.T) {
+		// given
+		certificateUtility := NewCertificateUtility(validityTime)
+
+		// when
+		key, err := certificateUtility.LoadKey(encodedRSAKey)
+
+		// then
+		require.NoError(t, err)
+		assert.NotNil(t, key)
+	})
 
 	t.Run("should load key", func(t *testing.T) {
 		// given

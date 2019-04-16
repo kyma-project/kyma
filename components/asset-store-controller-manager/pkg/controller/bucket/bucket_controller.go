@@ -10,6 +10,10 @@ import (
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
+	"k8s.io/client-go/util/retry"
+	"sigs.k8s.io/controller-runtime/pkg/cache"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
@@ -39,14 +43,16 @@ func Add(mgr manager.Manager) error {
 
 	store := store.New(minioClient)
 	deletionFinalizer := finalizer.New(deleteBucketFinalizerName)
-	handler := bucket.New(mgr.GetRecorder("bucket-controller"), store, cfg.Store.ExternalEndpoint, log)
 
 	reconciler := &ReconcileBucket{
-		Client:         mgr.GetClient(),
-		scheme:         mgr.GetScheme(),
-		handler:        handler,
-		relistInterval: cfg.BucketRequeueInterval,
-		finalizer:      deletionFinalizer,
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		relistInterval:   cfg.BucketRequeueInterval,
+		finalizer:        deletionFinalizer,
+		store:            store,
+		externalEndpoint: cfg.Store.ExternalEndpoint,
+		recorder:         mgr.GetRecorder("bucket-controller"),
+		cache:            mgr.GetCache(),
 	}
 
 	return add(mgr, reconciler)
@@ -74,11 +80,14 @@ var _ reconcile.Reconciler = &ReconcileBucket{}
 // ReconcileBucket reconciles a Bucket object
 type ReconcileBucket struct {
 	client.Client
-	scheme *runtime.Scheme
+	cache    cache.Cache
+	scheme   *runtime.Scheme
+	recorder record.EventRecorder
 
-	handler        bucket.Handler
-	relistInterval time.Duration
-	finalizer      finalizer.Finalizer
+	relistInterval   time.Duration
+	finalizer        finalizer.Finalizer
+	store            store.Store
+	externalEndpoint string
 }
 
 // Reconcile reads that state of the cluster for a Bucket object and makes changes based on the state read
@@ -88,6 +97,10 @@ type ReconcileBucket struct {
 func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
+
+	if err := r.appendFinalizer(ctx, request.NamespacedName); err != nil {
+		return reconcile.Result{}, errors.Wrap(err, "while appending finalizer")
+	}
 
 	instance := &assetstorev1alpha2.Bucket{}
 	err := r.Get(ctx, request.NamespacedName, instance)
@@ -99,86 +112,101 @@ func (r *ReconcileBucket) Reconcile(request reconcile.Request) (reconcile.Result
 		return reconcile.Result{}, err
 	}
 
-	switch {
-	case !r.handler.ShouldReconcile(instance, instance.Status.CommonBucketStatus, time.Now(), r.relistInterval):
-		return reconcile.Result{}, nil
-	case r.handler.IsOnDelete(instance):
-		return r.onDelete(ctx, instance)
-	case r.handler.IsOnAddOrUpdate(instance, instance.Status.CommonBucketStatus):
-		return r.onAddOrUpdate(ctx, instance)
-	case r.handler.IsOnReady(instance.Status.CommonBucketStatus):
-		return r.onReady(ctx, instance)
-	case r.handler.IsOnFailed(instance.Status.CommonBucketStatus):
-		return r.onFailed(ctx, instance)
+	bucketLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "name", instance.GetName(), "namespace", instance.GetNamespace())
+	commonHandler := bucket.New(bucketLogger, r.recorder, r.store, r.externalEndpoint, r.relistInterval)
+	commonStatus, err := commonHandler.Do(ctx, time.Now(), instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
+	if updateErr := r.updateStatus(ctx, request.NamespacedName, commonStatus); updateErr != nil {
+		finalErr := updateErr
+		if err != nil {
+			finalErr = errors.Wrapf(err, "along with update error %s", updateErr.Error())
+		}
+		return reconcile.Result{}, finalErr
 	}
-
-	return reconcile.Result{}, nil
-}
-
-func (r *ReconcileBucket) onFailed(ctx context.Context, instance *assetstorev1alpha2.Bucket) (reconcile.Result, error) {
-	status, err := r.handler.OnFailed(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	if err := r.updateStatus(ctx, instance, *status); err != nil {
-		return reconcile.Result{}, err
+	if err := r.removeFinalizer(ctx, request.NamespacedName); err != nil {
+		return reconcile.Result{}, errors.Wrap(err, "while removing finalizer")
 	}
 
-	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
+	return reconcile.Result{
+		RequeueAfter: r.relistInterval,
+	}, nil
 }
 
-func (r *ReconcileBucket) onReady(ctx context.Context, instance *assetstorev1alpha2.Bucket) (reconcile.Result, error) {
-	status := r.handler.OnReady(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
+func (r *ReconcileBucket) appendFinalizer(ctx context.Context, namespacedName types.NamespacedName) error {
+	updateFnc := func(instance *assetstorev1alpha2.Bucket) error {
+		if !instance.DeletionTimestamp.IsZero() || r.finalizer.IsDefinedIn(instance) {
+			return nil
+		}
 
-	if err := r.updateStatus(ctx, instance, status); err != nil {
-		return reconcile.Result{}, err
+		copy := instance.DeepCopy()
+		r.finalizer.AddTo(copy)
+		return r.Update(ctx, copy)
 	}
 
-	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
+	return r.update(ctx, namespacedName, updateFnc)
 }
 
-func (r *ReconcileBucket) onDelete(ctx context.Context, instance *assetstorev1alpha2.Bucket) (reconcile.Result, error) {
-	if !r.finalizer.IsDefinedIn(instance) {
-		return reconcile.Result{}, nil
+func (r *ReconcileBucket) removeFinalizer(ctx context.Context, namespacedName types.NamespacedName) error {
+	updateFnc := func(instance *assetstorev1alpha2.Bucket) error {
+		if instance.DeletionTimestamp.IsZero() {
+			return nil
+		}
+
+		copy := instance.DeepCopy()
+		r.finalizer.DeleteFrom(copy)
+
+		return r.Update(ctx, copy)
 	}
 
-	err := r.handler.OnDelete(ctx, instance, instance.Status.CommonBucketStatus)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	r.finalizer.DeleteFrom(instance)
-
-	if err := r.Update(ctx, instance); err != nil {
-		return reconcile.Result{}, errors.Wrap(err, "while updating instance")
-	}
-
-	return reconcile.Result{}, nil
+	return r.update(ctx, namespacedName, updateFnc)
 }
 
-func (r *ReconcileBucket) onAddOrUpdate(ctx context.Context, instance *assetstorev1alpha2.Bucket) (reconcile.Result, error) {
-	if !r.finalizer.IsDefinedIn(instance) {
-		r.finalizer.AddTo(instance)
-		return reconcile.Result{Requeue: true}, r.Update(ctx, instance)
+func (r *ReconcileBucket) updateStatus(ctx context.Context, namespacedName types.NamespacedName, commonStatus *assetstorev1alpha2.CommonBucketStatus) error {
+	updateFnc := func(instance *assetstorev1alpha2.Bucket) error {
+		if r.isStatusUnchanged(instance, commonStatus) {
+			return nil
+		}
+
+		copy := instance.DeepCopy()
+		copy.Status.CommonBucketStatus = *commonStatus
+
+		return r.Status().Update(ctx, copy)
 	}
 
-	status := r.handler.OnAddOrUpdate(instance, instance.Spec.CommonBucketSpec, instance.Status.CommonBucketStatus)
-
-	if err := r.updateStatus(ctx, instance, status); err != nil {
-		return reconcile.Result{}, err
-	}
-
-	return reconcile.Result{RequeueAfter: r.relistInterval}, nil
+	return r.update(ctx, namespacedName, updateFnc)
 }
 
-func (r *ReconcileBucket) updateStatus(ctx context.Context, instance *assetstorev1alpha2.Bucket, commonStatus assetstorev1alpha2.CommonBucketStatus) error {
-	toUpdate := instance.DeepCopy()
-	toUpdate.Status.CommonBucketStatus = commonStatus
+func (r *ReconcileBucket) isStatusUnchanged(instance *assetstorev1alpha2.Bucket, newStatus *assetstorev1alpha2.CommonBucketStatus) bool {
+	currentStatus := instance.Status.CommonBucketStatus
 
-	if err := r.Status().Update(ctx, toUpdate); err != nil {
-		return errors.Wrap(err, "while updating status")
-	}
+	return newStatus == nil ||
+		currentStatus.ObservedGeneration == newStatus.ObservedGeneration &&
+			currentStatus.Phase == newStatus.Phase &&
+			currentStatus.Reason == newStatus.Reason
+}
 
-	return nil
+func (r *ReconcileBucket) update(ctx context.Context, namespacedName types.NamespacedName, updateFnc func(instance *assetstorev1alpha2.Bucket) error) error {
+	err := retry.RetryOnConflict(retry.DefaultRetry, func() error {
+		instance := &assetstorev1alpha2.Bucket{}
+		err := r.Get(ctx, namespacedName, instance)
+		if err != nil {
+			if apiErrors.IsNotFound(err) {
+				return nil
+			}
+			// Error reading the object - requeue the request.
+			return err
+		}
+
+		err = updateFnc(instance)
+		if err != nil && apiErrors.IsConflict(err) {
+			r.cache.WaitForCacheSync(ctx.Done())
+		}
+
+		return err
+	})
+
+	return err
 }

@@ -81,9 +81,12 @@ spec:
     matchLabels: &labels
       clusterChannelProvisioner: natss
       role: controller
+      app: natss-controller
   template:
     metadata:
-      labels: *labels
+      labels: 
+        <<: *labels
+        rand: {{ randAlpha 6 }}
     spec:
       serviceAccountName: natss-controller
       containers:
@@ -95,6 +98,20 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: EB_USER
+            valueFrom:
+              secretKeyRef:
+                name: nats-user-eventbus
+                key: username
+          - name: EB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: nats-user-eventbus
+                key: password
+          - name: DEFAULT_CLUSTER_ID
+            value: kyma-nats-streaming
+          - name: DEFAULT_NATSS_URL
+            value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
 
 ---
 
@@ -157,11 +174,14 @@ spec:
     matchLabels: &labels
       clusterChannelProvisioner: natss
       role: dispatcher
+      app: natss-dispatcher
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "true"
-      labels: *labels
+      labels: 
+        <<: *labels
+        rand: {{ randAlpha 6 }}
     spec:
       serviceAccountName: natss-dispatcher
       containers:
@@ -173,3 +193,18 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.namespace
+          - name: EB_USER
+            valueFrom:
+              secretKeyRef:
+                name: nats-user-eventbus
+                key: username
+          - name: EB_PASS
+            valueFrom:
+              secretKeyRef:
+                name: nats-user-eventbus
+                key: password
+          - name: DEFAULT_CLUSTER_ID
+            value: kyma-nats-streaming
+          - name: DEFAULT_NATSS_URL
+            value: nats://$(EB_USER):$(EB_PASS)@{{ .Values.global.natsStreaming.url }}
+          

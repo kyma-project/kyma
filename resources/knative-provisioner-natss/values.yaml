@@ -3,14 +3,15 @@
 # Declare variables to be passed into your templates.
 global:
   isLocalEnv: false
-  knative: false
+  natsStreaming:
+    url: "nats-streaming.natss:4222"
 
 knative-provisioner-natss:
   controller:
     image:
       pullPolicy: IfNotPresent
-      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/controller:v0.4.1
+      location: eu.gcr.io/kyma-project/event-bus/knative/natss/controller:1d23a08
   dispatcher:
     image:
       pullPolicy: IfNotPresent
-      location: gcr.io/knative-releases/github.com/knative/eventing/contrib/natss/pkg/dispatcher:v0.4.1
+      location: eu.gcr.io/kyma-project/event-bus/knative/natss/dispatcher:1d23a08

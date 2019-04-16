@@ -1,2 +1,8 @@
-istio:
-  namespace: istio-system
+---
+global:
+  cluster:
+    rbac:
+      mode: ON_WITH_INCLUSION
+      inclusion:
+        services:
+        - logging.kyma-system.svc.cluster.local

@@ -114,5 +114,5 @@ func authenticationFromDefaultConfig() (Interface, error) {
 		JwksUri: "https://www.googleapis.com/oauth2/v3/certs",
 	}
 
-	return New(clientset, sampleJwtDefaultConfig), nil
+	return New(clientset, sampleJwtDefaultConfig, true), nil
 }

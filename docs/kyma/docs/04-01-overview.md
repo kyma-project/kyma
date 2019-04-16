@@ -10,6 +10,7 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 | Component | Kyma | Kyma Lite |
 |----------------|------|------|
 | `core` | ✅ | ✅ |
+| `cms` | ✅ | ✅ |
 | `cluster-essentials` | ✅ | ✅ |
 | `application-connector` | ✅ | ✅ |
 | `ark` | ✅ | ⛔️ |
@@ -28,17 +29,12 @@ To make the local development process easier, we introduced the **Kyma Lite** co
 
 ## Installation guides
 
-Follow these installation guides to install Kyma locally:
+Follow these installation guides to install Kyma locally or on a cluster:
 
-- [Install Kyma locally from a release](#installation-install-kyma-locally-from-the-release)
-- [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources)
-
-You can also install Kyma depending on the supported cloud providers:
-- [Install Kyma on a GKE cluster](#installation-install-kyma-on-a-gke-cluster)
-- [Install Kyma on an AKS cluster](#installation-install-kyma-on-an-aks-cluster)
+- [Install Kyma locally](#installation-install-kyma-locally)
+- [Install Kyma on a cluster](#installation-install-kyma-on-a-cluster)
 
 Read rest of the installation documents to learn how to:
-- [Install Kyma with Knative](#installation-installation-with-knative)
 - [Disable the selected components' installation or install them separately](#installation-custom-component-installation)
 - [Update Kyma](#installation-update-kyma)
 - [Reinstall Kyma](#installation-reinstall-kyma)

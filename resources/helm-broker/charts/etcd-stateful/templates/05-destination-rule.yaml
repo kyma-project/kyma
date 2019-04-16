@@ -1,0 +1,9 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "etcd-hb-fullname" . }}-client
+spec:
+  host: {{ template "etcd-hb-fullname" . }}-client.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE

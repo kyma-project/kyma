@@ -3,13 +3,12 @@ title: How to start
 type: Overview
 ---
 
-When you already know what Kyma is and what components it consists of, you can start using it. Minikube allows you to run Kyma locally, develop, and test your solutions on a small scale before you push them to a cluster. With the Installation and Getting Started guides in hand, you can start developing in a matter of minutes.
+Minikube allows you to run Kyma locally, develop, and test your solutions on a small scale before you push them to a cluster. With the Installation and Getting Started guides at hand, you can start developing in a matter of minutes.
 
 Read, learn, and try on your own to:
 
-- [Install Kyma locally from the release](#installation-install-kyma-locally-from-the-release)
-- [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources)
-- [Install Kyma on a cluster](#installation-install-kyma-on-a-gke-cluster)
+- [Install Kyma locally](#installation-install-kyma-locally)
+- [Install Kyma on a cluster](#installation-install-kyma-on-a-cluster)
 - [Deploy a sample service locally](#tutorials-sample-service-deployment-on-local)
 - [Deploy a service on a cluster](#tutorials-sample-service-deployment-on-a-cluster)
 - [Develop a service locally without using Docker](#tutorials-develop-a-service-locally-without-using-docker)

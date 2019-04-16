@@ -78,4 +78,28 @@ metadata:
     kyma-project.io/installation: ""
 data:
   knative-serving.domainName: "__DOMAIN__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: intallation-logging-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: logging
+    kyma-project.io/installation: ""
+data:
+  global.logging.promtail.config.name: "__PROMTAIL_CONFIG_NAME__"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: core-test-ui-acceptance-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: core
+    kyma-project.io/installation: ""
+data:
+  test.acceptance.ui.logging.enabled: "__LOGGING_INSTALL_ENABLED__"
 

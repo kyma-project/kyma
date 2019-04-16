@@ -9,6 +9,7 @@ import (
 	"k8s.io/helm/pkg/helm"
 	"k8s.io/helm/pkg/proto/hapi/release"
 	rls "k8s.io/helm/pkg/proto/hapi/services"
+	"k8s.io/helm/pkg/tlsutil"
 )
 
 // ClientInterface .
@@ -29,10 +30,16 @@ type Client struct {
 }
 
 // NewClient .
-func NewClient(host string) *Client {
-	return &Client{
-		helm: helm.NewClient(helm.Host(host)),
+func NewClient(host string, TLSKey string, TLSCert string, TLSInsecureSkipVerify bool) (*Client, error) {
+	tlsopts := tlsutil.Options{
+		KeyFile:            TLSKey,
+		CertFile:           TLSCert,
+		InsecureSkipVerify: TLSInsecureSkipVerify,
 	}
+	tlscfg, err := tlsutil.ClientConfig(tlsopts)
+	return &Client{
+		helm: helm.NewClient(helm.Host(host), helm.WithTLS(tlscfg)),
+	}, err
 }
 
 // ListReleases lists all releases except for the superseded ones

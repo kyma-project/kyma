@@ -10,12 +10,17 @@ import (
 
 	"github.com/golang/glog"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	cmsPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms/pretty"
 	contentPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/pkg/errors"
+)
+
+const (
+	kymaIntegrationNamespace = "kyma-integration"
 )
 
 //go:generate mockery -name=serviceClassListGetter -output=automock -outpkg=automock -case=underscore
@@ -45,17 +50,19 @@ type serviceClassResolver struct {
 	planLister        servicePlanLister
 	instanceLister    instanceListerByServiceClass
 	contentRetriever  shared.ContentRetriever
+	cmsRetriever      shared.CmsRetriever
 	classConverter    gqlServiceClassConverter
 	instanceConverter gqlServiceInstanceConverter
 	planConverter     gqlServicePlanConverter
 }
 
-func newServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, contentRetriever shared.ContentRetriever) *serviceClassResolver {
+func newServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, contentRetriever shared.ContentRetriever, cmsRetriever shared.CmsRetriever) *serviceClassResolver {
 	return &serviceClassResolver{
 		classLister:       classLister,
 		planLister:        planLister,
 		instanceLister:    instanceLister,
 		contentRetriever:  contentRetriever,
+		cmsRetriever:      cmsRetriever,
 		classConverter:    &serviceClassConverter{},
 		planConverter:     &servicePlanConverter{},
 		instanceConverter: &serviceInstanceConverter{},
@@ -298,4 +305,52 @@ func (r *serviceClassResolver) ServiceClassContentField(ctx context.Context, obj
 	}
 
 	return &result, nil
+}
+
+func (r *serviceClassResolver) ServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterDocsTopic, error) {
+	if obj == nil {
+		glog.Error(errors.New("%s cannot be empty in order to resolve `clusterDocsTopic` field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
+	}
+
+	item, err := r.cmsRetriever.ClusterDocsTopic().Find(obj.Name)
+	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", cmsPretty.ClusterDocsTopic, pretty.ServiceClass, obj.Name))
+		return nil, gqlerror.New(err, cmsPretty.ClusterDocsTopic)
+	}
+
+	clusterDocsTopic, err := r.cmsRetriever.ClusterDocsTopicConverter().ToGQL(item)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", cmsPretty.ClusterDocsTopic))
+		return nil, gqlerror.New(err, cmsPretty.ClusterDocsTopic)
+	}
+
+	return clusterDocsTopic, nil
+}
+
+func (r *serviceClassResolver) ServiceClassDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.DocsTopic, error) {
+	if obj == nil {
+		glog.Error(errors.New("%s cannot be empty in order to resolve `docsTopic` field"), pretty.ServiceClass)
+		return nil, gqlerror.NewInternal()
+	}
+
+	item, err := r.cmsRetriever.DocsTopic().Find(obj.Namespace, obj.Name)
+	if err != nil {
+		if module.IsDisabledModuleError(err) {
+			return nil, err
+		}
+		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", cmsPretty.DocsTopic, pretty.ServiceClass, obj.Name))
+		return nil, gqlerror.New(err, cmsPretty.DocsTopic)
+	}
+
+	docsTopic, err := r.cmsRetriever.DocsTopicConverter().ToGQL(item)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", cmsPretty.DocsTopic))
+		return nil, gqlerror.New(err, cmsPretty.DocsTopic)
+	}
+
+	return docsTopic, nil
 }

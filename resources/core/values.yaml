@@ -21,6 +21,9 @@ console:
 global:
   isLocalEnv: false
   knative: false
+   # Change value below to your own GitHub user name if you want point to documentation sources from your fork
+   # Example: kymaOrgName: "kyma-incubator"
+  kymaOrgName: "kyma-project"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   istio:
@@ -30,11 +33,11 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: develop/
-    version: e12b49fc
+    dir: pr/
+    version: PR-3702
   api_controller:
     dir: develop/
-    version: "0bcf18a4"
+    version: "1323f962"
   api_controller_acceptance_tests:
     dir: develop/
     version: 736988df
@@ -47,31 +50,32 @@ global:
     version: aabedc33
   docs:
     dir: develop/
-    version: daf235a6
+    version: 98a43f0c
+    # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
+    # - Change the value below to the release branch during the release
+    # Example: clusterDocsTopicsVersion: "0.9.0"
+    clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
-    version: 429bfbcc
-  etcd_backup_job:
-    dir: develop/
-    version: 6e0a7fe2
+    version: 8a10f0ed
   kubeless_integration_tests:
     dir: develop/tests/
-    version: 7ee6af96
+    version: 50d9482b
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: "d74ff201"
+    version: 311ed23b
   test_namespace_controller:
     dir: develop/
-    version: 429bfbcc
+    version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: fbf6fcf1
+    version: 'e3d783bb'
   console_backend_service_test:
     dir: develop/
-    version: fbf6fcf1
+    version: '9ecc0bcc'
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
@@ -82,10 +86,10 @@ global:
     runtime:
       node6:
         dir: develop/
-        version: "ddf6f99f"
+        version: "a9cdca75"
       node8:
         dir: develop/
-        version: "ddf6f99f"
+        version: "a9cdca75"
     installation:
       node6:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
@@ -112,3 +116,5 @@ test:
       limits:
         memory: 1.5Gi
         cpu: 300m
+      logging:
+        enabled:

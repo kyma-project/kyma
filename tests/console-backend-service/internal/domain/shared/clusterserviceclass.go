@@ -19,4 +19,5 @@ type ClusterServiceClass struct {
 	odataSpec           string
 	asyncApiSpec        map[string]interface{}
 	content             map[string]interface{}
+	ClusterDocsTopic    ClusterDocsTopic
 }

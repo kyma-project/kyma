@@ -11,6 +11,35 @@ DEST_FILE_PATH="/config/dst/config.yaml"
 PLACEHOLDER="#__STATIC_PASSWORDS__"
 
 NEWLINE="%"
+MAX_RETRIES=60
+
+# check if kubectl works as expected. Minikube stop and then minikube start cases temporary unavailability of the api-server)
+function checkIfApiServerAvailable() {
+    local cnt=0
+    set +o errexit
+
+    while :
+    do
+      if [[ $(kubectl get secrets -l dex-user-config=true --all-namespaces -o json) ]]
+        then
+          echo "Api-server available via kubectl."
+          break
+        else
+          ((cnt++))
+          if (( cnt > $MAX_RETRIES )); then
+            echo "Max retries has been reached (retries $MAX_RETRIES). Exit."
+            exit 1
+          fi
+
+          echo "Api-server not available via kubectl - waiting 5s..."
+          sleep 5
+        fi
+    done
+
+    set -o errexit
+}
+
+checkIfApiServerAvailable
 
 NUM=0
 for secret in $(kubectl get secrets -l dex-user-config=true --all-namespaces -o json | jq -r -c '.items | .[] | .data')
@@ -49,7 +78,7 @@ do
 
   # generate userID
   USER_ID=$(cat /dev/urandom | LC_ALL=C tr -dc 'a-z0-9' | fold -w 32 | head -n 1)
-  
+
   # prepare config map to enable static users
   if [ $NUM -eq 1 ]
   then

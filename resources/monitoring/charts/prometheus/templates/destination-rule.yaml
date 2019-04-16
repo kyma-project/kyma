@@ -1,0 +1,10 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "prometheus.fullname" . }}
+  namespace: kyma-system
+spec:
+  host: {{ template "prometheus.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE

@@ -22,7 +22,7 @@ if [ -z "$CR_PATH" ]; then
 
 fi
 
-bash $SCRIPTS_DIR/installer.sh --local --cr "$CR_PATH" "$KNATIVE" --password "$ADMIN_PASSWORD"
+bash $SCRIPTS_DIR/installer.sh --local --cr "$CR_PATH" --password "$ADMIN_PASSWORD"
 rm -rf $TMPDIR
 ```
 Subsequent sections provide details of all involved subscripts, in the order in which the `run.sh` script triggers them.
@@ -64,6 +64,8 @@ The `installation/scripts/installer.sh` script creates the default RBAC role, in
 >**NOTE:** For the Kyma Installer deployment details, refer to the `installation/resources/installer.yaml` file.
 
 The script applies the Installation custom resource and marks it with the `action=install` label, which triggers the Kyma installation.
+
+In the process of installing Tiller, a set of TLS certificates is created and saved to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home) to secure the connection between the client and the server.
 
 >**NOTE:** The Kyma installation runs in the background. Execute the `./installation/scripts/is-installed.sh` script to follow the installation process.
 

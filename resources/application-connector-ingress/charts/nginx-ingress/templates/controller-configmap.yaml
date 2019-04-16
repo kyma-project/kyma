@@ -11,7 +11,7 @@ metadata:
   name: {{ template "nginx-ingress.controller.fullname" . }}
 data:
   enable-vts-status: "{{ .Values.controller.stats.enabled }}"
-  enable-opentracing: "true"
+  enable-opentracing: "{{ .Values.controller.tracing.enabled }}"
   zipkin-service-name: "connector"
   zipkin-collector-host: zipkin.kyma-system
 {{- if .Values.controller.headers }}

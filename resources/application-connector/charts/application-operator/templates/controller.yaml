@@ -20,6 +20,7 @@ spec:
         control-plane: {{ .Chart.Name }}
         controller-tools.k8s.io: "1.0"
     spec:
+      serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
         args:
@@ -28,9 +29,13 @@ spec:
         - "--domainName={{ .Values.global.applicationConnector.domainName }}"
         - "--namespace={{ .Values.global.namespace }}"
         - "--tillerUrl={{ .Values.controller.args.tillerUrl }}"
+        - "--helmTLSKeyFile={{ .Values.controller.args.helmTLSKeyFile }}"
+        - "--helmTLSCertificateFile={{ .Values.controller.args.helmTLSCertificateFile }}"
+        - "--tillerTLSSkipVerify={{ .Values.controller.args.tillerTLSInsecure }}"
         - "--applicationGatewayImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway.dir }}application-gateway:{{ .Values.global.application_gateway.version }}"
+        - "--applicationGatewayTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_gateway_tests.dir }}application-gateway-tests:{{ .Values.global.application_gateway_tests.version }}"
         - "--eventServiceImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_service.dir }}event-service:{{ .Values.global.event_service.version }}"
-        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway_tests.dir }}gateway-acceptance-tests:{{ .Values.global.gateway_tests.version }}"
+        - "--eventServiceTestsImage={{ .Values.global.containerRegistry.path }}/{{ .Values.global.gateway_tests.dir }}gateway-tests:{{ .Values.global.gateway_tests.version }}"
         - "--syncPeriod={{ .Values.controller.args.syncPeriod }}"
         - "--installationTimeout={{ .Values.controller.args.installationTimeout }}"
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.application_operator.dir }}application-operator:{{ .Values.global.application_operator.version }}
@@ -38,8 +43,16 @@ spec:
         resources:
           limits:
             cpu: 100m
-            memory: 50Mi
+            memory: 100Mi
           requests:
             cpu: 100m
             memory: 20Mi
+        volumeMounts:
+          - mountPath: /etc/certs
+            name: helm-certs
+            readOnly: true
+      volumes:
+        - name: helm-certs
+          secret:
+            secretName: helm-secret
       terminationGracePeriodSeconds: 10

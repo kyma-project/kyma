@@ -26,6 +26,7 @@ type PolicySpec struct {
 	Targets          Targets          `json:"targets"`
 	PrincipalBinding PrincipalBinding `json:"principalBinding"`
 	Origins          Origins          `json:"origins,omitempty"`
+	Peers            Peers            `json:"peers,omitempty"`
 }
 
 type PrincipalBinding string
@@ -56,6 +57,12 @@ type Origin struct {
 
 func (o *Origin) String() string {
 	return fmt.Sprintf("{Jwt: %v}", o.Jwt)
+}
+
+type Peers []*Peer
+
+type Peer struct {
+	MTLS struct{} `json:"mtls"`
 }
 
 type Jwt struct {

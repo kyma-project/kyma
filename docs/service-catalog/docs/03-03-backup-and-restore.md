@@ -3,15 +3,15 @@ title: Service Catalog backup and restore
 type: Details
 ---
 
-In the production setup, the Service Catalog uses the etcd database cluster which is defined in the Service Catalog [`etcd-stateful`][sc-etcd-sub-chart] sub-chart. The [etcd backup operator][etcd-backup-operator] executes the backup procedure.
+In the production setup, the Service Catalog uses the etcd database cluster which is defined in the Service Catalog [`etcd-stateful`](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/etcd-stateful/templates) sub-chart. The [etcd backup operator](https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/backup-operator.md) executes the backup procedure.
 
 ### Backup
 
-To execute the backup process, set the following values in the [`core`][core-chart-values] chart:
+To execute the backup process, set the following values in the [`core`](https://github.com/kyma-project/kyma/blob/master/resources/core/values.yaml) chart:
 
 | Property name              | Description |
 |---------------------------------------------------|---|
-| **global.etcdBackup.enabled**                       | If set to `true`, the [`etcd-operator`][etcd-operator-chart] chart and the Service Catalog backup [sub-chart][sc-backup-sub-chart] install the CronJob which periodically executes the [Etcd Backup][etcd-backup-app] application. The etcd-operator also creates a [Secret][abs-creds] with the **storage-account** and **storage-key** keys. For more information on how to configure the backup CronJob, see the [Etcd Backup][etcd-backup-app-readme] documentation. |
+| **global.etcdBackup.enabled**                       | If set to `true`, the [`etcd-operator`](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator) chart and the Service Catalog backup [sub-chart](https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/etcd-stateful/templates/05-backup-job.yaml) install the CronJob which periodically executes the [etcd backup](https://github.com/kyma-project/kyma/tree/master/components/etcd-backup-job) application. The etcd-operator also creates a [Secret](https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/etcd-backup-abs-storage-secret.yaml) with the **storage-account** and **storage-key** keys. For more information on how to configure the backup CronJob, see the [etcd backup](https://github.com/kyma-project/kyma/blob/master/components/etcd-backup-job/README.md) documentation. |
 | **global.etcdBackup.containerName**                 | The Azure Blob Storage (ABS) container to store the backup. |
 | **etcd-operator.backupOperator.abs.storageAccount** | The name of the storage account for the ABS. It stores the value for the **storage-account** Secret key. |
 | **etcd-operator.backupOperator.abs.storageKey**     | The key value of the storage account for the ABS. It stores the value for the **storage-key** Secret key. |
@@ -28,7 +28,7 @@ export ABS_PATH=$(kubectl get cm -n kyma-system sc-recorded-etcd-backup-data -o=
 export BACKUP_FILE_NAME=etcd.backup
 ```
 
-2. Download the backup to the local workstation using the portal or [Azure CLI][az-cli]. Set the downloaded file path:
+2. Download the backup to the local workstation using the portal or the [Azure CLI](https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest). Set the downloaded file path:
 ```bash
 export BACKUP_FILE_NAME=/path/to/downloaded/file
 ```
@@ -65,19 +65,3 @@ done
 ```bash
 kubectl delete pod service-catalog-etcd-stateful-0 service-catalog-etcd-stateful-1 service-catalog-etcd-stateful-2 -n kyma-system
 ```
-
-[etcd-backup-operator]:https://github.com/coreos/etcd-operator/blob/master/doc/user/walkthrough/backup-operator.md
-
-<!-- These absolute paths should be replaced with the relative links after adding this functionality to Kyma -->
-[az-cli]:https://docs.microsoft.com/en-us/cli/azure/?view=azure-cli-latest
-
-[sc-etcd-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/etcd-stateful/templates
-[sc-backup-sub-chart]:https://github.com/kyma-project/kyma/blob/master/resources/service-catalog/charts/etcd-stateful/templates/05-backup-job.yaml
-[etcd-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator
-[etcd-backup-operator-chart]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/backup-deployment.yaml
-[core-chart-values]:https://github.com/kyma-project/kyma/blob/master/resources/core/values.yaml
-
-[etcd-backup-app-readme]:https://github.com/kyma-project/kyma/blob/master/components/etcd-backup-job/README.md
-[etcd-backup-app]:https://github.com/kyma-project/kyma/tree/master/components/etcd-backup-job
-
-[abs-creds]:https://github.com/kyma-project/kyma/blob/master/resources/core/charts/etcd-operator/templates/etcd-backup-abs-storage-secret.yaml

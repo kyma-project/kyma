@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"time"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -12,11 +11,10 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"github.com/google/uuid"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
-
+	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
 	"k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/client-go/kubernetes"
 )
 
 type statefulSetTest struct {
@@ -25,22 +23,29 @@ type statefulSetTest struct {
 }
 
 func NewStatefulSetTest() (*statefulSetTest, error) {
-
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	restConfig, err := config.NewRestClientConfig()
 	if err != nil {
 		return nil, err
 	}
 
-	coreClient, err := kubernetes.NewForConfig(config)
+	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
 		return nil, err
 	}
+
 	return &statefulSetTest{
 		coreClient:      coreClient,
 		statefulSetName: "hello",
 		uuid:            uuid.New().String(),
 	}, nil
+}
+
+func (t *statefulSetTest) CreateResources(namespace string) {
+	replicas := int32(2)
+	err := t.createService(namespace, replicas)
+	So(err, ShouldBeNil)
+	err = t.createStatefulSet(namespace, replicas)
+	So(err, ShouldBeNil)
 }
 
 func (t *statefulSetTest) TestResources(namespace string) {
@@ -58,8 +63,11 @@ func (t *statefulSetTest) TestResources(namespace string) {
 	}
 }
 
-func (t *statefulSetTest) getOutput(host string, waitmax time.Duration) (string, error) {
+func (t statefulSetTest) DeleteResources(namespace string) {
+	// There is not need to be implemented for this test.
+}
 
+func (t *statefulSetTest) getOutput(host string, waitmax time.Duration) (string, error) {
 	tick := time.Tick(2 * time.Second)
 	timeout := time.After(waitmax)
 	messages := ""
@@ -86,14 +94,6 @@ func (t *statefulSetTest) getOutput(host string, waitmax time.Duration) (string,
 		}
 	}
 
-}
-
-func (t *statefulSetTest) CreateResources(namespace string) {
-	replicas := int32(2)
-	err := t.createService(namespace, replicas)
-	So(err, ShouldBeNil)
-	err = t.createStatefulSet(namespace, replicas)
-	So(err, ShouldBeNil)
 }
 
 func (t *statefulSetTest) createStatefulSet(namespace string, replicas int32) error {
@@ -238,7 +238,7 @@ func (t *statefulSetTest) waitForPodDeployment(namespace string, replicas int32,
 			}
 
 			if statefulSet.Status.ReadyReplicas != int32(len(pods.Items)) {
-				return fmt.Errorf("Number of pods %v different from ready replicas %v", len(pods.Items), statefulSet.Status.ReadyReplicas)
+				break
 			}
 			return nil
 		}

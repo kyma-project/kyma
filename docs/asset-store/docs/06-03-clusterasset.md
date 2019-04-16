@@ -11,7 +11,7 @@ kubectl get crd clusterassets.assetstore.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample resource (CR) that provides details of the bucket for storing assets.
+This is a sample ClusterAsset CR configuration:
 
 ```
 apiVersion: assetstore.kyma-project.io/v1alpha2
@@ -47,15 +47,22 @@ spec:
     - name: swagger-operations-svc
       namespace: default
       endpoint: "/validate"
+      filter: \.js$
     mutationWebhookService:
     - name: swagger-operations-svc
       namespace: default
       endpoint: "/mutate"
+      filter: \.js$
       metadata:
         rewrite: keyvalue
         pattern: \json|yaml
         data:
           basePath: /test/v2
+    metadataWebhookService:
+    - name: swagger-operations-svc
+      namespace: default
+      endpoint: "/extract"
+      filter: \.js$
   bucketRef:
     name: my-bucket
 status:
@@ -84,14 +91,21 @@ This table lists all possible parameters of a given resource together with their
 | **spec.source.url** |    **YES**   | Specifies the location of the file. |
 | **spec.source.filter** |    **NO**   | Specifies the regex pattern used to select files to store from the package. |
 | **spec.source.validationwebhookservice** |    **NO**   | Provides specification of the validation webhook services. |
-| **spec.source.validationwebhookservice.name** |    **NO**   | Provides the name of the validation webhook service. |
-| **spec.source.validationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
+| **spec.source.validationwebhookservice.name** |    **YES**   | Provides the name of the validation webhook service. |
+| **spec.source.validationwebhookservice.namespace** |    **YES**   | Provides the Namespace in which the service is available. |
 | **spec.source.validationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
+| **spec.source.validationwebhookservice.filter** |    **NO**   | Specifies the regex pattern used to select files sent to the service. |
 | **spec.source.mutationwebhookservice** |    **NO**   | Provides specification of the mutation webhook services. |
-| **spec.source.mutationwebhookservice.name** |    **NO**   | Provides the name of the mutation webhook service. |
-| **spec.source.mutationwebhookservice.namespace** |    **NO**   | Provides the Namespace in which the service is available. It must be the same as the asset's Namespace. |
+| **spec.source.mutationwebhookservice.name** |    **YES**   | Provides the name of the mutation webhook service. |
+| **spec.source.mutationwebhookservice.namespace** |    **YES**   | Provides the Namespace in which the service is available. |
 | **spec.source.mutationwebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
 | **spec.source.mutationwebhookservice.metadata** |    **NO**   | Provides detailed metadata specific for a given mutation service and its functionality. |
+| **spec.source.mutationwebhookservice.filter** |    **NO**   | Specifies the regex pattern used to select files sent to the service. |
+| **spec.source.metadatawebhookservice** |    **NO**   | Provides specification of the metadata webhook services. |
+| **spec.source.metadatawebhookservice.name** |    **YES**   | Provides the name of the metadata webhook service. |
+| **spec.source.metadatawebhookservice.namespace** |    **YES**   | Provides the Namespace in which the service is available. |
+| **spec.source.metadatawebhookservice.endpoint** |    **NO**   | Specifies the endpoint to which the service sends calls. |
+| **spec.source.metadatawebhookservice.filter** |    **NO**   | Specifies the regex pattern used to select files sent to the service. |
 | **spec.bucketref.name** |    **YES**   | Provides the name of the bucket for storing the asset. |
 | **status.phase** |    **Not applicable**   | The ClusterAsset Controller adds it to the ClusterAsset CR. It describes the status of processing the ClusterAsset CR by the ClusterAsset Controller. It can be `Ready`, `Failed`, or `Pending`. |
 | **status.reason** |    **Not applicable**   | Provides the reason why the ClusterAsset CR processing failed or is pending.  |

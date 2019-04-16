@@ -3,16 +3,19 @@ package certificates
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"net/url"
+	"encoding/pem"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 )
 
-func CalculateHash(cert string) (string, error) {
-	uc, err := url.PathUnescape(cert)
-	if err != nil {
-		return "", err
+// FingerprintSHA256 decodes pem block and returns fingerprint generated using SHA 256 algorithm
+func FingerprintSHA256(rawPem []byte) (string, apperrors.AppError) {
+	block, _ := pem.Decode(rawPem)
+	if block == nil {
+		return "", apperrors.Internal("Failed to decode pem block.")
 	}
-	input := []byte(uc)
-	sha := sha256.Sum256(input)
+
+	sha := sha256.Sum256(block.Bytes)
 
 	return hex.EncodeToString(sha[:]), nil
 }

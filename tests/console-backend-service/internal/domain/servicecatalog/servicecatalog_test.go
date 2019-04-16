@@ -7,40 +7,44 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/setup"
-	"github.com/pkg/errors"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/exit"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/setup"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/module"
 )
 
+var AuthSuite *auth.TestSuite
+
 func TestMain(m *testing.M) {
 	dex.ExitIfSCIEnabled()
 
 	c, err := graphql.New()
-	exitOnError(err, "while GraphQL client setup")
+	exit.OnError(err, "while GraphQL client setup for module %s", ModuleName)
 
 	module.SkipPluggableMainIfShould(c, ModuleName)
 
-	scInstaller, err := setup.NewServiceCatalogInstaller("console-backend-service-sc")
-	exitOnError(err, "while initializing Service Catalog installer")
+	scInstaller, err := setup.NewServiceCatalogConfigurer(TestNamespace, true)
+	exit.OnError(err, "while initializing Service Catalog Configurer for module %s", ModuleName)
 
 	err = scInstaller.Setup()
 	if err != nil {
-		scInstaller.Cleanup()
-		exitOnError(err, "while setup")
+		cleanupErr := scInstaller.Cleanup()
+		log.Printf("Error while cleanup after failed setup for %s: %s", ModuleName, cleanupErr.Error())
+		exit.OnError(err, "while setup for module %s", ModuleName)
 	}
+
+	AuthSuite = auth.New()
 
 	code := m.Run()
 
-	scInstaller.Cleanup()
-	os.Exit(code)
-}
-
-func exitOnError(err error, context string) {
-	if err != nil {
-		log.Fatal(errors.Wrap(err, context))
+	cleanupErr := scInstaller.Cleanup()
+	if cleanupErr != nil {
+		log.Printf("Error while cleanup for %s: %s", ModuleName, cleanupErr.Error())
 	}
+	os.Exit(code)
 }
