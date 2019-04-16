@@ -1,31 +1,31 @@
-# ---
-# apiVersion: networking.istio.io/v1alpha3
-# kind: VirtualService
-# metadata:
-#   labels:
-#     app: {{ include "hydra.name" . }}
-#   name: {{ include "hydra.name" . }}-public
-# spec:
-#   gateways:
-#   - {{ .Values.global.gateway.name }}
-#   hosts:
-#   - public.oauth.kyma.local
-#   http:
-#   - match:
-#     - uri:
-#         regex: /.*
-#     route:
-#     - destination:
-#         host: {{ include "hydra.name" . }}
-#         port:
-#           number: {{ .Values.service.ports.public }}
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
   labels:
     app: {{ include "hydra.name" . }}
-  name: {{ include "hydra.name" . }}
+  name: {{ include "hydra.name" . }}-public
+spec:
+  gateways:
+  - {{ .Values.global.gateway.name }}
+  hosts:
+  - client.oauth.kyma.local
+  http:
+  - match:
+    - uri:
+        regex: /.*
+    route:
+    - destination:
+        host: {{ include "hydra.name" . }}
+        port:
+          number: {{ .Values.service.ports.public }}
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  labels:
+    app: {{ include "hydra.name" . }}
+  name: {{ include "hydra.name" . }}-private
 spec:
   gateways:
   - {{ .Values.global.gateway.name }}

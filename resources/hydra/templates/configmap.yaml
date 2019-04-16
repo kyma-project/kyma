@@ -14,6 +14,18 @@ data:
     # Be aware that the X-Forwarded-Proto header must be set and must never be modifiable by anyone but your proxy / gateway / load balancer. Supports ipv4 and ipv6.
     # Hydra serves http instead of https when this option is set.
     serve:
+      public:
+        cors:
+          enabled: true
+          allowed_headers:
+            - Authorization
+          allow_credentials: true
+      admin:
+        cors:
+          enabled: true
+          allowed_headers:
+            - Authorization
+          allow_credentials: true
       tls:
         allow_termination_from:
           - 0.0.0.0/0

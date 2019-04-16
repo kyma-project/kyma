@@ -53,6 +53,10 @@ data:
       - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
       - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth/callback'
       secret: oiEWUWOIEwedfgg
-
+    - id: {{ .Values.oidc.hydraClientId }}
+      name: {{ .Values.oidc.hydraClientName }}
+      redirectURIs:
+      - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth/callback'
+      secret: 72320fcb29afe7ea
     enablePasswordDB: true
     #__STATIC_PASSWORDS__
