@@ -10,7 +10,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
 
 test:

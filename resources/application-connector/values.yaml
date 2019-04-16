@@ -16,46 +16,46 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   application_operator_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   connector_service:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   connector_service_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   connection_token_handler:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   connection_token_handler_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   connectivity_certs_controller:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   event_service:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   gateway_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   application_gateway:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   application_gateway_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   application_registry:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   application_registry_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   application_broker:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
 
 connectivity_certs_controller:

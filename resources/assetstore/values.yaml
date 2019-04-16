@@ -5,16 +5,16 @@ global:
     gateway:
       name: kyma-gateway
   asset_store_controller_manager:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   asset_upload_service:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   asset_metadata_service:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   asset_store_test:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
 
 minio:

@@ -3,7 +3,7 @@
 test:
   image:
     name: monitoring
-    dir: develop/tests/
+    dir: tests/
     version: 1.0.0-rc1
 global:
   isLocalEnv: false

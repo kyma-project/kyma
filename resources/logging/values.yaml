@@ -198,7 +198,7 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_logging:
-    dir: develop
+    dir:
     version: 1.0.0-rc1
   logging:
     promtail:

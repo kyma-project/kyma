@@ -30,8 +30,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   alpine_net:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1

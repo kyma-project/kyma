@@ -33,62 +33,62 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   api_controller:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   api_controller_acceptance_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
     testNamespace: api-controller-tests
   apiserver_proxy:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   configurations_generator:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   docs:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
     # Example: clusterDocsTopicsVersion: "0.9.0"
     clusterDocsTopicsVersion: release-1.0
   namespace_controller:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   kubeless_integration_tests:
-    dir: develop/tests/
+    dir: tests/
     version: 1.0.0-rc1
   kubeless_tests:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   test_apiserver_proxy:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   test_namespace_controller:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   console_backend_service:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   console_backend_service_test:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   cluster_users_test:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   xip_patch:
-    dir: develop/
+    dir:
     version: 1.0.0-rc1
   kubeless_images:
     runtime:
       node6:
-        dir: develop/
+        dir:
         version: 1.0.0-rc1
       node8:
-        dir: develop/
+        dir:
         version: 1.0.0-rc1
     installation:
       node6:
