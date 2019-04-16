@@ -5,16 +5,16 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/sirupsen/logrus"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	tokenMocks "github.com/kyma-project/kyma/components/connector-service/internal/tokens/mocks"
 	"github.com/stretchr/testify/assert"
@@ -23,6 +23,7 @@ import (
 
 const (
 	commonName = "commonName"
+	subject    = "subject"
 )
 
 type dummyClientContextService struct{}
@@ -43,8 +44,8 @@ func (dc dummyClientContextService) GetLogger() *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{})
 }
 
-func (dc dummyClientContextService) FillPlaceholders(format string) string {
-	return format
+func (dc dummyClientContextService) GetSubject() string {
+	return subject
 }
 
 type dummyClientContextServiceWithEmptyURLs struct {
@@ -58,6 +59,22 @@ func (dc dummyClientContextServiceWithEmptyURLs) GetRuntimeUrls() *clientcontext
 	}
 }
 
+type appClientCertCtx struct {
+	*clientcontext.ExtendedApplicationContext
+}
+
+func (cc appClientCertCtx) GetSubject() string {
+	return subject
+}
+
+type runtimeClientCertCtx struct {
+	*clientcontext.ClusterContext
+}
+
+func (cc runtimeClientCertCtx) GetSubject() string {
+	return subject
+}
+
 func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 
 	baseURL := "https://connector-service.kyma.cx/v1/applications"
@@ -65,14 +82,6 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 	newToken := "newToken"
 
 	urlApps := fmt.Sprintf("/v1/applications/signingRequests/info?token=%s", token)
-
-	subjectValues := certificates.CSRSubject{
-		Country:            country,
-		Organization:       organization,
-		OrganizationalUnit: organizationalUnit,
-		Locality:           locality,
-		Province:           province,
-	}
 
 	dummyClientContextService := dummyClientContextService{}
 	clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
@@ -82,7 +91,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 	expectedSignUrl := fmt.Sprintf("%s/certificates?token=%s", baseURL, newToken)
 
 	expectedCertInfo := certInfo{
-		Subject:      fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName),
+		Subject:      subject,
 		Extensions:   "",
 		KeyAlgorithm: "rsa2048",
 	}
@@ -97,7 +106,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Save", dummyClientContextService).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -139,7 +148,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Save", dummyClientContextServiceWithEmptyURLs).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -173,7 +182,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Save", dummyClientContextService).Return(newToken, nil)
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, predefinedGetInfoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, predefinedGetInfoURL, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -202,7 +211,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			return nil, apperrors.Internal("error")
 		}
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, errorExtractor, infoURL, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -228,7 +237,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 		tokenCreator := &tokenMocks.Creator{}
 		tokenCreator.On("Save", dummyClientContextService).Return("", apperrors.Internal("error"))
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, baseURL)
 
 		req, err := http.NewRequest(http.MethodPost, urlApps, bytes.NewReader(tokenRequestRaw))
 		require.NoError(t, err)
@@ -262,17 +271,19 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 			},
 		}
 
+		clientCertCtx := appClientCertCtx{ExtendedApplicationContext: extendedCtx}
+
 		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return *extendedCtx, nil
+			return clientCertCtx, nil
 		}
 
 		tokenCreator := &tokenMocks.Creator{}
-		tokenCreator.On("Save", *extendedCtx).Return(newToken, nil)
+		tokenCreator.On("Save", clientCertCtx).Return(newToken, nil)
 
 		req, err := http.NewRequest(http.MethodGet, urlApps, nil)
 		require.NoError(t, err)
 
-		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, subjectValues, baseURL)
+		infoHandler := NewCSRInfoHandler(tokenCreator, clientContextService, infoURL, baseURL)
 
 		rr := httptest.NewRecorder()
 

@@ -50,19 +50,6 @@ func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.
 	revokedCertsRepo := newRevokedCertsRepository(coreClientSet, opts.namespace, opts.revocationConfigMapName)
 	secretsRepository := newSecretsRepository(coreClientSet, opts.namespace)
 
-	return Handlers{
-		internalAPI: newInternalHandler(tokenCreatorProvider, opts, globalMiddlewares, revokedCertsRepo),
-		externalAPI: newExternalHandler(tokenManager, tokenCreatorProvider, opts, env, globalMiddlewares, secretsRepository, revokedCertsRepo),
-	}
-}
-
-func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider,
-	opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc, secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository) http.Handler {
-
-	lookupEnabled := clientcontext.LookupEnabledType(opts.lookupEnabled)
-
-	lookupService := middlewares.NewGraphQLLookupService()
-
 	subjectValues := certificates.CSRSubject{
 		Country:            env.country,
 		Organization:       env.organization,
@@ -71,7 +58,22 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		Province:           env.province,
 	}
 
-	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName, subjectValues)
+	contextExtractor := clientcontext.NewContextExtractor(subjectValues)
+
+	return Handlers{
+		internalAPI: newInternalHandler(tokenCreatorProvider, opts, globalMiddlewares, revokedCertsRepo),
+		externalAPI: newExternalHandler(tokenManager, tokenCreatorProvider, opts, globalMiddlewares, secretsRepository, revokedCertsRepo, contextExtractor),
+	}
+}
+
+func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc,
+	secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository, extractor *clientcontext.ContextExtractor) http.Handler {
+
+	lookupEnabled := clientcontext.LookupEnabledType(opts.lookupEnabled)
+
+	lookupService := middlewares.NewGraphQLLookupService()
+
+	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName)
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
@@ -96,8 +98,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		ManagementInfoURL:           opts.appsInfoURL,
 		ConnectorServiceBaseURL:     fmt.Sprintf(AppURLFormat, opts.connectorServiceHost),
 		CertificateProtectedBaseURL: fmt.Sprintf(AppURLFormat, opts.certificateProtectedHost),
-		Subject:                     subjectValues,
-		ContextExtractor:            clientcontext.CreateApplicationClientContextService,
+		ContextExtractor:            extractor.CreateApplicationClientContextService,
 		CertService:                 appCertificateService,
 		RevokedCertsRepo:            revocationListRepository,
 	}

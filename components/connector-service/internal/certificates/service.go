@@ -11,7 +11,7 @@ import (
 type Service interface {
 	// SignCSR takes encoded CSR, validates subject and generates Certificate based on CA stored in secret
 	// returns base64 encoded certificate chain
-	SignCSR(encodedCSR []byte, commonName string) (EncodedCertificateChain, apperrors.AppError)
+	SignCSR(encodedCSR []byte, subject string) (EncodedCertificateChain, apperrors.AppError)
 }
 
 type certificateService struct {
@@ -19,7 +19,6 @@ type certificateService struct {
 	certUtil                    CertificateUtility
 	caSecretName                string
 	rootCACertificateSecretName string
-	csrSubject                  CSRSubject
 }
 
 func NewCertificateService(secretRepository secrets.Repository, certUtil CertificateUtility, caSecretName, rootCACertificateSecretName string, csrSubject CSRSubject) Service {
@@ -28,17 +27,16 @@ func NewCertificateService(secretRepository secrets.Repository, certUtil Certifi
 		certUtil:                    certUtil,
 		caSecretName:                caSecretName,
 		rootCACertificateSecretName: rootCACertificateSecretName,
-		csrSubject:                  csrSubject,
 	}
 }
 
-func (svc *certificateService) SignCSR(encodedCSR []byte, commonName string) (EncodedCertificateChain, apperrors.AppError) {
+func (svc *certificateService) SignCSR(encodedCSR []byte, subject string) (EncodedCertificateChain, apperrors.AppError) {
 	csr, err := svc.certUtil.LoadCSR(encodedCSR)
 	if err != nil {
 		return EncodedCertificateChain{}, err
 	}
 
-	err = svc.checkCSR(csr, commonName)
+	err = svc.checkCSR(csr, subject)
 	if err != nil {
 		return EncodedCertificateChain{}, err
 	}

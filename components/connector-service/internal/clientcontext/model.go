@@ -65,11 +65,15 @@ const (
 	LookupDisabled LookupEnabledType = false
 )
 
-type ClientContextService interface {
+type clientContextService interface {
 	GetCommonName() string
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
-	FillPlaceholders(format string) string
+}
+
+type ClientContextService interface {
+	clientContextService
+	GetSubject() string
 }
 
 type ContextExtender interface {
