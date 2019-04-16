@@ -126,7 +126,7 @@ curl {CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.cr
     "metadataUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
     "eventsUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
     "renewCertURL": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals",
-    "revocationsCertURL": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
+    "revokeCertURL": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
   },
   "certificate": {
     "subject": "OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
