@@ -1,109 +1,54 @@
 package dex
 
 import (
-	"context"
-	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"net"
 	"net/http"
-	"os"
-	"os/exec"
-	"strconv"
 	"strings"
 	"testing"
-	"time"
 
-	"github.com/golang/glog"
+	"github.com/kyma-project/kyma/common/ingressgateway"
 	. "github.com/smartystreets/goconvey/convey"
+	"github.com/vrischmann/envconfig"
 )
 
 const (
-	ingressGatewayControllerServiceURLEnv = "INGRESSGATEWAY_FQDN"
-	domainEnvName                         = "KYMA_DOMAIN"
-	isLocalEnvEnvName                     = "IS_LOCAL_ENV"
-	clientId                              = "kyma-client"
-	usernameEnvName                       = "DEX_USER_EMAIL"
-	passwordEnvName                       = "DEX_USER_PASSWORD"
+	clientId = "kyma-client"
 )
 
+type Config struct {
+	IsLocalEnv      bool   `envconfig:"default=true"`
+	DomainName      string `envconfig:"default=kyma.local"`
+	DexUserEmail    string `envconfig:"default=admin@kyma.cx"`
+	DexUserPassword string
+}
+
 func TestSpec(t *testing.T) {
-
-	ingressGatewayControllerServiceURL, envFound := os.LookupEnv(ingressGatewayControllerServiceURLEnv)
-	if !envFound {
-		t.Fatalf("%s env variable not set", ingressGatewayControllerServiceURLEnv)
-	}
-
-	isLocalEnv, envFound := os.LookupEnv(isLocalEnvEnvName)
-	if !envFound {
-		t.Fatal(isLocalEnvEnvName + " env variable not set")
-	}
-
-	testRunningInLocalEnv, err := strconv.ParseBool(isLocalEnv)
+	cfg := Config{}
+	err := envconfig.Init(&cfg)
 	if err != nil {
-		t.Fatal(err)
-	} else if !testRunningInLocalEnv {
-		t.Skip()
+		t.Errorf("Error while loading env config: %s", err)
 	}
 
-	var ingressGatewayControllerAddr string
-	hostLookupResponse, err := net.LookupHost(ingressGatewayControllerServiceURL)
+	if !cfg.IsLocalEnv {
+		t.Skip("Test is enabled on in local env")
+	}
+
+	client, err := ingressgateway.FromEnv().Client()
 	if err != nil {
-		glog.Warningf("Unable to resolve host '%s' (if you are running this test from outside of Kyma ignore this log). Root cause: %v", ingressGatewayControllerServiceURL, err)
-
-		minikubeIp := tryToGetMinikubeIp()
-		if minikubeIp == "" {
-			t.Fatal(err)
-		}
-		ingressGatewayControllerAddr = minikubeIp
-	} else {
-		ingressGatewayControllerAddr = hostLookupResponse[0]
+		t.Errorf("Error while creating ingress gateway client: %s", err)
 	}
 
-	domain, envFound := os.LookupEnv(domainEnvName)
-	if !envFound {
-		t.Fatal(domainEnvName + " env variable not set")
-	}
-
-	username, envFound := os.LookupEnv(usernameEnvName)
-	if !envFound {
-		t.Fatal(usernameEnvName + " env variable not set")
-	}
-
-	password, envFound := os.LookupEnv(passwordEnvName)
-	if !envFound {
-		t.Fatal(passwordEnvName + " env variable not set")
-	}
-
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-
-	if testRunningInLocalEnv {
-		tr.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
-			// Changes request destination address to ingress gateway internal cluster address for requests to dex.
-			if strings.HasPrefix(addr, "dex") {
-				addr = fmt.Sprintf("%s:443", ingressGatewayControllerAddr)
-			}
-			dialer := net.Dialer{}
-			return dialer.DialContext(ctx, network, addr)
-		}
-	}
-
-	dexHttpClient := &http.Client{
-		Transport: tr,
-		Timeout:   time.Second * 10,
-		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			return http.ErrUseLastResponse
-		},
+	client.CheckRedirect = func(req *http.Request, via []*http.Request) error {
+		return http.ErrUseLastResponse
 	}
 
 	idProviderConfig := idProviderConfig{
 		dexConfig: dexConfig{
-			baseUrl:           fmt.Sprintf("https://dex.%s", domain),
-			authorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", domain),
-			tokenEndpoint:     fmt.Sprintf("https://dex.%s/token", domain),
+			baseUrl:           fmt.Sprintf("https://dex.%s", cfg.DomainName),
+			authorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", cfg.DomainName),
+			tokenEndpoint:     fmt.Sprintf("https://dex.%s/token", cfg.DomainName),
 		},
 		clientConfig: clientConfig{
 			id:          clientId,
@@ -111,12 +56,12 @@ func TestSpec(t *testing.T) {
 		},
 
 		userCredentials: userCredentials{
-			username: username,
-			password: password,
+			username: cfg.DexUserEmail,
+			password: cfg.DexUserPassword,
 		},
 	}
 
-	idTokenProvider := newDexIdTokenProvider(dexHttpClient, idProviderConfig)
+	idTokenProvider := newDexIdTokenProvider(client, idProviderConfig)
 
 	Convey("Should issue an ID token", t, func() {
 
@@ -146,14 +91,4 @@ func TestSpec(t *testing.T) {
 		So(tokenPayload["email"].(string), ShouldEqual, idProviderConfig.userCredentials.username)
 		So(tokenPayload["email_verified"].(bool), ShouldBeTrue)
 	})
-}
-
-func tryToGetMinikubeIp() string {
-	mipCmd := exec.Command("minikube", "ip")
-	if mipOut, err := mipCmd.Output(); err != nil {
-		glog.Warningf("Error while getting minikube IP (ignore this message if you are running this test inside Kyma). Root cause: %s", err)
-		return ""
-	} else {
-		return strings.Trim(string(mipOut), "\n")
-	}
 }
