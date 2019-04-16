@@ -35,11 +35,11 @@ func deleteK8s(yamlFile string) {
 }
 
 func printContentsOfNamespace(namespace string) {
-	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "deploy,svc,rs,po,serviceinstance,servicebinding,servicebindingusage,function,subscriptions.eventing.kyma-project.io,api,eventactivation.applicationconnector.kyma-project.io")
+	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "deploy,svc,rs,po,serviceinstance,servicebinding,servicebindingusage,function,subscriptions.eventing.kyma-project.io,api.gateway.kyma-project.io,eventactivation.applicationconnector.kyma-project.io")
 	stdoutStderr, err := getResourcesCmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil {
-		log.Fatal("Unable to get deploy,svc,rs,po,serviceinstance,servicebinding,servicebindingusage,function,subscriptions.eventing.kyma-project.io,api,eventactivation.applicationconnector.kyma-project.io:\n", output)
+		log.Fatal("Unable to get deploy,svc,rs,po,serviceinstance,servicebinding,servicebindingusage,function,subscriptions.eventing.kyma-project.io,api.gateway.kyma-project.io,eventactivation.applicationconnector.kyma-project.io:\n", output)
 	}
 	log.Printf("Current contents of the ns:%s is:\n %v", namespace, output)
 }
