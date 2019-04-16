@@ -33,7 +33,7 @@ test(){
     status=$?
     set -e
 
-    if [[ "$status" -ne 0 ]] || [[ "${UUID}" != $(echo "${out}" | tail -n 1) ]]; then
+    if [[ "$status" -ne 0 ]] || [[ "${UUID}" != "${out}" ]]; then
         echo "kubectl exec error ($status):"
         echo "${out}"
         echo "---"

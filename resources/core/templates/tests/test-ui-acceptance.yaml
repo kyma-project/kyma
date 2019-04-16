@@ -4,11 +4,12 @@ kind: Pod
 metadata:
   name: "test-{{ template "fullname" . }}-ui-acceptance"
   annotations:
-    sidecar.istio.io/inject: "false"
+    sidecar.istio.io/inject: "true"
     "helm.sh/hook": test-success
   labels:
     "helm-chart-test": "true"
 spec:
+  shareProcessNamespace: true
   {{ if .Values.global.isLocalEnv }}
   hostAliases:
    - ip: {{ .Values.test.acceptance.ui.minikubeIP }}
@@ -56,6 +57,24 @@ spec:
       volumeMounts:
         - name: dex-config
           mountPath: /etc/dex/cfg
+    - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+      name: manager
+      command:
+        - bin/sh
+        - -c
+        - |
+          SERVICE="npm"
+          sleep 10
+          while true; do
+          if pgrep -x "${SERVICE}"; then
+            echo "---> ${SERVICE} is running."
+              sleep 10
+            else
+              echo "---> ${SERVICE} has stopped, stopping istio"
+              pkill -TERM pilot-agent
+              break
+            fi
+          done
   # Needed for detecting if static user is disabled
   volumes:
     - name: dex-config

@@ -93,9 +93,10 @@ metadata:
   labels:
     helm-chart-test: "true"
   annotations:
-    sidecar.istio.io/inject: "false"   # needed if the tester could run with side cars
+    sidecar.istio.io/inject: "true"   # needed if the tester could run with side cars
     helm.sh/hook: test-success
 spec:
+  shareProcessNamespace: true
   serviceAccount: {{ .Values.e2eTests.nameTester }}
   containers:
   - image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-tester:{{ .Values.global.event_bus_tests.version }}"
@@ -105,4 +106,21 @@ spec:
       - --publish-event-uri=http://event-bus-publish:8080/v1/events
       - --publish-status-uri=http://event-bus-publish:8080/v1/status/ready
       - --subscriber-image={{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus_tests.dir }}event-bus-e2e-subscriber:{{ .Values.global.event_bus_tests.version }}
+  - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+    name: manager
+    command:
+      - bin/sh
+      - -c 
+      - |
+        SERVICE="/root/e2e-tester"
+        while true; do
+          if pgrep -x "${SERVICE}"; then
+            echo "---> ${SERVICE} is running."
+            sleep 10
+          else
+            echo "---> ${SERVICE} has stopped, stopping istio"
+            pkill -TERM pilot-agent
+            break
+          fi
+        done
   restartPolicy: Never
