@@ -65,6 +65,9 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	myMicroFrontendTest, err := NewMicrofrontendTest()
 	fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
+	myEventBusTest, err := NewEventBusTest()
+	fatalOnError(t, err, "while creating structure for EventBus test")
+
 	// appBrokerTest, err := NewAppBrokerTest()
 	// fatalOnError(t, err, "while creating structure for AppBroker test")
 
@@ -85,6 +88,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		myAssetStoreTest,
 		apiControllerTest,
 		myMicroFrontendTest,
+		myEventBusTest,
 		// appBrokerTest,
 		// helmBrokerTest,
 	}

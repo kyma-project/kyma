@@ -469,6 +469,7 @@ func createSubscriber(subscriberName string, subscriberNamespace string, sbscrIm
 		log.Println("Create Subscriber service")
 		if _, err := clientK8S.CoreV1().Services(subscriberNamespace).Create(util.NewSubscriberService()); err != nil {
 			log.Printf("Create Subscriber service failed: %v\n", err)
+			return err
 		}
 		time.Sleep(30 * time.Second)
 
