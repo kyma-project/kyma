@@ -73,10 +73,12 @@ func getSubscriptionResource(name string, namespace string, uid string, subscrib
 		},
 
 		Status: subApi.SubscriptionStatus{
-			Conditions: []subApi.SubscriptionCondition{
-				{
-					Type:   subApi.EventsActivated,
-					Status: subApi.ConditionTrue,
+			Status: subApi.Status{
+				Conditions: []subApi.SubscriptionCondition{
+					{
+						Type:   subApi.EventsActivated,
+						Status: subApi.ConditionTrue,
+					},
 				},
 			},
 		},
