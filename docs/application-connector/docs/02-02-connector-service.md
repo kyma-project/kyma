@@ -24,8 +24,8 @@ This diagram illustrates the client certificate generation flow in details:
     - information uniquely identifying certificate, such as the Application name
     - information required to generate a CSR  
 
->**NOTE:** The external application should not hardcode any URLs. The information returned from metadata endpoint should be stored by the external application along with the certificate. This approach implicates less coupling and offers a great deal of flexibility. 
+>**NOTE:** The external application should not hardcode any URLs. The information returned from the `metadata` endpoint should be stored by the external application along with the certificate. This approach implicates less coupling and offers a great deal of flexibility. 
 
->**NOTE:**  The external application can call the metadata endpoint to fetch information required to generate a CSR prior to certificate renewal. This approach makes certificate rotation process convenient and flexible, since the external application does not need to store information required to generate a CSR in its data model.     
+>**NOTE:**  The external application can call the `metadata` endpoint to fetch information required to generate a CSR prior to certificate renewal. This approach makes certificate rotation process convenient and flexible, since the external application does not need to store information required to generate a CSR in its data model.     
 
 >**NOTE:** Follow [this](#tutorials-get-the-client-certificate) tutorial to learn how to get a client certificate for your implementation.
