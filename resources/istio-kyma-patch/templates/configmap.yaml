@@ -76,7 +76,6 @@ data:
   injection-in-namespaces: |
     istio-system disabled
     kube-system disabled
-    knative-build disabled
 
   delete: |
     deployment prometheus
