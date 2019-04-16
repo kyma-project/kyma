@@ -1,18 +1,14 @@
 ---
-title: API registration in Application Registry
+title: API registration in the Application Registry
 type: Details
 ---
 
-### Supported formats
-
-The Application Registry supports API Specification in the following formats:
+The Application Registry supports the following formats of the API specification:
 - OpenAPI 2.0
-- OData 2.0
+- OData XML 2.0, 3.0 and 4.0
 
-### Registration methods
-
-Application Registry supports two ways of passing API spec:
-- in JSON format
+You can pass the API specification in two ways:
+- JSON format
 - by `SpecificationUrl`
 
 >**NOTE:** Specification passed directly as a JSON has a higher priority than `SpecificationUrl`, which in such case will be ignored.

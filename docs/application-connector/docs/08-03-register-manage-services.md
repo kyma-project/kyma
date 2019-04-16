@@ -134,7 +134,7 @@ A successful response returns the ID of the registered service:
 
 Application Registry allows you to pass API specification in form of specification URL.
 
-To register API with specification URL replace `api.spec` with `api.specificationUrl`. Be aware that `api.spec` has higher priority than `api.specificationUrl`.
+To register API with specification URL replace `api.spec` with `api.specificationUrl`. If both are provided `api.spec` will be used due to its higher priority.
 
 ```
 "api": {
@@ -148,16 +148,16 @@ To register API with specification URL replace `api.spec` with `api.specificatio
 }
 ```
 
-The Application Registry will fetch the specification from provided URL but it will not use any credentials, therefor the endpoint can not be secured by any authentication mechanism.
+The Application Registry will fetch the specification from provided URL but it will not use any credentials, therefore the endpoint can not be secured by any authentication mechanism.
 
->**NOTE:** Fetching specification from URL is supported only for API Spec. It can not be done for Events and Documentation.
+>**NOTE:** Fetching specification from a URL is supported only for APIs. Fetching specifications for Events or documentation is not supported.
 
 
-## Registering OData API
+## Register the OData API
 
-If no `api.spec` or `api.specificationUrl` are specified and `api.type` is set to `OData`, the Application Registry will try to fetch the specification from the target URL with the `$metadata` path.
+If the **api.spec** or **api.specificationUrl** parameters are not specified and the **api.type** parameter is set to `OData`, the Application Registry will try to fetch specification from the target URL with the `$metadata` path.
 
-For service with the following api:
+For example, for the service with the following API, the Application Registry will try to fetch API specification from `https://services.odata.org/OData/OData.svc/$metadata`.
 ```
 "api": {
   "targetUrl": "https://services.odata.org/OData/OData.svc",
@@ -169,5 +169,3 @@ For service with the following api:
     }
 }
 ```
-
-Application Registry will try to fetch API Spec from `https://services.odata.org/OData/OData.svc/$metadata`.
