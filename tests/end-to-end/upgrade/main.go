@@ -3,9 +3,6 @@ package main
 import (
 	"flag"
 	"fmt"
-	"strings"
-
-	"github.com/pkg/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
@@ -37,7 +34,7 @@ import (
 // Config holds application configuration
 type Config struct {
 	Logger              logger.Config
-	DexUserEmail        string `envconfig:"default=admin@kyma.cx"`
+	DexUserSecret       string `envconfig:"default=admin-user"`
 	DexNamespace        string `envconfig:"default=kyma-system"`
 	MaxConcurrencyLevel int    `envconfig:"default=1"`
 	KubeconfigPath      string `envconfig:"optional"`
@@ -99,12 +96,12 @@ func main() {
 
 	dexConfig := dex.Config{}
 	if action == executeTestsActionName {
-		userPassword, err := getUserPasswordFromCluster(k8sCli, cfg.DexUserEmail, cfg.DexNamespace)
+		userEmail, userPassword, err := getUserPasswordFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace)
 		fatalOnError(err, "while reading user password from cluster")
 
 		dexConfig = dex.Config{
 			Domain:       domainName,
-			UserEmail:    cfg.DexUserEmail,
+			UserEmail:    userEmail,
 			UserPassword: userPassword,
 		}
 	}
@@ -177,16 +174,10 @@ func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
 	return value, nil
 }
 
-func getUserPasswordFromCluster(k8sCli *k8sclientset.Clientset, userEmail, dexNamespace string) (string, error) {
-	userEmailLabel := strings.Replace(userEmail, "@", ".", -1)
-	secretList, err := k8sCli.CoreV1().Secrets(dexNamespace).List(metav1.ListOptions{LabelSelector: fmt.Sprintf("user-email=%s", userEmailLabel)})
+func getUserPasswordFromCluster(k8sCli *k8sclientset.Clientset, userSecret, dexNamespace string) (string, string, error) {
+	secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
-	if len(secretList.Items) != 1 {
-		return "", errors.Errorf("Invalid number of secrets for user email %s in namespace %s: %v", userEmail, dexNamespace, len(secretList.Items))
-	}
-
-	password := secretList.Items[0].Data["password"]
-	return string(password), nil
+	return string(secret.Data["email"]), string(secret.Data["password"]), nil
 }
