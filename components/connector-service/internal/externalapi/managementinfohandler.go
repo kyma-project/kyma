@@ -34,7 +34,7 @@ func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 
 	urls := ih.buildURLs(clientContextService)
 
-	certInfo := makeCertInfo(clientContextService.GetSubject())
+	certInfo := makeCertInfo(clientContextService.GetSubject().ToString())
 
 	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls, ClientIdentity: clientContextService, CertificateInfo: certInfo})
 }

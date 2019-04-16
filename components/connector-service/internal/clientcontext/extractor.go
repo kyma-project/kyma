@@ -64,9 +64,9 @@ func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.C
 	return newClientCertificateContext(extendedCtx, subject), nil
 }
 
-func (ext *ContextExtractor) prepareSubject(tenant, group, commonName string) string {
-	organization := tenant
-	organizationalUnit := group
+func (ext *ContextExtractor) prepareSubject(org, orgUnit, commonName string) certificates.CSRSubject {
+	organization := org
+	organizationalUnit := orgUnit
 
 	if isEmpty(organization) {
 		organization = ext.subjectDefaults.Organization
@@ -76,7 +76,14 @@ func (ext *ContextExtractor) prepareSubject(tenant, group, commonName string) st
 		organizationalUnit = ext.subjectDefaults.OrganizationalUnit
 	}
 
-	return fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, ext.subjectDefaults.Locality, ext.subjectDefaults.Province, ext.subjectDefaults.Country, commonName)
+	return certificates.CSRSubject{
+		Organization:       organization,
+		OrganizationalUnit: organizationalUnit,
+		CommonName:         commonName,
+		Country:            ext.subjectDefaults.Country,
+		Locality:           ext.subjectDefaults.Locality,
+		Province:           ext.subjectDefaults.Province,
+	}
 }
 
 func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Context) (ClientContextService, apperrors.AppError) {

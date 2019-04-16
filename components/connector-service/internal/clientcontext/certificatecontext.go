@@ -1,17 +1,19 @@
 package clientcontext
 
+import "github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+
 type clientCertificateContext struct {
 	clientContextService
-	subject string
+	subject certificates.CSRSubject
 }
 
-func newClientCertificateContext(clientContext clientContextService, subject string) *clientCertificateContext {
+func newClientCertificateContext(clientContext clientContextService, subject certificates.CSRSubject) *clientCertificateContext {
 	return &clientCertificateContext{
 		clientContextService: clientContext,
-		subject:              subject, // TODO - should it be certificates.CSRSubject?
+		subject:              subject,
 	}
 }
 
-func (cc *clientCertificateContext) GetSubject() string {
+func (cc *clientCertificateContext) GetSubject() certificates.CSRSubject {
 	return cc.subject
 }

@@ -10,6 +10,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+
 	"github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
@@ -23,17 +25,25 @@ import (
 
 const (
 	commonName = "commonName"
-	subject    = "subject"
+)
+
+var (
+	subject = certificates.CSRSubject{
+		Organization:       "Org",
+		OrganizationalUnit: "OrgUnit",
+		Country:            "PL",
+		Province:           "Province",
+		Locality:           "Gliwice",
+		CommonName:         "CommonName",
+	}
+
+	strSubject = "OU=Org,O=OrgUnit,L=Gliwice,ST=Province,C=PL,CN=CommonName"
 )
 
 type dummyClientContextService struct{}
 
 func (dc dummyClientContextService) ToJSON() ([]byte, error) {
 	return []byte("test"), nil
-}
-
-func (dc dummyClientContextService) GetCommonName() string {
-	return commonName
 }
 
 func (dc dummyClientContextService) GetRuntimeUrls() *clientcontext.RuntimeURLs {
@@ -44,7 +54,7 @@ func (dc dummyClientContextService) GetLogger() *logrus.Entry {
 	return logrus.WithFields(logrus.Fields{})
 }
 
-func (dc dummyClientContextService) GetSubject() string {
+func (dc dummyClientContextService) GetSubject() certificates.CSRSubject {
 	return subject
 }
 
@@ -63,7 +73,7 @@ type appClientCertCtx struct {
 	*clientcontext.ExtendedApplicationContext
 }
 
-func (cc appClientCertCtx) GetSubject() string {
+func (cc appClientCertCtx) GetSubject() certificates.CSRSubject {
 	return subject
 }
 
@@ -71,7 +81,7 @@ type runtimeClientCertCtx struct {
 	*clientcontext.ClusterContext
 }
 
-func (cc runtimeClientCertCtx) GetSubject() string {
+func (cc runtimeClientCertCtx) GetSubject() certificates.CSRSubject {
 	return subject
 }
 
@@ -91,7 +101,7 @@ func TestCSRInfoHandler_GetCSRInfo(t *testing.T) {
 	expectedSignUrl := fmt.Sprintf("%s/certificates?token=%s", baseURL, newToken)
 
 	expectedCertInfo := certInfo{
-		Subject:      subject,
+		Subject:      strSubject,
 		Extensions:   "",
 		KeyAlgorithm: "rsa2048",
 	}

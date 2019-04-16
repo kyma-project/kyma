@@ -11,7 +11,7 @@ import (
 type Service interface {
 	// SignCSR takes encoded CSR, validates subject and generates Certificate based on CA stored in secret
 	// returns base64 encoded certificate chain
-	SignCSR(encodedCSR []byte, subject string) (EncodedCertificateChain, apperrors.AppError)
+	SignCSR(encodedCSR []byte, subject CSRSubject) (EncodedCertificateChain, apperrors.AppError)
 }
 
 type certificateService struct {
@@ -30,7 +30,7 @@ func NewCertificateService(secretRepository secrets.Repository, certUtil Certifi
 	}
 }
 
-func (svc *certificateService) SignCSR(encodedCSR []byte, subject string) (EncodedCertificateChain, apperrors.AppError) {
+func (svc *certificateService) SignCSR(encodedCSR []byte, subject CSRSubject) (EncodedCertificateChain, apperrors.AppError) {
 	csr, err := svc.certUtil.LoadCSR(encodedCSR)
 	if err != nil {
 		return EncodedCertificateChain{}, err
@@ -100,18 +100,9 @@ func (svc *certificateService) loadRootCACert() ([]byte, apperrors.AppError) {
 	return svc.certUtil.AddCertificateHeaderAndFooter(rootCACrt.Raw), nil
 }
 
-func (svc *certificateService) checkCSR(csr *x509.CertificateRequest, commonName string) apperrors.AppError {
+func (svc *certificateService) checkCSR(csr *x509.CertificateRequest, expectedSubject CSRSubject) apperrors.AppError {
 
-	subjectValues := CSRSubject{
-		CommonName:         commonName,
-		Country:            svc.csrSubject.Country,
-		Organization:       svc.csrSubject.Organization,
-		OrganizationalUnit: svc.csrSubject.OrganizationalUnit,
-		Locality:           svc.csrSubject.Locality,
-		Province:           svc.csrSubject.Province,
-	}
-
-	return svc.certUtil.CheckCSRValues(csr, subjectValues)
+	return svc.certUtil.CheckCSRValues(csr, expectedSubject)
 }
 
 func (svc *certificateService) createCertChain(clientCrt, caCrt []byte) []byte {

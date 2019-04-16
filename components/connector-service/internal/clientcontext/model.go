@@ -3,6 +3,7 @@ package clientcontext
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/sirupsen/logrus"
 )
 
@@ -66,14 +67,13 @@ const (
 )
 
 type clientContextService interface {
-	GetCommonName() string
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
 }
 
 type ClientContextService interface {
 	clientContextService
-	GetSubject() string
+	GetSubject() certificates.CSRSubject
 }
 
 type ContextExtender interface {

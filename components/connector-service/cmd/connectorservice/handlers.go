@@ -61,13 +61,13 @@ func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.
 	contextExtractor := clientcontext.NewContextExtractor(subjectValues)
 
 	return Handlers{
-		internalAPI: newInternalHandler(tokenCreatorProvider, opts, globalMiddlewares, revokedCertsRepo),
+		internalAPI: newInternalHandler(tokenCreatorProvider, opts, globalMiddlewares, revokedCertsRepo, contextExtractor),
 		externalAPI: newExternalHandler(tokenManager, tokenCreatorProvider, opts, globalMiddlewares, secretsRepository, revokedCertsRepo, contextExtractor),
 	}
 }
 
 func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc,
-	secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository, extractor *clientcontext.ContextExtractor) http.Handler {
+	secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository, contextExtractor *clientcontext.ContextExtractor) http.Handler {
 
 	lookupEnabled := clientcontext.LookupEnabledType(opts.lookupEnabled)
 
@@ -98,7 +98,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		ManagementInfoURL:           opts.appsInfoURL,
 		ConnectorServiceBaseURL:     fmt.Sprintf(AppURLFormat, opts.connectorServiceHost),
 		CertificateProtectedBaseURL: fmt.Sprintf(AppURLFormat, opts.certificateProtectedHost),
-		ContextExtractor:            extractor.CreateApplicationClientContextService,
+		ContextExtractor:            contextExtractor.CreateApplicationClientContextService,
 		CertService:                 appCertificateService,
 		RevokedCertsRepo:            revocationListRepository,
 	}
@@ -106,7 +106,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	handlerBuilder.WithApps(appHandlerConfig)
 
 	if opts.central {
-		runtimeCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.runtimeCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName, subjectValues)
+		runtimeCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.runtimeCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName)
 		runtimeTokenTTLMinutes := time.Duration(opts.runtimeTokenExpirationMinutes) * time.Minute
 
 		runtimeHandlerConfig := externalapi.Config{
@@ -114,8 +114,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 			ManagementInfoURL:           opts.runtimesInfoURL,
 			ConnectorServiceBaseURL:     fmt.Sprintf(RuntimeURLFormat, opts.connectorServiceHost),
 			CertificateProtectedBaseURL: fmt.Sprintf(RuntimeURLFormat, opts.certificateProtectedHost),
-			Subject:                     subjectValues,
-			ContextExtractor:            clientcontext.CreateClusterClientContextService,
+			ContextExtractor:            contextExtractor.CreateClusterClientContextService,
 			CertService:                 runtimeCertificateService,
 			RevokedCertsRepo:            revocationListRepository,
 		}
@@ -126,7 +125,8 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	return handlerBuilder.GetHandler()
 }
 
-func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc, revocationListRepository revocation.RevocationListRepository) http.Handler {
+func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc,
+	revocationListRepository revocation.RevocationListRepository, contextExtractor *clientcontext.ContextExtractor) http.Handler {
 
 	ctxRequired := clientcontext.CtxRequiredType(opts.central)
 
@@ -137,7 +137,7 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 	appHandlerConfig := internalapi.Config{
 		TokenManager:     tokenManagerProvider.WithTTL(appTokenTTLMinutes),
 		CSRInfoURL:       fmt.Sprintf(appCSRInfoFmt, opts.connectorServiceHost),
-		ContextExtractor: clientcontext.CreateApplicationClientContextService,
+		ContextExtractor: contextExtractor.CreateApplicationClientContextService,
 		RevokedCertsRepo: revocationListRepository,
 	}
 
@@ -153,7 +153,7 @@ func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *
 		runtimeHandlerConfig := internalapi.Config{
 			TokenManager:            tokenManagerProvider.WithTTL(runtimeTokenTTLMinutes),
 			CSRInfoURL:              fmt.Sprintf(runtimeCSRInfoFmt, opts.connectorServiceHost),
-			ContextExtractor:        clientcontext.CreateClusterClientContextService,
+			ContextExtractor:        contextExtractor.CreateClusterClientContextService,
 			RevokedRuntimeCertsRepo: revocationListRepository,
 		}
 

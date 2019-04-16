@@ -4,6 +4,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 
 	"github.com/stretchr/testify/assert"
@@ -14,12 +16,23 @@ const (
 	appName = "appName"
 	tenant  = "tenant"
 	group   = "group"
-	token   = "token"
+)
+
+var (
+	subjectDefaults = certificates.CSRSubject{
+		Country:            "PL",
+		Organization:       "Org",
+		OrganizationalUnit: "OrgUnit",
+		Province:           "Province",
+		Locality:           "Gliwice",
+		CommonName:         "CommonName",
+	}
 )
 
 func Test_ExtractSerializableApplicationContext(t *testing.T) {
 
 	t.Run("should return ApplicationContext", func(t *testing.T) {
+		// given
 		appCtxPayload := ApplicationContext{
 			Application:    appName,
 			ClusterContext: ClusterContext{Group: group, Tenant: tenant},
@@ -27,42 +40,67 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 
 		ctx := appCtxPayload.ExtendContext(context.Background())
 
-		serializable, err := CreateApplicationClientContextService(ctx)
+		extractor := NewContextExtractor(subjectDefaults)
+
+		// when
+		clientCtx, err := extractor.CreateApplicationClientContextService(ctx)
 		require.NoError(t, err)
 
-		extractedContext, ok := serializable.(ApplicationContext)
-		assert.True(t, ok)
+		// then
+		certContext, ok := clientCtx.(*clientCertificateContext)
+		require.True(t, ok)
 
-		assert.Equal(t, appCtxPayload, extractedContext)
+		extractedAppCtx, ok := certContext.clientContextService.(ApplicationContext)
+		require.True(t, ok)
+
+		assert.Equal(t, appCtxPayload, extractedAppCtx)
 	})
 
 	t.Run("should fail when there is no ApplicationContext", func(t *testing.T) {
-		_, err := CreateApplicationClientContextService(context.Background())
+		// given
+		extractor := NewContextExtractor(subjectDefaults)
+
+		// when
+		_, err := extractor.CreateApplicationClientContextService(context.Background())
 		require.Error(t, err)
 
+		// then
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 	})
 }
 
 func Test_ExtractSerializableClusterContext(t *testing.T) {
 	t.Run("should return ClusterToken", func(t *testing.T) {
+		// given
 		clusterCtxPayload := ClusterContext{Group: group, Tenant: tenant}
 
 		ctx := clusterCtxPayload.ExtendContext(context.Background())
 
-		serializable, err := CreateClusterClientContextService(ctx)
+		extractor := NewContextExtractor(subjectDefaults)
+
+		// when
+		clientCtx, err := extractor.CreateClusterClientContextService(ctx)
 		require.NoError(t, err)
 
-		extractedContext, ok := serializable.(ClusterContext)
-		assert.True(t, ok)
+		// then
+		certContext, ok := clientCtx.(*clientCertificateContext)
+		require.True(t, ok)
 
-		assert.Equal(t, clusterCtxPayload, extractedContext)
+		extractedClusterCtx, ok := certContext.clientContextService.(ClusterContext)
+		require.True(t, ok)
+
+		assert.Equal(t, clusterCtxPayload, extractedClusterCtx)
 	})
 
 	t.Run("should fail when there is no ClusterContext", func(t *testing.T) {
-		_, err := CreateClusterClientContextService(context.Background())
+		// given
+		extractor := NewContextExtractor(subjectDefaults)
+
+		// when
+		_, err := extractor.CreateClusterClientContextService(context.Background())
 		require.Error(t, err)
 
+		// then
 		assert.Equal(t, apperrors.CodeInternal, err.Code())
 	})
 }

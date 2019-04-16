@@ -26,13 +26,6 @@ import (
 const (
 	appName = "appName"
 	token   = "token"
-
-	host               = "host"
-	country            = "country"
-	organization       = "organization"
-	organizationalUnit = "organizationalUnit"
-	locality           = "locality"
-	province           = "province"
 )
 
 var (
@@ -57,7 +50,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 		}
 
 		certService := &certMock.Service{}
-		certService.On("SignCSR", decodedCSR, commonName).Return(encodedChain, nil)
+		certService.On("SignCSR", decodedCSR, subject).Return(encodedChain, nil)
 
 		dummyClientContext := dummyClientContextService{}
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
@@ -158,7 +151,7 @@ func TestSignatureHandler_SignCSR(t *testing.T) {
 	t.Run("should return 500 when failed to sign CSR", func(t *testing.T) {
 		// given
 		certService := &certMock.Service{}
-		certService.On("SignCSR", decodedCSR, commonName).Return(certificates.EncodedCertificateChain{}, apperrors.Internal("error"))
+		certService.On("SignCSR", decodedCSR, subject).Return(certificates.EncodedCertificateChain{}, apperrors.Internal("error"))
 
 		dummyClientContext := dummyClientContextService{}
 		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {

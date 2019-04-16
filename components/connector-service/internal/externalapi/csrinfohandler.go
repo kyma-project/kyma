@@ -52,7 +52,7 @@ func (ih *csrInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 
 	csrURL := ih.makeCSRURLs(newToken)
 
-	certInfo := makeCertInfo(clientContextService.GetSubject())
+	certInfo := makeCertInfo(clientContextService.GetSubject().ToString())
 
 	httphelpers.RespondWithBody(w, http.StatusOK, csrInfoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }
