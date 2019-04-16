@@ -13,6 +13,14 @@
   revision = "fd208923b012d2b64c790e98c7731b32f676ea04"
 
 [[projects]]
+  digest = "1:13d5750ba049ce46bf931792803f1d5584b04026df9badea5931e33c22aa34ee"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "08d411bf8302219fe47ca04dbdf9de892010c5e5"
+  version = "v2.2.0"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -143,9 +151,12 @@
   version = "v9.0.0"
 
 [[projects]]
-  digest = "1:c563cf3dbd3765c3810ed7563791cd7a2fd8812865a1d7c64f2ea93bdd9ce5d8"
+  branch = "resilient-http"
+  digest = "1:9e119ef290c2a4b5f5839926c8a070c5c5d8048f8119905045012f2fde215c2f"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "common/ingressgateway",
+    "common/resilient",
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/application-broker/pkg/client/clientset/versioned",
     "components/application-broker/pkg/client/clientset/versioned/scheme",
@@ -154,15 +165,16 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
-    "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
-    "components/binding-usage-controller/pkg/client/clientset/versioned",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/scheme",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
+    "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/scheme",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
+  revision = "d5c25ad8d863f8840621de814052ce8063eb096a"
+  source = "https://github.com/sjanota/kyma"
 
 [[projects]]
   digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
@@ -516,21 +528,22 @@
     "github.com/Bplotka/go-httplog",
     "github.com/Bplotka/go-httplog/logrus",
     "github.com/ghodss/yaml",
-    "github.com/golang/glog",
     "github.com/golang/lint/golint",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kubernetes/client-go/kubernetes/typed/core/v1",
+    "github.com/kyma-project/kyma/common/ingressgateway",
+    "github.com/kyma-project/kyma/common/resilient",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
-    "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "github.com/pkg/errors",
     "github.com/pmorie/go-open-service-broker-client/v2",
     "github.com/sirupsen/logrus",
