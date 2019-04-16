@@ -202,7 +202,7 @@
   version = "v0.1.42"
 
 [[projects]]
-  digest = "1:04235537e24a172a0bdf0a1a3c7990e9f3bb1f396b780457ea5d3c127fe9fcd4"
+  digest = "1:9c718c4252c7d289ccf969173ffcb5876791fce189f7c2d3c30a58ad534e80ae"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
