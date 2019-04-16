@@ -39,6 +39,14 @@
   version = "v10.15.5"
 
 [[projects]]
+  digest = "1:13d5750ba049ce46bf931792803f1d5584b04026df9badea5931e33c22aa34ee"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "08d411bf8302219fe47ca04dbdf9de892010c5e5"
+  version = "v2.2.0"
+
+[[projects]]
   digest = "1:49b76494b9255c8d82aff7b0c77681bea23a1c301632473abe88da5630799a4b"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -790,6 +798,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/avast/retry-go",
     "github.com/ghodss/yaml",
     "github.com/google/uuid",
     "github.com/heptio/ark/pkg/apis/ark/v1",

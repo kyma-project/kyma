@@ -46,6 +46,10 @@ required = [
   name = "k8s.io/client-go"
   version = "kubernetes-1.11.3"
 
+[[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "2.2.0"
+
 [prune]
   go-tests = true
   unused-packages = true

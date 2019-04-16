@@ -3,9 +3,13 @@ package backupe2e
 import (
 	"crypto/tls"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/avast/retry-go"
+	"github.com/pkg/errors"
 
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 	"k8s.io/apimachinery/pkg/api/resource"
@@ -111,7 +115,7 @@ func (t ApiControllerTest) TestResourcesError(namespace string) error {
 		return err
 	}
 
-	err = t.callFunctionWithoutToken(2 * time.Minute)
+	err = t.callFunctionWithoutToken()
 	if err != nil {
 		return err
 	}
@@ -121,7 +125,7 @@ func (t ApiControllerTest) TestResourcesError(namespace string) error {
 		return err
 	}
 
-	err = t.callFunctionWithToken(token, 2*time.Minute)
+	err = t.callFunctionWithToken(token)
 	if err != nil {
 		return err
 	}
@@ -133,33 +137,34 @@ func (t ApiControllerTest) DeleteResources(namespace string) {
 	// There is not need to be implemented for this test.
 }
 
-func (t ApiControllerTest) callFunctionWithoutToken(waitMax time.Duration) error {
-	tick := time.Tick(2 * time.Second)
-	timeout := time.After(waitMax)
-	messages := ""
+func (t ApiControllerTest) callFunctionWithoutToken() error {
 	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
-	for {
-		select {
-		case <-tick:
-			host := fmt.Sprintf("https://%s", t.hostName)
-			resp, err := http.Get(host)
-			if err != nil {
-				messages += fmt.Sprintf("%+v\n", err)
-				break
-			}
-			if resp.StatusCode == http.StatusUnauthorized {
-				return nil
-			}
-			messages += fmt.Sprintf("%+v", err)
-
-		case <-timeout:
-			return fmt.Errorf("Could not get function output:\n %v", messages)
+	err := retry.Do(func() error {
+		host := fmt.Sprintf("https://%s", t.hostName)
+		resp, err := http.Get(host)
+		if err != nil {
+			return err
 		}
+		if resp.StatusCode == http.StatusUnauthorized {
+			return nil
+		}
+		rspBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		return errors.Errorf("unexpected response %v: %s", resp.StatusCode, string(rspBody))
+	},
+		retry.Delay(2*time.Second),
+		retry.Attempts(60),
+	)
+	if err != nil {
+		err = errors.Wrap(err, "cannot callFunctionWithoutToken")
 	}
+	return err
 }
 
-func (t ApiControllerTest) callFunctionWithToken(token string, waitmax time.Duration) error {
+func (t ApiControllerTest) callFunctionWithToken(token string) error {
 	client := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
@@ -174,28 +179,27 @@ func (t ApiControllerTest) callFunctionWithToken(token string, waitmax time.Dura
 
 	req.Header.Add("Authorization", "Bearer "+token)
 
-	tick := time.Tick(2 * time.Second)
-	timeout := time.After(waitmax)
-	messages := ""
-
-	for {
-		select {
-		case <-tick:
-
-			resp, err := client.Do(req)
-			if err != nil {
-				messages += fmt.Sprintf("%+v\n", err)
-				break
-			}
-			if resp.StatusCode == http.StatusOK {
-				return nil
-			}
-			messages += fmt.Sprintf("%+v", err)
-
-		case <-timeout:
-			return fmt.Errorf("Could not get function output:\n %v", messages)
+	err = retry.Do(func() error {
+		resp, err := client.Do(req)
+		if err != nil {
+			return err
 		}
+		if resp.StatusCode == http.StatusOK {
+			return nil
+		}
+		rspBody, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return err
+		}
+		return errors.Errorf("unexpected response %v: %s", resp.StatusCode, string(rspBody))
+	},
+		retry.Delay(2*time.Second),
+		retry.Attempts(60),
+	)
+	if err != nil {
+		err = errors.Wrap(err, "cannot callFunctionWithToken")
 	}
+	return err
 }
 
 func (t ApiControllerTest) createApi(namespace string) (*apiv1alpha2.Api, error) {
@@ -297,45 +301,34 @@ func (t ApiControllerTest) createFunction(namespace string) (*kubelessV1.Functio
 }
 
 func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.Duration) error {
-	timeout := time.After(waitmax)
-	tick := time.Tick(2 * time.Second)
-	for {
-		select {
-		case <-timeout:
-			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
-			if err != nil {
-				return err
-			}
-			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pods)
-		case <-tick:
-			pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
-			if err != nil {
-				return err
-			}
-			if len(pods.Items) == 0 {
-				break
-			}
-
-			if len(pods.Items) > 1 {
-				return fmt.Errorf("deployed 1 pod, got %v: %+v", len(pods.Items), pods)
-			}
-
-			pod := pods.Items[0]
-			if pod.Status.Phase == corev1.PodRunning {
-				return nil
-			}
-			if pod.Status.Phase == corev1.PodSucceeded || pod.Status.Phase == corev1.PodFailed || pod.Status.Phase == corev1.PodUnknown {
-				return fmt.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
-			}
+	failed := false
+	return retry.Do(func() error {
+		pods, err := t.coreInterface.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: "function=" + t.functionName})
+		if err != nil {
+			return err
 		}
-	}
+		if len(pods.Items) == 0 {
+			return errors.New("pod not scheduled yet")
+		}
+		if len(pods.Items) > 1 {
+			failed = true
+			return errors.Errorf("expected 1 pod, got %v: %+v", len(pods.Items), pods)
+		}
+
+		pod := pods.Items[0]
+		if pod.Status.Phase == corev1.PodRunning {
+			return nil
+		}
+		return errors.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
+	},
+		retry.Delay(2*time.Second),
+		retry.Attempts(60),
+		retry.RetryIf(func(_ error) bool {
+			return !failed
+		}),
+	)
 }
 
 func (t ApiControllerTest) fetchDexToken() (string, error) {
-	token, err := dex.Authenticate(t.idpConfig)
-	if err != nil {
-		return "", err
-	}
-
-	return token, nil
+	return dex.Authenticate(t.idpConfig)
 }
