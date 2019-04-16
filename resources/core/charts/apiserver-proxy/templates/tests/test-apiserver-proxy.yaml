@@ -29,7 +29,9 @@ spec:
         args: ["-c", "sleep 10; ./test.sh; exit_code=$?; pkill -INT pilot-agent; exit $exit_code;"]
         env:
             - name: POD_NAME
-              value: test-{{ .Release.Name }}-apiserver-proxy
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
             - name: DOMAIN
               value: {{ .Values.global.ingress.domainName }}
             - name: USER_EMAIL
