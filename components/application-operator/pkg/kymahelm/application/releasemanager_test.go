@@ -28,9 +28,7 @@ const (
     applicationGatewayTestsImage: 
     eventServiceImage: 
     eventServiceTestsImage: 
-    subjectCN: %s
-    subjectOrganization: %s
-    subjectOrganizationUnit: %s`
+    ingressValidationRule: %s`
 )
 
 var (
@@ -63,7 +61,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, appName, "", "")
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, fmt.Sprintf("%s%s%s", "'(.*(CN=", appName, "(,|]|$)).*)'"))
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
@@ -98,7 +96,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			Spec:       v1alpha1.ApplicationSpec{Tenant: "tenant", Group: "group"},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "default-app", "tenant", "group")
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, fmt.Sprintf("%s%s%s%s%s%s%s", "'(.*(OU=", "group", "(,|]|$)).*(O=", "tenant", "((,|]|$)).*(CN=", appName, "(,|]|$)).*)'"))
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)

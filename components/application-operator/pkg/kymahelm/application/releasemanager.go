@@ -1,6 +1,7 @@
 package application
 
 import (
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
@@ -102,10 +103,10 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
 	overridesData := r.overridesDefaults
 	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
-		overridesData.SubjectOrganization = application.Spec.Tenant
-		overridesData.SubjectOrganizationUnit = application.Spec.Group
+		overridesData.IngressValidationRule = fmt.Sprintf("%s%s%s%s%s%s%s", "'(.*(OU=", application.Spec.Group, "(,|]|$)).*(O=", application.Spec.Tenant, "((,|]|$)).*(CN=", application.Name, "(,|]|$)).*)'")
+	} else {
+		overridesData.IngressValidationRule = fmt.Sprintf("%s%s%s", "'(.*(CN=", application.Name, "(,|]|$)).*)'")
 	}
-	overridesData.SubjectCN = application.Name
 
 	return kymahelm.ParseOverrides(overridesData, overridesTemplate)
 }
