@@ -246,7 +246,7 @@
     "tests/end-to-end/backup-restore-test/utils/fetch-dex-token",
   ]
   pruneopts = "UT"
-  revision = "f6ec9215627d12fa2a3ab799a8edf8ddabf09ab4"
+  revision = "0f324b1d10bc9cff42fd5d60b72abf1ec7e465f7"
   source = "https://github.com/sjanota/kyma"
 
 [[projects]]
