@@ -102,4 +102,19 @@ metadata:
     kyma-project.io/installation: ""
 data:
   test.acceptance.ui.logging.enabled: "__LOGGING_INSTALL_ENABLED__"
-
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: assetstore-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: assetstore
+    kyma-project.io/installation: ""
+data:
+  minio.persistence.enabled: "__MINIO_PERSISTENCE_ENABLED__"
+  minio.gcsgateway.enabled: "__MINIO_GCS_GATEWAY_ENABLED__"
+  minio.gcsgateway.gcsKeySecret: "__MINIO_GCS_GATEWAY_GCS_KEY_SECRET__"
+  minio.gcsgateway.enabled: "__MINIO_GCS_GATEWAY_PROJECT_ID__"
+  minio.defaultBucket.enabled: "__MINIO_PERSISTENCE_ENABLED__"

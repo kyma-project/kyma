@@ -22,6 +22,12 @@ minio:
   accessKey: admin
   secretKey: topSecretKey
   replicas: 1
+  persistence:
+    enabled: true
+  gcsgateway:
+    enabled: false
+    gcsKeySecret: ""
+    projectId: ""
 
   deployment:
     strategy:
