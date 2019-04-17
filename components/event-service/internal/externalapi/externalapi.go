@@ -7,11 +7,12 @@ import (
 	"github.com/gorilla/mux"
 )
 
+//ActiveEventsHandler is an interface representing handler for the /v1/activeevents endpoint
 type ActiveEventsHandler interface {
 	GetActiveEvents(w http.ResponseWriter, r *http.Request)
 }
 
-// NewHandler creates http.Handler(s) for the /v1/events and /v1/health endpoints
+// NewHandler creates http.Handler(s) for the /v1/events /v1/activeevents and /v1/health endpoints
 func NewHandler(maxRequestSize int64) http.Handler {
 	router := mux.NewRouter()
 

@@ -11,6 +11,7 @@ type activeEventsHandler struct {
 	EventsClient registered.EventsClient
 }
 
+//NewActiveEventsHandler creates handler to handle activeevents endpoint
 func NewActiveEventsHandler(eventsClient registered.EventsClient) ActiveEventsHandler {
 	return &activeEventsHandler{EventsClient: eventsClient}
 }

@@ -7,10 +7,12 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+//EventsClient interface
 type EventsClient interface {
 	GetActiveEvents(appName string) (ActiveEvents, error)
 }
 
+//ActiveEvents represents collection of all events with subscriptions
 type ActiveEvents struct {
 	Events []string `json:"events"`
 }
@@ -20,6 +22,7 @@ type eventsClient struct {
 	namespacesClient    core.NamespaceInterface
 }
 
+//NewEventsClient function creates client for retrieving all active events
 func NewEventsClient() (EventsClient, error) {
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {
