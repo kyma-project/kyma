@@ -33,63 +33,63 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: develop/
-    version: ff50edcf
+    dir:
+    version: 1.0.0-rc1
   api_controller:
-    dir: develop/
-    version: "1323f962"
+    dir:
+    version: 1.0.0-rc1
   api_controller_acceptance_tests:
-    dir: develop/
-    version: 736988df
+    dir:
+    version: 1.0.0-rc1
     testNamespace: api-controller-tests
   apiserver_proxy:
-    dir: develop/
-    version: "962ad9b6"
+    dir:
+    version: 1.0.0-rc1
   configurations_generator:
-    dir: develop/
-    version: aabedc33
+    dir:
+    version: 1.0.0-rc1
   docs:
-    dir: develop/
-    version: 98a43f0c
+    dir:
+    version: 1.0.0-rc1
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
     # Example: clusterDocsTopicsVersion: "0.9.0"
-    clusterDocsTopicsVersion: master
+    clusterDocsTopicsVersion: release-1.0
   namespace_controller:
-    dir: develop/
-    version: 8a10f0ed
+    dir:
+    version: 1.0.0-rc1
   kubeless_integration_tests:
-    dir: develop/tests/
-    version: 50d9482b
+    dir: tests/
+    version: 1.0.0-rc1
   kubeless_tests:
-    dir: develop/
-    version: a9bfa9fc
+    dir:
+    version: 1.0.0-rc1
   test_apiserver_proxy:
-    dir: develop/
-    version: 311ed23b
+    dir:
+    version: 1.0.0-rc1
   test_namespace_controller:
-    dir: develop/
-    version: 6b4c356f
+    dir:
+    version: 1.0.0-rc1
   console_backend_service:
-    dir: develop/
-    version: '9ecc0bcc'
+    dir:
+    version: 1.0.0-rc1
   console_backend_service_test:
-    dir: develop/
-    version: '9ecc0bcc'
+    dir:
+    version: 1.0.0-rc1
   cluster_users_test:
-    dir: develop/
-    version: 3d94e9d8
+    dir:
+    version: 1.0.0-rc1
   xip_patch:
-    dir: develop/
-    version: "d20b1c29"
+    dir:
+    version: 1.0.0-rc1
   kubeless_images:
     runtime:
       node6:
-        dir: develop/
-        version: "a9cdca75"
+        dir:
+        version: 1.0.0-rc1
       node8:
-        dir: develop/
-        version: "a9cdca75"
+        dir:
+        version: 1.0.0-rc1
     installation:
       node6:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
