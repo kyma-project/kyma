@@ -15,6 +15,24 @@ func NewResolver(err error) *Resolver {
 	return &Resolver{err: err}
 }
 
+// AddAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, urls
+func (_m *Resolver) AddAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// AddonsConfigurationsQuery provides a failing mock function with given fields: ctx, first, offset
+func (_m *Resolver) AddonsConfigurationsQuery(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error) {
+	var r0 []gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ClusterServiceBrokerEventSubscription provides a failing mock function with given fields: ctx
 func (_m *Resolver) ClusterServiceBrokerEventSubscription(ctx context.Context) (<-chan gqlschema.ClusterServiceBrokerEvent, error) {
 	var r0 <-chan gqlschema.ClusterServiceBrokerEvent
@@ -141,6 +159,15 @@ func (_m *Resolver) ClusterServiceClassesQuery(ctx context.Context, first *int, 
 	return r0, r1
 }
 
+// Create provides a failing mock function with given fields: ctx, name, urls, labels
+func (_m *Resolver) CreateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // CreateServiceBindingMutation provides a failing mock function with given fields: ctx, serviceBindingName, serviceInstanceName, env, parameters
 func (_m *Resolver) CreateServiceBindingMutation(ctx context.Context, serviceBindingName *string, serviceInstanceName string, env string, parameters *gqlschema.JSON) (*gqlschema.CreateServiceBindingOutput, error) {
 	var r0 *gqlschema.CreateServiceBindingOutput
@@ -159,6 +186,15 @@ func (_m *Resolver) CreateServiceInstanceMutation(ctx context.Context, namespace
 	return r0, r1
 }
 
+// Delete provides a failing mock function with given fields: ctx, name
+func (_m *Resolver) DeleteAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // DeleteServiceBindingMutation provides a failing mock function with given fields: ctx, serviceBindingName, env
 func (_m *Resolver) DeleteServiceBindingMutation(ctx context.Context, serviceBindingName string, env string) (*gqlschema.DeleteServiceBindingOutput, error) {
 	var r0 *gqlschema.DeleteServiceBindingOutput
@@ -171,6 +207,15 @@ func (_m *Resolver) DeleteServiceBindingMutation(ctx context.Context, serviceBin
 // DeleteServiceInstanceMutation provides a failing mock function with given fields: ctx, name, namespace
 func (_m *Resolver) DeleteServiceInstanceMutation(ctx context.Context, name string, namespace string) (*gqlschema.ServiceInstance, error) {
 	var r0 *gqlschema.ServiceInstance
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// RemoveAddonsConfigurationURLs provides a failing mock function with given fields: ctx, name, urls
+func (_m *Resolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
 	var r1 error
 	r1 = _m.err
 
@@ -405,6 +450,15 @@ func (_m *Resolver) ServiceInstanceServicePlanField(ctx context.Context, obj *gq
 // ServiceInstancesQuery provides a failing mock function with given fields: ctx, namespace, first, offset, status
 func (_m *Resolver) ServiceInstancesQuery(ctx context.Context, namespace string, first *int, offset *int, status *gqlschema.InstanceStatusType) ([]gqlschema.ServiceInstance, error) {
 	var r0 []gqlschema.ServiceInstance
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
+// Update provides a failing mock function with given fields: ctx, name, urls, labels
+func (_m *Resolver) UpdateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	var r0 *gqlschema.AddonsConfiguration
 	var r1 error
 	r1 = _m.err
 

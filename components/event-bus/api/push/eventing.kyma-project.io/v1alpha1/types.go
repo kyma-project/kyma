@@ -26,8 +26,6 @@ type SubscriptionSpec struct {
 	SourceID                      string `json:"source_id"`
 }
 
-// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
-
 //SubscriptionList
 type SubscriptionList struct {
 	metav1.TypeMeta `json:",inline"`
@@ -37,7 +35,11 @@ type SubscriptionList struct {
 }
 
 type SubscriptionStatus struct {
-	Conditions []SubscriptionCondition `json:"conditions"`
+	Status `json:",inline"`
+}
+
+type Status struct {
+	Conditions Conditions `json:"conditions"`
 }
 
 type SubscriptionCondition struct {
@@ -47,16 +49,17 @@ type SubscriptionCondition struct {
 	Reason             string                    `json:"reason"`
 	Message            string                    `json:"message"`
 }
-type SubscriptionConditionType string
-
-const (
-	EventsActivated SubscriptionConditionType = "events-activated"
-	Ready SubscriptionConditionType = "is-ready"
-)
 
 type ConditionStatus string
+type SubscriptionConditionType string
+type Conditions []SubscriptionCondition
 
 const (
+	// condition status values
 	ConditionTrue  ConditionStatus = "True"
 	ConditionFalse ConditionStatus = "False"
+
+	// subscription condition type values
+	Ready           SubscriptionConditionType = "is-ready"
+	EventsActivated SubscriptionConditionType = "events-activated"
 )
