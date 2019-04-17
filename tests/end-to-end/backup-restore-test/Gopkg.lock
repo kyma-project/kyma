@@ -6,8 +6,8 @@
   name = "cloud.google.com/go"
   packages = ["compute/metadata"]
   pruneopts = "NUT"
-  revision = "458e1f376a2b44413160b5d301183b65debaa3f6"
-  version = "v0.37.2"
+  revision = "fcb9a2d5f791d07be64506ab54434de65989d370"
+  version = "v0.37.4"
 
 [[projects]]
   digest = "1:b9007f703ec9fe98a21ac92605a3126e6142d1a5fd87d5f7e1759f721f04230d"
@@ -39,15 +39,7 @@
   version = "v10.15.5"
 
 [[projects]]
-  digest = "1:13d5750ba049ce46bf931792803f1d5584b04026df9badea5931e33c22aa34ee"
-  name = "github.com/avast/retry-go"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "08d411bf8302219fe47ca04dbdf9de892010c5e5"
-  version = "v2.2.0"
-
-[[projects]]
-  digest = "1:49b76494b9255c8d82aff7b0c77681bea23a1c301632473abe88da5630799a4b"
+  digest = "1:9e06caa2de1be4cdbcdccd478b23a3c4f6487dcb73868c405039bd1496a5f72a"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -90,8 +82,8 @@
     "service/sts",
   ]
   pruneopts = "NUT"
-  revision = "9e05738701c04cb3d4ccdb493ad4f3c4c3994757"
-  version = "v1.19.5"
+  revision = "cf58d169c2d60e36f54964ceb4b9baa3434dbfe7"
+  version = "v1.19.12"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -194,12 +186,12 @@
   version = "v1.0.0"
 
 [[projects]]
-  branch = "master"
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
   name = "github.com/google/gofuzz"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "24818f796faf91cd76ec7bddd72458fbced7a6c1"
+  revision = "f140a6486e521aad38f5917de355cbf147cc0496"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:ab3ec1fe3e39bac4b3ab63390767766622be35b7cab03f47f787f9ec60522a53"
@@ -227,7 +219,7 @@
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
   pruneopts = "NUT"
-  revision = "bb2674552d8fc183605e16acbf9e8f0a0b031dee"
+  revision = "bd77b112433e999447bf4bc599e36214ba494a99"
 
 [[projects]]
   branch = "master"
@@ -252,10 +244,11 @@
   version = "v0.5.1"
 
 [[projects]]
-  digest = "1:3ce4ec15d5766f6e069ab9a8b1be49fb9d8cb9c9402b34d47ebefa13c31b9af3"
-  name = "github.com/heptio/ark"
+  digest = "1:97d6e14f55ce7bf504f7421c7e1dbec34eb24ad554b582605784b85d4d826429"
+  name = "github.com/heptio/velero"
   packages = [
     "pkg/apis/ark/v1",
+    "pkg/apis/velero/v1",
     "pkg/backup",
     "pkg/buildinfo",
     "pkg/client",
@@ -269,9 +262,10 @@
     "pkg/generated/clientset/versioned",
     "pkg/generated/clientset/versioned/scheme",
     "pkg/generated/clientset/versioned/typed/ark/v1",
-    "pkg/generated/informers/externalversions/ark/v1",
+    "pkg/generated/clientset/versioned/typed/velero/v1",
     "pkg/generated/informers/externalversions/internalinterfaces",
-    "pkg/generated/listers/ark/v1",
+    "pkg/generated/informers/externalversions/velero/v1",
+    "pkg/generated/listers/velero/v1",
     "pkg/kuberesource",
     "pkg/persistence",
     "pkg/podexec",
@@ -286,8 +280,8 @@
     "third_party/kubernetes/pkg/kubectl/cmd/util",
   ]
   pruneopts = "NUT"
-  revision = "bcc76c63d01a3d9adb83f76ed0ecab74a7be1d74"
-  version = "v0.10.2"
+  revision = "ab2fc65c02ecdcb9bb1690e3afe67a3b3196aebc"
+  version = "v0.11.0"
 
 [[projects]]
   digest = "1:aaa38889f11896ee3644d77e17dc7764cc47f5f3d3b488268df2af2b52541c5f"
@@ -452,24 +446,25 @@
   version = "v1.2.0"
 
 [[projects]]
-  digest = "1:bb9033d47c116ea3b981ff159bdef73df8351b0b9700da2066339b97211b1bf0"
+  digest = "1:998e4640c25e00ccb7b2569bf94562283937b8afb3485c0e1a0a05a15330240d"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "dae0fa8d5b0c810a8ab733fbd5510c7cae84eca4"
-  version = "v1.4.0"
+  revision = "8bdbc7bcc01dcbb8ec23dc8a28e332258d25251f"
+  version = "v1.4.1"
 
 [[projects]]
-  digest = "1:1f0b284a6858827de4c27c66b49b2b25df3e16b031c2b57b7892273131e7dd2b"
+  digest = "1:a0509115762ee481fd95b60521b4dcc5ad226c54b741a4924f4f28c0cc6aabc8"
   name = "github.com/smartystreets/assertions"
   packages = [
     ".",
+    "internal/go-diff/diffmatchpatch",
     "internal/go-render/render",
     "internal/oglematchers",
   ]
   pruneopts = "NUT"
-  revision = "7678a5452ebea5b7090a6b163f844c133f523da2"
-  version = "1.8.3"
+  revision = "f487f9de1cd36ebab28235b9373028812fb47cbd"
+  version = "1.10.1"
 
 [[projects]]
   digest = "1:7efd0b2309cdd6468029fa30c808c50a820c9344df07e1a4bbdaf18f282907aa"
@@ -513,11 +508,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "a5d413f7728c81fb97d96a2b722368945f651e78"
+  revision = "88737f569e3a9c7ab309cdc09a07fe7fc87233c3"
 
 [[projects]]
   branch = "master"
-  digest = "1:074dac1d643a16e60294ce29ce3bf8c08e8ad830e090eb3cc879d04236f84a30"
+  digest = "1:f3b980f9a6d4eb82e21a411145b79358e41f42a112df5014c12048d07547525a"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -530,11 +525,11 @@
     "idna",
   ]
   pruneopts = "NUT"
-  revision = "74de082e2cca95839e88aa0aeee5aadf6ce7710f"
+  revision = "1da14a5a36f220ea3f03470682b737b1dfd5de22"
 
 [[projects]]
   branch = "master"
-  digest = "1:c37a4098ad0b7a4d8f350edbac365ef88984915710311f859cae17a81f23be04"
+  digest = "1:3121d742fbe48670a16d98b6da4693501fc33cd76d69ed6f35850c564f255c65"
   name = "golang.org/x/oauth2"
   packages = [
     ".",
@@ -544,18 +539,18 @@
     "jwt",
   ]
   pruneopts = "NUT"
-  revision = "c85d3e98c914e3a33234ad863dcbff5dbc425bb8"
+  revision = "9f3314589c9a9136388751d9adae6b0ed400978a"
 
 [[projects]]
   branch = "master"
-  digest = "1:af393301820919efc2288c08608a9aab90a3b293aa64e65a06739b7edbb7082f"
+  digest = "1:c3e89c6a4dab7d8a33f668c50c096c62fa85e96bedc78e2628d8372d6c17d327"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "9eb1bfa1ce65ae8a6ff3114b0aaf9a41a6cf3560"
+  revision = "12500544f89f9420afe9529ba8940bf72d294972"
 
 [[projects]]
   digest = "1:f9bea942c292a95e0ed958678f84a13b9424067693f44c095e7e3d25f6402892"
@@ -596,7 +591,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e7b45a4ffa3ab66fdc5dee69afd5dda8a37d0bc733add9b281a309bf6fefe2aa"
+  digest = "1:8da649cc6b10a0aa2aeb71a7067fd39a00ccf3f26c809a09416dd409d690b4d6"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -613,7 +608,7 @@
     "internal/semver",
   ]
   pruneopts = "NUT"
-  revision = "aef51cc3777c6a88d6834b42444edffdac4860fa"
+  revision = "4ca4b55e2050cfa75f1a1f72ae10825e80b052a0"
 
 [[projects]]
   digest = "1:a4824d8df1fd1f63c6b3690bf4801d6ff1722adcb3e13c0489196a7e248d868a"
@@ -845,15 +840,14 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
-    "github.com/avast/retry-go",
     "github.com/ghodss/yaml",
     "github.com/go-redis/redis",
     "github.com/google/uuid",
-    "github.com/heptio/ark/pkg/apis/ark/v1",
-    "github.com/heptio/ark/pkg/backup",
-    "github.com/heptio/ark/pkg/cmd/util/output",
-    "github.com/heptio/ark/pkg/generated/clientset/versioned",
-    "github.com/heptio/ark/pkg/restic",
+    "github.com/heptio/velero/pkg/apis/velero/v1",
+    "github.com/heptio/velero/pkg/backup",
+    "github.com/heptio/velero/pkg/cmd/util/output",
+    "github.com/heptio/velero/pkg/generated/clientset/versioned",
+    "github.com/heptio/velero/pkg/restic",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
