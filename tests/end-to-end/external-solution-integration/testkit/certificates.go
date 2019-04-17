@@ -1,4 +1,4 @@
-package utils
+package testkit
 
 import (
 	"crypto/rand"
@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
 	"github.com/stretchr/testify/require"
 	"testing"
 )
@@ -17,14 +16,14 @@ const (
 	rsaKeySize = 2048
 )
 
-func createKey(t *testing.T) *rsa.PrivateKey {
+func CreateKey(t *testing.T) *rsa.PrivateKey {
 	key, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
 	require.NoError(t, err)
 
 	return key
 }
 
-func createCSR(t *testing.T, subject testkit.Subject, key *rsa.PrivateKey) []byte {
+func CreateCSR(t *testing.T, subject Subject, key *rsa.PrivateKey) []byte {
 	sub := pkix.Name{
 		CommonName:         subject.CommonName,
 		Country:            []string{subject.Country},

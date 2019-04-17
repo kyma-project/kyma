@@ -6,8 +6,8 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit/utils"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
@@ -45,6 +45,7 @@ func newHttpClient(skipVerify bool) *http.Client {
 func (cc *connectorClient) GetToken(appName string) (string, error) {
 	_, err := cc.trClient.CreateTokenRequest(appName)
 	if err != nil {
+		cc.logger.Error(err)
 		return "", err
 	}
 
@@ -53,6 +54,7 @@ func (cc *connectorClient) GetToken(appName string) (string, error) {
 
 	tr, err := cc.trClient.GetTokenRequest(appName, v1.GetOptions{})
 	if err != nil {
+		cc.logger.Error(err)
 		return "", err
 	}
 
@@ -75,7 +77,7 @@ func (cc *connectorClient) GetInfo(url string) (*InfoResponse, error) {
 
 	if response.StatusCode != http.StatusOK {
 		err := parseErrorResponse(response)
-		cc.logger.Errorf("GetInfo call received wrong status code: %s", err)
+		cc.logger.Error(err)
 		return nil, err
 	}
 
@@ -105,7 +107,6 @@ func (cc *connectorClient) GetCertificate(url string, csr *x509.CertificateReque
 		return nil, err
 	}
 
-	request.Close = true
 	request.Header.Add("Content-Type", "application/json")
 
 	response, err := cc.httpClient.Do(request)
@@ -117,7 +118,7 @@ func (cc *connectorClient) GetCertificate(url string, csr *x509.CertificateReque
 
 	if response.StatusCode != http.StatusCreated {
 		err := parseErrorResponse(response)
-		cc.logger.Errorf("SignCSR call received wrong status code: %s", err)
+		cc.logger.Error(err)
 		return nil, err
 	}
 
@@ -142,14 +143,4 @@ func (cc *connectorClient) GetCertificate(url string, csr *x509.CertificateReque
 	}
 
 	return certificateChain, nil
-}
-
-func parseErrorResponse(response *http.Response) error {
-	errorResponse := ErrorResponse{}
-	err := json.NewDecoder(response.Body).Decode(&errorResponse)
-	if err != nil {
-		return err
-	}
-
-	return errors.New(errorResponse.Error)
 }

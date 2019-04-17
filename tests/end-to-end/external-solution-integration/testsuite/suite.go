@@ -3,7 +3,7 @@ package testsuite
 type TestSuite interface {
 	DeployResources()
 	FetchCertificate()
-	RegisterServices()
+	RegisterService()
 	StartTestServer()
 	SendEvent()
 }
