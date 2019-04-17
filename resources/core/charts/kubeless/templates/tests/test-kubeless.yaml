@@ -32,9 +32,6 @@ rules:
 - apiGroups: ["autoscaling"]
   resources: ["horizontalpodautoscalers"]
   verbs: ["get", "list"]
-- apiGroups: ["extensions"]
-  resources: ["deployments", "replicasets"]
-  verbs: ["get", "list"]
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -112,6 +109,9 @@ rules:
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]
   verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["extensions"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list"]
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["serviceinstances", "servicebindings"]
   verbs: ["create", "delete", "get", "list"]
