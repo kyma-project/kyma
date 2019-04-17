@@ -1,10 +1,11 @@
 package externalapi
 
 import (
+	"net/http"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
-	"net/http"
 )
 
 type activeEventsHandler struct {

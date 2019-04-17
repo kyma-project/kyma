@@ -1,8 +1,9 @@
 package externalapi
 
 import (
-	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
 	"net/http"
+
+	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
 
 	"github.com/gorilla/mux"
 )

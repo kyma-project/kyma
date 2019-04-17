@@ -2,11 +2,12 @@ package httptools
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/event-service/internal/httperrors"
 	"github.com/sirupsen/logrus"
-	"net/http"
 )
 
 //RespondWithBody sends http response with json body

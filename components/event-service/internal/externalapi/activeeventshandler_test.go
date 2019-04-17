@@ -2,6 +2,11 @@ package externalapi
 
 import (
 	"encoding/json"
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/registered/mocks"
@@ -9,10 +14,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-	"io/ioutil"
-	"net/http"
-	"net/http/httptest"
-	"testing"
 )
 
 func TestActiveEventsHandler_GetActiveEvents(t *testing.T) {
