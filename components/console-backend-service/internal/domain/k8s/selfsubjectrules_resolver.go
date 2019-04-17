@@ -35,6 +35,10 @@ func newSelfSubjectRulesResolver(selfSubjectRulesSvc selfSubjectRulesSvc) *selfS
 }
 
 func (r *selfSubjectRulesResolver) SelfSubjectRulesQuery(ctx context.Context, namespace *string) (*gqlschema.SelfSubjectRules, error) {
+	if namespace == nil {
+		defaultnamespace := "*"
+		namespace = &defaultnamespace
+	}
 	ssrrin := &v1.SelfSubjectRulesReview{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "SelfSubjectRulesReview",
