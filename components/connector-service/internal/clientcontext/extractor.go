@@ -13,7 +13,7 @@ const (
 	MetadataURLFormat = "https://%s/%s/v1/metadata/services"
 	EventsURLFormat   = "https://%s/%s/v1/events"
 
-	RuntimeDefaultCommonName = "Runtime"
+	RuntimeDefaultCommonName = "*Runtime*"
 )
 
 type ConnectorClientExtractor func(ctx context.Context) (ClientCertContextService, apperrors.AppError)
@@ -93,7 +93,7 @@ func (ext *ContextExtractor) prepareSubject(org, orgUnit, commonName string) cer
 func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Context) (ClientCertContextService, apperrors.AppError) {
 	clusterCtx, ok := ctx.Value(ClusterContextKey).(ClusterContext)
 	if !ok {
-		return nil, apperrors.Internal("Failed to create params when reading ClusterContext")
+		return nil, apperrors.Internal("Failed to extract ClusterContext from request")
 	}
 
 	subject := ext.prepareSubject(clusterCtx.Tenant, clusterCtx.Group, RuntimeDefaultCommonName)
@@ -104,7 +104,7 @@ func (ext *ContextExtractor) CreateClusterClientContextService(ctx context.Conte
 func ExtractApplicationContext(ctx context.Context) (ApplicationContext, apperrors.AppError) {
 	appCtx, ok := ctx.Value(ApplicationContextKey).(ApplicationContext)
 	if !ok {
-		return ApplicationContext{}, apperrors.Internal("Failed to create params when reading ApplicationContext")
+		return ApplicationContext{}, apperrors.Internal("Failed to extract ApplicationContext from request")
 	}
 	return appCtx, nil
 }

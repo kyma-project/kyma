@@ -41,6 +41,7 @@ var (
 	caKey     = &rsa.PrivateKey{}
 	csr       = &x509.CertificateRequest{}
 
+	rootCACrtBytes = []byte("rootCACertificate")
 	clientCRT      = []byte("clientCertificate")
 	clientCRTBytes = []byte("clientCertificateBytes")
 	caCRTBytes     = []byte("caCRTBytes")
@@ -75,7 +76,7 @@ func TestCertificateService_SignCSR(t *testing.T) {
 		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, "")
 
 		// when
-		encodedCertChain, apperr := certificatesService.SignCSR(rawCSR, appName)
+		encodedCertChain, apperr := certificatesService.SignCSR(rawCSR, subjectValues)
 
 		// then
 		require.NoError(t, apperr)
@@ -112,7 +113,7 @@ func TestCertificateService_SignCSR(t *testing.T) {
 			On("AddCertificateHeaderAndFooter", rootCACrt.Raw).Return(rootCACrtBytes)
 		certUtils.On("AddCertificateHeaderAndFooter", clientCRT).Return(clientCRTBytes)
 
-		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, rootCASecretName, subjectValues)
+		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, rootCASecretName)
 
 		// when
 		encodedCertChain, apperr := certificatesService.SignCSR(rawCSR, subjectValues)
@@ -170,10 +171,10 @@ func TestCertificateService_SignCSR(t *testing.T) {
 		certUtils.On("AddCertificateHeaderAndFooter", caCrt.Raw).Return(caCRTBytes)
 		certUtils.On("AddCertificateHeaderAndFooter", clientCRT).Return(clientCRTBytes)
 
-		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, rootCASecretName, subjectValues)
+		certificatesService := certificates.NewCertificateService(secretsRepository, certUtils, authSecretName, rootCASecretName)
 
 		// when
-		encodedChain, err := certificatesService.SignCSR(rawCSR, appName)
+		encodedChain, err := certificatesService.SignCSR(rawCSR, subjectValues)
 
 		// then
 		require.Error(t, err)

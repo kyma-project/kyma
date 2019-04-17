@@ -12,7 +12,7 @@ type CSRSubject struct {
 }
 
 func (s CSRSubject) ToString() string {
-	return fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", s.Organization, s.OrganizationalUnit, s.Locality, s.Province, s.Country, s.CommonName)
+	return fmt.Sprintf("O=%s,OU=%s,L=%s,ST=%s,C=%s,CN=%s", s.Organization, s.OrganizationalUnit, s.Locality, s.Province, s.Country, s.CommonName)
 }
 
 type EncodedCertificateChain struct {

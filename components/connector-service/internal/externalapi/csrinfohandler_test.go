@@ -33,7 +33,7 @@ var (
 		CommonName:         "CommonName",
 	}
 
-	strSubject = "OU=Org,O=OrgUnit,L=Gliwice,ST=Province,C=PL,CN=CommonName"
+	strSubject = "O=Org,OU=OrgUnit,L=Gliwice,ST=Province,C=PL,CN=CommonName"
 )
 
 type dummyClientContextService struct{}

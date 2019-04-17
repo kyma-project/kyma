@@ -78,14 +78,14 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
 	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayHost, opts.lookupConfigMapPath, lookupEnabled, clientcontext.ExtractApplicationContext, lookupService)
-	appContextFromSubjMiddleware := clientcontextmiddlewares.NewAppContextFromSubjMiddleware()
+	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(opts.central)
 	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
 		AppTokenResolverMiddleware:      appTokenResolverMiddleware.Middleware,
 		RuntimeTokenResolverMiddleware:  clusterTokenResolverMiddleware.Middleware,
 		RuntimeURLsMiddleware:           runtimeURLsMiddleware.Middleware,
-		AppContextFromSubjectMiddleware: appContextFromSubjMiddleware.Middleware,
+		AppContextFromSubjectMiddleware: contextFromSubjMiddleware.Middleware,
 		CheckForRevokedCertMiddleware:   checkForRevokedCertMiddleware.Middleware,
 	}
 

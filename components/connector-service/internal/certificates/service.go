@@ -21,7 +21,7 @@ type certificateService struct {
 	rootCACertificateSecretName string
 }
 
-func NewCertificateService(secretRepository secrets.Repository, certUtil CertificateUtility, caSecretName, rootCACertificateSecretName string, csrSubject CSRSubject) Service {
+func NewCertificateService(secretRepository secrets.Repository, certUtil CertificateUtility, caSecretName, rootCACertificateSecretName string) Service {
 	return &certificateService{
 		secretsRepository:           secretRepository,
 		certUtil:                    certUtil,
@@ -101,7 +101,6 @@ func (svc *certificateService) loadRootCACert() ([]byte, apperrors.AppError) {
 }
 
 func (svc *certificateService) checkCSR(csr *x509.CertificateRequest, expectedSubject CSRSubject) apperrors.AppError {
-
 	return svc.certUtil.CheckCSRValues(csr, expectedSubject)
 }
 
