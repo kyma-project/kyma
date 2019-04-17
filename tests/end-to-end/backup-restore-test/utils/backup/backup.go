@@ -7,11 +7,11 @@ import (
 	"time"
 
 	"github.com/ghodss/yaml"
-	backupv1 "github.com/heptio/ark/pkg/apis/ark/v1"
-	arkbackuppkg "github.com/heptio/ark/pkg/backup"
-	"github.com/heptio/ark/pkg/cmd/util/output"
-	backup "github.com/heptio/ark/pkg/generated/clientset/versioned"
-	"github.com/heptio/ark/pkg/restic"
+	backupv1 "github.com/heptio/velero/pkg/apis/velero/v1"
+	veleroBackup "github.com/heptio/velero/pkg/backup"
+	"github.com/heptio/velero/pkg/cmd/util/output"
+	backup "github.com/heptio/velero/pkg/generated/clientset/versioned"
+	"github.com/heptio/velero/pkg/restic"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -78,7 +78,7 @@ func (c *backupClient) CreateBackup(backupName, specPath string) error {
 		},
 		Spec: backupSpec,
 	}
-	_, err = c.backupClient.ArkV1().Backups("heptio-ark").Create(backup)
+	_, err = c.backupClient.VeleroV1().Backups("kyma-backup").Create(backup)
 	return err
 }
 
@@ -91,7 +91,7 @@ func (c *backupClient) WaitForBackupToBeCreated(backupName string, waitmax time.
 		case <-timeout:
 			return fmt.Errorf("Backup %v could not be created within given time  %v", backupName, waitmax)
 		case <-tick:
-			backup, err := c.backupClient.ArkV1().Backups("heptio-ark").Get(backupName, metav1.GetOptions{})
+			backup, err := c.backupClient.VeleroV1().Backups("kyma-backup").Get(backupName, metav1.GetOptions{})
 			if err != nil {
 				return err
 			}
@@ -114,7 +114,7 @@ func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time
 		case <-timeout:
 			return fmt.Errorf("Backup %v could not be created within given time  %v", backupName, waitmax)
 		case <-tick:
-			restore, err := c.backupClient.ArkV1().Restores("heptio-ark").Get(backupName, metav1.GetOptions{})
+			restore, err := c.backupClient.VeleroV1().Restores("kyma-backup").Get(backupName, metav1.GetOptions{})
 			if err != nil {
 				return err
 			}
@@ -129,18 +129,18 @@ func (c *backupClient) WaitForBackupToBeRestored(backupName string, waitmax time
 }
 
 func (c *backupClient) DescribeBackup(backupName string) error {
-	backup, err := c.backupClient.ArkV1().Backups("heptio-ark").Get(backupName, metav1.GetOptions{})
+	backup, err := c.backupClient.VeleroV1().Backups("kyma-backup").Get(backupName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	deleteRequestListOptions := arkbackuppkg.NewDeleteBackupRequestListOptions(backup.Name, string(backup.UID))
-	deleteRequestList, err := c.backupClient.ArkV1().DeleteBackupRequests("heptio-ark").List(deleteRequestListOptions)
+	deleteRequestListOptions := veleroBackup.NewDeleteBackupRequestListOptions(backup.Name, string(backup.UID))
+	deleteRequestList, err := c.backupClient.VeleroV1().DeleteBackupRequests("kyma-backup").List(deleteRequestListOptions)
 	if err != nil {
 		return err
 	}
 
-	opts := restic.NewPodVolumeBackupListOptions(backup.Name, string(backup.UID))
-	podVolumeBackupList, err := c.backupClient.ArkV1().PodVolumeBackups("heptio-ark").List(opts)
+	opts := restic.NewPodVolumeBackupListOptions(backup.Name)
+	podVolumeBackupList, err := c.backupClient.VeleroV1().PodVolumeBackups("kyma-backup").List(opts)
 	if err != nil {
 		return err
 	}
@@ -153,12 +153,12 @@ func (c *backupClient) DescribeBackup(backupName string) error {
 }
 
 func (c *backupClient) DescribeRestore(backupName string) error {
-	restore, err := c.backupClient.ArkV1().Restores("heptio-ark").Get(backupName, metav1.GetOptions{})
+	restore, err := c.backupClient.VeleroV1().Restores("kyma-backup").Get(backupName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
-	opts := restic.NewPodVolumeRestoreListOptions(restore.Name, string(restore.UID))
-	podvolumeRestoreList, err := c.backupClient.ArkV1().PodVolumeRestores("heptio-ark").List(opts)
+	opts := restic.NewPodVolumeRestoreListOptions(restore.Name)
+	podvolumeRestoreList, err := c.backupClient.VeleroV1().PodVolumeRestores("kyma-backup").List(opts)
 	if err != nil {
 		return err
 	}
@@ -171,7 +171,7 @@ func (c *backupClient) DescribeRestore(backupName string) error {
 }
 
 func (c *backupClient) GetBackupStatus(backupName string) string {
-	backup, err := c.backupClient.ArkV1().Backups("heptio-ark").Get(backupName, metav1.GetOptions{})
+	backup, err := c.backupClient.VeleroV1().Backups("kyma-backup").Get(backupName, metav1.GetOptions{})
 	if err != nil {
 		return ""
 	}
@@ -189,7 +189,7 @@ func (c *backupClient) RestoreBackup(backupName string) error {
 			RestorePVs:              c.ptrBool(true),
 		},
 	}
-	_, err := c.backupClient.ArkV1().Restores("heptio-ark").Create(restore)
+	_, err := c.backupClient.VeleroV1().Restores("kyma-backup").Create(restore)
 	return err
 }
 

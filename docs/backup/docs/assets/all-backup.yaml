@@ -7,7 +7,7 @@ excludedNamespaces:
 - kyma-installer
 - default
 - natss
-- heptio-ark
+- kyma-backup
 includedResources:
 - '*'
 excludedResources: null
