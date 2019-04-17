@@ -8,8 +8,9 @@ import (
 )
 
 const (
-	MetadataURLFormat = "https://%s/%s/v1/metadata/services"
-	EventsURLFormat   = "https://%s/%s/v1/events"
+	MetadataURLFormat   = "https://%s/%s/v1/metadata/services"
+	EventsURLFormat     = "https://%s/%s/v1/events"
+	EventsInfoURLFormat = "https://%s/%s/v1/activeevents"
 )
 
 type ConnectorClientExtractor func(ctx context.Context) (ClientContextService, apperrors.AppError)
@@ -30,19 +31,22 @@ func CreateApplicationClientContextService(ctx context.Context) (ClientContextSe
 
 	metadataURL := ""
 	eventsURL := ""
+	eventsInfoURL := ""
 
 	if apiHosts.MetadataHost != "" {
 		metadataURL = fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataHost, appCtx.GetApplication())
 	}
 	if apiHosts.EventsHost != "" {
 		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
+		eventsInfoURL = fmt.Sprintf(EventsInfoURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
 	}
 
 	extendedCtx := &ExtendedApplicationContext{
 		ApplicationContext: appCtx,
 		RuntimeURLs: RuntimeURLs{
-			MetadataURL: metadataURL,
-			EventsURL:   eventsURL,
+			MetadataURL:   metadataURL,
+			EventsURL:     eventsURL,
+			EventsInfoURL: eventsInfoURL,
 		},
 	}
 
