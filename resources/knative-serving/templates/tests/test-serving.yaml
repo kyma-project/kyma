@@ -34,6 +34,29 @@ subjects:
   name: knative-serving-test
   namespace: knative-serving
 ---
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: test-knative-serving-acceptance
+template:
+  metadata:
+    annotations:
+      sidecar.istio.io/inject: "true"
+  spec:
+    serviceAccount: knative-serving-test
+    containers:
+    - name: test 
+      image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}" 
+      env:
+      - name: INGRESSGATEWAY_ADDRESS
+        value: istio-ingressgateway.istio-system.svc.cluster.local
+      - name: DOMAIN_NAME
+        value: {{ .Values.global.ingress.domainName }}
+      - name: TARGET
+        value: {{ .Values.test.target }}
+    restartPolicy: Never
+{{- else }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -57,3 +80,4 @@ spec:
     - name: TARGET
       value: {{ .Values.test.target }}
   restartPolicy: Never
+  {{- end }}
