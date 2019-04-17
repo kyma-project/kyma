@@ -34,7 +34,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: pr/
-    version: PR-3702
+    version: PR-3745
   api_controller:
     dir: develop/
     version: "1323f962"
