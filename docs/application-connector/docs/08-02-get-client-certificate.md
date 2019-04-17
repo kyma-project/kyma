@@ -75,7 +75,7 @@ A successful call returns the following response:
 }
 ```
 
-> **NOTE:** The response contains URLs to the Application Registry and Events Service API, however, it is not recommeded to use these. You should call the `metadata` endpoint URL, which is provided in `infoUrl` property, to fetch correct URLs to the Application Registry and Events API, and other configuration details.
+> **NOTE:** The response contains URLs to the Application Registry API and the Events Service API, however, it is not recommended to use them. You should call the `metadata` endpoint URL, which is provided in `api.infoUrl` property, to fetch correct URLs to the Application Registry API and to the Events Service API, and other configuration details.
 
 ## Generate a CSR and send it to Kyma
 
@@ -100,22 +100,24 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 }
 ```
 
-After you receive the certificate, decode it and use it in your application. Register the services of your external solution through the Application Registry.
+After you receive the certificate, decode it and use it in your application. 
 
 ## Call the metadata endpoint
 
-You must call the `metadata` endpoint with the generated certificate to get URLs to the following:
+Call the `metadata` endpoint with the generated certificate to get URLs to the following:
 
 - the Application Registry API
 - the Events Service API
 - the `certificate renewal` endpoint
 - the `certificate revocation` endpoint
 
-Use the link you got in the second step to fetch the metadata information. Run:
+URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the `api.infoUrl` property to get the URL. Run:
 
 ```
 curl {CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key
 ```
+
+A successful call returns the following response:
 
 ```
 {
@@ -125,8 +127,8 @@ curl {CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.cr
   "urls": {
     "metadataUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
     "eventsUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
-    "renewCertURL": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals",
-    "revokeCertURL": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
+    "renewCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals",
+    "revokeCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
   },
   "certificate": {
     "subject": "OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
@@ -135,6 +137,8 @@ curl {CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.cr
   }
 }
 ```
+
+Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Events API.
 
 ## Call the Application Registry and Event services on local deployment
 
