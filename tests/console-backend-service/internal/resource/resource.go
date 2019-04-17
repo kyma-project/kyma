@@ -58,3 +58,16 @@ func (r *Resource) Get(name string) (*unstructured.Unstructured, error) {
 
 	return u, nil
 }
+
+func (r *Resource) Delete(name string) error {
+	err := r.resCli.Delete(name, &metav1.DeleteOptions{})
+	if err != nil {
+		if apierrors.IsNotFound(err) {
+			r.log("Cannot delete. Resource %s with name '%s' is not found.", r.kind, name)
+			return nil
+		}
+		return errors.Wrapf(err, "while deleting resource %s '%s'", r.kind, name)
+	}
+
+	return nil
+}

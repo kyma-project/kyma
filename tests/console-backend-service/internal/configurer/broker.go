@@ -1,13 +1,14 @@
 package configurer
 
 import (
-	"github.com/pkg/errors"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	tester "github.com/kyma-project/kyma/tests/console-backend-service"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	tester "github.com/kyma-project/kyma/tests/console-backend-service"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/pkg/errors"
+	apiErrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type ServiceBrokerConfig struct {
@@ -52,7 +53,30 @@ func (c *ServiceBrokerConfigurer) Create() error {
 }
 
 func (c *ServiceBrokerConfigurer) Delete() error {
-	return c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Delete(c.cfg.Name, nil)
+	err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Delete(c.cfg.Name, nil)
+	if err != nil {
+		return err
+	}
+
+	return c.waitForServiceBrokerDeleted()
+}
+
+func (c *ServiceBrokerConfigurer) waitForServiceBrokerDeleted() error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+		_, err := c.svcatCli.ServicecatalogV1beta1().ServiceBrokers(c.cfg.Namespace).Get(c.cfg.Name, metav1.GetOptions{})
+		if apiErrors.IsNotFound(err) {
+			return true, nil
+		}
+		if err != nil {
+			return false, err
+		}
+		return false, nil
+	}, tester.DefaultDeletionTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for deletion of ServiceBroker %s", c.cfg.Name)
+	}
+
+	return nil
 }
 
 func (c *ServiceBrokerConfigurer) WaitForReady() error {

@@ -23,7 +23,7 @@ global:
     version: 68a39bb5
   connector_service:
     dir: develop/
-    version: 3ead571b
+    version: 76d6861b
   connector_service_tests:
     dir: develop/
     version: 9f878a38
