@@ -22,6 +22,7 @@ func newResourceService(client discovery.DiscoveryInterface) *resourceService {
 	}
 }
 
+// HERE
 func (svc *resourceService) Create(namespace string, resource types.Resource) (*types.Resource, error) {
 	if namespace != resource.Namespace {
 		return nil, apierror.NewInvalid(pretty.Resource, apierror.ErrorFieldAggregate{

@@ -34,6 +34,10 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 				r.Header.Set("sec-websocket-protocol", wsProtocol)
 			}
 
+			// header Authorization ->
+
+			//r.Header.Get
+
 			u, ok, err := a.AuthenticateRequest(r)
 			if err != nil {
 				glog.Errorf("Unable to authenticate the request due to an error: %v", err)
@@ -62,5 +66,9 @@ func UserInfoForContext(ctx context.Context) (user.Info, error) {
 }
 
 func WithUserInfoContext(ctx context.Context, userInfo user.Info) context.Context {
+	//userInfoCtx := context.WithValue(ctx, userInfoCtxKey, userInfo)
+
+	// context.WithValue(userInfoCtx, token, token)
+	//return context.WithValue(userInfoCtx)
 	return context.WithValue(ctx, userInfoCtxKey, userInfo)
 }

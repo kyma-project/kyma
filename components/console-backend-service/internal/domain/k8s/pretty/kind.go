@@ -26,6 +26,7 @@ const (
 	Secrets
 	Service
 	Services
+	SelfSubjectRules
 )
 
 func (k Kind) String() string {
@@ -76,6 +77,8 @@ func (k Kind) String() string {
 		return "Service"
 	case Services:
 		return "Services"
+	case SelfSubjectRules:
+		return "SelfSubjectRules"
 	default:
 		return ""
 	}

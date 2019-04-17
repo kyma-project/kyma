@@ -331,6 +331,12 @@ type ResourceQuotasStatus struct {
 	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
 }
 
+type ResourceRule struct {
+	Verbs     []string `json:"verbs"`
+	APIGroups []string `json:"apiGroups"`
+	Resources []string `json:"resources"`
+}
+
 type ResourceType struct {
 	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
@@ -355,6 +361,10 @@ type Secret struct {
 type SecretEvent struct {
 	Type   SubscriptionEventType `json:"type"`
 	Secret Secret                `json:"secret"`
+}
+
+type SelfSubjectRules struct {
+	ResourceRules []*ResourceRule `json:"resourceRules"`
 }
 
 type Service struct {
