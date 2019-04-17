@@ -60,7 +60,7 @@ func (l *CompleteBundleProvider) ProvideBundles() ([]CompleteBundle, error) {
 				l.log.Warnf("Could not load bundle: %s", err.Error())
 				continue
 			}
-			bundle.RemoteRepositoryURL = l.repo.URLForBundle(entryName, v.Version)
+			bundle.RepositoryURL = l.repo.URLForBundle(entryName, v.Version)
 
 			items = append(items, CompleteBundle{
 				Bundle: bundle,
