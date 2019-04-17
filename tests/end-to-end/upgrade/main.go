@@ -17,10 +17,13 @@ import (
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	ao "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	eaClientSet "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned"
+	subscriptionClientSet "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	bu "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
+	eventbus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/event-bus"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
@@ -79,6 +82,12 @@ func main() {
 	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kubeless clientset")
 
+	subCli, err := subscriptionClientSet.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Subscription clientset")
+
+	eaCli, err := eaClientSet.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Event Activation clientset")
+
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
@@ -105,6 +114,7 @@ func main() {
 		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
+		"EventBusUpgradeTest":             eventbus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
 	}
 
 	// Execute requested action
