@@ -5,12 +5,12 @@ type: Details
 
 Kyma components use [Octopus](http://github.com/kyma-incubator/octopus) for testing. 
 Octopus is a testing framework that allows you to run tests defined as Docker images on a running cluster.
-Octopus uses two Custom Resource Definitions (CRDs):
+Octopus uses two CustomResourceDefinitions (CRDs):
 - TestDefinition, which defines your test as a Pod specification.
 - ClusterTestSuite, which defines a suite of tests to execute and how to execute them.
 
 ## Add a new test
-To add a new test, create a yaml file with TestDefinition CR in your chart. By convention, place it under tests directory.
+To add a new test, create a `yaml` file with TestDefinition CR in your chart. To comply with the convention, place it under the `tests` directory.
 See the exemplary chart structure for Dex:
 
 ```
@@ -32,10 +32,9 @@ dex
 ```
 
 The test adds a new **test-dex-connection.yaml** under the `templates/tests` directory.
-Detailed TestDefinition description can be found in [Octopus documentation](https://github.com/kyma-incubator/octopus/blob/master/docs/crd-test-definition.md).
+For more information on TestDefinition, read the [Octopus documentation](https://github.com/kyma-incubator/octopus/blob/master/docs/crd-test-definition.md).
 
-In the simplest example, define just `spec.template` which is of type `PodTemplateSpec`.
-In the example below, there is a container that calls the `Dex` endpoint with cURL.
+The following example presents TestDefinition with a container that calls the Dex endpoint with cURL. You must define at least the **spec.template** parameter which is of the `PodTemplateSpec` type.
 
 ```yaml
 apiVersion: "testing.kyma-project.io/v1alpha1"
@@ -65,7 +64,7 @@ spec:
 
 ## Tests execution
 To run all tests, use the `testing.sh` script located in the `/installation/scripts/` directory. 
-Internally, ClusterTestSuite resource is defined, that fetches all TestDefinitions and executes them.
+Internally, the ClusterTestSuite resource is defined. It fetches all TestDefinitions and executes them.
 
 
 ### Run tests manually
@@ -84,7 +83,7 @@ spec:
   count: 1
 ```
 
-Creation of the suite triggers tests execution. See the current progress of the tests in the ClusterTestSuite status. Run:
+Creation of the suite triggers tests execution. See the current tests progress in the ClusterTestSuite status. Run:
 ```bash
  kubectl get cts {my-suite} -oyaml
  ```
