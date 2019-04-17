@@ -111,7 +111,7 @@ Call the `metadata` endpoint with the generated certificate to get URLs to the f
 - the `certificate renewal` endpoint
 - the `certificate revocation` endpoint
 
-URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the `api.infoUrl` property to get the URL. Run:
+The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the `api.infoUrl` property to get the URL. Run:
 
 ```
 curl {CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key
