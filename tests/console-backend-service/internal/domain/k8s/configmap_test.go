@@ -264,7 +264,7 @@ func readConfigMapEvent(sub *graphql.Subscription) (ConfigMapEvent, error) {
 		ConfigMapEvent ConfigMapEvent
 	}
 	var configMapEvent Response
-	err := sub.Next(&configMapEvent, tester.DefaultSubscriptionTimeout)
+	err := sub.Next(&configMapEvent, tester.DefaultSubscriptionTimeout*2)
 
 	return configMapEvent.ConfigMapEvent, err
 }
