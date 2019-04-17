@@ -33,7 +33,7 @@ func TestSpec(t *testing.T) {
 	}
 
 	if !cfg.IsLocalEnv {
-		t.Skip("Test is enabled on in local env")
+		t.Skip("Test is enabled only in local env")
 	}
 
 	ingressClient, err := ingressgateway.FromEnv().Client()
