@@ -101,7 +101,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			Spec:       v1alpha1.ApplicationSpec{Tenant: appTenant, Group: appGroup},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "(.*(OU="+appGroup+"(,|]|$)).*(O="+appTenant+"((,|]|$)).*(CN="+appName+"(,|]|$)).*)")
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "(?=.*(,|^)OU="+appGroup+"(,|]|$))(?=.*(,|^)O="+appTenant+"(,|]|$))(?=.*(,|^)CN="+appName+"(,|]|$)).*")
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)

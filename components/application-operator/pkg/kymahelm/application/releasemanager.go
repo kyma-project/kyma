@@ -2,6 +2,7 @@ package application
 
 import (
 	"fmt"
+
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
@@ -13,6 +14,9 @@ import (
 
 const (
 	applicationChartDirectory = "application"
+
+	fullValidationRegexFormat        = "(?=.*(,|^)OU=%s(,|]|$))(?=.*(,|^)O=%s(,|]|$))(?=.*(,|^)CN=%s(,|]|$)).*"
+	applicationValidationRegexFormat = "(.*(CN=%s(,|]|$)).*)"
 )
 
 type ApplicationClient interface {
@@ -103,9 +107,9 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
 	overridesData := r.overridesDefaults
 	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
-		overridesData.IngressValidationRule = fmt.Sprintf("%s%s%s%s%s%s%s", "(.*(OU=", application.Spec.Group, "(,|]|$)).*(O=", application.Spec.Tenant, "((,|]|$)).*(CN=", application.Name, "(,|]|$)).*)")
+		overridesData.IngressValidationRule = fmt.Sprintf(fullValidationRegexFormat, application.Spec.Group, application.Spec.Tenant, application.Name)
 	} else {
-		overridesData.IngressValidationRule = fmt.Sprintf("%s%s%s", "(.*(CN=", application.Name, "(,|]|$)).*)")
+		overridesData.IngressValidationRule = fmt.Sprintf(applicationValidationRegexFormat, application.Name)
 	}
 
 	return kymahelm.ParseOverrides(overridesData, overridesTemplate)
