@@ -63,6 +63,12 @@ rules:
 - apiGroups: ["gateway.kyma-project.io"]
   resources: ["apis"]
   verbs: ["create", "delete", "get", "list"]
+
+  # MicroFrontend
+- apiGroups: ["ui.kyma-project.io"]
+  resources: ["microfrontends", "clustermicrofrontends"]
+  verbs: ["create", "get", "delete", "list"]
+
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
