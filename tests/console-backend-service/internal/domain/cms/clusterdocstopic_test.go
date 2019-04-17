@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"testing"
 
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+
 	"strings"
 
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
@@ -69,6 +71,14 @@ func TestClusterDocsTopicsQueries(t *testing.T) {
 	assert.NoError(t, err)
 	assert.Equal(t, 3, len(multipleRes.ClusterDocsTopics))
 	assertClusterDocsTopicExistsAndEqual(t, fixedClusterDocsTopic, multipleRes.ClusterDocsTopics)
+
+	deleteClusterDocsTopics(t, clusterDocsTopicClient)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.List: {fixClusterDocsTopicsQuery(clusterDocsTopicDetailsFields())},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func createClusterDocsTopic(t *testing.T, client *resource.ClusterDocsTopic, name, order string) {
@@ -83,7 +93,20 @@ func waitForClusterDocsTopic(t *testing.T, client *resource.ClusterDocsTopic, na
 	require.NoError(t, err)
 }
 
-func queryMultipleClusterDocsTopics(c *graphql.Client, resourceDetailsQuery string) (clusterDocsTopicsQueryResponse, error) {
+func deleteClusterDocsTopics(t *testing.T, client *resource.ClusterDocsTopic) {
+	t.Log("Deleting Cluster Docs Topics")
+	dtNames := []string{
+		clusterDocsTopicName1,
+		clusterDocsTopicName2,
+		clusterDocsTopicName3,
+	}
+	for _, name := range dtNames {
+		err := client.Delete(name)
+		assert.NoError(t, err)
+	}
+}
+
+func fixClusterDocsTopicsQuery(resourceDetailsQuery string) *graphql.Request {
 	query := fmt.Sprintf(`
 			query ($viewContext: String, $groupName: String) {
 				clusterDocsTopics (viewContext: $viewContext, groupName: $groupName) {
@@ -94,6 +117,12 @@ func queryMultipleClusterDocsTopics(c *graphql.Client, resourceDetailsQuery stri
 	req := graphql.NewRequest(query)
 	req.SetVar("viewContext", fixture.DocsTopicViewContext)
 	req.SetVar("groupName", fixture.DocsTopicGroupName)
+
+	return req
+}
+
+func queryMultipleClusterDocsTopics(c *graphql.Client, resourceDetailsQuery string) (clusterDocsTopicsQueryResponse, error) {
+	req := fixClusterDocsTopicsQuery(resourceDetailsQuery)
 
 	var res clusterDocsTopicsQueryResponse
 	err := c.Do(req, &res)
