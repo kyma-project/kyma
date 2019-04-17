@@ -154,10 +154,7 @@ func (t ApiControllerTest) callFunctionWithoutToken() error {
 			return err
 		}
 		return errors.Errorf("unexpected response %v: %s", resp.StatusCode, string(rspBody))
-	},
-		retry.Delay(2*time.Second),
-		retry.Attempts(60),
-	)
+	})
 	if err != nil {
 		err = errors.Wrap(err, "cannot callFunctionWithoutToken")
 	}
@@ -192,10 +189,7 @@ func (t ApiControllerTest) callFunctionWithToken(token string) error {
 			return err
 		}
 		return errors.Errorf("unexpected response %v: %s", resp.StatusCode, string(rspBody))
-	},
-		retry.Delay(2*time.Second),
-		retry.Attempts(60),
-	)
+	})
 	if err != nil {
 		err = errors.Wrap(err, "cannot callFunctionWithToken")
 	}
@@ -321,8 +315,6 @@ func (t ApiControllerTest) getFunctionPodStatus(namespace string, waitmax time.D
 		}
 		return errors.Errorf("Function in state %v: \n%+v", pod.Status.Phase, pod)
 	},
-		retry.Delay(2*time.Second),
-		retry.Attempts(60),
 		retry.RetryIf(func(_ error) bool {
 			return !failed
 		}),
