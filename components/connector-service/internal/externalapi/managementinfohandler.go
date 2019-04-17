@@ -41,8 +41,8 @@ func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 
 func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.ClientCertContextService) mgmtURLs {
 	return mgmtURLs{
-		RuntimeURLs:       clientContextService.GetRuntimeUrls(),
-		RenewCertURL:      fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
-		RevocationCertURL: fmt.Sprintf(RevocationCertURLFormat, ih.certificateProtectedBaseURL),
+		RuntimeURLs:   clientContextService.GetRuntimeUrls(),
+		RenewCertURL:  fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
+		RevokeCertURL: fmt.Sprintf(RevocationCertURLFormat, ih.certificateProtectedBaseURL),
 	}
 }

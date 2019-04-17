@@ -84,7 +84,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, expectedMetadataURL, urls.MetadataURL)
 		assert.Equal(t, expectedEventsURL, urls.EventsURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
-		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
+		assert.Equal(t, expectedRevocationURL, urls.RevokeCertURL)
 		assert.Equal(t, appName, receivedContext[applicationKey])
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])
@@ -127,7 +127,7 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		receivedContext := infoResponse.ClientIdentity.(map[string]interface{})
 		certificateInfo := infoResponse.CertificateInfo
 
-		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
+		assert.Equal(t, expectedRevocationURL, urls.RevokeCertURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])

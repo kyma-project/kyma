@@ -463,10 +463,10 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 		// then
 		require.Nil(t, errorResponse)
-		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
+		require.NotEmpty(t, mgmInfoResponse.URLs.RevokeCertURL)
 
 		// when
-		errorResponse = client.RevokeCertificate(t, mgmInfoResponse.URLs.RevocationCertURL)
+		errorResponse = client.RevokeCertificate(t, mgmInfoResponse.URLs.RevokeCertURL)
 
 		// then
 		require.Nil(t, errorResponse)
@@ -498,7 +498,7 @@ func certificateRevocationSuite(t *testing.T, tokenRequest *http.Request, skipVe
 
 		// then
 		require.Nil(t, errorResponse)
-		require.NotEmpty(t, mgmInfoResponse.URLs.RevocationCertURL)
+		require.NotEmpty(t, mgmInfoResponse.URLs.RevokeCertURL)
 
 		// when
 		sha256Fingerprint := testkit.CertificateSHA256Fingerprint(t, certificates.ClientCRT)
