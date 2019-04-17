@@ -117,7 +117,7 @@ func getRegexMatch(regex, text string) string {
 	cnRegex := regexp.MustCompile(regex)
 	matches := cnRegex.FindStringSubmatch(text)
 
-	if matches == nil || len(matches) < 2 {
+	if len(matches) != 2 {
 		return ""
 	}
 
