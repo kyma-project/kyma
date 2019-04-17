@@ -19,6 +19,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
@@ -30,6 +31,7 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
 )
 
 // Config holds application configuration
@@ -95,6 +97,9 @@ func main() {
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
+	mfCli, err := mfClient.NewForConfig(k8sConfig)
+	fatalOnError(err, "while creating Microfrontends clientset")
+
 	dexConfig := dex.Config{}
 	if action == executeTestsActionName {
 		userEmail, userPassword, err := getUserPasswordFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace)
@@ -126,6 +131,8 @@ func main() {
 		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
 		"GrafanaUpgradeTest":           grafanaUpgradeTest,
 		"MetricsUpgradeTest":           metricUpgradeTest,
+		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
+		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 	}
 
 	// Execute requested action

@@ -47,10 +47,12 @@ func Test_UpdateFunction(t *testing.T) {
 }
 func verifyStartSubCalledOnEventActivation(orgSub *v1alpha1.Subscription, mockSupervisor *MockSupervisior, updateFunction func(oldObj, newObj interface{}), t *testing.T) *v1alpha1.Subscription {
 	activeStatus := v1alpha1.SubscriptionStatus{
-		Conditions: []v1alpha1.SubscriptionCondition{
-			{
-				Type:   v1alpha1.EventsActivated,
-				Status: v1alpha1.ConditionTrue,
+		Status: v1alpha1.Status{
+			Conditions: []v1alpha1.SubscriptionCondition{
+				{
+					Type:   v1alpha1.EventsActivated,
+					Status: v1alpha1.ConditionTrue,
+				},
 			},
 		},
 	}
@@ -65,10 +67,12 @@ func verifyStartSubCalledOnEventActivation(orgSub *v1alpha1.Subscription, mockSu
 
 func verifyStopSubCalledOnEventDeactivation(orgSub *v1alpha1.Subscription, mockSupervisor *MockSupervisior, updateFunction func(oldObj, newObj interface{}), t *testing.T) {
 	deactiveStatus := v1alpha1.SubscriptionStatus{
-		Conditions: []v1alpha1.SubscriptionCondition{
-			{
-				Type:   v1alpha1.EventsActivated,
-				Status: v1alpha1.ConditionFalse,
+		Status: v1alpha1.Status{
+			Conditions: []v1alpha1.SubscriptionCondition{
+				{
+					Type:   v1alpha1.EventsActivated,
+					Status: v1alpha1.ConditionFalse,
+				},
 			},
 		},
 	}
