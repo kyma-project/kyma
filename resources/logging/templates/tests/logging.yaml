@@ -50,7 +50,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: test-{{ template "fullname" . }}
-        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_logging.dir }}/{{ .Values.test.image.name }}:{{ .Values.global.test_logging.version }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_logging.dir }}{{ .Values.test.image.name }}:{{ .Values.global.test_logging.version }}
         imagePullPolicy: Always
         command:
           - "/bin/sh"
