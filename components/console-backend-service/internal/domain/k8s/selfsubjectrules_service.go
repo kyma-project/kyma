@@ -1,6 +1,9 @@
 package k8s
 
 import (
+	"context"
+	"fmt"
+
 	authv1 "k8s.io/api/authorization/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
@@ -15,8 +18,21 @@ func newSelfSubjectRulesService(client v1.AuthorizationV1Interface) *selfSubject
 	}
 }
 
-func (svc *selfSubjectRulesService) Create(ssrr *authv1.SelfSubjectRulesReview) (*authv1.SelfSubjectRulesReview, error) {
-	return svc.client.SelfSubjectRulesReviews().Create(ssrr)
+func (svc *selfSubjectRulesService) Create(ctx context.Context, ssrr *authv1.SelfSubjectRulesReview) (*authv1.SelfSubjectRulesReview, error) {
+
+	token := ctx.Value("token").(string)
+	result := svc.client.RESTClient().Post().
+		AbsPath("/apis/authorization.k8s.io/v1").
+		Resource("selfsubjectrulesreviews").
+		Body(ssrr).
+		SetHeader("Authorization", token).
+		Do()
+
+	response, err := result.Get()
+	ssrrout := response.(*authv1.SelfSubjectRulesReview)
+	fmt.Printf("REsponse : %-v", ssrrout)
+
+	return ssrrout, err
 }
 
 // func (svc *serviceService) List(namespace string, pagingParams pager.PagingParams) ([]*v1.Service, error) {

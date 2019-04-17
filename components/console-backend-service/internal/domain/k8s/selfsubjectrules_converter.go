@@ -1,8 +1,6 @@
 package k8s
 
 import (
-	"fmt"
-
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v1 "k8s.io/api/authorization/v1"
 )
@@ -14,10 +12,6 @@ func (c *selfSubjectRulesConverter) ToGQL(in *v1.SelfSubjectRulesReview) (*gqlsc
 	if in == nil {
 		return nil, nil
 	}
-
-	fmt.Printf("NAmespace : %s", in.Spec.Namespace)
-	fmt.Printf("Size : %d", len(in.Status.ResourceRules))
-	fmt.Printf("Out : %+v", in.Status.ResourceRules)
 
 	resourceRulesSlice := make([]*gqlschema.ResourceRule, len(in.Status.ResourceRules))
 	for i, resourceRule := range in.Status.ResourceRules {

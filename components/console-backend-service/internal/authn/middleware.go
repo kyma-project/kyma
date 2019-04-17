@@ -14,6 +14,7 @@ import (
 )
 
 var userInfoCtxKey = &contextKey{"userInfo"}
+var userTokenCtxKey = "token"
 
 type contextKey struct {
 	name string
@@ -34,9 +35,7 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 				r.Header.Set("sec-websocket-protocol", wsProtocol)
 			}
 
-			// header Authorization ->
-
-			//r.Header.Get
+			token := r.Header.Get("Authorization")
 
 			u, ok, err := a.AuthenticateRequest(r)
 			if err != nil {
@@ -47,6 +46,7 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 				return
 			}
 			ctx := WithUserInfoContext(r.Context(), u)
+			ctx = WithUserTokenContext(ctx, token)
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
@@ -66,9 +66,9 @@ func UserInfoForContext(ctx context.Context) (user.Info, error) {
 }
 
 func WithUserInfoContext(ctx context.Context, userInfo user.Info) context.Context {
-	//userInfoCtx := context.WithValue(ctx, userInfoCtxKey, userInfo)
-
-	// context.WithValue(userInfoCtx, token, token)
-	//return context.WithValue(userInfoCtx)
 	return context.WithValue(ctx, userInfoCtxKey, userInfo)
+}
+
+func WithUserTokenContext(ctx context.Context, token string) context.Context {
+	return context.WithValue(ctx, userTokenCtxKey, token)
 }
