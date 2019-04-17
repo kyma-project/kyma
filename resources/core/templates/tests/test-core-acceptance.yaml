@@ -18,21 +18,21 @@ spec:
         value: http://helm-broker.kyma-system.svc.cluster.local
       - name: RELEASE_NAMESPACE
         value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
-      - name: APP_DOMAIN_NAME
+      - name: DOMAIN_NAME
         value: {{ .Values.global.ingress.domainName }}
-      - name: APP_IS_LOCAL_ENV
+      - name: IS_LOCAL_ENV
         value: {{ .Values.global.isLocalEnv | toString | quote }}
-      - name: APP_DEX_USER_EMAIL
+      - name: DEX_USER_EMAIL
         valueFrom:
           secretKeyRef:
             name: admin-user
             key: email
-      - name: APP_DEX_USER_PASSWORD
+      - name: DEX_USER_PASSWORD
         valueFrom:
           secretKeyRef:
             name: admin-user
             key: password
-      - name: INGRESSGATEWAY_FQDN
+      - name: INGRESSGATEWAY_ADDRESS
         value: istio-ingressgateway.istio-system.svc.cluster.local
       - name: STUBS_DOCKER_IMAGE
         value: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
