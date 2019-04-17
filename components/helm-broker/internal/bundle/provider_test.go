@@ -2,10 +2,10 @@ package bundle_test
 
 import (
 	"io/ioutil"
+	"os"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
-	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle/automock"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger/spy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -14,9 +14,13 @@ import (
 func TestRepositoryLoaderSuccess(t *testing.T) {
 	// given
 	log := spy.NewLogDummy()
+	fakeRepo := &fakeRepository{path: "testdata"}
+
 	tmpDir, err := ioutil.TempDir("../../tmp", "RepositoryLoaderTest")
 	require.NoError(t, err)
-	bundleLoader := bundle.NewProvider(bundle.NewLocalRepository("testdata"), bundle.NewLoader(tmpDir, log), log)
+	defer os.RemoveAll(tmpDir)
+
+	bundleLoader := bundle.NewProvider(fakeRepo, bundle.NewLoader(tmpDir, log), log)
 
 	// when
 	result, err := bundleLoader.ProvideBundles()
@@ -29,12 +33,13 @@ func TestRepositoryLoaderSuccess(t *testing.T) {
 func TestRepositoryLoader(t *testing.T) {
 	// given
 	log := spy.NewLogDummy()
-	repo := &automock.Repository{}
-	repo.On("IndexReader").Return("")
+	fakeRepo := &fakeRepository{path: "testdata"}
 
 	tmpDir, err := ioutil.TempDir("../../tmp", "RepositoryLoaderTest")
 	require.NoError(t, err)
-	bundleLoader := bundle.NewProvider(bundle.NewLocalRepository("testdata"), bundle.NewLoader(tmpDir, log), log)
+	defer os.RemoveAll(tmpDir)
+
+	bundleLoader := bundle.NewProvider(fakeRepo, bundle.NewLoader(tmpDir, log), log)
 
 	// when
 	result, err := bundleLoader.ProvideBundles()
