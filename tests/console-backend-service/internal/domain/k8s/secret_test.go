@@ -6,17 +6,17 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
-	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -126,11 +126,23 @@ func TestSecret(t *testing.T) {
 	assert.Contains(t, nameSlice, secretName)
 
 	t.Log("Updating...")
-	secretRes.Secret.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update, err := stringifyJSON(secretRes.Secret.JSON)
-	require.NoError(t, err)
 	var updateRes updateSecretMutationResponse
-	err = c.Do(fixUpdateSecretMutation(update), &updateRes)
+	err = retrier.Retry(func() error {
+		err = c.Do(fixSecretQuery(), &secretRes)
+		if err != nil {
+			return err
+		}
+		secretRes.Secret.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
+		update, err := stringifyJSON(secretRes.Secret.JSON)
+		if err != nil {
+			return err
+		}
+		err = c.Do(fixUpdateSecretMutation(update), &updateRes)
+		if err != nil {
+			return err
+		}
+		return nil
+	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(t, secretName, updateRes.UpdateSecret.Name)
 	assert.Equal(t, secretNamespace, updateRes.UpdateSecret.Namespace)
