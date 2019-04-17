@@ -2,7 +2,7 @@ package configurer
 
 import (
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/pkg/errors"

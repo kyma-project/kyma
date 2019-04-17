@@ -10,9 +10,9 @@ import (
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/setup"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/exit"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/module"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/exit"
 )
 
 var AuthSuite *auth.TestSuite
