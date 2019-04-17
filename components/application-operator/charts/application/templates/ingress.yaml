@@ -31,6 +31,10 @@ spec:
         backend:
           serviceName: {{ .Release.Name }}-event-service-external-api
           servicePort: 8081
+      - path: /{{ .Release.Name }}/v1/activeevents
+        backend:
+          serviceName: {{ .Release.Name }}-event-service-external-api
+          servicePort: 8081
       - path: /{{ .Release.Name }}/v1/metadata
         backend:
           serviceName: application-registry-external-api
