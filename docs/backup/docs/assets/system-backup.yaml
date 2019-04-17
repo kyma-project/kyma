@@ -1,5 +1,4 @@
 includedNamespaces:
-- istio-system
 - kyma-system
 - kyma-integration
 - kyma-installer
