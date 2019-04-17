@@ -18,7 +18,6 @@ package backupe2e
 //      ]
 //    }
 // }
-//
 // {success {vector [{map[] [1.551424874014e+09 1.661]}]}}
 
 import (
