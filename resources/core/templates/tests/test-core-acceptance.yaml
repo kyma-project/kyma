@@ -18,16 +18,16 @@ spec:
         value: http://helm-broker.kyma-system.svc.cluster.local
       - name: RELEASE_NAMESPACE
         value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
-      - name: KYMA_DOMAIN
+      - name: APP_DOMAIN_NAME
         value: {{ .Values.global.ingress.domainName }}
-      - name: IS_LOCAL_ENV
+      - name: APP_IS_LOCAL_ENV
         value: {{ .Values.global.isLocalEnv | toString | quote }}
-      - name: DEX_USER_EMAIL
+      - name: APP_DEX_USER_EMAIL
         valueFrom:
           secretKeyRef:
             name: admin-user
             key: email
-      - name: DEX_USER_PASSWORD
+      - name: APP_DEX_USER_PASSWORD
         valueFrom:
           secretKeyRef:
             name: admin-user
