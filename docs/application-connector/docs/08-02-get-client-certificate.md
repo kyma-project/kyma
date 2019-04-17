@@ -102,7 +102,7 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 
 After you receive the certificate, decode it and use it in your application. Register the services of your external solution through the Application Registry.
 
-## Call the `metadata` endpoint
+## Call the metadata endpoint
 
 You must call the `metadata` endpoint with the generated certificate to get URLs to the following:
 
