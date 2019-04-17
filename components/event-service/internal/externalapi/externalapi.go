@@ -20,7 +20,7 @@ func NewHandler(maxRequestSize int64) http.Handler {
 	router.PathPrefix("/{re}/v1/events").Handler(NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
 
 	eventsClient, _ := registered.NewEventsClient()
-	router.Path("{application}/v1/activeevents").HandlerFunc(NewActiveEventsHandler(eventsClient).GetActiveEvents).Methods(http.MethodGet)
+	router.PathPrefix("{application}/v1/activeevents").HandlerFunc(NewActiveEventsHandler(eventsClient).GetActiveEvents).Methods(http.MethodGet)
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)
 
