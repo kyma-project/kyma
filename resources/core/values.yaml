@@ -74,8 +74,8 @@ global:
     dir: develop/
     version: '9ecc0bcc'
   console_backend_service_test:
-    dir: pr/
-    version: 'PR-3712'
+    dir: develop/
+    version: '5ec3de0d'
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8
