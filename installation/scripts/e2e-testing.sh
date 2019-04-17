@@ -58,7 +58,8 @@ function printLogsFromFailedHelmTests() {
             printLogsFromPod ${namespace} ${POD}
         ;;
         "Succeeded")
-           # do nothing
+            echo "Test of '${POD}' was successful"
+            echo "Logs are not displayed after success"
         ;;
         *)
             log "Unknown status of '${POD}' - ${phase}" red

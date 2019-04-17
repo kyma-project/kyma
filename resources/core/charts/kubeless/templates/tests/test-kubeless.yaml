@@ -170,6 +170,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
     spec:
+      shareProcessNamespace: true
       serviceAccount: "test-{{ template "fullname" . }}-int"
       containers:
       - name: test-{{ template "fullname" . }}

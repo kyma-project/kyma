@@ -69,7 +69,7 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	}()
 
 	ts.enableApplicationInTestNamespace()
-	ts.waitForAppServiceClasses(time.Second * 90)
+	ts.waitForAppServiceClasses(timeoutPerAssert)
 
 	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
 	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
