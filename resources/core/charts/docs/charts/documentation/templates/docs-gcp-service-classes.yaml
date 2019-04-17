@@ -1,0 +1,16 @@
+apiVersion: cms.kyma-project.io/v1alpha1
+kind: ClusterDocsTopic
+metadata:
+  labels:
+    cms.kyma-project.io/view-context: docs-ui
+    cms.kyma-project.io/group-name: gcp-broker-service-classes
+  name: gcp-broker-service-classes
+spec:
+  displayName: "gcp-broker-service-classes"
+  description: "gcp-broker-service-classes"
+  sources:
+    - type: markdown
+      name: docs
+      mode: package
+      url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterDocsTopicsVersion }}.zip
+      filter: /docs/service-brokers/gcp-broker-service-classes/
