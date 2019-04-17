@@ -9,21 +9,23 @@ import (
 	"net/http"
 )
 
+//RespondWithBody sends http response with json body
 func RespondWithBody(w http.ResponseWriter, events registered.ActiveEvents, httpCode int) {
-	Respond(w, httpCode)
+	respond(w, httpCode)
 	json.NewEncoder(w).Encode(events)
 }
 
+//RespondWithErrorAndLog logs error and sends http response with error json body
 func RespondWithErrorAndLog(e error, w http.ResponseWriter) {
 	logrus.Errorln(e.Error())
-	Respond(w, http.StatusInternalServerError)
+	respond(w, http.StatusInternalServerError)
 	json.NewEncoder(w).Encode(httperrors.ErrorResponse{
 		Code:  http.StatusInternalServerError,
 		Error: e.Error(),
 	})
 }
 
-func Respond(w http.ResponseWriter, httpCode int) {
+func respond(w http.ResponseWriter, httpCode int) {
 	w.Header().Set(httpconsts.HeaderContentType, httpconsts.ContentTypeApplicationJSON)
 	w.WriteHeader(httpCode)
 }
