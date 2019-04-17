@@ -102,7 +102,7 @@ func main() {
 
 	dexConfig := dex.Config{}
 	if action == executeTestsActionName {
-		userEmail, userPassword, err := getUserPasswordFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace)
+		userEmail, userPassword, err := getUserFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace)
 		fatalOnError(err, "while reading user password from cluster")
 
 		dexConfig = dex.Config{
@@ -125,12 +125,12 @@ func main() {
 	fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
-		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
-		"GrafanaUpgradeTest":           grafanaUpgradeTest,
-		"MetricsUpgradeTest":           metricUpgradeTest,
+		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		"ApiControllerUpgradeTest":        apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
+		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
+		"GrafanaUpgradeTest":              grafanaUpgradeTest,
+		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 	}
@@ -182,7 +182,7 @@ func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
 	return value, nil
 }
 
-func getUserPasswordFromCluster(k8sCli *k8sclientset.Clientset, userSecret, dexNamespace string) (string, string, error) {
+func getUserFromCluster(k8sCli *k8sclientset.Clientset, userSecret, dexNamespace string) (string, string, error) {
 	secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
 	if err != nil {
 		return "", "", err
