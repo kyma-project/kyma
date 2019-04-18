@@ -14,13 +14,12 @@ type ActiveEventsHandler interface {
 }
 
 // NewHandler creates http.Handler(s) for the /v1/events /v1/activeevents and /v1/health endpoints
-func NewHandler(maxRequestSize int64) http.Handler {
+func NewHandler(maxRequestSize int64, eventsClient registered.EventsClient) http.Handler {
 	router := mux.NewRouter()
 
-	router.PathPrefix("/{re}/v1/events").Handler(NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
+	router.Path("/{re}/v1/events").Handler(NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
 
-	eventsClient, _ := registered.NewEventsClient()
-	router.PathPrefix("{application}/v1/activeevents").HandlerFunc(NewActiveEventsHandler(eventsClient).GetActiveEvents).Methods(http.MethodGet)
+	router.Path("/{application}/v1/activeevents").HandlerFunc(NewActiveEventsHandler(eventsClient).GetActiveEvents).Methods(http.MethodGet)
 
 	router.Path("/v1/health").Handler(NewHealthCheckHandler()).Methods(http.MethodGet)
 

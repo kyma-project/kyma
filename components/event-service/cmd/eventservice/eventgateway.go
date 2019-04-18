@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
 	"net/http"
 	"os"
 	"os/signal"
@@ -32,7 +33,14 @@ func main() {
 
 	bus.Init(options.sourceID, options.eventsTargetURL)
 
-	externalHandler := externalapi.NewHandler(options.maxRequestSize)
+	eventsClient, e := registered.NewEventsClient()
+
+	if e != nil {
+		log.Error("Unable to create Events Client.", e.Error())
+		return
+	}
+
+	externalHandler := externalapi.NewHandler(options.maxRequestSize, eventsClient)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
