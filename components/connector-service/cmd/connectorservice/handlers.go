@@ -128,10 +128,11 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 func newInternalHandler(tokenManagerProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc,
 	revocationListRepository revocation.RevocationListRepository, contextExtractor *clientcontext.ContextExtractor) http.Handler {
 
-	ctxRequired := clientcontext.CtxRequiredType(opts.central)
+	clusterCtxEnabled := clientcontext.CtxEnabledType(opts.central)
+	clusterContextStrategy := clientcontext.NewClusterContextStrategy(clusterCtxEnabled)
 
-	clusterCtxMiddleware := clientcontextmiddlewares.NewClusterContextMiddleware(ctxRequired)
-	applicationCtxMiddleware := clientcontextmiddlewares.NewApplicationContextMiddleware(clusterCtxMiddleware)
+	clusterCtxMiddleware := clientcontextmiddlewares.NewClusterContextMiddleware(clusterContextStrategy)
+	applicationCtxMiddleware := clientcontextmiddlewares.NewApplicationContextMiddleware(clusterContextStrategy)
 
 	appTokenTTLMinutes := time.Duration(opts.appTokenExpirationMinutes) * time.Minute
 	appHandlerConfig := internalapi.Config{

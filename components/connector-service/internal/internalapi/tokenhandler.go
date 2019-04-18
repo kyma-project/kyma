@@ -30,9 +30,6 @@ func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fmt.Println("Internal handler:")
-	fmt.Println(clientContextService.GetSubject())
-
 	logger := clientContextService.GetLogger()
 
 	logger.Info("Generating token")

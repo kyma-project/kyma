@@ -9,8 +9,8 @@ import (
 
 type clientContextKey string
 
-// CtxRequiredType type defines if context is mandatory
-type CtxRequiredType bool
+// CtxEnabledType type defines if context is mandatory
+type CtxEnabledType bool
 
 // LookupEnabledType type defines if headers must be specified
 type LookupEnabledType bool
@@ -37,9 +37,6 @@ const (
 	// GroupHeader is key representing Group in headers
 	GroupHeader = "Group"
 
-	// SubjectCNSeparator holds separator for values packed in CN of Subject
-	SubjectCNSeparator = ";"
-
 	// GroupEmpty represents empty value for Group
 	GroupEmpty = ""
 
@@ -50,10 +47,10 @@ const (
 	ApplicationEmpty = ""
 
 	// CtxRequired represents value for required context
-	CtxRequired CtxRequiredType = true
+	CtxRequired CtxEnabledType = true
 
 	// CtxNotRequired represents value for not required context
-	CtxNotRequired CtxRequiredType = false
+	CtxNotRequired CtxEnabledType = false
 
 	// LookupEnabled represents value for required fetch from Runtime
 	LookupEnabled LookupEnabledType = true
