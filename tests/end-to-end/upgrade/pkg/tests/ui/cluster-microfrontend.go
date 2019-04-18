@@ -78,8 +78,8 @@ func (t *ClusterMicrofrontendUpgradeTest) createClusterMicrofrontend() error {
 						ShowInNavigation: true,
 					},
 					v1alpha1.NavigationNode{
-						Label:            "testCMF Child",
-						NavigationPath:   "test/child",
+						Label:            "testCMF child",
+						NavigationPath:   "child",
 						ViewURL:          "/resourcePath/child",
 						ShowInNavigation: true,
 					},
