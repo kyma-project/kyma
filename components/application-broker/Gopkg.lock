@@ -259,7 +259,7 @@
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
-  version = "v1.0.0-rc1"
+  version = "v1.0.0-rc2"
 
 [[projects]]
   name = "github.com/pkg/errors"
