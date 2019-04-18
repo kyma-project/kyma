@@ -7,7 +7,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit/utils"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
@@ -17,7 +16,7 @@ import (
 type ConnectorClient interface {
 	GetToken(appName string) (string, error)
 	GetInfo(url string) (*InfoResponse, error)
-	GetCertificate(url string, csr *x509.CertificateRequest) ([]*x509.Certificate, error)
+	GetCertificate(url string, csr []byte) ([]*x509.Certificate, error)
 }
 
 type connectorClient struct {
@@ -92,8 +91,8 @@ func (cc *connectorClient) GetInfo(url string) (*InfoResponse, error) {
 	return infoResponse, nil
 }
 
-func (cc *connectorClient) GetCertificate(url string, csr *x509.CertificateRequest) ([]*x509.Certificate, error) {
-	b64CSR := base64.StdEncoding.EncodeToString(csr.Raw)
+func (cc *connectorClient) GetCertificate(url string, csr []byte) ([]*x509.Certificate, error) {
+	b64CSR := base64.StdEncoding.EncodeToString(csr)
 
 	body, err := json.Marshal(CsrRequest{Csr: b64CSR})
 	if err != nil {

@@ -8,44 +8,49 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"errors"
-	"github.com/stretchr/testify/require"
-	"testing"
+	"strings"
 )
 
 const (
 	rsaKeySize = 2048
 )
 
-func CreateKey(t *testing.T) *rsa.PrivateKey {
+func CreateKey() (*rsa.PrivateKey, error) {
 	key, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
-	require.NoError(t, err)
+	if err != nil {
+		return nil, err
+	}
 
-	return key
+	return key, nil
 }
 
-func CreateCSR(t *testing.T, subject Subject, key *rsa.PrivateKey) []byte {
-	sub := pkix.Name{
-		CommonName:         subject.CommonName,
-		Country:            []string{subject.Country},
-		Organization:       []string{subject.Organization},
-		OrganizationalUnit: []string{subject.OrganizationalUnit},
-		Locality:           []string{subject.Locality},
-		Province:           []string{subject.Province},
+func CreateCSR(subjectRaw string, key *rsa.PrivateKey) ([]byte, error) {
+	subjectInfo := extractSubject(subjectRaw)
+
+	subject := pkix.Name{
+		CommonName:         subjectInfo["CN"],
+		Country:            []string{subjectInfo["C"]},
+		Organization:       []string{subjectInfo["O"]},
+		OrganizationalUnit: []string{subjectInfo["OU"]},
+		Locality:           []string{subjectInfo["L"]},
+		Province:           []string{subjectInfo["ST"]},
 	}
 
 	csrTemplate := &x509.CertificateRequest{
-		Subject: sub,
+		Subject: subject,
 	}
 
 	csrBytes, err := x509.CreateCertificateRequest(rand.Reader, csrTemplate, key)
-	require.NoError(t, err)
+	if err != nil {
+		return nil, err
+	}
 
 	csr := pem.EncodeToMemory(&pem.Block{
 		Type:  "CERTIFICATE REQUEST",
 		Bytes: csrBytes,
 	})
 
-	return csr
+	return csr, nil
 }
 
 func encodedCertChainToPemBytes(encodedChain string) ([]byte, error) {
@@ -75,4 +80,17 @@ func decodeBase64Cert(certificate string) ([]byte, error) {
 		return nil, err
 	}
 	return crtBytes, nil
+}
+
+func extractSubject(subject string) map[string]string {
+	result := map[string]string{}
+
+	segments := strings.Split(subject, ",")
+
+	for _, segment := range segments {
+		parts := strings.Split(segment, "=")
+		result[parts[0]] = parts[1]
+	}
+
+	return result
 }
