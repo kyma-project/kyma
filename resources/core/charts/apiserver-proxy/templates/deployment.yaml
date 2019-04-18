@@ -21,8 +21,10 @@ spec:
     spec:
       serviceAccountName: {{ template "name" . }}
       {{ if .Values.global.isLocalEnv }}
-      hostNetwork: true
-      dnsPolicy: ClusterFirstWithHostNet
+      hostAliases:
+        - ip: {{ .Values.minikubeIP }}
+          hostnames:
+            - "dex.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       containers:
       - image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.apiserver_proxy.dir }}apiserver-proxy:{{ .Values.global.apiserver_proxy.version }}
@@ -52,6 +54,9 @@ spec:
         ports:
         - containerPort: {{ .Values.port.insecure }}
         - containerPort: {{ .Values.port.secure }}
+          {{ if .Values.global.isLocalEnv }}
+          hostPort: {{ .Values.port.secure }}
+          {{ end }}
         volumeMounts:
         - name: tls-cert
           mountPath: /etc/tls-cert/

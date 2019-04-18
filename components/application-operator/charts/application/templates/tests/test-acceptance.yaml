@@ -4,15 +4,18 @@ metadata:
   name: test-{{.Release.Name }}-event-service-acceptance
   annotations:
     helm.sh/hook: test-success
-    sidecar.istio.io/inject: "false"
+    sidecar.istio.io/inject: "true"
   labels:
     helm-chart-test: "true"
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  shareProcessNamespace: true
   containers:
-    - name: test-{{.Release.Name }}-event-service-acceptance
+    - name: {{.Release.Name }}-event-service-acceptance
       image: {{ .Values.global.eventServiceTestsImage }}
+      command: ["/bin/sh"]
+      args: ["-c", "sleep 10; ./entrypoint.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
       env:
         - name: EVENT_SERVICE_URL

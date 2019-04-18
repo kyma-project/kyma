@@ -10,3 +10,4 @@ By default, following changes are applied:
  * The Egressgateway, Ingressgateway, policy, and telemetry are configured to use Zipkin from the `kyma-system` Namespace.
  * Monitoring and tracing related resources are deleted.
  * Sidecar injection is enabled in all Namespaces, except those labeled with `istio-injection: disabled`.
+ * A DestinationRule CR disabling mTLS for requests to Helm Tiller.
