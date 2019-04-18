@@ -4,6 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared"
 	"k8s.io/client-go/discovery"
 	apps "k8s.io/client-go/kubernetes/typed/apps/v1"
+	authv1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
@@ -108,4 +109,13 @@ func (r *configMapResolver) SetConfigMapConverter(converter gqlConfigMapConverte
 
 func NewConfigMapService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) *configMapService {
 	return newConfigMapService(informer, client)
+}
+
+// SelfSubjectRulesReview
+func NewSelfSubjectRulesReviewConverter() gqlSelfSubjectRulesConverter {
+	return &selfSubjectRulesConverter{}
+}
+
+func NewSelfSubjectRulesService(client authv1.AuthorizationV1Interface) *selfSubjectRulesService {
+	return newSelfSubjectRulesService(client)
 }

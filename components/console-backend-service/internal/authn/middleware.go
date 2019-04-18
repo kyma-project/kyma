@@ -43,7 +43,6 @@ func AuthMiddleware(a authenticator.Request) func(http.Handler) http.Handler {
 				return
 			}
 			ctx := WithUserInfoContext(r.Context(), u)
-			ctx = context.WithValue(ctx, "username", u.GetName())
 			r = r.WithContext(ctx)
 			next.ServeHTTP(w, r)
 		})
