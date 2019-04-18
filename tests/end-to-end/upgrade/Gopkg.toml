@@ -29,8 +29,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "api-backup-test-refactor"
-  source = "https://github.com/sjanota/kyma"
+  revision = "f5eb839e7689ebbcf7c2318880c44fb6712303db"
 
 [[constraint]]
   name = "github.com/pkg/errors"

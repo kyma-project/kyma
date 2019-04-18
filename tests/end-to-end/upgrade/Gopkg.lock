@@ -226,7 +226,6 @@
   version = "v0.1.43"
 
 [[projects]]
-  branch = "api-backup-test-refactor"
   digest = "1:1411e251d44e010a2823033842be4fe3131f0c8bff2dee07e985a0b60e84a4f4"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -274,8 +273,7 @@
     "tests/end-to-end/backup-restore-test/utils/fetch-dex-token",
   ]
   pruneopts = "UT"
-  revision = "c92ff4e161fca81c6a89e680b6f89781bd1cb67b"
-  source = "https://github.com/sjanota/kyma"
+  revision = "f5eb839e7689ebbcf7c2318880c44fb6712303db"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
