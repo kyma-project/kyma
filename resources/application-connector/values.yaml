@@ -16,17 +16,17 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: pr/
-    version: PR-3714
+    dir: develop/
+    version: 1ea3fd15
   application_operator_tests:
     dir: develop/
     version: 68a39bb5
   connector_service:
-    dir: pr/
-    version: PR-3753
+    dir: develop/
+    version: 3b4c9f62
   connector_service_tests:
-    dir: pr/
-    version: PR-3753
+    dir: develop/
+    version: 3b4c9f62
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
