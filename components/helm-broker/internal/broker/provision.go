@@ -14,6 +14,8 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
+const bundleRepositoryURLName = "bundleRepositoryURL"
+
 type provisionService struct {
 	bundleIDGetter           bundleIDGetter
 	chartGetter              chartGetter
@@ -126,9 +128,19 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		return nil, errors.Wrap(err, "while inserting instance to storage")
 	}
 
-	cvOver := internal.ChartValues(req.Parameters)
+	chartOverrides := internal.ChartValues(req.Parameters)
 
-	svc.doAsync(ctx, iID, opID, namespace, releaseName, bundlePlan, bundle.Bindable, cvOver)
+	provisionInput := provisioningInput{
+		instanceID:          iID,
+		operationID:         opID,
+		namespace:           namespace,
+		releaseName:         releaseName,
+		bundlePlan:          bundlePlan,
+		isBundleBindable:    bundle.Bindable,
+		bundleRepositoryURL: bundle.RemoteRepositoryURL,
+		chartOverrides:      chartOverrides,
+	}
+	svc.doAsync(ctx, provisionInput)
 
 	opKey := osb.OperationKey(op.OperationID)
 	resp := &osb.ProvisionResponse{
@@ -139,33 +151,47 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	return resp, nil
 }
 
-func (svc *provisionService) doAsync(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, namespace internal.Namespace, releaseName internal.ReleaseName, bundlePlan internal.BundlePlan, isBundleBindable bool, cvOver internal.ChartValues) {
+// provisioningInput holds all information required to provision a given instance
+type provisioningInput struct {
+	instanceID          internal.InstanceID
+	operationID         internal.OperationID
+	namespace           internal.Namespace
+	releaseName         internal.ReleaseName
+	bundlePlan          internal.BundlePlan
+	isBundleBindable    bool
+	chartOverrides      internal.ChartValues
+	bundleRepositoryURL string
+}
+
+func (svc *provisionService) doAsync(ctx context.Context, input provisioningInput) {
 	if svc.testHookAsyncCalled != nil {
-		svc.testHookAsyncCalled(opID)
+		svc.testHookAsyncCalled(input.operationID)
 	}
-	go svc.do(ctx, iID, opID, namespace, releaseName, bundlePlan, isBundleBindable, cvOver)
+	go svc.do(ctx, input)
 }
 
 // do is called asynchronously
-func (svc *provisionService) do(ctx context.Context, iID internal.InstanceID, opID internal.OperationID, namespace internal.Namespace, releaseName internal.ReleaseName, bundlePlan internal.BundlePlan, isBundleBindable bool, cvOver internal.ChartValues) {
+func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 
 	fDo := func() (*rls.InstallReleaseResponse, error) {
-		c, err := svc.chartGetter.Get(bundlePlan.ChartRef.Name, bundlePlan.ChartRef.Version)
+		c, err := svc.chartGetter.Get(input.bundlePlan.ChartRef.Name, input.bundlePlan.ChartRef.Version)
 		if err != nil {
 			return nil, errors.Wrap(err, "while getting chart from storage")
 		}
 
-		out, err := deepCopy(map[string]interface{}(bundlePlan.ChartValues))
+		out, err := deepCopy(input.bundlePlan.ChartValues)
 		if err != nil {
 			return nil, errors.Wrap(err, "while coping plan values")
 		}
 
-		out = mergeValues(out, map[string]interface{}(cvOver))
+		out = mergeValues(out, input.chartOverrides)
+
+		out[bundleRepositoryURLName] = input.bundleRepositoryURL
 
 		svc.log.Infof("Merging values for operation [%s], releaseName [%s], namespace [%s], bundlePlan [%s]. Plan values are: [%v], overrides: [%v], merged: [%v] ",
-			opID, releaseName, namespace, bundlePlan.Name, bundlePlan.ChartValues, cvOver, out)
+			input.operationID, input.releaseName, input.namespace, input.bundlePlan.Name, input.bundlePlan.ChartValues, input.chartOverrides, out)
 
-		resp, err := svc.helmInstaller.Install(c, internal.ChartValues(out), releaseName, namespace)
+		resp, err := svc.helmInstaller.Install(c, internal.ChartValues(out), input.releaseName, input.namespace)
 		if err != nil {
 			return nil, errors.Wrap(err, "while installing helm release")
 		}
@@ -182,14 +208,15 @@ func (svc *provisionService) do(ctx context.Context, iID internal.InstanceID, op
 		opDesc = fmt.Sprintf("provisioning failed on error: %s", err.Error())
 	}
 
-	if err == nil && svc.isBindable(bundlePlan, isBundleBindable) {
-		if resolveErr := svc.resolveAndSaveBindData(iID, namespace, bundlePlan, resp); resolveErr != nil {
+	if err == nil && svc.isBindable(input.bundlePlan, input.isBundleBindable) {
+		if resolveErr := svc.resolveAndSaveBindData(input.instanceID, input.namespace, input.bundlePlan, resp); resolveErr != nil {
 			opState = internal.OperationStateFailed
 			opDesc = fmt.Sprintf("resolving bind data failed with error: %s", resolveErr.Error())
 		}
 	}
 
-	if err := svc.operationUpdater.UpdateStateDesc(iID, opID, opState, &opDesc); err != nil {
+	if err := svc.operationUpdater.UpdateStateDesc(input.instanceID, input.operationID, opState, &opDesc); err != nil {
+		svc.log.Errorf("State description was not updated, got error: %v", err)
 	}
 }
 

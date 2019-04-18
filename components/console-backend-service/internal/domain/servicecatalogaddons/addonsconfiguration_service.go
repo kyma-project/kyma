@@ -30,10 +30,12 @@ type addonsConfigurationService struct {
 }
 
 func newAddonsConfigurationService(informer cache.SharedIndexInformer, cfgMapClient corev1.ConfigMapInterface) *addonsConfigurationService {
+	notifier := resource.NewNotifier()
+	informer.AddEventHandler(notifier)
 	return &addonsConfigurationService{
 		informer:     informer,
 		cfgMapClient: cfgMapClient,
-		notifier:     resource.NewNotifier(),
+		notifier:     notifier,
 	}
 }
 

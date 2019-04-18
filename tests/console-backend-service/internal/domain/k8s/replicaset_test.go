@@ -7,18 +7,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -104,11 +104,23 @@ func TestReplicaSet(t *testing.T) {
 	assert.Equal(t, replicaSetNamespace, replicaSetsRes.ReplicaSets[0].Namespace)
 
 	t.Log("Updating...")
-	replicaSetRes.ReplicaSet.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo1": "bar1"}
-	update, err := stringifyJSON(replicaSetRes.ReplicaSet.JSON)
-	require.NoError(t, err)
 	var updateRes updateReplicaSetMutationResponse
-	err = c.Do(fixUpdateReplicaSetMutation(update), &updateRes)
+	err = retrier.Retry(func() error {
+		err = c.Do(fixReplicaSetQuery(), &replicaSetRes)
+		if err != nil {
+			return err
+		}
+		replicaSetRes.ReplicaSet.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
+		update, err := stringifyJSON(replicaSetRes.ReplicaSet.JSON)
+		if err != nil {
+			return err
+		}
+		err = c.Do(fixUpdateReplicaSetMutation(update), &updateRes)
+		if err != nil {
+			return err
+		}
+		return nil
+	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(t, replicaSetName, updateRes.UpdateReplicaSet.Name)
 	assert.Equal(t, replicaSetNamespace, updateRes.UpdateReplicaSet.Namespace)

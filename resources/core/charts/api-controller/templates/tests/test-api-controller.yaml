@@ -1,25 +1,27 @@
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: test-api-controller-acceptance
-  annotations:
-    sidecar.istio.io/inject: "false"
-    "helm.sh/hook": test-success
-  labels:
-    "helm-chart-test": "true"
 spec:
-  shareProcessNamespace: true
-  serviceAccount: api-controller-test-account
-  containers:
-  - name: test-api-controller-acceptance
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller_acceptance_tests.dir }}api-controller-acceptance-tests:{{ .Values.global.api_controller_acceptance_tests.version }}
-    command: ["/bin/sh"]
-    args: ["-c", "sleep 10; /apicontroller.test -test.v; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
-    env:
-    - name: DOMAIN_NAME
-      value: {{ .Values.global.ingress.domainName }}
-    - name: INGRESSGATEWAY_ADDRESS
-      value: istio-ingressgateway.istio-system.svc.cluster.local
-    - name: NAMESPACE
-      value: {{ .Values.global.api_controller_acceptance_tests.testNamespace }}
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      shareProcessNamespace: true
+      serviceAccount: api-controller-test-account
+      containers:
+      - name: test-api-controller-acceptance
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.api_controller_acceptance_tests.dir }}api-controller-acceptance-tests:{{ .Values.global.api_controller_acceptance_tests.version }}
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 10; /apicontroller.test -test.v; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        env:
+        - name: DOMAIN_NAME
+          value: {{ .Values.global.ingress.domainName }}
+        - name: INGRESSGATEWAY_ADDRESS
+          value: istio-ingressgateway.istio-system.svc.cluster.local
+        - name: NAMESPACE
+          value: {{ .Values.global.api_controller_acceptance_tests.testNamespace }}
+      restartPolicy: Never
+{{- end }}

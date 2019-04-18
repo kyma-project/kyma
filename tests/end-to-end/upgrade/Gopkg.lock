@@ -10,6 +10,14 @@
   version = "v2.2.0"
 
 [[projects]]
+  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
+  name = "github.com/davecgh/go-spew"
+  packages = ["spew"]
+  pruneopts = "UT"
+  revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
+  version = "v1.1.1"
+
+[[projects]]
   digest = "1:2cd7915ab26ede7d95b8749e6b1f933f1c6d5398030684e6505940a10f31cfda"
   name = "github.com/ghodss/yaml"
   packages = ["."]
@@ -200,7 +208,7 @@
   version = "v0.6.0"
 
 [[projects]]
-  digest = "1:b42dbc41fce3c130d6d08181900fb3af9864f61f25b5a41f83489fdc492e71c4"
+  digest = "1:9a250b328a9564739d21af7eae0e92b3a1277410b880db9efe29984c1835704a"
   name = "github.com/kubernetes-incubator/service-catalog"
   packages = [
     "pkg/apis/servicecatalog",
@@ -214,12 +222,12 @@
     "pkg/filter",
   ]
   pruneopts = "UT"
-  revision = "49e5cc4f90c6794d490eea4256061797223d9564"
-  version = "v0.1.42"
+  revision = "2f4d37413ff5ebf816788aa94fa2613682f3b543"
+  version = "v0.1.43"
 
 [[projects]]
   branch = "api-backup-test-refactor"
-  digest = "1:efa741e9aa3ac47ce51ce39a1d00c1ae6e1fb55c3025743c23f4af813d7316cb"
+  digest = "1:1411e251d44e010a2823033842be4fe3131f0c8bff2dee07e985a0b60e84a4f4"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -242,6 +250,18 @@
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "components/event-bus/api/publish",
+    "components/event-bus/api/push/eventing.kyma-project.io",
+    "components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
+    "components/event-bus/generated/ea/clientset/versioned",
+    "components/event-bus/generated/ea/clientset/versioned/scheme",
+    "components/event-bus/generated/ea/clientset/versioned/typed/applicationconnector.kyma-project.io/v1alpha1",
+    "components/event-bus/generated/push/clientset/versioned",
+    "components/event-bus/generated/push/clientset/versioned/scheme",
+    "components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1",
+    "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io",
+    "components/event-bus/internal/ea/apis/applicationconnector.kyma-project.io/v1alpha1",
+    "components/event-bus/test/util",
     "components/installer/pkg/overrides",
     "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
@@ -296,6 +316,14 @@
   pruneopts = "UT"
   revision = "ba968bfe8b2f7e042a574c888954fccecfa385b4"
   version = "v0.8.1"
+
+[[projects]]
+  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
+  name = "github.com/pmezard/go-difflib"
+  packages = ["difflib"]
+  pruneopts = "UT"
+  revision = "792786c7400a136282c1664665ae0a8db921c6c2"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:2d32e501db06ad1b0df11dbad16e9af769aeadf47e1724b2221aa5ecc317ed26"
@@ -358,6 +386,14 @@
   version = "v1.0.3"
 
 [[projects]]
+  digest = "1:972c2427413d41a1e06ca4897e8528e5a1622894050e2f527b38ddf0f343f759"
+  name = "github.com/stretchr/testify"
+  packages = ["assert"]
+  pruneopts = "UT"
+  revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
+  version = "v1.3.0"
+
+[[projects]]
   digest = "1:1b8282c02f3cbf27de019d739246eaf8231f5dbcaaf9d0d7c7524184ee7b2d24"
   name = "github.com/vrischmann/envconfig"
   packages = ["."]
@@ -371,11 +407,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "UT"
-  revision = "88737f569e3a9c7ab309cdc09a07fe7fc87233c3"
+  revision = "f416ebab96af27ca70b6e5c23d6a0747530da626"
 
 [[projects]]
   branch = "master"
-  digest = "1:e4062746bd939735841b06731116013365b394bd1a792f5e347b0e5130dd3631"
+  digest = "1:dfdac5f7b01ef3c7c6c76348d439aa9dc4ef822a780e35bf50a4cfd4b7da4094"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -388,7 +424,7 @@
     "idna",
   ]
   pruneopts = "UT"
-  revision = "eb5bcb51f2a31c7d5141d810b70815c05d9c9146"
+  revision = "1da14a5a36f220ea3f03470682b737b1dfd5de22"
 
 [[projects]]
   branch = "master"
@@ -403,14 +439,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:788df6ab16e3b77c72cc916185de590254d2498027337005e0ed3e2c1f10ff7b"
+  digest = "1:32a91fdcb8f4ae0b2376129fe0091963fa1bbf42d4c1826ad41f7b6410f385c0"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "UT"
-  revision = "16da32be82c5df9a338c27758247c0b7b0bd8fea"
+  revision = "12500544f89f9420afe9529ba8940bf72d294972"
 
 [[projects]]
   digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
@@ -445,7 +481,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8da649cc6b10a0aa2aeb71a7067fd39a00ccf3f26c809a09416dd409d690b4d6"
+  digest = "1:d2338a2a5dc0b7f3bb801fef781991cd0170de0d94c7f0415289d47cf1f4c921"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -462,7 +498,7 @@
     "internal/semver",
   ]
   pruneopts = "UT"
-  revision = "681f9ce8ac52c4ba431539a515ecb7f2ab72eca0"
+  revision = "a5870b40385977769b3e1d711864fcd2d82bb9fd"
 
 [[projects]]
   digest = "1:6eb6e3b6d9fffb62958cf7f7d88dbbe1dd6839436b0802e194c590667a40412a"
@@ -686,6 +722,11 @@
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "github.com/kyma-project/kyma/components/event-bus/api/publish",
+    "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1",
+    "github.com/kyma-project/kyma/components/event-bus/generated/ea/clientset/versioned",
+    "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned",
+    "github.com/kyma-project/kyma/components/event-bus/test/util",
     "github.com/kyma-project/kyma/components/installer/pkg/overrides",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",

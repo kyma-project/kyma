@@ -24,6 +24,8 @@ spec:
       namespace: "knative-eventing"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
+    - name: "testing"
+      namespace: "kyma-system"
     - name: "prometheus-operator"
       namespace: "kyma-system"
     - name: "dex"

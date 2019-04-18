@@ -30,8 +30,8 @@ fi
 binaries=("broker" "indexbuilder" "targz" "preupgrade")
 buildEnv=""
 if [ "$1" == "$CI_FLAG" ]; then
-	# build binary statically
-	buildEnv="env CGO_ENABLED=0"
+	# build binary statically for linux architecture
+	buildEnv="env CGO_ENABLED=0 GOOS=linux GOARCH=amd64"
 fi
 
 for binary in "${binaries[@]}"; do
