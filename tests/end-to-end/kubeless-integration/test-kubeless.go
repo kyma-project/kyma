@@ -507,6 +507,7 @@ func cleanup() {
 	}()
 	go func() {
 		defer wg.Done()
+		deleteK8s("svc-binding.yaml")
 		deleteK8s("k8syaml/svcbind-lambda.yaml")
 		deleteK8s("svc-instance.yaml")
 	}()
