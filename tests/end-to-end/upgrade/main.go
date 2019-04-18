@@ -31,7 +31,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
 )
 
 // Config holds application configuration
@@ -131,8 +130,8 @@ func main() {
 		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
 		"GrafanaUpgradeTest":              grafanaUpgradeTest,
 		"MetricsUpgradeTest":              metricUpgradeTest,
-		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
-		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
+		//"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
+		//"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 	}
 
 	// Execute requested action
