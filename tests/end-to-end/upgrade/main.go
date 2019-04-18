@@ -23,13 +23,13 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
+	assetstore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
+	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
 	eventbus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/event-bus"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
-	assetstore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
 	"k8s.io/client-go/dynamic"
 )
 
