@@ -291,7 +291,7 @@ func deleteFun(namespace, name string) {
 		log.Fatal("Unable to delete function pod:\n", string(stdoutStderr))
 	}
 
-	timeout := time.After(2 * time.Minute)
+	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		select {
