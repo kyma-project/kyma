@@ -489,7 +489,7 @@ components:
           example: 'https://gateway.test.cluster.kyma.cx/{APP_NAME}/v1/events'
         renewCertUrl:
           type: 'string'
-          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewal'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewals'
         revokeCertUrl:
           type: 'string'
           example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
@@ -500,6 +500,8 @@ components:
           $ref: '#/components/schemas/applicationClientIdentity'
         urls:
           $ref: '#/components/schemas/applicationInfoResponseUrls'
+        certificate:
+          $ref: '#/components/schemas/cert'
     runtimeClientIdentity:
       type: 'object'
       properties:
@@ -514,7 +516,7 @@ components:
       properties:
         renewCertUrl:
           type: 'string'
-          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewal'
+          example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/renewals'
         revokeCertUrl:
           type: 'string'
           example: 'https://connector-service.test.cluster.kyma.cx/v1/applications/certificates/revocations'
@@ -525,6 +527,8 @@ components:
           $ref: '#/components/schemas/runtimeClientIdentity'
         urls:
           $ref: '#/components/schemas/runtimeInfoResponseUrls'
+        certificate:
+          $ref: '#/components/schemas/runtimeCert'
     csrRuntimeApiURLs:
       type: 'object'
       properties:

@@ -9,9 +9,9 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
+	pkgPath "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/path"
 	"github.com/pkg/errors"
 )
 
@@ -44,7 +44,7 @@ func (l *loader) loadPackage(src, name, filter string) (string, []string, error)
 		return "", nil, err
 	}
 
-	files, err = l.filterFiles(files, filter)
+	files, err = pkgPath.Filter(files, filter)
 	if err != nil {
 		return "", nil, err
 	}
@@ -185,22 +185,4 @@ func (l *loader) createFile(src io.Reader, dst string, mode int64) error {
 
 func (l *loader) createDir(dst string) error {
 	return os.MkdirAll(dst, os.ModePerm)
-}
-
-func (l *loader) filterFiles(files []string, filter string) ([]string, error) {
-	if filter == "" {
-		return files, nil
-	}
-
-	filtered := []string{}
-	regex, err := regexp.Compile(filter)
-	if err != nil {
-		return nil, errors.Wrapf(err, "while compiling file filter regex")
-	}
-	for _, value := range files {
-		if regex.MatchString(value) {
-			filtered = append(filtered, value)
-		}
-	}
-	return filtered, nil
 }

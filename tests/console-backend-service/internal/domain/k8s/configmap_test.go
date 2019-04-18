@@ -7,22 +7,23 @@ import (
 	"time"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
-
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
 	configMapName      = "test-config-map"
-	configMapNamespace = "console-backend-service-onfig-map"
+	configMapNamespace = "console-backend-service-config-map"
 )
 
 type ConfigMapEvent struct {
@@ -110,11 +111,23 @@ func TestConfigMap(t *testing.T) {
 	assert.Equal(t, configMapNamespace, configMapsRes.ConfigMaps[0].Namespace)
 
 	t.Log("Updating...")
-	configMapRes.ConfigMap.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update, err := stringifyJSON(configMapRes.ConfigMap.JSON)
-	require.NoError(t, err)
 	var updateRes updateConfigMapMutationResponse
-	err = c.Do(fixUpdateConfigMapMutation(update), &updateRes)
+	err = retrier.Retry(func() error {
+		err = c.Do(fixConfigMapQuery(), &configMapRes)
+		if err != nil {
+			return err
+		}
+		configMapRes.ConfigMap.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
+		update, err := stringifyJSON(configMapRes.ConfigMap.JSON)
+		if err != nil {
+			return err
+		}
+		err = c.Do(fixUpdateConfigMapMutation(update), &updateRes)
+		if err != nil {
+			return err
+		}
+		return nil
+	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(t, configMapName, updateRes.UpdateConfigMap.Name)
 	assert.Equal(t, configMapNamespace, updateRes.UpdateConfigMap.Namespace)
@@ -146,6 +159,16 @@ func TestConfigMap(t *testing.T) {
 	t.Log("Checking subscription for deleted config map...")
 	expectedEvent = configMapEvent("DELETE", configMap{Name: configMapName})
 	assert.NoError(t, checkConfigMapEvent(expectedEvent, subscription))
+
+	t.Log("Checking authorization directives...")
+	as := auth.New()
+	ops := &auth.OperationsInput{
+		auth.Get:    {fixConfigMapQuery()},
+		auth.List:   {fixConfigMapsQuery()},
+		auth.Update: {fixUpdateConfigMapMutation("{\"\":\"\"}")},
+		auth.Delete: {fixDeleteConfigMapMutation()},
+	}
+	as.Run(t, ops)
 }
 
 func fixConfigMap(name, namespace string) *v1.ConfigMap {
@@ -252,7 +275,7 @@ func readConfigMapEvent(sub *graphql.Subscription) (ConfigMapEvent, error) {
 		ConfigMapEvent ConfigMapEvent
 	}
 	var configMapEvent Response
-	err := sub.Next(&configMapEvent, tester.DefaultSubscriptionTimeout)
+	err := sub.Next(&configMapEvent, tester.DefaultSubscriptionTimeout*2)
 
 	return configMapEvent.ConfigMapEvent, err
 }

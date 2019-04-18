@@ -21,6 +21,7 @@ type options struct {
 	appTokenExpirationMinutes      int
 	runtimeTokenExpirationMinutes  int
 	caSecretName                   string
+	rootCACertificateSecretName    string
 	requestLogging                 bool
 	connectorServiceHost           string
 	gatewayHost                    string
@@ -31,6 +32,8 @@ type options struct {
 	runtimeCertificateValidityTime time.Duration
 	central                        bool
 	revocationConfigMapName        string
+	lookupEnabled                  bool
+	lookupConfigMapPath            string
 }
 
 type environment struct {
@@ -49,7 +52,8 @@ func parseArgs() *options {
 	tokenLength := flag.Int("tokenLength", 64, "Length of a registration tokens.")
 	appTokenExpirationMinutes := flag.Int("appTokenExpirationMinutes", 5, "Time to Live of application tokens expressed in minutes.")
 	runtimeTokenExpirationMinutes := flag.Int("runtimeTokenExpirationMinutes", 10, "Time to Live of runtime tokens expressed in minutes.")
-	caSecretName := flag.String("caSecretName", "nginx-auth-ca", "Name of the secret which contains root CA.")
+	caSecretName := flag.String("caSecretName", "nginx-auth-ca", "Name of the secret which contains certificate and key used for signing client certificates.")
+	rootCACertificateSecretName := flag.String("rootCACertificateSecretName", "", "Name of the secret which contains root CA Certificate in case certificates are singed by intermediate CA.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
 	gatewayHost := flag.String("gatewayHost", "gateway.wormhole.cluster.kyma.cx", "Host at which gateway service is accessible.")
@@ -60,6 +64,8 @@ func parseArgs() *options {
 	runtimeCertificateValidityTime := flag.String("runtimeCertificateValidityTime", "90d", "Validity time of certificates issued for runtimes by this service.")
 	central := flag.Bool("central", false, "Determines whether connector works as the central")
 	revocationConfigMapName := flag.String("revocationConfigMapName", "revocations-config", "Name of the config map containing revoked certificates")
+	lookupEnabled := flag.Bool("lookupEnabled", false, "Determines whether connector should make a call to get gateway endpoint")
+	lookupConfigMapPath := flag.String("lookupConfigMapPath", "/etc/config/config.json", "Path in the pod where Config Map for cluster lookup is stored")
 
 	flag.Parse()
 
@@ -82,6 +88,7 @@ func parseArgs() *options {
 		appTokenExpirationMinutes:      *appTokenExpirationMinutes,
 		runtimeTokenExpirationMinutes:  *runtimeTokenExpirationMinutes,
 		caSecretName:                   *caSecretName,
+		rootCACertificateSecretName:    *rootCACertificateSecretName,
 		requestLogging:                 *requestLogging,
 		connectorServiceHost:           *connectorServiceHost,
 		gatewayHost:                    *gatewayHost,
@@ -92,18 +99,22 @@ func parseArgs() *options {
 		appCertificateValidityTime:     appValidityTime,
 		runtimeCertificateValidityTime: runtimeValidityTime,
 		revocationConfigMapName:        *revocationConfigMapName,
+		lookupEnabled:                  *lookupEnabled,
+		lookupConfigMapPath:            *lookupConfigMapPath,
 	}
 }
 
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
-		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --requestLogging=%t "+
+		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --rootCACertificateSecretName=%s --requestLogging=%t "+
 		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayHost=%s "+
-		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s --revocationConfigMapName=%s",
+		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s "+
+		"--revocationConfigMapName=%s --lookupEnabled=%t --lookupConfigMapPath=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
-		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.requestLogging,
+		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.rootCACertificateSecretName, o.requestLogging,
 		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayHost,
-		o.appsInfoURL, o.runtimesInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime, o.revocationConfigMapName)
+		o.appsInfoURL, o.runtimesInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime,
+		o.revocationConfigMapName, o.lookupEnabled, o.lookupConfigMapPath)
 }
 
 func parseEnv() *environment {

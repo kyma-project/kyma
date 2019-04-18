@@ -48,7 +48,7 @@ func (a *clusterAsset) CreateMany(assets []assetData) error {
 						Name: a.ClusterBucketName,
 					},
 					Source: v1alpha2.AssetSource{
-						Url:  asset.URL,
+						URL:  asset.URL,
 						Mode: asset.Mode,
 					},
 				},

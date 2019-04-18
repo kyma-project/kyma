@@ -11,3 +11,5 @@ You can perform the following operations in the Service Catalog:
 - Expose the consumable services by listing them with all the details, including the documentation and the consumption plans.
 - Consume the services by provisioning them in a given Namespace.
 - Bind the services to the applications through Secrets.
+
+>**NOTE:** Kyma uses the Service Catalog based on the one provided by [Kubernetes](https://github.com/kubernetes-incubator/service-catalog). Kyma also supports the experimental version of the Service Catalog without api-server and etcd. Read [this](#details-experimental-features) document for more information.

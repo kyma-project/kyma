@@ -33,7 +33,6 @@ func newDexIdTokenProvider(httpClient *http.Client, config idProviderConfig) idT
 }
 
 func (p *dexIdTokenProvider) fetchIdToken() (string, error) {
-
 	flowResult, err := p.implicitFlow()
 	if err != nil {
 		return "", err
@@ -42,7 +41,6 @@ func (p *dexIdTokenProvider) fetchIdToken() (string, error) {
 }
 
 func (p *dexIdTokenProvider) implicitFlow() (map[string]string, error) {
-
 	authorizeResp, err := p.httpClient.PostForm(p.config.DexConfig.AuthorizeEndpoint, url.Values{
 		"response_type": {"id_token token"},
 		"client_id":     {p.config.ClientConfig.ID},

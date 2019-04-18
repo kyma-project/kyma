@@ -1,4 +1,3 @@
-{{- if .Values.global.uiapp.create }}
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -32,4 +31,3 @@ spec:
             items:
             - key: config.js
               path: config.js
-{{- end }}

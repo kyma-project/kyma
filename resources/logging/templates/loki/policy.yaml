@@ -1,4 +1,3 @@
-{{- if .Values.global.rbac.create }}
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
@@ -29,10 +28,7 @@ spec:
       allowTls: true
       mode: PERMISSIVE
   peerIsOptional: true
-
-{{- end }}
 ---
-{{- if .Values.global.rbac.create }}
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
@@ -46,4 +42,3 @@ spec:
   trafficPolicy:
     tls:
       mode: ISTIO_MUTUAL
-{{- end }}

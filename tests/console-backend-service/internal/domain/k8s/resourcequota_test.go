@@ -6,11 +6,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
@@ -83,6 +84,11 @@ func TestResourceQuotaQuery(t *testing.T) {
 	require.NoError(t, err)
 	assert.False(t, statusResult.Exceeded)
 
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.List: {fixListResourceQuotasQuery(), fixResourceQuotasStatusQuery()},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func fixListResourceQuotasQuery() *graphql.Request {

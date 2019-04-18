@@ -1,14 +1,18 @@
 package engine
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
+	"time"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook"
 	webhookv1alpha1 "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/api/v1alpha1"
+	pkgPath "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/path"
 	"github.com/pkg/errors"
-	"io/ioutil"
-	"time"
 )
 
 //go:generate mockery -name=Validator -output=automock -outpkg=automock -case=underscore
@@ -46,17 +50,18 @@ func (e *validationEngine) Validate(ctx context.Context, object Accessor, basePa
 	assetName := object.GetName()
 	assetNamespace := object.GetNamespace()
 
-	assets, err := e.readFiles(basePath, files, e.fileReader)
-	if err != nil {
-		return ValidationResult{
-			Success: false,
-		}, err
-	}
-
 	passed := true
 	var errorMessages []string
 	results := make(map[string][]ValidationMessage)
 	for _, service := range services {
+		filtered, err := pkgPath.Filter(files, service.Filter)
+		assets, err := e.readFiles(basePath, filtered, e.fileReader)
+		if err != nil {
+			return ValidationResult{
+				Success: false,
+			}, err
+		}
+
 		metadata := e.parseMetadata(service.Metadata)
 
 		request := &webhookv1alpha1.ValidationRequest{
@@ -65,9 +70,8 @@ func (e *validationEngine) Validate(ctx context.Context, object Accessor, basePa
 			Metadata:  metadata,
 			Assets:    assets,
 		}
-		url := e.getWebhookUrl(service)
 
-		response, err := e.validate(ctx, url, request)
+		response, err := e.validate(ctx, service, request)
 		if err != nil {
 			errorMessages = append(errorMessages, err.Error())
 			continue
@@ -104,12 +108,14 @@ func (e *validationEngine) parseResponse(response *webhookv1alpha1.ValidationRes
 	return messages
 }
 
-func (e *validationEngine) validate(ctx context.Context, url string, request *webhookv1alpha1.ValidationRequest) (*webhookv1alpha1.ValidationResponse, error) {
-	context, cancel := context.WithTimeout(ctx, e.timeout)
-	defer cancel()
+func (e *validationEngine) validate(ctx context.Context, service v1alpha2.AssetWebhookService, request *webhookv1alpha1.ValidationRequest) (*webhookv1alpha1.ValidationResponse, error) {
+	jsonBytes, err := json.Marshal(request)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while converting request to JSON")
+	}
 
 	response := new(webhookv1alpha1.ValidationResponse)
-	err := e.webhook.Call(context, url, request, response)
+	err = e.webhook.Do(ctx, "application/json", service.WebhookService, bytes.NewBuffer(jsonBytes), response, e.timeout)
 	if err != nil {
 		return nil, errors.Wrap(err, "while sending validation request")
 	}

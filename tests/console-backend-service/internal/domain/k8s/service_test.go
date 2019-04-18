@@ -6,25 +6,25 @@ import (
 	"testing"
 	"time"
 
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
-
-	"k8s.io/apimachinery/pkg/util/intstr"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
 
 	_assert "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
 	serviceName = "test-service"
-	namespace   = "ui-api-acceptance-service"
+	namespace   = "console-backend-service-service"
 )
 
 type ServiceEvent struct {
@@ -130,10 +130,23 @@ func TestService(t *testing.T) {
 	assert.Equal(serviceName, serviceRes.Service.Name)
 
 	t.Log("Updating...")
-	serviceRes.Service.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update, _ := stringifyJSON(serviceRes.Service.JSON)
 	var updateRes updateServiceMutationResponse
-	err = grapqlClient.Do(fixUpdateServiceMutation(update), &updateRes)
+	err = retrier.Retry(func() error {
+		err = grapqlClient.Do(fixServiceQuery(), &serviceRes)
+		if err != nil {
+			return err
+		}
+		serviceRes.Service.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
+		update, err := stringifyJSON(serviceRes.Service.JSON)
+		if err != nil {
+			return err
+		}
+		err = grapqlClient.Do(fixUpdateServiceMutation(update), &updateRes)
+		if err != nil {
+			return err
+		}
+		return nil
+	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(serviceName, updateRes.UpdateService.Name)
 
@@ -165,6 +178,15 @@ func TestService(t *testing.T) {
 	t.Log("Checking subscription for deleted service...")
 	expectedEvent = serviceEvent("DELETE", service{Name: serviceName})
 	assert.NoError(checkServiceEvent(expectedEvent, subscription))
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.Get:    {fixServiceQuery()},
+		auth.List:   {fixServicesQuery()},
+		auth.Create: {fixUpdateServiceMutation("{\"\":\"\"}")},
+		auth.Delete: {fixDeleteServiceMutation()},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func fixService(name, namespace string) *v1.Service {

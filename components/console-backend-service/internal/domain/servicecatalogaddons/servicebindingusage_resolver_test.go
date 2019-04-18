@@ -18,6 +18,7 @@ import (
 )
 
 func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testing.T) {
+	const namespace = "test-ns"
 	t.Run("Success with empty name", func(t *testing.T) {
 		svc := automock.NewServiceBindingUsageOperations()
 		bindingUsage := fixServiceBindingUsageResource()
@@ -29,7 +30,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 
 		input := fixCreateServiceBindingUsageInput()
 		input.Name = nil
-		result, err := resolver.CreateServiceBindingUsageMutation(nil, input)
+		result, err := resolver.CreateServiceBindingUsageMutation(nil, namespace, input)
 
 		require.NoError(t, err)
 		assert.Equal(t, fixServiceBindingUsage(), result)
@@ -44,7 +45,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
 		input := fixCreateServiceBindingUsageInput()
-		result, err := resolver.CreateServiceBindingUsageMutation(nil, input)
+		result, err := resolver.CreateServiceBindingUsageMutation(nil, namespace, input)
 
 		require.NoError(t, err)
 		assert.Equal(t, fixServiceBindingUsage(), result)
@@ -57,7 +58,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 		binding := fixCreateServiceBindingUsageInput()
 
-		_, err := resolver.CreateServiceBindingUsageMutation(nil, binding)
+		_, err := resolver.CreateServiceBindingUsageMutation(nil, namespace, binding)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsAlreadyExists(err))
@@ -69,7 +70,7 @@ func TestServiceBindingUsageResolver_CreateServiceBindingUsageMutation(t *testin
 		defer svc.AssertExpectations(t)
 		resolver := servicecatalogaddons.NewServiceBindingUsageResolver(svc)
 
-		_, err := resolver.CreateServiceBindingUsageMutation(nil, fixCreateServiceBindingUsageInput())
+		_, err := resolver.CreateServiceBindingUsageMutation(nil, namespace, fixCreateServiceBindingUsageInput())
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -218,8 +219,7 @@ func fixServiceBindingUsage() *gqlschema.ServiceBindingUsage {
 func fixCreateServiceBindingUsageInput() *gqlschema.CreateServiceBindingUsageInput {
 	name := "sbu-name"
 	return &gqlschema.CreateServiceBindingUsageInput{
-		Name:      &name,
-		Namespace: "test-ns",
+		Name: &name,
 		ServiceBindingRef: gqlschema.ServiceBindingRefInput{
 			Name: "binding-name",
 		},

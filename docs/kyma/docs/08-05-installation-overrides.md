@@ -18,7 +18,7 @@ To customize the Kyma installation, the Installer exposes a generic mechanism to
 
 ## User-defined overrides
 
-The Installer finds user-defined overrides by reading the ConfigMaps and Secrets deployed in the `kyma-installer` Namespace and marked with the `installer:overrides` Label.
+The Installer finds user-defined overrides by reading the ConfigMaps and Secrets deployed in the `kyma-installer` Namespace and marked with the `installer:overrides` label.
 
 The Installer constructs a single override by inspecting the ConfigMap or Secret entry key name. The key name should be a dot-separated sequence of strings corresponding to the structure of keys in the chart's `values.yaml` file or the entry in chart's template. See the examples below.
 
@@ -32,7 +32,7 @@ Overrides for the component are composed from two sets: **common** overrides and
 
 Kyma uses common overrides for the installation of all components. ConfigMaps and Secrets marked with the label `installer:overrides`, contain the definition. They require no additional label.
 
-Kyma uses component-specific overrides only for the installation of specific components. ConfigMaps and Secrets marked with both `installer:overrides` and `component: <name>` Labels, where `<name>` is the component name, contain the definition. Component-specific overrides have precedence over Common ones in case of conflicting entries.
+Kyma uses component-specific overrides only for the installation of specific components. ConfigMaps and Secrets marked with both `installer:overrides` and `component: <name>` labels, where `<name>` is the component name, contain the definition. Component-specific overrides have precedence over Common ones in case of conflicting entries.
 
 
 ## Overrides Examples

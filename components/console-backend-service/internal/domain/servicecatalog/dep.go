@@ -47,7 +47,7 @@ type serviceInstanceSvc interface {
 type gqlServiceInstanceConverter interface {
 	ToGQL(in *v1beta1.ServiceInstance) (*gqlschema.ServiceInstance, error)
 	ToGQLs(in []*v1beta1.ServiceInstance) ([]gqlschema.ServiceInstance, error)
-	GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput) *serviceInstanceCreateParameters
+	GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput, namespace string) *serviceInstanceCreateParameters
 	ServiceStatusTypeToGQLStatusType(in status.ServiceInstanceStatusType) gqlschema.InstanceStatusType
 	GQLStatusTypeToServiceStatusType(in gqlschema.InstanceStatusType) status.ServiceInstanceStatusType
 	GQLStatusToServiceStatus(in *gqlschema.ServiceInstanceStatus) *status.ServiceInstanceStatus

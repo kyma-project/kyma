@@ -45,7 +45,6 @@ Follow the steps to create an alert rule:
 
 1. Use the [prometheusRule template](./templates/kyma-rules.yaml) which contains the sample configuration for an alert rule.
 
-
 ```yaml
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule

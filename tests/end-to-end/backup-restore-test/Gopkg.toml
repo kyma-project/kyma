@@ -8,7 +8,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "f09ca1a5a23a9704806fa9264d179979820ce26e"
+  revision = "bc52d15b1703fb105ef09118b2961c119ce16570"
 
 [[constraint]]
   name = "github.com/google/uuid"
@@ -45,6 +45,10 @@ required = [
 [[override]]
   name = "k8s.io/client-go"
   version = "kubernetes-1.11.3"
+
+[[constraint]]
+  name = "github.com/kubernetes-incubator/service-catalog"
+  version = "=v0.1.34"
 
 [prune]
   go-tests = true

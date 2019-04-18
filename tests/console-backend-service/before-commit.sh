@@ -83,17 +83,6 @@ if [ $(echo ${#goFmtResult}) != 0 ]
 	else echo -e "${GREEN}√ go fmt${NC}"
 fi
 
-#
-# GO VET
-#
-goVetResult=$(echo "${filesToCheck}" | xargs -L1 go vet)
-if [ $(echo ${#goVetResult}) != 0 ]
-	then
-    	echo -e "${RED}✗ go vet${NC}\n$goVetResult${NC}"
-    	exit 1;
-	else echo -e "${GREEN}√ go vet${NC}"
-fi
-
 ##
 # ERRCHECK
 ##
@@ -111,4 +100,15 @@ if [[ $(echo ${#errCheckResult}) != 0 ]]; then
     echo -e "${RED}✗ [errcheck] unchecked error in:${NC}\n${errCheckResult}${NC}"
     exit 1
 else echo -e "${GREEN}√ errcheck ${NC}"
+fi
+
+#
+# GO VET
+#
+goVetResult=$(echo "${filesToCheck}" | xargs -L1 go vet)
+if [ $(echo ${#goVetResult}) != 0 ]
+	then
+    	echo -e "${RED}✗ go vet${NC}\n$goVetResult${NC}"
+    	exit 1;
+	else echo -e "${GREEN}√ go vet${NC}"
 fi

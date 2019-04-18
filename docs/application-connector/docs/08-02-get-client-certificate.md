@@ -12,7 +12,7 @@ You can also revoke the client certificate, which prevents it from being renewed
 
 ## Prerequisites
 
-- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which fulfil high security standards.
+- [OpenSSL toolkit](https://www.openssl.org/docs/man1.0.2/apps/openssl.html) to create a Certificate Signing Request (CSR), keys, and certificates which fulfil high security standards
 
 ## Get the configuration URL with a token
 
@@ -64,7 +64,7 @@ A successful call returns the following response:
     "api":{
         "metadataUrl":      "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
         "eventsUrl":        "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
-        "infoUrl":          "https://connector-service.kyma.local/v1/applications/management/info",
+        "infoUrl":          "https://gateway.{CLUSTER_DOMAIN}/v1/applications/management/info",
         "certificatesUrl":  "https://connector-service.{CLUSTER_DOMAIN}/v1/applications/certificates",
     },
     "certificate":{
@@ -74,6 +74,8 @@ A successful call returns the following response:
     }
 }
 ```
+
+> **NOTE:** The response contains URLs to the Application Registry API and the Events Service API, however, it is not recommended to use them. You should call the `metadata` endpoint URL, which is provided in `api.infoUrl` property, to fetch correct URLs to the Application Registry API and to the Events Service API, and other configuration details.
 
 ## Generate a CSR and send it to Kyma
 
@@ -98,17 +100,55 @@ The response contains a valid client certificate signed by the Kyma Certificate 
 }
 ```
 
-After you receive the certificate, decode it and use it in your application. Register the services of your external solution through the Application Registry.
+After you receive the certificate, decode it and use it in your application. 
 
-## Call the Metadata and Event services on local deployment
+## Call the metadata endpoint
 
-When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-ingress-nginx-ingress-controller` to successfully call the Metadata Service and the Event Service.
+Call the `metadata` endpoint with the generated certificate to get URLs to the following:
+
+- the Application Registry API
+- the Events Service API
+- the `certificate renewal` endpoint
+- the `certificate revocation` endpoint
+
+The URL to the `metadata` endpoint is returned in the response body from the configuration URL. Use the value of the `api.infoUrl` property to get the URL. Run:
+
+```
+curl {CLUSTER_DOMAIN}/v1/applications/management/info --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key
+```
+
+A successful call returns the following response:
+
+```
+{
+  "clientIdentity": {
+    "application": "{APP_NAME}"
+  },
+  "urls": {
+    "metadataUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/metadata/services",
+    "eventsUrl": "https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events",
+    "renewCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/renewals",
+    "revokeCertUrl": "https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"
+  },
+  "certificate": {
+    "subject": "OU=Test,O=Test,L=Blacksburg,ST=Virginia,C=US,CN={APP_NAME}",
+    "extensions": "string",
+    "key-algorithm": "rsa2048"
+  }
+}
+```
+
+Use `urls.metadataUrl` and `urls.eventsUrl` to get the URLs to the Application Registry API and to the Events API.
+
+## Call the Application Registry and Event services on local deployment
+
+When you connect an external solution to a local Kyma deployment, you must pass the NodePort of the `application-connector-ingress-nginx-ingress-controller` to successfully call the Application Registry and the Event Service.
 
 - To get the NodePort, run:
   ```
   kubectl -n kyma-system get svc application-connector-ingress-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
   ```
-- When you send requests to the Metadata Service and the Event Service, pass the NodePort along with the generated certificate and key. For example:
+- When you send requests to the Application Registry and the Event Service, pass the NodePort along with the generated certificate and key. For example:
   ```
   curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/metadata/services --cert {CERT_FILE_NAME}.crt --key {KEY_FILE_NAME}.key -k
   ```

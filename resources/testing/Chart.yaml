@@ -1,0 +1,7 @@
+apiVersion: v1
+name: testing
+description: Testing
+version: 0.0.1
+keywords:
+- testing
+- kyma

@@ -2,6 +2,7 @@ package assetstore
 
 import (
 	"errors"
+	"fmt"
 	"github.com/kyma-project/kyma/components/application-registry/internal/apperrors"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/docstopic"
 	"github.com/kyma-project/kyma/components/application-registry/internal/metadata/specification/assetstore/mocks"
@@ -49,6 +50,9 @@ func TestUpsertDocsTopic(t *testing.T) {
 
 		object, err := runtime.DefaultUnstructuredConverter.ToUnstructured(&dt)
 		require.NoError(t, err)
+
+		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+			Return(&unstructured.Unstructured{Object: object}, nil)
 
 		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
@@ -111,6 +115,9 @@ func TestUpsertDocsTopic(t *testing.T) {
 		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
 			Return(&unstructured.Unstructured{Object: object}, nil)
 
+		resourceInterfaceMock.On("Get", "id1", metav1.GetOptions{}).
+			Return(&unstructured.Unstructured{Object: object}, nil)
+
 		resourceInterfaceMock.On("Update", mock.Anything, metav1.UpdateOptions{}).Return(&unstructured.Unstructured{}, errors.New("some error"))
 
 		// when
@@ -118,7 +125,7 @@ func TestUpsertDocsTopic(t *testing.T) {
 
 		// then
 		require.Error(t, err)
-		resourceInterfaceMock.AssertNumberOfCalls(t, "Get", 1)
+		resourceInterfaceMock.AssertNumberOfCalls(t, "Get", 2)
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Create", 0)
 		resourceInterfaceMock.AssertNumberOfCalls(t, "Update", 1)
 	})
@@ -170,8 +177,8 @@ func TestGetDocsTopic(t *testing.T) {
 	})
 }
 
-func createK8sDocsTopic() v1alpha1.DocsTopic {
-	return v1alpha1.DocsTopic{
+func createK8sDocsTopic() v1alpha1.ClusterDocsTopic {
+	return v1alpha1.ClusterDocsTopic{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "id1",
 			Namespace: "kyma-integration",
@@ -180,7 +187,7 @@ func createK8sDocsTopic() v1alpha1.DocsTopic {
 			},
 			ResourceVersion: "1",
 		},
-		Spec: v1alpha1.DocsTopicSpec{
+		Spec: v1alpha1.ClusterDocsTopicSpec{
 			CommonDocsTopicSpec: v1alpha1.CommonDocsTopicSpec{
 				DisplayName: "Some display name",
 				Description: "Some description",
@@ -259,7 +266,7 @@ func createTestDocsTopicEntry() docstopic.Entry {
 func createMatcherFunction(docsTopicEntry docstopic.Entry, expectedResourceVersion string) func(*unstructured.Unstructured) bool {
 	findSource := func(sources []v1alpha1.Source, key string) (v1alpha1.Source, bool) {
 		for _, source := range sources {
-			if source.Type == key && source.Name == key {
+			if source.Type == key && source.Name == fmt.Sprintf(DocsTopicNameFormat, key, docsTopicEntry.Id) {
 				return source, true
 			}
 		}
@@ -283,7 +290,7 @@ func createMatcherFunction(docsTopicEntry docstopic.Entry, expectedResourceVersi
 	}
 
 	return func(u *unstructured.Unstructured) bool {
-		dt := v1alpha1.DocsTopic{}
+		dt := v1alpha1.ClusterDocsTopic{}
 		err := runtime.DefaultUnstructuredConverter.FromUnstructured(u.Object, &dt)
 		if err != nil {
 			return false

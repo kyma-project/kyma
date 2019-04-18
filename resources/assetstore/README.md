@@ -15,10 +15,10 @@ To configure Minio as a Gateway mode, you need a Secret with a service account t
 1. Open the [service accounts page](https://console.cloud.google.com/iam-admin/serviceaccounts).
 2. Select one of the projects or create a new one. Note down the project ID as you must use it to update the Asset Store deployment.
 3. Click **Create service account**, name your account, and click **Create**.
-4. Set the `Storage Admin` role.
+4. Set the **Storage Admin** role.
 5. Click **Create key** and choose `JSON` as a key type.
 6. Save the `JSON` file.
-7. Create a Secret from the JSON file by running this command:
+7. Create a Secret from the `JSON` file by running this command:
     ```bahs
     kubectl create secret generic assetstore-gcs-credentials --from-file=service-account.json={filename} --namespace kyma-system
     ```

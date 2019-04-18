@@ -164,23 +164,25 @@ func validateClusterAsset(cfg *testSuite, instance *v1alpha2.ClusterAsset, phase
 	g.Expect(instance.Status.Phase).To(gomega.Equal(phase))
 	g.Expect(instance.Status.Reason).To(gomega.Equal(reason.String()))
 	g.Expect(instance.Status.AssetRef.BaseURL).To(gomega.Equal(baseUrl))
-	g.Expect(instance.Status.AssetRef.Assets).To(gomega.Equal(files))
+	g.Expect(instance.Status.AssetRef.Files).To(gomega.HaveLen(len(files)))
 	g.Expect(instance.Finalizers).To(gomega.ContainElement(deleteClusterAssetFinalizerName))
 }
 
 type mocks struct {
-	store     *storeMock.Store
-	loader    *loaderMock.Loader
-	validator *engineMock.Validator
-	mutator   *engineMock.Mutator
+	store             *storeMock.Store
+	loader            *loaderMock.Loader
+	validator         *engineMock.Validator
+	mutator           *engineMock.Mutator
+	metadataExtractor *engineMock.MetadataExtractor
 }
 
 func newMocks() *mocks {
 	return &mocks{
-		store:     new(storeMock.Store),
-		loader:    new(loaderMock.Loader),
-		validator: new(engineMock.Validator),
-		mutator:   new(engineMock.Mutator),
+		store:             new(storeMock.Store),
+		loader:            new(loaderMock.Loader),
+		validator:         new(engineMock.Validator),
+		mutator:           new(engineMock.Mutator),
+		metadataExtractor: new(engineMock.MetadataExtractor),
 	}
 }
 
@@ -189,6 +191,7 @@ func (m *mocks) AssertExpetactions(t *testing.T) {
 	m.validator.AssertExpectations(t)
 	m.loader.AssertExpectations(t)
 	m.mutator.AssertExpectations(t)
+	m.metadataExtractor.AssertExpectations(t)
 }
 
 type testData struct {
@@ -248,38 +251,36 @@ func newTestData(name string) *testData {
 				Mode: v1alpha2.AssetSingle,
 				ValidationWebhookService: []v1alpha2.AssetWebhookService{
 					{
+						WebhookService: v1alpha2.WebhookService{
+							Namespace: "test",
+							Name:      "test",
+							Endpoint:  "/test",
+						},
+					},
+					{WebhookService: v1alpha2.WebhookService{
 						Namespace: "test",
 						Name:      "test",
 						Endpoint:  "/test",
 					},
-					{
-						Namespace: "test",
-						Name:      "test",
-						Endpoint:  "/test",
 					},
 				},
 				MutationWebhookService: []v1alpha2.AssetWebhookService{
 					{
-						Namespace: "test",
-						Name:      "test",
-						Endpoint:  "/test",
+						WebhookService: v1alpha2.WebhookService{
+							Namespace: "test",
+							Name:      "test",
+							Endpoint:  "/test",
+						},
 					},
 					{
-						Namespace: "test",
-						Name:      "test",
-						Endpoint:  "/test",
+						WebhookService: v1alpha2.WebhookService{
+							Namespace: "test",
+							Name:      "test",
+							Endpoint:  "/test",
+						},
 					},
 				},
 			},
-		}},
-		Status: v1alpha2.ClusterAssetStatus{CommonAssetStatus: v1alpha2.CommonAssetStatus{
-			ObservedGeneration: int64(1),
-			Phase:              v1alpha2.AssetReady,
-			AssetRef: v1alpha2.AssetStatusRef{
-				BaseURL: assetUrl,
-				Assets:  files,
-			},
-			LastHeartbeatTime: v1.Now(),
 		}},
 	}
 
@@ -304,18 +305,4 @@ func deleteBucket(cfg *testSuite, bucket *v1alpha2.ClusterBucket) {
 	c := cfg.c
 	err := c.Delete(context.TODO(), bucket)
 	g.Expect(err).NotTo(gomega.HaveOccurred())
-}
-
-func deleteAndExpectSuccess(cfg *testSuite, testData *testData) {
-	g := cfg.g
-	c := cfg.c
-	err := c.Delete(context.TODO(), testData.asset)
-	g.Expect(err).NotTo(gomega.HaveOccurred())
-	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
-	g.Eventually(func() bool {
-		instance := &v1alpha2.ClusterAsset{}
-		err := c.Get(context.TODO(), testData.key, instance)
-		return apierrors.IsNotFound(err)
-	}, timeout, 10*time.Millisecond).Should(gomega.BeTrue())
-	g.Eventually(cfg.requests, timeout).Should(gomega.Receive(gomega.Equal(testData.request)))
 }

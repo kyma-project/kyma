@@ -178,7 +178,7 @@ func convertToCloudEvent(payload *[]byte) (*api.CloudEvent, error) {
 		return nil, err
 	}
 
-	if err := api.ValidatePublish(&cloudEvent.PublishRequest); err != nil {
+	if err := api.ValidatePublish(&cloudEvent.PublishRequest, api.GetDefaultEventOptions()); err != nil {
 		return nil, fmt.Errorf("payload is not valid: %v", string(*payload))
 	}
 
