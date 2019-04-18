@@ -492,7 +492,7 @@ func ensureServceBindingIsReady(namespace, svcBinding string) {
 func cleanup() {
 	log.Println("Cleaning up")
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(4)
 	go func() {
 		defer wg.Done()
 		deleteK8s("k8syaml/k8s.yaml")
@@ -510,11 +510,8 @@ func cleanup() {
 		deleteK8s("k8syaml/svcbind-lambda.yaml")
 		deleteK8s("svc-instance.yaml")
 	}()
-	go func() {
-		defer wg.Done()
-		deleteNamespace("kubeless-test")
-	}()
 	wg.Wait()
+	deleteNamespace("kubeless-test")
 }
 
 var testDataRegex = regexp.MustCompile(`(?m)^OK ([a-z0-9]{8})$`)
