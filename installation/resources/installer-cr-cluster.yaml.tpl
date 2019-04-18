@@ -12,6 +12,8 @@ spec:
   components:
     - name: "cluster-essentials"
       namespace: "kyma-system"
+    - name: "testing"
+      namespace: "kyma-system"
     - name: "istio-init"
       namespace: "istio-system"
     - name: "istio"
@@ -24,8 +26,6 @@ spec:
       namespace: "knative-eventing"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
-    - name: "testing"
-      namespace: "kyma-system"
     - name: "prometheus-operator"
       namespace: "kyma-system"
     - name: "dex"
