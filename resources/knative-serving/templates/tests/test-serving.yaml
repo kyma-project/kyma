@@ -2,7 +2,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
-  name: knative-serving-test
+  name: {{ .Chart.Name }}-tests
   labels:
     helm-chart-test: "true"
 rules:
@@ -13,7 +13,7 @@ rules:
 apiVersion: v1
 kind: ServiceAccount
 metadata:
-  name: knative-serving-test
+  name: {{ .Chart.Name }}-tests
   namespace: knative-serving
   labels:
     helm-chart-test: "true"
@@ -21,33 +21,33 @@ metadata:
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
-  name: knative-serving-test
+  name: {{ .Chart.Name }}-tests
   namespace: knative-serving
   labels:
     helm-chart-test: "true"
 roleRef:
   apiGroup: rbac.authorization.k8s.io
   kind: ClusterRole
-  name: knative-serving-test
+  name: {{ .Chart.Name }}-tests
 subjects:
 - kind: ServiceAccount
-  name: knative-serving-test
+  name: {{ .Chart.Name }}-tests
   namespace: knative-serving
----
 {{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+---
 apiVersion: "testing.kyma-project.io/v1alpha1"
 kind: TestDefinition
 metadata:
-  name: test-knative-serving-acceptance
+  name: {{ .Chart.Name }}-tests
 spec:
   template:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccount: knative-serving-test
+      serviceAccount: {{ .Chart.Name }}-tests
       containers:
-      - name: test
+      - name: {{ .Chart.Name }}-tests
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}"
         env:
         - name: INGRESSGATEWAY_ADDRESS
@@ -58,10 +58,11 @@ spec:
           value: {{ .Values.test.target }}
       restartPolicy: Never
 {{- else }}
+---
 apiVersion: v1
 kind: Pod
 metadata:
-  name: test-knative-serving-acceptance
+  name: {{ .Chart.Name }}-tests
   namespace: knative-serving
   annotations:
     "sidecar.istio.io/inject": "false"
@@ -69,9 +70,9 @@ metadata:
   labels:
     "helm-chart-test": "true"
 spec:
-  serviceAccount: knative-serving-test
+  serviceAccount: {{ .Chart.Name }}-tests
   containers:
-  - name: test
+  - name: {{ .Chart.Name }}-tests
     image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_knative_serving_acceptance.dir }}knative-serving-acceptance-tests:{{ .Values.global.test_knative_serving_acceptance.version }}"
     env:
     - name: INGRESSGATEWAY_ADDRESS
@@ -81,4 +82,4 @@ spec:
     - name: TARGET
       value: {{ .Values.test.target }}
   restartPolicy: Never
-  {{- end }}
+{{- end }}
