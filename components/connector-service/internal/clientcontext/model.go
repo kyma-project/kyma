@@ -9,7 +9,7 @@ import (
 
 type clientContextKey string
 
-// CtxEnabledType type defines if context is mandatory
+// CtxEnabledType type defines if context is enabled
 type CtxEnabledType bool
 
 // LookupEnabledType type defines if headers must be specified
@@ -46,11 +46,11 @@ const (
 	// ApplicationEmpty represents empty value for Application
 	ApplicationEmpty = ""
 
-	// CtxRequired represents value for required context
-	CtxRequired CtxEnabledType = true
+	// CtxEnabled represents value for required context
+	CtxEnabled CtxEnabledType = true
 
-	// CtxNotRequired represents value for not required context
-	CtxNotRequired CtxEnabledType = false
+	// CtxNotEnabled represents value for not required context
+	CtxNotEnabled CtxEnabledType = false
 
 	// LookupEnabled represents value for required fetch from Runtime
 	LookupEnabled LookupEnabledType = true
