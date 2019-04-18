@@ -1,7 +1,6 @@
 package namespacecontroller
 
 import (
-	"github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/informers/externalversions/gateway.kyma-project.io"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 	"github.com/sirupsen/logrus"
 	"k8s.io/client-go/kubernetes"
@@ -9,12 +8,12 @@ import (
 
 // Test tests the API controller business logic after Kyma upgrade phase
 type Test struct {
-	upstream backupe2e
+	upstream backupe2e.NamespaceControllerTest
 }
 
 // New creates new instance of Test
-func New(gatewayInterface gateway.Interface, coreInterface kubernetes.Interface, kubelessInterface kubeless.Interface, domainName string) Test {
-	upstream := backupe2e.NewApiControllerTest(gatewayInterface, coreInterface, kubelessInterface, domainName)
+func New(coreInterface kubernetes.Interface) Test {
+	upstream := backupe2e.NewNamespaceControllerTest(coreInterface)
 	return Test{upstream}
 }
 
