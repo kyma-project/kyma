@@ -1,7 +1,7 @@
 package backupe2e
 
 import (
-	"fmt"
+	"github.com/avast/retry-go"
 	"time"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -78,24 +78,13 @@ func (n NamespaceControllerTest) labelTestNamespace(namespaceName string) error 
 }
 
 func (n NamespaceControllerTest) waitForResourceQuota(namespaceName string) error {
-	timeout := time.After(5 * time.Minute)
-	tick := time.Tick(1 * time.Second)
-
-	var messages string
-
-	for {
-		select {
-		case <-tick:
-			_, err := n.coreInterface.CoreV1().ResourceQuotas(namespaceName).Get(resourceQuotaObjName, metav1.GetOptions{})
-			if err != nil {
-				messages += fmt.Sprintf("%+v\n", err)
-				continue
-			}
-
-			return nil
-
-		case <-timeout:
-			return fmt.Errorf("unable to fetch resourcequota:\n %v", messages)
+	return retry.Do(func() error {
+		_, err := n.coreInterface.CoreV1().ResourceQuotas(namespaceName).Get(resourceQuotaObjName, metav1.GetOptions{})
+		if err != nil {
+			return err
 		}
-	}
+		return nil
+	},
+		retry.Delay(500*time.Millisecond),
+	)
 }
