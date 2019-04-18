@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 )
@@ -17,14 +16,12 @@ const (
 type managementInfoHandler struct {
 	connectorClientExtractor    clientcontext.ConnectorClientExtractor
 	certificateProtectedBaseURL string
-	csrSubject                  certificates.CSRSubject
 }
 
-func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, certProtectedBaseURL string, subjectValues certificates.CSRSubject) *managementInfoHandler {
+func NewManagementInfoHandler(connectorClientExtractor clientcontext.ConnectorClientExtractor, certProtectedBaseURL string) *managementInfoHandler {
 	return &managementInfoHandler{
 		connectorClientExtractor:    connectorClientExtractor,
 		certificateProtectedBaseURL: certProtectedBaseURL,
-		csrSubject:                  subjectValues,
 	}
 }
 
@@ -37,15 +34,15 @@ func (ih *managementInfoHandler) GetManagementInfo(w http.ResponseWriter, r *htt
 
 	urls := ih.buildURLs(clientContextService)
 
-	certInfo := makeCertInfo(ih.csrSubject, clientContextService.GetCommonName())
+	certInfo := makeCertInfo(clientContextService.GetSubject().ToString())
 
-	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls, ClientIdentity: clientContextService, CertificateInfo: certInfo})
+	httphelpers.RespondWithBody(w, http.StatusOK, mgmtInfoReponse{URLs: urls, ClientIdentity: clientContextService.ClientContext(), CertificateInfo: certInfo})
 }
 
-func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.ClientContextService) mgmtURLs {
+func (ih *managementInfoHandler) buildURLs(clientContextService clientcontext.ClientCertContextService) mgmtURLs {
 	return mgmtURLs{
-		RuntimeURLs:       clientContextService.GetRuntimeUrls(),
-		RenewCertURL:      fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
-		RevocationCertURL: fmt.Sprintf(RevocationCertURLFormat, ih.certificateProtectedBaseURL),
+		RuntimeURLs:   clientContextService.GetRuntimeUrls(),
+		RenewCertURL:  fmt.Sprintf(RenewCertURLFormat, ih.certificateProtectedBaseURL),
+		RevokeCertURL: fmt.Sprintf(RevocationCertURLFormat, ih.certificateProtectedBaseURL),
 	}
 }
