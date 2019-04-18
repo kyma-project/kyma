@@ -6,19 +6,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
-
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -112,11 +111,23 @@ func TestConfigMap(t *testing.T) {
 	assert.Equal(t, configMapNamespace, configMapsRes.ConfigMaps[0].Namespace)
 
 	t.Log("Updating...")
-	configMapRes.ConfigMap.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update, err := stringifyJSON(configMapRes.ConfigMap.JSON)
-	require.NoError(t, err)
 	var updateRes updateConfigMapMutationResponse
-	err = c.Do(fixUpdateConfigMapMutation(update), &updateRes)
+	err = retrier.Retry(func() error {
+		err = c.Do(fixConfigMapQuery(), &configMapRes)
+		if err != nil {
+			return err
+		}
+		configMapRes.ConfigMap.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
+		update, err := stringifyJSON(configMapRes.ConfigMap.JSON)
+		if err != nil {
+			return err
+		}
+		err = c.Do(fixUpdateConfigMapMutation(update), &updateRes)
+		if err != nil {
+			return err
+		}
+		return nil
+	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(t, configMapName, updateRes.UpdateConfigMap.Name)
 	assert.Equal(t, configMapNamespace, updateRes.UpdateConfigMap.Namespace)

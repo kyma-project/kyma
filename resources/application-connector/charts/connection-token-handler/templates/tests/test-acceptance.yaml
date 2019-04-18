@@ -1,21 +1,24 @@
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: {{ .Chart.Name }}-tests
-  annotations:
-    helm.sh/hook: test-success
-    sidecar.istio.io/inject: "false"
   labels:
-    helm-chart-test: "true"
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
-  serviceAccountName: {{ .Chart.Name }}-tests
-  containers:
-  - name: {{ .Release.Name }}-connection-token-handler-tests
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connection_token_handler_tests.dir }}connection-token-handler-tests:{{ .Values.global.connection_token_handler_tests.version }}
-    imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
-    env:
-    - name: CENTRAL
-      value: "{{ .Values.tests.central }}"
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: {{ .Chart.Name }}-tests
+      containers:
+      - name: {{ .Release.Name }}-connection-token-handler-tests
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connection_token_handler_tests.dir }}connection-token-handler-tests:{{ .Values.global.connection_token_handler_tests.version }}
+        imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
+        env:
+        - name: CENTRAL
+          value: "{{ .Values.tests.central }}"
+      restartPolicy: Never
+{{- end}}

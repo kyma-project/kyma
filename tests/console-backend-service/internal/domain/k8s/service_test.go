@@ -6,22 +6,20 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
-
-	"k8s.io/apimachinery/pkg/util/intstr"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
 
 	_assert "github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 const (
@@ -132,10 +130,23 @@ func TestService(t *testing.T) {
 	assert.Equal(serviceName, serviceRes.Service.Name)
 
 	t.Log("Updating...")
-	serviceRes.Service.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update, _ := stringifyJSON(serviceRes.Service.JSON)
 	var updateRes updateServiceMutationResponse
-	err = grapqlClient.Do(fixUpdateServiceMutation(update), &updateRes)
+	err = retrier.Retry(func() error {
+		err = grapqlClient.Do(fixServiceQuery(), &serviceRes)
+		if err != nil {
+			return err
+		}
+		serviceRes.Service.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
+		update, err := stringifyJSON(serviceRes.Service.JSON)
+		if err != nil {
+			return err
+		}
+		err = grapqlClient.Do(fixUpdateServiceMutation(update), &updateRes)
+		if err != nil {
+			return err
+		}
+		return nil
+	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(serviceName, updateRes.UpdateService.Name)
 

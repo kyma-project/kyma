@@ -61,6 +61,11 @@ rules:
   resources: ["apis"]
   verbs: ["create", "delete", "get", "list"]
 
+# MicroFrontend
+- apiGroups: ["ui.kyma-project.io"]
+  resources: ["microfrontends", "clustermicrofrontends"]
+  verbs: ["create", "get", "delete", "list"]
+
 # Event Bus
 - apiGroups: ["eventing.kyma-project.io"]
   resources: ["subscriptions"]
