@@ -76,6 +76,10 @@ func NewConfigMapSvc() *configMapSvc {
 	return new(configMapSvc)
 }
 
-// func NewSelfSubjectRulesSvc() *selfSubjectRulesSvc {
-// 	return new(selfSubjectRulesSvc)
-// }
+func NewSelfSubjectRulesSvc() *selfSubjectRulesSvc {
+	return new(selfSubjectRulesSvc)
+}
+
+func NewSelfSubjectRulesConverter() *gqlSelfSubjectRulesConverter {
+	return new(gqlSelfSubjectRulesConverter)
+}

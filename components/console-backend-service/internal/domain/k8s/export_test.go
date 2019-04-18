@@ -112,10 +112,18 @@ func NewConfigMapService(informer cache.SharedIndexInformer, client v1.CoreV1Int
 }
 
 // SelfSubjectRulesReview
-func NewSelfSubjectRulesReviewConverter() gqlSelfSubjectRulesConverter {
+func NewSelfSubjectRulesConverter() gqlSelfSubjectRulesConverter {
 	return &selfSubjectRulesConverter{}
 }
 
 func NewSelfSubjectRulesService(client authv1.AuthorizationV1Interface) *selfSubjectRulesService {
 	return newSelfSubjectRulesService(client)
+}
+
+func NewSelfSubjectRulesResolver(selfSubjectRulesSvc selfSubjectRulesSvc) *selfSubjectRulesResolver {
+	return newSelfSubjectRulesResolver(selfSubjectRulesSvc)
+}
+
+func (r *selfSubjectRulesResolver) SetSelfSubjectRulesConverter(converter gqlSelfSubjectRulesConverter) {
+	r.gqlSelfSubjectRulesConverter = converter
 }
