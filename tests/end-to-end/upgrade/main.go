@@ -19,7 +19,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
-	mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
+	//mfClient "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned"
 	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	kyma "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned"
 	ab "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
@@ -93,22 +93,20 @@ func main() {
 	kubelessCli, err := kubeless.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kubeless clientset")
 
-<<<<<<< HEAD
 	domainName, err := getDomainNameFromCluster(k8sCli)
 	fatalOnError(err, "while reading domain name from cluster")
-=======
+
 	subCli, err := subscriptionClientSet.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Subscription clientset")
 
 	eaCli, err := eaClientSet.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Event Activation clientset")
->>>>>>> master
 
 	kymaAPI, err := kyma.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Kyma Api clientset")
 
-	mfCli, err := mfClient.NewForConfig(k8sConfig)
-	fatalOnError(err, "while creating Microfrontends clientset")
+	//mfCli, err := mfClient.NewForConfig(k8sConfig)
+	//fatalOnError(err, "while creating Microfrontends clientset")
 
 	dexConfig := dex.Config{}
 	if action == executeTestsActionName {
@@ -135,15 +133,15 @@ func main() {
 	fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
-		"ApiControllerUpgradeTest":        apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
-		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
-		"GrafanaUpgradeTest":              grafanaUpgradeTest,
-		"MetricsUpgradeTest":              metricUpgradeTest,
+		"HelmBrokerUpgradeTest":        servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest": servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		"ApiControllerUpgradeTest":     apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
+		"LambdaFunctionUpgradeTest":    function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
+		"GrafanaUpgradeTest":           grafanaUpgradeTest,
+		"MetricsUpgradeTest":           metricUpgradeTest,
 		//"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		//"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		"EventBusUpgradeTest":             eventbus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
+		"EventBusUpgradeTest": eventbus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
 	}
 
 	// Execute requested action
