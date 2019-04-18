@@ -2,6 +2,9 @@ package module
 
 import (
 	"reflect"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/client-go/informers"
 )
 
 type Pluggable struct {
@@ -49,6 +52,17 @@ func (p *Pluggable) EnableAndSyncInformerFactory(informerFactory SharedInformerF
 	}(informerFactory, onSync, p.SyncCh)
 }
 
+func (p *Pluggable) EnableAndSyncDynamicInformerFactory(informerFactory DynamicSharedInformerFactory, onSync func()) {
+	p.Enable()
+
+	go func(informerFactory DynamicSharedInformerFactory, onSyncFn func(), syncCh chan bool) {
+		informerFactory.Start(p.stopCh)
+		informerFactory.WaitForCacheSync(p.stopCh)
+		onSyncFn()
+		syncCh <- true
+	}(informerFactory, onSync, p.SyncCh)
+}
+
 func (p *Pluggable) Disable(disableModule func(disabledErr error)) {
 	p.isEnabled = false
 
@@ -74,4 +88,10 @@ func (p *Pluggable) StopCacheSyncOnClose(stopCh <-chan struct{}) {
 type SharedInformerFactory interface {
 	Start(stopCh <-chan struct{})
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
+}
+
+type DynamicSharedInformerFactory interface {
+	Start(stopCh <-chan struct{})
+	ForResource(gvr schema.GroupVersionResource) informers.GenericInformer
+	WaitForCacheSync(stopCh <-chan struct{}) map[schema.GroupVersionResource]bool
 }

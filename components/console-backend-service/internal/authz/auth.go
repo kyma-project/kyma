@@ -149,25 +149,17 @@ func extractAttributes(attributes gqlschema.ResourceAttributes, resolverCtx *gra
 	var extracted extractedAttributes
 
 	if attributes.NameArg != nil {
-		var ok bool
-		name, ok := resolverCtx.Args[*attributes.NameArg].(string)
-		if !ok {
-			return extractedAttributes{}, errors.New("name in arguments found, but can't be converted to string")
-		}
-		if name == "" {
-			return extractedAttributes{}, errors.New("name in arguments not found")
+		name, err := extractValue(resolverCtx.Args[*attributes.NameArg], "name")
+		if err != nil {
+			return extractedAttributes{}, err
 		}
 		extracted.Name = name
 	}
 
 	if attributes.NamespaceArg != nil {
-		var ok bool
-		namespace, ok := resolverCtx.Args[*attributes.NamespaceArg].(string)
-		if !ok {
-			return extractedAttributes{}, errors.New("namespace in arguments found, but can't be converted to string")
-		}
-		if namespace == "" {
-			return extractedAttributes{}, errors.New("namespace in arguments not found")
+		namespace, err := extractValue(resolverCtx.Args[*attributes.NamespaceArg], "namespace")
+		if err != nil {
+			return extractedAttributes{}, err
 		}
 		extracted.Namespace = namespace
 	}
@@ -199,4 +191,23 @@ func extractAttributes(attributes gqlschema.ResourceAttributes, resolverCtx *gra
 	}
 
 	return extracted, nil
+}
+
+func extractValue(arg interface{}, valueName string) (string, error) {
+	var value string
+	switch v := arg.(type) {
+	case string:
+		value = v
+	case *string:
+		if v == nil {
+			return "", nil
+		}
+		value = *v
+	default:
+		return "", errors.Errorf("%s in arguments found, but can't be converted to string", valueName)
+	}
+	if value == "" {
+		return "", errors.Errorf("%s in arguments not found", valueName)
+	}
+	return value, nil
 }

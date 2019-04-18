@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func Test_getChannelName(t *testing.T) {
+func Test_encodeChannelName(t *testing.T) {
 	// define the test-case struct
 	type TestCase struct {
 		name             string
@@ -52,14 +52,14 @@ func Test_getChannelName(t *testing.T) {
 			sourceID:         "ec..default--test..1",
 			eventType:        "order--created..test--1",
 			eventTypeVersion: "v1",
-			expected:         "ec-p-pdefault-d-dtest-p-p1--order-d-dcreated-p-ptest-d-d--v1", // truncation applied on the event-type
+			expected:         "ec-p-pdefault-d-dtest-p-p1--order-d-dcreated-p-ptest-d-d1--v1",
 		},
 		{
 			name:             "test-case-6",
 			sourceID:         "ec--default..test--1",
 			eventType:        "order..created--test..1",
 			eventTypeVersion: "v1",
-			expected:         "ec-d-ddefault-p-ptest-d-d1--order-p-pcreated-d-dtest-p-p--v1", // truncation applied on the event-type
+			expected:         "ec-d-ddefault-p-ptest-d-d1--order-p-pcreated-d-dtest-p-p1--v1",
 		},
 		{
 			name:             "test-case-7",
@@ -94,16 +94,16 @@ func Test_getChannelName(t *testing.T) {
 	// run the test-cases
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := GetChannelName(&testCase.sourceID, &testCase.eventType, &testCase.eventTypeVersion)
+			result := encodeChannelName(&testCase.sourceID, &testCase.eventType, &testCase.eventTypeVersion)
 
-			// check the channel naming correctness
+			// check the channel name encoding correctness
 			if result != testCase.expected {
-				t.Errorf("getChannelName returned [%s] but expected [%s]", result, testCase.expected)
+				t.Errorf("encodeChannelName returned [%s] but expected [%s]", result, testCase.expected)
 			}
 
-			// check the channel naming collisions
+			// check the channel name encoding collisions
 			if tc, found := channelNames[result]; found {
-				t.Errorf("getChannelName generates the same chanel name [%s] for test case [%s] and [%s]", result, tc.name, testCase.name)
+				t.Errorf("encodeChannelName generates the same chanel name [%s] for test case [%s] and [%s]", result, tc.name, testCase.name)
 			}
 
 			// cache the test result

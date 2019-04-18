@@ -3,22 +3,19 @@ package clientcontext
 import (
 	"context"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/sirupsen/logrus"
 )
 
 type clientContextKey string
 
-// CtxRequiredType type defines if context is mandatory
-type CtxRequiredType bool
+// CtxEnabledType type defines if context is enabled
+type CtxEnabledType bool
 
-// HeadersRequiredType type defines if headers must be specified
-type HeadersRequiredType bool
+// LookupEnabledType type defines if headers must be specified
+type LookupEnabledType bool
 
 const (
-	TenantPlaceholder      = "{TENANT}"
-	GroupPlaceholder       = "{GROUP}"
-	ApplicationPlaceholder = "{APPLICATION}"
-
 	// ApplicationHeader is key representing Application in headers
 	ApplicationHeader = "Application"
 
@@ -40,9 +37,6 @@ const (
 	// GroupHeader is key representing Group in headers
 	GroupHeader = "Group"
 
-	// SubjectCNSeparator holds separator for values packed in CN of Subject
-	SubjectCNSeparator = ";"
-
 	// GroupEmpty represents empty value for Group
 	GroupEmpty = ""
 
@@ -52,24 +46,28 @@ const (
 	// ApplicationEmpty represents empty value for Application
 	ApplicationEmpty = ""
 
-	// CtxRequired represents value for required context
-	CtxRequired CtxRequiredType = true
+	// CtxEnabled represents value for required context
+	CtxEnabled CtxEnabledType = true
 
-	// CtxNotRequired represents value for not required context
-	CtxNotRequired CtxRequiredType = false
+	// CtxNotEnabled represents value for not required context
+	CtxNotEnabled CtxEnabledType = false
 
-	// HeadersRequired represents value for required headers
-	HeadersRequired HeadersRequiredType = true
+	// LookupEnabled represents value for required fetch from Runtime
+	LookupEnabled LookupEnabledType = true
 
-	// HeadersNotRequired represents value for not required headers
-	HeadersNotRequired HeadersRequiredType = false
+	// LookupDisabled represents value for not required fetch from Runtime
+	LookupDisabled LookupEnabledType = false
 )
 
 type ClientContextService interface {
-	GetCommonName() string
 	GetRuntimeUrls() *RuntimeURLs
 	GetLogger() *logrus.Entry
-	FillPlaceholders(format string) string
+}
+
+type ClientCertContextService interface {
+	ClientContextService
+	ClientContext() ClientContextService
+	GetSubject() certificates.CSRSubject
 }
 
 type ContextExtender interface {

@@ -91,7 +91,7 @@ func (c *serviceInstanceConverter) ToGQLs(in []*v1beta1.ServiceInstance) ([]gqls
 	return result, nil
 }
 
-func (c *serviceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput) *serviceInstanceCreateParameters {
+func (c *serviceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *gqlschema.ServiceInstanceCreateInput, namespace string) *serviceInstanceCreateParameters {
 	if in == nil {
 		return nil
 	}
@@ -108,7 +108,7 @@ func (c *serviceInstanceConverter) GQLCreateInputToInstanceCreateParameters(in *
 
 	parameters := serviceInstanceCreateParameters{
 		Name:      in.Name,
-		Namespace: in.Namespace,
+		Namespace: namespace,
 		Labels:    labels,
 		Schema:    parameterSchema,
 		ClassRef: instanceCreateResourceRef{

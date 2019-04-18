@@ -22,14 +22,15 @@ type csrInfoResponse struct {
 }
 
 type mgmtInfoReponse struct {
-	ClientIdentity interface{} `json:"clientIdentity"`
-	URLs           mgmtURLs    `json:"urls"`
+	ClientIdentity  interface{} `json:"clientIdentity"`
+	URLs            mgmtURLs    `json:"urls"`
+	CertificateInfo certInfo    `json:"certificate"`
 }
 
 type mgmtURLs struct {
 	*clientcontext.RuntimeURLs
-	RenewCertURL      string `json:"renewCertUrl"`
-	RevocationCertURL string `json:"revocationCertUrl"`
+	RenewCertURL  string `json:"renewCertUrl"`
+	RevokeCertURL string `json:"revokeCertUrl"`
 }
 
 type api struct {

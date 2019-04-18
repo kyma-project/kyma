@@ -71,7 +71,26 @@ The HTTP POST request payload is a JSON object:
 
 ## Successful Delivery
 
-A message delivered to a subscriber is considered successfully consumed if the service's HTTP response status code is `2xx`. If the status code is not `2xx` (< 200 or >= 300), it means that a message consumption is not successful and that the message delivery is re-tried. This implies **At-least-once** delivery guarantee.
+A message delivered to a subscriber is considered successfully consumed if the service's HTTP response status code is
+`2xx`, for example:
+```json
+{
+    "event-id": "22ae22a4-f5b7-4fa1-ada9-558a10a96f3d",
+    "status": "published",
+    "reason": "Message successfully published to the channel"
+}
+```
+If the status code is not `2xx` (< `200` or >= `300`), it means that the message was not consumed successfully and
+that the Event Bus will try to deliver it again. This implies **At-least-once** delivery guarantee.
+>**NOTE**: If there were no subscriptions or consumers to this `event-type`, the message is ignored and the response
+will look like this:
+```json
+{
+    "event-id": "22ae22a4-f5b7-4fa1-ada9-558a10a96f3d",
+    "status": "ignored",
+    "reason": "Event was ignored as there are no subscriptions or consumers configured for this event"
+}
+```
 
 ## Event Subscription Service Example
 

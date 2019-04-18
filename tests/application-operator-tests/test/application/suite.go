@@ -10,7 +10,7 @@ import (
 
 	"k8s.io/apimachinery/pkg/labels"
 
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 
 	"github.com/kyma-project/kyma/tests/application-operator-tests/test/testkit"
 	"github.com/stretchr/testify/require"
@@ -147,7 +147,17 @@ func (ts *TestSuite) getLogsAndCleanup(t *testing.T) {
 }
 
 func (ts *TestSuite) getPodLogs(t *testing.T, pod v1.Pod) {
-	req := ts.k8sClient.GetLogs(pod.Name, &v1.PodLogOptions{})
+
+	var testContainer string
+	for _, c := range pod.Spec.Containers {
+		if strings.HasPrefix(c.Name, ts.application) {
+			testContainer = c.Name
+		}
+	}
+
+	req := ts.k8sClient.GetLogs(pod.Name, &v1.PodLogOptions{
+		Container: testContainer,
+	})
 
 	reader, err := req.Stream()
 	require.NoError(t, err)

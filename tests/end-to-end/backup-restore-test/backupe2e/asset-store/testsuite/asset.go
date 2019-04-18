@@ -50,7 +50,7 @@ func (a *asset) Create(assetData assetData) error {
 					Name: a.bucketName,
 				},
 				Source: v1alpha2.AssetSource{
-					Url:  assetData.URL,
+					URL:  assetData.URL,
 					Mode: assetData.Mode,
 				},
 			},

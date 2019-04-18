@@ -30,23 +30,19 @@ spec:
           - "/applicationregistry"
           - "--proxyPort={{ .Values.deployment.args.proxyPort }}"
           - "--externalAPIPort={{ .Values.deployment.args.externalAPIPort }}"
-          - "--minioURL={{ .Values.deployment.args.minioURL }}"
+          - "--uploadServiceURL={{ .Values.deployment.args.uploadServiceURL }}"
           - "--namespace={{ .Values.global.namespace }}"
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
-        env:
-          - name: MINIO_ACCESSKEYID
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.minioUserSecretName }}
-                key: accesskey
-          - name: MINIO_ACCESSKEYSECRET
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.minioUserSecretName }}
-                key: secretkey
+          - "--insecureAssetDownload={{ .Values.deployment.args.insecureAssetDownload }}"
         ports:
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
             name: http-api-port
           - containerPort: 9090
             name: metrics-port
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.minikubeIP }}
+          hostnames:
+            - "minio.{{ .Values.global.ingress.domainName }}"
+      {{ end }}

@@ -40,7 +40,7 @@ spec:
         {{- end }}
         env:
         - name: ENABLE_BA
-          value: "false"
+          value: "true"
         - name: STAN_USERNAME
           valueFrom:
             secretKeyRef:
@@ -105,6 +105,8 @@ spec:
         - --stan_config=/etc/nats-streaming/{{ .Values.global.natsStreaming.fullname }}/stan.conf
         {{- end }}
         - --max_inactivity={{ .Values.global.natsStreaming.channel.maxInactivity }}
+        - --user=$(STAN_USERNAME)
+        - --pass=$(STAN_PASSWD)
         env:
         - name: POD_NAME
           valueFrom:

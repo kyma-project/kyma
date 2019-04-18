@@ -16,6 +16,7 @@ type InfoResponse struct {
 type ManagementInfoResponse struct {
 	URLs           ManagementInfoURLs        `json:"urls"`
 	ClientIdentity ApplicationClientIdentity `json:"clientIdentity"`
+	Certificate    CertInfo                  `json:"certificate"`
 }
 
 type ApplicationClientIdentity struct {
@@ -30,8 +31,8 @@ type ClusterClientIdentity struct {
 
 type ManagementInfoURLs struct {
 	*RuntimeURLs
-	RenewCertUrl string `json:"renewCertUrl"`
-	RevocationCertURL string `json:"revocationCertUrl"`
+	RenewCertUrl  string `json:"renewCertUrl"`
+	RevokeCertURL string `json:"revokeCertUrl"`
 }
 
 type RuntimeURLs struct {

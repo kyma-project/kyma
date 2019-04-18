@@ -3,7 +3,9 @@ package docstopic
 import (
 	"context"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/handler/docstopic"
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/webhookconfig"
 	"github.com/pkg/errors"
+	v1 "k8s.io/api/core/v1"
 	"k8s.io/client-go/tools/record"
 	"time"
 
@@ -29,19 +31,24 @@ func Add(mgr manager.Manager) error {
 	if err != nil {
 		return errors.Wrapf(err, "while loading configuration")
 	}
-
 	client := mgr.GetClient()
 	scheme := mgr.GetScheme()
 	assetService := newAssetService(client, scheme)
 	bucketService := newBucketService(client, scheme, cfg.BucketRegion)
+	informer, err := mgr.GetCache().GetInformer(&v1.ConfigMap{})
+	if err != nil {
+		return errors.Wrapf(err, "while getting informer for ConfigMap")
+	}
+	webhookCfgService := webhookconfig.New(informer.GetIndexer(), cfg.Webhook.CfgMapName, cfg.Webhook.CfgMapNamespace)
 
 	reconciler := &ReconcileDocsTopic{
-		relistInterval: cfg.DocsTopicRelistInterval,
-		Client:         mgr.GetClient(),
-		scheme:         mgr.GetScheme(),
-		recorder:       mgr.GetRecorder("docstopic-controller"),
-		assetSvc:       assetService,
-		bucketSvc:      bucketService,
+		relistInterval:   cfg.DocsTopicRelistInterval,
+		Client:           mgr.GetClient(),
+		scheme:           mgr.GetScheme(),
+		recorder:         mgr.GetRecorder("docstopic-controller"),
+		assetSvc:         assetService,
+		bucketSvc:        bucketService,
+		webhookConfigSvc: webhookCfgService,
 	}
 
 	return add(mgr, reconciler)
@@ -77,11 +84,12 @@ var _ reconcile.Reconciler = &ReconcileDocsTopic{}
 // ReconcileDocsTopic reconciles a DocsTopic object
 type ReconcileDocsTopic struct {
 	client.Client
-	scheme         *runtime.Scheme
-	relistInterval time.Duration
-	recorder       record.EventRecorder
-	assetSvc       docstopic.AssetService
-	bucketSvc      docstopic.BucketService
+	scheme           *runtime.Scheme
+	relistInterval   time.Duration
+	recorder         record.EventRecorder
+	assetSvc         docstopic.AssetService
+	bucketSvc        docstopic.BucketService
+	webhookConfigSvc webhookconfig.AssetWebhookConfigService
 }
 
 // Reconcile reads that state of the cluster for a DocsTopic object and makes changes based on the state read
@@ -92,6 +100,7 @@ type ReconcileDocsTopic struct {
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=assets/status,verbs=get;list;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets,verbs=get;list;watch;create;update;patch
 // +kubebuilder:rbac:groups=assetstore.kyma-project.io,resources=buckets/status,verbs=get;list;update;patch
+// +kubebuilder:rbac:resources=configmaps,verbs=get;watch
 func (r *ReconcileDocsTopic) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	ctx, cancel := context.WithCancel(context.TODO())
 	defer cancel()
@@ -107,7 +116,7 @@ func (r *ReconcileDocsTopic) Reconcile(request reconcile.Request) (reconcile.Res
 	}
 
 	docsTopicLogger := log.WithValues("kind", instance.GetObjectKind().GroupVersionKind().Kind, "namespace", instance.GetNamespace(), "name", instance.GetName())
-	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc)
+	commonHandler := docstopic.New(docsTopicLogger, r.recorder, r.assetSvc, r.bucketSvc, r.webhookConfigSvc)
 	commonStatus, err := commonHandler.Handle(ctx, instance, instance.Spec.CommonDocsTopicSpec, instance.Status.CommonDocsTopicStatus)
 	if updateErr := r.updateStatus(ctx, instance, commonStatus); updateErr != nil {
 		finalErr := updateErr

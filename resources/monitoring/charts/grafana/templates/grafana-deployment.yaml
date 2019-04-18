@@ -80,10 +80,13 @@ spec:
         - name: web
           containerPort: 3000
         readinessProbe:
-          httpGet:
-            path: /api/health
-            port: 3000
-          periodSeconds: 1
+          exec:
+            command:
+            - curl
+            - -f
+            - http://localhost:3000/api/health
+          initialDelaySeconds: 10
+          periodSeconds: 5
           timeoutSeconds: 1
           successThreshold: 1
           failureThreshold: 10
@@ -100,6 +103,7 @@ spec:
       tolerations:
 {{ toYaml .Values.tolerations | indent 8 }}
     {{- end }}
+      serviceAccountName: {{ .Release.Name }}-grafana-loki
       securityContext:
         fsGroup: 472
       volumes:

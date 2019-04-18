@@ -17,4 +17,3 @@ spec:
     targetPort: {{ .Values.port.secure }}
   selector:
     app: {{ template "name" . }}
-  

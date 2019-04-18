@@ -129,6 +129,10 @@ func (h *ExtractHandler) chanFromFormFiles(fileFields map[string][]*multipart.Fi
 			continue
 		}
 
+		if files[0].Size == 0 {
+			continue
+		}
+
 		jobs = append(jobs, processor.Job{
 			FilePath: key,
 			File:     fileheader.FromMultipart(files[0]),

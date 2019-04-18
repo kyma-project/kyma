@@ -34,15 +34,15 @@ spec:
             event_type:
               type: string
               minLength: 1
-              maxLength: 28
+              maxLength: 253
               pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
             event_type_version:
               type: string
               minLength: 1
-              maxLength: 2
+              maxLength: 4
               pattern: '^[a-z0-9]+$'
             source_id:
               type: string
               minLength: 1
-              maxLength: 28
+              maxLength: 253
               pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'

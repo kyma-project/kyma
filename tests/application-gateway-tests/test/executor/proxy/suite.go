@@ -22,18 +22,21 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
+	"k8s.io/client-go/util/retry"
 )
 
 const (
 	defaultCheckInterval           = 2 * time.Second
 	appGatewayHealthCheckTimeout   = 15 * time.Second
-	accessServiceConnectionTimeout = 45 * time.Second
+	accessServiceConnectionTimeout = 60 * time.Second
 	apiServerAccessTimeout         = 60 * time.Second
-	dnsWaitTime                    = 35 * time.Second
+	dnsWaitTime                    = 30 * time.Second
 
 	mockServiceNameFormat     = "%s-gateway-test-mock-service"
 	testExecutorPodNameFormat = "%s-tests-test-executor"
 )
+
+type updatePodFunc func(pod *v1.Pod)
 
 type TestSuite struct {
 	httpClient      *http.Client
@@ -134,8 +137,7 @@ func (ts *TestSuite) CallAccessService(t *testing.T, apiId, path string) *http.R
 	url := fmt.Sprintf("http://app-%s-%s/%s", ts.config.Application, apiId, path)
 
 	t.Log("Waiting for DNS in Istio Proxy...")
-	// Sometimes Istio Proxy has problems with DNS
-	// this wait prevents random failures
+	// Wait for Istio Pilot to propagate DNS
 	time.Sleep(dnsWaitTime)
 
 	var resp *http.Response
@@ -204,17 +206,30 @@ func (ts *TestSuite) deleteMockService(t *testing.T) {
 }
 
 func (ts *TestSuite) AddDenierLabel(t *testing.T, apiId string) {
-	pod, err := ts.podClient.Get(fmt.Sprintf(testExecutorPodNameFormat, ts.config.Application), metav1.GetOptions{})
-	require.NoError(t, err)
-
+	podName := fmt.Sprintf(testExecutorPodNameFormat, ts.config.Application)
 	serviceName := fmt.Sprintf("app-%s-%s", ts.config.Application, apiId)
 
-	if pod.Labels == nil {
-		pod.Labels = map[string]string{}
+	updateFunc := func(pod *v1.Pod) {
+		if pod.Labels == nil {
+			pod.Labels = map[string]string{}
+		}
+
+		pod.Labels[serviceName] = "true"
 	}
 
-	pod.Labels[serviceName] = "true"
-
-	_, err = ts.podClient.Update(pod)
+	err := ts.updatePod(podName, updateFunc)
 	require.NoError(t, err)
+}
+
+func (ts *TestSuite) updatePod(podName string, updateFunc updatePodFunc) error {
+	return retry.RetryOnConflict(retry.DefaultBackoff, func() error {
+		newPod, err := ts.podClient.Get(podName, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		updateFunc(newPod)
+		_, err = ts.podClient.Update(newPod)
+		return err
+	})
 }

@@ -14,6 +14,9 @@ import (
 
 const (
 	applicationChartDirectory = "application"
+
+	fullValidationRegexFormat        = "(?=.*(,|^)OU=%s(,|]|$))(?=.*(,|^)O=%s(,|]|$))(?=.*(,|^)CN=%s(,|]|$)).*"
+	applicationValidationRegexFormat = "(.*(CN=%s(,|]|$)).*)"
 )
 
 type ApplicationClient interface {
@@ -66,6 +69,9 @@ func (r *releaseManager) UpgradeReleases() error {
 	}
 
 	for _, app := range appList.Items {
+		if app.ShouldSkipInstallation() == true {
+			continue
+		}
 
 		status, description, err := r.upgradeChart(&app)
 		if err != nil {
@@ -101,9 +107,9 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
 	overridesData := r.overridesDefaults
 	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
-		overridesData.SubjectCN = fmt.Sprintf("%s\\\\\\;%s\\\\\\;%s", application.Spec.Tenant, application.Spec.Group, application.Name)
+		overridesData.IngressValidationRule = fmt.Sprintf(fullValidationRegexFormat, application.Spec.Group, application.Spec.Tenant, application.Name)
 	} else {
-		overridesData.SubjectCN = application.Name
+		overridesData.IngressValidationRule = fmt.Sprintf(applicationValidationRegexFormat, application.Name)
 	}
 
 	return kymahelm.ParseOverrides(overridesData, overridesTemplate)
@@ -130,7 +136,7 @@ func (r *releaseManager) CheckReleaseExistence(name string) (bool, error) {
 }
 
 func (r *releaseManager) checkExistence(name string) (bool, error) {
-	listResponse, err := r.helmClient.ListReleases()
+	listResponse, err := r.helmClient.ListReleases(r.namespace)
 	if err != nil {
 		return false, err
 	}

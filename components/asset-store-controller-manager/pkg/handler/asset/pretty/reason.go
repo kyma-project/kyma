@@ -11,6 +11,8 @@ const (
 	BucketError                    Reason = "BucketError"
 	Mutated                        Reason = "Mutated"
 	MutationFailed                 Reason = "MutationFailed"
+	MetadataExtracted              Reason = "MetadataExtracted"
+	MetadataExtractionFailed       Reason = "MetadataExtractionFailed"
 	Validated                      Reason = "Validated"
 	ValidationFailed               Reason = "ValidationFailed"
 	ValidationError                Reason = "ValidationError"
@@ -43,6 +45,10 @@ func (r Reason) Message() string {
 		return "Asset content has been mutated"
 	case MutationFailed:
 		return "Asset mutation failed due to error %s"
+	case MetadataExtracted:
+		return "Metadata has been extracted from asset content"
+	case MetadataExtractionFailed:
+		return "Metadata extraction failed due to error %s"
 	case Validated:
 		return "Asset content has been validated"
 	case ValidationFailed:

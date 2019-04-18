@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"regexp"
 
-	"github.com/golang/glog"
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingCli "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
 	mappingLister "github.com/kyma-project/kyma/components/application-broker/pkg/client/listers/applicationconnector/v1alpha1"
@@ -18,10 +17,13 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/iosafety"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/resource"
+
+	"github.com/golang/glog"
 	"github.com/pkg/errors"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -117,6 +119,12 @@ func (svc *applicationService) Update(name string, description string, labels gq
 		app, err := svc.Find(name)
 		if err != nil {
 			return nil, errors.Wrapf(err, "while getting %s [%s]", pretty.Application, name)
+		}
+		if app == nil {
+			return nil, apiErrors.NewNotFound(schema.GroupResource{
+				Group:    "applicationconnector.kyma-project.io",
+				Resource: "applications",
+			}, name)
 		}
 		app.Spec.Description = description
 		app.Spec.Labels = labels
