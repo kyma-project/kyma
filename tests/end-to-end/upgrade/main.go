@@ -3,7 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/namespace-controller"
+
+	namespacecontroller "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/namespace-controller"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
