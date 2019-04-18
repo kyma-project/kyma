@@ -2,13 +2,14 @@ package main
 
 import (
 	"context"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
 	"net/http"
 	"os"
 	"os/signal"
 	"strconv"
 	"syscall"
 	"time"
+
+	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
