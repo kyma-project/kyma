@@ -25,8 +25,8 @@ global:
     dir: pr/
     version: PR-3753
   connector_service_tests:
-    dir: develop/
-    version: 9f878a38
+    dir: pr/
+    version: PR-3753
   connection_token_handler:
     dir: develop/
     version: 3d922c3d
