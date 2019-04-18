@@ -49,9 +49,8 @@ spec:
           value: {{ .Values.test.acceptance.core.application.tearDownTimeoutPerStep | quote }}
         command:
         - "/bin/sh"
-      ar
-      gs:
-      - "-c"
-      - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
-  restartPolicy: Never
+        args:
+        - "-c"
+        - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
+    restartPolicy: Never
 {{- end }}
