@@ -2,12 +2,13 @@ package resilient_test
 
 import (
 	"errors"
-	"github.com/kyma-project/kyma/common/resilient"
 	"net/http"
 	"testing"
 	"time"
 
-	"github.com/avast/retry-go"
+	"github.com/kyma-project/kyma/common/resilient"
+
+	retry "github.com/avast/retry-go"
 	"github.com/stretchr/testify/assert"
 )
 
