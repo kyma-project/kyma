@@ -27,7 +27,7 @@ spec:
           - name: config
             mountPath: /var/public/config
           - name: nginx
-            mountPath: /etc/nginx/nginx.conf
+            mountPath: /etc/nginx
       volumes:
       - name: config
         configMap:
