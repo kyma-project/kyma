@@ -40,7 +40,7 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 					return errors.Wrap(err, "while getting catalog")
 				}
 				if !isForbidden {
-					return fmt.Errorf("%s catalog response must be forbidden", brokerURL)
+					return fmt.Errorf("%s catalog response must be forbidden", testName)
 				}
 				return nil
 			}, 5*time.Second)
