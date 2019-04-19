@@ -112,5 +112,5 @@ InitializeMinikubeConfig
 StartMinikube
 WaitForMinikubeToBeUp
 ConfigureMinikubeAddons
-AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "dex", "docs", "lambdas-ui", "console-backend", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
+AddDevDomainsToEtcHosts "apiserver", "console", "catalog", "instances", "brokers", "dex", "docs", "add-ons", "lambdas-ui", "console-backend", "minio", "jaeger", "grafana", "configurations-generator", "gateway", "connector-service"
 IncreaseFsInotifyMaxUserInstances
