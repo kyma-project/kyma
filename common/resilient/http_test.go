@@ -18,9 +18,14 @@ func (mockHttpClientFirstSuccess) Do(req *http.Request) (*http.Response, error) 
 }
 
 func TestHttpClientFirstSuccess(t *testing.T) {
+	// given
 	mock := &mockHttpClientFirstSuccess{}
 	wrapped := resilient.WrapHttpClient(mock, retry.Delay(time.Millisecond), retry.Attempts(5))
+
+	// when
 	resp, err := wrapped.Get("http://example.com/")
+
+	// then
 	assert.Nil(t, err)
 	assert.Equal(t, http.StatusTeapot, resp.StatusCode)
 }
@@ -39,9 +44,14 @@ func (c *mockHttpClientLateSuccess) Do(req *http.Request) (*http.Response, error
 }
 
 func TestHttpClientLateSuccess(t *testing.T) {
+	// given
 	mock := &mockHttpClientLateSuccess{successAfter: 3}
 	wrapped := resilient.WrapHttpClient(mock, retry.Delay(time.Millisecond), retry.Attempts(5))
+
+	// when
 	resp, err := wrapped.Get("http://example.com/")
+
+	// then
 	assert.Nil(t, err)
 	assert.Equal(t, 3, mock.calls)
 	assert.Equal(t, http.StatusTeapot, resp.StatusCode)
@@ -57,9 +67,14 @@ func (c *mockHttpClientError) Do(req *http.Request) (*http.Response, error) {
 }
 
 func TestHttpClientError(t *testing.T) {
+	// given
 	mock := &mockHttpClientError{}
 	wrapped := resilient.WrapHttpClient(mock, retry.Delay(time.Millisecond), retry.Attempts(5))
+
+	// when
 	_, err := wrapped.Get("http://example.com/")
+
+	// then
 	assert.NotNil(t, err)
 	assert.Equal(t, 5, mock.calls)
 }
