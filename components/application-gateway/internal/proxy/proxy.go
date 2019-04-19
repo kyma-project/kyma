@@ -156,7 +156,7 @@ func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry 
 
 func (p *proxy) createModifyResponseFunction(id string, r *http.Request) (func(*http.Response) error, apperrors.AppError) {
 	// Handle the case when credentials has been changed or OAuth token has expired
-	secondRequestBody, err := createSecondRequestBody(r)
+	secondRequestBody, err := copyRequestBody(r)
 	if err != nil {
 		return nil, err
 	}
@@ -169,16 +169,18 @@ func (p *proxy) createModifyResponseFunction(id string, r *http.Request) (func(*
 	return modifyResponseFunction, nil
 }
 
-func createSecondRequestBody(r *http.Request) (io.ReadCloser, apperrors.AppError) {
-	if r.Body != nil {
-		bodyCopy, secondRequestBody, err := drainBody(r.Body)
-		if err != nil {
-			return nil, apperrors.Internal("failed to drain request body, %s", err)
-		}
-		r.Body = bodyCopy
-		return secondRequestBody, nil
+func copyRequestBody(r *http.Request) (io.ReadCloser, apperrors.AppError) {
+	if r.Body == nil {
+		return nil, nil
 	}
-	return nil, nil
+
+	bodyCopy, secondRequestBody, err := drainBody(r.Body)
+	if err != nil {
+		return nil, apperrors.Internal("failed to drain request body, %s", err)
+	}
+	r.Body = bodyCopy
+
+	return secondRequestBody, nil
 }
 
 func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {

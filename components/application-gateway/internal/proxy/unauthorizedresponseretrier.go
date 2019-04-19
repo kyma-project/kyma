@@ -13,7 +13,7 @@ import (
 type retrier struct {
 	id                       string
 	request                  *http.Request
-	body                     io.ReadCloser
+	requestBodyCopy          io.ReadCloser
 	retried                  bool
 	timeout                  int
 	updateCacheEntryFunction updateCacheEntryFunction
@@ -21,8 +21,8 @@ type retrier struct {
 
 type updateCacheEntryFunction = func(string) (*CacheEntry, apperrors.AppError)
 
-func newUnauthorizedResponseRetrier(id string, request *http.Request, body io.ReadCloser, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
-	return &retrier{id: id, request: request, body: body, retried: false, timeout: timeout, updateCacheEntryFunction: updateCacheEntryFunc}
+func newUnauthorizedResponseRetrier(id string, request *http.Request, requestBodyCopy io.ReadCloser, timeout int, updateCacheEntryFunc updateCacheEntryFunction) *retrier {
+	return &retrier{id: id, request: request, requestBodyCopy: requestBodyCopy, retried: false, timeout: timeout, updateCacheEntryFunction: updateCacheEntryFunc}
 }
 
 func (rr *retrier) RetryIfFailedToAuthorize(r *http.Response) error {
@@ -55,7 +55,7 @@ func (rr *retrier) retry() (*http.Response, error) {
 	request, cancel := rr.prepareRequest()
 	defer cancel()
 
-	request.Body = rr.body
+	request.Body = rr.requestBodyCopy
 
 	cacheEntry, err := rr.updateCacheEntryFunction(rr.id)
 	if err != nil {
