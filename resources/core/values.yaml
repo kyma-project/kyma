@@ -72,10 +72,10 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: 'e3d783bb'
+    version: 'e03e4b24'
   console_backend_service_test:
     dir: develop/
-    version: '9ecc0bcc'
+    version: '5ec3de0d'
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

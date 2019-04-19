@@ -1,0 +1,33 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  creationTimestamp: null
+  name:  {{ template "octopus.fullname" . }}
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - delete
+- apiGroups:
+  - testing.kyma-project.io
+  resources:
+  - clustertestsuites
+  - testdefinitions
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - testing.kyma-project.io
+  resources:
+  - clustertestsuites/status
+  verbs:
+  - get
+  - update
+  - patch

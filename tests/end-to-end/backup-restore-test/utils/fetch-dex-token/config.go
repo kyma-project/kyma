@@ -7,64 +7,58 @@ import (
 	"github.com/vrischmann/envconfig"
 )
 
-type envConfig struct {
+type Config struct {
 	Domain       string `envconfig:"default=kyma.local"`
 	UserEmail    string
 	UserPassword string
 }
 
-type Config struct {
-	IdProviderConfig idProviderConfig
-	EnvConfig        envConfig
+type IdProviderConfig struct {
+	DexConfig       DexConfig
+	ClientConfig    ClientConfig
+	UserCredentials UserCredentials
 }
 
-type idProviderConfig struct {
-	DexConfig       dexConfig
-	ClientConfig    clientConfig
-	UserCredentials userCredentials
-}
-
-type dexConfig struct {
+type DexConfig struct {
 	BaseUrl           string
 	AuthorizeEndpoint string
 	TokenEndpoint     string
 }
 
-type clientConfig struct {
+type ClientConfig struct {
 	ID          string
 	RedirectUri string
 }
 
-type userCredentials struct {
+type UserCredentials struct {
 	Username string
 	Password string
 }
 
 func LoadConfig() (Config, error) {
-	env := envConfig{}
-	err := envconfig.Init(&env)
+	config := Config{}
+	err := envconfig.Init(&config)
 	if err != nil {
 		return Config{}, errors.Wrap(err, "while loading environment variables")
 	}
 
-	config := Config{EnvConfig: env}
+	return config, nil
+}
 
-	config.IdProviderConfig = idProviderConfig{
-		DexConfig: dexConfig{
-			BaseUrl:           fmt.Sprintf("https://dex.%s", env.Domain),
-			AuthorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", env.Domain),
-			TokenEndpoint:     fmt.Sprintf("https://dex.%s/token", env.Domain),
+func (c *Config) IdProviderConfig() IdProviderConfig {
+	return IdProviderConfig{
+		DexConfig: DexConfig{
+			BaseUrl:           fmt.Sprintf("https://dex.%s", c.Domain),
+			AuthorizeEndpoint: fmt.Sprintf("https://dex.%s/auth", c.Domain),
+			TokenEndpoint:     fmt.Sprintf("https://dex.%s/token", c.Domain),
 		},
-		ClientConfig: clientConfig{
+		ClientConfig: ClientConfig{
 			ID:          "kyma-client",
 			RedirectUri: "http://127.0.0.1:5555/callback",
 		},
+		UserCredentials: UserCredentials{
+			Username: c.UserEmail,
+			Password: c.UserPassword,
+		},
 	}
-
-	config.IdProviderConfig.UserCredentials = userCredentials{
-		Username: env.UserEmail,
-		Password: env.UserPassword,
-	}
-
-	return config, nil
 }
