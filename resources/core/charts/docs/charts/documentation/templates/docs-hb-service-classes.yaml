@@ -1,16 +1,47 @@
-apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
 metadata:
+  name: 84dad23a-794d-404f-92a1-5e73e91a74af
   labels:
-    cms.kyma-project.io/view-context: docs-ui
-    cms.kyma-project.io/group-name: helm-broker-service-classes
-  name: helm-broker-service-classes
+    cms.kyma-project.io/view-context: service-catalog
 spec:
-  displayName: "helm-broker-service-classes"
-  description: "helm broker service classes"
+  displayName: Azure Service Broker
+  description: Documentation for Azure Service Broker.
   sources:
-    - type: markdown
-      name: docs
-      mode: package
-      url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterDocsTopicsVersion }}.zip
-      filter: /docs/service-brokers/helm-broker-service-classes/
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/helm-broker-service-classes/azure-broker/docs/
+---
+kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+metadata:
+  name: aff0f62c-a988-406f-a950-348473743071
+  labels:
+    cms.kyma-project.io/view-context: service-catalog
+spec:
+  displayName: GCP Service Broker
+  description: Documentation for GCP Service Broker.
+  sources:
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/helm-broker-service-classes/gcp-broker/docs/
+---
+kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+metadata:
+  name: a2257daa-0e26-4c61-a68d-8a7453c1b767
+  labels:
+    cms.kyma-project.io/view-context: service-catalog
+spec:
+  displayName: Redis
+  description: Documentation for Redis.
+  sources:
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/helm-broker-service-classes/redis/docs/

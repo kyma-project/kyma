@@ -1,16 +1,111 @@
-apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
 metadata:
+  name: 8e0bbfa6-2cac-40b6-8adf-e5ee8dcbe4e8
   labels:
-    cms.kyma-project.io/view-context: docs-ui
-    cms.kyma-project.io/group-name: gcp-broker-service-classes
-  name: gcp-broker-service-classes
+    cms.kyma-project.io/view-context: service-catalog
 spec:
-  displayName: "gcp-broker-service-classes"
-  description: "gcp-broker-service-classes"
+  displayName: BigQuery
+  description: Documentation for BigQuery
   sources:
-    - type: markdown
-      name: docs
-      mode: package
-      url: https://github.com/{{ .Values.global.kymaOrgName }}/kyma/archive/{{ .Values.global.docs.clusterDocsTopicsVersion }}.zip
-      filter: /docs/service-brokers/gcp-broker-service-classes/
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/gcp-broker-service-classes/bigquery/docs/
+---
+kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+metadata:
+  name: b1de7f2f-1e84-44ae-b4f0-2dcb613c17c9
+  labels:
+    cms.kyma-project.io/view-context: service-catalog
+spec:
+  displayName: Cloud Bigtable
+  description: Documentation for Cloud Bigtable
+  sources:
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/gcp-broker-service-classes/cloud-bigtable/docs/
+---
+kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+metadata:
+  name: 5dcd0ba6-8df6-4a2a-b5fd-981d0aa76803
+  labels:
+    cms.kyma-project.io/view-context: service-catalog
+spec:
+  displayName: Cloud IAM Service Account
+  description: Documentation for Cloud IAM Service Account
+  sources:
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/gcp-broker-service-classes/cloud-iam-service-account/docs/
+---
+kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+metadata:
+  name: 6f4e8d17-4fde-45bd-9dcf-28bcb7eeea5c
+  labels:
+    cms.kyma-project.io/view-context: service-catalog
+spec:
+  displayName: Cloud Pub/Sub
+  description: Documentation for Cloud Pub/Sub
+  sources:
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/gcp-broker-service-classes/cloud-pubsub/docs/
+---
+kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+metadata:
+  name: 4197a602-3eb9-4d40-8e21-0311a7a8eecb
+  labels:
+    cms.kyma-project.io/view-context: service-catalog
+spec:
+  displayName: Cloud Spanner
+  description: Documentation for Cloud Spanner
+  sources:
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/gcp-broker-service-classes/cloud-spanner/docs/
+---
+kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+metadata:
+  name: 85c5e53a-d70b-480e-afd3-737b0b1329f3
+  labels:
+    cms.kyma-project.io/view-context: service-catalog
+spec:
+  displayName: Cloud SQL - MySQL
+  description: Documentation for Cloud SQL - MySQL
+  sources:
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/gcp-broker-service-classes/cloud-sql-mysql/docs/
+---
+kind: ClusterDocsTopic
+apiVersion: cms.kyma-project.io/v1alpha1
+metadata:
+  name: e9776b6c-4022-41ec-8b83-7c368ed9c270
+  labels:
+    cms.kyma-project.io/view-context: service-catalog
+spec:
+  displayName: Google Cloud Storage
+  description: Documentation for Google Cloud Storage
+  sources:
+  - type: markdown
+    name: docs
+    mode: package
+    url: https://github.com/{{.Values.global.kymaOrgName}}/kyma/archive/{{.Values.global.docs.clusterDocsTopicsVersion}}.zip
+    filter: /docs/service-brokers/gcp-broker-service-classes/google-cloud-storage/docs/
