@@ -37,7 +37,7 @@ spec:
             path: config.js
       - name: nginx
         configMap:
-          name: {{ .Chart.Name }}-config
+          name: {{ .Chart.Name }}-nginx
           items:
           - key: nginx.conf
             path: nginx.conf
