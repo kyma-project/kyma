@@ -1,5 +1,19 @@
 package automock
 
+// AddonsConfiguration
+
+func NewAddonsCfgLister() *addonsCfgLister {
+	return new(addonsCfgLister)
+}
+
+func NewAddonsCfgMutations() *addonsCfgMutations {
+	return new(addonsCfgMutations)
+}
+
+func NewAddonsCfgUpdater() *addonsCfgUpdater {
+	return new(addonsCfgUpdater)
+}
+
 // Service Binding Usage
 
 func NewServiceBindingUsageOperations() *serviceBindingUsageOperations {

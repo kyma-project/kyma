@@ -113,9 +113,11 @@ func TestSyncerWithOneLoader(t *testing.T) {
 			syncer.AddProvider(urlB, providerB)
 
 			// when
-			syncer.Execute()
+			err := syncer.Execute()
 
 			// then
+			require.NoError(t, err)
+
 			gotBundles, err := bStorage.FindAll()
 			require.NoError(t, err)
 
@@ -166,13 +168,11 @@ func fixBundleWithChart(id, name, url string) bundle.CompleteBundle {
 	chartVersion := semver.MustParse("1.0.0")
 	return bundle.CompleteBundle{
 		Bundle: &internal.Bundle{
-			ID:          internal.BundleID(id),
-			Name:        internal.BundleName(name),
-			Description: "simple description",
-			Version:     *semver.MustParse("0.2.3"),
-			Repository: internal.RemoteRepository{
-				URL: url,
-			},
+			ID:                  internal.BundleID(id),
+			Name:                internal.BundleName(name),
+			Description:         "simple description",
+			Version:             *semver.MustParse("0.2.3"),
+			RemoteRepositoryURL: url,
 			Plans: map[internal.BundlePlanID]internal.BundlePlan{
 				internal.BundlePlanID(fmt.Sprintf("plan-%s", name)): {
 					ChartRef: internal.ChartRef{

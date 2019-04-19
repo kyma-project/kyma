@@ -34,30 +34,32 @@ subjects:
   name: test-{{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}
-  annotations:
-    sidecar.istio.io/inject: "false"
-    "helm.sh/hook": test-success
-  labels:
-      "helm-chart-test": "true"
 spec:
-  serviceAccountName: test-{{ template "fullname" . }}
-  containers:
-  - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_namespace_controller.dir }}test-namespace-controller:{{ .Values.global.test_namespace_controller.version }}
-    env:
-      - name: EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT_REQUEST
-        value: "{{ .Values.limitRanges.defaultRequest }}"
-      - name: EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT
-        value: "{{ .Values.limitRanges.default }}"
-      - name: EXPECTED_LIMIT_RANGE_MEMORY_MAX
-        value: "{{ .Values.limitRanges.max }}"
-      - name: EXPECTED_RESOURCE_QUOTA_LIMITS_MEMORY
-        value: "{{ .Values.resourceQuota.limitsMemory}}"
-      - name: EXPECTED_RESOURCE_QUOTA_REQUESTS_MEMORY
-        value: "{{ .Values.resourceQuota.requestsMemory}}"
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: test-{{ template "fullname" . }}
+      containers:
+      - name: test-{{ template "fullname" . }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_namespace_controller.dir }}test-namespace-controller:{{ .Values.global.test_namespace_controller.version }}
+        env:
+          - name: EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT_REQUEST
+            value: "{{ .Values.limitRanges.defaultRequest }}"
+          - name: EXPECTED_LIMIT_RANGE_MEMORY_DEFAULT
+            value: "{{ .Values.limitRanges.default }}"
+          - name: EXPECTED_LIMIT_RANGE_MEMORY_MAX
+            value: "{{ .Values.limitRanges.max }}"
+          - name: EXPECTED_RESOURCE_QUOTA_LIMITS_MEMORY
+            value: "{{ .Values.resourceQuota.limitsMemory}}"
+          - name: EXPECTED_RESOURCE_QUOTA_REQUESTS_MEMORY
+            value: "{{ .Values.resourceQuota.requestsMemory}}"
+      restartPolicy: Never
 ---
+{{- end }}

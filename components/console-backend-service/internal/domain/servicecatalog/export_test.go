@@ -151,5 +151,5 @@ func NewServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, inf
 // Service Catalog Module
 
 func (r *PluggableContainer) SetFakeClient() {
-	r.cfg.client = fake.NewSimpleClientset()
+	r.cfg.scCli = fake.NewSimpleClientset()
 }
