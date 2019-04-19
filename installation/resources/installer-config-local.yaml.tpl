@@ -123,6 +123,7 @@ metadata:
 data:
   test.acceptance.ui.minikubeIP: ""
   test.acceptance.ui.logging.enabled: ""
+  test.acceptance.cbs.minikubeIP: ""
   apiserver-proxy.minikubeIP: ""
   configurations-generator.minikubeIP: ""
 ---
