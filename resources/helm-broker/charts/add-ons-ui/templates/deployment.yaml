@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}
+  name: {{ template "add-ons-ui-fullname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "add-ons-ui-name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
@@ -14,12 +14,12 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
       labels:
-        app: {{ template "name" . }}
+        app: {{ template "add-ons-ui-name" . }}
         release: {{ .Release.Name }}
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.global.containerRegistry.path }}/pr/{{ .Values.image.name }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
           - containerPort: {{ .Values.service.internalPort }}

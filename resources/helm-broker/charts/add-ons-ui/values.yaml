@@ -2,7 +2,7 @@ name: add-ons
 replicaCount: 1
 image:
   name: add-ons-ui
-  tag: 6ec6f6b9
+  tag: "PR-783"
   pullPolicy: IfNotPresent
 service:
   internalPort: 80

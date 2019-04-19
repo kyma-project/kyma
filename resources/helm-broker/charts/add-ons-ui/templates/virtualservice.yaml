@@ -1,5 +1,5 @@
 {{- if .Values.virtualservice.enabled }}
-{{- $serviceName := include "fullname" . -}}
+{{- $serviceName := include "add-ons-ui-fullname" . -}}
 {{- $servicePort := .Values.service.externalPort -}}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -8,9 +8,9 @@ metadata:
   annotations:
 {{ toYaml .Values.virtualservice.annotations | indent 4 }}
 {{- end }}
-  name: {{ template "fullname" . }}
+  name: {{ template "add-ons-ui-fullname" . }}
   labels:
-    app: {{ template "name" . }}
+    app: {{ template "add-ons-ui-name" . }}
     chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
     heritage: {{ .Release.Service }}
     release: {{ .Release.Name }}
