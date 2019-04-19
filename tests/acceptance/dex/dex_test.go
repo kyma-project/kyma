@@ -38,7 +38,7 @@ func TestSpec(t *testing.T) {
 
 	ingressClient, err := ingressgateway.FromEnv().Client()
 	if err != nil {
-		t.Errorf("Error while creating ingress gateway client: %s", err)
+		t.Fatalf("Error while creating ingress gateway client: %s", err)
 	}
 
 	ingressClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
@@ -75,6 +75,7 @@ func TestSpec(t *testing.T) {
 		So(idToken, ShouldNotBeEmpty)
 
 		tokenParts := strings.Split(idToken, ".")
+		So(len(tokenParts), ShouldEqual, 3)
 
 		tokenPayloadEncoded := tokenParts[1]
 
@@ -82,9 +83,7 @@ func TestSpec(t *testing.T) {
 		tokenPayloadEncoded += strings.Repeat("=", missingTokenBytes)
 
 		tokenPayloadDecoded, err := base64.StdEncoding.DecodeString(tokenPayloadEncoded)
-		if err != nil {
-			t.Fatal(err)
-		}
+		So(err, ShouldBeNil)
 
 		tokenPayload := make(map[string]interface{})
 		err = json.Unmarshal(tokenPayloadDecoded, &tokenPayload)
