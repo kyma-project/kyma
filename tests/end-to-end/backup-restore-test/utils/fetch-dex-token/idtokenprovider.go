@@ -22,10 +22,10 @@ type idTokenProvider interface {
 
 type dexIdTokenProvider struct {
 	httpClient *http.Client
-	config     idProviderConfig
+	config     IdProviderConfig
 }
 
-func newDexIdTokenProvider(httpClient *http.Client, config idProviderConfig) idTokenProvider {
+func newDexIdTokenProvider(httpClient *http.Client, config IdProviderConfig) idTokenProvider {
 	// turn off follow-redirects
 	httpClient.CheckRedirect = func(req *http.Request, via []*http.Request) error {
 		return http.ErrUseLastResponse

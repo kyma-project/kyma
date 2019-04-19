@@ -24,14 +24,13 @@ type csrInfoHandler struct {
 	csrSubject               certificates.CSRSubject
 }
 
-func NewCSRInfoHandler(tokenManager tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, getInfoURL string, subjectValues certificates.CSRSubject, baseURL string) CSRInfoHandler {
+func NewCSRInfoHandler(tokenManager tokens.Creator, connectorClientExtractor clientcontext.ConnectorClientExtractor, getInfoURL string, baseURL string) CSRInfoHandler {
 
 	return &csrInfoHandler{
 		tokenManager:             tokenManager,
 		connectorClientExtractor: connectorClientExtractor,
 		getInfoURL:               getInfoURL,
 		baseURL:                  baseURL,
-		csrSubject:               subjectValues,
 	}
 }
 
@@ -42,8 +41,7 @@ func (ih *csrInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	newToken, err := ih.tokenManager.Save(clientContextService)
-
+	newToken, err := ih.tokenManager.Save(clientContextService.ClientContext())
 	if err != nil {
 		httphelpers.RespondWithErrorAndLog(w, err)
 		return
@@ -53,7 +51,7 @@ func (ih *csrInfoHandler) GetCSRInfo(w http.ResponseWriter, r *http.Request) {
 
 	csrURL := ih.makeCSRURLs(newToken)
 
-	certInfo := makeCertInfo(ih.csrSubject, clientContextService.GetCommonName())
+	certInfo := makeCertInfo(clientContextService.GetSubject().ToString())
 
 	httphelpers.RespondWithBody(w, http.StatusOK, csrInfoResponse{CsrURL: csrURL, API: apiURLs, CertificateInfo: certInfo})
 }
@@ -65,18 +63,15 @@ func (ih *csrInfoHandler) makeCSRURLs(newToken string) string {
 	return csrURL + tokenParam
 }
 
-func (ih *csrInfoHandler) makeApiURLs(clientContextService clientcontext.ClientContextService) api {
-	infoURL := clientContextService.FillPlaceholders(ih.getInfoURL)
+func (ih *csrInfoHandler) makeApiURLs(clientContextService clientcontext.ClientCertContextService) api {
 	return api{
 		CertificatesURL: ih.baseURL + CertsEndpoint,
-		InfoURL:         infoURL,
+		InfoURL:         ih.getInfoURL,
 		RuntimeURLs:     clientContextService.GetRuntimeUrls(),
 	}
 }
 
-func makeCertInfo(csrSubject certificates.CSRSubject, commonName string) certInfo {
-	subject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", csrSubject.OrganizationalUnit, csrSubject.Organization, csrSubject.Locality, csrSubject.Province, csrSubject.Country, commonName)
-
+func makeCertInfo(subject string) certInfo {
 	return certInfo{
 		Subject:      subject,
 		Extensions:   "",

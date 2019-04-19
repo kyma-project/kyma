@@ -38,7 +38,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.36"
+  version = "v0.1.36"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
@@ -82,10 +82,6 @@ required = [
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.12.3"
-
-[[override]]
-  name = "k8s.io/client-go"
   version = "kubernetes-1.12.3"
 
 [[constraint]]

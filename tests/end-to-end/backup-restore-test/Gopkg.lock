@@ -39,6 +39,14 @@
   version = "v10.15.5"
 
 [[projects]]
+  digest = "1:13d5750ba049ce46bf931792803f1d5584b04026df9badea5931e33c22aa34ee"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "08d411bf8302219fe47ca04dbdf9de892010c5e5"
+  version = "v2.2.0"
+
+[[projects]]
   digest = "1:49b76494b9255c8d82aff7b0c77681bea23a1c301632473abe88da5630799a4b"
   name = "github.com/aws/aws-sdk-go"
   packages = [
@@ -127,6 +135,22 @@
   pruneopts = "NUT"
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:513691cf6809d4fa2482469adb88aba530f96a5c4a9c68a09a0786519b07c24a"
+  name = "github.com/go-redis/redis"
+  packages = [
+    ".",
+    "internal",
+    "internal/consistenthash",
+    "internal/hashtag",
+    "internal/pool",
+    "internal/proto",
+    "internal/util",
+  ]
+  pruneopts = "NUT"
+  revision = "d22fde8721cc915a55aeb6b00944a76a92bfeb6e"
+  version = "v6.15.2"
 
 [[projects]]
   digest = "1:a1b2a5e38f79688ee8250942d5fa960525fceb1024c855c7bc76fa77b0f3cca2"
@@ -327,7 +351,25 @@
   version = "v1.0.3"
 
 [[projects]]
-  digest = "1:71adfc957d2b833e36e9614542ca272850c1cb1ceea95792b594c22868b6af0c"
+  digest = "1:54e7a7ce3a89657b4c470572f6c0f26110f7ead329aead61ef44d7b010db80ca"
+  name = "github.com/kubernetes-incubator/service-catalog"
+  packages = [
+    "pkg/apis/servicecatalog",
+    "pkg/apis/servicecatalog/v1beta1",
+    "pkg/apis/settings",
+    "pkg/apis/settings/v1alpha1",
+    "pkg/client/clientset_generated/clientset",
+    "pkg/client/clientset_generated/clientset/scheme",
+    "pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
+    "pkg/client/clientset_generated/clientset/typed/settings/v1alpha1",
+    "pkg/filter",
+  ]
+  pruneopts = "NUT"
+  revision = "9a11d65cffff657bebf09ec7cbfdc4e5cd768628"
+  version = "v0.1.34"
+
+[[projects]]
+  digest = "1:641e999f93d21fb546135dd1cf1a84636888fb73011b1b5276e236e50798f6a5"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -340,8 +382,22 @@
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/scheme",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/typed/gateway.kyma-project.io/v1alpha2",
+    "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-broker/pkg/client/clientset/versioned",
+    "components/application-broker/pkg/client/clientset/versioned/scheme",
+    "components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "components/application-operator/pkg/client/clientset/versioned",
+    "components/application-operator/pkg/client/clientset/versioned/scheme",
+    "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/scheme",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
     "tests/asset-store/pkg/waiter",
   ]
   pruneopts = "NUT"
@@ -764,10 +820,9 @@
   version = "kubernetes-1.11.3"
 
 [[projects]]
-  digest = "1:6badd9d4bee0dd5de179b069273cdda138dff4bc56485711166e908a71cbfaa0"
+  digest = "1:dc762d3b3b0daf4d630a815b192792188c33a09bb8e46cba670912342eeafc95"
   name = "k8s.io/kubernetes"
   packages = [
-    "pkg/apis/core",
     "pkg/kubectl/genericclioptions",
     "pkg/kubectl/genericclioptions/printers",
     "pkg/kubectl/genericclioptions/resource",
@@ -790,7 +845,9 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/avast/retry-go",
     "github.com/ghodss/yaml",
+    "github.com/go-redis/redis",
     "github.com/google/uuid",
     "github.com/heptio/ark/pkg/apis/ark/v1",
     "github.com/heptio/ark/pkg/backup",
@@ -799,14 +856,23 @@
     "github.com/heptio/ark/pkg/restic",
     "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1",
     "github.com/kubeless/kubeless/pkg/client/clientset/versioned",
+    "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
+    "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
+    "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
+    "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2",
     "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/tests/asset-store/pkg/waiter",
     "github.com/pkg/errors",
+    "github.com/sirupsen/logrus",
     "github.com/smartystreets/goconvey/convey",
     "github.com/vrischmann/envconfig",
     "golang.org/x/net/html",
@@ -818,15 +884,15 @@
     "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
-    "k8s.io/apimachinery/pkg/fields",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
+    "k8s.io/apimachinery/pkg/util/wait",
     "k8s.io/client-go/dynamic",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/rest",
     "k8s.io/client-go/tools/clientcmd",
-    "k8s.io/kubernetes/pkg/apis/core",
+    "k8s.io/kubernetes/pkg/kubectl/genericclioptions/printers",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

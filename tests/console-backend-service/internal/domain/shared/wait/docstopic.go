@@ -3,7 +3,7 @@ package wait
 import (
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
 )
 
 func ForDocsTopicReady(name string, get func(name string) (*v1alpha1.DocsTopic, error)) error {
