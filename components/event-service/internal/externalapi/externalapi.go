@@ -17,7 +17,7 @@ type ActiveEventsHandler interface {
 func NewHandler(maxRequestSize int64, eventsClient registered.EventsClient) http.Handler {
 	router := mux.NewRouter()
 
-	router.Path("/{re}/v1/events").Handler(NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
+	router.Path("/{application}/v1/events").Handler(NewEventsHandler(maxRequestSize)).Methods(http.MethodPost)
 
 	router.Path("/{application}/v1/activeevents").HandlerFunc(NewActiveEventsHandler(eventsClient).GetActiveEvents).Methods(http.MethodGet)
 
