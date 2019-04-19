@@ -21,13 +21,19 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.add_ons_ui.dir }}{{ .Values.image.name }}:{{ .Values.global.add_ons_ui.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - nginx
+          - -c
+          - /nginx-conf/nginx.conf
+          - -g
+          - daemon off;
           ports:
           - containerPort: {{ .Values.service.internalPort }}
           volumeMounts:
           - name: config
             mountPath: /var/public/config
           - name: nginx
-            mountPath: /etc/nginx
+            mountPath: /nginx-conf
       volumes:
       - name: config
         configMap:

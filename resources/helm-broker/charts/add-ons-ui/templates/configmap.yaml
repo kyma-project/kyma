@@ -26,7 +26,7 @@ data:
     http {
 
       default_type application/octet-stream;
-      include mime.types;
+      include /etc/nginx/mime.types;
       sendfile on;
       tcp_nopush on;
       tcp_nodelay on;
