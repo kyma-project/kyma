@@ -10,6 +10,7 @@ metadata:
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
+  serviceAccountName: {{.Release.Name }}-event-service-acceptance
   containers:
     - name: test-{{.Release.Name }}-event-service-acceptance
       image: {{ .Values.global.eventServiceTestsImage }}
