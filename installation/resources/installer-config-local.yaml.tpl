@@ -85,7 +85,7 @@ metadata:
     component: helm-broker
     kyma-project.io/installation: ""
 data:
-  config.isDevelopMode: "true"
+  global.isDevelopMode: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
