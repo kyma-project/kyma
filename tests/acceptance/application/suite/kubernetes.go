@@ -29,7 +29,7 @@ const (
 func (ts *TestSuite) createKubernetesResources() {
 	gwSelectorLabels := map[string]string{
 		// label app value must match container name - used, when printing logs
-		"app":                 "fake-gateway",
+		"app": "fake-gateway",
 		"acceptance-test-app": "fake-gateway",
 	}
 
