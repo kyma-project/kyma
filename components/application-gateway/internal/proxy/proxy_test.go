@@ -385,7 +385,7 @@ func TestProxy(t *testing.T) {
 	})
 
 	t.Run("should invalidate proxy and retry when 403 occurred due to CRSF Token validation", func(t *testing.T) {
-		testRetryOnAuthFailure(http.StatusForbidden, nil, false,  t)
+		testRetryOnAuthFailure(http.StatusForbidden, nil, false, t)
 	})
 
 	t.Run("should return 403 status when the call and the retry with body returned 403", func(t *testing.T) {
