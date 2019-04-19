@@ -8,7 +8,7 @@ build:
 
 .PHONY: build-image
 build-image:
-	docker build -t $(APP_NAME):latest .
+	docker build -t tests:latest .
 
 .PHONY: push-image
 push-image:
