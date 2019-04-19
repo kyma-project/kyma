@@ -27,10 +27,6 @@ metadata:
 spec:
   maxRetries: 1
   concurrency: 1
-  selectors:
-    matchNames:
-      - name: test-core-core-acceptance
-        namespace: kyma-system
 EOF
 
 startTime=$(date +%s)
