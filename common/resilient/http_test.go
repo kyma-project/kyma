@@ -1,4 +1,4 @@
-package resilient
+package resilient_test
 
 import (
 	"errors"
