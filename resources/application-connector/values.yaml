@@ -40,8 +40,8 @@ global:
     dir: pr/
     version: PR-3765
   gateway_tests:
-    dir: develop/
-    version: e1af648f
+    dir: pr/
+    version: PR-3765
   application_gateway:
     dir: develop/
     version: 78b98274
@@ -57,6 +57,5 @@ global:
   application_broker:
     dir: develop/
     version: 59de9e9c
-
 connectivity_certs_controller:
   enabled: false
