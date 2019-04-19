@@ -41,8 +41,15 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  /v1/events:
+  /{application}/v1/events:
     post:
+      parameters:
+      - in: path
+        name: application
+        schema:
+          type: string
+        required: true
+        description: 'Application name'
       summary: 'Publish an event'
       operationId: 'publishEvent'
       tags:
