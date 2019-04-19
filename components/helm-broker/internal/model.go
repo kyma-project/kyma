@@ -135,7 +135,7 @@ type Bundle struct {
 	Description         string
 	Plans               map[BundlePlanID]BundlePlan
 	Metadata            BundleMetadata
-	Repository          RemoteRepository
+	RemoteRepositoryURL string
 	Tags                []BundleTag
 	Requires            []string
 	Bindable            bool
@@ -206,16 +206,6 @@ func (b BundleMetadata) DeepCopy() BundleMetadata {
 	}
 
 	return out
-}
-
-// RemoteRepository contains information about the repository which contains the given bundle.
-type RemoteRepository struct {
-	URL string
-}
-
-// ID returns an identifier of a repository which is the repository URL.
-func (r RemoteRepository) ID() string {
-	return r.URL
 }
 
 // InstanceID is a service instance identifier.

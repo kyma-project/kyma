@@ -1,56 +1,57 @@
 {{ if .Values.global.isLocalEnv }}
 ---
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: cluster-users-test
   namespace: {{ .Release.Namespace }}
-  annotations:
-    sidecar.istio.io/inject: "false"
-    "helm.sh/hook": test-success
-  labels:
-    "helm-chart-test": "true"
 spec:
-  hostNetwork: true
-  dnsPolicy: ClusterFirstWithHostNet
-  serviceAccount: cluster-users-test
-  containers:
-    - name: test-cluster-users
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_test.dir }}cluster-users-test:{{ .Values.global.cluster_users_test.version }}
-      env:
-      - name: ADMIN_EMAIL
-        valueFrom:
-          secretKeyRef:
-            name: admin-user
-            key: email
-      - name: ADMIN_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: admin-user
-            key: password
-      - name: DEVELOPER_EMAIL
-        valueFrom:
-          secretKeyRef:
-            name: test-developer-user
-            key: email
-      - name: DEVELOPER_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: test-developer-user
-            key: password
-      - name: VIEW_EMAIL
-        valueFrom:
-          secretKeyRef:
-            name: test-read-only-user
-            key: email
-      - name: VIEW_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: test-read-only-user
-            key: password
-      - name: NAMESPACE
-        value: {{ .Values.namespace }}
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      hostNetwork: true
+      dnsPolicy: ClusterFirstWithHostNet
+      serviceAccount: cluster-users-test
+      containers:
+        - name: test-cluster-users
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.cluster_users_test.dir }}cluster-users-test:{{ .Values.global.cluster_users_test.version }}
+          env:
+          - name: ADMIN_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: admin-user
+                key: email
+          - name: ADMIN_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: admin-user
+                key: password
+          - name: DEVELOPER_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: test-developer-user
+                key: email
+          - name: DEVELOPER_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-developer-user
+                key: password
+          - name: VIEW_EMAIL
+            valueFrom:
+              secretKeyRef:
+                name: test-read-only-user
+                key: email
+          - name: VIEW_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: test-read-only-user
+                key: password
+          - name: NAMESPACE
+            value: {{ .Values.namespace }}
+      restartPolicy: Never
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -71,4 +72,5 @@ subjects:
 - kind: ServiceAccount
   name: cluster-users-test
   namespace: {{ .Release.Namespace }}
+{{- end }}
 {{ end }}

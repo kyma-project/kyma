@@ -114,7 +114,7 @@ data:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: core-test-ui-acceptance-overrides
+  name: core-overrides
   namespace: kyma-installer
   labels:
     installer: overrides
@@ -123,6 +123,9 @@ metadata:
 data:
   test.acceptance.ui.minikubeIP: ""
   test.acceptance.ui.logging.enabled: ""
+  test.acceptance.cbs.minikubeIP: ""
+  apiserver-proxy.minikubeIP: ""
+  configurations-generator.minikubeIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -20,8 +20,10 @@ entries:
 `
 	dto := indexDTO{}
 	// WHEN
-	yaml.Unmarshal([]byte(data), &dto)
+	err := yaml.Unmarshal([]byte(data), &dto)
+
 	// THEN
+	require.NoError(t, err)
 	require.Len(t, dto.Entries, 1)
 	redis, ex := dto.Entries["redis"]
 	assert.True(t, ex)

@@ -76,7 +76,6 @@ data:
   injection-in-namespaces: |
     istio-system disabled
     kube-system disabled
-    knative-build disabled
 
   delete: |
     deployment prometheus
@@ -101,6 +100,7 @@ data:
     service jaeger-agent
     service jaeger-collector
     pod -lapp=istio-ingressgateway
+    pod -lapp=policy
 
   required-crds: |
     policies.authentication.istio.io

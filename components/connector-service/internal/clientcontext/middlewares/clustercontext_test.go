@@ -18,7 +18,7 @@ const (
 
 func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
-	t.Run("should set empty ctx when no headers specified and ctx not required", func(t *testing.T) {
+	t.Run("should set empty ctx when no headers specified and cluster ctx not enabled", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -35,7 +35,9 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewClusterContextMiddleware(clientcontext.CtxNotRequired)
+		clusterContextStrategy := clientcontext.NewClusterContextStrategy(false)
+
+		middleware := NewClusterContextMiddleware(clusterContextStrategy)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -45,7 +47,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should use header values", func(t *testing.T) {
+	t.Run("should use header values when cluster ctx enabled", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -64,7 +66,9 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewClusterContextMiddleware(clientcontext.CtxNotRequired)
+		clusterContextStrategy := clientcontext.NewClusterContextStrategy(true)
+
+		middleware := NewClusterContextMiddleware(clusterContextStrategy)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -74,7 +78,7 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should return 400 if no header provided and context is required", func(t *testing.T) {
+	t.Run("should return 400 if no header provided and cluster context is enabled", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
@@ -85,7 +89,9 @@ func TestClusterContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewClusterContextMiddleware(clientcontext.CtxRequired)
+		clusterContextStrategy := clientcontext.NewClusterContextStrategy(true)
+
+		middleware := NewClusterContextMiddleware(clusterContextStrategy)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
