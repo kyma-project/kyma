@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/pr/{{ .Values.image.name }}:{{ .Values.image.tag }}"
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.add_ons_ui.dir }}{{ .Values.image.name }}:{{ .Values.global.add_ons_ui.version }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
           - containerPort: {{ .Values.service.internalPort }}
@@ -31,13 +31,13 @@ spec:
       volumes:
       - name: config
         configMap:
-          name: {{ .Chart.Name }}-config
+          name: {{ .Chart.Name }}
           items:
           - key: config.js
             path: config.js
       - name: nginx
         configMap:
-          name: {{ .Chart.Name }}-nginx
+          name: {{ .Chart.Name }}
           items:
           - key: nginx.conf
             path: nginx.conf

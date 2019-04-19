@@ -2,7 +2,6 @@ name: add-ons
 replicaCount: 1
 image:
   name: add-ons-ui
-  tag: "PR-783"
   pullPolicy: IfNotPresent
 service:
   internalPort: 80
@@ -11,3 +10,4 @@ service:
 virtualservice:
   enabled: true
   annotations: {}
+resources: {}
