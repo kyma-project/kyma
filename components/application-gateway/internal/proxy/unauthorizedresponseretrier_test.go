@@ -140,7 +140,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		ts := NewTestServerForRetryTest(http.StatusForbidden, func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
-		})
+		}, false)
 		defer ts.Close()
 
 		authStrategyMock := &authMock.Strategy{}
@@ -175,7 +175,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		ts := NewTestServerForRetryTest(http.StatusUnauthorized, func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
-		})
+		}, false)
 		defer ts.Close()
 
 		authStrategyMock := &authMock.Strategy{}

@@ -1,7 +1,9 @@
 package proxy
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -323,15 +325,20 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 	})
 
-	testRetryOnAuthFailure := func(statusCode int, t *testing.T) {
+	testRetryOnAuthFailure := func(statusCode int, requestBody io.Reader, shouldRetryFail bool, t *testing.T) {
 		// given
 		tsf := NewTestServerForRetryTest(statusCode, func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
-		})
+		}, shouldRetryFail)
 		defer tsf.Close()
 
-		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		expectedStatusCode := http.StatusOK
+		if shouldRetryFail {
+			expectedStatusCode = statusCode
+		}
+
+		req, _ := http.NewRequest(http.MethodGet, "/orders/123", requestBody)
 		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
@@ -363,7 +370,7 @@ func TestProxy(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 
 		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, expectedStatusCode, rr.Code)
 		assert.Equal(t, "test", rr.Body.String())
 
 		serviceDefServiceMock.AssertExpectations(t)
@@ -374,11 +381,16 @@ func TestProxy(t *testing.T) {
 	}
 
 	t.Run("should invalidate proxy and retry when 401 occurred", func(t *testing.T) {
-		testRetryOnAuthFailure(http.StatusUnauthorized, t)
+		testRetryOnAuthFailure(http.StatusUnauthorized, nil, false, t)
 	})
 
 	t.Run("should invalidate proxy and retry when 403 occurred due to CRSF Token validation", func(t *testing.T) {
-		testRetryOnAuthFailure(http.StatusForbidden, t)
+		testRetryOnAuthFailure(http.StatusForbidden, nil, false,  t)
+	})
+
+	t.Run("should return 403 status when the call and the retry with body returned 403", func(t *testing.T) {
+		requestBody := bytes.NewBufferString("some body")
+		testRetryOnAuthFailure(http.StatusForbidden, requestBody, true, t)
 	})
 }
 
@@ -414,19 +426,19 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 	}))
 }
 
-func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httptest.Server {
-	firstCall := true
+func NewTestServerForRetryTest(status int, check func(req *http.Request), shouldRetryFail bool) *httptest.Server {
+	willFail := true
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		check(r)
-		if firstCall {
+		if willFail {
 			w.WriteHeader(status)
-			firstCall = false
+			willFail = shouldRetryFail
 		} else {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("test"))
 		}
+		w.Write([]byte("test"))
 	}))
 }
 
