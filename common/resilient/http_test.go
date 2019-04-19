@@ -7,19 +7,26 @@ import (
 	"testing"
 	"time"
 
-	retry "github.com/avast/retry-go"
+	"github.com/avast/retry-go"
 	"github.com/stretchr/testify/assert"
 )
 
-type mockHttpClientFirstSuccess struct{}
+type mockHttpClient struct {
+	calls        int
+	successAfter int
+}
 
-func (mockHttpClientFirstSuccess) Do(req *http.Request) (*http.Response, error) {
-	return &http.Response{StatusCode: http.StatusTeapot}, nil
+func (c *mockHttpClient) Do(req *http.Request) (*http.Response, error) {
+	c.calls++
+	if c.calls == c.successAfter {
+		return &http.Response{StatusCode: http.StatusTeapot}, nil
+	}
+	return nil, errors.New("some connection error")
 }
 
 func TestHttpClientFirstSuccess(t *testing.T) {
 	// given
-	mock := &mockHttpClientFirstSuccess{}
+	mock := &mockHttpClient{successAfter: 1}
 	wrapped := resilient.WrapHttpClient(mock, retry.Delay(time.Millisecond), retry.Attempts(5))
 
 	// when
@@ -27,25 +34,13 @@ func TestHttpClientFirstSuccess(t *testing.T) {
 
 	// then
 	assert.Nil(t, err)
+	assert.Equal(t, 1, mock.calls)
 	assert.Equal(t, http.StatusTeapot, resp.StatusCode)
-}
-
-type mockHttpClientLateSuccess struct {
-	calls        int
-	successAfter int
-}
-
-func (c *mockHttpClientLateSuccess) Do(req *http.Request) (*http.Response, error) {
-	if c.calls == c.successAfter {
-		return &http.Response{StatusCode: http.StatusTeapot}, nil
-	}
-	c.calls++
-	return nil, errors.New("some connection error")
 }
 
 func TestHttpClientLateSuccess(t *testing.T) {
 	// given
-	mock := &mockHttpClientLateSuccess{successAfter: 3}
+	mock := &mockHttpClient{successAfter: 3}
 	wrapped := resilient.WrapHttpClient(mock, retry.Delay(time.Millisecond), retry.Attempts(5))
 
 	// when
@@ -57,18 +52,9 @@ func TestHttpClientLateSuccess(t *testing.T) {
 	assert.Equal(t, http.StatusTeapot, resp.StatusCode)
 }
 
-type mockHttpClientError struct {
-	calls int
-}
-
-func (c *mockHttpClientError) Do(req *http.Request) (*http.Response, error) {
-	c.calls++
-	return nil, errors.New("some connection error")
-}
-
 func TestHttpClientError(t *testing.T) {
 	// given
-	mock := &mockHttpClientError{}
+	mock := &mockHttpClient{successAfter: 10}
 	wrapped := resilient.WrapHttpClient(mock, retry.Delay(time.Millisecond), retry.Attempts(5))
 
 	// when
