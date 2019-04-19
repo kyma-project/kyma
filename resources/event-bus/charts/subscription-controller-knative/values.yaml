@@ -8,3 +8,5 @@ image:
 monitoring:
   grafana: enabled
   alerts: enabled
+service:
+  type: ClusterIP

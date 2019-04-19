@@ -270,6 +270,9 @@
 /tests/acceptance/ @mszostok @polskikiel @piotrmiskiewicz @aszecowka @PK85 @jasiu001 @adamwalach
 /tests/acceptance/dex @sjanota @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
+# Knative Serving Acceptance
+/tests/knative-serving/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
+
 # test-namespace-controller
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
 

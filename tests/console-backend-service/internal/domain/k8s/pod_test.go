@@ -6,18 +6,18 @@ import (
 	"testing"
 	"time"
 
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/retrier"
 
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
-
-	"k8s.io/apimachinery/pkg/api/errors"
-
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -139,11 +139,23 @@ func TestPod(t *testing.T) {
 	assert.Equal(t, podNamespace, podsRes.Pods[0].Namespace)
 
 	t.Log("Updating...")
-	podRes.Pod.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
-	update, err := stringifyJSON(podRes.Pod.JSON)
-	require.NoError(t, err)
 	var updateRes updatePodMutationResponse
-	err = c.Do(fixUpdatePodMutation(update), &updateRes)
+	err = retrier.Retry(func() error {
+		err = c.Do(fixPodQuery(), &podRes)
+		if err != nil {
+			return err
+		}
+		podRes.Pod.JSON["metadata"].(map[string]interface{})["labels"] = map[string]string{"foo": "bar"}
+		update, err := stringifyJSON(podRes.Pod.JSON)
+		if err != nil {
+			return err
+		}
+		err = c.Do(fixUpdatePodMutation(update), &updateRes)
+		if err != nil {
+			return err
+		}
+		return nil
+	}, retrier.UpdateRetries)
 	require.NoError(t, err)
 	assert.Equal(t, podName, updateRes.UpdatePod.Name)
 	assert.Equal(t, podNamespace, updateRes.UpdatePod.Namespace)
@@ -200,6 +212,35 @@ func fixPod(name, namespace string) *v1.Pod {
 				},
 			},
 		},
+	}
+}
+
+func podEvent(eventType string, pod pod) PodEvent {
+	return PodEvent{
+		Type: eventType,
+		Pod:  pod,
+	}
+}
+
+func readPodEvent(sub *graphql.Subscription) (PodEvent, error) {
+	type Response struct {
+		PodEvent PodEvent
+	}
+	var podEvent Response
+	err := sub.Next(&podEvent, tester.DefaultSubscriptionTimeout)
+
+	return podEvent.PodEvent, err
+}
+
+func checkPodEvent(expected PodEvent, sub *graphql.Subscription) error {
+	for {
+		event, err := readPodEvent(sub)
+		if err != nil {
+			return err
+		}
+		if expected.Type == event.Type && expected.Pod.Name == event.Pod.Name {
+			return nil
+		}
 	}
 }
 
@@ -316,33 +357,4 @@ func fixDeletePodMutation() *graphql.Request {
 	req.SetVar("namespace", podNamespace)
 
 	return req
-}
-
-func podEvent(eventType string, pod pod) PodEvent {
-	return PodEvent{
-		Type: eventType,
-		Pod:  pod,
-	}
-}
-
-func readPodEvent(sub *graphql.Subscription) (PodEvent, error) {
-	type Response struct {
-		PodEvent PodEvent
-	}
-	var podEvent Response
-	err := sub.Next(&podEvent, tester.DefaultSubscriptionTimeout)
-
-	return podEvent.PodEvent, err
-}
-
-func checkPodEvent(expected PodEvent, sub *graphql.Subscription) error {
-	for {
-		event, err := readPodEvent(sub)
-		if err != nil {
-			return err
-		}
-		if expected.Type == event.Type && expected.Pod.Name == event.Pod.Name {
-			return nil
-		}
-	}
 }

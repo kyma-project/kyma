@@ -3,14 +3,12 @@ package externalapi
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httperrors"
 	"github.com/stretchr/testify/assert"
@@ -34,13 +32,6 @@ const (
 )
 
 func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
-	subjectValues := certificates.CSRSubject{
-		Country:            country,
-		Organization:       organization,
-		OrganizationalUnit: organizationalUnit,
-		Locality:           locality,
-		Province:           province,
-	}
 
 	t.Run("should successfully get management info response for application", func(t *testing.T) {
 		//given
@@ -63,17 +54,14 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			},
 		}
 
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return *extApplicationCtx, nil
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
+			return dummyClientCertCtx{extApplicationCtx}, nil
 		}
-
-		commonName := extApplicationCtx.GetCommonName()
-		expectedSubject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName)
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL, subjectValues)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
 
 		rr := httptest.NewRecorder()
 
@@ -96,11 +84,11 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		assert.Equal(t, expectedMetadataURL, urls.MetadataURL)
 		assert.Equal(t, expectedEventsURL, urls.EventsURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
-		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
+		assert.Equal(t, expectedRevocationURL, urls.RevokeCertURL)
 		assert.Equal(t, appName, receivedContext[applicationKey])
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])
-		assert.Equal(t, expectedSubject, certificateInfo.Subject)
+		assert.Equal(t, strSubject, certificateInfo.Subject)
 		assert.Equal(t, expectedExtensions, certificateInfo.Extensions)
 		assert.Equal(t, expectedKeyAlgorithm, certificateInfo.KeyAlgorithm)
 	})
@@ -112,17 +100,14 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 			Group:  group,
 		}
 
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
-			return *clusterContext, nil
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
+			return dummyClientCertCtx{clusterContext}, nil
 		}
-
-		commonName := clusterContext.GetCommonName()
-		expectedSubject := fmt.Sprintf("OU=%s,O=%s,L=%s,ST=%s,C=%s,CN=%s", organizationalUnit, organization, locality, province, country, commonName)
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/runtimes/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL, subjectValues)
+		infoHandler := NewManagementInfoHandler(connectorClientExtractor, protectedBaseURL)
 
 		rr := httptest.NewRecorder()
 
@@ -142,25 +127,25 @@ func TestManagementInfoHandler_GetManagementInfo(t *testing.T) {
 		receivedContext := infoResponse.ClientIdentity.(map[string]interface{})
 		certificateInfo := infoResponse.CertificateInfo
 
-		assert.Equal(t, expectedRevocationURL, urls.RevocationCertURL)
+		assert.Equal(t, expectedRevocationURL, urls.RevokeCertURL)
 		assert.Equal(t, expectedRenewalsURL, urls.RenewCertURL)
 		assert.Equal(t, group, receivedContext[groupKey])
 		assert.Equal(t, tenant, receivedContext[tenantKey])
-		assert.Equal(t, expectedSubject, certificateInfo.Subject)
+		assert.Equal(t, strSubject, certificateInfo.Subject)
 		assert.Equal(t, expectedExtensions, certificateInfo.Extensions)
 		assert.Equal(t, expectedKeyAlgorithm, certificateInfo.KeyAlgorithm)
 	})
 
 	t.Run("should return 500 when failed to extract context", func(t *testing.T) {
 		//given
-		clientContextService := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+		clientContextService := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 
 		req, err := http.NewRequest(http.MethodGet, "/v1/applications/management/info", nil)
 		require.NoError(t, err)
 
-		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL, subjectValues)
+		infoHandler := NewManagementInfoHandler(clientContextService, protectedBaseURL)
 
 		rr := httptest.NewRecorder()
 

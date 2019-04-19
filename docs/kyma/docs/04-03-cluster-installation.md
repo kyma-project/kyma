@@ -37,8 +37,8 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
     ```
     gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.12.5" --machine-type "n1-standard-4" \
-    --addons HorizontalPodAutoscaling,HttpLoadBalancing,KubernetesDashboard
+    --cluster-version "1.12" --machine-type "n1-standard-4" \
+    --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
 3. Install Tiller on your GKE cluster. Run:
@@ -172,8 +172,20 @@ Follow these steps:
     cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__DOMAIN__/$DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
-5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
+    > **NOTE:** If you deploy Kyma with GKE version 1.12.6-gke.X and above, follow these steps to prepare the deployment file.
 
+    - Run this command if you use the xip.io default domain:
+
+    ```
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    ```
+
+    - Run this command if you use your own domain:
+    ```
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__DOMAIN__/$DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    ```
+
+5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
 
 ### Using your own image
 
@@ -201,6 +213,17 @@ Follow these steps:
     - Run this command if you use your own domain:
     ```
     (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    ```
+    > **NOTE:** If you deploy Kyma with GKE version 1.12.6-gke.X and above, follow these steps to prepare the deployment file.
+
+    - Run this command if you use the xip.io default domain:
+    ```
+    (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    ```
+
+    - Run this command if you use your own domain:
+    ```
+    (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ([YOUR_DOCKER_LOGIN]/kyma-installer:latest). Use the modified file to deploy Kyma on your GKE cluster.
@@ -339,7 +362,7 @@ Set the following environment variables:
     ```
     kubectl apply -f installation/resources/tiller.yaml
     kubectl apply -f installation/resources/azure-crb-for-healthz.yaml
-    
+
 ## DNS setup and TLS certificate generation (optional)
 
 >**NOTE:** Execute instructions from this section only if you want to use your own domain. Otherwise, proceed to **Prepare the installation configuration file** section.
@@ -477,6 +500,18 @@ Follow these steps:
     cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
+    > **NOTE:** If you deploy Kyma with Kubernetes version 1.14 and above, follow these steps to prepare the deployment file.
+
+    - Run this command if you use the xip.io default domain:
+    ```
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    ```
+
+    - Run this command if you use your own domain:
+    ```
+    cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    ```
+
 5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
 
 
@@ -506,6 +541,16 @@ Follow these steps:
     - Run this command if you use your own domain:
     ```
     (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    ```
+    > **NOTE:** If you deploy Kyma with Kubernetes version 1.14 and above, follow these steps to prepare the deployment file.
+    - Run this command if you use the xip.io default domain:
+    ```
+    (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+    ```
+
+    - Run this command if you use your own domain:
+    ```
+    (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
 5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ([YOUR_DOCKER_LOGIN]/kyma-installer:latest). Use the modified file to deploy Kyma on your GKE cluster.
@@ -580,11 +625,11 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
 
 ## Access Tiller (optional)
 
-If you need to use Helm, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home). 
+If you need to use Helm, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home).
 
 Additionally, you must add the `--tls` flag to every Helm command you run.
 
->**NOTE:** Read [this](#details-tls-in-tiller) document to learn more about TLS in Tiller.
+>**NOTE:** Read [this](/components/security/#details-tls-in-tiller) document to learn more about TLS in Tiller.
 
 Run these commands to save the client certificate, key, and CA to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home):
 

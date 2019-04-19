@@ -16,6 +16,17 @@ type API struct {
 	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
 }
 
+type AddonsConfiguration struct {
+	Name   string   `json:"name"`
+	Urls   []string `json:"urls"`
+	Labels Labels   `json:"labels"`
+}
+
+type AddonsConfigurationEvent struct {
+	Type                SubscriptionEventType `json:"type"`
+	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+}
+
 type ApiService struct {
 	Name string `json:"name"`
 	Port int    `json:"port"`

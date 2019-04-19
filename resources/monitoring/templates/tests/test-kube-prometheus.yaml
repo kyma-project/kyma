@@ -34,24 +34,29 @@ subjects:
   name: test-{{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}
-  labels:
-    helm-chart-test: "true"
-  annotations:
-    sidecar.istio.io/inject: "false"
-    helm.sh/hook: test-success
 spec:
-  serviceAccount: test-{{ template "fullname" . }}
-  containers:
-  - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.test.image.dir }}{{ .Values.test.image.name }}:{{ .Values.test.image.version }}
-    imagePullPolicy: IfNotPresent
-    resources:
-      limits:
-        memory: 200Mi
-      requests:
-        memory: 96Mi
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      shareProcessNamespace: true
+      serviceAccount: test-{{ template "fullname" . }}
+      containers:
+      - name: test-{{ template "fullname" . }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.test.image.dir }}{{ .Values.test.image.name }}:{{ .Values.test.image.version }}
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 10; /test-monitoring; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        resources:
+          limits:
+            memory: 200Mi
+          requests:
+            memory: 96Mi
+      restartPolicy: Never
+{{- end }}

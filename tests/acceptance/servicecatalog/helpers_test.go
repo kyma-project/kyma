@@ -8,6 +8,7 @@ import (
 
 	catalog "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
@@ -15,6 +16,7 @@ import (
 	"github.com/stretchr/testify/require"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
@@ -123,4 +125,56 @@ func fixNamespace(name string) *corev1.Namespace {
 			Name: name,
 		},
 	}
+}
+
+func testDetailsReport(t *testing.T, services []osb.Service, ns string) {
+	t.Log("##### Start test report #####")
+
+	cs, err := clientset.NewForConfig(kubeConfig(t))
+	if err != nil {
+		t.Errorf("Cannot get client during creating a report: %s", err)
+	}
+
+	scs, err := cs.ServicecatalogV1beta1().ServiceClasses(ns).List(v1.ListOptions{})
+	if err != nil {
+		t.Errorf("Cannot fetch ClusterServiceClasses list during creating a report: %s", err)
+	}
+
+	scCnt, err := scClient.NewForConfig(kubeConfig(t))
+	if err != nil {
+		t.Errorf("Cannot get ServiceCatalog client during creating a report: %s", err)
+	}
+
+	t.Logf("Available Classes from Service broker (amount: %d)", len(services))
+	for _, service := range services {
+		t.Logf(" - ServiceId: %q - Service name: %q \n", service.ID, service.Name)
+	}
+
+	t.Logf("Status of ClusterServiceClasses (amount: %d)", len(scs.Items))
+	for _, sc := range scs.Items {
+		t.Logf(" - Name: %q (ExternalName: %s, ExternalId: %q) \n",
+			sc.Name,
+			sc.GetExternalName(),
+			sc.Spec.ExternalID)
+		t.Logf("   Is removed from catalog: %t", sc.Status.CommonServiceClassStatus.RemovedFromBrokerCatalog)
+	}
+
+	sbs, err := scCnt.ServicecatalogV1beta1().ServiceBrokers(ns).List(metav1.ListOptions{})
+	if err != nil {
+		t.Errorf("Cannot fetch ServiceBrokers list during creating a report: %s", err)
+	}
+
+	t.Logf("Status Conditions of ServiceBrokers (amount: %d)", len(sbs.Items))
+	for _, sb := range sbs.Items {
+		t.Logf(" - ServiceBroker %q:", sb.Name)
+		for _, cond := range sb.Status.Conditions {
+			t.Logf("   StatusType: %s", cond.Type)
+			t.Logf("   Status: %s", cond.Status)
+			t.Logf("   StatusReason: %s", cond.Reason)
+			t.Logf("   StatusMessage: %s", cond.Message)
+			t.Log("    ---")
+		}
+	}
+
+	t.Log("#####  End test report  #####")
 }

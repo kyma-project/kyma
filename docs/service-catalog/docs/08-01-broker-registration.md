@@ -7,7 +7,7 @@ This tutorial shows you how to register a broker in the Service Catalog. The bro
 
 ## Prerequisites
 
-* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl)
+* [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl)
 * [helm](https://github.com/helm/helm#install)
 
 ## Steps

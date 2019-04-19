@@ -23,7 +23,6 @@ type Config struct {
 	ManagementInfoURL           string
 	ConnectorServiceBaseURL     string
 	CertificateProtectedBaseURL string
-	Subject                     certificates.CSRSubject
 	CertService                 certificates.Service
 	RevokedCertsRepo            revocation.RevocationListRepository
 }
@@ -73,10 +72,10 @@ func NewHandlerBuilder(funcMiddlwares FunctionalMiddlewares, globalMiddlewares [
 }
 
 func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
-	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenCreator, appHandlerCfg.ContextExtractor, appHandlerCfg.ManagementInfoURL, appHandlerCfg.Subject, appHandlerCfg.ConnectorServiceBaseURL)
+	applicationInfoHandler := NewCSRInfoHandler(appHandlerCfg.TokenCreator, appHandlerCfg.ContextExtractor, appHandlerCfg.ManagementInfoURL, appHandlerCfg.ConnectorServiceBaseURL)
 	applicationRenewalHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
 	applicationSignatureHandler := NewSignatureHandler(appHandlerCfg.CertService, appHandlerCfg.ContextExtractor)
-	applicationManagementInfoHandler := NewManagementInfoHandler(appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateProtectedBaseURL, appHandlerCfg.Subject)
+	applicationManagementInfoHandler := NewManagementInfoHandler(appHandlerCfg.ContextExtractor, appHandlerCfg.CertificateProtectedBaseURL)
 	applicationRevocationHandler := NewRevocationHandler(appHandlerCfg.RevokedCertsRepo)
 
 	csrApplicationRouter := hb.router.PathPrefix("/v1/applications/signingRequests").Subrouter()
@@ -120,10 +119,10 @@ func (hb *handlerBuilder) WithApps(appHandlerCfg Config) {
 }
 
 func (hb *handlerBuilder) WithRuntimes(runtimeHandlerCfg Config) {
-	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenCreator, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.Subject, runtimeHandlerCfg.ConnectorServiceBaseURL)
+	runtimeInfoHandler := NewCSRInfoHandler(runtimeHandlerCfg.TokenCreator, runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.ManagementInfoURL, runtimeHandlerCfg.ConnectorServiceBaseURL)
 	runtimeRenewalHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
 	runtimeSignatureHandler := NewSignatureHandler(runtimeHandlerCfg.CertService, runtimeHandlerCfg.ContextExtractor)
-	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL, runtimeHandlerCfg.Subject)
+	runtimeManagementInfoHandler := NewManagementInfoHandler(runtimeHandlerCfg.ContextExtractor, runtimeHandlerCfg.CertificateProtectedBaseURL)
 	runtimeRevocationHandler := NewRevocationHandler(runtimeHandlerCfg.RevokedCertsRepo)
 
 	csrRuntimesRouter := hb.router.PathPrefix("/v1/runtimes/signingRequests").Subrouter()

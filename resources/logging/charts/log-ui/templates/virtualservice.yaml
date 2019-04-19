@@ -1,6 +1,5 @@
 {{- $serviceName := include "fullname" . -}}
 {{- $servicePort := .Values.service.externalPort -}}
-{{- if .Values.global.uiapp.create }}
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -24,4 +23,3 @@ spec:
         port:
           number: {{ .Values.service.externalPort }}
         host: {{ $serviceName }}
-{{- end }}
