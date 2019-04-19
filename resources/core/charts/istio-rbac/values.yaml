@@ -6,4 +6,3 @@ global:
       inclusion:
         services:
         - logging.kyma-system.svc.cluster.local
-        - helm-broker.kyma-system.svc.cluster.local

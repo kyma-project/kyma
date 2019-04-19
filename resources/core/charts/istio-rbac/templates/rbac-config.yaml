@@ -6,5 +6,4 @@ metadata:
 spec:
   mode: {{ .Values.global.cluster.rbac.mode }}
   inclusion:
-    services:
-{{ toYaml .Values.global.cluster.rbac.inclusion.services | indent 4 }}
+    services: {{ .Values.global.cluster.rbac.inclusion.services }}
