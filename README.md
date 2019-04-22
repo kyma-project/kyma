@@ -80,3 +80,6 @@ The repository has the following structure:
 
 ## License
 [![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Fkyma-project%2Fkyma?ref=badge_large)
+
+## TESTING for #https://github.com/kyma-project/test-infra/issues/494
+This is a test, to see if 494 is still valid.
