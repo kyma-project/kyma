@@ -26,7 +26,7 @@ config:
         bundle: ~
 
 global:
-  cfgReposUrlName: helm-repos-urls
+  cfgReposUrlName: "helm-repos-urls"
   isDevelopMode: "false"
   containerRegistry:
     path: eu.gcr.io/kyma-project
