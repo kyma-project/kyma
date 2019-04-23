@@ -2,12 +2,13 @@
 title: Architecture
 ---
 
-See the diagram overview of the Event flow configuration and Event cons
 
+## Eventing configuration and consumption
+
+
+### Configuration 
 ![Configure and Consume Events](./assets/configure-consume-events.svg)
 
-
-## Eventing configuration 
 
 1. A user configures a lambda or a serverless application to be triggered by an Event from an external solution. 
 >**NOTE**: For a serverless application the user must create a Kyma Subscription resource manually. For a lambda, the it is created automatically.
