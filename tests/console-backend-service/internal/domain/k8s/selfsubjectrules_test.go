@@ -47,7 +47,7 @@ func TestSelfSubjectRules(t *testing.T) {
 
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
-		auth.CreateSelfSubjectRulesReview: {fixSelfSubjectRulesQuery()},
+		auth.CreateSelfSubjectRulesReview: {fixSelfSubjectRulesQuery(), fixNamespacedSelfSubjectRulesQuery("foo")},
 	}
 	AuthSuite.Run(t, ops)
 }
