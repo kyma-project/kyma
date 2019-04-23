@@ -44,7 +44,7 @@ global:
     version: e1af648f
   application_gateway:
     dir: develop/
-    version: 78b98274
+    version: 0f47c038
   application_gateway_tests:
     dir: develop/
     version: 4b28ce69
