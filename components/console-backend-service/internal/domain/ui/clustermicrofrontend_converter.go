@@ -15,7 +15,6 @@ func (c *clusterMicrofrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFronte
 
 	mf := gqlschema.ClusterMicrofrontend{
 		Name:            in.Name,
-		Namespace:       in.ObjectMeta.Namespace,
 		Placement:       in.Spec.Placement,
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
 		Category:        in.Spec.CommonMicroFrontendSpec.Category,

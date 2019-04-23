@@ -18,8 +18,8 @@ func NewMicrofrontendService(informer cache.SharedIndexInformer) *microfrontendS
 	return newMicrofrontendService(informer)
 }
 
-func NewMicrofrontendResolver(microfrontendLister microfrontendLister) *microfrontendResolver {
-	return newMicrofrontendResolver(microfrontendLister)
+func NewMicrofrontendResolver(microfrontendSvc microfrontendSvc) *microfrontendResolver {
+	return newMicrofrontendResolver(microfrontendSvc)
 }
 
 func (r *microfrontendResolver) SetMicrofrontendConverter(converter gqlMicrofrontendConverter) {

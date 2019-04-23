@@ -496,6 +496,14 @@ func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *in
 	return r.k8s.SecretsQuery(ctx, namespace, first, offset)
 }
 
+func (r *queryResolver) Microfrontends(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Microfrontend, error) {
+	return r.ui.MicrofrontendsQuery(ctx, namespace, first, offset)
+}
+
+func (r *queryResolver) ClusterMicrofrontends(ctx context.Context, first *int, offset *int) ([]gqlschema.ClusterMicrofrontend, error) {
+	return r.ui.ClusterMicrofrontendsQuery(ctx)
+}
+
 // Subscriptions
 
 type subscriptionResolver struct {

@@ -876,11 +876,8 @@ type Query {
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 
-    microfrontend(name: String!, namespace: String!): Microfrontend @HasAccess(attributes: {resource: "microfrontends", verb: "get", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     microfrontends(namespace: String!, first: Int, offset: Int): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-
-    clusterMicrofrontend(name: String!, namespace: String!): ClusterMicrofrontend @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "get", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-    clusterMicrofrontends(namespace: String!, first: Int, offset: Int): [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    clusterMicrofrontends(first: Int, offset: Int): [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations
