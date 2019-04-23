@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "${ROOT_PATH}/utils.sh"
-source ${ROOT_PATH}/testing-common.sh
+
 #copied from  testing-common.sh: in testing-common.sh we use Octopus, here helm test. TODO later: rewrite e2e-testing to Octopus.
 
 function context_arg() {
@@ -22,6 +22,18 @@ function cleanupHelmTestPods() {
       return 1
     fi
     log "Success cleaning test pods.\n" nc bold
+}
+
+function getContainerFromPod() {
+    local namespace="$1"
+    local pod="$2"
+    local containers2ignore="istio-init istio-proxy manager"
+    containersInPod=$(kubectl get pods ${pod} -o jsonpath='{.spec.containers[*].name}' -n ${namespace})
+    for container in $containersInPod; do
+        if [[ ! ${containers2ignore[*]} =~ "${container}" ]]; then
+            echo "${container}"
+        fi
+    done
 }
 
 function printLogsFromPod() {
