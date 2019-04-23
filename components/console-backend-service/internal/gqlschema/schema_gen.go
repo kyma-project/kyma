@@ -390,6 +390,15 @@ type ComplexityRoot struct {
 		Name func(childComplexity int) int
 	}
 
+	Microfrontend struct {
+		Name            func(childComplexity int) int
+		Namespace       func(childComplexity int) int
+		Version         func(childComplexity int) int
+		Category        func(childComplexity int) int
+		ViewBaseUrl     func(childComplexity int) int
+		NavigationNodes func(childComplexity int) int
+	}
+
 	Mutation struct {
 		CreateResource                func(childComplexity int, namespace string, resource JSON) int
 		CreateServiceInstance         func(childComplexity int, namespace string, params ServiceInstanceCreateInput) int
@@ -425,6 +434,13 @@ type ComplexityRoot struct {
 	Namespace struct {
 		Name         func(childComplexity int) int
 		Applications func(childComplexity int) int
+	}
+
+	NavigationNode struct {
+		Label            func(childComplexity int) int
+		NavigationPath   func(childComplexity int) int
+		ViewUrl          func(childComplexity int) int
+		ShowInNavigation func(childComplexity int) int
 	}
 
 	Pod struct {
@@ -487,6 +503,8 @@ type ComplexityRoot struct {
 		Secrets               func(childComplexity int, namespace string, first *int, offset *int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
+		Microfrontend         func(childComplexity int, name string, namespace string) int
+		Microfrontends        func(childComplexity int, namespace string, first *int, offset *int) int
 	}
 
 	ReplicaSet struct {
@@ -872,6 +890,8 @@ type QueryResolver interface {
 	Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]Secret, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
+	Microfrontend(ctx context.Context, name string, namespace string) (*Microfrontend, error)
+	Microfrontends(ctx context.Context, namespace string, first *int, offset *int) ([]Microfrontend, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -3126,6 +3146,73 @@ func field_Query_IDPPresets_args(rawArgs map[string]interface{}) (map[string]int
 
 }
 
+func field_Query_Microfrontend_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Query_Microfrontends_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 *int
+	if tmp, ok := rawArgs["first"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["first"] = arg1
+	var arg2 *int
+	if tmp, ok := rawArgs["offset"]; ok {
+		var err error
+		var ptr1 int
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalInt(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["offset"] = arg2
+	return args, nil
+
+}
+
 func field_Query___type_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -4638,6 +4725,48 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LocalObjectReference.Name(childComplexity), true
 
+	case "Microfrontend.name":
+		if e.complexity.Microfrontend.Name == nil {
+			break
+		}
+
+		return e.complexity.Microfrontend.Name(childComplexity), true
+
+	case "Microfrontend.namespace":
+		if e.complexity.Microfrontend.Namespace == nil {
+			break
+		}
+
+		return e.complexity.Microfrontend.Namespace(childComplexity), true
+
+	case "Microfrontend.version":
+		if e.complexity.Microfrontend.Version == nil {
+			break
+		}
+
+		return e.complexity.Microfrontend.Version(childComplexity), true
+
+	case "Microfrontend.category":
+		if e.complexity.Microfrontend.Category == nil {
+			break
+		}
+
+		return e.complexity.Microfrontend.Category(childComplexity), true
+
+	case "Microfrontend.viewBaseUrl":
+		if e.complexity.Microfrontend.ViewBaseUrl == nil {
+			break
+		}
+
+		return e.complexity.Microfrontend.ViewBaseUrl(childComplexity), true
+
+	case "Microfrontend.navigationNodes":
+		if e.complexity.Microfrontend.NavigationNodes == nil {
+			break
+		}
+
+		return e.complexity.Microfrontend.NavigationNodes(childComplexity), true
+
 	case "Mutation.createResource":
 		if e.complexity.Mutation.CreateResource == nil {
 			break
@@ -4999,6 +5128,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Applications(childComplexity), true
+
+	case "NavigationNode.label":
+		if e.complexity.NavigationNode.Label == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.Label(childComplexity), true
+
+	case "NavigationNode.navigationPath":
+		if e.complexity.NavigationNode.NavigationPath == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.NavigationPath(childComplexity), true
+
+	case "NavigationNode.viewUrl":
+		if e.complexity.NavigationNode.ViewUrl == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.ViewUrl(childComplexity), true
+
+	case "NavigationNode.showInNavigation":
+		if e.complexity.NavigationNode.ShowInNavigation == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.ShowInNavigation(childComplexity), true
 
 	case "Pod.name":
 		if e.complexity.Pod.Name == nil {
@@ -5575,6 +5732,30 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Query.Idppresets(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+
+	case "Query.Microfrontend":
+		if e.complexity.Query.Microfrontend == nil {
+			break
+		}
+
+		args, err := field_Query_Microfrontend_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Microfrontend(childComplexity, args["name"].(string), args["namespace"].(string)), true
+
+	case "Query.Microfrontends":
+		if e.complexity.Query.Microfrontends == nil {
+			break
+		}
+
+		args, err := field_Query_Microfrontends_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Microfrontends(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
 	case "ReplicaSet.name":
 		if e.complexity.ReplicaSet.Name == nil {
@@ -14592,6 +14773,256 @@ func (ec *executionContext) _LocalObjectReference_name(ctx context.Context, fiel
 	return graphql.MarshalString(res)
 }
 
+var microfrontendImplementors = []string{"Microfrontend"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _Microfrontend(ctx context.Context, sel ast.SelectionSet, obj *Microfrontend) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, microfrontendImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("Microfrontend")
+		case "name":
+			out.Values[i] = ec._Microfrontend_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "namespace":
+			out.Values[i] = ec._Microfrontend_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "version":
+			out.Values[i] = ec._Microfrontend_version(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "category":
+			out.Values[i] = ec._Microfrontend_category(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "viewBaseUrl":
+			out.Values[i] = ec._Microfrontend_viewBaseUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "navigationNodes":
+			out.Values[i] = ec._Microfrontend_navigationNodes(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Microfrontend_name(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Microfrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Microfrontend_namespace(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Microfrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Microfrontend_version(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Microfrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Version, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Microfrontend_category(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Microfrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Category, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Microfrontend_viewBaseUrl(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Microfrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViewBaseURL, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Microfrontend_navigationNodes(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Microfrontend",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NavigationNodes, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]NavigationNode)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._NavigationNode(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
 var mutationImplementors = []string{"Mutation"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -15796,6 +16227,159 @@ func (ec *executionContext) _Namespace_applications(ctx context.Context, field g
 	return arr1
 }
 
+var navigationNodeImplementors = []string{"NavigationNode"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _NavigationNode(ctx context.Context, sel ast.SelectionSet, obj *NavigationNode) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, navigationNodeImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NavigationNode")
+		case "label":
+			out.Values[i] = ec._NavigationNode_label(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "navigationPath":
+			out.Values[i] = ec._NavigationNode_navigationPath(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "viewUrl":
+			out.Values[i] = ec._NavigationNode_viewUrl(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "showInNavigation":
+			out.Values[i] = ec._NavigationNode_showInNavigation(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NavigationNode_label(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NavigationNode",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Label, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NavigationNode_navigationPath(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NavigationNode",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.NavigationPath, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NavigationNode_viewUrl(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NavigationNode",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ViewURL, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NavigationNode_showInNavigation(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NavigationNode",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ShowInNavigation, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
+}
+
 var podImplementors = []string{"Pod"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -16576,6 +17160,21 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_IDPPresets(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
+		case "Microfrontend":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_Microfrontend(ctx, field)
+				wg.Done()
+			}(i, field)
+		case "Microfrontends":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_Microfrontends(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -18816,6 +19415,107 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._IDPPreset(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_Microfrontend(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_Microfrontend_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Microfrontend(rctx, args["name"].(string), args["namespace"].(string))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*Microfrontend)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._Microfrontend(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Query_Microfrontends(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_Microfrontends_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().Microfrontends(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]Microfrontend)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._Microfrontend(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -28047,6 +28747,23 @@ type ConfigMapEvent {
     configMap: ConfigMap!
 }
 
+# MF
+type NavigationNode {
+    label: String!
+	navigationPath: String!
+	viewUrl: String!
+	showInNavigation: Boolean!
+}
+
+type Microfrontend {
+	name: String!
+    namespace: String!
+	version: String!
+    category: String!
+    viewBaseUrl: String!
+    navigationNodes: [NavigationNode!]!
+}
+
 # Queries
 
 type Query {
@@ -28113,6 +28830,9 @@ type Query {
 
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+
+    Microfrontend(name: String!, namespace: String!): Microfrontend @HasAccess(attributes: {resource: "microfrontends", verb: "get", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    Microfrontends(namespace: String!, first: Int, offset: Int): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations

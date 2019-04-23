@@ -782,6 +782,23 @@ type ConfigMapEvent {
     configMap: ConfigMap!
 }
 
+# MF
+type NavigationNode {
+    label: String!
+	navigationPath: String!
+	viewUrl: String!
+	showInNavigation: Boolean!
+}
+
+type Microfrontend {
+	name: String!
+    namespace: String!
+	version: String!
+    category: String!
+    viewBaseUrl: String!
+    navigationNodes: [NavigationNode!]!
+}
+
 # Queries
 
 type Query {
@@ -848,6 +865,9 @@ type Query {
 
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+
+    Microfrontend(name: String!, namespace: String!): Microfrontend @HasAccess(attributes: {resource: "microfrontends", verb: "get", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    Microfrontends(namespace: String!, first: Int, offset: Int): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations

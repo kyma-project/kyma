@@ -291,6 +291,22 @@ type LocalObjectReferenceInput struct {
 	Name string `json:"name"`
 }
 
+type Microfrontend struct {
+	Name            string           `json:"name"`
+	Namespace       string           `json:"namespace"`
+	Version         string           `json:"version"`
+	Category        string           `json:"category"`
+	ViewBaseURL     string           `json:"viewBaseUrl"`
+	NavigationNodes []NavigationNode `json:"navigationNodes"`
+}
+
+type NavigationNode struct {
+	Label            string `json:"label"`
+	NavigationPath   string `json:"navigationPath"`
+	ViewURL          string `json:"viewUrl"`
+	ShowInNavigation bool   `json:"showInNavigation"`
+}
+
 type Pod struct {
 	Name              string           `json:"name"`
 	NodeName          string           `json:"nodeName"`
