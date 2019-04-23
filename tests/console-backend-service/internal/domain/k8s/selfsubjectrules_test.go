@@ -33,7 +33,7 @@ func TestSelfSubjectRules(t *testing.T) {
 	c, err := graphql.New()
 	require.NoError(t, err)
 
-	t.Log("Querying for SelfSubjctRules...")
+	t.Log("Querying for SelfSubjectRules...")
 
 	var selfSubjectRulesRes selfSubjectRulesQueryResponse
 
