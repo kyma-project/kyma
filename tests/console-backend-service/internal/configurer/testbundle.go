@@ -1,9 +1,10 @@
 package configurer
 
 import (
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	tester "github.com/kyma-project/kyma/tests/console-backend-service"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
+
+	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apiErrors "k8s.io/apimachinery/pkg/api/errors"
@@ -20,7 +21,7 @@ type TestBundleConfig struct {
 }
 
 type TestBundleConfigMap struct {
-	Name          string `envconfig:"default=helm-broker"`
+	Name          string `envconfig:"default=test-cbs"`
 	Namespace     string `envconfig:"default=kyma-system"`
 	RepositoryURL string `envconfig:"default=https://github.com/kyma-project/bundles/releases/download/0.3.0/index-testing.yaml"`
 	LabelKey      string `envconfig:"default=helm-broker-repo"`
@@ -71,6 +72,36 @@ func (c *TestBundleConfigurer) Cleanup() error {
 	err := c.coreCli.ConfigMaps(cfgMap.Namespace).Delete(cfgMap.Name, &metav1.DeleteOptions{})
 	if err != nil && !apiErrors.IsNotFound(err) {
 		return err
+	}
+
+	err = c.waitForClusterServiceClassDeleted()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *TestBundleConfigurer) waitForClusterServiceClassDeleted() error {
+	err := waiter.WaitAtMost(func() (bool, error) {
+		classesList, err := c.svcatCli.ServicecatalogV1beta1().ClusterServiceClasses().List(metav1.ListOptions{})
+		if apiErrors.IsNotFound(err) {
+			return true, nil
+		}
+		if err != nil {
+			return false, err
+		}
+
+		for _, class := range classesList.Items {
+			if class.GetExternalName() == c.cfg.ClusterServiceClassExternalName {
+				return false, nil
+			}
+		}
+
+		return true, nil
+	}, tester.DefaultDeletionTimeout)
+	if err != nil {
+		return errors.Wrapf(err, "while waiting for deletion of ClusterServiceClass with externalName %s", c.cfg.ClusterServiceClassExternalName)
 	}
 
 	return nil

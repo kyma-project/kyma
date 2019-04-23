@@ -9,6 +9,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
@@ -28,6 +30,18 @@ const (
 	dummyCtxValue = "dummyValue"
 )
 
+type dummyClientCertsContext struct {
+	clientcontext.ClientContextService
+}
+
+func (ctx dummyClientCertsContext) GetSubject() certificates.CSRSubject {
+	return certificates.CSRSubject{}
+}
+
+func (ctx dummyClientCertsContext) ClientContext() clientcontext.ClientContextService {
+	return ctx.ClientContextService
+}
+
 func TestTokenHandler_CreateToken(t *testing.T) {
 
 	clusterContext := clientcontext.ClusterContext{
@@ -35,14 +49,18 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 		Group:  group,
 	}
 
+	clusterClientContext := dummyClientCertsContext{clusterContext}
+
 	applicationContext := clientcontext.ApplicationContext{
 		ClusterContext: clusterContext,
 		Application:    appName,
 	}
 
-	connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+	applicationClientContext := dummyClientCertsContext{applicationContext}
+
+	connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 		assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
-		return applicationContext, nil
+		return applicationClientContext, nil
 	}
 
 	ctx := context.WithValue(context.Background(), dummyCtxKey, dummyCtxValue)
@@ -83,9 +101,9 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should create token for cluster context", func(t *testing.T) {
 		// given
-		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+		connectorClientExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 			assert.Equal(t, dummyCtxValue, ctx.Value(dummyCtxKey))
-			return clusterContext, nil
+			return clusterClientContext, nil
 		}
 
 		csrURL := "domain.local/v1/application/csr/info"
@@ -122,7 +140,7 @@ func TestTokenHandler_CreateToken(t *testing.T) {
 
 	t.Run("should return 500 when failed to parse context", func(t *testing.T) {
 		// given
-		errorExtractor := func(ctx context.Context) (clientcontext.ClientContextService, apperrors.AppError) {
+		errorExtractor := func(ctx context.Context) (clientcontext.ClientCertContextService, apperrors.AppError) {
 			return nil, apperrors.Internal("error")
 		}
 

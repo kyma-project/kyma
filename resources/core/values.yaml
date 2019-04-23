@@ -33,8 +33,8 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
-    dir: pr/
-    version: PR-3702
+    dir: develop/
+    version: "de186978"
   api_controller:
     dir: develop/
     version: "1323f962"
@@ -66,16 +66,16 @@ global:
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: 311ed23b
+    version: 5c4376db
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: 'e3d783bb'
+    version: 'e03e4b24'
   console_backend_service_test:
     dir: develop/
-    version: '9ecc0bcc'
+    version: '5ec3de0d'
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

@@ -28,27 +28,22 @@ const (
 	releaseNamespaceEnvName = "RELEASE_NAMESPACE"
 )
 
-func TestServiceCatalogContainsClusterServiceClasses(t *testing.T) {
+func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 	for testName, brokerURL := range map[string]string{
 		"Helm Broker": os.Getenv(helmBrokerURLEnvName),
 		// "<next broker>": os.Getenv("<broker url env name>"),
 	} {
 		t.Run(testName, func(t *testing.T) {
-			// given
-			var brokerServices []v2.Service
 			repeat.FuncAtMost(t, func() error {
-				brokerServices, err := getCatalogForBroker(brokerURL)
+				isForbidden, err := isCatalogForbidden(brokerURL)
 				if err != nil {
 					return errors.Wrap(err, "while getting catalog")
 				}
-				if len(brokerServices) < 1 {
-					return fmt.Errorf("%s catalog response should contains not empty list of the services", brokerURL)
+				if !isForbidden {
+					return fmt.Errorf("%s catalog response must be forbidden", testName)
 				}
 				return nil
 			}, 5*time.Second)
-
-			// test is run against existing service classes (before the test) - no need to wait too much.
-			awaitCatalogContainsClusterServiceClasses(t, 2*time.Second, brokerServices)
 		})
 	}
 }

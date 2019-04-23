@@ -7,14 +7,13 @@ import (
 	"testing"
 	"time"
 
+	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
-
-	gateway "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2"
-
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/client"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
-	"github.com/kyma-project/kyma/tests/console-backend-service/internal/waiter"
+	"github.com/kyma-project/kyma/tests/console-backend-service/pkg/waiter"
+
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	v1 "k8s.io/api/core/v1"
