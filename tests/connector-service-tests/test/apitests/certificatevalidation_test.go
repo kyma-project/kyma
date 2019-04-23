@@ -30,7 +30,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should access application", func(t *testing.T) {
 		// given
-		tokenRequest := createApplicationTokenRequest(t, config, testApp.Name)
+		tokenRequest := createApplicationTokenRequest(t, config, testApp.Name, config.Central)
 		connectorClient := testkit.NewConnectorClient(tokenRequest, config.SkipSslVerify)
 		tlsClient := createTLSClientWithCert(t, connectorClient, config.SkipSslVerify)
 
@@ -44,7 +44,7 @@ func TestCertificateValidation(t *testing.T) {
 
 	t.Run("should receive 403 when accessing Application with invalid CN", func(t *testing.T) {
 		// given
-		tokenRequest := createApplicationTokenRequest(t, config, "another-application")
+		tokenRequest := createApplicationTokenRequest(t, config, "another-application", config.Central)
 		connectorClient := testkit.NewConnectorClient(tokenRequest, config.SkipSslVerify)
 		tlsClient := createTLSClientWithCert(t, connectorClient, config.SkipSslVerify)
 

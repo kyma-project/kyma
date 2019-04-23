@@ -3,103 +3,82 @@ ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 
 source ${ROOT_PATH}/testing-common.sh
 
-echo "-------------------------------"
-echo "- Ensure test Pods are deleted "
-echo "-------------------------------"
-
-if [ -n "$KUBE_CONTEXT" ]; then
-    echo "Using context: $KUBE_CONTEXT"
-    KUBE_CONTEXT_ARG="--kube-context $KUBE_CONTEXT"
-fi
-
-cleanupHelmTestPods kyma-system
-cleanupCoreErr=$?
-
-cleanupHelmTestPods istio-system
-cleanupIstioErr=$?
-
-cleanupHelmTestPods knative-serving
-cleanupKnativeServingErr=$?
-
-cleanupHelmTestPods kyma-integration
-cleanupGatewayErr=$?
-
-if [ ${cleanupGatewayErr} -ne 0 ] || [ ${cleanupIstioErr} -ne 0 ] || [ ${cleanupCoreErr} -ne 0 ] || [ ${cleanupKnativeServingErr} -ne 0 ]
-then
-    exit 1
-fi
-
-monitoringTestErr=0
-loggingTestErr=0
-eventBusTestErr=0
-
+suiteName="testsuite-all-$(date '+%Y-%m-%d-%H-%M')"
 echo "----------------------------"
 echo "- Testing Kyma..."
 echo "----------------------------"
 
-echo "- Testing Core components..."
-# timeout set to 10 minutes
-helm ${KUBE_CONTEXT_ARG} test core --timeout 600 --tls
-coreTestErr=$?
+kc="kubectl $(context_arg)"
 
-# execute assetstore tests if 'assetstore' is installed
-if helm ${KUBE_CONTEXT_ARG} list --tls | grep -q "assetstore"; then
-echo "- Testing Asset Store"
-helm ${KUBE_CONTEXT_ARG} test assetstore --timeout 600 --tls
-assetstoreTestErr=$?
+${kc} get clustertestsuites.testing.kyma-project.io > /dev/null 2>&1
+if [[ $? -eq 1 ]]
+then
+   echo "ERROR: script requires ClusterTestSuite CRD"
+   exit 1
 fi
 
-# execute monitoring tests if 'monitoring' is installed
-if helm ${KUBE_CONTEXT_ARG} list --tls | grep -q "monitoring"; then
-echo "- Montitoring module is installed. Running tests for same"
-helm ${KUBE_CONTEXT_ARG} test monitoring --timeout 600 --tls
-monitoringTestErr=$?
-fi
+cat <<EOF | ${kc} apply -f -
+apiVersion: testing.kyma-project.io/v1alpha1
+kind: ClusterTestSuite
+metadata:
+  labels:
+    controller-tools.k8s.io: "1.0"
+  name: ${suiteName}
+spec:
+  maxRetries: 1
+  concurrency: 1
+EOF
 
-# execute logging tests if 'logging' is installed
-if helm ${KUBE_CONTEXT_ARG} list --tls | grep -q "logging"; then
-echo "- Logging module is installed. Running tests for same"
-helm ${KUBE_CONTEXT_ARG} test logging --timeout 600 --tls
-loggingTestErr=$?
-fi
+startTime=$(date +%s)
 
-# run event-bus tests if Knative is installed
-if kubectl -n knative-eventing get deployments.apps | grep -q "webhook"; then
-    echo "- Testing Event-Bus..."
-    helm ${KUBE_CONTEXT_ARG} test event-bus --timeout 600 --tls
-    eventBusTestErr=$?
-fi
+testExitCode=0
 
-checkAndCleanupTest kyma-system
-testCheckCore=$?
+while true
+do
+    currTime=$(date +%s)
+    statusSucceeded=$(${kc} get cts ${suiteName}  -ojsonpath="{.status.conditions[?(@.type=='Succeeded')]}")
+    statusFailed=$(${kc} get cts ${suiteName}  -ojsonpath="{.status.conditions[?(@.type=='Failed')]}")
+    statusError=$(${kc} get cts  ${suiteName} -ojsonpath="{.status.conditions[?(@.type=='Error')]}" )
 
-echo "- Testing Istio components..."
-helm ${KUBE_CONTEXT_ARG} test istio --tls
-istioTestErr=$?
+    if [[ "${statusSucceeded}" == *"True"* ]]; then
+       echo "Test suite '${suiteName}' succeeded."
+       break
+    fi
 
-checkAndCleanupTest istio-system
-testCheckIstio=$?
+    if [[ "${statusFailed}" == *"True"* ]]; then
+        echo "Test suite '${suiteName}' failed."
+        testExitCode=1
+        break
+    fi
 
-echo "- Testing Knative serving components..."
-helm ${KUBE_CONTEXT_ARG} test knative-serving --tls
-knativeServingTestErr=$?
+    if [[ "${statusError}" == *"True"* ]]; then
+        echo "Test suite '${suiteName}' errored."
+        testExitCode=1
+        break
+    fi
+    sec=$((currTime-startTime))
+    min=$((sec/60))
+    if (( min > 60 )); then
+        echo "Timeout for test suite '${suiteName}' occurred."
+        testExitCode=1
+        break
+    fi
+    echo "ClusterTestSuite not finished. Waiting..."
+    sleep 60
+done
 
-checkAndCleanupTest knative-serving
-knativeServingTestErr=$?
+echo "Test summary"
+kubectl get cts  ${suiteName} -o=go-template --template='{{range .status.results}}{{printf "Test status: %s - %s" .name .status }}{{ if gt (len .executions) 1 }}{{ print " (Retried)" }}{{end}}{{print "\n"}}{{end}}'
 
-echo "- Testing Application Connector"
-helm ${KUBE_CONTEXT_ARG} test application-connector --timeout 600 --tls
-acTestErr=$?
+waitForTerminationAndPrintLogs ${suiteName}
+cleanupExitCode=$?
 
-checkAndCleanupTest kyma-integration
-testCheckGateway=$?
+echo "ClusterTestSuite details:"
+kubectl get cts ${suiteName} -oyaml
+
+kubectl delete cts ${suiteName}
 
 printImagesWithLatestTag
-latestTagsErr=$?
+latestTagExitCode=$?
 
-if [ ${latestTagsErr} -ne 0 ] || [ ${coreTestErr} -ne 0 ] || [ ${assetstoreTestErr} -ne 0 ]  || [ ${istioTestErr} -ne 0 ] || [ ${acTestErr} -ne 0 ] || [ ${loggingTestErr} -ne 0 ] || [ ${monitoringTestErr} -ne 0 ] || [ ${knativeServingTestErr} -ne 0 ] || [ ${eventBusTestErr} -ne 0 ]
-then
-    exit 1
-else
-    exit 0
-fi
+exit $(($testExitCode + $cleanupExitCode + $latestTagExitCode))

@@ -2,6 +2,7 @@ package servicecatalog_test
 
 import (
 	"fmt"
+	"net/http"
 	"strings"
 	"testing"
 	"time"
@@ -20,6 +21,32 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+func isCatalogForbidden(url string) (bool, error) {
+	config := osb.DefaultClientConfiguration()
+	config.URL = url
+
+	client, err := osb.NewClient(config)
+	if err != nil {
+		return false, errors.Wrapf(err, "while creating osb client for broker with URL: %s", url)
+	}
+	isForbiddenError := func(err error) bool {
+		statusCodeError, ok := err.(osb.HTTPStatusCodeError)
+		if !ok {
+			return false
+		}
+		return statusCodeError.StatusCode == http.StatusForbidden
+	}
+
+	_, err = client.GetCatalog()
+	switch {
+	case err == nil:
+		return false, nil
+	case isForbiddenError(err):
+		return true, nil
+	default:
+		return false, errors.Wrapf(err, "while getting catalog from broker with URL: %s", url)
+	}
+}
 func getCatalogForBroker(url string) ([]osb.Service, error) {
 	config := osb.DefaultClientConfiguration()
 	config.URL = url
@@ -34,31 +61,6 @@ func getCatalogForBroker(url string) ([]osb.Service, error) {
 	}
 
 	return response.Services, nil
-}
-
-// awaitCatalogContainsClusterServiceClasses asserts that service catalog contains all OSB services mapped to Cluster Service Class.
-func awaitCatalogContainsClusterServiceClasses(t *testing.T, timeout time.Duration, services []osb.Service) {
-	repeat.FuncAtMost(t, func() error {
-		serviceMap := make(map[string]osb.Service)
-		for _, service := range services {
-			serviceMap[service.ID] = service
-		}
-		// fetch service classes from service-catalog
-		clusterServiceClasses := getClusterServiceClasses(t).Items
-
-		// cluster service class name is equal to OSB service ID
-		for _, csc := range clusterServiceClasses {
-			if svc, ok := serviceMap[csc.Name]; ok {
-				assert.Equal(t, svc.Name, csc.Spec.ExternalName, fmt.Sprintf("ClusterServiceClass (ID: %s) must have the same name as OSB Service.", svc.ID))
-				delete(serviceMap, csc.Name)
-			}
-		}
-		if len(serviceMap) == 0 {
-			return nil
-		}
-
-		return fmt.Errorf("service catalog must contains ClusterServiceClasses for every broker service. Missing: %s", serviceNames(serviceMap))
-	}, timeout)
 }
 
 func awaitCatalogContainsServiceClasses(t *testing.T, namespace string, timeout time.Duration, services []osb.Service) {

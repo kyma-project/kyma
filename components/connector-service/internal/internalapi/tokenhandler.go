@@ -33,7 +33,7 @@ func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 	logger := clientContextService.GetLogger()
 
 	logger.Info("Generating token")
-	token, err := th.tokenManager.Save(clientContextService)
+	token, err := th.tokenManager.Save(clientContextService.ClientContext())
 	if err != nil {
 		logger.Error(err)
 		httphelpers.RespondWithError(w, err)
@@ -43,7 +43,7 @@ func (th *tokenHandler) CreateToken(w http.ResponseWriter, r *http.Request) {
 	url := fmt.Sprintf(TokenURLFormat, th.csrInfoURL, token)
 	res := tokenResponse{URL: url, Token: token}
 
-	httphelpers.RespondWithBody(w, 201, res)
+	httphelpers.RespondWithBody(w, http.StatusCreated, res)
 }
 
 type tokenResponse struct {
