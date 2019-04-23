@@ -24,7 +24,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 1. Get the existing Root CA key. Fetch it from the `connector-service-app-ca` Secret and save it to a `ca.key` file. Run:
   ```
-  kubectl -n kyma-integration get secret connector-service-app-ca -o=jsonpath='{.data.ca\.key}' | base64 -D > ca.key
+  kubectl -n kyma-integration get secret connector-service-app-ca -o=jsonpath='{.data.ca\.key}' | base64 --decode > ca.key
   ```
 
 2. Generate a new certificate for the key you obtained and save it to a `new-ca.crt` file. Run:
@@ -47,7 +47,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 5. Get the existing Nginx Ingress Secret. Fetch it from the `nginx-auth-ca` Secret and save it to a `old-ca.crt` file. Run:
   ```
-  kubectl -n kyma-integration get secret nginx-auth-ca -o=jsonpath='{.data.ca\.crt}' | base64 -D > old-ca.crt
+  kubectl -n kyma-integration get secret nginx-auth-ca -o=jsonpath='{.data.ca\.crt}' | base64 --decode > old-ca.crt
   ```
 
 6. Merge the old Nginx certificate and the newly generated certificate into a single `nginx-ca.crt` file:
@@ -83,7 +83,7 @@ To successfully rotate a soon-to-expire CA certificate, replace it with a new ce
 
 1. Get the existing Root CA key. Fetch it from the `connector-service-app-ca` Secret and save it to a `ca.key` file. Run:
   ```
-  kubectl -n kyma-integration get secret connector-service-app-ca -o=jsonpath='{.data.ca\.key}' | base64 -D > ca.key
+  kubectl -n kyma-integration get secret connector-service-app-ca -o=jsonpath='{.data.ca\.key}' | base64 --decode > ca.key
   ```
 
 2. Generate a new certificate for the key you obtained and save it to a `new-ca.crt` file. Run:
