@@ -28,7 +28,7 @@ const (
     applicationGatewayTestsImage: 
     eventServiceImage: 
     eventServiceTestsImage: 
-    subjectCN: %s`
+    ingressValidationRule: %s`
 )
 
 var (
@@ -61,7 +61,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, appName)
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "(.*(CN="+appName+"(,|]|$)).*)")
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)
@@ -78,7 +78,7 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 		helmClient.AssertExpectations(t)
 	})
 
-	t.Run("should install release with CN equal to app name", func(t *testing.T) {
+	t.Run("should install release with CN equal to app name, O equal to tenant and OU equal to group", func(t *testing.T) {
 		// given
 		installationResponse := &rls.InstallReleaseResponse{
 			Release: &hapi_release5.Release{
@@ -91,12 +91,17 @@ func TestReleaseManager_InstallNewAppChart(t *testing.T) {
 			},
 		}
 
+		const (
+			appTenant = "tenant"
+			appGroup  = "group"
+		)
+
 		appWithGroupAndTenant := &v1alpha1.Application{
 			ObjectMeta: v1.ObjectMeta{Name: appName},
-			Spec:       v1alpha1.ApplicationSpec{Tenant: "tenant", Group: "group"},
+			Spec:       v1alpha1.ApplicationSpec{Tenant: appTenant, Group: appGroup},
 		}
 
-		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "tenant\\\\\\;group\\\\\\;default-app")
+		expectedOverrides := fmt.Sprintf(expectedOverridesFormat, "(?=.*(,|^)OU="+appGroup+"(,|]|$))(?=.*(,|^)O="+appTenant+"(,|]|$))(?=.*(,|^)CN="+appName+"(,|]|$)).*")
 
 		helmClient := &helmmocks.HelmClient{}
 		helmClient.On("InstallReleaseFromChart", applicationChartDirectory, namespace, appName, expectedOverrides).Return(installationResponse, nil)

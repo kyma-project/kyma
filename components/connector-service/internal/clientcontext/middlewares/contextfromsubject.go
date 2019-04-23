@@ -3,7 +3,6 @@ package middlewares
 import (
 	"net/http"
 	"regexp"
-	"strings"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
 
@@ -12,19 +11,29 @@ import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 )
 
-const (
-	subjectSeparator = "\\;"
-)
+type contextFromSubjectExtractor func(subject string) (clientcontext.ContextExtender, apperrors.AppError)
 
-type appContextFromSubjMiddleware struct{}
-
-func NewAppContextFromSubjMiddleware() *appContextFromSubjMiddleware {
-	return &appContextFromSubjMiddleware{}
+type contextFromSubjMiddleware struct {
+	contextFromSubject contextFromSubjectExtractor
 }
 
-func (cc *appContextFromSubjMiddleware) Middleware(handler http.Handler) http.Handler {
+func NewContextFromSubjMiddleware(extractFullContext bool) *contextFromSubjMiddleware {
+	var contextFromSubjectExtractor contextFromSubjectExtractor
+
+	if extractFullContext {
+		contextFromSubjectExtractor = fullContextFromSubject
+	} else {
+		contextFromSubjectExtractor = applicationContextFromSubject
+	}
+
+	return &contextFromSubjMiddleware{
+		contextFromSubject: contextFromSubjectExtractor,
+	}
+}
+
+func (cc *contextFromSubjMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		contextExtender, err := prepareContextExtender(r)
+		contextExtender, err := cc.parseContextFromSubject(r)
 		if err != nil {
 			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Invalid certificate subject"))
 			return
@@ -36,54 +45,85 @@ func (cc *appContextFromSubjMiddleware) Middleware(handler http.Handler) http.Ha
 	})
 }
 
-func prepareContextExtender(r *http.Request) (clientcontext.ContextExtender, apperrors.AppError) {
-	app, group, tenant := parseContextFromSubject(r)
+func (cc *contextFromSubjMiddleware) parseContextFromSubject(r *http.Request) (clientcontext.ContextExtender, apperrors.AppError) {
+	subject := r.Header.Get(clientcontext.SubjectHeader)
+	if subject == "" {
+		return nil, apperrors.BadRequest("Failed to get certificate subject from header.")
+	}
+
+	return cc.contextFromSubject(subject)
+}
+
+func applicationContextFromSubject(subject string) (clientcontext.ContextExtender, apperrors.AppError) {
+	appName := getCommonName(subject)
+
+	if isEmpty(appName) {
+		return nil, apperrors.BadRequest("Empty Common Name in subject header")
+	}
+
+	return clientcontext.ApplicationContext{
+		Application:    appName,
+		ClusterContext: clientcontext.ClusterContext{},
+	}, nil
+}
+
+func fullContextFromSubject(subject string) (clientcontext.ContextExtender, apperrors.AppError) {
+	tenant := getOrganization(subject)
+	group := getOrganizationalUnit(subject)
+	commonName := getCommonName(subject)
+
+	if isAnyEmpty(tenant, group, commonName) {
+		return nil, apperrors.BadRequest("Invalid subject header, one of the values not provided")
+	}
+
 	clusterContext := clientcontext.ClusterContext{
 		Group:  group,
 		Tenant: tenant,
 	}
 
-	if app == "" {
-		if clusterContext.IsEmpty() {
-			return nil, apperrors.BadRequest("Invalid certificate subject")
-		}
-
+	if commonName == clientcontext.RuntimeDefaultCommonName {
 		return clusterContext, nil
 	}
 
 	return clientcontext.ApplicationContext{
-		Application:    app,
+		Application:    commonName,
 		ClusterContext: clusterContext,
 	}, nil
 }
 
-func parseContextFromSubject(r *http.Request) (application string, group string, tenant string) {
-	subject := r.Header.Get(clientcontext.SubjectHeader)
-	if subject == "" {
-		return "", "", ""
+func isAnyEmpty(str ...string) bool {
+	for _, s := range str {
+		if isEmpty(s) {
+			return true
+		}
 	}
 
-	re := regexp.MustCompile("CN=([^,]+)")
-	matches := re.FindStringSubmatch(subject)
-
-	if matches == nil || len(matches) < 2 {
-		return "", "", ""
-	}
-
-	match := matches[1]
-
-	if strings.Contains(match, subjectSeparator) {
-		matchSplitted := strings.Split(match, subjectSeparator)
-		return getAt(matchSplitted, 2), getAt(matchSplitted, 1), getAt(matchSplitted, 0)
-	}
-
-	return match, "", ""
+	return false
 }
 
-func getAt(slice []string, index int) string {
-	if len(slice) <= index {
+func getCommonName(subject string) string {
+	return getRegexMatch("CN=([^,]+)", subject)
+}
+
+func getOrganization(subject string) string {
+	return getRegexMatch("O=([^,]+)", subject)
+}
+
+func getOrganizationalUnit(subject string) string {
+	return getRegexMatch("OU=([^,]+)", subject)
+}
+
+func getRegexMatch(regex, text string) string {
+	cnRegex := regexp.MustCompile(regex)
+	matches := cnRegex.FindStringSubmatch(text)
+
+	if len(matches) != 2 {
 		return ""
 	}
 
-	return slice[index]
+	return matches[1]
+}
+
+func isEmpty(str string) bool {
+	return str == ""
 }
