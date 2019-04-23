@@ -325,18 +325,13 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 	})
 
-	testRetryOnAuthFailure := func(statusCode int, requestBody io.Reader, shouldRetryFail bool, t *testing.T) {
+	testRetryOnAuthFailure := func(testServerConstructor func(check func(req *http.Request)) *httptest.Server, requestBody io.Reader, expectedStatusCode int, t *testing.T) {
 		// given
-		tsf := NewTestServerForRetryTest(statusCode, func(req *http.Request) {
+		tsf := testServerConstructor(func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
-		}, shouldRetryFail)
+		})
 		defer tsf.Close()
-
-		expectedStatusCode := http.StatusOK
-		if shouldRetryFail {
-			expectedStatusCode = statusCode
-		}
 
 		req, _ := http.NewRequest(http.MethodGet, "/orders/123", requestBody)
 		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
@@ -381,16 +376,28 @@ func TestProxy(t *testing.T) {
 	}
 
 	t.Run("should invalidate proxy and retry when 401 occurred", func(t *testing.T) {
-		testRetryOnAuthFailure(http.StatusUnauthorized, nil, false, t)
+		testRetryOnAuthFailure(func(check func(req *http.Request)) *httptest.Server {
+			return NewTestServerForRetryTest(http.StatusUnauthorized, check)
+		}, nil, http.StatusOK, t)
 	})
 
 	t.Run("should invalidate proxy and retry when 403 occurred due to CRSF Token validation", func(t *testing.T) {
-		testRetryOnAuthFailure(http.StatusForbidden, nil, false, t)
+		testRetryOnAuthFailure(func(check func(req *http.Request)) *httptest.Server {
+			return NewTestServerForRetryTest(http.StatusForbidden, check)
+		}, nil, http.StatusOK, t)
 	})
 
 	t.Run("should return 403 status when the call and the retry with body returned 403", func(t *testing.T) {
 		requestBody := bytes.NewBufferString("some body")
-		testRetryOnAuthFailure(http.StatusForbidden, requestBody, true, t)
+		testRetryOnAuthFailure(func(check func(req *http.Request)) *httptest.Server {
+			return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				r.ParseForm()
+				check(r)
+				w.WriteHeader(http.StatusForbidden)
+				w.Write([]byte("test"))
+			}))
+
+		}, requestBody, http.StatusForbidden, t)
 	})
 }
 
@@ -426,7 +433,7 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 	}))
 }
 
-func NewTestServerForRetryTest(status int, check func(req *http.Request), shouldRetryFail bool) *httptest.Server {
+func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httptest.Server {
 	willFail := true
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -434,7 +441,7 @@ func NewTestServerForRetryTest(status int, check func(req *http.Request), should
 		check(r)
 		if willFail {
 			w.WriteHeader(status)
-			willFail = shouldRetryFail
+			willFail = false
 		} else {
 			w.WriteHeader(http.StatusOK)
 		}
