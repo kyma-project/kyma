@@ -7,7 +7,7 @@ import (
 	"k8s.io/client-go/rest"
 )
 
-const testSubscriptionName = "test-sub-DQwLCQQCAws"
+const testSubscriptionName = "test-sub-dqwawshakjqmxifnc"
 
 type SubscriptionsClient interface {
 	Create(namespace, application, eventType string) error

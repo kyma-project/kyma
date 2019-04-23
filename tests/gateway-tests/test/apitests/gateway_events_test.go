@@ -102,5 +102,4 @@ func TestGatewayEvents(t *testing.T) {
 		err = client.Delete(config.Namespace)
 		require.NoError(t, e)
 	})
-
 }
