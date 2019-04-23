@@ -12,12 +12,15 @@ import (
 	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	mappingClient "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 
+	scc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+
 	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
 	"github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	apimerr "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/rand"
 	restclient "k8s.io/client-go/rest"
@@ -107,6 +110,70 @@ func TestServiceCatalogContainsABServiceClasses(t *testing.T) {
 	}, time.Second*90)
 
 	awaitCatalogContainsServiceClasses(t, broker.namespace, timeoutPerAssert, brokerServices)
+}
+
+func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
+	// given
+	k8sConfig, err := restclient.InClusterConfig()
+	require.NoError(t, err)
+
+	aClient, err := appClient.NewForConfig(k8sConfig)
+	require.NoError(t, err)
+
+	mClient, err := mappingClient.NewForConfig(k8sConfig)
+	require.NoError(t, err)
+
+	k8sClient, err := corev1.NewForConfig(k8sConfig)
+	require.NoError(t, err)
+
+	scClient, err := scc.NewForConfig(k8sConfig)
+	require.NoError(t, err)
+
+	namespace := fmt.Sprintf("test-acc-ns-broker-%s", rand.String(4))
+
+	t.Log("Creating Application")
+	app, err := aClient.ApplicationconnectorV1alpha1().Applications().Create(fixApplication())
+	require.NoError(t, err)
+
+	t.Logf("Creating Namespace %s", namespace)
+	_, err = k8sClient.Namespaces().Create(fixNamespace(namespace))
+	require.NoError(t, err)
+
+	t.Log("Creating ApplicationMapping")
+	am, err := mClient.ApplicationconnectorV1alpha1().ApplicationMappings(namespace).Create(fixApplicationMapping())
+	require.NoError(t, err)
+
+	// when
+	t.Logf("Removing Namespace %s", namespace)
+	err = k8sClient.Namespaces().Delete(namespace, &metav1.DeleteOptions{})
+	assert.NoError(t, err)
+
+	t.Log("Removing Application")
+	err = aClient.ApplicationconnectorV1alpha1().Applications().Delete(app.Name, &metav1.DeleteOptions{})
+	assert.NoError(t, err)
+
+	t.Log("Assert namespace is removed")
+	repeat.FuncAtMost(t, func() error {
+		_, err := k8sClient.Namespaces().Get(namespace, metav1.GetOptions{})
+		if apimerr.IsNotFound(err) {
+			return nil
+		}
+		return fmt.Errorf("%s is not removed", namespace)
+	}, time.Second*90)
+
+	// then
+	t.Log("Check resources are removed")
+	_, err = aClient.ApplicationconnectorV1alpha1().Applications().Get(app.Name, metav1.GetOptions{})
+	assert.True(t, apimerr.IsNotFound(err))
+
+	_, err = mClient.ApplicationconnectorV1alpha1().ApplicationMappings(namespace).Get(am.Name, metav1.GetOptions{})
+	assert.True(t, apimerr.IsNotFound(err))
+
+	listServices, err := k8sClient.Services(namespace).List(metav1.ListOptions{})
+	assert.Empty(t, listServices.Items)
+
+	listServiceBrokers, err := scClient.ServicecatalogV1beta1().ServiceBrokers(namespace).List(metav1.ListOptions{})
+	assert.Empty(t, listServiceBrokers.Items)
 }
 
 type brokerURL struct {
