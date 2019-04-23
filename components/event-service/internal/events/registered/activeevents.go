@@ -77,7 +77,7 @@ func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]stri
 		return nil, e
 	}
 
-	events := []string{}
+	events := make([]string, 0)
 
 	for _, subscription := range subscriptionList.Items {
 		if subscription.SourceID == appName {
