@@ -20,6 +20,7 @@ type Container struct {
 type Resolver struct {
 	*backendModuleResolver
 	*microfrontendResolver
+	*clusterMicrofrontendResolver
 
 	informerFactory   externalversions.SharedInformerFactory
 	mfInformerFactory mfInformer.SharedInformerFactory
@@ -41,13 +42,16 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 
 	microfrontendInformerFactory := mfInformer.NewSharedInformerFactory(microfrontendClientset, informerResyncPeriod)
 	microfrontendInformer := microfrontendInformerFactory.Ui().V1alpha1().MicroFrontends().Informer()
+	clusterMicrofrontendInformer := microfrontendInformerFactory.Ui().V1alpha1().ClusterMicroFrontends().Informer()
 	microfrontendService := newMicrofrontendService(microfrontendInformer)
+	clusterMicrofrontendService := newClusterMicrofrontendService(clusterMicrofrontendInformer)
 
 	return &Container{
 		Resolver: &Resolver{
-			backendModuleResolver: newBackendModuleResolver(backendModuleService),
-			informerFactory:       informerFactory,
-			microfrontendResolver: newMicrofrontendResolver(microfrontendService),
+			backendModuleResolver:        newBackendModuleResolver(backendModuleService),
+			informerFactory:              informerFactory,
+			microfrontendResolver:        newMicrofrontendResolver(microfrontendService),
+			clusterMicrofrontendResolver: newClusterMicrofrontendResolver(clusterMicrofrontendService),
 		},
 		BackendModuleInformer: backendModuleInformer,
 	}, nil

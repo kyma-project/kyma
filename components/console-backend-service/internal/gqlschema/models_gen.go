@@ -100,6 +100,16 @@ type ClusterDocsTopicEvent struct {
 	ClusterDocsTopic ClusterDocsTopic      `json:"clusterDocsTopic"`
 }
 
+type ClusterMicrofrontend struct {
+	Name            string           `json:"name"`
+	Namespace       string           `json:"namespace"`
+	Version         string           `json:"version"`
+	Category        string           `json:"category"`
+	ViewBaseURL     string           `json:"viewBaseUrl"`
+	Placement       string           `json:"placement"`
+	NavigationNodes []NavigationNode `json:"navigationNodes"`
+}
+
 type ClusterServiceBroker struct {
 	Name              string              `json:"name"`
 	Status            ServiceBrokerStatus `json:"status"`

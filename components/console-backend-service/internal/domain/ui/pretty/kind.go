@@ -7,6 +7,8 @@ const (
 	BackendModules
 	Microfrontend
 	Microfrontends
+	ClusterMicrofrontend
+	ClusterMicrofrontends
 )
 
 func (k Kind) String() string {
@@ -19,6 +21,10 @@ func (k Kind) String() string {
 		return "Microfrontend"
 	case Microfrontends:
 		return "Microfrontends"
+	case ClusterMicrofrontend:
+		return "ClusterMicrofrontend"
+	case ClusterMicrofrontends:
+		return "ClusterMicrofrontends"
 	default:
 		return ""
 	}
