@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/dex"
+	"github.com/kyma-project/kyma/tests/console-backend-service/internal/domain/shared/auth"
 	"github.com/kyma-project/kyma/tests/console-backend-service/internal/graphql"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -43,6 +44,12 @@ func TestSelfSubjectRules(t *testing.T) {
 	err = c.Do(fixNamespacedSelfSubjectRulesQuery("foo"), &selfSubjectRulesRes)
 	require.NoError(t, err)
 	assert.True(t, len(selfSubjectRulesRes.SelfSubjectRules.ResourceRules) > 0)
+
+	t.Log("Checking authorization directives...")
+	ops := &auth.OperationsInput{
+		auth.CreateSelfSubjectRulesReview: {fixSelfSubjectRulesQuery()},
+	}
+	AuthSuite.Run(t, ops)
 }
 
 func fixSelfSubjectRulesQuery() *graphql.Request {
