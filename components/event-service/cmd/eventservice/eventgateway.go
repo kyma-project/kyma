@@ -9,7 +9,7 @@ import (
 	"syscall"
 	"time"
 
-	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
@@ -34,7 +34,7 @@ func main() {
 
 	bus.Init(options.sourceID, options.eventsTargetURL)
 
-	eventsClient, e := registered.NewEventsClient()
+	eventsClient, e := subscribed.NewEventsClient()
 
 	if e != nil {
 		log.Error("Unable to create Events Client.", e.Error())

@@ -27,8 +27,13 @@ type PublishResponse struct {
 	EventId string `json:"event-id,omitempty"`
 }
 
-type ActiveEvents struct {
-	Events []string `json:"events"`
+type SubscribedEvents struct {
+	Events []Event `json:"events"`
+}
+
+type Event struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
 
 const (
@@ -80,7 +85,7 @@ func TestGatewayEvents(t *testing.T) {
 		err := client.Create(config.Namespace, config.Application, eventType)
 		require.NoError(t, err)
 
-		url := config.EventServiceUrl + "/" + config.Application + "/v1/activeevents"
+		url := config.EventServiceUrl + "/" + config.Application + "/v1/events/subscribed"
 
 		req, err := http.NewRequest(http.MethodGet, url, nil)
 		require.NoError(t, err)
@@ -90,13 +95,13 @@ func TestGatewayEvents(t *testing.T) {
 		require.NoError(t, err)
 
 		//then
-		var activeEvents ActiveEvents
+		var events SubscribedEvents
 
-		err = json.NewDecoder(response.Body).Decode(&activeEvents)
+		err = json.NewDecoder(response.Body).Decode(&events)
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, response.StatusCode)
-		assert.Equal(t, eventType, activeEvents.Events[0])
+		assert.Equal(t, eventType, events.Events[0].Name)
 
 		//cleanup
 		err = client.Delete(config.Namespace)

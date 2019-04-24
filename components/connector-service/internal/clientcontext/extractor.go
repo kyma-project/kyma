@@ -12,7 +12,7 @@ import (
 const (
 	MetadataURLFormat   = "https://%s/%s/v1/metadata/services"
 	EventsURLFormat     = "https://%s/%s/v1/events"
-	EventsInfoURLFormat = "https://%s/%s/v1/activeevents"
+	EventsInfoURLFormat = "https://%s/%s/v1/events/subscribed"
 
 	RuntimeDefaultCommonName = "*Runtime*"
 )
@@ -64,11 +64,11 @@ func prepareRuntimeURLs(appCtx ApplicationContext, apiHosts APIHosts) RuntimeURL
 		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
 		eventsInfoURL = fmt.Sprintf(EventsInfoURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
 	}
-  
+
 	return RuntimeURLs{
-		MetadataURL: metadataURL,
-		EventsURL:   eventsURL,
-    EventsInfoURL: eventsInfoURL,
+		MetadataURL:   metadataURL,
+		EventsURL:     eventsURL,
+		EventsInfoURL: eventsInfoURL,
 	}
 }
 

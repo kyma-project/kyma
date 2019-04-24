@@ -4,14 +4,14 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
 	"github.com/kyma-project/kyma/components/event-service/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/event-service/internal/httperrors"
 	"github.com/sirupsen/logrus"
 )
 
 //RespondWithBody sends http response with json body
-func RespondWithBody(w http.ResponseWriter, events registered.ActiveEvents, httpCode int) {
+func RespondWithBody(w http.ResponseWriter, events subscribed.Events, httpCode int) {
 	respond(w, httpCode)
 	json.NewEncoder(w).Encode(events)
 }

@@ -1,4 +1,4 @@
-package registered
+package subscribed
 
 import (
 	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
@@ -9,12 +9,18 @@ import (
 
 //EventsClient interface
 type EventsClient interface {
-	GetActiveEvents(appName string) (ActiveEvents, error)
+	GetSubscribedEvents(appName string) (Events, error)
 }
 
-//ActiveEvents represents collection of all events with subscriptions
-type ActiveEvents struct {
-	Events []string `json:"events"`
+//Events represents collection of all events with subscriptions
+type Events struct {
+	Events []Event `json:"events"`
+}
+
+//Event represents basic information about event
+type Event struct {
+	Name    string `json:"name"`
+	Version string `json:"version"`
 }
 
 type eventsClient struct {
@@ -50,38 +56,39 @@ func initClient(k8sConfig *rest.Config) (EventsClient, error) {
 	}, nil
 }
 
-func (ec *eventsClient) GetActiveEvents(appName string) (ActiveEvents, error) {
-	var activeEvents []string
+func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
+	var activeEvents []Event
 
 	namespaces, e := ec.getAllNamespaces()
 
 	if e != nil {
-		return ActiveEvents{}, e
+		return Events{}, e
 	}
 
 	for _, namespace := range namespaces {
 		events, err := ec.getEventsForNamespace(appName, namespace)
 		if err != nil {
-			return ActiveEvents{}, err
+			return Events{}, err
 		}
 		activeEvents = append(activeEvents, events...)
 	}
 
-	return ActiveEvents{Events: activeEvents}, nil
+	return Events{Events: activeEvents}, nil
 }
 
-func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]string, error) {
+func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]Event, error) {
 	subscriptionList, e := ec.subscriptionsClient.EventingV1alpha1().Subscriptions(namespace).List(meta.ListOptions{})
 
 	if e != nil {
 		return nil, e
 	}
 
-	events := make([]string, 0)
+	events := make([]Event, 0)
 
 	for _, subscription := range subscriptionList.Items {
 		if subscription.SourceID == appName {
-			events = append(events, subscription.EventType)
+			event := Event{Name: subscription.EventType, Version: subscription.EventTypeVersion}
+			events = append(events, event)
 		}
 	}
 

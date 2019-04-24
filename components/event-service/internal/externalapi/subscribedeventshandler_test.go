@@ -8,8 +8,8 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/registered"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/registered/mocks"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
+	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed/mocks"
 	"github.com/kyma-project/kyma/components/event-service/internal/httperrors"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"
@@ -22,13 +22,13 @@ func TestActiveEventsHandler_GetActiveEvents(t *testing.T) {
 
 	t.Run("Should return active events and http code 200", func(t *testing.T) {
 		//given
-		expectedResponse := registered.ActiveEvents{
-			Events: []string{"topic1, topic2"},
+		expectedResponse := subscribed.Events{
+			Events: []subscribed.Event{{Name: "topic1", Version: "v1"}, {Name: "topic2", Version: "v1"}},
 		}
 
 		eventsClient := &mocks.EventsClient{}
 
-		eventsClient.On("GetActiveEvents", "test-app").Return(expectedResponse, nil)
+		eventsClient.On("GetSubscribedEvents", "test-app").Return(expectedResponse, nil)
 
 		handler := NewActiveEventsHandler(eventsClient)
 
@@ -38,13 +38,13 @@ func TestActiveEventsHandler_GetActiveEvents(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		//when
-		handler.GetActiveEvents(rr, req)
+		handler.GetSubscribedEvents(rr, req)
 
 		//then
 		responseBody, err := ioutil.ReadAll(rr.Body)
 		require.NoError(t, err)
 
-		var response registered.ActiveEvents
+		var response subscribed.Events
 		err = json.Unmarshal(responseBody, &response)
 		require.NoError(t, err)
 
@@ -57,7 +57,7 @@ func TestActiveEventsHandler_GetActiveEvents(t *testing.T) {
 		errorMsg := "Some error"
 		eventsClient := &mocks.EventsClient{}
 
-		eventsClient.On("GetActiveEvents", "test-app").Return(registered.ActiveEvents{}, errors.New(errorMsg))
+		eventsClient.On("GetSubscribedEvents", "test-app").Return(subscribed.Events{}, errors.New(errorMsg))
 
 		handler := NewActiveEventsHandler(eventsClient)
 
@@ -67,7 +67,7 @@ func TestActiveEventsHandler_GetActiveEvents(t *testing.T) {
 		rr := httptest.NewRecorder()
 
 		//when
-		handler.GetActiveEvents(rr, req)
+		handler.GetSubscribedEvents(rr, req)
 
 		//then
 		responseBody, err := ioutil.ReadAll(rr.Body)
