@@ -4,6 +4,8 @@ import (
 	"context"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authn"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	authv1 "k8s.io/api/authorization/v1"
 	v1 "k8s.io/client-go/kubernetes/typed/authorization/v1"
 )
@@ -19,6 +21,10 @@ func newSelfSubjectRulesService(client v1.AuthorizationV1Interface) *selfSubject
 }
 
 func (svc *selfSubjectRulesService) Create(ctx context.Context, ssrr *authv1.SelfSubjectRulesReview) (result *authv1.SelfSubjectRulesReview, err error) {
+	if ssrr == nil {
+		err := gqlerror.New(err, pretty.SelfSubjectRules)
+		return &authv1.SelfSubjectRulesReview{}, err
+	}
 	u, err := authn.UserInfoForContext(ctx)
 	username := u.GetName()
 	result = &authv1.SelfSubjectRulesReview{}
