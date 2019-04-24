@@ -38,8 +38,8 @@ func TestSelfSubjectRulesQuery(t *testing.T) {
 		resolver := k8s.NewSelfSubjectRulesResolver(mockedService)
 		resolver.SetSelfSubjectRulesConverter(converter)
 
-		defaultnamespace := "foo"
-		result, err := resolver.SelfSubjectRulesQuery(nil, &defaultnamespace)
+		defaultNamespace := "foo"
+		result, err := resolver.SelfSubjectRulesQuery(nil, &defaultNamespace)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)

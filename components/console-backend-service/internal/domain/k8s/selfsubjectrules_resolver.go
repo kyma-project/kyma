@@ -36,10 +36,10 @@ func newSelfSubjectRulesResolver(selfSubjectRulesSvc selfSubjectRulesSvc) *selfS
 
 func (r *selfSubjectRulesResolver) SelfSubjectRulesQuery(ctx context.Context, namespace *string) ([]*gqlschema.ResourceRule, error) {
 	if namespace == nil {
-		defaultnamespace := "*"
-		namespace = &defaultnamespace
+		defaultNamespace := "*"
+		namespace = &defaultNamespace
 	}
-	ssrrin := &v1.SelfSubjectRulesReview{
+	ssrrIn := &v1.SelfSubjectRulesReview{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "SelfSubjectRulesReview",
 			APIVersion: "authorization.k8s.io/v1",
@@ -48,10 +48,10 @@ func (r *selfSubjectRulesResolver) SelfSubjectRulesQuery(ctx context.Context, na
 			Namespace: *namespace,
 		},
 	}
-	ssrrout, err := r.selfSubjectRulesSvc.Create(ctx, ssrrin)
+	ssrrOut, err := r.selfSubjectRulesSvc.Create(ctx, ssrrIn)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while reviewing self subject rules"))
 		return []*gqlschema.ResourceRule{}, gqlerror.New(err, pretty.SelfSubjectRules)
 	}
-	return r.gqlSelfSubjectRulesConverter.ToGQL(ssrrout)
+	return r.gqlSelfSubjectRulesConverter.ToGQL(ssrrOut)
 }
