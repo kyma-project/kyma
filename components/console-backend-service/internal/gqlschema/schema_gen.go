@@ -181,7 +181,6 @@ type ComplexityRoot struct {
 
 	ClusterMicrofrontend struct {
 		Name            func(childComplexity int) int
-		Namespace       func(childComplexity int) int
 		Version         func(childComplexity int) int
 		Category        func(childComplexity int) int
 		ViewBaseUrl     func(childComplexity int) int
@@ -402,7 +401,6 @@ type ComplexityRoot struct {
 
 	Microfrontend struct {
 		Name            func(childComplexity int) int
-		Namespace       func(childComplexity int) int
 		Version         func(childComplexity int) int
 		Category        func(childComplexity int) int
 		ViewBaseUrl     func(childComplexity int) int
@@ -3849,13 +3847,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterMicrofrontend.Name(childComplexity), true
 
-	case "ClusterMicrofrontend.namespace":
-		if e.complexity.ClusterMicrofrontend.Namespace == nil {
-			break
-		}
-
-		return e.complexity.ClusterMicrofrontend.Namespace(childComplexity), true
-
 	case "ClusterMicrofrontend.version":
 		if e.complexity.ClusterMicrofrontend.Version == nil {
 			break
@@ -4738,13 +4729,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Microfrontend.Name(childComplexity), true
-
-	case "Microfrontend.namespace":
-		if e.complexity.Microfrontend.Namespace == nil {
-			break
-		}
-
-		return e.complexity.Microfrontend.Namespace(childComplexity), true
 
 	case "Microfrontend.version":
 		if e.complexity.Microfrontend.Version == nil {
@@ -9914,11 +9898,6 @@ func (ec *executionContext) _ClusterMicrofrontend(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "namespace":
-			out.Values[i] = ec._ClusterMicrofrontend_namespace(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "version":
 			out.Values[i] = ec._ClusterMicrofrontend_version(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -9969,33 +9948,6 @@ func (ec *executionContext) _ClusterMicrofrontend_name(ctx context.Context, fiel
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ClusterMicrofrontend_namespace(ctx context.Context, field graphql.CollectedField, obj *ClusterMicrofrontend) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ClusterMicrofrontend",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -15076,11 +15028,6 @@ func (ec *executionContext) _Microfrontend(ctx context.Context, sel ast.Selectio
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
-		case "namespace":
-			out.Values[i] = ec._Microfrontend_namespace(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
 		case "version":
 			out.Values[i] = ec._Microfrontend_version(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
@@ -15126,33 +15073,6 @@ func (ec *executionContext) _Microfrontend_name(ctx context.Context, field graph
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Name, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Microfrontend_namespace(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Microfrontend",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Namespace, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -29069,7 +28989,6 @@ type NavigationNode {
 
 type Microfrontend {
 	name: String!
-    namespace: String!
 	version: String!
     category: String!
     viewBaseUrl: String!
@@ -29078,7 +28997,6 @@ type Microfrontend {
 
 type ClusterMicrofrontend {
 	name: String!
-    namespace: String!
 	version: String!
     category: String!
     viewBaseUrl: String!

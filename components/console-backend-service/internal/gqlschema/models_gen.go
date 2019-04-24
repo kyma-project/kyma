@@ -102,7 +102,6 @@ type ClusterDocsTopicEvent struct {
 
 type ClusterMicrofrontend struct {
 	Name            string           `json:"name"`
-	Namespace       string           `json:"namespace"`
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`
 	ViewBaseURL     string           `json:"viewBaseUrl"`
@@ -303,7 +302,6 @@ type LocalObjectReferenceInput struct {
 
 type Microfrontend struct {
 	Name            string           `json:"name"`
-	Namespace       string           `json:"namespace"`
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`
 	ViewBaseURL     string           `json:"viewBaseUrl"`

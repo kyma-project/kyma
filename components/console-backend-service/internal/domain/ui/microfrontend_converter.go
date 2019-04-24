@@ -14,7 +14,6 @@ func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschem
 
 	mf := gqlschema.Microfrontend{
 		Name:            in.Name,
-		Namespace:       in.ObjectMeta.Namespace,
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
 		Category:        in.Spec.CommonMicroFrontendSpec.Category,
 		ViewBaseURL:     in.Spec.CommonMicroFrontendSpec.ViewBaseURL,

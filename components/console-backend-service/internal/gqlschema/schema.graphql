@@ -792,7 +792,6 @@ type NavigationNode {
 
 type Microfrontend {
 	name: String!
-    namespace: String!
 	version: String!
     category: String!
     viewBaseUrl: String!
@@ -801,7 +800,6 @@ type Microfrontend {
 
 type ClusterMicrofrontend {
 	name: String!
-    namespace: String!
 	version: String!
     category: String!
     viewBaseUrl: String!
