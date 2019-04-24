@@ -363,10 +363,6 @@ type SecretEvent struct {
 	Secret Secret                `json:"secret"`
 }
 
-type SelfSubjectRules struct {
-	ResourceRules []*ResourceRule `json:"resourceRules"`
-}
-
 type Service struct {
 	Name              string        `json:"name"`
 	ClusterIP         string        `json:"clusterIP"`

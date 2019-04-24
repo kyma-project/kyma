@@ -534,10 +534,6 @@ type ComplexityRoot struct {
 		TopicType func(childComplexity int) int
 	}
 
-	SelfSubjectRules struct {
-		ResourceRules func(childComplexity int) int
-	}
-
 	Service struct {
 		Name              func(childComplexity int) int
 		ClusterIp         func(childComplexity int) int
@@ -859,7 +855,7 @@ type QueryResolver interface {
 	Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]Secret, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
-	SelfSubjectRules(ctx context.Context, namespace *string) (*SelfSubjectRules, error)
+	SelfSubjectRules(ctx context.Context, namespace *string) ([]ResourceRule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -5508,13 +5504,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Section.TopicType(childComplexity), true
-
-	case "SelfSubjectRules.resourceRules":
-		if e.complexity.SelfSubjectRules.ResourceRules == nil {
-			break
-		}
-
-		return e.complexity.SelfSubjectRules.ResourceRules(childComplexity), true
 
 	case "Service.name":
 		if e.complexity.Service.Name == nil {
@@ -15893,6 +15882,9 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
 				out.Values[i] = ec._Query_selfSubjectRules(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
 				wg.Done()
 			}(i, field)
 		case "__type":
@@ -18099,17 +18091,48 @@ func (ec *executionContext) _Query_selfSubjectRules(ctx context.Context, field g
 		return ec.resolvers.Query().SelfSubjectRules(rctx, args["namespace"].(*string))
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*SelfSubjectRules)
+	res := resTmp.([]ResourceRule)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
-	if res == nil {
-		return graphql.Null
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
 	}
 
-	return ec._SelfSubjectRules(ctx, field.Selections, res)
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ResourceRule(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 // nolint: vetshadow
@@ -19564,100 +19587,6 @@ func (ec *executionContext) _Section_topicType(ctx context.Context, field graphq
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
-}
-
-var selfSubjectRulesImplementors = []string{"SelfSubjectRules"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _SelfSubjectRules(ctx context.Context, sel ast.SelectionSet, obj *SelfSubjectRules) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, selfSubjectRulesImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("SelfSubjectRules")
-		case "resourceRules":
-			out.Values[i] = ec._SelfSubjectRules_resourceRules(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _SelfSubjectRules_resourceRules(ctx context.Context, field graphql.CollectedField, obj *SelfSubjectRules) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "SelfSubjectRules",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ResourceRules, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]*ResourceRule)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				if res[idx1] == nil {
-					return graphql.Null
-				}
-
-				return ec._ResourceRule(ctx, field.Selections, res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
 }
 
 var serviceImplementors = []string{"Service"}
@@ -27518,10 +27447,6 @@ type ConfigMapEvent {
 
 # SelfSubjectRules
 
-type SelfSubjectRules {
-    resourceRules: [ResourceRule]!
-}
-
 type ResourceRule {
     verbs: [String!]
     apiGroups: [String!]
@@ -27592,7 +27517,7 @@ type Query {
 
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
-    selfSubjectRules(namespace: String): SelfSubjectRules @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1"})
+    selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1"})
 }
 
 # Mutations
