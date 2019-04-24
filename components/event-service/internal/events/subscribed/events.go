@@ -73,6 +73,8 @@ func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
 		activeEvents = append(activeEvents, events...)
 	}
 
+	activeEvents = removeDuplicates(activeEvents)
+
 	return Events{Events: activeEvents}, nil
 }
 
@@ -109,4 +111,16 @@ func (ec *eventsClient) getAllNamespaces() ([]string, error) {
 	}
 
 	return namespaces, nil
+}
+
+func removeDuplicates(events []Event) []Event {
+	keys := make(map[Event]bool)
+	list := make([]Event, 0)
+	for _, event := range events {
+		if _, value := keys[event]; !value {
+			keys[event] = true
+			list = append(list, event)
+		}
+	}
+	return list
 }
