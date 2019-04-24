@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"fmt"
+
 	uiV1alpha1v "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
@@ -11,7 +13,8 @@ func (c *clusterMicrofrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFronte
 	if in == nil {
 		return nil, nil
 	}
-	//placement
+
+	fmt.Println(in)
 
 	mf := gqlschema.ClusterMicrofrontend{
 		Name:            in.Name,

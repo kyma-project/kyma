@@ -513,8 +513,8 @@ type ComplexityRoot struct {
 		Secrets               func(childComplexity int, namespace string, first *int, offset *int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
-		Microfrontends        func(childComplexity int, namespace string, first *int, offset *int) int
-		ClusterMicrofrontends func(childComplexity int, first *int, offset *int) int
+		Microfrontends        func(childComplexity int, namespace string) int
+		ClusterMicrofrontends func(childComplexity int) int
 	}
 
 	ReplicaSet struct {
@@ -900,8 +900,8 @@ type QueryResolver interface {
 	Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]Secret, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
-	Microfrontends(ctx context.Context, namespace string, first *int, offset *int) ([]Microfrontend, error)
-	ClusterMicrofrontends(ctx context.Context, first *int, offset *int) ([]ClusterMicrofrontend, error)
+	Microfrontends(ctx context.Context, namespace string) ([]Microfrontend, error)
+	ClusterMicrofrontends(ctx context.Context) ([]ClusterMicrofrontend, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -3167,68 +3167,6 @@ func field_Query_microfrontends_args(rawArgs map[string]interface{}) (map[string
 		}
 	}
 	args["namespace"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg1
-	var arg2 *int
-	if tmp, ok := rawArgs["offset"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg2 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["offset"] = arg2
-	return args, nil
-
-}
-
-func field_Query_clusterMicrofrontends_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 *int
-	if tmp, ok := rawArgs["first"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg0 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["first"] = arg0
-	var arg1 *int
-	if tmp, ok := rawArgs["offset"]; ok {
-		var err error
-		var ptr1 int
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalInt(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["offset"] = arg1
 	return args, nil
 
 }
@@ -5812,19 +5750,14 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Query.Microfrontends(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.Microfrontends(childComplexity, args["namespace"].(string)), true
 
 	case "Query.clusterMicrofrontends":
 		if e.complexity.Query.ClusterMicrofrontends == nil {
 			break
 		}
 
-		args, err := field_Query_clusterMicrofrontends_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.ClusterMicrofrontends(childComplexity, args["first"].(*int), args["offset"].(*int)), true
+		return e.complexity.Query.ClusterMicrofrontends(childComplexity), true
 
 	case "ReplicaSet.name":
 		if e.complexity.ReplicaSet.Name == nil {
@@ -19801,7 +19734,7 @@ func (ec *executionContext) _Query_microfrontends(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Microfrontends(rctx, args["namespace"].(string), args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().Microfrontends(rctx, args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19852,22 +19785,16 @@ func (ec *executionContext) _Query_microfrontends(ctx context.Context, field gra
 func (ec *executionContext) _Query_clusterMicrofrontends(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_clusterMicrofrontends_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
 	rctx := &graphql.ResolverContext{
 		Object: "Query",
-		Args:   args,
+		Args:   nil,
 		Field:  field,
 	}
 	ctx = graphql.WithResolverContext(ctx, rctx)
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ClusterMicrofrontends(rctx, args["first"].(*int), args["offset"].(*int))
+		return ec.resolvers.Query().ClusterMicrofrontends(rctx)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -29226,8 +29153,8 @@ type Query {
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 
-    microfrontends(namespace: String!, first: Int, offset: Int): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-    clusterMicrofrontends(first: Int, offset: Int): [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    microfrontends(namespace: String!): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    clusterMicrofrontends: [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
 }
 
 # Mutations

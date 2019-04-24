@@ -12,9 +12,10 @@ import (
 )
 
 type Container struct {
-	Resolver              *Resolver
-	BackendModuleInformer cache.SharedIndexInformer
-	MicrofrontendInformer cache.SharedIndexInformer
+	Resolver                     *Resolver
+	BackendModuleInformer        cache.SharedIndexInformer
+	MicrofrontendInformer        cache.SharedIndexInformer
+	ClusterMicrofrontendInformer cache.SharedIndexInformer
 }
 
 type Resolver struct {
@@ -53,7 +54,9 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 			microfrontendResolver:        newMicrofrontendResolver(microfrontendService),
 			clusterMicrofrontendResolver: newClusterMicrofrontendResolver(clusterMicrofrontendService),
 		},
-		BackendModuleInformer: backendModuleInformer,
+		BackendModuleInformer:        backendModuleInformer,
+		MicrofrontendInformer:        microfrontendInformer,
+		ClusterMicrofrontendInformer: clusterMicrofrontendInformer,
 	}, nil
 }
 

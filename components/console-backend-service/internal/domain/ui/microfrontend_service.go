@@ -4,7 +4,6 @@ import (
 	"fmt"
 
 	uiV1alpha1v "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -18,8 +17,8 @@ func newMicrofrontendService(informer cache.SharedIndexInformer) *microfrontendS
 	}
 }
 
-func (svc *microfrontendService) List(namespace string, pagingParams pager.PagingParams) ([]*uiV1alpha1v.MicroFrontend, error) {
-	items, err := pager.FromIndexer(svc.informer.GetIndexer(), "namespace", namespace).Limit(pagingParams)
+func (svc *microfrontendService) List(namespace string) ([]*uiV1alpha1v.MicroFrontend, error) {
+	items, err := svc.informer.GetIndexer().ByIndex(cache.NamespaceIndex, namespace)
 	if err != nil {
 		return nil, err
 	}
