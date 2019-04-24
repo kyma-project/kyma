@@ -45,7 +45,7 @@ func (sh *signatureHandler) SignCSR(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encodedCertificatesChain, err := sh.certificateService.SignCSR(rawCSR, clientContextService.GetCommonName())
+	encodedCertificatesChain, err := sh.certificateService.SignCSR(rawCSR, clientContextService.GetSubject())
 	if err != nil {
 		httphelpers.RespondWithErrorAndLog(w, err)
 		return

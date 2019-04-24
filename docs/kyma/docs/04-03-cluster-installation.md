@@ -37,7 +37,7 @@ This Installation guide shows developers how to quickly deploy Kyma on a [Google
     ```
     gcloud container --project "$PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.12.5" --machine-type "n1-standard-4" \
+    --cluster-version "1.12" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 

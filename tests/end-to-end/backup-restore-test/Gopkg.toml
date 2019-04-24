@@ -47,6 +47,10 @@ required = [
   version = "kubernetes-1.11.3"
 
 [[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "2.2.0"
+
+[[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
   version = "=v0.1.34"
 
