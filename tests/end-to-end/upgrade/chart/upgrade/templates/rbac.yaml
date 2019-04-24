@@ -75,7 +75,7 @@ rules:
   verbs: ["create", "get", "watch", "list", "delete"]
 
 # Namespace controller
-- apiGroup: [""]
+- apiGroups: [""]
   resources: ["resourcequotas"]
   verbs: ["get", "list", "watch"]
 ---
