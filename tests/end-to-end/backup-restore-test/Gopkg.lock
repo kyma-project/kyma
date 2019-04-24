@@ -39,7 +39,15 @@
   version = "v10.15.5"
 
 [[projects]]
-  digest = "1:9e06caa2de1be4cdbcdccd478b23a3c4f6487dcb73868c405039bd1496a5f72a"
+  digest = "1:13d5750ba049ce46bf931792803f1d5584b04026df9badea5931e33c22aa34ee"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "08d411bf8302219fe47ca04dbdf9de892010c5e5"
+  version = "v2.2.0"
+
+[[projects]]
+  digest = "1:7f58562897c16938b8186b7f54d02f4e27042e91a85662c56eb2647e50dacdaa"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -82,8 +90,8 @@
     "service/sts",
   ]
   pruneopts = "NUT"
-  revision = "cf58d169c2d60e36f54964ceb4b9baa3434dbfe7"
-  version = "v1.19.12"
+  revision = "ca6d5f771b63df153f02fe5b117434d5ebafeeda"
+  version = "v1.19.15"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -508,11 +516,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "88737f569e3a9c7ab309cdc09a07fe7fc87233c3"
+  revision = "d864b10871cd4370fe574816b489c819c675ccc7"
 
 [[projects]]
   branch = "master"
-  digest = "1:f3b980f9a6d4eb82e21a411145b79358e41f42a112df5014c12048d07547525a"
+  digest = "1:d8d9bd4e4834f4972db3902342f89ea8ff957e578dd6f64e89744ae28b90c25c"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -525,7 +533,7 @@
     "idna",
   ]
   pruneopts = "NUT"
-  revision = "1da14a5a36f220ea3f03470682b737b1dfd5de22"
+  revision = "afe8014c977f78fe2406743d9d32c8bd44d0542b"
 
 [[projects]]
   branch = "master"
@@ -543,14 +551,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:c3e89c6a4dab7d8a33f668c50c096c62fa85e96bedc78e2628d8372d6c17d327"
+  digest = "1:725ca61f5c46862b50791a9c72ad1f3537ee17428b1bd9461d6814973ac2343a"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "12500544f89f9420afe9529ba8940bf72d294972"
+  revision = "953cdadca894cdc07be76fc99f95b40c28f06623"
 
 [[projects]]
   digest = "1:f9bea942c292a95e0ed958678f84a13b9424067693f44c095e7e3d25f6402892"
@@ -591,7 +599,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:8da649cc6b10a0aa2aeb71a7067fd39a00ccf3f26c809a09416dd409d690b4d6"
+  digest = "1:11f22ff35d80e740985a00b590e49bdfcca17d5abdeafa4071ec83602cd2da57"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -608,7 +616,7 @@
     "internal/semver",
   ]
   pruneopts = "NUT"
-  revision = "4ca4b55e2050cfa75f1a1f72ae10825e80b052a0"
+  revision = "cb2dda6eabdf9160e66ca7293897f984154a7f8b"
 
 [[projects]]
   digest = "1:a4824d8df1fd1f63c6b3690bf4801d6ff1722adcb3e13c0489196a7e248d868a"
@@ -840,6 +848,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/avast/retry-go",
     "github.com/ghodss/yaml",
     "github.com/go-redis/redis",
     "github.com/google/uuid",
