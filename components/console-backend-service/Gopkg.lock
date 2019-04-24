@@ -328,14 +328,16 @@
   version = "v0.1.36"
 
 [[projects]]
-  digest = "1:6d87d9b6e0404dc4c1993c71cda5521ed53f473c83283b31ea0d658f7f1cefc9"
+  digest = "1:d85f1a80cfde3851b761c756b592fe66caecfc800707b2d35b5f04d2728ff9e6"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
     "common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "common/microfrontend-client/pkg/client/clientset/versioned",
+    "common/microfrontend-client/pkg/client/clientset/versioned/fake",
     "common/microfrontend-client/pkg/client/clientset/versioned/scheme",
     "common/microfrontend-client/pkg/client/clientset/versioned/typed/ui/v1alpha1",
+    "common/microfrontend-client/pkg/client/clientset/versioned/typed/ui/v1alpha1/fake",
     "common/microfrontend-client/pkg/client/informers/externalversions",
     "common/microfrontend-client/pkg/client/informers/externalversions/internalinterfaces",
     "common/microfrontend-client/pkg/client/informers/externalversions/ui",
@@ -1134,6 +1136,7 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned/fake",
     "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
