@@ -226,8 +226,7 @@
   version = "v0.1.43"
 
 [[projects]]
-  branch = "ns-backup-test-refactor"
-  digest = "1:bd7b82dd73876dc10cd5f549fa197bbb0739e5acc6c2ba0ed9fd2f819c9ccd73"
+  digest = "1:f69b0b66558c0f69004e68c53de80f0bdf1a23c60ed2245d53de30286fa1ce5b"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/microfrontend-client/pkg/apis/ui",
@@ -273,8 +272,7 @@
     "tests/end-to-end/backup-restore-test/utils/fetch-dex-token",
   ]
   pruneopts = "UT"
-  revision = "838f389a24b637c1e983b719427acca2e973e288"
-  source = "https://github.com/sjanota/kyma"
+  revision = "7e6a7ca01ae5a402a3620ad227bca5c1d5638450"
 
 [[projects]]
   digest = "1:33422d238f147d247752996a26574ac48dcf472976eda7f5134015f06bf16563"
