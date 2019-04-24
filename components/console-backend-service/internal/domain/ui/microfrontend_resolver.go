@@ -11,8 +11,8 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=microfrontendSvc -output=automock -outpkg=automock -case=underscore
-type microfrontendSvc interface {
+//go:generate mockery -name=microfrontendLister -output=automock -outpkg=automock -case=underscore
+type microfrontendLister interface {
 	List(namespace string) ([]*v1alpha1.MicroFrontend, error)
 }
 
@@ -23,13 +23,13 @@ type gqlMicrofrontendConverter interface {
 }
 
 type microfrontendResolver struct {
-	microfrontendSvc       microfrontendSvc
+	microfrontendLister    microfrontendLister
 	microfrontendConverter gqlMicrofrontendConverter
 }
 
-func newMicrofrontendResolver(microfrontendSvc microfrontendSvc) *microfrontendResolver {
+func newMicrofrontendResolver(microfrontendLister microfrontendLister) *microfrontendResolver {
 	return &microfrontendResolver{
-		microfrontendSvc:       microfrontendSvc,
+		microfrontendLister:    microfrontendLister,
 		microfrontendConverter: &microfrontendConverter{},
 	}
 }
@@ -38,7 +38,7 @@ func (r *microfrontendResolver) MicrofrontendsQuery(ctx context.Context, namespa
 	var items []*v1alpha1.MicroFrontend
 	var err error
 
-	items, err = r.microfrontendSvc.List(namespace)
+	items, err = r.microfrontendLister.List(namespace)
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Microfrontends))
