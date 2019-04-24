@@ -74,6 +74,10 @@ rules:
   resources: ["eventactivations"]
   verbs: ["create", "get", "watch", "list", "delete"]
 
+# Namespace controller
+- apiGroup: [""]
+  resources: ["resourcequotas"]
+  verbs: ["get", "list", "watch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1
