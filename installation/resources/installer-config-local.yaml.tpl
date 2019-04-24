@@ -52,6 +52,7 @@ metadata:
 data:
   gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
+  gateways.istio-ingressgateway.autoscaleEnabled: "false"
 
   pilot.resources.limits.memory: 1024Mi
   pilot.resources.limits.cpu: 200m
