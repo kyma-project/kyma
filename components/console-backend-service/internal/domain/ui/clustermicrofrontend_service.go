@@ -3,7 +3,7 @@ package ui
 import (
 	"fmt"
 
-	uiV1alpha1v "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -17,12 +17,12 @@ func newClusterMicrofrontendService(informer cache.SharedIndexInformer) *cluster
 	}
 }
 
-func (svc *clusterMicrofrontendService) List() ([]*uiV1alpha1v.ClusterMicroFrontend, error) {
+func (svc *clusterMicrofrontendService) List() ([]*v1alpha1.ClusterMicroFrontend, error) {
 	items := svc.informer.GetStore().List()
 
-	var clusterMicrofrontends []*uiV1alpha1v.ClusterMicroFrontend
+	var clusterMicrofrontends []*v1alpha1.ClusterMicroFrontend
 	for _, item := range items {
-		clusterMicrofrontend, ok := item.(*uiV1alpha1v.ClusterMicroFrontend)
+		clusterMicrofrontend, ok := item.(*v1alpha1.ClusterMicroFrontend)
 		if !ok {
 			return nil, fmt.Errorf("Incorrect item type: %T, should be: *ClusterMicrofrontend", item)
 		}
