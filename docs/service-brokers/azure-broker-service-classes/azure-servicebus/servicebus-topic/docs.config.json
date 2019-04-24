@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure Service Bus Topic",
-      "description": "Documentation for Azure Service Bus Topic.",
-      "id": "dc6d1545-4391-4c7e-ac7e-a8463787fb93",
-      "type":"Service Class"
-    }
-}
