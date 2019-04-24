@@ -11,7 +11,7 @@ data:
     window.clusterConfig = {
       graphqlApiUrl: 'https://console-backend.{{ .Values.global.ingress.domainName }}/graphql',
       subscriptionsApiUrl: 'wss://console-backend.{{ .Values.global.ingress.domainName }}/graphql',
-      DEFAULT_CONFIGURATION_NAME: {{ .Values.global.cfgReposUrlName }},
+      DEFAULT_CONFIGURATION_NAME: '{{ .Values.global.cfgReposUrlName }}',
       HELM_BROKER_IS_DEVELOPMENT_MODE: {{ .Values.global.isDevelopMode }}
     };
   nginx.conf: |
