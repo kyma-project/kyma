@@ -62,7 +62,8 @@ func TestServiceCatalogContainsABServiceClasses(t *testing.T) {
 	k8sClient, err := corev1.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 	releaseNS := os.Getenv(releaseNamespaceEnvName)
-	fixApp := fixApplication()
+	name := fmt.Sprintf("test-acc-app-%s", rand.String(4))
+	fixApp := fixApplication(name)
 
 	broker := brokerURL{
 		namespace: fmt.Sprintf("test-acc-ns-broker-%s", rand.String(4)),
@@ -92,7 +93,7 @@ func TestServiceCatalogContainsABServiceClasses(t *testing.T) {
 
 	// when
 	t.Log("Creating ApplicationMapping")
-	_, err = mClient.ApplicationconnectorV1alpha1().ApplicationMappings(broker.namespace).Create(fixApplicationMapping())
+	_, err = mClient.ApplicationconnectorV1alpha1().ApplicationMappings(broker.namespace).Create(fixApplicationMapping(name))
 	require.NoError(t, err)
 
 	// then
@@ -129,10 +130,11 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 	scClient, err := scc.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
+	name := fmt.Sprintf("test-acc-app-%s", rand.String(4))
 	namespace := fmt.Sprintf("test-acc-ns-broker-%s", rand.String(4))
 
 	t.Log("Creating Application")
-	app, err := aClient.ApplicationconnectorV1alpha1().Applications().Create(fixApplication())
+	app, err := aClient.ApplicationconnectorV1alpha1().Applications().Create(fixApplication(name))
 	require.NoError(t, err)
 
 	t.Logf("Creating Namespace %s", namespace)
@@ -140,7 +142,7 @@ func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {
 	require.NoError(t, err)
 
 	t.Log("Creating ApplicationMapping")
-	am, err := mClient.ApplicationconnectorV1alpha1().ApplicationMappings(namespace).Create(fixApplicationMapping())
+	am, err := mClient.ApplicationconnectorV1alpha1().ApplicationMappings(namespace).Create(fixApplicationMapping(name))
 	require.NoError(t, err)
 
 	// when
@@ -185,14 +187,14 @@ func (b *brokerURL) buildURL(releaseNS string) string {
 	return fmt.Sprintf("http://%s%s.%s.svc.cluster.local", b.prefix, b.namespace, releaseNS)
 }
 
-func fixApplication() *appTypes.Application {
+func fixApplication(name string) *appTypes.Application {
 	return &appTypes.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-acc-app",
+			Name: name,
 		},
 		Spec: appTypes.ApplicationSpec{
 			Description:      "Application used by acceptance test",
@@ -203,10 +205,10 @@ func fixApplication() *appTypes.Application {
 					ID:   "id-00000-1234-test",
 					Name: "provider-4951",
 					Labels: map[string]string{
-						"connected-app": "test-acc-app",
+						"connected-app": name,
 					},
 					ProviderDisplayName: "provider",
-					DisplayName:         "test-acc-app",
+					DisplayName:         name,
 					Description:         "Application Service Class used by acceptance test",
 					Tags:                []string{},
 					Entries: []appTypes.Entry{
@@ -222,14 +224,14 @@ func fixApplication() *appTypes.Application {
 	}
 }
 
-func fixApplicationMapping() *mappingTypes.ApplicationMapping {
+func fixApplicationMapping(name string) *mappingTypes.ApplicationMapping {
 	return &mappingTypes.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ApplicationMapping",
 			APIVersion: "applicationconnector.kyma-project.io/v1alpha1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
-			Name: "test-acc-app",
+			Name: name,
 		},
 	}
 }
