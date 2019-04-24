@@ -13,15 +13,15 @@ type gqlSelfSubjectRulesConverter struct {
 }
 
 // ToGQL provides a mock function with given fields: in
-func (_m *gqlSelfSubjectRulesConverter) ToGQL(in *v1.SelfSubjectRulesReview) ([]*gqlschema.ResourceRule, error) {
+func (_m *gqlSelfSubjectRulesConverter) ToGQL(in *v1.SelfSubjectRulesReview) ([]gqlschema.ResourceRule, error) {
 	ret := _m.Called(in)
 
-	var r0 []*gqlschema.ResourceRule
-	if rf, ok := ret.Get(0).(func(*v1.SelfSubjectRulesReview) []*gqlschema.ResourceRule); ok {
+	var r0 []gqlschema.ResourceRule
+	if rf, ok := ret.Get(0).(func(*v1.SelfSubjectRulesReview) []gqlschema.ResourceRule); ok {
 		r0 = rf(in)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]*gqlschema.ResourceRule)
+			r0 = ret.Get(0).([]gqlschema.ResourceRule)
 		}
 	}
 

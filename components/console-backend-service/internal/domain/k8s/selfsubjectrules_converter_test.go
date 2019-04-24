@@ -17,8 +17,8 @@ func TestRelfSubjectRulesConverter_ToGQL(t *testing.T) {
 		result, err := converter.ToGQL(in)
 		require.NoError(t, err)
 
-		expected := []*gqlschema.ResourceRule{
-			&gqlschema.ResourceRule{
+		expected := []gqlschema.ResourceRule{
+			gqlschema.ResourceRule{
 				Verbs: []string{
 					"foo", "bar",
 				},
@@ -36,7 +36,7 @@ func TestRelfSubjectRulesConverter_ToGQL(t *testing.T) {
 
 	t.Run("Empty", func(t *testing.T) {
 		converter := &selfSubjectRulesConverter{}
-		expected := []*gqlschema.ResourceRule{}
+		expected := []gqlschema.ResourceRule{}
 		result, err := converter.ToGQL(&authv1.SelfSubjectRulesReview{})
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)

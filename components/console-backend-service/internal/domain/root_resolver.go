@@ -472,7 +472,7 @@ func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *in
 	return r.k8s.SecretsQuery(ctx, namespace, first, offset)
 }
 
-func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) (*gqlschema.SelfSubjectRules, error) {
+func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
 	return r.k8s.SelfSubjectRulesQuery(ctx, namespace)
 }
 

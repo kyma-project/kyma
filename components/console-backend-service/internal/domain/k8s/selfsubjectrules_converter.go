@@ -8,14 +8,14 @@ import (
 type selfSubjectRulesConverter struct {
 }
 
-func (c *selfSubjectRulesConverter) ToGQL(in *v1.SelfSubjectRulesReview) ([]*gqlschema.ResourceRule, error) {
+func (c *selfSubjectRulesConverter) ToGQL(in *v1.SelfSubjectRulesReview) ([]gqlschema.ResourceRule, error) {
 	if in == nil {
 		return nil, nil
 	}
 
-	result := make([]*gqlschema.ResourceRule, len(in.Status.ResourceRules))
+	result := make([]gqlschema.ResourceRule, len(in.Status.ResourceRules))
 	for i, resourceRule := range in.Status.ResourceRules {
-		result[i] = &gqlschema.ResourceRule{
+		result[i] = gqlschema.ResourceRule{
 			Verbs:     resourceRule.Verbs,
 			APIGroups: resourceRule.APIGroups,
 			Resources: resourceRule.Resources,

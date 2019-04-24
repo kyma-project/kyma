@@ -14,7 +14,7 @@ import (
 
 func TestSelfSubjectRulesQuery(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		expected := []*gqlschema.ResourceRule{}
+		expected := []gqlschema.ResourceRule{}
 
 		in := &authv1.SelfSubjectRulesReview{
 			TypeMeta: metav1.TypeMeta{
