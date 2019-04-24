@@ -151,8 +151,8 @@
   version = "v9.0.0"
 
 [[projects]]
-  branch = "resilient-http"
-  digest = "1:8c108de91118be7bec68a358ac51fd9feeb62aa3a79910ab9b26cb171c743599"
+  branch = "master"
+  digest = "1:4c09fb609e59deeeae5b3a4eb86ccf3837843d6e0bbfec0f066f540299b806df"
   name = "github.com/kyma-project/kyma"
   packages = [
     "common/ingressgateway",
@@ -173,8 +173,7 @@
     "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "8290151b2b7d16a33ec242b52a4f0c52b0285331"
-  source = "https://github.com/sjanota/kyma"
+  revision = "d0e3a6dad66e37fae2fe4a362202bc9c868ce8b3"
 
 [[projects]]
   digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"

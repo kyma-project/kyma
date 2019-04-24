@@ -40,8 +40,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  branch = "resilient-http"
-  source = "https://github.com/sjanota/kyma"
+  branch = "master"
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
