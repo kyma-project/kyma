@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 
+	namespacecontroller "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/namespace-controller"
+
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
 	"github.com/sirupsen/logrus"
@@ -121,6 +123,7 @@ func main() {
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
 		"EventBusUpgradeTest":             eventbus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
+		"NamespaceUpgradeTest":            namespacecontroller.New(k8sCli),
 		"AssetStoreUpgradeTest":           assetstore.NewAssetStoreUpgradeTest(dynamicCli),
 		"HeadlessCMSUpgradeTest":          cms.NewHeadlessCmsUpgradeTest(dynamicCli),
 	}
