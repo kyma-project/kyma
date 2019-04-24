@@ -3,4 +3,4 @@ global:
     image:
       registry: eu.gcr.io/kyma-project/incubator
       dir: develop/
-      version: dc5dc284
+      version: c919e4ae

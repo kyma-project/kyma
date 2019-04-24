@@ -10,7 +10,7 @@ echo "----------------------------"
 
 kc="kubectl $(context_arg)"
 
-${kc} get clustertestsuites.testing.kyma-project.io
+${kc} get clustertestsuites.testing.kyma-project.io > /dev/null 2>&1
 if [[ $? -eq 1 ]]
 then
    echo "ERROR: script requires ClusterTestSuite CRD"
@@ -67,14 +67,14 @@ do
     sleep 60
 done
 
-echo "ClusterTestSuite details:"
-kubectl get cts ${suiteName} -oyaml
-
 echo "Test summary"
-kubectl get cts  ${suiteName} -o=go-template --template='{{range .status.results}}{{printf "Test status: %s - %s\n" .name .status}}{{end}}'
+kubectl get cts  ${suiteName} -o=go-template --template='{{range .status.results}}{{printf "Test status: %s - %s" .name .status }}{{ if gt (len .executions) 1 }}{{ print " (Retried)" }}{{end}}{{print "\n"}}{{end}}'
 
 waitForTerminationAndPrintLogs ${suiteName}
 cleanupExitCode=$?
+
+echo "ClusterTestSuite details:"
+kubectl get cts ${suiteName} -oyaml
 
 kubectl delete cts ${suiteName}
 

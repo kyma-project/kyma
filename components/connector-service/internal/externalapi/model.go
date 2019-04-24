@@ -29,8 +29,8 @@ type mgmtInfoReponse struct {
 
 type mgmtURLs struct {
 	*clientcontext.RuntimeURLs
-	RenewCertURL      string `json:"renewCertUrl"`
-	RevocationCertURL string `json:"revocationCertUrl"`
+	RenewCertURL  string `json:"renewCertUrl"`
+	RevokeCertURL string `json:"revokeCertUrl"`
 }
 
 type api struct {
