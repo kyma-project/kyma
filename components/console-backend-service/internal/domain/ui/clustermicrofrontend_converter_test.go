@@ -18,14 +18,6 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
 		placement := "cluster"
-		navigationNodes := []v1alpha1.NavigationNode{
-			v1alpha1.NavigationNode{
-				Label:            "test-mf",
-				NavigationPath:   "test-path",
-				ViewURL:          "/test/viewUrl",
-				ShowInNavigation: true,
-			},
-		}
 
 		item := v1alpha1.ClusterMicroFrontend{
 			ObjectMeta: metav1.ObjectMeta{
@@ -37,7 +29,14 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 					Version:         version,
 					Category:        category,
 					ViewBaseURL:     viewBaseUrl,
-					NavigationNodes: navigationNodes,
+					NavigationNodes: []v1alpha1.NavigationNode{
+						v1alpha1.NavigationNode{
+							Label:            "test-mf",
+							NavigationPath:   "test-path",
+							ViewURL:          "/test/viewUrl",
+							ShowInNavigation: true,
+						},
+					},
 				},
 			},
 		}
@@ -48,7 +47,14 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 			Category:        category,
 			ViewBaseURL:     viewBaseUrl,
 			Placement:       placement,
-			NavigationNodes: make([]gqlschema.NavigationNode, 0, len(navigationNodes)),
+			NavigationNodes: []gqlschema.NavigationNode{
+				gqlschema.NavigationNode{
+					Label:            "test-mf",
+					NavigationPath:   "test-path",
+					ViewURL:          "/test/viewUrl",
+					ShowInNavigation: true,
+				},
+			},
 		}
 
 		result, err := converter.ToGQL(&item)
@@ -78,14 +84,6 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"
 	placement := "cluster"
-	navigationNodes := []v1alpha1.NavigationNode{
-		v1alpha1.NavigationNode{
-			Label:            "test-mf",
-			NavigationPath:   "test-path",
-			ViewURL:          "/test/viewUrl",
-			ShowInNavigation: true,
-		},
-	}
 
 	item := v1alpha1.ClusterMicroFrontend{
 		ObjectMeta: metav1.ObjectMeta{
@@ -97,7 +95,14 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 				Version:         version,
 				Category:        category,
 				ViewBaseURL:     viewBaseUrl,
-				NavigationNodes: navigationNodes,
+				NavigationNodes: []v1alpha1.NavigationNode{
+					v1alpha1.NavigationNode{
+						Label:            "test-mf",
+						NavigationPath:   "test-path",
+						ViewURL:          "/test/viewUrl",
+						ShowInNavigation: true,
+					},
+				},
 			},
 		},
 	}
@@ -108,7 +113,14 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 		Category:        category,
 		ViewBaseURL:     viewBaseUrl,
 		Placement:       placement,
-		NavigationNodes: make([]gqlschema.NavigationNode, 0, len(navigationNodes)),
+		NavigationNodes: []gqlschema.NavigationNode{
+			gqlschema.NavigationNode{
+				Label:            "test-mf",
+				NavigationPath:   "test-path",
+				ViewURL:          "/test/viewUrl",
+				ShowInNavigation: true,
+			},
+		},
 	}
 
 	t.Run("Success", func(t *testing.T) {

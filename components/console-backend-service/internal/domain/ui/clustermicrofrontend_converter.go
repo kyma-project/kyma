@@ -12,13 +12,18 @@ func (c *clusterMicrofrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFronte
 		return nil, nil
 	}
 
+	navigationNodes, err := c.NavigationNodesToGQLs(in.Spec.CommonMicroFrontendSpec.NavigationNodes)
+	if err != nil {
+		return nil, err
+	}
+
 	mf := gqlschema.ClusterMicrofrontend{
 		Name:            in.Name,
 		Placement:       in.Spec.Placement,
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
 		Category:        in.Spec.CommonMicroFrontendSpec.Category,
 		ViewBaseURL:     in.Spec.CommonMicroFrontendSpec.ViewBaseURL,
-		NavigationNodes: make([]gqlschema.NavigationNode, 0, len(in.Spec.CommonMicroFrontendSpec.NavigationNodes)),
+		NavigationNodes: navigationNodes,
 	}
 
 	return &mf, nil
@@ -28,6 +33,36 @@ func (c *clusterMicrofrontendConverter) ToGQLs(in []*uiV1alpha1v.ClusterMicroFro
 	var result []gqlschema.ClusterMicrofrontend
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
+		if err != nil {
+			return nil, err
+		}
+
+		if converted != nil {
+			result = append(result, *converted)
+		}
+	}
+	return result, nil
+}
+
+func (c *clusterMicrofrontendConverter) NavigationNodeToGQL(in *uiV1alpha1v.NavigationNode) (*gqlschema.NavigationNode, error) {
+	if in == nil {
+		return nil, nil
+	}
+
+	navigationNode := gqlschema.NavigationNode{
+		Label:            in.Label,
+		NavigationPath:   in.NavigationPath,
+		ViewURL:          in.ViewURL,
+		ShowInNavigation: in.ShowInNavigation,
+	}
+
+	return &navigationNode, nil
+}
+
+func (c *clusterMicrofrontendConverter) NavigationNodesToGQLs(in []uiV1alpha1v.NavigationNode) ([]gqlschema.NavigationNode, error) {
+	var result []gqlschema.NavigationNode
+	for _, u := range in {
+		converted, err := c.NavigationNodeToGQL(&u)
 		if err != nil {
 			return nil, err
 		}

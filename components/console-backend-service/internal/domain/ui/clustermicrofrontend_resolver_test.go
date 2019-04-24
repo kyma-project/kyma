@@ -21,14 +21,6 @@ func TestClusterMicrofrontendResolver_ClusterMicrofrontendsQuery(t *testing.T) {
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
 		placement := "cluster"
-		navigationNodes := []v1alpha1.NavigationNode{
-			v1alpha1.NavigationNode{
-				Label:            "test-mf",
-				NavigationPath:   "test-path",
-				ViewURL:          "/test/viewUrl",
-				ShowInNavigation: true,
-			},
-		}
 
 		item := &v1alpha1.ClusterMicroFrontend{
 			ObjectMeta: metav1.ObjectMeta{
@@ -37,10 +29,17 @@ func TestClusterMicrofrontendResolver_ClusterMicrofrontendsQuery(t *testing.T) {
 			Spec: v1alpha1.ClusterMicroFrontendSpec{
 				Placement: placement,
 				CommonMicroFrontendSpec: v1alpha1.CommonMicroFrontendSpec{
-					Version:         version,
-					Category:        category,
-					ViewBaseURL:     viewBaseUrl,
-					NavigationNodes: navigationNodes,
+					Version:     version,
+					Category:    category,
+					ViewBaseURL: viewBaseUrl,
+					NavigationNodes: []v1alpha1.NavigationNode{
+						v1alpha1.NavigationNode{
+							Label:            "test-mf",
+							NavigationPath:   "test-path",
+							ViewURL:          "/test/viewUrl",
+							ShowInNavigation: true,
+						},
+					},
 				},
 			},
 		}
@@ -50,12 +49,19 @@ func TestClusterMicrofrontendResolver_ClusterMicrofrontendsQuery(t *testing.T) {
 		}
 
 		expectedItem := gqlschema.ClusterMicrofrontend{
-			Name:            name,
-			Version:         version,
-			Category:        category,
-			ViewBaseURL:     viewBaseUrl,
-			Placement:       placement,
-			NavigationNodes: make([]gqlschema.NavigationNode, 0, len(navigationNodes)),
+			Name:        name,
+			Version:     version,
+			Category:    category,
+			ViewBaseURL: viewBaseUrl,
+			Placement:   placement,
+			NavigationNodes: []gqlschema.NavigationNode{
+				gqlschema.NavigationNode{
+					Label:            "test-mf",
+					NavigationPath:   "test-path",
+					ViewURL:          "/test/viewUrl",
+					ShowInNavigation: true,
+				},
+			},
 		}
 
 		expectedItems := []gqlschema.ClusterMicrofrontend{
