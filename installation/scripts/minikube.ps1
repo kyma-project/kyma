@@ -89,7 +89,8 @@ function AddDevDomainsToEtcHosts([string[]]$hostnamesPrefixes) {
     $n = 6 # 7 hostnames in one line, others in next line. Windows can't read more than 9 hostnames in the same line.
     $hostnames = $hostnamesPrefixes | ForEach-Object {"$_.${DOMAIN}"} # for minikube ssh
     $hostnames1 = $hostnamesPrefixes[0..$n] | ForEach-Object {"$_.${DOMAIN}"}
-    $hostnames2 = $hostnamesPrefixes[ - ($n + 1)..-1] | ForEach-Object {"$_.${DOMAIN}"}
+    $hostnames2 = $hostnamesPrefixes[ - ($n + 1)..($n * 2)] | ForEach-Object {"$_.${DOMAIN}"}
+    $hostnames3 = $hostnamesPrefixes[ - ($n * 2 + 1)..-1] | ForEach-Object {"$_.${DOMAIN}"}
 
     $cmd = "minikube ip"
     $minikubeIp = (Invoke-Expression -Command $cmd | Out-String).Trim()
@@ -105,6 +106,7 @@ function AddDevDomainsToEtcHosts([string[]]$hostnamesPrefixes) {
 
     "${minikubeIp} ${hostnames1}" | Out-File $winHostsPath -Append
     "${minikubeIp} ${hostnames2}" | Out-File $winHostsPath -Append
+    "${minikubeIp} ${hostnames3}" | Out-File $winHostsPath -Append
 }
 
 CheckIfMinikubeIsInitialized
