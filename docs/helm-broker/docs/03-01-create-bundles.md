@@ -21,7 +21,7 @@ sample-bundle/
    │    │   └── values.yaml                  # Default configuration values in this plan for a chart defined in the `chart` directory
    │    └── ....
    │
-   └── docs/                                 # A directory which contains a documentation for this bundle
+   └── docs/                                 # A directory which contains documentation for this bundle
         ├── meta.yaml                        # A file which contains metadata information about documentation for this bundle
         ├── {assets}                         # Files with documentation and assets
         └── ....
@@ -92,25 +92,25 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 ## docs directory
 
-In the `docs` directory we specify documentation for the bundle and for the wrapped Helm Chart. You can define a `meta.yaml` file inside the `docs` folder which holds the information on how documentation for a bundle should be uploaded.
-Currently we provide the documentation for bundle using the ClusterDocsTopics because in Kyma the Helm Broker is installed as a ClusterServiceBroker.
-If the `docs/meta.yaml` is specified the Helm Broker tries to create the ClusterDocsTopic for this bundle. Below you can see the example structure of the `meta.yaml` file.
+In the `docs` directory, provide documentation for your bundle and for the wrapped Helm chart. You can also define a `meta.yaml` file inside the `docs` folder, which provides information on how documentation for the bundle is uploaded.
+As the Helm Broker is installed as a ClusterServiceBroker, documentation for bundles is provided using ClusterDocsTopics.
+If you specify the `meta.yaml`, the Helm Broker tries to create a ClusterDocsTopic for this bundle. The example structure of the `meta.yaml` file looks as follows:
 ```
 docs:
-    - template:                     # template describes the ClusterDocsTopic that will be created.
-        displayName: "Doc for redis bundle"
+    - template:                     # A template which describes the ClusterDocsTopic that will be created
+        displayName: "Docs for the Redis bundle"
         description: "Overall documentation"
-        sources:                    # list of files to upload as a Asset
+        sources:                    # A list of files that are uploaded as assets
           - type: markdown
-            name: markdown-files    # must be unique within sources
+            name: markdown-files    # A name that must be unique within sources
             mode: package           # defines that file under below 
-            url: abc.pl             # if not provided then Helm broker will inject the full repository URL for this bundle
+            url: abc.pl             # A URL to the documentation. If not provided, the Helm broker will inject the full repository URL for this bundle.
             filter: /docs/bundles
 ```
 For more information about the fields you can provide and ClusterDocsTopics see the following [file](https://kyma-project.io/docs/components/headless-cms/#custom-resource-clusterdocstopic).
-For now, we support only one entry in the `docs` array.
+>**NOTE:** You can provide only one entry in the `docs` array.
 
-The Helm Broker can provision a broker which provides its own ServiceClasses. You can see how to provide a documentation for them in the following [document](./03-04-bundles-docs.md).
+The Helm Broker can provision a broker which provides its own ServiceClasses. To learn how to upload documentation for those classes, read [this](#details-bundles-docs.md) document.
 
 ## Troubleshooting
 
