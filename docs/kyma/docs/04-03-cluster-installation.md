@@ -209,6 +209,7 @@ Set the following environment variables:
     ```
 
 5. Install Tiller and add additional privileges to be able to access readiness probes endpoints on your AKS cluster.
+
     * Installation from release
     ```
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_RELEASE_VERSION/installation/resources/tiller.yaml
@@ -258,7 +259,7 @@ Use the GitHub release 0.8 or higher.
     ```
     kubectl apply -f my-kyma.yaml
     ```
-    >**NOTE:** If you get the `Error from server (MethodNotAllowed)` error, run the command again before proceeding to the next step.
+    >**NOTE:** If you get `Error from server (MethodNotAllowed)`, run the command again before proceeding to the next step.
 
 2. Check if the Pods of Tiller and the Kyma Installer are running:
     ```

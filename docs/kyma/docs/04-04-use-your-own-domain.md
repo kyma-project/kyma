@@ -449,7 +449,7 @@ Use the GitHub release 0.8 or higher.
     ```
     kubectl apply -f my-kyma.yaml
     ```
-    >**NOTE:** If you get the `Error from server (MethodNotAllowed)` error, run the command again before proceeding to the next step.
+    >**NOTE:** If you get `Error from server (MethodNotAllowed)`, run the command again before proceeding to the next step.
 
 2. Check if the Pods of Tiller and the Kyma Installer are running:
     ```
