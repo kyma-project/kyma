@@ -4,8 +4,7 @@ import (
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/tools/clientcmd"
-	"os"
+	"k8s.io/client-go/rest"
 	"time"
 )
 
@@ -20,14 +19,7 @@ type tokenRequestClient struct {
 	namespace string
 }
 
-func NewTokenRequestClient(namespace string) (TokenRequestClient, error) {
-	kubeconfig := os.Getenv("KUBECONFIG")
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		return nil, err
-	}
-
+func NewTokenRequestClient(config *rest.Config, namespace string) (TokenRequestClient, error) {
 	clientSet, err := versioned.NewForConfig(config)
 	if err != nil {
 		return nil, err

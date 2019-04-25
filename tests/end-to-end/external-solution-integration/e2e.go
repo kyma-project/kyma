@@ -1,4 +1,45 @@
-package external_solution_integration
+package main
+
+import (
+	"fmt"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testsuite"
+	"github.com/sirupsen/logrus"
+	"k8s.io/client-go/rest"
+	"time"
+)
+
+func main() {
+	time.Sleep(60 * time.Second)
+
+	config, err := rest.InClusterConfig()
+	if err != nil {
+		panic(err)
+	}
+
+	ts, err := testsuite.NewTestSuite(config, logrus.New())
+	if err != nil {
+		panic(err)
+	}
+
+	err = ts.CreateResources()
+	if err != nil {
+		panic(err)
+	}
+
+	//cert, err := ts.FetchCertificate()
+
+	id, err := ts.RegisterService()
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	fmt.Println("ID:", id)
+
+	err = ts.CreateInstance(id)
+	if err != nil {
+		panic(err)
+	}
+}
 
 //TODO: WIP, delete everything and provide integration with upgrade and backup interfaces along with 'basic' scenario
 //import (
@@ -110,7 +151,7 @@ package external_solution_integration
 //		eventingClient, err := testkit.NewEventingClient(namespace)
 //		So(err, ShouldBeNil)
 //
-//		Convey("When binding is created", func() {
+//		Convey("When mapping is created", func() {
 //
 //			_, err := eventingClient.CreateMapping(appName)
 //			So(err, ShouldBeNil)

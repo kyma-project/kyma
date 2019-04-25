@@ -4,9 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit/utils"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/util/rand"
 	"net/http"
 )
 
@@ -121,29 +119,4 @@ func (rc *registryClient) DeleteService(id string) error {
 	}
 
 	return nil
-}
-
-func PrepareAppService(url string, labels map[string]string) *ServiceDetails {
-	return &ServiceDetails{
-		Name:        "test service",
-		Provider:    "service provider",
-		Description: "service description",
-		Identifier:  generateIdentifier(),
-		Labels:      labels,
-		Api: &API{
-			Spec:      ApiRawSpec,
-			TargetUrl: url,
-		},
-		Documentation: &Documentation{
-			DisplayName: "documentation name",
-			Description: "documentation description",
-			Type:        "documentation type",
-			Tags:        []string{"tag1", "tag2"},
-			Docs:        []DocsObject{{Title: "docs title", Type: "docs type", Source: "docs source"}},
-		},
-	}
-}
-
-func generateIdentifier() string {
-	return fmt.Sprintf("identifier-%s", rand.String(8))
 }

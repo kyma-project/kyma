@@ -5,8 +5,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"os"
 )
 
 type K8sResourcesClient interface {
@@ -23,14 +21,7 @@ type k8sResourcesClient struct {
 	namespace         string
 }
 
-func NewK8sResourcesClient(namespace string) (K8sResourcesClient, error) {
-	kubeconfig := os.Getenv("KUBECONFIG")
-
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
-	if err != nil {
-		return nil, err
-	}
-
+func NewK8sResourcesClient(config *restclient.Config, namespace string) (K8sResourcesClient, error) {
 	return initClient(config, namespace)
 }
 

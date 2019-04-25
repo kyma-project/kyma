@@ -3,7 +3,6 @@ package resourceskit
 import (
 	scv1 "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	acv1 "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	sbuv1 "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	sbuClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -12,7 +11,7 @@ import (
 )
 
 type ServiceCatalogClient interface {
-	CreateServiceInstance(id, siName string, service *acv1.Service) (*scv1.ServiceInstance, error)
+	CreateServiceInstance(siName, siID, serviceID string) (*scv1.ServiceInstance, error)
 	DeleteServiceInstance(siName string) error
 	CreateServiceBinding(id, sbName, svcInstanceName, secretName string) (*scv1.ServiceBinding, error)
 	DeleteServiceBinding(sbName string) error
@@ -40,7 +39,7 @@ func NewServiceCatalogClient(config *rest.Config, namespace string) (ServiceCata
 	return &serviceCatalogClient{scClient: scClientSet, sbuClient: sbuClientSet, namespace: namespace}, nil
 }
 
-func (c *serviceCatalogClient) CreateServiceInstance(id, siName string, service *acv1.Service) (*scv1.ServiceInstance, error) {
+func (c *serviceCatalogClient) CreateServiceInstance(siName, siID, serviceID string) (*scv1.ServiceInstance, error) {
 	serviceInstance := &scv1.ServiceInstance{
 		TypeMeta: v1.TypeMeta{Kind: "ServiceInstance", APIVersion: scv1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{
@@ -49,13 +48,13 @@ func (c *serviceCatalogClient) CreateServiceInstance(id, siName string, service 
 			Finalizers: []string{"kubernetes-incubator/service-catalog"},
 		},
 		Spec: scv1.ServiceInstanceSpec{
-			ExternalID: id,
+			ExternalID: siID,
 			Parameters: &runtime.RawExtension{},
 			ServiceClassRef: &scv1.LocalObjectReference{
-				Name: service.ID,
+				Name: serviceID,
 			},
 			ServicePlanRef: &scv1.LocalObjectReference{
-				Name: service.ID + "-plan",
+				Name: serviceID + "-plan",
 			},
 			UpdateRequests: 0,
 			UserInfo: &scv1.UserInfo{

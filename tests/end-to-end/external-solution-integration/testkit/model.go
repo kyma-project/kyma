@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+	"time"
 )
 
 var (
@@ -127,6 +128,14 @@ type DocsObject struct {
 type ErrorResponse struct {
 	Code  int    `json:"code"`
 	Error string `json:"error"`
+}
+
+type ExampleEvent struct {
+	EventType        string    `json:"event-type"`
+	EventTypeVersion string    `json:"event-type-version"`
+	EventID          string    `json:"event-id"`
+	EventTime        time.Time `json:"event-time"`
+	Data             string    `json:"data"`
 }
 
 func parseErrorResponse(response *http.Response) error {

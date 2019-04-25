@@ -14,7 +14,7 @@ type EventingClient interface {
 	DeleteMapping(appName string, options *metav1.DeleteOptions) error
 	CreateEventActivation(appName string) (*acV1.EventActivation, error)
 	DeleteEventActivation(appName string, options *metav1.DeleteOptions) error
-	CreateSubscription(appName string) (*subscriptionV1.Subscription, error)
+	CreateSubscription(appName, endpoint, eventType, eventTypeVersion string) (*subscriptionV1.Subscription, error)
 	DeleteSubscription(appName string, options *metav1.DeleteOptions) error
 }
 
@@ -75,14 +75,14 @@ func (c *eventingClient) DeleteEventActivation(appName string, options *metav1.D
 	return c.appConnClientSet.ApplicationconnectorV1alpha1().EventActivations(c.namespace).Delete(appName, options)
 }
 
-func (c *eventingClient) CreateSubscription(appName string) (*subscriptionV1.Subscription, error) {
+func (c *eventingClient) CreateSubscription(appName, endpoint, eventType, eventTypeVersion string) (*subscriptionV1.Subscription, error) {
 	subSpec := subscriptionV1.SubscriptionSpec{
-		Endpoint:                      "http://e2e-lambda.production:8080",
+		Endpoint:                      endpoint,
 		IncludeSubscriptionNameHeader: true,
 		MaxInflight:                   400,
 		PushRequestTimeoutMS:          2000,
-		EventType:                     "order.created",
-		EventTypeVersion:              "v1",
+		EventType:                     eventType,
+		EventTypeVersion:              eventTypeVersion,
 		SourceID:                      appName,
 	}
 
