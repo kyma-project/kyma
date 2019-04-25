@@ -40,7 +40,7 @@ spec:
           - "--caSecretName={{ .Values.deployment.args.caSecretName }}"
           - "--rootCACertificateSecretName={{ .Values.deployment.args.rootCACertificateSecretName }}"
           - "--connectorServiceHost=connector-service.{{ .Values.global.ingress.domainName }}"
-          - "--gatewayHost=gateway.{{ .Values.global.applicationConnector.domainName }}"
+          - "--gatewayURL=https://gateway.{{ .Values.global.applicationConnector.domainName }}"
           - "--certificateProtectedHost=gateway.{{ .Values.global.applicationConnector.domainName }}"
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
           - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
