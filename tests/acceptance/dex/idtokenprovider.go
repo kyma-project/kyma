@@ -18,12 +18,17 @@ type idTokenProvider interface {
 	fetchIdToken() (string, error)
 }
 
+type HttpClient interface {
+	Get(url string) (resp *http.Response, err error)
+	PostForm(url string, data url.Values) (resp *http.Response, err error)
+}
+
 type dexIdTokenProvider struct {
-	httpClient *http.Client
+	httpClient HttpClient
 	config     idProviderConfig
 }
 
-func newDexIdTokenProvider(httpClient *http.Client, config idProviderConfig) idTokenProvider {
+func newDexIdTokenProvider(httpClient HttpClient, config idProviderConfig) idTokenProvider {
 	return &dexIdTokenProvider{httpClient, config}
 }
 

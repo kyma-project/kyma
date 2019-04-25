@@ -1,8 +1,9 @@
 package backupe2e
 
 import (
-	"fmt"
 	"time"
+
+	"github.com/avast/retry-go"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
@@ -13,42 +14,56 @@ import (
 
 const resourceQuotaObjName = "kyma-default"
 
-type namespaceControllerTest struct {
-	coreClient *kubernetes.Clientset
+type NamespaceControllerTest struct {
+	coreInterface kubernetes.Interface
 }
 
-func NewNamespaceControllerTest() (namespaceControllerTest, error) {
+func NewNamespaceControllerTestFromEnv() (NamespaceControllerTest, error) {
 	restConfig, err := config.NewRestClientConfig()
 	if err != nil {
-		return namespaceControllerTest{}, err
+		return NamespaceControllerTest{}, err
 	}
 
 	coreClient, err := kubernetes.NewForConfig(restConfig)
 	if err != nil {
-		return namespaceControllerTest{}, err
+		return NamespaceControllerTest{}, err
 	}
 
-	return namespaceControllerTest{
-		coreClient: coreClient,
+	return NamespaceControllerTest{
+		coreInterface: coreClient,
 	}, nil
 }
 
-func (n namespaceControllerTest) CreateResources(namespace string) {
-	err := n.labelTestNamespace(namespace)
+func NewNamespaceControllerTest(coreInterface kubernetes.Interface) NamespaceControllerTest {
+	return NamespaceControllerTest{
+		coreInterface: coreInterface,
+	}
+}
+
+func (n NamespaceControllerTest) CreateResources(namespace string) {
+	err := n.CreateResourcesError(namespace)
 	So(err, ShouldBeNil)
 }
 
-func (n namespaceControllerTest) TestResources(namespace string) {
-	err := n.waitForResourceQuota(namespace)
+func (n NamespaceControllerTest) CreateResourcesError(namespace string) error {
+	return n.labelTestNamespace(namespace)
+}
+
+func (n NamespaceControllerTest) TestResources(namespace string) {
+	err := n.TestResourcesError(namespace)
 	So(err, ShouldBeNil)
 }
 
-func (n namespaceControllerTest) DeleteResources(namespace string) {
+func (n NamespaceControllerTest) TestResourcesError(namespace string) error {
+	return n.waitForResourceQuota(namespace)
+}
+
+func (n NamespaceControllerTest) DeleteResources(namespace string) {
 	// There is not need to be implemented for this test.
 }
 
-func (n namespaceControllerTest) labelTestNamespace(namespaceName string) error {
-	namespace, err := n.coreClient.CoreV1().Namespaces().Get(namespaceName, metav1.GetOptions{})
+func (n NamespaceControllerTest) labelTestNamespace(namespaceName string) error {
+	namespace, err := n.coreInterface.CoreV1().Namespaces().Get(namespaceName, metav1.GetOptions{})
 	if err != nil {
 		return err
 	}
@@ -59,29 +74,18 @@ func (n namespaceControllerTest) labelTestNamespace(namespaceName string) error 
 	namespaceCopy := namespace.DeepCopy()
 	namespaceCopy.SetLabels(labels)
 
-	_, err = n.coreClient.CoreV1().Namespaces().Update(namespaceCopy)
+	_, err = n.coreInterface.CoreV1().Namespaces().Update(namespaceCopy)
 	return err
 }
 
-func (n namespaceControllerTest) waitForResourceQuota(namespaceName string) error {
-	timeout := time.After(5 * time.Minute)
-	tick := time.Tick(1 * time.Second)
-
-	var messages string
-
-	for {
-		select {
-		case <-tick:
-			_, err := n.coreClient.CoreV1().ResourceQuotas(namespaceName).Get(resourceQuotaObjName, metav1.GetOptions{})
-			if err != nil {
-				messages += fmt.Sprintf("%+v\n", err)
-				continue
-			}
-
-			return nil
-
-		case <-timeout:
-			return fmt.Errorf("unable to fetch resourcequota:\n %v", messages)
+func (n NamespaceControllerTest) waitForResourceQuota(namespaceName string) error {
+	return retry.Do(func() error {
+		_, err := n.coreInterface.CoreV1().ResourceQuotas(namespaceName).Get(resourceQuotaObjName, metav1.GetOptions{})
+		if err != nil {
+			return err
 		}
-	}
+		return nil
+	},
+		retry.Delay(500*time.Millisecond),
+	)
 }
