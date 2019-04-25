@@ -21,8 +21,10 @@ spec:
         - apiGroup: applicationconnector.kyma-project.io
           resource: applications
           verbs:
-            - watch
+            - create
             - list
+            - update
+            - delete
     - label: Application Details
       navigationPath: apps/details
       viewUrl: '/home/settings/apps'
