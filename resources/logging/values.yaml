@@ -199,7 +199,7 @@ global:
     path: eu.gcr.io/kyma-project
   test_logging:
     dir:
-    version: 1.0.0-rc2
+    version: 1.0.0
   logging:
     promtail:
       config:
