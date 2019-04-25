@@ -10,8 +10,6 @@ service:
 
 config:
   tillerTLSInsecure: true
-  cfgReposUrlName: "helm-repos-urls"
-  isDevelopMode: "false"
   storage:
     - driver: etcd
       provide:
@@ -28,6 +26,8 @@ config:
         bundle: ~
 
 global:
+  cfgReposUrlName: "helm-repos-urls"
+  isDevelopMode: "false"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
@@ -42,3 +42,5 @@ global:
   istio:
     gateway:
       name: kyma-gateway
+  ingress:
+    domainName: adfas
