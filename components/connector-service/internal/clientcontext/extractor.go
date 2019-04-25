@@ -38,7 +38,7 @@ func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.C
 
 	subject := ext.prepareSubject(appCtx.Tenant, appCtx.Group, appCtx.Application)
 
-	apiHosts, ok := ctx.Value(APIHostsKey).(ApiURLs)
+	apiHosts, ok := ctx.Value(ApiURLsKey).(ApiURLs)
 	if !ok {
 		return newClientCertificateContext(appCtx, subject), nil
 	}

@@ -25,8 +25,8 @@ const (
 	// SubjectHeader is key representing client certificate subject set in headers
 	SubjectHeader = "Client-Certificate-Subject"
 
-	// APIHostsKey is the key value for storing API hosts in context
-	APIHostsKey clientContextKey = "ApiURLs"
+	// ApiURLsKey is the key value for storing API hosts in context
+	ApiURLsKey clientContextKey = "ApiURLs"
 
 	// ClusterContextKey is the key value for storing cluster data in context
 	ClusterContextKey clientContextKey = "ClusterContext"
@@ -86,5 +86,5 @@ type ApiURLs struct {
 
 // ExtendContext extends provided context with ApiURLs
 func (r ApiURLs) ExtendContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, APIHostsKey, r)
+	return context.WithValue(ctx, ApiURLsKey, r)
 }
