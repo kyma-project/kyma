@@ -31,7 +31,7 @@ spec:
   ports:
     - port: {{ .Values.service.internalapi.port }}
       protocol: TCP
-      name: int-api-port
+      name: http
   selector:
     app: {{ .Chart.Name }}
     release: {{ .Chart.Name }}

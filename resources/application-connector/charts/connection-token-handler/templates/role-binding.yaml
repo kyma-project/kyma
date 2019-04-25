@@ -22,9 +22,9 @@ metadata:
     release: {{ .Chart.Name }}
     heritage: {{ .Release.Service }}
 subjects:
-- kind: User
-  name: system:serviceaccount:{{ .Values.global.namespace }}:default
-  apiGroup: rbac.authorization.k8s.io
+- kind: ServiceAccount
+  name: {{ .Chart.Name }}
+  namespace: {{ .Values.global.namespace }}
 roleRef:
   kind: ClusterRole
   name: {{ .Chart.Name }}-clusterrole

@@ -4,7 +4,14 @@ kind: ClusterRbacConfig
 metadata:
   name: default
 spec:
-  mode: {{ .Values.global.cluster.rbac.mode }}
+  mode: {{ .Values.global.rbac.mode }}
+{{- if .Values.global.isLocalEnv}}
   inclusion:
     services:
-{{ toYaml .Values.global.cluster.rbac.inclusion.services | indent 4 }}
+{{ toYaml .Values.global.rbac.minikube.inclusion.services | indent 4 }}
+{{- end }}
+{{- if not .Values.global.isLocalEnv}}
+  inclusion:
+    services:
+{{ toYaml .Values.global.rbac.cluster.inclusion.services | indent 4 }}
+{{- end }}

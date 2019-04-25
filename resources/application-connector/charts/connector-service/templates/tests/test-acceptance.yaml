@@ -11,6 +11,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: {{ .Chart.Name }}-tests
       containers:
       - name: {{ .Chart.Name }}-tests
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connector_service_tests.dir }}connector-service-tests:{{ .Values.global.connector_service_tests.version }}
