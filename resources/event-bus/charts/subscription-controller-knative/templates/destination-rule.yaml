@@ -1,0 +1,9 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: {{ template "subscription-controller-knative-metrics-destination-rule.name" . }}
+spec:
+  host: {{ template "subscription-controller-knative-metrics-service.name" . }}.{{ .Release.Namespace }}.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE
