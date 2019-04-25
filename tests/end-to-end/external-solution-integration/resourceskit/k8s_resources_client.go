@@ -2,6 +2,8 @@ package resourceskit
 
 import (
 	"github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
+	model "k8s.io/api/apps/v1"
+	core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -15,6 +17,11 @@ type K8sResourcesClient interface {
 	GetIngress(name string, options v1.GetOptions) (interface{}, error)
 	GetRole(name string, options v1.GetOptions) (interface{}, error)
 	GetRoleBinding(name string, options v1.GetOptions) (interface{}, error)
+	CreateDeployment(deployment *model.Deployment) (interface{}, error)
+	CreateService(service *core.Service) (interface{}, error)
+	DeleteService(name string, options *v1.DeleteOptions) error
+	DeleteDeployment(name string, options *v1.DeleteOptions) error
+	GetNamespace() string
 }
 
 type k8sResourcesClient struct {
@@ -70,4 +77,24 @@ func (c *k8sResourcesClient) GetRoleBinding(name string, options v1.GetOptions) 
 
 func (c *k8sResourcesClient) GetService(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.CoreV1().Services(c.namespace).Get(name, options)
+}
+
+func (c *k8sResourcesClient) CreateDeployment(deployment *model.Deployment) (interface{}, error) {
+	return c.coreClient.AppsV1().Deployments(c.namespace).Create(deployment)
+}
+
+func (c *k8sResourcesClient) CreateService(service *core.Service) (interface{}, error) {
+	return c.coreClient.CoreV1().Services(c.namespace).Create(service)
+}
+
+func (c *k8sResourcesClient) DeleteDeployment(name string, options *v1.DeleteOptions) error {
+	return c.coreClient.AppsV1().Deployments(c.namespace).Delete(name, options)
+}
+
+func (c *k8sResourcesClient) DeleteService(name string, options *v1.DeleteOptions) error {
+	return c.coreClient.CoreV1().Services(c.namespace).Delete(name, options)
+}
+
+func (c *k8sResourcesClient) GetNamespace() string {
+	return c.namespace
 }
