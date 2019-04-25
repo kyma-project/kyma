@@ -26,7 +26,7 @@ const (
 	SubjectHeader = "Client-Certificate-Subject"
 
 	// APIHostsKey is the key value for storing API hosts in context
-	APIHostsKey clientContextKey = "APIHosts"
+	APIHostsKey clientContextKey = "ApiURLs"
 
 	// ClusterContextKey is the key value for storing cluster data in context
 	ClusterContextKey clientContextKey = "ClusterContext"
@@ -79,12 +79,12 @@ type RuntimeURLs struct {
 	MetadataURL string `json:"metadataUrl"`
 }
 
-type APIHosts struct {
-	EventsHost   string
-	MetadataHost string
+type ApiURLs struct {
+	EventsBaseURL   string
+	MetadataBaseURL string
 }
 
-// ExtendContext extends provided context with APIHosts
-func (r APIHosts) ExtendContext(ctx context.Context) context.Context {
+// ExtendContext extends provided context with ApiURLs
+func (r ApiURLs) ExtendContext(ctx context.Context) context.Context {
 	return context.WithValue(ctx, APIHostsKey, r)
 }

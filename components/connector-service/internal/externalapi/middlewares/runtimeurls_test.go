@@ -1,11 +1,12 @@
 package middlewares
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/mocks"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/stretchr/testify/assert"
@@ -41,13 +42,14 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			ctxValue := ctx.Value(clientcontext.APIHostsKey).(clientcontext.APIHosts)
-			assert.Equal(t, fetchedGatewayHost, ctxValue.EventsHost)
-			assert.Equal(t, fetchedGatewayHost, ctxValue.MetadataHost)
+			ctxValue := ctx.Value(clientcontext.APIHostsKey).(clientcontext.ApiURLs)
+			assert.Equal(t, fetchedGatewayHost, ctxValue.EventsBaseURL)
+			assert.Equal(t, fetchedGatewayHost, ctxValue.MetadataBaseURL)
 			w.WriteHeader(http.StatusOK)
 		})
 
 		request, err := http.NewRequest(http.MethodGet, url, nil)
+		require.NoError(t, err)
 		request = request.WithContext(appCtx.ExtendContext(request.Context()))
 		require.NoError(t, err)
 
@@ -67,9 +69,9 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			ctxValue := ctx.Value(clientcontext.APIHostsKey).(clientcontext.APIHosts)
-			assert.Equal(t, defaultGatewayHost, ctxValue.EventsHost)
-			assert.Equal(t, defaultGatewayHost, ctxValue.MetadataHost)
+			ctxValue := ctx.Value(clientcontext.APIHostsKey).(clientcontext.ApiURLs)
+			assert.Equal(t, defaultGatewayHost, ctxValue.EventsBaseURL)
+			assert.Equal(t, defaultGatewayHost, ctxValue.MetadataBaseURL)
 			w.WriteHeader(http.StatusOK)
 		})
 

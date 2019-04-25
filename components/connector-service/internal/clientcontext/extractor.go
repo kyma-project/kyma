@@ -10,8 +10,8 @@ import (
 )
 
 const (
-	MetadataURLFormat = "https://%s/%s/v1/metadata/services"
-	EventsURLFormat   = "https://%s/%s/v1/events"
+	MetadataURLFormat = "%s/%s/v1/metadata/services"
+	EventsURLFormat   = "%s/%s/v1/events"
 
 	RuntimeDefaultCommonName = "*Runtime*"
 )
@@ -38,12 +38,12 @@ func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.C
 
 	subject := ext.prepareSubject(appCtx.Tenant, appCtx.Group, appCtx.Application)
 
-	apiHosts, ok := ctx.Value(APIHostsKey).(APIHosts)
+	apiHosts, ok := ctx.Value(APIHostsKey).(ApiURLs)
 	if !ok {
 		return newClientCertificateContext(appCtx, subject), nil
 	}
 
-	extendedCtx := &ExtendedApplicationContext{
+	extendedCtx := ExtendedApplicationContext{
 		ApplicationContext: appCtx,
 		RuntimeURLs:        prepareRuntimeURLs(appCtx, apiHosts),
 	}
@@ -51,15 +51,15 @@ func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.C
 	return newClientCertificateContext(extendedCtx, subject), nil
 }
 
-func prepareRuntimeURLs(appCtx ApplicationContext, apiHosts APIHosts) RuntimeURLs {
+func prepareRuntimeURLs(appCtx ApplicationContext, apiHosts ApiURLs) RuntimeURLs {
 	metadataURL := ""
 	eventsURL := ""
 
-	if apiHosts.MetadataHost != "" {
-		metadataURL = fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataHost, appCtx.GetApplication())
+	if apiHosts.MetadataBaseURL != "" {
+		metadataURL = fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataBaseURL, appCtx.GetApplication())
 	}
-	if apiHosts.EventsHost != "" {
-		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsHost, appCtx.GetApplication())
+	if apiHosts.EventsBaseURL != "" {
+		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsBaseURL, appCtx.GetApplication())
 	}
 
 	return RuntimeURLs{
