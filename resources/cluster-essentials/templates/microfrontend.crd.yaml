@@ -55,8 +55,11 @@ spec:
                     items:
                       type: object
                       properties:
-                        apiGroup: string
-                        resource: string
+                        apiGroup: 
+                          type: string
+                        resource:
+                          type: string
                         verbs:
                           type: array
-                          items: string
+                          items: 
+                            type: string
