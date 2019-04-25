@@ -20,7 +20,7 @@ func newSelfSubjectRulesService(client v1.AuthorizationV1Interface) *selfSubject
 	}
 }
 
-func (svc *selfSubjectRulesService) Create(ctx context.Context, ssrr *authv1.SelfSubjectRulesReview) (result *authv1.SelfSubjectRulesReview, err error) {
+func (svc *selfSubjectRulesService) Create(ctx context.Context, ssrr []byte) (result *authv1.SelfSubjectRulesReview, err error) {
 	if ssrr == nil {
 		err := gqlerror.New(err, pretty.SelfSubjectRules)
 		return &authv1.SelfSubjectRulesReview{}, err

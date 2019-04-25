@@ -1,6 +1,8 @@
 package k8s
 
 import (
+	"encoding/json"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v1 "k8s.io/api/authorization/v1"
 )
@@ -23,4 +25,9 @@ func (c *selfSubjectRulesConverter) ToGQL(in *v1.SelfSubjectRulesReview) ([]gqls
 	}
 
 	return result, nil
+}
+
+func (c *selfSubjectRulesConverter) ToBytes(in *v1.SelfSubjectRulesReview) ([]byte, error) {
+
+	return json.Marshal(in)
 }

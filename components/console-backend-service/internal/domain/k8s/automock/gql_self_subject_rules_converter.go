@@ -12,6 +12,29 @@ type gqlSelfSubjectRulesConverter struct {
 	mock.Mock
 }
 
+// ToBytes provides a mock function with given fields: in
+func (_m *gqlSelfSubjectRulesConverter) ToBytes(in *v1.SelfSubjectRulesReview) ([]byte, error) {
+	ret := _m.Called(in)
+
+	var r0 []byte
+	if rf, ok := ret.Get(0).(func(*v1.SelfSubjectRulesReview) []byte); ok {
+		r0 = rf(in)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]byte)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*v1.SelfSubjectRulesReview) error); ok {
+		r1 = rf(in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ToGQL provides a mock function with given fields: in
 func (_m *gqlSelfSubjectRulesConverter) ToGQL(in *v1.SelfSubjectRulesReview) ([]gqlschema.ResourceRule, error) {
 	ret := _m.Called(in)

@@ -1,6 +1,7 @@
 package k8s_test
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
@@ -17,15 +18,19 @@ func TestSelfSubjectRulesQuery(t *testing.T) {
 		expected := fixExampleSSRRGQLResponse()
 
 		in := fixExampleSSRRServiceInput("foo")
+		inBytes, err := json.Marshal(in)
 
 		out := fixExampleSSRRServiceOutput()
 
 		mockedService := automock.NewSelfSubjectRulesSvc()
-		mockedService.On("Create", nil, in).Return(out, nil).Once()
+		mockedService.On("Create", nil, inBytes).Return(out, nil).Once()
 		defer mockedService.AssertExpectations(t)
 
 		converter := automock.NewSelfSubjectRulesConverter()
+
+		converter.On("ToBytes", in).Return(inBytes, nil).Once()
 		converter.On("ToGQL", out).Return(expected, nil).Once()
+
 		defer converter.AssertExpectations(t)
 
 		resolver := k8s.NewSelfSubjectRulesResolver(mockedService)
@@ -43,14 +48,16 @@ func TestSelfSubjectRulesQuery(t *testing.T) {
 		expected := fixExampleSSRRGQLResponse()
 
 		in := fixExampleSSRRServiceInput("*")
+		inBytes, err := json.Marshal(in)
 
 		out := fixExampleSSRRServiceOutput()
 
 		mockedService := automock.NewSelfSubjectRulesSvc()
-		mockedService.On("Create", nil, in).Return(out, nil).Once()
+		mockedService.On("Create", nil, inBytes).Return(out, nil).Once()
 		defer mockedService.AssertExpectations(t)
 
 		converter := automock.NewSelfSubjectRulesConverter()
+		converter.On("ToBytes", in).Return(inBytes, nil).Once()
 		converter.On("ToGQL", out).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 

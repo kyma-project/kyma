@@ -13,11 +13,11 @@ type selfSubjectRulesSvc struct {
 }
 
 // Create provides a mock function with given fields: ctx, ssrr
-func (_m *selfSubjectRulesSvc) Create(ctx context.Context, ssrr *v1.SelfSubjectRulesReview) (*v1.SelfSubjectRulesReview, error) {
+func (_m *selfSubjectRulesSvc) Create(ctx context.Context, ssrr []byte) (*v1.SelfSubjectRulesReview, error) {
 	ret := _m.Called(ctx, ssrr)
 
 	var r0 *v1.SelfSubjectRulesReview
-	if rf, ok := ret.Get(0).(func(context.Context, *v1.SelfSubjectRulesReview) *v1.SelfSubjectRulesReview); ok {
+	if rf, ok := ret.Get(0).(func(context.Context, []byte) *v1.SelfSubjectRulesReview); ok {
 		r0 = rf(ctx, ssrr)
 	} else {
 		if ret.Get(0) != nil {
@@ -26,7 +26,7 @@ func (_m *selfSubjectRulesSvc) Create(ctx context.Context, ssrr *v1.SelfSubjectR
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *v1.SelfSubjectRulesReview) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, []byte) error); ok {
 		r1 = rf(ctx, ssrr)
 	} else {
 		r1 = ret.Error(1)
