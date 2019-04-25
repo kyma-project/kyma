@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.global.cfgReposUrlName }}
+  name: {{ .Values.config.cfgReposUrlName }}
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "fullname" . }}
