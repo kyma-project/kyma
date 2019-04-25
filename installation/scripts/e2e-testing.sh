@@ -4,6 +4,12 @@ source "${ROOT_PATH}/utils.sh"
 
 #copied from  testing-common.sh: in testing-common.sh we use Octopus, here helm test. TODO later: rewrite e2e-testing to Octopus.
 
+function context_arg() {
+    if [ -n "$KUBE_CONTEXT" ]; then
+        echo "--context $KUBE_CONTEXT"
+    fi
+}
+
 function cleanupHelmTestPods() {
     local namespace=$1
 

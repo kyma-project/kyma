@@ -117,5 +117,3 @@
   directory: service-brokers/helm-broker-service-classes/gcp-broker
 - name: azure-broker
   directory: service-brokers/helm-broker-service-classes/azure-broker
-- name: redis
-  directory: service-brokers/helm-broker-service-classes/redis

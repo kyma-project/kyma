@@ -163,10 +163,10 @@ function addDevDomainsToEtcHosts() {
         # Delete old host alias
         case `uname -s` in
             Darwin)
-                sudo sed -i '' "/${MINIKUBE_DOMAIN}/d" /etc/hosts
+                sudo sed -i '' "/127.0.0.1/p;/${MINIKUBE_DOMAIN}/d" /etc/hosts
                 ;;
             *)
-                sudo sed -i  "/${MINIKUBE_DOMAIN}/d" /etc/hosts
+                sudo sed -i  "/127.0.0.1/p;/${MINIKUBE_DOMAIN}/d" /etc/hosts
                 ;;
         esac
     fi
