@@ -3,7 +3,7 @@ title: Use your own image
 type: Installation
 ---
 
-You can use your own image to prepare the installation file when installing Kyma on a GKE or AKS cluster.
+You can use your own image to prepare the configuration file when installing Kyma on a GKE or AKS cluster.
 
 >**NOTE:** Follow these steps both for your own and the `xip.io` default domain.
 

@@ -5,13 +5,13 @@ type: Configuration
 
 ## Default settings
 
-During the installation process, the Installer applies onto a cluster or Minikube all components defined in the `installer-cr-cluster.yaml.tpl` and `installer-cr.yaml.tpl` templates with their configuration defined in `value.yaml` files. It also imports the configuration settings defined in the `installer-config-cluster.yaml.tpl` and `installer-config-local.yaml.tpl` templates located under the `installation/resources` subfolder.
+During the installation process, the Installer applies onto a cluster or Minikube all components defined in the `installer-cr-cluster.yaml.tpl` and `installer-cr.yaml.tpl` templates with their configuration defined in `values.yaml` files. It also imports the configuration settings defined in the `installer-config-cluster.yaml.tpl` and `installer-config-local.yaml.tpl` templates located under the `installation/resources` subfolder.
 
 > **NOTE:** The installation and configuration templates serve as the basis for creating the corresponding installation (`kyma-config-local.yaml` and `kyma-config-cluster.yaml`) and configuration (`kyma-installer-local.yaml` and `kyma-installer-cluster.yaml`) release artefacts.
 
-Both configuration files contain pre-defined overrides in Secrets and ConfigMaps that the Installer uses during the installation to replace default values specified in `value.yaml` files or to provide required configuration values. While the local configuration file contains hardcoded override values, the cluster configuration file is based on placeholders that are replaced with real values during the installation process.
+Both configuration files contain pre-defined overrides in Secrets and ConfigMaps that the Installer uses during the installation to replace default values specified in `values.yaml` files or to provide required configuration values. While the local configuration file contains hardcoded override values, the cluster configuration file is based on placeholders that are replaced with real values during the installation process.
 
->**CAUTION:** Both `value.yaml` and the configuration files contain production settings that are tested and recommended. Note that you modify them on your own risk.
+>**CAUTION:** Both `values.yaml` and the configuration files contain production settings that are tested and recommended. Note that you modify them on your own risk.
 
 ## Installation configuration
 
@@ -30,7 +30,7 @@ For more details on custom component installation, see [this](#configuration-cus
 
 ### Overrides
 
-The configuration files provide production-ready settings for the Installer. These include ConfigMaps and Secrets with the overrides for the values hardcoded in the `value.yaml` files of component charts.
+The configuration files provide production-ready settings for the Installer. These include ConfigMaps and Secrets with the overrides for the values hardcoded in the `values.yaml` files of component charts.
 
 You can modify local settings, such as memory limits for a given resource, by changing values in the existing ConfigMaps and Secrets or adding new ones. Every ConfigMap and Secret that the Installer reads must contain an `installer: overrides` label and a `component: {component-name}` label if it refers to a specific component.
 
@@ -52,7 +52,7 @@ For an example of such a runtime configuration, see [Helm Broker configuration](
 
 ## Advanced configuration
 
-All `value.yaml` files in charts and sub-charts contain pre-defined attributes that are:
+All `values.yaml` files in charts and sub-charts contain pre-defined attributes that are:
 - Configurable
 - Used in chart templates
 - Recommended production settings

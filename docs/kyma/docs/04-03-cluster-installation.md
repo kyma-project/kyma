@@ -9,10 +9,10 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 Kyma cluster installation comes down to these steps:
 1. Preparation of the cluster.
-2. Preparation of the installation file.
+2. Preparation of the configuration file.
 3. Kyma deployment.
 
-The guide explains how to prepare the installation file from the latest GitHub release. If you want to use your own image, follow [these](#installation-use-your-own-image) steps.
+The guide explains how to prepare the configuration file from the latest GitHub release. If you want to use your own image, follow [these](#installation-use-your-own-image) steps.
 Additionally, if you need to use Helm and access Tiller securely, complete [additional configuration](#installation-use-helm) at the end of the installation procedure.
 
 Choose your cloud provider and get started:
@@ -62,7 +62,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
 
-### Prepare the installation file
+### Prepare the configuration file
 
 Use the GitHub release 0.8 or higher.
 
@@ -102,7 +102,7 @@ Use the GitHub release 0.8 or higher.
     gcloud container clusters get-credentials $CLUSTER_NAME --zone europe-west1-b --project $PROJECT
     ```
 
-2. Deploy Kyma using the `my-kyma` custom installation file you created. Run:
+2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
     ```
     kubectl apply -f my-kyma.yaml
     ```
@@ -222,7 +222,7 @@ Set the following environment variables:
 
     ```
 
-### Prepare the installation file
+### Prepare the configuration file
 
 Use the GitHub release 0.8 or higher.
 
@@ -255,7 +255,7 @@ Use the GitHub release 0.8 or higher.
 
 ### Deploy Kyma
 
-1. Deploy Kyma using the `my-kyma` custom installation file you created. Run:
+1. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
     ```
     kubectl apply -f my-kyma.yaml
     ```

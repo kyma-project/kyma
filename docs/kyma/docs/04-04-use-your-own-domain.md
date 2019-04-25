@@ -53,7 +53,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
 
-## DNS setup and TLS certificate generation
+## DNS setup and TLS certificate generation          
 
 ### Delegate the management of your domain to Google Cloud DNS
 
@@ -140,7 +140,7 @@ Follow these steps:
     export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64 | sed 's/ /\\ /g' | tr -d '\n')
     ```
 
-## Prepare the installation configuration file
+## Prepare the configuration file
 
 Use the GitHub release 0.8 or higher.
 
@@ -412,7 +412,7 @@ Follow these steps:
     export TLS_KEY=$(cat ./letsencrypt/live/$SUB_DOMAIN.$DNS_DOMAIN/privkey.pem | base64 | sed 's/ /\\ /g')
     ```
 
-## Prepare the installation configuration file
+## Prepare the configuration file
 
 Use the GitHub release 0.8 or higher.
 
