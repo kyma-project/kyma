@@ -34,7 +34,11 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 							Label:            "test-mf",
 							NavigationPath:   "test-path",
 							ViewURL:          "/test/viewUrl",
-							ShowInNavigation: true,
+							ShowInNavigation: false,
+							Order:            2,
+							Settings: v1alpha1.Settings{
+								ReadOnly: true,
+							},
 						},
 					},
 				},
@@ -52,7 +56,11 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 					Label:            "test-mf",
 					NavigationPath:   "test-path",
 					ViewURL:          "/test/viewUrl",
-					ShowInNavigation: true,
+					ShowInNavigation: false,
+					Order:            2,
+					Settings: gqlschema.Settings{
+						ReadOnly: true,
+					},
 				},
 			},
 		}
@@ -101,6 +109,9 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 						NavigationPath:   "test-path",
 						ViewURL:          "/test/viewUrl",
 						ShowInNavigation: true,
+						Settings: v1alpha1.Settings{
+							ReadOnly: true,
+						},
 					},
 				},
 			},
@@ -119,6 +130,9 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 				NavigationPath:   "test-path",
 				ViewURL:          "/test/viewUrl",
 				ShowInNavigation: true,
+				Settings: gqlschema.Settings{
+					ReadOnly: true,
+				},
 			},
 		},
 	}
@@ -171,6 +185,10 @@ func TestClusterMicrofrontendConverter_NavigationNodeToGQL(t *testing.T) {
 			NavigationPath:   "test-path",
 			ViewURL:          "/test/viewUrl",
 			ShowInNavigation: true,
+			Order:            0,
+			Settings: v1alpha1.Settings{
+				ReadOnly: true,
+			},
 		}
 
 		expected := gqlschema.NavigationNode{
@@ -178,6 +196,10 @@ func TestClusterMicrofrontendConverter_NavigationNodeToGQL(t *testing.T) {
 			NavigationPath:   "test-path",
 			ViewURL:          "/test/viewUrl",
 			ShowInNavigation: true,
+			Order:            0,
+			Settings: gqlschema.Settings{
+				ReadOnly: true,
+			},
 		}
 
 		result, err := converter.NavigationNodeToGQL(&item)
@@ -208,6 +230,10 @@ func TestClusterMicrofrontendConverter_NavigationNodesToGQLs(t *testing.T) {
 		NavigationPath:   "test-path",
 		ViewURL:          "/test/viewUrl",
 		ShowInNavigation: true,
+		Order:            0,
+		Settings: v1alpha1.Settings{
+			ReadOnly: false,
+		},
 	}
 
 	expected := gqlschema.NavigationNode{
@@ -215,6 +241,10 @@ func TestClusterMicrofrontendConverter_NavigationNodesToGQLs(t *testing.T) {
 		NavigationPath:   "test-path",
 		ViewURL:          "/test/viewUrl",
 		ShowInNavigation: true,
+		Order:            0,
+		Settings: gqlschema.Settings{
+			ReadOnly: false,
+		},
 	}
 
 	t.Run("Success", func(t *testing.T) {

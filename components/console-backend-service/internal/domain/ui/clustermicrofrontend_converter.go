@@ -54,6 +54,10 @@ func (c *clusterMicrofrontendConverter) NavigationNodeToGQL(in *uiV1alpha1v.Navi
 		NavigationPath:   in.NavigationPath,
 		ViewURL:          in.ViewURL,
 		ShowInNavigation: in.ShowInNavigation,
+		Order:            in.Order,
+		Settings: gqlschema.Settings{
+			ReadOnly: in.Settings.ReadOnly,
+		},
 	}
 
 	return &navigationNode, nil

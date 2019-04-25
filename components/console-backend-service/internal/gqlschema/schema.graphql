@@ -783,12 +783,6 @@ type ConfigMapEvent {
 }
 
 # MF
-type NavigationNode {
-    label: String!
-	navigationPath: String!
-	viewUrl: String!
-	showInNavigation: Boolean!
-}
 
 type Microfrontend {
 	name: String!
@@ -805,6 +799,19 @@ type ClusterMicrofrontend {
     viewBaseUrl: String!
     placement: String!
     navigationNodes: [NavigationNode!]!
+}
+
+type NavigationNode {
+    label: String!
+	navigationPath: String!
+	viewUrl: String!
+	showInNavigation: Boolean!
+    order: Int!
+    settings: Settings!
+}
+
+type Settings {
+    readOnly: Boolean!
 }
 
 # Queries

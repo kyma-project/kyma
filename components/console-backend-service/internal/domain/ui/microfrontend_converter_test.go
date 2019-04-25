@@ -35,6 +35,10 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 							NavigationPath:   "test-path",
 							ViewURL:          "/test/viewUrl",
 							ShowInNavigation: true,
+							Order:            2,
+							Settings: v1alpha1.Settings{
+								ReadOnly: true,
+							},
 						},
 					},
 				},
@@ -52,6 +56,10 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 					NavigationPath:   "test-path",
 					ViewURL:          "/test/viewUrl",
 					ShowInNavigation: true,
+					Order:            2,
+					Settings: gqlschema.Settings{
+						ReadOnly: true,
+					},
 				},
 			},
 		}
@@ -99,7 +107,11 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 						Label:            "test-mf",
 						NavigationPath:   "test-path",
 						ViewURL:          "/test/viewUrl",
-						ShowInNavigation: true,
+						ShowInNavigation: false,
+						Order:            2,
+						Settings: v1alpha1.Settings{
+							ReadOnly: false,
+						},
 					},
 				},
 			},
@@ -116,7 +128,11 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 				Label:            "test-mf",
 				NavigationPath:   "test-path",
 				ViewURL:          "/test/viewUrl",
-				ShowInNavigation: true,
+				ShowInNavigation: false,
+				Order:            2,
+				Settings: gqlschema.Settings{
+					ReadOnly: false,
+				},
 			},
 		},
 	}
@@ -169,6 +185,10 @@ func TestMicrofrontendConverter_NavigationNodeToGQL(t *testing.T) {
 			NavigationPath:   "test-path",
 			ViewURL:          "/test/viewUrl",
 			ShowInNavigation: true,
+			Order:            2,
+			Settings: v1alpha1.Settings{
+				ReadOnly: true,
+			},
 		}
 
 		expected := gqlschema.NavigationNode{
@@ -176,6 +196,10 @@ func TestMicrofrontendConverter_NavigationNodeToGQL(t *testing.T) {
 			NavigationPath:   "test-path",
 			ViewURL:          "/test/viewUrl",
 			ShowInNavigation: true,
+			Order:            2,
+			Settings: gqlschema.Settings{
+				ReadOnly: true,
+			},
 		}
 
 		result, err := converter.NavigationNodeToGQL(&item)
@@ -205,14 +229,22 @@ func TestMicrofrontendConverter_NavigationNodesToGQLs(t *testing.T) {
 		Label:            "test-mf",
 		NavigationPath:   "test-path",
 		ViewURL:          "/test/viewUrl",
-		ShowInNavigation: true,
+		ShowInNavigation: false,
+		Order:            2,
+		Settings: v1alpha1.Settings{
+			ReadOnly: false,
+		},
 	}
 
 	expected := gqlschema.NavigationNode{
 		Label:            "test-mf",
 		NavigationPath:   "test-path",
 		ViewURL:          "/test/viewUrl",
-		ShowInNavigation: true,
+		ShowInNavigation: false,
+		Order:            2,
+		Settings: gqlschema.Settings{
+			ReadOnly: false,
+		},
 	}
 
 	t.Run("Success", func(t *testing.T) {
