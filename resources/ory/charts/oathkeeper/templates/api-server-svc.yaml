@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: oathkeeper-api-server
+  namespace: kyma-system
+spec:
+  selector:
+    app: oathkeeper-api
+  type: ClusterIP
+  ports:
+    - name: oathkeeper-api
+      protocol: TCP
+      port: 80
+      targetPort: 4456

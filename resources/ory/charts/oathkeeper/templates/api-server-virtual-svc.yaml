@@ -1,0 +1,19 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: oathkeeper-api
+  namespace: kyma-system
+spec:
+  gateways:
+    - kyma-gateway
+  hosts:
+    - oathkeeper-api-server.kyma.local
+  http:
+    - match:
+        - uri:
+            regex: /.*
+      route:
+        - destination:
+            host: oathkeeper-api-server
+            port:
+              number: 80

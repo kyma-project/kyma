@@ -1,0 +1,40 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: oauth2
+  namespace: kyma-system
+spec:
+  gateways:
+    - kyma-gateway
+  hosts:
+    - oauth2.kyma.local
+  http:
+    - match:
+        - uri:
+            regex: /.*
+      route:
+        - destination:
+            host: oauth2
+            port:
+              number: 80
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: oauth2-admin
+  namespace: kyma-system
+spec:
+  gateways:
+    - kyma-gateway
+  hosts:
+    - oauth2-admin.kyma.local
+  http:
+    - match:
+        - uri:
+            regex: /.*
+      route:
+        - destination:
+            host: oauth2
+            port:
+              number: 4445

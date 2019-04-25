@@ -1,0 +1,24 @@
+
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: hydra-login-consent
+  namespace: kyma-system
+  labels:
+spec:
+  template:
+    metadata:
+      labels:
+        name: hydra-login-consent
+        app: hydra-login-consent
+    spec:
+      containers:
+        - name: hydra-login-consent
+          image: oryd/hydra-login-consent-node:v1.0.0-rc.6
+          imagePullPolicy: Always
+          env:
+            - name: HYDRA_ADMIN_URL
+              value: http://oauth2.kyma-system.svc.cluster.local:4445
+          ports:
+            - containerPort: 3000

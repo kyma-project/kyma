@@ -1,0 +1,18 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: oauth2
+  namespace: kyma-system
+spec:
+  selector:
+    app: hydra
+  type: ClusterIP
+  ports:
+    - name: http-oauth2
+      protocol: TCP
+      port: 80
+      targetPort: 4444
+    - name: http-oauth2-admin
+      protocol: TCP
+      port: 4445
+      targetPort: 4445

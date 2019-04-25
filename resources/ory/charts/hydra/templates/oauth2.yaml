@@ -1,0 +1,45 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: oauth2
+  namespace: kyma-system
+  labels:
+    kyma-project.io/installation: ""
+spec:
+  template:
+    metadata:
+      labels:
+        name: hydra
+        app: hydra
+    spec:
+      containers:
+        - name: hydra-server
+          image: oryd/hydra:v1.0.0-rc.8
+          imagePullPolicy: IfNotPresent
+          command:
+            - "hydra"
+          args:
+            - "serve"
+            - "all"
+            - "--dangerous-force-http"
+          env:
+            - name: OAUTH2_ISSUER_URL
+              value: "https://oauth2.kyma.local"
+            - name: OAUTH2_CONSENT_URL
+              value: "https://sample-oauth2-login-consent.kyma.local/consent"
+            - name: OAUTH2_LOGIN_URL
+              value: "https://sample-oauth2-login-consent.kyma.local/login"
+            - name: DATABASE_URL
+              value: "memory"
+            - name: SYSTEM_SECRET
+              value: "youReallyNeedToChangeThis"
+            - name: OAUTH2_SHARE_ERROR_DEBUG
+              value: "1"
+            - name: OIDC_SUBJECT_TYPES_SUPPORTED
+              value: "public,pairwise"
+            - name: OIDC_SUBJECT_TYPE_PAIRWISE_SALT
+              value: "youReallyNeedToChangeThis"
+          ports:
+            - containerPort: 4444
+            - containerPort: 4445

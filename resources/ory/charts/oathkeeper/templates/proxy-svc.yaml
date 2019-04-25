@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: oathkeeper-proxy
+  namespace: kyma-system
+spec:
+  selector:
+    app: oathkeeper-proxy
+  type: ClusterIP
+  ports:
+    - name: oathkeeper-proxy
+      protocol: TCP
+      port: 80
+      targetPort: 4455

@@ -1,0 +1,34 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: oathkeeper-proxy
+  namespace: kyma-system
+  labels:
+    kyma-project.io/installation: ""
+spec:
+  template:
+    metadata:
+      labels:
+        name: oathkeeper-proxy
+        app: oathkeeper-proxy
+    spec:
+      containers:
+        - name: oathkeeper-proxy
+          image: oryd/oathkeeper:v0.14.2_oryOS.10
+          imagePullPolicy: IfNotPresent
+          command:
+            - "oathkeeper"
+          args:
+            - "serve"
+            - "proxy"
+          env:
+            - name: CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET
+              value: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL29hdXRoMi5reW1hLmxvY2FsLyIsImlhdCI6MTU1NTUwNjk5MCwiZXhwIjoxNTg3MDQzMDA1LCJhdWQiOiJoeWRyYS10ZXN0Iiwic3ViIjoiamFrdWIua2FiemFAc2FwLmNvbSJ9.x64cZ1QW8iy-sndXFVZI7rm155esyQW9cZGlGqtlzok"
+            - name: PORT
+              value: "4455"
+            - name: OATHKEEPER_API_URL
+              value: "http://oathkeeper-api-server/"
+            - name: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL
+              value: "http://oauth2:4445/oauth2/introspect"
+          ports:
+            - containerPort: 4455

@@ -1,0 +1,14 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: sample-oauth2-login-consent
+  namespace: kyma-system
+spec:
+  selector:
+    app: hydra-login-consent
+  type: ClusterIP
+  ports:
+    - name: http-hydra-login-consent
+      protocol: TCP
+      port: 3000
+      targetPort: 3000
