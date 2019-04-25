@@ -6,11 +6,11 @@ includedNamespaces:
 - default
 - natss
 excludedNamespaces:
-- heptio-ark
+- kyma-backup
 includedResources:
 - '*'
 excludedResources:
-- heptio-ark
+- kyma-backup
 includeClusterResources: null
 labelSelector: null
 storageLocation: default
