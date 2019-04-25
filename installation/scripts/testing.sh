@@ -32,6 +32,7 @@ EOF
 startTime=$(date +%s)
 
 testExitCode=0
+previousPrintTime=-1
 
 while true
 do
@@ -56,6 +57,7 @@ do
         testExitCode=1
         break
     fi
+
     sec=$((currTime-startTime))
     min=$((sec/60))
     if (( min > 60 )); then
@@ -63,8 +65,11 @@ do
         testExitCode=1
         break
     fi
-    echo "ClusterTestSuite not finished. Waiting..."
-    sleep 60
+    if (( $previousPrintTime != $min )); then
+        echo "ClusterTestSuite not finished. Waiting..."
+        previousPrintTime=${min}
+    fi
+    sleep 3
 done
 
 echo "Test summary"
