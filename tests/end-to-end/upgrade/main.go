@@ -9,15 +9,15 @@ import (
 	dex "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/fetch-dex-token"
 
 	"github.com/kyma-project/kyma/components/installer/pkg/overrides"
-	namespacecontroller "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/namespace-controller"
+	namespaceController "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/namespace-controller"
 
 	sc "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
-	apicontroller "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
+	apiController "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/api-controller"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
-	k8sclientset "k8s.io/client-go/kubernetes"
-	restclient "k8s.io/client-go/rest"
+	k8sClientSet "k8s.io/client-go/kubernetes"
+	restClient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
@@ -32,12 +32,12 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/logger"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/platform/signal"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/internal/runner"
-	assetstore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
+	assetStore "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/asset-store"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/cms"
-	eventbus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/event-bus"
+	eventBus "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/event-bus"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/function"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
-	servicecatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
+	serviceCatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
 	"k8s.io/client-go/dynamic"
 )
@@ -78,7 +78,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	fatalOnError(err, "while creating k8s client cfg")
 
-	k8sCli, err := k8sclientset.NewForConfig(k8sConfig)
+	k8sCli, err := k8sClientSet.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating k8s clientset")
 
 	scCli, err := sc.NewForConfig(k8sConfig)
@@ -142,18 +142,18 @@ func main() {
 	fatalOnError(err, "while creating Metrics Upgrade Test")
 
 	tests := map[string]runner.UpgradeTest{
-		"HelmBrokerUpgradeTest":           servicecatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
-		"ApplicationBrokerUpgradeTest":    servicecatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
+		"HelmBrokerUpgradeTest":           serviceCatalog.NewHelmBrokerTest(k8sCli, scCli, buCli),
+		"ApplicationBrokerUpgradeTest":    serviceCatalog.NewAppBrokerUpgradeTest(scCli, k8sCli, buCli, appBrokerCli, appConnectorCli),
 		"LambdaFunctionUpgradeTest":       function.NewLambdaFunctionUpgradeTest(kubelessCli, k8sCli, kymaAPI, domainName),
 		"GrafanaUpgradeTest":              grafanaUpgradeTest,
 		"MetricsUpgradeTest":              metricUpgradeTest,
 		"MicrofrontendUpgradeTest":        ui.NewMicrofrontendUpgradeTest(mfCli),
 		"ClusterMicrofrontendUpgradeTest": ui.NewClusterMicrofrontendUpgradeTest(mfCli),
-		"EventBusUpgradeTest":             eventbus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
-		"NamespaceUpgradeTest":            namespacecontroller.New(k8sCli),
-		"AssetStoreUpgradeTest":           assetstore.NewAssetStoreUpgradeTest(dynamicCli),
+		"EventBusUpgradeTest":             eventBus.NewEventBusUpgradeTest(k8sCli, eaCli, subCli),
+		"NamespaceUpgradeTest":            namespaceController.New(k8sCli),
+		"AssetStoreUpgradeTest":           assetStore.NewAssetStoreUpgradeTest(dynamicCli),
 		"HeadlessCMSUpgradeTest":          cms.NewHeadlessCmsUpgradeTest(dynamicCli),
-		"ApiControllerUpgradeTest":        apicontroller.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
+		"ApiControllerUpgradeTest":        apiController.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
 	}
 
 	// Execute requested action
@@ -178,15 +178,15 @@ func fatalOnError(err error, context string) {
 	}
 }
 
-func newRestClientConfig(kubeConfigPath string) (*restclient.Config, error) {
+func newRestClientConfig(kubeConfigPath string) (*restClient.Config, error) {
 	if kubeConfigPath != "" {
 		return clientcmd.BuildConfigFromFlags("", kubeConfigPath)
 	}
 
-	return restclient.InClusterConfig()
+	return restClient.InClusterConfig()
 }
 
-func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
+func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 	overridesData := overrides.New(k8sCli)
 
 	coreOverridesYaml, err := overridesData.ForRelease("core")
@@ -203,7 +203,7 @@ func getDomainNameFromCluster(k8sCli *k8sclientset.Clientset) (string, error) {
 	return value, nil
 }
 
-func getUserFromCluster(k8sCli *k8sclientset.Clientset, userSecret, dexNamespace string) (string, string, error) {
+func getUserFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexNamespace string) (string, string, error) {
 	secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
 	if err != nil {
 		return "", "", err
