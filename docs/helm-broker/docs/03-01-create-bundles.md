@@ -21,8 +21,8 @@ sample-bundle/
    │    │   └── values.yaml                  # Default configuration values in this plan for a chart defined in the `chart` directory
    │    └── ....
    │
-   └── docs/                                 # A directory which contains a documentation for this bundle
-        ├── meta.yaml                        # A file which contains metadata information about documentation for this bundle
+   └── docs/                                 # [OPTIONAL] A directory which contains documentation for this bundle
+        ├── meta.yaml                        # [REQUIRED] A file which contains metadata information about documentation for this bundle
         ├── {assets}                         # Files with documentation and assets
         └── ....
 ```
@@ -92,25 +92,27 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 ## docs directory
 
-In the `docs` directory we specify documentation for the bundle and for the wrapped Helm Chart. You can define a `meta.yaml` file inside the `docs` folder which holds the information on how documentation for a bundle should be uploaded.
-Currently we provide the documentation for bundle using the [ClusterDocsTopics](https://kyma-project.io/docs/components/headless-cms/#custom-resource-clusterdocstopic) because in Kyma the Helm Broker is installed as a ClusterServiceBroker.
-If the `docs/meta.yaml` is specified the Helm Broker tries to create the ClusterDocsTopic for this bundle. Below you can see the example structure of the `meta.yaml` file.
-```
-docs:
-    - template:                     # template describes the ClusterDocsTopic that will be created.
-        displayName: "Doc for redis bundle"
-        description: "Overall documentation"
-        sources:                    # list of files to upload as a Asset
-          - type: markdown
-            name: markdown-files    # must be unique within sources
-            mode: package           # defines the file type under below URL
-            url: abc.pl             # if not provided then Helm broker will inject the full repository URL for this bundle
-            filter: /docs/bundles
-```
+In the `docs` directory, provide documentation for your bundle. You can also define a `meta.yaml` file inside the `docs` folder, which provides information on how documentation for the bundle is uploaded.
+As the Helm Broker is installed as a ClusterServiceBroker, documentation for bundles is provided using [ClusterDocsTopics]((/components/headless-cms/#custom-resource-clusterdocstopic)).
 
-For now, we support only one entry in the `docs` array.
+The `meta.yaml` file contains the specification of the ClusterDocsTopic. To learn more about it, read [this](/components/headless-cms/#custom-resource-clusterdocstopic) document. The example structure of the `meta.yaml` file looks as follows:
 
-The Helm Broker can provision a broker which provides its own ServiceClasses. You can see how to provide a documentation for them in the following [document](./03-04-bundles-docs.md).
+|  Field Name | Required |      Description               |
+|-----------|:--------:|------------------------------------|
+|   **docs[]**                           |   YES   | Contains the definitions of documentation.   |
+| **docs[].template**                    |   YES   | Contains the specification of the ClusterDocsTopic. |
+| **docs[].template.displayName**        |   YES   | DisplayName of the ClusterDocsTopic. |
+| **docs[].template.description**        |   YES   | Description of the ClusterDocsTopic. |
+| **docs[].template.sources[]**          |   YES   | Contains the definitions of assets for a bundle. |
+| **docs[].template.sources[].type**     |   YES   | Defines the type of the asset. |
+| **docs[].template.sources[].name**     |   YES   | Defines the name of the asset. |
+| **docs[].template.sources[].mode**     |   YES   | Defines the type of the asset file. |
+| **docs[].template.sources[].url**      |   YES   | Defines the URL under which the asset is stored. |
+| **docs[].template.sources[].filter**   |   YES   | Defines the path from which to upload assets.  |
+
+>**NOTE:** Currently you can provide only one entry in the `docs` array. In the future we will enable many entries in case of many charts in one bundle.
+
+The Helm Broker can provision a broker which provides its own ServiceClasses. To learn how to upload documentation for those classes, read [this](#details-bundles-docs.md) document.
 
 ## Troubleshooting
 

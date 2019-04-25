@@ -1,13 +1,10 @@
 ---
-title: Bundles docs
+title: Service Classes documentation provided by bundles
 type: Details
 ---
 
-## Documentation for ServiceClasses provided by bundle
+Using the Helm Broker, you can provision a bundle which provides its own Service Classes. If you want to provide documentation for those Service Classes, create the `docs.yaml` file inside the bundle's chart. The structure of this file looks as follows:
 
-The Helm Broker in the provisioning process pushes the `addonRepositoryURL` variable into installed chart. With this feature a bundle which provides its own ServiceClasses e.g. `Azure Broker` can also install a documentation for them.
-
-If the bundle provides ServiceClasses and you want to have a documentation for it, you should create a `docs.yaml` inside the bundle's chart with the following structure:
 ```
 apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
@@ -16,24 +13,37 @@ metadata:
     cms.kyma-project.io/view-context: service-catalog
   name: {ServiceClass ID}
 spec:
-  displayName: "Slack Connector Add-on"
-  description: "Overall documentation, OpenAPI and AsyncAPI for Slack Connector Add-on"
+  displayName: {displayName}
+  description: {description}
   sources:
     - type: {type}
-      name: {name}  # must be unique within sources
+      name: {name}
       mode: {mode}
       url: {.Values.addonsRepositoryURL}
-      filter: docs/{class_name}/   # provide filter only if you use the package mode
+      filter: docs/{class_name}/ 
 ___
 apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
 metadata ... 
 ```
+For detailed descriptions of all parameters, see the [ClusterDocsTopic custom resource](/components/headless-cms/#custom-resource-clusterdocstopic). Store ClusterDocsTopic definitions for a given bundle in the `docs.yaml` file.
+For more information about currently supported types of the assets, read [this](/components/headless-cms/#overview-overview-headless-cms-in-kyma) document.
 
-One ClusterDocsTopic object corresponds to a single ServiceClass with the same ID as the name of specified ClusterDocsTopic.
 
-You should hold the ClusterDocsTopics definitions for a given broker in one file.
+One ClusterDocsTopic object corresponds to a single Service Class with the same ID as the name of the specified ClusterDocsTopic.
+Store documentation for each Service Class in the `docs/{class_name}` directory.
 
-If you want to provide documentation for every class provided by the broker you must also provide the ClusterDocsTopics for all of them.
 
-The documentation for the ServiceClasses provided by a bundle should be stored in the `docs/{class_name}` folder.
+During the provisioning process, the Helm Broker pushes the **addonRepositoryURL** variable into the chart. The **addonsRepositoryURL** points to your bundle compressed to a `.tgz` file.
+
+
+## Markdown structure
+
+Deliver documentation for your bundle in the Markdown files with the specified metadata. The metadata must contain the **title** and **type** fields:
+
+```
+title: Services and Plans
+type: Details
+```
+
+The **title** field defines the title of the document displayed in the Console.
