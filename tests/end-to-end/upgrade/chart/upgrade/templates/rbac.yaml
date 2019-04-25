@@ -21,7 +21,7 @@ metadata:
 rules:
 - apiGroups: [""]
   resources: ["","namespaces"]
-  verbs: ["create", "delete", "get", "list", "patch"]
+  verbs: ["create", "delete", "get", "list", "patch", "update"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["create", "get", "delete", "list"]
@@ -61,6 +61,11 @@ rules:
   resources: ["apis"]
   verbs: ["create", "delete", "get", "list"]
 
+# MicroFrontend
+- apiGroups: ["ui.kyma-project.io"]
+  resources: ["microfrontends", "clustermicrofrontends"]
+  verbs: ["create", "get", "delete", "list"]
+
 # Event Bus
 - apiGroups: ["eventing.kyma-project.io"]
   resources: ["subscriptions"]
@@ -69,6 +74,10 @@ rules:
   resources: ["eventactivations"]
   verbs: ["create", "get", "watch", "list", "delete"]
 
+# Namespace controller
+- apiGroups: [""]
+  resources: ["resourcequotas"]
+  verbs: ["get", "list", "watch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

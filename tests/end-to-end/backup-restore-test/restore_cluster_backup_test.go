@@ -57,10 +57,10 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	scAddonsTest, err := NewServiceCatalogAddonsTest()
 	fatalOnError(t, err, "while creating structure for ScAddons test")
 
-	myNamespaceControllerTest, err := NewNamespaceControllerTest()
+	myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
 	fatalOnError(t, err, "while creating structure for NamespaceController test")
 
-	apiControllerTest, err := NewApiControllerTest()
+	apiControllerTest, err := NewApiControllerTestFromEnv()
 	fatalOnError(t, err, "while creating structure for ApiController test")
 
 	myGrafanaTest, err := NewGrafanaTest()

@@ -29,7 +29,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "f5eb839e7689ebbcf7c2318880c44fb6712303db"
+  revision = "7e6a7ca01ae5a402a3620ad227bca5c1d5638450"
 
 [[constraint]]
   name = "github.com/pkg/errors"

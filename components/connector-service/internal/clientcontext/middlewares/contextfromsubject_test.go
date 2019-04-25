@@ -3,6 +3,7 @@ package middlewares
 import (
 	"net/http"
 	"net/http/httptest"
+
 	"testing"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
@@ -11,35 +12,76 @@ import (
 )
 
 func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
-	fullSubject := "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=tenant\\;group\\;test-app,OU=OrgUnit"
+	fullSubject := "C=DE,ST=Waldorf,L=Waldorf,O=tenant,CN=test-app,OU=group"
 
 	subjAppName := "test-app"
 	subjGroup := "group"
 	subjTenant := "tenant"
 
 	testCases := []struct {
-		subject string
-		app     string
-		group   string
-		tenant  string
+		subject            string
+		contextExtender    clientcontext.ContextExtender
+		extractFullContext bool
+		isError            bool
 	}{
-		{subject: fullSubject, app: subjAppName, group: subjGroup, tenant: subjTenant},
-		{subject: "CN=tenant\\;group\\;test-app,C=DE,ST=Waldorf,L=Waldorf,O=Organization,OU=OrgUnit", app: subjAppName, group: subjGroup, tenant: subjTenant},
-		{subject: "C=DE,ST=Waldorf,L=Waldorf,O=Organization,OU=OrgUnit,CN=tenant\\;group\\;test-app", app: subjAppName, group: subjGroup, tenant: subjTenant},
-		{subject: "not matching", app: "", group: "", tenant: ""},
-		{subject: "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=test-app,OU=OrgUnit", app: subjAppName, group: "", tenant: ""},
-		{subject: "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=tenant\\;group,OU=OrgUnit", app: "", group: subjGroup, tenant: subjTenant},
+		{
+			subject:            fullSubject,
+			extractFullContext: true,
+			contextExtender:    clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup}},
+			isError:            false,
+		},
+		{
+			subject:            "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
+			extractFullContext: true,
+			contextExtender:    clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup},
+			isError:            false,
+		},
+		{
+			subject:            "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
+			extractFullContext: false,
+			contextExtender:    clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
+			isError:            false,
+		},
+		{
+			subject:            "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
+			extractFullContext: false,
+			contextExtender:    clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
+			isError:            false,
+		},
+		{
+			subject:            "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
+			extractFullContext: true,
+			contextExtender:    nil,
+			isError:            true,
+		},
+		{
+			subject:            "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
+			extractFullContext: true,
+			contextExtender:    nil,
+			isError:            true,
+		},
+		{
+			subject:            "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
+			extractFullContext: false,
+			contextExtender:    nil,
+			isError:            true,
+		},
 	}
 
 	t.Run("should parse context data from fullSubject", func(t *testing.T) {
 		for _, test := range testCases {
 			req := prepareRequestWithSubject(t, test.subject)
 
-			app, group, tenant := parseContextFromSubject(req)
+			ctxFromSubjMiddleware := NewContextFromSubjMiddleware(test.extractFullContext)
 
-			assert.Equal(t, test.app, app)
-			assert.Equal(t, test.group, group)
-			assert.Equal(t, test.tenant, tenant)
+			extender, err := ctxFromSubjMiddleware.parseContextFromSubject(req)
+			if test.isError {
+				require.Error(t, err)
+			} else {
+				require.NoError(t, err)
+			}
+
+			assert.Equal(t, test.contextExtender, extender)
 		}
 	})
 
@@ -60,7 +102,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewAppContextFromSubjMiddleware()
+		middleware := NewContextFromSubjMiddleware(true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -85,7 +127,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=test-app,OU=OrgUnit")
 		rr := httptest.NewRecorder()
 
-		middleware := NewAppContextFromSubjMiddleware()
+		middleware := NewContextFromSubjMiddleware(false)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -95,7 +137,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should create ClusterContext when no app name in CN", func(t *testing.T) {
+	t.Run("should create ClusterContext when CN equal *Runtime*", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
@@ -107,10 +149,10 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=tenant\\;group,OU=OrgUnit")
+		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=tenant,CN=*Runtime*,OU=group")
 		rr := httptest.NewRecorder()
 
-		middleware := NewAppContextFromSubjMiddleware()
+		middleware := NewContextFromSubjMiddleware(true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -129,7 +171,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=,OU=OrgUnit")
 		rr := httptest.NewRecorder()
 
-		middleware := NewAppContextFromSubjMiddleware()
+		middleware := NewContextFromSubjMiddleware(false)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -150,7 +192,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewAppContextFromSubjMiddleware()
+		middleware := NewContextFromSubjMiddleware(true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
