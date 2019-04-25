@@ -89,7 +89,7 @@ func (t microfrontendTest) createMicrofrontend(namespace string) (*uiV1alpha1v.M
 				NavigationNodes: []uiV1alpha1v.NavigationNode{
 					uiV1alpha1v.NavigationNode{
 						Label:            "testMF",
-						NavigationPath:   "/test/path",
+						NavigationPath:   "path",
 						ViewURL:          "/resourcePath",
 						ShowInNavigation: true,
 					},

@@ -24,6 +24,7 @@ import (
 const (
 	bundleChartDirName = "chart"
 	bundleMetaName     = "meta.yaml"
+	bundleDocsMetaPath = "docs/meta.yaml"
 	bundlePlanDirName  = "plans"
 
 	bundlePlanMetaName             = "meta.yaml"
@@ -178,6 +179,15 @@ func (l Loader) createFormFromBundleDir(baseDir string) (*form, error) {
 
 	if err := yaml.Unmarshal(bundleMetaFile, &f.Meta); err != nil {
 		return nil, errors.Wrapf(err, "while unmarshaling bundle %q file", bundleMetaName)
+	}
+
+	bundleDocsFile, err := ioutil.ReadFile(filepath.Join(baseDir, bundleDocsMetaPath))
+	if err != nil && !os.IsNotExist(err) {
+		return nil, errors.Wrapf(err, "while reading %q file", bundleDocsMetaPath)
+	}
+
+	if err := yaml.Unmarshal(bundleDocsFile, &f.DocsMeta); err != nil {
+		return nil, errors.Wrapf(err, "while unmarshaling bundle %q file", bundleDocsMetaPath)
 	}
 
 	plansPath := filepath.Join(baseDir, bundlePlanDirName)

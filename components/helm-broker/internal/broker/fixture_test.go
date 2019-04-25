@@ -14,11 +14,11 @@ type expAll struct {
 	InstanceID  internal.InstanceID
 	OperationID internal.OperationID
 	Bundle      struct {
-		ID                  internal.BundleID
-		Version             semver.Version
-		Name                internal.BundleName
-		Bindable            bool
-		RemoteRepositoryURL string
+		ID            internal.BundleID
+		Version       semver.Version
+		Name          internal.BundleName
+		Bindable      bool
+		RepositoryURL string
 	}
 	BundlePlan struct {
 		ID           internal.BundlePlanID
@@ -49,7 +49,7 @@ func (exp *expAll) Populate() {
 	exp.Bundle.Version = *semver.MustParse("0.1.2")
 	exp.Bundle.Name = internal.BundleName("fix-B-Name")
 	exp.Bundle.Bindable = true
-	exp.Bundle.RemoteRepositoryURL = "fix-url"
+	exp.Bundle.RepositoryURL = "fix-url"
 
 	exp.BundlePlan.ID = internal.BundlePlanID("fix-P-ID")
 	exp.BundlePlan.Name = internal.BundlePlanName("fix-P-Name")
@@ -95,11 +95,11 @@ func (exp *expAll) NewChart() *chart.Chart {
 
 func (exp *expAll) NewBundle() *internal.Bundle {
 	return &internal.Bundle{
-		ID:                  exp.Bundle.ID,
-		Version:             exp.Bundle.Version,
-		Name:                exp.Bundle.Name,
-		Bindable:            exp.Bundle.Bindable,
-		RemoteRepositoryURL: exp.Bundle.RemoteRepositoryURL,
+		ID:            exp.Bundle.ID,
+		Version:       exp.Bundle.Version,
+		Name:          exp.Bundle.Name,
+		Bindable:      exp.Bundle.Bindable,
+		RepositoryURL: exp.Bundle.RepositoryURL,
 		Plans: map[internal.BundlePlanID]internal.BundlePlan{
 			exp.BundlePlan.ID: {
 				ID:   exp.BundlePlan.ID,

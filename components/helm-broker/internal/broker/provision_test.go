@@ -104,7 +104,7 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	defer hiMock.AssertExpectations(t)
 	releaseResp := &rls.InstallReleaseResponse{}
 	expChartOverrides := internal.ChartValues{
-		"bundleRepositoryURL": expBundle.RemoteRepositoryURL,
+		"addonsRepositoryURL": expBundle.RepositoryURL,
 	}
 	hiMock.On("Install", &expChart, expChartOverrides, ts.Exp.ReleaseName, ts.Exp.Namespace).Return(releaseResp, nil).Once()
 

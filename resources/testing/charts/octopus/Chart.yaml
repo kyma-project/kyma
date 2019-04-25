@@ -1,0 +1,4 @@
+apiVersion: v1
+description: A Helm chart for Octopus framework
+name: octopus
+version: 0.1.0

@@ -1,0 +1,78 @@
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
+metadata:
+  name: "test-{{ template "fullname" . }}-console-backend-service"
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      shareProcessNamespace: true
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+        - ip: {{ .Values.test.acceptance.cbs.minikubeIP }}
+          hostnames:
+            - "console-backend.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      serviceAccountName:  "test-{{ template "fullname" . }}-console-backend-service"
+      containers:
+        - name: "test-{{ template "fullname" . }}-console-backend-service"
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.console_backend_service_test.dir }}console-backend-service-test:{{ .Values.global.console_backend_service_test.version }}
+          env:
+            - name: DOMAIN
+              value: "{{ .Values.global.ingress.domainName }}"
+            - name: GRAPHQL_ENDPOINT
+              value: "https://console-backend.{{ .Values.global.ingress.domainName }}/graphql"
+            - name: ADMIN_EMAIL
+              valueFrom:
+                secretKeyRef:
+                  name: admin-user
+                  key: email
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: admin-user
+                  key: password
+            - name: READ_ONLY_USER_EMAIL
+              valueFrom:
+                  secretKeyRef:
+                      name: test-read-only-user
+                      key: email
+            - name: READ_ONLY_USER_PASSWORD
+              valueFrom:
+                  secretKeyRef:
+                      name: test-read-only-user
+                      key: password
+            - name: NO_RIGHTS_USER_EMAIL
+              valueFrom:
+                  secretKeyRef:
+                      name: test-no-rights-user
+                      key: email
+            - name: NO_RIGHTS_USER_PASSWORD
+              valueFrom:
+                  secretKeyRef:
+                      name: test-no-rights-user
+                      key: password
+            - name: DEX_CONFIGURATION_FILE
+              value: /etc/dex/cfg/config.yaml
+          resources:
+            limits:
+              memory: 128Mi
+          volumeMounts:
+            - name: dex-config
+              mountPath: /etc/dex/cfg
+          command: ["/bin/sh"]
+          args: ["-c", "sleep 10; cd /app/tests/ && ./run-compiled-tests.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+      # Needed for detecting if SCI is enabled
+      volumes:
+        - name: dex-config
+          configMap:
+            name: dex-config
+            items:
+              - key: config.yaml
+                path: config.yaml
+      restartPolicy: Never
+{{- end }}

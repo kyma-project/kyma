@@ -17,10 +17,6 @@ const (
 
 func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
-	emptyClusterContextMiddleware := &clusterContextMiddleware{
-		required: clientcontext.CtxRequired,
-	}
-
 	t.Run("should set context based on header", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -43,7 +39,9 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewApplicationContextMiddleware(emptyClusterContextMiddleware)
+		clusterContextStrategy := clientcontext.NewClusterContextStrategy(true)
+
+		middleware := NewApplicationContextMiddleware(clusterContextStrategy)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -53,7 +51,40 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusOK, rr.Code)
 	})
 
-	t.Run("should return 400 if no application header provided and ctx is required", func(t *testing.T) {
+	t.Run("should use empty cluster context if disabled strategy", func(t *testing.T) {
+		// given
+		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			ctx := r.Context()
+			applicationCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
+			require.True(t, ok)
+
+			assert.Equal(t, testApplication, applicationCtx.Application)
+			assert.Empty(t, applicationCtx.ClusterContext)
+
+			w.WriteHeader(http.StatusOK)
+		})
+
+		req, err := http.NewRequest("GET", "/", nil)
+		require.NoError(t, err)
+		req.Header.Set(clientcontext.ApplicationHeader, testApplication)
+		req.Header.Set(clientcontext.TenantHeader, testTenant)
+		req.Header.Set(clientcontext.GroupHeader, testGroup)
+
+		rr := httptest.NewRecorder()
+
+		clusterContextStrategy := clientcontext.NewClusterContextStrategy(false)
+
+		middleware := NewApplicationContextMiddleware(clusterContextStrategy)
+
+		// when
+		resultHandler := middleware.Middleware(handler)
+		resultHandler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+	})
+
+	t.Run("should return 400 if no application header provided and ctx is enabled", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
@@ -66,7 +97,9 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewApplicationContextMiddleware(emptyClusterContextMiddleware)
+		clusterContextStrategy := clientcontext.NewClusterContextStrategy(true)
+
+		middleware := NewApplicationContextMiddleware(clusterContextStrategy)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -76,35 +109,4 @@ func TestApplicationContextMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
 
-	t.Run("should set context based on header and cluster middleware", func(t *testing.T) {
-		// given
-		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			ctx := r.Context()
-			applicationCtx, ok := ctx.Value(clientcontext.ApplicationContextKey).(clientcontext.ApplicationContext)
-			require.True(t, ok)
-
-			assert.Equal(t, testApplication, applicationCtx.Application)
-			assert.Equal(t, clientcontext.TenantEmpty, applicationCtx.ClusterContext.Tenant)
-			assert.Equal(t, clientcontext.GroupEmpty, applicationCtx.ClusterContext.Group)
-
-			w.WriteHeader(http.StatusOK)
-		})
-
-		clusterContextMiddleware := &clusterContextMiddleware{}
-
-		req, err := http.NewRequest("GET", "/", nil)
-		require.NoError(t, err)
-		req.Header.Set(clientcontext.ApplicationHeader, testApplication)
-
-		rr := httptest.NewRecorder()
-
-		middleware := NewApplicationContextMiddleware(clusterContextMiddleware)
-
-		// when
-		resultHandler := middleware.Middleware(handler)
-		resultHandler.ServeHTTP(rr, req)
-
-		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
-	})
 }

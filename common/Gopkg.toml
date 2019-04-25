@@ -22,6 +22,10 @@ required = [
   name = "k8s.io/code-generator"
   branch = "release-1.11"
 
+[[constraint]]
+  name = "github.com/avast/retry-go"
+  version = "2.2.0"
+
 [prune]
   go-tests = true
   unused-packages = true

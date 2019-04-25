@@ -74,6 +74,7 @@ func TestNsBrokerCreateHappyPath(t *testing.T) {
 func TestNsBrokerCreateErrorsHandlingOnBrokerCreation(t *testing.T) {
 	// GIVEN
 	scFakeClientset := sc_fake.NewSimpleClientset()
+
 	k8sFakeClientset := k8s_fake.NewSimpleClientset()
 	mockServiceNameProvider := &automock.ServiceNameProvider{}
 	defer mockServiceNameProvider.AssertExpectations(t)
@@ -91,7 +92,6 @@ func TestNsBrokerCreateErrorsHandlingOnBrokerCreation(t *testing.T) {
 	err := sut.Create(fixDestNs())
 	// THEN
 	assert.Error(t, err)
-	assertPerformedActionCreateService(t, k8sFakeClientset.Actions())
 	fmt.Println(logSink.DumpAll())
 	logSink.AssertLogged(t, logrus.WarnLevel, "Creation of namespaced-broker for namespace [stage] results in error: [some error]. AlreadyExist errors will be ignored.")
 }
@@ -136,13 +136,20 @@ func TestNsBrokerCreateAlreadyExistErrorsIgnored(t *testing.T) {
 	logSink := spy.NewLogSink()
 	k8sFakeClientSet.PrependReactor("create", "services", failingReactor(fixAlreadyExistError()))
 	scFakeClientset.PrependReactor("create", "servicebrokers", failingReactor(fixAlreadyExistError()))
+	scFakeClientset.PrependReactor("get", "servicebrokers", func(action k8s_testing.Action) (handled bool, ret runtime.Object, err error) {
+		return true, &v1beta1.ServiceBroker{
+			ObjectMeta: meta_v1.ObjectMeta{
+				Name: nsbroker.NamespacedBrokerName,
+				UID:  "1234-abcd",
+			},
+		}, nil
+	})
 	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientSet.CoreV1(), mockServiceNameProvider, mockBrokerSyncer, fixWorkingNs(), fixABSelectorKey(), fixABSelectorValue(), fixTargetPort(), logSink.Logger)
 	// WHEN
 	err := sut.Create(fixDestNs())
 	assert.NoError(t, err)
-	logSink.AssertLogged(t, logrus.WarnLevel, "Creation of namespaced-broker for namespace [stage] results in error")
+	logSink.AssertLogged(t, logrus.InfoLevel, "ServiceBroker for namespace [stage] already exist. Attempt to get resource.")
 	logSink.AssertLogged(t, logrus.WarnLevel, "Creation of service for namespaced-broker for namespace [stage] results in error")
-
 }
 
 func TestNsBrokerDeleteHappyPath(t *testing.T) {

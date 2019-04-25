@@ -4,7 +4,7 @@ containerRegistry:
 image:
   dir: pr/tests/
   version: "PR-3478"
-  pullPolicy: "Always"
+  pullPolicy: "IfNotPresent"
 
 dex:
   namespace: kyma-system

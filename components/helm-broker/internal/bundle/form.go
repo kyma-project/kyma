@@ -11,8 +11,9 @@ import (
 )
 
 type form struct {
-	Meta  *FormMeta
-	Plans map[string]*formPlan
+	Meta     *FormMeta
+	DocsMeta *DocsMeta
+	Plans    map[string]*formPlan
 }
 
 // FormMeta describes the metdata information about the bundle.
@@ -34,6 +35,11 @@ type FormMeta struct {
 	Requires            []string          `yaml:"requires"`
 	BindingsRetrievable bool              `yaml:"bindingsRetrievable"`
 	PlanUpdatable       *bool             `yaml:"planUpdatable"`
+}
+
+// DocsMeta contains data about bundle's docs fetched from docs/meta.yaml file
+type DocsMeta struct {
+	Docs []internal.BundleDocs `yaml:"docs"`
 }
 
 // MapLabelsToModel maps the FormMeta.Labels to the model internal.Labels
@@ -81,6 +87,22 @@ func (m *FormMeta) Validate() error {
 
 	return nil
 }
+
+// Validate checks the DocsMeta
+func (m *DocsMeta) Validate() error {
+	var messages []string
+
+	if len(m.Docs) != 1 {
+		messages = append(messages, "docs array should have at most one entry")
+	}
+
+	if len(messages) > 0 {
+		return errors.New(strings.Join(messages, ", "))
+	}
+
+	return nil
+}
+
 func (f *form) Validate() error {
 	var messages []string
 
@@ -99,6 +121,12 @@ func (f *form) Validate() error {
 	if f.Meta != nil {
 		if err := f.Meta.Validate(); err != nil {
 			messages = append(messages, fmt.Sprintf("while validating bundle meta: %s", err.Error()))
+		}
+	}
+
+	if f.DocsMeta != nil {
+		if err := f.DocsMeta.Validate(); err != nil {
+			messages = append(messages, fmt.Sprintf("while validating bundle docs meta: %s", err.Error()))
 		}
 	}
 
@@ -124,6 +152,11 @@ func (f *form) ToModel(c *chart.Chart) (internal.Bundle, error) {
 		mappedPlans[internal.BundlePlanID(plan.Meta.ID)] = dm
 	}
 
+	var bundleDocs []internal.BundleDocs
+	if f.DocsMeta != nil {
+		bundleDocs = f.DocsMeta.Docs
+	}
+
 	return internal.Bundle{
 		ID:          internal.BundleID(f.Meta.ID),
 		Name:        internal.BundleName(f.Meta.Name),
@@ -145,6 +178,7 @@ func (f *form) ToModel(c *chart.Chart) (internal.Bundle, error) {
 		Requires:            f.Meta.Requires,
 		BindingsRetrievable: f.Meta.BindingsRetrievable,
 		PlanUpdatable:       f.Meta.PlanUpdatable,
+		Docs:                bundleDocs,
 	}, nil
 }
 
