@@ -72,9 +72,15 @@ func (t *ClusterMicrofrontendUpgradeTest) createClusterMicrofrontend() error {
 				ViewBaseURL: "https://test.kyma.cx/mf-test",
 				NavigationNodes: []v1alpha1.NavigationNode{
 					v1alpha1.NavigationNode{
-						Label:            "testMF",
-						NavigationPath:   "/test/path",
+						Label:            "testCMF",
+						NavigationPath:   "test",
 						ViewURL:          "/resourcePath",
+						ShowInNavigation: true,
+					},
+					v1alpha1.NavigationNode{
+						Label:            "testCMF child",
+						NavigationPath:   "child",
+						ViewURL:          "/resourcePath/child",
 						ShowInNavigation: true,
 					},
 				},

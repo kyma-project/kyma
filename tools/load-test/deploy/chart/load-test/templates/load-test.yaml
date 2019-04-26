@@ -58,7 +58,7 @@ kind: Pod
 metadata:
   name: {{ template "load-test.fullname" . }}
   annotations:
-    sidecar.istio.io/inject: "false"
+    sidecar.istio.io/inject: "true"
   labels:
     helm-chart-test: "true"
     app: {{ template "load-test.name" . }}
@@ -66,11 +66,14 @@ metadata:
     release: "{{ .Release.Name }}"
     heritage: "{{ .Release.Service }}"
 spec:
+  shareProcessNamespace: true
   serviceAccount: {{ template "load-test.fullname" . }}
   containers:
   - name: load-test
     image: {{ .Values.containerRegistry.path }}/develop/load-test:{{ .Values.image.tag }}
     imagePullPolicy: IfNotPresent
+    command: ["/bin/sh"]
+    args: ["-c", "sleep 10; /load-test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
     env:
     - name: KUBELESS_CONFIG
       value: {{ .Values.env.kubelessConfig }}

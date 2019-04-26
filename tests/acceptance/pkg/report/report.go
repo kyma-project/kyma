@@ -12,7 +12,7 @@ import (
 
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
-	bucClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
+	bucClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 )
 
 type Report struct {
