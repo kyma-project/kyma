@@ -5,7 +5,7 @@ type: Configuration
 
 ## Default settings
 
-During the installation process, the Installer applies onto a cluster or Minikube all components defined in the `installer-cr-cluster.yaml.tpl` and `installer-cr.yaml.tpl` templates with their configuration defined in `values.yaml` files. It also imports the configuration settings defined in the `installer-config-cluster.yaml.tpl` and `installer-config-local.yaml.tpl` templates located under the `installation/resources` subfolder.
+During the installation process, the Installer applies onto a cluster or Minikube all components defined in the `installer-cr-cluster.yaml.tpl` or `installer-cr.yaml.tpl` templates with their configuration defined in `values.yaml` files. It also imports the configuration overrides defined in the `installer-config-cluster.yaml.tpl` and `installer-config-local.yaml.tpl` templates located under the `installation/resources` subfolder.
 
 > **NOTE:** The installation and configuration templates serve as the basis for creating the corresponding installation (`kyma-config-local.yaml` and `kyma-config-cluster.yaml`) and configuration (`kyma-installer-local.yaml` and `kyma-installer-cluster.yaml`) release artefacts.
 
