@@ -4,7 +4,7 @@ info:
   title: 'Kyma Events API'
 tags:
 - name: 'Kyma events'
-  description: 'API for events to Kyma.'
+  description: 'API for eventing.'
 paths:
   /v1/health:
     get:
