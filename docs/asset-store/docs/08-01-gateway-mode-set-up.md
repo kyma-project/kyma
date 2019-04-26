@@ -3,7 +3,7 @@ title: Set Minio to the Google Cloud Storage Gateway mode
 type: Tutorials
 ---
 
-By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the Google Cloud Storage (GCS) Gateway mode using an [override](root/kyma/#tutorials-helm-overrides-for-kyma-installation).
+By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the Google Cloud Storage (GCS) Gateway mode using an [override](/root/kyma/#tutorials-helm-overrides-for-kyma-installation).
 
 ## Prerequisites
 
@@ -49,27 +49,39 @@ You can set Minio to the GCS Gateway mode during Kyma installation, or switch to
     ```
 6. Export the private key as the environment variable:
     ```bash
-    export GCS_KEY_JSON=$(< "${SECRET_FILE}" base64 | tr -d '\n')
+    export GCS_KEY_JSON=$(< ${SECRET_FILE} base64 | tr -d '\n')
     ```
 7. Apply the following ConfigMap with an override onto a cluster or Minikube. Run:
     ```bash
     cat <<EOF | kubectl apply -f -
     apiVersion: v1
+    kind: Secret
+    metadata:
+      name: asset-store-overrides
+      namespace: kyma-installer
+      labels:
+        installer: overrides
+        component: assetstore
+        kyma-project.io/installation: ""
+    type: Opaque
+    data:
+      minio.gcsgateway.gcsKeyJson: "${GCS_KEY_JSON}"
+    ---
+    apiVersion: v1
     kind: ConfigMap
     metadata:
-    name: asset-store-overrides
-    namespace: kyma-installer
-    labels:
+      name: asset-store-overrides
+      namespace: kyma-installer
+      labels:
         installer: overrides
         component: assetstore
         kyma-project.io/installation: ""
     data:
-    minio.persistence.enabled: "false"
-    minio.gcsgateway.enabled: "true"
-    minio.defaultBucket.enabled: "false"
-    minio.gcsgateway.projectId: "${PROJECT}"
-    minio.gcsgateway.gcsKeyJson: "${GCS_KEY_JSON}"
-    minio.externalEndpoint: "https://storage.googleapis.com"
+      minio.persistence.enabled: "false"
+      minio.gcsgateway.enabled: "true"
+      minio.defaultBucket.enabled: "false"
+      minio.gcsgateway.projectId: "${PROJECT}"
+      global.minioExternalEndpoint: "https://storage.googleapis.com"
     EOF
     ```
 8. Lable the `kyma-installtion` custom resource by running `kubectl label installation/kyma-installation action=install` to trigger Kyma installation.
