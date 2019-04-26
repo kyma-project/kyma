@@ -134,10 +134,10 @@ A successful response returns the ID of the registered service:
 
 The Application Registry allows you to pass API specifications in a form of specification URLs.
 
-To register API with specification URL replace `api.spec` with `api.specificationUrl`. 
+To register API with specification URL, replace `api.spec` with `api.specificationUrl`. 
 
 >**NOTE** If both api.spec and api.specificationUrl are provided, api.spec will be used due to its higher priority.
-
+See the example of the API part of the request body with specification URL:
 ```
 "api": {
   "targetUrl": "https://services.odata.org/OData/OData.svc",
