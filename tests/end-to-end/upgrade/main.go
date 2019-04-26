@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"k8s.io/client-go/dynamic"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -39,7 +40,6 @@ import (
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/monitoring"
 	serviceCatalog "github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/service-catalog"
 	"github.com/kyma-project/kyma/tests/end-to-end/upgrade/pkg/tests/ui"
-	"k8s.io/client-go/dynamic"
 )
 
 // Config holds application configuration
@@ -114,20 +114,11 @@ func main() {
 	mfCli, err := mfClient.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating Microfrontends clientset")
 
-	dexConfig := dex.Config{}
-	if action == executeTestsActionName {
-		userEmail, userPassword, err := getUserFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace)
-		fatalOnError(err, "while reading user password from cluster")
-
-		dexConfig = dex.Config{
-			Domain:       domainName,
-			UserEmail:    userEmail,
-			UserPassword: userPassword,
-		}
-	}
-
 	dynamicCli, err := dynamic.NewForConfig(k8sConfig)
 	fatalOnError(err, "while creating K8s Dynamic client")
+
+	dexConfig, err := getDexConfigFromCluster(k8sCli, cfg.DexUserSecret, cfg.DexNamespace, domainName)
+	fatalOnError(err, "while reading dex config from cluster")
 
 	// Register tests. Convention:
 	// <test-name> : <test-instance>
@@ -203,10 +194,15 @@ func getDomainNameFromCluster(k8sCli *k8sClientSet.Clientset) (string, error) {
 	return value, nil
 }
 
-func getUserFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexNamespace string) (string, string, error) {
+func getDexConfigFromCluster(k8sCli *k8sClientSet.Clientset, userSecret, dexNamespace, domainName string) (dex.Config, error) {
 	secret, err := k8sCli.CoreV1().Secrets(dexNamespace).Get(userSecret, metav1.GetOptions{})
 	if err != nil {
-		return "", "", err
+		return dex.Config{}, err
 	}
-	return string(secret.Data["email"]), string(secret.Data["password"]), nil
+	dexConfig := dex.Config{
+		Domain:       domainName,
+		UserEmail:    string(secret.Data["email"]),
+		UserPassword: string(secret.Data["password"]),
+	}
+	return dexConfig, nil
 }
