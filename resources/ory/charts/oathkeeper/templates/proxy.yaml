@@ -27,7 +27,7 @@ spec:
             - name: PORT
               value: "4455"
             - name: OATHKEEPER_API_URL
-              value: "http://oathkeeper-api-server/"
+              value: "http://oathkeeper-api-server"
             - name: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL
               value: "http://oauth2:4445/oauth2/introspect"
           ports:
