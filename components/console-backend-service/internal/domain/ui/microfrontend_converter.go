@@ -7,16 +7,12 @@ import (
 
 type microfrontendConverter struct{}
 
-func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschema.Microfrontend, error) {
+func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) *gqlschema.Microfrontend {
 	if in == nil {
-		return nil, nil
+		return nil
 	}
 
-	navigationNodes, err := c.NavigationNodesToGQLs(in.Spec.CommonMicroFrontendSpec.NavigationNodes)
-	if err != nil {
-		return nil, err
-	}
-
+	navigationNodes := c.navigationNodesToGQLs(in.Spec.CommonMicroFrontendSpec.NavigationNodes)
 	mf := gqlschema.Microfrontend{
 		Name:            in.Name,
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
@@ -25,27 +21,23 @@ func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschem
 		NavigationNodes: navigationNodes,
 	}
 
-	return &mf, nil
+	return &mf
 }
 
-func (c *microfrontendConverter) ToGQLs(in []*uiV1alpha1v.MicroFrontend) ([]gqlschema.Microfrontend, error) {
+func (c *microfrontendConverter) ToGQLs(in []*uiV1alpha1v.MicroFrontend) []gqlschema.Microfrontend {
 	var result []gqlschema.Microfrontend
 	for _, u := range in {
-		converted, err := c.ToGQL(u)
-		if err != nil {
-			return nil, err
-		}
-
+		converted := c.ToGQL(u)
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result, nil
+	return result
 }
 
-func (c *microfrontendConverter) NavigationNodeToGQL(in *uiV1alpha1v.NavigationNode) (*gqlschema.NavigationNode, error) {
+func (c *microfrontendConverter) navigationNodeToGQL(in *uiV1alpha1v.NavigationNode) *gqlschema.NavigationNode {
 	if in == nil {
-		return nil, nil
+		return nil
 	}
 
 	navigationNode := gqlschema.NavigationNode{
@@ -59,20 +51,16 @@ func (c *microfrontendConverter) NavigationNodeToGQL(in *uiV1alpha1v.NavigationN
 		},
 	}
 
-	return &navigationNode, nil
+	return &navigationNode
 }
 
-func (c *microfrontendConverter) NavigationNodesToGQLs(in []uiV1alpha1v.NavigationNode) ([]gqlschema.NavigationNode, error) {
+func (c *microfrontendConverter) navigationNodesToGQLs(in []uiV1alpha1v.NavigationNode) []gqlschema.NavigationNode {
 	var result []gqlschema.NavigationNode
 	for _, u := range in {
-		converted, err := c.NavigationNodeToGQL(&u)
-		if err != nil {
-			return nil, err
-		}
-
+		converted := c.navigationNodeToGQL(&u)
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result, nil
+	return result
 }

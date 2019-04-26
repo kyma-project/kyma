@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	uiV1alpha1v "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/ui/pretty"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -27,7 +28,7 @@ func (svc *microfrontendService) List(namespace string) ([]*uiV1alpha1v.MicroFro
 	for _, item := range items {
 		microfrontend, ok := item.(*uiV1alpha1v.MicroFrontend)
 		if !ok {
-			return nil, fmt.Errorf("Incorrect item type: %T, should be: *Microfrontend", item)
+			return nil, fmt.Errorf("Incorrect item type: %T, should be: *%s", item, pretty.MicroFrontend)
 		}
 		microfrontends = append(microfrontends, microfrontend)
 	}

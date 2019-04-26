@@ -5,10 +5,10 @@ type Kind int
 const (
 	BackendModule Kind = iota
 	BackendModules
-	Microfrontend
-	Microfrontends
-	ClusterMicrofrontend
-	ClusterMicrofrontends
+	MicroFrontend
+	MicroFrontends
+	ClusterMicroFrontend
+	ClusterMicroFrontends
 )
 
 func (k Kind) String() string {
@@ -17,14 +17,14 @@ func (k Kind) String() string {
 		return "BackendService"
 	case BackendModules:
 		return "BackendServices"
-	case Microfrontend:
-		return "Microfrontend"
-	case Microfrontends:
-		return "Microfrontends"
-	case ClusterMicrofrontend:
-		return "ClusterMicrofrontend"
-	case ClusterMicrofrontends:
-		return "ClusterMicrofrontends"
+	case MicroFrontend:
+		return "MicroFrontend"
+	case MicroFrontends:
+		return "MicroFrontends"
+	case ClusterMicroFrontend:
+		return "ClusterMicroFrontend"
+	case ClusterMicroFrontends:
+		return "ClusterMicroFrontends"
 	default:
 		return ""
 	}
