@@ -24,7 +24,7 @@ type options struct {
 	rootCACertificateSecretName    string
 	requestLogging                 bool
 	connectorServiceHost           string
-	gatewayHost                    string
+	gatewayBaseURL                 string
 	certificateProtectedHost       string
 	appsInfoURL                    string
 	runtimesInfoURL                string
@@ -56,7 +56,7 @@ func parseArgs() *options {
 	rootCACertificateSecretName := flag.String("rootCACertificateSecretName", "", "Name of the secret which contains root CA Certificate in case certificates are singed by intermediate CA.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
 	connectorServiceHost := flag.String("connectorServiceHost", "cert-service.wormhole.cluster.kyma.cx", "Host at which this service is accessible.")
-	gatewayHost := flag.String("gatewayHost", "gateway.wormhole.cluster.kyma.cx", "Host at which gateway service is accessible.")
+	gatewayBaseURL := flag.String("gatewayBaseURL", "https://gateway.wormhole.cluster.kyma.cx", "Base URL of the gateway service.")
 	certificateProtectedHost := flag.String("certificateProtectedHost", "gateway.wormhole.cluster.kyma.cx", "Host secured with client certificate, used for certificate renewal.")
 	appsInfoURL := flag.String("appsInfoURL", "", "URL at which management information is available.")
 	runtimesInfoURL := flag.String("runtimesInfoURL", "", "URL at which management information is available.")
@@ -91,7 +91,7 @@ func parseArgs() *options {
 		rootCACertificateSecretName:    *rootCACertificateSecretName,
 		requestLogging:                 *requestLogging,
 		connectorServiceHost:           *connectorServiceHost,
-		gatewayHost:                    *gatewayHost,
+		gatewayBaseURL:                 *gatewayBaseURL,
 		certificateProtectedHost:       *certificateProtectedHost,
 		central:                        *central,
 		appsInfoURL:                    *appsInfoURL,
@@ -107,12 +107,12 @@ func parseArgs() *options {
 func (o *options) String() string {
 	return fmt.Sprintf("--appName=%s --externalAPIPort=%d --internalAPIPort=%d --namespace=%s --tokenLength=%d "+
 		"--appTokenExpirationMinutes=%d --runtimeTokenExpirationMinutes=%d --caSecretName=%s --rootCACertificateSecretName=%s --requestLogging=%t "+
-		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayHost=%s "+
+		"--connectorServiceHost=%s --certificateProtectedHost=%s --gatewayBaseURL=%s "+
 		"--appsInfoURL=%s --runtimesInfoURL=%s --central=%t --appCertificateValidityTime=%s --runtimeCertificateValidityTime=%s "+
 		"--revocationConfigMapName=%s --lookupEnabled=%t --lookupConfigMapPath=%s",
 		o.appName, o.externalAPIPort, o.internalAPIPort, o.namespace, o.tokenLength,
 		o.appTokenExpirationMinutes, o.runtimeTokenExpirationMinutes, o.caSecretName, o.rootCACertificateSecretName, o.requestLogging,
-		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayHost,
+		o.connectorServiceHost, o.certificateProtectedHost, o.gatewayBaseURL,
 		o.appsInfoURL, o.runtimesInfoURL, o.central, o.appCertificateValidityTime, o.runtimeCertificateValidityTime,
 		o.revocationConfigMapName, o.lookupEnabled, o.lookupConfigMapPath)
 }
