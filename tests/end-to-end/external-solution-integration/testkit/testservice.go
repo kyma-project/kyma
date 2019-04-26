@@ -33,10 +33,13 @@ type testService struct {
 	HttpClient         http.Client
 }
 
-func NewTestService(k8sClient resourceskit.K8sResourcesClient, httpClient http.Client) TestService {
+func NewTestService(k8sClient resourceskit.K8sResourcesClient) TestService {
+
+	httpClient := newHttpClient(true)
+
 	return &testService{
 		K8sResourcesClient: k8sClient,
-		HttpClient:         httpClient,
+		HttpClient:         *httpClient,
 	}
 }
 
