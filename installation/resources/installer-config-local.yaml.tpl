@@ -91,7 +91,7 @@ metadata:
     component: helm-broker
     kyma-project.io/installation: ""
 data:
-  config.isDevelopMode: "true"
+  global.isDevelopMode: "true" # global, because subcharts also use it
 ---
 apiVersion: v1
 kind: ConfigMap
