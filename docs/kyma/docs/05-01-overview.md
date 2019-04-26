@@ -9,7 +9,8 @@ During the installation process, the Installer applies onto a cluster or Minikub
 
 > **NOTE:** The installation and configuration templates serve as the basis for creating the corresponding installation (`kyma-config-local.yaml` and `kyma-config-cluster.yaml`) and configuration (`kyma-installer-local.yaml` and `kyma-installer-cluster.yaml`) release artefacts.
 
-Both configuration files contain pre-defined overrides in Secrets and ConfigMaps that the Installer uses during the installation to replace default values specified in `values.yaml` files or to provide required configuration values. While the local configuration file contains hardcoded override values, the cluster configuration file is based on placeholders that are replaced with real values during the installation process.
+Both configuration files contain pre-defined overrides in the form of Secrets and ConfigMaps that the Installer uses during the installation to replace default values specified in `values.yaml` files or to provide required configuration values. While the local configuration file contains hardcoded override values, the cluster configuration file is based on placeholders that are replaced with real values during the installation process.
+You can add multiple Secrets and ConfigMaps for one component. If you duplicate the same parameter in a few Secrets or ConfigMaps for a given component but give it different values, the Installer accepts the last value in the file.
 
 >**CAUTION:** Both `values.yaml` and the configuration files contain production settings that are tested and recommended. Note that you modify them on your own risk.
 
