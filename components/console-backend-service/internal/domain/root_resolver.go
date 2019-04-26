@@ -502,6 +502,9 @@ func (r *queryResolver) Microfrontends(ctx context.Context, namespace string) ([
 
 func (r *queryResolver) ClusterMicrofrontends(ctx context.Context) ([]gqlschema.ClusterMicrofrontend, error) {
 	return r.ui.ClusterMicrofrontendsQuery(ctx)
+	
+func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
+	return r.k8s.SelfSubjectRulesQuery(ctx, namespace)
 }
 
 // Subscriptions

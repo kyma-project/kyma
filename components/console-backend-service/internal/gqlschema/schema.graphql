@@ -814,6 +814,14 @@ type Settings {
     readOnly: Boolean!
 }
 
+# SelfSubjectRules
+
+type ResourceRule {
+    verbs: [String!]
+    apiGroups: [String!]
+    resources: [String!]
+}
+
 # Queries
 
 type Query {
@@ -883,6 +891,8 @@ type Query {
 
     microfrontends(namespace: String!): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     clusterMicrofrontends: [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    
+    selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 }
 
 # Mutations

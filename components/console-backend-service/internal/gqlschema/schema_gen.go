@@ -515,6 +515,7 @@ type ComplexityRoot struct {
 		Idppresets            func(childComplexity int, first *int, offset *int) int
 		Microfrontends        func(childComplexity int, namespace string) int
 		ClusterMicrofrontends func(childComplexity int) int
+		SelfSubjectRules      func(childComplexity int, namespace *string) int
 	}
 
 	ReplicaSet struct {
@@ -537,6 +538,12 @@ type ComplexityRoot struct {
 	ResourceQuotasStatus struct {
 		Exceeded       func(childComplexity int) int
 		ExceededQuotas func(childComplexity int) int
+	}
+
+	ResourceRule struct {
+		Verbs     func(childComplexity int) int
+		ApiGroups func(childComplexity int) int
+		Resources func(childComplexity int) int
 	}
 
 	ResourceType struct {
@@ -906,6 +913,7 @@ type QueryResolver interface {
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
 	Microfrontends(ctx context.Context, namespace string) ([]Microfrontend, error)
 	ClusterMicrofrontends(ctx context.Context) ([]ClusterMicrofrontend, error)
+	SelfSubjectRules(ctx context.Context, namespace *string) ([]ResourceRule, error)
 }
 type ServiceBindingResolver interface {
 	Secret(ctx context.Context, obj *ServiceBinding) (*Secret, error)
@@ -3166,6 +3174,26 @@ func field_Query_microfrontends_args(rawArgs map[string]interface{}) (map[string
 	if tmp, ok := rawArgs["namespace"]; ok {
 		var err error
 		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	return args, nil
+
+}
+
+func field_Query_selfSubjectRules_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 *string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		var ptr1 string
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalString(tmp)
+			arg0 = &ptr1
+		}
+
 		if err != nil {
 			return nil, err
 		}
@@ -5763,6 +5791,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.ClusterMicrofrontends(childComplexity), true
 
+	case "Query.selfSubjectRules":
+		if e.complexity.Query.SelfSubjectRules == nil {
+			break
+		}
+
+		args, err := field_Query_selfSubjectRules_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.SelfSubjectRules(childComplexity, args["namespace"].(*string)), true
+
 	case "ReplicaSet.name":
 		if e.complexity.ReplicaSet.Name == nil {
 			break
@@ -5853,6 +5893,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ResourceQuotasStatus.ExceededQuotas(childComplexity), true
+
+	case "ResourceRule.verbs":
+		if e.complexity.ResourceRule.Verbs == nil {
+			break
+		}
+
+		return e.complexity.ResourceRule.Verbs(childComplexity), true
+
+	case "ResourceRule.apiGroups":
+		if e.complexity.ResourceRule.ApiGroups == nil {
+			break
+		}
+
+		return e.complexity.ResourceRule.ApiGroups(childComplexity), true
+
+	case "ResourceRule.resources":
+		if e.complexity.ResourceRule.Resources == nil {
+			break
+		}
+
+		return e.complexity.ResourceRule.Resources(childComplexity), true
 
 	case "ResourceType.memory":
 		if e.complexity.ResourceType.Memory == nil {
@@ -17479,6 +17540,15 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
+		case "selfSubjectRules":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Query_selfSubjectRules(ctx, field)
+				if out.Values[i] == graphql.Null {
+					invalid = true
+				}
+				wg.Done()
+			}(i, field)
 		case "__type":
 			out.Values[i] = ec._Query___type(ctx, field)
 		case "__schema":
@@ -19854,6 +19924,72 @@ func (ec *executionContext) _Query_clusterMicrofrontends(ctx context.Context, fi
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Query_selfSubjectRules(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Query_selfSubjectRules_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Query",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Query().SelfSubjectRules(rctx, args["namespace"].(*string))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]ResourceRule)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._ResourceRule(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Query___type(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -20447,6 +20583,136 @@ func (ec *executionContext) _ResourceQuotasStatus_exceededQuotas(ctx context.Con
 
 	}
 	wg.Wait()
+	return arr1
+}
+
+var resourceRuleImplementors = []string{"ResourceRule"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _ResourceRule(ctx context.Context, sel ast.SelectionSet, obj *ResourceRule) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, resourceRuleImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("ResourceRule")
+		case "verbs":
+			out.Values[i] = ec._ResourceRule_verbs(ctx, field, obj)
+		case "apiGroups":
+			out.Values[i] = ec._ResourceRule_apiGroups(ctx, field, obj)
+		case "resources":
+			out.Values[i] = ec._ResourceRule_resources(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ResourceRule_verbs(ctx context.Context, field graphql.CollectedField, obj *ResourceRule) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ResourceRule",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Verbs, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ResourceRule_apiGroups(ctx context.Context, field graphql.CollectedField, obj *ResourceRule) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ResourceRule",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.APIGroups, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ResourceRule_resources(ctx context.Context, field graphql.CollectedField, obj *ResourceRule) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ResourceRule",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Resources, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
 	return arr1
 }
 
@@ -29160,6 +29426,14 @@ type Settings {
     readOnly: Boolean!
 }
 
+# SelfSubjectRules
+
+type ResourceRule {
+    verbs: [String!]
+    apiGroups: [String!]
+    resources: [String!]
+}
+
 # Queries
 
 type Query {
@@ -29229,6 +29503,8 @@ type Query {
 
     microfrontends(namespace: String!): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     clusterMicrofrontends: [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    
+    selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 }
 
 # Mutations

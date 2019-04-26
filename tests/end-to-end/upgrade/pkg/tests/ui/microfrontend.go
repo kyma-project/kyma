@@ -72,8 +72,14 @@ func (t *MicrofrontendUpgradeTest) createMicrofrontend(namespace string) error {
 				NavigationNodes: []v1alpha1.NavigationNode{
 					v1alpha1.NavigationNode{
 						Label:            "testMF",
-						NavigationPath:   "/test/path",
+						NavigationPath:   "test",
 						ViewURL:          "/resourcePath",
+						ShowInNavigation: true,
+					},
+					v1alpha1.NavigationNode{
+						Label:            "testMF Child",
+						NavigationPath:   "test/child",
+						ViewURL:          "/resourcePath/child",
 						ShowInNavigation: true,
 					},
 				},
