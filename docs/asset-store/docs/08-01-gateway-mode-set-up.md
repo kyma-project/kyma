@@ -3,19 +3,17 @@ title: Set Minio to the Google Cloud Storage Gateway mode
 type: Tutorials
 ---
 
-By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the Google Cloud Storage (GCS) Gateway mode using an [override](https://kyma-project.io/docs/root/kyma/#configuration-helm-overrides-for-kyma-installation). 
-
-You can set Minio to the GCS Gateway mode during Kyma installation, or switch to the GCS Gateway mode after Kyma installation.
+By default, you install Kyma with the Asset Store in Minio stand-alone mode. This tutorial shows how to set Minio to the Google Cloud Storage (GCS) Gateway mode using an [override](root/kyma/#tutorials-helm-overrides-for-kyma-installation).
 
 ## Prerequisites
 
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/#install-kubectl)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [Google Cloud Platform (GCP)](https://cloud.google.com) project
 
 ## Steps
 
-To use Minio in the GCS Gateway mode, create a Google service account that has a private key and the **Storage Admin** role permissions, apply a ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation. Follow these steps:
+You can set Minio to the GCS Gateway mode during Kyma installation, or switch to the GCS Gateway mode after Kyma installation. In both cases you need to create a Google service account that has a private key and the **Storage Admin** role permissions, apply a ConfigMap with an override onto a cluster or Minikube, and trigger Kyma installation. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
@@ -74,7 +72,7 @@ To use Minio in the GCS Gateway mode, create a Google service account that has a
     minio.externalEndpoint: "https://storage.googleapis.com"
     EOF
     ```
-8. Lable the `kyma-installtion` custom resource by running `kubectl label installation/kyma-installation action=install` to trigger the Kyma installation.
+8. Lable the `kyma-installtion` custom resource by running `kubectl label installation/kyma-installation action=install` to trigger Kyma installation.
 
 
 >**CAUTION** When you install Kyma locally from sources, you need to manually add the ConfigMap to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.
