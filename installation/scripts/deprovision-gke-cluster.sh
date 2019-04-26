@@ -32,15 +32,7 @@ command -v gcloud
 command -v gunzip
 
 KEY_FILE=${HOME}/gcp.json
-
-case `uname -s` in
-    Darwin)
-        echo ${GCLOUD_SERVICE_KEY} | base64 -D | gunzip > ${KEY_FILE}
-        ;;
-    *)
-        echo ${GCLOUD_SERVICE_KEY} | base64 -d | gunzip > ${KEY_FILE}
-        ;;
-esac
+echo ${GCLOUD_SERVICE_KEY} | base64 --decode | gunzip > ${KEY_FILE}
 
 gcloud auth activate-service-account --key-file=${KEY_FILE}
 gcloud config set project ${GCLOUD_PROJECT_NAME}

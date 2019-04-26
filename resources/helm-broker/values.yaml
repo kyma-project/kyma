@@ -10,7 +10,6 @@ service:
 
 config:
   tillerTLSInsecure: true
-  isDevelopMode: "false"
   storage:
     - driver: etcd
       provide:
@@ -27,11 +26,19 @@ config:
         bundle: ~
 
 global:
+  cfgReposUrlName: "helm-repos-urls"
+  isDevelopMode: "false"
   containerRegistry:
     path: eu.gcr.io/kyma-project
   helm_broker:
     dir: develop/
-    version: c3d382fc
+    version: 73a9a5cd
   alpine_net:
     dir: develop/
     version: 149967d0
+  add_ons_ui:
+    dir: ""
+    version: 38e96d29
+  istio:
+    gateway:
+      name: kyma-gateway
