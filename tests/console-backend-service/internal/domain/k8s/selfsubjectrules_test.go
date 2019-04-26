@@ -14,14 +14,10 @@ import (
 )
 
 type selfSubjectRulesQueryResponse struct {
-	SelfSubjectRules selfSubjectRules `json:"selfSubjectRules"`
+	SelfSubjectRules []*selfSubjectRule `json:"selfSubjectRules"`
 }
 
-type selfSubjectRules struct {
-	ResourceRules []*resourceRule `json:"resourceRules"`
-}
-
-type resourceRule struct {
+type selfSubjectRule struct {
 	Verbs     []string `json:"verbs"`
 	APIGroups []string `json:"apiGroups"`
 	Resources []string `json:"resources"`
@@ -39,11 +35,11 @@ func TestSelfSubjectRules(t *testing.T) {
 
 	err = c.Do(fixSelfSubjectRulesQuery(), &selfSubjectRulesRes)
 	require.NoError(t, err)
-	assert.True(t, len(selfSubjectRulesRes.SelfSubjectRules.ResourceRules) > 0)
+	assert.True(t, len(selfSubjectRulesRes.SelfSubjectRules) > 0)
 
 	err = c.Do(fixNamespacedSelfSubjectRulesQuery("foo"), &selfSubjectRulesRes)
 	require.NoError(t, err)
-	assert.True(t, len(selfSubjectRulesRes.SelfSubjectRules.ResourceRules) > 0)
+	assert.True(t, len(selfSubjectRulesRes.SelfSubjectRules) > 0)
 
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
@@ -56,11 +52,9 @@ func fixSelfSubjectRulesQuery() *graphql.Request {
 	query := fmt.Sprintf(
 		`query {
 		selfSubjectRules {
-			resourceRules{
-				verbs
-				resources
-				apiGroups
-			}
+			verbs
+			resources
+			apiGroups
 		}
 	}`)
 	return graphql.NewRequest(query)
@@ -70,11 +64,9 @@ func fixNamespacedSelfSubjectRulesQuery(namespace string) *graphql.Request {
 	query := fmt.Sprintf(
 		`query ($namespace: String){
 		selfSubjectRules (namespace: $namespace){
-			resourceRules{
-				verbs
-				resources
-				apiGroups
-			}
+			verbs
+			resources
+			apiGroups
 		}
 	}`)
 	req := graphql.NewRequest(query)
