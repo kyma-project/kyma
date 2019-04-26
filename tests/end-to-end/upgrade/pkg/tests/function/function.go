@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"strings"
 	"time"
 
@@ -40,11 +39,7 @@ type LambdaFunctionUpgradeTest struct {
 }
 
 // NewLambdaFunctionUpgradeTest returns new instance of the FunctionUpgradeTest
-func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kubernetes.Interface, kymaAPI kyma.Interface) *LambdaFunctionUpgradeTest {
-	domainName := os.Getenv("DOMAIN")
-	if len(domainName) == 0 {
-		logrus.Fatal("Environment variable DOMAIN is not found.")
-	}
+func NewLambdaFunctionUpgradeTest(kubelessCli kubeless.Interface, k8sCli kubernetes.Interface, kymaAPI kyma.Interface, domainName string) *LambdaFunctionUpgradeTest {
 	nSpace := strings.ToLower("LambdaFunctionUpgradeTest")
 	hostName := fmt.Sprintf("%s-%s.%s", "hello", nSpace, domainName)
 	httpCli, err := getHTTPClient(true)
