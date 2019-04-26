@@ -7,7 +7,7 @@ See [this file](./assets/eventsapi.yaml) for the Event Service API specification
 
 ### Fetching all subscribed events for the application
 
-Event service provides enpoint for fetching all active events for the application. To do so, make a call:
+Event service provides an endpoint for fetching subscribed events for the application. To do so, make a call:
 
 ```
 curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events/subscribed -k --cert {APP_CERT} --key {APP_CERTS_KEY}
