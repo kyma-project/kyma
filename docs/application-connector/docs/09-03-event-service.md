@@ -5,7 +5,7 @@ type: API
 
 See [this file](./assets/eventsapi.yaml) for the Event Service API specification.
 
-###Fetching all active events for the application
+### Fetching all subscribed events for the application
 
 Event service provides enpoint for fetching all active events for the application. To do so, make a call:
 
