@@ -6,8 +6,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   event_bus:
-    dir: develop/
-    version: cf2181f1
+    dir: pr/
+    version: PR-3882
   event_bus_tests:
     dir: develop/
     version: f4c58b01
