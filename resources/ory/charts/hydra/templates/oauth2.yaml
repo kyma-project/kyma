@@ -27,9 +27,9 @@ spec:
             - name: OAUTH2_ISSUER_URL
               value: "https://oauth2.kyma.local"
             - name: OAUTH2_CONSENT_URL
-              value: "https://sample-oauth2-login-consent.kyma.local/consent"
+              value: "https://oauth2-login-consent.kyma.local/consent"
             - name: OAUTH2_LOGIN_URL
-              value: "https://sample-oauth2-login-consent.kyma.local/login"
+              value: "https://oauth2-login-consent.kyma.local/login"
             - name: DATABASE_URL
               value: "memory"
             - name: SYSTEM_SECRET

@@ -1,7 +1,7 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: sample-oauth2-login-consent
+  name: oauth2-login-consent
   namespace: kyma-system
 spec:
   selector:
