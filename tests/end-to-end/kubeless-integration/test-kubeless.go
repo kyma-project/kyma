@@ -285,11 +285,11 @@ func deleteFun(namespace, name string) {
 		log.Fatal("Unable to delete function ", name, ":\n", output)
 	}
 
-	cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name, "--grace-period=0", "--force")
-	stdoutStderr, err = cmd.CombinedOutput()
-	if err != nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "warning: Immediate deletion does not wait for confirmation that the running resource has been terminated") {
-		log.Fatal("Unable to delete function pod:\n", string(stdoutStderr))
-	}
+	// cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name, "--grace-period=0", "--force")
+	// stdoutStderr, err = cmd.CombinedOutput()
+	// if err != nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "warning: Immediate deletion does not wait for confirmation that the running resource has been terminated") {
+	// 	log.Fatal("Unable to delete function pod:\n", string(stdoutStderr))
+	// }
 
 	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
