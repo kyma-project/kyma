@@ -137,8 +137,8 @@ Follow these steps:
 5. Export the certificate and key as environment variables. Run these commands:
 
     ```
-    export TLS_CERT=$(cat ./letsencrypt/live/$DOMAIN/fullchain.pem | base64 | sed 's/ /\\ /g')
-    export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64 | sed 's/ /\\ /g')
+    export TLS_CERT=$(cat ./letsencrypt/live/$DOMAIN/fullchain.pem | base64 | sed 's/ /\\ /g' | tr -d '\n');
+    export TLS_KEY=$(cat ./letsencrypt/live/$DOMAIN/privkey.pem | base64 | sed 's/ /\\ /g' | tr -d '\n')
     ```
 
 ## Prepare the installation configuration file
@@ -641,7 +641,7 @@ kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.he
 
 ## Access the cluster
 
-1. To get the address of the cluster's Console, check the name of the Console's virtual service. The name of this virtual service corresponds to the Console URL. To get the virtual service name, run:
+1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
 
 ```
 kubectl get virtualservice core-console -n kyma-system
@@ -650,7 +650,7 @@ kubectl get virtualservice core-console -n kyma-system
 2. Access your cluster under this address:
 
 ```
-https://{VIRTUAL_SERVICE_NAME}
+https://{VIRTUAL_SERVICE_HOST}
 ```
 
 >**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see [this](#installation-install-kyma-locally-access-the-kyma-console) document.

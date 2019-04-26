@@ -149,7 +149,7 @@ Access your local Kyma instance through [this](https://console.kyma.local/) link
 * Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password contained in the  `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
 
 ``` bash
-kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D
+kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
 ```
 
 * Click the **Namespaces** section and select a Namespace from the drop-down menu to explore Kyma further.

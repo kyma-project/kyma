@@ -13,6 +13,14 @@
   revision = "fd208923b012d2b64c790e98c7731b32f676ea04"
 
 [[projects]]
+  digest = "1:13d5750ba049ce46bf931792803f1d5584b04026df9badea5931e33c22aa34ee"
+  name = "github.com/avast/retry-go"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "08d411bf8302219fe47ca04dbdf9de892010c5e5"
+  version = "v2.2.0"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -101,22 +109,6 @@
   revision = "a0a7cfed7b2a54080888fd2b3d4a3ec14562c86c"
 
 [[projects]]
-  branch = "master"
-  digest = "1:b7f860847a1d71f925ba9385ed95f1ebc0abfeb418a78e219ab61f48fdfeffad"
-  name = "github.com/howeyc/gopass"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "bf9dde6d0d2c004a008c27aaee91170c786f6db8"
-
-[[projects]]
-  digest = "1:aaa38889f11896ee3644d77e17dc7764cc47f5f3d3b488268df2af2b52541c5f"
-  name = "github.com/imdario/mergo"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "7c29201646fa3de8506f701213473dd407f19646"
-  version = "v0.3.7"
-
-[[projects]]
   digest = "1:30e9bf1e10cdcd6f89cf203e26712bb0952314996ab4eac81c281a36364226c4"
   name = "github.com/json-iterator/go"
   packages = ["."]
@@ -159,9 +151,12 @@
   version = "v9.0.0"
 
 [[projects]]
-  digest = "1:c563cf3dbd3765c3810ed7563791cd7a2fd8812865a1d7c64f2ea93bdd9ce5d8"
+  branch = "master"
+  digest = "1:4c09fb609e59deeeae5b3a4eb86ccf3837843d6e0bbfec0f066f540299b806df"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "common/ingressgateway",
+    "common/resilient",
     "components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "components/application-broker/pkg/client/clientset/versioned",
     "components/application-broker/pkg/client/clientset/versioned/scheme",
@@ -170,15 +165,15 @@
     "components/application-operator/pkg/client/clientset/versioned",
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
-    "components/binding-usage-controller/pkg/apis/settings/v1alpha1",
-    "components/binding-usage-controller/pkg/client/clientset/versioned",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/scheme",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
-    "components/binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
+    "components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "components/service-binding-usage-controller/pkg/apis/settings/v1alpha1",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/scheme",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
+    "components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/settings/v1alpha1",
   ]
   pruneopts = "NUT"
-  revision = "56b261fcf0ecff236ed643d5c6620faad1b708d2"
+  revision = "d0e3a6dad66e37fae2fe4a362202bc9c868ce8b3"
 
 [[projects]]
   digest = "1:5cf3f025cbee5951a4ee961de067c8a89fc95a5adabead774f82822efabab121"
@@ -462,7 +457,7 @@
   revision = "2f0d1d0a58f22eae7a0ec3d6cf01f4a122a57dae"
 
 [[projects]]
-  digest = "1:c8db7e6aacdb30ee86feaf93ec02a98ebaea7f3d4655d8242a52e26cc9d7b5ea"
+  digest = "1:2afc2e9c84de5eda8b2850457623287061dc068beb1243527778a0e5cd6baf85"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -504,17 +499,12 @@
     "rest",
     "rest/watch",
     "third_party/forked/golang/template",
-    "tools/auth",
-    "tools/clientcmd",
     "tools/clientcmd/api",
-    "tools/clientcmd/api/latest",
-    "tools/clientcmd/api/v1",
     "tools/metrics",
     "tools/reference",
     "transport",
     "util/cert",
     "util/flowcontrol",
-    "util/homedir",
     "util/integer",
     "util/jsonpath",
   ]
@@ -537,21 +527,22 @@
     "github.com/Bplotka/go-httplog",
     "github.com/Bplotka/go-httplog/logrus",
     "github.com/ghodss/yaml",
-    "github.com/golang/glog",
     "github.com/golang/lint/golint",
     "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kubernetes/client-go/kubernetes/typed/core/v1",
+    "github.com/kyma-project/kyma/common/ingressgateway",
+    "github.com/kyma-project/kyma/common/resilient",
     "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned",
     "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
-    "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
-    "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned",
-    "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "github.com/pkg/errors",
     "github.com/pmorie/go-open-service-broker-client/v2",
     "github.com/sirupsen/logrus",
@@ -567,7 +558,6 @@
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
     "k8s.io/apimachinery/pkg/apis/meta/v1/unstructured",
-    "k8s.io/apimachinery/pkg/fields",
     "k8s.io/apimachinery/pkg/runtime",
     "k8s.io/apimachinery/pkg/runtime/schema",
     "k8s.io/apimachinery/pkg/util/intstr",
@@ -577,7 +567,6 @@
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",
-    "k8s.io/client-go/tools/clientcmd",
   ]
   solver-name = "gps-cdcl"
   solver-version = 1

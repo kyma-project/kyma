@@ -14,7 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal"
 )
 
-const bundleRepositoryURLName = "bundleRepositoryURL"
+const addonsRepositoryURLName = "addonsRepositoryURL"
 
 type provisionService struct {
 	bundleIDGetter           bundleIDGetter
@@ -137,7 +137,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		releaseName:         releaseName,
 		bundlePlan:          bundlePlan,
 		isBundleBindable:    bundle.Bindable,
-		bundleRepositoryURL: bundle.RemoteRepositoryURL,
+		addonsRepositoryURL: bundle.RepositoryURL,
 		chartOverrides:      chartOverrides,
 	}
 	svc.doAsync(ctx, provisionInput)
@@ -160,7 +160,7 @@ type provisioningInput struct {
 	bundlePlan          internal.BundlePlan
 	isBundleBindable    bool
 	chartOverrides      internal.ChartValues
-	bundleRepositoryURL string
+	addonsRepositoryURL string
 }
 
 func (svc *provisionService) doAsync(ctx context.Context, input provisioningInput) {
@@ -186,7 +186,7 @@ func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 
 		out = mergeValues(out, input.chartOverrides)
 
-		out[bundleRepositoryURLName] = input.bundleRepositoryURL
+		out[addonsRepositoryURLName] = input.addonsRepositoryURL
 
 		svc.log.Infof("Merging values for operation [%s], releaseName [%s], namespace [%s], bundlePlan [%s]. Plan values are: [%v], overrides: [%v], merged: [%v] ",
 			input.operationID, input.releaseName, input.namespace, input.bundlePlan.Name, input.bundlePlan.ChartValues, input.chartOverrides, out)
