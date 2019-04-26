@@ -14,7 +14,7 @@ type EventsClient interface {
 
 //Events represents collection of all events with subscriptions
 type Events struct {
-	Events []Event `json:"events"`
+	EventsInfo []Event `json:"eventsInfo"`
 }
 
 //Event represents basic information about event
@@ -75,7 +75,7 @@ func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
 
 	activeEvents = removeDuplicates(activeEvents)
 
-	return Events{Events: activeEvents}, nil
+	return Events{EventsInfo: activeEvents}, nil
 }
 
 func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]Event, error) {

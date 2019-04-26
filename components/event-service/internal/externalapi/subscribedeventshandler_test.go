@@ -23,7 +23,7 @@ func TestActiveEventsHandler_GetActiveEvents(t *testing.T) {
 	t.Run("Should return active events and http code 200", func(t *testing.T) {
 		//given
 		expectedResponse := subscribed.Events{
-			Events: []subscribed.Event{{Name: "topic1", Version: "v1"}, {Name: "topic2", Version: "v1"}},
+			EventsInfo: []subscribed.Event{{Name: "topic1", Version: "v1"}, {Name: "topic2", Version: "v1"}},
 		}
 
 		eventsClient := &mocks.EventsClient{}

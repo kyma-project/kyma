@@ -28,7 +28,7 @@ type PublishResponse struct {
 }
 
 type SubscribedEvents struct {
-	Events []Event `json:"events"`
+	EventsInfo []Event `json:"eventsInfo"`
 }
 
 type Event struct {
@@ -101,7 +101,7 @@ func TestGatewayEvents(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, response.StatusCode)
-		assert.Equal(t, eventType, events.Events[0].Name)
+		assert.Equal(t, eventType, events.EventsInfo[0].Name)
 
 		//cleanup
 		err = client.Delete(config.Namespace)
