@@ -2,19 +2,19 @@
 title: Architecture
 ---
 
-When you create a lambda or a service to perform a given business functionality, you must define which Events trigger it. Define triggers by creating the Subscription CR in which you instruct the Event Bus to forward the Events of a particular type to your lambda. 
-For example, whenever the `order-created` Event comes in, the Event Bus consumes it by saving it in NATS Streaming and persistence. Then it sends it to the receiver specified in the Subscription definition.
+## Event consumption
+
+When you create a lambda or a service to perform a given business functionality, you must define which Events trigger it. Define triggers by creating the [Subscription CR](components/event-bus/#custom-resource-subscription) in which you instruct the Event Bus to forward the Events of a particular type to your lambda. 
+For example, whenever the `order-created` Event comes in, the Event Bus stores it in NATS Streaming. It then dispatches it to the receiver specified in the Subscription definition.
 
 > **NOTE:** The Event Bus creates a separate Event Trigger for each Subscription.
-
-## Event consumption
 
 ![Configure and Consume Events](./assets/configure-consume-events.svg)
 
 
 1. A user creates a lambda or a service to be triggered by an Event coming from an external solution. 
     >**NOTE**: For a service, the user must create a Kyma Subscription resource manually. For a lambda, it is created automatically.
-2. The **subscription-controller-knative** component reacts on the creation of Kyma Subscription. It [verifies](#event-validation) if the Event type has Subscription permissions to if so, it creates Knative Channel and Knative Subscription resources.
+2. The **subscription-controller-knative** component reacts on the creation of Kyma Subscription.  It [verifies](#event-validation) if the Event type from the Application can be consumed in the Namespace where the Kyma Subscription has been created.  If so, it creates the Knative Channel and Knative Subscription resources.
 3. The **nats-controller** reacts on the creation of a Knative Channel and creates the required Kubernetes and Istio services.
 4. The **nats-dispatcher** reacts on the creation of a Knative Subscription and creates the NATS Streaming subscription. 
 5. The **nats-dispatcher** picks the Event and dispatches it to the configured lambda or the service URL as an HTTP POST request. The lambda reacts on the received Event.
