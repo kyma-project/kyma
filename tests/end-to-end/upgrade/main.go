@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+
 	"k8s.io/client-go/dynamic"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
