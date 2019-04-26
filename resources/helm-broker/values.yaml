@@ -42,5 +42,3 @@ global:
   istio:
     gateway:
       name: kyma-gateway
-  ingress:
-    domainName: adfas
