@@ -23,7 +23,10 @@ spec:
             - "proxy"
           env:
             - name: CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET
-              value: {{ quote .Values.credentialsIssuerID.token }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ template "fullname" . }}-token
+                  key: credentialsIssuerIDTokenSecret
             - name: PORT
               value: {{ quote .Values.proxy.port }}
             - name: OATHKEEPER_API_URL
