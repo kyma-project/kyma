@@ -17,6 +17,16 @@ then
    exit 1
 fi
 
+matchTests="" # match all tests
+
+${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__STATIC_PASSWORDS__"
+if [[ $? -eq 1 ]]
+then
+  # if static users are not available, do not execute tests which requires them
+  matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template --template='{{println "  selectors:"}}{{println "    matchNames:"}}{{range .items}}{{printf "      - name: %s\n" .metadata.name}}{{printf "        namespace: %s\n" .metadata.namespace}}{{end}}')
+  echo "WARNING: some tests will be skipped due to the lack of static users"
+fi
+
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1
 kind: ClusterTestSuite
@@ -27,6 +37,7 @@ metadata:
 spec:
   maxRetries: 1
   concurrency: 1
+${matchTests}
 EOF
 
 startTime=$(date +%s)
