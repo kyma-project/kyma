@@ -1,3 +1,5 @@
+# DO NOT MERGE
+
 <p align="center">
  <img src="https://raw.githubusercontent.com/kyma-project/kyma/master/logo.png" width="235">
 </p>
