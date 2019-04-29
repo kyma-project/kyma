@@ -7,7 +7,7 @@ type: Configuration
 
 During the installation process, the Installer applies onto a cluster or Minikube all components defined in the `installer-cr-cluster.yaml.tpl` or `installer-cr.yaml.tpl` templates with their configuration defined in `values.yaml` files. It also imports the configuration overrides defined in the `installer-config-cluster.yaml.tpl` and `installer-config-local.yaml.tpl` templates located under the `installation/resources` subfolder.
 
-> **NOTE:** The installation and configuration templates serve as the basis for creating the corresponding installation (`kyma-config-local.yaml` and `kyma-config-cluster.yaml`) and configuration (`kyma-installer-local.yaml` and `kyma-installer-cluster.yaml`) release artefacts.
+> **NOTE:** The installation and configuration templates serve as the basis for creating the installation (`kyma-installer-local.yaml` and `kyma-installer-cluster.yaml`) and configuration (`kyma-config-local.yaml` and `kyma-config-cluster.yaml`) release artefacts.
 
 Both configuration files contain pre-defined overrides in the form of Secrets and ConfigMaps that the Installer uses during the installation to replace default values specified in `values.yaml` files or to provide required configuration values. While the local configuration file contains hardcoded override values, the cluster configuration file is based on placeholders that are replaced with real values during the installation process.
 You can add multiple Secrets and ConfigMaps for one component. If you duplicate the same parameter in a few Secrets or ConfigMaps for a given component but give it different values, the Installer accepts the last value in the file.
@@ -20,7 +20,7 @@ Before you start the Kyma installation process, you can customize the default se
 
 ### Components
 
-During the installation, the Installer creates the Kyma Installer image that contains all component charts located in the `kyma/resources` folder. Both cluster and local installation files contain a full list of these component names and their Namespaces.
+One of the installation artifacts is the Kyma Installer image that contains all component charts located in the `kyma/resources` folder. Both cluster and local installation files contain a full list of these component names and their Namespaces.
 Components that are not an integral part of the default Kyma Lite package, are preceded with hashtags (#) which means that the Installer skips them during the installation process.   
 You can customize the component installation files by:
 - Removing hashtags in front of the component entries to enable a component installation.
