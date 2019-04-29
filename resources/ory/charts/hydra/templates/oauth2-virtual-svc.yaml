@@ -14,7 +14,7 @@ spec:
             regex: /.*
       route:
         - destination:
-            host: oauth2
+            host: {{ template "fullname" . }}-oauth2
             port:
               number: {{ .Values.hydraServer.service.port }}
 
@@ -35,6 +35,6 @@ spec:
             regex: /.*
       route:
         - destination:
-            host: oauth2
+            host: {{ template "fullname" . }}-oauth2
             port:
               number: {{ .Values.hydraServer.service.adminPort }}
