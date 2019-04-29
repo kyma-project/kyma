@@ -6,9 +6,9 @@ metadata:
 spec:
   selector:
     app: {{ template "fullname" . }}-api-server
-  type: {{ .Values.proxy.service.type }}
+  type: {{ .Values.apiServer.service.type }}
   ports:
     - name: {{ template "fullname" . }}-api-server
       protocol: TCP
-      port: {{ .Values.proxy.service.port }}
-      targetPort: {{ .Values.api-server.port }}
+      port: {{ .Values.apiServer.service.port }}
+      targetPort: {{ .Values.apiServer.port }}

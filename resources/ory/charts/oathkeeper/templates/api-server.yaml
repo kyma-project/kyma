@@ -25,10 +25,10 @@ spec:
             - name: CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET
               value: {{ .Values.credentialsIssuerID.token }}
             - name: PORT
-              value: {{ quote .Values.api-server.port }}
+              value: {{ quote .Values.apiServer.port }}
             - name: DATABASE_URL
-              value: {{ .Values.api-server.config.databaseUrl }}
+              value: {{ .Values.apiServer.config.databaseUrl }}
             - name: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL
-              value: {{ .Values.introspectionServer.url }}
+              value: {{ .Values.tokenIntrospection.serverUrl }}
           ports:
-            - containerPort: {{ .Values.api-server.port }}
+            - containerPort: {{ .Values.apiServer.port }}

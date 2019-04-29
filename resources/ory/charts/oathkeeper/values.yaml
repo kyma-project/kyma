@@ -17,7 +17,7 @@ proxy:
     type: ClusterIP
     port: 80
 
-api-server:
+apiServer:
   port: 4456
   config:
     databaseUrl: memory

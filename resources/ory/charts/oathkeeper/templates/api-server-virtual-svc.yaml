@@ -16,4 +16,4 @@ spec:
         - destination:
             host: {{ .Chart.Name }}-api-server
             port:
-              number: {{ .Values.api-server.service.port }}
+              number: {{ .Values.apiServer.service.port }}
