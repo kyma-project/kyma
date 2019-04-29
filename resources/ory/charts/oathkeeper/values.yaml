@@ -11,8 +11,6 @@ tokenIntrospection:
 
 proxy:
   port: 4455
-  config:
-    oathkeeperApiUrl: http://oathkeeper-api-server/
   service:
     type: ClusterIP
     port: 80

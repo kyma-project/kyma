@@ -24,21 +24,21 @@ spec:
             - "--dangerous-force-http"
           env:
             - name: OAUTH2_ISSUER_URL
-              value: {{ .Values.hydraServer.config.oauth2.issuerUrl }}
+              value: {{ quote .Values.hydraServer.config.oauth2.issuerUrl }}
             - name: OAUTH2_CONSENT_URL
-              value: {{ .Values.hydraServer.config.oauth2.consentUrl }}
+              value: {{ quote .Values.hydraServer.config.oauth2.consentUrl }}
             - name: OAUTH2_LOGIN_URL
-              value: {{ .Values.hydraServer.config.oauth2.loginUrl }}
+              value: {{ quote .Values.hydraServer.config.oauth2.loginUrl }}
             - name: OAUTH2_SHARE_ERROR_DEBUG
-              value: {{ .Values.hydraServer.config.oauth2.shareErrorDebug }}
+              value: {{ quote .Values.hydraServer.config.oauth2.shareErrorDebug }}
             - name: DATABASE_URL
-              value: {{ .Values.hydraServer.config.databaseUrl }}
+              value: {{ quote .Values.hydraServer.config.databaseUrl }}
             - name: SYSTEM_SECRET
-              value: {{ .Values.hydraServer.config.systemSecret }}
+              value: {{ quote .Values.hydraServer.config.systemSecret }}
             - name: OIDC_SUBJECT_TYPES_SUPPORTED
-              value: {{ .Values.hydraServer.config.oidc.subjectTypesSupported }}
+              value: {{ quote .Values.hydraServer.config.oidc.subjectTypesSupported }}
             - name: OIDC_SUBJECT_TYPE_PAIRWISE_SALT
-              value: {{ .Values.hydraServer.config.oidc.subjectTypePairwiseSalt }}
+              value: {{ quote .Values.hydraServer.config.oidc.subjectTypePairwiseSalt }}
           ports:
             - containerPort: {{ .Values.hydraServer.port }}
             - containerPort: {{ .Values.hydraServer.adminPort }}

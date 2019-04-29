@@ -9,8 +9,8 @@ spec:
   template:
     metadata:
       labels:
-        name: {{ template "fullname" . }}
-        app: {{ template "fullname" . }}
+        name: {{ template "fullname" . }}-api-server
+        app: {{ template "fullname" . }}-api-server
     spec:
       containers:
         - name: {{ .Chart.Name }}-api-server
@@ -23,12 +23,12 @@ spec:
             - "api"
           env:
             - name: CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET
-              value: {{ .Values.credentialsIssuerID.token }}
+              value: {{ quote .Values.credentialsIssuerID.token }}
             - name: PORT
               value: {{ quote .Values.apiServer.port }}
             - name: DATABASE_URL
-              value: {{ .Values.apiServer.config.databaseUrl }}
+              value: {{ quote .Values.apiServer.config.databaseUrl }}
             - name: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL
-              value: {{ .Values.tokenIntrospection.serverUrl }}
+              value: {{ quote .Values.tokenIntrospection.serverUrl }}
           ports:
             - containerPort: {{ .Values.apiServer.port }}

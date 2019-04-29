@@ -17,6 +17,6 @@ spec:
           imagePullPolicy: {{ .Values.loginConsent.image.pullPolicy }}
           env:
             - name: HYDRA_ADMIN_URL
-              value: {{ .Values.loginConsent.config.hydraAdminUrl }}
+              value: {{ quote .Values.loginConsent.config.hydraAdminUrl }}
           ports:
             - containerPort: {{ .Values.loginConsent.port }}

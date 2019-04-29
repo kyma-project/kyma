@@ -23,12 +23,12 @@ spec:
             - "proxy"
           env:
             - name: CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET
-              value: {{ .Values.credentialsIssuerID.token }}
+              value: {{ quote .Values.credentialsIssuerID.token }}
             - name: PORT
               value: {{ quote .Values.proxy.port }}
             - name: OATHKEEPER_API_URL
-              value: {{ .Values.proxy.config.oathkeeperApiUrl }}
+              value: http://{{ template "fullname" . }}-api-server
             - name: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL
-              value: {{ .Values.tokenIntrospection.serverUrl }}
+              value: {{ quote .Values.tokenIntrospection.serverUrl }}
           ports:
             - containerPort: {{ .Values.proxy.port }}
