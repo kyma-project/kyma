@@ -103,6 +103,27 @@ u/1tNUOn8VJWVtOHtVdmMOkSf1+H3g4JOD+nq+AD2ZTgB+KRkUQph6V0bc1H9CnW
 KtvlOZ1W3/EFj1Hwouw=
 -----END CERTIFICATE-----`
 
+	rootCaCertificatePem = `-----BEGIN CERTIFICATE-----
+MIIDOjCCAiICCQDUf/5116L7fTANBgkqhkiG9w0BAQsFADBfMQ8wDQYDVQQLDAZD
+NGNvcmUxDDAKBgNVBAoMA1NBUDEQMA4GA1UEBwwHV2FsZG9yZjEQMA4GA1UECAwH
+V2FsZG9yZjELMAkGA1UEBhMCREUxDTALBgNVBAMMBEt5bWEwHhcNMTgwNzEzMDk1
+MjUxWhcNMTkwNzEzMDk1MjUxWjBfMQ8wDQYDVQQLDAZDNGNvcmUxDDAKBgNVBAoM
+A1NBUDEQMA4GA1UEBwwHV2FsZG9yZjEQMA4GA1UECAwHV2FsZG9yZjELMAkGA1UE
+BhMCREUxDTALBgNVBAMMBEt5bWEwggEiMA0GCSqGSIb3DQEBAQUAA4IBDwAwggEK
+AoIBAQD49IZuqogcaqAVSV79L7xKMI36NMy6ig+jTquecN9LRhQcalKDKxJ0BRet
+bSUhftr8qcE3SaxOtPPvTLoiixjlMFaQ46ZfAx8HgGBEevb/jYoBtATXLD1K/RP/
+XXmbh7moy0mxhPA5em2LU8s22EGjN9L0VjbmqER6xWlRccZ8BmAGQVOgILK98IGD
+EN7EQSf6ZzLzClBS3AxGr62suP81yuXQLytNLY9xbNRPsQ7WnpPHrZM13CCb4wqb
+4G5MXyLj077RdVFZV8l7P6DQ0Bb2AYWf2egYv1iEMRun2v3bzN4DX6Oup2vRD/RC
+sKd/QyqWV1U9FSTgbRKAIKb1I1tZAgMBAAEwDQYJKoZIhvcNAQELBQADggEBAMXo
+tY+WqHGVXhrStebknCJ5dd8bLQwqEqCBBLDzsjP43Q1g3yXT7fTl1zIdUNYhD/x9
+y02YCDJnRXR5vRivR47TXtdXJFL8d2jSBGF7q2J4qDNdHLNsEzmWYHzNYUYqBB+5
+XkiqUKgKvdbaGCsHkhlmwUS3IdtxVQGtPDOzZ3/ZRwMqlhiPayFHGCpk7aGvSHA6
+rU4XYOp88sPhuqmy7zafUNNlmt2XSWaNrS/Nf1WNH1GtH92uUaLh53BSP/MB5//a
+u/1tNUOn8VJWVtOHtVdmMOkSf1+H3g4JOD+nq+AD2ZTgB+KRkUQph6V0bc1H9CnW
+KtvlOZ1W3/EFj1Hwouw=
+-----END CERTIFICATE-----`
+
 	renewedClientCertificatePem = `-----BEGIN CERTIFICATE-----
 MIICIzCCAYwCCQDDkk/CKHDcZjANBgkqhkiG9w0BAQUFADASMRAwDgYDVQQKEwdB
 Y21lIENvMCAXDTE5MDMyOTEzMjU1M1oYDzIxMTkwMzA1MTMyNTUzWjAUMRIwEAYD
@@ -127,7 +148,10 @@ func TestController_Reconcile(t *testing.T) {
 
 	clientKey := loadPrivateKey(t, []byte(clientKeyPem))
 	clientCert := loadCertificate(t, []byte(clientCertificatePem))
-	caCert := loadCertificate(t, []byte(caCertificatePem))
+	caCert := []*x509.Certificate{
+		loadCertificate(t, []byte(caCertificatePem)),
+		loadCertificate(t, []byte(rootCaCertificatePem)),
+	}
 
 	renewedClientCert := []byte(renewedClientCertificatePem)
 
@@ -158,7 +182,7 @@ func TestController_Reconcile(t *testing.T) {
 	certificateCredentials := connectorservice.CertificateCredentials{
 		ClientKey:  clientKey,
 		ClientCert: clientCert,
-		CACert:     caCert,
+		CACerts:    caCert,
 	}
 
 	t.Run("should check connection and renew certificate", func(t *testing.T) {
@@ -183,7 +207,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificate").Return(caCert, nil)
+		certProvider.On("GetCACertificates").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -231,7 +255,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificate").Return(caCert, nil)
+		certProvider.On("GetCACertificates").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -271,7 +295,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificate").Return(caCert, nil)
+		certProvider.On("GetCACertificates").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -364,7 +388,7 @@ func TestController_Reconcile(t *testing.T) {
 		certPreserver := &certMocks.Preserver{}
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificate").Return(nil, errors.New("error"))
+		certProvider.On("GetCACertificates").Return(nil, errors.New("error"))
 
 		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
 
@@ -390,7 +414,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificate").Return(caCert, nil)
+		certProvider.On("GetCACertificates").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).
@@ -421,7 +445,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificate").Return(caCert, nil)
+		certProvider.On("GetCACertificates").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -453,7 +477,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificate").Return(caCert, nil)
+		certProvider.On("GetCACertificates").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
@@ -489,7 +513,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
-		certProvider.On("GetCACertificate").Return(caCert, nil)
+		certProvider.On("GetCACertificates").Return(caCert, nil)
 
 		mutualTLSClient := &connectorMocks.MutualTLSClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)

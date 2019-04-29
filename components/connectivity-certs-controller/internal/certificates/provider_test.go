@@ -3,6 +3,8 @@ package certificates
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/pkg/errors"
 
 	"github.com/stretchr/testify/require"
@@ -15,6 +17,32 @@ const (
 	caCertSecretName      = "ca-cert"
 
 	pemCertificate = `-----BEGIN CERTIFICATE-----
+MIIEcDCCA1igAwIBAgIBAjANBgkqhkiG9w0BAQsFADBfMQ8wDQYDVQQLDAZDNGNv
+cmUxDDAKBgNVBAoMA1NBUDEQMA4GA1UEBwwHV2FsZG9yZjEQMA4GA1UECAwHV2Fs
+ZG9yZjELMAkGA1UEBhMCREUxDTALBgNVBAMMBEt5bWEwHhcNMTkwMjEyMTIwNDM4
+WhcNMjAwMjEyMTIwNDM4WjBvMQswCQYDVQQGEwJERTEQMA4GA1UECBMHV2FsZG9y
+ZjEQMA4GA1UEBxMHV2FsZG9yZjEVMBMGA1UEChMMT3JnYW5pemF0aW9uMRAwDgYD
+VQQLEwdPcmdVbml0MRMwEQYDVQQDEwplYy1kZWZhdWx0MIICIjANBgkqhkiG9w0B
+AQEFAAOCAg8AMIICCgKCAgEAq4TMGWybHjvhF9RSSZJG8zfp73RJlRhPj3e4EJgr
+z0Ai/PmHa8WeK2eVAfsoky9UVE+1t+cn+5trejIzSMf1R8AKpgcvTDkO9RPRLqKm
+3u8CjvOrJn0tKSk1Jf9kdSY9xQzd4SOnzSjhbL44MV3zpQ5qdlA2vIvCVNK0SwwS
+xqVQbI4FEmbOjtvQKpxnkov2fjviAqcRd+PhR5lNnCGKGtNoVi9lEnXRCdfQsn5C
+V67+y8MQkdswBdGrAdSgjTwLvI9kp7eiHAFyRJsLxcFT4VwDFJ2LrEm1hcs/5mDp
+UnJWig3g6yVW9ME9oxy7F2etxUsJ4WRFfxixma0hW1AQk1LZduPVmRIHroIDKJA3
+79C2gk4b75usaH3gL9s7HUOQeBTyaOcz3RRQWztwnM09A0AfSTxmutBHasrMSUbE
+zumznBNkI2dMPiCdrojrCTmcRJceh8cI/Mx8BIm3+Z0OQiPpZaZxxFxyBQuAf6/z
+8TyEgT0B+RNGMZ+771h+8t4ysYt9SPK7IHodyse814F9wxApTc+Ut5KJfnSmN/hu
+UvTwssqXX0puFuxPJ61uKkbTUD+y/FqHQmG93cUzC0xYCWDbL/+Rr81MzzMhfBvm
+qf/JQl0zI8VXHHz0m1JGXwZRQ6ZsWa5b+hwkYFP8CRkzXvgl/zXKrdvPUuIVo36b
+qG8CAwEAAaMnMCUwDgYDVR0PAQH/BAQDAgeAMBMGA1UdJQQMMAoGCCsGAQUFBwMC
+MA0GCSqGSIb3DQEBCwUAA4IBAQCrc7O91DuLk17S6iH0786AxH0IEk4fXoHlr0oi
+B+tuzO4ccaYxxG0bVwgYIRFqz35YioAoOEdk/xlDbWEn03/ibIqizPkEPwU/JnMY
+Jmzph7W9iNkezfUsC1nR3Dw9jVU0TkUz0tnlr57M0jKn3vAzmzMHeil4bnbcmaoC
+bnJlJkQ9Uv2OZSfRxc6irVmefC/u97KJPzmGjAlG/KrTVPm/gZtn46szwKKepMqd
+7iQJK/xxgHd2kKuOcSVDf2g2ygHbIE7mwofRZLM3VsfaFqIvWBmT1mbC6pzZs30C
+m0BmlwDa5ONBGAqjBP9TTm42f4ufzsGF/eFLXZ8lAbpJmLqx
+-----END CERTIFICATE-----
+-----BEGIN CERTIFICATE-----
 MIIEcDCCA1igAwIBAgIBAjANBgkqhkiG9w0BAQsFADBfMQ8wDQYDVQQLDAZDNGNv
 cmUxDDAKBgNVBAoMA1NBUDEQMA4GA1UEBwwHV2FsZG9yZjEQMA4GA1UECAwHV2Fs
 ZG9yZjELMAkGA1UEBhMCREUxDTALBgNVBAMMBEt5bWEwHhcNMTkwMjEyMTIwNDM4
@@ -55,11 +83,12 @@ func TestCertificateProvider_GetCACertificate(t *testing.T) {
 		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
-		cert, err := certificateProvider.GetCACertificate()
+		certs, err := certificateProvider.GetCACertificates()
 
 		// then
 		require.NoError(t, err)
-		require.NotNil(t, cert)
+		require.NotNil(t, certs)
+		assert.Equal(t, 2, len(certs))
 	})
 
 	t.Run("should return error when failed to read secret", func(t *testing.T) {
@@ -70,7 +99,7 @@ func TestCertificateProvider_GetCACertificate(t *testing.T) {
 		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
-		_, err := certificateProvider.GetCACertificate()
+		_, err := certificateProvider.GetCACertificates()
 
 		// then
 		require.Error(t, err)
@@ -86,7 +115,7 @@ func TestCertificateProvider_GetCACertificate(t *testing.T) {
 		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
-		_, err := certificateProvider.GetCACertificate()
+		_, err := certificateProvider.GetCACertificates()
 
 		// then
 		require.Error(t, err)
@@ -104,7 +133,7 @@ func TestCertificateProvider_GetCACertificate(t *testing.T) {
 		certificateProvider := NewCertificateProvider(clusterCertSecretName, caCertSecretName, secretRepository)
 
 		// when
-		_, err := certificateProvider.GetCACertificate()
+		_, err := certificateProvider.GetCACertificates()
 
 		// then
 		require.Error(t, err)

@@ -17,7 +17,7 @@ func TestMutualTLSClientProvider_CreateClient(t *testing.T) {
 		credentials := CertificateCredentials{
 			ClientKey:  &rsa.PrivateKey{},
 			ClientCert: &x509.Certificate{Subject: subject},
-			CACert:     &x509.Certificate{},
+			CACerts:    []*x509.Certificate{},
 		}
 
 		csrProvider := &mocks.CSRProvider{}

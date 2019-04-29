@@ -11,7 +11,7 @@ import (
 type CertificateCredentials struct {
 	ClientKey  *rsa.PrivateKey
 	ClientCert *x509.Certificate
-	CACert     *x509.Certificate
+	CACerts    []*x509.Certificate
 }
 
 type MutualTLSClientProvider interface {
@@ -30,10 +30,16 @@ func NewMutualTLSClientProvider(csrProvider certificates.CSRProvider) MutualTLSC
 
 func (cp *mutualTLSClientProvider) CreateClient(credentials CertificateCredentials) MutualTLSClient {
 
+	rawCerts := [][]byte{credentials.ClientCert.Raw}
+
+	for _, cert := range credentials.CACerts {
+		rawCerts = append(rawCerts, cert.Raw)
+	}
+
 	certs := []tls.Certificate{
 		{
 			PrivateKey:  credentials.ClientKey,
-			Certificate: [][]byte{credentials.ClientCert.Raw, credentials.CACert.Raw},
+			Certificate: rawCerts,
 		},
 	}
 
