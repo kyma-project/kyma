@@ -13,7 +13,13 @@ By default, you install Kyma with the Asset Store in Minio stand-alone mode. Thi
 
 ## Steps
 
-You can set Minio to the GCS Gateway mode during Kyma installation, or switch to the GCS Gateway mode after Kyma installation. In both cases you need to create a Google service account that has a private key and the **Storage Admin** role permissions, apply a ConfigMap with an override onto a cluster or Minikube, and trigger Kyma installation. Follow these steps:
+You can set Minio to the GCS Gateway mode both during and after Kyma installation. In both cases you need to create and configure a Google service account, apply a ConfigMap with an override onto a cluster or Minikube, and trigger the Kyma installation process. 
+
+>**CAUTION:** Buckets created in Minio without using Bucket CR are neither recreated nor migrated while switching to the Minio Gateway mode.
+
+### Google service accounts
+
+Create a Google service account that has a private key and the **Storage Admin** role permissions. Follow these steps:
 
 1. Run the `export {VARIABLE}={value}` command to set up the following environment variables, where:
 
@@ -47,44 +53,51 @@ You can set Minio to the GCS Gateway mode during Kyma installation, or switch to
     ```bash
     gcloud iam service-accounts keys create $SECRET_FILE --iam-account=$SA_NAME@$PROJECT.iam.gserviceaccount.com
     ```
-6. Export the private key as the environment variable:
+5. Export the private key as the environment variable:
     ```bash
-    export GCS_KEY_JSON=$(< ${SECRET_FILE} base64 | tr -d '\n')
+    export GCS_KEY_JSON=$(< "${SECRET_FILE}" base64 | tr -d '\n')
     ```
-7. Apply the following ConfigMap with an override onto a cluster or Minikube. Run:
-    ```bash
-    cat <<EOF | kubectl apply -f -
-    apiVersion: v1
-    kind: Secret
-    metadata:
-      name: asset-store-overrides
-      namespace: kyma-installer
-      labels:
-        installer: overrides
-        component: assetstore
-        kyma-project.io/installation: ""
-    type: Opaque
-    data:
-      minio.gcsgateway.gcsKeyJson: "${GCS_KEY_JSON}"
-    ---
-    apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: asset-store-overrides
-      namespace: kyma-installer
-      labels:
-        installer: overrides
-        component: assetstore
-        kyma-project.io/installation: ""
-    data:
-      minio.persistence.enabled: "false"
-      minio.gcsgateway.enabled: "true"
-      minio.defaultBucket.enabled: "false"
-      minio.gcsgateway.projectId: "${PROJECT}"
-      global.minioExternalEndpoint: "https://storage.googleapis.com"
-    EOF
-    ```
-8. Lable the `kyma-installtion` custom resource by running `kubectl label installation/kyma-installation action=install` to trigger Kyma installation.
 
+### ConfigMap
 
->**CAUTION** When you install Kyma locally from sources, you need to manually add the ConfigMap to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.
+Apply the following ConfigMap with an override onto a cluster or Minikube. Run:
+```bash
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+    name: asset-store-overrides
+    namespace: kyma-installer
+    labels:
+    installer: overrides
+    component: assetstore
+    kyma-project.io/installation: ""
+type: Opaque
+data:
+    minio.gcsgateway.gcsKeyJson: "${GCS_KEY_JSON}"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+    name: asset-store-overrides
+    namespace: kyma-installer
+    labels:
+    installer: overrides
+    component: assetstore
+    kyma-project.io/installation: ""
+data:
+    minio.persistence.enabled: "false"
+    minio.gcsgateway.enabled: "true"
+    minio.defaultBucket.enabled: "false"
+    minio.gcsgateway.projectId: "${PROJECT}"
+    global.minioExternalEndpoint: "https://storage.googleapis.com"
+EOF
+```
+>**CAUTION** When you install Kyma locally from sources, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.
+
+### Kyma installation
+
+Trigger Kyma installation or update by labeling the `kyma-installtion` custom resource. Run:
+```bash
+kubectl label installation/kyma-installation action=install
+```
