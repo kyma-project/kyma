@@ -266,7 +266,7 @@ func (f *eventBusFlow) publishTestEvent() error {
 
 func (f *eventBusFlow) publish(publishEventURL string) (*api.PublishResponse, error) {
 	payload := fmt.Sprintf(
-		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-1"}`, srcID, eventType)
+		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-2"}`, srcID, eventType)
 	f.log.Infof("event to be published: %v\n", payload)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -315,8 +315,8 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		if len(resp) == 0 { // no event received by subscriber
 			continue
 		}
-		if resp != "test-event-1" {
-			return fmt.Errorf("wrong response: %s, want: %s", resp, "test-event-1")
+		if resp != "test-event-2" {
+			return fmt.Errorf("wrong response: %s, want: %s", resp, "test-event-2")
 		}
 		return nil
 	}
