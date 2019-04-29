@@ -1,13 +1,13 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: oauth2
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-oauth2
+  namespace: {{ .Release.Namespace }}
 spec:
   gateways:
-    - kyma-gateway
+    - {{ .Values.global.gateway }}
   hosts:
-    - oauth2.kyma.local
+    - {{ .Values.hydraServer.host.oauth2.name }}.kyma.local
   http:
     - match:
         - uri:
@@ -16,19 +16,19 @@ spec:
         - destination:
             host: oauth2
             port:
-              number: 80
+              number: {{ .Values.hydraServer.service.port }}
 
 ---
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: oauth2-admin
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-oauth2-admin
+  namespace: {{ .Release.Namespace }}
 spec:
   gateways:
-    - kyma-gateway
+    - {{ .Values.global.gateway }}
   hosts:
-    - oauth2-admin.kyma.local
+    - {{ .Values.hydraServer.host.admin.name }}.kyma.local
   http:
     - match:
         - uri:
@@ -37,4 +37,4 @@ spec:
         - destination:
             host: oauth2
             port:
-              number: 4445
+              number: {{ .Values.hydraServer.service.adminPort }}

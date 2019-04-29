@@ -1,14 +1,14 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: oauth2-login-consent
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-login-consent
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
-    app: hydra-login-consent
-  type: ClusterIP
+    app: {{ template "fullname" . }}-login-consent
+  type: {{ .Values.loginConsent.service.type }}
   ports:
-    - name: http-hydra-login-consent
+    - name: http-{{ .Chart.Name }}-login-consent
       protocol: TCP
-      port: 3000
-      targetPort: 3000
+      port: {{ .Values.loginConsent.service.port }}
+      targetPort: {{ .Values.loginConsent.port }}

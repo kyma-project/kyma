@@ -7,12 +7,12 @@ credentialsIssuerID:
   token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL29hdXRoMi5reW1hLmxvY2FsLyIsImlhdCI6MTU1NTUwNjk5MCwiZXhwIjoxNTg3MDQzMDA1LCJhdWQiOiJoeWRyYS10ZXN0Iiwic3ViIjoiamFrdWIua2FiemFAc2FwLmNvbSJ9.x64cZ1QW8iy-sndXFVZI7rm155esyQW9cZGlGqtlzok"
 
 tokenIntrospection:
-  serverUrl: "http://oauth2:4445/oauth2/introspect"
+  serverUrl: http://oauth2:4445/oauth2/introspect
 
 proxy:
   port: 4455
   config:
-    oathkeeperApiUrl: "http://oathkeeper-api-server/"
+    oathkeeperApiUrl: http://oathkeeper-api-server/
   service:
     type: ClusterIP
     port: 80
@@ -20,10 +20,7 @@ proxy:
 api-server:
   port: 4456
   config:
-    databaseUrl: "memory"
+    databaseUrl: memory
   service:
     type: ClusterIP
     port: 80
-
-
-gateway: kyma-gateway

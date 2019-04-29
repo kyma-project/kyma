@@ -1,20 +1,19 @@
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: oauth2
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-oauth2
+  namespace: {{ .Release.Namespace }}
   labels:
     kyma-project.io/installation: ""
 spec:
   template:
     metadata:
       labels:
-        name: hydra
-        app: hydra
+        name: {{ template "fullname" . }}-oauth2
+        app: {{ template "fullname" . }}-oauth2
     spec:
       containers:
-        - name: hydra-server
+        - name: {{ .Chart.Name }}-oauth2-server
           image: oryd/hydra:v1.0.0-rc.8
           imagePullPolicy: IfNotPresent
           command:
@@ -25,21 +24,21 @@ spec:
             - "--dangerous-force-http"
           env:
             - name: OAUTH2_ISSUER_URL
-              value: "https://oauth2.kyma.local"
+              value: {{ .Values.hydraServer.config.oauth2.issuerUrl }}
             - name: OAUTH2_CONSENT_URL
-              value: "https://oauth2-login-consent.kyma.local/consent"
+              value: {{ .Values.hydraServer.config.oauth2.consentUrl }}
             - name: OAUTH2_LOGIN_URL
-              value: "https://oauth2-login-consent.kyma.local/login"
-            - name: DATABASE_URL
-              value: "memory"
-            - name: SYSTEM_SECRET
-              value: "youReallyNeedToChangeThis"
+              value: {{ .Values.hydraServer.config.oauth2.loginUrl }}
             - name: OAUTH2_SHARE_ERROR_DEBUG
-              value: "1"
+              value: {{ .Values.hydraServer.config.oauth2.shareErrorDebug }}
+            - name: DATABASE_URL
+              value: {{ .Values.hydraServer.config.databaseUrl }}
+            - name: SYSTEM_SECRET
+              value: {{ .Values.hydraServer.config.systemSecret }}
             - name: OIDC_SUBJECT_TYPES_SUPPORTED
-              value: "public,pairwise"
+              value: {{ .Values.hydraServer.config.oidc.subjectTypesSupported }}
             - name: OIDC_SUBJECT_TYPE_PAIRWISE_SALT
-              value: "youReallyNeedToChangeThis"
+              value: {{ .Values.hydraServer.config.oidc.subjectTypePairwiseSalt }}
           ports:
-            - containerPort: 4444
-            - containerPort: 4445
+            - containerPort: {{ .Values.hydraServer.port }}
+            - containerPort: {{ .Values.hydraServer.adminPort }}

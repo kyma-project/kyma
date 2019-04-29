@@ -1,18 +1,18 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: oauth2
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-oauth2
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
-    app: hydra
-  type: ClusterIP
+    app: {{ template "fullname" . }}-oauth2
+  type: {{ .Values.hydraServer.service.type }}
   ports:
-    - name: http-oauth2
+    - name: http-{{ .Chart.Name }}-oauth2
       protocol: TCP
-      port: 80
-      targetPort: 4444
-    - name: http-oauth2-admin
+      port: {{ .Values.hydraServer.service.port }}
+      targetPort: {{ .Values.hydraServer.port }}
+    - name: http-{{ .Chart.Name }}-oauth2-admin
       protocol: TCP
-      port: 4445
-      targetPort: 4445
+      port: {{ .Values.hydraServer.service.adminPort }}
+      targetPort: {{ .Values.hydraServer.adminPort }}

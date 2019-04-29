@@ -1,19 +1,19 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: oauth2-login-consent
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-login-consent
+  namespace: {{ .Release.Namespace }}
 spec:
   gateways:
-    - kyma-gateway
+    - {{ .Values.global.gateway }}
   hosts:
-    - oauth2-login-consent.kyma.local
+    - {{ .Values.loginConsent.host.name }}.kyma.local
   http:
     - match:
         - uri:
             regex: /.*
       route:
         - destination:
-            host: oauth2-login-consent
+            host: {{ .Values.loginConsent.host.name }}
             port:
-              number: 3000
+              number: {{ .Values.loginConsent.service.port }}

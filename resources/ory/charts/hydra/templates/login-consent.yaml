@@ -1,24 +1,22 @@
-
----
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: hydra-login-consent
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-login-consent
+  namespace: {{ .Release.Namespace }}
   labels:
 spec:
   template:
     metadata:
       labels:
-        name: hydra-login-consent
-        app: hydra-login-consent
+        name: {{ template "fullname" . }}-login-consent
+        app: {{ template "fullname" . }}-login-consent
     spec:
       containers:
-        - name: hydra-login-consent
-          image: oryd/hydra-login-consent-node:v1.0.0-rc.6
-          imagePullPolicy: Always
+        - name: {{ .Chart.Name }}-login-consent
+          image: {{ .Values.loginConsent.image.repository }}:{{ .Values.loginConsent.image.tag }}
+          imagePullPolicy: {{ .Values.loginConsent.image.pullPolicy }}
           env:
             - name: HYDRA_ADMIN_URL
-              value: http://oauth2.kyma-system.svc.cluster.local:4445
+              value: {{ .Values.loginConsent.config.hydraAdminUrl }}
           ports:
-            - containerPort: 3000
+            - containerPort: {{ .Values.loginConsent.port }}
