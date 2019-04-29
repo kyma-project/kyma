@@ -4,7 +4,7 @@ title: Architecture
 
 ## Event consumption
 
-When you create a lambda or a service to perform a given business functionality, you must define which Events trigger it. Define triggers by creating the [Subscription CR](components/event-bus/#custom-resource-subscription) where you instruct the Event Bus to forward the Events of a particular type to your lambda. 
+When you create a lambda or a service to perform a given business functionality, you must define which Events trigger it. Define triggers by creating the [Subscription CR](/components/event-bus/#custom-resource-subscription) where you instruct the Event Bus to forward the Events of a particular type to your lambda. 
 For example, whenever the `order-created` Event comes in, the Event Bus stores it in NATS Streaming. It then dispatches it to the receiver specified in the Subscription CR definition.
 
 > **NOTE:** The Event Bus creates a separate Event trigger for each Subscription.
