@@ -7,19 +7,24 @@ Bundles which the Helm Broker uses must have a specific structure. These are all
 
 ```
 sample-bundle/
-  ├── meta.yaml                             # [REQUIRED] A file which contains metadata information about this bundle
-  ├── chart/                                # [REQUIRED] A directory which contains a Helm chart that installs your Kubernetes resources
-  │    └── {chart-name}/                    # [REQUIRED] A Helm chart directory
-  │         └── ....                        # [REQUIRED] Helm chart files   
-  └── plans/                                # [REQUIRED] A directory which contains the possible plans for an installed chart
-       ├── example-enterprise               # [REQUIRED] A directory which contains files for a specific plan
-       │   ├── meta.yaml                    # [REQUIRED] A file which contains metadata information about this plan
-       │   ├── bind.yaml                    # A file which contains information required to bind this plan
-       │   ├── create-instance-schema.json  # JSON schema definitions for creating a ServiceInstance
-       │   ├── bind-instance-schema.json    # JSON schema definitions for binding a ServiceInstance
-       │   ├── update-instance-schema.json  # JSON schema definitions for updating a ServiceInstance
-       │   └── values.yaml                  # Default configuration values in this plan for a chart defined in the `chart` directory
-       └── ....
+   ├── meta.yaml                             # [REQUIRED] A file which contains metadata information about this bundle
+   ├── chart/                                # [REQUIRED] A directory which contains a Helm chart that installs your Kubernetes resources
+   │    └── {chart-name}/                    # [REQUIRED] A Helm chart directory
+   │         └── ....                        # [REQUIRED] Helm chart files   
+   ├── plans/                                # [REQUIRED] A directory which contains the possible plans for an installed chart
+   │    ├── example-enterprise               # [REQUIRED] A directory which contains files for a specific plan
+   │    │   ├── meta.yaml                    # [REQUIRED] A file which contains metadata information about this plan
+   │    │   ├── bind.yaml                    # A file which contains information required to bind this plan
+   │    │   ├── create-instance-schema.json  # JSON schema definitions for creating a ServiceInstance
+   │    │   ├── bind-instance-schema.json    # JSON schema definitions for binding a ServiceInstance
+   │    │   ├── update-instance-schema.json  # JSON schema definitions for updating a ServiceInstance
+   │    │   └── values.yaml                  # Default configuration values in this plan for a chart defined in the `chart` directory
+   │    └── ....
+   │
+   └── docs/                                 # A directory which contains documentation for this bundle
+        ├── meta.yaml                        # [REQUIRED] A file which contains metadata information about documentation for this bundle
+        ├── {assets}                         # Files with documentation and assets
+        └── ....
 ```
 
 > **NOTE:** All file names in a bundle repository are case-sensitive.
@@ -84,6 +89,30 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 * `bind-instance-schema.json` file - contains a schema that defines parameters for a bind operation. Each input parameter is expressed as a property within a JSON object.
 
 >**NOTE:** For more information about schemas, see [this](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md#schemas-object) specification.
+
+## docs directory
+
+In the `docs` directory, provide documentation for your bundle. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the bundle is uploaded.
+As the Helm Broker is installed as a ClusterServiceBroker, documentation for bundles is provided using [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic).
+
+The `meta.yaml` file contains the specification of the ClusterDocsTopic. The example structure of the `meta.yaml` file looks as follows:
+
+|  Field Name | Required |      Description               |
+|-----------|:--------:|------------------------------------|
+|   **docs[]**                           |   YES   | Contains the definitions of documentation.   |
+| **docs[].template**                    |   YES   | Contains the specification of the ClusterDocsTopic. |
+| **docs[].template.displayName**        |   YES   | Specifies the display name of the ClusterDocsTopic. |
+| **docs[].template.description**        |   YES   | Provides the description of the ClusterDocsTopic. |
+| **docs[].template.sources[]**          |   YES   | Contains the definitions of assets for a bundle. |
+| **docs[].template.sources[].type**     |   YES   | Defines the type of the asset. |
+| **docs[].template.sources[].name**     |   YES   | Defines the name of the asset. |
+| **docs[].template.sources[].mode**     |   YES   | Defines the type of the asset file. |
+| **docs[].template.sources[].url**      |   YES   | Defines the URL under which the asset is stored. |
+| **docs[].template.sources[].filter**   |   YES   | Defines the path from which to upload assets.  |
+
+>**NOTE:** Currently you can provide only one entry in the `docs` array.
+
+Using the Helm Broker, you can provision a broker which provides its own Service Classes. To learn how to upload documentation for those classes, read [this](#details-bundles-docs.md) document.
 
 ## Troubleshooting
 
