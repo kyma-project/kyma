@@ -1,14 +1,14 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: oathkeeper-proxy
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-proxy
+  namespace: {{ .Release.Namespace }}
 spec:
   selector:
-    app: oathkeeper-proxy
+    app: {{ template "fullname" . }}-proxy
   type: ClusterIP
   ports:
-    - name: oathkeeper-proxy
+    - name: {{ template "fullname" . }}-proxy
       protocol: TCP
       port: 80
-      targetPort: 4455
+      targetPort: {{ .Values.proxy.port }}

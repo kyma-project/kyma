@@ -1,21 +1,21 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: oathkeeper-proxy
-  namespace: kyma-system
+  name: {{ template "fullname" . }}-proxy
+  namespace: {{ .Release.Namespace }}
   labels:
     kyma-project.io/installation: ""
 spec:
   template:
     metadata:
       labels:
-        name: oathkeeper-proxy
-        app: oathkeeper-proxy
+        name: {{ template "fullname" . }}-proxy
+        app: {{ template "fullname" . }}-proxy
     spec:
       containers:
-        - name: oathkeeper-proxy
-          image: oryd/oathkeeper:v0.14.2_oryOS.10
-          imagePullPolicy: IfNotPresent
+        - name: {{ .Chart.Name }}-proxy
+          image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "oathkeeper"
           args:
@@ -23,12 +23,12 @@ spec:
             - "proxy"
           env:
             - name: CREDENTIALS_ISSUER_ID_TOKEN_HS256_SECRET
-              value: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL29hdXRoMi5reW1hLmxvY2FsLyIsImlhdCI6MTU1NTUwNjk5MCwiZXhwIjoxNTg3MDQzMDA1LCJhdWQiOiJoeWRyYS10ZXN0Iiwic3ViIjoiamFrdWIua2FiemFAc2FwLmNvbSJ9.x64cZ1QW8iy-sndXFVZI7rm155esyQW9cZGlGqtlzok"
+              value: {{ .Values.credentialsIssuerID.token }}
             - name: PORT
-              value: "4455"
+              value: {{ quote .Values.proxy.port }}
             - name: OATHKEEPER_API_URL
-              value: "http://oathkeeper-api-server"
+              value: {{ .Values.proxy.config.oathkeeperApiUrl }}
             - name: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL
-              value: "http://oauth2:4445/oauth2/introspect"
+              value: {{ .Values.introspectionServer.url }}
           ports:
-            - containerPort: 4455
+            - containerPort: {{ .Values.proxy.port }}
