@@ -29,6 +29,6 @@ spec:
             - name: OATHKEEPER_API_URL
               value: {{ .Values.proxy.config.oathkeeperApiUrl }}
             - name: AUTHENTICATOR_OAUTH2_INTROSPECTION_URL
-              value: {{ .Values.introspectionServer.url }}
+              value: {{ .Values.tokenIntrospection.serverUrl }}
           ports:
             - containerPort: {{ .Values.proxy.port }}

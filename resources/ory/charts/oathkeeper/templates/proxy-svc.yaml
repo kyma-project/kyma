@@ -6,9 +6,9 @@ metadata:
 spec:
   selector:
     app: {{ template "fullname" . }}-proxy
-  type: ClusterIP
+  type: {{ .Values.proxy.service.type }}
   ports:
     - name: {{ template "fullname" . }}-proxy
       protocol: TCP
-      port: 80
+      port: {{ .Values.proxy.service.port }}
       targetPort: {{ .Values.proxy.port }}
