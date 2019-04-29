@@ -31,13 +31,13 @@ For example, whenever the `order-created` Event comes in, the Event Bus stores i
 3. The Application Connector makes a REST API call to **publish-knative** and sends the enriched Event.
 4. **publish-knative** makes the HTTP payload compatible with Knative and sends the Event to the relevant **knative-channel** service URL which is inferred based on **source id**, **event type**, and **event type version** parameters.
 5. Istio Virtual Service forwards the Event to the **nats-dispatcher** service served by the **nats-dispatcher** Pod.
-6. The **nats-dispatcher** saves the Event in NATS Streaming which stores the Event details in the Persistence storage volume.
+6. **nats-dispatcher** saves the Event in NATS Streaming which stores the Event details in the Persistence storage volume.
 
 
 
 ## Event validation 
 
-The **subscription-controller-knative** checks if the Namespace can receive Events from the Application. It performs the check for each Kyma Subscription created in a Namespace for a particular Event type with a version for a specific Application.
+ **subscription-controller-knative** checks if the Namespace can receive Events from the application. It performs the check for each Kyma Subscription created in a Namespace for a particular Event type with a version for a specific application.
 
 ### Validation flow
 
@@ -48,5 +48,5 @@ See the diagram and a step-by-step description of the Event verification process
 1. The Kyma user defines a lambda or a service.
 2. The Kyma user creates a Subscription custom resource.
 3. **subscription-controller-knative** reads the new Subscription.
-4. **subscription-controller-knative** reads the EventActivation CR to verify if it exists in the Namespace for a certain Application.
-5. **subscription-controller-knative**  updates the Subscription resource accordingly with the activation status `true` or `false`. The Event Bus uses this status to allow or prohibit Event delivery.
+4. **subscription-controller-knative** reads the EventActivation CR to verify if it exists in the Namespace for a certain application.
+5. **subscription-controller-knative** updates the Subscription resource accordingly with the activation status `true` or `false`. The Event Bus uses this status to allow or prohibit Event delivery.
