@@ -15,13 +15,13 @@ function pushDockerImageToAcr {
 }
 
 function setKubeconfig {
-  echo $KUBECONFIG_JSON | base64 -d > kubeconfig
+  echo $KUBECONFIG_JSON | base64 --decode > kubeconfig
   export KUBECONFIG=kubeconfig
 }
 
 function deletePod {
   setKubeconfig
-  
+
   kubectl delete pod $POD_NAME
 }
 
@@ -75,7 +75,7 @@ EOF
     echo "Pod is in status: $podStatus - $containerReason. Waiting..."
     sleep 5
   done
-  
+
   kubectl logs $POD_NAME -f
 
   podStatus=$(kubectl get pod $POD_NAME -o jsonpath='{.status.phase}')

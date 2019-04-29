@@ -36,7 +36,7 @@ rules:
     nonResourceURLs: []
   - apiGroups: ["applicationconnector.kyma-project.io"]
     resources: ["applications", "applicationmappings"]
-    verbs: ["create", "delete", "list"]
+    verbs: ["get", "list", "create", "delete"]
     nonResourceURLs: []
   - apiGroups: ["apps"]
     resources: ["deployments"]

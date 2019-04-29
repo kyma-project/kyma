@@ -39,8 +39,7 @@ spec:
   template:
     metadata:
       annotations:
-        # TODO: to discuss
-        status.sidecar.istio.io/port: "0"
+        sidecar.istio.io/inject: "false"
       labels:
         app: {{ template "octopus.name" . }}
         control-plane: controller-manager
