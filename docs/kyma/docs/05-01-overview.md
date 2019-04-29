@@ -23,9 +23,9 @@ Before you start the Kyma installation process, you can customize the default se
 During the installation, the Installer creates the Kyma Installer image that contains all component charts located in the `kyma/resources` folder. Both cluster and local installation files contain a full list of these component names and their Namespaces.
 Components that are not an integral part of the default Kyma Lite package, are preceded with hashtags (#) which means that the Installer skips them during the installation process.   
 You can customize the component installation files by:
-- Removing hashtags in front of the component entries to enable a component installation
-- Adding hashtags to disable a component installation
-- Adding new components to the list along with their chart definition in the `kyma/resources` folder.
+- Removing hashtags in front of the component entries to enable a component installation.
+- Adding hashtags to disable a component installation.
+- Adding new components to the list along with their chart definition in the `kyma/resources` folder. In that case you must create your own [Kyma Installer image](#configuration-use-your-own-kyma-installer-image) as you are adding new chart configuration.
 
 For more details on custom component installation, see [this](#configuration-custom-component-installation) document.
 
