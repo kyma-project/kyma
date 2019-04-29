@@ -33,7 +33,7 @@ For more details on custom component installation, see [this](#configuration-cus
 
 The configuration files provide production-ready settings for the Installer. These include ConfigMaps and Secrets with the overrides for the values hardcoded in the `values.yaml` files of component charts.
 
-You can modify local settings, such as memory limits for a given resource, by changing values in the existing ConfigMaps and Secrets or adding new ones. Every ConfigMap and Secret that the Installer reads must contain an `installer: overrides` label and a `component: {component-name}` label if it refers to a specific component.
+You can modify local settings, such as memory limits for a given resource, by changing values in the existing ConfigMaps and Secrets or adding new ones. Every ConfigMap and Secret that the Installer reads must contain an `installer: overrides` label and a `component: {component-name}` label if it refers to a specific component. Add the `kyma-project.io/installation: ""` label to all non-Kubernetes resources to delete or search for them easier.
 
 [Read more](#configuration-helm-overrides-for-kyma-installation) about the types of overrides and the rules for creating them.
 

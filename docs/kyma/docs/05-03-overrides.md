@@ -8,7 +8,7 @@ This document describes how to configure the Installer with new values for Helm 
 
 ## Overview
 
-The Installer is a Kubernetes Operator that uses Helm to install Kyma components.
+The Installer is a [Kubernetes Operator](https://coreos.com/operators/) that uses Helm to install Kyma components.
 Helm provides an overrides feature to customize the installation of charts, such as to configure environment-specific values.
 When using Installer for Kyma installation, users can't interact with Helm directly. The installation is not an interactive process.
 
@@ -32,7 +32,7 @@ Kyma uses common overrides for the installation of all components. ConfigMaps an
 Kyma uses component-specific overrides only for the installation of specific components. ConfigMaps and Secrets marked with both `installer:overrides` and `component: {component-name}` labels contain the definition. Component-specific overrides have precedence over common ones in case of conflicting entries.
 
 
-## Overrides Examples
+## Overrides examples
 
 ### Top-level charts overrides
 
@@ -40,28 +40,52 @@ Overrides for top-level charts are straightforward. Just use the template value 
 
 Example:
 
-The Installer uses a `core` top-level chart that contains a template with the following value reference:
+The Installer uses a `asset-store` top-level chart that contains a template with the following value reference:
+
 ```
-memory: {{ .Values.test.acceptance.ui.requests.memory }}
+resources: {{ toYaml .Values.resources | indent 12 }}
 ```
-The chart's default value `test.acceptance.ui.requests.memory` in the `values.yaml` file resolves the template.
+
+The chart's default values `minio.resources.limits.memory` and `minio.resources.limits.cpu` in the `values.yaml` file resolve the template.
 The following fragment of `values.yaml` shows this definition:
 ```
-test:
-  acceptance:
-    ui:
-      requests:
-        memory: "1Gi"
+minio:
+  resources:
+    limits:
+      memory: "128Mi"
+      cpu: "100m"
 ```
 
-To override this value, for example to "2Gi", proceed as follows:
-- Create a ConfigMap in the `kyma-installer` Namespace, labelled with: `installer:overrides` (or reuse an existing one).
-- Add an entry `test.acceptance.ui.requests.memory: 2Gi` to the map.
+To override these values, for example to `512Mi` and `250m`, proceed as follows:
+- Create a ConfigMap in the `kyma-installer` Namespace, labelled with: `installer:overrides`. You can also use the existing ConfigMap.
+- Add the `minio.resources.limits.memory: 512Mi` and `minio.resources.limits.cpu: 250m` entries to the ConfigMap and apply it:
 
-Once the installation starts, the Installer generates overrides based on the map entries. The system uses the value of "2Gi" instead of the default "1Gi" from the chart `values.yaml` file.
+```
+cat <<EOF | kubectl apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: assetstore-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: assetstore
+    kyma-project.io/installation: ""
+data:
+  minio.resources.limits.memory: 512Mi #increased from 128Mi
+  minio.resources.limits.cpu: 250m #increased from 100m
+EOF
+```
+
+Once the installation starts, the Installer generates overrides based on the map entries. The system uses the values of `512Mi` instead of the default `128Mi` for Minio memory and `250m` instead of `100m` for Minio CPU from the chart's `values.yaml` file.
 
 For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret with `installer:overrides`.
 
+If you add the overrides in the runtime, trigger the update process using this command:
+
+```
+kubectl label installation/kyma-installation action=install
+```
 
 ### Sub-chart overrides
 
@@ -137,7 +161,7 @@ If at least one of keys points to a final value, the Installer performs the merg
 It is important to avoid overrides having the same keys for final values.
 
 
-### Example of non-conflicting merge:
+### Non-conflicting merge example
 
 Two overrides with a common key prefix ("a.b"):
 
@@ -155,7 +179,7 @@ a:
     d: second
 ```
 
-### Example of conflicting merge:
+### Conflicting merge example
 
 Two overrides with the same key ("a.b"):
 
