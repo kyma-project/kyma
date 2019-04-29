@@ -3,11 +3,8 @@ image:
   tag: v0.14.2_oryOS.10
   pullPolicy: IfNotPresent
 
-credentialsIssuerID:
-  token: "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL29hdXRoMi5reW1hLmxvY2FsLyIsImlhdCI6MTU1NTUwNjk5MCwiZXhwIjoxNTg3MDQzMDA1LCJhdWQiOiJoeWRyYS10ZXN0Iiwic3ViIjoiamFrdWIua2FiemFAc2FwLmNvbSJ9.x64cZ1QW8iy-sndXFVZI7rm155esyQW9cZGlGqtlzok"
-
 tokenIntrospection:
-  serverUrl: http://oauth2:4445/oauth2/introspect
+  serverUrl: http://ory-hydra-oauth2:4445/oauth2/introspect
 
 proxy:
   port: 4455
