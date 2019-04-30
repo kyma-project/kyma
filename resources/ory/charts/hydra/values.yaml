@@ -10,7 +10,7 @@ loginConsent:
     type: ClusterIP
     port: 3000
   host:
-    name: oauth2-login-consent
+    name: oauth2-login-consent.kyma.local
 
 hydraServer:
   port: 4444
@@ -21,9 +21,6 @@ hydraServer:
     pullPolicy: IfNotPresent
   config:
     oauth2:
-      issuerUrl: https://oauth2.kyma.local
-      consentUrl: https://oauth2-login-consent.kyma.local/consent
-      loginUrl: https://oauth2-login-consent.kyma.local/login
       shareErrorDebug: "1"
     databaseUrl: memory
     systemSecret: "youReallyNeedToChangeThis"
@@ -36,6 +33,6 @@ hydraServer:
     adminPort: 4445
   host:
     oauth2:
-      name: oauth2
+      name: oauth2.kyma.local
     admin:
-      name: oauth2-admin
+      name: oauth2-admin.kyma.local

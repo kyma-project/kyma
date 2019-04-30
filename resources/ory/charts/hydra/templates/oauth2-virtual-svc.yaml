@@ -7,7 +7,7 @@ spec:
   gateways:
     - {{ .Values.global.gateway }}
   hosts:
-    - {{ .Values.hydraServer.host.oauth2.name }}.kyma.local
+    - {{ .Values.hydraServer.host.oauth2.name }}
   http:
     - match:
         - uri:
@@ -28,7 +28,7 @@ spec:
   gateways:
     - {{ .Values.global.gateway }}
   hosts:
-    - {{ .Values.hydraServer.host.admin.name }}.kyma.local
+    - {{ .Values.hydraServer.host.admin.name }}
   http:
     - match:
         - uri:

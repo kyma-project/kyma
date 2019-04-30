@@ -7,13 +7,13 @@ spec:
   gateways:
     - {{ .Values.global.gateway }}
   hosts:
-    - {{ .Values.loginConsent.host.name }}.kyma.local
+    - {{ .Values.loginConsent.host.name }}
   http:
     - match:
         - uri:
             regex: /.*
       route:
         - destination:
-            host: {{ .Values.loginConsent.host.name }}
+            host: {{ template "fullname" . }}-login-consent
             port:
               number: {{ .Values.loginConsent.service.port }}
