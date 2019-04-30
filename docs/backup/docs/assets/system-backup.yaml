@@ -10,7 +10,7 @@ excludedNamespaces:
 includedResources:
 - '*'
 excludedResources:
-- kyma-backup
+- testdefinitions.testing.kyma-project.io
 includeClusterResources: null
 labelSelector: null
 storageLocation: default
