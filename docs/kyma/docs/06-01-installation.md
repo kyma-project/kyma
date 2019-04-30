@@ -66,7 +66,7 @@ The Kyma Installer adds the **status** section which describes the status of Kym
 |----------|:-------------:|:------|
 | **status.state** | **YES** | Describes the installation state. Takes one of four values. |
 | **status.description** | **YES** | Describes the installation step the installer performs at the moment. |
-| **status.errorLog** | **YES** | Lists all errors that happen during the installation. |
+| **status.errorLog** | **YES** | Lists all errors that happen during installation. |
 | **status.errorLog.component** | **YES** | Specifies the name of the component that causes the error. |
 | **status.errorLog.log** | **YES** | Provides a description of the error. |
 | **status.errorLog.occurrences** | **YES** | Specifies the number of subsequent occurrences of the error. |
