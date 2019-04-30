@@ -4,8 +4,6 @@ loginConsent:
     repository: oryd/hydra-login-consent-node
     tag: v1.0.0-rc.6
     pullPolicy: IfNotPresent
-  config:
-    hydraAdminUrl: http://oauth2.kyma-system.svc.cluster.local:4445
   service:
     type: ClusterIP
     port: 3000
