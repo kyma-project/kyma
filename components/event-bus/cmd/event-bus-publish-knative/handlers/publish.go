@@ -134,7 +134,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 
 	// publish the message
 	err, status := (*knativePublisher).Publish(knativeLib, &channelName, &defaultChannelNamespace, &message.Headers,
-		&messagePayload)
+		&messagePayload, publishRequest)
 	if err != nil {
 		_ = publish.SendJSONError(w, err)
 		return nil, nil, nil, err, publisher.FAILED
