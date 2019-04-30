@@ -31,6 +31,8 @@ import (
 	"strings"
 	"time"
 
+	prometheusClient "github.com/coreos/prometheus-operator/pkg/client/versioned"
+	// prometheusClientset "github.com/coreos/prometheus-operator/pkg/client/versioned/clientset"
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
@@ -46,6 +48,7 @@ const (
 	metricsQuery              = "max(sum(kube_pod_container_resource_requests_cpu_cores) by (instance))"
 	port                      = "9090"
 	metricName                = "kube_pod_container_resource_requests_cpu_cores"
+	prometheusName            = "monitoring"
 	prometheusPodName         = "prometheus-monitoring-0"
 	prometheusServiceName     = "monitoring-prometheus"
 	prometheusStatefulsetName = "prometheus-monitoring"
@@ -71,6 +74,7 @@ type dataResult struct {
 type prometheusTest struct {
 	metricName, uuid string
 	coreClient       *kubernetes.Clientset
+	prometheusClient *prometheusClient.Clientset
 	beforeBackup     queryResponse
 	expectedResult   string
 	finalResult      string
@@ -103,13 +107,19 @@ func NewPrometheusTest() (*prometheusTest, error) {
 		return &prometheusTest{}, err
 	}
 
+	pClient, err := prometheusClient.NewForConfig(restConfig)
+	if err != nil {
+		return &prometheusTest{}, err
+	}
+
 	queryToApi := apiQuery{api: api, domain: domain, metricQuery: metricsQuery, port: port, prometheusNS: prometheusNS}
 
 	return &prometheusTest{
-		coreClient: coreClient,
-		metricName: metricName,
-		uuid:       uuid.New().String(),
-		apiQuery:   queryToApi,
+		coreClient:       coreClient,
+		prometheusClient: pClient,
+		metricName:       metricName,
+		uuid:             uuid.New().String(),
+		apiQuery:         queryToApi,
 	}, nil
 }
 
@@ -141,7 +151,7 @@ func (qresp *queryResponse) connectToPrometheusApi(domain, port, api, query, poi
 
 	resp, err := client.Get(url)
 	if err != nil {
-		return fmt.Errorf("http request to the api (%s) failed with '%s'\n", uri, err)
+		return fmt.Errorf("http request to the api (%s) failed with '%s'", uri, err)
 	}
 	defer func() {
 		err := resp.Body.Close()
@@ -238,7 +248,7 @@ func (t *prometheusTest) DeleteResources(namespace string) {
 	err = t.deleteServices(prometheusNS, prometheusServiceName, prometheusLabelSelector)
 	So(err, ShouldBeNil)
 
-	err = t.deleteStatefulset(prometheusNS, prometheusStatefulsetName)
+	err = t.deletePrometheus(prometheusNS, prometheusName)
 	So(err, ShouldBeNil)
 
 	err = t.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
@@ -307,6 +317,18 @@ func (t *prometheusTest) deleteServices(namespace, serviceName, labelSelector st
 
 	return nil
 
+}
+
+func (t *prometheusTest) deletePrometheus(namespace, name string) error {
+	deletePolicy := metav1.DeletePropagationForeground
+	err := t.prometheusClient.MonitoringV1().Prometheuses(namespace).Delete(name, &metav1.DeleteOptions{
+		PropagationPolicy: &deletePolicy,
+	})
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (t *prometheusTest) deleteStatefulset(namespace, statefulsetName string) error {
