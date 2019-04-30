@@ -186,6 +186,9 @@
 # The `xip-patch` chart
 /resources/xip-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
+# The `ory` chart
+/resources/ory/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
+
 # Components
 #API server proxy Component
 /components/apiserver-proxy/ @piotrmsc @kubadz @sjanota @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
