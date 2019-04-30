@@ -43,11 +43,11 @@ Alternatively, run this command if you deploy Kyma with GKE version 1.12.6-gke.X
 (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__.*__//g" > my-kyma.yaml
 ```
 
-    </details>
-    <details>
-    <summary>
-    GKE - own domain
-    </summary>
+  </details>
+  <details>
+  <summary>
+  GKE - own domain
+  </summary>
 
 
 Run this command:
@@ -82,11 +82,11 @@ Alternatively, run this command if you deploy Kyma with Kubernetes version 1.14 
 (cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__.*__//g" > my-kyma.yaml
 ```
 
-    </details>
-    <details>
-    <summary>
-    AKS - own domain
-    </summary>
+  </details>
+  <details>
+  <summary>
+  AKS - own domain
+  </summary>
 
 
 Run this command:
