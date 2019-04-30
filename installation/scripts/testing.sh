@@ -23,8 +23,9 @@ ${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__
 if [[ $? -eq 1 ]]
 then
   # if static users are not available, do not execute tests which requires them
-  matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template --template='{{println "  selectors:"}}{{println "    matchNames:"}}{{range .items}}{{printf "      - name: %s\n" .metadata.name}}{{printf "        namespace: %s\n" .metadata.namespace}}{{end}}')
-  echo "WARNING: some tests will be skipped due to the lack of static users"
+  matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template-file --template='./../resources/test-selector.yaml.tpl')
+  echo "WARNING: following tests will be skipped due to the lack of static users:"
+  echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
 fi
 
 cat <<EOF | ${kc} apply -f -
