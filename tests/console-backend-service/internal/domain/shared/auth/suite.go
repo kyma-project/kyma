@@ -28,6 +28,7 @@ const (
 	Create
 	Update
 	Delete
+	CreateSelfSubjectRulesReview
 )
 
 type OperationsInput map[OperationType][]*graphql.Request
@@ -100,6 +101,8 @@ func (a *TestSuite) Run(t *testing.T, ops *OperationsInput) {
 				a.testUpdate(t, req)
 			case Delete:
 				a.testDelete(t, req)
+			case CreateSelfSubjectRulesReview:
+				a.testCreateSelfSubjectRulesReview(t, req)
 			default:
 				t.Log("unknown operation type")
 				t.Fail()
@@ -169,6 +172,19 @@ func (a *TestSuite) testDelete(t *testing.T, request *graphql.Request) {
 	}
 
 	t.Run("Delete", func(t *testing.T) {
+		a.runTests(t, &tc, request)
+	})
+}
+
+func (a *TestSuite) testCreateSelfSubjectRulesReview(t *testing.T, request *graphql.Request) {
+	tc := testCases{
+		noUser:        {graphql.NoUser, true},
+		noRightsUser:  {graphql.NoRightsUser, true},
+		readOnlyUser:  {graphql.ReadOnlyUser, true},
+		readWriteUser: {graphql.AdminUser, true},
+	}
+
+	t.Run("CreateSelfSubjectRulesReview", func(t *testing.T) {
 		a.runTests(t, &tc, request)
 	})
 }

@@ -9,16 +9,16 @@ import (
 )
 
 type appContextMiddleware struct {
-	*clusterContextMiddleware
+	contextHandler clientcontext.ClusterContextStrategy
 }
 
 func (cc appContextMiddleware) isValidCtx(appCtx clientcontext.ApplicationContext) bool {
-	return (appCtx.IsEmpty() || (appCtx.ClusterContext.IsEmpty() && bool(cc.clusterContextMiddleware.required))) == false
+	return !appCtx.IsEmpty() && cc.contextHandler.IsValidContext(appCtx.ClusterContext)
 }
 
-func NewApplicationContextMiddleware(clusterContextMiddleware *clusterContextMiddleware) *appContextMiddleware {
+func NewApplicationContextMiddleware(contextHandler clientcontext.ClusterContextStrategy) *appContextMiddleware {
 	return &appContextMiddleware{
-		clusterContextMiddleware: clusterContextMiddleware,
+		contextHandler: contextHandler,
 	}
 }
 
@@ -26,10 +26,10 @@ func (cc *appContextMiddleware) Middleware(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		appContext := clientcontext.ApplicationContext{
 			Application:    r.Header.Get(clientcontext.ApplicationHeader),
-			ClusterContext: cc.readClusterContextFromRequest(r),
+			ClusterContext: cc.contextHandler.ReadClusterContextFromRequest(r),
 		}
 
-		if cc.isValidCtx(appContext) == false {
+		if !cc.isValidCtx(appContext) {
 			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Required headers for ApplicationContext not specified."))
 			return
 		}

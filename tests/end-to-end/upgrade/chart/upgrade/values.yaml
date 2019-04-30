@@ -3,5 +3,9 @@ containerRegistry:
 
 image:
   dir: develop/tests/
-  version: 3afdffef
+  version: "2442524d"
   pullPolicy: "IfNotPresent"
+
+dex:
+  namespace: kyma-system
+  userSecret: admin-user

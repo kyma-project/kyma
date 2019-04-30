@@ -5,7 +5,7 @@ type: Overview
 
 Kyma allows you to connect applications and third-party services in a cloud-native environment. Use it to create extensions for the existing systems, regardless of the language they are written in. Customize extensions with minimum effort and time devoted to learning their configuration details.
 
-With Kyma in hand, you can focus purely on coding since it ensures the following out-of-the-box functionalities:
+Focus purely on coding with these out-of-the-box functionalities at hand:
 - Service-to-service communication and proxying (Istio Service Mesh)
 - In-built monitoring, tracing, and logging (Grafana, Prometheus, Jaeger, Loki)
 - Secure authentication and authorization (Dex, Service Identity, TLS, Role Based Access Control)

@@ -302,6 +302,26 @@ func (r *mutationResolver) DeleteApplication(ctx context.Context, name string) (
 	return r.app.Resolver.DeleteApplication(ctx, name)
 }
 
+func (r *mutationResolver) CreateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.CreateAddonsConfiguration(ctx, name, urls, labels)
+}
+
+func (r *mutationResolver) UpdateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.UpdateAddonsConfiguration(ctx, name, urls, labels)
+}
+
+func (r *mutationResolver) DeleteAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.DeleteAddonsConfiguration(ctx, name)
+}
+
+func (r *mutationResolver) AddAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddAddonsConfigurationURLs(ctx, name, urls)
+}
+
+func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, urls)
+}
+
 // Queries
 
 type queryResolver struct {
@@ -408,6 +428,10 @@ func (r *queryResolver) UsageKinds(ctx context.Context, first *int, offset *int)
 	return r.sca.Resolver.ListUsageKinds(ctx, first, offset)
 }
 
+func (r *queryResolver) AddonsConfigurations(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddonsConfigurationsQuery(ctx, first, offset)
+}
+
 func (r *queryResolver) BindableResources(ctx context.Context, namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
 	return r.sca.Resolver.ListBindableResources(ctx, namespace)
 }
@@ -472,6 +496,10 @@ func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *in
 	return r.k8s.SecretsQuery(ctx, namespace, first, offset)
 }
 
+func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
+	return r.k8s.SelfSubjectRulesQuery(ctx, namespace)
+}
+
 // Subscriptions
 
 type subscriptionResolver struct {
@@ -532,6 +560,10 @@ func (r *subscriptionResolver) ConfigMapEvent(ctx context.Context, namespace str
 
 func (r *subscriptionResolver) SecretEvent(ctx context.Context, namespace string) (<-chan gqlschema.SecretEvent, error) {
 	return r.k8s.SecretEventSubscription(ctx, namespace)
+}
+
+func (r *subscriptionResolver) AddonsConfigurationEvent(ctx context.Context) (<-chan gqlschema.AddonsConfigurationEvent, error) {
+	return r.sca.Resolver.AddonsConfigurationEventSubscription(ctx)
 }
 
 // Service Instance

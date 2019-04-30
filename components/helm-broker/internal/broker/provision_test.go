@@ -103,7 +103,10 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	hiMock := &automock.HelmClient{}
 	defer hiMock.AssertExpectations(t)
 	releaseResp := &rls.InstallReleaseResponse{}
-	hiMock.On("Install", &expChart, internal.ChartValues(map[string]interface{}{}), ts.Exp.ReleaseName, ts.Exp.Namespace).Return(releaseResp, nil).Once()
+	expChartOverrides := internal.ChartValues{
+		"addonsRepositoryURL": expBundle.RepositoryURL,
+	}
+	hiMock.On("Install", &expChart, expChartOverrides, ts.Exp.ReleaseName, ts.Exp.Namespace).Return(releaseResp, nil).Once()
 
 	renderedYAML := bind.RenderedBindYAML(`rendered-template`)
 	rendererMock := &automock.BindTemplateRenderer{}

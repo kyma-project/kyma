@@ -37,48 +37,6 @@ func TestApplicationContext_IsEmpty(t *testing.T) {
 	})
 }
 
-func TestApplicationContext_FillPlaceholders(t *testing.T) {
-
-	appCtx := ApplicationContext{
-		Application: "application",
-		ClusterContext: ClusterContext{
-			Tenant: "tenant",
-			Group:  "group",
-		},
-	}
-
-	t.Run("should fill placeholders with values", func(t *testing.T) {
-		// given
-		expectedInfoURL := "https://test.cluster.cx/tenant/" + appCtx.ClusterContext.Tenant +
-			"/group/" + appCtx.ClusterContext.Group +
-			"/application/" + appCtx.Application +
-			"/v1/applications/management/info"
-
-		baseInfoURL := "https://test.cluster.cx/tenant/" + TenantPlaceholder +
-			"/group/" + GroupPlaceholder +
-			"/application/" + ApplicationPlaceholder +
-			"/v1/applications/management/info"
-
-		// when
-		filledInfoURL := appCtx.FillPlaceholders(baseInfoURL)
-
-		// then
-		assert.Equal(t, expectedInfoURL, filledInfoURL)
-	})
-
-	t.Run("should leave the format intact if there are no placeholders", func(t *testing.T) {
-		// given
-		expectedInfoURL := "https://test.cluster.cx/v1/applications/management/info"
-		baseInfoURL := expectedInfoURL
-
-		// when
-		filledInfoURL := appCtx.FillPlaceholders(baseInfoURL)
-
-		// then
-		assert.Equal(t, expectedInfoURL, filledInfoURL)
-	})
-}
-
 func TestApplicationContext_ExtendContext(t *testing.T) {
 
 	t.Run("should extend context with application context", func(t *testing.T) {

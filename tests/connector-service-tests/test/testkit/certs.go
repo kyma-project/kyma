@@ -28,17 +28,8 @@ func CreateKey(t *testing.T) *rsa.PrivateKey {
 }
 
 // CreateCsr creates CSR request
-func CreateCsr(t *testing.T, certInfo CertInfo, keys *rsa.PrivateKey) []byte {
-	subjectInfo := extractSubject(certInfo.Subject)
-
-	subject := pkix.Name{
-		CommonName:         subjectInfo["CN"],
-		Country:            []string{subjectInfo["C"]},
-		Organization:       []string{subjectInfo["O"]},
-		OrganizationalUnit: []string{subjectInfo["OU"]},
-		Locality:           []string{subjectInfo["L"]},
-		Province:           []string{subjectInfo["ST"]},
-	}
+func CreateCsr(t *testing.T, strSubject string, keys *rsa.PrivateKey) []byte {
+	subject := ParseSubject(strSubject)
 
 	var csrTemplate = x509.CertificateRequest{
 		Subject: subject,
@@ -143,6 +134,19 @@ func CheckIfCertIsSigned(t *testing.T, certificates []*x509.Certificate) {
 
 func EncodeBase64(src []byte) string {
 	return base64.StdEncoding.EncodeToString(src)
+}
+
+func ParseSubject(subject string) pkix.Name {
+	subjectInfo := extractSubject(subject)
+
+	return pkix.Name{
+		CommonName:         subjectInfo["CN"],
+		Country:            []string{subjectInfo["C"]},
+		Organization:       []string{subjectInfo["O"]},
+		OrganizationalUnit: []string{subjectInfo["OU"]},
+		Locality:           []string{subjectInfo["L"]},
+		Province:           []string{subjectInfo["ST"]},
+	}
 }
 
 func decodeBase64Cert(certificate string, t *testing.T) []byte {

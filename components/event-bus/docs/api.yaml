@@ -18,7 +18,7 @@ paths:
           description: Identifier for the origin of the event. Either specify this or provide 'source-id' in the json payload.
           schema:
             type: string
-            pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+            pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
             example:
               - "stage.commerce.kyma.local"
           required: false
@@ -75,7 +75,7 @@ components:
         source-id:
           description: Identifier for the origin of the event. Either specify this or provide 'Source-Id' header value.
           type: string
-          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+          pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
           maxLength: 253
           example:
             - "stage.commerce.kyma.local"
@@ -83,14 +83,14 @@ components:
           description: Type of the event.
           type: string
           format: hostname
-          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+          pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
           maxLength: 253
           example:
             - "order.created"
         event-type-version:
           description: The version of the event-type. This is applicable to the data payload alone.
           type: string
-          pattern: '^[a-z0-9]+$'
+          pattern: '^[a-zA-Z0-9]+$'
           maxLength: 4
           example:
             - "v1"

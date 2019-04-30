@@ -39,12 +39,12 @@ func TestServiceClassesQueries(t *testing.T) {
 
 	docsTopicClient := resource.NewDocsTopic(cmsCli, expectedResource.Namespace, t.Logf)
 
-	t.Log(fmt.Sprintf("Create docsTopic %s", expectedResource.ExternalName))
-	err = docsTopicClient.Create(fixDocsTopicMeta(expectedResource.ExternalName), fixCommonDocsTopicSpec())
+	t.Log(fmt.Sprintf("Create docsTopic %s", expectedResource.Name))
+	err = docsTopicClient.Create(fixDocsTopicMeta(expectedResource.Name), fixCommonDocsTopicSpec())
 	require.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Wait for docsTopic %s Ready", expectedResource.ExternalName))
-	err = wait.ForDocsTopicReady(expectedResource.ExternalName, docsTopicClient.Get)
+	t.Log(fmt.Sprintf("Wait for docsTopic %s Ready", expectedResource.Name))
+	err = wait.ForDocsTopicReady(expectedResource.Name, docsTopicClient.Get)
 	require.NoError(t, err)
 
 	resourceDetailsQuery := `
@@ -141,7 +141,7 @@ func checkClass(t *testing.T, expected, actual shared.ServiceClass) {
 
 	// DocsTopic
 	require.NotEmpty(t, actual.DocsTopic)
-	checkDocsTopic(t, fixture.DocsTopic(expected.Namespace, expected.ExternalName), actual.DocsTopic)
+	checkDocsTopic(t, fixture.DocsTopic(expected.Namespace, expected.Name), actual.DocsTopic)
 }
 
 func checkPlan(t *testing.T, expected, actual shared.ServicePlan) {

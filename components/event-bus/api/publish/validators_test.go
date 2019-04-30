@@ -167,9 +167,9 @@ func TestSourceIDAndEventTypeRegex(t *testing.T) {
 		"test":      true,  // alphabet
 		"test1":     true,  // can end with number
 		"1test":     true,  // can start with number
+		"TEST":      true,  // uppercase allowed
 		"test*test": false, // * not allowed
 		"test_test": false, // _ not allowed
-		"TEST":      false, // uppercase not allowed
 		"test.":     false, // cannot end with symbol
 		".test":     false, // cannot start with symbol
 	}
@@ -187,11 +187,11 @@ func TestEventTypeVersionRegex(t *testing.T) {
 		"test":      true,  // alphabet
 		"test1":     true,  // can end with number
 		"1test":     true,  // can start with number
+		"TEST":      true,  // uppercase allowed
 		"test.test": false, // . allowed
 		"test-test": false, // - allowed
 		"test*test": false, // * not allowed
 		"test_test": false, // _ not allowed
-		"TEST":      false, // uppercase not allowed
 		"test.":     false, // cannot end with symbol
 		".test":     false, // cannot start with symbol
 	}
