@@ -66,7 +66,7 @@ func TestController_Reconcile(t *testing.T) {
 		preserver := &certMocks.Preserver{}
 		preserver.On("PreserveCertificates", certs).Return(nil)
 		centralConnectionClient := &ccMocks.Client{}
-		centralConnectionClient.On("Upsert", mock.AnythingOfType("*v1alpha1.CentralConnection")).Return(nil, nil)
+		centralConnectionClient.On("Upsert", certificateRequestName, mock.AnythingOfType("v1alpha1.CentralConnectionSpec")).Return(nil, nil)
 
 		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, centralConnectionClient)
 
@@ -174,7 +174,7 @@ func TestController_Reconcile(t *testing.T) {
 		preserver := &certMocks.Preserver{}
 		preserver.On("PreserveCertificates", certs).Return(errors.New("error"))
 		centralConnectionClient := &ccMocks.Client{}
-		centralConnectionClient.On("Upsert", mock.AnythingOfType("*v1alpha1.CentralConnection")).Return(nil, nil)
+		centralConnectionClient.On("Upsert", certificateRequestName, mock.AnythingOfType("v1alpha1.CentralConnectionSpec")).Return(nil, nil)
 
 		certificateRequestController := newCertificatesRequestController(client, connectorClient, preserver, centralConnectionClient)
 

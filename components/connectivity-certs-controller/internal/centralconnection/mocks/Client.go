@@ -9,13 +9,13 @@ type Client struct {
 	mock.Mock
 }
 
-// Upsert provides a mock function with given fields: _a0
-func (_m *Client) Upsert(_a0 *v1alpha1.CentralConnection) (*v1alpha1.CentralConnection, error) {
-	ret := _m.Called(_a0)
+// Upsert provides a mock function with given fields: name, spec
+func (_m *Client) Upsert(name string, spec v1alpha1.CentralConnectionSpec) (*v1alpha1.CentralConnection, error) {
+	ret := _m.Called(name, spec)
 
 	var r0 *v1alpha1.CentralConnection
-	if rf, ok := ret.Get(0).(func(*v1alpha1.CentralConnection) *v1alpha1.CentralConnection); ok {
-		r0 = rf(_a0)
+	if rf, ok := ret.Get(0).(func(string, v1alpha1.CentralConnectionSpec) *v1alpha1.CentralConnection); ok {
+		r0 = rf(name, spec)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1alpha1.CentralConnection)
@@ -23,8 +23,8 @@ func (_m *Client) Upsert(_a0 *v1alpha1.CentralConnection) (*v1alpha1.CentralConn
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(*v1alpha1.CentralConnection) error); ok {
-		r1 = rf(_a0)
+	if rf, ok := ret.Get(1).(func(string, v1alpha1.CentralConnectionSpec) error); ok {
+		r1 = rf(name, spec)
 	} else {
 		r1 = ret.Error(1)
 	}

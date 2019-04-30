@@ -8,7 +8,6 @@ import (
 
 	"k8s.io/apimachinery/pkg/types"
 
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/util/retry"
 
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates"
@@ -80,12 +79,13 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 		return reconcile.Result{}, nil
 	}
 
+	c.logger.Infof("Establishing connection with Connector Service for %s Cert Request...", instance.Name)
 	establishedConnection, err := c.connectorClient.ConnectToCentralConnector(instance.Spec.CSRInfoURL)
 	if err != nil {
 		c.logger.Errorf("Error while requesting certificates from Connector Service: %s", err.Error())
 		return reconcile.Result{}, c.setRequestErrorStatus(instance, err)
 	}
-	c.logger.Infoln("Certificates fetched successfully")
+	c.logger.Infof("Certificates for %s Cert Request fetched successfully", instance.Name)
 
 	err = c.manageResources(instance.Name, establishedConnection)
 	if err != nil {
@@ -109,15 +109,12 @@ func (c *Controller) manageResources(connectionName string, connection connector
 	}
 	c.logger.Infoln("Certificates saved successfully")
 
-	masterConnection := &v1alpha1.CentralConnection{
-		ObjectMeta: v1.ObjectMeta{Name: connectionName},
-		Spec: v1alpha1.CentralConnectionSpec{
-			ManagementInfoURL: connection.ManagementInfoURL,
-			EstablishedAt:     metav1.NewTime(time.Now()),
-		},
+	centralConnectionSpec := v1alpha1.CentralConnectionSpec{
+		ManagementInfoURL: connection.ManagementInfoURL,
+		EstablishedAt:     metav1.NewTime(time.Now()),
 	}
 
-	_, err = c.connectionClient.Upsert(masterConnection)
+	_, err = c.connectionClient.Upsert(connectionName, centralConnectionSpec)
 	if err != nil {
 		c.logger.Errorf("Error while upserting Central Connection resource: %s", err.Error())
 		return err

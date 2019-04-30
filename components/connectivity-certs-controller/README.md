@@ -26,7 +26,7 @@ After a successful exchange of certificates, the controller creates new Secrets 
 ## Connection status
 
 When certificates are fetched successfully the `CentralConnection` CR is created.
-It contains the `ManagementInfoURL`, status of a connection with central the Connector Service and the certificate validity period.
+It contains the `ManagementInfoURL`, status of a connection with the central Connector Service and the certificate validity period.
 
 
 The `CentralConnection` CR is created with the same name as a name of `CertificateRequest` for which connection was established.
@@ -60,7 +60,7 @@ The Connectivity Certs Controller checks a status of the connection by calling `
 
 Connectivity Certs Controller renews client certificate when it is getting close to its expiration time. Renewed certificate will replace the previous one in the Secret together with new private key.
 
-To renew the certificate immediately `spec.RenewNow` field on `CentralConnection` should be set to `true`. 
+To renew the certificate immediately `spec.renewNow` field on `CentralConnection` should be set to `true`. 
 
 
 ## Troubleshooting 

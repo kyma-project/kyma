@@ -39,7 +39,7 @@ type ResourceClient interface {
 }
 
 type Controller struct {
-	masterConnectionClient  ResourceClient
+	centralConnectionClient ResourceClient
 	certificatePreserver    certificates.Preserver
 	certificateProvider     certificates.Provider
 	mutualTLSClientProvider connectorservice.MutualTLSClientProvider
@@ -47,7 +47,7 @@ type Controller struct {
 	logger                  *log.Entry
 }
 
-func InitCentralConnectionsController(
+func InitCentralConnectionController(
 	mgr manager.Manager,
 	appName string,
 	minimalSyncTime time.Duration,
@@ -84,7 +84,7 @@ func newCentralConnectionController(
 	mTLSClientProvider connectorservice.MutualTLSClientProvider) *Controller {
 
 	return &Controller{
-		masterConnectionClient:  client,
+		centralConnectionClient: client,
 		minimalSyncTime:         minimalSyncTime,
 		certificatePreserver:    certPreserver,
 		certificateProvider:     certProvider,
@@ -98,7 +98,7 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 	c.logger.Infof("Processing %s Central Connection", request.Name)
 
-	err := c.masterConnectionClient.Get(context.Background(), request.NamespacedName, instance)
+	err := c.centralConnectionClient.Get(context.Background(), request.NamespacedName, instance)
 	if err != nil {
 		return c.handleErrorWhileGettingInstance(err, request)
 	}
@@ -156,6 +156,8 @@ func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnec
 	}
 	c.logger.Infof("Successfully fetched Management Info for %s Central Connection", connection.Name)
 
+	c.setSynchronizationStatus(connection)
+
 	if !shouldRenew(connection, c.minimalSyncTime) {
 		c.logger.Infof("Skipping certificate renewal for %s Central Connection", connection.Name)
 		return nil
@@ -168,8 +170,6 @@ func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnec
 		return errors.Wrap(err, "Failed to renew certificate")
 	}
 	c.logger.Infof("Successfully renewed Certificate for %s Central Connection", connection.Name)
-
-	c.setSynchronizationStatus(connection)
 
 	return nil
 }
@@ -281,7 +281,7 @@ func (c *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConne
 	existingConnection := &v1alpha1.CentralConnection{}
 
 	err := retry.RetryOnConflict(retry.DefaultBackoff, func() error {
-		err := c.masterConnectionClient.Get(context.Background(), name, existingConnection)
+		err := c.centralConnectionClient.Get(context.Background(), name, existingConnection)
 		if err != nil {
 			return errors.Wrap(err, "Failed to get up to date resource")
 		}
@@ -289,7 +289,7 @@ func (c *Controller) updateCentralConnectionCR(connection *v1alpha1.CentralConne
 		existingConnection.Status = connection.Status
 		existingConnection.Spec.RenewNow = connection.Spec.RenewNow
 
-		return c.masterConnectionClient.Update(context.Background(), existingConnection)
+		return c.centralConnectionClient.Update(context.Background(), existingConnection)
 	})
 	if err != nil {
 		return errors.Wrap(err, "Failed to update Central Connection")

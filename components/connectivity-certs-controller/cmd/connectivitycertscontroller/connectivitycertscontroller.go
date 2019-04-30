@@ -96,7 +96,7 @@ func main() {
 
 	// Setup Central Connection Controller
 	log.Info("Setting up Central Connection controller")
-	if err := centralconnection.InitCentralConnectionsController(mgr, options.appName, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider); err != nil {
+	if err := centralconnection.InitCentralConnectionController(mgr, options.appName, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider); err != nil {
 		log.Error(err, "Unable to register controllers to the manager")
 		os.Exit(1)
 	}
