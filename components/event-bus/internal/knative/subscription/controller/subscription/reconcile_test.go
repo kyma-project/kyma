@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/knative/pkg/apis"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"testing"
-	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -397,7 +398,9 @@ func makeKnChannel(provisioner string, namespace string, name string, labels *ma
 		},
 		Spec: evapisv1alpha1.ChannelSpec{
 			Provisioner: &corev1.ObjectReference{
-				Name: provisioner,
+				Name:       provisioner,
+				APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
+				Kind:       "ClusterChannelProvisioner",
 			},
 		},
 		Status: evapisv1alpha1.ChannelStatus{
