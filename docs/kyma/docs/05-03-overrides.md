@@ -3,7 +3,7 @@ title: Helm overrides for Kyma installation
 type: Configuration
 ---
 
-Kyma packages its components into [Helm](https://github.com/helm/helm/tree/master/docs) charts that the [Installer](https://github.com/kyma-project/kyma/tree/master/components/installer) uses during installation and updates.
+Kyma packages its components into [Helm](https://github.com/helm/helm/tree/master/docs) charts that the [Installer](https://github.com/kyma-project/kyma/tree/master/components/installer) uses during the installation and updates.
 This document describes how to configure the Installer with new values for Helm [charts](https://github.com/helm/helm/blob/master/docs/charts.md) to override the default settings in `values.yaml` files.
 
 ## Overview
@@ -16,21 +16,26 @@ To customize the Kyma installation, the Installer exposes a generic mechanism to
 
 ## User-defined overrides
 
-The Installer finds user-defined overrides by reading the ConfigMaps and Secrets deployed in the `kyma-installer` Namespace and marked with the `installer:overrides` label.
+The Installer finds user-defined overrides by reading the ConfigMaps and Secrets deployed in the `kyma-installer` Namespace and marked with:
+- the `installer: overrides` label
+- a `component: {COMPONENT_NAME}` label if the override refers to a specific component
+
+>**NOTE:** There is also an additional `kyma-project.io/installation: ""` label in all ConfigMaps and Secrets that allows you to easily filter the Installer resources.
 
 The Installer constructs a single override by inspecting the ConfigMap or Secret entry key name. The key name should be a dot-separated sequence of strings corresponding to the structure of keys in the chart's `values.yaml` file or the entry in chart's template.
 
-The Installer merges all overrides recursively into a single yaml stream and passes it to Helm during the Kyma installation and upgrade operation.
+The Installer merges all overrides recursively into a single `yaml` stream and passes it to Helm during the Kyma installation and upgrade operation.
 
 ## Common vs component overrides
 
 The Installer looks for available overrides each time a component installation or update operation is due.
 Overrides for the component are composed from two sets: **common** overrides and **component-specific** overrides.
 
-Kyma uses common overrides for the installation of all components. ConfigMaps and Secrets marked with the label `installer:overrides`, contain the definition. They require no additional label.
+Kyma uses common overrides for the installation of all components. ConfigMaps and Secrets marked with the `installer: overrides` label, contain the definition.
 
-Kyma uses component-specific overrides only for the installation of specific components. ConfigMaps and Secrets marked with both `installer:overrides` and `component: {component-name}` labels contain the definition. Component-specific overrides have precedence over common ones in case of conflicting entries.
+Kyma uses component-specific overrides only for the installation of specific components. ConfigMaps and Secrets marked with both `installer: overrides` and `component: {component-name}` labels contain the definition. Component-specific overrides have precedence over common ones in case of conflicting entries.
 
+>**NOTE**: Add the additional `kyma-project.io/installation: ""` label to both common and component-specific overrides to enable easy installation resources filtering.
 
 ## Overrides examples
 
@@ -57,7 +62,7 @@ minio:
 ```
 
 To override these values, for example to `512Mi` and `250m`, proceed as follows:
-- Create a ConfigMap in the `kyma-installer` Namespace, labelled with: `installer:overrides`. You can also use the existing ConfigMap.
+- Create a ConfigMap in the `kyma-installer` Namespace and [label](#helm-overrides-for-kyma-installation-user-defined-overrides) it.
 - Add the `minio.resources.limits.memory: 512Mi` and `minio.resources.limits.cpu: 250m` entries to the ConfigMap and apply it:
 
 ```
@@ -79,7 +84,7 @@ EOF
 
 Once the installation starts, the Installer generates overrides based on the map entries. The system uses the values of `512Mi` instead of the default `128Mi` for Minio memory and `250m` instead of `100m` for Minio CPU from the chart's `values.yaml` file.
 
-For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to label the Secret with `installer:overrides`.
+For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to [label](#helm-overrides-for-kyma-installation-user-defined-overrides) the Secret.
 
 If you add the overrides in the runtime, trigger the update process using this command:
 
@@ -122,34 +127,34 @@ deployment:
     tokenExpirationMinutes: 60
 ```
 
-To override this value, such as to change "60 to "90", do the following:
+To override this value, such as to change `60` to `90`, do the following:
 
-- Create a ConfigMap in the `kyma-installer` Namespace labeled with `installer:overrides` or reuse existing one.
-- Add an entry `application-connector.connector-service.deployment.args.tokenExpirationMinutes: 90` to the map.
+- Create a ConfigMap in the `kyma-installer` Namespace and [label](#helm-overrides-for-kyma-installation-user-defined-overrides) it.
+- Add the `application-connector.connector-service.deployment.args.tokenExpirationMinutes: 90` entry to the ConfigMap.
 
 Notice that the user-provided override key now contains two parts:
 
 - The chart "path" inside the top-level `core` chart: `application-connector.connector-service`
 - The original template value reference from the chart without the .Values. prefix: `deployment.args.tokenExpirationMinutes`.
 
-Once the installation starts, the Installer generates overrides based on the map entries. The system uses the value of "90" instead of the default value of "60" from the `values.yaml` chart file.
+Once the installation starts, the Installer generates overrides based on the map entries. The system uses the value of "90" instead of the default value of `60` from the `values.yaml` chart file.
 
 
 ## Global overrides
 
 There are several important parameters usually shared across the charts.
 Helm convention to provide these requires the use of the `global` override key.
-For example, to define the `global.domain` override, just use "global.domain" as the name of the key in ConfigMap or Secret for the Installer.
+For example, to define the `global.domain` override, just use `global.domain` as the name of the key in ConfigMap or Secret for the Installer.
 
 Once the installation starts, the Installer merges all of the map entries and collects all of the global entries under the `global` top-level key to use for installation.
 
 
 ## Values and types
 
-Installer generally recognizes all override values as strings. It internally renders overrides to Helm as a YAML stream with only string values.
+Installer generally recognizes all override values as strings. It internally renders overrides to Helm as a `yaml` stream with only string values.
 
 There is one exception to this rule with respect to handling booleans:
-The system converts "true" or "false" strings that it encounters to a corresponding boolean value (true/false).
+The system converts `true` or `false` strings that it encounters to a corresponding boolean value (true/false).
 
 
 ## Merging and conflicting entries

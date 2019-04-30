@@ -5,7 +5,7 @@ type: Installation
 
 You can use Helm to manage Kubernetes resources in Kyma, for example to check the already installed Kyma charts or to install new charts that are not included in the Kyma Installer image.
 
-To use it, however, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home).
+To use it, you must establish a secure connection with Tiller by saving the cluster's client certificate, key, and Certificate Authority (CA) to [Helm Home](https://helm.sh/docs/glossary/#helm-home-helm-home).
 
 >**NOTE:** Read [this](/components/security/#details-tls-in-tiller) document to learn more about TLS in Tiller.
 

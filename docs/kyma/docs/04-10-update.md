@@ -44,7 +44,7 @@ In case of dependency conflicts or major changes between components versions, so
 
 ## Perform the update
 
-If your changes involve any modifications in the `/resources` folder that includes component chart configurations, you need to perform the whole update process that includes updating the Kyma Installer and triggering the update. If your only modify installation artefacts, for example by adding or removing components in the installation files or adding or removing overrides in the configuration files, you only trigger the update process.
+If your changes involve any modifications in the `/resources` folder that includes component chart configurations, perform the whole update process that includes updating the Kyma Installer and triggering the update. If you only modify installation artifacts, for example by adding or removing components in the installation files or adding or removing overrides in the configuration files, only trigger the update process.
 
 Read about each update step in the following sections.
 
