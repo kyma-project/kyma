@@ -5,7 +5,7 @@ type: Installation
 
 This installation guide explains how you can quickly deploy Kyma on a cluster with a wildcard DNS provided by [`xip.io`](http://xip.io).
 
->**NOTE:** If you have your own domain and want to use it during the installation, follow [this](#installation-use-your-own-domain) guide.
+>**NOTE:** If you have your own domain and want to use it during installation, follow [this](#installation-use-your-own-domain) guide.
 
 Kyma cluster installation comes down to these steps:
 1. Preparation of the cluster.

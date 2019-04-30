@@ -5,11 +5,11 @@ type: Configuration
 
 ## Default settings
 
-During the installation, the Installer applies onto a cluster or Minikube all components defined in the `installer-cr-cluster.yaml.tpl` or `installer-cr.yaml.tpl` templates with their configuration defined in `values.yaml` files. It also imports the configuration overrides defined in the `installer-config-cluster.yaml.tpl` and `installer-config-local.yaml.tpl` templates located under the `installation/resources` subfolder.
+During installation, the Installer applies onto a cluster or Minikube all components defined in the `installer-cr-cluster.yaml.tpl` or `installer-cr.yaml.tpl` templates with their configuration defined in `values.yaml` files. It also imports the configuration overrides defined in the `installer-config-cluster.yaml.tpl` and `installer-config-local.yaml.tpl` templates located under the `installation/resources` subfolder.
 
 > **NOTE:** The installation and configuration templates serve as the basis for creating the installation (`kyma-installer-local.yaml` and `kyma-installer-cluster.yaml`) and configuration (`kyma-config-local.yaml` and `kyma-config-cluster.yaml`) release artifacts.
 
-Both configuration files contain pre-defined overrides in the form of Secrets and ConfigMaps that the Installer uses during the installation to replace default values specified in `values.yaml` files or to provide required configuration values. While the local configuration file contains hardcoded override values, the cluster configuration file is based on placeholders replaced with real values during the installation.
+Both configuration files contain pre-defined overrides in the form of Secrets and ConfigMaps that the Installer uses during installation to replace default values specified in `values.yaml` files or to provide required configuration values. While the local configuration file contains hardcoded override values, the cluster configuration file is based on placeholders replaced with real values during installation.
 You can add multiple Secrets and ConfigMaps for one component. If you duplicate the same parameter in a few Secrets or ConfigMaps for a given component but give it different values, the Installer accepts the last value in the file.
 
 >**CAUTION:** Both `values.yaml` and configuration files contain tested and recommended production settings. Note that you modify them on your own risk.
