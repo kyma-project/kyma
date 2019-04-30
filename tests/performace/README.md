@@ -1,0 +1,2 @@
+# Kyma Performance Test Guidelines
+
