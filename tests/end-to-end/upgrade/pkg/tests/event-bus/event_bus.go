@@ -248,6 +248,7 @@ func (f *eventBusFlow) checkSubscriptionReady() error {
 
 func (f *eventBusFlow) publishTestEvent() error {
 	randomInt = rand.Intn(100)
+	f.log.Debugf("Publish random int: %v", randomInt)
 	f.log.Infof("Publish test event")
 	var eventSent bool
 	var err error
@@ -320,9 +321,11 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		if len(resp) == 0 { // no event received by subscriber
 			continue
 		}
-		if resp != "test-event-2" {
-			return fmt.Errorf("wrong response: %s, want: %s", resp, composePayloadData("test-event",
-				randomInt))
+		expectedResp := composePayloadData("test-event", randomInt)
+		f.log.Debugf("Expected subscriber response: %s", expectedResp)
+		f.log.Debugf("Subscriber response: %s", resp)
+		if resp != expectedResp {
+			return fmt.Errorf("wrong response: %s, want: %s", resp, expectedResp)
 		}
 		return nil
 	}
