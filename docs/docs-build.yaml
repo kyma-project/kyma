@@ -15,9 +15,3 @@
 - name: asset-store
 - name: backup
 - name: headless-cms
-
-# Helm Broker
-- name: gcp-broker
-  directory: service-brokers/helm-broker-service-classes/gcp-broker
-- name: azure-broker
-  directory: service-brokers/helm-broker-service-classes/azure-broker
