@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math/rand"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -35,6 +36,8 @@ const (
 	publishEventEndpointURL  = "http://event-bus-publish.kyma-system:8080/v1/events"
 	publishStatusEndpointURL = "http://event-bus-publish.kyma-system:8080/v1/status/ready"
 )
+
+var randomInt int
 
 // UpgradeTest tests the Event Bus business logic after Kyma upgrade phase
 type UpgradeTest struct {
@@ -244,6 +247,7 @@ func (f *eventBusFlow) checkSubscriptionReady() error {
 }
 
 func (f *eventBusFlow) publishTestEvent() error {
+	randomInt = rand.Intn(100)
 	f.log.Infof("Publish test event")
 	var eventSent bool
 	var err error
@@ -266,7 +270,8 @@ func (f *eventBusFlow) publishTestEvent() error {
 
 func (f *eventBusFlow) publish(publishEventURL string) (*api.PublishResponse, error) {
 	payload := fmt.Sprintf(
-		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"test-event-2"}`, srcID, eventType)
+		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":%s}`,
+		srcID, eventType, composePayloadData("test-event", randomInt))
 	f.log.Infof("event to be published: %v\n", payload)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
 	if err != nil {
@@ -316,7 +321,8 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 			continue
 		}
 		if resp != "test-event-2" {
-			return fmt.Errorf("wrong response: %s, want: %s", resp, "test-event-2")
+			return fmt.Errorf("wrong response: %s, want: %s", resp, composePayloadData("test-event",
+				randomInt))
 		}
 		return nil
 	}
@@ -394,4 +400,8 @@ func isPodReady(pod *apiv1.Pod) bool {
 		}
 	}
 	return true
+}
+
+func composePayloadData(data string, salt int) string {
+	return fmt.Sprintf("%s-%v", data, salt)
 }
