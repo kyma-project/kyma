@@ -15,6 +15,7 @@ Choose your cloud provider and get started:
   GKE
   </summary>
 
+
 Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster.
 
 ## Prerequisites
@@ -254,6 +255,7 @@ Use the GitHub release 0.8 or higher.
   <summary>
   AKS
   </summary>
+
 
 Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster.
 

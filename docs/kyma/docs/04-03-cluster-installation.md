@@ -23,6 +23,7 @@ Choose your cloud provider and get started:
   GKE
   </summary>
 
+
 Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes-engine/) (GKE) cluster.
 
 ## Prerequisites
@@ -164,6 +165,7 @@ After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-sign
   <summary>
   AKS
   </summary>
+
 
 Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/services/kubernetes-service/) (AKS) cluster.
 
