@@ -15,7 +15,7 @@ the script once.
 
 K6 can also execute local files.
 ```bash
-k6 run script.js
+k6 run http_basic.js
 ```
 
 ## K6 with Kyma
