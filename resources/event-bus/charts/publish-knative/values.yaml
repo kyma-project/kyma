@@ -13,3 +13,5 @@ trace:
 monitoring:
   grafana: enabled
   alerts: enabled
+  port: 9090
+  interval: 30s
