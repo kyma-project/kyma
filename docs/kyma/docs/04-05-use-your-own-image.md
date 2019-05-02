@@ -8,7 +8,7 @@ If you install Kyma from sources and use the latest `master` branch, you must bu
 
 In addition to tools required in installation from release you also need:
 - [Docker](https://www.docker.com/)
-- [Docker Hub](https://hub.docker.com/) account
+- [Docker Hub](https://hub.docker.com/) account or any other docker registry
 
 >**NOTE:** Follow these steps both for your own and the `xip.io` default domain.
 
