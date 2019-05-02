@@ -2,48 +2,51 @@
 title: Architecture
 ---
 
-See the diagram and steps for an overview of the basic Event Bus flow:
+## Event consumption
 
-![Event Bus architecture](./assets/event-bus-architecture.png)
+When you create a lambda or a service to perform a given business functionality, you must define which Events trigger it. Define triggers by creating the [Subscription CR](/components/event-bus/#custom-resource-subscription) where you instruct the Event Bus to forward the Events of a particular type to your lambda. 
+For example, whenever the `order-created` Event comes in, the Event Bus stores it in NATS Streaming. It then dispatches it to the receiver specified in the Subscription CR definition.
 
-## Event flow
+> **NOTE:** The Event Bus creates a separate Event trigger for each Subscription.
 
-1. The external solution integrated with Kyma makes a REST API call to the Application Connector to indicate that a new Event is available.
+![Configure and Consume Events](./assets/configure-consume-events.svg)
 
+
+1. A user creates a lambda or a service that an Event coming from an external solution triggers. 
+    >**NOTE**: For a service, the user must create a Kyma Subscription resource manually. For a lambda, it is created automatically.
+2. **subscription-controller-knative** reacts to the creation of Kyma Subscription.  It [verifies](#event-validation) if the Event type from the application can be consumed in the Namespace where the Kyma Subscription has been created.  If so, it creates the Knative Channel and Knative Subscription resources.
+3. **nats-controller** reacts to the creation of a Knative Channel and creates the required Kubernetes and Istio services.
+4. **nats-dispatcher** reacts to the creation of a Knative Subscription and creates the NATS Streaming Subscription. 
+5. **nats-dispatcher** picks the Event and dispatches it to the configured lambda or the service URL as an HTTP POST request. The lambda reacts to the received Event.
+
+## Event publishing
+
+![Publish Events](./assets/publish-events.svg)
+
+1. The external application integrated with Kyma makes a REST API request to the Application Connector's Events Gateway to indicate that a new Event is available. The request provides the Application Connector with the Event metadata. 
 2. The Application Connector enriches the Event with the details of its source.
 
-> **NOTE:** There is always one dedicated instance of the Application Connector for every instance of an external solution connected to Kyma.
+    > **NOTE:** There is always one dedicated instance of the Application Connector for every instance of an external solution connected to Kyma.
 
-3. The Application Connector makes a REST API call to `publish` and sends the enriched Event.
+3. The Application Connector makes a REST API call to **publish-knative** and sends the enriched Event.
+4. **publish-knative** makes the HTTP payload compatible with Knative and sends the Event to the relevant **knative-channel** service URL which is inferred based on **source id**, **event type**, and **event type version** parameters.
+5. Istio Virtual Service forwards the Event to the **nats-dispatcher** service served by the **nats-dispatcher** Pod.
+6. **nats-dispatcher** saves the Event in NATS Streaming which stores the Event details in the Persistence storage volume.
 
-4. `publish` saves the information in the NATS Streaming database.
 
-5. NATS Streaming stores the Event details in the Persistence storage volume to ensure the data is not lost if the NATS Streaming crashes.
 
-6. If the Subscription [validation process](#architecture-architecture-event-validation) completes successfully, `push` consumes the Event from NATS Streaming.
+## Event validation 
 
-7. `push` delivers the Event to the lambda or the service.
-
-## Event validation
-
-The Event Bus performs Event validation before it allows Event consumption.
-
-### Validation details
-
-When you create a lambda or a service to perform a given business functionality, you also need to define which Events trigger it. Define triggers by creating the Subscription custom resource in which you register with the Event Bus to forward the Events of a particular type, such as `order-created`, to your lambda or a service. Whenever the `order-created` Event comes in, the Event Bus consumes it by saving it in NATS Streaming and Persistence, and sends it to the correct receiver specified in the Subscription definition.
-
-> **NOTE:** The Event Bus creates a separate Event Trigger for each Subscription.
-
-Before the Event Bus forwards the Event to the receiver, the sub-validator performs a security check to verify the permissions for this Event in a given Namespace. It reads all new Subscription resources and refers to the EventActivation resource to check whether a particular Event type is enabled in a given Namespace. If the Event is enabled for an Namespace, it updates the Subscription resource with the information. Based on the information, `push` sends the Event to the lambda or the service.
+ **subscription-controller-knative** checks if the Namespace can receive Events from the application. It performs the check for each Kyma Subscription created in a Namespace for a particular Event type with a version for a specific application.
 
 ### Validation flow
 
 See the diagram and a step-by-step description of the Event verification process.
 
-![Event validation process](./assets/event-validation.png)
+![Event validation process](./assets/event-validation.svg)
 
 1. The Kyma user defines a lambda or a service.
 2. The Kyma user creates a Subscription custom resource.
-3. The sub-validator reads the new Subscription.
-4. The sub-validator refers to the EventActivation resource to check if the Event in the Subscription is activated for the given Namespace.
-5. The sub-validator updates the Subscription resource accordingly.
+3. **subscription-controller-knative** reads the new Subscription.
+4. **subscription-controller-knative** reads the EventActivation CR to verify if it exists in the Namespace for a certain application.
+5. **subscription-controller-knative** updates the Subscription resource accordingly with the activation status `true` or `false`. The Event Bus uses this status to allow or prohibit Event delivery.

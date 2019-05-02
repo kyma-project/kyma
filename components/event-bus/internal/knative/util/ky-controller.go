@@ -143,7 +143,7 @@ func WriteSubscriptions(ctx context.Context, client runtimeClient.Client, subs [
 
 func WriteSubscription(ctx context.Context, client runtimeClient.Client, sub *subApis.Subscription) error {
 	// update the subscription status subresource
-	if err := client.Status().Update(ctx, sub); err != nil {
+	if err := client.Status().Update(ctx, sub.DeepCopy()); err != nil {
 		return err
 	}
 	// update the subscription resource

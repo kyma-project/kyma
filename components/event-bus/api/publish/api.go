@@ -12,9 +12,9 @@ const ( //TODO Check how to access struct tags
 	AllowedEventIDChars = `^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$`
 
 	// fully-qualified topic name components
-	AllowedSourceIdChars         = `^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
-	AllowedEventTypeChars        = `^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$`
-	AllowedEventTypeVersionChars = `^[a-z0-9]+$`
+	AllowedSourceIdChars         = `^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$`
+	AllowedEventTypeChars        = `^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$`
+	AllowedEventTypeVersionChars = `^[a-zA-Z0-9]+$`
 
 	HeaderSourceId = "Source-Id"
 )
