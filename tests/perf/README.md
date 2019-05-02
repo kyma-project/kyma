@@ -44,37 +44,44 @@ Environment variables
 - **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
 
 Test execution tags 
+- **testName**, is the name of test which every test should provide in test code implementation. 
+This information will be used later on grafan to filter test results
 - TBD
 
-An example k6 test testing Kyma Gateway
+An example k6 test testing Kyma Gateway, with predefined tag name ```testName```
 
 ```javascript
 import http from "k6/http"
-import { check, sleep } from "k6";
+import {check, sleep} from "k6";
 
 export let options = {
     vus: 10,
     duration: "1m",
     tags: {
-            "testName": "gateway_event_test"
-        }
+        "testName": "gateway_event_test"
+    }
 }
 
 export let configuration = {
-    params:  { headers: { "Content-Type": "application/json" } },
+    params: {headers: {"Content-Type": "application/json"}},
     url: `https://gateway.${__ENV.CLUSTER_DOMAIN_NAME}/lszymik/v1/events`,
-    payload: JSON.stringify({"event-type" : "petCreated","event-type-version" : "v1","event-time" : "2018-11-02T22:08:41+00:00","data" : {"pet": {"id": "4caad296-e0c5-491e-98ac-0ed118f9474e"}}})
+    payload: JSON.stringify({
+        "event-type": "petCreated",
+        "event-type-version": "v1",
+        "event-time": "2018-11-02T22:08:41+00:00",
+        "data": {"pet": {"id": "4caad296-e0c5-491e-98ac-0ed118f9474e"}}
+    })
 }
 
-export default function() { 
+export default function () {
     let res = http.post(configuration.url, configuration.payload, configuration.params);
-    
+
     check(res, {
-      "status was 200": (r) => r.status == 200,
-      "transaction time OK": (r) => r.timings.duration < 200
+        "status was 200": (r) => r.status == 200,
+        "transaction time OK": (r) => r.timings.duration < 200
     });
     sleep(1);
-};
+}
 ```
 
 
