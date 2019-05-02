@@ -368,4 +368,4 @@
 milv.config.yaml @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # performance tests
-/tests/performance/ @rakesh-garimella @venturasr @lilitgh @hisarbalik @lszymik
+/tests/perf/ @rakesh-garimella @venturasr @lilitgh @hisarbalik @lszymik @a-thaler
