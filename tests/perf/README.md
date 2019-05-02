@@ -10,7 +10,7 @@ To execute a very simple k6 test from the command line, you can use this:
 k6 run github.com/kyma-project/kyma/tests/perf/examples/http_basic.js
 ```
 
-With command above, k6 will fetch the http_het.js file from Github and only fires 1 virtual user which get execute 
+With command above, k6 will fetch the http_basic.js file from Github and only fires 1 virtual user which get execute 
 the script once.
 
 K6 can also execute local files.
