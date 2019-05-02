@@ -20,7 +20,7 @@ k6 run script.js
 
 ## K6 with Kyma
 
-Directory ```test/perf``` contains all performance tests source code.
+Directory ```tests/perf``` contains all performance tests source code.
 A Kyma performance test is a K6 test script with or without prerequisites like custom component deployments or configurations.
 A Kyma performance test will runs against [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
@@ -46,7 +46,7 @@ Environment variables
 
 Test execution tags 
 - **testName**, is the name of test which every test should provide in test code implementation. 
-This information will be used later on grafan to filter test results
+This information will be used later on [grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1) to filter test results
 - TBD
 
 An example k6 test testing Kyma Gateway, with predefined tag name ```testName```
@@ -99,4 +99,6 @@ Variable ```options``` defines execution behavior of test implementation. With f
 - ```tags``` defines custom tags to mark test execution
 
 More about available options and test execution behavior please read [here](https://docs.k6.io/docs/options).
+
+Result of test execution will be stored in a Influx-DB on Kyma Load Generator Cluster and can be accessed from [here](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1)
 ### Run test locally
