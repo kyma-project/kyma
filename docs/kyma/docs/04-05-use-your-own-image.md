@@ -6,6 +6,10 @@ type: Installation
 When you install Kyma from the release, you use the release artifacts that already contain the Kyma Installer - a Docker image containing the combined binary of the Installer and the component charts from the `/resources` folder.
 If you install Kyma from sources and use the latest `master` branch, you must build the image yourself to prepare the configuration file for Kyma installation on a GKE or AKS cluster. You also require a new image if you add to the installation components and custom Helm charts that are not included in the `/resources` folder.
 
+In addition to tools required in installation from release you also need:
+- [Docker](https://www.docker.com/)
+- [Docker Hub](https://hub.docker.com/) account
+
 >**NOTE:** Follow these steps both for your own and the `xip.io` default domain.
 
 1. Clone the repository using the `git clone https://github.com/kyma-project/kyma.git` command and navigate to the root folder.

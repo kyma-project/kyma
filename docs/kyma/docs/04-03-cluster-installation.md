@@ -29,8 +29,6 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 ## Prerequisites
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
-- [Docker](https://www.docker.com/)
-- [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
 
