@@ -85,7 +85,8 @@ export default function () {
 }
 ```
 
-Example test above will execute a load test against Kyma gateway on a cluster deployed on **CLUSTER_DOMAIN_NAME** with 10 virtual users 1 minute long and 1000 request per second.
+Example test above will execute a load test against Kyma gateway on a cluster deployed on **CLUSTER_DOMAIN_NAME** 
+with 10 virtual users, 1 minute long and 1000 request per second across all virtual users.
 
 Test logic should be implemented in a function defined as default, more about test execution lifecycle please read [here](https://docs.k6.io/docs/test-life-cycle).
 
@@ -95,4 +96,6 @@ Variable ```options``` defines execution behavior of test implementation. With f
 - ```duration``` defines test execution duration.
 - ```rps``` defines request per second across all virtual users
 - ```tags``` defines custom tags to mark test execution
+
+More about available options and test execution behavior please read [here](https://docs.k6.io/docs/options).
 ### Run test locally
