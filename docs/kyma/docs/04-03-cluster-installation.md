@@ -41,10 +41,9 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
     export GCP_PROJECT={YOUR_GCP_PROJECT}
     export GCP_ZONE={GCP_ZONE_TO_DEPLOY_TO}
-    export KYMA_VERSION={KYMA_RELEASE_VERSION}
     ```
 
-2. Create a cluster in the `europe-west1` region. Run:
+2. Create a cluster in the configured zone. Run:
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
@@ -71,7 +70,7 @@ Use the GitHub release 0.8 or higher.
 3. Install Tiller on your GKE cluster. Run:
 
     ```
-    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{KYMA_VERSION}/installation/resources/tiller.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
     ```
 
 4. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
@@ -100,7 +99,7 @@ Use the GitHub release 0.8 or higher.
 
 1. Configure kubectl to use your new cluster. Run:
     ```
-    gcloud container clusters get-credentials $CLUSTER_NAME --zone europe-west1-b --project $GCP_PROJECT
+    gcloud container clusters get-credentials $CLUSTER_NAME --zone $GCP_ZONE --project $GCP_PROJECT
     ```
 
 2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:

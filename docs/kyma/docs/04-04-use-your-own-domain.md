@@ -21,8 +21,6 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 ## Prerequisites
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
-- [Docker](https://www.docker.com/)
-- [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
 - A domain for your GKE cluster
@@ -32,21 +30,16 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 1. Select a name for your cluster. Set the cluster name and the name of your GCP project as environment variables. Run:
     ```
     export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
-    export PROJECT={YOUR_GCP_PROJECT}
+    export GCP_PROJECT={YOUR_GCP_PROJECT}
+    export GCP_ZONE={GCP_ZONE_TO_DEPLOY_TO}
     ```
 
-2. Create a cluster in the `europe-west1` region. Run:
+2. Create a cluster in the configured zone. Run:
     ```
-    gcloud container --project "$PROJECT" clusters \
-    create "$CLUSTER_NAME" --zone "europe-west1-b" \
+    gcloud container --project "$GCP_PROJECT" clusters \
+    create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
     --cluster-version "1.12.5" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
-    ```
-
-3. Install Tiller on your GKE cluster. Run:
-
-    ```
-    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{RELEASE_TAG}/installation/resources/tiller.yaml
     ```
 
 4. Add your account as the cluster administrator:
@@ -58,28 +51,26 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
 ### Delegate the management of your domain to Google Cloud DNS
 
+> **NOTE**: Google Cloud DNS setup has to be done only once per DNS zone
+
 Follow these steps:
 
 1. Export the domain name, project name, and DNS zone name as environment variables. Run the commands listed below:
 
     ```
-    export DOMAIN={YOUR_SUBDOMAIN}
-    export DNS_NAME={YOUR_DOMAIN}.
-    export PROJECT={YOUR_GOOGLE_PROJECT_ID}
+    export DNS_NAME={YOUR_ZONE_DOMAIN}.
     export DNS_ZONE={YOUR_DNS_ZONE}
     ```
     Example:
     ```
-    export DOMAIN=my.kyma-demo.ga
     export DNS_NAME=kyma-demo.ga.
-    export PROJECT=kyma-demo-235208
     export DNS_ZONE=myzone
     ```
 
 2. Create a DNS-managed zone in your Google project. Run:
 
     ```
-    gcloud dns --project=$PROJECT managed-zones create $DNS_ZONE --description= --dns-name=$DNS_NAME
+    gcloud dns --project=$GCP_PROJECT managed-zones create $DNS_ZONE --description= --dns-name=$DNS_NAME
     ```
 
     Alternatively, create it through the GCP UI. Navigate go to **Network Services** in the **Network** section, click **Cloud DNS** and select **Create Zone**.
@@ -104,30 +95,47 @@ Follow these steps:
 
 ### Get the TLS certificate
 
+1. Export domain for the cluster and issuer email:
+    ```
+    export DOMAIN={YOUR_CLUSTER_SUBDOMAIN}
+    export CERT_ISSUER_EMAIL={YOUR_EMAIL}
+    ```
+    Example:
+    ```
+    export DOMAIN=my.kyma-demo.ga
+    export CERT_ISSUER_EMAIL=john.smith@example.com
+    ```
+
 1. Create a folder for certificates. Run:
     ```
     mkdir letsencrypt
     ```
 2. Create a new service account and assign it to the `dns.admin` role. Run these commands:
     ```
-    gcloud iam service-accounts create dnsmanager --display-name "dnsmanager" --project "$PROJECT"
+    gcloud iam service-accounts create dnsmanager --display-name "dnsmanager" --project "$GCP_PROJECT"
     ```
     ```
-    gcloud projects add-iam-policy-binding $PROJECT \
-        --member serviceAccount:dnsmanager@$PROJECT.iam.gserviceaccount.com --role roles/dns.admin
+    gcloud projects add-iam-policy-binding $GCP_PROJECT \
+        --member serviceAccount:dnsmanager@$GCP_PROJECT.iam.gserviceaccount.com --role roles/dns.admin
     ```
+
+> **NOTE**: You don't have to create new DNS manager Service Account every time. You may use existing SA as long as it has role `dns.admin` assigned.
+
 
 3. Generate an access key for this account in the `letsencrypt` folder. Run:
     ```
-    gcloud iam service-accounts keys create ./letsencrypt/key.json --iam-account dnsmanager@$PROJECT.iam.gserviceaccount.com
+    gcloud iam service-accounts keys create ./letsencrypt/key.json --iam-account dnsmanager@$GCP_PROJECT.iam.gserviceaccount.com
     ```
+    
+> **NOTE**: There is a fixed number of keys that may be generated for single Service Account. We suggest reusing keys instead of generating new one for every cluster.
+
 4. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot uses the key to apply DNS challenge for the certificate request and stores the TLS certificates in that folder. Run:
     ```
     docker run -it --name certbot --rm \
         -v "$(pwd)/letsencrypt:/etc/letsencrypt" \
         certbot/dns-google \
         certonly \
-        -m YOUR_EMAIL_HERE --agree-tos --no-eff-email \
+        -m $CERT_ISSUER_EMAIL --agree-tos --no-eff-email \
         --dns-google \
         --dns-google-credentials /etc/letsencrypt/key.json \
         --server https://acme-v02.api.letsencrypt.org/directory \
@@ -145,20 +153,26 @@ Follow these steps:
 
 Use the GitHub release 0.8 or higher.
 
-1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.
+1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
 
 2. Export the release version as an environment variable. Run:
     ```
-    export LATEST={KYMA_RELEASE_VERSION}
+    export KYMA_VERSION={KYMA_RELEASE_VERSION}
     ```
 
-3. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
+3. Install Tiller on your GKE cluster. Run:
+
+    ```
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
+    ```
+
+4. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
    ```
-   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml
-   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
    ```
 
-4. Prepare the deployment file.
+5. Prepare the deployment file.
 
     - Run this command:
     ```
@@ -170,13 +184,13 @@ Use the GitHub release 0.8 or higher.
     cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__DOMAIN__/$DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
-5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
+6. The output of this operation is the `my-kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
 
 ## Deploy Kyma
 
 1. Configure kubectl to use your new cluster. Run:
     ```
-    gcloud container clusters get-credentials $CLUSTER_NAME --zone europe-west1-b --project $PROJECT
+    gcloud container clusters get-credentials $CLUSTER_NAME --zone $GCP_ZONE --project $GCP_PROJECT
     ```
 
 2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
@@ -209,37 +223,31 @@ Use the GitHub release 0.8 or higher.
 
 ## Configure DNS for the cluster load balancer
 
-1. Export the domain of your cluster and DNS zone as environment variables. Run:
-    ```
-    export DOMAIN=$(kubectl get cm net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.domainName}')
-    export DNS_ZONE={YOUR_DNS_ZONE}
-    ```
+To add DNS entries, run these commands:
+```
+export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-2. To add DNS entries, run these commands:
-    ```
-    export EXTERNAL_PUBLIC_IP=$(kubectl get service -n istio-system istio-ingressgateway -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+export APISERVER_PUBLIC_IP=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-    export APISERVER_PUBLIC_IP=$(kubectl get service -n kyma-system apiserver-proxy-ssl -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+export APP_CONNECTOR_PUBLIC_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
 
-    export REMOTE_ENV_IP=$(kubectl get service -n kyma-system application-connector-ingress-nginx-ingress-controller -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
 
-    gcloud dns --project=$PROJECT record-sets transaction start --zone=$DNS_ZONE
+gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
-    gcloud dns --project=$PROJECT record-sets transaction add $EXTERNAL_PUBLIC_IP --name=\*.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
+gcloud dns --project=$PROJECT record-sets transaction add $APP_CONNECTOR_PUBLIC_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
-    gcloud dns --project=$PROJECT record-sets transaction add $REMOTE_ENV_IP --name=\gateway.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
+gcloud dns --project=$PROJECT record-sets transaction add $APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
 
-    gcloud dns --project=$PROJECT record-sets transaction add $APISERVER_PUBLIC_IP --name=\apiserver.$DOMAIN. --ttl=60 --type=A --zone=$DNS_ZONE
-
-    gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
-    ```
+gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
+```
 
 ## Access the cluster
 
 1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
 
     ```
-    kubectl get virtualservice core-console -n kyma-system
+    kubectl get virtualservice core-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
     ```
 
 2. Access your cluster under this address:
