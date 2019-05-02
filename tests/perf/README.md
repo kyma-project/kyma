@@ -42,6 +42,7 @@ More about K6 tag please read from [here](https://docs.k6.io/docs/tags-and-group
 
 Environment variables
 - **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
+- TBD
 
 Test execution tags 
 - **testName**, is the name of test which every test should provide in test code implementation. 
