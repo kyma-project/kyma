@@ -14,4 +14,4 @@ excludedResources:
 includeClusterResources: null
 labelSelector: null
 storageLocation: default
-volumeSnapshotLocations: null
+volumeSnapshotLocations: default
