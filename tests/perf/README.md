@@ -100,5 +100,6 @@ Variable ```options``` defines execution behavior of test implementation. With f
 
 More about available options and test execution behavior please read [here](https://docs.k6.io/docs/options).
 
-Result of test execution will be stored in a Influx-DB on Kyma Load Generator Cluster and can be accessed from [here](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1)
+Result of test execution will be stored in a Influx-DB along with Grafana on Kyma Load Generator Cluster and can be accessed from [here](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1)
+
 ### Run test locally
