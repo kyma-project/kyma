@@ -32,6 +32,50 @@ Prerequisites directory content will be deployed after load test cluster deploym
 
 ### Implementing Kyma performance test
 
+This section will document Kyma specific k6 test implementation, for detailed information about k6 test framework you can 
+read from [original documentation](https://docs.k6.io/docs)
+
+Kyma k6 executor has some pre-defined environment variable and tags to provide some additional information about 
+current execution and target test cluster.
+
+More about K6 tag please read from [here](https://docs.k6.io/docs/tags-and-groups)
+
+Environment variables
+- **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
+
+Test execution tags 
+- TBD
+
+An example k6 test testing Kyma Gateway
+
+```javascript
+import http from "k6/http"
+import { check, sleep } from "k6";
+
+export let options = {
+    vus: 10,
+    duration: "1m",
+    tags: {
+            "testName": "gateway_event_test"
+        }
+}
+
+export let configuration = {
+    params:  { headers: { "Content-Type": "application/json" } },
+    url: `https://gateway.${__ENV.CLUSTER_DOMAIN_NAME}/lszymik/v1/events`,
+    payload: JSON.stringify({"event-type" : "petCreated","event-type-version" : "v1","event-time" : "2018-11-02T22:08:41+00:00","data" : {"pet": {"id": "4caad296-e0c5-491e-98ac-0ed118f9474e"}}})
+}
+
+export default function() { 
+    let res = http.post(configuration.url, configuration.payload, configuration.params);
+    
+    check(res, {
+      "status was 200": (r) => r.status == 200,
+      "transaction time OK": (r) => r.timings.duration < 200
+    });
+    sleep(1);
+};
+```
 
 
 ### Run test locally
