@@ -62,7 +62,7 @@ minio:
 ```
 
 To override these values, for example to `512Mi` and `250m`, proceed as follows:
-- Create a ConfigMap in the `kyma-installer` Namespace and [label](#helm-overrides-for-kyma-installation-user-defined-overrides) it.
+- Create a ConfigMap in the `kyma-installer` Namespace and [label](#user-defined-overrides) it.
 - Add the `minio.resources.limits.memory: 512Mi` and `minio.resources.limits.cpu: 250m` entries to the ConfigMap and apply it:
 
 ```
@@ -84,7 +84,7 @@ EOF
 
 Once the installation starts, the Installer generates overrides based on the ConfigMap entries. The system uses the values of `512Mi` instead of the default `128Mi` for Minio memory and `250m` instead of `100m` for Minio CPU from the chart's `values.yaml` file.
 
-For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to [label](#helm-overrides-for-kyma-installation-user-defined-overrides) the Secret.
+For overrides that the system should keep in Secrets, just define a Secret object instead of a ConfigMap with the same key and a base64-encoded value. Be sure to [label](#user-defined-overrides) the Secret.
 
 If you add the overrides in the runtime, trigger the update process using this command:
 
@@ -129,7 +129,7 @@ deployment:
 
 To override this value, and change it from `60` to `90`, do the following:
 
-- Create a ConfigMap in the `kyma-installer` Namespace and [label](#helm-overrides-for-kyma-installation-user-defined-overrides) it.
+- Create a ConfigMap in the `kyma-installer` Namespace and [label](#user-defined-overrides) it.
 - Add the `application-connector.connector-service.deployment.args.tokenExpirationMinutes: 90` entry to the ConfigMap.
 
 Notice that the user-provided override key now contains two parts:

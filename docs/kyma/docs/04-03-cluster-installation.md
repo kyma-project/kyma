@@ -13,7 +13,7 @@ Kyma cluster installation comes down to these steps:
 2. Preparation of the configuration file
 3. Kyma deployment
 
-The guide explains how to prepare the configuration file from the latest GitHub release. If you want to use your own image, follow [these](#installation-use-your-own-image) steps.
+The guide explains how to prepare the configuration file from the latest GitHub release. If you want to use your own image, follow [these](#installation-use-your-own-kyma-installer-image) steps.
 Additionally, if you need to use Helm and access Tiller securely, complete [additional configuration](#installation-use-helm) at the end of the installation procedure.
 
 Choose your cloud provider and get started:
