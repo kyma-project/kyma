@@ -25,7 +25,7 @@ Components that are not an integral part of the default Kyma Lite package are pr
 You can customize component installation files by:
 - Removing hashtags in front of the component entries to enable a component installation.
 - Adding hashtags to disable a component installation.
-- Adding new components to the list along with their chart definition in the `kyma/resources` folder. In that case you must create your own [Kyma Installer image](#configuration-use-your-own-kyma-installer-image) as you are adding new chart configuration.
+- Adding new components to the list along with their chart definition in the `kyma/resources` folder. In that case you must create your own [Kyma Installer image](#installation-use-your-own-kyma-installer-image) as you are adding new chart configuration.
 
 For more details on custom component installation, see [this](#configuration-custom-component-installation) document.
 
