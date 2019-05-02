@@ -38,7 +38,7 @@ read from [original documentation](https://docs.k6.io/docs)
 Kyma k6 executor has some pre-defined environment variable and tags to provide some additional information about 
 current execution and target test cluster.
 
-More about K6 tag please read from [here](https://docs.k6.io/docs/tags-and-groups)
+More about K6 tag please read from [here](https://docs.k6.io/docs/tags-and-groups).
 
 Environment variables
 - **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
@@ -57,8 +57,9 @@ import {check, sleep} from "k6";
 export let options = {
     vus: 10,
     duration: "1m",
+    rps: 1000,
     tags: {
-        "testName": "gateway_event_test"
+        "testName": "gateway_event"
     }
 }
 
@@ -84,5 +85,14 @@ export default function () {
 }
 ```
 
+Example test above will execute a load test against Kyma gateway on a cluster deployed on **CLUSTER_DOMAIN_NAME** with 10 virtual users 1 minute long and 1000 request per second.
 
+Test logic should be implemented in a function defined as default, more about test execution lifecycle please read [here](https://docs.k6.io/docs/test-life-cycle).
+
+Variable ```options``` defines execution behavior of test implementation. With following options
+
+- ```vus``` defines amount of virtual users.
+- ```duration``` defines test execution duration.
+- ```rps``` defines request per second across all virtual users
+- ```tags``` defines custom tags to mark test execution
 ### Run test locally
