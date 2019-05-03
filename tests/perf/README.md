@@ -21,10 +21,10 @@ k6 run http_basic.js
 ## K6 with Kyma
 
 Directory ```tests/perf``` contains all performance tests source code.
-A Kyma performance test is a K6 test script with or without prerequisites like custom component deployments or configurations.
+A Kyma performance test is a K6 test script with or without prerequisites like custom test component deployments or configurations.
 A Kyma performance test will runs against [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
-Each subdirectory in the ```tests/perf``` directory defines source code for one test suite and focusing on one component, 
+Each subdirectory in the ```tests/perf``` directory defines source code for one test suite and focusing on one component or area, 
 the subdirectory ```prerequisites``` will contains **yaml** files of test component deployments 
 (like custom configuration or custom scenario deployments) if necessary.
 
@@ -87,9 +87,9 @@ export default function () {
 ```
 
 Example test above will execute a load test against Kyma gateway on a cluster deployed on **CLUSTER_DOMAIN_NAME** 
-with 10 virtual users, 1 minute long and 1000 request per second across all virtual users.
+with **10** virtual users, **1** minute long and **1000** request per second across all virtual users.
 
-Test logic should be implemented in a function defined as default, more about test execution lifecycle please read [here](https://docs.k6.io/docs/test-life-cycle).
+Test logic should be implemented in a function defined as **default**, more about test execution lifecycle please read [here](https://docs.k6.io/docs/test-life-cycle).
 
 Variable ```options``` defines execution behavior of test implementation. With following options
 
@@ -104,7 +104,7 @@ Result of test execution will be stored in a Influx-DB along with Grafana on Kym
 
 ### Run test locally
 
-Each load test can be executed locally without Kyma load test executor for development or test purposes. 
+Each load test can be executed locally without Kyma load generator for development or test purposes. 
 Example below shown deployment of example test component on a Kyma cluster and execution of simple load test
 
 >NOTE: Before you start running test locally ensure k6 installed on your local machine and running. Installation instruction available [here](https://docs.k6.io/docs/installation)
