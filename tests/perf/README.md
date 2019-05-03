@@ -105,7 +105,7 @@ Result of test execution will be stored in a Influx-DB along with Grafana on Kym
 ### Run test locally
 
 Each load test can be executed locally without Kyma load test executor for development or test purposes. 
-Example below shown deployment of example component on a Kyma cluster and execution of simple load test
+Example below shown deployment of example test component on a Kyma cluster and execution of simple load test
 
 >NOTE: Before you start running test locally ensure k6 installed on your local machine and running. Installation instruction available [here](https://docs.k6.io/docs/installation)
 
