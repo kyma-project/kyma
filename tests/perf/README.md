@@ -25,7 +25,7 @@ A Kyma performance test is a K6 test script with or without prerequisites like c
 A Kyma performance test will runs against [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
 Each subdirectory in the ```tests/perf``` directory defines source code for one test suite and focusing on one component, 
-the subdirectory ```prerequisites``` will contains **yaml** files of custom component deployments 
+the subdirectory ```prerequisites``` will contains **yaml** files of test component deployments 
 (like custom configuration or custom scenario deployments) if necessary.
 
 Prerequisites directory content will be deployed after load test cluster deployment and before test execution.
@@ -103,3 +103,27 @@ More about available options and test execution behavior please read [here](http
 Result of test execution will be stored in a Influx-DB along with Grafana on Kyma Load Generator Cluster and can be accessed from [here](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1)
 
 ### Run test locally
+
+Each load test can be executed locally without Kyma load test executor for development or test purposes. 
+Example below shown deployment of example component on a Kyma cluster and execution of simple load test
+
+>NOTE: Before you start running test locally ensure k6 installed on your local machine and running. Installation instruction available [here](https://docs.k6.io/docs/installation)
+
+First deploy example test service which we execute load test against on Kyma cluster
+
+```bash
+kubectl apply -f prerequisites/example.yaml
+```
+
+After test service deployed we can start load test locally to against Kyma cluster from command line with an environment 
+variable which represent domain name of Kyma test cluster
+
+```bash
+CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx k6 run examples/http_get.js
+```
+
+or we can use ```-e``` CLI flag for all platform
+
+```bash
+k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx examples/http_get.js
+```
