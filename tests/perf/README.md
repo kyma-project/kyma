@@ -1,7 +1,7 @@
 # Kyma Performance Test Guidelines
 
 ## Overview
-Kyma uses [K6](https://docs.k6.io/docs) for performance and load testing, K6 is a developer oriented well documented load testing tool, easy to 
+Kyma uses [K6](https://docs.k6.io) for performance and load testing, K6 is a developer oriented well documented load testing tool, easy to 
 integrate into Kyma workflow and automation flow.
 
 ### Running K6
@@ -33,7 +33,7 @@ Prerequisites directory content will be deployed after load test cluster deploym
 ### Implementing Kyma performance test
 
 This section will document Kyma specific k6 test implementation, for detailed information about k6 test framework you can 
-read from [original documentation](https://docs.k6.io/docs)
+read from [original documentation](https://docs.k6.io)
 
 Kyma k6 executor has some pre-defined environment variable and tags to provide some additional information about 
 current execution and target test cluster.
