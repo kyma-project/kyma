@@ -5,21 +5,21 @@ type: Details
 
 You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a Subscription custom resource.
 
-## Event Delivery
+## Event delivery
 
-The Event is delivered as an `HTTP POST` request. Event Metadata is a part of an HTTP request Headers. Event Payload is the body of the request.
+The Event is delivered as an HTTP POST request. Event metadata is a part of an HTTP request headers. Event payload is the body of the request.
 
-![TEST](./assets/service-programming-model.png)
+![eventdelivery](./assets/event-delivery.svg)
 
-The Event Delivery workflow is as follows:
+The Event delivery workflow is as follows:
 
-1. The Event is published to the Kyma Event Bus from an external system instance in a bound Application.
-2. The Event Bus checks for the Event subscription and activation. It creates an `HTTP POST` request using Event Payload and Metadata.
-3. The Service receives the `HTTP POST` request. The Event Metadata is represented in the `HTTP Request Headers` request and the Event Payload is represented in the `HTTP Request Body`.
+1. An external system instance publishes the Event to the Kyma Event Bus from an external system instance in a bound Application.
+2. The Event Bus checks for the Event subscription and activation. It creates an `HTTP POST` request using Event payload and metadata.
+3. The service (or lambda) receives the `HTTP POST` request. The Event metadata is represented in the `HTTP Request Headers` request and the Event payload is represented in the `HTTP Request Body`.
 
-## Event Metadata
+## Event metadata
 
-The following HTTP Headers provide information about the Event Metadata.
+The following HTTP Headers provide information about the Event metadata.
 
 |Header| Description|
 |------|--------|
@@ -39,11 +39,11 @@ The following HTTP Headers provide information about the Event Metadata.
 | **x-envoy-expected-rq-timeout-ms** | Time in milliseconds in which the router expects the request to be completed. Envoy sets this header so that the upstream host receiving the request can make decisions based on the request timeout. It is set on internal requests and is either taken from the **x-envoy-upstream-rq-timeout-ms** header or from the route timeout. |
 | **x-istio-attributes** | Istio-specific metadata. |
 
-## Event Payload
+## Event payload
 
 The Event Payload is delivered as the body of the HTTP Request in JSON format. The JSON schema is available in the Service Catalog in the registered service for the remote Events.
 
-## Event Payload Example
+## Event payload example
 
 In this example, you write a service for an `order.created` Event published by the external solution service. The published Event schema looks as follows:
 
@@ -69,10 +69,12 @@ The HTTP POST request payload is a JSON object:
 {"orderCode": "4caad296-e0c5-491e-98ac-0ed118f9474e"}
 ```
 
-## Successful Delivery
+## Successful delivery
 
 A message delivered to a subscriber is considered successfully consumed if the service's HTTP response status code is
-`2xx`, for example:
+`2xx`.
+For example:
+
 ```json
 {
     "event-id": "22ae22a4-f5b7-4fa1-ada9-558a10a96f3d",
@@ -92,6 +94,6 @@ will look like this:
 }
 ```
 
-## Event Subscription Service Example
+## Event Subscription service example
 
 Refer to [this](https://github.com/kyma-project/examples/tree/master/event-subscription/service) example to find a complete scenario for implementing a subscriber service to a business Event.
