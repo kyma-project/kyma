@@ -49,7 +49,7 @@ To access the Application Connector and connect an external solution to the loca
 
 ## Install Kyma
 
-You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. Read [this](/root/kyma#installation-custom-component-installation) document to learn how to install only the selected subcomponents.
+You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. Read [this](/root/kyma#configuration-custom-component-installation) document to learn how to install only the selected subcomponents.
 
   > **CAUTION:** Running the installation script deletes any previously existing cluster from your Minikube.
 
