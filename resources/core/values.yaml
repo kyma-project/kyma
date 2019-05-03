@@ -37,7 +37,7 @@ global:
     version: "a19d8d50"
   ui_acceptance_tests:
     dir: pr/
-    version: "3736d11"
+    version: "PR-3920"
   api_controller:
     dir: develop/
     version: "1323f962"
