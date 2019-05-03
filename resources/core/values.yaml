@@ -36,6 +36,7 @@ global:
     dir: develop/
     version: "a19d8d50"
   ui_acceptance_tests:
+    dir: pr/
     version: "3736d11"
   api_controller:
     dir: develop/
