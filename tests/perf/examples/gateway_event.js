@@ -6,7 +6,7 @@ export let options = {
     duration: "1m",
     rps: 1000,
     tags: {
-        "testName": "gateway_event"
+        "testName": "example_gateway_event"
     }
 }
 

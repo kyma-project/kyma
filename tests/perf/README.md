@@ -21,7 +21,7 @@ k6 run http_basic.js
 ## K6 with Kyma
 
 Directory ```tests/perf``` contains all performance tests source code.
-A Kyma performance test is a K6 test script with or without prerequisites like custom test component deployments or configurations.
+A Kyma performance test is a K6 test script with or without prerequisites e.g. custom test component deployments.
 A Kyma performance test will runs against [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
 Each subdirectory in the ```tests/perf``` directory defines source code for one test suite and focusing on one component or area, 
@@ -60,7 +60,7 @@ export let options = {
     duration: "1m",
     rps: 1000,
     tags: {
-        "testName": "gateway_event"
+        "testName": "example_gateway_event"
     }
 }
 
