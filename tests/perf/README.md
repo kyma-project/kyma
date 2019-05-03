@@ -109,6 +109,8 @@ Example below shown deployment of example test component on a Kyma cluster and e
 
 >NOTE: Before you start running test locally ensure k6 installed on your local machine and running. Installation instruction available [here](https://docs.k6.io/docs/installation)
 
+Following example require some test component on Kyma cluster to execute load test against.
+
 First deploy example test service which we execute load test against on Kyma cluster
 
 ```bash
