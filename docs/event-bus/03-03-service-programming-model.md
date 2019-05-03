@@ -3,7 +3,7 @@ title: Service Programming Model
 type: Details
 ---
 
-You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a Subscription custom resource.
+You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a ;[Subscription](/components/event-bus/#custom-resource-subscription) custom resource.
 
 ## Event delivery
 
@@ -13,9 +13,9 @@ The Event is delivered as an HTTP POST request. Event metadata is a part of an H
 
 The Event delivery workflow is as follows:
 
-1. An external system instance publishes the Event to the Kyma Event Bus from an external system instance in a bound Application.
+1. An external system uses the bound Application to publish an Event to the Kyma Event Bus.
 2. The Event Bus checks for the Event subscription and activation. It creates an `HTTP POST` request using Event payload and metadata.
-3. The service (or lambda) receives the `HTTP POST` request. The Event metadata is represented in the `HTTP Request Headers` request and the Event payload is represented in the `HTTP Request Body`.
+3. The service receives the `HTTP POST` request. `HTTP Request Headers` request represents Event metadata and `HTTP Request Body`- the Event payload.
 
 ## Event metadata
 
@@ -27,7 +27,7 @@ The following HTTP Headers provide information about the Event metadata.
 | **ce-event-time** | Business Event's time delivered to the microservice. |
 | **ce-event-type** | Business Event's type delivered to the microservice. |
 | **ce-event-type-version** | Business Event's version delivered to the microservice. |
-| **ce-source-id** | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events. |
+| **ce-source-id** | Identifies the origin of Events. This can be an external solution or a defined identifier for internally generated Events. |
 | **kyma-subscription** | Subscription name defined in the subscription contract, or in a CRD. This business Event is published to its subscribers. |
 | **x-b3-flags** | Header used by the Zipkin tracer in Envoy. It encodes one or more options. See more on Zipkin tracing [here](https://github.com/openzipkin/b3-propagation). |
 | **x-b3-parentspanid** | Header used by the Zipkin tracer in Envoy. The **ParentSpanId** is 64-bit in length and indicates the position of the parent operation in the trace tree. When the span is the root of the trace tree, the **ParentSpanId** is absent. |
@@ -41,7 +41,7 @@ The following HTTP Headers provide information about the Event metadata.
 
 ## Event payload
 
-The Event Payload is delivered as the body of the HTTP Request in JSON format. The JSON schema is available in the Service Catalog in the registered service for the remote Events.
+The Event payload is delivered as the body of the HTTP Request in `JSON` format. The `JSON` schema is available in the Service Catalog in the registered service for the remote Events.
 
 ## Event payload example
 
@@ -71,8 +71,7 @@ The HTTP POST request payload is a JSON object:
 
 ## Successful delivery
 
-A message delivered to a subscriber is considered successfully consumed if the service's HTTP response status code is
-`2xx`.
+The service's HTTP response status code `2xx` means that the message was successfully delivered to the subscriber.
 For example:
 
 ```json
@@ -82,7 +81,7 @@ For example:
     "reason": "Message successfully published to the channel"
 }
 ```
-If the status code is not `2xx` (< `200` or >= `300`), it means that the message was not consumed successfully and
+If the status code is not `2xx` (< `200` or >= `300`), it means that the delivery was unsuccessful and
 that the Event Bus will try to deliver it again. This implies **At-least-once** delivery guarantee.
 >**NOTE**: If there were no subscriptions or consumers to this `event-type`, the message is ignored and the response
 will look like this:
