@@ -29,18 +29,16 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/authz"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/pkg/origin"
 )
 
 type config struct {
-	Host                 string   `envconfig:"default=127.0.0.1"`
-	Port                 int      `envconfig:"default=3000"`
-	AllowedOrigins       []string `envconfig:"optional"`
-	Verbose              bool     `envconfig:"default=false"`
-	KubeconfigPath       string   `envconfig:"optional"`
-	Content              content.Config
+	Host                 string        `envconfig:"default=127.0.0.1"`
+	Port                 int           `envconfig:"default=3000"`
+	AllowedOrigins       []string      `envconfig:"optional"`
+	Verbose              bool          `envconfig:"default=false"`
+	KubeconfigPath       string        `envconfig:"optional"`
 	InformerResyncPeriod time.Duration `envconfig:"default=10m"`
 	ServerTimeout        time.Duration `envconfig:"default=10s"`
 	Application          application.Config
@@ -57,7 +55,7 @@ func main() {
 	k8sConfig, err := newRestClientConfig(cfg.KubeconfigPath)
 	exitOnError(err, "Error while initializing REST client config")
 
-	resolvers, err := domain.New(k8sConfig, cfg.Content, cfg.Application, cfg.InformerResyncPeriod, cfg.FeatureToggles)
+	resolvers, err := domain.New(k8sConfig, cfg.Application, cfg.InformerResyncPeriod, cfg.FeatureToggles)
 	exitOnError(err, "Error while creating resolvers")
 
 	kubeClient, err := kubernetes.NewForConfig(k8sConfig)

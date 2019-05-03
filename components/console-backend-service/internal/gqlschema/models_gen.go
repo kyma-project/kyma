@@ -309,12 +309,12 @@ type Microfrontend struct {
 }
 
 type NavigationNode struct {
-	Label            string   `json:"label"`
-	NavigationPath   string   `json:"navigationPath"`
-	ViewURL          string   `json:"viewUrl"`
-	ShowInNavigation bool     `json:"showInNavigation"`
-	Order            int      `json:"order"`
-	Settings         Settings `json:"settings"`
+	Label            string `json:"label"`
+	NavigationPath   string `json:"navigationPath"`
+	ViewURL          string `json:"viewUrl"`
+	ShowInNavigation bool   `json:"showInNavigation"`
+	Order            int    `json:"order"`
+	Settings         string `json:"settings"`
 }
 
 type Pod struct {

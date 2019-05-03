@@ -217,11 +217,6 @@ type ComplexityRoot struct {
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int, namespace *string) int
 		Instances           func(childComplexity int, namespace *string) int
-		ApiSpec             func(childComplexity int) int
-		OpenApiSpec         func(childComplexity int) int
-		OdataSpec           func(childComplexity int) int
-		AsyncApiSpec        func(childComplexity int) int
-		Content             func(childComplexity int) int
 		ClusterDocsTopic    func(childComplexity int) int
 	}
 
@@ -504,8 +499,6 @@ type ComplexityRoot struct {
 		ResourceQuotas        func(childComplexity int, namespace string) int
 		ResourceQuotasStatus  func(childComplexity int, namespace string) int
 		Functions             func(childComplexity int, namespace string, first *int, offset *int) int
-		Content               func(childComplexity int, contentType string, id string) int
-		Topics                func(childComplexity int, input []InputTopic, internal *bool) int
 		EventActivations      func(childComplexity int, namespace string) int
 		LimitRanges           func(childComplexity int, namespace string) int
 		BackendModules        func(childComplexity int) int
@@ -570,13 +563,6 @@ type ComplexityRoot struct {
 	SecretEvent struct {
 		Type   func(childComplexity int) int
 		Secret func(childComplexity int) int
-	}
-
-	Section struct {
-		Name      func(childComplexity int) int
-		Anchor    func(childComplexity int) int
-		Titles    func(childComplexity int) int
-		TopicType func(childComplexity int) int
 	}
 
 	Service struct {
@@ -682,11 +668,6 @@ type ComplexityRoot struct {
 		Plans               func(childComplexity int) int
 		Activated           func(childComplexity int) int
 		Instances           func(childComplexity int) int
-		ApiSpec             func(childComplexity int) int
-		OpenApiSpec         func(childComplexity int) int
-		OdataSpec           func(childComplexity int) int
-		AsyncApiSpec        func(childComplexity int) int
-		Content             func(childComplexity int) int
 		ClusterDocsTopic    func(childComplexity int) int
 		DocsTopic           func(childComplexity int) int
 	}
@@ -771,18 +752,6 @@ type ComplexityRoot struct {
 		AddonsConfigurationEvent  func(childComplexity int) int
 	}
 
-	Title struct {
-		Name   func(childComplexity int) int
-		Anchor func(childComplexity int) int
-		Titles func(childComplexity int) int
-	}
-
-	TopicEntry struct {
-		ContentType func(childComplexity int) int
-		Id          func(childComplexity int) int
-		Sections    func(childComplexity int) int
-	}
-
 	UsageKind struct {
 		Name        func(childComplexity int) int
 		Group       func(childComplexity int) int
@@ -814,11 +783,6 @@ type ClusterServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ClusterServiceClass) ([]ClusterServicePlan, error)
 	Activated(ctx context.Context, obj *ClusterServiceClass, namespace *string) (bool, error)
 	Instances(ctx context.Context, obj *ClusterServiceClass, namespace *string) ([]ServiceInstance, error)
-	APISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
-	OpenAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
-	OdataSpec(ctx context.Context, obj *ClusterServiceClass) (*string, error)
-	AsyncAPISpec(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
-	Content(ctx context.Context, obj *ClusterServiceClass) (*JSON, error)
 	ClusterDocsTopic(ctx context.Context, obj *ClusterServiceClass) (*ClusterDocsTopic, error)
 }
 type DeploymentResolver interface {
@@ -898,8 +862,6 @@ type QueryResolver interface {
 	ResourceQuotas(ctx context.Context, namespace string) ([]ResourceQuota, error)
 	ResourceQuotasStatus(ctx context.Context, namespace string) (ResourceQuotasStatus, error)
 	Functions(ctx context.Context, namespace string, first *int, offset *int) ([]Function, error)
-	Content(ctx context.Context, contentType string, id string) (*JSON, error)
-	Topics(ctx context.Context, input []InputTopic, internal *bool) ([]TopicEntry, error)
 	EventActivations(ctx context.Context, namespace string) ([]EventActivation, error)
 	LimitRanges(ctx context.Context, namespace string) ([]LimitRange, error)
 	BackendModules(ctx context.Context) ([]BackendModule, error)
@@ -921,11 +883,6 @@ type ServiceClassResolver interface {
 	Plans(ctx context.Context, obj *ServiceClass) ([]ServicePlan, error)
 	Activated(ctx context.Context, obj *ServiceClass) (bool, error)
 	Instances(ctx context.Context, obj *ServiceClass) ([]ServiceInstance, error)
-	APISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
-	OpenAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
-	OdataSpec(ctx context.Context, obj *ServiceClass) (*string, error)
-	AsyncAPISpec(ctx context.Context, obj *ServiceClass) (*JSON, error)
-	Content(ctx context.Context, obj *ServiceClass) (*JSON, error)
 	ClusterDocsTopic(ctx context.Context, obj *ServiceClass) (*ClusterDocsTopic, error)
 	DocsTopic(ctx context.Context, obj *ServiceClass) (*DocsTopic, error)
 }
@@ -2954,70 +2911,6 @@ func field_Query_functions_args(rawArgs map[string]interface{}) (map[string]inte
 
 }
 
-func field_Query_content_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 string
-	if tmp, ok := rawArgs["contentType"]; ok {
-		var err error
-		arg0, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["contentType"] = arg0
-	var arg1 string
-	if tmp, ok := rawArgs["id"]; ok {
-		var err error
-		arg1, err = graphql.UnmarshalString(tmp)
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["id"] = arg1
-	return args, nil
-
-}
-
-func field_Query_topics_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
-	args := map[string]interface{}{}
-	var arg0 []InputTopic
-	if tmp, ok := rawArgs["input"]; ok {
-		var err error
-		var rawIf1 []interface{}
-		if tmp != nil {
-			if tmp1, ok := tmp.([]interface{}); ok {
-				rawIf1 = tmp1
-			} else {
-				rawIf1 = []interface{}{tmp}
-			}
-		}
-		arg0 = make([]InputTopic, len(rawIf1))
-		for idx1 := range rawIf1 {
-			arg0[idx1], err = UnmarshalInputTopic(rawIf1[idx1])
-		}
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["input"] = arg0
-	var arg1 *bool
-	if tmp, ok := rawArgs["internal"]; ok {
-		var err error
-		var ptr1 bool
-		if tmp != nil {
-			ptr1, err = graphql.UnmarshalBoolean(tmp)
-			arg1 = &ptr1
-		}
-
-		if err != nil {
-			return nil, err
-		}
-	}
-	args["internal"] = arg1
-	return args, nil
-
-}
-
 func field_Query_eventActivations_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -4075,41 +3968,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ClusterServiceClass.Instances(childComplexity, args["namespace"].(*string)), true
-
-	case "ClusterServiceClass.apiSpec":
-		if e.complexity.ClusterServiceClass.ApiSpec == nil {
-			break
-		}
-
-		return e.complexity.ClusterServiceClass.ApiSpec(childComplexity), true
-
-	case "ClusterServiceClass.openApiSpec":
-		if e.complexity.ClusterServiceClass.OpenApiSpec == nil {
-			break
-		}
-
-		return e.complexity.ClusterServiceClass.OpenApiSpec(childComplexity), true
-
-	case "ClusterServiceClass.odataSpec":
-		if e.complexity.ClusterServiceClass.OdataSpec == nil {
-			break
-		}
-
-		return e.complexity.ClusterServiceClass.OdataSpec(childComplexity), true
-
-	case "ClusterServiceClass.asyncApiSpec":
-		if e.complexity.ClusterServiceClass.AsyncApiSpec == nil {
-			break
-		}
-
-		return e.complexity.ClusterServiceClass.AsyncApiSpec(childComplexity), true
-
-	case "ClusterServiceClass.content":
-		if e.complexity.ClusterServiceClass.Content == nil {
-			break
-		}
-
-		return e.complexity.ClusterServiceClass.Content(childComplexity), true
 
 	case "ClusterServiceClass.clusterDocsTopic":
 		if e.complexity.ClusterServiceClass.ClusterDocsTopic == nil {
@@ -5665,30 +5523,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Functions(childComplexity, args["namespace"].(string), args["first"].(*int), args["offset"].(*int)), true
 
-	case "Query.content":
-		if e.complexity.Query.Content == nil {
-			break
-		}
-
-		args, err := field_Query_content_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Content(childComplexity, args["contentType"].(string), args["id"].(string)), true
-
-	case "Query.topics":
-		if e.complexity.Query.Topics == nil {
-			break
-		}
-
-		args, err := field_Query_topics_args(rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.Topics(childComplexity, args["input"].([]InputTopic), args["internal"].(*bool)), true
-
 	case "Query.eventActivations":
 		if e.complexity.Query.EventActivations == nil {
 			break
@@ -6008,34 +5842,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.SecretEvent.Secret(childComplexity), true
-
-	case "Section.name":
-		if e.complexity.Section.Name == nil {
-			break
-		}
-
-		return e.complexity.Section.Name(childComplexity), true
-
-	case "Section.anchor":
-		if e.complexity.Section.Anchor == nil {
-			break
-		}
-
-		return e.complexity.Section.Anchor(childComplexity), true
-
-	case "Section.titles":
-		if e.complexity.Section.Titles == nil {
-			break
-		}
-
-		return e.complexity.Section.Titles(childComplexity), true
-
-	case "Section.topicType":
-		if e.complexity.Section.TopicType == nil {
-			break
-		}
-
-		return e.complexity.Section.TopicType(childComplexity), true
 
 	case "Service.name":
 		if e.complexity.Service.Name == nil {
@@ -6478,41 +6284,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ServiceClass.Instances(childComplexity), true
 
-	case "ServiceClass.apiSpec":
-		if e.complexity.ServiceClass.ApiSpec == nil {
-			break
-		}
-
-		return e.complexity.ServiceClass.ApiSpec(childComplexity), true
-
-	case "ServiceClass.openApiSpec":
-		if e.complexity.ServiceClass.OpenApiSpec == nil {
-			break
-		}
-
-		return e.complexity.ServiceClass.OpenApiSpec(childComplexity), true
-
-	case "ServiceClass.odataSpec":
-		if e.complexity.ServiceClass.OdataSpec == nil {
-			break
-		}
-
-		return e.complexity.ServiceClass.OdataSpec(childComplexity), true
-
-	case "ServiceClass.asyncApiSpec":
-		if e.complexity.ServiceClass.AsyncApiSpec == nil {
-			break
-		}
-
-		return e.complexity.ServiceClass.AsyncApiSpec(childComplexity), true
-
-	case "ServiceClass.content":
-		if e.complexity.ServiceClass.Content == nil {
-			break
-		}
-
-		return e.complexity.ServiceClass.Content(childComplexity), true
-
 	case "ServiceClass.clusterDocsTopic":
 		if e.complexity.ServiceClass.ClusterDocsTopic == nil {
 			break
@@ -6942,48 +6713,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Subscription.AddonsConfigurationEvent(childComplexity), true
-
-	case "Title.name":
-		if e.complexity.Title.Name == nil {
-			break
-		}
-
-		return e.complexity.Title.Name(childComplexity), true
-
-	case "Title.anchor":
-		if e.complexity.Title.Anchor == nil {
-			break
-		}
-
-		return e.complexity.Title.Anchor(childComplexity), true
-
-	case "Title.titles":
-		if e.complexity.Title.Titles == nil {
-			break
-		}
-
-		return e.complexity.Title.Titles(childComplexity), true
-
-	case "TopicEntry.contentType":
-		if e.complexity.TopicEntry.ContentType == nil {
-			break
-		}
-
-		return e.complexity.TopicEntry.ContentType(childComplexity), true
-
-	case "TopicEntry.id":
-		if e.complexity.TopicEntry.Id == nil {
-			break
-		}
-
-		return e.complexity.TopicEntry.Id(childComplexity), true
-
-	case "TopicEntry.sections":
-		if e.complexity.TopicEntry.Sections == nil {
-			break
-		}
-
-		return e.complexity.TopicEntry.Sections(childComplexity), true
 
 	case "UsageKind.name":
 		if e.complexity.UsageKind.Name == nil {
@@ -10566,36 +10295,6 @@ func (ec *executionContext) _ClusterServiceClass(ctx context.Context, sel ast.Se
 				}
 				wg.Done()
 			}(i, field)
-		case "apiSpec":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ClusterServiceClass_apiSpec(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		case "openApiSpec":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ClusterServiceClass_openApiSpec(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		case "odataSpec":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ClusterServiceClass_odataSpec(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		case "asyncApiSpec":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ClusterServiceClass_asyncApiSpec(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		case "content":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ClusterServiceClass_content(ctx, field, obj)
-				wg.Done()
-			}(i, field)
 		case "clusterDocsTopic":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -11109,146 +10808,6 @@ func (ec *executionContext) _ClusterServiceClass_instances(ctx context.Context, 
 	}
 	wg.Wait()
 	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ClusterServiceClass_apiSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ClusterServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ClusterServiceClass().APISpec(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ClusterServiceClass_openApiSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ClusterServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ClusterServiceClass().OpenAPISpec(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ClusterServiceClass_odataSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ClusterServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ClusterServiceClass().OdataSpec(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ClusterServiceClass_asyncApiSpec(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ClusterServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ClusterServiceClass().AsyncAPISpec(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ClusterServiceClass_content(ctx context.Context, field graphql.CollectedField, obj *ClusterServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ClusterServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ClusterServiceClass().Content(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
 }
 
 // nolint: vetshadow
@@ -16719,10 +16278,10 @@ func (ec *executionContext) _NavigationNode_settings(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(Settings)
+	res := resTmp.(string)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return res
+	return graphql.MarshalString(res)
 }
 
 var podImplementors = []string{"Pod"}
@@ -17439,18 +16998,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
-				wg.Done()
-			}(i, field)
-		case "content":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_content(ctx, field)
-				wg.Done()
-			}(i, field)
-		case "topics":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_topics(ctx, field)
 				wg.Done()
 			}(i, field)
 		case "eventActivations":
@@ -19281,103 +18828,6 @@ func (ec *executionContext) _Query_functions(ctx context.Context, field graphql.
 			arr1[idx1] = func() graphql.Marshaler {
 
 				return ec._Function(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Query_content(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_content_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Content(rctx, args["contentType"].(string), args["id"].(string))
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Query_topics(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_topics_args(rawArgs)
-	if err != nil {
-		ec.Error(ctx, err)
-		return graphql.Null
-	}
-	rctx := &graphql.ResolverContext{
-		Object: "Query",
-		Args:   args,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Topics(rctx, args["input"].([]InputTopic), args["internal"].(*bool))
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]TopicEntry)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._TopicEntry(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -21243,192 +20693,6 @@ func (ec *executionContext) _SecretEvent_secret(ctx context.Context, field graph
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
 	return ec._Secret(ctx, field.Selections, &res)
-}
-
-var sectionImplementors = []string{"Section"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Section(ctx context.Context, sel ast.SelectionSet, obj *Section) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, sectionImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Section")
-		case "name":
-			out.Values[i] = ec._Section_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "anchor":
-			out.Values[i] = ec._Section_anchor(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "titles":
-			out.Values[i] = ec._Section_titles(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "topicType":
-			out.Values[i] = ec._Section_topicType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Section_name(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Section",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Section_anchor(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Section",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Anchor, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Section_titles(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Section",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Titles, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]Title)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._Title(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Section_topicType(ctx context.Context, field graphql.CollectedField, obj *Section) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Section",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.TopicType, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
 }
 
 var serviceImplementors = []string{"Service"}
@@ -23424,36 +22688,6 @@ func (ec *executionContext) _ServiceClass(ctx context.Context, sel ast.Selection
 				}
 				wg.Done()
 			}(i, field)
-		case "apiSpec":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ServiceClass_apiSpec(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		case "openApiSpec":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ServiceClass_openApiSpec(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		case "odataSpec":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ServiceClass_odataSpec(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		case "asyncApiSpec":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ServiceClass_asyncApiSpec(ctx, field, obj)
-				wg.Done()
-			}(i, field)
-		case "content":
-			wg.Add(1)
-			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._ServiceClass_content(ctx, field, obj)
-				wg.Done()
-			}(i, field)
 		case "clusterDocsTopic":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -23988,146 +23222,6 @@ func (ec *executionContext) _ServiceClass_instances(ctx context.Context, field g
 	}
 	wg.Wait()
 	return arr1
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceClass_apiSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ServiceClass().APISpec(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceClass_openApiSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ServiceClass().OpenAPISpec(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceClass_odataSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ServiceClass().OdataSpec(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalString(*res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceClass_asyncApiSpec(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ServiceClass().AsyncAPISpec(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _ServiceClass_content(ctx context.Context, field graphql.CollectedField, obj *ServiceClass) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "ServiceClass",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.ServiceClass().Content(rctx, obj)
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.(*JSON)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return *res
 }
 
 // nolint: vetshadow
@@ -26139,308 +25233,6 @@ func (ec *executionContext) _Subscription_addonsConfigurationEvent(ctx context.C
 		}())
 		return &out
 	}
-}
-
-var titleImplementors = []string{"Title"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Title(ctx context.Context, sel ast.SelectionSet, obj *Title) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, titleImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Title")
-		case "name":
-			out.Values[i] = ec._Title_name(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "anchor":
-			out.Values[i] = ec._Title_anchor(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "titles":
-			out.Values[i] = ec._Title_titles(ctx, field, obj)
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Title_name(ctx context.Context, field graphql.CollectedField, obj *Title) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Title",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Name, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Title_anchor(ctx context.Context, field graphql.CollectedField, obj *Title) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Title",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Anchor, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Title_titles(ctx context.Context, field graphql.CollectedField, obj *Title) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Title",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Titles, nil
-	})
-	if resTmp == nil {
-		return graphql.Null
-	}
-	res := resTmp.([]Title)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._Title(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
-}
-
-var topicEntryImplementors = []string{"TopicEntry"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _TopicEntry(ctx context.Context, sel ast.SelectionSet, obj *TopicEntry) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, topicEntryImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("TopicEntry")
-		case "contentType":
-			out.Values[i] = ec._TopicEntry_contentType(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "id":
-			out.Values[i] = ec._TopicEntry_id(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		case "sections":
-			out.Values[i] = ec._TopicEntry_sections(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _TopicEntry_contentType(ctx context.Context, field graphql.CollectedField, obj *TopicEntry) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "TopicEntry",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ContentType, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _TopicEntry_id(ctx context.Context, field graphql.CollectedField, obj *TopicEntry) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "TopicEntry",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ID, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(string)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _TopicEntry_sections(ctx context.Context, field graphql.CollectedField, obj *TopicEntry) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "TopicEntry",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.Sections, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.([]Section)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	arr1 := make(graphql.Array, len(res))
-	var wg sync.WaitGroup
-
-	isLen1 := len(res) == 1
-	if !isLen1 {
-		wg.Add(len(res))
-	}
-
-	for idx1 := range res {
-		idx1 := idx1
-		rctx := &graphql.ResolverContext{
-			Index:  &idx1,
-			Result: &res[idx1],
-		}
-		ctx := graphql.WithResolverContext(ctx, rctx)
-		f := func(idx1 int) {
-			if !isLen1 {
-				defer wg.Done()
-			}
-			arr1[idx1] = func() graphql.Marshaler {
-
-				return ec._Section(ctx, field.Selections, &res[idx1])
-			}()
-		}
-		if isLen1 {
-			f(idx1)
-		} else {
-			go f(idx1)
-		}
-
-	}
-	wg.Wait()
-	return arr1
 }
 
 var usageKindImplementors = []string{"UsageKind"}
@@ -28654,27 +27446,6 @@ enum DocsTopicPhaseType {
     FAILED
 }
 
-# Content
-
-type Title {
-    name: String!
-    anchor: String!
-    titles: [Title!]
-}
-
-type Section {
-    name: String!
-    anchor: String!
-    titles: [Title!]!
-    topicType: String!
-}
-
-type TopicEntry {
-    contentType: String!
-    id: String!
-    sections: [Section!]!
-}
-
 # Service Catalog
 
 type AddonsConfiguration {
@@ -28779,11 +27550,6 @@ type ServiceClass {
     plans: [ServicePlan!]!
     activated: Boolean!
     instances: [ServiceInstance!]!
-    apiSpec: JSON @deprecated(reason: "No longer supported")
-    openApiSpec: JSON @deprecated(reason: "No longer supported")
-    odataSpec: String @deprecated(reason: "No longer supported")
-    asyncApiSpec: JSON @deprecated(reason: "No longer supported")
-    content: JSON @deprecated(reason: "No longer supported")
 
     # Depends on cms domain
     clusterDocsTopic: ClusterDocsTopic
@@ -28806,11 +27572,6 @@ type ClusterServiceClass {
     plans: [ClusterServicePlan!]!
     activated(namespace: String): Boolean!
     instances(namespace: String): [ServiceInstance!]!
-    apiSpec: JSON @deprecated(reason: "No longer supported")
-    openApiSpec: JSON @deprecated(reason: "No longer supported")
-    odataSpec: String @deprecated(reason: "No longer supported")
-    asyncApiSpec: JSON @deprecated(reason: "No longer supported")
-    content: JSON @deprecated(reason: "No longer supported")
 
     # Depends on cms domain
     clusterDocsTopic: ClusterDocsTopic
@@ -29416,8 +28177,6 @@ type Query {
 
     functions(namespace: String!, first: Int, offset: Int): [Function!]! @HasAccess(attributes: {resource: "functions", verb: "list", apiGroup: "kubeless.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
-    content(contentType: String!, id: String!): JSON @deprecated(reason: "No longer supported")
-    topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!] @deprecated(reason: "No longer supported")
     eventActivations(namespace: String!): [EventActivation!]! @HasAccess(attributes: {resource: "eventactivations", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
     limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})

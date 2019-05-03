@@ -11,7 +11,6 @@ import (
 	"github.com/golang/glog"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	cmsPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms/pretty"
-	contentPretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/pretty"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -45,19 +44,17 @@ type clusterServiceClassResolver struct {
 	classLister       clusterServiceClassListGetter
 	planLister        clusterServicePlanLister
 	instanceLister    instanceListerByClusterServiceClass
-	contentRetriever  shared.ContentRetriever
 	cmsRetriever      shared.CmsRetriever
 	classConverter    gqlClusterServiceClassConverter
 	instanceConverter gqlServiceInstanceConverter
 	planConverter     gqlClusterServicePlanConverter
 }
 
-func newClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, contentRetriever shared.ContentRetriever, cmsRetriever shared.CmsRetriever) *clusterServiceClassResolver {
+func newClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, cmsRetriever shared.CmsRetriever) *clusterServiceClassResolver {
 	return &clusterServiceClassResolver{
 		classLister:       classLister,
 		planLister:        planLister,
 		instanceLister:    instanceLister,
-		contentRetriever:  contentRetriever,
 		cmsRetriever:      cmsRetriever,
 		classConverter:    &clusterServiceClassConverter{},
 		planConverter:     &clusterServicePlanConverter{},
@@ -153,149 +150,6 @@ func (r *clusterServiceClassResolver) ClusterServiceClassActivatedField(ctx cont
 	}
 
 	return len(instances) > 0, nil
-}
-
-func (r *clusterServiceClassResolver) ClusterServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	if obj == nil {
-		glog.Error(errors.New("%s cannot be empty in order to resolve apiSpec field"), pretty.ClusterServiceClass)
-		return nil, gqlerror.NewInternal()
-	}
-
-	apiSpec, err := r.contentRetriever.ApiSpec().Find("service-class", obj.Name)
-	if err != nil {
-		if module.IsDisabledModuleError(err) {
-			return nil, err
-		}
-
-		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.ApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.ApiSpec)
-	}
-
-	if apiSpec == nil {
-		return nil, nil
-	}
-
-	var result gqlschema.JSON
-	err = result.UnmarshalGQL(apiSpec.Raw)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.ApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.ApiSpec)
-	}
-
-	return &result, nil
-}
-
-func (r *clusterServiceClassResolver) ClusterServiceClassOpenApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	if obj == nil {
-		glog.Error(errors.New("%s cannot be empty in order to resolve openApiSpec field"), pretty.ClusterServiceClass)
-		return nil, gqlerror.NewInternal()
-	}
-
-	openApiSpec, err := r.contentRetriever.OpenApiSpec().Find("service-class", obj.Name)
-	if err != nil {
-		if module.IsDisabledModuleError(err) {
-			return nil, err
-		}
-
-		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.OpenApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.OpenApiSpec)
-	}
-
-	if openApiSpec == nil {
-		return nil, nil
-	}
-
-	var result gqlschema.JSON
-	err = result.UnmarshalGQL(openApiSpec.Raw)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.OpenApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.OpenApiSpec)
-	}
-
-	return &result, nil
-}
-
-func (r *clusterServiceClassResolver) ClusterServiceClassODataSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*string, error) {
-	if obj == nil {
-		glog.Error(errors.New("%s cannot be empty in order to resolve odataSpec field"), pretty.ClusterServiceClass)
-		return nil, gqlerror.NewInternal()
-	}
-
-	odataSpec, err := r.contentRetriever.ODataSpec().Find("service-class", obj.Name)
-	if err != nil {
-		if module.IsDisabledModuleError(err) {
-			return nil, err
-		}
-
-		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.ODataSpec, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.ODataSpec)
-	}
-
-	if odataSpec == nil || odataSpec.Raw == "" {
-		return nil, nil
-	}
-
-	return &odataSpec.Raw, nil
-}
-
-func (r *clusterServiceClassResolver) ClusterServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	if obj == nil {
-		glog.Error(errors.New("%s cannot be empty in order to resolve asyncApiSpec field"), pretty.ClusterServiceClass)
-		return nil, gqlerror.NewInternal()
-	}
-
-	asyncApiSpec, err := r.contentRetriever.AsyncApiSpec().Find("service-class", obj.Name)
-	if err != nil {
-		if module.IsDisabledModuleError(err) {
-			return nil, err
-		}
-
-		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.AsyncApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.AsyncApiSpec)
-	}
-
-	if asyncApiSpec == nil {
-		return nil, nil
-	}
-
-	var result gqlschema.JSON
-	err = result.UnmarshalGQL(asyncApiSpec.Raw)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.AsyncApiSpec, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.AsyncApiSpec)
-	}
-
-	return &result, nil
-}
-
-func (r *clusterServiceClassResolver) ClusterServiceClassContentField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	if obj == nil {
-		glog.Error(errors.New("%s cannot be empty in order to resolve `content` field"), pretty.ClusterServiceClass)
-		return nil, gqlerror.NewInternal()
-	}
-
-	content, err := r.contentRetriever.Content().Find("service-class", obj.Name)
-	if err != nil {
-		if module.IsDisabledModuleError(err) {
-			return nil, err
-		}
-
-		glog.Error(errors.Wrapf(err, "while gathering %s for %s %s", contentPretty.Content, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.Content)
-	}
-
-	if content == nil {
-		return nil, nil
-	}
-
-	var result gqlschema.JSON
-	err = result.UnmarshalGQL(content.Raw)
-	if err != nil {
-		glog.Error(errors.Wrapf(err, "while converting %s for %s %s", contentPretty.Content, pretty.ClusterServiceClass, obj.ExternalName))
-		return nil, gqlerror.New(err, contentPretty.Content)
-	}
-
-	return &result, nil
 }
 
 func (r *clusterServiceClassResolver) ClusterServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterDocsTopic, error) {

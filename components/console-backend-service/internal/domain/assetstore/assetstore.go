@@ -26,6 +26,7 @@ type assetStoreRetriever struct {
 	AssetGetter              shared.AssetGetter
 	GqlClusterAssetConverter shared.GqlClusterAssetConverter
 	GqlAssetConverter        shared.GqlAssetConverter
+	SpecificationSvc         shared.SpecificationGetter
 }
 
 func (r *assetStoreRetriever) ClusterAsset() shared.ClusterAssetGetter {
@@ -42,6 +43,10 @@ func (r *assetStoreRetriever) ClusterAssetConverter() shared.GqlClusterAssetConv
 
 func (r *assetStoreRetriever) AssetConverter() shared.GqlAssetConverter {
 	return r.GqlAssetConverter
+}
+
+func (r *assetStoreRetriever) Specification() shared.SpecificationGetter {
+	return r.SpecificationSvc
 }
 
 type PluggableContainer struct {
@@ -101,6 +106,11 @@ func (r *PluggableContainer) Enable() error {
 		return errors.Wrapf(err, "while creating asset service")
 	}
 
+	specificationService, err := newSpecificationService()
+	if err != nil {
+		return errors.Wrap(err, "while creating Specification Service")
+	}
+
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
 			clusterAssetResolver: newClusterAssetResolver(clusterAssetService),
@@ -110,6 +120,7 @@ func (r *PluggableContainer) Enable() error {
 		r.AssetStoreRetriever.AssetGetter = assetService
 		r.AssetStoreRetriever.GqlClusterAssetConverter = &clusterAssetConverter{}
 		r.AssetStoreRetriever.GqlAssetConverter = &assetConverter{}
+		r.AssetStoreRetriever.SpecificationSvc = specificationService
 	})
 
 	return nil
@@ -122,6 +133,7 @@ func (r *PluggableContainer) Disable() error {
 		r.AssetStoreRetriever.AssetGetter = disabled.NewAssetSvc(disabledErr)
 		r.AssetStoreRetriever.GqlClusterAssetConverter = disabled.NewGqlClusterAssetConverter(disabledErr)
 		r.AssetStoreRetriever.GqlAssetConverter = disabled.NewGqlAssetConverter(disabledErr)
+		r.AssetStoreRetriever.SpecificationSvc = disabled.NewSpecificationSvc(disabledErr)
 		r.informerFactory = nil
 	})
 

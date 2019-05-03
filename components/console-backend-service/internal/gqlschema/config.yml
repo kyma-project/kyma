@@ -68,16 +68,6 @@ models:
         resolver: true
       activated:
         resolver: true
-      apiSpec:
-        resolver: true
-      openApiSpec:
-        resolver: true
-      odataSpec:
-        resolver: true
-      asyncApiSpec:
-        resolver: true
-      content:
-        resolver: true
       clusterDocsTopic:
         resolver: true
       docsTopic:
@@ -90,16 +80,6 @@ models:
       instances:
         resolver: true
       activated:
-        resolver: true
-      apiSpec:
-        resolver: true
-      openApiSpec:
-        resolver: true
-      odataSpec:
-        resolver: true
-      asyncApiSpec:
-        resolver: true
-      content:
         resolver: true
       clusterDocsTopic:
         resolver: true
@@ -135,11 +115,3 @@ models:
     fields:
       applications:
         resolver: true
-  Section:
-    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Section"
-  TopicEntry:
-    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.TopicEntry"
-  Title:
-    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Title"
-  Settings:
-    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Settings"
