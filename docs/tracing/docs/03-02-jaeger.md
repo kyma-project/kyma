@@ -20,7 +20,7 @@ For details, see [Istio's Distributed Tracing](https://istio.io/docs/tasks/telem
 
 ## Install Jaeger locally
 
-Read [this](/root/kyma#installation-custom-component-installation-add-a-component) document to learn how to install Jaeger locally.
+Read [this](/root/kyma#configuration-custom-component-installation-add-a-component) document to learn how to install Jaeger locally.
 
 ## Access Jaeger
 
