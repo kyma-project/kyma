@@ -2,10 +2,11 @@ package subscription
 
 import (
 	"context"
-
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/internal/knative/metrics"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	"github.com/prometheus/client_golang/prometheus"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/client-go/tools/record"
@@ -20,9 +21,9 @@ const (
 
 	// Finalizer for deleting Knative Subscriptions
 	finalizerName = "subscription.finalizers.kyma-project.io"
-	
-	subscriptionSourceID = "kyma-source-id"
-	subscriptionEventType = "kyma-event-type"
+
+	subscriptionSourceID         = "kyma-source-id"
+	subscriptionEventType        = "kyma-event-type"
 	subscriptionEventTypeVersion = "kyma-event-type-version"
 )
 
@@ -48,6 +49,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	ctx := context.TODO()
 	// Fetch the Subscription instance
 	subscription := &eventingv1alpha1.Subscription{}
+	KymaSubscriptionsGauge := metrics.NewKymaSubscriptionsGauge()
 	err := r.client.Get(ctx, request.NamespacedName, subscription)
 
 	// The Subscription may have been deleted since it was added to the workqueue. If
@@ -86,16 +88,33 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 				log.Error(err, "SetReadySubscription() failed for the subscription:", "subscription", subscription)
 				reconcileErr = err
 			} else {
+				//TODO READY Subscription
+				log.Info("Ready Subscription!")
+				log.Info("Setting the metric to ready....!")
+				KymaSubscriptionsGauge.DeleteKymaSubscriptionsGauge([]string{subscription.Namespace, subscription.Name,
+					"false"})
+				KymaSubscriptionsGauge.Metric.With(prometheus.Labels{
+					metrics.Namespace: subscription.Namespace,
+					metrics.Name:      subscription.Name,
+					metrics.Ready:     "true"}).Set(1)
 				log.Info("Subscription reconciled")
 				r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
 					"Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
 			}
 		} else {
-			// reconcile finished with no errors, but subscripition is not activated
+			// reconcile finished with no errors, but subscription is not activated
 			if err := util.SetNotReadySubscription(ctx, r.client, subscription, "", r.time); err != nil {
 				log.Error(err, "SetNotReadySubscription() failed for the subscription:", "subscription", subscription)
 				reconcileErr = err
 			} else {
+				//TODO NOT READY Subscription
+				log.Info("Not Ready Subscription!")
+				log.Info("Setting the metric to not ready....!")
+				KymaSubscriptionsGauge.DeleteKymaSubscriptionsGauge([]string{subscription.Namespace, subscription.Name,
+					"true"})
+				KymaSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Namespace: subscription.Namespace,
+					metrics.Name:  subscription.Name,
+					metrics.Ready: "false"}).Set(1)
 				log.Info("Subscription reconciled")
 				r.recorder.Eventf(subscription, corev1.EventTypeNormal, subReconciled,
 					"Subscription reconciled, name: %q; namespace: %q", subscription.Name, subscription.Namespace)
