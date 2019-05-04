@@ -127,8 +127,9 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 }
 
 func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alpha1.Subscription,
-	KymaSubscriptionsGauge *metrics.KymaSubscriptionsGauge) (bool, error) {
+	KymaSubscriptionsGauge *metrics.SubscriptionsGauge) (bool, error) {
 
+	KnativeSubscriptionsGauge := metrics.KnativeSubscriptionsGaugeObj
 	knativeSubsName := util.GetKnSubscriptionName(&subscription.Name, &subscription.Namespace)
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
@@ -201,6 +202,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			if err != nil {
 				return false, err
 			}
+			//TODO
+			log.Info("Delete knative sub A and set a new one")
+			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
+			KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name:  subscription.Name,
+				metrics.Ready: "false"}).Set(1)
 			log.Info("Knative Subscription is created", "Subscription", knativeSubsName)
 		} else {
 			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
@@ -214,6 +220,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 				if err != nil {
 					return false, err
 				}
+				//TODO
+				log.Info("Delete knative sub B and set a new one")
+				KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
+				KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name:  subscription.Name,
+					metrics.Ready: "false"}).Set(1)
 				log.Info("Knative Subscription is re-created", "Subscription", knativeSubsName)
 			}
 		}
@@ -229,14 +240,15 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		return true, nil
 	} else {
 		// In case Kyma Subscription does not have events-activated condition and there is no EventActivation, delete Knative Subscription & Channel if exist.
-		knativeSubs, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
+		knativeSub, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
 		if err != nil && !errors.IsNotFound(err) {
 			return false, err
-		} else if err == nil && knativeSubs != nil {
+		} else if err == nil && knativeSub != nil {
 			err = r.knativeLib.DeleteSubscription(knativeSubsName, knativeSubsNamespace)
 			if err != nil {
 				return false, err
 			}
+			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
 			log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
 		}
 

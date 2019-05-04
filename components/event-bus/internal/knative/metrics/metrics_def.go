@@ -8,23 +8,22 @@ import (
 const (
 	Namespace        = "namespace"
 	Name             = "name"
-	Status           = "status"
-	SourceID         = "source_id"
-	EventType        = "event_type"
-	EventTypeVersion = "event_type_version"
 	Ready            = "ready"
-	EventsActivated  = "events_activated"
 )
 
-type KymaSubscriptionsGauge struct {
+type SubscriptionsGauge struct {
 	Labels []string
 	Metric *prometheus.GaugeVec
 }
 
 var (
-	KymaSubscriptionsGaugeObj *KymaSubscriptionsGauge
+	KymaSubscriptionsGaugeObj *SubscriptionsGauge
 	kymaSubscriptionsGaugeVec *prometheus.GaugeVec
 	kymaSubscriptionsGaugeLabels = []string{Namespace, Name, Ready}
+
+	KnativeSubscriptionsGaugeObj *SubscriptionsGauge
+	knativeSubscriptionsGaugeVec *prometheus.GaugeVec
+	knativeSubscriptionsGaugeLabels = []string{Name, Ready}
 )
 
 func init() {
@@ -32,15 +31,29 @@ func init() {
 		Name: "total_kyma_subscriptions",
 		Help: "The total number of Kyma subscriptions",
 	}, kymaSubscriptionsGaugeLabels)
-	KymaSubscriptionsGaugeObj = &KymaSubscriptionsGauge{
+	KymaSubscriptionsGaugeObj = &SubscriptionsGauge{
 		Labels: kymaSubscriptionsGaugeLabels,
 		Metric: kymaSubscriptionsGaugeVec,
 	}
+
+	knativeSubscriptionsGaugeVec = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "total_knative_subscriptions",
+		Help: "The total number of Knative subscriptions",
+	}, knativeSubscriptionsGaugeLabels)
+	KnativeSubscriptionsGaugeObj = &SubscriptionsGauge{
+		Labels: knativeSubscriptionsGaugeLabels,
+		Metric: knativeSubscriptionsGaugeVec,
+	}
 }
 
-func (ksg *KymaSubscriptionsGauge) DeleteKymaSubscriptionsGauge(namespace string, name string) {
+func (ksg *SubscriptionsGauge) DeleteKymaSubscriptionsGauge(namespace string, name string) {
 	values := []string{namespace, name, "true"}
 	ksg.Metric.DeleteLabelValues(values...)
 	values = []string{namespace, name, "false"}
 	ksg.Metric.DeleteLabelValues(values...)
+}
+
+func (ksg *SubscriptionsGauge) DeleteKnativeSubscriptionsGauge(name string) {
+	ksg.Metric.DeleteLabelValues(name, "true")
+	ksg.Metric.DeleteLabelValues(name, "false")
 }
