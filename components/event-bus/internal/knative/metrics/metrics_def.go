@@ -21,18 +21,26 @@ type KymaSubscriptionsGauge struct {
 	Metric *prometheus.GaugeVec
 }
 
-func NewKymaSubscriptionsGauge() *KymaSubscriptionsGauge {
-	labels := []string{Namespace, Name, Ready}
-	kymaSubscriptionsGauge := KymaSubscriptionsGauge{
-		Labels: labels,
-		Metric: promauto.NewGaugeVec(prometheus.GaugeOpts{
-			Name: "total_kyma_subscriptions",
-			Help: "The total number of Kyma subscriptions",
-		}, labels),
+var (
+	KymaSubscriptionsGaugeObj *KymaSubscriptionsGauge
+	kymaSubscriptionsGaugeVec *prometheus.GaugeVec
+	kymaSubscriptionsGaugeLabels = []string{Namespace, Name, Ready}
+)
+
+func init() {
+	kymaSubscriptionsGaugeVec = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "total_kyma_subscriptions",
+		Help: "The total number of Kyma subscriptions",
+	}, kymaSubscriptionsGaugeLabels)
+	KymaSubscriptionsGaugeObj = &KymaSubscriptionsGauge{
+		Labels: kymaSubscriptionsGaugeLabels,
+		Metric: kymaSubscriptionsGaugeVec,
 	}
-	return &kymaSubscriptionsGauge
 }
 
-func (ksg *KymaSubscriptionsGauge) DeleteKymaSubscriptionsGauge(values []string) {
+func (ksg *KymaSubscriptionsGauge) DeleteKymaSubscriptionsGauge(namespace string, name string) {
+	values := []string{namespace, name, "true"}
+	ksg.Metric.DeleteLabelValues(values...)
+	values = []string{namespace, name, "false"}
 	ksg.Metric.DeleteLabelValues(values...)
 }

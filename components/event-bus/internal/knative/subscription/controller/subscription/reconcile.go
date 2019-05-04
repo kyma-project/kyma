@@ -49,10 +49,11 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	ctx := context.TODO()
 	// Fetch the Subscription instance
 	subscription := &eventingv1alpha1.Subscription{}
-	KymaSubscriptionsGauge := metrics.NewKymaSubscriptionsGauge()
+	KymaSubscriptionsGauge := metrics.KymaSubscriptionsGaugeObj
+
 	err := r.client.Get(ctx, request.NamespacedName, subscription)
 
-	// The Subscription may have been deleted since it was added to the workqueue. If
+	// The Subscription may have been deleted since it was added to the work queue. If
 	// so, there is nothing to be done.
 	if errors.IsNotFound(err) {
 		log.Info("Could not find Subscription: ", "err", err)
@@ -69,7 +70,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 
 	subscription = subscription.DeepCopy()
 
-	requeue, reconcileErr := r.reconcile(ctx, subscription)
+	requeue, reconcileErr := r.reconcile(ctx, subscription, KymaSubscriptionsGauge)
 	if reconcileErr != nil {
 		log.Error(reconcileErr, "Reconciling Subscription")
 		if err := util.SetNotReadySubscription(ctx, r.client, subscription, reconcileErr.Error(), r.time); err != nil {
@@ -91,8 +92,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 				//TODO READY Subscription
 				log.Info("Ready Subscription!")
 				log.Info("Setting the metric to ready....!")
-				KymaSubscriptionsGauge.DeleteKymaSubscriptionsGauge([]string{subscription.Namespace, subscription.Name,
-					"false"})
+				KymaSubscriptionsGauge.DeleteKymaSubscriptionsGauge(subscription.Namespace, subscription.Name)
 				KymaSubscriptionsGauge.Metric.With(prometheus.Labels{
 					metrics.Namespace: subscription.Namespace,
 					metrics.Name:      subscription.Name,
@@ -110,8 +110,7 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 				//TODO NOT READY Subscription
 				log.Info("Not Ready Subscription!")
 				log.Info("Setting the metric to not ready....!")
-				KymaSubscriptionsGauge.DeleteKymaSubscriptionsGauge([]string{subscription.Namespace, subscription.Name,
-					"true"})
+				KymaSubscriptionsGauge.DeleteKymaSubscriptionsGauge(subscription.Namespace, subscription.Name)
 				KymaSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Namespace: subscription.Namespace,
 					metrics.Name:  subscription.Name,
 					metrics.Ready: "false"}).Set(1)
@@ -127,7 +126,8 @@ func (r *reconciler) Reconcile(request reconcile.Request) (reconcile.Result, err
 	}, reconcileErr
 }
 
-func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alpha1.Subscription) (bool, error) {
+func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alpha1.Subscription,
+	KymaSubscriptionsGauge *metrics.KymaSubscriptionsGauge) (bool, error) {
 
 	knativeSubsName := util.GetKnSubscriptionName(&subscription.Name, &subscription.Namespace)
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
@@ -149,6 +149,8 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		}
 	} else {
 		// The object is being deleted
+		//TODO Deleted Subscription
+		KymaSubscriptionsGauge.DeleteKymaSubscriptionsGauge(subscription.Namespace, subscription.Name)
 		if util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			// our finalizer is present, so lets handle our external dependency
 			if err := r.deleteExternalDependency(ctx, knativeSubsName, knativeChannelName, knativeSubsNamespace); err != nil {
