@@ -206,7 +206,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			log.Info("Delete knative sub A and set a new one")
 			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
 			KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name:  subscription.Name,
-				metrics.Ready: "false"}).Set(1)
+				metrics.Ready: "true"}).Set(1)
 			log.Info("Knative Subscription is created", "Subscription", knativeSubsName)
 		} else {
 			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
