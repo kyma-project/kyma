@@ -19,7 +19,8 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/catalog-ui:{{ .Chart.AppVersion }}"
+          image: "{{ .Values.global.containerRegistry.path }}/pr/catalog-ui:PR-828"
+#          image: "{{ .Values.global.containerRegistry.path }}/catalog-ui:{{ .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
