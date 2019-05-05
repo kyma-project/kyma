@@ -22,7 +22,7 @@ Kyma security enforces RBAC (Role Based Access Control) in the cluster. [Dex](ht
 
 ## Helm Broker
 
-The Helm Broker is a Service Broker which runs in the Kyma cluster and deploys Kubernetes native resources using [Helm](https://github.com/kubernetes/helm) and Kyma bundles. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. Use bundles to install the [GCP Broker](/components/service-catalog#service-brokers-gcp-broker) and the [Azure Service Broker](/components/service-catalog#service-brokers-azure-service-broker) in Kyma.
+The Helm Broker is a Service Broker which runs in the Kyma cluster and deploys Kubernetes native resources using [Helm](https://github.com/kubernetes/helm) and Kyma bundles. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. Use bundles to install the [GCP Broker](/components/service-catalog#service-brokers-gcp-broker), [Azure Service Broker](/components/service-catalog#service-brokers-azure-service-broker) and the [AWS Service Broker](/components/service-catalog#service-brokers-aws-service-broker) in Kyma.
 
 ## Application Connector
 
