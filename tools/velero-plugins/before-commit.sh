@@ -27,7 +27,7 @@ fi
 ##
 # GO BUILD
 ##
-binary="ark-plugins"
+binary="velero-plugins"
 buildEnv=""
 if [ "$1" == "$CI_FLAG" ]; then
 	# build binary statically
