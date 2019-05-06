@@ -250,9 +250,10 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			if err != nil {
 				return false, err
 			}
-			log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
 			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
-			log.Info("Knative Subscription gauge is deleted")
+			log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
+			KnativeChannelGauge.DeleteKnativeChannelGauge(subscription.Name)
+			log.Info("Knative Channel Gauge is deleted", "subscription", subscription.Name)
 		}
 
 		// Check if Channel has any other Subscription, if not, delete it.
