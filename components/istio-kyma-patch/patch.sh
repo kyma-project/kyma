@@ -171,11 +171,22 @@ function check_ingress_ports() {
   done
   local out=$(kubectl exec -t ${pod} -n istio-system -- netstat -lptnu)
   if echo "${out}" | grep "443" ; then
-    echo "Port 443 is open"
+    echo "OPEN"
   else
-    echo "Port 443 closed"
-    exit 1
+    echo "CLOSED"
   fi
+}
+
+function restart_ingress_pod() {
+  echo "---> Checking istio-ingressgateway ports"
+  while true; do
+    status=$(check_ingress_ports)
+    if [[ "$status" == "OPEN" ]]; then
+      break
+    else
+      sleep 5s
+    fi
+  done
 }
 
 require_istio_system
@@ -188,4 +199,4 @@ restart_sidecar_injector
 run_all_patches
 remove_not_used
 label_namespaces
-check_ingress_ports
+restart_ingress_pod
