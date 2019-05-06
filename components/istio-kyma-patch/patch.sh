@@ -202,4 +202,4 @@ restart_sidecar_injector
 run_all_patches
 remove_not_used
 label_namespaces
-restart_ingress_pod
+# restart_ingress_pod
