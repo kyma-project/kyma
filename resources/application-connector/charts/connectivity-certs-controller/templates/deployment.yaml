@@ -32,8 +32,8 @@ spec:
           - "--namespace={{ .Values.global.namespace }}"
           - "--clusterCertificatesSecret={{ .Values.deployment.args.clusterCertificatesSecret }}"
           - "--caCertificatesSecret={{ .Values.deployment.args.caCertificatesSecret }}"
-          - "--syncPeriod={{ .Values.deployment.args.syncPeriod }}"
-          - "--minimalSyncTime={{ .Values.deployment.args.minimalSyncTime }}"
+          - "--controllerSyncPeriod={{ .Values.deployment.args.controllerSyncPeriod }}"
+          - "--minimalConnectionSyncPeriod={{ .Values.deployment.args.minimalConnectionSyncPeriod }}"
         resources:
           limits:
             cpu: 100m
