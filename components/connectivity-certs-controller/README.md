@@ -25,17 +25,17 @@ After a successful exchange of certificates, the controller creates new Secrets 
 
 ## Connection status
 
-When certificates are fetched successfully the `CentralConnection` CR is created.
-It contains the `ManagementInfoURL`, status of a connection with the central Connector Service and the certificate validity period.
+When certificates are fetched successfully, the CentralConnection CR is created.
+It contains **ManagementInfoURL**, the status of a connection with the central Connector Service, and the certificate validity period.
 
 
-The `CentralConnection` CR is created with the same name as a name of `CertificateRequest` for which connection was established.
-To get `CentralConnection` run:
+The CentralConnection CR is created with the same name as the name of `CertificateRequest` for which the connection was established.
+To get the CentralConnection CR, run:
 ```
 kubectl get centralconnections.applicationconnector.kyma-project.io {CENTRAL_CONNECTION_NAME} -oyaml
 ```
 
-The example resource looks like that:
+The example resource looks as follows:
 ```
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: CentralConnection
@@ -53,14 +53,14 @@ status:
     lastSync: "2019-04-10T09:01:06Z"
 ```
 
-The Connectivity Certs Controller checks a status of the connection by calling `ManagementInfoURL` stored in `CentralConnection` CR.
+The Connectivity Certs Controller checks the connection status by calling **ManagementInfoURL** stored in the CentralConnection CR.
 
 
 ## Certificate renewal
 
-Connectivity Certs Controller renews client certificate when it is getting close to its expiration time. Renewed certificate will replace the previous one in the Secret together with new private key.
+The Connectivity Certs Controller renews a client certificate when it gets close to the expiration time. A renewed certificate will replace the previous one in the Secret together with a new private key.
 
-To renew the certificate immediately `spec.renewNow` field on `CentralConnection` should be set to `true`. 
+To renew the certificate, set the **spec.renewNow** field in the CentralConnection CR to `true`. 
 
 
 ## Troubleshooting 
@@ -72,9 +72,9 @@ To get the error message, run:
 kubectl get certificaterequests.applicationconnector.kyma-project.io {CERT_REQUEST_NAME} -o jsonpath={.status.error}
 ```
 
-Similarly if the synchronization with central Connector Service or certificate renewal fails, the error status will be set on `CentralConnection` CR.
+Similarly, if the synchronization with the central Connector Service or the certificate renewal fails, the error status will be displayed in the CentralConnection CR.
 
-To check it, run:
+To check the error status, run:
 ```
 kubectl get centralconnections.applicationconnector.kyma-project.io {CENTRAL_CONNECTION_NAME} -o jsonpath={.status.error.message}
 ```
