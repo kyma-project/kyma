@@ -29397,16 +29397,16 @@ type ConfigMapEvent {
 # MF
 
 type Microfrontend {
-	name: String!
-	version: String!
+    name: String!
+    version: String!
     category: String!
     viewBaseUrl: String!
     navigationNodes: [NavigationNode!]!
 }
 
 type ClusterMicrofrontend {
-	name: String!
-	version: String!
+    name: String!
+    version: String!
     category: String!
     viewBaseUrl: String!
     placement: String!
@@ -29415,9 +29415,9 @@ type ClusterMicrofrontend {
 
 type NavigationNode {
     label: String!
-	navigationPath: String!
-	viewUrl: String!
-	showInNavigation: Boolean!
+    navigationPath: String!
+    viewUrl: String!
+    showInNavigation: Boolean!
     order: Int!
     settings: Settings!
 }
