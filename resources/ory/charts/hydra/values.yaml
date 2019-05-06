@@ -1,14 +1,6 @@
 loginConsent:
-  port: 3000
-  image:
-    repository: oryd/hydra-login-consent-node
-    tag: v1.0.0-rc.6
-    pullPolicy: IfNotPresent
-  service:
-    type: ClusterIP
-    port: 3000
   host:
-    name: oauth2-login-consent.kyma.local
+    name: oauth2-login-consent.kyma.local #TODO: change this value if implicit flow is integrated
 
 hydraServer:
   port: 4444
@@ -16,17 +8,13 @@ hydraServer:
   image:
     repository: oryd/hydra
     tag: v1.0.0-rc.8
-    pullPolicy: IfNotPresent
   config:
     oauth2:
       shareErrorDebug: "1"
     databaseUrl: memory
-    systemSecret: "youReallyNeedToChangeThis"
     oidc:
       subjectTypesSupported: "public,pairwise"
-      subjectTypePairwiseSalt: "youReallyNeedToChangeThis"
   service:
-    type: ClusterIP
     port: 80
     adminPort: 4445
   host:

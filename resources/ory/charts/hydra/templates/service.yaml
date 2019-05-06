@@ -6,7 +6,6 @@ metadata:
 spec:
   selector:
     app: {{ template "fullname" . }}-oauth2
-  type: {{ .Values.hydraServer.service.type }}
   ports:
     - name: http-{{ .Chart.Name }}-oauth2
       protocol: TCP

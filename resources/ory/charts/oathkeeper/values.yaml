@@ -1,7 +1,6 @@
 image:
   repository: oryd/oathkeeper
   tag: v0.14.2_oryOS.10
-  pullPolicy: IfNotPresent
 
 tokenIntrospection:
   serverUrl: http://ory-hydra-oauth2:4445/oauth2/introspect
@@ -9,7 +8,6 @@ tokenIntrospection:
 proxy:
   port: 4455
   service:
-    type: ClusterIP
     port: 80
 
 apiServer:
@@ -17,5 +15,4 @@ apiServer:
   config:
     databaseUrl: memory
   service:
-    type: ClusterIP
     port: 80

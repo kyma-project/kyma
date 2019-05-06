@@ -6,7 +6,6 @@ metadata:
 spec:
   selector:
     app: {{ template "fullname" . }}-api-server
-  type: {{ .Values.apiServer.service.type }}
   ports:
     - name: {{ template "fullname" . }}-api-server
       protocol: TCP

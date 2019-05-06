@@ -3,8 +3,6 @@ kind: Deployment
 metadata:
   name: {{ template "fullname" . }}-proxy
   namespace: {{ .Release.Namespace }}
-  labels:
-    kyma-project.io/installation: ""
 spec:
   template:
     metadata:
@@ -15,7 +13,6 @@ spec:
       containers:
         - name: {{ .Chart.Name }}-proxy
           image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
             - "oathkeeper"
           args:

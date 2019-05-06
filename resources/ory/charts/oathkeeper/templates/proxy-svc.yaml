@@ -6,7 +6,6 @@ metadata:
 spec:
   selector:
     app: {{ template "fullname" . }}-proxy
-  type: {{ .Values.proxy.service.type }}
   ports:
     - name: {{ template "fullname" . }}-proxy
       protocol: TCP
