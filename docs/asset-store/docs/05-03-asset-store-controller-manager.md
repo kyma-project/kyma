@@ -12,7 +12,7 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **resources.limits.cpu** |      | `100m` |
-| **resources.limits.memory** |      | `128Mi` |
-| **resources.requests.cpu** |      | `100m` |
-| **resources.requests.memory** |      | `64Mi` |
+| **resources.limits.cpu** | Defines limits for CPU resources. | `100m` |
+| **resources.limits.memory** | Defines limits for memory resources. | `128Mi` |
+| **resources.requests.cpu** | Defines requests for CPU resources. | `100m` |
+| **resources.requests.memory** | Defines requests for memory resources. | `64Mi` |

@@ -13,6 +13,6 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **replicaCount** | Defines the number of replicas of the service. | `1` |
-| **virtualservice.enabled** |       | `false` |
+| **virtualservice.enabled** |  Enables to use an external service. | `false` |
 | **virtualservice.annotations** |       | `{}` |
-| **virtualservice.name** |       | `asset-upload-service` |
+| **virtualservice.name** |  Defines the service name. | `asset-upload-service` |

@@ -12,11 +12,9 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **minio.mode** |  | `standalone` |
-| **minio.accessKey** |       | `admin` |
-| **minio.secretKey** |       | `topSecretKey` |
-| **minio.environment.MINIO_BROWSER** |     | `"off"` |
-| **resources.requests.memory** |      | `32Mi` |
-| **resources.requests.cpu** |      | `10m` |
-| **resources.limits.memory** |      | `128Mi` |
-| **resources.limits.cpu** |      | `100m` |
+| **minio.mode** | Specifies Minio mode. | `standalone` |
+| **minio.environment.MINIO_BROWSER** | Enables browsing Minio storage. By deafult, the Minio browser is turned off for security reasons. You can change the value to `on` to use the browser. | `"off"` |
+| **resources.requests.memory** | Defines requests for memory resources. | `32Mi` |
+| **resources.requests.cpu** |   Defines requests for CPU resources. | `10m` |
+| **resources.limits.memory** |  Defines limits for memory resources. | `128Mi` |
+| **resources.limits.cpu** | Defines limits for CPU resources. | `100m` |
