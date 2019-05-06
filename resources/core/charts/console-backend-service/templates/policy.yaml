@@ -1,4 +1,5 @@
 {{ if .Values.global.isLocalEnv }}
+# Policy needed to be able to connect to Dex
 apiVersion: authentication.istio.io/v1alpha1
 kind: Policy
 metadata:
