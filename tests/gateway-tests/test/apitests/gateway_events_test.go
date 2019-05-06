@@ -101,10 +101,19 @@ func TestGatewayEvents(t *testing.T) {
 		require.NoError(t, err)
 
 		assert.Equal(t, http.StatusOK, response.StatusCode)
-		assert.Equal(t, eventType, events.EventsInfo[0].Name)
+		assert.True(t, containsEventName(events.EventsInfo, eventType))
 
 		//cleanup
 		err = client.Delete(config.Namespace)
 		require.NoError(t, e)
 	})
+}
+
+func containsEventName(events []Event, name string) bool {
+	for _, e := range events {
+		if e.Name == name {
+			return true
+		}
+	}
+	return false
 }

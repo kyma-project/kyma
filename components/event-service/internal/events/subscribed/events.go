@@ -1,7 +1,9 @@
 package subscribed
 
 import (
+	eventtypes "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	coretypes "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	core "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -85,6 +87,10 @@ func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]Even
 		return nil, e
 	}
 
+	return getEventsFromSubscriptions(subscriptionList, appName), nil
+}
+
+func getEventsFromSubscriptions(subscriptionList *eventtypes.SubscriptionList, appName string) []Event {
 	events := make([]Event, 0)
 
 	for _, subscription := range subscriptionList.Items {
@@ -94,7 +100,7 @@ func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]Even
 		}
 	}
 
-	return events, nil
+	return events
 }
 
 func (ec *eventsClient) getAllNamespaces() ([]string, error) {
@@ -104,13 +110,17 @@ func (ec *eventsClient) getAllNamespaces() ([]string, error) {
 		return nil, e
 	}
 
+	return extractNamespacesNames(namespaceList), nil
+}
+
+func extractNamespacesNames(namespaceList *coretypes.NamespaceList) []string {
 	var namespaces []string
 
 	for _, namespace := range namespaceList.Items {
 		namespaces = append(namespaces, namespace.Name)
 	}
 
-	return namespaces, nil
+	return namespaces
 }
 
 func removeDuplicates(events []Event) []Event {
