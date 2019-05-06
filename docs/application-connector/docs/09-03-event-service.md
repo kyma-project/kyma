@@ -19,7 +19,7 @@ To get the NodePort, run this command:
  kubectl -n kyma-system get svc application-connector-ingress-nginx-ingress-controller -o 'jsonpath={.spec.ports[?(@.port==443)].nodePort}'
  ```
  
- The next step is to run this command:
+ To fetch the Events, run this command:
  ```
  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/events/subscribed -k --cert {APP_CERT} --key {APP_CERTS_KEY}
  ```
