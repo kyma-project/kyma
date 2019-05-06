@@ -44,7 +44,7 @@ spec:
     - label: IDP Presets
       navigationPath: idp-presets
       viewUrl: '/home/settings/idpPresets'
-      order: 3
+      order: 4
       requiredPermissions:
         - apiGroup: authentication.kyma-project.io
           resource: idppresets

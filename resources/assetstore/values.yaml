@@ -22,12 +22,14 @@ minio:
   accessKey: admin
   secretKey: topSecretKey
   replicas: 1
+  persistence:
+    enabled: true
 
-  deployment:
-    strategy:
-      type: Recreate
-    annotations:
-      sidecar.istio.io/inject: "false"
+  DeploymentUpdate:
+    type: Recreate
+  
+  podAnnotations:
+    sidecar.istio.io/inject: "false"
 
   service:
     annotations:
