@@ -3,7 +3,6 @@ title: Event Service
 type: API
 ---
 
-See [this file](./assets/eventsapi.yaml) for the Event Service API specification.
 
 ### Fetching all subscribed events for the application
 
