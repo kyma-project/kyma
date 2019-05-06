@@ -160,6 +160,7 @@ function check_requirements() {
 }
 
 function check_ingress_ports() {
+  sleep 5s
   local pod=$(kubectl get pod -l app=istio-ingressgateway -n istio-system | grep "istio-ingressgateway" | awk '{print $1}')
   local out=$(kubectl exec -t ${pod} -n istio-system -- netstat -lptnu)
   if echo "${out}" | grep "443" ; then
