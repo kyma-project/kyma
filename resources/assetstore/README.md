@@ -10,6 +10,4 @@ The Asset Store consists of the following sub-charts:
 - [Asset Upload Service](charts/asset-upload-service/README.md)
 - [Minio](charts/minio/README.md)
 
-## Details
-
-To learn more about the Asset Store, see the [Asset Store documentation](https://kyma-project.io/docs/components/asset-store) on [kyma-project.io](https://kyma-project.io/).
+To learn more about the Asset Store, see the [Asset Store documentation](https://kyma-project.io/docs/components/asset-store).

@@ -4,6 +4,4 @@
 
 The Asset Upload Service is an HTTP server that exposes the file upload functionality for Minio. It contains a simple HTTP endpoint which accepts multipart/form-data forms. It can upload files to the private and public system buckets.
 
-## Details
-
-To learn more about the Asset Upload Service, see the [Asset Upload Service documentation](https://kyma-project.io/docs/components/asset-store#details-asset-upload-service) on [kyma-project.io](https://kyma-project.io/).
+To learn more about the Asset Upload Service, see the [Asset Upload Service documentation](https://kyma-project.io/docs/components/asset-store#details-asset-upload-service).
