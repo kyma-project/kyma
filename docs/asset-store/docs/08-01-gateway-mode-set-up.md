@@ -74,7 +74,7 @@ metadata:
     kyma-project.io/installation: ""
 type: Opaque
 data:
-  minio.gcsgateway.gcsKeyJson: "${GCS_KEY_JSON}"
+  minio.gcsgateway.gcsKeyJson: "$GCS_KEY_JSON"
 ---
 apiVersion: v1
 kind: ConfigMap
