@@ -15,3 +15,6 @@ rules:
 - apiGroups: ["authentication.istio.io"]
   resources: ["policies"]
   verbs: ["*"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create"]
