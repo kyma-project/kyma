@@ -5,7 +5,7 @@ type: API
 
 
 
-Event service provides an endpoint for fetching subscribed events for the application. To do so, make a call:
+The Event Service provides an endpoint for fetching subscribed Events for the application. To fetch all of them, make a call:
 
 ```
 curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events/subscribed -k --cert {APP_CERT} --key {APP_CERTS_KEY}
