@@ -4,7 +4,6 @@ type: API
 ---
 
 
-### Fetching all subscribed events for the application
 
 Event service provides an endpoint for fetching subscribed events for the application. To do so, make a call:
 
