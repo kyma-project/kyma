@@ -11,7 +11,7 @@ The Event Service provides an endpoint for fetching subscribed Events for the ap
 curl https://gateway.{CLUSTER_DOMAIN}/{APP_NAME}/v1/events/subscribed -k --cert {APP_CERT} --key {APP_CERTS_KEY}
 ```
 
-To get all events locally, provide the NodePort of the `application-connector-ingress-nginx-ingress-controller`.
+To get all events locally, provide the NodePort of `application-connector-ingress-nginx-ingress-controller`.
                   
 To get the NodePort, run this command:
                   
