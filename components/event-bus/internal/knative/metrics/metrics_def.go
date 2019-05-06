@@ -9,6 +9,7 @@ const (
 	Namespace        = "namespace"
 	Name             = "name"
 	Ready            = "ready"
+	//Subscriber		 = "subscriber"
 )
 
 type SubscriptionsGauge struct {
@@ -24,6 +25,10 @@ var (
 	KnativeSubscriptionsGaugeObj *SubscriptionsGauge
 	knativeSubscriptionsGaugeVec *prometheus.GaugeVec
 	knativeSubscriptionsGaugeLabels = []string{Name, Ready}
+
+	KnativeChanelGaugeObj *SubscriptionsGauge
+	knativeChanelGaugeVec *prometheus.GaugeVec
+	knativeChanelGaugeLabels = []string{Name}
 )
 
 func init() {
@@ -44,6 +49,15 @@ func init() {
 		Labels: knativeSubscriptionsGaugeLabels,
 		Metric: knativeSubscriptionsGaugeVec,
 	}
+
+	knativeChanelGaugeVec = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "total_knative_channels",
+		Help: "The total number of Knative channels",
+	}, knativeChanelGaugeLabels)
+	KnativeChanelGaugeObj = &SubscriptionsGauge{
+		Labels: knativeChanelGaugeLabels,
+		Metric: knativeChanelGaugeVec,
+	}
 }
 
 func (ksg *SubscriptionsGauge) DeleteKymaSubscriptionsGauge(namespace string, name string) {
@@ -56,4 +70,9 @@ func (ksg *SubscriptionsGauge) DeleteKymaSubscriptionsGauge(namespace string, na
 func (ksg *SubscriptionsGauge) DeleteKnativeSubscriptionsGauge(name string) {
 	ksg.Metric.DeleteLabelValues(name, "true")
 	ksg.Metric.DeleteLabelValues(name, "false")
+}
+
+
+func (kchg *SubscriptionsGauge) DeleteKnativeChannelGauge(name string) {
+	kchg.Metric.DeleteLabelValues(name)
 }

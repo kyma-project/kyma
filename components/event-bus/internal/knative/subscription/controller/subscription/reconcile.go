@@ -130,6 +130,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	KymaSubscriptionsGauge *metrics.SubscriptionsGauge) (bool, error) {
 
 	KnativeSubscriptionsGauge := metrics.KnativeSubscriptionsGaugeObj
+	KnativeChannelGauge := metrics.KnativeChanelGaugeObj
 	knativeSubsName := util.GetKnSubscriptionName(&subscription.Name, &subscription.Namespace)
 	knativeSubsNamespace := util.GetDefaultChannelNamespace()
 	knativeSubsURI := subscription.Endpoint
@@ -150,11 +151,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 		}
 	} else {
 		// The object is being deleted
-		//TODO Deleted Subscription
 		KymaSubscriptionsGauge.DeleteKymaSubscriptionsGauge(subscription.Namespace, subscription.Name)
 		if util.ContainsString(&subscription.ObjectMeta.Finalizers, finalizerName) {
 			// our finalizer is present, so lets handle our external dependency
-			if err := r.deleteExternalDependency(ctx, knativeSubsName, knativeChannelName, knativeSubsNamespace); err != nil {
+			if err := r.deleteExternalDependency(ctx, knativeSubsName, knativeChannelName, knativeSubsNamespace,
+				subscription.Name, KnativeSubscriptionsGauge, KnativeChannelGauge); err != nil {
 				// if fail to delete the external dependency here, return with error
 				// so that it can be retried
 				return false, err
@@ -192,6 +193,8 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			}
 			log.Info("Knative Channel is created", "Channel", knativeChannel)
 		}
+		KnativeChannelGauge.Metric.With(prometheus.Labels{metrics.Name: subscription.Name}).Set(1)
+		log.Info("Knative channel gauge is created:", "subscription", subscription.Name)
 
 		// Check if Knative Subscription already exists, if not create one.
 		sub, err := r.knativeLib.GetSubscription(knativeSubsName, knativeSubsNamespace)
@@ -205,7 +208,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			//TODO
 			log.Info("Delete knative sub A and set a new one")
 			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
-			KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name:  subscription.Name,
+			KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name: subscription.Name,
 				metrics.Ready: "true"}).Set(1)
 			log.Info("Knative Subscription is created", "Subscription", knativeSubsName)
 		} else {
@@ -223,7 +226,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 				//TODO
 				log.Info("Delete knative sub B and set a new one")
 				KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
-				KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name:  subscription.Name,
+				KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name: subscription.Name,
 					metrics.Ready: "false"}).Set(1)
 				log.Info("Knative Subscription is re-created", "Subscription", knativeSubsName)
 			}
@@ -236,7 +239,6 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			return false, err
 		}
 		log.Info("Kyma Subscription is activated", "Subscription", subscription.Name)
-
 		return true, nil
 	} else {
 		// In case Kyma Subscription does not have events-activated condition and there is no EventActivation, delete Knative Subscription & Channel if exist.
@@ -248,8 +250,9 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			if err != nil {
 				return false, err
 			}
-			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
 			log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
+			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
+			log.Info("Knative Subscription gauge is deleted")
 		}
 
 		// Check if Channel has any other Subscription, if not, delete it.
@@ -264,6 +267,8 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 					return false, err
 				}
 				log.Info("Knative Channel is deleted", "Channel", knativeChannel)
+				KnativeChannelGauge.DeleteKnativeChannelGauge(subscription.Name)
+				log.Info("Knative Channel Gauge is deleted", "subscription", subscription.Name)
 			}
 		}
 	}
@@ -271,7 +276,9 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 	return false, nil
 }
 
-func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsName string, channelName string, namespace string) error {
+func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsName string, channelName string,
+	namespace string, kymaSubscriptionName string, KnativeSubscriptionsGauge *metrics.SubscriptionsGauge,
+	KnativeChannelGauge *metrics.SubscriptionsGauge) error {
 	log.Info("Deleting the external dependencies")
 
 	// In case Knative Subscription exists, delete it.
@@ -283,6 +290,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 		if err != nil {
 			return err
 		}
+		KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(kymaSubscriptionName)
 		log.Info("Knative Subscription is deleted", "Subscription", knativeSubs.Name)
 	}
 
@@ -298,6 +306,8 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 				return err
 			}
 			log.Info("Knative Channel is deleted", "Channel", knativeChannel)
+			KnativeChannelGauge.DeleteKnativeChannelGauge(kymaSubscriptionName)
+			log.Info("Knative Channel gauge is deleted", "subscription", kymaSubscriptionName)
 		}
 	}
 	return nil
