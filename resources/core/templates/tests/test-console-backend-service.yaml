@@ -20,8 +20,7 @@ spec:
       serviceAccountName:  "test-{{ template "fullname" . }}-console-backend-service"
       containers:
         - name: "test-{{ template "fullname" . }}-console-backend-service"
-          # image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.console_backend_service_test.dir }}console-backend-service-test:{{ .Values.global.console_backend_service_test.version }}
-          image: "eu.gcr.io/kyma-project/pr/console-backend-service-test:PR-3767"
+          image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.console_backend_service_test.dir }}console-backend-service-test:{{ .Values.global.console_backend_service_test.version }}
           env:
             - name: DOMAIN
               value: "{{ .Values.global.ingress.domainName }}"
