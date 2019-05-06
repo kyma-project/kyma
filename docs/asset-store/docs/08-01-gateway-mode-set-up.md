@@ -55,7 +55,7 @@ Create a Google service account that has a private key and the **Storage Admin**
     ```
 5. Export the private key as an environment variable:
     ```bash
-    export GCS_KEY_JSON=$(< "${SECRET_FILE}" base64 | tr -d '\n')
+    export GCS_KEY_JSON=$(< "$SECRET_FILE" base64 | tr -d '\n')
     ```
 
 ### Configure Minio Gateway mode
