@@ -160,9 +160,9 @@ function check_requirements() {
 }
 
 function check_ingress_ports() {
-  local pod=$(kubectl get pod -l app=istio-ingressgateway -n istio-system | grep "istio-ingressgateway" | awk '{print $1}')
   while true; do
-    local state=$(kubectl get pod $pod -n istio-system -o jsonpath="{.status.phase}")
+    local pod=$(kubectl get pod -l app=istio-ingressgateway -n istio-system | grep "istio-ingressgateway" | awk '{print $1}')
+    local state=$(kubectl get pod ${pod} -n istio-system -o jsonpath="{.status.phase}")
     if [[ "$state" == "Running" ]]; then
       break
     else
