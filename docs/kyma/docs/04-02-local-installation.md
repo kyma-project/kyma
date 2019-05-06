@@ -26,26 +26,26 @@ Virtualization:
 1. Open a terminal window and navigate to a space in which you want to store your local Kyma sources.
 
 2. Clone the Kyma repository to your machine using either HTTPS or SSH. Run this command to clone the repository and change your working directory to `kyma`:
-  <div tabs>
-    <details>
-    <summary>
-    HTTPS
-    </summary>
+    <div tabs>
+      <details>
+      <summary>
+      HTTPS
+      </summary>
 
-    ```
-    git clone https://github.com/kyma-project/kyma.git ; cd kyma
-    ```
-    </details>
-    <details>
-    <summary>
-    SSH
-    </summary>
+      ```
+      git clone https://github.com/kyma-project/kyma.git ; cd kyma
+      ```
+      </details>
+      <details>
+      <summary>
+      SSH
+      </summary>
 
-    ```
-    git clone git@github.com:kyma-project/kyma.git ; cd kyma
-    ```
-    </details>
-  </div>
+      ```
+      git clone git@github.com:kyma-project/kyma.git ; cd kyma
+      ```
+      </details>
+    </div>
 
 3. Choose the release from which you want to install Kyma. Go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about each of the available releases. Run this command to list all of the available tags that correspond to releases:
   ```
@@ -70,26 +70,26 @@ Virtualization:
   >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
 7. Start the installation. Trigger the `run.sh` script to start Minikube with a Kyma-specific configuration and install the necessary components. Define the password used to log in to the Console UI using the `--password` flag. Run:
-  <div tabs>
-    <details>
-    <summary>
-    MacOS
-    </summary>
+    <div tabs>
+      <details>
+      <summary>
+      MacOS
+      </summary>
 
-    ```
-    ./cmd/run.sh --password {USER_PASSWORD}
-    ```
-    </details>
-    <details>
-    <summary>
-    Linux
-    </summary>
+      ```
+      ./cmd/run.sh --password {USER_PASSWORD}
+      ```
+      </details>
+      <details>
+      <summary>
+      Linux
+      </summary>
 
-    ```
-    ./cmd/run.sh --password {USER_PASSWORD} --vm-driver virtualbox
-    ```
-    </details>
-  </div>
+      ```
+      ./cmd/run.sh --password {USER_PASSWORD} --vm-driver virtualbox
+      ```
+      </details>
+    </div>
 
 8. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running the `is-installed.sh` script. It is designed to give you clear information about the Kyma installation. Run it at any point to get the current installation status, or to find out whether the installation is successful.
 
@@ -114,26 +114,26 @@ Use the `minikube.sh` script to restart the Minikube cluster without reinstallin
   minikube stop
   ```
 2. Restart the cluster without reinstalling Kyma. Run:
-  <div tabs>
-    <details>
-    <summary>
-    MacOS
-    </summary>
+    <div tabs>
+      <details>
+      <summary>
+      MacOS
+      </summary>
 
-    ```
-    ./scripts/minikube.sh --domain "kyma.local" --vm-driver hyperkit
-    ```
-    </details>
-    <details>
-    <summary>
-    Linux
-    </summary>
+      ```
+      ./scripts/minikube.sh --domain "kyma.local" --vm-driver hyperkit
+      ```
+      </details>
+      <details>
+      <summary>
+      Linux
+      </summary>
 
-    ```
-    ./scripts/minikube.sh --domain "kyma.local" --vm-driver virtualbox
-    ```
-    </details>
-  </div>
+      ```
+      ./scripts/minikube.sh --domain "kyma.local" --vm-driver virtualbox
+      ```
+      </details>
+    </div>
 
 The script discovers that a Minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the script to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
 
