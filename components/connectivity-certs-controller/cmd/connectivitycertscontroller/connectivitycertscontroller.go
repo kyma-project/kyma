@@ -45,7 +45,7 @@ func main() {
 
 	// Create a new Cmd to provide shared dependencies and start components
 	log.Info("Setting up manager")
-	syncPeriod := time.Second * time.Duration(options.syncPeriod)
+	syncPeriod := time.Second * time.Duration(options.controllerSyncPeriod)
 
 	mgr, err := manager.New(cfg, manager.Options{SyncPeriod: &syncPeriod})
 	if err != nil {
@@ -85,7 +85,7 @@ func main() {
 	connectorClient := connectorservice.NewInitialConnectionClient(csrProvider)
 	certProvider := certificates.NewCertificateProvider(options.clusterCertificatesSecret, options.caCertificatesSecret, secretsRepository)
 	mTLSClientProvider := connectorservice.NewEstablishedConnectionClientProvider(csrProvider)
-	minimalSyncTime := time.Duration(options.minimalSyncTime) * time.Second
+	minimalSyncTime := time.Duration(options.minimalConnectionSyncPeriod) * time.Second
 
 	// Setup Certificate Request Controller
 	log.Info("Setting up Certificate Request controller")

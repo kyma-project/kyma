@@ -43,30 +43,30 @@ type Controller struct {
 	certificatePreserver                certificates.Preserver
 	certificateProvider                 certificates.Provider
 	establishedConnectionClientProvider connectorservice.EstablishedConnectionClientProvider
-	minimalSyncTime                     time.Duration
+	minimalConnectionSyncPeriod         time.Duration
 	logger                              *log.Entry
 }
 
 func InitCentralConnectionController(
 	mgr manager.Manager,
 	appName string,
-	minimalSyncTime time.Duration,
+	minimalConnectionSyncPeriod time.Duration,
 	certPreserver certificates.Preserver,
 	certProvider certificates.Provider,
 	connectionClientProvider connectorservice.EstablishedConnectionClientProvider) error {
 
-	return startController(appName, mgr, minimalSyncTime, certPreserver, certProvider, connectionClientProvider)
+	return startController(appName, mgr, minimalConnectionSyncPeriod, certPreserver, certProvider, connectionClientProvider)
 }
 
 func startController(
 	appName string,
 	mgr manager.Manager,
-	minimalSyncTime time.Duration,
+	minimalConnectionSyncPeriod time.Duration,
 	certPreserver certificates.Preserver,
 	certProvider certificates.Provider,
 	connectionClientProvider connectorservice.EstablishedConnectionClientProvider) error {
 
-	certRequestController := newCentralConnectionController(mgr.GetClient(), minimalSyncTime, certPreserver, certProvider, connectionClientProvider)
+	certRequestController := newCentralConnectionController(mgr.GetClient(), minimalConnectionSyncPeriod, certPreserver, certProvider, connectionClientProvider)
 
 	c, err := controller.New(appName, mgr, controller.Options{Reconciler: certRequestController})
 	if err != nil {
@@ -78,14 +78,14 @@ func startController(
 
 func newCentralConnectionController(
 	client ResourceClient,
-	minimalSyncTime time.Duration,
+	minimalConnectionSyncPeriod time.Duration,
 	certPreserver certificates.Preserver,
 	certProvider certificates.Provider,
 	connectionClientProvider connectorservice.EstablishedConnectionClientProvider) *Controller {
 
 	return &Controller{
 		centralConnectionClient:             client,
-		minimalSyncTime:                     minimalSyncTime,
+		minimalConnectionSyncPeriod:         minimalConnectionSyncPeriod,
 		certificatePreserver:                certPreserver,
 		certificateProvider:                 certProvider,
 		establishedConnectionClientProvider: connectionClientProvider,
@@ -142,7 +142,7 @@ func (c *Controller) shouldSynchronizeConnection(connection *v1alpha1.CentralCon
 	}
 
 	timeFromLastSync := time.Since(connection.Status.SynchronizationStatus.LastSync.Time)
-	return timeFromLastSync > c.minimalSyncTime
+	return timeFromLastSync > c.minimalConnectionSyncPeriod
 }
 
 func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnection, certCredentials connectorservice.CertificateCredentials) error {
@@ -158,7 +158,7 @@ func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnec
 
 	c.setSynchronizationStatus(connection)
 
-	if !shouldRenew(connection, c.minimalSyncTime) {
+	if !shouldRenew(connection, c.minimalConnectionSyncPeriod) {
 		c.logger.Infof("Skipping certificate renewal for %s Central Connection", connection.Name)
 		return nil
 	}
@@ -174,7 +174,7 @@ func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnec
 	return nil
 }
 
-// Certificate should be renewed when less than 30% of validity time is left or if time left is less than 2 times minimalSyncTime
+// Certificate should be renewed when less than 30% of validity time is left or if time left is less than 2 times minimalConnectionSyncPeriod
 func shouldRenew(connection *v1alpha1.CentralConnection, minimalSyncTime time.Duration) bool {
 	if connection.Spec.RenewNow {
 		return true
