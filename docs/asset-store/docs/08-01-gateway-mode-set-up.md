@@ -89,7 +89,7 @@ data:
   minio.persistence.enabled: "false"
   minio.gcsgateway.enabled: "true"
   minio.defaultBucket.enabled: "false"
-  minio.gcsgateway.projectId: "${PROJECT}"
+  minio.gcsgateway.projectId: "$PROJECT"
   global.minioExternalEndpoint: "https://storage.googleapis.com"
 EOF
 ```
