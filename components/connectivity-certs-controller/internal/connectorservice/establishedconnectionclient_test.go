@@ -64,7 +64,7 @@ func TestMutualTLSConnectorClient_GetManagementInfo(t *testing.T) {
 			respond(t, w, http.StatusOK, managementInfo)
 		})
 
-		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
+		mutualTLSClient := NewEstablishedConnectionClient(tlsConfig, csrProvider, subject)
 
 		// when
 		managementInfoResponse, err := mutualTLSClient.GetManagementInfo(server.URL + managementInfoEndpoint)
@@ -77,7 +77,7 @@ func TestMutualTLSConnectorClient_GetManagementInfo(t *testing.T) {
 
 	t.Run("should return error when request failed", func(t *testing.T) {
 		// given
-		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
+		mutualTLSClient := NewEstablishedConnectionClient(tlsConfig, csrProvider, subject)
 
 		// when
 		_, err := mutualTLSClient.GetManagementInfo("https://invalid.url.kyma.cx")
@@ -93,7 +93,7 @@ func TestMutualTLSConnectorClient_GetManagementInfo(t *testing.T) {
 
 		router.HandleFunc(managementInfoEndpoint, errorHandler(t))
 
-		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
+		mutualTLSClient := NewEstablishedConnectionClient(tlsConfig, csrProvider, subject)
 
 		// when
 		_, err := mutualTLSClient.GetManagementInfo(server.URL + managementInfoEndpoint)
@@ -137,7 +137,7 @@ func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
 
 		renewalURL := fmt.Sprintf("%s%s", server.URL, renewalEndpoint)
 
-		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
+		mutualTLSClient := NewEstablishedConnectionClient(tlsConfig, csrProvider, subject)
 
 		// when
 		certificates, err := mutualTLSClient.RenewCertificate(renewalURL)
@@ -154,7 +154,7 @@ func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
 		csrProvider := &mocks.CSRProvider{}
 		csrProvider.On("CreateCSR", subject).Return("", nil, errors.New("error"))
 
-		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
+		mutualTLSClient := NewEstablishedConnectionClient(tlsConfig, csrProvider, subject)
 
 		// when
 		_, err := mutualTLSClient.RenewCertificate("https://invalid.url.kyma.cx")
@@ -168,7 +168,7 @@ func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
 		csrProvider := &mocks.CSRProvider{}
 		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
-		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
+		mutualTLSClient := NewEstablishedConnectionClient(tlsConfig, csrProvider, subject)
 
 		// when
 		_, err := mutualTLSClient.RenewCertificate("https://invalid.url.kyma.cx")
@@ -189,7 +189,7 @@ func TestMutualTLSConnectorClient_RenewCertificate(t *testing.T) {
 
 		renewalURL := fmt.Sprintf("%s%s", server.URL, renewalEndpoint)
 
-		mutualTLSClient := NewMutualTLSConnectorClient(tlsConfig, csrProvider, subject)
+		mutualTLSClient := NewEstablishedConnectionClient(tlsConfig, csrProvider, subject)
 
 		// when
 		_, err := mutualTLSClient.RenewCertificate(renewalURL)

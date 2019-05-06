@@ -82,9 +82,9 @@ func main() {
 
 	csrProvider := certificates.NewCSRProvider()
 	certPreserver := certificates.NewCertificatePreserver(options.clusterCertificatesSecret, options.caCertificatesSecret, secretsRepository)
-	connectorClient := connectorservice.NewConnectorClient(csrProvider)
+	connectorClient := connectorservice.NewInitialConnectionClient(csrProvider)
 	certProvider := certificates.NewCertificateProvider(options.clusterCertificatesSecret, options.caCertificatesSecret, secretsRepository)
-	mTLSClientProvider := connectorservice.NewMutualTLSClientProvider(csrProvider)
+	mTLSClientProvider := connectorservice.NewEstablishedConnectionClientProvider(csrProvider)
 	minimalSyncTime := time.Duration(options.minimalSyncTime) * time.Second
 
 	// Setup Certificate Request Controller

@@ -209,11 +209,11 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificates").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSClient{}
+		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 		mTLSClientProvider.On("CreateClient", certificateCredentials).Return(mutualTLSClient, nil)
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
@@ -257,11 +257,11 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificates").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSClient{}
+		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 		mTLSClientProvider.On("CreateClient", certificateCredentials).Return(mutualTLSClient, nil)
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
@@ -297,10 +297,10 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificates").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSClient{}
+		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 		mTLSClientProvider.On("CreateClient", certificateCredentials).Return(mutualTLSClient, nil)
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
@@ -321,7 +321,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certPreserver := &certMocks.Preserver{}
 		certProvider := &certMocks.Provider{}
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
 
@@ -341,7 +341,7 @@ func TestController_Reconcile(t *testing.T) {
 
 		certPreserver := &certMocks.Preserver{}
 		certProvider := &certMocks.Provider{}
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
 
@@ -365,7 +365,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider := &certMocks.Provider{}
 		certProvider.On("GetClientCredentials").Return(nil, nil, errors.New("error"))
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
 
@@ -390,7 +390,7 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificates").Return(nil, errors.New("error"))
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
 
@@ -416,11 +416,11 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificates").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSClient{}
+		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).
 			Return(connectorservice.ManagementInfo{}, errors.New("error"))
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 		mTLSClientProvider.On("CreateClient", certificateCredentials).Return(mutualTLSClient, nil)
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
@@ -447,11 +447,11 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificates").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSClient{}
+		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(certificates.Certificates{}, errors.New("error"))
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 		mTLSClientProvider.On("CreateClient", certificateCredentials).Return(mutualTLSClient, nil)
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
@@ -479,11 +479,11 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificates").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSClient{}
+		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(renewedCertificates, nil)
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 		mTLSClientProvider.On("CreateClient", certificateCredentials).Return(mutualTLSClient, nil)
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
@@ -515,11 +515,11 @@ func TestController_Reconcile(t *testing.T) {
 		certProvider.On("GetClientCredentials").Return(clientKey, clientCert, nil)
 		certProvider.On("GetCACertificates").Return(caCert, nil)
 
-		mutualTLSClient := &connectorMocks.MutualTLSClient{}
+		mutualTLSClient := &connectorMocks.EstablishedConnectionClient{}
 		mutualTLSClient.On("GetManagementInfo", managementInfoURL).Return(managementInfo, nil)
 		mutualTLSClient.On("RenewCertificate", renewalURL).Return(invalidCerts, nil)
 
-		mTLSClientProvider := &connectorMocks.MutualTLSClientProvider{}
+		mTLSClientProvider := &connectorMocks.EstablishedConnectionClientProvider{}
 		mTLSClientProvider.On("CreateClient", certificateCredentials).Return(mutualTLSClient, nil)
 
 		connectionController := newCentralConnectionController(client, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)

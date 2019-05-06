@@ -39,12 +39,12 @@ type ResourceClient interface {
 }
 
 type Controller struct {
-	centralConnectionClient ResourceClient
-	certificatePreserver    certificates.Preserver
-	certificateProvider     certificates.Provider
-	mutualTLSClientProvider connectorservice.MutualTLSClientProvider
-	minimalSyncTime         time.Duration
-	logger                  *log.Entry
+	centralConnectionClient             ResourceClient
+	certificatePreserver                certificates.Preserver
+	certificateProvider                 certificates.Provider
+	establishedConnectionClientProvider connectorservice.EstablishedConnectionClientProvider
+	minimalSyncTime                     time.Duration
+	logger                              *log.Entry
 }
 
 func InitCentralConnectionController(
@@ -53,9 +53,9 @@ func InitCentralConnectionController(
 	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
 	certProvider certificates.Provider,
-	mTLSClientProvider connectorservice.MutualTLSClientProvider) error {
+	connectionClientProvider connectorservice.EstablishedConnectionClientProvider) error {
 
-	return startController(appName, mgr, minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
+	return startController(appName, mgr, minimalSyncTime, certPreserver, certProvider, connectionClientProvider)
 }
 
 func startController(
@@ -64,9 +64,9 @@ func startController(
 	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
 	certProvider certificates.Provider,
-	mTLSClientProvider connectorservice.MutualTLSClientProvider) error {
+	connectionClientProvider connectorservice.EstablishedConnectionClientProvider) error {
 
-	certRequestController := newCentralConnectionController(mgr.GetClient(), minimalSyncTime, certPreserver, certProvider, mTLSClientProvider)
+	certRequestController := newCentralConnectionController(mgr.GetClient(), minimalSyncTime, certPreserver, certProvider, connectionClientProvider)
 
 	c, err := controller.New(appName, mgr, controller.Options{Reconciler: certRequestController})
 	if err != nil {
@@ -81,15 +81,15 @@ func newCentralConnectionController(
 	minimalSyncTime time.Duration,
 	certPreserver certificates.Preserver,
 	certProvider certificates.Provider,
-	mTLSClientProvider connectorservice.MutualTLSClientProvider) *Controller {
+	connectionClientProvider connectorservice.EstablishedConnectionClientProvider) *Controller {
 
 	return &Controller{
-		centralConnectionClient: client,
-		minimalSyncTime:         minimalSyncTime,
-		certificatePreserver:    certPreserver,
-		certificateProvider:     certProvider,
-		mutualTLSClientProvider: mTLSClientProvider,
-		logger:                  log.WithField("Controller", "Central Connection"),
+		centralConnectionClient:             client,
+		minimalSyncTime:                     minimalSyncTime,
+		certificatePreserver:                certPreserver,
+		certificateProvider:                 certProvider,
+		establishedConnectionClientProvider: connectionClientProvider,
+		logger: log.WithField("Controller", "Central Connection"),
 	}
 }
 
@@ -146,10 +146,10 @@ func (c *Controller) shouldSynchronizeConnection(connection *v1alpha1.CentralCon
 }
 
 func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnection, certCredentials connectorservice.CertificateCredentials) error {
-	tlsConnectorClient := c.mutualTLSClientProvider.CreateClient(certCredentials)
+	establishedConnectionClient := c.establishedConnectionClientProvider.CreateClient(certCredentials)
 
 	c.logger.Infof("Trying to access Management Info for %s Central Connection...", connection.Name)
-	managementInfo, err := tlsConnectorClient.GetManagementInfo(connection.Spec.ManagementInfoURL)
+	managementInfo, err := establishedConnectionClient.GetManagementInfo(connection.Spec.ManagementInfoURL)
 	if err != nil {
 		c.logger.Errorf("Failed to request Management Info from URL %s for %s Central Connection: %s", connection.Spec.ManagementInfoURL, connection.Name, err.Error())
 		return errors.Wrap(err, "Failed to access Management Info")
@@ -164,7 +164,7 @@ func (c *Controller) synchronizeWithConnector(connection *v1alpha1.CentralConnec
 	}
 
 	c.logger.Infof("Trying to renew client certificate for %s Central Connection...", connection.Name)
-	err = c.renewCertificate(connection, tlsConnectorClient, managementInfo)
+	err = c.renewCertificate(connection, establishedConnectionClient, managementInfo)
 	if err != nil {
 		c.logger.Errorf("Failed to renew certificate for %s Central Connection: %s", connection.Name, err.Error())
 		return errors.Wrap(err, "Failed to renew certificate")
@@ -208,8 +208,8 @@ func (c *Controller) getCertificateCredentials() (connectorservice.CertificateCr
 	}, nil
 }
 
-func (c *Controller) renewCertificate(connection *v1alpha1.CentralConnection, tlsConnectorClient connectorservice.MutualTLSClient, managementInfo connectorservice.ManagementInfo) error {
-	renewedCerts, err := tlsConnectorClient.RenewCertificate(managementInfo.ManagementURLs.RenewalURL)
+func (c *Controller) renewCertificate(connection *v1alpha1.CentralConnection, establishedConnectionClient connectorservice.EstablishedConnectionClient, managementInfo connectorservice.ManagementInfo) error {
+	renewedCerts, err := establishedConnectionClient.RenewCertificate(managementInfo.ManagementURLs.RenewalURL)
 	if err != nil {
 		return errors.Wrap(err, "Failed to renew client certificate")
 	}

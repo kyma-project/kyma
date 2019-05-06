@@ -83,10 +83,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(csrProvider)
+		connectorClient := NewInitialConnectionClient(csrProvider)
 
 		// when
-		connection, err := connectorClient.ConnectToCentralConnector(csrURL)
+		connection, err := connectorClient.Establish(csrURL)
 		require.NoError(t, err)
 
 		// then
@@ -106,10 +106,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(nil)
+		connectorClient := NewInitialConnectionClient(nil)
 
 		// when
-		_, err := connectorClient.ConnectToCentralConnector(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
@@ -129,10 +129,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(csrProvider)
+		connectorClient := NewInitialConnectionClient(csrProvider)
 
 		// when
-		_, err := connectorClient.ConnectToCentralConnector(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
@@ -154,10 +154,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(csrProvider)
+		connectorClient := NewInitialConnectionClient(csrProvider)
 
 		// when
-		_, err := connectorClient.ConnectToCentralConnector(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
@@ -167,10 +167,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(nil)
+		connectorClient := NewInitialConnectionClient(nil)
 
 		// when
-		_, err := connectorClient.ConnectToCentralConnector(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
@@ -190,10 +190,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(csrProvider)
+		connectorClient := NewInitialConnectionClient(csrProvider)
 
 		// when
-		_, err := connectorClient.ConnectToCentralConnector(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
@@ -236,10 +236,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 				csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-				connectorClient := NewConnectorClient(csrProvider)
+				connectorClient := NewInitialConnectionClient(csrProvider)
 
 				// when
-				_, err := connectorClient.ConnectToCentralConnector(csrURL)
+				_, err := connectorClient.Establish(csrURL)
 				require.Error(t, err)
 			})
 		}

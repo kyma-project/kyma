@@ -20,23 +20,23 @@ import (
 	"github.com/pkg/errors"
 )
 
-type Client interface {
-	ConnectToCentralConnector(csrInfoURL string) (EstablishedConnection, error)
+type InitialConnectionClient interface {
+	Establish(csrInfoURL string) (EstablishedConnection, error)
 }
 
-type connectorClient struct {
+type initialConnectionClient struct {
 	csrProvider certificates.CSRProvider
 	httpClient  *http.Client
 }
 
-func NewConnectorClient(csrProvider certificates.CSRProvider) Client {
-	return &connectorClient{
+func NewInitialConnectionClient(csrProvider certificates.CSRProvider) InitialConnectionClient {
+	return &initialConnectionClient{
 		httpClient:  &http.Client{},
 		csrProvider: csrProvider,
 	}
 }
 
-func (cc *connectorClient) ConnectToCentralConnector(csrInfoURL string) (EstablishedConnection, error) {
+func (cc *initialConnectionClient) Establish(csrInfoURL string) (EstablishedConnection, error) {
 	infoResponse, err := cc.requestCSRInfo(csrInfoURL)
 	if err != nil {
 		return EstablishedConnection{}, errors.Wrap(err, "Failed while requesting CSR info")
@@ -57,7 +57,7 @@ func (cc *connectorClient) ConnectToCentralConnector(csrInfoURL string) (Establi
 	return composeConnectionData(clientKey, certificateResponse, infoResponse.Api.InfoURL)
 }
 
-func (cc *connectorClient) requestCSRInfo(csrInfoURL string) (InfoResponse, error) {
+func (cc *initialConnectionClient) requestCSRInfo(csrInfoURL string) (InfoResponse, error) {
 	csrInfoReq, err := http.NewRequest(http.MethodGet, csrInfoURL, nil)
 	if err != nil {
 		return InfoResponse{}, err
@@ -82,7 +82,7 @@ func (cc *connectorClient) requestCSRInfo(csrInfoURL string) (InfoResponse, erro
 	return infoResponse, nil
 }
 
-func (cc *connectorClient) requestCertificates(csrURL string, encodedCSR string) (CertificatesResponse, error) {
+func (cc *initialConnectionClient) requestCertificates(csrURL string, encodedCSR string) (CertificatesResponse, error) {
 	requestData, err := json.Marshal(CertificateRequest{CSR: encodedCSR})
 	if err != nil {
 		return CertificatesResponse{}, err

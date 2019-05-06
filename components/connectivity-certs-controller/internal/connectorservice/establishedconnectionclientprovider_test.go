@@ -12,7 +12,7 @@ import (
 
 func TestMutualTLSClientProvider_CreateClient(t *testing.T) {
 
-	t.Run("should create Mutual TLS Connector Client", func(t *testing.T) {
+	t.Run("should create Mutual TLS Connector InitialConnectionClient", func(t *testing.T) {
 		// given
 		credentials := CertificateCredentials{
 			ClientKey:  &rsa.PrivateKey{},
@@ -22,7 +22,7 @@ func TestMutualTLSClientProvider_CreateClient(t *testing.T) {
 
 		csrProvider := &mocks.CSRProvider{}
 
-		clientProvider := NewMutualTLSClientProvider(csrProvider)
+		clientProvider := NewEstablishedConnectionClientProvider(csrProvider)
 
 		// when
 		client := clientProvider.CreateClient(credentials)

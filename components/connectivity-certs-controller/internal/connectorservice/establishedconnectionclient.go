@@ -13,20 +13,19 @@ import (
 	"github.com/pkg/errors"
 )
 
-type MutualTLSClient interface {
+type EstablishedConnectionClient interface {
 	GetManagementInfo(managementInfoURL string) (ManagementInfo, error)
 	RenewCertificate(renewalURL string) (certificates.Certificates, error)
 }
 
-type mutualTLSConnectorClient struct {
+type establishedConnectionClient struct {
 	httpClient  *http.Client
 	csrProvider certificates.CSRProvider
 	subject     pkix.Name
 }
 
-func NewMutualTLSConnectorClient(config *tls.Config, csrProvider certificates.CSRProvider, subject pkix.Name) MutualTLSClient {
-
-	return &mutualTLSConnectorClient{
+func NewEstablishedConnectionClient(config *tls.Config, csrProvider certificates.CSRProvider, subject pkix.Name) EstablishedConnectionClient {
+	return &establishedConnectionClient{
 		httpClient: &http.Client{
 			Transport: &http.Transport{
 				TLSClientConfig: config,
@@ -37,7 +36,7 @@ func NewMutualTLSConnectorClient(config *tls.Config, csrProvider certificates.CS
 	}
 }
 
-func (cc *mutualTLSConnectorClient) GetManagementInfo(managementInfoURL string) (ManagementInfo, error) {
+func (cc *establishedConnectionClient) GetManagementInfo(managementInfoURL string) (ManagementInfo, error) {
 	request, err := http.NewRequest(http.MethodGet, managementInfoURL, nil)
 	if err != nil {
 		return ManagementInfo{}, errors.Wrap(err, " Failed to create Management Info request")
@@ -62,7 +61,7 @@ func (cc *mutualTLSConnectorClient) GetManagementInfo(managementInfoURL string) 
 	return managementInfoResponse, nil
 }
 
-func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string) (certificates.Certificates, error) {
+func (cc *establishedConnectionClient) RenewCertificate(renewalURL string) (certificates.Certificates, error) {
 	csr, clientKey, err := cc.csrProvider.CreateCSR(cc.subject)
 	if err != nil {
 		return certificates.Certificates{}, errors.Wrap(err, "Failed to create CSR")
@@ -87,7 +86,7 @@ func (cc *mutualTLSConnectorClient) RenewCertificate(renewalURL string) (certifi
 	return decodeCertificateResponse(clientKey, certificateResponse)
 }
 
-func (cc *mutualTLSConnectorClient) requestCertificateRenewal(renewalURL, csr string) (*http.Response, error) {
+func (cc *establishedConnectionClient) requestCertificateRenewal(renewalURL, csr string) (*http.Response, error) {
 	reqBody, err := json.Marshal(CertificateRequest{CSR: csr})
 	if err != nil {
 		return nil, errors.Wrap(err, "Failed to marshal certificate request")

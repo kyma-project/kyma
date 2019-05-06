@@ -61,8 +61,8 @@ func TestController_Reconcile(t *testing.T) {
 		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CertificateRequest")).
 			Run(setupCertificateRequestInstance).Return(nil)
 		client.On("Delete", context.Background(), mock.AnythingOfType("*v1alpha1.CertificateRequest")).Return(nil)
-		connectorClient := &connectorMocks.Client{}
-		connectorClient.On("ConnectToCentralConnector", csrInfoURL).Return(establishedConnection, nil)
+		connectorClient := &connectorMocks.InitialConnectionClient{}
+		connectorClient.On("Establish", csrInfoURL).Return(establishedConnection, nil)
 		preserver := &certMocks.Preserver{}
 		preserver.On("PreserveCertificates", certs).Return(nil)
 		centralConnectionClient := &ccMocks.Client{}
@@ -84,7 +84,7 @@ func TestController_Reconcile(t *testing.T) {
 		client := &mocks.Client{}
 		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CertificateRequest")).
 			Run(setupCertificateRequestWithErrorStatus).Return(nil)
-		connectorClient := &connectorMocks.Client{}
+		connectorClient := &connectorMocks.InitialConnectionClient{}
 		preserver := &certMocks.Preserver{}
 		centralConnectionClient := &ccMocks.Client{}
 
@@ -104,7 +104,7 @@ func TestController_Reconcile(t *testing.T) {
 		client := &mocks.Client{}
 		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CertificateRequest")).
 			Return(k8sErrors.NewNotFound(schema.GroupResource{}, "error"))
-		connectorClient := &connectorMocks.Client{}
+		connectorClient := &connectorMocks.InitialConnectionClient{}
 		preserver := &certMocks.Preserver{}
 		centralConnectionClient := &ccMocks.Client{}
 
@@ -124,7 +124,7 @@ func TestController_Reconcile(t *testing.T) {
 		client := &mocks.Client{}
 		client.On("Get", context.Background(), namespacedName, mock.AnythingOfType("*v1alpha1.CertificateRequest")).
 			Return(errors.New("error"))
-		connectorClient := &connectorMocks.Client{}
+		connectorClient := &connectorMocks.InitialConnectionClient{}
 		preserver := &certMocks.Preserver{}
 		centralConnectionClient := &ccMocks.Client{}
 
@@ -146,8 +146,8 @@ func TestController_Reconcile(t *testing.T) {
 			Run(setupCertificateRequestInstance).Return(nil).Twice()
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CertificateRequest")).
 			Run(assertErrorStatus).Return(nil)
-		connectorClient := &connectorMocks.Client{}
-		connectorClient.On("ConnectToCentralConnector", csrInfoURL).Return(emptyConnection, errors.New("error"))
+		connectorClient := &connectorMocks.InitialConnectionClient{}
+		connectorClient.On("Establish", csrInfoURL).Return(emptyConnection, errors.New("error"))
 		preserver := &certMocks.Preserver{}
 		centralConnectionClient := &ccMocks.Client{}
 
@@ -169,8 +169,8 @@ func TestController_Reconcile(t *testing.T) {
 			Run(setupCertificateRequestInstance).Return(nil).Twice()
 		client.On("Update", context.Background(), mock.AnythingOfType("*v1alpha1.CertificateRequest")).
 			Run(assertErrorStatus).Return(nil)
-		connectorClient := &connectorMocks.Client{}
-		connectorClient.On("ConnectToCentralConnector", csrInfoURL).Return(establishedConnection, nil)
+		connectorClient := &connectorMocks.InitialConnectionClient{}
+		connectorClient.On("Establish", csrInfoURL).Return(establishedConnection, nil)
 		preserver := &certMocks.Preserver{}
 		preserver.On("PreserveCertificates", certs).Return(errors.New("error"))
 		centralConnectionClient := &ccMocks.Client{}

@@ -33,18 +33,18 @@ type Client interface {
 
 type Controller struct {
 	certificateRequestClient Client
-	connectorClient          connectorservice.Client
+	initialConnectionClient  connectorservice.InitialConnectionClient
 	certificatePreserver     certificates.Preserver
 	connectionClient         centralconnection.Client
 	logger                   *log.Entry
 }
 
-func InitCertificatesRequestController(mgr manager.Manager, appName string, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionClient centralconnection.Client) error {
+func InitCertificatesRequestController(mgr manager.Manager, appName string, connectorClient connectorservice.InitialConnectionClient, certPreserver certificates.Preserver, connectionClient centralconnection.Client) error {
 	return startController(appName, mgr, connectorClient, certPreserver, connectionClient)
 }
 
-func startController(appName string, mgr manager.Manager, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionClient centralconnection.Client) error {
-	certRequestController := newCertificatesRequestController(mgr.GetClient(), connectorClient, certPreserver, connectionClient)
+func startController(appName string, mgr manager.Manager, initialConnectionClient connectorservice.InitialConnectionClient, certPreserver certificates.Preserver, connectionClient centralconnection.Client) error {
+	certRequestController := newCertificatesRequestController(mgr.GetClient(), initialConnectionClient, certPreserver, connectionClient)
 
 	c, err := controller.New(appName, mgr, controller.Options{Reconciler: certRequestController})
 	if err != nil {
@@ -54,10 +54,10 @@ func startController(appName string, mgr manager.Manager, connectorClient connec
 	return c.Watch(&source.Kind{Type: &v1alpha1.CertificateRequest{}}, &handler.EnqueueRequestForObject{})
 }
 
-func newCertificatesRequestController(client Client, connectorClient connectorservice.Client, certPreserver certificates.Preserver, connectionManager centralconnection.Client) *Controller {
+func newCertificatesRequestController(client Client, connectorClient connectorservice.InitialConnectionClient, certPreserver certificates.Preserver, connectionManager centralconnection.Client) *Controller {
 	return &Controller{
 		certificateRequestClient: client,
-		connectorClient:          connectorClient,
+		initialConnectionClient:  connectorClient,
 		certificatePreserver:     certPreserver,
 		connectionClient:         connectionManager,
 		logger:                   log.WithField("Controller", "Certificate Request"),
@@ -80,7 +80,7 @@ func (c *Controller) Reconcile(request reconcile.Request) (reconcile.Result, err
 	}
 
 	c.logger.Infof("Establishing connection with Connector Service for %s Cert Request...", instance.Name)
-	establishedConnection, err := c.connectorClient.ConnectToCentralConnector(instance.Spec.CSRInfoURL)
+	establishedConnection, err := c.initialConnectionClient.Establish(instance.Spec.CSRInfoURL)
 	if err != nil {
 		c.logger.Errorf("Error while requesting certificates from Connector Service: %s", err.Error())
 		return reconcile.Result{}, c.setRequestErrorStatus(instance, err)

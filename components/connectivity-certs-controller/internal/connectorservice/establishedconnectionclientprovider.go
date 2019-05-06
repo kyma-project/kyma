@@ -14,21 +14,21 @@ type CertificateCredentials struct {
 	CACerts    []*x509.Certificate
 }
 
-type MutualTLSClientProvider interface {
-	CreateClient(credentials CertificateCredentials) MutualTLSClient
+type EstablishedConnectionClientProvider interface {
+	CreateClient(credentials CertificateCredentials) EstablishedConnectionClient
 }
 
-type mutualTLSClientProvider struct {
+type establishedConnectionClientProvider struct {
 	csrProvider certificates.CSRProvider
 }
 
-func NewMutualTLSClientProvider(csrProvider certificates.CSRProvider) MutualTLSClientProvider {
-	return &mutualTLSClientProvider{
+func NewEstablishedConnectionClientProvider(csrProvider certificates.CSRProvider) EstablishedConnectionClientProvider {
+	return &establishedConnectionClientProvider{
 		csrProvider: csrProvider,
 	}
 }
 
-func (cp *mutualTLSClientProvider) CreateClient(credentials CertificateCredentials) MutualTLSClient {
+func (cp *establishedConnectionClientProvider) CreateClient(credentials CertificateCredentials) EstablishedConnectionClient {
 
 	rawCerts := [][]byte{credentials.ClientCert.Raw}
 
@@ -47,5 +47,5 @@ func (cp *mutualTLSClientProvider) CreateClient(credentials CertificateCredentia
 		Certificates: certs,
 	}
 
-	return NewMutualTLSConnectorClient(tlsConfig, cp.csrProvider, credentials.ClientCert.Subject)
+	return NewEstablishedConnectionClient(tlsConfig, cp.csrProvider, credentials.ClientCert.Subject)
 }
