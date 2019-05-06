@@ -27,14 +27,14 @@ apiVersion: cms.kyma-project.io/v1alpha1
 kind: DocsTopic
 metadata ... 
 ```
-If your bundle defines `ServiceBroker`, use `DocsTopic` type. If your bundle defines `ClusterServiceBroker`, use `ClusterDocsTopic` type.
+If your bundle defines a ServiceBroker, use the DocsTopic type. If your bundle defines a ClusterServiceBroker, use the ClusterDocsTopic type.
 
-For detailed descriptions of all parameters, see the [ClusterDocsTopic custom resource](/components/headless-cms/#custom-resource-clusterdocstopic)
-or [DocsTopic custom resource](/components/headless-cms/#custom-resource-docstopic).
+For more details, see the [ClusterDocsTopic](/components/headless-cms/#custom-resource-clusterdocstopic)
+and [DocsTopic](/components/headless-cms/#custom-resource-docstopic) custom resources documentation.
 For more information about currently supported types of the assets, read [this](/components/headless-cms/#overview-overview-headless-cms-in-kyma) document.
 
 
-One ClusterDocsTopic or DocsTopic object corresponds to a single Service Class with the same ID as the name of the specified ClusterDocsTopic or DocsTopic.
+One ClusterDocsTopic or DocsTopic object corresponds to a single Service Class with the same ID as the name of the specified object.
 Store documentation for each Service Class in the `docs/{class_name}` directory which corresponds to the value of the **filter** parameter in the ClusterDocsTopic or DocsTopic definition.
 
 During the provisioning process, the Helm Broker pushes the **addonRepositoryURL** variable into the chart. The **addonsRepositoryURL** points to your bundle compressed to a `.tgz` file.
