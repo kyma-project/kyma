@@ -5,15 +5,6 @@ type: Details
 
 The whole concept of the Asset Store relies on Minio as the storage solution. It supports Kyma's manifesto and the "batteries included" rule by providing you with this on-premise solution by default.
 
-
-For security reasons, Minio credentials are generated during Kyma installation and stored inside the Kubernetes `Secret` object. To access the credentials, run the following commands:
-```bash
-#Access Key to Minio
-kubectl get secret assetstore-minio -n kyma-system -o jsonpath=“{.data.accesskey}” | base64 -D
-#Secret Key to Minio
-kubectl get secret assetstore-minio -n kyma-system -o jsonpath=“{.data.secretkey}” | base64 -D
-```
-
 Depending on the usage scenario, you can:
 - Use Minio for local development.
 - Store your assets on a production scale using Minio in a [Gateway mode](https://github.com/minio/minio/tree/master/docs/gateway).
@@ -28,6 +19,13 @@ Minio is an open-source asset storage server with Amazon S3 compatible API. You 
 In the context of the Asset Store, the Asset Controller stores all assets in Minio, in a dedicated storage space.
 
 ![](./assets/minio.svg)
+
+### Access Minio credentials
+
+For security reasons, Minio credentials are generated during Kyma installation and stored inside the Kubernetes Secret object. To access them, run the following commands:
+
+- Get the access key using `kubectl get secret assetstore-minio -n kyma-system -o jsonpath=“{.data.accesskey}” | base64 -D`
+- Get the secret key using `kubectl get secret assetstore-minio -n kyma-system -o jsonpath=“{.data.secretkey}” | base64 -D`
 
 
 ## Production storage
