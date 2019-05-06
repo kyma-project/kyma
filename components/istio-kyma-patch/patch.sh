@@ -159,6 +159,17 @@ function check_requirements() {
   done <${CONFIG_DIR}/required-crds
 }
 
+function check_ingress_ports() {
+  local pod=$(kubectl get pod -l app=istio-ingressgateway -n istio-system | grep "istio-ingressgateway" | awk '{print $1}')
+  local out=$(kubectl exec -t ${pod} -n istio-system -- netstat -lptnu)
+  if echo "${out}" | grep "443" ; then
+    echo "Port 443 is open"
+  else
+    echo "Port 443 closed"
+    exit 1
+  fi
+}
+
 require_istio_system
 require_istio_version
 require_mtls_enabled
@@ -169,3 +180,4 @@ restart_sidecar_injector
 run_all_patches
 remove_not_used
 label_namespaces
+check_ingress_ports
