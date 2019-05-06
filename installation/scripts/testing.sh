@@ -17,6 +17,17 @@ then
    exit 1
 fi
 
+matchTests="" # match all tests
+
+${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__STATIC_PASSWORDS__"
+if [[ $? -eq 1 ]]
+then
+  # if static users are not available, do not execute tests which requires them
+  matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template-file --template='./../resources/test-selector.yaml.tpl')
+  echo "WARNING: following tests will be skipped due to the lack of static users:"
+  echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
+fi
+
 cat <<EOF | ${kc} apply -f -
 apiVersion: testing.kyma-project.io/v1alpha1
 kind: ClusterTestSuite
@@ -27,11 +38,13 @@ metadata:
 spec:
   maxRetries: 1
   concurrency: 1
+${matchTests}
 EOF
 
 startTime=$(date +%s)
 
 testExitCode=0
+previousPrintTime=-1
 
 while true
 do
@@ -56,6 +69,7 @@ do
         testExitCode=1
         break
     fi
+
     sec=$((currTime-startTime))
     min=$((sec/60))
     if (( min > 60 )); then
@@ -63,8 +77,11 @@ do
         testExitCode=1
         break
     fi
-    echo "ClusterTestSuite not finished. Waiting..."
-    sleep 60
+    if (( $previousPrintTime != $min )); then
+        echo "ClusterTestSuite not finished. Waiting..."
+        previousPrintTime=${min}
+    fi
+    sleep 3
 done
 
 echo "Test summary"
