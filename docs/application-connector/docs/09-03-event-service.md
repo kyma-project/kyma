@@ -25,4 +25,6 @@ To get the NodePort, run this command:
  curl https://gateway.kyma.local:{NODE_PORT}/{APP_NAME}/v1/events/subscribed -k --cert {APP_CERT} --key {APP_CERTS_KEY}
  ```
  
- Succesfull call will return a list of all active events for the application.
+ The successful call returns a list of all active Events for the application.
+ 
+>**TIP:** For details on the Event Service API specification, see [this file](./assets/eventsapi.yaml).
