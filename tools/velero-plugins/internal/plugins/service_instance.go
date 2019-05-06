@@ -1,15 +1,15 @@
 package plugins
 
 import (
-	"github.com/heptio/ark/pkg/apis/ark/v1"
-	"github.com/heptio/ark/pkg/restore"
+	"github.com/heptio/velero/pkg/apis/velero/v1"
+	"github.com/heptio/velero/pkg/restore"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/api/meta"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-// RemoveServiceInstanceFields is a plugin for ark to remove several fields before creating restored object
+// RemoveServiceInstanceFields is a plugin for velero to remove several fields before creating restored object
 type RemoveServiceInstanceFields struct {
 	Log logrus.FieldLogger
 }

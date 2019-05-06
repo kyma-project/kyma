@@ -1,13 +1,13 @@
 package main
 
 import (
-	arkplugin "github.com/heptio/ark/pkg/plugin"
-	"github.com/kyma-project/kyma/tools/ark-plugins/internal/plugins"
+	veleroplugin "github.com/heptio/velero/pkg/plugin"
+	"github.com/kyma-project/kyma/tools/velero-plugins/internal/plugins"
 	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	arkplugin.NewServer(arkplugin.NewLogger()).
+	veleroplugin.NewServer(veleroplugin.NewLogger()).
 		RegisterRestoreItemAction("si-restore-plugin", newRemoveServiceInstanceFields).
 		RegisterRestoreItemAction("or-restore-plugin", newSetOwnerReference).
 		Serve()

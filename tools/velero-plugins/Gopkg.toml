@@ -31,18 +31,14 @@ required = [
   go-tests = true
 
 [[constraint]]
-  branch = "master"
-  name = "github.com/hashicorp/go-plugin"
-
-[[constraint]]
-  name = "github.com/heptio/ark"
-  branch = "master"
+  name = "github.com/heptio/velero"
+  version = "v0.11.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "1.0.3"
 
-# Match Ark dependency versions
+# Match Velero dependency versions
 [[constraint]]
   name = "k8s.io/apimachinery"
   version = "kubernetes-1.11.0"
