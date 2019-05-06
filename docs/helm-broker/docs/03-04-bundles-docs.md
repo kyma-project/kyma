@@ -3,7 +3,7 @@ title: Service Classes documentation provided by bundles
 type: Details
 ---
 
-Using the Helm Broker, you can provision a bundle which defines Service Broker and provides its own Service Classes. If you want to provide documentation for those Service Classes, create the `docs.yaml` file inside the bundle's chart to comply with the naming convention. 
+Using the Helm Broker, you can provision a bundle which defines a Service Broker and provides its own Service Classes. If you want to provide documentation for those Service Classes, create the `docs.yaml` file inside the bundle's chart to comply with the naming convention. 
 The structure of this file looks as follows:
 
 ```
