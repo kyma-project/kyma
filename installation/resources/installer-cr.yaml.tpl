@@ -20,6 +20,8 @@ spec:
       namespace: "istio-system"
     - name: "xip-patch"
       namespace: "kyma-installer"
+    - name: "gateway"
+      namespace: "kyma-system"
     - name: "istio-kyma-patch"
       namespace: "istio-system"
     # - name: "knative-serving"

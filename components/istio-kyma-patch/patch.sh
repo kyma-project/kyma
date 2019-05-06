@@ -166,11 +166,11 @@ function check_ingress_ports() {
     if [[ "$state" == "Running" ]]; then
       break
     else
-      sleep 10s
+      sleep 5s
     fi
   done
   local out=$(kubectl exec -t ${pod} -n istio-system -- netstat -lptnu)
-  if echo "${out}" | grep "443" ; then
+  if echo "${out}" | grep -q "443" ; then
     echo "OPEN"
   else
     echo "CLOSED"
@@ -182,8 +182,11 @@ function restart_ingress_pod() {
   while true; do
     status=$(check_ingress_ports)
     if [[ "$status" == "OPEN" ]]; then
+      echo "     Ports are open, continue"
       break
     else
+      echo "     Ports are closed, recreatting pod"
+      kubectl delete pod -l app=istio-ingressgateway -n istio-system
       sleep 5s
     fi
   done
