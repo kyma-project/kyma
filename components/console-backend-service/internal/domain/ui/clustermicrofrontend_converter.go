@@ -12,7 +12,7 @@ func (c *clusterMicrofrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFronte
 		return nil
 	}
 
-	navigationNodes := c.NavigationNodesToGQLs(in.Spec.CommonMicroFrontendSpec.NavigationNodes)
+	navigationNodes := c.navigationNodesToGQLs(in.Spec.CommonMicroFrontendSpec.NavigationNodes)
 
 	cmf := gqlschema.ClusterMicrofrontend{
 		Name:            in.Name,
@@ -37,7 +37,7 @@ func (c *clusterMicrofrontendConverter) ToGQLs(in []*uiV1alpha1v.ClusterMicroFro
 	return result
 }
 
-func (c *clusterMicrofrontendConverter) NavigationNodeToGQL(in *uiV1alpha1v.NavigationNode) *gqlschema.NavigationNode {
+func (c *clusterMicrofrontendConverter) navigationNodeToGQL(in *uiV1alpha1v.NavigationNode) *gqlschema.NavigationNode {
 	if in == nil {
 		return nil
 	}
@@ -56,10 +56,10 @@ func (c *clusterMicrofrontendConverter) NavigationNodeToGQL(in *uiV1alpha1v.Navi
 	return &navigationNode
 }
 
-func (c *clusterMicrofrontendConverter) NavigationNodesToGQLs(in []uiV1alpha1v.NavigationNode) []gqlschema.NavigationNode {
+func (c *clusterMicrofrontendConverter) navigationNodesToGQLs(in []uiV1alpha1v.NavigationNode) []gqlschema.NavigationNode {
 	var result []gqlschema.NavigationNode
 	for _, u := range in {
-		converted := c.NavigationNodeToGQL(&u)
+		converted := c.navigationNodeToGQL(&u)
 		if converted != nil {
 			result = append(result, *converted)
 		}
