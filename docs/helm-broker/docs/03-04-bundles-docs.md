@@ -7,7 +7,7 @@ Using the Helm Broker, you can provision a bundle which provides its own Service
 
 ```
 apiVersion: cms.kyma-project.io/v1alpha1
-kind: ClusterDocsTopic
+kind: DocsTopic
 metadata:
   labels:
     cms.kyma-project.io/view-context: service-catalog
@@ -19,11 +19,11 @@ spec:
     - type: {type}
       name: {name}
       mode: {mode}
-      url: {.Values.addonsRepositoryURL}
+      url: {{ .Values.addonsRepositoryURL }}
       filter: docs/{class_name}/ 
 ___
 apiVersion: cms.kyma-project.io/v1alpha1
-kind: ClusterDocsTopic
+kind: DocsTopic
 metadata ... 
 ```
 For detailed descriptions of all parameters, see the [ClusterDocsTopic custom resource](/components/headless-cms/#custom-resource-clusterdocstopic). 
