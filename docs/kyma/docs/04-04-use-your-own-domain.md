@@ -110,7 +110,7 @@ Follow these steps:
     ```
     mkdir letsencrypt
     ```
-2. Create a new service account and assign it to the `dns.admin` role. Run these commands:
+2. Create a new service account and assign it to the **dns.admin** role. Run these commands:
     ```
     gcloud iam service-accounts create dnsmanager --display-name "dnsmanager" --project "$GCP_PROJECT"
     ```
