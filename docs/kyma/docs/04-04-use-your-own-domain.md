@@ -58,12 +58,12 @@ Follow these steps:
 1. Export the domain name, project name, and DNS zone name as environment variables. Run the commands listed below:
 
     ```
-    export DNS_NAME={YOUR_ZONE_DOMAIN}.
+    export DNS_NAME={YOUR_ZONE_DOMAIN}
     export DNS_ZONE={YOUR_DNS_ZONE}
     ```
     Example:
     ```
-    export DNS_NAME=kyma-demo.ga.
+    export DNS_NAME=kyma-demo.ga
     export DNS_ZONE=myzone
     ```
 
@@ -95,22 +95,17 @@ Follow these steps:
 
 ### Get the TLS certificate
 
-1. Export domain for the cluster and issuer email:
+1. Export issuer email and domain for the cluster:
     ```
-    export DOMAIN={YOUR_CLUSTER_SUBDOMAIN}
     export CERT_ISSUER_EMAIL={YOUR_EMAIL}
-    ```
-    Example:
-    ```
-    export DOMAIN=my.kyma-demo.ga
-    export CERT_ISSUER_EMAIL=john.smith@example.com
+    export DOMAIN="$CLUSTER_NAME.$(echo $DNS_NAME | sed `s/\.$//`)"
     ```
 
-1. Create a folder for certificates. Run:
+2. Create a folder for certificates. Run:
     ```
     mkdir letsencrypt
     ```
-2. Create a new service account and assign it to the **dns.admin** role. Run these commands:
+3. Create a new service account and assign it to the **dns.admin** role. Run these commands:
     ```
     gcloud iam service-accounts create dnsmanager --display-name "dnsmanager" --project "$GCP_PROJECT"
     ```
@@ -119,17 +114,17 @@ Follow these steps:
         --member serviceAccount:dnsmanager@$GCP_PROJECT.iam.gserviceaccount.com --role roles/dns.admin
     ```
 
-> **NOTE**: You don't have to create a new DNS manager service account (SA) every time you deploy a cluster. Instead, you can use an existing SA that has the **dns.admin** assigned.
+    > **NOTE**: You don't have to create a new DNS manager service account (SA) every time you deploy a cluster. Instead, you can use an existing SA that has the **dns.admin** assigned.
 
 
-3. Generate an access key for this account in the `letsencrypt` folder. Run:
+4. Generate an access key for this account in the `letsencrypt` folder. Run:
     ```
     gcloud iam service-accounts keys create ./letsencrypt/key.json --iam-account dnsmanager@$GCP_PROJECT.iam.gserviceaccount.com
     ```
     
-> **NOTE**: There is a fixed number of keys that may be generated for single Service Account. We suggest reusing keys instead of generating new one for every cluster.
+    > **NOTE**: There is a fixed number of keys that may be generated for single Service Account. We suggest reusing keys instead of generating new one for every cluster.
 
-4. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot uses the key to apply DNS challenge for the certificate request and stores the TLS certificates in that folder. Run:
+5. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot uses the key to apply DNS challenge for the certificate request and stores the TLS certificates in that folder. Run:
     ```
     docker run -it --name certbot --rm \
         -v "$(pwd)/letsencrypt:/etc/letsencrypt" \
@@ -142,7 +137,7 @@ Follow these steps:
         -d "*.$DOMAIN"
     ```
 
-5. Export the certificate and key as environment variables. Run these commands:
+6. Export the certificate and key as environment variables. Run these commands:
 
     ```
     export TLS_CERT=$(cat ./letsencrypt/live/$DOMAIN/fullchain.pem | base64 | sed 's/ /\\ /g' | tr -d '\n');
