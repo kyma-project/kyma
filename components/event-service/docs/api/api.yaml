@@ -108,13 +108,13 @@ components:
           description: Type of the event.
           type: string
           format: hostname
-          pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
+          pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
           maxLength: 253
           example: 'order.created'
         event-type-version:
           description: The version of the event-type. This is applicable to the data payload alone.
           type: string
-          pattern: '^[a-zA-Z0-9]+$'
+          pattern: '^[a-z0-9]+$'
           maxLength: 4
           example: 'v1'
         event-id:
