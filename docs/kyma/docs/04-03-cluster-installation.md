@@ -43,7 +43,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     export GCP_ZONE={GCP_ZONE_TO_DEPLOY_TO}
     ```
 
-2. Create a cluster in the configured zone. Run:
+2. Create a cluster in the zone defined in the previous step. Run:
     ```
     gcloud container --project "$GCP_PROJECT" clusters \
     create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
