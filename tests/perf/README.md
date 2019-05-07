@@ -20,30 +20,30 @@ k6 run http_basic.js
 
 ## K6 with Kyma
 
-Directory ```tests/perf``` contains all performance tests source code.
-A Kyma performance test is a K6 test script with or without prerequisites e.g. custom test component deployments.
+Directory ```tests/perf``` contains all performance test script source code.
+A Kyma performance test is a K6 test script with or without prerequisites e.g. custom test component and/or scenario deployments.
 A Kyma performance test will runs against [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
 Each subdirectory in the ```tests/perf``` directory defines source code for one test suite and focusing on one component or area, 
 the subdirectory ```prerequisites``` will contains **yaml** files of test component deployments 
 (like custom configuration or custom scenario deployments) if necessary.
 
-Prerequisites directory content will be deployed after load test cluster deployment and before test execution.
+Prerequisites directory content will be deployed after load test cluster creation and before test execution.
 
 ### Implementing Kyma performance test
 
 This section will document Kyma specific k6 test implementation, for detailed information about k6 test framework you can 
 read from [original documentation](https://docs.k6.io)
 
-Kyma k6 executor has some pre-defined environment variable and tags to provide some additional information about 
+Kyma k6 executor has some pre-defined environment variable and tags to provide some additional meta information about 
 current execution and target test cluster.
 
-More about K6 tag please read from [here](https://docs.k6.io/docs/tags-and-groups).
+More about K6 tags please read from [here](https://docs.k6.io/docs/tags-and-groups).
 
-Environment variables
+Available environment variables
 - **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
 
-Test execution tags 
+Pre-Defined test execution tags 
 - **testName**, is the name of test scenario which every test should provide in test script implementation. 
 - **component**, the component or area which currently being tested this tag also should be provided with test script implementation
 - **revision**, SHA id of master branch which used for tests, this will be provided with Kyma performance test runner and test script should not provide 
