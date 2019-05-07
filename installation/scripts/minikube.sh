@@ -162,7 +162,7 @@ function addDevDomainsToEtcHosts() {
 
         # Delete old host alias
         # Filter out lines that DO NOT start with 127.0.0.1 AND contain the MINIKUBE_DOMAIN pattern
-        awk -v domain="$MINIKUBE_DOMAIN" '$1=="127.0.0.1"||!index($0,domain)' /etc/hosts > kyma-hosts-tmp
+        awk -v domain="${MINIKUBE_DOMAIN}" '$1=="127.0.0.1"||!index($0,domain)' /etc/hosts > kyma-hosts-tmp
         cat kyma-hosts-tmp | sudo tee /etc/hosts > /dev/null
         rm kyma-hosts-tmp
     fi
