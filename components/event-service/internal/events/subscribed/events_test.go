@@ -1,8 +1,9 @@
 package subscribed
 
 import (
-	"github.com/stretchr/testify/mock"
 	"testing"
+
+	"github.com/stretchr/testify/mock"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed/mocks"
 	"github.com/pkg/errors"
@@ -13,7 +14,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	coretypes "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 func newStubSubscription(subscriptionList *v1alpha1.SubscriptionList) *stubSubscriptions {

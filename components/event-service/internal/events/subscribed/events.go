@@ -12,7 +12,7 @@ type EventsClient interface {
 	GetSubscribedEvents(appName string) (Events, error)
 }
 
-//SubscriptionsClient interface
+//SubscriptionsGetter interface
 type SubscriptionsGetter interface {
 	Subscriptions(namespace string) v1alpha1.SubscriptionInterface
 }
