@@ -15,7 +15,7 @@ rules:
     resources: ["pods","services", "configmaps", "secrets"]
     verbs: ["get", "list", "watch", "update", "delete"]
   - apiGroups: [""]
-    resources: ["users"]
+    resources: ["users", "groups"]
     verbs: ["impersonate"]
   - apiGroups: ["extensions", "apps"]
     resources: ["deployments"]
