@@ -9,7 +9,6 @@ const (
 	Namespace        = "namespace"
 	Name             = "name"
 	Ready            = "ready"
-	//Subscriber		 = "subscriber"
 )
 
 type SubscriptionsGauge struct {
