@@ -42,14 +42,15 @@ More about K6 tag please read from [here](https://docs.k6.io/docs/tags-and-group
 
 Environment variables
 - **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
-- TBD
 
 Test execution tags 
-- **testName**, is the name of test which every test should provide in test code implementation. 
-This information will be used later on [grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1) to filter test results
-- TBD
+- **testName**, is the name of test scenario which every test should provide in test code implementation. 
+- **component**, the component or area which tested this tag also should be provided with test script
+- **SHAID**, SHA id of master branch which used for tests, this will be provided with Kyma performance test runner and test script should not provide 
 
-An example k6 test testing Kyma Gateway, with predefined tag name ```testName```
+This information will be used later on [grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1) to filter test results
+
+An example k6 test testing Kyma Gateway, with predefined tag name ```testName``` and ```component```
 
 ```javascript
 import http from "k6/http"
@@ -60,7 +61,8 @@ export let options = {
     duration: "1m",
     rps: 1000,
     tags: {
-        "testName": "example_gateway_event"
+        "testName": "example_gateway_event",
+        "component": "gateway"
     }
 }
 
