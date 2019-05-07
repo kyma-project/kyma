@@ -44,8 +44,8 @@ Environment variables
 - **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
 
 Test execution tags 
-- **testName**, is the name of test scenario which every test should provide in test code implementation. 
-- **component**, the component or area which tested this tag also should be provided with test script
+- **testName**, is the name of test scenario which every test should provide in test script implementation. 
+- **component**, the component or area which currently being tested this tag also should be provided with test script implementation
 - **SHAID**, SHA id of master branch which used for tests, this will be provided with Kyma performance test runner and test script should not provide 
 
 This information will be used later on [grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1) to filter test results
