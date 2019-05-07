@@ -5,10 +5,11 @@ type: Configuration
 
 To configure the Asset Store chart, override the default values of its `values.yaml` file. This document describes parameters that you can configure.
 
+To learn more about how to use overrides in Kyma, read [this document](/kyma/#configuration-helm-overrides-for-kyma-installation). See also examples of [top-level charts overrides](/kyma/#configuration-helm-overrides-for-kyma-installation-top-level-charts-overrides) and [sub-charts overrides](https://kyma-project.io/docs/master/root/kyma/#configuration-helm-overrides-for-kyma-installation-sub-chart-overrides).
+
 ## Configurable parameters
 
 This table lists the configurable parameters, their descriptions, and default values:
-
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
