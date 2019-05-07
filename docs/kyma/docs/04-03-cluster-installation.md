@@ -36,7 +36,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
 ### Prepare the GKE cluster
 
-1. Select a name for your cluster. Set the cluster name and the name of your GCP project as environment variables. Run:
+1. Select a name for your cluster. Export the cluster name, the name of your GCP project, and the zone you want to deploy to as environment variables. Run:
     ```
     export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
     export GCP_PROJECT={YOUR_GCP_PROJECT}
