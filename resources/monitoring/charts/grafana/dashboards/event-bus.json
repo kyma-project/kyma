@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1557234230474,
+  "iteration": 1557234230484,
   "links": [],
   "panels": [
     {
@@ -24,7 +24,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Prometheus",
-      "description": "Number of published events per {namespace $| \nsource ID &| event type &| event type version} per minute",
+      "description": "Rate of published events per {namespace $| \nsource ID &| event type &| event type version} per minute",
       "fill": 1,
       "gridPos": {
         "h": 12,
@@ -66,7 +66,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Published Events Rate",
+      "title": "Messages Rate ($status)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -136,18 +136,20 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": "",
         "current": {
-          "selected": true,
+          "tags": [],
           "text": "ignored",
-          "value": "ignored"
+          "value": [
+            "ignored"
+          ]
         },
         "datasource": "Prometheus",
         "definition": "label_values(total_published_messages, status)",
         "hide": 0,
         "includeAll": true,
         "label": "Status",
-        "multi": false,
+        "multi": true,
         "name": "status",
         "options": [],
         "query": "label_values(total_published_messages, status)",
@@ -159,12 +161,11 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": true
       },
       {
         "allValue": null,
         "current": {
-          "selected": false,
           "text": "All",
           "value": "$__all"
         },
@@ -173,7 +174,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Source ID",
-        "multi": false,
+        "multi": true,
         "name": "source_id",
         "options": [],
         "query": "label_values(total_published_messages, source_id)",
@@ -190,7 +191,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "hello",
           "value": "hello"
         },
@@ -199,7 +199,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Event Type",
-        "multi": false,
+        "multi": true,
         "name": "event_type",
         "options": [],
         "query": "label_values(total_published_messages, event_type)",
@@ -216,7 +216,6 @@
       {
         "allValue": null,
         "current": {
-          "selected": true,
           "text": "v1",
           "value": "v1"
         },
@@ -225,7 +224,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Event Type Version",
-        "multi": false,
+        "multi": true,
         "name": "event_type_version",
         "options": [],
         "query": "label_values(total_published_messages, event_type_version)",
@@ -242,7 +241,7 @@
     ]
   },
   "time": {
-    "from": "now-1m",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
