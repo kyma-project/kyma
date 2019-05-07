@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/kyma-project/kyma/common/resilient"
 	"github.com/pkg/errors"
 
 	"github.com/google/go-cmp/cmp"
@@ -124,7 +125,9 @@ func getHTTPClient(skipVerify bool) (*http.Client, error) {
 		return nil, err
 	}
 
-	return &http.Client{Timeout: 15 * time.Second, Transport: tr, Jar: cookieJar}, nil
+	client := &http.Client{Timeout: 15 * time.Second, Transport: tr, Jar: cookieJar}
+
+	return resilient.WrapHttpClient(client), nil
 }
 
 func (ut *GrafanaUpgradeTest) getGrafana() error {
