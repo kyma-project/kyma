@@ -135,6 +135,7 @@ func (c *ServiceBindingUsageController) onAddServiceBindingUsage(obj interface{}
 		c.log.Errorf("while handling addition event: couldn't get key: %v", err)
 		return
 	}
+	c.log.Infof("new add event with key %q triggered", key)
 	c.queue.Add(key)
 }
 
@@ -144,6 +145,7 @@ func (c *ServiceBindingUsageController) onDeleteServiceBindingUsage(obj interfac
 		c.log.Errorf("while handling deletion event: couldn't get key: %v", err)
 		return
 	}
+	c.log.Infof("new delete event with key %q triggered", key)
 	c.queue.Add(key)
 }
 
@@ -169,6 +171,7 @@ func (c *ServiceBindingUsageController) onUpdateOrRelistServiceBindingUsage(old,
 		c.log.Errorf("while handling updating event: couldn't get key: %v", err)
 		return
 	}
+	c.log.Infof("new update event with key %q triggered. Updated object: %s/%s", key, oldUsage.Namespace, oldUsage.Name)
 	c.queue.Add(key)
 }
 
@@ -203,9 +206,13 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 
 	key, shutdown := c.queue.Get()
 	if shutdown {
+		c.log.Info("queue has been shutdown")
 		return false
 	}
-	defer c.queue.Done(key)
+	defer func() {
+		c.log.Infof("process for key %q has been completed", key)
+		c.queue.Done(key)
+	}()
 
 	namespace, name, err := cache.SplitMetaNamespaceKey(key.(string))
 	if err != nil {
@@ -231,6 +238,7 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 
 	// set ServiceBindingUsage status if ServiceBindingUsage and his status exist
 	if usageStatus != nil {
+		c.log.Debug("Starting process of updating ServiceBindingUsageCondition")
 		usageStatus.wrapMessageForFailed(fmt.Sprintf("Process error during %d attempts from %d", retry, c.maxRetires))
 
 		bindingUsage, err := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
@@ -239,6 +247,7 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 			return true
 		}
 
+		c.log.Debugf("Updating %q conditions", pretty.ServiceBindingUsageName(bindingUsage))
 		condition := sbuStatus.NewUsageCondition(usageStatus.sbuType, usageStatus.condition, usageStatus.reason, usageStatus.message)
 		if err := c.updateStatus(bindingUsage, *condition); err != nil {
 			c.log.Errorf("Error processing %q while updating sbu status with condition %+v", key, condition)
@@ -285,6 +294,7 @@ func (c *ServiceBindingUsageController) syncServiceBindingUsage(namespace string
 }
 
 func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage *sbuTypes.ServiceBindingUsage) *processBindingUsageError {
+	c.log.Debugf("process of reconsile %s", pretty.ServiceBindingUsageName(newUsage))
 	var (
 		workNS         = newUsage.Namespace
 		newBindingName = newUsage.Spec.ServiceBindingRef.Name
@@ -356,6 +366,7 @@ func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage
 		)
 	}
 
+	c.log.Debugf("process for %s has been completed", pretty.ServiceBindingUsageName(newUsage))
 	return nil
 }
 
