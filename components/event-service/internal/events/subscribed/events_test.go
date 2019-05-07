@@ -1,6 +1,7 @@
 package subscribed
 
 import (
+	"github.com/stretchr/testify/mock"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed/mocks"
@@ -10,25 +11,10 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 
 	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	coretypes "k8s.io/api/core/v1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
-
-type stubSubscriptionsGetter struct {
-	stubSubscriptions eventingv1alpha1.SubscriptionInterface
-}
-
-func newStubSubscriptionsGetter(stubSubscriptions eventingv1alpha1.SubscriptionInterface) *stubSubscriptionsGetter {
-	return &stubSubscriptionsGetter{
-		stubSubscriptions: stubSubscriptions,
-	}
-}
-
-func (sg *stubSubscriptionsGetter) Subscriptions(namespace string) eventingv1alpha1.SubscriptionInterface {
-	return sg.stubSubscriptions
-}
 
 func newStubSubscription(subscriptionList *v1alpha1.SubscriptionList) *stubSubscriptions {
 	return &stubSubscriptions{
@@ -82,7 +68,8 @@ func TestEvents_GetSubscribedEvents(t *testing.T) {
 
 		stubSubscriptions := newStubSubscription(subscriptions)
 
-		stubSubscriptionsGetter := newStubSubscriptionsGetter(stubSubscriptions)
+		stubSubscriptionsGetter := &mocks.SubscriptionsGetter{}
+		stubSubscriptionsGetter.On("Subscriptions", mock.Anything).Return(stubSubscriptions)
 
 		ns1 := *createNamespace(testNamespace1)
 		ns2 := *createNamespace(testNamespace2)
@@ -114,10 +101,8 @@ func TestEvents_GetSubscribedEvents(t *testing.T) {
 
 		stubSubscriptions := newStubSubscription(subscriptions)
 
-		stubSubscriptionsGetter := newStubSubscriptionsGetter(stubSubscriptions)
-
-		subscriptionsClient := &mocks.SubscriptionsClient{}
-		subscriptionsClient.On("EventingV1alpha1").Return(stubSubscriptionsGetter)
+		stubSubscriptionsGetter := &mocks.SubscriptionsGetter{}
+		stubSubscriptionsGetter.On("Subscriptions", mock.Anything).Return(stubSubscriptions)
 
 		ns1 := *createNamespace(testNamespace1)
 		ns2 := *createNamespace(testNamespace2)
@@ -126,7 +111,7 @@ func TestEvents_GetSubscribedEvents(t *testing.T) {
 		nsClient := &mocks.NamespacesClient{}
 		nsClient.On("List", v1.ListOptions{}).Return(namespaceList, nil)
 
-		eventsClient := NewEventsClient(subscriptionsClient, nsClient)
+		eventsClient := NewEventsClient(stubSubscriptionsGetter, nsClient)
 
 		//when
 		events, e := eventsClient.GetSubscribedEvents(appName)
@@ -148,15 +133,13 @@ func TestEvents_GetSubscribedEvents(t *testing.T) {
 
 		stubSubscriptions := newStubSubscription(subscriptions)
 
-		stubSubscriptionsGetter := newStubSubscriptionsGetter(stubSubscriptions)
-
-		subscriptionsClient := &mocks.SubscriptionsClient{}
-		subscriptionsClient.On("EventingV1alpha1").Return(stubSubscriptionsGetter)
+		stubSubscriptionsGetter := &mocks.SubscriptionsGetter{}
+		stubSubscriptionsGetter.On("Subscriptions", mock.Anything).Return(stubSubscriptions)
 
 		nsClient := &mocks.NamespacesClient{}
 		nsClient.On("List", v1.ListOptions{}).Return(&coretypes.NamespaceList{}, errors.New("Some error"))
 
-		eventsClient := NewEventsClient(subscriptionsClient, nsClient)
+		eventsClient := NewEventsClient(stubSubscriptionsGetter, nsClient)
 
 		//when
 		_, e := eventsClient.GetSubscribedEvents(appName)
