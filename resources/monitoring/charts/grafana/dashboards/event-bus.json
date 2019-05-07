@@ -15,10 +15,54 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 27,
-  "iteration": 1556403376151,
+  "iteration": 1557231628683,
   "links": [],
   "panels": [
+    {
+      "datasource": "Prometheus",
+      "description": "",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 6,
+        "y": 0
+      },
+      "id": 4,
+      "links": [],
+      "options": {
+        "maxValue": "1000000000000",
+        "minValue": 0,
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true,
+        "thresholds": [
+          {
+            "color": "#7EB26D",
+            "index": 0,
+            "value": null
+          }
+        ],
+        "valueMappings": [],
+        "valueOptions": {
+          "decimals": null,
+          "prefix": "",
+          "stat": "avg",
+          "suffix": "",
+          "unit": "none"
+        }
+      },
+      "targets": [
+        {
+          "expr": "sum(total_published_messages{namespace=~\"$namespace\",event_type=~\"$event_type\",event_type_version=~\"$event_type_version\",source_id=~\"$source_id\",status=~\"$status\"})",
+          "format": "time_series",
+          "intervalFactor": 1,
+          "refId": "A"
+        }
+      ],
+      "timeFrom": null,
+      "timeShift": null,
+      "title": "Published Events Number",
+      "type": "gauge"
+    },
     {
       "aliasColors": {},
       "bars": false,
@@ -30,8 +74,8 @@
       "gridPos": {
         "h": 12,
         "w": 21,
-        "x": 0,
-        "y": 0
+        "x": 1,
+        "y": 8
       },
       "id": 2,
       "legend": {
@@ -238,7 +282,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-2m",
     "to": "now"
   },
   "timepicker": {
@@ -269,5 +313,5 @@
   "timezone": "",
   "title": "Event Bus",
   "uid": "6iBqM-zZz",
-  "version": 5
+  "version": 1
 }
