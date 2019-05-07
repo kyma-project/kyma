@@ -12,6 +12,7 @@ import (
 const (
 	MetadataURLFormat = "%s/%s/v1/metadata/services"
 	EventsURLFormat   = "%s/%s/v1/events"
+  EventsInfoURLFormat = "%s/%s/v1/events/subscribed"
 
 	RuntimeDefaultCommonName = "*Runtime*"
 )
@@ -54,17 +55,21 @@ func (ext *ContextExtractor) CreateApplicationClientContextService(ctx context.C
 func prepareRuntimeURLs(appCtx ApplicationContext, apiHosts ApiURLs) RuntimeURLs {
 	metadataURL := ""
 	eventsURL := ""
+	eventsInfoURL := ""
 
 	if apiHosts.MetadataBaseURL != "" {
 		metadataURL = fmt.Sprintf(MetadataURLFormat, apiHosts.MetadataBaseURL, appCtx.GetApplication())
 	}
+
 	if apiHosts.EventsBaseURL != "" {
 		eventsURL = fmt.Sprintf(EventsURLFormat, apiHosts.EventsBaseURL, appCtx.GetApplication())
+    eventsInfoURL = fmt.Sprintf(EventsInfoURLFormat, apiHosts.EventsBaseURL, appCtx.GetApplication())
 	}
 
 	return RuntimeURLs{
-		MetadataURL: metadataURL,
-		EventsURL:   eventsURL,
+		MetadataURL:   metadataURL,
+		EventsURL:     eventsURL,
+		EventsInfoURL: eventsInfoURL,
 	}
 }
 

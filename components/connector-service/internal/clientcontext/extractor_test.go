@@ -98,8 +98,9 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 		expectedApplicationContext := ExtendedApplicationContext{
 			ApplicationContext: appCtxPayload,
 			RuntimeURLs: RuntimeURLs{
-				MetadataURL: metadataBasedURL + "/" + appName + "/v1/metadata/services",
-				EventsURL:   eventsBasedURL + "/" + appName + "/v1/events",
+				MetadataURL:   metadataBasedURL + "/" + appName + "/v1/metadata/services",
+				EventsURL:     eventsBasedURL + "/" + appName + "/v1/events",
+				EventsInfoURL: eventsBasedURL + "/" + appName + "/v1/events/subscribed",
 			},
 		}
 

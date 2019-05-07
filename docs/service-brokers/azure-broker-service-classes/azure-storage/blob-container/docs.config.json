@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure Storage Blob Container",
-      "description": "Documentation for Azure Storage Blob Container.",
-      "id": "fb6ce656-c16d-4b48-aff9-286714298af8",
-      "type":"Service Class"
-    }
-}

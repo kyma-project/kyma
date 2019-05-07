@@ -14,7 +14,7 @@ import (
 )
 
 func TestErrorHandler_ServeHTTP(t *testing.T) {
-	t.Run("Should always respond with given error and status code", func(t *testing.T) {
+	t.Run("Should always Respond with given error and status code", func(t *testing.T) {
 
 		r := mux.NewRouter()
 
