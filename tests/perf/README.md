@@ -89,7 +89,7 @@ export default function () {
 ```
 
 Example test above will execute a load test against Kyma gateway on a cluster deployed on **CLUSTER_DOMAIN_NAME** 
-with **10** virtual users, **1** minute long and **1000** request per second across all virtual users.
+with **10** virtual users, **1** minute long and **1000** request per second across **10** virtual users.
 
 Test logic should be implemented in a function defined as **default**, more about test execution lifecycle please read [here](https://docs.k6.io/docs/test-life-cycle).
 
