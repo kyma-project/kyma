@@ -35,7 +35,7 @@ global:
     version: 00d7f520
   connectivity_certs_controller:
     dir: develop/
-    version: 2dc766a0
+    version: ffc9ea80
   event_service:
     dir: develop/
     version: fedca3db
@@ -44,7 +44,7 @@ global:
     version: fedca3db
   application_gateway:
     dir: develop/
-    version: 78b98274
+    version: 0f47c038
   application_gateway_tests:
     dir: develop/
     version: 4b28ce69
@@ -56,6 +56,6 @@ global:
     version: 4c614be5
   application_broker:
     dir: develop/
-    version: 59de9e9c
+    version: 426e984b
 connectivity_certs_controller:
   enabled: false

@@ -12,10 +12,7 @@ import (
 	"time"
 
 	scCs "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-
+	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bind"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/broker"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/bundle"
@@ -23,10 +20,16 @@ import (
 	"github.com/kyma-project/kyma/components/helm-broker/internal/helm"
 	"github.com/kyma-project/kyma/components/helm-broker/internal/storage"
 	"github.com/kyma-project/kyma/components/helm-broker/platform/logger"
+	"github.com/sirupsen/logrus"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	v1 "k8s.io/client-go/informers/core/v1"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/cache"
+	"k8s.io/client-go/tools/clientcmd"
+
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 const (
@@ -62,7 +65,15 @@ func main() {
 	// broker sync
 	stopCh := make(chan struct{})
 	bLoader := bundle.NewLoader(cfg.TmpDir, log)
-	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), log)
+
+	sch, err := v1alpha1.SchemeBuilder.Build()
+	fatalOnError(err)
+
+	dynamicClient, err := client.New(k8sConfig, client.Options{Scheme: sch})
+	fatalOnError(err)
+
+	docsProvider := bundle.NewDocsProvider(dynamicClient)
+	bundleSyncer := bundle.NewSyncer(sFact.Bundle(), sFact.Chart(), docsProvider, log)
 	brokerSyncer := broker.NewClusterServiceBrokerSyncer(csbInterface, log)
 	cfgMapInformer := v1.NewFilteredConfigMapInformer(clientset, cfg.Namespace, 10*time.Minute, cache.Indexers{}, func(options *metav1.ListOptions) {
 		options.LabelSelector = fmt.Sprintf("%s=%s", mapLabelKey, mapLabelValue)

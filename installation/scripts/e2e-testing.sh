@@ -4,6 +4,12 @@ source "${ROOT_PATH}/utils.sh"
 
 #copied from  testing-common.sh: in testing-common.sh we use Octopus, here helm test. TODO later: rewrite e2e-testing to Octopus.
 
+function context_arg() {
+    if [ -n "$KUBE_CONTEXT" ]; then
+        echo "--context $KUBE_CONTEXT"
+    fi
+}
+
 function cleanupHelmTestPods() {
     local namespace=$1
 
@@ -33,7 +39,7 @@ function printLogsFromPod() {
 function printLogsFromFailedHelmTests() {
     local namespace=$1
 
-    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} -l helm-chart-test=true --show-all -o jsonpath='{.items[*].metadata.name}')
+    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} -l helm-chart-test=true -o jsonpath='{.items[*].metadata.name}')
     do
         log "Testing '${POD}'" nc bold
 
@@ -75,7 +81,7 @@ function checkTestPodTerminated() {
 
     runningPods=false
 
-    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} -l helm-chart-test=true --show-all -o jsonpath='{.items[*].metadata.name}')
+    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} -l helm-chart-test=true -o jsonpath='{.items[*].metadata.name}')
     do
         phase=$(kubectl $(context_arg)  get pod "$POD" -n ${namespace} -o jsonpath="{ .status.phase }")
         # A Pod's phase  Failed or Succeeded means pod has terminated.
@@ -120,7 +126,7 @@ function checkTestPodLabel() {
     err=false
 
     log "Test pods should be marked with label 'helm-chart-test=true'. Checking..." nc bold
-    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} --show-all -o jsonpath='{.items[*].metadata.name}')
+    for POD in $(kubectl $(context_arg)  get pods -n ${namespace} -o jsonpath='{.items[*].metadata.name}')
     do
         annotation=$(kubectl $(context_arg)  get pod "$POD" -n ${namespace} -o jsonpath="{ .metadata.annotations.helm\.sh/hook }")
         if [ "${annotation}" == "test-success" ] || [ "${annotation}" == "test-failure" ]

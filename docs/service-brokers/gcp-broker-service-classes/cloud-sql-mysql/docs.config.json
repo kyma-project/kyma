@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Cloud SQL - MySQL",
-      "description": "Documentation for Cloud SQL - MySQL",
-      "id": "85c5e53a-d70b-480e-afd3-737b0b1329f3",
-      "type":"Service Class"
-    }
-}

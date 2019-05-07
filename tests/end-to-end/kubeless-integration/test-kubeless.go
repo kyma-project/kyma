@@ -35,11 +35,11 @@ func deleteK8s(yamlFile string) {
 }
 
 func printContentsOfNamespace(namespace string) {
-	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation")
+	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "deployments,services,replicasets,pods,serviceinstances,servicebindings,servicebindingusages,functions,subscriptions.eventing.kyma-project.io,apis.gateway.kyma-project.io,eventactivations.applicationconnector.kyma-project.io")
 	stdoutStderr, err := getResourcesCmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil {
-		log.Fatal("Unable to get all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation:\n", output)
+		log.Fatal("Unable to get deployments,services,replicasets,pods,serviceinstances,servicebindings,servicebindingusages,functions,subscriptions.eventing.kyma-project.io,apis.gateway.kyma-project.io,eventactivations.applicationconnector.kyma-project.io:\n", output)
 	}
 	log.Printf("Current contents of the ns:%s is:\n %v", namespace, output)
 }
@@ -285,13 +285,7 @@ func deleteFun(namespace, name string) {
 		log.Fatal("Unable to delete function ", name, ":\n", output)
 	}
 
-	cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name, "--grace-period=0", "--force")
-	stdoutStderr, err = cmd.CombinedOutput()
-	if err != nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "warning: Immediate deletion does not wait for confirmation that the running resource has been terminated") {
-		log.Fatal("Unable to delete function pod:\n", string(stdoutStderr))
-	}
-
-	timeout := time.After(2 * time.Minute)
+	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		select {
@@ -492,7 +486,7 @@ func ensureServceBindingIsReady(namespace, svcBinding string) {
 func cleanup() {
 	log.Println("Cleaning up")
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(4)
 	go func() {
 		defer wg.Done()
 		deleteK8s("k8syaml/k8s.yaml")
@@ -507,14 +501,12 @@ func cleanup() {
 	}()
 	go func() {
 		defer wg.Done()
+		deleteK8s("svc-binding.yaml")
 		deleteK8s("k8syaml/svcbind-lambda.yaml")
 		deleteK8s("svc-instance.yaml")
 	}()
-	go func() {
-		defer wg.Done()
-		deleteNamespace("kubeless-test")
-	}()
 	wg.Wait()
+	deleteNamespace("kubeless-test")
 }
 
 var testDataRegex = regexp.MustCompile(`(?m)^OK ([a-z0-9]{8})$`)

@@ -1,11 +1,12 @@
 package middlewares
 
 import (
-	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
-	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/externalapi/middlewares/mocks"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/clientcontext"
 	"github.com/stretchr/testify/assert"
@@ -18,16 +19,16 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 	configPath := "/etc/config/lookup"
 
-	fetchedGatewayHost := "gateway.host"
+	fetchedGatewayBaseURL := "https://gateway.host"
 
-	defaultGatewayHost := "gateway.kyma.local"
+	defaultGatewayBaseURL := "https://gateway.kyma.local"
 
 	lookupService := &mocks.LookupService{}
 	extractor := clientcontext.ExtractApplicationContext
 
 	t.Run("should set fetched gateway URL value in context when lookup is enabled", func(t *testing.T) {
 		//given
-		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayHost, configPath, clientcontext.LookupEnabled, extractor, lookupService)
+		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayBaseURL, configPath, clientcontext.LookupEnabled, extractor, lookupService)
 
 		appCtx := clientcontext.ApplicationContext{
 			Application: "testApp",
@@ -37,17 +38,18 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 			},
 		}
 
-		lookupService.On("Fetch", appCtx, configPath).Return(fetchedGatewayHost, nil)
+		lookupService.On("Fetch", appCtx, configPath).Return(fetchedGatewayBaseURL, nil)
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			ctxValue := ctx.Value(clientcontext.APIHostsKey).(clientcontext.APIHosts)
-			assert.Equal(t, fetchedGatewayHost, ctxValue.EventsHost)
-			assert.Equal(t, fetchedGatewayHost, ctxValue.MetadataHost)
+			ctxValue := ctx.Value(clientcontext.ApiURLsKey).(clientcontext.ApiURLs)
+			assert.Equal(t, fetchedGatewayBaseURL, ctxValue.EventsBaseURL)
+			assert.Equal(t, fetchedGatewayBaseURL, ctxValue.MetadataBaseURL)
 			w.WriteHeader(http.StatusOK)
 		})
 
 		request, err := http.NewRequest(http.MethodGet, url, nil)
+		require.NoError(t, err)
 		request = request.WithContext(appCtx.ExtendContext(request.Context()))
 		require.NoError(t, err)
 
@@ -63,13 +65,13 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 	t.Run("should use default gateway value when lookup is disabled", func(t *testing.T) {
 		//given
-		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayHost, configPath, clientcontext.LookupDisabled, extractor, lookupService)
+		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayBaseURL, configPath, clientcontext.LookupDisabled, extractor, lookupService)
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			ctx := r.Context()
-			ctxValue := ctx.Value(clientcontext.APIHostsKey).(clientcontext.APIHosts)
-			assert.Equal(t, defaultGatewayHost, ctxValue.EventsHost)
-			assert.Equal(t, defaultGatewayHost, ctxValue.MetadataHost)
+			ctxValue := ctx.Value(clientcontext.ApiURLsKey).(clientcontext.ApiURLs)
+			assert.Equal(t, defaultGatewayBaseURL, ctxValue.EventsBaseURL)
+			assert.Equal(t, defaultGatewayBaseURL, ctxValue.MetadataBaseURL)
 			w.WriteHeader(http.StatusOK)
 		})
 
@@ -88,7 +90,7 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 	t.Run("should return code 500 when cannot read ApplicationContext", func(t *testing.T) {
 		//given
-		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayHost, configPath, clientcontext.LookupEnabled, extractor, lookupService)
+		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayBaseURL, configPath, clientcontext.LookupEnabled, extractor, lookupService)
 
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {})
 
@@ -107,7 +109,7 @@ func TestRuntimeURLs_Middleware(t *testing.T) {
 
 	t.Run("should return code 500 when gateway URL fetch failed", func(t *testing.T) {
 		//given
-		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayHost, configPath, clientcontext.LookupEnabled, extractor, lookupService)
+		runtimeURLsMiddleware := NewRuntimeURLsMiddleware(defaultGatewayBaseURL, configPath, clientcontext.LookupEnabled, extractor, lookupService)
 
 		appCtx := clientcontext.ApplicationContext{
 			Application: "test-app",
