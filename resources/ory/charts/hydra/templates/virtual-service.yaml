@@ -7,7 +7,7 @@ spec:
   gateways:
     - {{ .Values.global.gateway }}
   hosts:
-    - {{ .Values.hydraServer.host.oauth2.name }}
+    - oauth2.{{ .Values.global.ingress.domainName }}
   http:
     - match:
         - uri:
@@ -28,7 +28,7 @@ spec:
   gateways:
     - {{ .Values.global.gateway }}
   hosts:
-    - {{ .Values.hydraServer.host.admin.name }}
+    - oauth2-admin.{{ .Values.global.ingress.domainName }}
   http:
     - match:
         - uri:

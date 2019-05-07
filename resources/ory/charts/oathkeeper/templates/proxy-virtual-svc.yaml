@@ -7,7 +7,7 @@ spec:
   gateways:
     - {{ .Values.global.gateway }}
   hosts:
-    - {{ .Chart.Name }}-proxy.kyma.local
+    - {{ .Chart.Name }}-proxy.{{ .Values.global.ingress.domainName }}
   http:
     - match:
         - uri:

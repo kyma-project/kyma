@@ -1,7 +1,3 @@
-loginConsent:
-  host:
-    name: oauth2-login-consent.kyma.local #TODO: change this value if implicit flow is integrated
-
 hydraServer:
   port: 4444
   adminPort: 4445
@@ -17,8 +13,3 @@ hydraServer:
   service:
     port: 80
     adminPort: 4445
-  host:
-    oauth2:
-      name: oauth2.kyma.local
-    admin:
-      name: oauth2-admin.kyma.local
