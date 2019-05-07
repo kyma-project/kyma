@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -53,16 +54,12 @@ type ClusterMicroFrontendSpec struct {
 }
 
 type NavigationNode struct {
-	Label            string `json:"label"`
-	NavigationPath   string `json:"navigationPath"`
-	ViewURL          string `json:"viewUrl"`
-	ShowInNavigation bool   `json:"showInNavigation"`
-	Order            int    `json:"order"`
-	Settings         `json:"settings"`
-}
-
-type Settings struct {
-	ReadOnly bool `json:"readOnly"`
+	Label            string                `json:"label"`
+	NavigationPath   string                `json:"navigationPath"`
+	ViewURL          string                `json:"viewUrl"`
+	ShowInNavigation bool                  `json:"showInNavigation"`
+	Order            int                   `json:"order"`
+	Settings         *runtime.RawExtension `json:"settings"`
 }
 
 func (n *NavigationNode) UnmarshalJSON(data []byte) error {
