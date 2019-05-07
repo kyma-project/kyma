@@ -98,7 +98,7 @@ Variable ```options``` defines execution behavior of test implementation. With f
 - ```vus``` defines amount of virtual users.
 - ```duration``` defines test execution duration.
 - ```rps``` defines request per second across all virtual users
-- ```tags``` defines custom tags to mark test execution
+- ```tags``` defines custom tags to add meta information to test execution 
 
 More about available options and test execution behavior please read [here](https://docs.k6.io/docs/options).
 
