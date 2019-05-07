@@ -166,7 +166,7 @@ Use the GitHub release 0.8 or higher.
     kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
     ```
 
-4. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
+4. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the release you want install. Run:
    ```
    wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-config-cluster.yaml
    wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
