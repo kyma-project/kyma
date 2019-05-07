@@ -119,7 +119,7 @@ Follow these steps:
         --member serviceAccount:dnsmanager@$GCP_PROJECT.iam.gserviceaccount.com --role roles/dns.admin
     ```
 
-> **NOTE**: You don't have to create new DNS manager Service Account every time. You may use existing SA as long as it has role `dns.admin` assigned.
+> **NOTE**: You don't have to create a new DNS manager service account (SA) every time you deploy a cluster. Instead, you can use an existing SA that has the **dns.admin** assigned.
 
 
 3. Generate an access key for this account in the `letsencrypt` folder. Run:
