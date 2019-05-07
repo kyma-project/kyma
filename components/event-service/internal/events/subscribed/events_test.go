@@ -3,104 +3,178 @@ package subscribed
 import (
 	"testing"
 
+	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed/mocks"
+	"github.com/pkg/errors"
+	"github.com/stretchr/testify/require"
+	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/apimachinery/pkg/watch"
+	"k8s.io/client-go/rest"
+
 	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
 	"github.com/stretchr/testify/assert"
 	coretypes "k8s.io/api/core/v1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestEvents_getEventsFromSubscriptions(t *testing.T) {
+type stubSubscriptionsGetter struct {
+	stubSubscriptions eventingv1alpha1.SubscriptionInterface
+}
 
-	testNamespace := "namespace"
+func newStubSubscriptionsGetter(stubSubscriptions eventingv1alpha1.SubscriptionInterface) *stubSubscriptionsGetter {
+	return &stubSubscriptionsGetter{
+		stubSubscriptions: stubSubscriptions,
+	}
+}
+
+func (sg *stubSubscriptionsGetter) Subscriptions(namespace string) eventingv1alpha1.SubscriptionInterface {
+	return sg.stubSubscriptions
+}
+
+func (sg *stubSubscriptionsGetter) RESTClient() rest.Interface {
+	return nil
+}
+
+func newStubSubscription(subscriptionList *v1alpha1.SubscriptionList) *stubSubscriptions {
+	return &stubSubscriptions{
+		subscriptionList: subscriptionList,
+	}
+}
+
+type stubSubscriptions struct {
+	subscriptionList *v1alpha1.SubscriptionList
+}
+
+func (sSub *stubSubscriptions) Create(*v1alpha1.Subscription) (*v1alpha1.Subscription, error) {
+	return nil, nil
+}
+func (sSub *stubSubscriptions) Update(*v1alpha1.Subscription) (*v1alpha1.Subscription, error) {
+	return nil, nil
+}
+func (sSub *stubSubscriptions) UpdateStatus(*v1alpha1.Subscription) (*v1alpha1.Subscription, error) {
+	return nil, nil
+}
+func (sSub *stubSubscriptions) Delete(name string, options *v1.DeleteOptions) error { return nil }
+func (sSub *stubSubscriptions) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+	return nil
+}
+func (sSub *stubSubscriptions) Get(name string, options v1.GetOptions) (*v1alpha1.Subscription, error) {
+	return nil, nil
+}
+func (sSub *stubSubscriptions) List(opts v1.ListOptions) (*v1alpha1.SubscriptionList, error) {
+	return sSub.subscriptionList, nil
+}
+func (*stubSubscriptions) Watch(opts v1.ListOptions) (watch.Interface, error) { return nil, nil }
+func (*stubSubscriptions) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1alpha1.Subscription, err error) {
+	return nil, nil
+}
+
+func TestEvents_GetSubscribedEvents(t *testing.T) {
+
+	testNamespace1 := "namespace"
+	testNamespace2 := "test-namespace"
+
 	appName := "test_app"
 	eventType1 := "someType"
 	eventType2 := "testType"
 
-	t.Run("Should return event types from subscriptions", func(t *testing.T) {
+	t.Run("Should return subscribed events from multiple namespaces", func(t *testing.T) {
 		//given
-		testSub1 := createSubscription(testNamespace, appName, eventType1, "some_sub")
-		testSub2 := createSubscription(testNamespace, appName, eventType2, "test_sub")
+		testSub1 := createSubscription(testNamespace1, appName, eventType1, "some_sub", "v1")
+		testSub2 := createSubscription(testNamespace2, appName, eventType2, "test_sub", "v1")
 
-		subscriptions := []v1alpha1.Subscription{*testSub1, *testSub2}
+		subscriptions := &v1alpha1.SubscriptionList{Items: []v1alpha1.Subscription{*testSub1, *testSub2}}
 
-		subscriptionList := &v1alpha1.SubscriptionList{Items: subscriptions}
+		stubSubscriptions := newStubSubscription(subscriptions)
 
-		//when
-		events := getEventsFromSubscriptions(subscriptionList, appName)
+		stubSubscriptionsGetter := newStubSubscriptionsGetter(stubSubscriptions)
 
-		//then
-		assert.Equal(t, 2, len(events))
-		assert.True(t, containsEventName(events, eventType1))
-		assert.True(t, containsEventName(events, eventType2))
-	})
+		subscriptionsClient := &mocks.SubscriptionsClient{}
+		subscriptionsClient.On("EventingV1alpha1").Return(stubSubscriptionsGetter)
 
-	t.Run("Should add event to list only if subscription matches application name", func(t *testing.T) {
-		//given
-
-		testSub1 := createSubscription(testNamespace, appName, eventType1, "some_sub")
-		testSub2 := createSubscription(testNamespace, "someName", eventType2, "test_sub")
-
-		subscriptions := []v1alpha1.Subscription{*testSub1, *testSub2}
-
-		subscriptionList := &v1alpha1.SubscriptionList{Items: subscriptions}
-
-		//when
-		events := getEventsFromSubscriptions(subscriptionList, appName)
-
-		//then
-		assert.Equal(t, 1, len(events))
-		assert.True(t, containsEventName(events, eventType1))
-		assert.False(t, containsEventName(events, eventType2))
-	})
-}
-
-func TestEvents_extractNamespacesNames(t *testing.T) {
-	t.Run("Should extract names from namespaces", func(t *testing.T) {
-		//given
-		ns1 := *createNamespace("some_ns")
-		ns2 := *createNamespace("test_ns")
+		ns1 := *createNamespace(testNamespace1)
+		ns2 := *createNamespace(testNamespace2)
 		namespaceList := &coretypes.NamespaceList{Items: []coretypes.Namespace{ns1, ns2}}
 
+		nsClient := &mocks.NamespacesClient{}
+		nsClient.On("List", v1.ListOptions{}).Return(namespaceList, nil)
+
+		eventsClient := NewEventsClient(subscriptionsClient, nsClient)
+
 		//when
-		namespacesNames := extractNamespacesNames(namespaceList)
+		events, e := eventsClient.GetSubscribedEvents(appName)
 
 		//then
-		assert.Equal(t, 2, len(namespacesNames))
+		require.NoError(t, e)
+		eventsInfo := events.EventsInfo
+
+		assert.Equal(t, 2, len(eventsInfo))
+		assert.True(t, containsEventName(eventsInfo, eventType1))
+		assert.True(t, containsEventName(eventsInfo, eventType2))
+	})
+
+	t.Run("Should return subscribed events without duplicates", func(t *testing.T) {
+		//given
+		testSub1 := createSubscription(testNamespace1, appName, eventType1, "some_sub", "v1")
+		testSub2 := createSubscription(testNamespace2, appName, eventType1, "test_sub", "v1")
+
+		subscriptions := &v1alpha1.SubscriptionList{Items: []v1alpha1.Subscription{*testSub1, *testSub2}}
+
+		stubSubscriptions := newStubSubscription(subscriptions)
+
+		stubSubscriptionsGetter := newStubSubscriptionsGetter(stubSubscriptions)
+
+		subscriptionsClient := &mocks.SubscriptionsClient{}
+		subscriptionsClient.On("EventingV1alpha1").Return(stubSubscriptionsGetter)
+
+		ns1 := *createNamespace(testNamespace1)
+		ns2 := *createNamespace(testNamespace2)
+		namespaceList := &coretypes.NamespaceList{Items: []coretypes.Namespace{ns1, ns2}}
+
+		nsClient := &mocks.NamespacesClient{}
+		nsClient.On("List", v1.ListOptions{}).Return(namespaceList, nil)
+
+		eventsClient := NewEventsClient(subscriptionsClient, nsClient)
+
+		//when
+		events, e := eventsClient.GetSubscribedEvents(appName)
+
+		//then
+		require.NoError(t, e)
+		eventsInfo := events.EventsInfo
+
+		assert.Equal(t, 1, len(eventsInfo))
+		assert.True(t, containsEventName(eventsInfo, eventType1))
+	})
+
+	t.Run("Should return error when fetching namespaces fails", func(t *testing.T) {
+		//given
+		testSub1 := createSubscription(testNamespace1, appName, eventType1, "some_sub", "v1")
+		testSub2 := createSubscription(testNamespace2, appName, eventType1, "test_sub", "v1")
+
+		subscriptions := &v1alpha1.SubscriptionList{Items: []v1alpha1.Subscription{*testSub1, *testSub2}}
+
+		stubSubscriptions := newStubSubscription(subscriptions)
+
+		stubSubscriptionsGetter := newStubSubscriptionsGetter(stubSubscriptions)
+
+		subscriptionsClient := &mocks.SubscriptionsClient{}
+		subscriptionsClient.On("EventingV1alpha1").Return(stubSubscriptionsGetter)
+
+		nsClient := &mocks.NamespacesClient{}
+		nsClient.On("List", v1.ListOptions{}).Return(&coretypes.NamespaceList{}, errors.New("Some error"))
+
+		eventsClient := NewEventsClient(subscriptionsClient, nsClient)
+
+		//when
+		_, e := eventsClient.GetSubscribedEvents(appName)
+
+		//then
+		require.Error(t, e)
 	})
 }
 
-func TestEvents_removeDuplicates(t *testing.T) {
-	t.Run("Should remove events with duplicated name and version", func(t *testing.T) {
-		//given
-		event := Event{Name: "someEvent", Version: "v1"}
-		events := []Event{event, event}
-
-		//when
-		events = removeDuplicates(events)
-
-		//then
-		assert.Equal(t, 1, len(events))
-		assert.True(t, containsEvent(events, event))
-	})
-
-	t.Run("Should not remove event when duplicated name but different version", func(t *testing.T) {
-		//given
-		eventV1 := Event{Name: "someEvent", Version: "v1"}
-		eventV2 := Event{Name: "someEvent", Version: "v2"}
-
-		events := []Event{eventV1, eventV2}
-
-		//when
-		events = removeDuplicates(events)
-
-		//then
-		assert.Equal(t, 2, len(events))
-		assert.True(t, containsEvent(events, eventV1))
-		assert.True(t, containsEvent(events, eventV2))
-	})
-}
-
-func createSubscription(namespace, application, eventType, testSubscriptionName string) *v1alpha1.Subscription {
+func createSubscription(namespace, application, eventType, testSubscriptionName, version string) *v1alpha1.Subscription {
 	return &v1alpha1.Subscription{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "Subscription",
@@ -116,7 +190,7 @@ func createSubscription(namespace, application, eventType, testSubscriptionName 
 			MaxInflight:                   400,
 			PushRequestTimeoutMS:          2000,
 			EventType:                     eventType,
-			EventTypeVersion:              "v1",
+			EventTypeVersion:              version,
 			SourceID:                      application,
 		},
 	}
@@ -137,15 +211,6 @@ func createNamespace(name string) *coretypes.Namespace {
 func containsEventName(events []Event, eventType string) bool {
 	for _, e := range events {
 		if e.Name == eventType {
-			return true
-		}
-	}
-	return false
-}
-
-func containsEvent(events []Event, event Event) bool {
-	for _, e := range events {
-		if e == event {
 			return true
 		}
 	}

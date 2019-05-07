@@ -7,9 +7,10 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/event-service/internal/externalapi/mocks"
+
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
-	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed/mocks"
 	"github.com/kyma-project/kyma/components/event-service/internal/httperrors"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/assert"

@@ -2,16 +2,24 @@ package subscribed
 
 import (
 	eventtypes "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
 	coretypes "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
-	core "k8s.io/client-go/kubernetes/typed/core/v1"
-	"k8s.io/client-go/rest"
 )
 
 //EventsClient interface
 type EventsClient interface {
 	GetSubscribedEvents(appName string) (Events, error)
+}
+
+//SubscriptionsClient interface
+type SubscriptionsClient interface {
+	EventingV1alpha1() eventingv1alpha1.EventingV1alpha1Interface
+}
+
+//NamespacesClient interface
+type NamespacesClient interface {
+	List(opts meta.ListOptions) (*coretypes.NamespaceList, error)
 }
 
 //Events represents collection of all events with subscriptions
@@ -26,36 +34,17 @@ type Event struct {
 }
 
 type eventsClient struct {
-	subscriptionsClient *subscriptions.Clientset
-	namespacesClient    core.NamespaceInterface
+	subscriptionsClient SubscriptionsClient
+	namespacesClient    NamespacesClient
 }
 
 //NewEventsClient function creates client for retrieving all active events
-func NewEventsClient() (EventsClient, error) {
-	k8sConfig, err := rest.InClusterConfig()
-	if err != nil {
-		return nil, err
-	}
-	return initClient(k8sConfig)
-}
-
-func initClient(k8sConfig *rest.Config) (EventsClient, error) {
-	subscriptionsClient, err := subscriptions.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	coreClient, err := core.NewForConfig(k8sConfig)
-	if err != nil {
-		return nil, err
-	}
-
-	namespaces := coreClient.Namespaces()
+func NewEventsClient(subscriptionsClient SubscriptionsClient, namespacesClient NamespacesClient) EventsClient {
 
 	return &eventsClient{
 		subscriptionsClient: subscriptionsClient,
-		namespacesClient:    namespaces,
-	}, nil
+		namespacesClient:    namespacesClient,
+	}
 }
 
 func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
