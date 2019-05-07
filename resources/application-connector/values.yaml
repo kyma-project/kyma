@@ -16,14 +16,14 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-    dir: pr/
-    version: PR-3765
+    dir: develop/
+    version: fedca3db
   application_operator_tests:
     dir: develop/
     version: 68a39bb5
   connector_service:
-    dir: pr/
-    version: PR-3765
+    dir: develop/
+    version: fedca3db
   connector_service_tests:
     dir: develop/
     version: 3b4c9f62
@@ -37,11 +37,11 @@ global:
     dir: develop/
     version: 2dc766a0
   event_service:
-    dir: pr/
-    version: PR-3765
+    dir: develop/
+    version: fedca3db
   gateway_tests:
-    dir: pr/
-    version: PR-3765
+    dir: develop/
+    version: fedca3db
   application_gateway:
     dir: develop/
     version: 78b98274
