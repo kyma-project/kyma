@@ -19,8 +19,6 @@ global:
 
 minio:
   mode: standalone
-  accessKey: admin
-  secretKey: topSecretKey
   replicas: 1
   persistence:
     enabled: true

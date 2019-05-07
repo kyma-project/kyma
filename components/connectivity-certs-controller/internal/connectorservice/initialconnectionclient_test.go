@@ -1,6 +1,9 @@
 package connectorservice
 
 import (
+	"crypto/rand"
+	"crypto/rsa"
+	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -23,7 +26,9 @@ const (
 	clientCRTBase64 = "Y2xpZW50Q1JU" // clientCRT
 	caCRTBase64     = "Y2FDUlQ="     // caCRT
 
-	plainSubject = "CN=some-cn"
+	plainSubject = "OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE,CN=ec-default"
+
+	infoURL = "https://connector-service/v1/runtimes/management/info"
 )
 
 var (
@@ -34,12 +39,23 @@ var (
 
 func TestConnectorClient_RequestCertificate(t *testing.T) {
 
+	subject := pkix.Name{
+		OrganizationalUnit: []string{"OrgUnit"},
+		Organization:       []string{"Organization"},
+		Locality:           []string{"Waldorf"},
+		Province:           []string{"Waldorf"},
+		Country:            []string{"DE"},
+		CommonName:         "ec-default",
+	}
+
 	encodedCSR := "encodedCSR"
+	clientKey, err := rsa.GenerateKey(rand.Reader, 2048)
+	require.NoError(t, err)
 
 	t.Run("should receive certificates", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", plainSubject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		testServer, router := createTestServer()
 		connectorURL := testServer.URL
@@ -67,16 +83,17 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(csrProvider)
+		connectorClient := NewInitialConnectionClient(csrProvider)
 
 		// when
-		certificates, err := connectorClient.RequestCertificates(csrURL)
+		connection, err := connectorClient.Establish(csrURL)
 		require.NoError(t, err)
 
 		// then
-		assert.Equal(t, clientCRT, certificates.ClientCRT)
-		assert.Equal(t, caCRT, certificates.CaCRT)
-		assert.Equal(t, crtChain, certificates.CRTChain)
+		assert.Equal(t, clientCRT, connection.Certificates.ClientCRT)
+		assert.Equal(t, caCRT, connection.Certificates.CaCRT)
+		assert.Equal(t, crtChain, connection.Certificates.CRTChain)
+		assert.Equal(t, infoURL, connection.ManagementInfoURL)
 	})
 
 	t.Run("should return error when failed request info response", func(t *testing.T) {
@@ -89,17 +106,17 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(nil)
+		connectorClient := NewInitialConnectionClient(nil)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
 	t.Run("should return error when failed to create CSR", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", plainSubject).Return("", errors.New("Error"))
+		csrProvider.On("CreateCSR", subject).Return("", nil, errors.New("Error"))
 
 		testServer, router := createTestServer()
 		connectorURL := testServer.URL
@@ -112,17 +129,17 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(csrProvider)
+		connectorClient := NewInitialConnectionClient(csrProvider)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
 	t.Run("should return error when failed get certificate response", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", plainSubject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		testServer, router := createTestServer()
 		connectorURL := testServer.URL
@@ -137,10 +154,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(csrProvider)
+		connectorClient := NewInitialConnectionClient(csrProvider)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
@@ -150,17 +167,17 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(nil)
+		connectorClient := NewInitialConnectionClient(nil)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
 	t.Run("should return error when Certificate URL is incorrect", func(t *testing.T) {
 		// given
 		csrProvider := &mocks.CSRProvider{}
-		csrProvider.On("CreateCSR", plainSubject).Return(encodedCSR, nil)
+		csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 		testServer, router := createTestServer()
 		connectorURL := testServer.URL
@@ -173,10 +190,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 		csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-		connectorClient := NewConnectorClient(csrProvider)
+		connectorClient := NewInitialConnectionClient(csrProvider)
 
 		// when
-		_, err := connectorClient.RequestCertificates(csrURL)
+		_, err := connectorClient.Establish(csrURL)
 		require.Error(t, err)
 	})
 
@@ -198,7 +215,7 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 			t.Run("should return error when failed to decode certificate", func(t *testing.T) {
 				// given
 				csrProvider := &mocks.CSRProvider{}
-				csrProvider.On("CreateCSR", plainSubject).Return(encodedCSR, nil)
+				csrProvider.On("CreateCSR", subject).Return(encodedCSR, clientKey, nil)
 
 				testServer, router := createTestServer()
 				connectorURL := testServer.URL
@@ -219,10 +236,10 @@ func TestConnectorClient_RequestCertificate(t *testing.T) {
 
 				csrURL := fmt.Sprintf("%s%s", connectorURL, csrPath)
 
-				connectorClient := NewConnectorClient(csrProvider)
+				connectorClient := NewInitialConnectionClient(csrProvider)
 
 				// when
-				_, err := connectorClient.RequestCertificates(csrURL)
+				_, err := connectorClient.Establish(csrURL)
 				require.Error(t, err)
 			})
 		}
@@ -235,6 +252,9 @@ func createInfoResponse(connectorURL string) InfoResponse {
 		CsrURL: fmt.Sprintf("%s%s", connectorURL, certificatePath),
 		CertificateInfo: CertificateInfo{
 			Subject: plainSubject,
+		},
+		Api: APIUrls{
+			InfoURL: infoURL,
 		},
 	}
 }

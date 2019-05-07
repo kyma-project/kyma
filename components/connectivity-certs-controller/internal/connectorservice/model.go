@@ -1,5 +1,7 @@
 package connectorservice
 
+import "github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/certificates"
+
 type CertificatesResponse struct {
 	CRTChain  string `json:"crt"`
 	ClientCRT string `json:"clientCrt"`
@@ -30,4 +32,27 @@ type CertificateRequest struct {
 type ErrorResponse struct {
 	Code  int    `json:"code"`
 	Error string `json:"error"`
+}
+
+type EstablishedConnection struct {
+	Certificates      certificates.Certificates
+	ManagementInfoURL string
+}
+
+type ManagementInfo struct {
+	ClientIdentity ClientIdentity `json:"clientIdentity"`
+	ManagementURLs ManagementURLs `json:"urls"`
+}
+
+type ClientIdentity struct {
+	Application string
+	Tenant      string
+	Group       string
+}
+
+type ManagementURLs struct {
+	EventsURL     string `json:"eventsUrl"`
+	MetadataURL   string `json:"metadataUrl"`
+	RenewalURL    string `json:"renewCertUrl"`
+	RevocationURL string `json:"revocationCertUrl"`
 }

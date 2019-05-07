@@ -2,6 +2,10 @@
 
 package v1alpha1
 
+// CentralConnectionListerExpansion allows custom methods to be added to
+// CentralConnectionLister.
+type CentralConnectionListerExpansion interface{}
+
 // CertificateRequestListerExpansion allows custom methods to be added to
 // CertificateRequestLister.
 type CertificateRequestListerExpansion interface{}

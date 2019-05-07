@@ -11,12 +11,17 @@ import (
 
 type ApplicationconnectorV1alpha1Interface interface {
 	RESTClient() rest.Interface
+	CentralConnectionsGetter
 	CertificateRequestsGetter
 }
 
 // ApplicationconnectorV1alpha1Client is used to interact with features provided by the applicationconnector.kyma-project.io group.
 type ApplicationconnectorV1alpha1Client struct {
 	restClient rest.Interface
+}
+
+func (c *ApplicationconnectorV1alpha1Client) CentralConnections() CentralConnectionInterface {
+	return newCentralConnections(c)
 }
 
 func (c *ApplicationconnectorV1alpha1Client) CertificateRequests() CertificateRequestInterface {

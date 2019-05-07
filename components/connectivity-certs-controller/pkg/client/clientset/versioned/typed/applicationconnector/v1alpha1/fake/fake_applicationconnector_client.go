@@ -12,6 +12,10 @@ type FakeApplicationconnectorV1alpha1 struct {
 	*testing.Fake
 }
 
+func (c *FakeApplicationconnectorV1alpha1) CentralConnections() v1alpha1.CentralConnectionInterface {
+	return &FakeCentralConnections{c}
+}
+
 func (c *FakeApplicationconnectorV1alpha1) CertificateRequests() v1alpha1.CertificateRequestInterface {
 	return &FakeCertificateRequests{c}
 }
