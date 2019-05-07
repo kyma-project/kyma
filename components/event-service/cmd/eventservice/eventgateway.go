@@ -102,7 +102,7 @@ func shutdown(server *http.Server, timeout time.Duration) {
 	}
 }
 
-func initK8sResourcesClients() (subscribed.SubscriptionsClient, subscribed.NamespacesClient, error) {
+func initK8sResourcesClients() (subscribed.SubscriptionsGetter, subscribed.NamespacesClient, error) {
 	k8sConfig, err := rest.InClusterConfig()
 	if err != nil {
 		return nil, nil, err
@@ -120,5 +120,5 @@ func initK8sResourcesClients() (subscribed.SubscriptionsClient, subscribed.Names
 
 	namespacesClient := coreClient.Namespaces()
 
-	return subscriptionsClient, namespacesClient, nil
+	return subscriptionsClient.EventingV1alpha1(), namespacesClient, nil
 }

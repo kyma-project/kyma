@@ -2,7 +2,7 @@ package subscribed
 
 import (
 	eventtypes "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
-	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
+	"github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
 	coretypes "k8s.io/api/core/v1"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -13,8 +13,8 @@ type EventsClient interface {
 }
 
 //SubscriptionsClient interface
-type SubscriptionsClient interface {
-	EventingV1alpha1() eventingv1alpha1.EventingV1alpha1Interface
+type SubscriptionsGetter interface {
+	Subscriptions(namespace string) v1alpha1.SubscriptionInterface
 }
 
 //NamespacesClient interface
@@ -34,12 +34,12 @@ type Event struct {
 }
 
 type eventsClient struct {
-	subscriptionsClient SubscriptionsClient
+	subscriptionsClient SubscriptionsGetter
 	namespacesClient    NamespacesClient
 }
 
 //NewEventsClient function creates client for retrieving all active events
-func NewEventsClient(subscriptionsClient SubscriptionsClient, namespacesClient NamespacesClient) EventsClient {
+func NewEventsClient(subscriptionsClient SubscriptionsGetter, namespacesClient NamespacesClient) EventsClient {
 
 	return &eventsClient{
 		subscriptionsClient: subscriptionsClient,
@@ -70,7 +70,7 @@ func (ec *eventsClient) GetSubscribedEvents(appName string) (Events, error) {
 }
 
 func (ec *eventsClient) getEventsForNamespace(appName, namespace string) ([]Event, error) {
-	subscriptionList, e := ec.subscriptionsClient.EventingV1alpha1().Subscriptions(namespace).List(meta.ListOptions{})
+	subscriptionList, e := ec.subscriptionsClient.Subscriptions(namespace).List(meta.ListOptions{})
 
 	if e != nil {
 		return nil, e

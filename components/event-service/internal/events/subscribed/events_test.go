@@ -8,7 +8,6 @@ import (
 	"github.com/stretchr/testify/require"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/watch"
-	"k8s.io/client-go/rest"
 
 	"github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned/typed/eventing.kyma-project.io/v1alpha1"
@@ -29,10 +28,6 @@ func newStubSubscriptionsGetter(stubSubscriptions eventingv1alpha1.SubscriptionI
 
 func (sg *stubSubscriptionsGetter) Subscriptions(namespace string) eventingv1alpha1.SubscriptionInterface {
 	return sg.stubSubscriptions
-}
-
-func (sg *stubSubscriptionsGetter) RESTClient() rest.Interface {
-	return nil
 }
 
 func newStubSubscription(subscriptionList *v1alpha1.SubscriptionList) *stubSubscriptions {
@@ -89,9 +84,6 @@ func TestEvents_GetSubscribedEvents(t *testing.T) {
 
 		stubSubscriptionsGetter := newStubSubscriptionsGetter(stubSubscriptions)
 
-		subscriptionsClient := &mocks.SubscriptionsClient{}
-		subscriptionsClient.On("EventingV1alpha1").Return(stubSubscriptionsGetter)
-
 		ns1 := *createNamespace(testNamespace1)
 		ns2 := *createNamespace(testNamespace2)
 		namespaceList := &coretypes.NamespaceList{Items: []coretypes.Namespace{ns1, ns2}}
@@ -99,7 +91,7 @@ func TestEvents_GetSubscribedEvents(t *testing.T) {
 		nsClient := &mocks.NamespacesClient{}
 		nsClient.On("List", v1.ListOptions{}).Return(namespaceList, nil)
 
-		eventsClient := NewEventsClient(subscriptionsClient, nsClient)
+		eventsClient := NewEventsClient(stubSubscriptionsGetter, nsClient)
 
 		//when
 		events, e := eventsClient.GetSubscribedEvents(appName)
