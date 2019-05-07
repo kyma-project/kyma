@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure Redis Cache",
-      "description": "Documentation for Azure Redis Cache.",
-      "id": "0346088a-d4b2-4478-aa32-f18e295ec1d9",
-      "type":"Service Class"
-    }
-}

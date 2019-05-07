@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure Application Insights (Experimental)",
-      "description": "Documentation for Azure Application Insights (Experimental).",
-      "id": "66130ee7-451b-4c61-8b78-d5c426a06f3e",
-      "type":"Service Class"
-    }
-}
