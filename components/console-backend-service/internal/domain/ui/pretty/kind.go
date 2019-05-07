@@ -9,6 +9,7 @@ const (
 	MicroFrontends
 	ClusterMicroFrontend
 	ClusterMicroFrontends
+	NavigationNode
 )
 
 func (k Kind) String() string {
@@ -25,6 +26,8 @@ func (k Kind) String() string {
 		return "ClusterMicroFrontend"
 	case ClusterMicroFrontends:
 		return "ClusterMicroFrontends"
+	case NavigationNode:
+		return "NavigationNode"
 	default:
 		return ""
 	}

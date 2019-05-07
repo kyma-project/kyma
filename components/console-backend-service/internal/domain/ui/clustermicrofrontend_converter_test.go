@@ -1,12 +1,14 @@
 package ui
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
@@ -17,6 +19,8 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
 		placement := "cluster"
+		settings, err := fixSettings()
+		assert.Nil(t, err)
 
 		item := v1alpha1.ClusterMicroFrontend{
 			ObjectMeta: metav1.ObjectMeta{
@@ -35,8 +39,8 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 							ViewURL:          "/test/viewUrl",
 							ShowInNavigation: false,
 							Order:            2,
-							Settings: v1alpha1.Settings{
-								ReadOnly: true,
+							Settings: &runtime.RawExtension{
+								Raw: settings,
 							},
 						},
 					},
@@ -58,7 +62,7 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 					ShowInNavigation: false,
 					Order:            2,
 					Settings: gqlschema.Settings{
-						ReadOnly: true,
+						"readOnly": true,
 					},
 				},
 			},
@@ -89,6 +93,8 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"
 	placement := "cluster"
+	settings, err := fixSettings()
+	assert.Nil(t, err)
 
 	item := v1alpha1.ClusterMicroFrontend{
 		ObjectMeta: metav1.ObjectMeta{
@@ -106,8 +112,8 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 						NavigationPath:   "test-path",
 						ViewURL:          "/test/viewUrl",
 						ShowInNavigation: true,
-						Settings: v1alpha1.Settings{
-							ReadOnly: true,
+						Settings: &runtime.RawExtension{
+							Raw: settings,
 						},
 					},
 				},
@@ -128,7 +134,7 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 				ViewURL:          "/test/viewUrl",
 				ShowInNavigation: true,
 				Settings: gqlschema.Settings{
-					ReadOnly: true,
+					"readOnly": true,
 				},
 			},
 		},
@@ -169,4 +175,11 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 		assert.Len(t, result, 1)
 		assert.Equal(t, expected, result[0])
 	})
+}
+
+func fixSettings() ([]byte, error) {
+	settings := map[string]interface{}{
+		"readOnly": true,
+	}
+	return json.Marshal(settings)
 }

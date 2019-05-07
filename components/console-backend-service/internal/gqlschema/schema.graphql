@@ -6,6 +6,8 @@ scalar Labels
 
 scalar Timestamp
 
+scalar Settings
+
 # Directives
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
@@ -808,10 +810,6 @@ type NavigationNode {
     showInNavigation: Boolean!
     order: Int!
     settings: Settings!
-}
-
-type Settings {
-    readOnly: Boolean!
 }
 
 # SelfSubjectRules

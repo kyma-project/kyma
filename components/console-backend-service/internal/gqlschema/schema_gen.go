@@ -754,10 +754,6 @@ type ComplexityRoot struct {
 		LoadBalancer func(childComplexity int) int
 	}
 
-	Settings struct {
-		ReadOnly func(childComplexity int) int
-	}
-
 	Subscription struct {
 		ClusterAssetEvent         func(childComplexity int) int
 		AssetEvent                func(childComplexity int, namespace string) int
@@ -6803,13 +6799,6 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ServiceStatus.LoadBalancer(childComplexity), true
-
-	case "Settings.readOnly":
-		if e.complexity.Settings.ReadOnly == nil {
-			break
-		}
-
-		return e.complexity.Settings.ReadOnly(childComplexity), true
 
 	case "Subscription.clusterAssetEvent":
 		if e.complexity.Subscription.ClusterAssetEvent == nil {
@@ -16733,8 +16722,7 @@ func (ec *executionContext) _NavigationNode_settings(ctx context.Context, field 
 	res := resTmp.(Settings)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	return ec._Settings(ctx, field.Selections, &res)
+	return res
 }
 
 var podImplementors = []string{"Pod"}
@@ -25702,63 +25690,6 @@ func (ec *executionContext) _ServiceStatus_loadBalancer(ctx context.Context, fie
 	return ec._LoadBalancerStatus(ctx, field.Selections, &res)
 }
 
-var settingsImplementors = []string{"Settings"}
-
-// nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Settings(ctx context.Context, sel ast.SelectionSet, obj *Settings) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, settingsImplementors)
-
-	out := graphql.NewOrderedMap(len(fields))
-	invalid := false
-	for i, field := range fields {
-		out.Keys[i] = field.Alias
-
-		switch field.Name {
-		case "__typename":
-			out.Values[i] = graphql.MarshalString("Settings")
-		case "readOnly":
-			out.Values[i] = ec._Settings_readOnly(ctx, field, obj)
-			if out.Values[i] == graphql.Null {
-				invalid = true
-			}
-		default:
-			panic("unknown field " + strconv.Quote(field.Name))
-		}
-	}
-
-	if invalid {
-		return graphql.Null
-	}
-	return out
-}
-
-// nolint: vetshadow
-func (ec *executionContext) _Settings_readOnly(ctx context.Context, field graphql.CollectedField, obj *Settings) graphql.Marshaler {
-	ctx = ec.Tracer.StartFieldExecution(ctx, field)
-	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
-	rctx := &graphql.ResolverContext{
-		Object: "Settings",
-		Args:   nil,
-		Field:  field,
-	}
-	ctx = graphql.WithResolverContext(ctx, rctx)
-	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
-	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
-		ctx = rctx // use context from middleware stack in children
-		return obj.ReadOnly, nil
-	})
-	if resTmp == nil {
-		if !ec.HasError(rctx) {
-			ec.Errorf(ctx, "must not be null")
-		}
-		return graphql.Null
-	}
-	res := resTmp.(bool)
-	rctx.Result = res
-	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalBoolean(res)
-}
-
 var subscriptionImplementors = []string{"Subscription"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -28618,6 +28549,8 @@ scalar Labels
 
 scalar Timestamp
 
+scalar Settings
+
 # Directives
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
@@ -29420,10 +29353,6 @@ type NavigationNode {
     showInNavigation: Boolean!
     order: Int!
     settings: Settings!
-}
-
-type Settings {
-    readOnly: Boolean!
 }
 
 # SelfSubjectRules

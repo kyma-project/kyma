@@ -7,6 +7,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 )
 
 func TestMicrofrontendConverter_ToGQL(t *testing.T) {
@@ -17,6 +18,8 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 		version := "v1"
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
+		settings, err := fixSettings()
+		assert.Nil(t, err)
 
 		item := v1alpha1.MicroFrontend{
 			ObjectMeta: metav1.ObjectMeta{
@@ -35,8 +38,8 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 							ViewURL:          "/test/viewUrl",
 							ShowInNavigation: true,
 							Order:            2,
-							Settings: v1alpha1.Settings{
-								ReadOnly: true,
+							Settings: &runtime.RawExtension{
+								Raw: settings,
 							},
 						},
 					},
@@ -57,7 +60,7 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 					ShowInNavigation: true,
 					Order:            2,
 					Settings: gqlschema.Settings{
-						ReadOnly: true,
+						"readOnly": true,
 					},
 				},
 			},
@@ -89,6 +92,8 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 	version := "v1"
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"
+	settings, err := fixSettings()
+	assert.Nil(t, err)
 
 	item := v1alpha1.MicroFrontend{
 		ObjectMeta: metav1.ObjectMeta{
@@ -107,8 +112,8 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 						ViewURL:          "/test/viewUrl",
 						ShowInNavigation: false,
 						Order:            2,
-						Settings: v1alpha1.Settings{
-							ReadOnly: false,
+						Settings: &runtime.RawExtension{
+							Raw: settings,
 						},
 					},
 				},
@@ -129,7 +134,7 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 				ShowInNavigation: false,
 				Order:            2,
 				Settings: gqlschema.Settings{
-					ReadOnly: false,
+					"readOnly": true,
 				},
 			},
 		},

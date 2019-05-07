@@ -534,10 +534,6 @@ type ServiceStatus struct {
 	LoadBalancer LoadBalancerStatus `json:"loadBalancer"`
 }
 
-type Settings struct {
-	ReadOnly bool `json:"readOnly"`
-}
-
 type UsageKind struct {
 	Name        string `json:"name"`
 	Group       string `json:"group"`
