@@ -12,6 +12,6 @@ This table lists the configurable parameters, their descriptions, and default va
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **replicaCount** | Defines the number of replicas of the service. For more details, see the [Kubernetes documentation](https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/).| `1` |
-| **virtualservice.enabled** |  Enables to use an external service. | `false` |
-| **virtualservice.annotations** |       | `{}` |
+| **virtualservice.enabled** | Enables to use an external service. | `false` |
+| **virtualservice.annotations** | Defines the service annotation. | `{}` |
 | **virtualservice.name** | Defines the service name. | `asset-metadata-service` |

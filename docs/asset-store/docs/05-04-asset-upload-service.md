@@ -14,5 +14,5 @@ This table lists the configurable parameters, their descriptions, and default va
 |-----------|-------------|---------------|
 | **replicaCount** | Defines the number of replicas of the service. | `1` |
 | **virtualservice.enabled** |  Enables to use an external service. | `false` |
-| **virtualservice.annotations** |       | `{}` |
+| **virtualservice.annotations** | Defines the service annotation. | `{}` |
 | **virtualservice.name** |  Defines the service name. | `asset-upload-service` |
