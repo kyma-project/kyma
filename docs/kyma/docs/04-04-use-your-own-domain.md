@@ -122,7 +122,7 @@ Follow these steps:
     gcloud iam service-accounts keys create ./letsencrypt/key.json --iam-account dnsmanager@$GCP_PROJECT.iam.gserviceaccount.com
     ```
     
-    > **NOTE**: There is a fixed number of keys that may be generated for single Service Account. We suggest reusing keys instead of generating new one for every cluster.
+    > **NOTE**: The number of keys you can generate for a single service account is limited. Reuse the existing keys instead of generating a new key for every cluster.
 
 5. Run the Certbot Docker image with the `letsencrypt` folder mounted. Certbot uses the key to apply DNS challenge for the certificate request and stores the TLS certificates in that folder. Run:
     ```
