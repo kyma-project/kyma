@@ -18,31 +18,31 @@ files:
   - path: "./kyma/tools/stability-checker/README.md"
     config:
       white-list-external: ["https://github.com/kyma-project/stability-checker/raw/{branchName}/deploy/chart/stability-checker-0.1.0.tgz"]
-  - path: "./kyma/docs/monitoring/docs/02-01-monitoring.md"
+  - path: "./kyma/docs/monitoring/02-01-monitoring.md"
     config:
       white-list-external: ["https://grafana.{DOMAIN"]
   - path: "./kyma/resources/core/charts/monitoring/charts/alertmanager/README.md"
     config:
       white-list-external: ["https://alert.victorops.com/integrations/generic/20131114/alert"]
-  - path: "./kyma/docs/application-connector/docs/012-details-serviceclass-documentation.md"
+  - path: "./kyma/docs/application-connector/012-details-serviceclass-documentation.md"
     config:
       white-list-external: ["https://www.orders.com/v1/orders"]
-  - path: "./kyma/docs/security/docs/03-01-kubecofig-generator.md"
+  - path: "./kyma/docs/security/03-01-kubecofig-generator.md"
     config:
       white-list-external: ["https://configurations-generator.{YOUR_CLUSTER_DOMAIN"]
-  - path: "./kyma/docs/helm-broker/docs/05-01-helm-broker.md"
+  - path: "./kyma/docs/helm-broker/05-01-helm-broker.md"
     config:
       white-list-external: ["custom.bundles-repository"]
-  - path: "./kyma/docs/kyma/docs/04-07-aks-xip.io-domain.md"
+  - path: "./kyma/docs/kyma/04-07-aks-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
-  - path: "./kyma/docs/kyma/docs/04-06-gke-xip.io-domain.md"
+  - path: "./kyma/docs/kyma/04-06-gke-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
-  - path: "./kyma/docs/helm-broker/docs/05-04-configure-hb.md"
+  - path: "./kyma/docs/helm-broker/05-04-configure-hb.md"
     config:
       white-list-external: ["https://{host}/{path}/{bundle_repo_version"]
-  - path: "./kyma/docs/application-connector/docs/08-09-revoke-cert.md"
+  - path: "./kyma/docs/application-connector/08-09-revoke-cert.md"
     config:
       white-list-external: ["https://gateway.{CLUSTER_DOMAIN}/v1/applications/certificates/revocations"]
   - path: "./kyma/resources/istio/README.md"
@@ -51,12 +51,12 @@ files:
   - path: "./kyma/docs/migration-guides/0.8-0.9.md"
     config:
       white-list-external: ["https://github.com/kyma-project/kyma/releases/tag/0.9.0"]
-  - path: "./kyma/docs/asset-store/docs/05-02-asset-store-metadata-service.md"
+  - path: "./kyma/docs/asset-store/05-02-asset-store-metadata-service.md"
     config:
       white-list-external: ["https://{VIRTUALSERVICE_NAME}.{DOMAIN"]
-  - path: "./kyma/docs/asset-store/docs/05-04-asset-upload-service.md"
+  - path: "./kyma/docs/asset-store/05-04-asset-upload-service.md"
     config:
       white-list-external: ["https://{VIRTUALSERVICE_NAME}.{DOMAIN"]
-  - path: "./kyma/docs/asset-store/docs/05-01-asset-store.md"
+  - path: "./kyma/docs/asset-store/05-01-asset-store.md"
     config:
       white-list-external: ["https://minio.{DOMAIN}/minio"] 
