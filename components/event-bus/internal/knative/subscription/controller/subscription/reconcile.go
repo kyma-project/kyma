@@ -207,9 +207,11 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			}
 			//TODO
 			log.Info("Delete knative sub A and set a new one")
-			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
-			KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name: subscription.Name,
-				metrics.Ready: "true"}).Set(1)
+			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Namespace, subscription.Name)
+			KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{
+				metrics.Namespace: subscription.Namespace,
+				metrics.Name:      subscription.Name,
+				metrics.Ready:     "true"}).Set(1)
 			log.Info("Knative Subscription is created", "Subscription", knativeSubsName)
 		} else {
 			// In case there is a change in Channel name or URI, delete and re-create Knative Subscription because update does not work.
@@ -225,8 +227,10 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 				}
 				//TODO
 				log.Info("Delete knative sub B and set a new one")
-				KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
-				KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{metrics.Name: subscription.Name,
+				KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Namespace, subscription.Name)
+				KnativeSubscriptionsGauge.Metric.With(prometheus.Labels{
+					metrics.Namespace: subscription.Namespace,
+					metrics.Name: subscription.Name,
 					metrics.Ready: "false"}).Set(1)
 				log.Info("Knative Subscription is re-created", "Subscription", knativeSubsName)
 			}
@@ -250,7 +254,7 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 			if err != nil {
 				return false, err
 			}
-			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Name)
+			KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(subscription.Namespace, subscription.Name)
 			log.Info("Knative Subscription is deleted", "Subscription", knativeSubsName)
 			KnativeChannelGauge.DeleteKnativeChannelGauge(subscription.Name)
 			log.Info("Knative Channel Gauge is deleted", "subscription", subscription.Name)
@@ -291,7 +295,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 		if err != nil {
 			return err
 		}
-		KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(kymaSubscriptionName)
+		KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGauge(namespace, kymaSubscriptionName)
 		log.Info("Knative Subscription is deleted", "Subscription", knativeSubs.Name)
 	}
 

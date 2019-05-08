@@ -23,7 +23,7 @@ var (
 
 	KnativeSubscriptionsGaugeObj *SubscriptionsGauge
 	knativeSubscriptionsGaugeVec *prometheus.GaugeVec
-	knativeSubscriptionsGaugeLabels = []string{Name, Ready}
+	knativeSubscriptionsGaugeLabels = []string{Namespace,Name, Ready}
 
 	KnativeChanelGaugeObj *SubscriptionsGauge
 	knativeChanelGaugeVec *prometheus.GaugeVec
@@ -66,9 +66,9 @@ func (ksg *SubscriptionsGauge) DeleteKymaSubscriptionsGauge(namespace string, na
 	ksg.Metric.DeleteLabelValues(values...)
 }
 
-func (ksg *SubscriptionsGauge) DeleteKnativeSubscriptionsGauge(name string) {
-	ksg.Metric.DeleteLabelValues(name, "true")
-	ksg.Metric.DeleteLabelValues(name, "false")
+func (ksg *SubscriptionsGauge) DeleteKnativeSubscriptionsGauge(namespace string, name string) {
+	ksg.Metric.DeleteLabelValues(namespace, name, "true")
+	ksg.Metric.DeleteLabelValues(namespace, name, "false")
 }
 
 
