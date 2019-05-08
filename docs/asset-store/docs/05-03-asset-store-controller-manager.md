@@ -13,7 +13,6 @@ To configure the Asset Store Controller Manager sub-chart, override the default 
 
 This table lists the configurable parameters, their descriptions, and default values:
 
-
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
 | **resources.limits.cpu** | Defines limits for CPU resources. | `100m` |

@@ -9,6 +9,15 @@ To configure the Minio sub-chart, override the default values of its `values.yam
 >* [Helm overrides for Kyma installation](/root/kyma/#configuration-helm-overrides-for-kyma-installation)
 >* [Sub-charts overrides](/root/kyma/#configuration-helm-overrides-for-kyma-installation-sub-chart-overrides)
 
->**NOTE:** As Minio is originally an opensource Helm chart, some of its values in Kyma are already overridden in the main `values.yaml` of the Asset Store chart.
+As Minio is originally an open-source Helm chart, some of its values in Kyma are already overridden in the main `values.yaml` of the Asset Store chart.
 
-See [this document](https://github.com/helm/charts/tree/master/stable/minio#configuration) for a full list of Minio configurable parameters.
+## Configurable parameters
+
+This table lists the configurable parameters, their descriptions, and default values:
+
+| Parameter | Description | Default value |
+|-----------|-------------|---------------|
+| **secretkey** | Defines the secret key. Add the parameter to set your own **secretkey** credentials. | By default, the **secretkey** is automatically generated. |
+| **accesskey** | Defines the access key. Add the parameter to set your own **accesskey** credentials.  | By default, the **accesskey** is automatically generated. |
+
+See the official [Minio documentation](https://github.com/helm/charts/tree/master/stable/minio#configuration) for a full list of Minio configurable parameters.
