@@ -61,11 +61,11 @@ data:
   # pilot.resources.requests.cpu: 100m
   pilot.autoscaleEnabled: "false"
 
-  # Those values are deprecated, need to update to:
   mixer.policy.resources.limits.memory: 1024Mi
   mixer.policy.resources.requests.memory: 512Mi
   mixer.telemetry.resources.limits.memory: 1024Mi
   mixer.telemetry.resources.requests.memory: 512Mi
+  mixer.loadshedding.mode: disabled
 
   mixer.policy.autoscaleEnabled: "false"
   mixer.telemetry.autoscaleEnabled: "false"
