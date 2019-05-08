@@ -95,7 +95,7 @@ Follow these steps:
 
 ### Get the TLS certificate
 
-1. Export issuer email and domain for the cluster:
+1. Export the certificate issuer email and the cluster domain as environment variables:
     ```
     export CERT_ISSUER_EMAIL={YOUR_EMAIL}
     export DOMAIN="$CLUSTER_NAME.$(echo $DNS_NAME | sed `s/\.$//`)"
