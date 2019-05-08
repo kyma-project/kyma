@@ -237,21 +237,6 @@ gcloud dns --project=$PROJECT record-sets transaction add $APISERVER_PUBLIC_IP -
 gcloud dns --project=$PROJECT record-sets transaction execute --zone=$DNS_ZONE
 ```
 
-## Access the cluster
-
-1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
-
-    ```
-    kubectl get virtualservice core-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
-    ```
-
-2. Access your cluster under this address:
-
-    ```
-    https://{VIRTUAL_SERVICE_HOST}
-    ```
->**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see [this](#installation-install-kyma-locally-access-the-kyma-console) document.
-
 
   </details>
   <details>
@@ -500,19 +485,11 @@ az network dns record-set a create -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.$SUB
 az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.$SUB_DOMAIN -a $APISERVER_PUBLIC_IP
 ```
 
-## Post-installation steps
 
-### Add the xip.io self-signed certificate to your OS trusted certificates
+</details>
+</div>
 
-After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
-```
-tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-&& kubectl get configmap cluster-certificate-overrides -n kyma-installer -o jsonpath='{.data.global\.tlsCrt}' | base64 --decode > $tmpfile \
-&& sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
-&& rm $tmpfile
-```
-
-### Access the cluster
+## Access the cluster
 
 1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
   ```
@@ -528,6 +505,3 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
   ```
   kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
   ```
-
-</details>
-</div>
