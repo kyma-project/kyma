@@ -27,7 +27,9 @@ export yourClusterDomain='demo.cluster.kyma.cx'
 
 Use the command line to create, call, deploy, expose, and bind a function.
 
-### Deploy a function using a yaml file and kubectl
+### Deploy a function
+
+#### Using a yaml file and kubectl
 
 You can use the Kubeless CLI to deploy functions in Kyma.
 
@@ -35,11 +37,7 @@ You can use the Kubeless CLI to deploy functions in Kyma.
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/deployment.yaml
 ```
 
-Check if the function is available:
-```bash
-kubeless function list hello
-```
-### Deploy a function using a JS file and the Kubeless CLI
+#### Using a JS file and the Kubeless CLI
 
 You can deploy a function using the Kubernetes and Kubeless CLI. See the following example:
 
@@ -47,15 +45,17 @@ You can deploy a function using the Kubernetes and Kubeless CLI. See the followi
 kubeless function deploy hello --runtime nodejs8 --handler hello.main --from-file https://raw.githubusercontent.com/kyma-project/examples/master/event-subscription/lambda/js/hello-with-data.js
 ```
 
-### Call a function using the CLI
+### List functions
 
-Use the CLI to call a function:
+Check if the function is available:
 
 ```bash
-kubeless function call hello
+kubeless function list hello
 ```
 
-### Expose a function without authentication
+### Expose a function
+
+#### Without authentication
 
 Use the CLI to create an API for your function:
 
@@ -63,14 +63,15 @@ Use the CLI to create an API for your function:
 kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/api-without-auth.yaml
 ```
 
-### Expose a function with authentication enabled
+#### With authentication enabled
 
 If your function is deployed to a cluster, run:
 
 ```bash
-curl -k https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/api-with-auth.yaml | sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -f -
+curl https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/api-with-auth.yaml | sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -f -
 ```
 
+### Call the function using curl
 
 If Kyma is running locally, add `hello.kyma.local` mapped to `minikube ip` to `/etc/hosts`.
 
@@ -78,10 +79,16 @@ If Kyma is running locally, add `hello.kyma.local` mapped to `minikube ip` to `/
 echo "$(minikube ip) hello.kyma.local" | sudo tee -a /etc/hosts
 ```
 
-Create the API for your function:
+Use curl to call the function:
 
 ```bash
-kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/api-with-auth.yaml
+curl -L -k hello.kyma.local
+```
+
+You should receive the following response:
+
+```
+hello world
 ```
 
 ### Bind a function to events
