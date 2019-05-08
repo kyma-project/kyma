@@ -11,7 +11,7 @@ This is an example lambda function:
 
 ```
 module.exports = {
-  foo: function (event, context) {
+  main: function (event, context) {
     return 'hello world!';
   }
 }
