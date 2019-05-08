@@ -1,0 +1,216 @@
+{{- if not .Values.minio.persistence.enabled }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ template "fullname" . }}-migrator
+  labels:
+    app: {{ template "name" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "0"
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ .Values.minio.persistence.size | quote }}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-migrator
+  labels:
+    app: {{ template "name" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": pre-upgrade,post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+data:
+  initialize: |-
+{{ include (print $.Template.BasePath "/_helper_migrate_buckets.txt") . | indent 4 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-migration-pre
+  labels:
+    app: {{ template "name" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-weight": "2"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: minio-configuration
+          projected:
+            sources:
+            - configMap:
+                name: {{ template "fullname" . }}-migrator
+            - secret:
+                name: assetstore-minio
+        - name: export
+          persistentVolumeClaim:
+            claimName: {{ template "fullname" . }}-migrator
+      initContainers:
+      - name: mode-checker
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        imagePullPolicy: IfNotPresent
+        command:
+        - bash
+        - -c
+        - "kubectl -n {{ .Release.Namespace }} get deployment assetstore-minio -o jsonpath=\"{.spec.template.metadata.annotations.persistance}\" | xargs -n1 echo | tr -d '\n' > /export/persistance.enabled"
+        volumeMounts:
+        - name: export
+          mountPath: /export
+      containers:
+      - name: migrator
+        image: "{{ .Values.global.minio_client.image }}:{{ .Values.global.minio_client.tag }}"
+        imagePullPolicy: IfNotPresent
+        command:
+        - /bin/sh
+        - /config/initialize
+        env:
+          - name: MINIO_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_ENDPOINT
+          - name: MINIO_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_PORT
+          - name: PRIVATE_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: asset-upload-service
+                key: private
+          - name: PUBLIC_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: asset-upload-service
+                key: public
+          - name: LOCAL_STORAGE
+            value: /export
+          - name: MODE
+            value: pre
+        volumeMounts:
+          - name: minio-configuration
+            mountPath: /config
+          - name: export
+            mountPath: /export
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-migration-post
+  labels:
+    app: {{ template "name" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: minio-configuration
+          projected:
+            sources:
+            - configMap:
+                name: {{ template "fullname" . }}-migrator
+            - secret:
+                name: assetstore-minio
+        - name: export
+          persistentVolumeClaim:
+            claimName: {{ template "fullname" . }}-migrator
+      containers:
+      - name: migrator
+        image: "{{ .Values.global.minio_client.image }}:{{ .Values.global.minio_client.tag }}"
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh", "/config/initialize"]
+        env:
+          - name: MINIO_ENDPOINT
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_ENDPOINT
+          - name: MINIO_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_PORT
+          - name: PRIVATE_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: asset-upload-service
+                key: private
+          - name: PUBLIC_BUCKET
+            valueFrom:
+              configMapKeyRef:
+                name: asset-upload-service
+                key: public
+          - name: LOCAL_STORAGE
+            value: /export
+        volumeMounts:
+          - name: minio-configuration
+            mountPath: /config
+          - name: export
+            mountPath: /export
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-migration-delete-pvc
+  labels:
+    app: {{ template "name" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: pvc-remover
+        image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+        imagePullPolicy: IfNotPresent
+        command:
+        - bash
+        - -c
+        - "kubectl -n {{ .Release.Namespace }} delete pvc {{ template "fullname" . }}-migrator"
+{{- end }}
