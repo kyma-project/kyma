@@ -10,10 +10,11 @@ Lambdas or lambda functions are small functions that run in Kyma in a cost-effic
 This is an example lambda function:
 
 ```
-def myfunction (event, context):
-  print event
-  return event['data']
-
+module.exports = {
+  foo: function (event, context) {
+    return 'hello world!';
+  }
+}
 ```
 
 The use of lambdas in Kyma addresses several scenarios:  
