@@ -57,7 +57,7 @@ data:
 
   pilot.resources.limits.memory: 1024Mi
   # pilot.resources.limits.cpu: 200m
-  pilot.resources.requests.memory: 256Mi
+  pilot.resources.requests.memory: 512Mi
   # pilot.resources.requests.cpu: 100m
   pilot.autoscaleEnabled: "false"
 
