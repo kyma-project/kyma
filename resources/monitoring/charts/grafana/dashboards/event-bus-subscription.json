@@ -16,7 +16,7 @@
   "gnetId": null,
   "graphTooltip": 0,
   "id": 28,
-  "iteration": 1557310862710,
+  "iteration": 1557310862712,
   "links": [],
   "panels": [
     {
@@ -92,7 +92,7 @@
       "thresholds": "1,2",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Kyma Subscription",
+      "title": "Kyma Subscription Status",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -189,7 +189,7 @@
       "thresholds": "1,2",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Knative Subscription",
+      "title": "Knative Subscription Status",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -281,7 +281,7 @@
       "thresholds": "1,2",
       "timeFrom": null,
       "timeShift": null,
-      "title": "Knative Channels",
+      "title": "Knative Channels Status",
       "type": "singlestat",
       "valueFontSize": "80%",
       "valueMaps": [
@@ -338,8 +338,8 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "hello-with-kaka-subscription",
-          "value": "hello-with-kaka-subscription"
+          "text": "hello-with-data-subscription",
+          "value": "hello-with-data-subscription"
         },
         "datasource": "Prometheus",
         "definition": "label_values(total_kyma_subscriptions, name)",
