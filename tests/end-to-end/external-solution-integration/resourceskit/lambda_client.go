@@ -10,6 +10,23 @@ import (
 	"k8s.io/client-go/rest"
 )
 
+const lambdaFunction = `
+	const request = require('request')
+	module.exports = { 'entrypoint': function (event, context) {
+		return new Promise((resolve, reject) => {
+			const url = "http://" + process.env.GATEWAY_URL + "/counter"
+			sendReq(url, resolve, reject)
+		})
+	} }
+	function sendReq(url, resolve, reject) {
+        request.post(url, { json: true }, (error, response, body) => {
+            if (error) {
+                resolve(error);
+            }
+            resolve(response);dd 
+        })
+    }`
+
 type LambdaClient interface {
 	DeployLambda(appName string) error
 	DeleteLambda(appName string, options *metav1.DeleteOptions) error
@@ -48,13 +65,12 @@ func (c *lambdaClient) DeleteLambda(appName string, options *metav1.DeleteOption
 }
 
 func (c *lambdaClient) createLambda(name string) *kubelessV1.Function {
-	//TODO: Modify lambda's code - it can handle URL to gist
 	lambdaSpec := kubelessV1.FunctionSpec{
 		Handler:             "e2e.entrypoint",
-		Function:            "module.exports={'entrypoint':(event,context)=>{console.log(\"IMPLEMENT_ME\")}}",
+		Function:            lambdaFunction,
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
-		Deps:                "",
+		Deps:                "request",
 		Deployment: v1beta1.Deployment{
 			TypeMeta:   metav1.TypeMeta{Kind: "Deployment", APIVersion: v1beta1.SchemeGroupVersion.String()},
 			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: c.namespace, Labels: map[string]string{"function": name}},
