@@ -44,7 +44,7 @@ kubeless function list hello
 You can deploy a function using the Kubernetes and Kubeless CLI. See the following example:
 
 ```bash
-kubeless function deploy hello --runtime nodejs8 --handler hello.main --from-file https://raw.githubusercontent.com/kyma-project/examples/master/event-subscription/lambda/js/hello-with-data.js --trigger-http
+kubeless function deploy hello --runtime nodejs8 --handler hello.main --from-file https://raw.githubusercontent.com/kyma-project/examples/master/event-subscription/lambda/js/hello-with-data.js
 ```
 
 ### Call a function using the CLI
