@@ -9,10 +9,16 @@ import (
 	"syscall"
 	"time"
 
+	"k8s.io/client-go/rest"
+
+	"github.com/kyma-project/kyma/components/event-service/internal/events/subscribed"
+
+	subscriptions "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
 	"github.com/kyma-project/kyma/components/event-service/internal/events/bus"
 	"github.com/kyma-project/kyma/components/event-service/internal/externalapi"
 	"github.com/kyma-project/kyma/components/event-service/internal/httptools"
 	log "github.com/sirupsen/logrus"
+	core "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 const (
@@ -32,7 +38,16 @@ func main() {
 
 	bus.Init(options.sourceID, options.eventsTargetURL)
 
-	externalHandler := externalapi.NewHandler(options.maxRequestSize)
+	subscriptionsClient, namespacesClient, e := initK8sResourcesClients()
+
+	if e != nil {
+		log.Error("Unable to create Events Client.", e.Error())
+		return
+	}
+
+	eventsClient := subscribed.NewEventsClient(subscriptionsClient, namespacesClient)
+
+	externalHandler := externalapi.NewHandler(options.maxRequestSize, eventsClient)
 
 	if options.requestLogging {
 		externalHandler = httptools.RequestLogger("External handler: ", externalHandler)
@@ -85,4 +100,25 @@ func shutdown(server *http.Server, timeout time.Duration) {
 	} else {
 		log.Info("HTTP server shutdown successful")
 	}
+}
+
+func initK8sResourcesClients() (subscribed.SubscriptionsGetter, subscribed.NamespacesClient, error) {
+	k8sConfig, err := rest.InClusterConfig()
+	if err != nil {
+		return nil, nil, err
+	}
+
+	subscriptionsClient, err := subscriptions.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	coreClient, err := core.NewForConfig(k8sConfig)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	namespacesClient := coreClient.Namespaces()
+
+	return subscriptionsClient.EventingV1alpha1(), namespacesClient, nil
 }

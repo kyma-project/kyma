@@ -33,3 +33,9 @@ spec:
       navigationPath: service-brokers
       viewUrl: '/home/settings/serviceBrokers'
       order: 2
+      requiredPermissions:
+        - apiGroup: servicecatalog.k8s.io
+          resource: clusterservicebrokers
+          verbs:
+            - list
+            - watch

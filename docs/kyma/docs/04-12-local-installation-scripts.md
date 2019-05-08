@@ -3,9 +3,9 @@ title: Local installation scripts deep-dive
 type: Installation
 ---
 
-This document extends the [Install Kyma locally from sources](#installation-install-kyma-locally-from-sources) guide with a detailed breakdown of the alternative local installation method which is the `run.sh` script.
+This document extends the [Install Kyma locally](#installation-install-kyma-locally) guide with a detailed breakdown of the `run.sh` script.
 
-The following snippet is the main element of the `run.sh` script:
+The following snippet is the main element of the script:
 
 ```
 if [[ ! $SKIP_MINIKUBE_START ]]; then
@@ -25,6 +25,12 @@ fi
 bash $SCRIPTS_DIR/installer.sh --local --cr "$CR_PATH" --password "$ADMIN_PASSWORD"
 rm -rf $TMPDIR
 ```
+You can execute the `run.sh` script with the following parameters:
+
+- `--password {YOUR_PASSWORD}` which allows you to set a password for the **admin@kyma.cx** user.
+- `--skip-minikube-start` which skips the execution of the `installation/scripts/minikube.sh` script.
+- `--vm-driver` which points to either `virtualbox` or `hyperkit`, depending on your operating system.
+
 Subsequent sections provide details of all involved subscripts, in the order in which the `run.sh` script triggers them.
 
 ## The minikube.sh script

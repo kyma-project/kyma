@@ -107,4 +107,4 @@ You can only remove the component before the installation process starts. To dis
   ```
   kubectl get pods -n kyma-system
   ```
-2. Sign in to the Kyma Console using the `admin@kyma.cx` email address as described in the [Install Kyma locally from the release](#installation-install-kyma-locally-from-the-release) document.
+2. Sign in to the Kyma Console using the `admin@kyma.cx` email address as described in the [Install Kyma locally from the release](#installation-install-kyma-locally) document.
