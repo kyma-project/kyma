@@ -10,7 +10,7 @@ metadata:
 spec:
   replicas: {{ .Values.controllerManager.replicas }}
   strategy:
-{{ toYaml .Values.controllerManager.updateStrategy | indent 4 }}
+    type: {{ .Values.controllerManager.updateStrategy }}
   minReadySeconds: {{ .Values.controllerManager.minReadySeconds }}
   selector:
     matchLabels:
@@ -30,34 +30,6 @@ spec:
     spec:
       serviceAccountName: "{{ .Values.controllerManager.serviceAccount }}"
       containers:
-      {{- if .Values.controllerManager.healthcheck.enabled }}
-      - name: healthcheck
-        image: eu.gcr.io/kyma-project/develop/service-catalog/health-proxy:0.0.1
-        env:
-          - name: PROXY_TARGET_URL
-            value: "https://localhost:8444/"
-        imagePullPolicy: Always
-        livenessProbe:
-          failureThreshold: 3
-          httpGet:
-            path: /healthz
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 40
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-        readinessProbe:
-          failureThreshold: 1
-          httpGet:
-            path: /healthz/ready
-            port: 8080
-            scheme: HTTP
-          initialDelaySeconds: 20
-          periodSeconds: 10
-          successThreshold: 1
-          timeoutSeconds: 5
-      {{- end }}
       - name: controller-manager
         image: {{ .Values.image }}
         imagePullPolicy: {{ .Values.imagePullPolicy }}
@@ -115,6 +87,28 @@ spec:
         {{- end }}
         ports:
         - containerPort: 8444
+        {{- if .Values.controllerManager.healthcheck.enabled }}
+        readinessProbe:
+          httpGet:
+            port: 8444
+            path: /healthz/ready
+            scheme: HTTPS
+          failureThreshold: 1
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        livenessProbe:
+          httpGet:
+            port: 8444
+            path: /healthz
+            scheme: HTTPS
+          failureThreshold: 3
+          initialDelaySeconds: 40
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 5
+        {{- end }}
       {{ if .Values.controllerManager.nodeSelector }}
       nodeSelector:
          {{ .Values.controllerManager.nodeSelector }}

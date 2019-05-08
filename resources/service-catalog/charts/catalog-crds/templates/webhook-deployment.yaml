@@ -10,7 +10,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-{{ toYaml .Values.webhook.updateStrategy | indent 4 }}
+    type: {{ .Values.webhook.updateStrategy }}
   minReadySeconds: {{ .Values.webhook.minReadySeconds }}
   selector:
     matchLabels:
