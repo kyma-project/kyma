@@ -6,6 +6,8 @@ kind: TestDefinition
 metadata:
   name: test-{{ .Release.Name }}-apiserver-proxy
   namespace: kyma-system
+  labels:
+    require-static-users: "true" # the test will fail if run on the cluster without static users
 spec:
   template:
     metadata:

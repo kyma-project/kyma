@@ -134,6 +134,7 @@ data:
   test.acceptance.cbs.minikubeIP: ""
   apiserver-proxy.minikubeIP: ""
   configurations-generator.minikubeIP: ""
+  console-backend-service.minikubeIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap

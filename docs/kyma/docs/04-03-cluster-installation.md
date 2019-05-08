@@ -8,11 +8,12 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 >**NOTE:** If you have your own domain and want to use it during installation, follow [this](#installation-use-your-own-domain) guide.
 
 Kyma cluster installation comes down to these steps:
-1. Preparation of the cluster.
-2. Preparation of the configuration file.
-3. Kyma deployment.
 
-The guide explains how to prepare the configuration file from the latest GitHub release. If you want to use your own image, follow [these](#installation-use-your-own-image) steps.
+1. Preparation of the cluster
+2. Preparation of the configuration file
+3. Kyma deployment
+
+The guide explains how to prepare the configuration file from the latest GitHub release. If you want to use your own image, follow [these](#installation-use-your-own-kyma-installer-image) steps.
 Additionally, if you need to use Helm and access Tiller securely, complete [additional configuration](#installation-use-helm) at the end of the installation procedure.
 
 Choose your cloud provider and get started:
@@ -29,8 +30,6 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 ## Prerequisites
 - [Google Cloud Platform](https://console.cloud.google.com/) (GCP) project with Kubernetes Engine API enabled
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
-- [Docker](https://www.docker.com/)
-- [Docker Hub](https://hub.docker.com/) account
 - [gcloud](https://cloud.google.com/sdk/gcloud/)
 - [wget](https://www.gnu.org/software/wget/)
 
@@ -38,27 +37,22 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
 ### Prepare the GKE cluster
 
-1. Select a name for your cluster. Set the cluster name and the name of your GCP project as environment variables. Run:
+1. Select a name for your cluster. Export the cluster name, the name of your GCP project, and the zone you want to deploy to as environment variables. Run:
     ```
     export CLUSTER_NAME={CLUSTER_NAME_YOU_WANT}
-    export PROJECT={YOUR_GCP_PROJECT}
+    export GCP_PROJECT={YOUR_GCP_PROJECT}
+    export GCP_ZONE={GCP_ZONE_TO_DEPLOY_TO}
     ```
 
-2. Create a cluster in the `europe-west1` region. Run:
+2. Create a cluster in the zone defined in the previous step. Run:
     ```
-    gcloud container --project "$PROJECT" clusters \
-    create "$CLUSTER_NAME" --zone "europe-west1-b" \
-    --cluster-version "1.12" --machine-type "n1-standard-4" \
+    gcloud container --project "$GCP_PROJECT" clusters \
+    create "$CLUSTER_NAME" --zone "$GCP_ZONE" \
+    --cluster-version "1.12.5" --machine-type "n1-standard-4" \
     --addons HorizontalPodAutoscaling,HttpLoadBalancing
     ```
 
-3. Install Tiller on your GKE cluster. Run:
-
-    ```
-    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/{RELEASE_TAG}/installation/resources/tiller.yaml
-    ```
-
-4. Add your account as the cluster administrator:
+3. Add your account as the cluster administrator:
     ```
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
@@ -67,20 +61,26 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 
 Use the GitHub release 0.8 or higher.
 
-1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.
+1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
 
 2. Export the release version as an environment variable. Run:
     ```
-    export LATEST={KYMA_RELEASE_VERSION}
+    export KYMA_VERSION={KYMA_RELEASE_VERSION}
+    ```
+ 
+3. Install Tiller on your GKE cluster. Run:
+
+    ```
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
     ```
 
-3. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
+4. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
    ```
-   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-cluster.yaml
-   wget https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-config-cluster.yaml
+   wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
    ```
 
-4. Prepare the deployment file.
+5. Prepare the deployment file.
 
     - Run this command:
     ```
@@ -93,14 +93,14 @@ Use the GitHub release 0.8 or higher.
     cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
-5. The output of this operation is the `my_kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
+6. The output of this operation is the `my-kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
 
 
 ### Deploy Kyma
 
 1. Configure kubectl to use your new cluster. Run:
     ```
-    gcloud container clusters get-credentials $CLUSTER_NAME --zone europe-west1-b --project $PROJECT
+    gcloud container clusters get-credentials $CLUSTER_NAME --zone $GCP_ZONE --project $GCP_PROJECT
     ```
 
 2. Deploy Kyma using the `my-kyma` custom configuration file you created. Run:
@@ -130,34 +130,6 @@ In case of an error, you can fetch the logs from the Installer by running:
     ```
     kubectl -n kyma-installer logs -l 'name=kyma-installer'
     ```
-
-## Post-installation steps
-
-### Add the xip.io self-signed certificate to your OS trusted certificates
-
-After the installation, add the custom Kyma [`xip.io`](http://xip.io/) self-signed certificate to the trusted certificates of your OS. For MacOS, run:
-  ```
-  tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
-  && kubectl get configmap  net-global-overrides -n kyma-installer -o jsonpath='{.data.global\.ingress\.tlsCrt}'  | base64 --decode > $tmpfile \
-  && sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain $tmpfile \
-  && rm $tmpfile
-  ```
-
-### Access the cluster
-
-  1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
-
-  ```
-  kubectl get virtualservice core-console -n kyma-system
-  ```
-
-  2. Access your cluster under this address:
-
-  ```
-  https://{VIRTUAL_SERVICE_HOST}
-  ```
-
-> **NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see [this](#installation-install-kyma-locally-access-the-kyma-console) document.
 
 
   </details>
@@ -287,6 +259,9 @@ In case of an error, you can fetch the logs from the Installer by running:
     ```
 
 
+  </details>
+</div>
+
 ## Post-installation steps
 
 ### Add the xip.io self-signed certificate to your OS trusted certificates
@@ -302,19 +277,16 @@ tmpfile=$(mktemp /tmp/temp-cert.XXXXXX) \
 ### Access the cluster
 
 1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
-
-```
-kubectl get virtualservice core-console -n kyma-system
-```
+    ```
+    kubectl get virtualservice core-console -n kyma-system -o jsonpath='{ .spec.hosts[0] }'
+    ```
 
 2. Access your cluster under this address:
+    ```
+    https://{VIRTUAL_SERVICE_HOST}
+    ```
 
-```
-https://{VIRTUAL_SERVICE_HOST}
-```
-
->**NOTE:** To log in to your cluster, use the default `admin` static user. To learn how to get the login details for this user, see [this](#installation-install-kyma-locally-access-the-kyma-console) document.
-
-
-  </details>
-</div>
+3. To log in to your cluster's Console UI, use the default `admin` static user. Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password contained in the `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
+    ```
+    kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
+    ```

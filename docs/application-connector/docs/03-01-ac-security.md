@@ -37,5 +37,3 @@ The Application Gateway calls the registered APIs accordingly, basing on the sec
 The Application Gateway overrides the registered APIs security type if it gets a request which contains the **Access-Token** header. In such a case, the Application Gateway rewrites the token from the **Access-Token** header into an OAuth-compliant **Authorization** header and forwards it to the target API.
 
 This mechanism is suited for implementations in which an external application handles user authentication.
-
-See [this](https://github.com/kyma-project/examples/tree/master/call-ec) example to see such an implementation in action.

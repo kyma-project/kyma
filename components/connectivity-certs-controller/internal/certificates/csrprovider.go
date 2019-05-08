@@ -7,13 +7,10 @@ import (
 	"crypto/x509/pkix"
 	"encoding/base64"
 	"encoding/pem"
-	"fmt"
+
 	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets"
-	"strings"
 
 	"github.com/pkg/errors"
-
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 const (
@@ -22,7 +19,7 @@ const (
 )
 
 type CSRProvider interface {
-	CreateCSR(plainSubject string) (string, error)
+	CreateCSR(subject pkix.Name) (string, *rsa.PrivateKey, error)
 }
 
 type csrProvider struct {
@@ -31,31 +28,25 @@ type csrProvider struct {
 	secretRepository      secrets.Repository
 }
 
-func NewCSRProvider(clusterCertSecret, caCRTSecret string, secretRepository secrets.Repository) CSRProvider {
-	return &csrProvider{
-		clusterCertSecretName: clusterCertSecret,
-		caCRTSecretName:       caCRTSecret,
-		secretRepository:      secretRepository,
-	}
+func NewCSRProvider() CSRProvider {
+	return &csrProvider{}
 }
 
-func (cp *csrProvider) CreateCSR(plainSubject string) (string, error) {
-	clusterPrivateKey, err := cp.provideClusterPrivateKey()
+func (cp *csrProvider) CreateCSR(subject pkix.Name) (string, *rsa.PrivateKey, error) {
+	clusterPrivateKey, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	csr, err := createCSR(plainSubject, clusterPrivateKey)
+	csr, err := createCSR(subject, clusterPrivateKey)
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 
-	return base64.StdEncoding.EncodeToString(csr), nil
+	return base64.StdEncoding.EncodeToString(csr), clusterPrivateKey, nil
 }
 
-func createCSR(plainSubject string, key *rsa.PrivateKey) ([]byte, error) {
-	subject := parseSubject(plainSubject)
-
+func createCSR(subject pkix.Name, key *rsa.PrivateKey) ([]byte, error) {
 	csrTemplate := x509.CertificateRequest{
 		Subject: subject,
 	}
@@ -70,65 +61,4 @@ func createCSR(plainSubject string, key *rsa.PrivateKey) ([]byte, error) {
 	})
 
 	return pemEncodedCSR, nil
-}
-
-func parseSubject(plainSubject string) pkix.Name {
-	subjectInfo := extractSubject(plainSubject)
-
-	return pkix.Name{
-		CommonName:         subjectInfo["CN"],
-		Country:            []string{subjectInfo["C"]},
-		Organization:       []string{subjectInfo["O"]},
-		OrganizationalUnit: []string{subjectInfo["OU"]},
-		Locality:           []string{subjectInfo["L"]},
-		Province:           []string{subjectInfo["ST"]},
-	}
-}
-
-func extractSubject(plainSubject string) map[string]string {
-	result := map[string]string{}
-
-	segments := strings.Split(plainSubject, ",")
-
-	for _, segment := range segments {
-		parts := strings.Split(segment, "=")
-		result[parts[0]] = parts[1]
-	}
-
-	return result
-}
-
-func (cp *csrProvider) provideClusterPrivateKey() (*rsa.PrivateKey, error) {
-	secret, err := cp.secretRepository.Get(cp.clusterCertSecretName)
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return cp.createClusterKeySecret()
-		}
-		return nil, errors.Wrapf(err, fmt.Sprintf("Failed to read cluster %s secret", cp.clusterCertSecretName))
-	}
-
-	block, _ := pem.Decode(secret[clusterKeySecretKey])
-	if block == nil {
-		return cp.createClusterKeySecret()
-	}
-
-	return x509.ParsePKCS1PrivateKey(block.Bytes)
-}
-
-func (cp *csrProvider) createClusterKeySecret() (*rsa.PrivateKey, error) {
-	key, err := rsa.GenerateKey(rand.Reader, rsaKeySize)
-	if err != nil {
-		return nil, err
-	}
-
-	secretData := map[string][]byte{
-		clusterKeySecretKey: pem.EncodeToMemory(&pem.Block{Type: "RSA PRIVATE KEY", Bytes: x509.MarshalPKCS1PrivateKey(key)}),
-	}
-
-	err = cp.secretRepository.UpsertWithReplace(cp.clusterCertSecretName, secretData)
-	if err != nil {
-		return nil, errors.Wrap(err, "Failed to override cluster key secret")
-	}
-
-	return key, nil
 }

@@ -75,8 +75,9 @@ type ContextExtender interface {
 }
 
 type RuntimeURLs struct {
-	EventsURL   string `json:"eventsUrl"`
-	MetadataURL string `json:"metadataUrl"`
+	EventsInfoURL string `json:"eventsInfoUrl"`
+	EventsURL     string `json:"eventsUrl"`
+	MetadataURL   string `json:"metadataUrl"`
 }
 
 type ApiURLs struct {
