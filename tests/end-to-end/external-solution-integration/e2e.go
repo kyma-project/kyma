@@ -9,21 +9,21 @@ import (
 )
 
 func main() {
-	time.Sleep(60 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	ts, err := testsuite.NewTestSuite(config, logrus.New())
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	err = ts.CreateResources()
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
 
 	//cert, err := ts.FetchCertificate()
@@ -35,10 +35,12 @@ func main() {
 
 	fmt.Println("ID:", id)
 
-	err = ts.CreateInstance(id)
+	svi, err := ts.CreateInstance(id)
 	if err != nil {
-		panic(err)
+		fmt.Println(err)
 	}
+
+	fmt.Printf("%+v\n", svi)
 }
 
 //TODO: WIP, delete everything and provide integration with upgrade and backup interfaces along with 'basic' scenario

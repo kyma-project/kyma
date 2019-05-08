@@ -40,7 +40,7 @@ func NewServiceCatalogClient(config *rest.Config, namespace string) (ServiceCata
 }
 
 func (c *serviceCatalogClient) CreateServiceInstance(siName, siID, serviceID string) (*scv1.ServiceInstance, error) {
-	serviceInstance := &scv1.ServiceInstance{
+	return c.scClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Create(&scv1.ServiceInstance{
 		TypeMeta: v1.TypeMeta{Kind: "ServiceInstance", APIVersion: scv1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{
 			Name:       siName,
@@ -50,11 +50,9 @@ func (c *serviceCatalogClient) CreateServiceInstance(siName, siID, serviceID str
 		Spec: scv1.ServiceInstanceSpec{
 			ExternalID: siID,
 			Parameters: &runtime.RawExtension{},
-			ServiceClassRef: &scv1.LocalObjectReference{
-				Name: serviceID,
-			},
-			ServicePlanRef: &scv1.LocalObjectReference{
-				Name: serviceID + "-plan",
+			PlanReference: scv1.PlanReference{
+				ServiceClassName: serviceID,
+				ServicePlanName:  serviceID + "-plan",
 			},
 			UpdateRequests: 0,
 			UserInfo: &scv1.UserInfo{
@@ -67,9 +65,7 @@ func (c *serviceCatalogClient) CreateServiceInstance(siName, siID, serviceID str
 				Username: "system:serviceaccount:kyma-system:core-console-backend-service",
 			},
 		},
-	}
-
-	return c.scClient.ServicecatalogV1beta1().ServiceInstances(c.namespace).Create(serviceInstance)
+	})
 }
 
 func (c *serviceCatalogClient) DeleteServiceInstance(siName string) error {
@@ -82,7 +78,7 @@ func (c *serviceCatalogClient) CreateServiceBinding(id, sbName, svcInstanceName,
 		ObjectMeta: v1.ObjectMeta{Name: sbName, Namespace: c.namespace},
 		Spec: scv1.ServiceBindingSpec{
 			ExternalID: id,
-			ServiceInstanceRef: scv1.LocalObjectReference{
+			InstanceRef: scv1.LocalObjectReference{
 				Name: svcInstanceName,
 			},
 			SecretName: secretName,

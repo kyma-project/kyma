@@ -3,6 +3,7 @@ package testsuite
 import (
 	"crypto/x509"
 	"encoding/json"
+	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
 	"github.com/sirupsen/logrus"
@@ -14,7 +15,7 @@ type TestSuite interface {
 	CreateResources() error
 	FetchCertificate() ([]*x509.Certificate, error)
 	RegisterService() (string, error)
-	CreateInstance(serviceID string) error
+	CreateInstance(serviceID string) (*v1beta1.ServiceInstance, error)
 	//StartTestServer()
 	SendEvent()
 	//CleanUp()
@@ -114,14 +115,14 @@ func (ts *testSuite) createApplication() error {
 		return err
 	}
 
-	////TODO: Polling / retries
-	time.Sleep(5 * time.Second)
-	checker := resourceskit.NewK8sChecker(ts.k8sClient, appName)
-
-	err = checker.CheckK8sResources()
-	if err != nil {
-		return err
-	}
+	//////TODO: Polling / retries
+	//time.Sleep(5 * time.Second)
+	//checker := resourceskit.NewK8sChecker(ts.k8sClient, appName)
+	//
+	//err = checker.CheckK8sResources()
+	//if err != nil {
+	//	return err
+	//}
 
 	return nil
 }
@@ -174,9 +175,8 @@ func prepareService() *testkit.ServiceDetails {
 	}
 }
 
-func (ts *testSuite) CreateInstance(serviceID string) error {
-	_, err := ts.scClient.CreateServiceInstance(serviceInstanceName, serviceInstanceID, serviceID)
-	return err
+func (ts *testSuite) CreateInstance(serviceID string) (*v1beta1.ServiceInstance, error) {
+	return ts.scClient.CreateServiceInstance(serviceInstanceName, serviceInstanceID, serviceID)
 }
 
 func (ts *testSuite) SendEvent() {

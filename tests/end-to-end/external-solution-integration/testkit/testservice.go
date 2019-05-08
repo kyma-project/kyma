@@ -124,6 +124,7 @@ func (ts *testService) getHealthEndpointURL() string {
 }
 
 func (ts *testService) createDeployment() error {
+	rs := int32(1)
 	deployment := &model.Deployment{
 		TypeMeta: v1.TypeMeta{
 			Kind:       "Deployment",
@@ -137,7 +138,7 @@ func (ts *testService) createDeployment() error {
 			},
 		},
 		Spec: model.DeploymentSpec{
-			Replicas: new(int32, 1),
+			Replicas: &rs,
 			Selector: &v1.LabelSelector{
 				MatchLabels: map[string]string{
 					labelKey: testServiceName,

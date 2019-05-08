@@ -50,7 +50,7 @@ func (rc *registryClient) RegisterService(service *ServiceDetails) (string, erro
 	}
 	defer response.Body.Close()
 
-	if response.StatusCode != http.StatusCreated {
+	if response.StatusCode != http.StatusOK {
 		err := parseErrorResponse(response)
 		rc.logger.Error(err)
 		return "", err

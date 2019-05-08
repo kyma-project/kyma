@@ -35,20 +35,16 @@
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.28"
+  version = "v0.1.41"
 
-[[override]]
+[[constraint]]
   name = "k8s.io/api"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
-[[override]]
+[[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.10.1"
-
-[[override]]
-  name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.10.1"
+  version = "kubernetes-1.12.3"
