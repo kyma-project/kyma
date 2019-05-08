@@ -65,6 +65,7 @@ data:
   mixer.policy.resources.requests.memory: 512Mi
   mixer.telemetry.resources.limits.memory: 1024Mi
   mixer.telemetry.resources.requests.memory: 512Mi
+  mixer.loadshedding.mode: disabled
 
   mixer.policy.autoscaleEnabled: "false"
   mixer.telemetry.autoscaleEnabled: "false"
