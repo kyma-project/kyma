@@ -25,8 +25,8 @@ const (
 	// SubjectHeader is key representing client certificate subject set in headers
 	SubjectHeader = "Client-Certificate-Subject"
 
-	// APIHostsKey is the key value for storing API hosts in context
-	APIHostsKey clientContextKey = "APIHosts"
+	// ApiURLsKey is the key value for storing API hosts in context
+	ApiURLsKey clientContextKey = "ApiURLs"
 
 	// ClusterContextKey is the key value for storing cluster data in context
 	ClusterContextKey clientContextKey = "ClusterContext"
@@ -75,16 +75,17 @@ type ContextExtender interface {
 }
 
 type RuntimeURLs struct {
-	EventsURL   string `json:"eventsUrl"`
-	MetadataURL string `json:"metadataUrl"`
+	EventsInfoURL string `json:"eventsInfoUrl"`
+	EventsURL     string `json:"eventsUrl"`
+	MetadataURL   string `json:"metadataUrl"`
 }
 
-type APIHosts struct {
-	EventsHost   string
-	MetadataHost string
+type ApiURLs struct {
+	EventsBaseURL   string
+	MetadataBaseURL string
 }
 
-// ExtendContext extends provided context with APIHosts
-func (r APIHosts) ExtendContext(ctx context.Context) context.Context {
-	return context.WithValue(ctx, APIHostsKey, r)
+// ExtendContext extends provided context with ApiURLs
+func (r ApiURLs) ExtendContext(ctx context.Context) context.Context {
+	return context.WithValue(ctx, ApiURLsKey, r)
 }

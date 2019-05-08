@@ -12,8 +12,7 @@ function cmdGetPodsForSuite() {
     cmd="kubectl $(context_arg) get pods -l testing.kyma-project.io/suite-name=${suiteName} \
             --all-namespaces \
             --no-headers=true \
-            -o=custom-columns=name:metadata.name,ns:metadata.namespace \
-            --show-all=true"
+            -o=custom-columns=name:metadata.name,ns:metadata.namespace"
     echo $cmd
 }
 

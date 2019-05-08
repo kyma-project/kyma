@@ -24,6 +24,9 @@
 # The `pod-preset` subchart
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
+# The Microfrontend CRD 
+/resources/cluster-essentials/templates/microfrontend.crd.yaml @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
 
@@ -185,6 +188,9 @@
 
 # The `xip-patch` chart
 /resources/xip-patch/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
+
+# The `ory` chart
+/resources/ory/ @piotrmsc @sjanota @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @kfurgol @Demonsthere
 
 # Components
 #API server proxy Component

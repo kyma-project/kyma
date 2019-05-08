@@ -11,6 +11,7 @@ Depending on the usage scenario, you can:
 
 The Asset Store ensures that both usage scenarios work for Kyma, without additional configuration of the built-in controllers.
 
+
 ## Development mode storage
 
 Minio is an open-source asset storage server with Amazon S3 compatible API. You can use it to store various types of assets, such as documents, files, or images.
@@ -18,6 +19,15 @@ Minio is an open-source asset storage server with Amazon S3 compatible API. You 
 In the context of the Asset Store, the Asset Controller stores all assets in Minio, in a dedicated storage space.
 
 ![](./assets/minio.svg)
+
+### Access Minio credentials
+
+For security reasons, Minio credentials are generated during Kyma installation and stored inside the Kubernetes Secret object. To access them, run the following commands:
+
+- Get the access key using `kubectl get secret assetstore-minio -n kyma-system -o jsonpath=“{.data.accesskey}” | base64 -D`
+- Get the secret key using `kubectl get secret assetstore-minio -n kyma-system -o jsonpath=“{.data.secretkey}” | base64 -D`
+
+You can also set Minio credentials directly using `values.yaml` files. For more details, see the official [Minio documentation](https://github.com/helm/charts/tree/master/stable/minio#configuration).
 
 
 ## Production storage
@@ -30,3 +40,5 @@ For the production purposes, the Asset Store uses Minio Gateway which:
 
 
 ![](./assets/minio-gateway.svg)
+
+See [this tutorial](#tutorials-set-minio-to-the-google-cloud-storage-gateway-mode) to learn how to set Minio to the Google Cloud Storage Gateway mode.

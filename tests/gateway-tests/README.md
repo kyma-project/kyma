@@ -36,9 +36,9 @@ RUNNING: test-ec-default-acceptance
 PASSED: test-ec-default-acceptance
 ```
 
-3. To see the logs, find the pod, that ran tests using `kubectl get po --show-all`. It'll be in `Completed` state.
+3. To see the logs, find the pod, that ran tests using `kubectl get po`. It'll be in `Completed` state.
 ```sh
-$ kubectl get po --show-all
+$ kubectl get po
 NAME                                  READY     STATUS      RESTARTS   AGE
 ec-default-gateway-5dffff49f-drr7n    2/2       Running     0          1h
 hmc-default-gateway-669965894-5wwv8   2/2       Running     0          3h

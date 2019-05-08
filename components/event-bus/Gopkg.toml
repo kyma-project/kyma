@@ -89,3 +89,7 @@ required = [
 [[prune.project]]
    name = "k8s.io/code-generator"
    unused-packages = false
+
+[[constraint]]
+  name = "github.com/prometheus/client_golang"
+  version = "0.9.2"

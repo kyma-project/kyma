@@ -37,6 +37,8 @@ func (f *genericInformer) Lister() cache.GenericLister {
 func (f *sharedInformerFactory) ForResource(resource schema.GroupVersionResource) (GenericInformer, error) {
 	switch resource {
 	// Group=applicationconnector.kyma-project.io, Version=v1alpha1
+	case v1alpha1.SchemeGroupVersion.WithResource("centralconnections"):
+		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().CentralConnections().Informer()}, nil
 	case v1alpha1.SchemeGroupVersion.WithResource("certificaterequests"):
 		return &genericInformer{resource: resource.GroupResource(), informer: f.Applicationconnector().V1alpha1().CertificateRequests().Informer()}, nil
 

@@ -8,6 +8,7 @@ import (
 	"github.com/Masterminds/semver"
 	"github.com/alecthomas/jsonschema"
 	"github.com/fatih/structs"
+	cms "github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
 	"github.com/pkg/errors"
 )
 
@@ -127,6 +128,11 @@ func (b BundlePlanMetadata) ToMap() map[string]interface{} {
 // BundleTag is a Tag attached to Bundle.
 type BundleTag string
 
+// BundleDocs contains data to create ClusterDocsTopic for every ClusterServiceClass.
+type BundleDocs struct {
+	Template cms.ClusterDocsTopicSpec
+}
+
 // Bundle represents bundle as defined by OSB API.
 type Bundle struct {
 	ID                  BundleID
@@ -135,12 +141,13 @@ type Bundle struct {
 	Description         string
 	Plans               map[BundlePlanID]BundlePlan
 	Metadata            BundleMetadata
-	RemoteRepositoryURL string
+	RepositoryURL       string
 	Tags                []BundleTag
 	Requires            []string
 	Bindable            bool
 	BindingsRetrievable bool
 	PlanUpdatable       *bool
+	Docs                []BundleDocs
 }
 
 // IsProvisioningAllowed determines bundle can be provision on indicated namespace

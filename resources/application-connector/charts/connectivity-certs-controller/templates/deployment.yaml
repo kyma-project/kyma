@@ -21,6 +21,7 @@ spec:
         app: {{ .Chart.Name }}
         release: {{ .Chart.Name }}
     spec:
+      serviceAccountName: {{ .Chart.Name }}
       containers:
       - name: {{ .Chart.Name }}
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connectivity_certs_controller.dir }}connectivity-certs-controller:{{ .Values.global.connectivity_certs_controller.version }}
@@ -31,6 +32,8 @@ spec:
           - "--namespace={{ .Values.global.namespace }}"
           - "--clusterCertificatesSecret={{ .Values.deployment.args.clusterCertificatesSecret }}"
           - "--caCertificatesSecret={{ .Values.deployment.args.caCertificatesSecret }}"
+          - "--controllerSyncPeriod={{ .Values.deployment.args.controllerSyncPeriod }}"
+          - "--minimalConnectionSyncPeriod={{ .Values.deployment.args.minimalConnectionSyncPeriod }}"
         resources:
           limits:
             cpu: 100m

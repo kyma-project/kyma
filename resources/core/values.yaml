@@ -34,7 +34,10 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: "de186978"
+    version: "a19d8d50"
+  ui_acceptance_tests:
+    dir:
+    version: "83aa639b"
   api_controller:
     dir: develop/
     version: "1323f962"
@@ -60,7 +63,7 @@ global:
     version: 8a10f0ed
   kubeless_integration_tests:
     dir: develop/tests/
-    version: 50d9482b
+    version: 3c2c6431
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
@@ -72,10 +75,10 @@ global:
     version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: 'e03e4b24'
+    version: 'db3c45d5'
   console_backend_service_test:
     dir: develop/
-    version: '5ec3de0d'
+    version: 'c19f5756'
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

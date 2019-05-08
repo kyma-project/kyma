@@ -35,6 +35,10 @@ spec:
         release: "{{ .Release.Name }}"
         heritage: "{{ .Release.Service }}"
     spec:
+{{- with .Values.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+{{- end }}
       serviceAccountName: "{{ .Values.controllerManager.serviceAccount }}"
       containers:
       {{- if .Values.controllerManager.healthcheck.enabled }}
