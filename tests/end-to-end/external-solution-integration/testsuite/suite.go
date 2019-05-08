@@ -6,7 +6,9 @@ import (
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
+	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"time"
 )
@@ -16,9 +18,9 @@ type TestSuite interface {
 	FetchCertificate() ([]*x509.Certificate, error)
 	RegisterService() (string, error)
 	CreateInstance(serviceID string) (*v1beta1.ServiceInstance, error)
-	//StartTestServer()
+	StartTestServer() error
 	SendEvent()
-	//CleanUp()
+	CleanUp() error
 }
 
 type testSuite struct {
@@ -28,7 +30,7 @@ type testSuite struct {
 	eventingClient resourceskit.EventingClient
 	lambdaClient   resourceskit.LambdaClient
 	scClient       resourceskit.ServiceCatalogClient
-
+	testService    testkit.TestService
 	connClient     testkit.ConnectorClient
 	registryClient testkit.RegistryClient
 }
@@ -64,6 +66,8 @@ func NewTestSuite(config *rest.Config, logger logrus.FieldLogger) (TestSuite, er
 		return nil, err
 	}
 
+	testService := testkit.NewTestService(k8sClient)
+
 	connClient := testkit.NewConnectorClient(trClient, true, logger)
 	registryClient := testkit.NewRegistryClient("http://application-registry-external-api.kyma-integration.svc.cluster.local:8081/"+appName+"/v1/metadata/services", true, logger)
 
@@ -76,6 +80,7 @@ func NewTestSuite(config *rest.Config, logger logrus.FieldLogger) (TestSuite, er
 		lambdaClient:   lambdaClient,
 		registryClient: registryClient,
 		scClient:       scClient,
+		testService:    testService,
 	}, nil
 }
 
@@ -115,14 +120,14 @@ func (ts *testSuite) createApplication() error {
 		return err
 	}
 
-	//////TODO: Polling / retries
-	//time.Sleep(5 * time.Second)
-	//checker := resourceskit.NewK8sChecker(ts.k8sClient, appName)
-	//
-	//err = checker.CheckK8sResources()
-	//if err != nil {
-	//	return err
-	//}
+	////TODO: Polling / retries. Use waitUntil, you should create additional function that checks if Application is ready and returns true if ready
+	time.Sleep(5 * time.Second)
+	checker := resourceskit.NewK8sChecker(ts.k8sClient, appName)
+
+	err = checker.CheckK8sResources()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -193,4 +198,72 @@ func prepareEvent() *testkit.ExampleEvent {
 		EventTime:        time.Now(),
 		Data:             "some data",
 	}
+}
+
+func (ts *testSuite) StartTestServer() error {
+	var e error
+	e = ts.testService.CreateTestService()
+
+	if e != nil {
+		return e
+	}
+
+	e = waitUntil(5, 30, ts.testService.CheckIfReady)
+
+	if e != nil {
+		return e
+	}
+
+	return nil
+}
+
+func (ts *testSuite) CleanUp() error {
+	var e error
+
+	e = ts.testService.DeleteTestService()
+	if e != nil {
+		return e
+	}
+	e = ts.lambdaClient.DeleteLambda(appName, &v1.DeleteOptions{})
+	if e != nil {
+		return e
+	}
+	e = ts.eventingClient.DeleteSubscription(appName, &v1.DeleteOptions{})
+	if e != nil {
+		return e
+	}
+	e = ts.eventingClient.DeleteEventActivation(appName, &v1.DeleteOptions{})
+	if e != nil {
+		return e
+	}
+	e = ts.eventingClient.DeleteMapping(appName, &v1.DeleteOptions{})
+	if e != nil {
+		return e
+	}
+	e = ts.acClient.DeleteApplication(appName, &v1.DeleteOptions{})
+	if e != nil {
+		return e
+	}
+	return nil
+}
+
+func waitUntil(retries int, sleepTimeSeconds int, predicate func() (bool, error)) error {
+	var ready bool
+	var e error
+
+	sleepDuration := time.Duration(sleepTimeSeconds) * time.Second
+
+	for i := 0; i < retries && !ready; i++ {
+		ready, e = predicate()
+		if e != nil {
+			return e
+		}
+		time.Sleep(sleepDuration)
+	}
+
+	if ready {
+		return nil
+	}
+
+	return errors.New("Resource not ready")
 }
