@@ -3,10 +3,6 @@ black-list: ["/vendor/", "/testdata/"]
 black-list-internal: ["./kyma/docs/"]
 timeout: 60
 request-repeats: 5
-basePath:
-  - filePath: "./kyma/docs/"
-    prefix: "https://kyma-project.io/docs/master"
-    suffix: ""
 files:
   - path: "./kyma/.github/ISSUE_TEMPLATE/security-vulnerability.md"
     config:
