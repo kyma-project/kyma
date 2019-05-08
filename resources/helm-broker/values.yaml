@@ -38,7 +38,7 @@ global:
     version: 149967d0
   add_ons_ui:
     dir: ""
-    version: 38e96d29
+    version: "PR-813"
   istio:
     gateway:
       name: kyma-gateway
