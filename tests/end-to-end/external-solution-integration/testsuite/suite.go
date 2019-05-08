@@ -3,10 +3,10 @@ package testsuite
 import (
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
-	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
