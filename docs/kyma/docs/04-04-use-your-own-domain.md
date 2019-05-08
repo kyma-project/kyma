@@ -492,16 +492,16 @@ az network dns record-set a add-record -g $RS_GROUP -z $DNS_DOMAIN -n apiserver.
 ## Access the cluster
 
 1. To get the address of the cluster's Console, check the host of the Console's virtual service. The name of the host of this virtual service corresponds to the Console URL. To get the virtual service host, run:
-  ```
-  kubectl get virtualservice core-console -n kyma-system
-  ```
+    ```
+    kubectl get virtualservice core-console -n kyma-system
+    ```
 
 2. Access your cluster under this address:
-  ```
-  https://{VIRTUAL_SERVICE_HOST}
-  ```
+    ```
+    https://{VIRTUAL_SERVICE_HOST}
+    ```
 
 3. To log in to your cluster's Console UI, use the default `admin` static user. Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password contained in the `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
-  ```
-  kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
-  ```
+    ```
+    kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
+    ```
