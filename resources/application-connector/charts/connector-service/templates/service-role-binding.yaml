@@ -1,4 +1,4 @@
-{{ if and ( .Values.istio.rbac.enabled ) ( not .Values.global.isLocalEnv ) }}
+{{ if .Values.istio.rbac.enabled }}
 apiVersion: "rbac.istio.io/v1alpha1"
 kind: ServiceRoleBinding
 metadata:

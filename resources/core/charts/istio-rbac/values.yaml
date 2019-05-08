@@ -1,15 +1,10 @@
 ---
 global:
-  rbac:
-    mode: ON_WITH_INCLUSION
-    cluster:
+  cluster:
+    rbac:
+      mode: ON_WITH_INCLUSION
       inclusion:
         services:
           - logging.kyma-system.svc.cluster.local
           - helm-broker.kyma-system.svc.cluster.local
           - connector-service-internal-api.kyma-integration.svc.cluster.local
-    minikube:
-      inclusion:
-        services:
-          - logging.kyma-system.svc.cluster.local
-          - helm-broker.kyma-system.svc.cluster.local
