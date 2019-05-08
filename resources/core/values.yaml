@@ -2,16 +2,6 @@ dex:
   tls:
     createSecret: false
 
-minio:
-  service:
-    type: NodePort
-  accessKey: "admin"
-  secretKey: "topSecretKey"
-  resources:
-    limits:
-      memory: 128Mi
-      cpu: 250m
-
 console:
   cluster:
     headerLogoUrl: "assets/logo.svg"
