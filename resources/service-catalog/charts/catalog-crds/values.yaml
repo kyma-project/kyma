@@ -8,8 +8,11 @@ imagePullPolicy: Always
 ##
 rbacEnable: true
 webhook:
-  # updateStrategy for service-catalog; value values are "RollingUpdate" and "Recreate"
-  updateStrategy: RollingUpdate
+  # deployment strategy for service-catalog webhook
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
   minReadySeconds: 1
   # annotations is a collection of annotations to add to the webhook pods.
   annotations: {}
@@ -28,7 +31,7 @@ webhook:
     nodePort:
       # Available port in allowable range (e.g. 30000 - 32767 on minikube)
       # The TLS-enabled endpoint will be exposed here
-      securePort: 30443
+      securePort: 30441
   # Log level; valid values are in the range 0 - 10
   verbosity: 10
   serviceAccount: service-catalog-webhook
@@ -43,8 +46,11 @@ webhook:
       memory: 30Mi
 controllerManager:
   replicas: 1
-  # updateStrategy for service-catalog; value values are "RollingUpdate" and "Recreate"
-  updateStrategy: RollingUpdate
+  # deployment strategy for service-catalog controllerManager
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
   minReadySeconds: 1
   # annotations is a collection of annotations to add to the controllerManager pod.
   annotations: {}
