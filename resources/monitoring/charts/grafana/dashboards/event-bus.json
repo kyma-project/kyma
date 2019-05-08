@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 27,
-  "iteration": 1556403376151,
+  "iteration": 1557234230484,
   "links": [],
   "panels": [
     {
@@ -25,7 +24,7 @@
       "dashLength": 10,
       "dashes": false,
       "datasource": "Prometheus",
-      "description": "Number of published events per {namespace $| \nsource ID &| event type &| event type version} per minute",
+      "description": "Rate of published events per {namespace $| \nsource ID &| event type &| event type version} per minute",
       "fill": 1,
       "gridPos": {
         "h": 12,
@@ -57,7 +56,7 @@
       "steppedLine": false,
       "targets": [
         {
-          "expr": "sum(irate(total_published_messages{namespace=~\"$namespace\",event_type=~\"$event_type\",event_type_version=~\"$event_type_version\",source_id=~\"$source_id\",status=~\"$status\"}[1m]))",
+          "expr": "irate(total_published_messages{namespace=~\"$namespace\",event_type=~\"$event_type\",event_type_version=~\"$event_type_version\",source_id=~\"$source_id\",status=~\"$status\"}[1m])",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"
@@ -67,7 +66,7 @@
       "timeFrom": null,
       "timeRegions": [],
       "timeShift": null,
-      "title": "Published Events Rate",
+      "title": "Messages Rate ($status)",
       "tooltip": {
         "shared": true,
         "sort": 0,
@@ -113,6 +112,7 @@
       {
         "allValue": null,
         "current": {
+          "selected": true,
           "text": "kyma-system",
           "value": "kyma-system"
         },
@@ -136,17 +136,20 @@
         "useTags": false
       },
       {
-        "allValue": null,
+        "allValue": "",
         "current": {
+          "tags": [],
           "text": "ignored",
-          "value": "ignored"
+          "value": [
+            "ignored"
+          ]
         },
         "datasource": "Prometheus",
         "definition": "label_values(total_published_messages, status)",
         "hide": 0,
         "includeAll": true,
         "label": "Status",
-        "multi": false,
+        "multi": true,
         "name": "status",
         "options": [],
         "query": "label_values(total_published_messages, status)",
@@ -158,20 +161,20 @@
         "tags": [],
         "tagsQuery": "",
         "type": "query",
-        "useTags": false
+        "useTags": true
       },
       {
         "allValue": null,
         "current": {
-          "text": "external-application",
-          "value": "external-application"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "Prometheus",
         "definition": "label_values(total_published_messages, source_id)",
         "hide": 0,
         "includeAll": true,
         "label": "Source ID",
-        "multi": false,
+        "multi": true,
         "name": "source_id",
         "options": [],
         "query": "label_values(total_published_messages, source_id)",
@@ -196,7 +199,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Event Type",
-        "multi": false,
+        "multi": true,
         "name": "event_type",
         "options": [],
         "query": "label_values(total_published_messages, event_type)",
@@ -221,7 +224,7 @@
         "hide": 0,
         "includeAll": true,
         "label": "Event Type Version",
-        "multi": false,
+        "multi": true,
         "name": "event_type_version",
         "options": [],
         "query": "label_values(total_published_messages, event_type_version)",
@@ -238,7 +241,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
@@ -269,5 +272,5 @@
   "timezone": "",
   "title": "Event Bus",
   "uid": "6iBqM-zZz",
-  "version": 5
+  "version": 1
 }
