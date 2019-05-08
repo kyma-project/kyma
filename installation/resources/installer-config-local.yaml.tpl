@@ -55,17 +55,18 @@ data:
   gateways.istio-ingressgateway.autoscaleEnabled: "false"
   gateways.istio-egressgateway.autoscaleEnabled: "false"
 
-  pilot.resources.limits.memory: 2048Mi
-  pilot.resources.limits.cpu: 512m
-  pilot.resources.requests.memory: 512Mi
-  pilot.resources.requests.cpu: 256m
+  pilot.resources.limits.memory: 1024Mi
+  # pilot.resources.limits.cpu: 200m
+  pilot.resources.requests.memory: 256Mi
+  # pilot.resources.requests.cpu: 100m
   pilot.autoscaleEnabled: "false"
 
-  mixer.policy.resources.limits.memory: 256Mi
-  mixer.policy.resources.requests.memory: 128Mi
+  mixer.policy.resources.limits.memory: 1024Mi
+  mixer.policy.resources.requests.memory: 512Mi
+  mixer.telemetry.resources.limits.memory: 1024Mi
+  mixer.telemetry.resources.requests.memory: 512Mi
+
   mixer.policy.autoscaleEnabled: "false"
-  mixer.telemetry.resources.limits.memory: 512Mi
-  mixer.telemetry.resources.requests.memory: 256Mi
   mixer.telemetry.autoscaleEnabled: "false"
 ---
 apiVersion: v1
