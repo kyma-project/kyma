@@ -19,9 +19,9 @@ The commands throughout this guide use URLs that require you to provide the doma
 
 For example, if your cluster's domain is `demo.cluster.kyma.cx`, run the following command:
 
-   ```bash
-   export yourClusterDomain='demo.cluster.kyma.cx'
-   ```
+```bash
+export yourClusterDomain='demo.cluster.kyma.cx'
+```
 
 ## Details
 
@@ -68,7 +68,7 @@ kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/
 If your function is deployed to a cluster, run:
 
 ```bash
- curl -k https://github.com/kyma-project/examples/blob/master/gateway/lambda/api-with-auth.yaml | sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -f -
+curl -k https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/api-with-auth.yaml | sed "s/.kyma.local/.$yourClusterDomain/" | kubectl apply -f -
 ```
 
 
@@ -81,7 +81,7 @@ echo "$(minikube ip) hello.kyma.local" | sudo tee -a /etc/hosts
 Create the API for your function:
 
 ```bash
-kubectl apply -f https://github.com/kyma-project/examples/blob/master/gateway/lambda/api-with-auth.yaml
+kubectl apply -f https://raw.githubusercontent.com/kyma-project/examples/master/gateway/lambda/api-with-auth.yaml
 ```
 
 ### Bind a function to events
