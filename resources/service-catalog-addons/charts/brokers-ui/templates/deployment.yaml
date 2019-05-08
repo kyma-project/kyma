@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/brokers-ui:{{ .Chart.AppVersion }}"
+          image: "eu.gcr.io/kyma-project/pr/brokers-ui:PR-820"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: {{ .Values.service.internalPort }}
