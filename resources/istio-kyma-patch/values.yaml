@@ -6,5 +6,10 @@ global:
     dir:
     version: 1.0.0
   istio_kyma_patch:
+<<<<<<< HEAD
     dir:
     version: 1.0.0
+=======
+    dir: develop/
+    version: e0e414f1
+>>>>>>> master

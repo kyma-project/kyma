@@ -35,6 +35,10 @@ spec:
 {{ toYaml .Values.apiserver.annotations | indent 8 }}
       {{- end }}
     spec:
+{{- with .Values.securityContext }}
+      securityContext:
+{{ toYaml . | indent 8 }}
+{{- end }}
       serviceAccountName: "{{ .Values.apiserver.serviceAccount }}"
       containers:
       - name: apiserver

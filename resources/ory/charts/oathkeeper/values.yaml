@@ -1,0 +1,18 @@
+image:
+  repository: oryd/oathkeeper
+  tag: v0.14.2_oryOS.10
+
+tokenIntrospection:
+  serverUrl: http://ory-hydra-oauth2:4445/oauth2/introspect
+
+proxy:
+  port: 4455
+  service:
+    port: 80
+
+apiServer:
+  port: 4456
+  config:
+    databaseUrl: memory
+  service:
+    port: 80

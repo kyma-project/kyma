@@ -15,6 +15,7 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/name"
 	"github.com/pkg/errors"
+
 	"k8s.io/client-go/rest"
 )
 
@@ -42,14 +43,14 @@ type ServiceBindingFinderLister interface {
 }
 
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRetriever shared.ContentRetriever, cmsRetriever shared.CmsRetriever) (*PluggableContainer, error) {
-	client, err := clientset.NewForConfig(restConfig)
+	scCli, err := clientset.NewForConfig(restConfig)
 	if err != nil {
-		return nil, errors.Wrap(err, "while initializing Clientset")
+		return nil, errors.Wrap(err, "while initializing SC clientset")
 	}
 
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
-			client:               client,
+			scCli:                scCli,
 			informerResyncPeriod: informerResyncPeriod,
 			contentRetriever:     contentRetriever,
 			cmsRetriever:         cmsRetriever,
@@ -67,15 +68,16 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRet
 
 func (r *PluggableContainer) Enable() error {
 	informerResyncPeriod := r.cfg.informerResyncPeriod
-	client := r.cfg.client
+	scCli := r.cfg.scCli
 
 	contentRetriever := r.cfg.contentRetriever
 	cmsRetriever := r.cfg.cmsRetriever
 
-	informerFactory := catalogInformers.NewSharedInformerFactory(client, informerResyncPeriod)
+	informerFactory := catalogInformers.NewSharedInformerFactory(scCli, informerResyncPeriod)
+
 	r.informerFactory = informerFactory
 
-	serviceInstanceService, err := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), client)
+	serviceInstanceService, err := newServiceInstanceService(informerFactory.Servicecatalog().V1beta1().ServiceInstances().Informer(), scCli)
 	if err != nil {
 		return errors.Wrapf(err, "while creating service instance service")
 	}
@@ -89,7 +91,7 @@ func (r *PluggableContainer) Enable() error {
 		return errors.Wrapf(err, "while creating service class service")
 	}
 	serviceBrokerService := newServiceBrokerService(informerFactory.Servicecatalog().V1beta1().ServiceBrokers().Informer())
-	serviceBindingService, err := newServiceBindingService(client.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
+	serviceBindingService, err := newServiceBindingService(scCli.ServicecatalogV1beta1(), informerFactory.Servicecatalog().V1beta1().ServiceBindings().Informer(), name.Generate)
 	if err != nil {
 		return errors.Wrapf(err, "while creating service binding service")
 	}
@@ -130,7 +132,7 @@ func (r *PluggableContainer) Disable() error {
 }
 
 type resolverConfig struct {
-	client               clientset.Interface
+	scCli                clientset.Interface
 	informerResyncPeriod time.Duration
 	contentRetriever     shared.ContentRetriever
 	cmsRetriever         shared.CmsRetriever

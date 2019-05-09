@@ -1,0 +1,50 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "add-ons-ui-fullname" . }}
+  labels:
+    app: {{ template "add-ons-ui-name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: {{ template "add-ons-ui-name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.add_ons_ui.dir }}{{ .Values.image.name }}:{{ .Values.global.add_ons_ui.version }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+          - nginx
+          - -c
+          - /nginx-conf/nginx.conf
+          - -g
+          - daemon off;
+          ports:
+          - containerPort: {{ .Values.service.internalPort }}
+          volumeMounts:
+          - name: config
+            mountPath: /var/public/config
+          - name: nginx
+            mountPath: /nginx-conf
+      volumes:
+      - name: config
+        configMap:
+          name: {{ .Chart.Name }}
+          items:
+          - key: config.js
+            path: config.js
+      - name: nginx
+        configMap:
+          name: {{ .Chart.Name }}
+          items:
+          - key: nginx.conf
+            path: nginx.conf
+

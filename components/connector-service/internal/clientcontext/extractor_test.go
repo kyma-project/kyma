@@ -67,6 +67,61 @@ func Test_ExtractSerializableApplicationContext(t *testing.T) {
 		assert.Equal(t, appCtxPayload, extractedAppCtx)
 	})
 
+	t.Run("should return ApplicationContext with Runtime URLs", func(t *testing.T) {
+		// given
+		expectedSubject := certificates.CSRSubject{
+			Country:            "PL",
+			Organization:       tenant,
+			OrganizationalUnit: group,
+			Province:           "Province",
+			Locality:           "Gliwice",
+			CommonName:         appName,
+		}
+
+		eventsBasedURL := "https://gateway.cool-cluster.cluster.extend.events.cx"
+		metadataBasedURL := "https://gateway.cool-cluster.cluster.extend.metadata.cx"
+
+		appCtxPayload := ApplicationContext{
+			Application:    appName,
+			ClusterContext: ClusterContext{Group: group, Tenant: tenant},
+		}
+
+		ctx := appCtxPayload.ExtendContext(context.Background())
+
+		apiUrls := ApiURLs{
+			EventsBaseURL:   eventsBasedURL,
+			MetadataBaseURL: metadataBasedURL,
+		}
+
+		ctx = apiUrls.ExtendContext(ctx)
+
+		expectedApplicationContext := ExtendedApplicationContext{
+			ApplicationContext: appCtxPayload,
+			RuntimeURLs: RuntimeURLs{
+				MetadataURL:   metadataBasedURL + "/" + appName + "/v1/metadata/services",
+				EventsURL:     eventsBasedURL + "/" + appName + "/v1/events",
+				EventsInfoURL: eventsBasedURL + "/" + appName + "/v1/events/subscribed",
+			},
+		}
+
+		extractor := NewContextExtractor(subjectDefaults)
+
+		// when
+		clientCtx, err := extractor.CreateApplicationClientContextService(ctx)
+		require.NoError(t, err)
+
+		// then
+		certContext, ok := clientCtx.(*clientCertificateContext)
+		require.True(t, ok)
+
+		assert.Equal(t, expectedSubject, certContext.GetSubject())
+
+		extractedAppCtx, ok := certContext.ClientContextService.(ExtendedApplicationContext)
+		require.True(t, ok)
+
+		assert.Equal(t, expectedApplicationContext, extractedAppCtx)
+	})
+
 	t.Run("should fail when there is no ApplicationContext", func(t *testing.T) {
 		// given
 		extractor := NewContextExtractor(subjectDefaults)

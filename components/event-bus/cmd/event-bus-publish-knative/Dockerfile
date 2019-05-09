@@ -13,6 +13,7 @@ COPY main.go     .
 COPY application ./application
 COPY handlers    ./handlers
 COPY httpserver  ./httpserver
+COPY metrics     ./metrics
 COPY publisher   ./publisher
 COPY validators  ./validators
 

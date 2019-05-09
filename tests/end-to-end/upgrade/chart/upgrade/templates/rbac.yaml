@@ -20,8 +20,11 @@ metadata:
     heritage: "{{ .Release.Service }}"
 rules:
 - apiGroups: [""]
-  resources: ["","namespaces"]
-  verbs: ["create", "delete", "get", "list", "patch"]
+  resources: ["", "namespaces"]
+  verbs: ["create", "delete", "get", "list", "patch", "update"]
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["list", "get"]
 - apiGroups: ["apps"]
   resources: ["deployments"]
   verbs: ["create", "get", "delete", "list"]
@@ -41,7 +44,7 @@ rules:
   resources: ["applications", "applicationmappings","eventactivations"]
   verbs: ["create", "delete", "list", "get"]
 - apiGroups: [""]
-  resources: ["pods", "pods/log", "secrets", "configmaps"]
+  resources: ["pods", "pods/log", "pods/status", "secrets", "configmaps"]
   verbs: ["create", "delete", "get", "list"]
 - apiGroups: ["assetstore.kyma-project.io"]
   resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
@@ -51,7 +54,7 @@ rules:
   verbs: ["create", "delete", "get"]
 - apiGroups: [""]
   resources: ["services", "services/proxy"]
-  verbs: ["get", "list"]
+  verbs: ["create", "delete", "get", "list"]
 
 # Kubeless
 - apiGroups: ["kubeless.io"]
@@ -60,6 +63,24 @@ rules:
 - apiGroups: ["gateway.kyma-project.io"]
   resources: ["apis"]
   verbs: ["create", "delete", "get", "list"]
+
+  # MicroFrontend
+- apiGroups: ["ui.kyma-project.io"]
+  resources: ["microfrontends", "clustermicrofrontends"]
+  verbs: ["create", "get", "delete", "list"]
+
+# Event Bus
+- apiGroups: ["eventing.kyma-project.io"]
+  resources: ["subscriptions"]
+  verbs: ["create","get", "watch", "list", "delete"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
+  resources: ["eventactivations"]
+  verbs: ["create", "get", "watch", "list", "delete"]
+
+# Namespace controller
+- apiGroups: [""]
+  resources: ["resourcequotas"]
+  verbs: ["get", "list", "watch"]
 ---
 kind: ClusterRoleBinding
 apiVersion: rbac.authorization.k8s.io/v1beta1

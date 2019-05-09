@@ -1,86 +1,88 @@
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
 {{- $uiDeploymentEnabled :=  .Values.test.acceptance.ui.logging.enabled | default "false" -}}
-apiVersion: v1
-kind: Pod
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: "test-{{ template "fullname" . }}-ui-acceptance"
-  annotations:
-    sidecar.istio.io/inject: "true"
-    "helm.sh/hook": test-success
-  labels:
-    "helm-chart-test": "true"
 spec:
-  shareProcessNamespace: true
-  {{ if .Values.global.isLocalEnv }}
-  hostAliases:
-   - ip: {{ .Values.test.acceptance.ui.minikubeIP }}
-     hostnames:
-      - "apiserver.{{ .Values.global.ingress.domainName }}"
-      - "console.{{ .Values.global.ingress.domainName }}"
-      - "catalog.{{ .Values.global.ingress.domainName }}"
-      - "instances.{{ .Values.global.ingress.domainName }}"
-      - "brokers.{{ .Values.global.ingress.domainName }}"
-      - "dex.{{ .Values.global.ingress.domainName }}"
-      - "docs.{{ .Values.global.ingress.domainName }}"
-      - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
-      - "console-backend.{{ .Values.global.ingress.domainName }}"
-      - "minio.{{ .Values.global.ingress.domainName }}"
-  {{ end }}
-  serviceAccountName:  "test-{{ template "fullname" . }}-ui-acceptance"
-  containers:
-    - name: "test-{{ template "fullname" . }}-ui-acceptance"
-      image: {{ .Values.global.containerRegistry.path }}/ui-tests:1fb907f7
-      imagePullPolicy: IfNotPresent
-      resources:
-         requests:
-           memory: {{ .Values.test.acceptance.ui.requests.memory }}
-           cpu: {{ .Values.test.acceptance.ui.requests.cpu }}
-         limits:
-           memory: {{ .Values.test.acceptance.ui.limits.memory }}
-           cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
-      env:
-        - name: LOGGING_ENABLED
-          value: {{ $uiDeploymentEnabled | quote}}
-        - name: DOMAIN
-          value: {{ .Values.global.ingress.domainName }}
-        - name: LOGIN
-          valueFrom:
-            secretKeyRef:
-              name: admin-user
-              key: email
-        - name: PASSWORD
-          valueFrom:
-            secretKeyRef:
-              name: admin-user
-              key: password
-        - name: DEX_CONFIG
-          value: /etc/dex/cfg/config.yaml
-      volumeMounts:
-        - name: dex-config
-          mountPath: /etc/dex/cfg
-    - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
-      name: manager
-      command:
-        - bin/sh
-        - -c
-        - |
-          SERVICE="npm"
-          sleep 10
-          while true; do
-          if pgrep -x "${SERVICE}"; then
-            echo "---> ${SERVICE} is running."
-              sleep 10
-            else
-              echo "---> ${SERVICE} has stopped, stopping istio"
-              pkill -TERM pilot-agent
-              break
-            fi
-          done
-  # Needed for detecting if static user is disabled
-  volumes:
-    - name: dex-config
-      configMap:
-        name: dex-config
-        items:
-          - key: config.yaml
-            path: config.yaml
-  restartPolicy: Never
+    template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "true"
+        spec:
+          shareProcessNamespace: true
+          {{ if .Values.global.isLocalEnv }}
+          hostAliases:
+           - ip: {{ .Values.test.acceptance.ui.minikubeIP }}
+             hostnames:
+              - "apiserver.{{ .Values.global.ingress.domainName }}"
+              - "console.{{ .Values.global.ingress.domainName }}"
+              - "catalog.{{ .Values.global.ingress.domainName }}"
+              - "instances.{{ .Values.global.ingress.domainName }}"
+              - "brokers.{{ .Values.global.ingress.domainName }}"
+              - "dex.{{ .Values.global.ingress.domainName }}"
+              - "docs.{{ .Values.global.ingress.domainName }}"
+              - "lambdas-ui.{{ .Values.global.ingress.domainName }}"
+              - "console-backend.{{ .Values.global.ingress.domainName }}"
+              - "minio.{{ .Values.global.ingress.domainName }}"
+          {{ end }}
+          serviceAccountName: "test-{{ template "fullname" . }}-ui-acceptance"
+          containers:
+            - name: "test-{{ template "fullname" . }}-ui-acceptance"
+              image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.ui_acceptance_tests.dir }}ui-tests:{{ .Values.global.ui_acceptance_tests.version }}
+              imagePullPolicy: IfNotPresent
+              resources:
+                 requests:
+                   memory: {{ .Values.test.acceptance.ui.requests.memory }}
+                   cpu: {{ .Values.test.acceptance.ui.requests.cpu }}
+                 limits:
+                   memory: {{ .Values.test.acceptance.ui.limits.memory }}
+                   cpu: {{ .Values.test.acceptance.ui.limits.cpu }}
+              env:
+                - name: LOGGING_ENABLED
+                  value: {{ $uiDeploymentEnabled | quote }}
+                - name: DOMAIN
+                  value: {{ .Values.global.ingress.domainName }}
+                - name: LOGIN
+                  valueFrom:
+                    secretKeyRef:
+                      name: admin-user
+                      key: email
+                - name: PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: admin-user
+                      key: password
+                - name: DEX_CONFIG
+                  value: /etc/dex/cfg/config.yaml
+              volumeMounts:
+                - name: dex-config
+                  mountPath: /etc/dex/cfg
+            - image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
+              name: manager
+              command:
+                - bin/sh
+                - -c
+                - |
+                  SERVICE="npm"
+                  sleep 10
+                  while true; do
+                    if pgrep -x "${SERVICE}"; then
+                      echo "---> ${SERVICE} is running."
+                      sleep 10
+                    else
+                      echo "---> ${SERVICE} has stopped, stopping istio"
+                      pkill -TERM pilot-agent
+                      break
+                    fi
+                  done
+          # Needed for detecting if static user is disabled
+          volumes:
+            - name: dex-config
+              configMap:
+                name: dex-config
+                items:
+                  - key: config.yaml
+                    path: config.yaml
+          restartPolicy: Never
+{{- end}}

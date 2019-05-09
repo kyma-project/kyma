@@ -1,0 +1,40 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "fullname" . }}-oauth2
+  namespace: {{ .Release.Namespace }}
+spec:
+  gateways:
+    - {{ .Values.global.gateway }}
+  hosts:
+    - oauth2.{{ .Values.global.ingress.domainName }}
+  http:
+    - match:
+        - uri:
+            regex: /.*
+      route:
+        - destination:
+            host: {{ template "fullname" . }}-oauth2
+            port:
+              number: {{ .Values.hydraServer.service.port }}
+
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ template "fullname" . }}-oauth2-admin
+  namespace: {{ .Release.Namespace }}
+spec:
+  gateways:
+    - {{ .Values.global.gateway }}
+  hosts:
+    - oauth2-admin.{{ .Values.global.ingress.domainName }}
+  http:
+    - match:
+        - uri:
+            regex: /.*
+      route:
+        - destination:
+            host: {{ template "fullname" . }}-oauth2
+            port:
+              number: {{ .Values.hydraServer.service.adminPort }}

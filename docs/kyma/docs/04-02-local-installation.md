@@ -3,13 +3,9 @@ title: Install Kyma locally
 type: Installation
 ---
 
-This Installation guide shows developers how to quickly deploy Kyma locally on the MacOS and Linux platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites, instructions on how to install Kyma locally and verify the deployment, as well as the troubleshooting tips.
+This Installation guide shows you how to quickly deploy Kyma locally on the MacOS and Linux platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites and instructions on how to install Kyma on your machine, as well as the troubleshooting tips.
 
 ## Prerequisites
-
-To run Kyma locally, clone [this](https://github.com/kyma-project/kyma) Git repository to your machine and check out the latest release.
-
-Additionally, download these tools:
 
 - [Docker](https://www.docker.com/get-started)
 - [Minikube](https://github.com/kubernetes/minikube) 0.33.0
@@ -20,140 +16,132 @@ Additionally, download these tools:
 
 Virtualization:
 
-- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - Mac only
+- [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - MacOS only
 - [VirtualBox](https://www.virtualbox.org/) - Linux only
 
-> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma does not work on a basic Minikube cluster that you can start using the `minikube start` command.
+> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma requires a specific Minikube configuration and does not work on a basic Minikube cluster that you can start using the `minikube start` command.
 
-## Set up certificates
+## Install Kyma and access the Console UI
 
-Kyma comes with a local wildcard self-signed `server.crt` certificate that you can find under the `/installation/certs/workspace/raw/` directory of the `kyma` repository. Trust it on the OS level for convenience.
+1. Open a terminal window and navigate to a space in which you want to store your local Kyma sources.
 
-Follow these steps to "always trust" the Kyma certificate on MacOS:
+2. Clone the Kyma repository to your machine using either HTTPS or SSH. Run this command to clone the repository and change your working directory to `kyma`:
+    <div tabs>
+      <details>
+      <summary>
+      HTTPS
+      </summary>
 
-1. Change the working directory to `installation`:
+      ```
+      git clone https://github.com/kyma-project/kyma.git ; cd kyma
+      ```
+      </details>
+      <details>
+      <summary>
+      SSH
+      </summary>
 
+      ```
+      git clone git@github.com:kyma-project/kyma.git ; cd kyma
+      ```
+      </details>
+    </div>
+
+3. Choose the release from which you want to install Kyma. Go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about each of the available releases. Run this command to list all of the available tags that correspond to releases:
+  ```
+  git tag
+  ```
+
+4. Checkout the tag corresponding to the Kyma release you want to install. Run:
+  ```
+  git checkout {TAG}
+  ```
+ >**NOTE:** If you don't checkout any of the available tags, your sources match the state of the project's `master` branch at the moment of cloning the repository.
+
+5. Navigate to the `installation` directory which contains all of the required installation resources. Run:
   ```
   cd installation
   ```
 
-2. Run this command:
-
+6. Kyma comes with a local wildcard self-signed `server.crt` certificate. Add this certificate to your OS trusted certificates to access the Console UI. On MacOS, run:
   ```
   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/workspace/raw/server.crt
   ```
+  >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
->**NOTE:** "Always trusting" the certificate does not work with Mozilla Firefox.
+7. Start the installation. Trigger the `run.sh` script to start Minikube with a Kyma-specific configuration and install the necessary components. Define the password used to log in to the Console UI using the `--password` flag. Run:
+    <div tabs>
+      <details>
+      <summary>
+      MacOS
+      </summary>
 
-To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
-
-## Install Kyma
-
-You can install Kyma either with all core subcomponents or only with the selected ones. This section describes how to install Kyma with all core subcomponents. Read [this](/root/kyma#installation-custom-component-installation) document to learn how to install only the selected subcomponents.
-
-  > **CAUTION:** Running the installation script deletes any previously existing cluster from your Minikube.
-
-  > **NOTE:** Logging and Monitoring subcomponents are not included by default when you install Kyma on Minikube. You can install them using the instructions provided [here](https://github.com/kyma-project/kyma/tree/master/resources).
-
-Follow these instructions to install Kyma from a release or from local sources:
-<div tabs>
-  <details>
-  <summary>
-  From a release
-  </summary>
-
-  1. Change the working directory to `installation`:
       ```
-      cd installation
+      ./cmd/run.sh --password {USER_PASSWORD}
       ```
+      </details>
+      <details>
+      <summary>
+      Linux
+      </summary>
 
-  2. Use the following command to run Kubernetes locally using Minikube:
       ```
-      ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
+      ./cmd/run.sh --password {USER_PASSWORD} --vm-driver virtualbox
       ```
+      </details>
+    </div>
 
-  3. Wait until the `kube-dns` Pod is ready. Run this script to setup Tiller:
-      ```
-      ./scripts/install-tiller.sh
-      ```
+8. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running the `is-installed.sh` script. It is designed to give you clear information about the Kyma installation. Run it at any point to get the current installation status, or to find out whether the installation is successful.
 
-  4. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.
+  ```
+  ./scripts/is-installed.sh
+  ```
+  >**TIP:** If the script indicates that the installation failed, try to install Kyma again by re-running the `run.sh` script. If the installation fails in a reproducible manner, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue in the project or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
 
-  5. Export the release version as an environment variable. Run:
-      ```
-      export LATEST={KYMA_RELEASE_VERSION}
-      ```
+9. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password you set using the `--password` flag.
 
-  6. Deploy the Kyma Installer in your cluster from the `$LATEST` release:
-      ```
-      kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-installer-local.yaml
-      ```
-
-  7. Configure the Kyma installation using the local configuration file from the `$LATEST` release:
-      ```
-      wget -qO- https://github.com/kyma-project/kyma/releases/download/$LATEST/kyma-config-local.yaml | sed "s/minikubeIP: \"\"/minikubeIP: \"$(minikube ip)\"/g" | kubectl apply -f -
-      ```
-
-  8. To trigger the installation process, label the `kyma-installation` custom resource:
-      ```
-      kubectl label installation/kyma-installation action=install
-      ```
-
-  9. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running this script:
-      ```
-      ./scripts/is-installed.sh
-      ```
-</details>
-<details>
-<summary>
-From sources
-</summary>
-
-To start the local installation from sources, run this command:
-
-```
-./installation/cmd/run.sh
-```
-
-This script sets up default parameters, starts Minikube, builds the Kyma Installer, generates local configuration, creates the Installation custom resource, and sets up the Installer.
-
-> **NOTE:** See [this](#installation-local-installation-scripts-deep-dive) document for a detailed explanation of the `run.sh` script and the subscripts it triggers.
-
-You can execute the `installation/cmd/run.sh` script with the following parameters:
-
-- `--password {YOUR_PASSWORD}` which allows you to set a password for the **admin@kyma.cx** user.
-- `--skip-minikube-start` which skips the execution of the `installation/scripts/minikube.sh` script.
-- `--vm-driver` which points to either `virtualbox` or `hyperkit`, depending on your operating system.
-  </details>
-</div>
+10. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
 
 Read [this](#installation-reinstall-kyma) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 To learn how to test Kyma, see [this](#details-testing-kyma) document.
 
-## Verify the deployment
+## Stop and restart Kyma without reinstalling
 
-Follow the guidelines in the subsections to confirm that your Kubernetes API Server is up and running as expected.
+Use the `minikube.sh` script to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
 
-### Verify the installation status using the is-installed.sh script
+1. Stop the Minikube cluster with Kyma installed. Run:
+  ```
+  minikube stop
+  ```
+2. Restart the cluster without reinstalling Kyma. Run:
+    <div tabs>
+      <details>
+      <summary>
+      MacOS
+      </summary>
 
-The `is-installed.sh` script is designed to give you clear information about the Kyma installation. Run it at any point to get the current installation status, or to find out whether the installation is successful.
+      ```
+      ./scripts/minikube.sh --domain "kyma.local" --vm-driver hyperkit
+      ```
+      </details>
+      <details>
+      <summary>
+      Linux
+      </summary>
 
-If the script indicates that the installation failed, try to install Kyma again by re-running the `run.sh` script.
+      ```
+      ./scripts/minikube.sh --domain "kyma.local" --vm-driver virtualbox
+      ```
+      </details>
+    </div>
 
-If the installation fails in a reproducible manner, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue in the project or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
+The script discovers that a Minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the script to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
 
-### Access the Kyma console
+To verify that the restart is successful, run this command and check if all Pods have the `RUNNING` status:
 
-Access your local Kyma instance through [this](https://console.kyma.local/) link.
-
-* Click **Login with Email** and sign in with the **admin@kyma.cx** email address. Use the password contained in the  `admin-user` Secret located in the `kyma-system` Namespace. To get the password, run:
-
-``` bash
-kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 -D
 ```
-
-* Click the **Namespaces** section and select a Namespace from the drop-down menu to explore Kyma further.
-
+kubectl get pods --all-namespaces
+```
 
 ## Enable Horizontal Pod Autoscaler (HPA)
 
@@ -175,35 +163,19 @@ Follow these steps to enable HPA:
   minikube addons list
   ```
 
-## Stop and restart Kyma without reinstalling
-
-Use the `minikube.sh` script to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
-
-1. Stop the Minikube cluster with Kyma installed. Run:
-  ```
-  minikube stop
-  ```
-2. Restart the cluster without reinstalling Kyma. Run:
-  ```
-  ./scripts/minikube.sh --domain "kyma.local" --vm-driver "hyperkit"
-  ```
-
-The script discovers that a Minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the script to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
-
-To verify that the restart is successful, run this command and check if all Pods have the `RUNNING` status:
-
-```
-kubectl get pods --all-namespaces
-```
-
 ## Troubleshooting
 
-1. If the Installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
+1. If you don't set the password for the **admin@kyma.cx** user using the `--password` parameter or you forget the password you set, you can get it from the `admin-user` Secret located in the `kyma-system` Namespace. Run this command:
+    ```
+    kubectl get secret admin-user -n kyma-system -o jsonpath="{.data.password}" | base64 --decode
+    ```
+
+2. If the Installer does not respond as expected, check the installation status using the `is-installed.sh` script with the `--verbose` flag added. Run:
    ```
    scripts/is-installed.sh --verbose
    ```
 
-2. If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:
+3. If the installation is successful but a component does not behave in an expected way, see if all deployed Pods are running. Run this command:
    ```
    kubectl get pods --all-namespaces
    ```
@@ -212,7 +184,7 @@ kubectl get pods --all-namespaces
 
    If the problem persists, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
 
-3. If you put your local running cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run:
+4. If you put your local running cluster into hibernation or use `minikube stop` and `minikube start` the date and time settings of Minikube get out of sync with the system date and time settings. As a result, the access token used to log in cannot be properly validated by Dex and you cannot log in to the console. To fix that, set the date and time used by your machine in Minikube. Run:
    ```
    minikube ssh -- docker run -i --rm --privileged --pid=host debian nsenter -t 1 -m -u -n -i date -u $(date -u +%m%d%H%M%Y)
    ```

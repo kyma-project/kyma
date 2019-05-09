@@ -3,6 +3,7 @@ package bundle_test
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -137,4 +138,25 @@ func assertDirNotExits(t *testing.T, path string) {
 	if !os.IsNotExist(err) {
 		t.Errorf("Got error while checking if dir %q exits: %v", path, err)
 	}
+}
+
+// fakeRepository provide access to bundles repository
+type fakeRepository struct {
+	path string
+}
+
+// IndexReader returns index.yaml file from fake repository
+func (p *fakeRepository) IndexReader() (io.ReadCloser, error) {
+	fName := fmt.Sprintf("%s/%s", p.path, "index.yaml")
+	return os.Open(fName)
+}
+
+// BundleReader returns body reader for the given bundle
+func (p *fakeRepository) BundleReader(name bundle.Name, version bundle.Version) (io.ReadCloser, error) {
+	return os.Open(p.URLForBundle(name, version))
+}
+
+// URLForBundle returns download url for given bundle
+func (p *fakeRepository) URLForBundle(name bundle.Name, version bundle.Version) string {
+	return fmt.Sprintf("%s/%s-%s.tgz", p.path, name, version)
 }

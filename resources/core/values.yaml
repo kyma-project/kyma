@@ -2,16 +2,6 @@ dex:
   tls:
     createSecret: false
 
-minio:
-  service:
-    type: NodePort
-  accessKey: "admin"
-  secretKey: "topSecretKey"
-  resources:
-    limits:
-      memory: 128Mi
-      cpu: 250m
-
 console:
   cluster:
     headerLogoUrl: "assets/logo.svg"
@@ -33,8 +23,16 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
+<<<<<<< HEAD
     dir:
     version: 1.0.0
+=======
+    dir: develop/
+    version: "a19d8d50"
+  ui_acceptance_tests:
+    dir:
+    version: "83aa639b"
+>>>>>>> master
   api_controller:
     dir:
     version: 1.0.0
@@ -59,23 +57,41 @@ global:
     dir:
     version: 1.0.0
   kubeless_integration_tests:
+<<<<<<< HEAD
     dir: tests/
     version: 1.0.0
+=======
+    dir: develop/tests/
+    version: 3c2c6431
+>>>>>>> master
   kubeless_tests:
     dir:
     version: 1.0.0
   test_apiserver_proxy:
+<<<<<<< HEAD
     dir:
     version: 1.0.0
+=======
+    dir: develop/
+    version: 5c4376db
+>>>>>>> master
   test_namespace_controller:
     dir:
     version: 1.0.0
   console_backend_service:
+<<<<<<< HEAD
     dir:
     version: 1.0.0
   console_backend_service_test:
     dir:
     version: 1.0.0
+=======
+    dir: develop/
+    version: 'db3c45d5'
+  console_backend_service_test:
+    dir: develop/
+    version: 'c19f5756'
+>>>>>>> master
   cluster_users_test:
     dir:
     version: 1.0.0

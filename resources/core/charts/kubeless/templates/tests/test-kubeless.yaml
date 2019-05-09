@@ -55,31 +55,33 @@ subjects:
   name: test-{{ template "fullname" . }}
   namespace: {{ .Release.Namespace }}
 ---
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}
-  labels:
-    helm-chart-test: "true"
-  annotations:
-    sidecar.istio.io/inject: "true"
-    helm.sh/hook: test-success
 spec:
-  shareProcessNamespace: true
-  serviceAccount: "test-{{ template "fullname" . }}"
-  containers:
-  - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_tests.dir }}kubeless-tests:{{ .Values.global.kubeless_tests.version }}
-    env:
-    - name: KUBELESS_NAMESPACE
-      value: kyma-system
-    - name: KUBELESS_CONFIG
-      value: {{ template "fullname" . }}-config
-    - name: DOMAIN_NAME
-      value: {{ .Values.global.ingress.domainName }}
-    command: ["/bin/sh"]
-    args: ["-c", "sleep 10; /kubeless-tests; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      shareProcessNamespace: true
+      serviceAccount: "test-{{ template "fullname" . }}"
+      containers:
+      - name: test-{{ template "fullname" . }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_tests.dir }}kubeless-tests:{{ .Values.global.kubeless_tests.version }}
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 10; /kubeless-tests; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        env:
+        - name: KUBELESS_NAMESPACE
+          value: kyma-system
+        - name: KUBELESS_CONFIG
+          value: {{ template "fullname" . }}-config
+        - name: DOMAIN_NAME
+          value: {{ .Values.global.ingress.domainName }}
+      restartPolicy: Never
+{{- end }}
 ---
 {{- if not .Values.global.isLocalEnv }}
 ### Executes integration kubeless tests along with other Kyma resources
@@ -107,6 +109,9 @@ rules:
 - apiGroups: ["kubeless.io"]
   resources: ["functions"]
   verbs: ["create", "delete", "get", "list"]
+- apiGroups: ["extensions"]
+  resources: ["deployments", "replicasets"]
+  verbs: ["get", "list"]
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["serviceinstances", "servicebindings"]
   verbs: ["create", "delete", "get", "list"]
@@ -157,43 +162,45 @@ subjects:
   name: test-{{ template "fullname" . }}-int
   namespace: {{ .Release.Namespace }}
 ---
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}-int
-  labels:
-    helm-chart-test: "true"
-  annotations:
-    sidecar.istio.io/inject: "true"
-    helm.sh/hook: test-success
 spec:
-  shareProcessNamespace: true
-  serviceAccount: "test-{{ template "fullname" . }}-int"
-  containers:
-  - name: test-{{ template "fullname" . }}
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration:{{ .Values.global.kubeless_integration_tests.version }}
-    command: ["/bin/sh"]
-    args: ["-c", "sleep 10; /test-kubeless; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
-    volumeMounts:
-    - name: k8syaml
-      mountPath: /k8syaml
-    env:
-    - name: INGRESSGATEWAY_ADDRESS
-      value: istio-ingressgateway.istio-system.svc.cluster.local
-    - name: KUBELESS_NAMESPACE
-      value: kyma-system
-    - name: KUBELESS_CONFIG
-      value: {{ template "fullname" . }}-config
-    - name: DOMAIN_NAME
-      value: {{ .Values.global.ingress.domainName }}
-  volumes:
-    - name: k8syaml
-      configMap:
-        name: "test-{{ template "fullname" . }}-config-int"
-        items:
-          - key: k8sYaml
-            path: k8s.yaml
-          - key: svcBindLambdaYaml
-            path: svcbind-lambda.yaml
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      shareProcessNamespace: true
+      serviceAccount: "test-{{ template "fullname" . }}-int"
+      containers:
+      - name: test-{{ template "fullname" . }}
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.kubeless_integration_tests.dir }}kubeless-integration:{{ .Values.global.kubeless_integration_tests.version }}
+        command: ["/bin/sh"]
+        args: ["-c", "sleep 10; /test-kubeless; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+        volumeMounts:
+        - name: k8syaml
+          mountPath: /k8syaml
+        env:
+        - name: INGRESSGATEWAY_ADDRESS
+          value: istio-ingressgateway.istio-system.svc.cluster.local
+        - name: KUBELESS_NAMESPACE
+          value: kyma-system
+        - name: KUBELESS_CONFIG
+          value: {{ template "fullname" . }}-config
+        - name: DOMAIN_NAME
+          value: {{ .Values.global.ingress.domainName }}
+      volumes:
+        - name: k8syaml
+          configMap:
+            name: "test-{{ template "fullname" . }}-config-int"
+            items:
+              - key: k8sYaml
+                path: k8s.yaml
+              - key: svcBindLambdaYaml
+                path: svcbind-lambda.yaml
+      restartPolicy: Never
+{{- end }}
 {{- end }}

@@ -8,6 +8,7 @@ WORKDIR ${BASE_APP_DIR}
 #
 
 COPY ./internal/ ${BASE_APP_DIR}/internal/
+COPY ./pkg/ ${BASE_APP_DIR}/pkg/
 COPY ./vendor/ ${BASE_APP_DIR}/vendor/
 COPY ./tester.go ${BASE_APP_DIR}/tester.go
 

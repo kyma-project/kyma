@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net/http"
 	"time"
@@ -48,6 +50,19 @@ func main() {
 	// start the HTTP server
 	server := httpserver.NewHttpServer(&options.Port, &handler)
 	go server.Start()
+
+	metricsServeMux := http.NewServeMux()
+	metricsServeMux.Handle("/metrics", promhttp.Handler())
+	metricsServer := http.Server{
+		Addr:    fmt.Sprintf(":%d", options.MonitoringPort),
+		Handler: metricsServeMux,
+	}
+	log.Printf("HTTP metrics server starting on %v", options.MonitoringPort)
+	go func() {
+		if err := metricsServer.ListenAndServe(); err != nil {
+			log.Fatalf("HTTP metrics server failed with error:\n%v", err)
+		}
+	}()
 
 	// shutdown the HTTP server gracefully
 	server.Shutdown(shutdownTimeout)

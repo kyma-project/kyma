@@ -1,21 +1,22 @@
 package publisher
 
 import (
-	"log"
-
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
+	"github.com/kyma-project/kyma/components/event-bus/cmd/event-bus-publish-knative/metrics"
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	"github.com/prometheus/client_golang/prometheus"
+	"log"
 )
 
-const(
-FAILED = "failed"
-IGNORED = "ignored"
-PUBLISHED = "published"
+const (
+	FAILED    = "failed"
+	IGNORED   = "ignored"
+	PUBLISHED = "published"
 )
 
 type KnativePublisher interface {
 	Publish(knativeLib *knative.KnativeLib, channelName *string, namespace *string, headers *map[string]string,
-		payload *[]byte) (*api.Error, string)
+		payload *[]byte, publishRequest *api.PublishRequest) (*api.Error, string)
 }
 
 type DefaultKnativePublisher struct{}
@@ -26,7 +27,8 @@ func NewKnativePublisher() KnativePublisher {
 }
 
 func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib, channelName *string,
-	namespace *string, headers *map[string]string, payload *[]byte) (*api.Error, string) {
+	namespace *string, headers *map[string]string, payload *[]byte, publishRequest *api.PublishRequest) (*api.Error,
+	string) {
 	// knativelib should not be nil
 	if knativeLib == nil {
 		log.Println("knative-lib is nil")
@@ -61,6 +63,13 @@ func (publisher *DefaultKnativePublisher) Publish(knativeLib *knative.KnativeLib
 	channel, err := knativeLib.GetChannel(*channelName, *namespace)
 	if err != nil {
 		log.Printf("cannot find the knative channel '%v' in namespace '%v'", *channelName, *namespace)
+		log.Println("incrementing ignored messages counter")
+		metrics.TotalPublishedMessages.With(prometheus.Labels{
+			metrics.Namespace:		  *namespace,
+			metrics.Status:           IGNORED,
+			metrics.SourceID:         publishRequest.SourceID,
+			metrics.EventType:        publishRequest.EventType,
+			metrics.EventTypeVersion: publishRequest.EventTypeVersion}).Inc()
 		return nil, IGNORED
 	}
 
