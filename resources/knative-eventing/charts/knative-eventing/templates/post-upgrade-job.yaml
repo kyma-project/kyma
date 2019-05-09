@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: knative-eventing-post-upgrade
+  annotations:
+    "helm.sh/hook": "post-upgrade"
+spec:
+  template:
+    spec:
+      containers:
+      - name: post-upgrade
+        image: eu.gcr.io/kyma-project/snapshot/test/post-upgrade:test
+      restartPolicy: Never
+  backoffLimit: 2
