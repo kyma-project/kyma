@@ -30,7 +30,8 @@ export let configuration = {
                 "pet": {
                     "id": "4caad296-e0c5-491e-98ac-0ed118f9474e"
                 }
-            } })
+            }
+        })
 }
 
 export default function () {
