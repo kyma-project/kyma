@@ -52,56 +52,28 @@ Pre-Defined test execution tags
 
 This information will be used later on [grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1) to filter test results
 
-An example k6 test testing Kyma Gateway, with predefined tag name ```testName``` and ```component```
+An example k6 test testing example http-db-service defined [here](./prerequisites/examples/example.yaml), with predefined tag name ```testName``` and ```component```
 
 ```javascript
-import http from "k6/http"
-import { check, sleep } from "k6";
+import http from 'k6/http';
 
 export let options = {
     vus: 10,
     duration: "1m",
+    rps: 1000,
     tags: {
-        "testName": "send_event_gateway_10vu_60s_1000",
-        "component": "application-gateway",
-        "revision": `${__ENV.REVISION}`
-    },
-    tlsAuth: [
-        {
-            domains: [`gateway.${__ENV.CLUSTER_DOMAIN_NAME}`],
-            cert: open(`${__ENV.APP_CONNECTOR_CERT_DIR}/generated.crt`),
-            key: open(`${__ENV.APP_CONNECTOR_CERT_DIR}/generated.key`)
-        }
-    ]
+        "testName": "http_basic_10vu_60s_1000",
+        "component": "http-db-service",
+        "revision": "123456"
+    }
 }
 
-export let configuration = {
-    params: { headers: { "Content-Type": "application/json" } },
-    url: `https://gateway.${__ENV.CLUSTER_DOMAIN_NAME}/perf-app/v1/events`,
-    payload: JSON.stringify(
-        {
-            "event-type": "petCreated",
-            "event-type-version": "v1",
-            "event-time": "2018-11-02T22:08:41+00:00",
-            "data": {
-                "pet": {
-                    "id": "4caad296-e0c5-491e-98ac-0ed118f9474e"
-                }
-            } })
+export default function() {
+    const response = http.get(`https://http-db-service.${__ENV.CLUSTER_DOMAIN_NAME}/`);
 }
-
-export default function () {
-    let res = http.post(configuration.url, configuration.payload, configuration.params);
-
-    check(res, {
-        "status was 200": (r) => r.status == 200,
-        "transaction time OK": (r) => r.timings.duration < 200
-    });
-    sleep(1);
-};
 ```
 
-Example test above will execute a load test against Kyma gateway on a cluster deployed on **CLUSTER_DOMAIN_NAME** 
+Example test above will execute a load test against http-db-service on a cluster deployed on **CLUSTER_DOMAIN_NAME** 
 with **10** virtual users, **1** minute long and **1000** request per second across **10** virtual users.
 
 Test logic should be implemented in a function defined as **default**, more about test execution lifecycle please read [here](https://docs.k6.io/docs/test-life-cycle).
@@ -131,7 +103,7 @@ Following example will deploy some test component on Kyma cluster to execute loa
 First deploy example test service which we execute load test against on Kyma cluster
 
 ```bash
-kubectl apply -f prerequisites/example.yaml
+kubectl apply -f prerequisites/examples/example.yaml
 ```
 
 After test service deployed we can start load test locally to against Kyma cluster from command line with an environment 

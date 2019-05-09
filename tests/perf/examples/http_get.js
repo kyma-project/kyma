@@ -5,7 +5,9 @@ export let options = {
     duration: "1m",
     rps: 1000,
     tags: {
-        "testName": "http_basic"
+        "testName": "http_basic_10vu_60s_1000",
+        "component": "http-db-service",
+        "revision": "123456"
     }
 }
 
