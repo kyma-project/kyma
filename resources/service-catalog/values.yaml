@@ -17,7 +17,7 @@ global:
     secretName: etcd-backup-abs-credentials
   etcd_backup_job:
     dir:
-    version: 1.1.0
+    version: 1.1.0-rc0
 
 service-catalog-apiserver:
   enabled: true
