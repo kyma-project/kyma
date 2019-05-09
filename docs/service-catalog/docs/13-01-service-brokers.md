@@ -20,6 +20,7 @@ You can also install these brokers using the Helm Broker's bundles:
 
 * [Google Cloud Platform (GCP) Broker](#service-brokers-gcp-broker)
 * [Azure Service Broker](#service-brokers-azure-service-broker)
+* [AWS Service Broker](#service-brokers-aws-broker)
 
 To get the bundles that the Helm Broker provides, go to the [`bundles`](https://github.com/kyma-project/bundles) repository. To build your own Service Broker, follow the [Open Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md) specification. For details on how to register a sample Service Broker in the Service Catalog, see [this](#tutorials-register-a-broker-in-the-service-catalog) tutorial.
 
