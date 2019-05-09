@@ -59,19 +59,19 @@ func init() {
 	}
 }
 
-func (ksg *SubscriptionsGauge) DeleteKymaSubscriptionsGauge(namespace string, name string) {
+func (ksg *SubscriptionsGauge) DeleteKymaSubscriptionsGaugeLabelValues(namespace string, name string) {
 	values := []string{namespace, name, "true"}
 	ksg.Metric.DeleteLabelValues(values...)
 	values = []string{namespace, name, "false"}
 	ksg.Metric.DeleteLabelValues(values...)
 }
 
-func (ksg *SubscriptionsGauge) DeleteKnativeSubscriptionsGauge(namespace string, name string) {
+func (ksg *SubscriptionsGauge) DeleteKnativeSubscriptionsGaugeLabelValues(namespace string, name string) {
 	ksg.Metric.DeleteLabelValues(namespace, name, "true")
 	ksg.Metric.DeleteLabelValues(namespace, name, "false")
 }
 
 
-func (kchg *SubscriptionsGauge) DeleteKnativeChannelGauge(name string) {
+func (kchg *SubscriptionsGauge) DeleteKnativeChannelGaugeLabelValues(name string) {
 	kchg.Metric.DeleteLabelValues(name)
 }
