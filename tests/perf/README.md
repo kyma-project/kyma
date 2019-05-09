@@ -83,7 +83,7 @@ export let options = {
     tags: {
         "testName": "http_basic_10vu_60s_1000",
         "component": "http-db-service",
-        "revision": "123456"
+        "revision": `${__ENV.REVISION}`
     }
 }
 
