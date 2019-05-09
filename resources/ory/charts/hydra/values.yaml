@@ -12,9 +12,6 @@ hydraServer:
       subjectTypesSupported: "public,pairwise"
   service:
     port: 80
-<<<<<<< HEAD
-    adminPort: 4445
-=======
     adminPort: 4445
 loginConsent:
   name: oauth2-login-consent
@@ -23,4 +20,3 @@ loginConsent:
     repository: tsmsap/hydra-dex
     tag: test3_1
   dexJwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
->>>>>>> initial
