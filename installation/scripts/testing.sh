@@ -19,20 +19,6 @@ fi
 
 matchTests="" # match all tests
 
-<<<<<<< HEAD
-# execute logging tests if 'logging' is installed
-if helm ${KUBE_CONTEXT_ARG} list --tls | grep -q "logging"; then
-echo "- Logging module is installed. Running tests for same"
-helm ${KUBE_CONTEXT_ARG} test logging --timeout 600 --tls
-loggingTestErr=$?
-fi
-
-# run event-bus tests if Knative is installed
-if kubectl -n knative-eventing get deployments.apps | grep -q "webhook"; then
-    echo "- Testing Event-Bus..."
-    helm ${KUBE_CONTEXT_ARG} test event-bus --timeout 600 --tls
-    eventBusTestErr=$?
-=======
 ${kc} get cm dex-config -n kyma-system -ojsonpath="{.data}" | grep --silent "#__STATIC_PASSWORDS__"
 if [[ $? -eq 1 ]]
 then
@@ -40,7 +26,6 @@ then
   matchTests=$(${kc} get testdefinitions --all-namespaces -l 'require-static-users!=true' -o=go-template-file --template='./../resources/test-selector.yaml.tpl')
   echo "WARNING: following tests will be skipped due to the lack of static users:"
   echo "$(${kc} get testdefinitions --all-namespaces -l 'require-static-users=true' -o=go-template --template='{{- range .items}}{{printf " - %s\n" .metadata.name}}{{- end}}')"
->>>>>>> master
 fi
 
 cat <<EOF | ${kc} apply -f -

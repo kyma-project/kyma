@@ -10,13 +10,8 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   test_knative_serving_acceptance:
-<<<<<<< HEAD
-    dir:
-    version: 1.0.0
-=======
     dir: develop/
     version: 40c11b98
->>>>>>> master
 
 test:
   target: "Test Target"

@@ -16,30 +16,17 @@ global:
   containerRegistry:
     path: eu.gcr.io/kyma-project
   application_operator:
-<<<<<<< HEAD
-    dir:
-    version: 1.0.0
-=======
     dir: develop/
     version: fedca3db
->>>>>>> master
   application_operator_tests:
     dir:
     version: 1.0.0
   connector_service:
-<<<<<<< HEAD
-    dir:
-    version: 1.0.0
-  connector_service_tests:
-    dir:
-    version: 1.0.0
-=======
     dir: develop/
     version: fedca3db
   connector_service_tests:
     dir: develop/
     version: 3b4c9f62
->>>>>>> master
   connection_token_handler:
     dir:
     version: 1.0.0
@@ -47,19 +34,6 @@ global:
     dir:
     version: 1.0.0
   connectivity_certs_controller:
-<<<<<<< HEAD
-    dir:
-    version: 1.0.0
-  event_service:
-    dir:
-    version: 1.0.0
-  gateway_tests:
-    dir:
-    version: 1.0.0
-  application_gateway:
-    dir:
-    version: 1.0.0
-=======
     dir: develop/
     version: ffc9ea80
   event_service:
@@ -71,7 +45,6 @@ global:
   application_gateway:
     dir: develop/
     version: 0f47c038
->>>>>>> master
   application_gateway_tests:
     dir:
     version: 1.0.0
@@ -82,13 +55,7 @@ global:
     dir:
     version: 1.0.0
   application_broker:
-<<<<<<< HEAD
-    dir:
-    version: 1.0.0
-
-=======
     dir: develop/
     version: 426e984b
->>>>>>> master
 connectivity_certs_controller:
   enabled: false
