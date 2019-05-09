@@ -66,6 +66,7 @@ metadata:
 data:
   gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.proxy.excludeIPRanges: "__PROXY_EXCLUDE_IP_RANGES__"
+  gateways.istio-egressgateway.enabled: "true"
 ---
 apiVersion: v1
 kind: ConfigMap

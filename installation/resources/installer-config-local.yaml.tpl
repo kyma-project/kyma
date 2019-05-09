@@ -53,6 +53,7 @@ data:
   gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
   gateways.istio-ingressgateway.autoscaleEnabled: "false"
+  gateways.istio-egressgateway.enabled: "true"
   gateways.istio-egressgateway.autoscaleEnabled: "false"
 
   pilot.resources.limits.memory: 1024Mi
