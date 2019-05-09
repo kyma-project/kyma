@@ -141,3 +141,5 @@ models:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.TopicEntry"
   Title:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Title"
+  Settings:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Settings"

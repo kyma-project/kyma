@@ -13,3 +13,27 @@ func NewBackendModuleResolver(backendModuleLister backendModuleLister) *backendM
 func (r *backendModuleResolver) SetInstanceConverter(converter gqlBackendModuleConverter) {
 	r.backendModuleConverter = converter
 }
+
+func NewMicrofrontendService(informer cache.SharedIndexInformer) *microfrontendService {
+	return newMicrofrontendService(informer)
+}
+
+func NewMicrofrontendResolver(microfrontendLister microfrontendLister) *microfrontendResolver {
+	return newMicrofrontendResolver(microfrontendLister)
+}
+
+func (r *microfrontendResolver) SetMicrofrontendConverter(converter gqlMicrofrontendConverter) {
+	r.microfrontendConverter = converter
+}
+
+func NewClusterMicrofrontendService(informer cache.SharedIndexInformer) *clusterMicrofrontendService {
+	return newClusterMicrofrontendService(informer)
+}
+
+func NewClusterMicrofrontendResolver(clusterMicrofrontendLister clusterMicrofrontendLister) *clusterMicrofrontendResolver {
+	return newClusterMicrofrontendResolver(clusterMicrofrontendLister)
+}
+
+func (r *clusterMicrofrontendResolver) SetClusterMicrofrontendConverter(converter gqlClusterMicrofrontendConverter) {
+	r.clusterMicrofrontendConverter = converter
+}
