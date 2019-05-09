@@ -14,9 +14,4 @@ hydraServer:
     port: 80
     adminPort: 4445
 loginConsent:
-  name: oauth2-login-consent
-  port: 3000
-  image:
-    repository: tsmsap/hydra-dex
-    tag: test3_1
-  dexJwksUri: http://dex-service.kyma-system.svc.cluster.local:5556/keys
+  name: non-existing-application

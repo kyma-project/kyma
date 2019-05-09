@@ -1,6 +1,6 @@
 ################################################################################
 ## Turn Off mTLS for hydra server, because Istio Pilot can't fetch
-## jwks keys if mTLS is active.
+## jwks keys from Hydra Server if mTLS is active.
 #################################################################################
 kind: Policy
 apiVersion: authentication.istio.io/v1alpha1
@@ -13,7 +13,7 @@ spec:
   - mtls:
       mode: PERMISSIVE
   targets:
-  - name: {{ template "fullname" . }}-oauth2
+  - name: {{ .Values.hydraServer.serviceName }}
 ---
 kind: DestinationRule
 apiVersion: networking.istio.io/v1alpha3
@@ -21,7 +21,7 @@ metadata:
   name: {{ template "fullname" . }}-destinationrule
   namespace: {{ .Release.Namespace }}
 spec:
-  host: {{ template "fullname" . }}-oauth2.kyma-system.svc.cluster.local
+  host: {{ .Values.hydraServer.serviceName }}.{{ .Values.hydraServer.namespace }}.svc.cluster.local
   trafficPolicy:
     tls:
       mode: DISABLE
