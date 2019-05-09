@@ -26,8 +26,15 @@ spec:
       namespace: "knative-serving"
     - name: "knative-eventing"
       namespace: "knative-eventing"
+<<<<<<< HEAD
     # - name: "prometheus-operator"
     # namespace: "kyma-system"
+=======
+    - name: "istio-kyma-patch"
+      namespace: "istio-system"
+    - name: "prometheus-operator"
+      namespace: "kyma-system"
+>>>>>>> 23a611a0... Increased tiller version. Added kiali service to /etc/hosts
     - name: "dex"
       namespace: "kyma-system"
     #- name: "ory"
@@ -62,5 +69,5 @@ spec:
     #  namespace: "kyma-system"
     #- name: "jaeger"
     #  namespace: "kyma-system"
-    #- name: "monitoring"
-    #  namespace: "kyma-system"
+    - name: "monitoring"
+      namespace: "kyma-system"
