@@ -4,6 +4,7 @@ import (
 	"crypto/x509"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
@@ -120,8 +121,12 @@ func (ts *testSuite) createApplication() error {
 		return err
 	}
 
-	////TODO: Polling / retries. Use waitUntil, you should create additional function that checks if Application is ready and returns true if ready
-	time.Sleep(5 * time.Second)
+	err = waitUntil(5, 15, ts.isApplicationReady)
+
+	if err != nil {
+		return err
+	}
+
 	checker := resourceskit.NewK8sChecker(ts.k8sClient, appName)
 
 	err = checker.CheckK8sResources()
@@ -130,6 +135,16 @@ func (ts *testSuite) createApplication() error {
 	}
 
 	return nil
+}
+
+func (ts *testSuite) isApplicationReady() (bool, error) {
+	application, e := ts.acClient.GetApplication(appName, v1.GetOptions{})
+
+	if e != nil {
+		return false, e
+	}
+
+	return application.Status.InstallationStatus.Status == "DEPLOYED", nil
 }
 
 func (ts *testSuite) FetchCertificate() ([]*x509.Certificate, error) {
@@ -211,7 +226,7 @@ func (ts *testSuite) StartTestServer() error {
 	e = waitUntil(5, 30, ts.testService.CheckIfReady)
 
 	if e != nil {
-		return e
+		return errors.New(fmt.Sprintf("Test Service not started: %s", e))
 	}
 
 	return nil
@@ -265,5 +280,5 @@ func waitUntil(retries int, sleepTimeSeconds int, predicate func() (bool, error)
 		return nil
 	}
 
-	return errors.New("Resource not ready")
+	return errors.New("resource not ready")
 }
