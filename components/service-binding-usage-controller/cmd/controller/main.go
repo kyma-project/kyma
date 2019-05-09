@@ -11,6 +11,7 @@ import (
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/controller/usagekind"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/internal/platform/logger"
+	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
 	bindingUsageClientset "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
 	bindingUsageInformers "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/signal"
@@ -18,6 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"
 	k8sClientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -115,19 +117,23 @@ func main() {
 	bindingUsageInformerFactory.Start(stopCh)
 	serviceCatalogInformerFactory.Start(stopCh)
 
-	go runHTTPServer(stopCh, fmt.Sprintf(":%d", cfg.Port), log)
+	go runHTTPServer(stopCh, fmt.Sprintf(":%d", cfg.Port), bindingUsageCli, cfg.AppliedSBUConfigMapNamespace, log)
 	go kindController.Run(stopCh)
 	go ukProtectionController.Run(stopCh)
 
 	ctr.Run(stopCh)
 }
 
-func runHTTPServer(stop <-chan struct{}, addr string, log logrus.FieldLogger) {
+func runHTTPServer(stop <-chan struct{}, addr string, sbuClient *bindingUsageClientset.Clientset, ns string, log logrus.FieldLogger) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		if _, err := fmt.Fprint(w, "OK"); err != nil {
 			log.Errorf("Cannot write response body, got err: %v ", err)
+		}
+
+		if err := informerAvailability(sbuClient, ns); err != nil {
+			log.Errorf("Cannot apply ServiceBindingUsage sample: %v ", err)
 		}
 	})
 	mux.Handle("/metrics", promhttp.Handler())
@@ -144,6 +150,36 @@ func runHTTPServer(stop <-chan struct{}, addr string, log logrus.FieldLogger) {
 	if err := srv.ListenAndServe(); err != http.ErrServerClosed {
 		log.Errorf("HTTP server ListenAndServe: %v", err)
 	}
+}
+
+func informerAvailability(sbuClient *bindingUsageClientset.Clientset, namespace string) error {
+	_, err := sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Create(
+		&v1alpha1.ServiceBindingUsage{
+			TypeMeta: metav1.TypeMeta{
+				APIVersion: "servicecatalog.kyma-project.io/v1alpha1",
+				Kind:       "ServiceBindingUsage",
+			},
+			ObjectMeta: metav1.ObjectMeta{Name: controller.LivenessBUCSample},
+		})
+	if err != nil {
+		return errors.Wrap(err, "while creating ServiceBindingUsage")
+	}
+	_, err = sbuClient.
+		ServicecatalogV1alpha1().
+		ServiceBindingUsages(namespace).
+		Get(controller.LivenessBUCSample, metav1.GetOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while fetching ServiceBindingUsage")
+	}
+	err = sbuClient.
+		ServicecatalogV1alpha1().
+		ServiceBindingUsages(namespace).
+		Delete(controller.LivenessBUCSample, &metav1.DeleteOptions{})
+	if err != nil {
+		return errors.Wrap(err, "while deleteing ServiceBindingUsage")
+	}
+
+	return nil
 }
 
 func fatalOnError(err error) {

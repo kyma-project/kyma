@@ -34,6 +34,8 @@ const (
 	//
 	// 5ms, 10ms, 20ms, 40ms, 80ms, 160ms, 320ms, 640ms, 1.3s, 2.6s, 5.1s, 10.2s, 20.4s, 41s, 82s
 	defaultMaxRetries = 15
+	// LivenessBUCSample name of ServiceBindingUsage used for liveness probe
+	LivenessBUCSample = "informer.liveness.probe.service.binding.usage.name"
 )
 
 var podPresetOwnerAnnotationKey = fmt.Sprintf("servicebindingusages.%s/owner-name", sbuTypes.SchemeGroupVersion.Group)
@@ -218,6 +220,11 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 	if err != nil {
 		c.log.Errorf("Error processing %q (splitting meta namespace key failed): %v", key, err)
 		c.queue.Forget(key)
+		return true
+	}
+	// Skip all process if ServiceBiningUsage comes from informer liveness probe
+	// in that case we only check informer handle the queue, all process is not needed
+	if name == LivenessBUCSample {
 		return true
 	}
 
