@@ -16,8 +16,8 @@ global:
     enabled: false
     secretName: etcd-backup-abs-credentials
   etcd_backup_job:
-    dir: develop/
-    version: ad738fd7
+    dir:
+    version: 1.1.0
 
 service-catalog-apiserver:
   enabled: true

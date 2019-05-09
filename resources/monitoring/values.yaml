@@ -3,8 +3,8 @@
 test:
   image:
     name: monitoring
-    dir: develop/tests/
-    version: 06b8d357
+    dir: tests/
+    version: 1.1.0
 global:
   isLocalEnv: false
   containerRegistry:
