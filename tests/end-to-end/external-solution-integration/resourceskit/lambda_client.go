@@ -1,6 +1,7 @@
 package resourceskit
 
 import (
+	"fmt"
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
 	"k8s.io/api/core/v1"
@@ -14,7 +15,7 @@ const lambdaFunction = `
 	const request = require('request')
 	module.exports = { 'entrypoint': function (event, context) {
 		return new Promise((resolve, reject) => {
-			const url = "http://" + process.env.GATEWAY_URL + "/counter"
+			const url = "%s"
 			sendReq(url, resolve, reject)
 		})
 	} }
@@ -28,7 +29,7 @@ const lambdaFunction = `
     }`
 
 type LambdaClient interface {
-	DeployLambda(appName string) error
+	DeployLambda(appName, url string) error
 	DeleteLambda(appName string, options *metav1.DeleteOptions) error
 }
 
@@ -49,8 +50,8 @@ func NewLambdaClient(config *rest.Config, namespace string) (LambdaClient, error
 	}, nil
 }
 
-func (c *lambdaClient) DeployLambda(appName string) error {
-	lambda := c.createLambda(appName)
+func (c *lambdaClient) DeployLambda(appName, url string) error {
+	lambda := c.createLambda(appName, url)
 
 	_, err := c.kubelessClientSet.KubelessV1beta1().Functions(c.namespace).Create(lambda)
 	if err != nil {
@@ -64,10 +65,10 @@ func (c *lambdaClient) DeleteLambda(appName string, options *metav1.DeleteOption
 	return c.kubelessClientSet.KubelessV1beta1().Functions(c.namespace).Delete(appName, options)
 }
 
-func (c *lambdaClient) createLambda(name string) *kubelessV1.Function {
+func (c *lambdaClient) createLambda(name, url string) *kubelessV1.Function {
 	lambdaSpec := kubelessV1.FunctionSpec{
 		Handler:             "e2e.entrypoint",
-		Function:            lambdaFunction,
+		Function:            fmt.Sprintf(lambdaFunction, url),
 		FunctionContentType: "text",
 		Runtime:             "nodejs8",
 		Deps:                "request",
