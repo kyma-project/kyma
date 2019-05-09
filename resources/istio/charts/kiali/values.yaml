@@ -1,14 +1,14 @@
 #
 # addon kiali
 #
-enabled: false
+enabled: false 
 replicaCount: 1
 hub: docker.io/kiali
 tag: v0.14
 contextPath: /kiali
 nodeSelector: {}
 ingress:
-  enabled: false
+  enabled: false 
   ## Used to create an Ingress record.
   hosts:
     - kiali.local
@@ -26,12 +26,16 @@ dashboard:
   usernameKey: username
   passphraseKey: passphrase
 
+credentials:
+  username: admin
+  passphrase: admin
+
   # Override the automatically detected Grafana URL, useful when Grafana service has no ExternalIPs
   # grafanaURL:
 
   # Override the automatically detected Jaeger URL, useful when Jaeger service has no ExternalIPs
   # jaegerURL:
-prometheusAddr: http://prometheus:9090
+prometheusAddr: http://monitoring-prometheus.kyma-system:9090
 
 # When true, a secret will be created with a default username and password. Useful for demos.
-createDemoSecret: false
+createDemoSecret: true 
