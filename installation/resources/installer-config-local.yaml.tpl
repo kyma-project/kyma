@@ -53,20 +53,14 @@ data:
   gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
   gateways.istio-ingressgateway.autoscaleEnabled: "false"
-  gateways.istio-egressgateway.autoscaleEnabled: "false"
 
   pilot.resources.limits.memory: 1024Mi
   pilot.resources.limits.cpu: 200m
   pilot.resources.requests.memory: 256Mi
   pilot.resources.requests.cpu: 100m
-  pilot.autoscaleEnabled: "false"
 
-  mixer.policy.resources.limits.memory: 256Mi
-  mixer.policy.resources.requests.memory: 128Mi
-  mixer.policy.autoscaleEnabled: "false"
-  mixer.telemetry.resources.limits.memory: 512Mi
-  mixer.telemetry.resources.requests.memory: 256Mi
-  mixer.telemetry.autoscaleEnabled: "false"
+  mixer.resources.limits.memory: 256Mi
+  mixer.resources.requests.memory: 128Mi
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -133,6 +127,7 @@ data:
   test.acceptance.cbs.minikubeIP: ""
   apiserver-proxy.minikubeIP: ""
   configurations-generator.minikubeIP: ""
+  console-backend-service.minikubeIP: ""
 ---
 apiVersion: v1
 kind: ConfigMap

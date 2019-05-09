@@ -112,7 +112,7 @@ func verifyDeletedAssets(files []uploadedFile, logFn func(format string, args ..
 
 func deleteFiles(minioCli *minio.Client, uploadResult *upload.Response, logFn func(format string, args ...interface{})) error {
 	for _, res := range uploadResult.UploadedFiles {
-		path := strings.SplitAfter(res.RemotePath, res.Bucket)[1]
+		path := strings.SplitAfter(res.RemotePath, fmt.Sprintf("%s/", res.Bucket))[1]
 		logFn("Deleting '%s' from bucket '%s'...", path, res.Bucket)
 		err := minioCli.RemoveObject(res.Bucket, path)
 		if err != nil {

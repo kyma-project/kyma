@@ -25,8 +25,10 @@ spec:
       value: "1"
     - name: APP_LOGGER_LEVEL
       value: "info"
-    - name: DOMAIN
-      value: "{{ .Values.global.domainName }}"
+    - name: APP_DEX_NAMESPACE
+      value: "{{ .Values.dex.namespace }}"
+    - name: APP_DEX_USER_SECRET
+      value: "{{ .Values.dex.userSecret }}"
   - name: manager
     image: eu.gcr.io/kyma-project/test-infra/alpine-kubectl:v20190325-ff66a3a
     command:

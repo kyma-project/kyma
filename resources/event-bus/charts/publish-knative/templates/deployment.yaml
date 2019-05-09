@@ -43,6 +43,7 @@ spec:
             - --max_source_id_length={{ .Values.global.publishKnative.maxSourceIDLength }}
             - --max_event_type_length={{ .Values.global.publishKnative.maxEventTypeLength }}
             - --max_event_type_version_length={{ .Values.global.publishKnative.maxEventTypeVersionLength }}
+            - --monitoring_port={{ .Values.monitoring.port }}
           ports:
             - name: http
               containerPort: {{ .Values.port }}

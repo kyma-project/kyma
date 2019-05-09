@@ -105,12 +105,12 @@ Run the application using Helm:
 
 1. Prepare the upgrade data:
     ```bash
-    helm install --name e2e-test-upgrade --namespace {namespace} ./chart/upgrade/ --wait
+    helm install --name e2e-test-upgrade --namespace {namespace} ./chart/upgrade/ --wait --tls
     ```
 
 2. Run tests:
     ```bash
-    helm test e2e-test-upgrade
+    helm test e2e-test-upgrade --tls
     ```
 
 ### Run tests using Telepresence

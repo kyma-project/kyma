@@ -45,10 +45,7 @@ spec:
                 name: assetstore-minio-docs-upload
                 key: APP_UPLOAD_ENDPOINT_WITH_PORT
           - name: APP_STORE_EXTERNAL_ENDPOINT
-            valueFrom:
-              configMapKeyRef:
-                name: assetstore-minio-docs-upload
-                key: APP_EXTERNAL_ENDPOINT
+            value: {{ if .Values.global.minioExternalEndpoint }}{{ .Values.global.minioExternalEndpoint }}{{ else }}'https://minio.{{ .Values.global.ingress.domainName }}'{{ end }}
           - name: APP_STORE_USE_SSL
             valueFrom:
               configMapKeyRef:

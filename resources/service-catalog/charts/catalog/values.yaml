@@ -1,6 +1,6 @@
 # Default values for Service Catalog
 # service-catalog image to use
-image: quay.io/kubernetes-service-catalog/service-catalog:v0.1.40
+image: quay.io/kubernetes-service-catalog/service-catalog:v0.1.43
 # imagePullPolicy for the service-catalog; valid values are "IfNotPresent",
 # "Never", and "Always"
 imagePullPolicy: Always
@@ -9,6 +9,7 @@ useAggregator: true
 ## If true, create & use RBAC resources
 ##
 rbacEnable: true
+rbacApiVersion: rbac.authorization.k8s.io/v1
 apiserver:
   replicas: 1
   minReadySeconds: 1
@@ -177,3 +178,7 @@ asyncBindingOperationsEnabled: true
 namespacedServiceBrokerDisabled: false
 # Whether the ServicePlanDefaults alpha feature should be enabled
 servicePlanDefaultsEnabled: false
+## Security context give the opportunity to run container as nonroot by setting a securityContext
+## by example :
+## securityContext: { runAsUser: 1001 }
+securityContext: {}

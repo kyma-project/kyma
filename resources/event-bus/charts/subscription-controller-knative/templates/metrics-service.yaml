@@ -1,0 +1,15 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "subscription-controller-knative-metrics-service.name" . }}
+  labels:
+{{ include "subscription-controller-knative.labels.standard" . | indent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+  - name: metrics-port
+    port: {{ .Values.monitoring.port }}
+  selector:
+    app: {{ template "subscription-controller-knative.fullname" . }}
+    release: {{ .Release.Name }}

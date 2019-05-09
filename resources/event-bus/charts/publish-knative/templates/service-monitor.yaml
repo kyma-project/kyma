@@ -1,0 +1,21 @@
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+    namespace: kyma-system
+    name: '{{ template "publish-knative.fullname" . }}-service-monitor'
+    labels:
+        prometheus: monitoring
+        app: {{ template "publish-knative.fullname" . }}
+        chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+        release: "{{ .Release.Name }}"
+        heritage: "{{ .Release.Service }}"
+spec:
+    selector:
+        matchLabels:
+            app: {{ template "publish-knative.fullname" . }}
+    endpoints:
+        - port: metrics-port
+          interval: {{ .Values.monitoring.interval }}
+    namespaceSelector:
+        any: true

@@ -2,8 +2,9 @@ package certificates
 
 import (
 	"errors"
-	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets/mocks"
 	"testing"
+
+	"github.com/kyma-project/kyma/components/connectivity-certs-controller/internal/secrets/mocks"
 
 	"github.com/stretchr/testify/require"
 )
@@ -12,6 +13,7 @@ var (
 	crtChain  = []byte("certificateChain")
 	clientCRT = []byte("clientCertificate")
 	caCRT     = []byte("caCertificate")
+	clientKey = []byte("clientKey")
 )
 
 func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
@@ -23,11 +25,15 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 		CRTChain:  crtChain,
 		ClientCRT: clientCRT,
 		CaCRT:     caCRT,
+		ClientKey: clientKey,
 	}
 
 	t.Run("should preserve certificates", func(t *testing.T) {
 		// given
-		clusterSecretData := map[string][]byte{clusterCertificateSecretKey: crtChain}
+		clusterSecretData := map[string][]byte{
+			clusterCertificateSecretKey: clientCRT,
+			clusterKeySecretKey:         clientKey,
+		}
 		caSecretData := map[string][]byte{caCertificateSecretKey: caCRT}
 
 		secretsRepository := &mocks.Repository{}
@@ -46,7 +52,10 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 
 	t.Run("should return error when failed to save cluster secret", func(t *testing.T) {
 		// given
-		clusterSecretData := map[string][]byte{clusterCertificateSecretKey: crtChain}
+		clusterSecretData := map[string][]byte{
+			clusterCertificateSecretKey: clientCRT,
+			clusterKeySecretKey:         clientKey,
+		}
 
 		secretsRepository := &mocks.Repository{}
 		secretsRepository.On("UpsertWithMerge", clusterCertSecretName, clusterSecretData).Return(errors.New("error"))
@@ -63,7 +72,10 @@ func TestCertificatePreserver_PreserveCertificates(t *testing.T) {
 
 	t.Run("should return error when failed to save ca secret", func(t *testing.T) {
 		// given
-		clusterSecretData := map[string][]byte{clusterCertificateSecretKey: crtChain}
+		clusterSecretData := map[string][]byte{
+			clusterCertificateSecretKey: clientCRT,
+			clusterKeySecretKey:         clientKey,
+		}
 		caSecretData := map[string][]byte{caCertificateSecretKey: caCRT}
 
 		secretsRepository := &mocks.Repository{}

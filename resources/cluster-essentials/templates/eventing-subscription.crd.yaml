@@ -12,6 +12,8 @@ spec:
     kind: Subscription
     shortNames:
     - sub
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       properties:
@@ -35,14 +37,14 @@ spec:
               type: string
               minLength: 1
               maxLength: 253
-              pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+              pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
             event_type_version:
               type: string
               minLength: 1
               maxLength: 4
-              pattern: '^[a-z0-9]+$'
+              pattern: '^[a-zA-Z0-9]+$'
             source_id:
               type: string
               minLength: 1
               maxLength: 253
-              pattern: '^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$'
+              pattern: '^[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([-a-zA-Z0-9]*[a-zA-Z0-9])?)*$'
