@@ -7,7 +7,7 @@ integrate into Kyma workflow and automation flow.
 ### Running K6
 To execute a very simple k6 test from the command line, you can use this:
 ```bash
-k6 run github.com/kyma-project/kyma/tests/perf/examples/http_basic.js
+k6 run github.com/kyma-project/kyma/tests/perf/components/examples/http_basic.js
 ```
 
 With command above, k6 will fetch the http_basic.js file from Github and only fires 1 virtual user which get execute 
@@ -129,11 +129,11 @@ After test service deployed we can start load test locally to against Kyma clust
 variable which represent domain name of Kyma test cluster
 
 ```bash
-CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx k6 run examples/http_get.js
+CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx k6 run components/examples/http_get.js
 ```
 
 or we can use ```-e``` CLI flag for all platform
 
 ```bash
-k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx examples/http_get.js
+k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx components/examples/http_get.js
 ```
