@@ -90,6 +90,7 @@ function remove_not_used() {
     local type=$(cut -d' ' -f1 <<< ${line})
     local name=$(cut -d' ' -f2 <<< ${line})
     kubectl delete ${type} ${name} -n istio-system --ignore-not-found=true
+    sleep 5s
   done <${CONFIG_DIR}/delete
 }
 
