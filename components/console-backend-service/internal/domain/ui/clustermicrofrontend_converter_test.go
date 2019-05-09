@@ -68,21 +68,25 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 			},
 		}
 
-		result := converter.ToGQL(&item)
+		result, err := converter.ToGQL(&item)
+
+		assert.Nil(t, err)
 		assert.Equal(t, &expected, result)
 	})
 
 	t.Run("Empty", func(t *testing.T) {
 		converter := &clusterMicrofrontendConverter{}
-		item := converter.ToGQL(&v1alpha1.ClusterMicroFrontend{})
+		item, err := converter.ToGQL(&v1alpha1.ClusterMicroFrontend{})
 
+		assert.Nil(t, err)
 		assert.Empty(t, item)
 	})
 
 	t.Run("Nil", func(t *testing.T) {
 		converter := &clusterMicrofrontendConverter{}
-		item := converter.ToGQL(nil)
+		item, err := converter.ToGQL(nil)
 
+		assert.Nil(t, err)
 		assert.Nil(t, item)
 	})
 }
@@ -147,8 +151,9 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 		}
 
 		converter := clusterMicrofrontendConverter{}
-		result := converter.ToGQLs(clusterMicrofrontends)
+		result, err := converter.ToGQLs(clusterMicrofrontends)
 
+		assert.Nil(t, err)
 		assert.Len(t, result, 2)
 		assert.Equal(t, expected, result[0])
 	})
@@ -157,8 +162,9 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 		var clusterMicrofrontends []*v1alpha1.ClusterMicroFrontend
 
 		converter := clusterMicrofrontendConverter{}
-		result := converter.ToGQLs(clusterMicrofrontends)
+		result, err := converter.ToGQLs(clusterMicrofrontends)
 
+		assert.Nil(t, err)
 		assert.Empty(t, result)
 	})
 
@@ -170,8 +176,9 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 		}
 
 		converter := clusterMicrofrontendConverter{}
-		result := converter.ToGQLs(clusterMicrofrontends)
+		result, err := converter.ToGQLs(clusterMicrofrontends)
 
+		assert.Nil(t, err)
 		assert.Len(t, result, 1)
 		assert.Equal(t, expected, result[0])
 	})

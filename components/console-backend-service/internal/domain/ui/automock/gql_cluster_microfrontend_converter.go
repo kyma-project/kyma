@@ -13,7 +13,7 @@ type gqlClusterMicrofrontendConverter struct {
 }
 
 // ToGQL provides a mock function with given fields: in
-func (_m *gqlClusterMicrofrontendConverter) ToGQL(in *v1alpha1.ClusterMicroFrontend) *gqlschema.ClusterMicrofrontend {
+func (_m *gqlClusterMicrofrontendConverter) ToGQL(in *v1alpha1.ClusterMicroFrontend) (*gqlschema.ClusterMicrofrontend, error) {
 	ret := _m.Called(in)
 
 	var r0 *gqlschema.ClusterMicrofrontend
@@ -25,11 +25,18 @@ func (_m *gqlClusterMicrofrontendConverter) ToGQL(in *v1alpha1.ClusterMicroFront
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func(*v1alpha1.ClusterMicroFrontend) error); ok {
+		r1 = rf(in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }
 
 // ToGQLs provides a mock function with given fields: in
-func (_m *gqlClusterMicrofrontendConverter) ToGQLs(in []*v1alpha1.ClusterMicroFrontend) []gqlschema.ClusterMicrofrontend {
+func (_m *gqlClusterMicrofrontendConverter) ToGQLs(in []*v1alpha1.ClusterMicroFrontend) ([]gqlschema.ClusterMicrofrontend, error) {
 	ret := _m.Called(in)
 
 	var r0 []gqlschema.ClusterMicrofrontend
@@ -41,5 +48,12 @@ func (_m *gqlClusterMicrofrontendConverter) ToGQLs(in []*v1alpha1.ClusterMicroFr
 		}
 	}
 
-	return r0
+	var r1 error
+	if rf, ok := ret.Get(1).(func([]*v1alpha1.ClusterMicroFrontend) error); ok {
+		r1 = rf(in)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
 }

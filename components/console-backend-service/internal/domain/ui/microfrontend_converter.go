@@ -11,12 +11,15 @@ import (
 
 type microfrontendConverter struct{}
 
-func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) *gqlschema.Microfrontend {
+func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschema.Microfrontend, error) {
 	if in == nil {
-		return nil
+		return nil, nil
 	}
 
-	navigationNodes := c.navigationNodesToGQLs(in.Spec.CommonMicroFrontendSpec.NavigationNodes)
+	navigationNodes, err := c.navigationNodesToGQLs(in.Spec.CommonMicroFrontendSpec.NavigationNodes)
+	if err != nil {
+		return nil, err
+	}
 	mf := gqlschema.Microfrontend{
 		Name:            in.Name,
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
@@ -25,26 +28,32 @@ func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) *gqlschema
 		NavigationNodes: navigationNodes,
 	}
 
-	return &mf
+	return &mf, nil
 }
 
-func (c *microfrontendConverter) ToGQLs(in []*uiV1alpha1v.MicroFrontend) []gqlschema.Microfrontend {
+func (c *microfrontendConverter) ToGQLs(in []*uiV1alpha1v.MicroFrontend) ([]gqlschema.Microfrontend, error) {
 	var result []gqlschema.Microfrontend
 	for _, u := range in {
-		converted := c.ToGQL(u)
+		converted, err := c.ToGQL(u)
+		if err != nil {
+			return nil, err
+		}
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result
+	return result, nil
 }
 
-func (c *microfrontendConverter) navigationNodeToGQL(in *uiV1alpha1v.NavigationNode) *gqlschema.NavigationNode {
+func (c *microfrontendConverter) navigationNodeToGQL(in *uiV1alpha1v.NavigationNode) (*gqlschema.NavigationNode, error) {
 	if in == nil {
-		return nil
+		return nil, nil
 	}
 
-	settingsGqlJSON, _ := c.settingsToGQLJSON(in)
+	settingsGqlJSON, err := c.settingsToGQLJSON(in)
+	if err != nil {
+		return nil, err
+	}
 
 	navigationNode := gqlschema.NavigationNode{
 		Label:            in.Label,
@@ -55,18 +64,21 @@ func (c *microfrontendConverter) navigationNodeToGQL(in *uiV1alpha1v.NavigationN
 		Settings:         settingsGqlJSON,
 	}
 
-	return &navigationNode
+	return &navigationNode, nil
 }
 
-func (c *microfrontendConverter) navigationNodesToGQLs(in []uiV1alpha1v.NavigationNode) []gqlschema.NavigationNode {
+func (c *microfrontendConverter) navigationNodesToGQLs(in []uiV1alpha1v.NavigationNode) ([]gqlschema.NavigationNode, error) {
 	var result []gqlschema.NavigationNode
 	for _, u := range in {
-		converted := c.navigationNodeToGQL(&u)
+		converted, err := c.navigationNodeToGQL(&u)
+		if err != nil {
+			return nil, err
+		}
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result
+	return result, nil
 }
 
 func (c *microfrontendConverter) settingsToGQLJSON(in *uiV1alpha1v.NavigationNode) (gqlschema.Settings, error) {

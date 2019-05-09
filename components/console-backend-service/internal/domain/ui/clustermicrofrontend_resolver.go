@@ -18,8 +18,8 @@ type clusterMicrofrontendLister interface {
 
 //go:generate mockery -name=gqlClusterMicrofrontendConverter -output=automock -outpkg=automock -case=underscore
 type gqlClusterMicrofrontendConverter interface {
-	ToGQL(in *v1alpha1.ClusterMicroFrontend) *gqlschema.ClusterMicrofrontend
-	ToGQLs(in []*v1alpha1.ClusterMicroFrontend) []gqlschema.ClusterMicrofrontend
+	ToGQL(in *v1alpha1.ClusterMicroFrontend) (*gqlschema.ClusterMicrofrontend, error)
+	ToGQLs(in []*v1alpha1.ClusterMicroFrontend) ([]gqlschema.ClusterMicrofrontend, error)
 }
 
 type clusterMicrofrontendResolver struct {
@@ -42,7 +42,10 @@ func (r *clusterMicrofrontendResolver) ClusterMicrofrontendsQuery(ctx context.Co
 		return nil, gqlerror.New(err, pretty.ClusterMicroFrontends)
 	}
 
-	cmfs := r.clusterMicrofrontendConverter.ToGQLs(items)
+	cmfs, err := r.clusterMicrofrontendConverter.ToGQLs(items)
+	if err != nil {
+		return nil, err
+	}
 
 	return cmfs, nil
 }
