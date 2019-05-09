@@ -32,6 +32,7 @@ func (svc *selfSubjectRulesService) Create(ctx context.Context, ssrr []byte) (re
 		AbsPath("/apis/authorization.k8s.io/v1").
 		Resource("selfsubjectrulesreviews").
 		SetHeader("Impersonate-User", username).
+		SetHeader("Impersonate-Group", u.GetGroups()...).
 		Body(ssrr).
 		Do().
 		Into(result)

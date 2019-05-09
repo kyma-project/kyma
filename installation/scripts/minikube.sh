@@ -161,14 +161,10 @@ function addDevDomainsToEtcHosts() {
         minikube ssh "echo \"127.0.0.1 ${hostnames}\" | sudo tee -a /etc/hosts"
 
         # Delete old host alias
-        case `uname -s` in
-            Darwin)
-                sudo sed -i '' "/127.0.0.1/p;/${MINIKUBE_DOMAIN}/d" /etc/hosts
-                ;;
-            *)
-                sudo sed -i  "/127.0.0.1/p;/${MINIKUBE_DOMAIN}/d" /etc/hosts
-                ;;
-        esac
+        # Filter out lines that DO NOT start with 127.0.0.1 AND contain the MINIKUBE_DOMAIN pattern
+        awk -v domain="${MINIKUBE_DOMAIN}" '$1=="127.0.0.1"||!index($0,domain)' /etc/hosts > kyma-hosts-tmp
+        cat kyma-hosts-tmp | sudo tee /etc/hosts > /dev/null
+        rm kyma-hosts-tmp
     fi
 
     log "Adding ${hostnames} to /etc/hosts on localhost" yellow
