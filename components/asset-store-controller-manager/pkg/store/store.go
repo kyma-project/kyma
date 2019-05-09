@@ -127,19 +127,27 @@ func (s *store) CompareBucketPolicy(name string, expected v1alpha2.BucketPolicy)
 		return false, err
 	}
 
+	if currentPolicy == nil {
+		return false, nil
+	}
+
+	if len(expectedPolicy.Statements) > 1 && len(currentPolicy.Statements) == 1 {
+		return s.compareMergedPolicy(expectedPolicy, currentPolicy), nil
+	}
+
 	return reflect.DeepEqual(&expectedPolicy, currentPolicy), nil
 }
 
 // Object
 
 func (s *store) ContainsAllObjects(ctx context.Context, bucketName, assetName string, files []string) (bool, error) {
-	objects, err := s.listObjects(ctx, bucketName, fmt.Sprintf("/%s", assetName))
+	objects, err := s.listObjects(ctx, bucketName, assetName)
 	if err != nil {
 		return false, err
 	}
 
 	for _, f := range files {
-		key := fmt.Sprintf("/%s/%s", assetName, f)
+		key := fmt.Sprintf("%s/%s", assetName, f)
 
 		_, ok := objects[key]
 		if !ok {
@@ -317,4 +325,27 @@ func (s *store) unmarshalBucketPolicy(marshaledPolicy string) (*policy.BucketAcc
 	}
 
 	return bucketPolicy, nil
+}
+
+func (s *store) compareMergedPolicy(expected policy.BucketAccessPolicy, current *policy.BucketAccessPolicy) bool {
+	if current == nil {
+		return false
+	}
+
+	merged := policy.BucketAccessPolicy{
+		Version:    expected.Version,
+		Statements: []policy.Statement{expected.Statements[0]},
+	}
+
+	for _, statement := range expected.Statements[1:] {
+		for action := range statement.Actions {
+			merged.Statements[0].Actions.Add(action)
+		}
+
+		for resource := range statement.Resources {
+			merged.Statements[0].Resources.Add(resource)
+		}
+	}
+
+	return reflect.DeepEqual(&merged, current)
 }

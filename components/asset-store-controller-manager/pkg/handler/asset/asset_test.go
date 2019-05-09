@@ -2,7 +2,6 @@ package asset_test
 
 import (
 	"context"
-	"fmt"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine"
 	engineMock "github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/assethook/engine/automock"
@@ -255,7 +254,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
@@ -289,7 +288,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
@@ -317,7 +316,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, errors.New("nope")).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 
@@ -344,7 +343,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(errors.New("nope")).Once()
@@ -372,7 +371,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
@@ -402,7 +401,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
@@ -431,7 +430,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
 		mocks.mutator.On("Mutate", ctx, asset, "/tmp", mock.AnythingOfType("[]string"), asset.Spec.Source.MutationWebhookService).Return(nil).Once()
@@ -460,7 +459,7 @@ func TestAssetHandler_Handle_OnPending(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(errors.New("nope")).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
@@ -563,7 +562,7 @@ func TestAssetHandler_Handle_OnFailed(t *testing.T) {
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
 
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 		mocks.store.On("PutObjects", ctx, remoteBucketName, asset.Name, "/tmp", mock.AnythingOfType("[]string")).Return(nil).Once()
 		mocks.loader.On("Load", asset.Spec.Source.URL, asset.Name, asset.Spec.Source.Mode, asset.Spec.Source.Filter).Return("/tmp", nil, nil).Once()
 		mocks.loader.On("Clean", "/tmp").Return(nil).Once()
@@ -639,7 +638,7 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -662,8 +661,8 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(files, nil).Once()
-		mocks.store.On("DeleteObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(files, nil).Once()
+		mocks.store.On("DeleteObjects", ctx, remoteBucketName, asset.Name).Return(nil).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -685,7 +684,7 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(nil, errors.New("nope")).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(nil, errors.New("nope")).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
@@ -708,8 +707,8 @@ func TestAssetHandler_Handle_OnDelete(t *testing.T) {
 
 		handler, mocks := newHandler(relistInterval)
 		defer mocks.AssertExpectations(t)
-		mocks.store.On("ListObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(files, nil).Once()
-		mocks.store.On("DeleteObjects", ctx, remoteBucketName, fmt.Sprintf("/%s", asset.Name)).Return(errors.New("nope")).Once()
+		mocks.store.On("ListObjects", ctx, remoteBucketName, asset.Name).Return(files, nil).Once()
+		mocks.store.On("DeleteObjects", ctx, remoteBucketName, asset.Name).Return(errors.New("nope")).Once()
 
 		// When
 		status, err := handler.Do(ctx, now, asset, asset.Spec.CommonAssetSpec, asset.Status.CommonAssetStatus)
