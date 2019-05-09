@@ -31,14 +31,18 @@ type Credentials struct {
 	SecretName           string
 	Url                  string
 	CSRFTokenEndpointURL string
+	Headers              *map[string][]string
+	QueryParameters      *map[string][]string
 }
 
 // ServiceAPI stores information needed to call an API
 type ServiceAPI struct {
-	GatewayURL  string
-	AccessLabel string
-	TargetUrl   string
-	Credentials *Credentials
+	GatewayURL      string
+	AccessLabel     string
+	TargetUrl       string
+	Credentials     *Credentials
+	Headers         *map[string][]string
+	QueryParameters *map[string][]string
 }
 
 // Service represents a service stored in Application
@@ -112,10 +116,12 @@ func convertFromK8sType(service v1alpha1.Service) (Service, apperrors.AppError) 
 		for _, entry := range service.Entries {
 			if entry.Type == specAPIType {
 				api = &ServiceAPI{
-					GatewayURL:  entry.GatewayUrl,
-					AccessLabel: entry.AccessLabel,
-					TargetUrl:   entry.TargetUrl,
-					Credentials: convertCredentialsFromK8sType(entry.Credentials),
+					GatewayURL:      entry.GatewayUrl,
+					AccessLabel:     entry.AccessLabel,
+					TargetUrl:       entry.TargetUrl,
+					Credentials:     convertCredentialsFromK8sType(entry.Credentials),
+					Headers:         entry.Headers,
+					QueryParameters: entry.QueryParameters,
 				}
 			} else if entry.Type == specEventsType {
 				events = true
@@ -154,5 +160,7 @@ func convertCredentialsFromK8sType(credentials v1alpha1.Credentials) *Credential
 		SecretName:           credentials.SecretName,
 		Url:                  credentials.AuthenticationUrl,
 		CSRFTokenEndpointURL: csrfTokenEndpointURL,
+		Headers:              credentials.Headers,
+		QueryParameters:      credentials.QueryParameters,
 	}
 }
