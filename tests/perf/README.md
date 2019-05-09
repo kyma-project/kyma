@@ -25,8 +25,9 @@ A Kyma performance test is a K6 test script with or without prerequisites e.g. c
 A Kyma performance test will runs against [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
 Each subdirectory in the ```tests/perf``` directory defines source code for one test suite and focusing on one component or area, 
-the subdirectory ```prerequisites``` will contains **yaml** files of test component deployments 
-(like custom configuration or custom scenario deployments) if necessary.
+the subdirectory ```prerequisites``` will contains **yaml** files of test component deployments and shell scripts 
+(like custom configuration or custom scenario deployments) if necessary. 
+Each component should create a subdirectory in ```prerequisites``` to place yaml files and shell scripts, the name of subdirectory should be same as where test script placed.
 
 Prerequisites directory content will be deployed after load test cluster creation and before test execution.
 
@@ -42,6 +43,7 @@ More about K6 tags please read from [here](https://docs.k6.io/docs/tags-and-grou
 
 Available environment variables
 - **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
+- **REVISION**, the SHA id of master branch being testing
 
 Pre-Defined test execution tags 
 - **testName**, is the name of test scenario which every test should provide in test script implementation. 
@@ -54,27 +56,38 @@ An example k6 test testing Kyma Gateway, with predefined tag name ```testName```
 
 ```javascript
 import http from "k6/http"
-import {check, sleep} from "k6";
+import { check, sleep } from "k6";
 
 export let options = {
     vus: 10,
     duration: "1m",
-    rps: 1000,
     tags: {
-        "testName": "example_gateway_event",
-        "component": "gateway"
-    }
+        "testName": "send_event_gateway_10vu_60s_1000",
+        "component": "application-gateway",
+        "revision": `${__ENV.REVISION}`
+    },
+    tlsAuth: [
+        {
+            domains: [`gateway.${__ENV.CLUSTER_DOMAIN_NAME}`],
+            cert: open(`${__ENV.APP_CONNECTOR_CERT_DIR}/generated.crt`),
+            key: open(`${__ENV.APP_CONNECTOR_CERT_DIR}/generated.key`)
+        }
+    ]
 }
 
 export let configuration = {
-    params: {headers: {"Content-Type": "application/json"}},
-    url: `https://gateway.${__ENV.CLUSTER_DOMAIN_NAME}/lszymik/v1/events`,
-    payload: JSON.stringify({
-        "event-type": "petCreated",
-        "event-type-version": "v1",
-        "event-time": "2018-11-02T22:08:41+00:00",
-        "data": {"pet": {"id": "4caad296-e0c5-491e-98ac-0ed118f9474e"}}
-    })
+    params: { headers: { "Content-Type": "application/json" } },
+    url: `https://gateway.${__ENV.CLUSTER_DOMAIN_NAME}/perf-app/v1/events`,
+    payload: JSON.stringify(
+        {
+            "event-type": "petCreated",
+            "event-type-version": "v1",
+            "event-time": "2018-11-02T22:08:41+00:00",
+            "data": {
+                "pet": {
+                    "id": "4caad296-e0c5-491e-98ac-0ed118f9474e"
+                }
+            } })
 }
 
 export default function () {
@@ -85,7 +98,7 @@ export default function () {
         "transaction time OK": (r) => r.timings.duration < 200
     });
     sleep(1);
-}
+};
 ```
 
 Example test above will execute a load test against Kyma gateway on a cluster deployed on **CLUSTER_DOMAIN_NAME** 
