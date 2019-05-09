@@ -22,7 +22,7 @@ spec:
         - name: CONFIG_DIR
           value: /etc/config
         - name: REQUIRED_ISTIO_VERSION
-          value: 1.1.0
+          value: {{ .Values.global.required_istio_version }}
       volumes:
       - name: config-volume
         configMap:

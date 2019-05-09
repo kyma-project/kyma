@@ -8,3 +8,4 @@ global:
   istio_kyma_patch:
     dir: pr/
     version: "PR-3890"
+  required_istio_version: 1.1.5
