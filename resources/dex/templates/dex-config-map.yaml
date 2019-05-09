@@ -53,8 +53,8 @@ data:
       - 'http://jaeger.{{ .Values.global.ingress.domainName }}:3000/oauth/callback'
       - 'https://jaeger.{{ .Values.global.ingress.domainName }}/oauth/callback'
       secret: oiEWUWOIEwedfgg
-    - id: {{ .Values.oidc.hydraClientId }}
-      name: {{ .Values.oidc.hydraClientName }}
+    - id: hydra-integration
+      name: 'Hydra Integration'
       redirectURIs:
       - 'https://oauth2-login-consent.{{ .Values.global.ingress.domainName }}/cb'
       secret: f1Bf6d5ED4f47c309e8G566b

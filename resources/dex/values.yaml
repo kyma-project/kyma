@@ -10,8 +10,6 @@ oidc:
   grafanaClientName: 'Grafana UI'
   jaegerClientId: jaeger
   jaegerClientName: 'Jaeger UI'
-  hydraClientId: hydra-integration
-  hydraClientName: 'Hydra Integration'
 
 dex:
   expiry:

@@ -6,7 +6,7 @@ kind: Policy
 apiVersion: authentication.istio.io/v1alpha1
 metadata:
   labels:
-  name: {{ template "fullname" . }}-policy
+  name: {{ .Release.Name }}-policy
   namespace: {{ .Release.Namespace }}
 spec:
   peers:
@@ -18,7 +18,7 @@ spec:
 kind: DestinationRule
 apiVersion: networking.istio.io/v1alpha3
 metadata:
-  name: {{ template "fullname" . }}-destinationrule
+  name: {{ .Release.Name }}-destinationrule
   namespace: {{ .Release.Namespace }}
 spec:
   host: {{ .Values.hydraServer.serviceName }}.{{ .Values.hydraServer.namespace }}.svc.cluster.local

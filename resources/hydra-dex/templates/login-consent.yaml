@@ -1,34 +1,34 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ template "fullname" . }}-{{ .Values.loginConsent.name }}
+  name: {{ .Release.Name }}-{{ .Values.loginConsent.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   template:
     metadata:
       labels:
-        name: {{ template "fullname" . }}-{{ .Values.loginConsent.name }}
-        app: {{ template "fullname" . }}-{{ .Values.loginConsent.name }}
+        name: {{ .Release.Name }}-{{ .Values.loginConsent.name }}
+        app: {{ .Release.Name }}-{{ .Values.loginConsent.name }}
     spec:
       containers:
-        - name: {{ .Chart.Name }}-{{ .Values.loginConsent.name }}
+        - name: {{ .Release.Name }}-{{ .Values.loginConsent.name }}
           image: {{ .Values.loginConsent.image.repository }}:{{ .Values.loginConsent.image.tag }}
           env:
-          - name: HYDRA_ADMIN_URL
-            value: http://{{ template "fullname" . }}-oauth2.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.hydraServer.adminPort }}
-            #The public domain name of the running application in Kyma cluster (used in user-agent redirects)
-          - name: DOMAIN
-            value: {{ .Values.loginConsent.name }}.{{ .Values.global.ingress.domainName }}
-            #The public domain name of the dex in Kyma cluster (used in user-agent redirects)
-          - name: DEX_DOMAIN
-            value: dex.{{ .Values.global.ingress.domainName }}
-          - name: DEX_JWKS_URI
-            value: {{ .Values.loginConsent.dexJwksUri }}
-          - name: DEX_RESPONSE_TYPE
-            value: id_token%20token
-          - name: DEX_CLIENT_ID
-            value: hydra-integration
-          - name: DEX_SCOPE
-            value: openid%20profile%20email%20groups
+            - name: HYDRA_ADMIN_URL
+              value: http://{{ .Values.hydraServer.serviceName }}.{{ .Values.hydraServer.namespace }}.svc.cluster.local:{{ .Values.hydraServer.adminPort }}
+              #The public domain name of the running application in Kyma cluster (used in user-agent redirects)
+            - name: DOMAIN
+              value: {{ .Values.loginConsent.name }}.{{ .Values.loginConsent.domainName }}
+              #The public domain name of the dex in Kyma cluster (used in user-agent redirects)
+            - name: DEX_DOMAIN
+              value: dex.{{ .Values.loginConsent.domainName }}
+            - name: DEX_JWKS_URI
+              value: {{ .Values.loginConsent.dexJwksUri }}
+            - name: DEX_RESPONSE_TYPE
+              value: id_token%20token
+            - name: DEX_CLIENT_ID
+              value: hydra-integration
+            - name: DEX_SCOPE
+              value: openid%20profile%20email%20groups
           ports:
           - containerPort: {{ .Values.loginConsent.port }}

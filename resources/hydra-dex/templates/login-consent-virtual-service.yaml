@@ -1,19 +1,19 @@
 kind: VirtualService
 apiVersion: networking.istio.io/v1alpha3
 metadata:
-  name: {{ template "fullname" . }}-{{ .Values.loginConsent.name }}
+  name: {{ .Release.Name }}-{{ .Values.loginConsent.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   gateways:
   - {{ .Values.global.gateway }}
   hosts:
-  - {{ .Values.loginConsent.name }}.{{ .Values.global.ingress.domainName }}
+  - {{ .Values.loginConsent.name }}.{{ .Values.loginConsent.domainName }}
   http:
   - match:
     - uri:
         regex: /.*
     route:
     - destination:
-        host: {{ template "fullname" . }}-{{ .Values.loginConsent.name }}
+        host: {{ .Release.Name }}-{{ .Values.loginConsent.name }}
         port:
           number: {{ .Values.loginConsent.port }}

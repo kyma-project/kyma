@@ -3,8 +3,10 @@ global:
 hydraServer:
   serviceName: ory-hydra-oauth2
   namespace: kyma-system
+  adminPort: 4445
 loginConsent:
   name: oauth2-login-consent
+  domainName: kymaIngressDomain
   port: 3000
   image:
     repository: tsmsap/hydra-dex

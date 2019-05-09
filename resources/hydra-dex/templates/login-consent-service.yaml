@@ -1,11 +1,11 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: {{ template "fullname" . }}-{{ .Values.loginConsent.name }}
+  name: {{ .Release.Name }}-{{ .Values.loginConsent.name }}
   namespace: {{ .Release.Namespace }}
 spec:
   selector:
-    app: {{ template "fullname" . }}-{{ .Values.loginConsent.name }}
+    app: {{ .Release.Name }}-{{ .Values.loginConsent.name }}
   ports:
     - name: http-{{ .Chart.Name }}-{{ .Values.loginConsent.name }}
       protocol: TCP
