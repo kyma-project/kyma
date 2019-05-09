@@ -212,7 +212,7 @@
 /components/cms-controller-manager/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
 # Binding usage controller Component
-/components/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
+/components/service-binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # Installer Component
 /components/installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @piotrmsc @kubadz @sjanota @kfurgol @Demonsthere
