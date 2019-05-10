@@ -247,7 +247,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(err).To(HaveOccurred())
 		g.Expect(status).ToNot(BeZero())
 		g.Expect(status.Phase).To(Equal(v1alpha2.BucketFailed))
 		g.Expect(status.Reason).To(Equal(pretty.BucketNotFound.String()))
