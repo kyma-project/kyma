@@ -78,6 +78,7 @@ spec:
         kyma-alerts: {{ .Values.eventService.deployment.labels.alerts }}
         release: {{ .Release.Name }}-event-service
     spec:
+      serviceAccountName: {{.Release.Name }}-event-service
       containers:
       - name: {{ .Release.Name }}-event-service
         image: {{ .Values.global.eventServiceImage }}
