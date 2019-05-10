@@ -306,12 +306,12 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		res, err := http.Get(subscriberResultsEndpointURL)
 		if err != nil {
 			f.log.Errorf("Get request failed: %v\n", err)
-			return err
+			continue
 		}
 		f.dumpResponse(res)
 		if err := verifyStatusCode(res, 200); err != nil {
 			f.log.Errorf("Get request failed: %v", err)
-			return err
+			continue
 		}
 		body, err := ioutil.ReadAll(res.Body)
 		var resp string
@@ -325,7 +325,8 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		f.log.Debugf("Expected subscriber response: %s", expectedResp)
 		f.log.Debugf("Subscriber response: %s", resp)
 		if resp != expectedResp {
-			return fmt.Errorf("wrong response: %s, want: %s", resp, expectedResp)
+			fmt.Errorf("wrong response: %s, want: %s", resp, expectedResp)
+			continue
 		}
 		return nil
 	}
