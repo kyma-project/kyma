@@ -26,11 +26,11 @@ For security reasons, Minio credentials are generated during Kyma installation a
 
 - Get the access key using 
   ```bash
-  kubectl get secret assetstore-minio -n kyma-system -o jsonpath=“{.data.accesskey}” | base64 -D
+  kubectl get secret assetstore-minio -n kyma-system -o jsonpath="{.data.accesskey}" | base64 -D
   ```
 - Get the secret key using
   ```bash
-  kubectl get secret assetstore-minio -n kyma-system -o jsonpath=“{.data.secretkey}” | base64 -D
+  kubectl get secret assetstore-minio -n kyma-system -o jsonpath="{.data.secretkey}" | base64 -D
   ```
 
 You can also set Minio credentials directly using `values.yaml` files. For more details, see the official [Minio documentation](https://github.com/helm/charts/tree/master/stable/minio#configuration).
