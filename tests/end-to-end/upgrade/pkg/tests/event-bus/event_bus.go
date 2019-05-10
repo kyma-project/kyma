@@ -325,7 +325,7 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		f.log.Debugf("Expected subscriber response: %s", expectedResp)
 		f.log.Debugf("Subscriber response: %s", resp)
 		if resp != expectedResp {
-			fmt.Errorf("wrong response: %s, want: %s", resp, expectedResp)
+			f.log.Errorf("wrong response: %s, want: %s", resp, expectedResp)
 			continue
 		}
 		return nil
