@@ -47,13 +47,7 @@ func (cc *connectorClient) GetToken(appName string) (string, error) {
 		return "", err
 	}
 
-	err = WaitUntil(5, 5, func() (bool, error) {
-		tr, err := cc.trClient.GetTokenRequest(appName, v1.GetOptions{})
-		if err != nil {
-			return false, err
-		}
-		return tr.Status.URL != "", nil //TODO: Confirm if TokenRequest.Status.URL is set to "" if not ready.
-	})
+	err = cc.waitUntilTokenRequestIsReady(appName)
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
@@ -66,6 +60,16 @@ func (cc *connectorClient) GetToken(appName string) (string, error) {
 	}
 
 	return tr.Status.URL, nil
+}
+
+func (cc *connectorClient) waitUntilTokenRequestIsReady(appName string) error {
+	return WaitUntil(5, 5, func() (bool, error) {
+		tr, err := cc.trClient.GetTokenRequest(appName, v1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		return tr.Status.URL != "", nil //TODO: Confirm if TokenRequest.Status.URL is set to "" if not ready.
+	})
 }
 
 func (cc *connectorClient) GetInfo(url string) (*InfoResponse, error) {
