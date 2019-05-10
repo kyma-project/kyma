@@ -101,9 +101,7 @@ func (ts *testSuite) CreateResources() error {
 		return err
 	}
 
-	url := ts.testService.GetTestServiceURL()
-
-	err = ts.lambdaClient.DeployLambda(appName, url)
+	err = ts.lambdaClient.DeployLambda(appName)
 	if err != nil {
 		return err
 	}
