@@ -272,8 +272,8 @@ func (r *reconciler) reconcile(ctx context.Context, subscription *eventingv1alph
 }
 
 func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsName string, channelName string,
-	namespace string, kymaSubscriptionName string, KnativeSubscriptionsGauge *metrics.SubscriptionsGauge,
-	KnativeChannelGauge *metrics.SubscriptionsGauge) error {
+	namespace string, kymaSubscriptionName string, knativeSubscriptionsGauge *metrics.SubscriptionsGauge,
+	knativeChannelGauge *metrics.SubscriptionsGauge) error {
 	log.Info("Deleting the external dependencies")
 
 	// In case Knative Subscription exists, delete it.
@@ -285,7 +285,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 		if err != nil {
 			return err
 		}
-		KnativeSubscriptionsGauge.DeleteKnativeSubscriptionsGaugeLabelValues(namespace, kymaSubscriptionName)
+		knativeSubscriptionsGauge.DeleteKnativeSubscriptionsGaugeLabelValues(namespace, kymaSubscriptionName)
 		log.Info("Knative Subscription is deleted", "Subscription", knativeSubs.Name)
 	}
 
@@ -301,7 +301,7 @@ func (r *reconciler) deleteExternalDependency(ctx context.Context, knativeSubsNa
 				return err
 			}
 			log.Info("Knative Channel is deleted", "Channel", knativeChannel)
-			KnativeChannelGauge.DeleteKnativeChannelGaugeLabelValues(kymaSubscriptionName)
+			knativeChannelGauge.DeleteKnativeChannelGaugeLabelValues(kymaSubscriptionName)
 			log.Info("Knative Channel gauge is deleted", "subscription", kymaSubscriptionName)
 		}
 	}
