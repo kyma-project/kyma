@@ -16,7 +16,6 @@ func TestBrokerModeGetNsFromURL(t *testing.T) {
 	// THEN
 	require.NoError(t, err)
 	assert.Equal(t, "stage", actNs)
-
 }
 
 func TestBrokerModeErrorOnGetNsFromURL(t *testing.T) {

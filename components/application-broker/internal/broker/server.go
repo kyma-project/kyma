@@ -123,25 +123,27 @@ func (srv *Server) createHandler() http.Handler {
 		fmt.Fprint(w, "OK")
 	}).Methods("GET")
 
-	osbContextMiddleware := NewOsbContextMiddleware(srv.brokerService, srv.logger)
-	reqAsyncMiddleware := &RequireAsyncMiddleware{}
-	// sync operations
+	catalogRtr := rtr.PathPrefix("/{namespace}").Subrouter()
 
-	rtr.Path("/v2/catalog").Methods(http.MethodGet).Handler(
+	osbContextMiddleware := &OSBContextMiddleware{}
+	reqAsyncMiddleware := &RequireAsyncMiddleware{}
+
+	// sync operations
+	catalogRtr.Path("/v2/catalog").Methods(http.MethodGet).Handler(
 		negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.catalogAction)))
 
-	rtr.Path("/v2/service_instances/{instance_id}/last_operation").Methods(http.MethodGet).Handler(
+	catalogRtr.Path("/v2/service_instances/{instance_id}/last_operation").Methods(http.MethodGet).Handler(
 		negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.getServiceInstanceLastOperationAction)))
 
-	rtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodPut).Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.bindAction)))
+	catalogRtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodPut).Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.bindAction)))
 
-	rtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodDelete).Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.unBindAction)))
+	catalogRtr.Path("/v2/service_instances/{instance_id}/service_bindings/{binding_id}").Methods(http.MethodDelete).Handler(negroni.New(osbContextMiddleware, negroni.WrapFunc(srv.unBindAction)))
 
 	// async operations
-	rtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodPut).Handler(
+	catalogRtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodPut).Handler(
 		negroni.New(reqAsyncMiddleware, osbContextMiddleware, negroni.WrapFunc(srv.provisionAction)),
 	)
-	rtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodDelete).Handler(
+	catalogRtr.Path("/v2/service_instances/{instance_id}").Methods(http.MethodDelete).Handler(
 		negroni.New(reqAsyncMiddleware, osbContextMiddleware, negroni.WrapFunc(srv.deprovisionAction)),
 	)
 
