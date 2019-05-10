@@ -27,13 +27,15 @@ import (
 )
 
 const (
-	helmBrokerURLEnvName    = "HELM_BROKER_URL"
-	releaseNamespaceEnvName = "RELEASE_NAMESPACE"
+	helmBrokerURLEnvName        = "HELM_BROKER_URL"
+	applicationBrokerURLEnvName = "APPLICATION_BROKER_URL"
+	releaseNamespaceEnvName     = "RELEASE_NAMESPACE"
 )
 
 func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 	for testName, brokerURL := range map[string]string{
-		"Helm Broker": os.Getenv(helmBrokerURLEnvName),
+		"Helm Broker":        os.Getenv(helmBrokerURLEnvName),
+		"Application Broker": os.Getenv(applicationBrokerURLEnvName),
 		// "<next broker>": os.Getenv("<broker url env name>"),
 	} {
 		t.Run(testName, func(t *testing.T) {
