@@ -110,7 +110,7 @@ func (h *bucketHandler) onReady(object MetaAccessor, spec v1alpha2.CommonBucketS
 	}
 	if !exists {
 		h.recordWarningEventf(object, pretty.BucketNotFound, status.RemoteName)
-		return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketFailed, pretty.BucketNotFound, status.RemoteName), errors.Errorf(pretty.BucketNotFound.String(), status.RemoteName)
+		return h.getStatus(object, "", "", v1alpha2.BucketFailed, pretty.BucketNotFound, status.RemoteName), errors.Errorf(pretty.BucketNotFound.String(), status.RemoteName)
 	}
 	h.logInfof("Bucket exists")
 
