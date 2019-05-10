@@ -33,6 +33,7 @@ type Config struct {
 	UniqueSelectorLabelKey   string `valid:"required"`
 	UniqueSelectorLabelValue string `valid:"required"`
 	Namespace                string `valid:"required"`
+	ServiceName              string `valid:"required"`
 }
 
 // Load method has following strategy:

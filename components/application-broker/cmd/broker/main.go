@@ -96,7 +96,7 @@ func main() {
 	brokerService, err := broker.NewNsBrokerService()
 	fatalOnError(err)
 
-	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerService, nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
+	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, cfg.ServiceName, int32(cfg.Port), log)
 
 	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log)
 
@@ -122,6 +122,13 @@ func main() {
 	appInformerFactory.WaitForCacheSync(stopCh)
 	mInformerFactory.WaitForCacheSync(stopCh)
 	cache.WaitForCacheSync(stopCh, nsInformer.HasSynced)
+
+	// migration old ServiceBrokers & Services setup
+	migrationService, err := nsbroker.NewMigrationService(k8sClient.CoreV1(), scClientSet.ServicecatalogV1beta1(), cfg.Namespace, cfg.ServiceName, log)
+	fatalOnError(err)
+	// The migration is done synchronously to prevent HTTP 404 when ServiceCatalog is doing a call via a legacy service.
+	// In such case the broker returns 404 which could mean the service instance does not exists - it could make a problem.
+	migrationService.Migrate()
 
 	// start services & ctrl
 	go appSyncCtrl.Run(stopCh)
