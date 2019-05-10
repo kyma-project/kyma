@@ -1,0 +1,13 @@
+{{ if .Values.istio.rbac.enabled }}
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRoleBinding
+metadata:
+  name: {{ .Chart.Name }}-internal-api
+  namespace: {{ .Values.global.namespace }}
+spec:
+  subjects:
+{{ tpl (toYaml .Values.istio.rbac.connectorServiceInternalApi.subjects | indent 4) . }}
+  roleRef:
+    kind: ServiceRole
+    name: {{ .Chart.Name }}-internal-api
+{{ end }}

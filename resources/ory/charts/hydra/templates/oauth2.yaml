@@ -21,11 +21,11 @@ spec:
             - "--dangerous-force-http"
           env:
             - name: OAUTH2_ISSUER_URL
-              value: https://oauth2.{{ .Values.global.ingress.domainName }}
+              value: https://oauth2.{{ .Values.global.ingress.domainName }}/
             - name: OAUTH2_CONSENT_URL
-              value: https://oauth2-login-consent.{{ .Values.global.ingress.domainName }}/consent
+              value: https://{{ .Values.loginConsent.name }}.{{ .Values.global.ingress.domainName }}/consent
             - name: OAUTH2_LOGIN_URL
-              value: https://oauth2-login-consent.{{ .Values.global.ingress.domainName }}/login
+              value: https://{{ .Values.loginConsent.name }}.{{ .Values.global.ingress.domainName }}/login
             - name: OAUTH2_SHARE_ERROR_DEBUG
               value: {{ quote .Values.hydraServer.config.oauth2.shareErrorDebug }}
             - name: DATABASE_URL

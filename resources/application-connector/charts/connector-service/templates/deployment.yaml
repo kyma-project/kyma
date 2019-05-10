@@ -68,9 +68,9 @@ spec:
             value: "{{ .Values.deployment.envvars.province }}"
         ports:
           - containerPort: {{ .Values.deployment.args.internalAPIPort }}
-            name: int-api-port
+            name: http-int
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
-            name: http-api-port
+            name: http-ext
           - containerPort: 9090
             name: metrics-port
         securityContext:
