@@ -15,6 +15,7 @@ import (
 	bindingUsageInformers "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/signal"
 	"github.com/pkg/errors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	"k8s.io/client-go/dynamic"
@@ -114,14 +115,14 @@ func main() {
 	bindingUsageInformerFactory.Start(stopCh)
 	serviceCatalogInformerFactory.Start(stopCh)
 
-	go runStatuszHTTPServer(stopCh, fmt.Sprintf(":%d", cfg.Port), log)
+	go runHTTPServer(stopCh, fmt.Sprintf(":%d", cfg.Port), log)
 	go kindController.Run(stopCh)
 	go ukProtectionController.Run(stopCh)
 
 	ctr.Run(stopCh)
 }
 
-func runStatuszHTTPServer(stop <-chan struct{}, addr string, log logrus.FieldLogger) {
+func runHTTPServer(stop <-chan struct{}, addr string, log logrus.FieldLogger) {
 	mux := http.NewServeMux()
 	mux.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -129,9 +130,9 @@ func runStatuszHTTPServer(stop <-chan struct{}, addr string, log logrus.FieldLog
 			log.Errorf("Cannot write response body, got err: %v ", err)
 		}
 	})
+	mux.Handle("/metrics", promhttp.Handler())
 
 	srv := &http.Server{Addr: addr, Handler: mux}
-
 	go func() {
 		<-stop
 		// We received an interrupt signal, shut down.
