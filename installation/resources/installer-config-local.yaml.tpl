@@ -62,10 +62,10 @@ data:
   # pilot.resources.requests.cpu: 100m
   pilot.autoscaleEnabled: "false"
 
-  mixer.policy.resources.limits.memory: 2048Mi
-  mixer.policy.resources.requests.memory: 512Mi
-  mixer.telemetry.resources.limits.memory: 2048Mi
-  mixer.telemetry.resources.requests.memory: 512Mi
+  # mixer.policy.resources.limits.memory: 2048Mi
+  # mixer.policy.resources.requests.memory: 512Mi
+  # mixer.telemetry.resources.limits.memory: 2048Mi
+  # mixer.telemetry.resources.requests.memory: 512Mi
   mixer.loadshedding.mode: disabled
 
   mixer.policy.autoscaleEnabled: "false"
