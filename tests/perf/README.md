@@ -136,11 +136,11 @@ After test service deployed we can start load test locally to against Kyma clust
 variable which represent domain name of Kyma test cluster
 
 ```bash
-CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx REVISION=123 k6 run components/examples/http_get.js
+CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx REVISION=123 k6 run components/examples/http-db-service.js
 ```
 
 or we can use ```-e``` CLI flag for all platform
 
 ```bash
-k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 components/examples/http_get.js
+k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 components/examples/http-db-service.js
 ```
