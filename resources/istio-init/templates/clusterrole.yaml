@@ -12,4 +12,3 @@ rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["create", "get", "list", "watch", "patch"]
-  

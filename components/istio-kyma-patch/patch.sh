@@ -159,39 +159,6 @@ function check_requirements() {
   done <${CONFIG_DIR}/required-crds
 }
 
-function check_ingress_ports() {
-  while true; do
-    local pod=$(kubectl get pod -l app=istio-ingressgateway -n istio-system | grep "istio-ingressgateway" | awk '{print $1}')
-    local state=$(kubectl get pod ${pod} -n istio-system -o jsonpath="{.status.phase}")
-    if [[ "$state" == "Running" ]]; then
-      break
-    else
-      sleep 5s
-    fi
-  done
-  local out=$(kubectl exec -t ${pod} -n istio-system -- netstat -lptnu)
-  if echo "${out}" | grep -q "443" ; then
-    echo "OPEN"
-  else
-    echo "CLOSED"
-  fi
-}
-
-function restart_ingress_pod() {
-  echo "---> Checking istio-ingressgateway ports"
-  while true; do
-    status=$(check_ingress_ports)
-    if [[ "$status" == "OPEN" ]]; then
-      echo "     Ports are open, continue"
-      break
-    else
-      echo "     Ports are closed, recreatting pod"
-      kubectl delete pod -l app=istio-ingressgateway -n istio-system
-      sleep 5s
-    fi
-  done
-}
-
 require_istio_system
 require_istio_version
 require_mtls_enabled
@@ -202,4 +169,3 @@ restart_sidecar_injector
 run_all_patches
 remove_not_used
 label_namespaces
-# restart_ingress_pod
