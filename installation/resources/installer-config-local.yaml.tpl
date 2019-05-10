@@ -152,3 +152,16 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.logging.promtail.config.name: ""
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: installation-kiali-overrides
+  namespace: kyma-installer
+  labels:
+    installer: overrides
+    component: istio
+    kyma-project.io/installation: ""
+data:
+  kiali.enabled: "true"
+
