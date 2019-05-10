@@ -44,6 +44,8 @@ spec:
             value: app
           - name: APP_UNIQUE_SELECTOR_LABEL_VALUE
             value: {{ .Chart.Name }}
+          - name: APP_SERVICE_NAME
+            value: {{ .Chart.Name }}
           - name: APP_NAMESPACE
             valueFrom:
               fieldRef:

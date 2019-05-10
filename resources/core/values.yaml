@@ -24,7 +24,7 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: "a19d8d50"
+    version: "cb16ab4c"
   ui_acceptance_tests:
     dir:
     version: "83aa639b"
