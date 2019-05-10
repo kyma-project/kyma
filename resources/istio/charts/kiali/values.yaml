@@ -28,7 +28,6 @@ dashboard:
 
 credentials:
   username: admin
-  passphrase: admin
 
   # Override the automatically detected Grafana URL, useful when Grafana service has no ExternalIPs
   # grafanaURL:
