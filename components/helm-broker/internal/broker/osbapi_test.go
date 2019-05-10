@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/komkom/go-jsonhash"
 	"github.com/pborman/uuid"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
@@ -155,8 +156,12 @@ func TestOSBAPIStatusSuccess(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s/statusz", ts.ServerAddr), nil)
+	req.Header.Set(osb.APIVersionHeader, "2.13")
+
 	// WHEN
-	resp, err := http.Get(fmt.Sprintf("http://%s/statusz", ts.ServerAddr))
+	resp, err := client.Do(req)
 
 	// THEN
 	require.NoError(t, err)
@@ -230,6 +235,7 @@ func TestOSBAPIProvisionRepeatedOnAlreadyFullyProvisionedInstance(t *testing.T) 
 	ts := newOSBAPITestSuite(t, nil)
 
 	fixInstance := ts.Exp.NewInstance()
+	fixInstance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 	ts.StorageFactory.Instance().Insert(fixInstance)
 
 	fixOperation := ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded)
@@ -269,6 +275,7 @@ func TestOSBAPIProvisionRepeatedOnProvisioningInProgress(t *testing.T) {
 	ts := newOSBAPITestSuite(t, nil)
 
 	fixInstance := ts.Exp.NewInstance()
+	fixInstance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
 	ts.StorageFactory.Instance().Insert(fixInstance)
 
 	fixOperation := ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateInProgress)
@@ -300,6 +307,82 @@ func TestOSBAPIProvisionRepeatedOnProvisioningInProgress(t *testing.T) {
 
 	assert.True(t, resp.Async)
 	assert.EqualValues(t, expOpID, *resp.OperationKey)
+
+	// No activity on tiller should happen
+	defer ts.HelmClient.AssertExpectations(t)
+}
+
+func TestOSBAPIProvisionConflictErrorOnAlreadyFullyProvisionedInstance(t *testing.T) {
+	// GIVEN
+	ts := newOSBAPITestSuite(t, nil)
+
+	fixInstance := ts.Exp.NewInstance()
+	ts.StorageFactory.Instance().Insert(fixInstance)
+
+	fixOperation := ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded)
+	ts.StorageFactory.InstanceOperation().Insert(fixOperation)
+
+	ts.ServerRun()
+	defer ts.ServerShutdown()
+
+	nsUID := uuid.NewRandom().String()
+	req := &osb.ProvisionRequest{
+		AcceptsIncomplete: true,
+		InstanceID:        string(ts.Exp.InstanceID),
+		ServiceID:         string(ts.Exp.Service.ID),
+		PlanID:            string(ts.Exp.ServicePlan.ID),
+		Context: map[string]interface{}{
+			"namespace": string(ts.Exp.Namespace),
+		},
+		OrganizationGUID: nsUID,
+		SpaceGUID:        nsUID,
+	}
+
+	// WHEN
+	resp, err := ts.OSBClient().ProvisionInstance(req)
+
+	// THEN
+	assert.Nil(t, resp)
+	assert.Equal(t, osb.HTTPStatusCodeError{StatusCode:http.StatusConflict, ErrorMessage:ptrStr(fmt.Sprintf("while comparing provisioning parameters map[]: provisioning parameters hash differs - new hqB_njX1ZeC2Y0XVG9_uBw==, old TODO, for instance fix-I-ID")), Description:ptrStr("")}, err)
+
+	// No activity on tiller should happen
+	defer ts.HelmClient.AssertExpectations(t)
+}
+
+func TestOSBAPIProvisionConflictErrorOnProvisioningInProgress(t *testing.T) {
+	// GIVEN
+	ts := newOSBAPITestSuite(t, nil)
+
+	fixInstance := ts.Exp.NewInstance()
+	ts.StorageFactory.Instance().Insert(fixInstance)
+
+	fixOperation := ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateInProgress)
+	expOpID := internal.OperationID("fix-op-id")
+	fixOperation.OperationID = expOpID
+	ts.StorageFactory.InstanceOperation().Insert(fixOperation)
+
+	ts.ServerRun()
+	defer ts.ServerShutdown()
+
+	nsUID := uuid.NewRandom().String()
+	req := &osb.ProvisionRequest{
+		AcceptsIncomplete: true,
+		InstanceID:        string(ts.Exp.InstanceID),
+		ServiceID:         string(ts.Exp.Service.ID),
+		PlanID:            string(ts.Exp.ServicePlan.ID),
+		Context: map[string]interface{}{
+			"namespace": string(ts.Exp.Namespace),
+		},
+		OrganizationGUID: nsUID,
+		SpaceGUID:        nsUID,
+	}
+
+	// WHEN
+	resp, err := ts.OSBClient().ProvisionInstance(req)
+
+	// THEN
+	assert.Nil(t, resp)
+	assert.Equal(t, osb.HTTPStatusCodeError{StatusCode:http.StatusConflict, ErrorMessage:ptrStr(fmt.Sprintf("while comparing provisioning parameters map[]: provisioning parameters hash differs - new hqB_njX1ZeC2Y0XVG9_uBw==, old TODO, for instance fix-I-ID")), Description:ptrStr("")}, err)
 
 	// No activity on tiller should happen
 	defer ts.HelmClient.AssertExpectations(t)
@@ -530,4 +613,8 @@ type fakeBindTmplResolver struct{}
 
 func (fakeBindTmplResolver) Resolve(bindYAML bind.RenderedBindYAML, ns internal.Namespace) (*bind.ResolveOutput, error) {
 	return &bind.ResolveOutput{}, nil
+}
+
+func ptrStr(str string) *string {
+	return &str
 }
