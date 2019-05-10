@@ -88,7 +88,7 @@ tracing:
 # addon kiali tracing configuration
 #
 kiali:
-  enabled: true 
+  enabled: false 
 
 #
 # Istio CNI plugin enabled

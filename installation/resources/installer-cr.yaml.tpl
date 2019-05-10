@@ -62,5 +62,5 @@ spec:
     #  namespace: "kyma-system"
     #- name: "jaeger"
     #  namespace: "kyma-system"
-    - name: "monitoring"
-      namespace: "kyma-system"
+    #- name: "monitoring"
+    #  namespace: "kyma-system"
