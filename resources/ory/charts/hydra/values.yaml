@@ -13,3 +13,5 @@ hydraServer:
   service:
     port: 80
     adminPort: 4445
+loginConsent:
+  name: non-existing-application

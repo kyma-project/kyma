@@ -48,7 +48,7 @@ rules:
     resources: ["idppresets"]
     verbs: ["get", "list", "watch", "create", "delete"]
   - apiGroups: ["ui.kyma-project.io"]
-    resources: ["backendmodules"]
+    resources: ["backendmodules", "microfrontends", "clustermicrofrontends"]
     verbs: ["get", "list", "watch"]
   - apiGroups: ["assetstore.kyma-project.io"]
     resources: ["clusterbuckets", "clusterassets", "buckets", "assets"]
