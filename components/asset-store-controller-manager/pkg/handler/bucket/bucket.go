@@ -79,7 +79,7 @@ func (*bucketHandler) isOnAddOrUpdate(object MetaAccessor, status v1alpha2.Commo
 }
 
 func (*bucketHandler) isOnFailed(status v1alpha2.CommonBucketStatus) bool {
-	return status.Phase == v1alpha2.BucketFailed && status.Reason != pretty.BucketNotFound.String()
+	return status.Phase == v1alpha2.BucketFailed
 }
 
 func (*bucketHandler) isOnDelete(object MetaAccessor) bool {
