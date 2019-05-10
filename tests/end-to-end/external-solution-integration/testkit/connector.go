@@ -10,7 +10,6 @@ import (
 	"github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
-	"time"
 )
 
 type ConnectorClient interface {
@@ -48,8 +47,17 @@ func (cc *connectorClient) GetToken(appName string) (string, error) {
 		return "", err
 	}
 
-	//TODO: Polling of tokenrequest
-	time.Sleep(5 * time.Second)
+	err = WaitUntil(5, 5, func() (bool, error) {
+		tr, err := cc.trClient.GetTokenRequest(appName, v1.GetOptions{})
+		if err != nil {
+			return false, err
+		}
+		return tr.Status.URL != "", nil //TODO: Confirm if TokenRequest.Status.URL is set to "" if not ready.
+	})
+	if err != nil {
+		cc.logger.Error(err)
+		return "", err
+	}
 
 	tr, err := cc.trClient.GetTokenRequest(appName, v1.GetOptions{})
 	if err != nil {
