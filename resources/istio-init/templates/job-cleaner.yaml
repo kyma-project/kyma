@@ -1,3 +1,4 @@
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -12,7 +13,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
-      serviceAccountName: istio-init-service-account
+      serviceAccountName: istio-init-cleaner-service-account
       containers:
       - name: istio-init-cleaner
         image: "{{ .Values.global.hub }}/kubectl:{{ .Values.global.tag }}"
@@ -26,3 +27,46 @@ spec:
             kubectl delete -n istio-system job istio-init-crd-certmanager-10 --ignore-not-found=true
             kubectl delete -n istio-system job istio-init-crd-certmanager-11 --ignore-not-found=true
       restartPolicy: OnFailure
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: istio-init-cleaner-service-account
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+  labels:
+    app: istio-init
+    istio: init
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: istio-init-cleaner-{{ .Release.Namespace }}
+  labels:
+    app: istio-init
+    istio: istio-init
+  annotations:
+    "helm.sh/hook": pre-upgrade
+rules:
+- apiGroups: ["batch", "extensions"]
+  resources: ["jobs"]
+  verbs: ["get", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: istio-init-cleaner-admin-role-binding-{{ .Release.Namespace }}
+  labels:
+    app: istio-init
+    istio: init
+  annotations:
+    "helm.sh/hook": pre-upgrade
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: istio-init-cleaner-{{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: istio-init-cleaner-service-account
+    namespace: {{ .Release.Namespace }}
