@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 28,
-  "iteration": 1557310862712,
+  "iteration": 1557508556084,
   "links": [],
   "panels": [
     {
@@ -84,7 +83,7 @@
           "expr": "total_kyma_subscriptions{exported_namespace=\"$kyma_subscription_namespace\",name=\"$kyma_subscription_name\",ready=\"true\"} OR on() vector(0)",
           "format": "time_series",
           "hide": false,
-          "instant": false,
+          "instant": true,
           "intervalFactor": 1,
           "refId": "A"
         }
@@ -181,6 +180,7 @@
         {
           "expr": "total_knative_subscriptions{exported_namespace=\"$kyma_subscription_namespace\", name=\"$kyma_subscription_name\", ready=\"true\"} OR on() vector(0)",
           "format": "time_series",
+          "instant": true,
           "intervalFactor": 1,
           "legendFormat": "",
           "refId": "A"
@@ -274,6 +274,7 @@
         {
           "expr": "total_knative_channels{name=\"$kyma_subscription_name\"} OR on() vector(0)",
           "format": "time_series",
+          "instant": true,
           "intervalFactor": 1,
           "refId": "A"
         }
@@ -312,6 +313,7 @@
       {
         "allValue": null,
         "current": {
+          "tags": [],
           "text": "default",
           "value": "default"
         },
@@ -338,8 +340,8 @@
         "allValue": null,
         "current": {
           "tags": [],
-          "text": "hello-with-data-subscription",
-          "value": "hello-with-data-subscription"
+          "text": "All",
+          "value": "$__all"
         },
         "datasource": "Prometheus",
         "definition": "label_values(total_kyma_subscriptions, name)",
@@ -394,5 +396,5 @@
   "timezone": "",
   "title": "Event Bus Subscription",
   "uid": "Rds51KmWk",
-  "version": 42
+  "version": 1
 }
