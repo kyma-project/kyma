@@ -43,7 +43,7 @@ chart and their default values.
 | **image** | Specifies the Service Catalog image. | `quay.io/kubernetes-service-catalog/service-catalog:v0.1.41` |
 | **imagePullPolicy** | Specifies `imagePullPolicy` for the Service Catalog. | `Always` |
 | **webhook.updateStrategy** | Specifies **updateStrategy** for the Service Catalog webhook deployment. | `RollingUpdate` |
-| `webhook.minReadySeconds` | how many seconds an webhook server pod needs to be ready before killing the next, during update | `1` |
+| **webhook.minReadySeconds** | The minimum number of seconds for which a newly created Webhook Pod should be ready without any of its containers crashing, for it to be considered available. | `1` |
 | **webhook.annotations** | Provides annotations for webhook Pods. | `{}` |
 | **webhook.nodeSelector** | A nodeSelector value to apply to the webhook Pods. If not specified, no nodeSelector will be applied. | |
 | **webhook.service.type** | Specifies the type of service. The possible values are `LoadBalancer` , `NodePort`, and `ClusterIP`. | `NodePort` |
@@ -52,9 +52,9 @@ chart and their default values.
 | **webhook.verbosity** | The log level. The possible values range from `0 - 10`. | `10` |
 | **webhook.healthcheck.enabled** | Enables readiness and liveliness probes. | `true` |
 | **webhook.resources** | Specifies resources allocation (requests and limits). | `{requests: {cpu: 100m, memory: 20Mi}, limits: {cpu: 100m, memory: 30Mi}}` |
-| `controllerManager.replicas` | `replicas` for the service catalog controllerManager pod count | `1` |
+| **controllerManager.replicas** | `replicas` for the service catalog controllerManager pod count | `1` |
 | **controllerManager.updateStrategy** | Specifies the update strategy for the Service Catalog controllerManager deployments. | `RollingUpdate` |
-| `controllerManager.minReadySeconds` | how many seconds a controllerManager pod needs to be ready before killing the next, during update | `1` |
+| **controllerManager.minReadySeconds** |The minimum number of seconds for which a newly created Controller Manager Pod should be ready without any of its containers crashing, | `1` |
 | **controllerManager.annotations** | Provides annotations for controllerManager Pods. | `{}` |
 | **controllerManager.nodeSelector** | A nodeSelector value to apply to the controllerManager Pods. If not specified, no nodeSelector will be applied. | |
 | **controllerManager.healthcheck.enabled** | Enables readiness and liveliness probes. | `true` |
@@ -62,11 +62,11 @@ chart and their default values.
 | **controllerManager.resyncInterval** | Specifies how often the controller resyncs informers. The duration has a format of `20m`, `1h`, etc. | `5m` |
 | **controllerManager.brokerRelistInterval** | Specifies how often the controller relists the catalogs of ready brokers. The duration has a format of `20m`, `1h`, etc. | `24h` |
 | **controllerManager.brokerRelistIntervalActivated** | Specifies if the controller supports a --broker-relist-interval flag. If set to `true`, the `brokerRelistInterval` value will be used for that flag. | `true` |
-| `controllerManager.profiling.disabled` | Disable profiling via web interface host:port/debug/pprof/ | `false` |
+| **controllerManager.profiling.disabled** | Disable profiling via web interface host:port/debug/pprof/ | `false` |
 | **controllerManager.profiling.contentionProfiling** | Enables lock contention profiling, if profiling is enabled. | `false` |
 | **controllerManager.leaderElection.activated** | Specifies if the controller has leader election enabled. | `false` |
 | **controllerManager.serviceAccount** | Specifies the service account. | `service-catalog-controller-manager` |
-| `controllerManager.enablePrometheusScrape` | Whether the controller will expose metrics on /metrics | `false` |
+| **controllerManager.enablePrometheusScrape** | Whether the controller will expose metrics on /metrics | `false` |
 | **controllerManager.resources** | Specifies resources allocation (requests and limits). | `{requests: {cpu: 100m, memory: 20Mi}, limits: {cpu: 100m, memory: 30Mi}}` |
 | **rbacEnable** | If set to `true`, you can create and use RBAC resources. | `true` |
 | **originatingIdentityEnabled** | Specifies if the OriginatingIdentity feature is enabled. | `true` |
