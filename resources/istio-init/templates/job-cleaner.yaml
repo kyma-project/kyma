@@ -5,7 +5,7 @@ metadata:
   name: istio-init-cleaner
   annotations:
     "helm.sh/hook-delete-policy": hook-succeeded
-    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook": pre-upgrade
 spec:
   template:
     metadata:
