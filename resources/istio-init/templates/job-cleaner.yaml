@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  namespace: {{ .Release.Namespace }}
+  name: istio-init-cleaner
+  annotations:
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook": pre-install,pre-upgrade
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+    spec:
+      serviceAccountName: istio-init-service-account
+      containers:
+      - name: istio-init-cleaner
+        image: "{{ .Values.global.hub }}/kubectl:{{ .Values.global.tag }}"
+        imagePullPolicy: {{ .Values.global.imagePullPolicy }}
+        command: 
+          - /bin/bash
+          - -c 
+          - |
+            kubectl delete -n istio-system job istio-init-crd-10 --ignore-not-found=true
+            kubectl delete -n istio-system job istio-init-crd-11 --ignore-not-found=true
+            kubectl delete -n istio-system job istio-init-crd-certmanager-10 --ignore-not-found=true
+            kubectl delete -n istio-system job istio-init-crd-certmanager-11 --ignore-not-found=true
+      restartPolicy: OnFailure
