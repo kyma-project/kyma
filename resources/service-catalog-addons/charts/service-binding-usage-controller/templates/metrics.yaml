@@ -22,8 +22,8 @@ metadata:
     heritage: "{{ .Release.Service }}"
 spec:
   ports:
-  - name: metrics
-    port: 8080
+  - name: http-metrics
+    port: {{ .Values.service.internalPort }}
   selector:
     app: {{ template "fullname" . }}
 ---
@@ -41,7 +41,7 @@ metadata:
 spec:
   endpoints:
     - interval: 30s
-      port: metrics
+      port: http-metrics
   namespaceSelector:
     matchNames:
       - "{{ .Release.Namespace }}"

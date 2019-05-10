@@ -5,5 +5,5 @@ global:
     gateway:
       name: kyma-gateway
   service_binding_usage_controller:
-    dir: pr/
-    version: PR-3987
+    dir: develop/
+    version: 95d56e38
