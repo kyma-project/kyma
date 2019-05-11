@@ -17,6 +17,8 @@ spec:
         env:
         - name: HELM_BROKER_URL
           value: http://helm-broker.kyma-system.svc.cluster.local
+        - name: APPLICATION_BROKER_URL
+          value: http://application-broker.kyma-integration.svc.cluster.local
         - name: RELEASE_NAMESPACE
           value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
         - name: DOMAIN_NAME
