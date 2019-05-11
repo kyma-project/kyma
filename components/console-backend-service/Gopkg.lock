@@ -375,7 +375,7 @@
     "tools/failery",
   ]
   pruneopts = "NUT"
-  revision = "a9c40842cdb31df978020bef540052f7e15136f7"
+  revision = "87b72bbab0a4e0dbfd4384a224b456fddd9d33ed"
 
 [[projects]]
   branch = "master"

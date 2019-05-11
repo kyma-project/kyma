@@ -22,6 +22,8 @@ models:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Labels"
   Timestamp:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Timestamp"
+  Settings:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Settings"
   DocsTopic:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.DocsTopic"
     fields:

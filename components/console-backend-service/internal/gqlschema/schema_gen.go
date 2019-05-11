@@ -16278,10 +16278,10 @@ func (ec *executionContext) _NavigationNode_settings(ctx context.Context, field 
 		}
 		return graphql.Null
 	}
-	res := resTmp.(string)
+	res := resTmp.(Settings)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-	return graphql.MarshalString(res)
+	return res
 }
 
 var podImplementors = []string{"Pod"}
