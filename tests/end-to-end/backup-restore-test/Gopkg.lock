@@ -2,12 +2,12 @@
 
 
 [[projects]]
-  digest = "1:4d6f036ea3fe636bcb2e89850bcdc62a771354e157cd51b8b22a2de8562bf663"
+  digest = "1:80004fcc5cf64e591486b3e11b406f1e0d17bf85d475d64203c8494f5da4fcd1"
   name = "cloud.google.com/go"
   packages = ["compute/metadata"]
   pruneopts = "NUT"
-  revision = "fcb9a2d5f791d07be64506ab54434de65989d370"
-  version = "v0.37.4"
+  revision = "775730d6e48254a2430366162cf6298e5368833c"
+  version = "v0.39.0"
 
 [[projects]]
   digest = "1:b9007f703ec9fe98a21ac92605a3126e6142d1a5fd87d5f7e1759f721f04230d"
@@ -63,7 +63,7 @@
   version = "v2.3.0"
 
 [[projects]]
-  digest = "1:680dc594328c2ae0ec20ae87cf71a0720d061f2b3a5e215351e519ce28c37609"
+  digest = "1:7125e86147ea420709c06188f42470671dd8ef6b4571cb916848fb4c83c8ebf4"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -106,8 +106,8 @@
     "service/sts",
   ]
   pruneopts = "NUT"
-  revision = "26af3c32ec16138888e2b1c1fdc2ea66b99b0ef3"
-  version = "v1.19.20"
+  revision = "49378c3c0300fe39e80f4e4794a8b62daae83139"
+  version = "v1.19.29"
 
 [[projects]]
   digest = "1:a80dd73b64585bfa4c84e44e277d95ed163e9d73dedfc7e32030eba648e36efb"
@@ -151,15 +151,15 @@
   revision = "6480d4af844c189cf5dd913db24ddd339d3a4f85"
 
 [[projects]]
-  digest = "1:4f48083a56b5ac1f38cfbd8c0ccc19273079c97f9e4967a63f130c4f4b8bcfc5"
+  digest = "1:f1d9e643ea0408e45146172db79bc4c6d00e2e05ff3dbbbc487a5f15eafdf130"
   name = "github.com/emicklei/go-restful"
   packages = [
     ".",
     "log",
   ]
   pruneopts = "NUT"
-  revision = "b9bbc5664f49b6deec52393bd68f39830687a347"
-  version = "v2.9.3"
+  revision = "103c9496ad8f7e687b8291b56750190012091a96"
+  version = "v2.9.4"
 
 [[projects]]
   digest = "1:db115eee0ae265dab922fecbb7966c3fcdc4eae3c2e9caae302fdcba3ba422c7"
@@ -195,11 +195,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:ac672f42180ef887536774396f5a79b4f426b6338f46bbe17a6ef8da9adc24ea"
+  digest = "1:f04cb7797917efbe9d9efd509a311f28930a9ee7ef1e047d01808d64ded53554"
   name = "github.com/go-openapi/spec"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "9d9763c0ce87242cb4611b52b8601987f01eb4ed"
+  revision = "b2056d62a953adee01fed8ee65a046bd8f0419d5"
 
 [[projects]]
   digest = "1:076ebf43e6e70f18ef9d079a685ede59a0f4dc9247256c209cf57407f959cef9"
@@ -300,7 +300,7 @@
   name = "github.com/gopherjs/gopherjs"
   packages = ["js"]
   pruneopts = "NUT"
-  revision = "bd77b112433e999447bf4bc599e36214ba494a99"
+  revision = "3e4dfb77656c424b6d1196a4d5fed0fcf63677cc"
 
 [[projects]]
   branch = "master"
@@ -601,11 +601,11 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "a29dc8fdc73485234dbef99ebedb95d2eced08de"
+  revision = "22d7a77e9e5f409e934ed268692e56707cd169e5"
 
 [[projects]]
   branch = "master"
-  digest = "1:c7569e3804e133821cd6f0e587270358dd19f101033cac00b0c90461e2d82640"
+  digest = "1:1446f331ac09e67147e1a442061a4e9860b05b40a127684297f4f90ba24f011d"
   name = "golang.org/x/net"
   packages = [
     "context",
@@ -618,7 +618,7 @@
     "idna",
   ]
   pruneopts = "NUT"
-  revision = "4829fb13d2c62012c17688fa7f629f371014946d"
+  revision = "a4d6f7feada510cc50e69a37b484cb0fdc6b7876"
 
 [[projects]]
   branch = "master"
@@ -636,14 +636,14 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:5dd24de689c9d7a471bc7e57c720ae57cbff2cb5671127b2cd29ca78bc2cb4fd"
+  digest = "1:a35de0f03fb7916d3b467ea9684797cc5c6ddaf8e18786728986ee478eceb41d"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "d89cdac9e8725f2aefce25fcbfef41134c9ad412"
+  revision = "a5b02f93d862f065920dd6a40dddc66b60d0dec4"
 
 [[projects]]
   digest = "1:dfcb3d446a3c6a6c71b74cf7baf366cd630a8cb43c3fcb741f34e49727da168d"
@@ -704,7 +704,7 @@
     "internal/semver",
   ]
   pruneopts = "NUT"
-  revision = "b9fed7929fc1d5f8c3daa266389c35f3ee124473"
+  revision = "d81a07b7e58487eed036bf115fa834653590d6cd"
 
 [[projects]]
   digest = "1:a4824d8df1fd1f63c6b3690bf4801d6ff1722adcb3e13c0489196a7e248d868a"
@@ -918,7 +918,7 @@
   revision = "c59034cc13d587f5ef4e85ca0ade0c1866ae8e1d"
 
 [[projects]]
-  digest = "1:dc762d3b3b0daf4d630a815b192792188c33a09bb8e46cba670912342eeafc95"
+  digest = "1:b1459daa050c520864deb1353bd3a48803ae7b3c737e5f6318ba005fdb274499"
   name = "k8s.io/kubernetes"
   packages = [
     "pkg/kubectl/genericclioptions",
@@ -928,8 +928,8 @@
     "pkg/printers",
   ]
   pruneopts = "NUT"
-  revision = "16236ce91790d4c75b79f6ce96841db1c843e7d2"
-  version = "v1.11.9"
+  revision = "7a578febe155a7366767abce40d8a16795a96371"
+  version = "v1.11.10"
 
 [[projects]]
   digest = "1:84a8609383bec11b71d52dd813f33f1d16614b91966940bdc2aa79bea864fa25"
