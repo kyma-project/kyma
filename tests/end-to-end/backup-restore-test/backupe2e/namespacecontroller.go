@@ -1,6 +1,7 @@
 package backupe2e
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/avast/retry-go"
@@ -52,6 +53,7 @@ func (n NamespaceControllerTest) CreateResourcesError(namespace string) error {
 func (n NamespaceControllerTest) TestResources(namespace string) {
 	err := n.TestResourcesError(namespace)
 	So(err, ShouldBeNil)
+	fmt.Println("NamespaceControllerTest is working!")
 }
 
 func (n NamespaceControllerTest) TestResourcesError(namespace string) error {
