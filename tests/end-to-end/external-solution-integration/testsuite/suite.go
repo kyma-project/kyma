@@ -103,9 +103,7 @@ func (ts *testSuite) CreateResources() error {
 		return err
 	}
 
-	url := ts.testService.GetTestServiceURL()
-
-	err = ts.lambdaClient.DeployLambda(appName, url)
+	err = ts.lambdaClient.DeployLambda(appName)
 	if err != nil {
 		return err
 	}
@@ -124,7 +122,7 @@ func (ts *testSuite) createApplication() error {
 		return err
 	}
 
-	err = waitUntil(5, 15, ts.isApplicationReady)
+	err = testkit.WaitUntil(5, 15, ts.isApplicationReady)
 
 	if err != nil {
 		return err
@@ -244,7 +242,7 @@ func (ts *testSuite) StartTestServer() error {
 		return e
 	}
 
-	e = waitUntil(5, 30, ts.testService.CheckIfReady)
+	e = testkit.WaitUntil(5, 30, ts.testService.CheckIfReady)
 
 	if e != nil {
 		return errors.New(fmt.Sprintf("Test Service not started: %s", e))
@@ -281,25 +279,4 @@ func (ts *testSuite) CleanUp() error {
 		return e
 	}
 	return nil
-}
-
-func waitUntil(retries int, sleepTimeSeconds int, predicate func() (bool, error)) error {
-	var ready bool
-	var e error
-
-	sleepDuration := time.Duration(sleepTimeSeconds) * time.Second
-
-	for i := 0; i < retries && !ready; i++ {
-		ready, e = predicate()
-		if e != nil {
-			return e
-		}
-		time.Sleep(sleepDuration)
-	}
-
-	if ready {
-		return nil
-	}
-
-	return errors.New("resource not ready")
 }
