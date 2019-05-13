@@ -1,0 +1,61 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ template "fullname" . }}-migration
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+data:
+  migrate: |-
+{{ include (print $.Template.BasePath "/_helper_rm_minio_content_bucket.txt") . | indent 4 }}
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ template "fullname" . }}-rm-minio-content-bucket-job
+  labels:
+    app: {{ template "name" . }}
+    chart: {{ .Chart.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
+      labels:
+        app: {{ template "name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      restartPolicy: OnFailure
+      volumes:
+        - name: minio-configuration
+          projected:
+            sources:
+            - configMap:
+                name: {{ template "fullname" . }}-migration
+            - secret:
+                name: {{ default "assetstore-minio" .Values.existingSecret }}
+      containers:
+      - name: minio-mc
+        image: bash:5
+        imagePullPolicy: IfNotPresent
+        command: ["/bin/sh","-c"]
+        args: ["/usr/local/bin/bash", "/config/migrate"]
+        env:
+          - name: MINIO_ENDPOINT
+            value: assetstore-minio
+          - name: MINIO_PORT
+            value: "9000"
+        volumeMounts:
+          - name: minio-configuration
+            mountPath: /config
