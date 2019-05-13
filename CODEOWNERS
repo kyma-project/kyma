@@ -326,9 +326,6 @@
 # The gcp-broker-provider directory
 /tools/gcp-broker-provider/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
-# The docsbuilder directory
-/tools/docsbuilder/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
-
 # The failery directory
 /tools/failery/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
 
