@@ -30,6 +30,7 @@ spec:
         - ip: {{ .Values.minikubeIP }}
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
+            - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       containers:
       - name: {{ .Chart.Name }}
