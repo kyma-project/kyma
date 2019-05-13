@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: e2e
-        image: jmedrek/e2e:0.27
+        image: jmedrek/e2e:0.29
         imagePullPolicy: IfNotPresent
         args:
         - "/e2e"
@@ -39,8 +39,8 @@ metadata:
     app: e2e
 rules:
 - apiGroups: ["*"]
-  resources: ["services", "deployments"]
-  verbs: ["create", "get", "delete"]
+  resources: ["services", "deployments", "pods"]
+  verbs: ["create", "get", "delete", "list"]
 - apiGroups: ["*"]
   resources: ["secrets"]
   verbs: ["create", "get", "update", "delete"]
