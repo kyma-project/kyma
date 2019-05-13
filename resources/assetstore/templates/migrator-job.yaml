@@ -29,10 +29,50 @@ metadata:
     "helm.sh/hook-weight": "0"
 spec:
   accessModes:
-    - ReadWriteOnce
+    - ReadWriteMany
   resources:
     requests:
       storage: {{ .Values.minio.persistence.size | quote }}
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-migration
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}-migration
+  namespace: kyma-system
+roleRef:
+  kind: ClusterRole
+  name: {{ template "fullname" . }}-migration
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-migration
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
+rules:
+- apiGroups: ["extensions"]
+  resources: [ "deployments" ]
+  verbs: ["get"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "fullname" . }}-migration
+  namespace: kyma-system
+  annotations:
+    "helm.sh/hook": pre-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
 ---
 apiVersion: batch/v1
 kind: Job
@@ -44,7 +84,7 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     "helm.sh/hook": pre-upgrade
-    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-weight": "2"
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
@@ -55,6 +95,7 @@ spec:
       annotations:
         sidecar.istio.io/inject: "false"
     spec:
+      serviceAccountName: {{ template "fullname" . }}-migration
       restartPolicy: OnFailure
       volumes:
         - name: minio-configuration
@@ -74,7 +115,7 @@ spec:
         command:
         - bash
         - -c
-        - "kubectl -n {{ .Release.Namespace }} get deployment assetstore-minio -o jsonpath=\"{.spec.template.metadata.annotations.persistance}\" | xargs -n1 echo | tr -d '\n' > /export/persistance.enabled"
+        - "kubectl -n {{ .Release.Namespace }} get deployment assetstore-minio -o jsonpath=\"{.spec.template.metadata.annotations.persistance}\" > /export/persistance.enabled"
         volumeMounts:
         - name: export
           mountPath: /export
@@ -183,6 +224,46 @@ spec:
           - name: export
             mountPath: /export
 ---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-migration-delete-pvc
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
+subjects:
+- kind: ServiceAccount
+  name: {{ template "fullname" . }}-migration-delete-pvc
+  namespace: kyma-system
+roleRef:
+  kind: ClusterRole
+  name: {{ template "fullname" . }}-migration-delete-pvc
+  apiGroup: rbac.authorization.k8s.io
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: {{ template "fullname" . }}-migration-delete-pvc
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
+rules:
+- apiGroups: [""]
+  resources: [ "persistentvolumeclaims" ]
+  verbs: ["delete"]
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ template "fullname" . }}-migration-delete-pvc
+  namespace: kyma-system
+  annotations:
+    "helm.sh/hook": post-upgrade
+    "helm.sh/hook-delete-policy": hook-succeeded
+    "helm.sh/hook-weight": "1"
+---
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -193,7 +274,7 @@ metadata:
     heritage: {{ .Release.Service }}
   annotations:
     "helm.sh/hook": post-upgrade
-    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-weight": "2"
     "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
@@ -205,6 +286,7 @@ spec:
         sidecar.istio.io/inject: "false"
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: {{ template "fullname" . }}-migration-delete-pvc
       containers:
       - name: pvc-remover
         image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.alpine_kubectl.dir }}{{ .Values.global.alpine_kubectl.image }}:{{ .Values.global.alpine_kubectl.version }}"

@@ -66,9 +66,7 @@ copyFromBucket() {
 }
 
 isPersistance() {
-  IS_PERSISTANCE_ENABLED=$(cat "/export/persistance.enabled")
-
-  if "$IS_PERSISTANCE_ENABLED" == "true"; then
+  if grep -q "true" "/export/persistance.enabled"; then
     return 0
   fi
 
