@@ -54,7 +54,7 @@ These are the pre-defined test execution tags:
 
 The tags allow you to distinguish test results in [Grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1).
 
-See [this](./prerequisites/examples/example.yaml) file for a k6 test example run for **http-db-service**, that contains the pre-defined **testName** and **component** tag names:
+See [this](./prerequisites/examples/http-db-service.js) file for a k6 test example run for **http-db-service**, that contains the pre-defined **testName** and **component** tag names:
 
 ```javascript
 import http from 'k6/http';
@@ -65,7 +65,7 @@ export let options = {
     duration: "1m",
     rps: 1000,
     tags: {
-        "testName": "http_basic_10vu_60s_1000",
+        "testName": "http_db_service_10vu_60s_1000",
         "component": "http-db-service",
         "revision": `${__ENV.REVISION}`
     }
@@ -131,11 +131,11 @@ kubectl apply -f prerequisites/examples/example.yaml
 2. After deploying the test service, start the load test locally, with an environment variable that represents the domain name of the Kyma test cluster:
 
 ```bash
-CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx REVISION=123 k6 run components/examples/http_get.js
+CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx REVISION=123 k6 run components/examples/http-db-service.js
 ```
 
 You can also use the **-e** CLI flag for all platforms:
 
 ```bash
-k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 components/examples/http_get.js
+k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 components/examples/http-db-service.js
 ```
