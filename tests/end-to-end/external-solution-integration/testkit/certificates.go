@@ -13,6 +13,7 @@ import (
 
 const (
 	rsaKeySize = 2048
+	csrType    = "CERTIFICATE REQUEST"
 )
 
 func CreateKey() (*rsa.PrivateKey, error) {
@@ -46,7 +47,7 @@ func CreateCSR(subjectRaw string, key *rsa.PrivateKey) ([]byte, error) {
 	}
 
 	csr := pem.EncodeToMemory(&pem.Block{
-		Type:  "CERTIFICATE REQUEST",
+		Type:  csrType,
 		Bytes: csrBytes,
 	})
 

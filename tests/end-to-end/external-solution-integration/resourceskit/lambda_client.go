@@ -3,6 +3,7 @@ package resourceskit
 import (
 	kubelessV1 "github.com/kubeless/kubeless/pkg/apis/kubeless/v1beta1"
 	kubeless "github.com/kubeless/kubeless/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"k8s.io/api/core/v1"
 	"k8s.io/api/extensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -28,8 +29,8 @@ const lambdaFunction = `
     }`
 
 type LambdaClient interface {
-	DeployLambda(appName string) error
-	DeleteLambda(appName string, options *metav1.DeleteOptions) error
+	DeployLambda() error
+	DeleteLambda() error
 }
 
 type lambdaClient struct {
@@ -49,8 +50,8 @@ func NewLambdaClient(config *rest.Config, namespace string) (LambdaClient, error
 	}, nil
 }
 
-func (c *lambdaClient) DeployLambda(appName string) error {
-	lambda := c.createLambda(appName)
+func (c *lambdaClient) DeployLambda() error {
+	lambda := c.createLambda()
 
 	_, err := c.kubelessClientSet.KubelessV1beta1().Functions(c.namespace).Create(lambda)
 	if err != nil {
@@ -60,11 +61,11 @@ func (c *lambdaClient) DeployLambda(appName string) error {
 	return nil
 }
 
-func (c *lambdaClient) DeleteLambda(appName string, options *metav1.DeleteOptions) error {
-	return c.kubelessClientSet.KubelessV1beta1().Functions(c.namespace).Delete(appName, options)
+func (c *lambdaClient) DeleteLambda() error {
+	return c.kubelessClientSet.KubelessV1beta1().Functions(c.namespace).Delete(consts.AppName, &metav1.DeleteOptions{})
 }
 
-func (c *lambdaClient) createLambda(name string) *kubelessV1.Function {
+func (c *lambdaClient) createLambda() *kubelessV1.Function {
 	lambdaSpec := kubelessV1.FunctionSpec{
 		Handler:             "e2e.entrypoint",
 		Function:            lambdaFunction,
@@ -73,13 +74,13 @@ func (c *lambdaClient) createLambda(name string) *kubelessV1.Function {
 		Deps:                "request",
 		Deployment: v1beta1.Deployment{
 			TypeMeta:   metav1.TypeMeta{Kind: "Deployment", APIVersion: v1beta1.SchemeGroupVersion.String()},
-			ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: c.namespace, Labels: map[string]string{"function": name}},
+			ObjectMeta: metav1.ObjectMeta{Name: consts.AppName, Namespace: c.namespace, Labels: map[string]string{"function": consts.AppName}},
 			Spec: v1beta1.DeploymentSpec{
 				Template: v1.PodTemplateSpec{
 					Spec: v1.PodSpec{
 						Containers: []v1.Container{
 							{
-								Name: name,
+								Name: consts.AppName,
 							},
 						},
 					},
@@ -95,13 +96,13 @@ func (c *lambdaClient) createLambda(name string) *kubelessV1.Function {
 					TargetPort: intstr.FromInt(8080),
 				},
 			},
-			Selector: map[string]string{"created-by": "kubeless", "function": name},
+			Selector: map[string]string{"created-by": "kubeless", "function": consts.AppName},
 		},
 	}
 
 	return &kubelessV1.Function{
 		TypeMeta:   metav1.TypeMeta{Kind: "Function", APIVersion: kubelessV1.SchemeGroupVersion.String()},
-		ObjectMeta: metav1.ObjectMeta{Name: name, Namespace: c.namespace},
+		ObjectMeta: metav1.ObjectMeta{Name: consts.AppName, Namespace: c.namespace},
 		Spec:       lambdaSpec,
 	}
 }

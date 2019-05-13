@@ -19,6 +19,7 @@ type K8sResourcesClient interface {
 	CreateService(service *core.Service) (interface{}, error)
 	DeleteService(name string, options *v1.DeleteOptions) error
 	DeleteDeployment(name string, options *v1.DeleteOptions) error
+	ListPods(options v1.ListOptions) (*core.PodList, error)
 	GetNamespace() string
 }
 
@@ -52,6 +53,10 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 
 func (c *k8sResourcesClient) GetDeployment(name string, options v1.GetOptions) (interface{}, error) {
 	return c.coreClient.AppsV1().Deployments(c.namespace).Get(name, options)
+}
+
+func (c *k8sResourcesClient) ListPods(options v1.ListOptions) (*core.PodList, error) {
+	return c.coreClient.CoreV1().Pods(c.namespace).List(options)
 }
 
 func (c *k8sResourcesClient) GetIngress(name string, options v1.GetOptions) (interface{}, error) {

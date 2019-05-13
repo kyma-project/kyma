@@ -5,17 +5,18 @@ import (
 	ac "github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned"
 	subscriptionV1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	subscription "github.com/kyma-project/kyma/components/event-bus/generated/push/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 )
 
 type EventingClient interface {
-	CreateMapping(appName string) (*acV1.ApplicationMapping, error)
-	DeleteMapping(appName string, options *metav1.DeleteOptions) error
-	CreateEventActivation(appName string) (*acV1.EventActivation, error)
-	DeleteEventActivation(appName string, options *metav1.DeleteOptions) error
-	CreateSubscription(appName, endpoint, eventType, eventTypeVersion string) (*subscriptionV1.Subscription, error)
-	DeleteSubscription(appName string, options *metav1.DeleteOptions) error
+	CreateMapping() (*acV1.ApplicationMapping, error)
+	DeleteMapping() error
+	CreateEventActivation() (*acV1.EventActivation, error)
+	DeleteEventActivation() error
+	CreateSubscription() (*subscriptionV1.Subscription, error)
+	DeleteSubscription() error
 }
 
 type eventingClient struct {
@@ -42,28 +43,28 @@ func NewEventingClient(config *rest.Config, namespace string) (EventingClient, e
 	}, nil
 }
 
-func (c *eventingClient) CreateMapping(appName string) (*acV1.ApplicationMapping, error) {
+func (c *eventingClient) CreateMapping() (*acV1.ApplicationMapping, error) {
 	am := &acV1.ApplicationMapping{
 		TypeMeta:   metav1.TypeMeta{Kind: "ApplicationMapping", APIVersion: acV1.SchemeGroupVersion.String()},
-		ObjectMeta: metav1.ObjectMeta{Name: appName, Namespace: c.namespace},
+		ObjectMeta: metav1.ObjectMeta{Name: consts.AppName, Namespace: c.namespace},
 	}
 
 	return c.appConnClientSet.ApplicationconnectorV1alpha1().ApplicationMappings(c.namespace).Create(am)
 }
 
-func (c *eventingClient) DeleteMapping(appName string, options *metav1.DeleteOptions) error {
-	return c.appConnClientSet.ApplicationconnectorV1alpha1().ApplicationMappings(c.namespace).Delete(appName, options)
+func (c *eventingClient) DeleteMapping() error {
+	return c.appConnClientSet.ApplicationconnectorV1alpha1().ApplicationMappings(c.namespace).Delete(consts.AppName, &metav1.DeleteOptions{})
 }
 
-func (c *eventingClient) CreateEventActivation(appName string) (*acV1.EventActivation, error) {
+func (c *eventingClient) CreateEventActivation() (*acV1.EventActivation, error) {
 	eaSpec := acV1.EventActivationSpec{
 		DisplayName: "Commerce-events",
-		SourceID:    appName,
+		SourceID:    consts.AppName,
 	}
 
 	ea := &acV1.EventActivation{
 		TypeMeta:   metav1.TypeMeta{Kind: "EventActivation", APIVersion: acV1.SchemeGroupVersion.String()},
-		ObjectMeta: metav1.ObjectMeta{Name: appName, Namespace: c.namespace},
+		ObjectMeta: metav1.ObjectMeta{Name: consts.AppName, Namespace: c.namespace},
 
 		Spec: eaSpec,
 	}
@@ -71,24 +72,24 @@ func (c *eventingClient) CreateEventActivation(appName string) (*acV1.EventActiv
 	return c.appConnClientSet.ApplicationconnectorV1alpha1().EventActivations(c.namespace).Create(ea)
 }
 
-func (c *eventingClient) DeleteEventActivation(appName string, options *metav1.DeleteOptions) error {
-	return c.appConnClientSet.ApplicationconnectorV1alpha1().EventActivations(c.namespace).Delete(appName, options)
+func (c *eventingClient) DeleteEventActivation() error {
+	return c.appConnClientSet.ApplicationconnectorV1alpha1().EventActivations(c.namespace).Delete(consts.AppName, &metav1.DeleteOptions{})
 }
 
-func (c *eventingClient) CreateSubscription(appName, endpoint, eventType, eventTypeVersion string) (*subscriptionV1.Subscription, error) {
+func (c *eventingClient) CreateSubscription() (*subscriptionV1.Subscription, error) {
 	subSpec := subscriptionV1.SubscriptionSpec{
-		Endpoint:                      endpoint,
+		Endpoint:                      consts.LambdaEndpoint,
 		IncludeSubscriptionNameHeader: true,
 		MaxInflight:                   400,
 		PushRequestTimeoutMS:          2000,
-		EventType:                     eventType,
-		EventTypeVersion:              eventTypeVersion,
-		SourceID:                      appName,
+		EventType:                     consts.EventType,
+		EventTypeVersion:              consts.EventVersion,
+		SourceID:                      consts.AppName,
 	}
 
 	sub := &subscriptionV1.Subscription{
 		TypeMeta:   metav1.TypeMeta{Kind: "Subscription", APIVersion: subscriptionV1.SchemeGroupVersion.String()},
-		ObjectMeta: metav1.ObjectMeta{Name: appName, Namespace: c.namespace, Labels: map[string]string{"Function": appName}},
+		ObjectMeta: metav1.ObjectMeta{Name: consts.AppName, Namespace: c.namespace, Labels: map[string]string{"Function": consts.AppName}},
 
 		SubscriptionSpec: subSpec,
 	}
@@ -96,6 +97,6 @@ func (c *eventingClient) CreateSubscription(appName, endpoint, eventType, eventT
 	return c.subscriptionClientSet.EventingV1alpha1().Subscriptions(c.namespace).Create(sub)
 }
 
-func (c *eventingClient) DeleteSubscription(appName string, options *metav1.DeleteOptions) error {
-	return c.subscriptionClientSet.EventingV1alpha1().Subscriptions(c.namespace).Delete(appName, options)
+func (c *eventingClient) DeleteSubscription() error {
+	return c.subscriptionClientSet.EventingV1alpha1().Subscriptions(c.namespace).Delete(consts.AppName, &metav1.DeleteOptions{})
 }
