@@ -15,7 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1557508556084,
+  "iteration": 1557743411868,
   "links": [],
   "panels": [
     {
@@ -119,7 +119,7 @@
       "colorPostfix": false,
       "colorValue": true,
       "colors": [
-        "#d44a3a",
+        "#F2495C",
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
@@ -216,7 +216,7 @@
       "colorBackground": false,
       "colorValue": true,
       "colors": [
-        "#d44a3a",
+        "#F2495C",
         "rgba(237, 129, 40, 0.89)",
         "#299c46"
       ],
@@ -344,14 +344,14 @@
           "value": "$__all"
         },
         "datasource": "Prometheus",
-        "definition": "label_values(total_kyma_subscriptions, name)",
+        "definition": "label_values(total_kyma_subscriptions{exported_namespace=\"$kyma_subscription_namespace\"}, name)",
         "hide": 0,
         "includeAll": true,
         "label": "Kyma Subscription Name",
         "multi": false,
         "name": "kyma_subscription_name",
         "options": [],
-        "query": "label_values(total_kyma_subscriptions, name)",
+        "query": "label_values(total_kyma_subscriptions{exported_namespace=\"$kyma_subscription_namespace\"}, name)",
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
@@ -365,7 +365,7 @@
     ]
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-5m",
     "to": "now"
   },
   "timepicker": {
