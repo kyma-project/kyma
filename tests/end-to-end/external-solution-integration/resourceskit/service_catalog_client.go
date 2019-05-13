@@ -101,7 +101,7 @@ func (c *serviceCatalogClient) DeleteServiceBinding(sbName string) error {
 
 func (c *serviceCatalogClient) CreateServiceBindingUsage(sbuName, lambdaName, sbName string) (*sbuv1.ServiceBindingUsage, error) {
 	serviceBindingUsage := &sbuv1.ServiceBindingUsage{
-		TypeMeta: v1.TypeMeta{Kind: "ServiceBindingUsage", APIVersion: scv1.SchemeGroupVersion.String()},
+		TypeMeta: v1.TypeMeta{Kind: "ServiceBindingUsage", APIVersion: sbuv1.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{
 			Name:      sbuName,
 			Namespace: c.namespace,

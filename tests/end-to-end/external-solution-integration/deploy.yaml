@@ -20,7 +20,7 @@ spec:
     spec:
       containers:
       - name: e2e
-        image: jmedrek/e2e:0.24
+        image: jmedrek/e2e:0.27
         imagePullPolicy: IfNotPresent
         args:
         - "/e2e"
@@ -57,7 +57,10 @@ rules:
   resources: ["functions"]
   verbs: ["create", "get", "update", "delete"]
 - apiGroups: ["servicecatalog.k8s.io"]
-  resources: ["serviceinstances"]
+  resources: ["serviceinstances", "servicebindings"]
+  verbs: ["create", "get", "update", "delete"]
+- apiGroups: ["servicecatalog.kyma-project.io"]
+  resources: ["servicebindingusages"]
   verbs: ["create", "get", "update", "delete"]
 
 ---

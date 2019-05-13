@@ -10,6 +10,8 @@ import (
 
 //TODO: This is example use of testing suite, this still needs to be finished and cleaned up
 func main() {
+	time.Sleep(10 * time.Second)
+
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		fmt.Println(err)
@@ -39,7 +41,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	time.Sleep(30 * time.Second)
+	time.Sleep(120 * time.Second)
 
 	err = ts.CreateServiceBinding()
 	if err != nil {
