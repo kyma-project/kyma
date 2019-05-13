@@ -163,5 +163,4 @@ metadata:
     component: istio
     kyma-project.io/installation: ""
 data:
-  kiali.enabled: "true"
-
+  kiali.enabled: "false"
