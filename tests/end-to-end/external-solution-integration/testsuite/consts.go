@@ -14,6 +14,12 @@ const (
 	serviceInstanceName = "e2e-test-app-si"
 	serviceInstanceID   = "e2e-test-app-si-id"
 
+	serviceBindingName = "e2e-test-app-sb"
+	serviceBindingID   = "e2e-test-app-sb-id"
+	serviceBindingSecret = "e2e-test-app-sb-secret"
+
+	serviceBindingUsageName = "e2e-test-app-sbu"
+
 	serviceProvider         = "e2e"
 	serviceName             = "e2e-test-app-svc"
 	serviceDescription      = "e2e testing app"

@@ -78,7 +78,7 @@ func (c *serviceCatalogClient) CreateServiceBinding(id, sbName, svcInstanceName,
 		ObjectMeta: v1.ObjectMeta{Name: sbName, Namespace: c.namespace},
 		Spec: scv1.ServiceBindingSpec{
 			ExternalID: id,
-			ServiceInstanceRef: scv1.LocalObjectReference{
+			InstanceRef: scv1.LocalObjectReference{
 				Name: svcInstanceName,
 			},
 			SecretName: secretName,
