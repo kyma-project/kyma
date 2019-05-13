@@ -4,23 +4,56 @@ info:
   title: 'Kyma Events API'
 tags:
 - name: 'Kyma events'
-  description: 'API for publishing events to Kyma.'
+  description: 'API for eventing.'
 paths:
   /v1/health:
     get:
       summary: 'Returns health of a service'
       operationId: 'getHealth'
       tags:
-        - 'health'
+      - 'health'
       responses:
         '200':
           description: 'The service is in a good health'
-  /v1/events:
+  /{application}/v1/events/subscribed:
+    get:
+      parameters:
+      - in: path
+        name: application
+        schema:
+          type: string
+        required: true
+        description: 'Application name'
+      tags:
+      - 'events'
+      summary: 'Returns subscribed events'
+      operationId: 'getEvents'
+      responses:
+        '200':
+          description: 'Successful operation'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscribedEvents'
+        '500':
+          description: 'Internal server error'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /{application}/v1/events:
     post:
+      parameters:
+      - in: path
+        name: application
+        schema:
+          type: string
+        required: true
+        description: 'Application name'
       summary: 'Publish an event'
       operationId: 'publishEvent'
       tags:
-        - 'publish'
+      - 'publish'
       requestBody:
         description: 'The event to be published'
         required: true
@@ -97,10 +130,10 @@ components:
         data:
           $ref: '#/components/schemas/AnyValue'
       required:
-        - event-type
-        - event-type-version
-        - event-time
-        - data
+      - event-type
+      - event-type-version
+      - event-time
+      - data
     PublishResponse:
       type: object
       description: A Publish response
@@ -111,10 +144,29 @@ components:
           pattern: '^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$'
           example: '31109198-4d69-4ae0-972d-76117f3748c8'
       required:
-        - event-id
+      - event-id
+    SubscribedEvents:
+      type: 'object'
+      properties:
+        events:
+          type: 'array'
+          items:
+            type: 'object'
+            properties:
+              name:
+                type: 'string'
+              version:
+                type: 'string'
     AnyValue:
       nullable: false
       description: Can be any value but null.
+    ErrorResponse:
+      type: 'object'
+      properties:
+        code:
+          type: 'integer'
+        error:
+          type: 'string'
     APIError:
       type: object
       description: API Error response body
@@ -144,8 +196,8 @@ components:
           items:
             $ref: '#/components/schemas/APIErrorDetail'
       required:
-        - status
-        - type
+      - status
+      - type
     APIErrorDetail:
       description: schema for specific error detail
       type: object
@@ -173,4 +225,4 @@ components:
             link to documentation to investigate further and finding
             support for error detail
       required:
-        - type
+      - type

@@ -45,3 +45,11 @@ spec:
       navigationPath: idp-presets
       viewUrl: '/home/settings/idpPresets'
       order: 4
+      requiredPermissions:
+        - apiGroup: authentication.kyma-project.io
+          resource: idppresets
+          verbs:
+            - list
+            - get
+            - create
+            - delete

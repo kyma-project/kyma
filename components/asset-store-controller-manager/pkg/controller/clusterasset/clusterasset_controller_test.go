@@ -80,7 +80,7 @@ func TestReconcileClusterAsset_Reconcile(t *testing.T) {
 	mocks.validator.On("Validate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.ValidationWebhookService).Return(engine.ValidationResult{Success: true}, nil).Twice()
 	mocks.mutator.On("Mutate", mock.Anything, mock.Anything, testData.tmpBaseDir, testData.files, testData.asset.Spec.Source.MutationWebhookService).Return(nil).Twice()
 	mocks.store.On("PutObjects", mock.Anything, testData.bucketName, testData.assetName, testData.tmpBaseDir, testData.files).Return(nil).Twice()
-	mocks.store.On("ListObjects", mock.Anything, testData.bucketName, fmt.Sprintf("/%s", testData.assetName)).Return(nil, nil).Times(3)
+	mocks.store.On("ListObjects", mock.Anything, testData.bucketName, testData.assetName).Return(nil, nil).Times(3)
 	defer mocks.AssertExpetactions(t)
 
 	cfg := prepareReconcilerTest(t, mocks)

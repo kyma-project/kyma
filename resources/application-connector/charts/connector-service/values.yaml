@@ -44,6 +44,14 @@ ingress:
   authSecret: kyma-integration/nginx-auth-ca
   tlsSecret: application-connector-ingress-tls-cert
 
+istio:
+  rbac:
+    enabled: true
+    connectorServiceInternalApi:
+      subjects:
+          - user: cluster.local/ns/kyma-integration/sa/connection-token-handler
+          - user: cluster.local/ns/kyma-integration/sa/{{ .Chart.Name }}-tests
+          - user: cluster.local/ns/kyma-system/sa/core-console-backend-service
 tests:
   enabled: true
   skipSslVerify: true

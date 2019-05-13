@@ -10,6 +10,7 @@ In Kyma, you can use bundles to install the following Service Brokers:
 
 * [Google Cloud Platform (GCP) Broker](/components/service-catalog/#service-brokers-gcp-broker)
 * [Azure Service Broker](/components/service-catalog/#service-brokers-azure-service-broker)
+* [AWS Service Broker](/components/service-catalog/#service-brokers-aws-service-broker)
 
 To get all the bundles that the Helm Broker provides, go to the [`bundles`](https://github.com/kyma-project/bundles) repository.
 
