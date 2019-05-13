@@ -2,11 +2,14 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: knative-eventing-post-upgrade
+  namespace: knative-eventing
   annotations:
     "helm.sh/hook": "post-upgrade"
-    sidecar.istio.io/inject: "false"
 spec:
   template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec:
       containers:
       - name: post-upgrade
@@ -31,10 +34,10 @@ rules:
   verbs: ["create", "delete", "get", "list"]
 - apiGroups: ["eventing.knative.dev"]
   resources: ["channels"]
-  verbs: ["get", "create", "update", "delete"]
+  verbs: ["get", "create", "update", "delete", "list"]
 - apiGroups: ["eventing.knative.dev"]
   resources: ["subscriptions"]
-  verbs: ["get", "create", "delete"]
+  verbs: ["get", "create", "delete", "list"]
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["*"]  
