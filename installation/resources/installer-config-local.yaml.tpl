@@ -61,6 +61,8 @@ data:
 
   mixer.resources.limits.memory: 256Mi
   mixer.resources.requests.memory: 128Mi
+
+  kiali.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -152,15 +154,3 @@ metadata:
     kyma-project.io/installation: ""
 data:
   global.logging.promtail.config.name: ""
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: installation-kiali-overrides
-  namespace: kyma-installer
-  labels:
-    installer: overrides
-    component: istio
-    kyma-project.io/installation: ""
-data:
-  kiali.enabled: "false"
