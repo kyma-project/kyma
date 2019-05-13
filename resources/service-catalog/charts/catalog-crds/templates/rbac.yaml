@@ -172,6 +172,9 @@ items:
     - apiGroups: ["servicecatalog.k8s.io"]
       resources: ["serviceinstances","servicebindings"]
       verbs:     ["get","list","watch"]
+    - apiGroups: ["authorization.k8s.io"]
+      resources: ["subjectaccessreviews"]
+      verbs:     ["get","list","create"]
     {{- if not .Values.namespacedServiceBrokerDisabled }}
     - apiGroups: ["servicecatalog.k8s.io"]
       resources: ["serviceclasses"]
