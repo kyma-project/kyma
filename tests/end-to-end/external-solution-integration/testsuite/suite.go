@@ -253,8 +253,8 @@ func (ts *testSuite) CreateInstance(serviceID string) (*v1beta1.ServiceInstance,
 	return ts.scClient.CreateServiceInstance(consts.ServiceInstanceName, consts.ServiceInstanceID, serviceID)
 }
 
-func (ts *testSuite) CreateServiceBinding() (error) {
-	_, err := ts.scClient.CreateServiceBinding(serviceBindingID, serviceBindingName, serviceInstanceName, serviceBindingSecret)
+func (ts *testSuite) CreateServiceBinding() error {
+	_, err := ts.scClient.CreateServiceBinding()
 	if err != nil {
 		return err
 	}
@@ -262,8 +262,8 @@ func (ts *testSuite) CreateServiceBinding() (error) {
 	return nil
 }
 
-func (ts *testSuite) CreateServiceBindingUsage() (error) {
-	_, err := ts.scClient.CreateServiceBindingUsage(serviceBindingUsageName, appName, serviceBindingName)
+func (ts *testSuite) CreateServiceBindingUsage() error {
+	_, err := ts.scClient.CreateServiceBindingUsage()
 	if err != nil {
 		return err
 	}
