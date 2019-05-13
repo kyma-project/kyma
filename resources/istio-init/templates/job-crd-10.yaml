@@ -4,7 +4,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
   name: istio-init-crd-10
   annotations:
-    "helm.sh/hook-delete-policy": "hook-succeeded, before-hook-creation"
+    "helm.sh/hook-delete-policy": "before-hook-creation"
 spec:
   template:
     metadata:
