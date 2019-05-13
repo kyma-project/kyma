@@ -50,10 +50,17 @@ func main() {
 		fmt.Println(err)
 	}
 
+	//TODO: Get rid of constant time waits, you can check for readiness of SI / SB / SBU
 	time.Sleep(30 * time.Second)
 
 	err = ts.CreateServiceBindingUsage()
 	if err != nil {
 		fmt.Println(err)
 	}
+
+	//TODO: Sending event
+
+	//TODO: Check
+
+	//TODO: CleanUp
 }
