@@ -6,6 +6,7 @@ metadata:
   name: istio-init-crd-certmanager-11
   annotations:
     "helm.sh/hook-delete-policy": "before-hook-creation"
+    "helm.sh/hook": "pre-rollback, pre-upgrade, pre-install"
 spec:
   template:
     metadata:
