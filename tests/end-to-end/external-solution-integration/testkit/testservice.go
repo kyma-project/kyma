@@ -24,7 +24,7 @@ type TestService interface {
 	CreateTestService() error
 	DeleteTestService() error
 	CheckValue() (int, error)
-	CheckIfReady() (bool, error)
+	IsReady() (bool, error)
 	GetTestServiceURL() string
 }
 
@@ -81,7 +81,7 @@ func (ts *testService) CheckValue() (int, error) {
 	return response.counter, nil
 }
 
-func (ts *testService) CheckIfReady() (bool, error) {
+func (ts *testService) IsReady() (bool, error) {
 
 	url := ts.getHealthEndpointURL()
 

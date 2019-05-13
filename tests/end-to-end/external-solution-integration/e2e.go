@@ -26,9 +26,11 @@ func main() {
 		fmt.Println(err)
 	}
 
+	url := ts.GetTestServiceURL()
+
 	//cert, err := ts.FetchCertificate()
 
-	id, err := ts.RegisterService()
+	id, err := ts.RegisterService(url)
 	if err != nil {
 		fmt.Println(err)
 	}

@@ -1,25 +1,25 @@
-package testsuite
+package consts
 
 const (
-	appName     = "e2e-test-app"
-	accessLabel = "e2e-test-app-label"
+	AppName     = "e2e-test-app"
+	AccessLabel = "e2e-test-app-label"
 
-	integrationNamespace = "kyma-integration"
-	productionNamespace  = "production"
+	IntegrationNamespace = "kyma-integration"
+	ProductionNamespace  = "production"
 
-	lambdaEndpoint = "http://e2e-lambda.production:8080"
-	eventType      = "exampleevent"
-	eventVersion   = "v1"
+	LambdaEndpoint = "http://e2e-lambda.production:8080"
+	EventType      = "exampleevent"
+	EventVersion   = "v1"
 
-	serviceInstanceName = "e2e-test-app-si"
-	serviceInstanceID   = "e2e-test-app-si-id"
+	ServiceInstanceName = "e2e-test-app-si"
+	ServiceInstanceID   = "e2e-test-app-si-id"
 
-	serviceProvider         = "e2e"
-	serviceName             = "e2e-test-app-svc"
-	serviceDescription      = "e2e testing app"
-	serviceShortDescription = "e2e testing app"
-	serviceIdentifier       = "e2e-test-app-svc-id"
-	serviceEventsSpec       = `{
+	ServiceProvider         = "e2e"
+	ServiceName             = "e2e-test-app-svc"
+	ServiceDescription      = "e2e testing app"
+	ServiceShortDescription = "e2e testing app"
+	ServiceIdentifier       = "e2e-test-app-svc-id"
+	ServiceEventsSpec       = `{
    "asyncapi":"1.0.0",
    "info":{
       "title":"Example Events",

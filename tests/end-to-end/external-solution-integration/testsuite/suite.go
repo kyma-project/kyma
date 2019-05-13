@@ -6,22 +6,27 @@ import (
 	"errors"
 	"fmt"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testkit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/wait"
 	"github.com/sirupsen/logrus"
+	v12 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
+	"strings"
 	"time"
 )
 
 type TestSuite interface {
 	CreateResources() error
 	FetchCertificate() ([]*x509.Certificate, error)
-	RegisterService() (string, error)
+	RegisterService(targetURL string) (string, error)
 	CreateInstance(serviceID string) (*v1beta1.ServiceInstance, error)
 	StartTestServer() error
 	SendEvent()
 	CleanUp() error
+	GetTestServiceURL() string
 }
 
 type testSuite struct {
@@ -37,32 +42,32 @@ type testSuite struct {
 }
 
 func NewTestSuite(config *rest.Config, logger logrus.FieldLogger) (TestSuite, error) {
-	acClient, err := resourceskit.NewAppConnectorClient(config, integrationNamespace)
+	acClient, err := resourceskit.NewAppConnectorClient(config, consts.IntegrationNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	k8sClient, err := resourceskit.NewK8sResourcesClient(config, integrationNamespace)
+	k8sClient, err := resourceskit.NewK8sResourcesClient(config, consts.IntegrationNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	trClient, err := resourceskit.NewTokenRequestClient(config, integrationNamespace)
+	trClient, err := resourceskit.NewTokenRequestClient(config, consts.IntegrationNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	eventingClient, err := resourceskit.NewEventingClient(config, productionNamespace)
+	eventingClient, err := resourceskit.NewEventingClient(config, consts.ProductionNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	lambdaClient, err := resourceskit.NewLambdaClient(config, productionNamespace)
+	lambdaClient, err := resourceskit.NewLambdaClient(config, consts.ProductionNamespace)
 	if err != nil {
 		return nil, err
 	}
 
-	scClient, err := resourceskit.NewServiceCatalogClient(config, productionNamespace)
+	scClient, err := resourceskit.NewServiceCatalogClient(config, consts.ProductionNamespace)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +75,7 @@ func NewTestSuite(config *rest.Config, logger logrus.FieldLogger) (TestSuite, er
 	testService := testkit.NewTestService(k8sClient)
 
 	connClient := testkit.NewConnectorClient(trClient, true, logger)
-	registryClient := testkit.NewRegistryClient("http://application-registry-external-api.kyma-integration.svc.cluster.local:8081/"+appName+"/v1/metadata/services", true, logger)
+	registryClient := testkit.NewRegistryClient("http://application-registry-external-api.kyma-integration.svc.cluster.local:8081/"+consts.AppName+"/v1/metadata/services", true, logger)
 
 	return &testSuite{
 		acClient:       acClient,
@@ -91,24 +96,28 @@ func (ts *testSuite) CreateResources() error {
 		return err
 	}
 
-	_, err = ts.eventingClient.CreateMapping(appName)
+	_, err = ts.eventingClient.CreateMapping()
 	if err != nil {
 		return err
 	}
 
-	_, err = ts.eventingClient.CreateEventActivation(appName)
+	_, err = ts.eventingClient.CreateEventActivation()
 	if err != nil {
 		return err
 	}
 
-	url := ts.testService.GetTestServiceURL()
-
-	err = ts.lambdaClient.DeployLambda(appName, url)
+	err = ts.lambdaClient.DeployLambda()
 	if err != nil {
 		return err
 	}
 
-	_, err = ts.eventingClient.CreateSubscription(appName, lambdaEndpoint, eventType, eventVersion)
+	err = wait.Until(5, 10, ts.isLambdaReady)
+
+	if err != nil {
+		return errors.New(fmt.Sprintf("Lambda function not ready, %s", err))
+	}
+
+	_, err = ts.eventingClient.CreateSubscription()
 	if err != nil {
 		return err
 	}
@@ -116,19 +125,58 @@ func (ts *testSuite) CreateResources() error {
 	return nil
 }
 
+func (ts *testSuite) isLambdaReady() (bool, error) {
+	podList, e := ts.k8sClient.ListPods(v1.ListOptions{})
+
+	pods := podList.Items
+
+	if e != nil {
+		return false, e
+	}
+
+	pods = filter(pods)
+
+	for _, pod := range pods {
+		for _, condition := range pod.Status.Conditions {
+			if condition.Status != "True" {
+				return false, nil
+			}
+		}
+	}
+
+	return true, nil
+}
+
+func filter(pods []v12.Pod) []v12.Pod {
+
+	var filteredPods []v12.Pod
+
+	for _, pod := range pods {
+		if strings.Contains(pod.Name, consts.AppName) {
+			filteredPods = append(filteredPods, pod)
+		}
+	}
+
+	return filteredPods
+}
+
+func (ts *testSuite) GetTestServiceURL() string {
+	return ts.testService.GetTestServiceURL()
+}
+
 func (ts *testSuite) createApplication() error {
-	_, err := ts.acClient.CreateDummyApplication(appName, accessLabel, false)
+	_, err := ts.acClient.CreateDummyApplication(false)
 	if err != nil {
 		return err
 	}
 
-	err = waitUntil(5, 15, ts.isApplicationReady)
+	err = wait.Until(5, 15, ts.isApplicationReady)
 
 	if err != nil {
 		return err
 	}
 
-	checker := resourceskit.NewK8sChecker(ts.k8sClient, appName)
+	checker := resourceskit.NewK8sChecker(ts.k8sClient)
 
 	err = checker.CheckK8sResources()
 	if err != nil {
@@ -139,7 +187,7 @@ func (ts *testSuite) createApplication() error {
 }
 
 func (ts *testSuite) isApplicationReady() (bool, error) {
-	application, e := ts.acClient.GetApplication(appName, v1.GetOptions{})
+	application, e := ts.acClient.GetApplication()
 
 	if e != nil {
 		return false, e
@@ -154,7 +202,7 @@ func (ts *testSuite) FetchCertificate() ([]*x509.Certificate, error) {
 		return nil, err
 	}
 
-	infoURL, err := ts.connClient.GetToken(appName)
+	infoURL, err := ts.connClient.GetToken()
 	if err != nil {
 		return nil, err
 	}
@@ -177,39 +225,42 @@ func (ts *testSuite) FetchCertificate() ([]*x509.Certificate, error) {
 	return certificate, nil
 }
 
-func (ts *testSuite) RegisterService() (string, error) {
-	service := prepareService()
+func (ts *testSuite) RegisterService(targetURL string) (string, error) {
+	service := prepareService(targetURL)
 
 	return ts.registryClient.RegisterService(service)
 }
 
-func prepareService() *testkit.ServiceDetails {
+func prepareService(targetURL string) *testkit.ServiceDetails {
 	return &testkit.ServiceDetails{
-		Provider:         serviceProvider,
-		Name:             serviceName,
-		Description:      serviceDescription,
-		ShortDescription: serviceShortDescription,
-		Identifier:       serviceIdentifier,
+		Provider:         consts.ServiceProvider,
+		Name:             consts.ServiceName,
+		Description:      consts.ServiceDescription,
+		ShortDescription: consts.ServiceShortDescription,
+		Identifier:       consts.ServiceIdentifier,
 		Events: &testkit.Events{
-			Spec: json.RawMessage(serviceEventsSpec),
+			Spec: json.RawMessage(consts.ServiceEventsSpec),
+		},
+		Api: &testkit.API{
+			TargetUrl: targetURL,
 		},
 	}
 }
 
 func (ts *testSuite) CreateInstance(serviceID string) (*v1beta1.ServiceInstance, error) {
-	return ts.scClient.CreateServiceInstance(serviceInstanceName, serviceInstanceID, serviceID)
+	return ts.scClient.CreateServiceInstance(consts.ServiceInstanceName, consts.ServiceInstanceID, serviceID)
 }
 
 func (ts *testSuite) SendEvent() {
 	event := prepareEvent()
 
-	testkit.SendEvent("http://application-registry-external-api.kyma-integration.svc.cluster.local:8081/"+appName+"/v1/events", event)
+	testkit.SendEvent("http://application-registry-external-api.kyma-integration.svc.cluster.local:8081/"+consts.AppName+"/v1/events", event)
 }
 
 func prepareEvent() *testkit.ExampleEvent {
 	return &testkit.ExampleEvent{
-		EventType:        eventType,
-		EventTypeVersion: eventVersion,
+		EventType:        consts.EventType,
+		EventTypeVersion: consts.EventVersion,
 		EventID:          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa",
 		EventTime:        time.Now(),
 		Data:             "some data",
@@ -224,7 +275,7 @@ func (ts *testSuite) StartTestServer() error {
 		return e
 	}
 
-	e = waitUntil(5, 30, ts.testService.CheckIfReady)
+	e = wait.Until(5, 30, ts.testService.IsReady)
 
 	if e != nil {
 		return errors.New(fmt.Sprintf("Test Service not started: %s", e))
@@ -240,46 +291,25 @@ func (ts *testSuite) CleanUp() error {
 	if e != nil {
 		return e
 	}
-	e = ts.lambdaClient.DeleteLambda(appName, &v1.DeleteOptions{})
+	e = ts.lambdaClient.DeleteLambda()
 	if e != nil {
 		return e
 	}
-	e = ts.eventingClient.DeleteSubscription(appName, &v1.DeleteOptions{})
+	e = ts.eventingClient.DeleteSubscription()
 	if e != nil {
 		return e
 	}
-	e = ts.eventingClient.DeleteEventActivation(appName, &v1.DeleteOptions{})
+	e = ts.eventingClient.DeleteEventActivation()
 	if e != nil {
 		return e
 	}
-	e = ts.eventingClient.DeleteMapping(appName, &v1.DeleteOptions{})
+	e = ts.eventingClient.DeleteMapping()
 	if e != nil {
 		return e
 	}
-	e = ts.acClient.DeleteApplication(appName, &v1.DeleteOptions{})
+	e = ts.acClient.DeleteApplication()
 	if e != nil {
 		return e
 	}
 	return nil
-}
-
-func waitUntil(retries int, sleepTimeSeconds int, predicate func() (bool, error)) error {
-	var ready bool
-	var e error
-
-	sleepDuration := time.Duration(sleepTimeSeconds) * time.Second
-
-	for i := 0; i < retries && !ready; i++ {
-		ready, e = predicate()
-		if e != nil {
-			return e
-		}
-		time.Sleep(sleepDuration)
-	}
-
-	if ready {
-		return nil
-	}
-
-	return errors.New("resource not ready")
 }

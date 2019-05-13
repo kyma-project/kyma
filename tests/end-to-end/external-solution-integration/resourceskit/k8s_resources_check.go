@@ -2,6 +2,7 @@ package resourceskit
 
 import (
 	"fmt"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -36,20 +37,20 @@ type K8sResourceChecker struct {
 	resources []k8sResource
 }
 
-func NewK8sChecker(client K8sResourcesClient, appName string) *K8sResourceChecker {
+func NewK8sChecker(client K8sResourcesClient) *K8sResourceChecker {
 	resources := []k8sResource{
-		newResource(fmt.Sprintf(ingressNameFormat, appName), "ingress", client.GetIngress),
-		newResource(fmt.Sprintf(applicationProxyDeploymentFormat, appName), "deployment", client.GetDeployment),
-		newResource(fmt.Sprintf(applicationProxyRoleFormat, appName), "role", client.GetRole),
-		newResource(fmt.Sprintf(applicationProxyRoleBindingFormat, appName), "ingress", client.GetRoleBinding),
-		newResource(fmt.Sprintf(applicationProxySvcFormat, appName), "ingress", client.GetService),
-		newResource(fmt.Sprintf(eventServiceDeploymentFormat, appName), "ingress", client.GetDeployment),
-		newResource(fmt.Sprintf(eventServiceSvcFormat, appName), "ingress", client.GetService),
+		newResource(fmt.Sprintf(ingressNameFormat, consts.AppName), "ingress", client.GetIngress),
+		newResource(fmt.Sprintf(applicationProxyDeploymentFormat, consts.AppName), "deployment", client.GetDeployment),
+		newResource(fmt.Sprintf(applicationProxyRoleFormat, consts.AppName), "role", client.GetRole),
+		newResource(fmt.Sprintf(applicationProxyRoleBindingFormat, consts.AppName), "ingress", client.GetRoleBinding),
+		newResource(fmt.Sprintf(applicationProxySvcFormat, consts.AppName), "ingress", client.GetService),
+		newResource(fmt.Sprintf(eventServiceDeploymentFormat, consts.AppName), "ingress", client.GetDeployment),
+		newResource(fmt.Sprintf(eventServiceSvcFormat, consts.AppName), "ingress", client.GetService),
 	}
 
 	return &K8sResourceChecker{
 		k8sClient: client,
-		appName:   appName,
+		appName:   consts.AppName,
 		resources: resources,
 	}
 }

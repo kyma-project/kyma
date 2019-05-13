@@ -3,15 +3,16 @@ package resourceskit
 import (
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
 	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"time"
 )
 
 type TokenRequestClient interface {
-	CreateTokenRequest(appName string) (*v1alpha1.TokenRequest, error)
-	GetTokenRequest(appName string, options v1.GetOptions) (*v1alpha1.TokenRequest, error)
-	DeleteTokenRequest(appName string, options *v1.DeleteOptions) error
+	CreateTokenRequest() (*v1alpha1.TokenRequest, error)
+	GetTokenRequest() (*v1alpha1.TokenRequest, error)
+	DeleteTokenRequest() error
 }
 
 type tokenRequestClient struct {
@@ -28,10 +29,10 @@ func NewTokenRequestClient(config *rest.Config, namespace string) (TokenRequestC
 	return &tokenRequestClient{client: clientSet, namespace: namespace}, nil
 }
 
-func (t *tokenRequestClient) CreateTokenRequest(appName string) (*v1alpha1.TokenRequest, error) {
+func (t *tokenRequestClient) CreateTokenRequest() (*v1alpha1.TokenRequest, error) {
 	tokenRequest := &v1alpha1.TokenRequest{
 		TypeMeta:   v1.TypeMeta{Kind: "Application", APIVersion: v1alpha1.SchemeGroupVersion.String()},
-		ObjectMeta: v1.ObjectMeta{Name: appName, Namespace: t.namespace},
+		ObjectMeta: v1.ObjectMeta{Name: consts.AppName, Namespace: t.namespace},
 		Status: v1alpha1.TokenRequestStatus{
 			ExpireAfter: v1.NewTime(time.Now().Add(5 * time.Minute)),
 		},
@@ -40,10 +41,10 @@ func (t *tokenRequestClient) CreateTokenRequest(appName string) (*v1alpha1.Token
 	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Create(tokenRequest)
 }
 
-func (t *tokenRequestClient) GetTokenRequest(appName string, options v1.GetOptions) (*v1alpha1.TokenRequest, error) {
-	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Get(appName, options)
+func (t *tokenRequestClient) GetTokenRequest() (*v1alpha1.TokenRequest, error) {
+	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Get(consts.AppName, v1.GetOptions{})
 }
 
-func (t *tokenRequestClient) DeleteTokenRequest(appName string, options *v1.DeleteOptions) error {
-	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Delete(appName, options)
+func (t *tokenRequestClient) DeleteTokenRequest() error {
+	return t.client.ApplicationconnectorV1alpha1().TokenRequests(t.namespace).Delete(consts.AppName, &v1.DeleteOptions{})
 }

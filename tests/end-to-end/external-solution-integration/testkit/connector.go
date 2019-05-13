@@ -7,14 +7,13 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/wait"
 	"github.com/sirupsen/logrus"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
 	"net/http"
-	"time"
 )
 
 type ConnectorClient interface {
-	GetToken(appName string) (string, error)
+	GetToken() (string, error)
 	GetInfo(url string) (*InfoResponse, error)
 	GetCertificate(url string, csr []byte) ([]*x509.Certificate, error)
 }
@@ -41,23 +40,31 @@ func newHttpClient(skipVerify bool) *http.Client {
 	return client
 }
 
-func (cc *connectorClient) GetToken(appName string) (string, error) {
-	_, err := cc.trClient.CreateTokenRequest(appName)
+func (cc *connectorClient) GetToken() (string, error) {
+	_, err := cc.trClient.CreateTokenRequest()
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
 	}
 
-	//TODO: Polling of tokenrequest
-	time.Sleep(5 * time.Second)
+	wait.Until(5, 10, cc.isTokenRequestReady)
 
-	tr, err := cc.trClient.GetTokenRequest(appName, v1.GetOptions{})
+	tr, err := cc.trClient.GetTokenRequest()
 	if err != nil {
 		cc.logger.Error(err)
 		return "", err
 	}
 
 	return tr.Status.URL, nil
+}
+
+func (cc *connectorClient) isTokenRequestReady() (bool, error) {
+	tokenRequest, e := cc.trClient.GetTokenRequest()
+	if e != nil {
+		return false, e
+	}
+
+	return &tokenRequest.Status != nil && &tokenRequest.Status.URL != nil && tokenRequest.Status.URL != "", nil
 }
 
 func (cc *connectorClient) GetInfo(url string) (*InfoResponse, error) {
