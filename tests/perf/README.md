@@ -1,35 +1,18 @@
-# Kyma Performance Test Guidelines
+# Performance Tests
 
 ## Overview
-Kyma uses [K6](https://docs.k6.io) for performance and load testing, K6 is a developer oriented well documented load testing tool, easy to 
-integrate into Kyma workflow and automation flow.
 
-### Running K6
-To execute a very simple k6 test from the command line, you can use this:
-```bash
-k6 run github.com/kyma-project/kyma/tests/perf/components/examples/http_basic.js
-```
+Kyma uses [K6](https://docs.k6.io) as a tool for performance and load testing. One of its benefits is that it is easy to integrate it with the Kyma workflow and automation flow.
 
-With command above, k6 will fetch the http_basic.js file from Github and only fires 1 virtual user which get execute 
-the script once.
+### Folder structure
 
-K6 can also execute local files.
-```bash
-k6 run http_basic.js
-```
+The `tests/perf` directory contains the source code for the performance test script.
+A Kyma performance test is a K6 test script that can contain prerequisites such as a custom test component or scenario deployments. Every test runs against the [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
-## K6 with Kyma
+Each subdirectory in the `tests/perf/components` directory defines source code for one test suite and refers to one component or area. The `prerequisites` subdirectory contains `yaml` files of test component deployments and, if required, shell scripts such as custom configuration or custom scenario deployments.
+There should be one `prerequisites` subdirectory for each component. The name of this subdirectory should be the same as the name of a given subdirectory with scripts under the `components` subdirectory.
 
-Directory ```tests/perf``` contains all performance test script source code.
-A Kyma performance test is a K6 test script with or without prerequisites e.g. custom test component and/or scenario deployments.
-A Kyma performance test will runs against [Kyma load test cluster](https://github.com/kyma-project/test-infra).
-
-Each subdirectory in the ```tests/perf/components``` directory defines source code for one test suite and focusing on one component or area, 
-the subdirectory ```prerequisites``` will contains **yaml** files of test component deployments and shell scripts 
-(like custom configuration or custom scenario deployments) if necessary. 
-Each component should create a subdirectory in ```prerequisites``` to place yaml files and shell scripts, the name of subdirectory should be same as where test script placed.
-
-e.g. Directory structure for components **application-gateway** and **event-bus** should look like following
+See an exemplary directory structure for **application-gateway** and **event-bus** components:
 ```
 tests
 |  
@@ -37,41 +20,41 @@ tests
      |   
      |--- components
      |    |
-     |    |--- application-gateway // will contain test scripts for application gateway
+     |    |--- application-gateway // A folder with test scripts for the Application Gateway
      |    |
-     |    +--- event-bus           // will contain test scripts for event bus
+     |    +--- event-bus           // A folder with test scripts for the Event Bus
      |      
      +--- prerequisites
           |
-          |--- application-gateway // will contain shell scripts or deployement files for application gateway
+          |--- application-gateway // A folder with shell scripts or deployment files for the Application Gateway
           |
-          +--- event-bus           // will contain shell scripts or deployement files for event bus
+          +--- event-bus           // A folder with shell scripts or deployment files for the Event Bus
 
-``` 
-Prerequisites directory content will be deployed after load test cluster creation and before test execution.
+```
+The content of the `prerequisites` subdirectory is deployed after load test cluster creation and before test execution.
 
-### Implementing Kyma performance test
+### Kyma performance test implementation
 
-This section will document Kyma specific k6 test implementation, for detailed information about k6 test framework you can 
-read from [original documentation](https://docs.k6.io)
+This section describes Kyma-specific k6 test implementation.
 
-Kyma k6 executor has some pre-defined environment variable and tags to provide some additional meta information about 
-current execution and target test cluster.
+> **NOTE:** For detailed information about the k6 test framework, read the [k6 documentation](https://docs.k6.io).
 
-More about K6 tags please read from [here](https://docs.k6.io/docs/tags-and-groups).
+The Kyma k6 executor has a pre-defined environment variable and tags that provide additional metadata about the current execution and the target test cluster.
 
-Available environment variables
-- **CLUSTER_DOMAIN_NAME**, is the domain name of the target Kyma load test cluster
-- **REVISION**, the SHA id of master branch being testing
+> **NOTE:** For more information about K6 tags, read [this](https://docs.k6.io/docs/tags-and-groups) document.
 
-Pre-Defined test execution tags 
-- **testName**, is the name of test scenario which every test should provide in test script implementation. 
-- **component**, the component or area which currently being tested this tag also should be provided with test script implementation
-- **revision**, SHA id of master branch which used for tests, this will be provided with Kyma performance test runner and test script should not provide 
+These are the available environment variables:
+- **CLUSTER_DOMAIN_NAME** is the domain name of the target Kyma load test cluster.
+- **REVISION** is the SHA ID of the tested `master` branch.
 
-This information will be used later on [grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1) to filter test results
+These are the pre-defined test execution tags:
+- **testName** is the name of a test scenario that every test should provide in the test script implementation.
+- **component** is the tested component or area. Provide this tag also with the test script implementation.
+- **revision** is the SHA ID of the `master` branch used for tests. It is provided with the Kyma performance test runner. The test script should use the **REVISION** variable as a value.
 
-An example k6 test testing example http-db-service defined [here](./prerequisites/examples/example.yaml), with predefined tag name ```testName``` and ```component```
+The tags allow you to distinguish test results in [Grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1).
+
+See [this](./prerequisites/examples/example.yaml) file for a k6 test example run for **http-db-service**, that contains the pre-defined **testName** and **component** tag names:
 
 ```javascript
 import http from 'k6/http';
@@ -82,7 +65,7 @@ export let options = {
     duration: "1m",
     rps: 1000,
     tags: {
-        "testName": "http_db_service_10vu_60s_1000",
+        "testName": "http_basic_10vu_60s_1000",
         "component": "http-db-service",
         "revision": `${__ENV.REVISION}`
     }
@@ -99,48 +82,60 @@ export default function() {
 }
 ```
 
-Example test above will execute a load test against http-db-service on a cluster deployed on **CLUSTER_DOMAIN_NAME** 
-with **10** virtual users, **1** minute long and **1000** request per second across **10** virtual users.
+This example executes a **1** minute long load test that runs with **1000** request per second. The test is run against **http-db-service**, on a cluster deployed on **CLUSTER_DOMAIN_NAME**, across **10** virtual users.
 
-Test logic should be implemented in a function defined as **default**, more about test execution lifecycle please read [here](https://docs.k6.io/docs/test-life-cycle).
+The test logic should be implemented in a function defined as **default**.
 
-Variable ```options``` defines execution behavior of test implementation. With following options
+> **NOTE:** Read more about the test execution lifecycle [here](https://docs.k6.io/docs/test-life-cycle).
 
-- ```vus``` defines amount of virtual users.
-- ```duration``` defines test execution duration.
-- ```rps``` defines request per second across all virtual users
-- ```tags``` defines custom tags to add meta information to test execution 
+The **options** variable defines the execution behavior of the test implementation, where:
 
-More about available options and test execution behavior please read [here](https://docs.k6.io/docs/options).
+- **vus** defines the number of virtual users.
+- **duration** defines test execution duration.
+- **rps** defines a number of requests per second across all virtual users.
+- **tags** defines custom tags to add metadata to test execution.
 
-Result of test execution will be stored in a Influx-DB along with Grafana on Kyma Load Generator Cluster and can be accessed from [here](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1)
+> **NOTE:** Read [this](https://docs.k6.io/docs/options) document for more details on the available options and the test execution behavior.
 
-### Run test locally
+The test result is stored in InfluxDB and in Grafana that is deployed on a Kyma load generator cluster. You can access the result [here](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1).
 
-Each load test can be executed locally without Kyma load generator for development purposes or testing k6 script locally before 
-script executed on load generator cluster. 
+## Usage
 
-Example below shown deployment of example test component on a Kyma cluster and execution of simple load test against
+To run a k6 test, use this command:
+```bash
+k6 run github.com/kyma-project/kyma/tests/perf/components/examples/http_basic.js
+```
 
->NOTE: Before you start running test locally ensure k6 installed on your local machine and running. Installation instruction available [here](https://docs.k6.io/docs/installation)
+This command runs the script once, fetching the `http_basic.js` file from GitHub and triggering one virtual user.
 
-Following example will deploy some test component on Kyma cluster to execute load test against.
+To run local files, use this command:
+```bash
+k6 run http_basic.js
+```
 
-First deploy example test service which we execute load test against on Kyma cluster
+### Run a load test locally
+
+Although k6 test scripts are designed to run on a Kyma load generator cluster automatically, you can run every load test locally without the Kyma load generator.
+
+See an example that deploys a test component on a Kyma cluster to execute a load test:
+
+>NOTE: To run the test locally, install k6 on your local machine and make sure it is running. See [this](https://docs.k6.io/docs/installation) document for the installation instructions.
+
+
+1. Deploy an example test service:
 
 ```bash
 kubectl apply -f prerequisites/examples/example.yaml
 ```
 
-After test service deployed we can start load test locally to against Kyma cluster from command line with an environment 
-variable which represent domain name of Kyma test cluster
+2. After deploying the test service, start the load test locally, with an environment variable that represents the domain name of the Kyma test cluster:
 
 ```bash
-CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx REVISION=123 k6 run components/examples/http-db-service.js
+CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx REVISION=123 k6 run components/examples/http_get.js
 ```
 
-or we can use ```-e``` CLI flag for all platform
+You can also use the **-e** CLI flag for all platforms:
 
 ```bash
-k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 components/examples/http-db-service.js
+k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 components/examples/http_get.js
 ```
