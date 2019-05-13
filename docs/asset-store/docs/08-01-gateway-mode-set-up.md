@@ -90,7 +90,6 @@ data:
   minio.gcsgateway.enabled: "true"
   minio.defaultBucket.enabled: "false"
   minio.gcsgateway.projectId: "$PROJECT"
-  global.minioExternalEndpoint: "https://storage.googleapis.com"
 EOF
 ```
 >**CAUTION:** When you install Kyma locally from sources, you need to manually add the ConfigMap and the Secret to the `installer-config-local.yaml.tpl` template located under the `installation/resources` subfolder before you run the installation script.
