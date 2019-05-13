@@ -54,7 +54,7 @@ These are the pre-defined test execution tags:
 
 The tags allow you to distinguish test results in [Grafana](https://grafana.perf.kyma-project.io/d/ReuNR5Aik/kyma-performance-test-results?orgId=1).
 
-See [this](./prerequisites/examples/http-db-service.js) file for a k6 test example run for **http-db-service**, that contains the pre-defined **testName** and **component** tag names:
+See [this](./components/examples/http-db-service.js) file for a k6 test example run for **http-db-service**, that contains the pre-defined **testName** and **component** tag names:
 
 ```javascript
 import http from 'k6/http';
