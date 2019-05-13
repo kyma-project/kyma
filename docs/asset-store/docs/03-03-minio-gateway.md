@@ -22,13 +22,13 @@ In the context of the Asset Store, the Asset Controller stores all assets in Min
 
 ### Access Minio credentials
 
-For security reasons, Minio credentials are generated during Kyma installation and stored inside the Kubernetes Secret object. To access them, run the following commands:
+For security reasons, Minio credentials are generated during Kyma installation and stored inside the Kubernetes Secret object. 
 
-- Get the access key using 
+- To get the access key, run: 
   ```bash
   kubectl get secret assetstore-minio -n kyma-system -o jsonpath="{.data.accesskey}" | base64 -D
   ```
-- Get the secret key using
+- To get the secret key, run: 
   ```bash
   kubectl get secret assetstore-minio -n kyma-system -o jsonpath="{.data.secretkey}" | base64 -D
   ```
