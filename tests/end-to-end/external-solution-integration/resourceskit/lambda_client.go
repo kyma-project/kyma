@@ -15,16 +15,16 @@ const lambdaFunction = `
 	const request = require('request')
 	module.exports = { 'entrypoint': function (event, context) {
 		return new Promise((resolve, reject) => {
-			const url = "%s"
+			const url = "http://" + process.env.GATEWAY_URL + "/counter"
 			sendReq(url, resolve, reject)
 		})
 	} }
 	function sendReq(url, resolve, reject) {
         request.post(url, { json: true }, (error, response, body) => {
             if (error) {
-                resolve(error);
+                resolve(error)
             }
-            resolve(response);dd 
+            resolve(response) 
         })
     }`
 

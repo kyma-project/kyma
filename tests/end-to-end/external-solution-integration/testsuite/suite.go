@@ -23,6 +23,8 @@ type TestSuite interface {
 	FetchCertificate() ([]*x509.Certificate, error)
 	RegisterService(targetURL string) (string, error)
 	CreateInstance(serviceID string) (*v1beta1.ServiceInstance, error)
+	CreateServiceBinding() error
+	CreateServiceBindingUsage() error
 	StartTestServer() error
 	SendEvent()
 	CleanUp() error
@@ -249,6 +251,24 @@ func prepareService(targetURL string) *testkit.ServiceDetails {
 
 func (ts *testSuite) CreateInstance(serviceID string) (*v1beta1.ServiceInstance, error) {
 	return ts.scClient.CreateServiceInstance(consts.ServiceInstanceName, consts.ServiceInstanceID, serviceID)
+}
+
+func (ts *testSuite) CreateServiceBinding() (error) {
+	_, err := ts.scClient.CreateServiceBinding(serviceBindingID, serviceBindingName, serviceInstanceName, serviceBindingSecret)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (ts *testSuite) CreateServiceBindingUsage() (error) {
+	_, err := ts.scClient.CreateServiceBindingUsage(serviceBindingUsageName, appName, serviceBindingName)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (ts *testSuite) SendEvent() {

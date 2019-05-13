@@ -47,7 +47,11 @@ func (cc *connectorClient) GetToken() (string, error) {
 		return "", err
 	}
 
-	wait.Until(5, 10, cc.isTokenRequestReady)
+	err = wait.Until(5, 10, cc.isTokenRequestReady)
+	if err != nil {
+		cc.logger.Error(err)
+		return "", err
+	}
 
 	tr, err := cc.trClient.GetTokenRequest()
 	if err != nil {
