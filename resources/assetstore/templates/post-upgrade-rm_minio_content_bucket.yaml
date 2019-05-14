@@ -49,8 +49,7 @@ spec:
       - name: minio-mc
         image: bash:5
         imagePullPolicy: IfNotPresent
-        command: ["/bin/sh","-c"]
-        args: ["/usr/local/bin/bash", "/config/migrate"]
+        command: ["/usr/local/bin/bash", "/config/migrate"]
         env:
           - name: MINIO_ENDPOINT
             value: assetstore-minio
