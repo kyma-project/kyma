@@ -100,13 +100,13 @@
 /resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/monitoring/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
+/resources/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `kubeless` subchart
 /resources/core/charts/kubeless/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # The `logging` subchart
-/resources/logging/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/resources/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # The `log-ui` subchart
 /resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
@@ -283,10 +283,10 @@
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
 # monitoring tests
-/tests/monitoring/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/tests/monitoring/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # test-logging tests
-/tests/logging/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/tests/logging/ @a-thaler @igor-karpukhin @hisarbalik @lilitgh @suleymanakbas91 @clebs
 
 # api-controller acceptance tests
 /tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
