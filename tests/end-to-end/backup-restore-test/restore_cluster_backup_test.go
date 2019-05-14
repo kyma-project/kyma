@@ -9,10 +9,10 @@ import (
 	"github.com/google/uuid"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
+	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
+	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
 
-	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
+	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
 	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -41,23 +41,23 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// myFunctionTest, err := NewFunctionTest()
 	// fatalOnError(t, err, "while creating structure for Function test")
 
-	myStatefulSetTest, err := NewStatefulSetTest()
-	fatalOnError(t, err, "while creating structure for StatefulSet test")
+	// myStatefulSetTest, err := NewStatefulSetTest()
+	// fatalOnError(t, err, "while creating structure for StatefulSet test")
 
-	myDeploymentTest, err := NewDeploymentTest()
-	fatalOnError(t, err, "while creating structure for Deployment test")
+	// myDeploymentTest, err := NewDeploymentTest()
+	// fatalOnError(t, err, "while creating structure for Deployment test")
 
-	// myPrometheusTest, err := NewPrometheusTest()
-	// fatalOnError(t, err, "while creating structure for Prometheus test")
+	myPrometheusTest, err := NewPrometheusTest()
+	fatalOnError(t, err, "while creating structure for Prometheus test")
 
-	appBrokerTest, err := NewAppBrokerTest()
-	fatalOnError(t, err, "while creating structure for AppBroker test")
+	// appBrokerTest, err := NewAppBrokerTest()
+	// fatalOnError(t, err, "while creating structure for AppBroker test")
 
 	// helmBrokerTest, err := NewHelmBrokerTest()
 	// fatalOnError(t, err, "while creating structure for HelmBroker test")
 
-	scAddonsTest, err := NewServiceCatalogAddonsTest()
-	fatalOnError(t, err, "while creating structure for ScAddons test")
+	// scAddonsTest, err := NewServiceCatalogAddonsTest()
+	// fatalOnError(t, err, "while creating structure for ScAddons test")
 
 	// myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
 	// fatalOnError(t, err, "while creating structure for NamespaceController test")
@@ -65,32 +65,32 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// apiControllerTest, err := NewApiControllerTestFromEnv()
 	// fatalOnError(t, err, "while creating structure for ApiController test")
 
-	myGrafanaTest, err := NewGrafanaTest()
-	fatalOnError(t, err, "while creating structure for Grafana test")
+	// myGrafanaTest, err := NewGrafanaTest()
+	// fatalOnError(t, err, "while creating structure for Grafana test")
 
 	// myMicroFrontendTest, err := NewMicrofrontendTest()
 	// fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
-	myAssetStoreTest, err := NewAssetStoreTest(t)
-	fatalOnError(t, err, "while creating structure for AssetStore test")
+	// myAssetStoreTest, err := NewAssetStoreTest(t)
+	// fatalOnError(t, err, "while creating structure for AssetStore test")
 
-	myCmsTest, err := NewCmsTest(t)
-	fatalOnError(t, err, "while creating structure for Cms test")
+	// myCmsTest, err := NewCmsTest(t)
+	// fatalOnError(t, err, "while creating structure for Cms test")
 
 	backupTests := []BackupTest{
-		// myPrometheusTest,
+		myPrometheusTest,
 		// myFunctionTest,
-		myDeploymentTest,
-		myStatefulSetTest,
+		// myDeploymentTest,
+		// myStatefulSetTest,
 		// helmBrokerTest,
-		appBrokerTest,
-		scAddonsTest,
+		// appBrokerTest,
+		// scAddonsTest,
 		// myNamespaceControllerTest,
 		// apiControllerTest,
-		myGrafanaTest,
+		// myGrafanaTest,
 		// myMicroFrontendTest,
-		myAssetStoreTest,
-		myCmsTest,
+		// myAssetStoreTest,
+		// myCmsTest,
 	}
 	e2eTests := make([]e2eTest, len(backupTests))
 
