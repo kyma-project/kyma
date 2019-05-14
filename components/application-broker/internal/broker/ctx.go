@@ -3,16 +3,18 @@ package broker
 import (
 	"context"
 
+	"strings"
+
 	"github.com/pkg/errors"
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 )
 
 type contextKey int
 
 const (
-	osbContextKey contextKey = 5001
+	osbAPIVersion = "2.13"
 
-	osbAPIVersion    = "2.13"
-	platformIdentity = "kubernetes"
+	osbContextKey contextKey = 5001
 )
 
 type osbContext struct {
@@ -29,8 +31,8 @@ func (ctx *osbContext) validateAPIVersion() error {
 }
 
 func (ctx *osbContext) validateOriginatingIdentity() error {
-	if ctx.OriginatingIdentity != "" && ctx.OriginatingIdentity != platformIdentity {
-		return errors.Errorf("while checking 'X-Broker-API-Originating-Identity' header, should be %s, got %s", platformIdentity, ctx.OriginatingIdentity)
+	if ctx.OriginatingIdentity != "" && !strings.Contains(ctx.OriginatingIdentity, osb.PlatformKubernetes) {
+		return errors.Errorf("while checking 'X-Broker-API-Originating-Identity' header, should be %s, got %s", osb.PlatformKubernetes, ctx.OriginatingIdentity)
 	}
 	return nil
 }

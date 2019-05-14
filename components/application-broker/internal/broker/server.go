@@ -363,11 +363,13 @@ func (srv *Server) bindAction(w http.ResponseWriter, r *http.Request) {
 	err := httpBodyToDTO(r, &params)
 	if err != nil {
 		srv.writeErrorResponse(w, http.StatusBadRequest, err.Error(), "cannot get bind parameters from request body")
+		return
 	}
 
 	err = params.Validate()
 	if err != nil {
 		srv.writeErrorResponse(w, http.StatusBadRequest, err.Error(), "")
+		return
 	}
 
 	q := r.URL.Query()
