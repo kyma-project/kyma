@@ -1,0 +1,57 @@
+apiVersion: kubeless.io/v1beta1
+kind: Function
+metadata:
+  annotations:
+    function-size: L
+  name: size-l
+spec:
+  handler: handler.main
+  runtime: nodejs8
+  type: HTTP
+  deployment:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: size-l
+            resources:
+              limits:
+                cpu: 100m
+                memory: 128Mi
+              requests:
+                cpu: 100m
+                memory: 100Mi
+  function: |
+    module.exports = {
+      main: (event, context) => {
+        return 'hello world';
+      }
+    };
+---
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  labels:
+    function: size-l
+  name: size-l
+spec:
+  authentication: []
+  hostname: size-l.$CLUSTER_DOMAIN_NAME
+  service:
+    name: size-l
+    port: 8080
+---
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  labels:
+    function: size-l
+  name: size-l
+spec:
+  maxReplicas: 10
+  minReplicas: 5
+  scaleTargetRef:
+    apiVersion: apps/v1beta1
+    kind: Deployment
+    name: size-l
+  targetCPUUtilizationPercentage: 50

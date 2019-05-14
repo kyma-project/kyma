@@ -1,0 +1,12 @@
+apiVersion: gateway.kyma-project.io/v1alpha2
+kind: Api
+metadata:
+  labels:
+    function: $FUNC_NAME
+  name: $FUNC_NAME
+spec:
+  authentication: []
+  hostname: $FUNC_NAME.$CLUSTER_DOMAIN_NAME
+  service:
+    name: $FUNC_NAME
+    port: 8080
