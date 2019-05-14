@@ -200,6 +200,7 @@ func (c *backupClient) CreateNamespace(name string) error {
 			Labels: map[string]string{
 				"env":             "true",
 				"istio-injection": "enabled",
+				"test":            "backup-restore",
 			},
 		},
 		Spec: corev1.NamespaceSpec{},

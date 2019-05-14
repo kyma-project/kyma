@@ -26,12 +26,16 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
 	"time"
 
+	v1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 	prometheusClient "github.com/coreos/prometheus-operator/pkg/client/versioned"
+	"github.com/sirupsen/logrus"
+
 	// prometheusClientset "github.com/coreos/prometheus-operator/pkg/client/versioned/clientset"
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
@@ -75,11 +79,13 @@ type prometheusTest struct {
 	metricName, uuid string
 	coreClient       *kubernetes.Clientset
 	prometheusClient *prometheusClient.Clientset
-	beforeBackup     queryResponse
+	response         queryResponse
+	beforeBackup     bool
 	expectedResult   string
 	finalResult      string
 	apiQuery
 	pointInTime
+	log logrus.FieldLogger
 }
 
 type pointInTime struct {
@@ -95,6 +101,8 @@ type apiQuery struct {
 	metricQuery  string
 	port         string
 }
+
+var backedupPrometheus *v1.Prometheus
 
 func NewPrometheusTest() (*prometheusTest, error) {
 	restConfig, err := config.NewRestClientConfig()
@@ -120,6 +128,8 @@ func NewPrometheusTest() (*prometheusTest, error) {
 		metricName:       metricName,
 		uuid:             uuid.New().String(),
 		apiQuery:         queryToApi,
+		beforeBackup:     true,
+		log:              logrus.WithField("test", "prometheus"),
 	}, nil
 }
 
@@ -192,7 +202,7 @@ func (pt *prometheusTest) CreateResources(namespace string) {
 	err := qresp.connectToPrometheusApi(pt.domain, pt.port, pt.api, pt.metricQuery, "")
 	So(err, ShouldBeNil)
 
-	pt.beforeBackup = *qresp
+	pt.response = *qresp
 	point := pointInTime{}
 	if len(qresp.Data.Result) > 0 && len(qresp.Data.Result[0].Value) > 0 {
 		values := qresp.Data.Result[0].Value
@@ -216,11 +226,43 @@ func (pt *prometheusTest) CreateResources(namespace string) {
 }
 
 func (pt *prometheusTest) TestResources(namespace string) {
-	err := pt.waitForPodPrometheus(5 * time.Minute)
-	So(err, ShouldBeNil)
+	if !pt.beforeBackup {
+		err := pt.deletePrometheus(prometheusNS, prometheusName)
+		So(err, ShouldBeNil)
 
+		err = pt.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
+		So(err, ShouldBeNil)
+
+		err = pt.createPrometheusFromSavedResource()
+		So(err, ShouldBeNil)
+	}
+
+	pt.beforeBackup = false
+	err := pt.waitForPodPrometheus(10 * time.Minute)
+	So(err, ShouldBeNil)
 	qresp := &queryResponse{}
-	err = qresp.connectToPrometheusApi(pt.domain, pt.port, pt.api, pt.metricQuery, pt.pointInTime.formmattedValue)
+
+	timeout := time.After(2 * time.Minute)
+	tick := time.Tick(2 * time.Second)
+	timedout := false
+	done := false
+	for {
+		select {
+		case <-timeout:
+			timedout = true
+			pt.log.Infof("Timedout: while hitting Prometheus API: %v", err)
+		case <-tick:
+			err = qresp.connectToPrometheusApi(pt.domain, pt.port, pt.api, pt.metricQuery, pt.pointInTime.formmattedValue)
+			if err == nil {
+				done = true
+			}
+		}
+
+		if done || timedout {
+			break
+		}
+	}
+
 	So(err, ShouldBeNil)
 
 	if len(qresp.Data.Result) > 0 && len(qresp.Data.Result[0].Value) > 0 {
@@ -240,25 +282,23 @@ func (pt *prometheusTest) TestResources(namespace string) {
 	So(strings.TrimSpace(pt.finalResult), ShouldEqual, strings.TrimSpace(pt.expectedResult))
 }
 
-func (t *prometheusTest) DeleteResources(namespace string) {
+func (pt *prometheusTest) DeleteResources(namespace string) {
 	// It needs to be implemented for this test.
-	err := t.waitForPodPrometheus(1 * time.Minute)
+	err := pt.waitForPodPrometheus(1 * time.Minute)
 	So(err, ShouldBeNil)
 
-	err = t.deleteServices(prometheusNS, prometheusServiceName, prometheusLabelSelector)
+	err = pt.deleteServices(prometheusNS, prometheusServiceName, prometheusLabelSelector)
 	So(err, ShouldBeNil)
 
-	err = t.deletePrometheus(prometheusNS, prometheusName)
+	err = pt.deletePrometheus(prometheusNS, prometheusName)
 	So(err, ShouldBeNil)
 
-	err = t.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
+	err = pt.deletePod(prometheusNS, prometheusPodName, prometheusLabelSelector)
 	So(err, ShouldBeNil)
 
-	err = t.deletePVC(prometheusNS, prometheusPvcName, prometheusLabelSelector)
+	err = pt.deletePVC(prometheusNS, prometheusPvcName, prometheusLabelSelector)
 	So(err, ShouldBeNil)
 
-	//err1 := t.waitForPodPrometheus(2 * time.Minute)
-	//So(err1, ShouldBeError) // An error is expected.
 }
 
 func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
@@ -274,8 +314,12 @@ func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 			return fmt.Errorf("Pod did not start within given time  %v: %+v", waitmax, pod)
 		case <-tick:
 			pod, err := pt.coreClient.CoreV1().Pods(prometheusNS).Get(prometheusPodName, metav1.GetOptions{})
-			if err != nil {
-				return err
+			pt.log.Info("Waiting for prometheus pod to be up!")
+			if err != nil && strings.Contains(err.Error(), "not found") {
+				// If Pod is not there, we hope the pod will come soon
+				break
+			} else if err != nil {
+				return fmt.Errorf("Error in fetching Prometheus pod %s: ", err.Error())
 			}
 
 			// If Pod condition is not ready the for will continue until timeout
@@ -283,6 +327,7 @@ func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 				conditions := pod.Status.Conditions
 				for _, cond := range conditions {
 					if cond.Type == corev1.PodReady && cond.Status == corev1.ConditionTrue {
+						pt.log.Info("Prometheus pod is ready!")
 						return nil
 					}
 				}
@@ -296,17 +341,17 @@ func (pt *prometheusTest) waitForPodPrometheus(waitmax time.Duration) error {
 	}
 }
 
-func (t *prometheusTest) deleteServices(namespace, serviceName, labelSelector string) error {
+func (pt *prometheusTest) deleteServices(namespace, serviceName, labelSelector string) error {
 	deletePolicy := metav1.DeletePropagationForeground
 
-	serviceList, err := t.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
+	serviceList, err := pt.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
 		return err
 	}
 
 	for _, service := range serviceList.Items {
 		if service.Name == serviceName {
-			err := t.coreClient.CoreV1().Services(namespace).Delete(serviceName, &metav1.DeleteOptions{
+			err := pt.coreClient.CoreV1().Services(namespace).Delete(serviceName, &metav1.DeleteOptions{
 				PropagationPolicy: &deletePolicy,
 			})
 			if err != nil {
@@ -319,34 +364,91 @@ func (t *prometheusTest) deleteServices(namespace, serviceName, labelSelector st
 
 }
 
-func (t *prometheusTest) deletePrometheus(namespace, name string) error {
+func (pt *prometheusTest) savePrometheusResource(namespace, name string) error {
+	backedupPrometheusLocal, err := pt.prometheusClient.MonitoringV1().Prometheuses(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		return err
+	}
+	backedupPrometheus = backedupPrometheusLocal
+	byteArr, err := json.Marshal(backedupPrometheus)
+	if err != nil {
+		return err
+	}
+	pt.log.Infoln("------------- Prometheus obj after saving -------------------")
+	pt.log.Infof("%v", string(byteArr))
+	return nil
+}
+
+func (pt *prometheusTest) createPrometheusFromSavedResource() error {
+	backedupPrometheus.ObjectMeta.ResourceVersion = ""
+	backedupPrometheus.Status = nil
+	backedupPrometheus.Generation = 0
+	prometheusAnnotations := backedupPrometheus.Annotations
+	backedupPrometheus.ObjectMeta = metav1.ObjectMeta{
+		Annotations:       prometheusAnnotations,
+		Name:              backedupPrometheus.Name,
+		Labels:            backedupPrometheus.Labels,
+		Namespace:         backedupPrometheus.Namespace,
+		CreationTimestamp: backedupPrometheus.CreationTimestamp,
+	}
+	podAnnotations := backedupPrometheus.Spec.PodMetadata.Annotations
+	backedupPrometheus.Spec.PodMetadata = &metav1.ObjectMeta{
+		Annotations:       podAnnotations,
+		CreationTimestamp: backedupPrometheus.CreationTimestamp,
+	}
+	backedupPrometheus.Spec.Storage.VolumeClaimTemplate.ObjectMeta = metav1.ObjectMeta{
+		CreationTimestamp: backedupPrometheus.CreationTimestamp,
+	}
+
+	byteArr, err := json.Marshal(backedupPrometheus)
+	if err != nil {
+		return err
+	}
+
+	pt.log.Infoln("------------- Prometheus obj while creation -------------------")
+	pt.log.Infof("%v", string(byteArr))
+	for {
+		_, err := pt.prometheusClient.MonitoringV1().Prometheuses(backedupPrometheus.Namespace).Get(backedupPrometheus.Name, metav1.GetOptions{})
+		if err != nil && strings.Contains(err.Error(), "not found") {
+			log.Printf("err: %s", err.Error())
+			break
+		}
+	}
+
+	_, err = pt.prometheusClient.MonitoringV1().Prometheuses(backedupPrometheus.ObjectMeta.Namespace).Create(backedupPrometheus)
+	return err
+}
+
+func (pt *prometheusTest) deletePrometheus(namespace, name string) error {
+	pt.savePrometheusResource(namespace, name)
 	deletePolicy := metav1.DeletePropagationForeground
-	err := t.prometheusClient.MonitoringV1().Prometheuses(namespace).Delete(name, &metav1.DeleteOptions{
+	err := pt.prometheusClient.MonitoringV1().Prometheuses(namespace).Delete(name, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	})
 	if err != nil {
 		return err
 	}
 
+	pt.log.Info("Deletion of Prometheus: monitoring is successful!")
 	return nil
 }
 
-func (t *prometheusTest) deleteStatefulset(namespace, statefulsetName string) error {
+func (pt *prometheusTest) deleteStatefulset(namespace, statefulsetName string) error {
 	deletePolicy := metav1.DeletePropagationForeground
 
-	collection := t.coreClient.AppsV1().StatefulSets(namespace)
+	collection := pt.coreClient.AppsV1().StatefulSets(namespace)
 	err := collection.Delete(statefulsetName, &metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	})
 	if err != nil {
 		return err
 	}
-
+	pt.log.Info("Deletion of sts: Prometheus is successful!")
 	return nil
 }
 
-func (t *prometheusTest) deletePod(namespace, podName, labelSelector string) error {
-	podList, err := t.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
+func (pt *prometheusTest) deletePod(namespace, podName, labelSelector string) error {
+	podList, err := pt.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
 		return err
 	}
@@ -354,7 +456,7 @@ func (t *prometheusTest) deletePod(namespace, podName, labelSelector string) err
 	for _, pod := range podList.Items {
 		if pod.Name == podName {
 			// Delete Pod
-			err = t.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
+			err = pt.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
 			if err != nil {
 				return err
 			}
@@ -365,20 +467,20 @@ func (t *prometheusTest) deletePod(namespace, podName, labelSelector string) err
 
 }
 
-func (t *prometheusTest) deletePVC(namespace, pvcName, labelSelector string) error {
-	pvcList, err := t.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
+func (pt *prometheusTest) deletePVC(namespace, pvcName, labelSelector string) error {
+	pvcList, err := pt.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
 		return err
 	}
 
 	for _, pvc := range pvcList.Items {
 		if pvc.Name == pvcName {
-			err = t.coreClient.CoreV1().PersistentVolumeClaims(namespace).Delete(pvcName, &metav1.DeleteOptions{})
+			err = pt.coreClient.CoreV1().PersistentVolumeClaims(namespace).Delete(pvcName, &metav1.DeleteOptions{})
 			if err != nil {
 				return err
 			}
+			pt.log.Infof("Deletion of pvc: %v is successful!", pvcName)
 		}
 	}
-
 	return nil
 }

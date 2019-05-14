@@ -11,6 +11,7 @@ includedResources:
 - '*'
 excludedResources:
 - testdefinitions.testing.kyma-project.io
+- pods
 includeClusterResources: null
 labelSelector: null
 storageLocation: default
