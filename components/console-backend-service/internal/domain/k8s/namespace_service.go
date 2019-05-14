@@ -2,6 +2,7 @@ package k8s
 
 import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
 	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -31,4 +32,19 @@ func (svc *namespaceService) List() ([]v1.Namespace, error) {
 	}
 
 	return list.Items, nil
+}
+
+func (svc *namespaceService) Create(name string, labels gqlschema.Labels) (*v1.Namespace, error) {
+	namespace := v1.Namespace{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: "authentication.kyma-project.io/v1alpha1",
+			Kind:       "Namespace",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   name,
+			Labels: labels,
+		},
+	}
+
+	return svc.nsInterface.Create(&namespace)
 }

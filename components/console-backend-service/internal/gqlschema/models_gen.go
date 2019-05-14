@@ -308,6 +308,11 @@ type Microfrontend struct {
 	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
+type NamespaceCreationOutput struct {
+	Name   string `json:"name"`
+	Labels Labels `json:"labels"`
+}
+
 type NavigationNode struct {
 	Label            string   `json:"label"`
 	NavigationPath   string   `json:"navigationPath"`

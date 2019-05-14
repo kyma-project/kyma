@@ -19,6 +19,7 @@ import (
 
 //go:generate mockery -name=nsLister -output=automock -outpkg=automock -case=underscore
 type nsLister interface {
+	Create(name string, labels gqlschema.Labels) (*v1.Namespace, error)
 	List() ([]v1.Namespace, error)
 }
 
@@ -94,4 +95,25 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 	}
 
 	return appNames, nil
+}
+
+func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name string, qglLabels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) { //namespaceoutput
+	labels := r.returnWithDefaults(qglLabels)
+	_, err := r.nsLister.Create(name, labels)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
+		return gqlschema.NamespaceCreationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
+	}
+	return gqlschema.NamespaceCreationOutput{
+		Name:   name,
+		Labels: labels,
+	}, nil
+}
+
+func (r *namespaceResolver) returnWithDefaults(gqlLabels *gqlschema.Labels) (labels gqlschema.Labels) {
+	if gqlLabels != nil {
+		labels = *gqlLabels
+	}
+
+	return labels
 }
