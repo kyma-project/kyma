@@ -5,7 +5,7 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   peers:
-    - mtls:
-        mode: PERMISSIVE
+  - mtls:
+      mode: PERMISSIVE
   targets:
-    - name: {{ template "fullname" . }}-webhook
+  - name: {{ template "fullname" . }}-webhook

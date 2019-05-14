@@ -247,7 +247,7 @@ func TestBucketHandler_Handle_OnReady(t *testing.T) {
 		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
-		g.Expect(err).ToNot(HaveOccurred())
+		g.Expect(err).To(HaveOccurred())
 		g.Expect(status).ToNot(BeZero())
 		g.Expect(status.Phase).To(Equal(v1alpha2.BucketFailed))
 		g.Expect(status.Reason).To(Equal(pretty.BucketNotFound.String()))
@@ -487,19 +487,27 @@ func TestBucketHandler_Handle_OnFailed(t *testing.T) {
 		data.Status.ObservedGeneration = int64(1)
 		data.Status.Phase = v1alpha2.BucketFailed
 		data.Status.Reason = pretty.BucketNotFound.String()
-		data.Status.RemoteName = fmt.Sprintf("%s-123", data.Name)
+		remoteName := fmt.Sprintf("%s-123", data.Name)
+		url := "http://localhost"
 
 		store := new(automock.Store)
 		defer store.AssertExpectations(t)
 
-		handler := bucket.New(log, fakeRecorder(), store, "https://localhost", relistInterval)
+		store.On("CreateBucket", data.Namespace, data.Name, string(data.Spec.Region)).Return(remoteName, nil).Once()
+		store.On("SetBucketPolicy", remoteName, data.Spec.Policy).Return(nil).Once()
+
+		handler := bucket.New(log, fakeRecorder(), store, url, relistInterval)
 
 		// When
 		status, err := handler.Do(ctx, now, data, data.Spec.CommonBucketSpec, data.Status.CommonBucketStatus)
 
 		// Then
 		g.Expect(err).ToNot(HaveOccurred())
-		g.Expect(status).To(BeZero())
+		g.Expect(status).ToNot(BeZero())
+		g.Expect(status.Phase).To(Equal(v1alpha2.BucketReady))
+		g.Expect(status.Reason).To(Equal(pretty.BucketPolicyUpdated.String()))
+		g.Expect(status.RemoteName).To(Equal(remoteName))
+		g.Expect(status.URL).To(Equal(fmt.Sprintf("%s/%s", url, remoteName)))
 	})
 }
 
