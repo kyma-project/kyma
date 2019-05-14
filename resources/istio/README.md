@@ -55,7 +55,7 @@ The chart deploys Pods that consume minimum resources as specified in the resour
 
 1. If you enable Kiali, enable `prometheus-operator` and `monitoring` components first. The Kiali installer generates a random password for the `admin` user and stores it in a Secret. Use the `admin` user to login to the Kiali UI. Run this command to get the password:
 ```
-$ kubectl -n istio-system get secret kiali -o json | jq -r .data.passphrase | base64 -D | awk '{print "Password:", $1}' 
+$ kubectl -n istio-system get secret kiali -o json | jq -r .data.passphrase | base64 --decode | awk '{print "Password:", $1}' 
 ```
 
 1. If you are using security mode for Grafana, create the secret first as follows:
