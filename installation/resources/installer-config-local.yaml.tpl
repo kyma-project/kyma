@@ -53,18 +53,22 @@ data:
   gateways.istio-ingressgateway.loadBalancerIP: ""
   gateways.istio-ingressgateway.type: "NodePort"
   gateways.istio-ingressgateway.autoscaleEnabled: "false"
+  gateways.istio-egressgateway.enabled: "true"
   gateways.istio-egressgateway.autoscaleEnabled: "false"
 
   pilot.resources.limits.memory: 1024Mi
-  # pilot.resources.limits.cpu: 200m
-  pilot.resources.requests.memory: 256Mi
-  # pilot.resources.requests.cpu: 100m
+  pilot.resources.limits.cpu: 300m
+  pilot.resources.requests.memory: 512Mi
+  pilot.resources.requests.cpu: 150m
   pilot.autoscaleEnabled: "false"
 
   mixer.policy.resources.limits.memory: 2048Mi
   mixer.policy.resources.requests.memory: 512Mi
+  mixer.policy.resources.requests.cpu: 500m
+
   mixer.telemetry.resources.limits.memory: 2048Mi
   mixer.telemetry.resources.requests.memory: 512Mi
+  mixer.telemetry.resources.requests.cpu: 500m
   mixer.loadshedding.mode: disabled
 
   mixer.policy.autoscaleEnabled: "false"
