@@ -10,7 +10,7 @@
 /common/ @mszostok @aszecowka @piotrmiskiewicz @sjanota @Tomasz-Smelcerz-SAP @strekm @crabtree @akgalwas @janmedrek @Szymongib @sayanh @radufa @suleymanakbas91
 
 # Microfrontend k8s client
-/common/microfrontend-client/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+/common/microfrontend-client/ @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska
 
 # The `installation` directory and subdirectories
 /installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
@@ -25,7 +25,7 @@
 /resources/cluster-essentials/charts/pod-preset @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The Microfrontend CRD 
-/resources/cluster-essentials/templates/microfrontend.crd.yaml @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
+/resources/cluster-essentials/templates/microfrontend.crd.yaml @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska
 
 # The `values.yaml` file for `core` chart
 /resources/core/values.yaml @kyma-project/developers
@@ -79,7 +79,7 @@
 /resources/application-connector-ingress/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # The `console` subchart
-/resources/core/charts/console/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @antiheld
+/resources/core/charts/console/ @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska
 
 # The `dex` subchart
 /resources/dex/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -133,13 +133,13 @@
 /resources/service-catalog-addons/charts/binding-usage-controller/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `brokers-ui` subchart
-/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/brokers-ui/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem
 
 # The `catalog-ui` subchart
-/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/catalog-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem
 
 # The `instances-ui` subchart
-/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu
+/resources/service-catalog-addons/charts/instances-ui/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @kwiatekus @dariadomagala @y-kkamil @parostatkiem
 
 # The `docs` subchart
 /resources/core/charts/docs/ @akucharska @michal-hudy @pkosiec @aerfio @tgorgol @magicmatatjahu @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
