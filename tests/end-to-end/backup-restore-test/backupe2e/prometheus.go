@@ -31,8 +31,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
+	v1 "github.com/coreos/prometheus-operator/pkg/apis/monitoring/v1"
 	prometheusClient "github.com/coreos/prometheus-operator/pkg/client/versioned"
+
 	// prometheusClientset "github.com/coreos/prometheus-operator/pkg/client/versioned/clientset"
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
