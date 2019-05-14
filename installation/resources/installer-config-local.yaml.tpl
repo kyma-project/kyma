@@ -128,7 +128,7 @@ data:
   apiserver-proxy.minikubeIP: ""
   configurations-generator.minikubeIP: ""
   console-backend-service.minikubeIP: ""
-  console-backend-service.verifySSL: false
+  console-backend-service.verifySSL: "false"
 ---
 apiVersion: v1
 kind: ConfigMap
