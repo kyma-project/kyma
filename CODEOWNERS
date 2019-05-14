@@ -172,7 +172,7 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `knative-serving` chart
-/resources/knative-serving/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
+/resources/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # The `knative-eventing` chart
 /resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
