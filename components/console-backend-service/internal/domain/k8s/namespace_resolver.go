@@ -28,16 +28,14 @@ type gqlNamespaceConverter interface {
 }
 
 type namespaceResolver struct {
-	nsLister           nsLister
-	appRetriever       shared.ApplicationRetriever
-	namespaceConverter gqlNamespaceConverter
+	nsLister     nsLister
+	appRetriever shared.ApplicationRetriever
 }
 
 func newNamespaceResolver(nsLister nsLister, appRetriever shared.ApplicationRetriever) *namespaceResolver {
 	return &namespaceResolver{
-		nsLister:           nsLister,
-		appRetriever:       appRetriever,
-		namespaceConverter: &namespaceConverter{},
+		nsLister:     nsLister,
+		appRetriever: appRetriever,
 	}
 }
 
@@ -104,7 +102,9 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 }
 
 func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) { //namespaceoutput
-	r.namespaceConverter.AddEnvLabel(labels)
+
+	// temporary: add 'env' label to newly created namespaces
+	labels["env"] = "true"
 	_, err := r.nsLister.Create(name, labels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
