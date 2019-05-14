@@ -15,13 +15,19 @@ global:
     version: : 1.1.0-rc2
   asset_store_test:
     dir:
-    version: : 1.1.0-rc2
+    version: 1.1.0-rc2
+  minio_client:
+    image: 'minio/mc'
+    tag: 'RELEASE.2019-04-03T17-59-57Z'
+  alpine_kubectl:
+    image: 'alpine-kubectl'
+    dir: 'test-infra/'
+    version: 'v20190325-ff66a3a'
 
 minio:
-  mode: standalone
-  replicas: 1
   persistence:
     enabled: true
+    size: 10Gi
 
   DeploymentUpdate:
     type: Recreate
