@@ -13,7 +13,7 @@
 /common/microfrontend-client/ @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil
 
 # The `installation` directory and subdirectories
-/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @sjanota @kubadz @Demonsthere @kfurgol
+/installation/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
 # The `installation` PowerShell scripts
 /installation/**/*.ps1 @crabtree @venturasr
@@ -338,7 +338,7 @@
 /tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
 # The tools/kyma-installer directory
-/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @sjanota @kfurgol @Demonsthere
+/tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
 # The tools/load-test directory
 /tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
