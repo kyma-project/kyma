@@ -38,7 +38,7 @@ global:
       monitoring: 8222
     resources:
       limits:
-        memory: "32M"
+        memory: "256M"
     channel:
       maxInactivity: "48h"
     clusterID: "kyma-nats-streaming"
