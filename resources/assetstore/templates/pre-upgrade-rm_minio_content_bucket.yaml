@@ -1,3 +1,4 @@
+{{- if .Values.minio.persistence.enabled }}
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -47,14 +48,23 @@ spec:
                 name: {{ default "assetstore-minio" .Values.existingSecret }}
       containers:
       - name: minio-mc
-        image: bash:5
+        image: "{{ .Values.global.minio_client.image }}:{{ .Values.global.minio_client.tag }}"
         imagePullPolicy: IfNotPresent
-        command: ["/usr/local/bin/bash", "/config/migrate"]
+        command: ["/bin/sh", "/config/migrate"]
         env:
           - name: MINIO_ENDPOINT
-            value: assetstore-minio
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_ENDPOINT
+          - name: MINIO_PORT
+            valueFrom:
+              configMapKeyRef:
+                name: assetstore-minio-docs-upload
+                key: APP_UPLOAD_PORT
           - name: MINIO_PORT
             value: "9000"
         volumeMounts:
           - name: minio-configuration
             mountPath: /config
+{{- end }}

@@ -1,21 +1,36 @@
-#!/usr/bin/env bash
-set -e ; # turn on immediate exit if pipeline returns a non-zero status
+#!/bin/sh
 
-apk add --update ca-certificates \
-    && apk add --update -t deps curl \
-    && curl --silent https://dl.minio.io/client/mc/release/linux-amd64/mc > /usr/bin/mc \
-    && chmod +x /usr/bin/mc
+HOST_ALIAS=assetstore-minio
 
-ACCESS=$(cat /config/accesskey) ;
-SECRET=$(cat /config/secretkey) ;
-SCHEME=http
-MINIO_URL=$SCHEME'://'$MINIO_ENDPOINT':'$MINIO_PORT
+connectToMinio() {
+  SCHEME=$1
+  ATTEMPTS=0 ; LIMIT=29 ; # Allow 30 attempts
+  set -e ; # fail if we can't read the keys.
+  ACCESS=$(cat /config/accesskey) ; SECRET=$(cat /config/secretkey) ;
+  set +e ; # The connections to minio are allowed to fail.
+  echo "Connecting to Minio server: $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT" ;
+  MC_COMMAND="mc config host add $HOST_ALIAS $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT $ACCESS $SECRET" ;
+  $MC_COMMAND ;
+  STATUS=$? ;
+  until [ $STATUS = 0 ]
+  do
+    ATTEMPTS=`expr $ATTEMPTS + 1` ;
+    echo \"Failed attempts: $ATTEMPTS\" ;
+    if [ $ATTEMPTS -gt $LIMIT ]; then
+      exit 1 ;
+    fi ;
+    sleep 2 ; # 1 second intervals between attempts
+    $MC_COMMAND ;
+    STATUS=$? ;
+  done ;
+  set -e ; # reset `e` as active
+  return 0
+}
 
-echo 'Configuring minio client, adding new host: '$MINIO_ENDPOINT' with url: '$MINIO_URL ;
-mc config host add $MINIO_ENDPOINT $MINIO_URL $ACCESS $SECRET
+connectToMinio http
 
-BUCKET_TO_DELETE=content/
-QUANTITY=$(mc ls --no-color assetstore-minio/ | awk -v BUCKET_TO_DELETE=$BUCKET_TO_DELETE '$NF ~ BUCKET_TO_DELETE {print $NF}' | wc -w)
+BUCKET_TO_DELETE=content
+QUANTITY=$(mc ls --no-color $HOST_ALIAS | awk -v BUCKET_TO_DELETE=$BUCKET_TO_DELETE '$NF ~ BUCKET_TO_DELETE {print $NF}' | wc -w)
 
 if [ "$QUANTITY" -ne 1 ]; then
   echo 'Bucket: '$MINIO_ENDPOINT'/'$BUCKET_TO_DELETE' does not exist'
@@ -23,6 +38,6 @@ if [ "$QUANTITY" -ne 1 ]; then
 fi
 
 echo 'Deleting bucket: '$MINIO_ENDPOINT'/'$BUCKET_TO_DELETE
-mc rb --force $MINIO_ENDPOINT/$BUCKET_TO_DELETE
+mc rb --force $HOST_ALIAS'/'$BUCKET_TO_DELETE
 echo 'Bucket: '$BUCKET_TO_DELETE' deleted'
 exit 0
