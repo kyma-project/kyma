@@ -38,7 +38,7 @@ This table lists all possible parameters of a given resource together with their
 
 
 | Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
+|----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR which is also used to generate the name of the bucket in the bucket storage. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the CR is available. |
 | **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/asset-store-controller-manager/config/crds/assetstore_v1alpha2_bucket.yaml#L48) under which the Bucket Controller creates the bucket. If the field is empty, the Bucket Controller creates the bucket under the default location. |
@@ -58,11 +58,11 @@ This table lists all possible parameters of a given resource together with their
 These are the resources related to this CR:
 
 | Custom resource |   Description |
-|:----------:|:------|
+|----------|------|
 | Asset |  Provides the name of the storage bucket which the Asset CR refers to. |
 
 These components use this CR:
 
 | Component   |   Description |
-|:----------:|:------|
+|----------|------|
 | Asset Store |  Uses the Bucket CR for the storage bucket definition. |

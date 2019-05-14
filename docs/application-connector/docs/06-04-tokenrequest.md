@@ -28,7 +28,7 @@ context:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
+|----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the App to request token for. |
 | **context.tenant**|    **NO**    | Specifies the name of the Tenant.  |
 | **context.group** |    **NO**    | Specifies the name of the Group. |
@@ -39,7 +39,7 @@ This table lists all the possible parameters of a given resource together with t
 When you fetch an existing TokenRequest CR, the system adds the **status** section which describes the status of the request and lists the configuration details. This table lists the fields of the **status** section.
 
 | Field   |  Description |
-|:----------:|:-------------:|
+|----------|-------------|
 | **status.expireAfter** | Date and time after wich the token will expire and the controller will delete the CR. |
 | **status.application** | The name of the App for which the token was issued. |
 | **status.state** | Status of the token request. This field can have one of two values: `OK` or `ERR`. |

@@ -16,7 +16,7 @@ Additionally, you can secure the API against cross-site request forgery (CSRF) a
 To register an API secured with Basic Authentication, add a `credentials.basic` object to the `api` section of the service registration request body. You must include these fields:
 
 | Field   |  Description |
-|:----------:|:------|
+|----------|------|
 | **username** | Basic Authorization username |
 | **password** | Basic Authorization password |
 
@@ -37,7 +37,7 @@ This is an example of the `api` section of the request body for an API secured w
 To register an API secured with OAuth, add a `credentials.oauth` object to the `api` section of the service registration request body. You must include these fields:
 
 | Field   |  Description |
-|:----------:|:------|
+|----------|------|
 | **url** |  OAuth token exchange endpoint of the service |
 | **clientId** | OAuth client ID |
 | **clientSecret** | OAuth client Secret |    
@@ -63,7 +63,7 @@ To register an API and secure it with client certificates, you must add the `cre
 Include this field in the service registration request body:
 
 | Field   |  Description |
-|:----------:|:------|
+|----------|------|
 | **commonName** |  Name of the generated certificate. Set as the `CN` field of the certificate Subject.  |
 
 This is an example of the `api` section of the request body for an API secured with generated client certificates:
@@ -120,7 +120,7 @@ The Application Registry supports CSRF tokens as an additional layer of API prot
 Include this field in the service registration request body:
 
 | Field | Description |
-|:-----:|:-----------:|
+|-----|-----------|
 | **tokenEndpointURL** | The URL to the upstream service endpoint that exposes CSRF tokens. |
 
 This is an example of the `api` section of the request body for an API secured with both Basic Authentication and a CSRF token.
