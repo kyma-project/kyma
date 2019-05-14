@@ -37,7 +37,7 @@ This table lists all possible parameters of a given resource together with their
 
 
 | Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
+|----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR which is also the prefix of the bucket name in the bucket storage. |
 | **spec.region** |    **NO**   | Specifies the location of the [region](https://github.com/kyma-project/kyma/blob/master/components/asset-store-controller-manager/config/crds/assetstore_v1alpha2_bucket.yaml#L48) under which the ClusterBucket Controller creates the bucket. If the field is empty, the ClusterBucket Controller creates the bucket under the default location. |
 | **spec.policy** | **NO** | Specifies the type of bucket access. Use `none`, `readonly`, `writeonly`, or `readwrite`. |
@@ -56,11 +56,11 @@ This table lists all possible parameters of a given resource together with their
 These are the resources related to this CR:
 
 | Custom resource |   Description |
-|:----------:|:------|
+|----------|------|
 | ClusterAsset |  Provides the name of the storage bucket which the ClusterAsset CR refers to. |
 
 These components use this CR:
 
 | Component   |   Description |
-|:----------:|:------|
+|----------|------|
 | Asset Store |  Uses the ClusterBucket CR for the storage bucket definition. |

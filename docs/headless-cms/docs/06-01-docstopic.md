@@ -72,11 +72,11 @@ This table lists all possible parameters of a given resource together with their
 These are the resources related to this CR:
 
 | Custom resource |   Description |
-|:----------:|:------|
+|----------|------|
 | Asset |  The DocsTopic CR orchestrates the creation of the Asset CR and defines its content. |
 
 These components use this CR:
 
 | Component   |   Description |
-|:----------:|:------|
+|----------|------|
 | Asset Store | Manages Asset CRs created based on the definition in the DocsTopic CR. |

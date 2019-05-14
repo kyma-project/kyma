@@ -44,6 +44,6 @@ The **issuer** and **jwksUri** fields originate from the [Api CR](/components/ap
 These components use this CR:
 
 | Name   |   Description |
-|:----------:|:------|
+|----------|------|
 | IDP Preset |  Generates a Go client which allows components and tests to create, delete, or get IDP Preset resources. |
 | Console Backend Service |  Enables the IDP Preset management with GraphQL API. |

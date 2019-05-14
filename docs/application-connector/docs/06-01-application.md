@@ -32,7 +32,7 @@ spec:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
+|----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **spec.description** |    **NO**   | Describes the connected Application.  |
 | **spec.accessLabel** |    **NO**   | Labels the App when an ApplicationMapping is created. |
@@ -60,7 +60,7 @@ This table lists all the possible parameters of a given resource together with t
 These components use this CR:
 
 | Component   |  Description |
-|:-----------:|:-------------|
+|-----------|-------------|
 | Application Registry | Reads and saves the APIs and Event Catalog metadata of the connected external solution in this CR. |
 | Application Broker | Exposes the APIs and Event definitions stored in this CR as ServiceClasses to the Service Catalog. |
 | Application Operator | Provisions and de-provisions an instance of Application Gateway and Event Service for every created or deleted Application CR. |
@@ -70,7 +70,7 @@ These components use this CR:
 The Application Operator adds the **status** section which describes the status of the App installation to the created CR periodically. This table lists the fields of the **status** section.
 
 | Field   |  Description |
-|:----------:|:-------------:|
+|----------|-------------|
 | **status.installationStatus** | Describes the status of the App installation. |
 | **status.installationStatus.description** | Provides a longer description of the installation status. |
 | **status.installationStatus.status** | Provides a short, human-readable description of the installation status. |
