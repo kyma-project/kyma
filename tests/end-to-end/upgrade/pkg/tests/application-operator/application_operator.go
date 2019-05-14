@@ -1,6 +1,7 @@
 package applicationoperator
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
@@ -21,7 +22,7 @@ const (
 	gatewayURL      = "https://gateway.local"
 )
 
-// UpgradeTest checks if Application Operator upgrades image versions of Application Proxy and Event Service of the created Application.
+// UpgradeTest checks if Application Operator upgrades image versions of Application Proxy and Events Service of the created Application.
 type UpgradeTest struct {
 	appConnectorInterface   appConnector.Interface
 	serviceCatalogInterface clientset.Interface
@@ -111,7 +112,7 @@ func (ut *UpgradeTest) waitForResources(stop <-chan struct{}, log logrus.FieldLo
 	//TODO: Make sure that Application Proxy is created by Application Operator
 
 	if err := ut.waitForInstance(eventsServiceID, namespace, stop); err != nil {
-		return errors.Wrap(err, "could not find Event Service instance")
+		return errors.Wrap(err, "could not find Events Service instance")
 	}
 
 	return nil
@@ -147,7 +148,10 @@ func (ut *UpgradeTest) wait(timeout time.Duration, conditionFunc wait.ConditionF
 // TestResources tests resources after backup phase
 func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Info("ApplicationOperator UpgradeTest testing resources...")
-	//TODO: Make sure that image versions of the Application Proxy and Event Service are upgraded
+
+	if err := ut.verifyResources(namespace); err != nil {
+		return errors.Wrap(err, "image versions are not upgraded")
+	}
 
 	if err := ut.deleteResources(log, namespace); err != nil {
 		return errors.Wrap(err, "could not delete resources")
@@ -157,8 +161,33 @@ func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogge
 	return nil
 }
 
+func (ut *UpgradeTest) verifyResources(namespace string) error {
+	if err := ut.verifyServiceInstance(eventsServiceID, namespace); err != nil {
+		return errors.Wrap(err, "Events Service is not upgraded")
+	}
+
+	//TODO: Make sure that image version of the Application Proxy is upgraded
+
+	return nil
+}
+
+func (ut *UpgradeTest) verifyServiceInstance(name, namespace string) error {
+	serviceInstance, err := ut.getServiceInstance(name, namespace)
+	if err != nil {
+		return err
+	}
+
+	//TODO: Make sure that image version of the Events Service is upgraded
+	fmt.Print(serviceInstance.ResourceVersion)
+	return nil
+}
+
+func (ut *UpgradeTest) getServiceInstance(name, namespace string) (*v1beta1.ServiceInstance, error) {
+	return ut.serviceCatalogInterface.ServicecatalogV1beta1().ServiceInstances(namespace).Get(name, metav1.GetOptions{})
+}
+
 func (ut *UpgradeTest) deleteResources(log logrus.FieldLogger, namespace string) error {
-	if err := ut.deleteApplication(log); err != nil {
+	if err := ut.deleteApplication(); err != nil {
 		return err
 	}
 
@@ -171,7 +200,7 @@ func (ut *UpgradeTest) deleteResources(log logrus.FieldLogger, namespace string)
 	return nil
 }
 
-func (ut *UpgradeTest) deleteApplication(log logrus.FieldLogger) error {
+func (ut *UpgradeTest) deleteApplication() error {
 	return ut.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Delete(applicationName, &metav1.DeleteOptions{})
 }
 
