@@ -23,15 +23,21 @@ type nsLister interface {
 	List() ([]v1.Namespace, error)
 }
 
+type gqlNamespaceConverter interface {
+	AddEnvLabel(labels gqlschema.Labels)
+}
+
 type namespaceResolver struct {
-	nsLister     nsLister
-	appRetriever shared.ApplicationRetriever
+	nsLister           nsLister
+	appRetriever       shared.ApplicationRetriever
+	namespaceConverter gqlNamespaceConverter
 }
 
 func newNamespaceResolver(nsLister nsLister, appRetriever shared.ApplicationRetriever) *namespaceResolver {
 	return &namespaceResolver{
-		nsLister:     nsLister,
-		appRetriever: appRetriever,
+		nsLister:           nsLister,
+		appRetriever:       appRetriever,
+		namespaceConverter: &namespaceConverter{},
 	}
 }
 
@@ -97,8 +103,8 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 	return appNames, nil
 }
 
-func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name string, qglLabels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) { //namespaceoutput
-	labels := r.returnWithDefaults(qglLabels)
+func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) { //namespaceoutput
+	r.namespaceConverter.AddEnvLabel(labels)
 	_, err := r.nsLister.Create(name, labels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
@@ -108,12 +114,4 @@ func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name st
 		Name:   name,
 		Labels: labels,
 	}, nil
-}
-
-func (r *namespaceResolver) returnWithDefaults(gqlLabels *gqlschema.Labels) (labels gqlschema.Labels) {
-	if gqlLabels != nil {
-		labels = *gqlLabels
-	}
-
-	return labels
 }
