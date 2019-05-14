@@ -31,7 +31,7 @@
 /resources/core/values.yaml @kyma-project/developers
 
 # The `heptio ark` chart
-/resources/ark/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/resources/ark/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # The `api-controller` subchart
 /resources/core/charts/api-controller/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -100,13 +100,13 @@
 /resources/helm-broker/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
 
 # The `monitoring` subchart
-/resources/monitoring/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/resources/monitoring/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # The `kubeless` subchart
-/resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/resources/core/charts/kubeless/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # The `logging` subchart
-/resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/resources/logging/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # The `log-ui` subchart
 /resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
@@ -172,7 +172,7 @@
 /resources/istio-kyma-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The `knative-serving` chart
-/resources/knative-serving/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/resources/knative-serving/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # The `knative-eventing` chart
 /resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
@@ -181,7 +181,7 @@
 /resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # The `prometheus-operator` chart
-/resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/resources/prometheus-operator/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # The `service-catalog` chart
 /resources/service-catalog/ @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -269,7 +269,7 @@
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Kubeless Images
-/components/kubeless-images @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/components/kubeless-images @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # Tests
 # acceptance tests
@@ -277,16 +277,16 @@
 /tests/acceptance/dex @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # Knative Serving Acceptance
-/tests/knative-serving/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/tests/knative-serving/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # test-namespace-controller
 /tests/test-namespace-controller/ @Tomasz-Smelcerz-SAP @strekm @jakkab @piotrmsc @kubadz @Demonsthere
 
 # monitoring tests
-/tests/monitoring/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/tests/monitoring/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # test-logging tests
-/tests/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/tests/logging/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # api-controller acceptance tests
 /tests/api-controller-acceptance-tests/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -335,19 +335,19 @@
 /tools/static-users-generator/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
 
 # The tools/ark-plugins directory
-/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/tools/ark-plugins/ @mwieczorek @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # The tools/kyma-installer directory
 /tools/kyma-installer/ @Tomasz-Smelcerz-SAP @strekm @jakkab @crabtree @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @piotrmsc @jasiu001 @adamwalach @kubadz @Demonsthere
 
 # The tools/load-test directory
-/tools/load-test/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/tools/load-test/ @joek @rakesh-garimella @venturasr @lilitgh @k15r @nachtmaar
 
 # kubeless-integration tests directory
-/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/tests/end-to-end/kubeless-integration/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # kubeless tests
-/tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/tests/kubeless/ @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # Event Bus Tests
 /tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
@@ -356,7 +356,7 @@
 /tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # E2E Backup Tests
-/tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r @nachtmaar
+/tests/end-to-end/backup-restore-test @rakesh-garimella @joek @venturasr @lilitgh @k15r @nachtmaar
 
 # E2E Upgrade Tests
 /tests/end-to-end/upgrade @mszostok @PK85 @aszecowka @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
