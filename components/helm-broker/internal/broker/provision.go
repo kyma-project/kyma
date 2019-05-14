@@ -218,7 +218,7 @@ func (svc *provisionService) do(ctx context.Context, input provisioningInput) {
 	if err == nil && svc.isBindable(input.bundlePlan, input.isBundleBindable) {
 		if resolveErr := svc.resolveAndSaveBindData(input.instanceID, input.namespace, input.bundlePlan, resp); resolveErr != nil {
 			opState = internal.OperationStateFailed
-			opDesc = fmt.Sprintf("resolving bind data failed with error: %s", resolveErr)
+			opDesc = fmt.Sprintf("resolving bind data failed with error: %s", resolveErr.Error())
 		}
 	}
 
