@@ -61,8 +61,6 @@ data:
 
   mixer.resources.limits.memory: 256Mi
   mixer.resources.requests.memory: 128Mi
-
-  kiali.enabled: "false"
 ---
 apiVersion: v1
 kind: ConfigMap

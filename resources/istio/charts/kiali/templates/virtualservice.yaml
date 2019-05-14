@@ -10,7 +10,7 @@ spec:
   gateways:
   - kyma-gateway.kyma-system.svc.cluster.local
   hosts:
-  - "kiali.kyma.local"
+  - {{ .Values.global.domainName }} 
   http:
   - match:
     - uri:

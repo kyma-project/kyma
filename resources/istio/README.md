@@ -117,7 +117,7 @@ Helm charts expose configuration options which are currently in alpha.  The curr
 | Parameter | Description | Values | Default |
 | --- | --- | --- | --- |
 | `global.hub` | Specifies the HUB for most images used by Istio | registry/namespace | `docker.io/istio` |
-| `global.tag` | Specifies the TAG for most images used by Istio | valid image tag | `0.8.latest` |
+| `global.tag` | Specifies the TAG for most images used by Istio | valid image tag | `1.1.0` |
 | `global.proxy.image` | Specifies the proxy image name | valid proxy name | `proxyv2` |
 | `global.proxy.concurrency` | Specifies the number of proxy worker threads | number, 0 = auto | `0` |
 | `global.imagePullPolicy` | Specifies the image pull policy | valid image pull policy | `IfNotPresent` |
