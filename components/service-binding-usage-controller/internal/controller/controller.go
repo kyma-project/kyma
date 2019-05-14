@@ -222,9 +222,14 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 		c.queue.Forget(key)
 		return true
 	}
-	// Skip all process if ServiceBiningUsage comes from informer liveness probe
-	// in that case we only check informer handle the queue, all process is not needed
+	// Skip all reconcile process if ServiceBindingUsage comes from informer liveness probe
+	// in that case we only check informer handle the queue so we need to only change the SBU status,
+	// all process is not needed
 	if name == LivenessBUCSample {
+		err := c.handleServiceBindingUsageSample(namespace, name)
+		if err != nil {
+			c.log.Errorf("failed handle SBU sample: %s", err)
+		}
 		return true
 	}
 
@@ -300,8 +305,29 @@ func (c *ServiceBindingUsageController) syncServiceBindingUsage(namespace string
 	return bindingUsageStatus, nil
 }
 
+func (c *ServiceBindingUsageController) handleServiceBindingUsageSample(namespace, name string) error {
+	bindingUsage, err := c.bindingUsageLister.ServiceBindingUsages(namespace).Get(name)
+
+	switch {
+	case err == nil:
+		if err := c.updateStatus(bindingUsage, sbuTypes.ServiceBindingUsageCondition{
+			Status:             sbuTypes.ConditionTrue,
+			LastTransitionTime: metaV1.Now(),
+		}); err != nil {
+			c.log.Errorf("Error processing %q while updating sbu status for SBU sample: %s", err)
+		}
+	case apiErrors.IsNotFound(err):
+		// absence in store means watcher caught the deletion
+		return nil
+	default:
+		return errors.Wrap(err, "while getting ServiceBindingUsage")
+	}
+
+	return nil
+}
+
 func (c *ServiceBindingUsageController) reconcileServiceBindingUsageAdd(newUsage *sbuTypes.ServiceBindingUsage) *processBindingUsageError {
-	c.log.Debugf("process of reconsile %s", pretty.ServiceBindingUsageName(newUsage))
+	c.log.Debugf("process of reconcile %s", pretty.ServiceBindingUsageName(newUsage))
 	var (
 		workNS         = newUsage.Namespace
 		newBindingName = newUsage.Spec.ServiceBindingRef.Name

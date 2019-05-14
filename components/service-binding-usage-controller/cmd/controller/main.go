@@ -20,6 +20,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"github.com/vrischmann/envconfig"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/dynamic"
 	k8sClientset "k8s.io/client-go/kubernetes"
 	restclient "k8s.io/client-go/rest"
@@ -29,6 +30,13 @@ import (
 // informerResyncPeriod defines how often informer will execute relist action. Setting to zero disable resync.
 // BEWARE: too short period time will increase the CPU load.
 const informerResyncPeriod = 30 * time.Minute
+
+// liveness probe is run in some period of time (e.g. 10s), one of the liveness functionality
+// is create ServiceBindingUsage sample, check its state and remove it.
+// It is not necessary to run this check too often, that is the reason of livenessInhibitor value,
+// it slows down the process, is a time multiplier
+// (period of ServiceBindingUsage sample checker = liveness period * livenessInhibitor)
+const livenessInhibitor = 10
 
 // Config holds application configuration
 type Config struct {
@@ -125,6 +133,7 @@ func main() {
 }
 
 func runHTTPServer(stop <-chan struct{}, addr string, sbuClient *bindingUsageClientset.Clientset, ns string, log logrus.FieldLogger) {
+	counter := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
@@ -132,9 +141,13 @@ func runHTTPServer(stop <-chan struct{}, addr string, sbuClient *bindingUsageCli
 			log.Errorf("Cannot write response body, got err: %v ", err)
 		}
 
-		if err := informerAvailability(sbuClient, ns); err != nil {
-			log.Errorf("Cannot apply ServiceBindingUsage sample: %v ", err)
+		if counter >= livenessInhibitor {
+			if err := informerAvailability(sbuClient, ns); err != nil {
+				log.Errorf("Cannot apply ServiceBindingUsage sample: %v ", err)
+			}
+			counter = 0
 		}
+		counter++
 	})
 	mux.Handle("/metrics", promhttp.Handler())
 
@@ -164,17 +177,26 @@ func informerAvailability(sbuClient *bindingUsageClientset.Clientset, namespace 
 	if err != nil {
 		return errors.Wrap(err, "while creating ServiceBindingUsage")
 	}
-	_, err = sbuClient.
-		ServicecatalogV1alpha1().
-		ServiceBindingUsages(namespace).
-		Get(controller.LivenessBUCSample, metav1.GetOptions{})
+	err = wait.Poll(1*time.Second, 20*time.Second, func() (done bool, err error) {
+		sbuSample, err := sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Get(
+			controller.LivenessBUCSample,
+			metav1.GetOptions{})
+		if err != nil {
+			return false, errors.Wrap(err, "while fetching ServiceBindingUsage")
+		}
+		for _, condition := range sbuSample.Status.Conditions {
+			if condition.Status == v1alpha1.ConditionTrue {
+				return true, nil
+			}
+		}
+		return false, nil
+	})
 	if err != nil {
-		return errors.Wrap(err, "while fetching ServiceBindingUsage")
+		return errors.Wrap(err, "while checking ServiceBindingUsage status conditions")
 	}
-	err = sbuClient.
-		ServicecatalogV1alpha1().
-		ServiceBindingUsages(namespace).
-		Delete(controller.LivenessBUCSample, &metav1.DeleteOptions{})
+	err = sbuClient.ServicecatalogV1alpha1().ServiceBindingUsages(namespace).Delete(
+		controller.LivenessBUCSample,
+		&metav1.DeleteOptions{})
 	if err != nil {
 		return errors.Wrap(err, "while deleteing ServiceBindingUsage")
 	}
