@@ -15,7 +15,8 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "iteration": 1557743411868,
+  "id": 23,
+  "iteration": 1557761361702,
   "links": [],
   "panels": [
     {
@@ -120,7 +121,7 @@
       "colorValue": true,
       "colors": [
         "#F2495C",
-        "rgba(237, 129, 40, 0.89)",
+        "#FF9830",
         "#299c46"
       ],
       "datasource": "Prometheus",
@@ -217,7 +218,7 @@
       "colorValue": true,
       "colors": [
         "#F2495C",
-        "rgba(237, 129, 40, 0.89)",
+        "#FF9830",
         "#299c46"
       ],
       "datasource": "Prometheus",
@@ -313,7 +314,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "default",
           "value": "default"
         },
@@ -339,7 +339,6 @@
       {
         "allValue": null,
         "current": {
-          "tags": [],
           "text": "All",
           "value": "$__all"
         },
