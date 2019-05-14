@@ -47,29 +47,29 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// myDeploymentTest, err := NewDeploymentTest()
 	// fatalOnError(t, err, "while creating structure for Deployment test")
 
-	myPrometheusTest, err := NewPrometheusTest()
-	fatalOnError(t, err, "while creating structure for Prometheus test")
+	// myPrometheusTest, err := NewPrometheusTest()
+	// fatalOnError(t, err, "while creating structure for Prometheus test")
 
 	// appBrokerTest, err := NewAppBrokerTest()
 	// fatalOnError(t, err, "while creating structure for AppBroker test")
 
-	// helmBrokerTest, err := NewHelmBrokerTest()
-	// fatalOnError(t, err, "while creating structure for HelmBroker test")
+	helmBrokerTest, err := NewHelmBrokerTest()
+	fatalOnError(t, err, "while creating structure for HelmBroker test")
 
 	// scAddonsTest, err := NewServiceCatalogAddonsTest()
 	// fatalOnError(t, err, "while creating structure for ScAddons test")
 
-	// myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
-	// fatalOnError(t, err, "while creating structure for NamespaceController test")
+	myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
+	fatalOnError(t, err, "while creating structure for NamespaceController test")
 
-	// apiControllerTest, err := NewApiControllerTestFromEnv()
-	// fatalOnError(t, err, "while creating structure for ApiController test")
+	apiControllerTest, err := NewApiControllerTestFromEnv()
+	fatalOnError(t, err, "while creating structure for ApiController test")
 
 	// myGrafanaTest, err := NewGrafanaTest()
 	// fatalOnError(t, err, "while creating structure for Grafana test")
 
-	// myMicroFrontendTest, err := NewMicrofrontendTest()
-	// fatalOnError(t, err, "while creating structure for MicroFrontend test")
+	myMicroFrontendTest, err := NewMicrofrontendTest()
+	fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
 	// myAssetStoreTest, err := NewAssetStoreTest(t)
 	// fatalOnError(t, err, "while creating structure for AssetStore test")
@@ -78,17 +78,17 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// fatalOnError(t, err, "while creating structure for Cms test")
 
 	backupTests := []BackupTest{
-		myPrometheusTest,
+		// myPrometheusTest,
 		// myFunctionTest,
 		// myDeploymentTest,
 		// myStatefulSetTest,
-		// helmBrokerTest,
+		helmBrokerTest,
 		// appBrokerTest,
 		// scAddonsTest,
-		// myNamespaceControllerTest,
-		// apiControllerTest,
+		myNamespaceControllerTest,
+		apiControllerTest,
 		// myGrafanaTest,
-		// myMicroFrontendTest,
+		myMicroFrontendTest,
 		// myAssetStoreTest,
 		// myCmsTest,
 	}
