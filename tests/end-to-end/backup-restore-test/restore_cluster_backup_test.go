@@ -59,14 +59,14 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// scAddonsTest, err := NewServiceCatalogAddonsTest()
 	// fatalOnError(t, err, "while creating structure for ScAddons test")
 
-	myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
-	fatalOnError(t, err, "while creating structure for NamespaceController test")
+	// myNamespaceControllerTest, err := NewNamespaceControllerTestFromEnv()
+	// fatalOnError(t, err, "while creating structure for NamespaceController test")
 
-	apiControllerTest, err := NewApiControllerTestFromEnv()
-	fatalOnError(t, err, "while creating structure for ApiController test")
+	// apiControllerTest, err := NewApiControllerTestFromEnv()
+	// fatalOnError(t, err, "while creating structure for ApiController test")
 
-	myGrafanaTest, err := NewGrafanaTest()
-	fatalOnError(t, err, "while creating structure for Grafana test")
+	// myGrafanaTest, err := NewGrafanaTest()
+	// fatalOnError(t, err, "while creating structure for Grafana test")
 
 	myMicroFrontendTest, err := NewMicrofrontendTest()
 	fatalOnError(t, err, "while creating structure for MicroFrontend test")
@@ -85,9 +85,9 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		// helmBrokerTest,
 		// appBrokerTest,
 		// scAddonsTest,
-		myNamespaceControllerTest,
-		apiControllerTest,
-		myGrafanaTest,
+		// myNamespaceControllerTest,
+		// apiControllerTest,
+		// myGrafanaTest,
 		myMicroFrontendTest,
 		myAssetStoreTest,
 		myCmsTest,
