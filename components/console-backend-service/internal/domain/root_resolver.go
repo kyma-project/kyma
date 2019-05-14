@@ -74,7 +74,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 	makePluggable(scaContainer)
 
-	appContainer, err := application.New(restConfig, appCfg, contentCfg, informerResyncPeriod, contentContainer.ContentRetriever, assetStoreContainer.AssetStoreRetriever)
+	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, contentContainer.ContentRetriever, assetStoreContainer.AssetStoreRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}

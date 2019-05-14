@@ -7,7 +7,6 @@ import (
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/gateway"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"k8s.io/client-go/rest"
@@ -22,7 +21,7 @@ func TestPluggableContainer(t *testing.T) {
 			StatusRefreshPeriod: 1 * time.Second,
 		},
 	}
-	pluggable, err := application.New(&rest.Config{}, appCfg, content.Config{}, informerResyncPeriod, nil, nil)
+	pluggable, err := application.New(&rest.Config{}, appCfg, informerResyncPeriod, nil, nil)
 	require.NoError(t, err)
 
 	pluggable.SetFakeClient()
