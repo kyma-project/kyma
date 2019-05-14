@@ -68,8 +68,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// myGrafanaTest, err := NewGrafanaTest()
 	// fatalOnError(t, err, "while creating structure for Grafana test")
 
-	myMicroFrontendTest, err := NewMicrofrontendTest()
-	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+	// myMicroFrontendTest, err := NewMicrofrontendTest()
+	// fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
 	myAssetStoreTest, err := NewAssetStoreTest(t)
 	fatalOnError(t, err, "while creating structure for AssetStore test")
@@ -88,7 +88,7 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		// myNamespaceControllerTest,
 		// apiControllerTest,
 		// myGrafanaTest,
-		myMicroFrontendTest,
+		// myMicroFrontendTest,
 		myAssetStoreTest,
 		myCmsTest,
 	}
