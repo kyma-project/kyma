@@ -36,8 +36,8 @@ spec:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 
-| Field   |      Mandatory?      |  Description |
-|:----------:|:-------------:|:------|
+| Field   |      Mandatory      |  Description |
+|----------|:-------------:|------|
 | **metadata.name** | **YES** | Specifies the name of the CR. |
 | **metadata.namespace** | **YES** | Specifies the target Namespace for the CR. |
 | **spec.version** | **NO** | Specifies the version of the micro front-end. |

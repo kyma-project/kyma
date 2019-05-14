@@ -3,7 +3,7 @@
 ## Overview
 
 This project contains end-to-end backup and restore tests for the Kyma installation. The tests run weekly on Prow to validate if the backup and restore process works for all components.
- 
+
 
 ## Prerequisites
 
@@ -34,7 +34,7 @@ The backup and restore [continuous integration flow](https://github.com/kyma-pro
 Use the following environment variables to configure the tests:
 
 | Name | Required | Default | Description |
-|-----|:---------:|:--------:|------------|
+|-----|:---------:|--------|------------|
 | **DOMAIN** | NO | `kyma.local` | The domain where Kyma runs. |
 | **USER_EMAIL** | YES | - | The email address for authentication in Dex. |
 | **USER_PASSWORD** | YES | - | The password for authentication in Dex. |
@@ -45,7 +45,7 @@ Use the following environment variables to configure the tests:
 
 ## Development
 
-This section presents how to add and run a new test. 
+This section presents how to add and run a new test.
 
 ### Add a new test
 
@@ -60,7 +60,7 @@ type BackupTest interface {
 ```
 The functions work as follows:
 
-- The `TestResources` function validates if the test data works as expected. 
+- The `TestResources` function validates if the test data works as expected.
 - The `CreateResources` function installs the required test data before the backup process starts.
 - The `DeleteResources` function deletes the resources that are a part of the cluster before executing the test. The resources need to be deleted to test the restore process.
 

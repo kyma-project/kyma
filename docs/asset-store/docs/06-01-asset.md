@@ -87,7 +87,7 @@ This table lists all possible parameters of a given resource together with their
 
 
 | Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
+|----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. |
 | **metadata.namespace** |    **YES**   | Defines the Namespace in which the CR is available. |
 | **spec.source.mode** |    **YES**   | Specifies if the asset consists of one file or a set of compressed files in the ZIP or TAR formats. Use `single` for one file and `package` for a set of files. |
@@ -127,11 +127,11 @@ This table lists all possible parameters of a given resource together with their
 These are the resources related to this CR:
 
 | Custom resource |   Description |
-|:----------:|:------|
+|----------|------|
 | Bucket |  The Asset CR uses the name of the bucket specified in the definition of the Bucket CR. |
 
 These components use this CR:
 
 | Component   |   Description |
-|:----------:|:------|
+|----------|------|
 | Asset Store |  Uses the Asset CR for the detailed asset definition, including its location and the name of the bucket in which it is stored. |

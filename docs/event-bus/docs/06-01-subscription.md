@@ -37,7 +37,7 @@ spec:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Parameter                                 | Mandatory | Description                                                                                                                |
-|:-----------------------------------------:|:---------:|:---------------------------------------------------------------------------------------------------------------------------|
+|-----------------------------------------|:---------:|---------------------------------------------------------------------------------------------------------------------------|
 | **metadata.name**                         | **YES**   | Specifies the name of the CR.                                                                                              |
 | **spec.endpoint**                         | **YES**   | The HTTP endpoint to which events are delivered as a POST request.                                                         |
 | **spec.push_request_timeout_ms**          | **YES**   | The HTTP request timeout. Once the timeout expires, the Event Bus retries to deliver the Event. Setting the **minimum** parameter to `0` applies the default value of `1000ms`.                                   |

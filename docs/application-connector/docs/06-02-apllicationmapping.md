@@ -26,7 +26,7 @@ metadata:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
+|----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR and the App. |
 | **metadata.namespace** |    **YES**   | Specifies the Namespace in which the App is enabled. |
 
@@ -35,6 +35,6 @@ This table lists all the possible parameters of a given resource together with t
 These components use this CR:
 
 | Component   |   Description |
-|:----------:|:------|
+|----------|------|
 | Application Broker |  Uses this CR to enable the provisioning of ServiceClasses in a given Namespace. |
 | Console Backend Service | Uses this CR to filter the enabled Apps. It also allows you to create or delete ApplicationMappings. |

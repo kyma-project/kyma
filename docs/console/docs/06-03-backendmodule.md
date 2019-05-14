@@ -27,7 +27,7 @@ metadata:
 This table lists all the possible parameters of a given resource together with their descriptions:
 
 | Parameter   |      Mandatory      |  Description |
-|:----------:|:-------------:|:------|
+|----------|:-------------:|------|
 | **metadata.name** |    **YES**   | Specifies the name of the CR. It must be the same as the name of a given Console Backend Service module. |
 
 ## Related resources and components
@@ -35,5 +35,5 @@ This table lists all the possible parameters of a given resource together with t
 These components use this CR:
 
 | Component   |   Description |
-|:----------:|:------|
+|----------|------|
 | Console Backend Service |  The component reacts to every action of adding or deleting the BackendModule custom resource and enables or disables a given Console Backend Service module accordingly. |

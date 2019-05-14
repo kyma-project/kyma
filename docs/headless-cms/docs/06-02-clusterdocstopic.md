@@ -68,11 +68,11 @@ This table lists all possible parameters of a given resource together with their
 These are the resources related to this CR:
 
 | Custom resource |   Description |
-|:----------:|:------|
+|----------|------|
 | ClusterAsset | The ClusterDocsTopic CR orchestrates the creation of the ClusterAsset CR and defines its content. |
 
 These components use this CR:
 
 | Component   |   Description |
-|:----------:|:------|
+|----------|------|
 | Asset Store |  Manages ClusterAsset CRs created based on the definition in the ClusterDocsTopic CR. |
