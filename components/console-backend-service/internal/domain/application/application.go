@@ -22,6 +22,7 @@ import (
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/disabled"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/gateway"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content"
 )
 
 //go:generate failery -name=ApplicationLister -case=underscore -output disabled -outpkg disabled
@@ -59,7 +60,7 @@ type PluggableContainer struct {
 	gatewayService         *gateway.Service
 }
 
-func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, contentRetriever shared.ContentRetriever, assetStoreRetriever shared.AssetStoreRetriever) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, reCfg Config, contentCfg content.Config, informerResyncPeriod time.Duration, contentRetriever shared.ContentRetriever, assetStoreRetriever shared.AssetStoreRetriever) (*PluggableContainer, error) {
 	mCli, err := mappingClient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing application broker Clientset")
@@ -84,6 +85,7 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 			informerResyncPeriod: informerResyncPeriod,
 			contentRetriever:     contentRetriever,
 			assetStoreRetriever:  assetStoreRetriever,
+			verifySSL:            contentCfg.VerifySSL,
 		},
 		Pluggable:            module.NewPluggable("application"),
 		ApplicationRetriever: &applicationRetriever{},
@@ -138,7 +140,7 @@ func (r *PluggableContainer) Enable() error {
 
 		r.Resolver = &domainResolver{
 			applicationResolver:     NewApplicationResolver(appService, gatewayService),
-			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.contentRetriever, r.cfg.assetStoreRetriever),
+			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.contentRetriever, r.cfg.assetStoreRetriever, r.cfg.verifySSL),
 		}
 		r.ApplicationRetriever.ApplicationLister = appService
 	})
@@ -166,6 +168,7 @@ type resolverConfig struct {
 	informerResyncPeriod time.Duration
 	contentRetriever     shared.ContentRetriever
 	assetStoreRetriever  shared.AssetStoreRetriever
+	verifySSL            bool
 }
 
 //go:generate failery -name=Resolver -case=underscore -output disabled -outpkg disabled
