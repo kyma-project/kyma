@@ -147,7 +147,7 @@ func main() {
 		"AssetStoreUpgradeTest":           assetStore.NewAssetStoreUpgradeTest(dynamicCli),
 		"HeadlessCMSUpgradeTest":          cms.NewHeadlessCmsUpgradeTest(dynamicCli),
 		"ApiControllerUpgradeTest":        apiController.New(gatewayCli, k8sCli, kubelessCli, domainName, dexConfig.IdProviderConfig()),
-		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, scCli),
+		"ApplicationOperatorUpgradeTest":  applicationOperator.NewApplicationOperatorUpgradeTest(appConnectorCli, k8sCli.AppsV1()),
 	}
 
 	// Execute requested action

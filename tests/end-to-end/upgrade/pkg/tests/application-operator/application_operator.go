@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
-	"github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
+	v1 "k8s.io/api/apps/v1"
+
 	"k8s.io/apimachinery/pkg/util/wait"
 
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
@@ -13,26 +13,29 @@ import (
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	appsCli "k8s.io/client-go/kubernetes/typed/apps/v1"
 )
 
 const (
-	applicationName = "application-for-testing"
-	apiServiceID    = "api-service-id"
-	eventsServiceID = "events-service-id"
-	gatewayURL      = "https://gateway.local"
+	applicationName            = "test-app"
+	eventsServiceDeployment    = "test-app-event-service"
+	applicationProxyDeployment = "test-app-application-gateway"
+	apiServiceID               = "api-service-id"
+	eventsServiceID            = "events-service-id"
+	gatewayURL                 = "https://gateway.local"
 )
 
 // UpgradeTest checks if Application Operator upgrades image versions of Application Proxy and Events Service of the created Application.
 type UpgradeTest struct {
-	appConnectorInterface   appConnector.Interface
-	serviceCatalogInterface clientset.Interface
+	appConnectorInterface appConnector.Interface
+	deploymentCli         appsCli.DeploymentsGetter
 }
 
 // NewApplicationOperatorUpgradeTest returns new instance of the UpgradeTest.
-func NewApplicationOperatorUpgradeTest(acCli appConnector.Interface, scCli clientset.Interface) *UpgradeTest {
+func NewApplicationOperatorUpgradeTest(acCli appConnector.Interface, deployCli appsCli.DeploymentsGetter) *UpgradeTest {
 	return &UpgradeTest{
-		appConnectorInterface:   acCli,
-		serviceCatalogInterface: scCli,
+		appConnectorInterface: acCli,
+		deploymentCli:         deployCli,
 	}
 }
 
@@ -47,6 +50,9 @@ func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLog
 	if err := ut.waitForResources(stop, log, namespace); err != nil {
 		return errors.Wrap(err, "could not find resources")
 	}
+
+	//TODO: Get Events Service and Application Proxy images and timestamps
+	//TODO: Create ConfigMap with Events Service and Application Proxy images and timestamps
 
 	log.Info("ApplicationOperator UpgradeTest resources created!")
 	return nil
@@ -109,22 +115,24 @@ func (ut *UpgradeTest) createApplication(log logrus.FieldLogger) error {
 }
 
 func (ut *UpgradeTest) waitForResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
-	//TODO: Make sure that Application Proxy is created by Application Operator
+	if err := ut.waitForDeployment(applicationProxyDeployment, namespace, stop); err != nil {
+		return errors.Wrap(err, "could not find Application Proxy deployment")
+	}
 
-	if err := ut.waitForInstance(eventsServiceID, namespace, stop); err != nil {
-		return errors.Wrap(err, "could not find Events Service instance")
+	if err := ut.waitForDeployment(eventsServiceDeployment, namespace, stop); err != nil {
+		return errors.Wrap(err, "could not find Events Service deployment")
 	}
 
 	return nil
 }
 
-func (ut *UpgradeTest) waitForInstance(name, namespace string, stop <-chan struct{}) error {
+func (ut *UpgradeTest) waitForDeployment(name, namespace string, stop <-chan struct{}) error {
 	return ut.wait(2*time.Minute, func() (done bool, err error) {
-		si, err := ut.serviceCatalogInterface.ServicecatalogV1beta1().ServiceInstances(namespace).Get(name, metav1.GetOptions{})
+		si, err := ut.deploymentCli.Deployments(namespace).Get(name, metav1.GetOptions{})
 		if err != nil {
 			return false, err
 		}
-		if si.Status.ProvisionStatus == v1beta1.ServiceInstanceProvisionStatusProvisioned {
+		if si.Status.ReadyReplicas >= 1 {
 			return true, nil
 		}
 		return false, nil
@@ -162,28 +170,34 @@ func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogge
 }
 
 func (ut *UpgradeTest) verifyResources(namespace string) error {
-	if err := ut.verifyServiceInstance(eventsServiceID, namespace); err != nil {
+	if err := ut.verifyDeployment(eventsServiceDeployment, namespace); err != nil {
 		return errors.Wrap(err, "Events Service is not upgraded")
 	}
 
-	//TODO: Make sure that image version of the Application Proxy is upgraded
+	if err := ut.verifyDeployment(applicationProxyDeployment, namespace); err != nil {
+		return errors.Wrap(err, "Application Proxy is not upgraded")
+	}
 
 	return nil
 }
 
-func (ut *UpgradeTest) verifyServiceInstance(name, namespace string) error {
-	serviceInstance, err := ut.getServiceInstance(name, namespace)
+func (ut *UpgradeTest) verifyDeployment(name, namespace string) error {
+	deployment, err := ut.getDeployment(name, namespace)
 	if err != nil {
 		return err
 	}
 
-	//TODO: Make sure that image version of the Events Service is upgraded
-	fmt.Print(serviceInstance.ResourceVersion)
+	//TODO: Make sure that image version of the deployment is upgraded (use values from ConfigMap)
+	// images should be different OR timestamps should be different
+	// this condition covers two cases (1. the same image after upgrade 2. new image after upgrade)
+	fmt.Println(deployment.Spec.Template.Spec.Containers[0].Image)
+	fmt.Println(deployment.CreationTimestamp)
+
 	return nil
 }
 
-func (ut *UpgradeTest) getServiceInstance(name, namespace string) (*v1beta1.ServiceInstance, error) {
-	return ut.serviceCatalogInterface.ServicecatalogV1beta1().ServiceInstances(namespace).Get(name, metav1.GetOptions{})
+func (ut *UpgradeTest) getDeployment(name, namespace string) (*v1.Deployment, error) {
+	return ut.deploymentCli.Deployments(namespace).Get(name, metav1.GetOptions{})
 }
 
 func (ut *UpgradeTest) deleteResources(log logrus.FieldLogger, namespace string) error {
@@ -191,11 +205,7 @@ func (ut *UpgradeTest) deleteResources(log logrus.FieldLogger, namespace string)
 		return err
 	}
 
-	if err := ut.deleteServiceInstance(eventsServiceID, namespace); err != nil {
-		return err
-	}
-
-	//TODO: Delete Application Proxy and other created resources
+	//TODO: Make sure that all created resources are deleted
 
 	return nil
 }
@@ -204,6 +214,6 @@ func (ut *UpgradeTest) deleteApplication() error {
 	return ut.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Delete(applicationName, &metav1.DeleteOptions{})
 }
 
-func (ut *UpgradeTest) deleteServiceInstance(name, namespace string) error {
-	return ut.serviceCatalogInterface.ServicecatalogV1beta1().ServiceInstances(namespace).Delete(name, &metav1.DeleteOptions{})
+func (ut *UpgradeTest) deleteDeployment(name, namespace string) error {
+	return ut.deploymentCli.Deployments(namespace).Delete(name, &metav1.DeleteOptions{})
 }
