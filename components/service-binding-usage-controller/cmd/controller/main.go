@@ -136,18 +136,20 @@ func runHTTPServer(stop <-chan struct{}, addr string, sbuClient *bindingUsageCli
 	counter := 0
 	mux := http.NewServeMux()
 	mux.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
-		w.WriteHeader(http.StatusOK)
-		if _, err := fmt.Fprint(w, "OK"); err != nil {
-			log.Errorf("Cannot write response body, got err: %v ", err)
-		}
-
 		if counter >= livenessInhibitor {
 			if err := informerAvailability(sbuClient, ns); err != nil {
 				log.Errorf("Cannot apply ServiceBindingUsage sample: %v ", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				return
 			}
 			counter = 0
 		}
 		counter++
+
+		w.WriteHeader(http.StatusOK)
+		if _, err := fmt.Fprint(w, "OK"); err != nil {
+			log.Errorf("Cannot write response body, got err: %v ", err)
+		}
 	})
 	mux.Handle("/metrics", promhttp.Handler())
 

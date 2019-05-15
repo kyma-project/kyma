@@ -230,6 +230,7 @@ func (c *ServiceBindingUsageController) processNextWorkItem() bool {
 		if err != nil {
 			c.log.Errorf("failed handle SBU sample: %s", err)
 		}
+		c.queue.Forget(key)
 		return true
 	}
 
