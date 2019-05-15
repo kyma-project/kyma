@@ -112,7 +112,7 @@
 /resources/logging/charts/log-ui/ @rakesh-garimella @pekura @maxmarkus @jesusreal @kwiatekus @dariadomagala @hardl @y-kkamil @hisarbalik @a-thaler @igor-karpukhin
 
 # The `event-bus` chart
-/resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # The `nats-streaming` chart
 /resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
