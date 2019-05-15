@@ -629,6 +629,7 @@ type Namespace {
 
     # Depends on application module
     applications: [String!]
+    labels: Labels
 }
 
 type NamespaceCreationOutput {

@@ -68,7 +68,8 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 	var ns []gqlschema.Namespace
 	for _, n := range namespaces {
 		ns = append(ns, gqlschema.Namespace{
-			Name: n.Name,
+			Name:   n.Name,
+			Labels: n.Labels,
 		})
 	}
 

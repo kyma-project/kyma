@@ -443,6 +443,7 @@ type ComplexityRoot struct {
 	Namespace struct {
 		Name         func(childComplexity int) int
 		Applications func(childComplexity int) int
+		Labels       func(childComplexity int) int
 	}
 
 	NamespaceCreationOutput struct {
@@ -5192,6 +5193,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.Namespace.Applications(childComplexity), true
+
+	case "Namespace.labels":
+		if e.complexity.Namespace.Labels == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Labels(childComplexity), true
 
 	case "NamespaceCreationOutput.name":
 		if e.complexity.NamespaceCreationOutput.Name == nil {
@@ -16533,6 +16541,8 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 				out.Values[i] = ec._Namespace_applications(ctx, field, obj)
 				wg.Done()
 			}(i, field)
+		case "labels":
+			out.Values[i] = ec._Namespace_labels(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16602,6 +16612,30 @@ func (ec *executionContext) _Namespace_applications(ctx context.Context, field g
 	}
 
 	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Namespace_labels(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var namespaceCreationOutputImplementors = []string{"NamespaceCreationOutput"}
@@ -29357,6 +29391,7 @@ type Namespace {
 
     # Depends on application module
     applications: [String!]
+    labels: Labels
 }
 
 type NamespaceCreationOutput {
