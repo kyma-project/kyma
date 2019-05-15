@@ -23,10 +23,6 @@ type namespaceSvc interface {
 	List() ([]*v1.Namespace, error)
 }
 
-type gqlNamespaceConverter interface {
-	AddEnvLabel(labels gqlschema.Labels)
-}
-
 type namespaceResolver struct {
 	namespaceSvc namespaceSvc
 	appRetriever shared.ApplicationRetriever
