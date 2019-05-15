@@ -38,11 +38,11 @@ type RootResolver struct {
 	authentication *authentication.PluggableResolver
 }
 
-func New(restConfig *rest.Config, appCfg application.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer)
 
-	assetStoreContainer, err := assetstore.New(restConfig, informerResyncPeriod)
+	assetStoreContainer, err := assetstore.New(restConfig, assetstoreCfg, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing AssetStore resolver")
 	}

@@ -4,28 +4,50 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"crypto/tls"
+	"fmt"
+	"strings"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/specification"
 )
 
 //go:generate mockery -name=specificationSvc -output=automock -outpkg=automock -case=underscore
 //go:generate failery -name=specificationSvc -case=underscore -output disabled -outpkg disabled
 type specificationSvc interface {
-	AsyncApi(path string) (*specification.AsyncApiSpec, error)
+	AsyncApi(baseURL, name string) (*specification.AsyncApiSpec, error)
 }
 
-type specificationService struct{}
-
-func newSpecificationService() (*specificationService, error) {
-	return &specificationService{}, nil
+type specificationService struct {
+	cfg      Config
+	endpoint string
+	client   *http.Client
 }
 
-func (s *specificationService) AsyncApi(path string) (*specification.AsyncApiSpec, error) {
-	if path == "" {
-		return nil, nil
+func newSpecificationService(cfg Config) (*specificationService, error) {
+	client := &http.Client{}
+	if !cfg.VerifySSL {
+		transCfg := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore invalid SSL certificates
+		}
+		client.Transport = transCfg
 	}
 
-	data, err := fetch(path)
-	if err != nil {
+	protocol := "http"
+	if cfg.Secure {
+		protocol = protocol + "s"
+	}
+	endpoint := fmt.Sprintf("%s://%s", protocol, cfg.Address)
+
+	return &specificationService{
+		cfg:      cfg,
+		endpoint: endpoint,
+		client:   client,
+	}, nil
+}
+
+func (s *specificationService) AsyncApi(baseURL, name string) (*specification.AsyncApiSpec, error) {
+	data, err := s.readData(baseURL, name)
+	if err != nil || len(data) == 0 {
 		return nil, err
 	}
 
@@ -38,12 +60,46 @@ func (s *specificationService) AsyncApi(path string) (*specification.AsyncApiSpe
 	return asyncApiSpec, nil
 }
 
-func fetch(path string) ([]byte, error) {
+func (s *specificationService) readData(baseURL, name string) ([]byte, error) {
+	path := s.preparePath(baseURL, name)
 	if path == "" {
 		return nil, nil
 	}
 
-	resp, err := http.Get(path)
+	data, err := s.fetch(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(data) == 0 {
+		return nil, nil
+	}
+
+	return data, nil
+}
+
+func (s *specificationService) preparePath(baseURL, name string) string {
+	if baseURL == "" || name == "" {
+		return ""
+	}
+
+	splitedBaseURL := strings.Split(baseURL, "/")
+	if len(splitedBaseURL) < 3 {
+		return ""
+	}
+
+	bucketName := splitedBaseURL[len(splitedBaseURL)-2]
+	assetName := splitedBaseURL[len(splitedBaseURL)-1]
+
+	return fmt.Sprintf("%s/%s/%s/%s", s.endpoint, bucketName, assetName, name)
+}
+
+func (s *specificationService) fetch(path string) ([]byte, error) {
+	if path == "" {
+		return nil, nil
+	}
+
+	resp, err := s.client.Get(path)
 	if err != nil {
 		return nil, err
 	}

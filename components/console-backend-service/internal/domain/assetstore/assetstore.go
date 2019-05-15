@@ -21,6 +21,12 @@ const (
 	CmsTypeLabel      = "cms.kyma-project.io/type"
 )
 
+type Config struct {
+	Address   string `envconfig:"default=minio.kyma.local"`
+	Secure    bool   `envconfig:"default=true"`
+	VerifySSL bool   `envconfig:"default=true"`
+}
+
 type assetStoreRetriever struct {
 	ClusterAssetGetter       shared.ClusterAssetGetter
 	AssetGetter              shared.AssetGetter
@@ -58,7 +64,7 @@ type PluggableContainer struct {
 	informerFactory     dynamicinformer.DynamicSharedInformerFactory
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration) (*PluggableContainer, error) {
 	dynamicClient, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Dynamic Clientset")
@@ -66,6 +72,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
+			cfg:                  reCfg,
 			dynamicClient:        dynamicClient,
 			informerResyncPeriod: informerResyncPeriod,
 		},
@@ -106,7 +113,7 @@ func (r *PluggableContainer) Enable() error {
 		return errors.Wrapf(err, "while creating asset service")
 	}
 
-	specificationService, err := newSpecificationService()
+	specificationService, err := newSpecificationService(r.cfg.cfg)
 	if err != nil {
 		return errors.Wrap(err, "while creating Specification Service")
 	}
@@ -149,6 +156,7 @@ type Resolver interface {
 }
 
 type resolverConfig struct {
+	cfg                  Config
 	dynamicClient        dynamic.Interface
 	informerResyncPeriod time.Duration
 }

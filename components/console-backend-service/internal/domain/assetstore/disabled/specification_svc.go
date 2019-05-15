@@ -14,8 +14,8 @@ func NewSpecificationSvc(err error) *specificationSvc {
 	return &specificationSvc{err: err}
 }
 
-// AsyncApi provides a failing mock function with given fields: path
-func (_m *specificationSvc) AsyncApi(path string) (*specification.AsyncApiSpec, error) {
+// AsyncApi provides a failing mock function with given fields: baseURL, name
+func (_m *specificationSvc) AsyncApi(baseURL string, name string) (*specification.AsyncApiSpec, error) {
 	var r0 *specification.AsyncApiSpec
 	var r1 error
 	r1 = _m.err

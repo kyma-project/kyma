@@ -30,7 +30,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		}, nil)
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil, false)
+		resolver := application.NewEventActivationResolver(svc, nil)
 		result, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.NoError(t, err)
@@ -44,7 +44,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		svc.On("List", "test").Return([]*v1alpha1.EventActivation{}, nil)
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil, false)
+		resolver := application.NewEventActivationResolver(svc, nil)
 		result, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.NoError(t, err)
@@ -56,7 +56,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		svc.On("List", "test").Return(nil, errors.New("trol"))
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil, false)
+		resolver := application.NewEventActivationResolver(svc, nil)
 		_, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.Error(t, err)
@@ -65,6 +65,9 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 }
 
 func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
+	asyncApiBaseUrl := "example.com"
+	asyncApiFileName := "asyncApiSpec.json"
+
 	clusterAssets := []*v1alpha2.ClusterAsset{
 		{
 			ObjectMeta: metav1.ObjectMeta{
@@ -73,10 +76,10 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 			Status: v1alpha2.ClusterAssetStatus{
 				CommonAssetStatus: v1alpha2.CommonAssetStatus{
 					AssetRef: v1alpha2.AssetStatusRef{
-						BaseURL: "https://example.com",
+						BaseURL: asyncApiBaseUrl,
 						Files: []v1alpha2.AssetFile{
 							{
-								Name: "asyncApiSpec.json",
+								Name: asyncApiFileName,
 							},
 						},
 					},
@@ -84,7 +87,6 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 			},
 		},
 	}
-	asyncApiSpecPath := "https://example.com/asyncApiSpec.json"
 	types := []string{"asyncapi", "asyncApi", "asyncapispec", "asyncApiSpec", "events"}
 
 	t.Run("Success", func(t *testing.T) {
@@ -111,14 +113,14 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		defer clusterAssetGetter.AssertExpectations(t)
 
 		specificationGetter := new(assetstoreMock.SpecificationGetter)
-		specificationGetter.On("AsyncApi", asyncApiSpecPath).Return(asyncApiSpec, nil)
+		specificationGetter.On("AsyncApi", asyncApiBaseUrl, asyncApiFileName).Return(asyncApiSpec, nil)
 		defer specificationGetter.AssertExpectations(t)
 
 		retriever := new(assetstoreMock.AssetStoreRetriever)
 		retriever.On("ClusterAsset").Return(clusterAssetGetter)
 		retriever.On("Specification").Return(specificationGetter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, false)
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.NoError(t, err)
@@ -135,7 +137,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		assetStoreRetriever := new(assetstoreMock.AssetStoreRetriever)
 		assetStoreRetriever.On("ClusterAsset").Return(clusterAssetGetter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, false)
+		resolver := application.NewEventActivationResolver(nil, assetStoreRetriever)
 		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.NoError(t, err)
@@ -154,14 +156,14 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		defer clusterAssetGetter.AssertExpectations(t)
 
 		specificationGetter := new(assetstoreMock.SpecificationGetter)
-		specificationGetter.On("AsyncApi", asyncApiSpecPath).Return(asyncApiSpec, nil)
+		specificationGetter.On("AsyncApi", asyncApiBaseUrl, asyncApiFileName).Return(asyncApiSpec, nil)
 		defer specificationGetter.AssertExpectations(t)
 
 		retriever := new(assetstoreMock.AssetStoreRetriever)
 		retriever.On("ClusterAsset").Return(clusterAssetGetter)
 		retriever.On("Specification").Return(specificationGetter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, false)
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.Error(t, err)
@@ -174,7 +176,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(assetstoreMock.AssetStoreRetriever)
 		retriever.On("ClusterAsset").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, false)
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		_, err := resolver.EventActivationEventsField(nil, nil)
 
 		require.Error(t, err)
@@ -189,7 +191,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(assetstoreMock.AssetStoreRetriever)
 		retriever.On("ClusterAsset").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, false)
+		resolver := application.NewEventActivationResolver(nil, retriever)
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.Error(t, err)

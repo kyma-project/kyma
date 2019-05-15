@@ -10,13 +10,13 @@ type SpecificationGetter struct {
 	mock.Mock
 }
 
-// AsyncApi provides a mock function with given fields: path
-func (_m *SpecificationGetter) AsyncApi(path string) (*specification.AsyncApiSpec, error) {
-	ret := _m.Called(path)
+// AsyncApi provides a mock function with given fields: baseURL, name
+func (_m *SpecificationGetter) AsyncApi(baseURL string, name string) (*specification.AsyncApiSpec, error) {
+	ret := _m.Called(baseURL, name)
 
 	var r0 *specification.AsyncApiSpec
-	if rf, ok := ret.Get(0).(func(string) *specification.AsyncApiSpec); ok {
-		r0 = rf(path)
+	if rf, ok := ret.Get(0).(func(string, string) *specification.AsyncApiSpec); ok {
+		r0 = rf(baseURL, name)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*specification.AsyncApiSpec)
@@ -24,8 +24,8 @@ func (_m *SpecificationGetter) AsyncApi(path string) (*specification.AsyncApiSpe
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string) error); ok {
-		r1 = rf(path)
+	if rf, ok := ret.Get(1).(func(string, string) error); ok {
+		r1 = rf(baseURL, name)
 	} else {
 		r1 = ret.Error(1)
 	}

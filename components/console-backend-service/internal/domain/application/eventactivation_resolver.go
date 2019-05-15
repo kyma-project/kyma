@@ -21,7 +21,6 @@ type eventActivationResolver struct {
 	service             eventActivationLister
 	converter           *eventActivationConverter
 	assetStoreRetriever shared.AssetStoreRetriever
-	verifySSL           bool
 }
 
 //go:generate mockery -name=eventActivationLister -output=automock -outpkg=automock -case=underscore
@@ -29,12 +28,11 @@ type eventActivationLister interface {
 	List(namespace string) ([]*v1alpha1.EventActivation, error)
 }
 
-func newEventActivationResolver(service eventActivationLister, assetStoreRetriever shared.AssetStoreRetriever, verifySSL bool) *eventActivationResolver {
+func newEventActivationResolver(service eventActivationLister, assetStoreRetriever shared.AssetStoreRetriever) *eventActivationResolver {
 	return &eventActivationResolver{
 		service:             service,
 		converter:           &eventActivationConverter{},
 		assetStoreRetriever: assetStoreRetriever,
-		verifySSL:           verifySSL,
 	}
 }
 
@@ -69,9 +67,7 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 	}
 
 	assetRef := items[0].Status.AssetRef
-	asyncApiFilePath := fmt.Sprintf("%s/%s", assetRef.BaseURL, assetRef.Files[0].Name)
-
-	asyncApiSpec, err := r.assetStoreRetriever.Specification().AsyncApi(asyncApiFilePath)
+	asyncApiSpec, err := r.assetStoreRetriever.Specification().AsyncApi(assetRef.BaseURL, assetRef.Files[0].Name)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while fetching and decoding `AsyncApiSpec` for %s %s", pretty.EventActivation, eventActivation.Name))
 		return []gqlschema.EventActivationEvent{}, gqlerror.New(err, assetstorePretty.ClusterAsset)

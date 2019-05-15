@@ -39,5 +39,5 @@ type GqlAssetConverter interface {
 
 //go:generate mockery -name=SpecificationGetter -output=automock -outpkg=automock -case=underscore
 type SpecificationGetter interface {
-	AsyncApi(path string) (*specification.AsyncApiSpec, error)
+	AsyncApi(baseURL, name string) (*specification.AsyncApiSpec, error)
 }

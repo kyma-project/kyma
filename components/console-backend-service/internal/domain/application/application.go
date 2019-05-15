@@ -41,7 +41,6 @@ func (r *applicationRetriever) Application() shared.ApplicationLister {
 type Config struct {
 	Gateway   gateway.Config
 	Connector ConnectorSvcCfg
-	VerifySSL bool `envconfig:"default=true"`
 }
 
 type ConnectorSvcCfg struct {
@@ -138,7 +137,7 @@ func (r *PluggableContainer) Enable() error {
 
 		r.Resolver = &domainResolver{
 			applicationResolver:     NewApplicationResolver(appService, gatewayService),
-			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.assetStoreRetriever, r.cfg.cfg.VerifySSL),
+			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.assetStoreRetriever),
 		}
 		r.ApplicationRetriever.ApplicationLister = appService
 	})
