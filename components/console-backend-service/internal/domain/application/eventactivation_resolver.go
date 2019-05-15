@@ -12,6 +12,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
+	"crypto/tls"
+
 	"github.com/golang/glog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
 	assetstorePretty "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/pretty"
@@ -31,6 +33,7 @@ type eventActivationResolver struct {
 	converter           *eventActivationConverter
 	contentRetriever    shared.ContentRetriever
 	assetStoreRetriever shared.AssetStoreRetriever
+	verifySSL           bool
 }
 
 //go:generate mockery -name=eventActivationLister -output=automock -outpkg=automock -case=underscore
@@ -38,12 +41,13 @@ type eventActivationLister interface {
 	List(namespace string) ([]*v1alpha1.EventActivation, error)
 }
 
-func newEventActivationResolver(service eventActivationLister, contentRetriever shared.ContentRetriever, assetStoreRetriever shared.AssetStoreRetriever) *eventActivationResolver {
+func newEventActivationResolver(service eventActivationLister, contentRetriever shared.ContentRetriever, assetStoreRetriever shared.AssetStoreRetriever, verifySSL bool) *eventActivationResolver {
 	return &eventActivationResolver{
 		service:             service,
 		converter:           &eventActivationConverter{},
 		contentRetriever:    contentRetriever,
 		assetStoreRetriever: assetStoreRetriever,
+		verifySSL:           verifySSL,
 	}
 }
 
@@ -130,7 +134,16 @@ func (r *eventActivationResolver) getAsyncApi(eventActivationName string) (*stor
 
 // TODO: Remove this temporary function after removing content domain
 func (r *eventActivationResolver) fetchAsyncApi(path string) ([]byte, error) {
-	resp, err := http.Get(path)
+	client := &http.Client{}
+	if !r.verifySSL {
+		transCfg := &http.Transport{
+			TLSClientConfig: &tls.Config{InsecureSkipVerify: true}, // ignore invalid SSL certificates
+		}
+
+		client.Transport = transCfg
+	}
+
+	resp, err := client.Get(path)
 	if err != nil {
 		return nil, err
 	}
