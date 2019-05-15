@@ -1,5 +1,5 @@
 ---
-title: Configuration
+title: Tutorials
 ---
 
 By default, the Helm Broker fetches bundles listed in the `index.yaml` file from the `bundles` repository [release](https://github.com/kyma-project/bundles/releases). You can also configure the Helm Broker to fetch bundle definitions from other remote HTTPS servers. To do so, follow these steps:
@@ -14,7 +14,7 @@ By default, the Helm Broker fetches bundles listed in the `index.yaml` file from
     kubectl create configmap my-helm-repos-urls -n kyma-system --from-literal=URLs=https://github.com/kyma-project/bundles/releases/download/0.3.0/index-testing.yaml
     ```
     >**NOTE:** If you want to fetch bundles from many HTTP servers, use `\n` to separate the URLs.
-    
+
     If you use this method, you must label your ConfigMap with `helm-broker-repo=true`. To add the label to your ConfigMap, run:
     ```bash
     kubectl label configmap my-helm-repos-urls -n kyma-system helm-broker-repo=true
@@ -36,7 +36,7 @@ By default, the Helm Broker fetches bundles listed in the `index.yaml` file from
 
     Then, run:
     ```bash
-    kubectl apply my-helm-repos-urls
+    kubectl apply -f my-helm-repos-urls
     ```
     >**NOTE:** Your bundle repository must contain at least one file named `index.yaml` as the Helm Broker automatically searches for it when you provide the `https://{host}/{path}/{bundle_repo_version}/` URL to your ConfigMap.
 
