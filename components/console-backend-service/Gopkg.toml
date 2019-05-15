@@ -70,7 +70,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kwiatekus/kyma"
-  revision = "cb3e23748b9ea77c428059fa71342ec7db8962af"
+  revision = "20f3983cc054c89c720ed6c1018d900221281d04"
   branch = "propagate-required-permissions-mf-attribute"
 
 [[override]]
