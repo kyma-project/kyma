@@ -12,8 +12,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-// TODO: Write unit tests
-
 const envLabelSelector = "true"
 
 type namespaceService struct {

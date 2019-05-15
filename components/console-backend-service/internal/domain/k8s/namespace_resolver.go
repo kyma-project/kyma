@@ -43,6 +43,8 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 	if applicationName == nil {
 		namespaces, err = r.namespaceSvc.List()
 	} else {
+
+		// TODO: Investigate if we still need the query for namespaces bound to an application
 		var namespaceNames []string
 		namespaceNames, err = r.appRetriever.Application().ListNamespacesFor(*applicationName)
 
