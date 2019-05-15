@@ -9,7 +9,7 @@ autoscaleMax: 5
 # replicaCount: 1
 image: pilot
 sidecar: true
-traceSampling: 1.0
+traceSampling: 100.0
 # Resources for a small pilot install
 resources:
   requests:
