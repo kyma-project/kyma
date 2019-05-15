@@ -115,13 +115,13 @@
 /resources/event-bus/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # The `nats-streaming` chart
-/resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # The `knative-provisioner-natss` chart
 /resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
 
 # The `k8s-dashboard-proxy` subchart
-/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # The `application-broker` subchart
 /resources/application-connector/charts/application-broker @aszecowka @PK85 @mszostok @piotrmiskiewicz @polskikiel @jasiu001 @adamwalach
@@ -175,10 +175,10 @@
 /resources/knative-serving/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # The `knative-eventing` chart
-/resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/resources/knative-eventing/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # The `jaeger` charts
-/resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/resources/jaeger/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # The `prometheus-operator` chart
 /resources/prometheus-operator/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
@@ -257,13 +257,13 @@
 /components/application-gateway/ @lszymik @akgalwas @janmedrek @Szymongib @franpog859 @Maladie @crabtree
 
 # Event Bus Component
-/components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/components/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # K8s Dashboard Proxy Component
-/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/components/k8s-dashboard-proxy/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # Event Service Component
-/components/event-service/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/components/event-service/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # Xip Patch Component
 /components/xip-patch/ @piotrmsc @kubadz @strekm @jakkab @Tomasz-Smelcerz-SAP @Demonsthere
@@ -350,10 +350,10 @@
 /tests/kubeless/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
 # Event Bus Tests
-/tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/tests/event-bus/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # Event Service Tests
-/tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/tests/gateway-tests/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # E2E Backup Tests
 /tests/end-to-end/backup-restore-test @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
