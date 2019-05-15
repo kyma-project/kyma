@@ -375,7 +375,7 @@ func (k *MockKnativeLib) GetSubscription(name string, namespace string) (*evapis
 func (k *MockKnativeLib) UpdateSubscription(sub *evapisv1alpha1.Subscription) (*evapisv1alpha1.Subscription, error) {
 	return nil, nil
 }
-func (k *MockKnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string]string, message *string) error {
+func (k *MockKnativeLib) SendMessage(channel *evapisv1alpha1.Channel, headers *map[string][]string, message *string) error {
 	return nil
 }
 func (k *MockKnativeLib) InjectClient(c eventingclientset.EventingV1alpha1Interface) error {

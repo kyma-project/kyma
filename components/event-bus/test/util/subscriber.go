@@ -17,6 +17,9 @@ const (
 	SubServer2EventsPath  = "/v2/events"
 	SubServer2StatusPath  = "/v2/status"
 	SubServer2ResultsPath = "/v2/results"
+	SubServer3EventsPath  = "/v3/events"
+	SubServer3StatusPath  = "/v3/status"
+	SubServer3ResultsPath = "/v3/results"
 )
 
 // NewSubscriberServerV1 ...
@@ -43,7 +46,10 @@ func NewSubscriberServerWithPort(port int, stop chan bool) *http.Server {
 	subscriberMux.HandleFunc("/v1/events", eventsHandlerV1)
 	subscriberMux.HandleFunc("/v1/status", statusHandler)
 	subscriberMux.HandleFunc("/v1/results", resultsHandlerV1)
-	subscriberMux.Handle("/v1/shutdown", shutdownHandler(stop))
+	subscriberMux.HandleFunc(SubServer3EventsPath, eventsHandlerV3)
+	subscriberMux.HandleFunc(SubServer3StatusPath, statusHandler)
+	subscriberMux.HandleFunc(SubServer3ResultsPath, resultsHandlerV3)
+	subscriberMux.Handle("/shutdown", shutdownHandler(stop))
 
 	srv := &http.Server{Addr: fmt.Sprintf(":%d", port), Handler: Logger(subscriberMux)}
 
@@ -58,34 +64,47 @@ func NewSubscriberServerWithPort(port int, stop chan bool) *http.Server {
 var (
 	subscriberV1Result string
 	subscriberV2Result string
+	subscriberV3Result map[string][]string
 	mu                 sync.Mutex
 )
 
-func resultsHandlerV1(w http.ResponseWriter, r *http.Request) {
+func resultsHandlerV1(w http.ResponseWriter, _ *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 	json.NewEncoder(w).Encode(subscriberV1Result)
 }
 
-func eventsHandlerV1(w http.ResponseWriter, r *http.Request) {
+func eventsHandlerV1(_ http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 	json.NewDecoder(r.Body).Decode(&subscriberV1Result)
 }
 
-func resultsHandlerV2(w http.ResponseWriter, r *http.Request) {
+func resultsHandlerV2(w http.ResponseWriter, _ *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 	json.NewEncoder(w).Encode(subscriberV2Result)
 }
 
-func eventsHandlerV2(w http.ResponseWriter, r *http.Request) {
+func eventsHandlerV2(_ http.ResponseWriter, r *http.Request) {
 	mu.Lock()
 	defer mu.Unlock()
 	json.NewDecoder(r.Body).Decode(&subscriberV2Result)
 }
 
-func statusHandler(w http.ResponseWriter, r *http.Request) {
+func resultsHandlerV3(w http.ResponseWriter, _ *http.Request) {
+	mu.Lock()
+	defer mu.Unlock()
+	json.NewEncoder(w).Encode(subscriberV3Result)
+}
+
+func eventsHandlerV3(_ http.ResponseWriter, r *http.Request) {
+	mu.Lock()
+	defer mu.Unlock()
+	subscriberV3Result = r.Header
+}
+
+func statusHandler(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 

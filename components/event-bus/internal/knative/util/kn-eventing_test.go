@@ -170,8 +170,8 @@ func Test_SendMessage(t *testing.T) {
 
 	// send a message to the channel
 	p := "message 1"
-	h := make(map[string]string)
-	h["test"] = "test"
+	h := make(map[string][]string)
+	h["test"] = []string{"test"}
 	err = k.SendMessage(ch, &h, &p)
 	assert.Nil(t, err)
 }
@@ -246,4 +246,18 @@ func Test_CreateSubscriptionAgain(t *testing.T) {
 	assert.Nil(t, err)
 	err = k.CreateSubscription(subscriptionName, testNS, channelName, &uri)
 	assert.True(t, k8serrors.IsAlreadyExists(err))
+}
+
+func Test_makeHttpRequest(t *testing.T) {
+	headers := make(map[string][]string)
+	headers["ce-test"] = []string{"test-ce"}
+	headers["not-ce-test"] = []string{"test-not-ce"}
+	payload := ""
+	req, _ := makeHttpRequest(testChannel, &headers, &payload)
+	assert.Equal(t, req.Header["Content-Type"][0], "application/json")
+	assert.Equal(t, req.Header["ce-test"][0], "test-ce")
+	for k := range req.Header {
+		log.Printf("Request Header: %s", k)
+	}
+	assert.Len(t, req.Header, 3, "Headers map should have exactly 3 keys")
 }
