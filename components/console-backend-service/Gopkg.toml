@@ -69,9 +69,9 @@ required = [
   version = "v1.13.1"
 
 [[constraint]]
-  name = "github.com/kwiatekus/kyma"
-  revision = "20f3983cc054c89c720ed6c1018d900221281d04"
+  name = "github.com/kyma-project/kyma"
   branch = "propagate-required-permissions-mf-attribute"
+  source = "https://github.com/kwiatekus/kyma.git"
 
 [[override]]
   name = "k8s.io/api"

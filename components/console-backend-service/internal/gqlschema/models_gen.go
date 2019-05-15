@@ -309,12 +309,14 @@ type Microfrontend struct {
 }
 
 type NavigationNode struct {
-	Label            string   `json:"label"`
-	NavigationPath   string   `json:"navigationPath"`
-	ViewURL          string   `json:"viewUrl"`
-	ShowInNavigation bool     `json:"showInNavigation"`
-	Order            int      `json:"order"`
-	Settings         Settings `json:"settings"`
+	Label               string               `json:"label"`
+	NavigationPath      string               `json:"navigationPath"`
+	ViewURL             string               `json:"viewUrl"`
+	ShowInNavigation    bool                 `json:"showInNavigation"`
+	Order               int                  `json:"order"`
+	Settings            Settings             `json:"settings"`
+	ExternalLink        *string              `json:"externalLink"`
+	RequiredPermissions []RequiredPermission `json:"requiredPermissions"`
 }
 
 type Pod struct {
@@ -342,6 +344,12 @@ type ReplicaSet struct {
 	CreationTimestamp time.Time `json:"creationTimestamp"`
 	Labels            Labels    `json:"labels"`
 	JSON              JSON      `json:"json"`
+}
+
+type RequiredPermission struct {
+	Verbs    []string `json:"verbs"`
+	APIGroup string   `json:"apiGroup"`
+	Resource string   `json:"resource"`
 }
 
 type ResourceAttributes struct {

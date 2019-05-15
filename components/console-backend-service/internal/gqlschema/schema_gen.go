@@ -445,12 +445,14 @@ type ComplexityRoot struct {
 	}
 
 	NavigationNode struct {
-		Label            func(childComplexity int) int
-		NavigationPath   func(childComplexity int) int
-		ViewUrl          func(childComplexity int) int
-		ShowInNavigation func(childComplexity int) int
-		Order            func(childComplexity int) int
-		Settings         func(childComplexity int) int
+		Label               func(childComplexity int) int
+		NavigationPath      func(childComplexity int) int
+		ViewUrl             func(childComplexity int) int
+		ShowInNavigation    func(childComplexity int) int
+		Order               func(childComplexity int) int
+		Settings            func(childComplexity int) int
+		ExternalLink        func(childComplexity int) int
+		RequiredPermissions func(childComplexity int) int
 	}
 
 	Pod struct {
@@ -526,6 +528,12 @@ type ComplexityRoot struct {
 		CreationTimestamp func(childComplexity int) int
 		Labels            func(childComplexity int) int
 		Json              func(childComplexity int) int
+	}
+
+	RequiredPermission struct {
+		Verbs    func(childComplexity int) int
+		ApiGroup func(childComplexity int) int
+		Resource func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -5192,6 +5200,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.NavigationNode.Settings(childComplexity), true
 
+	case "NavigationNode.externalLink":
+		if e.complexity.NavigationNode.ExternalLink == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.ExternalLink(childComplexity), true
+
+	case "NavigationNode.requiredPermissions":
+		if e.complexity.NavigationNode.RequiredPermissions == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.RequiredPermissions(childComplexity), true
+
 	case "Pod.name":
 		if e.complexity.Pod.Name == nil {
 			break
@@ -5847,6 +5869,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ReplicaSet.Json(childComplexity), true
+
+	case "RequiredPermission.verbs":
+		if e.complexity.RequiredPermission.Verbs == nil {
+			break
+		}
+
+		return e.complexity.RequiredPermission.Verbs(childComplexity), true
+
+	case "RequiredPermission.apiGroup":
+		if e.complexity.RequiredPermission.ApiGroup == nil {
+			break
+		}
+
+		return e.complexity.RequiredPermission.ApiGroup(childComplexity), true
+
+	case "RequiredPermission.resource":
+		if e.complexity.RequiredPermission.Resource == nil {
+			break
+		}
+
+		return e.complexity.RequiredPermission.Resource(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -16552,6 +16595,10 @@ func (ec *executionContext) _NavigationNode(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "externalLink":
+			out.Values[i] = ec._NavigationNode_externalLink(ctx, field, obj)
+		case "requiredPermissions":
+			out.Values[i] = ec._NavigationNode_requiredPermissions(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16723,6 +16770,91 @@ func (ec *executionContext) _NavigationNode_settings(ctx context.Context, field 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NavigationNode_externalLink(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NavigationNode",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ExternalLink, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NavigationNode_requiredPermissions(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NavigationNode",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RequiredPermissions, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]RequiredPermission)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._RequiredPermission(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 var podImplementors = []string{"Pod"}
@@ -20297,6 +20429,130 @@ func (ec *executionContext) _ReplicaSet_json(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+var requiredPermissionImplementors = []string{"RequiredPermission"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _RequiredPermission(ctx context.Context, sel ast.SelectionSet, obj *RequiredPermission) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, requiredPermissionImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RequiredPermission")
+		case "verbs":
+			out.Values[i] = ec._RequiredPermission_verbs(ctx, field, obj)
+		case "apiGroup":
+			out.Values[i] = ec._RequiredPermission_apiGroup(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "resource":
+			out.Values[i] = ec._RequiredPermission_resource(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RequiredPermission_verbs(ctx context.Context, field graphql.CollectedField, obj *RequiredPermission) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "RequiredPermission",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Verbs, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RequiredPermission_apiGroup(ctx context.Context, field graphql.CollectedField, obj *RequiredPermission) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "RequiredPermission",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.APIGroup, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RequiredPermission_resource(ctx context.Context, field graphql.CollectedField, obj *RequiredPermission) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "RequiredPermission",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Resource, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var resourceQuotaImplementors = []string{"ResourceQuota"}
@@ -29353,6 +29609,14 @@ type NavigationNode {
     showInNavigation: Boolean!
     order: Int!
     settings: Settings!
+    externalLink: String
+    requiredPermissions: [RequiredPermission!]
+}
+
+type RequiredPermission {
+    verbs: [String!]
+    apiGroup: String!
+    resource: String!
 }
 
 # SelfSubjectRules

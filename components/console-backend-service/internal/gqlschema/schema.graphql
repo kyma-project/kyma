@@ -810,6 +810,14 @@ type NavigationNode {
     showInNavigation: Boolean!
     order: Int!
     settings: Settings!
+    externalLink: String
+    requiredPermissions: [RequiredPermission!]
+}
+
+type RequiredPermission {
+    verbs: [String!]
+    apiGroup: String!
+    resource: String!
 }
 
 # SelfSubjectRules

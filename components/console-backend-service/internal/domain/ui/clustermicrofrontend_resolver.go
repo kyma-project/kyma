@@ -30,7 +30,7 @@ type clusterMicrofrontendResolver struct {
 func newClusterMicrofrontendResolver(clusterMicrofrontendLister clusterMicrofrontendLister) *clusterMicrofrontendResolver {
 	return &clusterMicrofrontendResolver{
 		clusterMicrofrontendLister:    clusterMicrofrontendLister,
-		clusterMicrofrontendConverter: &clusterMicrofrontendConverter{},
+		clusterMicrofrontendConverter: newClusterMicrofrontendConverter(),
 	}
 }
 
