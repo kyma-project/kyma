@@ -17,7 +17,7 @@ global:
     path: eu.gcr.io/kyma-project
   event_bus:
     dir:
-    version: 1.1.0-rc1
+    version: 1.1.0-rc2
   namespace: natss
   natsStreaming:
     fullname: nats-streaming
@@ -38,7 +38,7 @@ global:
       monitoring: 8222
     resources:
       limits:
-        memory: "32M"
+        memory: "256M"
     channel:
       maxInactivity: "48h"
     clusterID: "kyma-nats-streaming"

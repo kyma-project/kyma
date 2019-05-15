@@ -19,8 +19,8 @@ func NewEventActivationService(informer cache.SharedIndexInformer) *eventActivat
 	return newEventActivationService(informer)
 }
 
-func NewEventActivationResolver(service eventActivationLister, contentRetriever shared.ContentRetriever, assetStoreRetriever shared.AssetStoreRetriever) *eventActivationResolver {
-	return newEventActivationResolver(service, contentRetriever, assetStoreRetriever)
+func NewEventActivationResolver(service eventActivationLister, contentRetriever shared.ContentRetriever, assetStoreRetriever shared.AssetStoreRetriever, verifySSL bool) *eventActivationResolver {
+	return newEventActivationResolver(service, contentRetriever, assetStoreRetriever, verifySSL)
 }
 
 func (r *PluggableContainer) SetFakeClient() {
