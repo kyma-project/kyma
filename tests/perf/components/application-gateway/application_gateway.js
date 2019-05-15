@@ -4,6 +4,7 @@ import { check, sleep } from "k6";
 export let options = {
     vus: 10,
     duration: "1m",
+    rps: 1000,
     tags: {
         "testName": "send_event_gateway_10vu_60s_1000",
         "component": "application-gateway",
