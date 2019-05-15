@@ -26,12 +26,12 @@ curl -i https://httpbin.org/headers -H "Authorization: Bearer eyJhbGciOiJSUzI1Ni
 You can specify multiple JWT token issuers to allow to access the secured service with tokens issued by different ID providers. You can successfully call the secured service using JWT ID tokens issued by any of the parties specified in the **authentication** attribute of the CR. This is an example of the **authentication** attribute that allows to access the service using JWT tokens signed by two different issuers.
 
 ```
-    - type: JWT
-      jwt:
-        issuer: https://sampleissuer1.abc.com
-        jwksUri: https://www.sampleapis.com/oauth2/v3/certs
-    - type: JWT
-      jwt:
-        issuer: https://sampleissuer2.abc.com
-        jwksUri: https://www.regularsampleapis.com/oauth2/v3/certs
+- type: JWT
+  jwt:
+    issuer: https://sampleissuer1.abc.com
+    jwksUri: https://www.sampleapis.com/oauth2/v3/certs
+- type: JWT
+  jwt:
+    issuer: https://sampleissuer2.abc.com
+    jwksUri: https://www.regularsampleapis.com/oauth2/v3/certs
 ```
