@@ -27,15 +27,6 @@ data:
       {{ end }}
     ]
 
-  istio-egressgateway.deployment.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/15",
-        "value": "zipkin.kyma-system:9411"
-      }
-    ]
-
   istio-policy.deployment.patch.json: |
     [
       {
