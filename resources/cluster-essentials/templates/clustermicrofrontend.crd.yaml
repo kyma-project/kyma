@@ -54,3 +54,16 @@ spec:
                     type: string
                   showInNavigation:
                     type: boolean
+                  requiredPermissions:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        apiGroup: 
+                          type: string
+                        resource:
+                          type: string
+                        verbs:
+                          type: array
+                          items: 
+                            type: string
