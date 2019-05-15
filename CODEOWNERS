@@ -118,7 +118,7 @@
 /resources/nats-streaming/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # The `knative-provisioner-natss` chart
-/resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91
+/resources/knative-provisioner-natss/ @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
 
 # The `k8s-dashboard-proxy` subchart
 /resources/core/charts/k8s-dashboard-proxy/ @a-thaler @montaro @abbi-gaurav @marcobebway @radufa @suleymanakbas91 @sayanh
