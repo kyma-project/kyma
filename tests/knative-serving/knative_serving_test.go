@@ -14,9 +14,14 @@ import (
 	serving "github.com/knative/serving/pkg/client/clientset/versioned/typed/serving/v1alpha1"
 	"github.com/kyma-project/kyma/common/ingressgateway"
 	core_api "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
 	meta "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+)
+
+const (
+	cpuLimits = "50m"
 )
 
 func TestKnativeServing_Acceptance(t *testing.T) {
@@ -47,6 +52,11 @@ func TestKnativeServing_Acceptance(t *testing.T) {
 									{
 										Name:  "TARGET",
 										Value: target,
+									},
+								},
+								Resources: core_api.ResourceRequirements{
+									Requests: core_api.ResourceList{
+										core_api.ResourceCPU: resource.MustParse(cpuLimits),
 									},
 								},
 							},

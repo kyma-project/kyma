@@ -28,7 +28,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		}, nil)
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil, nil)
+		resolver := application.NewEventActivationResolver(svc, nil, nil, false)
 		result, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.NoError(t, err)
@@ -42,7 +42,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		svc.On("List", "test").Return([]*v1alpha1.EventActivation{}, nil)
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil, nil)
+		resolver := application.NewEventActivationResolver(svc, nil, nil, false)
 		result, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.NoError(t, err)
@@ -54,7 +54,7 @@ func TestEventActivationResolver_EventActivationsQuery(t *testing.T) {
 		svc.On("List", "test").Return(nil, errors.New("trol"))
 		defer svc.AssertExpectations(t)
 
-		resolver := application.NewEventActivationResolver(svc, nil, nil)
+		resolver := application.NewEventActivationResolver(svc, nil, nil, false)
 		_, err := resolver.EventActivationsQuery(nil, "test")
 
 		require.Error(t, err)
@@ -89,7 +89,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(contentMock.ContentRetriever)
 		retriever.On("AsyncApiSpec").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, nil)
+		resolver := application.NewEventActivationResolver(nil, retriever, nil, false)
 		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.NoError(t, err)
@@ -115,7 +115,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		assetStoreRetriever := new(contentMock.AssetStoreRetriever)
 		assetStoreRetriever.On("ClusterAsset").Return(clusterAssetGetter)
 
-		resolver := application.NewEventActivationResolver(nil, contentRetriever, assetStoreRetriever)
+		resolver := application.NewEventActivationResolver(nil, contentRetriever, assetStoreRetriever, false)
 		result, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.NoError(t, err)
@@ -136,7 +136,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(contentMock.ContentRetriever)
 		retriever.On("AsyncApiSpec").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, nil)
+		resolver := application.NewEventActivationResolver(nil, retriever, nil, false)
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.Error(t, err)
@@ -149,7 +149,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(contentMock.ContentRetriever)
 		retriever.On("AsyncApiSpec").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, nil)
+		resolver := application.NewEventActivationResolver(nil, retriever, nil, false)
 		_, err := resolver.EventActivationEventsField(nil, nil)
 
 		require.Error(t, err)
@@ -164,7 +164,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		retriever := new(contentMock.ContentRetriever)
 		retriever.On("AsyncApiSpec").Return(getter)
 
-		resolver := application.NewEventActivationResolver(nil, retriever, nil)
+		resolver := application.NewEventActivationResolver(nil, retriever, nil, false)
 		_, err := resolver.EventActivationEventsField(nil, fixGQLEventActivation("test"))
 
 		require.Error(t, err)
