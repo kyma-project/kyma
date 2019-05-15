@@ -42,23 +42,23 @@ The chart deploys Pods that consume minimum resources as specified in the resour
     $ kubectl apply -f install/kubernetes/helm/helm-service-account.yaml
     ```
 
-1. Install Tiller on your cluster with the service account:
+2. Install Tiller on your cluster with the service account:
     ```
     $ helm init --service-account tiller
     ```
 
-1. Set and create the namespace where Istio was installed:
+3. Set and create the namespace where Istio was installed:
     ```
     $ NAMESPACE=istio-system
     $ kubectl create ns $NAMESPACE
     ```
 
-1. If you enable Kiali, enable `prometheus-operator` and `monitoring` components first. The Kiali installer generates a random password for the `admin` user and stores it in a Secret. Use the `admin` user to login to the Kiali UI. Run this command to get the password:
-```
-$ kubectl -n istio-system get secret kiali -o json | jq -r .data.passphrase | base64 --decode | awk '{print "Password:", $1}' 
-```
+4. If you enable Kiali, enable `prometheus-operator` and `monitoring` components first. The Kiali installer generates a random password for the `admin` user and stores it in a Secret. Use the `admin` user to login to the Kiali UI. Run this command to get the password:
+    ```
+    $ kubectl -n istio-system get secret kiali -o json | jq -r .data.passphrase | base64 --decode | awk '{print "Password:", $1}' 
+    ```
 
-1. If you are using security mode for Grafana, create the secret first as follows:
+5. If you are using security mode for Grafana, create the secret first as follows:
 
     - Encode username, you can change the username to the name as you want:
     ```
@@ -89,13 +89,13 @@ $ kubectl -n istio-system get secret kiali -o json | jq -r .data.passphrase | ba
     EOF
     ```
 
-1. Add `istio.io` chart repository and point to the release:
+6. Add `istio.io` chart repository and point to the release:
     ```
     $ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.0/charts
     ```
 
 
-1. To install the chart with the release name `istio` in namespace $NAMESPACE you defined above:
+7. To install the chart with the release name `istio` in namespace $NAMESPACE you defined above:
 
     - With [automatic sidecar injection](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#automatic-sidecar-injection) (requires Kubernetes >=1.9.0):
     ```
