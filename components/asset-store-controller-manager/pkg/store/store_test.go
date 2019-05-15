@@ -3,6 +3,9 @@ package store_test
 import (
 	"context"
 	"fmt"
+	"path/filepath"
+	"testing"
+
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/store/automock"
@@ -10,8 +13,6 @@ import (
 	"github.com/onsi/gomega"
 	"github.com/pkg/errors"
 	"github.com/stretchr/testify/mock"
-	"path/filepath"
-	"testing"
 )
 
 func TestStore_BucketExists(t *testing.T) {
@@ -158,6 +159,27 @@ func TestStore_CompareBucketPolicy(t *testing.T) {
 		g.Expect(equal).To(gomega.Equal(true))
 	})
 
+	t.Run("SuccessMerged", func(t *testing.T) {
+		// Given
+		g := gomega.NewGomegaWithT(t)
+		bucketName := "test-bucket"
+		expectedPolicy := v1alpha2.BucketPolicyReadOnly
+		remotePolicy := "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Action\":[\"s3:GetBucketLocation\",\"s3:ListBucket\",\"s3:GetObject\"],\"Effect\":\"Allow\",\"Principal\":{\"AWS\":[\"*\"]},\"Resource\":[\"arn:aws:s3:::test-bucket\",\"arn:aws:s3:::test-bucket/*\"],\"Sid\":\"\"}]}"
+
+		minio := new(automock.MinioClient)
+		minio.On("GetBucketPolicy", bucketName).Return(remotePolicy, nil).Once()
+		defer minio.AssertExpectations(t)
+
+		store := store.New(minio)
+
+		// When
+		equal, err := store.CompareBucketPolicy(bucketName, expectedPolicy)
+
+		// Then
+		g.Expect(err).NotTo(gomega.HaveOccurred())
+		g.Expect(equal).To(gomega.Equal(true))
+	})
+
 	t.Run("EmptyRemotePolicy", func(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
@@ -205,11 +227,11 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		bucketName := "test-bucket"
 		assetName := "test-asset"
 		files := []string{"test/a.txt", "test/b/c/d.txt"}
-		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "/test-asset/test/a.txt"}, minio.ObjectInfo{Key: "/test-asset/test/b/c/d.txt"})
+		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "test-asset/test/a.txt"}, minio.ObjectInfo{Key: "test-asset/test/b/c/d.txt"})
 		ctx := context.TODO()
 
 		minio := new(automock.MinioClient)
-		minio.On("ListObjects", bucketName, fmt.Sprintf("/%s", assetName), true, ctx.Done()).Return(objCh).Once()
+		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
 		store := store.New(minio)
@@ -228,11 +250,11 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		bucketName := "test-bucket"
 		assetName := "test-asset"
 		files := []string{"test/a.txt", "test/b/c/d.txt"}
-		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "/test-asset/test/a.txt"})
+		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "test-asset/test/a.txt"})
 		ctx := context.TODO()
 
 		minio := new(automock.MinioClient)
-		minio.On("ListObjects", bucketName, fmt.Sprintf("/%s", assetName), true, ctx.Done()).Return(objCh).Once()
+		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
 		store := store.New(minio)
@@ -255,7 +277,7 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		ctx := context.TODO()
 
 		minio := new(automock.MinioClient)
-		minio.On("ListObjects", bucketName, fmt.Sprintf("/%s", assetName), true, ctx.Done()).Return(objCh).Once()
+		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
 		store := store.New(minio)
@@ -274,11 +296,11 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		bucketName := "test-bucket"
 		assetName := "test-asset"
 		files := make([]string, 0)
-		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "/test-asset/test/a.txt"})
+		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "test-asset/test/a.txt"})
 		ctx := context.TODO()
 
 		minio := new(automock.MinioClient)
-		minio.On("ListObjects", bucketName, fmt.Sprintf("/%s", assetName), true, ctx.Done()).Return(objCh).Once()
+		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
 		store := store.New(minio)
@@ -297,11 +319,11 @@ func TestStore_ContainsAllObjects(t *testing.T) {
 		bucketName := "test-bucket"
 		assetName := "test-asset"
 		files := make([]string, 0)
-		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "/test-asset/test/a.txt", Err: errors.New("test-err")})
+		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "test-asset/test/a.txt", Err: errors.New("test-err")})
 		ctx := context.TODO()
 
 		minio := new(automock.MinioClient)
-		minio.On("ListObjects", bucketName, fmt.Sprintf("/%s", assetName), true, ctx.Done()).Return(objCh).Once()
+		minio.On("ListObjects", bucketName, assetName, true, ctx.Done()).Return(objCh).Once()
 		defer minio.AssertExpectations(t)
 
 		store := store.New(minio)
@@ -605,9 +627,9 @@ func TestStore_DeleteObjects(t *testing.T) {
 		// Given
 		g := gomega.NewGomegaWithT(t)
 		name := "test-bucket"
-		prefix := "/test"
+		prefix := "test"
 		ctx := context.TODO()
-		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "/test/obj1"}, minio.ObjectInfo{Key: "/test/obj2"}, minio.ObjectInfo{Key: "/test/obj3"})
+		objCh := fixObjectsChannel(minio.ObjectInfo{Key: "test/obj1"}, minio.ObjectInfo{Key: "test/obj2"}, minio.ObjectInfo{Key: "test/obj3"})
 		errCh := fixRemoveObjectErrorChannel()
 
 		minio := new(automock.MinioClient)

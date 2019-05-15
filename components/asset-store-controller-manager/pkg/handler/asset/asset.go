@@ -141,7 +141,7 @@ func (h *assetHandler) onDelete(ctx context.Context, object MetaAccessor, spec v
 
 func (h *assetHandler) deleteRemoteContent(ctx context.Context, object MetaAccessor, bucketName string) error {
 	h.logInfof("Checking if bucket contains files for asset")
-	prefix := fmt.Sprintf("/%s", object.GetName())
+	prefix := object.GetName()
 	files, err := h.store.ListObjects(ctx, bucketName, prefix)
 	if err != nil {
 		return errors.Wrap(err, "while listing files in bucket")

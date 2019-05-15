@@ -1,0 +1,12 @@
+{{ if .Values.istio.rbac.enabled  }}
+apiVersion: "rbac.istio.io/v1alpha1"
+kind: ServiceRole
+metadata:
+  name: {{ .Chart.Name }}-internal-api
+  namespace: {{ .Values.global.namespace }}
+spec:
+  rules:
+    - services: ["connector-service-internal-api.kyma-integration.svc.cluster.local"]
+      paths: ["*"]
+      methods: ["*"]
+{{ end }}

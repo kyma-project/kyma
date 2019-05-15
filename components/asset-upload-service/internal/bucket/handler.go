@@ -114,10 +114,9 @@ func (h *Handler) SetPolicy(bucketName, policy string) error {
 }
 
 func (h *Handler) tryCreatingBucket(prefix string) (string, error) {
-	bucketName := h.generateBucketName(prefix)
-
 	for i := 0; i < creationRetries; i++ {
 		glog.Infof("Trying to create a bucket with prefix %s (attempt %d of %d)", prefix, i+1, creationRetries)
+		bucketName := h.generateBucketName(prefix)
 		err := h.CreateIfDoesntExist(bucketName, h.cfg.Region)
 		if err != nil {
 			if i == creationRetries-1 {

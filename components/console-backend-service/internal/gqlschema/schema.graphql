@@ -6,6 +6,8 @@ scalar Labels
 
 scalar Timestamp
 
+scalar Settings
+
 # Directives
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
@@ -782,6 +784,34 @@ type ConfigMapEvent {
     configMap: ConfigMap!
 }
 
+# MF
+
+type Microfrontend {
+    name: String!
+    version: String!
+    category: String!
+    viewBaseUrl: String!
+    navigationNodes: [NavigationNode!]!
+}
+
+type ClusterMicrofrontend {
+    name: String!
+    version: String!
+    category: String!
+    viewBaseUrl: String!
+    placement: String!
+    navigationNodes: [NavigationNode!]!
+}
+
+type NavigationNode {
+    label: String!
+    navigationPath: String!
+    viewUrl: String!
+    showInNavigation: Boolean!
+    order: Int!
+    settings: Settings!
+}
+
 # SelfSubjectRules
 
 type ResourceRule {
@@ -856,6 +886,10 @@ type Query {
 
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
+
+    microfrontends(namespace: String!): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    clusterMicrofrontends: [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 }
 
