@@ -15,8 +15,7 @@
   "editable": true,
   "gnetId": null,
   "graphTooltip": 0,
-  "id": 23,
-  "iteration": 1557761361702,
+  "iteration": 1557922635828,
   "links": [],
   "panels": [
     {
@@ -81,7 +80,7 @@
       "tableColumn": "Value",
       "targets": [
         {
-          "expr": "total_kyma_subscriptions{exported_namespace=\"$kyma_subscription_namespace\",name=\"$kyma_subscription_name\",ready=\"true\"} OR on() vector(0)",
+          "expr": "total_kyma_subscriptions{exported_namespace=~\"$kyma_subscription_namespace\",name=~\"$kyma_subscription_name\",ready=\"true\"} OR on() vector(0)",
           "format": "time_series",
           "hide": false,
           "instant": true,
@@ -179,7 +178,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "total_knative_subscriptions{exported_namespace=\"$kyma_subscription_namespace\", name=\"$kyma_subscription_name\", ready=\"true\"} OR on() vector(0)",
+          "expr": "total_knative_subscriptions{exported_namespace=~\"$kyma_subscription_namespace\", name=~\"$kyma_subscription_name\", ready=\"true\"} OR on() vector(0)",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
@@ -273,7 +272,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "total_knative_channels{name=\"$kyma_subscription_name\"} OR on() vector(0)",
+          "expr": "total_knative_channels{name=~\"$kyma_subscription_name\"} OR on() vector(0)",
           "format": "time_series",
           "instant": true,
           "intervalFactor": 1,
