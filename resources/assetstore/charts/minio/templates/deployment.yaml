@@ -48,6 +48,7 @@ spec:
         # MODIFIED: Block - START
         checksum/secrets: {{ include (print $.Template.BasePath "/secrets.yaml") . | sha256sum }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        persistance: {{ .Values.persistence.enabled | quote }}
         # MODIFIED: Block - END
 {{ toYaml .Values.podAnnotations | indent 8 }}
       {{- end }}

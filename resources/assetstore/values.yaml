@@ -6,22 +6,28 @@ global:
       name: kyma-gateway
   asset_store_controller_manager:
     dir: develop/
-    version: '1c4c7390'
+    version: '826f42db'
   asset_upload_service:
     dir: develop/
-    version: '84af083b'
+    version: '826f42db'
   asset_metadata_service:
     dir: develop/
     version: '1c4c7390'
   asset_store_test:
     dir: develop/
-    version: 'a804f409'
+    version: '47ef2289'
+  minio_client:
+    image: 'minio/mc'
+    tag: 'RELEASE.2019-04-03T17-59-57Z'
+  alpine_kubectl:
+    image: 'alpine-kubectl'
+    dir: 'test-infra/'
+    version: 'v20190325-ff66a3a'
 
 minio:
-  mode: standalone
-  replicas: 1
   persistence:
     enabled: true
+    size: 10Gi
 
   DeploymentUpdate:
     type: Recreate

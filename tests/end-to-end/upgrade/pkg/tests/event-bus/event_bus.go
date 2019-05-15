@@ -271,7 +271,7 @@ func (f *eventBusFlow) publishTestEvent() error {
 
 func (f *eventBusFlow) publish(publishEventURL string) (*api.PublishResponse, error) {
 	payload := fmt.Sprintf(
-		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":%s}`,
+		`{"source-id": "%s","event-type":"%s","event-type-version":"v1","event-time":"2018-11-02T22:08:41+00:00","data":"%s"}`,
 		srcID, eventType, composePayloadData("test-event", randomInt))
 	f.log.Infof("event to be published: %v\n", payload)
 	res, err := http.Post(publishEventURL, "application/json", strings.NewReader(payload))
@@ -306,12 +306,12 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		res, err := http.Get(subscriberResultsEndpointURL)
 		if err != nil {
 			f.log.Errorf("Get request failed: %v\n", err)
-			return err
+			continue
 		}
 		f.dumpResponse(res)
 		if err := verifyStatusCode(res, 200); err != nil {
 			f.log.Errorf("Get request failed: %v", err)
-			return err
+			continue
 		}
 		body, err := ioutil.ReadAll(res.Body)
 		var resp string
@@ -325,7 +325,8 @@ func (f *eventBusFlow) checkSubscriberReceivedEvent() error {
 		f.log.Debugf("Expected subscriber response: %s", expectedResp)
 		f.log.Debugf("Subscriber response: %s", resp)
 		if resp != expectedResp {
-			return fmt.Errorf("wrong response: %s, want: %s", resp, expectedResp)
+			f.log.Errorf("wrong response: %s, want: %s", resp, expectedResp)
+			continue
 		}
 		return nil
 	}

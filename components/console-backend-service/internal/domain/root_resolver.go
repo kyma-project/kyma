@@ -496,6 +496,14 @@ func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *in
 	return r.k8s.SecretsQuery(ctx, namespace, first, offset)
 }
 
+func (r *queryResolver) Microfrontends(ctx context.Context, namespace string) ([]gqlschema.Microfrontend, error) {
+	return r.ui.MicrofrontendsQuery(ctx, namespace)
+}
+
+func (r *queryResolver) ClusterMicrofrontends(ctx context.Context) ([]gqlschema.ClusterMicrofrontend, error) {
+	return r.ui.ClusterMicrofrontendsQuery(ctx)
+}
+
 func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
 	return r.k8s.SelfSubjectRulesQuery(ctx, namespace)
 }

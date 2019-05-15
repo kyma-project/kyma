@@ -34,6 +34,6 @@ roleRef:
   kind: Role
   name: {{ .Chart.Name }}-tests
 subjects:
-- apiGroup: rbac.authorization.k8s.io
-  kind: User
-  name: system:serviceaccount:{{ .Release.Namespace }}:{{ .Chart.Name }}-tests
+- kind: ServiceAccount
+  name: {{ .Chart.Name }}-tests
+  namespace: {{ .Values.global.namespace }}

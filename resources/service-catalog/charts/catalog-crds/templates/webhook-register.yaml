@@ -120,6 +120,45 @@ metadata:
   name: {{ template "fullname" . }}-validating-webhook
   namespace: "{{ .Release.Namespace }}"
 webhooks:
+- name: validating.status.servicebindings.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-servicebindings/status"
+  failurePolicy: Fail
+  rules:
+  - operations: [ "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["servicebindings/status"]
+- name: validating.status.servicbrokers.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-servicebrokers/status"
+  failurePolicy: Fail
+  rules:
+  - operations: [ "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["servicebrokers/status"]
+- name: validating.status.clusterservicbrokers.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-clusterservicebrokers/status"
+  failurePolicy: Fail
+  rules:
+  - operations: [ "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["clusterservicebrokers/status"]
 - name: validating.serviceinstances.servicecatalog.k8s.io
   clientConfig:
     caBundle: {{ b64enc $ca.Cert }}
@@ -133,6 +172,97 @@ webhooks:
     apiGroups: ["servicecatalog.k8s.io"]
     apiVersions: ["v1beta1"]
     resources: ["serviceinstances"]
+- name: validating.clusterservicebrokers.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-clusterservicebrokers"
+  failurePolicy: Fail
+  rules:
+    - operations: [ "CREATE", "UPDATE" ]
+      apiGroups: ["servicecatalog.k8s.io"]
+      apiVersions: ["v1beta1"]
+      resources: ["clusterservicebrokers"]
+- name: validating.servicebindings.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-servicebindings"
+  failurePolicy: Fail
+  rules:
+  - operations: [ "CREATE", "UPDATE" ]
+    apiGroups: ["servicecatalog.k8s.io"]
+    apiVersions: ["v1beta1"]
+    resources: ["servicebindings"]
+- name: validating.servicebrokers.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-servicebrokers"
+  failurePolicy: Fail
+  rules:
+    - operations: [ "CREATE", "UPDATE" ]
+      apiGroups: ["servicecatalog.k8s.io"]
+      apiVersions: ["v1beta1"]
+      resources: ["servicebrokers"]
+- name: validating.serviceclasses.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-serviceclasses"
+  failurePolicy: Fail
+  rules:
+    - operations: [ "CREATE", "UPDATE" ]
+      apiGroups: ["servicecatalog.k8s.io"]
+      apiVersions: ["v1beta1"]
+      resources: ["serviceclasses"]
+- name: validating.clusterserviceclasses.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-clusterserviceclasses"
+  failurePolicy: Fail
+  rules:
+    - operations: [ "CREATE", "UPDATE" ]
+      apiGroups: ["servicecatalog.k8s.io"]
+      apiVersions: ["v1beta1"]
+      resources: ["clusterserviceclasses"]
+- name: validating.serviceplans.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-serviceplans"
+  failurePolicy: Fail
+  rules:
+    - operations: [ "CREATE", "UPDATE" ]
+      apiGroups: ["servicecatalog.k8s.io"]
+      apiVersions: ["v1beta1"]
+      resources: ["serviceplans"]
+- name: validating.clusterserviceplans.servicecatalog.k8s.io
+  clientConfig:
+    caBundle: {{ b64enc $ca.Cert }}
+    service:
+      name: {{ template "fullname" . }}-webhook
+      namespace: "{{ .Release.Namespace }}"
+      path: "/validating-clusterserviceplans"
+  failurePolicy: Fail
+  rules:
+    - operations: [ "CREATE", "UPDATE" ]
+      apiGroups: ["servicecatalog.k8s.io"]
+      apiVersions: ["v1beta1"]
+      resources: ["clusterserviceplans"]
 ---
 apiVersion: v1
 kind: Secret

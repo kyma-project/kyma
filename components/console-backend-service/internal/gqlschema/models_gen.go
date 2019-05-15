@@ -100,6 +100,15 @@ type ClusterDocsTopicEvent struct {
 	ClusterDocsTopic ClusterDocsTopic      `json:"clusterDocsTopic"`
 }
 
+type ClusterMicrofrontend struct {
+	Name            string           `json:"name"`
+	Version         string           `json:"version"`
+	Category        string           `json:"category"`
+	ViewBaseURL     string           `json:"viewBaseUrl"`
+	Placement       string           `json:"placement"`
+	NavigationNodes []NavigationNode `json:"navigationNodes"`
+}
+
 type ClusterServiceBroker struct {
 	Name              string              `json:"name"`
 	Status            ServiceBrokerStatus `json:"status"`
@@ -289,6 +298,23 @@ type LocalObjectReference struct {
 type LocalObjectReferenceInput struct {
 	Kind string `json:"kind"`
 	Name string `json:"name"`
+}
+
+type Microfrontend struct {
+	Name            string           `json:"name"`
+	Version         string           `json:"version"`
+	Category        string           `json:"category"`
+	ViewBaseURL     string           `json:"viewBaseUrl"`
+	NavigationNodes []NavigationNode `json:"navigationNodes"`
+}
+
+type NavigationNode struct {
+	Label            string   `json:"label"`
+	NavigationPath   string   `json:"navigationPath"`
+	ViewURL          string   `json:"viewUrl"`
+	ShowInNavigation bool     `json:"showInNavigation"`
+	Order            int      `json:"order"`
+	Settings         Settings `json:"settings"`
 }
 
 type Pod struct {
