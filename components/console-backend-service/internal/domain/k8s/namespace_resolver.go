@@ -17,10 +17,10 @@ import (
 
 // TODO: Write tests
 
-//go:generate mockery -name=nsLister -output=automock -outpkg=automock -case=underscore
-type nsLister interface {
+//go:generate mockery -name=namespaceSvc -output=automock -outpkg=automock -case=underscore
+type namespaceSvc interface {
 	Create(name string, labels gqlschema.Labels) (*v1.Namespace, error)
-	List() ([]v1.Namespace, error)
+	List() ([]*v1.Namespace, error)
 }
 
 type gqlNamespaceConverter interface {
@@ -28,13 +28,13 @@ type gqlNamespaceConverter interface {
 }
 
 type namespaceResolver struct {
-	nsLister     nsLister
+	namespaceSvc namespaceSvc
 	appRetriever shared.ApplicationRetriever
 }
 
-func newNamespaceResolver(nsLister nsLister, appRetriever shared.ApplicationRetriever) *namespaceResolver {
+func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
 	return &namespaceResolver{
-		nsLister:     nsLister,
+		namespaceSvc: namespaceSvc,
 		appRetriever: appRetriever,
 	}
 }
@@ -43,16 +43,16 @@ func newNamespaceResolver(nsLister nsLister, appRetriever shared.ApplicationRetr
 func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName *string) ([]gqlschema.Namespace, error) {
 	var err error
 
-	var namespaces []v1.Namespace
+	var namespaces []*v1.Namespace
 	if applicationName == nil {
-		namespaces, err = r.nsLister.List()
+		namespaces, err = r.namespaceSvc.List()
 	} else {
 		var namespaceNames []string
 		namespaceNames, err = r.appRetriever.Application().ListNamespacesFor(*applicationName)
 
 		//TODO: Refactor 'ListNamespacesFor' to return []v1.Namespace and remove this workaround
 		for _, nsName := range namespaceNames {
-			namespaces = append(namespaces, v1.Namespace{
+			namespaces = append(namespaces, &v1.Namespace{
 				ObjectMeta: metav1.ObjectMeta{
 					Name: nsName,
 				},
@@ -105,7 +105,7 @@ func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name st
 
 	// temporary: add 'env' label to newly created namespaces
 	labels["env"] = "true"
-	_, err := r.nsLister.Create(name, labels)
+	_, err := r.namespaceSvc.Create(name, labels)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while creating %s `%s`", pretty.Namespace, name))
 		return gqlschema.NamespaceCreationOutput{}, gqlerror.New(err, pretty.Namespace, gqlerror.WithName(name))
