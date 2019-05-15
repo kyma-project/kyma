@@ -5,7 +5,7 @@ type: Service Brokers
 
 The AWS Service Broker is an open-source, [Open Service Broker](https://www.openservicebrokerapi.org/)-compatible API server that provisions managed services in the AWS public cloud. Kyma provides the Namespace-scoped AWS Service Broker. In each Namespace, you can configure the AWS Service Broker against different subscriptions. Install the AWS Service Broker by provisioning the **AWS Service Broker** class provided by the Helm Broker.
 
-![aws broker class](./assets/aws-class.png)
+![aws broker class](assets/aws-class.png)
 
 Once you provision the **AWS Service Broker** class, the AWS Service Broker classes are available in the Service Catalog view in a given Namespace.
 The AWS Service Broker provides these Service Classes to use with the Service Catalog:
