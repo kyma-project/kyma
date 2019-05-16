@@ -59,4 +59,4 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.navigationNodes.navigationPath** | **NO** | Specifies the path used for routing within the Console. |
 | **spec.navigationNodes.viewUrl** | **NO** | Specifies the URL used to display the content of a micro front-end. |
 | **spec.navigationNodes.showInNavigation** | **NO** | The Boolean that specifies if the micro front-end's node is visible in the navigation or not. |
-| **spec.navigationNodes.requiredPermissions** | **NO** | Specifies the list of permissions (RBAC rules) that determine if the navigation node should be shown for the current user  |
+| **spec.navigationNodes.requiredPermissions** | **NO** | Specifies the list of permissions (RBAC rules) that determine if the navigation node should be shown for the current user.  |
