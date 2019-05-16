@@ -12,7 +12,7 @@ When you prepare the ClusterDocsTopics, make sure that:
 
 This tutorial shows how you can customize the `docs-ui` view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** topic groups and a set of Markdown subdocuments. The ClusterDocsTopic points to the official Prometheus documentation from which you filter out topics you want to be visible in the UI.  
 
->*NOTE:** When you apply multiple ClusterDocsTopics, use the **order** label to specify their order. Without this label, topics are displayed in the Console UI in the order in which they are applied.
+>**NOTE:** When you apply multiple ClusterDocsTopics, sort them using the **order** label. Otherwise, the Console Ui displays the topics in the order in which you applied them.
 
 ## Prerequisites
 
@@ -20,9 +20,9 @@ This tutorial shows how you can customize the `docs-ui` view that is available i
 
 ## Steps
 
-1. Run Kyma locally or on a cluster.
+1. Install Kyma.
 
-2. Apply this ClusterDocsTopic custom resource on the cluster:
+2. In the terminal, apply these ClusterDocsTopic custom resources:
 
 ```yaml
 cat <<EOF | kubectl apply -f -
@@ -64,7 +64,7 @@ spec:
 EOF
 ```
 
-3. Check the status of both ClusterDocsTopics. Run this command:
+3. Check their status:
 
 ```
 kubectl get clusterdocstopics
@@ -78,7 +78,7 @@ prometheus-concepts                    Ready   59s
 prometheus-guides                      Ready   59s
 ```
 
-If a given resource is in the `Ready` phase and you want to get details of ClusterAssets created as a result of applying ClusterDocsTopics, such as document names and the location of Minio buckets under the **baseUrl** parameter, run this command:
+If a given resource is in the `Ready` phase and you want to get details of the created ClusterAssets, such as document names and the location of Minio buckets, run this command:
 
 ```
 kubectl get clusterasset -o yaml -l cms.kyma-project.io/docs-topic=prometheus-concepts
@@ -156,7 +156,7 @@ metadata:
   selfLink: ""
 ```
 
-4. Open the Console UI and navigate to the `docs-ui` view. The new **Prometheus** section with **Concepts** and **Guides** topic groups, and Markdown documents in an alphabetical order appear at the bottom of the documentation panel:
+4. Open the Console UI and navigate to the `docs-ui` view. The new **Prometheus** section with **Concepts** and **Guides** topic groups and alphabetically ordered Markdown documents appear at the bottom of the documentation panel:
 
 ![](./assets/prometheus.png)
 
@@ -179,7 +179,7 @@ status:
   message: "The file is not valid against the provided json schema"
 ```
 
-Alternatively, analyze logs of the Asset Store Controller Manager:
+Alternatively, you can analyze logs of the Asset Store Controller Manager:
 
 ```
 kubectl -n kyma-system logs -l 'app=asset-store-controller-manager'
