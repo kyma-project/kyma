@@ -65,7 +65,7 @@ spec:
             - name: dex-config
               mountPath: /etc/dex/cfg
           command: ["/bin/sh"]
-          args: ["-c", "sleep 10; cd /app/tests/ && ./run-compiled-tests.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+          args: ["-c", "sleep 10; cd /app/tests/ && ./run-compiled-tests.sh; exit_code=$?; pkill -TERM pilot-agent; sleep 4; exit $exit_code;"]
       # Needed for detecting if SCI is enabled
       volumes:
         - name: dex-config

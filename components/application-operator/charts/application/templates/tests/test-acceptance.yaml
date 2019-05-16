@@ -16,7 +16,7 @@ spec:
     - name: {{.Release.Name }}-event-service-acceptance
       image: {{ .Values.global.eventServiceTestsImage }}
       command: ["/bin/sh"]
-      args: ["-c", "sleep 10; ./entrypoint.sh; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+      args: ["-c", "sleep 10; ./entrypoint.sh; exit_code=$?; pkill -TERM pilot-agent; sleep 4; exit $exit_code;"]
       imagePullPolicy: {{ .Values.acceptanceTest.image.pullPolicy }}
       env:
         - name: EVENT_SERVICE_URL

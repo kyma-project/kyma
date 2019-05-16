@@ -28,7 +28,7 @@ spec:
         image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_apiserver_proxy.dir }}apiserver-proxy-test:{{ .Values.global.test_apiserver_proxy.version }}
         imagePullPolicy: Always
         command: ["/bin/bash"]
-        args: ["-c", "sleep 10; ./test.sh; exit_code=$?; pkill -INT pilot-agent; exit $exit_code;"]
+        args: ["-c", "sleep 10; ./test.sh; exit_code=$?; pkill -TERM pilot-agent; exit $exit_code;"]
         env:
             - name: POD_NAME
               valueFrom:

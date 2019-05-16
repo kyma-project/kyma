@@ -73,7 +73,7 @@ spec:
     image: {{ .Values.containerRegistry.path }}/develop/load-test:{{ .Values.image.tag }}
     imagePullPolicy: IfNotPresent
     command: ["/bin/sh"]
-    args: ["-c", "sleep 10; /load-test; exit_code=$?; pkill -INT pilot-agent; sleep 4; exit $exit_code;"]
+    args: ["-c", "sleep 10; /load-test; exit_code=$?; pkill -TERM pilot-agent; sleep 4; exit $exit_code;"]
     env:
     - name: KUBELESS_CONFIG
       value: {{ .Values.env.kubelessConfig }}
