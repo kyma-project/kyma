@@ -4,7 +4,7 @@ title: Overview
 
 The Helm Broker is a [Service Broker](/components/service-catalog/#service-brokers-overview) which exposes Helm charts as Service Classes in the Service Catalog. To do so, the Helm Broker uses the concept of bundles. Bundles are abstraction layers over Helm charts which provide all necessary information to convert the charts into Service Classes.
 
-The Helm Broker fetches bundles which contain a set of specific [files](#details-create-a-bundle). You must place your bundles in a repository of an appropriate [format](#details-create-a-bundles-repository). By default, the Helm Broker fetches bundles from the release of the [`bundles`](https://github.com/kyma-project/bundles/releases) repository. You can also [configure](#configuration-configuration) the Helm Broker to fetch bundle definitions from any remote HTTPS server.
+The Helm Broker fetches bundles which contain a set of specific [files](#details-create-a-bundle). You must place your bundles in a repository of an appropriate [format](#details-create-a-bundles-repository). By default, the Helm Broker fetches bundles from the release of the [`bundles`](https://github.com/kyma-project/bundles/releases) repository. You can also [configure](#tutorials-tutorials) the Helm Broker to fetch bundle definitions from any remote HTTP(S) server.
 
 In Kyma, you can use bundles to install the following Service Brokers:
 
