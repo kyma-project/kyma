@@ -67,7 +67,7 @@ Follow there instructions to install Kyma from a release or from sources:
        </summary>
      
         ```bash
-        git clone https://github.com/kyma-project/kyma.git ; cd kyma
+        git clone https://github.com/kyma-project/kyma.git
         ```
        </details>
        <details>
@@ -76,7 +76,7 @@ Follow there instructions to install Kyma from a release or from sources:
        </summary>
      
        ```bash
-       git clone git@github.com:kyma-project/kyma.git ; cd kyma
+       git clone git@github.com:kyma-project/kyma.git
        ```
        </details>
      </div>
