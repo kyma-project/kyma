@@ -25,7 +25,7 @@ func newNamespaceService(informer cache.SharedIndexInformer, client corev1.CoreV
 		"labelSelector": func(obj interface{}) ([]string, error) {
 			namespace, ok := obj.(*v1.Namespace)
 			if !ok {
-				return nil, fmt.Errorf("Cannot convert item")
+				return nil, fmt.Errorf("Cannot cast item")
 			}
 			return []string{namespace.Labels["env"]}, nil
 		},
