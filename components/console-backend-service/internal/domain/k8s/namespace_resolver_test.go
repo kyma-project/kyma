@@ -30,16 +30,16 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		expected := []gqlschema.Namespace{
 			expectedResult, expectedResult,
 		}
-		resourceGetter := automock.NewNamespaceSvc()
+		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		resourceGetter.On("List").Return(resources, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
+		svc.On("List").Return(resources, nil).Once()
+		defer svc.AssertExpectations(t)
 
 		converter := automock.NewNamespaceConverter()
 		converter.On("ToGQLs", resources).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 
-		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 		resolver.SetNamespaceConverter(converter)
 
 		result, err := resolver.NamespacesQuery(nil, nil)
@@ -51,16 +51,16 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 	t.Run("Empty", func(t *testing.T) {
 		resources := []*v1.Namespace{}
 		expected := []gqlschema.Namespace(nil)
-		resourceGetter := automock.NewNamespaceSvc()
+		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		resourceGetter.On("List").Return(resources, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
+		svc.On("List").Return(resources, nil).Once()
+		defer svc.AssertExpectations(t)
 
 		converter := automock.NewNamespaceConverter()
 		converter.On("ToGQLs", resources).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 
-		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 		resolver.SetNamespaceConverter(converter)
 
 		result, err := resolver.NamespacesQuery(nil, nil)
@@ -70,11 +70,11 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 	})
 
 	t.Run("Error", func(t *testing.T) {
-		resourceGetter := automock.NewNamespaceSvc()
+		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		resourceGetter.On("List").Return(nil, errors.New("Error")).Once()
-		defer resourceGetter.AssertExpectations(t)
-		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		svc.On("List").Return(nil, errors.New("Error")).Once()
+		defer svc.AssertExpectations(t)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 
 		result, err := resolver.NamespacesQuery(nil, nil)
 
@@ -86,16 +86,16 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 	t.Run("ErrorConverting", func(t *testing.T) {
 		resources := []*v1.Namespace{}
 		expected := errors.New("Test")
-		resourceGetter := automock.NewNamespaceSvc()
+		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		resourceGetter.On("List").Return(resources, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
+		svc.On("List").Return(resources, nil).Once()
+		defer svc.AssertExpectations(t)
 
 		converter := automock.NewNamespaceConverter()
 		converter.On("ToGQLs", resources).Return(nil, expected).Once()
 		defer converter.AssertExpectations(t)
 
-		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 		resolver.SetNamespaceConverter(converter)
 
 		result, err := resolver.NamespacesQuery(nil, nil)
@@ -116,11 +116,11 @@ func TestNamespaceResolver_CreateNamespaceMutationn(t *testing.T) {
 			Labels: labels,
 		}
 
-		resourceGetter := automock.NewNamespaceSvc()
+		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		resourceGetter.On("Create", name, labels).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		svc.On("Create", name, labels).Return(resource, nil).Once()
+		defer svc.AssertExpectations(t)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 
 		result, err := resolver.CreateNamespaceMutation(nil, name, labels)
 
@@ -132,11 +132,11 @@ func TestNamespaceResolver_CreateNamespaceMutationn(t *testing.T) {
 		name := "exampleName"
 		labels := gqlschema.Labels{}
 
-		resourceGetter := automock.NewNamespaceSvc()
+		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
-		resourceGetter.On("Create", name, labels).Return(nil, errors.New("Error")).Once()
-		defer resourceGetter.AssertExpectations(t)
-		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		svc.On("Create", name, labels).Return(nil, errors.New("Error")).Once()
+		defer svc.AssertExpectations(t)
+		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 
 		result, err := resolver.CreateNamespaceMutation(nil, name, labels)
 
