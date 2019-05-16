@@ -30,6 +30,7 @@ spec:
         - ip: {{ .Values.minikubeIP }}
           hostnames:
             - "dex.{{ .Values.global.ingress.domainName }}"
+            - "minio.{{ .Values.global.ingress.domainName }}"
       {{ end }}
       containers:
       - name: {{ .Chart.Name }}
@@ -96,6 +97,8 @@ spec:
             value: "http://connector-service-internal-api.kyma-integration.svc.cluster.local:8080"
           - name: APP_APPLICATION_CONNECTOR_HTTP_CALL_TIMEOUT
             value: "2s"
+          - name: APP_APPLICATION_VERIFY_SSL
+            value: "{{ .Values.verifySSL }}"
           - name: APP_OIDC_ISSUER_URL
             value: "https://dex.{{ .Values.global.ingress.domainName }}"
           - name: APP_OIDC_CLIENT_ID

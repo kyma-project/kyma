@@ -54,12 +54,20 @@ type ClusterMicroFrontendSpec struct {
 }
 
 type NavigationNode struct {
-	Label            string                `json:"label"`
-	NavigationPath   string                `json:"navigationPath"`
-	ViewURL          string                `json:"viewUrl"`
-	ShowInNavigation bool                  `json:"showInNavigation"`
-	Order            int                   `json:"order"`
-	Settings         *runtime.RawExtension `json:"settings"`
+	Label               string                `json:"label"`
+	NavigationPath      string                `json:"navigationPath"`
+	ViewURL             string                `json:"viewUrl"`
+	ShowInNavigation    bool                  `json:"showInNavigation"`
+	Order               int                   `json:"order"`
+	Settings            *runtime.RawExtension `json:"settings"`
+	RequiredPermissions []RequiredPermission  `json:"requiredPermissions"`
+	ExternalLink        string                `json:"externalLink"`
+}
+
+type RequiredPermission struct {
+	APIGroup string   `json:"apiGroup"`
+	Resource string   `json:"resource"`
+	Verbs    []string `json:"verbs"`
 }
 
 func (n *NavigationNode) UnmarshalJSON(data []byte) error {

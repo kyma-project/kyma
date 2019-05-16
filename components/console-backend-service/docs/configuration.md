@@ -27,6 +27,7 @@ Use the following environment variables to configure the application:
 | APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE | Yes |  | The namespace with gateway services. |
 | APP_APPLICATION_CONNECTOR_URL | Yes |  | The address of the connector service. |
 | APP_APPLICATION_CONNECTOR_CALL_HTTP_TIMEOUT | No | `500ms` | The timeout of the HTTP call. |
+| APP_APPLICATION_VERIFY_SSL | No | `true` | Ignore invalid SSL certificates. |
 | APP_OIDC_ISSUER_URL | Yes | | The URL of the OpenID issuer. Used to verify the OIDC JWT. |
 | APP_OIDC_CLIENT_ID | Yes | | The client ID for which the JWT must be issued for. |
 | APP_OIDC_CA_FILE | No | host's root CA set | One of the Certificate Authorities defined in this file is used to verify the OpenID server's certificate. |

@@ -6,7 +6,7 @@ Ark is a tool to back up and restore Kubernetes resources and persistent volumes
 
 ## Details
 
-The Ark installation contains only the configuration for storage providers. The Backup custom resource defines the backup content and scope configuration. To comply with the specific Ark architecture, Kyma delivers tested sample files you can use to run the [backup process](https://github.com/kyma-project/kyma/tree/master/docs/backup/docs). Add all components which store data in this configuration to allow administrators to set up a proper backup process.
+The Ark installation contains only the configuration for storage providers. The Backup custom resource defines the backup content and scope configuration. To comply with the specific Ark architecture, Kyma delivers tested sample files you can use to run the [backup process](https://kyma-project.io/docs/components/backup/). Add all components which store data in this configuration to allow administrators to set up a proper backup process.
 
 ### Add components to backup
 

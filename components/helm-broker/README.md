@@ -4,8 +4,8 @@
 
 The Helm Broker is an implementation of a service broker which runs on the Kyma cluster and deploys applications into the Kubernetes cluster using Kyma bundles, and the [Helm](https://github.com/kubernetes/helm) client. A bundle is an abstraction layer over a Helm chart which allows you to represent it as a ClusterServiceClass in the Service Catalog. For example, a bundle can provide plan definitions or binding details. The Helm Broker fetches bundles definitions from an HTTP servers. A list of HTTP bundles repositories is defined in the config map and can be changed in the runtime.
 
-For the details about Helm Broker configuration, see [this](../../docs/helm-broker/docs/05-04-configure-hb.md) document. See the [Create a bundle](../../docs/helm-broker/docs/03-01-create-bundles.md) and [Bind bundles](../../docs/helm-broker/docs/03-02-bind-bundles.md) documents to learn more about bundles.
-The Helm Broker implements the Service Broker API. For more information about the Service Brokers, see the [Service Brokers](../../docs/service-catalog/docs/13-01-service-brokers.md) overview document.
+For the details about Helm Broker configuration, see [this](../../docs/helm-broker/05-04-configure-hb.md) document. See the [Create a bundle](../../docs/helm-broker/03-01-create-bundles.md) and [Bind bundles](../../docs/helm-broker/03-02-bind-bundles.md) documents to learn more about bundles.
+The Helm Broker implements the Service Broker API. For more information about the Service Brokers, see the [Service Brokers](../../docs/service-catalog/13-01-service-brokers.md) overview document.
 
 ## Prerequisites
 
