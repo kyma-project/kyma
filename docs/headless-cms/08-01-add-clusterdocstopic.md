@@ -3,14 +3,14 @@ title: Add a ClusterDocsTopic
 type: Tutorial
 ---
 
-Headless CMS allows you to extend documentation in the Console UI with new topic groups by applying ClusterDocsTopic custom resources on your cluster.
+Headless CMS allows you to extend documentation topics in the Console UI using ClusterDocsTopic custom resources.
 
 When you prepare ClusterDocsTopics, make sure that:
-- ClusterDocsTopics follow the [custom resource definition](#custom-resource-clusterdocstopic).
-- Documents start with metadata, including `Title` for the document name and optional `Type` for additional document grouping.
-- Documents are written in Markdown and follow simple Markdown syntax. Any customizations can result in incorrect images or links rendering. To avoid such issues, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines).
+- ClusterDocsTopics have a proper [custom resource definition](#custom-resource-clusterdocstopic).
+- Documents start with metadata, including obligatory `Title` for the document name and optional `Type` for any additional document grouping.
+- Documents are written in Markdown and follow a simple Markdown syntax. Any customizations can result in incorrect images or links rendering. To avoid such issues, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines).
 
-This tutorial shows how you can customize the `docs-ui` view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** topic groups and a set of Markdown subdocuments. The ClusterDocsTopic points to the official Prometheus documentation from which you filter out topics you want to be visible in the UI.  
+This tutorial shows how you can customize the `docs-ui` view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** topic groups and a set of Markdown subdocuments. The document sources used in the ClusterDocsTopics point to the official Prometheus documentation which specific topics filtered out.  
 
 >**NOTE:** When you apply multiple ClusterDocsTopics, sort them using the **order** label. Otherwise, the Console UI displays the topics in the order in which you applied them.
 
@@ -70,7 +70,7 @@ EOF
 kubectl get clusterdocstopics
 ```
 
-The resources should be in the `Ready` phase:
+The custom resources should be in the `Ready` phase:
 
 ```
 NAME                                   PHASE   AGE
@@ -78,7 +78,7 @@ prometheus-concepts                    Ready   59s
 prometheus-guides                      Ready   59s
 ```
 
-If a given resource is in the `Ready` phase and you want to get details of the created ClusterAssets, such as document names and the location of Minio buckets, run this command:
+If a given custom resource is in the `Ready` phase and you want to get details of the created ClusterAssets, such as document names and the location of Minio buckets, run this command:
 
 ```
 kubectl get clusterasset -o yaml -l cms.kyma-project.io/docs-topic=prometheus-concepts
