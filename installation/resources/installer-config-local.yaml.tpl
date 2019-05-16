@@ -110,7 +110,7 @@ metadata:
     component: knative-serving
     kyma-project.io/installation: ""
 data:
-  knative-serving.domainName: "kyma.local"
+  knative-serving.domainName: "papa.dudu"
 ---
 apiVersion: v1
 kind: ConfigMap

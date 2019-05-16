@@ -27,7 +27,10 @@ In addition to the tools required to install Kyma on a custer, you also need:
     ```
 
 4. Prepare the deployment file.
-
+<!--
+TODO: This should be the end of this file. We're duplicating instructions from two other files here.
+TODO: The next part of this instruction should point to the other ones: "xip.io" or "own domain".
+--!>
 <div tabs>
   <details>
   <summary>
@@ -38,13 +41,7 @@ In addition to the tools required to install Kyma on a custer, you also need:
 Run this command:
 
 ```
-(cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__.*__//g" > my-kyma.yaml
-```
-
-Alternatively, run this command if you deploy Kyma with GKE version 1.12.6-gke.X and above:
-
-```
-(cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+(cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) > my-kyma.yaml
 ```
 
   </details>
@@ -55,12 +52,6 @@ Alternatively, run this command if you deploy Kyma with GKE version 1.12.6-gke.X
 
 
 Run this command:
-
-```
-(cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
-```
-
-Alternatively, run this command if you deploy Kyma with GKE version 1.12.6-gke.X and above:
 
 ```
 (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
