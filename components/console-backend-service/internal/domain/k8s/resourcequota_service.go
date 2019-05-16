@@ -7,7 +7,8 @@ import (
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
-	metaV1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/api/resource"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreV1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
 )
@@ -16,15 +17,15 @@ type resourceQuotaService struct {
 	rqInformer cache.SharedIndexInformer
 	rsInformer cache.SharedIndexInformer
 	ssInformer cache.SharedIndexInformer
-	podClient  coreV1.CoreV1Interface
+	client     coreV1.CoreV1Interface
 }
 
-func newResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer cache.SharedIndexInformer, ssInformer cache.SharedIndexInformer, podClient coreV1.CoreV1Interface) *resourceQuotaService {
+func newResourceQuotaService(rqInformer cache.SharedIndexInformer, rsInformer cache.SharedIndexInformer, ssInformer cache.SharedIndexInformer, client coreV1.CoreV1Interface) *resourceQuotaService {
 	return &resourceQuotaService{
 		rqInformer: rqInformer,
 		rsInformer: rsInformer,
 		ssInformer: ssInformer,
-		podClient:  podClient,
+		client:     client,
 	}
 }
 
@@ -41,6 +42,28 @@ func (svc *resourceQuotaService) ListResourceQuotas(namespace string) ([]*v1.Res
 			return nil, fmt.Errorf("unexpected item type: %T, should be *ResourceQuota", item)
 		}
 		result = append(result, rq)
+	}
+
+	return result, nil
+}
+
+func (svc *resourceQuotaService) CreateResourceQuota(namespace string, name string, memoryLimits string, memoryRequests string) (*v1.ResourceQuota, error) {
+	ResourceQuota := &v1.ResourceQuota{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1.ResourceQuotaSpec{
+			Hard: v1.ResourceList{
+				v1.ResourceLimitsMemory:   resource.MustParse(memoryLimits),
+				v1.ResourceRequestsMemory: resource.MustParse(memoryRequests),
+			},
+		},
+	}
+
+	result, err := svc.client.ResourceQuotas(namespace).Create(ResourceQuota)
+	if err != nil {
+		return nil, errors.Wrap(err, "while creating resource quota")
 	}
 
 	return result, nil
@@ -90,7 +113,7 @@ func (svc *resourceQuotaService) ListPods(namespace string, labelSelector map[st
 
 	selector := strings.Join(selectors, ",")
 
-	pods, err := svc.podClient.Pods(namespace).List(metaV1.ListOptions{
+	pods, err := svc.client.Pods(namespace).List(metav1.ListOptions{
 		LabelSelector: selector,
 	})
 	if err != nil {
