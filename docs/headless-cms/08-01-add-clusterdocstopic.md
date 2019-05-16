@@ -64,7 +64,7 @@ spec:
 EOF
 ```
 
-3. Check their status:
+3. Check the status of custom resources:
 
 ```
 kubectl get clusterdocstopics
