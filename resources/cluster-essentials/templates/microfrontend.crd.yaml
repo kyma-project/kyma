@@ -50,6 +50,8 @@ spec:
                     type: string
                   showInNavigation:
                     type: boolean
+                  externalLink:
+                    type: string
                   requiredPermissions:
                     type: array
                     items:

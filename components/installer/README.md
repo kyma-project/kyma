@@ -81,7 +81,7 @@ Run this command to uninstall Kyma:
 
 ## Custom resource file
 
-The [Installation custom resource file](https://github.com/kyma-project/kyma/blob/master/docs/kyma/docs/06-01-installation.md) provides the basic information for Kyma installation.
+The [Installation custom resource file](https://kyma-project.io/docs/root/kyma/#custom-resource-installation) provides the basic information for Kyma installation.
 
 The required properties include:
 
