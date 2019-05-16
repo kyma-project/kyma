@@ -14,6 +14,7 @@ import (
 //go:generate mockery -name=resourceQuotaLister -output=automock -outpkg=automock -case=underscore
 type resourceQuotaLister interface {
 	ListResourceQuotas(namespace string) ([]*v1.ResourceQuota, error)
+	CreateResourceQuota(namespace string, name string, memoryLimits string, memoryRequests string) (*v1.ResourceQuota, error)
 }
 
 func newResourceQuotaResolver(resourceQuotaLister resourceQuotaLister) *resourceQuotaResolver {
@@ -37,4 +38,14 @@ func (r *resourceQuotaResolver) ResourceQuotasQuery(ctx context.Context, namespa
 	}
 
 	return r.converter.ToGQLs(items), nil
+}
+
+func (r *resourceQuotaResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, memoryLimits string, memoryRequests string) (*gqlschema.ResourceQuota, error) {
+	item, err := r.rqLister.CreateResourceQuota(namespace, name, memoryLimits, memoryRequests)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while creating %s [namespace: %s]", pretty.ResourceQuotas, namespace))
+		return nil, gqlerror.New(err, pretty.ResourceQuotas, gqlerror.WithNamespace(namespace))
+	}
+
+	return r.converter.ToGQL(item), nil
 }
