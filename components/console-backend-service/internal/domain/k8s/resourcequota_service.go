@@ -82,9 +82,9 @@ func (svc *resourceQuotaService) ListStatefulSets(namespace string) ([]*apps.Sta
 	return result, nil
 }
 
-func (svc *resourceQuotaService) ListPods(namespace string, labelSelector map[string]string) ([]v1.Pod, error) {
+func (svc *resourceQuotaService) ListPods(namespace string, envLabelSelector map[string]string) ([]v1.Pod, error) {
 	selectors := make([]string, 0)
-	for key, value := range labelSelector {
+	for key, value := range envLabelSelector {
 		selectors = append(selectors, fmt.Sprintf("%s=%s", key, value))
 	}
 
@@ -94,7 +94,7 @@ func (svc *resourceQuotaService) ListPods(namespace string, labelSelector map[st
 		LabelSelector: selector,
 	})
 	if err != nil {
-		return nil, errors.Wrapf(err, "while listing Pods in namespace: %selector, with labelSelector: %selector", namespace, labelSelector)
+		return nil, errors.Wrapf(err, "while listing Pods in namespace: %selector, with envLabelSelector: %selector", namespace, envLabelSelector)
 	}
 
 	return pods.Items, err

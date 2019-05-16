@@ -1,14 +1,11 @@
 package k8s
 
 import (
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/state"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	v1 "k8s.io/api/core/v1"
 )
 
-type namespaceConverter struct {
-	extractor state.ContainerExtractor
-}
+type namespaceConverter struct{}
 
 func (c *namespaceConverter) ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error) {
 	if in == nil {

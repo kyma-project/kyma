@@ -69,7 +69,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		assert.Equal(t, expected, result)
 	})
 
-	t.Run("Error", func(t *testing.T) {
+	t.Run("ErrorListing", func(t *testing.T) {
 		svc := automock.NewNamespaceSvc()
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		svc.On("List").Return(nil, errors.New("Error")).Once()
@@ -128,7 +128,7 @@ func TestNamespaceResolver_CreateNamespaceMutationn(t *testing.T) {
 		assert.Equal(t, expected, result)
 	})
 
-	t.Run("Success", func(t *testing.T) {
+	t.Run("Error", func(t *testing.T) {
 		name := "exampleName"
 		labels := gqlschema.Labels{}
 

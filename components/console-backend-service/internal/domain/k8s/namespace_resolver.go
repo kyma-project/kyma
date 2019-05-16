@@ -105,9 +105,9 @@ func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschem
 	return appNames, nil
 }
 
-func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) { //namespaceoutput
+func (r *namespaceResolver) CreateNamespaceMutation(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
 
-	// temporary: add 'env' label to newly created namespaces
+	// TODO: remove the 'env' label when the method to distinguish if it's a system namespace or not
 	labels["env"] = "true"
 	_, err := r.namespaceSvc.Create(name, labels)
 	if err != nil {

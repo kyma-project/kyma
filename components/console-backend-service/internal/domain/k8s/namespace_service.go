@@ -12,8 +12,6 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-const envLabelSelector = "true"
-
 type namespaceService struct {
 	informer cache.SharedIndexInformer
 	client   corev1.CoreV1Interface
@@ -22,10 +20,10 @@ type namespaceService struct {
 func newNamespaceService(informer cache.SharedIndexInformer, client corev1.CoreV1Interface) (*namespaceService, error) {
 
 	err := informer.AddIndexers(cache.Indexers{
-		"labelSelector": func(obj interface{}) ([]string, error) {
+		"envLabelSelector": func(obj interface{}) ([]string, error) {
 			namespace, ok := obj.(*v1.Namespace)
 			if !ok {
-				return nil, fmt.Errorf("Cannot cast item")
+				return nil, fmt.Errorf("Incorrect item type: %T, should be: *Namespace", obj)
 			}
 			return []string{namespace.Labels["env"]}, nil
 		},
@@ -41,7 +39,7 @@ func newNamespaceService(informer cache.SharedIndexInformer, client corev1.CoreV
 }
 
 func (svc *namespaceService) List() ([]*v1.Namespace, error) {
-	items, err := svc.informer.GetIndexer().ByIndex("labelSelector", "true")
+	items, err := svc.informer.GetIndexer().ByIndex("envLabelSelector", "true")
 
 	if err != nil {
 		return nil, errors.Wrapf(err, "while listing %s", pretty.Namespace)
