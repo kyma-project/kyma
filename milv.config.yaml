@@ -35,7 +35,7 @@ files:
   - path: "./kyma/docs/kyma/04-06-gke-xip.io-domain.md"
     config:
       white-list-external: ["https://console.{WILDCARD_DNS}.xip.io"]
-  - path: "./kyma/docs/helm-broker/05-04-configure-hb.md"
+  - path: "./kyma/docs/helm-broker/08-01-configure-hb.md"
     config:
       white-list-external: ["https://{host}/{path}/{bundle_repo_version"]
   - path: "./kyma/docs/application-connector/08-09-revoke-cert.md"
@@ -55,4 +55,4 @@ files:
       white-list-external: ["https://{VIRTUALSERVICE_NAME}.{DOMAIN"]
   - path: "./kyma/docs/asset-store/05-01-asset-store.md"
     config:
-      white-list-external: ["https://minio.{DOMAIN}/minio"] 
+      white-list-external: ["https://minio.{DOMAIN}/minio"]
