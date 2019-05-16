@@ -56,6 +56,6 @@ global:
     version: 4c614be5
   application_broker:
     dir: develop/
-    version: 426e984b
+    version: e9e5bd30
 connectivity_certs_controller:
   enabled: false

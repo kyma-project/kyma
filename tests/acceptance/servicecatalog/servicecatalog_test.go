@@ -17,7 +17,6 @@ import (
 	corev1 "github.com/kubernetes/client-go/kubernetes/typed/core/v1"
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/repeat"
 	"github.com/pkg/errors"
-	"github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	apimerr "k8s.io/apimachinery/pkg/api/errors"
@@ -27,13 +26,15 @@ import (
 )
 
 const (
-	helmBrokerURLEnvName    = "HELM_BROKER_URL"
-	releaseNamespaceEnvName = "RELEASE_NAMESPACE"
+	helmBrokerURLEnvName        = "HELM_BROKER_URL"
+	applicationBrokerURLEnvName = "APPLICATION_BROKER_URL"
+	releaseNamespaceEnvName     = "RELEASE_NAMESPACE"
 )
 
 func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 	for testName, brokerURL := range map[string]string{
-		"Helm Broker": os.Getenv(helmBrokerURLEnvName),
+		"Helm Broker":        os.Getenv(helmBrokerURLEnvName),
+		"Application Broker": os.Getenv(applicationBrokerURLEnvName),
 		// "<next broker>": os.Getenv("<broker url env name>"),
 	} {
 		t.Run(testName, func(t *testing.T) {
@@ -49,68 +50,6 @@ func TestBrokerHasIstioRbacAuthorizationRules(t *testing.T) {
 			}, 5*time.Second)
 		})
 	}
-}
-
-func TestServiceCatalogContainsABServiceClasses(t *testing.T) {
-	// given
-	k8sConfig, err := restclient.InClusterConfig()
-	require.NoError(t, err)
-	aClient, err := appClient.NewForConfig(k8sConfig)
-	require.NoError(t, err)
-	mClient, err := mappingClient.NewForConfig(k8sConfig)
-	require.NoError(t, err)
-	k8sClient, err := corev1.NewForConfig(k8sConfig)
-	require.NoError(t, err)
-	releaseNS := os.Getenv(releaseNamespaceEnvName)
-	name := fmt.Sprintf("test-acc-app-%s", rand.String(4))
-	fixApp := fixApplication(name)
-
-	broker := brokerURL{
-		namespace: fmt.Sprintf("test-acc-ns-broker-%s", rand.String(4)),
-		prefix:    "ab-ns-for-",
-	}
-	var brokerServices []v2.Service
-
-	t.Log("Creating Application")
-	app, err := aClient.ApplicationconnectorV1alpha1().Applications().Create(fixApp)
-	require.NoError(t, err)
-
-	t.Logf("Creating Namespace %s", broker.namespace)
-	_, err = k8sClient.Namespaces().Create(fixNamespace(broker.namespace))
-	require.NoError(t, err)
-
-	defer func() {
-		if t.Failed() {
-			testDetailsReport(t, brokerServices, broker.namespace)
-		}
-		err = k8sClient.Namespaces().Delete(broker.namespace, &metav1.DeleteOptions{})
-		assert.NoError(t, err)
-		err = aClient.ApplicationconnectorV1alpha1().Applications().Delete(app.Name, &metav1.DeleteOptions{
-			GracePeriodSeconds: new(int64), // zero
-		})
-		assert.NoError(t, err)
-	}()
-
-	// when
-	t.Log("Creating ApplicationMapping")
-	_, err = mClient.ApplicationconnectorV1alpha1().ApplicationMappings(broker.namespace).Create(fixApplicationMapping(name))
-	require.NoError(t, err)
-
-	// then
-	repeat.FuncAtMost(t, func() error {
-		brokerServices, err = getCatalogForBroker(broker.buildURL(releaseNS))
-		if err != nil {
-			return errors.Wrap(err, "while getting catalog")
-		}
-		for _, svc := range brokerServices {
-			if svc.ID == fixApp.Spec.Services[0].ID {
-				return nil
-			}
-		}
-		return fmt.Errorf("%s catalog response should contains service with ID: %s", broker, fixApp.Spec.Services[0].ID)
-	}, time.Second*90)
-
-	awaitCatalogContainsServiceClasses(t, broker.namespace, timeoutPerAssert, brokerServices)
 }
 
 func TestServiceCatalogResourcesAreCleanUp(t *testing.T) {

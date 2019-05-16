@@ -2,7 +2,7 @@
 
 ## Overview
 
-The Application Broker (AB) provides applications in the [Service Catalog](../../docs/service-catalog/docs/01-01-service-catalog.md).
+The Application Broker (AB) provides applications in the [Service Catalog](../../docs/service-catalog/01-01-service-catalog.md).
 An Application represents a remote application connected to the Kyma instance.
 The AB implements the [Service Broker API](https://github.com/openservicebrokerapi/servicebroker/blob/master/spec.md).
 
@@ -30,6 +30,7 @@ Before each commit, use the `before-commit.sh` script or the `make build` comman
 |-----|---------|--------|------------|
 |**APP_PORT** | NO | `8080` | The port on which the HTTP server listens |
 |**APP_BROKER_RELIST_DURATION_WINDOW** | YES | - | Time period after which the AB synchronizes with the Service Catalog if a new Application is added. In case more than one Application is added, synchronization is performed only once. |
+| **APP_SERVICE_NAME** | YES | - | The name of the Kubernetes service which exposes the Service Brokers API |
 | **APP_UNIQUE_SELECTOR_LABEL_KEY** | YES | - | Defined label key selector which allows uniquely identify AB pod's |
 | **APP_UNIQUE_SELECTOR_LABEL_VALUE** | YES | - | Defined label value selector which allows uniquely identify AB pod's |
 | **NAMESPACE** | YES | - | AB working Namespace |

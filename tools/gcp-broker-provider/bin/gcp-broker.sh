@@ -4,6 +4,7 @@
 #
 # Expected environment variables:
 #   - WORKING_NAMESPACE - name of the namespace where GCP Broker should be installed
+#   - GCP_SECRET_NAME - name of the secret for the GCP Broker which should exist in the WORKING_NAMESPACE
 #
 # Input flags:
 #   - action - possible values: provision or deprovision
@@ -11,7 +12,6 @@
 set -o errexit # exit immediately if a command exits with a non-zero status.
 
 readonly CURRENT_DIR="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
-readonly GCP_SECRET_NAME="gcp-broker-data"
 
 trap cleanup EXIT SIGINT SIGTERM
 

@@ -79,7 +79,7 @@ func (*bucketHandler) isOnAddOrUpdate(object MetaAccessor, status v1alpha2.Commo
 }
 
 func (*bucketHandler) isOnFailed(status v1alpha2.CommonBucketStatus) bool {
-	return status.Phase == v1alpha2.BucketFailed && status.Reason != pretty.BucketNotFound.String()
+	return status.Phase == v1alpha2.BucketFailed
 }
 
 func (*bucketHandler) isOnDelete(object MetaAccessor) bool {
@@ -88,6 +88,8 @@ func (*bucketHandler) isOnDelete(object MetaAccessor) bool {
 
 func (h *bucketHandler) onFailed(object MetaAccessor, spec v1alpha2.CommonBucketSpec, status v1alpha2.CommonBucketStatus) (*v1alpha2.CommonBucketStatus, error) {
 	switch status.Reason {
+	case pretty.BucketNotFound.String():
+		return h.onAddOrUpdate(object, spec, status)
 	case pretty.BucketCreationFailure.String():
 		return h.onAddOrUpdate(object, spec, status)
 	case pretty.BucketVerificationFailure.String():
@@ -107,9 +109,8 @@ func (h *bucketHandler) onReady(object MetaAccessor, spec v1alpha2.CommonBucketS
 		return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketFailed, pretty.BucketVerificationFailure, err.Error()), err
 	}
 	if !exists {
-		h.logInfof("Remote bucket %s has been removed", status.RemoteName)
 		h.recordWarningEventf(object, pretty.BucketNotFound, status.RemoteName)
-		return h.getStatus(object, status.RemoteName, status.URL, v1alpha2.BucketFailed, pretty.BucketNotFound, status.RemoteName), nil
+		return h.getStatus(object, "", "", v1alpha2.BucketFailed, pretty.BucketNotFound, status.RemoteName), errors.Errorf(pretty.BucketNotFound.String(), status.RemoteName)
 	}
 	h.logInfof("Bucket exists")
 
