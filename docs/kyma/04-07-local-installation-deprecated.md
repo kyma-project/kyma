@@ -3,11 +3,12 @@ title: Install Kyma locally
 type: Installation
 ---
 
+>**WARNING:** Deprecated TBD
+
 This Installation guide shows you how to quickly deploy Kyma locally on the MacOS and Linux platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites and instructions on how to install Kyma on your machine, as well as the troubleshooting tips.
 
 ## Prerequisites
 
-- [Kyma CLI](https://github.com/kyma-project/cli) 0.6.1
 - [Docker](https://www.docker.com/get-started)
 - [Minikube](https://github.com/kubernetes/minikube) 0.33.0
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
@@ -24,98 +25,84 @@ Virtualization:
 
 ## Install Kyma and access the Console UI
 
-Follow there instructions to install Kyma from a release or from sources:
-<div tabs>
-  <details>
-  <summary>
-  From a release
-  </summary>
-    
-  1. Provision minikube this command:
-    
-     ```bash
-     kyma provision minikube
-     ```
-     > **NOTE:** Kyma CLI command above uses default minikube vm driver installed for your OS, for list of default vm driver for supported OS and other available vm drivers you can read from [here](http://github.com/kyma-project/cli)
-  2. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.  
-  
-  3. Export the release version as an environment variable:
-     ```bash
-     export KYMA_RELEASE={KYMA_RELEASE_VERSION}
-     ```
-  4. Install Kyma release `$KYMA_RELEASE` in minikube:
-     ```bash
-     kyma install -r $KYMA_RELEASE
-     ```
-     
-     Wait until installation process completed
-     
-  </details>
-  <details>
-  <summary>
-  From sources
-  </summary>
-    
-  1. Open a terminal window and navigate to a space in which you want to store local Kyma sources.
-    
-  2. Clone the Kyma repository to your machine using either HTTPS or SHH. Run this command to clone the repository.
-     
-     <div tabs>
-       <details>
-       <summary>
-       HTTPS
-       </summary>
-     
-        ```bash
-        git clone https://github.com/kyma-project/kyma.git ; cd kyma
-        ```
-       </details>
-       <details>
-       <summary>
-       SSH
-       </summary>
-     
-       ```bash
-       git clone git@github.com:kyma-project/kyma.git ; cd kyma
-       ```
-       </details>
-     </div>
-  3. Choose the release from which you want to install Kyma. Go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about each of the available releases. Run this command to list all of the available tags that correspond to releases:
-     ```bash
-     git tag
-     ```
-  4. Checkout the tag corresponding to the Kyma release you want to install. Run:
-     ```bash
-     git checkout {TAG}
-     ```
-   >**NOTE:** If you don't checkout any of the available tags, your sources match the state of the project's `master` branch at the moment of cloning the repository.
-  
-  5. Kyma comes with a local wildcard self-signed `server.crt` certificate. Add this certificate to your OS trusted certificates to access the Console UI. On MacOS, run:
-     ```bash
-     sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/workspace/raw/server.crt
-     ```
-     >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
+1. Open a terminal window and navigate to a space in which you want to store your local Kyma sources.
 
-  6. Provision minikube with this command:
-     ```bash
-     kyma provision minikube
-     ```
-     > **NOTE:** Kyma CLI command above uses default minikube vm driver installed for your OS, for list of default vm driver for supported OS and other available vm drivers you can read from [here](http://github.com/kyma-project/cli)
-  7. Install Kyma with following command with with password for the `admin@kyma.cx` user:
-     
-     ```bash
-     kyma install --local --src-path {YOUR_KYMA_SOURCE_PATH} --password {YOUR_PASSWORD}
-     ```
-     
-     Wait until installation process completed.
-  
-  9. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password you set using the `--password` flag.
+2. Clone the Kyma repository to your machine using either HTTPS or SSH. Run this command to clone the repository and change your working directory to `kyma`:
+    <div tabs>
+      <details>
+      <summary>
+      HTTPS
+      </summary>
 
-  10. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
+      ```
+      git clone https://github.com/kyma-project/kyma.git ; cd kyma
+      ```
+      </details>
+      <details>
+      <summary>
+      SSH
+      </summary>
 
-   </details>
-</div>
+      ```
+      git clone git@github.com:kyma-project/kyma.git ; cd kyma
+      ```
+      </details>
+    </div>
 
+3. Choose the release from which you want to install Kyma. Go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about each of the available releases. Run this command to list all of the available tags that correspond to releases:
+  ```
+  git tag
+  ```
+
+4. Checkout the tag corresponding to the Kyma release you want to install. Run:
+  ```
+  git checkout {TAG}
+  ```
+ >**NOTE:** If you don't checkout any of the available tags, your sources match the state of the project's `master` branch at the moment of cloning the repository.
+
+5. Navigate to the `installation` directory which contains all of the required installation resources. Run:
+  ```
+  cd installation
+  ```
+
+6. Kyma comes with a local wildcard self-signed `server.crt` certificate. Add this certificate to your OS trusted certificates to access the Console UI. On MacOS, run:
+  ```
+  sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/workspace/raw/server.crt
+  ```
+  >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
+
+7. Start the installation. Trigger the `run.sh` script to start Minikube with a Kyma-specific configuration and install the necessary components. Define the password used to log in to the Console UI using the `--password` flag. Run:
+    <div tabs>
+      <details>
+      <summary>
+      MacOS
+      </summary>
+
+      ```
+      ./cmd/run.sh --password {USER_PASSWORD}
+      ```
+      </details>
+      <details>
+      <summary>
+      Linux
+      </summary>
+
+      ```
+      ./cmd/run.sh --password {USER_PASSWORD} --vm-driver virtualbox
+      ```
+      </details>
+    </div>
+
+8. By default, the Kyma installation is a background process, which allows you to perform other tasks in the terminal window. Nevertheless, you can track the progress of the installation by running the `is-installed.sh` script. It is designed to give you clear information about the Kyma installation. Run it at any point to get the current installation status, or to find out whether the installation is successful.
+
+  ```
+  ./scripts/is-installed.sh
+  ```
+  >**TIP:** If the script indicates that the installation failed, try to install Kyma again by re-running the `run.sh` script. If the installation fails in a reproducible manner, don't hesitate to create a [GitHub](https://github.com/kyma-project/kyma/issues) issue in the project or reach out to the ["installation" Slack channel](https://kyma-community.slack.com/messages/CD2HJ0E78) to get direct support from the community.
+
+9. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password you set using the `--password` flag.
+
+10. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
 
 Read [this](#installation-reinstall-kyma) document to learn how to reinstall Kyma without deleting the cluster from Minikube.
 To learn how to test Kyma, see [this](#details-testing-kyma) document.
