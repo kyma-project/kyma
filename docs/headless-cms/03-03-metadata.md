@@ -19,13 +19,13 @@ type: {Document type}
 - The `title` metadata defines the title of your document. 
 - The `type` metadata groups single documents together. Multiple documents that use the same `type` generate a grouping. For example, if you have multiple tutorials, you can group them below a navigation node called **Tutorials**.
 
->**NOTE:** If there is only one document of a certain type, remove the `type` metadata, so that the document displays well in the UI.
+>**NOTE:** If there is only one document of a certain type, remove the `type` metadata, so that the document displays well in the UIs.
 
 ## Metadata display
 
-In the Docs UI, which is the view displayed once you click on the question mark icon (![](./assets/docs-ui-question-mark.png)) in the top-right corner of the Console, the metadata help create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows three documents, their metadata, and corresponding place in the left-side navigation:
+In the Docs UI, which is the view displayed once you click on the question mark icon (![](./assets/docs-ui-question-mark.png)) in the top-right corner of the Console, the metadata help create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows three documents, their metadata, and corresponding places in the left-side navigation.
 
-Markdown documents
+Markdown documents:
 
 ```
 //02-01-product-x.md
@@ -47,7 +47,7 @@ type: Tutorials
 title: Products
 ---
 ```
-Left-side navigation
+Left-side navigation:
 
 ```
 - Products
