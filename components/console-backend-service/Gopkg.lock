@@ -328,7 +328,6 @@
   version = "v0.1.36"
 
 [[projects]]
-  branch = "propagate-required-permissions-mf-attribute"
   digest = "1:0e276a37b86a9d7b6bf4a0c38341818d1cf8fbc5317176a68fb6f8f1d04323b1"
   name = "github.com/kyma-project/kyma"
   packages = [
@@ -411,8 +410,7 @@
     "tools/failery",
   ]
   pruneopts = "NUT"
-  revision = "20f3983cc054c89c720ed6c1018d900221281d04"
-  source = "https://github.com/kwiatekus/kyma.git"
+  revision = "c1e2b1843da85dc012337f90c534d1d1634fba95"
 
 [[projects]]
   branch = "master"
