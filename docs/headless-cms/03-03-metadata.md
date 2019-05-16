@@ -3,7 +3,7 @@ title: Metadata
 type: Details
 ---
 
-Apart from content, each markdown document displayed in the Kyma Console requires metadata in a specific format.
+Apart from content, each markdown document displayed in the Kyma Console requires metadata in a specific format called [Front Matter](https://forestry.io/docs/editing/front-matter/).
 
 ## Metadata structure
 
@@ -23,7 +23,38 @@ type: {Document type}
 
 ## Metadata display
 
-In the Docs UI, which is the view displayed once you click on the question mark icon in the top-right corner of the Console, the metadata create the left-side navigation structure. The Docs UI displays the documents grouped under a common `type` in the alphanumeric order as per files name.
+In the Docs UI, which is the view displayed once you click on the question mark icon (![](./assets/docs-ui-question-mark.png)) in the top-right corner of the Console, the metadata help create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows three documents, their metadata, and corresponding place in the left-side navigation:
+
+Markdown documents
+
+```
+//02-01-product-x.md
+---
+title: Product X
+type: Tutorials
+---
+``` 
+```
+//02-02-product-y.md
+---
+title: Product Y
+type: Tutorials
+---
+```
+```
+//01-01-my-products.md
+---
+title: Products
+---
+```
+Left-side navigation
+
+```
+- Products
+- Tutorials
+    - Product X
+    - Product Y
+```
 
 In the Service Catalog and Instances views, in which you can see Service Classes documentation, the `title` metadata displays as the name of a particular tab. If you don't provide `title`, the UIs display the file name as a fallback. 
 
