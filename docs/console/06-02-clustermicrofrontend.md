@@ -58,6 +58,6 @@ This table lists all the possible parameters of a given resource together with t
 | **spec.navigationNodes.label** | **YES** | Specifies the name used to display the cluster micro front-end's node in the Console UI. |
 | **spec.navigationNodes.navigationPath** | **NO** | Specifies the path that is used for routing within the Console. |
 | **spec.navigationNodes.viewUrl** | **NO** | Specifies the URL used to display the content of the cluster micro-front end. |
-| **spec.navigationNodes.externalLink** | **NO** | Specifies the URL used to display the content of the cluster micro-front end in the new browser tab. |
+| **spec.navigationNodes.externalLink** | **NO** | Specifies the URL used to display the content of the cluster micro front-end in a new browser tab. |
 | **spec.navigationNodes.showInNavigation** | **NO** | The Boolean that specifies if the cluster micro front-end's node is visible in the navigation or not. |
 | **spec.navigationNodes.requiredPermissions** | **NO** | Specifies the list of permissions (RBAC rules) that determine if the navigation node should be shown for the current user.  |
