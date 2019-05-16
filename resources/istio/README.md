@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This chart bootstraps all istio [components](https://istio.io/docs/concepts/what-is-istio/) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps all istio [components](https://istio.io/docs/concepts/what-is-istio/overview.html) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Chart Details
 
@@ -107,7 +107,7 @@ The chart deploys pods that consume minimum resources as specified in the resour
 
 1. Add `istio.io` chart repository and point to the release:
     ```
-    $ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.5/charts
+    $ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.6/charts
     ```
 
 
