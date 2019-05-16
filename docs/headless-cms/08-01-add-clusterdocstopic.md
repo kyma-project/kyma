@@ -179,7 +179,7 @@ status:
   message: "The file is not valid against the provided json schema"
 ```
 
-Alternatively, you can analyze logs of the Asset Store Controller Manager:
+You can also analyze logs of the Asset Store Controller Manager:
 
 ```
 kubectl -n kyma-system logs -l 'app=asset-store-controller-manager'
