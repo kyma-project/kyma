@@ -5,14 +5,14 @@ type: Tutorial
 
 Headless CMS allows you to extend documentation in the Console UI with new topic groups by applying ClusterDocsTopic custom resources on your cluster.
 
-When you prepare the ClusterDocsTopics, make sure that:
+When you prepare ClusterDocsTopics, make sure that:
 - ClusterDocsTopics follow the [custom resource definition](#custom-resource-clusterdocstopic).
 - Documents start with metadata, including `Title` for the document name and optional `Type` for additional document grouping.
 - Documents are written in Markdown and follow simple Markdown syntax. Any customizations can result in incorrect images or links rendering. To avoid such issues, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines).
 
 This tutorial shows how you can customize the `docs-ui` view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** topic groups and a set of Markdown subdocuments. The ClusterDocsTopic points to the official Prometheus documentation from which you filter out topics you want to be visible in the UI.  
 
->**NOTE:** When you apply multiple ClusterDocsTopics, sort them using the **order** label. Otherwise, the Console Ui displays the topics in the order in which you applied them.
+>**NOTE:** When you apply multiple ClusterDocsTopics, sort them using the **order** label. Otherwise, the Console UI displays the topics in the order in which you applied them.
 
 ## Prerequisites
 
