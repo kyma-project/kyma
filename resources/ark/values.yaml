@@ -71,4 +71,4 @@ global:
     path: eu.gcr.io/kyma-project
   ark_plugin:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0-rc3
