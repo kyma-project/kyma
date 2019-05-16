@@ -15,9 +15,9 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **etcd.secure** | Specifies whether TLS can be used. | `false` |
+| **etcd.secure** | Indicates whether TLS is used. | `false` |
 | **etcd.resources.limits.cpu** | Defines limits for CPU resources. | `200m` |
 | **etcd.resources.limits.memory** | Defines limits for memory resources. | `256Mi` |
 | **etcd.resources.requests.cpu** | Defines requests for CPU resources. | `50m` |
 | **etcd.resources.requests.memory** | Defines requests for memory resources. | `64Mi` |
-| **replicaCount** | Defines the number of etcd Pods in a cluster. | `1` |
+| **replicaCount** | Defines the size of the etcd cluster. | `1` |

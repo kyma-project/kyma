@@ -15,5 +15,5 @@ This table lists the configurable parameters, their descriptions, and default va
 
 | Parameter | Description | Default value |
 |-----------|-------------|---------------|
-| **global.cfgReposUrlName** | Specifies the name of the ConfigMap which provides the bundles repository URLs. | `helm-repos-urls` |
-| **global.isDevelopMode** | Defines that the repository URL must be an HTTPS server. If set to `true`, HTTP servers are also acceptable.  | `false` |
+| **global.cfgReposUrlName** | Specifies the name of the default ConfigMap which provides the URLs of bundles repositories. | `helm-repos-urls` |
+| **global.isDevelopMode** | Defines that each repository URL must be an HTTPS server. If set to `true`, HTTP servers are also acceptable.  | `false` |

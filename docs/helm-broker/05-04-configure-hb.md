@@ -20,7 +20,7 @@ By default, the Helm Broker fetches bundles listed in the `index.yaml` file from
     kubectl label configmap my-helm-repos-urls -n kyma-system helm-broker-repo=true
     ```
 
-  * Create a valid ConfigMap from the `yaml` file. Follow this example:
+  * Create a ConfigMap from the following example:
 
     ```yaml
     apiVersion: v1
@@ -34,9 +34,9 @@ By default, the Helm Broker fetches bundles listed in the `index.yaml` file from
             https://github.com/kyma-project/bundles/releases/download/0.3.0/index-testing.yaml
     ```
 
-    Then, run:
+    Save your ConfigMap as `my-helm-repos-urls.yaml`. Then, run:
     ```bash
-    kubectl apply -f my-helm-repos-urls
+    kubectl apply -f my-helm-repos-urls.yaml
     ```
     >**NOTE:** Your bundle repository must contain at least one file named `index.yaml` as the Helm Broker automatically searches for it when you provide the `https://{host}/{path}/{bundle_repo_version}/` URL to your ConfigMap.
 
