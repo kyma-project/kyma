@@ -23,15 +23,23 @@ type namespaceSvc interface {
 	List() ([]*v1.Namespace, error)
 }
 
+//go:generate mockery -name=gqlNamespaceConverter -output=automock -outpkg=automock -case=underscore
+type gqlNamespaceConverter interface {
+	ToGQL(in *v1.Namespace) (*gqlschema.Namespace, error)
+	ToGQLs(in []*v1.Namespace) ([]gqlschema.Namespace, error)
+}
+
 type namespaceResolver struct {
-	namespaceSvc namespaceSvc
-	appRetriever shared.ApplicationRetriever
+	namespaceSvc       namespaceSvc
+	appRetriever       shared.ApplicationRetriever
+	namespaceConverter gqlNamespaceConverter
 }
 
 func newNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
 	return &namespaceResolver{
-		namespaceSvc: namespaceSvc,
-		appRetriever: appRetriever,
+		namespaceSvc:       namespaceSvc,
+		appRetriever:       appRetriever,
+		namespaceConverter: &namespaceConverter{},
 	}
 }
 
@@ -66,16 +74,13 @@ func (r *namespaceResolver) NamespacesQuery(ctx context.Context, applicationName
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.Namespaces))
 		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
-
-	var ns []gqlschema.Namespace
-	for _, n := range namespaces {
-		ns = append(ns, gqlschema.Namespace{
-			Name:   n.Name,
-			Labels: n.Labels,
-		})
+	converted, err := r.namespaceConverter.ToGQLs(namespaces)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while converting %s", pretty.Namespaces))
+		return nil, gqlerror.New(err, pretty.Namespaces)
 	}
 
-	return ns, nil
+	return converted, nil
 }
 
 func (r *namespaceResolver) ApplicationsField(ctx context.Context, obj *gqlschema.Namespace) ([]string, error) {

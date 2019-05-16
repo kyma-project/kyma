@@ -34,7 +34,13 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		resourceGetter.On("List").Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		converter.On("ToGQLs", resources).Return(expected, nil).Once()
+		defer converter.AssertExpectations(t)
+
 		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		resolver.SetNamespaceConverter(converter)
 
 		result, err := resolver.NamespacesQuery(nil, nil)
 
@@ -49,7 +55,13 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		appRetriever := new(appAutomock.ApplicationRetriever)
 		resourceGetter.On("List").Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		converter.On("ToGQLs", resources).Return(expected, nil).Once()
+		defer converter.AssertExpectations(t)
+
 		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		resolver.SetNamespaceConverter(converter)
 
 		result, err := resolver.NamespacesQuery(nil, nil)
 
@@ -63,6 +75,28 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 		resourceGetter.On("List").Return(nil, errors.New("Error")).Once()
 		defer resourceGetter.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+
+		result, err := resolver.NamespacesQuery(nil, nil)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+
+	t.Run("ErrorConverting", func(t *testing.T) {
+		resources := []*v1.Namespace{}
+		expected := errors.New("Test")
+		resourceGetter := automock.NewNamespaceSvc()
+		appRetriever := new(appAutomock.ApplicationRetriever)
+		resourceGetter.On("List").Return(resources, nil).Once()
+		defer resourceGetter.AssertExpectations(t)
+
+		converter := automock.NewNamespaceConverter()
+		converter.On("ToGQLs", resources).Return(nil, expected).Once()
+		defer converter.AssertExpectations(t)
+
+		resolver := k8s.NewNamespaceResolver(resourceGetter, appRetriever)
+		resolver.SetNamespaceConverter(converter)
 
 		result, err := resolver.NamespacesQuery(nil, nil)
 

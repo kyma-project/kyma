@@ -128,10 +128,16 @@ func (r *selfSubjectRulesResolver) SetSelfSubjectRulesConverter(converter gqlSel
 	r.gqlSelfSubjectRulesConverter = converter
 }
 
+//Namespace
+
 func NewNamespaceService(informer cache.SharedIndexInformer, client v1.CoreV1Interface) (*namespaceService, error) {
 	return newNamespaceService(informer, client)
 }
 
 func NewNamespaceResolver(namespaceSvc namespaceSvc, appRetriever shared.ApplicationRetriever) *namespaceResolver {
 	return newNamespaceResolver(namespaceSvc, appRetriever)
+}
+
+func (r *namespaceResolver) SetNamespaceConverter(converter gqlNamespaceConverter) {
+	r.namespaceConverter = converter
 }
