@@ -3,4 +3,4 @@ containerRegistry:
 
 image:
   dir:
-  tag: 1.1.0-rc2
+  tag: 1.1.0
