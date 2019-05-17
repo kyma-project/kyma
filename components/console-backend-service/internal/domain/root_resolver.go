@@ -322,7 +322,7 @@ func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, na
 	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, urls)
 }
 
-func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
+func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
 	return r.k8s.CreateNamespace(ctx, name, labels)
 }
 
