@@ -20,6 +20,6 @@ This table lists the configurable parameters, their descriptions, and default va
 | **resources.requests.cpu** | Defines requests for CPU resources. | `100m` |
 | **resources.requests.memory** | Defines requests for memory resources. | `20Mi` |
 | **clusterDocsTopic.relistInterval** | Determines time intervals in which the Controller Manager verifies the ClusterDocsTopic for changes. | `5m` |
-| **DocsTopic.relistInterval** | Determines time intervals in which the Controller Manager verifies the DocsTopic for changes. | `5m` |
+| **docsTopic.relistInterval** | Determines time intervals in which the Controller Manager verifies the DocsTopic for changes. | `5m` |
 | **clusterBucket.region** | Specifies the regional location of the ClusterBucket in a given cloud storage. | `us-east-1` |
 | **bucket.region** | Specifies the regional location of the Bucket in a given cloud storage. | `us-east-1` |
