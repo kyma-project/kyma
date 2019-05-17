@@ -24,6 +24,7 @@ const (
 	applicationProxyDeployment = "test-app-haufmzt-application-gateway"
 	eventsConfigMapName        = "test-app-haufmzt-configmap-events"
 	proxyConfigMapName         = "test-app-haufmzt-configmap-proxy"
+	integrationNamespace       = "kyma-integration"
 
 	imageKey     = "image"
 	timestampKey = "timestamp"
@@ -55,7 +56,7 @@ func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLog
 		return errors.Wrap(err, "could not find resources")
 	}
 
-	if err := ut.setVerificationData(namespace); err != nil {
+	if err := ut.setVerificationData(integrationNamespace); err != nil {
 		return errors.Wrap(err, "could not set verification data")
 	}
 
@@ -160,11 +161,11 @@ func (ut *UpgradeTest) createConfigMap(name, namespace, image string, timestamp 
 func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Info("ApplicationOperator UpgradeTest testing resources...")
 
-	if err := ut.verifyResources(namespace); err != nil {
+	if err := ut.verifyResources(integrationNamespace); err != nil {
 		return errors.Wrap(err, "image versions are not upgraded")
 	}
 
-	if err := ut.deleteResources(log, namespace); err != nil {
+	if err := ut.deleteResources(log, integrationNamespace); err != nil {
 		return errors.Wrap(err, "could not delete resources")
 	}
 
