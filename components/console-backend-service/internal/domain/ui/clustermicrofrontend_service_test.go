@@ -16,35 +16,35 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-func TestClusterMicrofrontendService_List(t *testing.T) {
+func TestClusterMicroFrontendService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
-		ClusterMicrofrontend1 := fixClusterMicrofrontend("1")
-		ClusterMicrofrontend2 := fixClusterMicrofrontend("2")
-		ClusterMicrofrontend3 := fixClusterMicrofrontend("3")
+		ClusterMicroFrontend1 := fixClusterMicroFrontend("1")
+		ClusterMicroFrontend2 := fixClusterMicroFrontend("2")
+		ClusterMicroFrontend3 := fixClusterMicroFrontend("3")
 
-		ClusterMicrofrontendInformer := fixCMFInformer(ClusterMicrofrontend1, ClusterMicrofrontend2, ClusterMicrofrontend3)
-		svc := ui.NewClusterMicrofrontendService(ClusterMicrofrontendInformer)
+		ClusterMicroFrontendInformer := fixCMFInformer(ClusterMicroFrontend1, ClusterMicroFrontend2, ClusterMicroFrontend3)
+		svc := ui.NewClusterMicroFrontendService(ClusterMicroFrontendInformer)
 
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, ClusterMicrofrontendInformer)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, ClusterMicroFrontendInformer)
 
-		clustermicrofrontends, err := svc.List()
+		clustermicroFrontends, err := svc.List()
 		require.NoError(t, err)
-		assert.Contains(t, clustermicrofrontends, ClusterMicrofrontend1)
-		assert.Contains(t, clustermicrofrontends, ClusterMicrofrontend2)
-		assert.Contains(t, clustermicrofrontends, ClusterMicrofrontend3)
+		assert.Contains(t, clustermicroFrontends, ClusterMicroFrontend1)
+		assert.Contains(t, clustermicroFrontends, ClusterMicroFrontend2)
+		assert.Contains(t, clustermicroFrontends, ClusterMicroFrontend3)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
-		ClusterMicrofrontendInformer := fixCMFInformer()
+		ClusterMicroFrontendInformer := fixCMFInformer()
 
-		svc := ui.NewClusterMicrofrontendService(ClusterMicrofrontendInformer)
+		svc := ui.NewClusterMicroFrontendService(ClusterMicroFrontendInformer)
 
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, ClusterMicrofrontendInformer)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, ClusterMicroFrontendInformer)
 
 		var emptyArray []*v1alpha1.ClusterMicroFrontend
-		clustermicrofrontends, err := svc.List()
+		clustermicroFrontends, err := svc.List()
 		require.NoError(t, err)
-		assert.Equal(t, emptyArray, clustermicrofrontends)
+		assert.Equal(t, emptyArray, clustermicroFrontends)
 	})
 }
 
@@ -57,7 +57,7 @@ func fixCMFInformer(objects ...runtime.Object) cache.SharedIndexInformer {
 	return informer
 }
 
-func fixClusterMicrofrontend(name string) *v1alpha1.ClusterMicroFrontend {
+func fixClusterMicroFrontend(name string) *v1alpha1.ClusterMicroFrontend {
 	version := "v1"
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"

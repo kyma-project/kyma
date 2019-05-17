@@ -42,7 +42,7 @@ type ServiceBindingFinderLister interface {
 	ListForServiceInstance(namespace string, instanceName string) ([]*bindingApi.ServiceBinding, error)
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRetriever shared.ContentRetriever, cmsRetriever shared.CmsRetriever) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, informerResyncPeriod time.Duration, cmsRetriever shared.CmsRetriever) (*PluggableContainer, error) {
 	scCli, err := clientset.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing SC clientset")
@@ -52,7 +52,6 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration, contentRet
 		cfg: &resolverConfig{
 			scCli:                scCli,
 			informerResyncPeriod: informerResyncPeriod,
-			contentRetriever:     contentRetriever,
 			cmsRetriever:         cmsRetriever,
 		},
 		Pluggable:               module.NewPluggable("servicecatalog"),
@@ -70,7 +69,6 @@ func (r *PluggableContainer) Enable() error {
 	informerResyncPeriod := r.cfg.informerResyncPeriod
 	scCli := r.cfg.scCli
 
-	contentRetriever := r.cfg.contentRetriever
 	cmsRetriever := r.cfg.cmsRetriever
 
 	informerFactory := catalogInformers.NewSharedInformerFactory(scCli, informerResyncPeriod)
@@ -109,8 +107,8 @@ func (r *PluggableContainer) Enable() error {
 	r.Pluggable.EnableAndSyncInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
 			serviceInstanceResolver:      newServiceInstanceResolver(serviceInstanceService, clusterServicePlanService, clusterServiceClassService, servicePlanService, serviceClassService),
-			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, contentRetriever, cmsRetriever),
-			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, contentRetriever, cmsRetriever),
+			clusterServiceClassResolver:  newClusterServiceClassResolver(clusterServiceClassService, clusterServicePlanService, serviceInstanceService, cmsRetriever),
+			serviceClassResolver:         newServiceClassResolver(serviceClassService, servicePlanService, serviceInstanceService, cmsRetriever),
 			clusterServiceBrokerResolver: newClusterServiceBrokerResolver(clusterServiceBrokerService),
 			serviceBrokerResolver:        newServiceBrokerResolver(serviceBrokerService),
 			serviceBindingResolver:       newServiceBindingResolver(serviceBindingService),
@@ -134,7 +132,6 @@ func (r *PluggableContainer) Disable() error {
 type resolverConfig struct {
 	scCli                clientset.Interface
 	informerResyncPeriod time.Duration
-	contentRetriever     shared.ContentRetriever
 	cmsRetriever         shared.CmsRetriever
 }
 
@@ -145,11 +142,6 @@ type Resolver interface {
 	ClusterServiceClassPlansField(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error)
 	ClusterServiceClassInstancesField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) ([]gqlschema.ServiceInstance, error)
 	ClusterServiceClassActivatedField(ctx context.Context, obj *gqlschema.ClusterServiceClass, namespace *string) (bool, error)
-	ClusterServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error)
-	ClusterServiceClassOpenApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error)
-	ClusterServiceClassODataSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*string, error)
-	ClusterServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error)
-	ClusterServiceClassContentField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error)
 	ClusterServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterDocsTopic, error)
 
 	ServiceClassQuery(ctx context.Context, name, namespace string) (*gqlschema.ServiceClass, error)
@@ -157,11 +149,6 @@ type Resolver interface {
 	ServiceClassPlansField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServicePlan, error)
 	ServiceClassInstancesField(ctx context.Context, obj *gqlschema.ServiceClass) ([]gqlschema.ServiceInstance, error)
 	ServiceClassActivatedField(ctx context.Context, obj *gqlschema.ServiceClass) (bool, error)
-	ServiceClassApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error)
-	ServiceClassOpenApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error)
-	ServiceClassODataSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*string, error)
-	ServiceClassAsyncApiSpecField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error)
-	ServiceClassContentField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error)
 	ServiceClassClusterDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterDocsTopic, error)
 	ServiceClassDocsTopicField(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.DocsTopic, error)
 

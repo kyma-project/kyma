@@ -15,7 +15,7 @@ const testTimes = 3
 const informerResyncPeriod = 10 * time.Second
 
 func TestPluggableContainer(t *testing.T) {
-	pluggable, err := assetstore.New(&rest.Config{}, informerResyncPeriod)
+	pluggable, err := assetstore.New(&rest.Config{}, assetstore.Config{}, informerResyncPeriod)
 	require.NoError(t, err)
 
 	pluggable.SetFakeClient()
