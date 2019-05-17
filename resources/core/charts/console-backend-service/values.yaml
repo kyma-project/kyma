@@ -12,3 +12,4 @@ virtualservice:
   annotations: {}
 istio:
   namespace: istio-system
+verifySSL: false
