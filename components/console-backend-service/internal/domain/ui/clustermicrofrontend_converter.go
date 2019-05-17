@@ -11,17 +11,17 @@ type qglNavigationNodeConverter interface {
 	ToGQLs(in []uiV1alpha1v.NavigationNode) ([]gqlschema.NavigationNode, error)
 }
 
-type clusterMicrofrontendConverter struct {
+type clusterMicroFrontendConverter struct {
 	navigationNodeConverter qglNavigationNodeConverter
 }
 
-func newClusterMicrofrontendConverter() *clusterMicrofrontendConverter {
-	return &clusterMicrofrontendConverter{
+func newClusterMicroFrontendConverter() *clusterMicroFrontendConverter {
+	return &clusterMicroFrontendConverter{
 		navigationNodeConverter: &navigationNodeConverter{},
 	}
 }
 
-func (c *clusterMicrofrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFrontend) (*gqlschema.ClusterMicrofrontend, error) {
+func (c *clusterMicroFrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFrontend) (*gqlschema.ClusterMicroFrontend, error) {
 	if in == nil {
 		return nil, nil
 	}
@@ -31,7 +31,7 @@ func (c *clusterMicrofrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFronte
 		return nil, err
 	}
 
-	cmf := gqlschema.ClusterMicrofrontend{
+	cmf := gqlschema.ClusterMicroFrontend{
 		Name:            in.Name,
 		Placement:       in.Spec.Placement,
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
@@ -43,8 +43,8 @@ func (c *clusterMicrofrontendConverter) ToGQL(in *uiV1alpha1v.ClusterMicroFronte
 	return &cmf, nil
 }
 
-func (c *clusterMicrofrontendConverter) ToGQLs(in []*uiV1alpha1v.ClusterMicroFrontend) ([]gqlschema.ClusterMicrofrontend, error) {
-	var result []gqlschema.ClusterMicrofrontend
+func (c *clusterMicroFrontendConverter) ToGQLs(in []*uiV1alpha1v.ClusterMicroFrontend) ([]gqlschema.ClusterMicroFrontend, error) {
+	var result []gqlschema.ClusterMicroFrontend
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {

@@ -9,9 +9,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func TestMicrofrontendConverter_ToGQL(t *testing.T) {
+func TestMicroFrontendConverter_ToGQL(t *testing.T) {
 	t.Run("All properties are given", func(t *testing.T) {
-		converter := newMicrofrontendConverter()
+		converter := newMicroFrontendConverter()
 		name := "test-name"
 		namespace := "test-namespace"
 		version := "v1"
@@ -37,7 +37,7 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 		}
 
 		expectedNavigationNode := fixGqlNavigationNode()
-		expected := gqlschema.Microfrontend{
+		expected := gqlschema.MicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
@@ -54,7 +54,7 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		converter := newMicrofrontendConverter()
+		converter := newMicroFrontendConverter()
 		item, err := converter.ToGQL(&v1alpha1.MicroFrontend{})
 
 		assert.Nil(t, err)
@@ -62,7 +62,7 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		converter := newMicrofrontendConverter()
+		converter := newMicroFrontendConverter()
 		item, err := converter.ToGQL(nil)
 
 		assert.Nil(t, err)
@@ -70,7 +70,7 @@ func TestMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 }
 
-func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
+func TestMicroFrontendConverter_ToGQLs(t *testing.T) {
 	name := "test-name"
 	namespace := "test-namespace"
 	version := "v1"
@@ -96,7 +96,7 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 	}
 
 	expectedNavigationNode := fixGqlNavigationNode()
-	expected := gqlschema.Microfrontend{
+	expected := gqlschema.MicroFrontend{
 		Name:        name,
 		Version:     version,
 		Category:    category,
@@ -107,13 +107,13 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 	}
 
 	t.Run("Success", func(t *testing.T) {
-		microfrontends := []*v1alpha1.MicroFrontend{
+		microFrontends := []*v1alpha1.MicroFrontend{
 			&item,
 			&item,
 		}
 
-		converter := newMicrofrontendConverter()
-		result, err := converter.ToGQLs(microfrontends)
+		converter := newMicroFrontendConverter()
+		result, err := converter.ToGQLs(microFrontends)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 2)
@@ -121,24 +121,24 @@ func TestMicrofrontendConverter_ToGQLs(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		var microfrontends []*v1alpha1.MicroFrontend
+		var microFrontends []*v1alpha1.MicroFrontend
 
-		converter := newMicrofrontendConverter()
-		result, err := converter.ToGQLs(microfrontends)
+		converter := newMicroFrontendConverter()
+		result, err := converter.ToGQLs(microFrontends)
 
 		assert.Nil(t, err)
 		assert.Empty(t, result)
 	})
 
 	t.Run("With nil", func(t *testing.T) {
-		microfrontends := []*v1alpha1.MicroFrontend{
+		microFrontends := []*v1alpha1.MicroFrontend{
 			nil,
 			&item,
 			nil,
 		}
 
-		converter := newMicrofrontendConverter()
-		result, err := converter.ToGQLs(microfrontends)
+		converter := newMicroFrontendConverter()
+		result, err := converter.ToGQLs(microFrontends)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 1)

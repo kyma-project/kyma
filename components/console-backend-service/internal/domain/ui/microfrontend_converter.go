@@ -5,17 +5,17 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
-type microfrontendConverter struct {
+type microFrontendConverter struct {
 	navigationNodeConverter qglNavigationNodeConverter
 }
 
-func newMicrofrontendConverter() *microfrontendConverter {
-	return &microfrontendConverter{
+func newMicroFrontendConverter() *microFrontendConverter {
+	return &microFrontendConverter{
 		navigationNodeConverter: &navigationNodeConverter{},
 	}
 }
 
-func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschema.Microfrontend, error) {
+func (c *microFrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschema.MicroFrontend, error) {
 	if in == nil {
 		return nil, nil
 	}
@@ -24,7 +24,7 @@ func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschem
 	if err != nil {
 		return nil, err
 	}
-	mf := gqlschema.Microfrontend{
+	mf := gqlschema.MicroFrontend{
 		Name:            in.Name,
 		Version:         in.Spec.CommonMicroFrontendSpec.Version,
 		Category:        in.Spec.CommonMicroFrontendSpec.Category,
@@ -35,8 +35,8 @@ func (c *microfrontendConverter) ToGQL(in *uiV1alpha1v.MicroFrontend) (*gqlschem
 	return &mf, nil
 }
 
-func (c *microfrontendConverter) ToGQLs(in []*uiV1alpha1v.MicroFrontend) ([]gqlschema.Microfrontend, error) {
-	var result []gqlschema.Microfrontend
+func (c *microFrontendConverter) ToGQLs(in []*uiV1alpha1v.MicroFrontend) ([]gqlschema.MicroFrontend, error) {
+	var result []gqlschema.MicroFrontend
 	for _, u := range in {
 		converted, err := c.ToGQL(u)
 		if err != nil {

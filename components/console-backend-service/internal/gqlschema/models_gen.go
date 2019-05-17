@@ -100,7 +100,7 @@ type ClusterDocsTopicEvent struct {
 	ClusterDocsTopic ClusterDocsTopic      `json:"clusterDocsTopic"`
 }
 
-type ClusterMicrofrontend struct {
+type ClusterMicroFrontend struct {
 	Name            string           `json:"name"`
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`
@@ -300,7 +300,7 @@ type LocalObjectReferenceInput struct {
 	Name string `json:"name"`
 }
 
-type Microfrontend struct {
+type MicroFrontend struct {
 	Name            string           `json:"name"`
 	Version         string           `json:"version"`
 	Category        string           `json:"category"`

@@ -11,9 +11,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
+func TestClusterMicroFrontendConverter_ToGQL(t *testing.T) {
 	t.Run("All properties are given", func(t *testing.T) {
-		converter := newClusterMicrofrontendConverter()
+		converter := newClusterMicroFrontendConverter()
 		name := "test-name"
 		version := "v1"
 		category := "test-category"
@@ -40,7 +40,7 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 
 		expectedNavigationNode := fixGqlNavigationNode()
 
-		expected := gqlschema.ClusterMicrofrontend{
+		expected := gqlschema.ClusterMicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
@@ -58,7 +58,7 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		converter := newClusterMicrofrontendConverter()
+		converter := newClusterMicroFrontendConverter()
 		item, err := converter.ToGQL(&v1alpha1.ClusterMicroFrontend{})
 
 		assert.Nil(t, err)
@@ -66,7 +66,7 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		converter := newClusterMicrofrontendConverter()
+		converter := newClusterMicroFrontendConverter()
 		item, err := converter.ToGQL(nil)
 
 		assert.Nil(t, err)
@@ -74,7 +74,7 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 }
 
-func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
+func TestClusterMicroFrontendConverter_ToGQLs(t *testing.T) {
 	name := "test-name"
 	version := "v1"
 	category := "test-category"
@@ -99,7 +99,7 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 	}
 
 	expectedNavigationNode := fixGqlNavigationNode()
-	expected := gqlschema.ClusterMicrofrontend{
+	expected := gqlschema.ClusterMicroFrontend{
 		Name:        name,
 		Version:     version,
 		Category:    category,
@@ -111,13 +111,13 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 	}
 
 	t.Run("Success", func(t *testing.T) {
-		clusterMicrofrontends := []*v1alpha1.ClusterMicroFrontend{
+		clusterMicroFrontends := []*v1alpha1.ClusterMicroFrontend{
 			&item,
 			&item,
 		}
 
-		converter := newClusterMicrofrontendConverter()
-		result, err := converter.ToGQLs(clusterMicrofrontends)
+		converter := newClusterMicroFrontendConverter()
+		result, err := converter.ToGQLs(clusterMicroFrontends)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 2)
@@ -125,24 +125,24 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		var clusterMicrofrontends []*v1alpha1.ClusterMicroFrontend
+		var clusterMicroFrontends []*v1alpha1.ClusterMicroFrontend
 
-		converter := newClusterMicrofrontendConverter()
-		result, err := converter.ToGQLs(clusterMicrofrontends)
+		converter := newClusterMicroFrontendConverter()
+		result, err := converter.ToGQLs(clusterMicroFrontends)
 
 		assert.Nil(t, err)
 		assert.Empty(t, result)
 	})
 
 	t.Run("With nil", func(t *testing.T) {
-		clusterMicrofrontends := []*v1alpha1.ClusterMicroFrontend{
+		clusterMicroFrontends := []*v1alpha1.ClusterMicroFrontend{
 			nil,
 			&item,
 			nil,
 		}
 
-		converter := newClusterMicrofrontendConverter()
-		result, err := converter.ToGQLs(clusterMicrofrontends)
+		converter := newClusterMicroFrontendConverter()
+		result, err := converter.ToGQLs(clusterMicroFrontends)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 1)

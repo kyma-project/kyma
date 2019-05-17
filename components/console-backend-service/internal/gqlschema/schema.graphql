@@ -786,7 +786,7 @@ type ConfigMapEvent {
 
 # MF
 
-type Microfrontend {
+type MicroFrontend {
     name: String!
     version: String!
     category: String!
@@ -794,7 +794,7 @@ type Microfrontend {
     navigationNodes: [NavigationNode!]!
 }
 
-type ClusterMicrofrontend {
+type ClusterMicroFrontend {
     name: String!
     version: String!
     category: String!
@@ -811,11 +811,11 @@ type NavigationNode {
     order: Int!
     settings: Settings!
     externalLink: String
-    requiredPermissions: [RequiredPermission!]
+    requiredPermissions: [RequiredPermission!]!
 }
 
 type RequiredPermission {
-    verbs: [String!]
+    verbs: [String!]!
     apiGroup: String!
     resource: String!
 }
@@ -895,8 +895,8 @@ type Query {
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 
-    microfrontends(namespace: String!): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-    clusterMicrofrontends: [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 }
