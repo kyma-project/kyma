@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This chart bootstraps all [Istio](https://istio.io/docs/concepts/what-is-istio/) components deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps all istio [components](https://istio.io/docs/concepts/what-is-istio/) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Chart Details
 
@@ -29,11 +29,11 @@ To enable or disable each component, change the corresponding `enabled` flag.
 - Kubernetes 1.9 or newer cluster with RBAC (Role-Based Access Control) enabled is required
 - Helm 2.7.2 or newer or alternately the ability to modify RBAC rules is also required
 - If you want to enable automatic sidecar injection, Kubernetes 1.9+ with `admissionregistration` API is required, and `kube-apiserver` process must have the `admission-control` flag set with the `MutatingAdmissionWebhook` and `ValidatingAdmissionWebhook` admission controllers added and listed in the correct order.
-- The `istio-init` chart must be run to completion prior to installing the `istio` chart.
+- The `istio-init` chart must be run to completion prior to install the `istio` chart.
 
 ## Resources Required
 
-The chart deploys Pods that consume minimum resources as specified in the resources configuration parameter.
+The chart deploys pods that consume minimum resources as specified in the resources configuration parameter.
 
 ## Installing the Chart
 
@@ -107,13 +107,13 @@ The chart deploys Pods that consume minimum resources as specified in the resour
 
 1. Add `istio.io` chart repository and point to the release:
     ```
-    $ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.0/charts
+    $ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.6/charts
     ```
 
 
 1. To install the chart with the release name `istio` in namespace $NAMESPACE you defined above:
 
-    - With [automatic sidecar injection](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#automatic-sidecar-injection) (requires Kubernetes >=1.9.0):
+    - With [automatic sidecar injection](https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection) (requires Kubernetes >=1.9.0):
     ```
     $ helm install istio --name istio --namespace $NAMESPACE
     ```
