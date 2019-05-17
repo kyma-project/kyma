@@ -43,7 +43,7 @@ metadata:
     istio: init 
 --- 
 apiVersion: rbac.authorization.k8s.io/v1  
-kind: ClusterRole 
+kind: Role 
 metadata: 
   name: istio-init-cleaner-{{ .Release.Namespace }} 
   labels: 
@@ -59,7 +59,7 @@ rules:
   verbs: ["get", "list", "delete"]  
 --- 
 apiVersion: rbac.authorization.k8s.io/v1  
-kind: ClusterRoleBinding  
+kind: RoleBinding  
 metadata: 
   name: istio-init-cleaner-admin-role-binding-{{ .Release.Namespace }}  
   labels: 
@@ -71,8 +71,8 @@ metadata:
     "helm.sh/hook-delete-policy": "before-hook-creation"
 roleRef:  
   apiGroup: rbac.authorization.k8s.io 
-  kind: ClusterRole 
-  name: istio-init-cleaner-{{ .Release.Namespace }} 
+  kind: Role 
+  name: istio-init-cleaner-{{ .Release.Namespace }}
 subjects: 
   - kind: ServiceAccount  
     name: istio-init-cleaner-service-account  
