@@ -62,8 +62,6 @@ spec:
               configMapKeyRef:
                 name: assetstore-minio-docs-upload
                 key: APP_UPLOAD_PORT
-          - name: MINIO_PORT
-            value: "9000"
         volumeMounts:
           - name: minio-configuration
             mountPath: /config
