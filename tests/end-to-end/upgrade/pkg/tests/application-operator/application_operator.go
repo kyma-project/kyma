@@ -5,7 +5,7 @@ import (
 	"strings"
 	"time"
 
-	"k8s.io/api/apps/v1"
+	v1 "k8s.io/api/apps/v1"
 
 	core "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
@@ -201,20 +201,20 @@ func (ut *UpgradeTest) verifyDeployment(name, configmapName, namespace string) e
 	previousImage, ok := configMap.Data[imageKey]
 
 	if !ok {
-		return errors.New("pre-upgrade image not found")
+		return fmt.Errorf("pre-upgrade image not found")
 	}
 
 	previousTimestamp, ok := configMap.Data[timestampKey]
 
 	if !ok {
-		return errors.New("pre-upgrade timestamp not found")
+		return fmt.Errorf("pre-upgrade timestamp not found")
 	}
 
 	if previousImage != image || previousTimestamp != timestamp.String() {
 		return nil
 	}
 
-	return errors.New("image and timestamp not changed")
+	return fmt.Errorf("image and timestamp not changed")
 }
 
 func (ut *UpgradeTest) getDeploymentData(name, namespace string) (image string, timestamp metav1.Time, err error) {
@@ -238,7 +238,7 @@ func getImageVersion(containerName string, containers []core.Container) (string,
 			return c.Image, nil
 		}
 	}
-	return "", errors.New(fmt.Sprintf("container name %s not found", containerName))
+	return "", fmt.Errorf(fmt.Sprintf("container name %s not found", containerName))
 }
 
 func (ut *UpgradeTest) getDeployment(name, namespace string) (*v1.Deployment, error) {
