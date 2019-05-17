@@ -8,18 +8,18 @@ func NewBackendModuleService() *backendModuleLister {
 	return new(backendModuleLister)
 }
 
-func NewMicrofrontendConverter() *gqlMicrofrontendConverter {
-	return new(gqlMicrofrontendConverter)
+func NewMicroFrontendConverter() *gqlMicroFrontendConverter {
+	return new(gqlMicroFrontendConverter)
 }
 
-func NewMicrofrontendService() *microfrontendLister {
-	return new(microfrontendLister)
+func NewMicroFrontendService() *microFrontendLister {
+	return new(microFrontendLister)
 }
 
-func NewClusterMicrofrontendConverter() *gqlClusterMicrofrontendConverter {
-	return new(gqlClusterMicrofrontendConverter)
+func NewClusterMicroFrontendConverter() *gqlClusterMicroFrontendConverter {
+	return new(gqlClusterMicroFrontendConverter)
 }
 
-func NewClusterMicrofrontendService() *clusterMicrofrontendLister {
-	return new(clusterMicrofrontendLister)
+func NewClusterMicroFrontendService() *clusterMicroFrontendLister {
+	return new(clusterMicroFrontendLister)
 }

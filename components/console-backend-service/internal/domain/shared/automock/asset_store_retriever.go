@@ -72,3 +72,19 @@ func (_m *AssetStoreRetriever) ClusterAssetConverter() shared.GqlClusterAssetCon
 
 	return r0
 }
+
+// Specification provides a mock function with given fields:
+func (_m *AssetStoreRetriever) Specification() shared.SpecificationGetter {
+	ret := _m.Called()
+
+	var r0 shared.SpecificationGetter
+	if rf, ok := ret.Get(0).(func() shared.SpecificationGetter); ok {
+		r0 = rf()
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).(shared.SpecificationGetter)
+		}
+	}
+
+	return r0
+}

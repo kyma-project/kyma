@@ -11,16 +11,15 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 )
 
-func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
+func TestClusterMicroFrontendConverter_ToGQL(t *testing.T) {
 	t.Run("All properties are given", func(t *testing.T) {
-		converter := clusterMicrofrontendConverter{}
+		converter := newClusterMicroFrontendConverter()
 		name := "test-name"
 		version := "v1"
 		category := "test-category"
 		viewBaseUrl := "http://test-viewBaseUrl.com"
 		placement := "cluster"
-		settings, err := fixSettings()
-		assert.Nil(t, err)
+		navigationNode := fixNavigationNode(t)
 
 		item := v1alpha1.ClusterMicroFrontend{
 			ObjectMeta: metav1.ObjectMeta{
@@ -33,38 +32,22 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 					Category:    category,
 					ViewBaseURL: viewBaseUrl,
 					NavigationNodes: []v1alpha1.NavigationNode{
-						v1alpha1.NavigationNode{
-							Label:            "test-mf",
-							NavigationPath:   "test-path",
-							ViewURL:          "/test/viewUrl",
-							ShowInNavigation: false,
-							Order:            2,
-							Settings: &runtime.RawExtension{
-								Raw: settings,
-							},
-						},
+						navigationNode,
 					},
 				},
 			},
 		}
 
-		expected := gqlschema.ClusterMicrofrontend{
+		expectedNavigationNode := fixGqlNavigationNode()
+
+		expected := gqlschema.ClusterMicroFrontend{
 			Name:        name,
 			Version:     version,
 			Category:    category,
 			ViewBaseURL: viewBaseUrl,
 			Placement:   placement,
 			NavigationNodes: []gqlschema.NavigationNode{
-				gqlschema.NavigationNode{
-					Label:            "test-mf",
-					NavigationPath:   "test-path",
-					ViewURL:          "/test/viewUrl",
-					ShowInNavigation: false,
-					Order:            2,
-					Settings: gqlschema.Settings{
-						"readOnly": true,
-					},
-				},
+				expectedNavigationNode,
 			},
 		}
 
@@ -75,7 +58,7 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		converter := &clusterMicrofrontendConverter{}
+		converter := newClusterMicroFrontendConverter()
 		item, err := converter.ToGQL(&v1alpha1.ClusterMicroFrontend{})
 
 		assert.Nil(t, err)
@@ -83,7 +66,7 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 
 	t.Run("Nil", func(t *testing.T) {
-		converter := &clusterMicrofrontendConverter{}
+		converter := newClusterMicroFrontendConverter()
 		item, err := converter.ToGQL(nil)
 
 		assert.Nil(t, err)
@@ -91,15 +74,13 @@ func TestClusterMicrofrontendConverter_ToGQL(t *testing.T) {
 	})
 }
 
-func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
+func TestClusterMicroFrontendConverter_ToGQLs(t *testing.T) {
 	name := "test-name"
 	version := "v1"
 	category := "test-category"
 	viewBaseUrl := "http://test-viewBaseUrl.com"
 	placement := "cluster"
-	settings, err := fixSettings()
-	assert.Nil(t, err)
-
+	navigationNode := fixNavigationNode(t)
 	item := v1alpha1.ClusterMicroFrontend{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
@@ -111,47 +92,32 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 				Category:    category,
 				ViewBaseURL: viewBaseUrl,
 				NavigationNodes: []v1alpha1.NavigationNode{
-					v1alpha1.NavigationNode{
-						Label:            "test-mf",
-						NavigationPath:   "test-path",
-						ViewURL:          "/test/viewUrl",
-						ShowInNavigation: true,
-						Settings: &runtime.RawExtension{
-							Raw: settings,
-						},
-					},
+					navigationNode,
 				},
 			},
 		},
 	}
 
-	expected := gqlschema.ClusterMicrofrontend{
+	expectedNavigationNode := fixGqlNavigationNode()
+	expected := gqlschema.ClusterMicroFrontend{
 		Name:        name,
 		Version:     version,
 		Category:    category,
 		ViewBaseURL: viewBaseUrl,
 		Placement:   placement,
 		NavigationNodes: []gqlschema.NavigationNode{
-			gqlschema.NavigationNode{
-				Label:            "test-mf",
-				NavigationPath:   "test-path",
-				ViewURL:          "/test/viewUrl",
-				ShowInNavigation: true,
-				Settings: gqlschema.Settings{
-					"readOnly": true,
-				},
-			},
+			expectedNavigationNode,
 		},
 	}
 
 	t.Run("Success", func(t *testing.T) {
-		clusterMicrofrontends := []*v1alpha1.ClusterMicroFrontend{
+		clusterMicroFrontends := []*v1alpha1.ClusterMicroFrontend{
 			&item,
 			&item,
 		}
 
-		converter := clusterMicrofrontendConverter{}
-		result, err := converter.ToGQLs(clusterMicrofrontends)
+		converter := newClusterMicroFrontendConverter()
+		result, err := converter.ToGQLs(clusterMicroFrontends)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 2)
@@ -159,24 +125,24 @@ func TestClusterMicrofrontendConverter_ToGQLs(t *testing.T) {
 	})
 
 	t.Run("Empty", func(t *testing.T) {
-		var clusterMicrofrontends []*v1alpha1.ClusterMicroFrontend
+		var clusterMicroFrontends []*v1alpha1.ClusterMicroFrontend
 
-		converter := clusterMicrofrontendConverter{}
-		result, err := converter.ToGQLs(clusterMicrofrontends)
+		converter := newClusterMicroFrontendConverter()
+		result, err := converter.ToGQLs(clusterMicroFrontends)
 
 		assert.Nil(t, err)
 		assert.Empty(t, result)
 	})
 
 	t.Run("With nil", func(t *testing.T) {
-		clusterMicrofrontends := []*v1alpha1.ClusterMicroFrontend{
+		clusterMicroFrontends := []*v1alpha1.ClusterMicroFrontend{
 			nil,
 			&item,
 			nil,
 		}
 
-		converter := clusterMicrofrontendConverter{}
-		result, err := converter.ToGQLs(clusterMicrofrontends)
+		converter := newClusterMicroFrontendConverter()
+		result, err := converter.ToGQLs(clusterMicroFrontends)
 
 		assert.Nil(t, err)
 		assert.Len(t, result, 1)
@@ -189,4 +155,49 @@ func fixSettings() ([]byte, error) {
 		"readOnly": true,
 	}
 	return json.Marshal(settings)
+}
+
+func fixNavigationNode(t *testing.T) v1alpha1.NavigationNode {
+	settings, err := fixSettings()
+	assert.Nil(t, err)
+	return v1alpha1.NavigationNode{
+		Label:            "test-mf",
+		NavigationPath:   "test-path",
+		ViewURL:          "/test/viewUrl",
+		ShowInNavigation: false,
+		Order:            2,
+		Settings: &runtime.RawExtension{
+			Raw: settings,
+		},
+		ExternalLink: "link",
+		RequiredPermissions: []v1alpha1.RequiredPermission{
+			v1alpha1.RequiredPermission{
+				Verbs:    []string{"foo", "bar"},
+				Resource: "resource",
+				APIGroup: "apigroup",
+			},
+		},
+	}
+}
+
+func fixGqlNavigationNode() gqlschema.NavigationNode {
+	externalLinkValue := "link"
+	return gqlschema.NavigationNode{
+		Label:            "test-mf",
+		NavigationPath:   "test-path",
+		ViewURL:          "/test/viewUrl",
+		ShowInNavigation: false,
+		Order:            2,
+		Settings: gqlschema.Settings{
+			"readOnly": true,
+		},
+		ExternalLink: &externalLinkValue,
+		RequiredPermissions: []gqlschema.RequiredPermission{
+			gqlschema.RequiredPermission{
+				Verbs:    []string{"foo", "bar"},
+				Resource: "resource",
+				APIGroup: "apigroup",
+			},
+		},
+	}
 }

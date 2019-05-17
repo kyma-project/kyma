@@ -14,17 +14,17 @@ import (
 type Container struct {
 	Resolver                     *Resolver
 	BackendModuleInformer        cache.SharedIndexInformer
-	MicrofrontendInformer        cache.SharedIndexInformer
-	ClusterMicrofrontendInformer cache.SharedIndexInformer
+	MicroFrontendInformer        cache.SharedIndexInformer
+	ClusterMicroFrontendInformer cache.SharedIndexInformer
 }
 
 type Resolver struct {
 	*backendModuleResolver
-	*microfrontendResolver
-	*clusterMicrofrontendResolver
+	*microFrontendResolver
+	*clusterMicroFrontendResolver
 
 	informerFactory              externalversions.SharedInformerFactory
-	microfrontendInformerFactory mfInformer.SharedInformerFactory
+	microFrontendInformerFactory mfInformer.SharedInformerFactory
 }
 
 func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Container, error) {
@@ -32,7 +32,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 	if err != nil {
 		return nil, err
 	}
-	microfrontendClientset, err := mfClient.NewForConfig(restConfig)
+	microFrontendClientset, err := mfClient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -41,29 +41,29 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Containe
 	backendModuleInformer := informerFactory.Ui().V1alpha1().BackendModules().Informer()
 	backendModuleService := newBackendModuleService(backendModuleInformer)
 
-	microfrontendInformerFactory := mfInformer.NewSharedInformerFactory(microfrontendClientset, informerResyncPeriod)
-	microfrontendInformer := microfrontendInformerFactory.Ui().V1alpha1().MicroFrontends().Informer()
-	clusterMicrofrontendInformer := microfrontendInformerFactory.Ui().V1alpha1().ClusterMicroFrontends().Informer()
-	microfrontendService := newMicrofrontendService(microfrontendInformer)
-	clusterMicrofrontendService := newClusterMicrofrontendService(clusterMicrofrontendInformer)
+	microFrontendInformerFactory := mfInformer.NewSharedInformerFactory(microFrontendClientset, informerResyncPeriod)
+	microFrontendInformer := microFrontendInformerFactory.Ui().V1alpha1().MicroFrontends().Informer()
+	clusterMicroFrontendInformer := microFrontendInformerFactory.Ui().V1alpha1().ClusterMicroFrontends().Informer()
+	microFrontendService := newMicroFrontendService(microFrontendInformer)
+	clusterMicroFrontendService := newClusterMicroFrontendService(clusterMicroFrontendInformer)
 
 	return &Container{
 		Resolver: &Resolver{
 			backendModuleResolver:        newBackendModuleResolver(backendModuleService),
 			informerFactory:              informerFactory,
-			microfrontendResolver:        newMicrofrontendResolver(microfrontendService),
-			clusterMicrofrontendResolver: newClusterMicrofrontendResolver(clusterMicrofrontendService),
-			microfrontendInformerFactory: microfrontendInformerFactory,
+			microFrontendResolver:        newMicroFrontendResolver(microFrontendService),
+			clusterMicroFrontendResolver: newClusterMicroFrontendResolver(clusterMicroFrontendService),
+			microFrontendInformerFactory: microFrontendInformerFactory,
 		},
 		BackendModuleInformer:        backendModuleInformer,
-		MicrofrontendInformer:        microfrontendInformer,
-		ClusterMicrofrontendInformer: clusterMicrofrontendInformer,
+		MicroFrontendInformer:        microFrontendInformer,
+		ClusterMicroFrontendInformer: clusterMicroFrontendInformer,
 	}, nil
 }
 
 func (r *Resolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.informerFactory.Start(stopCh)
 	r.informerFactory.WaitForCacheSync(stopCh)
-	r.microfrontendInformerFactory.Start(stopCh)
-	r.microfrontendInformerFactory.WaitForCacheSync(stopCh)
+	r.microFrontendInformerFactory.Start(stopCh)
+	r.microFrontendInformerFactory.WaitForCacheSync(stopCh)
 }

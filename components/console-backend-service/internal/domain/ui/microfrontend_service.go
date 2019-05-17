@@ -8,30 +8,30 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-type microfrontendService struct {
+type microFrontendService struct {
 	informer cache.SharedIndexInformer
 }
 
-func newMicrofrontendService(informer cache.SharedIndexInformer) *microfrontendService {
-	return &microfrontendService{
+func newMicroFrontendService(informer cache.SharedIndexInformer) *microFrontendService {
+	return &microFrontendService{
 		informer: informer,
 	}
 }
 
-func (svc *microfrontendService) List(namespace string) ([]*uiV1alpha1v.MicroFrontend, error) {
+func (svc *microFrontendService) List(namespace string) ([]*uiV1alpha1v.MicroFrontend, error) {
 	items, err := svc.informer.GetIndexer().ByIndex(cache.NamespaceIndex, namespace)
 	if err != nil {
 		return nil, err
 	}
 
-	var microfrontends []*uiV1alpha1v.MicroFrontend
+	var microFrontends []*uiV1alpha1v.MicroFrontend
 	for _, item := range items {
-		microfrontend, ok := item.(*uiV1alpha1v.MicroFrontend)
+		microFrontend, ok := item.(*uiV1alpha1v.MicroFrontend)
 		if !ok {
 			return nil, fmt.Errorf("Incorrect item type: %T, should be: *%s", item, pretty.MicroFrontend)
 		}
-		microfrontends = append(microfrontends, microfrontend)
+		microFrontends = append(microFrontends, microFrontend)
 	}
 
-	return microfrontends, nil
+	return microFrontends, nil
 }
