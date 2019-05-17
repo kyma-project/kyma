@@ -1,28 +1,24 @@
 ---
-title: Add a ClusterDocsTopic
+title: Add new documentation to the Console's documentation view
 type: Tutorial
 ---
 
-Headless CMS allows you to extend documentation topics in the Console UI using ClusterDocsTopic custom resources.
+This tutorial shows how you can customize the Documentation view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** documentation topics with a set of Markdown subdocuments. The Markdown sources used in this tutorial point to specific topics in the official Prometheus documentation.  
 
 When you prepare ClusterDocsTopics, make sure that:
 - ClusterDocsTopics have a proper [custom resource definition](#custom-resource-clusterdocstopic).
 - Documents start with metadata, including obligatory `Title` for the document name and optional `Type` for any additional document grouping.
 - Documents are written in Markdown and follow a simple Markdown syntax. Any customizations can result in incorrect images or links rendering. To avoid such issues, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines).
 
-This tutorial shows how you can customize the `docs-ui` view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** topic groups and a set of Markdown subdocuments. The document sources used in the ClusterDocsTopics point to specific topics in the official Prometheus documentation.  
-
->**NOTE:** When you apply multiple ClusterDocsTopics, sort them using the **order** label. Otherwise, the Console UI displays the topics in the order in which you apply them.
 
 ## Prerequisites
 
+- Kyma
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
 
 ## Steps
 
-1. Install Kyma.
-
-2. In the terminal, apply these ClusterDocsTopic custom resources:
+1. Open the terminal and apply these ClusterDocsTopic custom resources:
 
 ```yaml
 cat <<EOF | kubectl apply -f -
@@ -30,19 +26,19 @@ apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
 metadata:
   labels:
-    cms.kyma-project.io/view-context: docs-ui
-    cms.kyma-project.io/group-name: prometheus
-    cms.kyma-project.io/order: "1"
+    cms.kyma-project.io/view-context: docs-ui # This label specifies that you want to render the documentation in the Documentation view.
+    cms.kyma-project.io/group-name: prometheus # This label defines the group under which you want to render the given asset in the Documentation view. The value cannot include spaces.
+    cms.kyma-project.io/order: "1" # This label specifies the position of the ClusterDocsTopic in relation to other ClusterDocsTopic in the Documentation view.
   name: prometheus-concepts
 spec:
-  displayName: "Concepts"
+  displayName: "Concepts" # The name of the topic that shows in the Documentation view under the main Prometheus section.
   description: "Some docs about Prometheus concepts"
   sources:
-    - type: markdown
+    - type: markdown # This type indicates that the Asset Metadata Service must extract front matter metadata from the source Prometheus documents and add them later to a ClusterDocsTopic as a status.
       name: docs
-      mode: package
-      url: https://github.com/prometheus/docs/archive/master.zip
-      filter: content/docs/concepts
+      mode: package # This mode indicates that you import a ZIP file instead of a single file.
+      url: https://github.com/prometheus/docs/archive/master.zip # The source location of Prometheus documents.
+      filter: content/docs/concepts # The exact location of the documents that you want to extract.
 ---
 apiVersion: cms.kyma-project.io/v1alpha1
 kind: ClusterDocsTopic
@@ -64,7 +60,9 @@ spec:
 EOF
 ```
 
-3. Check the status of custom resources:
+>**NOTE:** For a detailed explanation of all parameters, see the [ClusterDocsTopics custom resource](#custom-resource-clusterdocstopic).
+
+2. Check the status of custom resources:
 
 ```
 kubectl get clusterdocstopics
@@ -84,7 +82,7 @@ If a given custom resource is in the `Ready` phase and you want to get details o
 kubectl get clusterasset -o yaml -l cms.kyma-project.io/docs-topic=prometheus-concepts
 ```
 
-The result is as follows:
+The command lists details of ClusterAsset created by the **prometheus-concepts** custom resource:
 
 ```
 apiVersion: v1
@@ -156,9 +154,23 @@ metadata:
   selfLink: ""
 ```
 
-4. Open the Console UI and navigate to the `docs-ui` view. The new **Prometheus** section with **Concepts** and **Guides** topic groups and alphabetically ordered Markdown documents appear at the bottom of the documentation panel:
+In the **status** section of the ClusterAsset, you can see details of all documents and **baseUrl** with their location in Minio.
+```
+status:
+  assetRef:
+    baseUrl: https://minio.kyma.local/cms-public-1b7mtf1de5ost-1b7mtf1h187r7/prometheus-concepts-docs-markdown-1b7mu6bmkmse4
+    files:
+    - metadata:
+        sort_rank: 1
+        title: Data model
+      name: docs-master/content/docs/concepts/data_model.md
+```
+
+3. Open the Console UI and navigate to the Documentation view. The new **Prometheus** section with **Concepts** and **Guides** topic groups and alphabetically ordered Markdown documents appear at the bottom of the documentation panel:
 
 ![](./assets/prometheus.png)
+
+>**NOTE:** Since the source Markdown documents are prepared for different UIs and can contain custom tags, there can be issues with rendering their content. However, if you prepare your own input, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to make sure the documents render properly in the Console UI.
 
 ## Troubleshooting
 
