@@ -118,7 +118,7 @@ type: Details
 
 Content is the body of your document. Write content in [Markdown](https://daringfireball.net/projects/markdown/syntax) which is a simplified markup language.
 
-In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples in usage:
+In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples:
 1. Linking - link between documents in the same or different topics using metadata. 
     <div tabs>
       <details>
