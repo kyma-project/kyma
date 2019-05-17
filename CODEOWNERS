@@ -106,6 +106,9 @@
 # The `kubeless` subchart
 /resources/core/charts/kubeless/ @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r
 
+# The `lambda-ui` subchart
+/resources/core/charts/kubeless/charts/lambdas-ui  @joek @rakesh-garimella @sayanh @venturasr @lilitgh @k15r @kwiatekus @dariadomagala @y-kkamil @parostatkiem @akucharska @sjanota
+
 # The `logging` subchart
 /resources/logging/ @rakesh-garimella @joek @sayanh @venturasr @lilitgh @k15r
 
