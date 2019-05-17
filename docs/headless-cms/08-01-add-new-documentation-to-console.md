@@ -1,15 +1,11 @@
 ---
-title: Add new documentation to the Console's documentation view
+title: Add new documents to the Documentation view in the Console UI
 type: Tutorial
 ---
 
 This tutorial shows how you can customize the Documentation view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** documentation topics with a set of Markdown subdocuments. The Markdown sources used in this tutorial point to specific topics in the official Prometheus documentation.  
 
-When you prepare ClusterDocsTopics, make sure that:
-- ClusterDocsTopics have a proper [custom resource definition](#custom-resource-clusterdocstopic).
-- Documents start with metadata, including obligatory `Title` for the document name and optional `Type` for any additional document grouping.
-- Documents are written in Markdown and follow a simple Markdown syntax. Any customizations can result in incorrect images or links rendering. To avoid such issues, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines).
-
+>**NOTE:** The Documentation view only displays documents uploaded through ClusterDocsTopics. Make sure they have valid [definitions](#custom-resource-clusterdocstopic) and that the Markdown documents they render have correct [metadata and structure](#details-markdown-documents).
 
 ## Prerequisites
 
