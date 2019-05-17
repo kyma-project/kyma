@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: $APPLICATION_NAME-gke-deployer
+  labels:
+    app.kubernetes.io/name: $APPLICATION_NAME
+  annotations:
+    sidecar.istio.io/inject: "false"
+spec:
+  serviceAccountName: $SERVICE_ACCOUNT
+  restartPolicy: Never
+  containers:
+    - name: $APPLICATION_NAME-deployer
+      image: $KYMA_DEPLOYER_IMAGE
+      imagePullPolicy: Always
+      env:
+        - name: APPLICATION_NAME
+          value: $APPLICATION_NAME
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace
