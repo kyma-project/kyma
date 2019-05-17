@@ -116,9 +116,9 @@ type: Details
 
 ## Content
 
-Content is the body of your document which displays in the Kyma Console. Write content in [Markdown](https://daringfireball.net/projects/markdown/syntax) which is a simplified markup language.
+Content is the body of your document. Write content in [Markdown](https://daringfireball.net/projects/markdown/syntax) which is a simplified markup language.
 
-In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples:
+In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples in usage:
 1. Linking - link between documents in the same or different topics using metadata. 
     <div tabs>
       <details>
@@ -193,6 +193,6 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </details>
     </div>
 
- See the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more details about the customized Markdown features and other rules of writing Markdown content in Kyma. 
+ Read the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma. 
 
  >**CAUTION:** Markdown customized in a different way than in Kyma may not render properly in the Console UI.
