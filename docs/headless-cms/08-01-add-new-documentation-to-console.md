@@ -32,7 +32,7 @@ spec:
   sources:
     - type: markdown # This type indicates that the Asset Metadata Service must extract front matter metadata from the source Prometheus documents and add them to a ClusterDocsTopic as a status.
       name: docs
-      mode: package # This mode indicates that you import a ZIP file instead of a single file.
+      mode: package # This mode indicates that the source file is compressed and the Asset Controller must unpack it first to process it.
       url: https://github.com/prometheus/docs/archive/master.zip # The source location of Prometheus documents.
       filter: content/docs/concepts # The exact location of the documents that you want to extract.
 ---
