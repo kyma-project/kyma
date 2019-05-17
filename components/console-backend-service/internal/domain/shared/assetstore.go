@@ -2,6 +2,7 @@ package shared
 
 import (
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
@@ -11,6 +12,7 @@ type AssetStoreRetriever interface {
 	Asset() AssetGetter
 	ClusterAssetConverter() GqlClusterAssetConverter
 	AssetConverter() GqlAssetConverter
+	Specification() SpecificationGetter
 }
 
 //go:generate mockery -name=ClusterAssetGetter -output=automock -outpkg=automock -case=underscore
@@ -33,4 +35,9 @@ type GqlClusterAssetConverter interface {
 type GqlAssetConverter interface {
 	ToGQL(item *v1alpha2.Asset) (*gqlschema.Asset, error)
 	ToGQLs(in []*v1alpha2.Asset) ([]gqlschema.Asset, error)
+}
+
+//go:generate mockery -name=SpecificationGetter -output=automock -outpkg=automock -case=underscore
+type SpecificationGetter interface {
+	AsyncAPI(baseURL, name string) (*spec.AsyncAPISpec, error)
 }
