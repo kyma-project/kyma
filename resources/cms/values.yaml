@@ -3,4 +3,4 @@ global:
     path: eu.gcr.io/kyma-project
   cms_controller_manager:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0

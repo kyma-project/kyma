@@ -24,65 +24,65 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   ui_acceptance_tests:
     dir:
     version: "83aa639b"
   api_controller:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   api_controller_acceptance_tests:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
     testNamespace: api-controller-tests
   apiserver_proxy:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   configurations_generator:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   docs:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
     # Example: clusterDocsTopicsVersion: "0.9.0"
     clusterDocsTopicsVersion: release-1.1
   namespace_controller:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   kubeless_integration_tests:
     dir: tests/
-    version: 1.1.0-rc2
+    version: 1.1.0
   kubeless_tests:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   test_apiserver_proxy:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   test_namespace_controller:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   console_backend_service:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   console_backend_service_test:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   cluster_users_test:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   xip_patch:
     dir:
-    version: 1.1.0-rc2
+    version: 1.1.0
   kubeless_images:
     runtime:
       node6:
         dir:
-        version: 1.1.0-rc2
+        version: 1.1.0
       node8:
         dir:
-        version: 1.1.0-rc2
+        version: 1.1.0
     installation:
       node6:
         image: "kubeless/nodejs@sha256:4d8f5d6ad51676e8faffc0da6fabe8e12cf8cf34ae0ce8e94ee4e510f9876d2e"
