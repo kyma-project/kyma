@@ -437,7 +437,7 @@ type ComplexityRoot struct {
 		DeleteIdppreset               func(childComplexity int, name string) int
 		UpdateService                 func(childComplexity int, name string, namespace string, service JSON) int
 		DeleteService                 func(childComplexity int, name string, namespace string) int
-		CreateNamespaceMutation       func(childComplexity int, name string, labels Labels) int
+		CreateNamespace               func(childComplexity int, name string, labels Labels) int
 	}
 
 	Namespace struct {
@@ -867,7 +867,7 @@ type MutationResolver interface {
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
-	CreateNamespaceMutation(ctx context.Context, name string, labels Labels) (NamespaceCreationOutput, error)
+	CreateNamespace(ctx context.Context, name string, labels Labels) (NamespaceCreationOutput, error)
 }
 type NamespaceResolver interface {
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
@@ -1973,7 +1973,7 @@ func field_Mutation_deleteService_args(rawArgs map[string]interface{}) (map[stri
 
 }
 
-func field_Mutation_createNamespaceMutation_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Mutation_createNamespace_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["name"]; ok {
@@ -5168,17 +5168,17 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteService(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
-	case "Mutation.createNamespaceMutation":
-		if e.complexity.Mutation.CreateNamespaceMutation == nil {
+	case "Mutation.createNamespace":
+		if e.complexity.Mutation.CreateNamespace == nil {
 			break
 		}
 
-		args, err := field_Mutation_createNamespaceMutation_args(rawArgs)
+		args, err := field_Mutation_createNamespace_args(rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Mutation.CreateNamespaceMutation(childComplexity, args["name"].(string), args["labels"].(Labels)), true
+		return e.complexity.Mutation.CreateNamespace(childComplexity, args["name"].(string), args["labels"].(Labels)), true
 
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
@@ -15454,8 +15454,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updateService(ctx, field)
 		case "deleteService":
 			out.Values[i] = ec._Mutation_deleteService(ctx, field)
-		case "createNamespaceMutation":
-			out.Values[i] = ec._Mutation_createNamespaceMutation(ctx, field)
+		case "createNamespace":
+			out.Values[i] = ec._Mutation_createNamespace(ctx, field)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -16482,11 +16482,11 @@ func (ec *executionContext) _Mutation_deleteService(ctx context.Context, field g
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Mutation_createNamespaceMutation(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Mutation_createNamespace(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Mutation_createNamespaceMutation_args(rawArgs)
+	args, err := field_Mutation_createNamespace_args(rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -16500,7 +16500,7 @@ func (ec *executionContext) _Mutation_createNamespaceMutation(ctx context.Contex
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().CreateNamespaceMutation(rctx, args["name"].(string), args["labels"].(Labels))
+		return ec.resolvers.Mutation().CreateNamespace(rctx, args["name"].(string), args["labels"].(Labels))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -29703,7 +29703,7 @@ type Mutation {
     updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
-    createNamespaceMutation(name: String!, labels: Labels!): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
+    createNamespace(name: String!, labels: Labels!): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
 }
 
 # Subscriptions

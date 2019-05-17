@@ -106,7 +106,7 @@ func TestNamespaceResolver_NamespacesQuery(t *testing.T) {
 	})
 }
 
-func TestNamespaceResolver_CreateNamespaceMutationn(t *testing.T) {
+func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		name := "exampleName"
 		labels := gqlschema.Labels{}
@@ -122,7 +122,7 @@ func TestNamespaceResolver_CreateNamespaceMutationn(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 
-		result, err := resolver.CreateNamespaceMutation(nil, name, labels)
+		result, err := resolver.CreateNamespace(nil, name, labels)
 
 		require.NoError(t, err)
 		assert.Equal(t, expected, result)
@@ -138,7 +138,7 @@ func TestNamespaceResolver_CreateNamespaceMutationn(t *testing.T) {
 		defer svc.AssertExpectations(t)
 		resolver := k8s.NewNamespaceResolver(svc, appRetriever)
 
-		result, err := resolver.CreateNamespaceMutation(nil, name, labels)
+		result, err := resolver.CreateNamespace(nil, name, labels)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
