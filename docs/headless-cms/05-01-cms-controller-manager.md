@@ -21,5 +21,5 @@ This table lists the configurable parameters, their descriptions, and default va
 | **resources.requests.memory** | Defines requests for memory resources. | `20Mi` |
 | **clusterDocsTopic.relistInterval** | Determines time intervals in which the Controller Manager verifies the ClusterDocsTopic for changes. | `5m` |
 | **docsTopic.relistInterval** | Determines time intervals in which the Controller Manager verifies the DocsTopic for changes. | `5m` |
-| **clusterBucket.region** | Specifies the regional location of the ClusterBucket in a given cloud storage. | `us-east-1` |
-| **bucket.region** | Specifies the regional location of the Bucket in a given cloud storage. | `us-east-1` |
+| **clusterBucket.region** | Specifies the regional location of the ClusterBucket in a given cloud storage. Use one of [these](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/bucket.crd.yaml#L52) regions. | `us-east-1` |
+| **bucket.region** | Specifies the regional location of the Bucket in a given cloud storage. Use one of [these](https://github.com/kyma-project/kyma/blob/master/resources/cluster-essentials/templates/bucket.crd.yaml#L52) regions. | `us-east-1` |
