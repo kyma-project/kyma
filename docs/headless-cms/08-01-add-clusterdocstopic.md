@@ -10,9 +10,9 @@ When you prepare ClusterDocsTopics, make sure that:
 - Documents start with metadata, including obligatory `Title` for the document name and optional `Type` for any additional document grouping.
 - Documents are written in Markdown and follow a simple Markdown syntax. Any customizations can result in incorrect images or links rendering. To avoid such issues, use our [content guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines).
 
-This tutorial shows how you can customize the `docs-ui` view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** topic groups and a set of Markdown subdocuments. The document sources used in the ClusterDocsTopics point to the official Prometheus documentation which specific topics filtered out.  
+This tutorial shows how you can customize the `docs-ui` view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** topic groups and a set of Markdown subdocuments. The document sources used in the ClusterDocsTopics point to specific topics in the official Prometheus documentation.  
 
->**NOTE:** When you apply multiple ClusterDocsTopics, sort them using the **order** label. Otherwise, the Console UI displays the topics in the order in which you applied them.
+>**NOTE:** When you apply multiple ClusterDocsTopics, sort them using the **order** label. Otherwise, the Console UI displays the topics in the order in which you apply them.
 
 ## Prerequisites
 
@@ -164,7 +164,7 @@ metadata:
 
 If you apply the ClusterDocsTopic custom resource but its status stays `Pending` or shows `Failed`, check the status details.
 
-This command checks the status details for the `prometheus-concepts` ClusterDocsTopic:
+This command lists details of the `prometheus-concepts` ClusterDocsTopic:
 
 ```
 kubectl get clusterasset -o yaml -l cms.kyma-project.io/docs-topic=prometheus-concepts
