@@ -8,13 +8,13 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/specification"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
 )
 
 //go:generate mockery -name=specificationSvc -output=automock -outpkg=automock -case=underscore
 //go:generate failery -name=specificationSvc -case=underscore -output disabled -outpkg disabled
 type specificationSvc interface {
-	AsyncApi(baseURL, name string) (*specification.AsyncApiSpec, error)
+	AsyncAPI(baseURL, name string) (*spec.AsyncAPISpec, error)
 }
 
 type specificationService struct {
@@ -45,13 +45,13 @@ func newSpecificationService(cfg Config) (*specificationService, error) {
 	}, nil
 }
 
-func (s *specificationService) AsyncApi(baseURL, name string) (*specification.AsyncApiSpec, error) {
+func (s *specificationService) AsyncAPI(baseURL, name string) (*spec.AsyncAPISpec, error) {
 	data, err := s.readData(baseURL, name)
 	if err != nil || len(data) == 0 {
 		return nil, err
 	}
 
-	asyncApiSpec := new(specification.AsyncApiSpec)
+	asyncApiSpec := new(spec.AsyncAPISpec)
 	err = asyncApiSpec.Decode(data)
 	if err != nil {
 		return nil, err

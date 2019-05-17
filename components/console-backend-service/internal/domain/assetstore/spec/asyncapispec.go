@@ -1,27 +1,27 @@
-package specification
+package spec
 
 import (
 	"encoding/json"
 )
 
-type AsyncApiSpec struct {
+type AsyncAPISpec struct {
 	Raw  map[string]interface{}
-	Data AsyncApiSpecData
+	Data AsyncAPISpecData
 }
 
-type AsyncApiSpecData struct {
+type AsyncAPISpecData struct {
 	AsyncAPI string
 	Topics   map[string]interface{}
 }
 
-func (o *AsyncApiSpec) Decode(data []byte) error {
+func (o *AsyncAPISpec) Decode(data []byte) error {
 	var raw map[string]interface{}
 	err := json.Unmarshal(data, &raw)
 	if err != nil {
 		return err
 	}
 
-	var specData AsyncApiSpecData
+	var specData AsyncAPISpecData
 	err = json.Unmarshal(data, &specData)
 	if err != nil {
 		return err

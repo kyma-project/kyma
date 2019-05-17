@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/specification"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -146,9 +146,9 @@ func fixEventActivation() *v1alpha1.EventActivation {
 	}
 }
 
-func fixAsyncApiSpec() *specification.AsyncApiSpec {
-	return &specification.AsyncApiSpec{
-		Data: specification.AsyncApiSpecData{
+func fixAsyncApiSpec() *spec.AsyncAPISpec {
+	return &spec.AsyncAPISpec{
+		Data: spec.AsyncAPISpecData{
 			AsyncAPI: "1.0.0",
 			Topics: map[string]interface{}{
 				"sell.v1": map[string]interface{}{
@@ -166,9 +166,9 @@ func fixAsyncApiSpec() *specification.AsyncApiSpec {
 	}
 }
 
-func fixAsyncApiSpecWithoutVersion() *specification.AsyncApiSpec {
-	return &specification.AsyncApiSpec{
-		Data: specification.AsyncApiSpecData{
+func fixAsyncApiSpecWithoutVersion() *spec.AsyncAPISpec {
+	return &spec.AsyncAPISpec{
+		Data: spec.AsyncAPISpecData{
 			AsyncAPI: "1.0.0",
 			Topics: map[string]interface{}{
 				"sell": map[string]interface{}{

@@ -67,7 +67,7 @@ func (r *eventActivationResolver) EventActivationEventsField(ctx context.Context
 	}
 
 	assetRef := items[0].Status.AssetRef
-	asyncApiSpec, err := r.assetStoreRetriever.Specification().AsyncApi(assetRef.BaseURL, assetRef.Files[0].Name)
+	asyncApiSpec, err := r.assetStoreRetriever.Specification().AsyncAPI(assetRef.BaseURL, assetRef.Files[0].Name)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while fetching and decoding `AsyncApiSpec` for %s %s", pretty.EventActivation, eventActivation.Name))
 		return []gqlschema.EventActivationEvent{}, gqlerror.New(err, assetstorePretty.ClusterAsset)

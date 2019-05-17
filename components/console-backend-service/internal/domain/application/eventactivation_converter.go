@@ -4,7 +4,7 @@ import (
 	"strings"
 
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/specification"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 )
 
@@ -34,7 +34,7 @@ func (c *eventActivationConverter) ToGQLs(in []*v1alpha1.EventActivation) []gqls
 	return result
 }
 
-func (c *eventActivationConverter) ToGQLEvents(in *specification.AsyncApiSpec) []gqlschema.EventActivationEvent {
+func (c *eventActivationConverter) ToGQLEvents(in *spec.AsyncAPISpec) []gqlschema.EventActivationEvent {
 	if in == nil {
 		return []gqlschema.EventActivationEvent{}
 	}

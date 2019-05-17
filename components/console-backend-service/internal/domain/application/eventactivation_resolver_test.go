@@ -9,7 +9,7 @@ import (
 	"github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/specification"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore/spec"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
@@ -90,8 +90,8 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 	types := []string{"asyncapi", "asyncApi", "asyncapispec", "asyncApiSpec", "events"}
 
 	t.Run("Success", func(t *testing.T) {
-		asyncApiSpec := &specification.AsyncApiSpec{
-			Data: specification.AsyncApiSpecData{
+		asyncApiSpec := &spec.AsyncAPISpec{
+			Data: spec.AsyncAPISpecData{
 				AsyncAPI: "1.0.0",
 				Topics: map[string]interface{}{
 					"sell.v1": map[string]interface{}{
@@ -113,7 +113,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		defer clusterAssetGetter.AssertExpectations(t)
 
 		specificationGetter := new(assetstoreMock.SpecificationGetter)
-		specificationGetter.On("AsyncApi", asyncApiBaseUrl, asyncApiFileName).Return(asyncApiSpec, nil)
+		specificationGetter.On("AsyncAPI", asyncApiBaseUrl, asyncApiFileName).Return(asyncApiSpec, nil)
 		defer specificationGetter.AssertExpectations(t)
 
 		retriever := new(assetstoreMock.AssetStoreRetriever)
@@ -145,8 +145,8 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 	})
 
 	t.Run("Invalid version", func(t *testing.T) {
-		asyncApiSpec := &specification.AsyncApiSpec{
-			Data: specification.AsyncApiSpecData{
+		asyncApiSpec := &spec.AsyncAPISpec{
+			Data: spec.AsyncAPISpecData{
 				AsyncAPI: "1.0.1",
 			},
 		}
@@ -156,7 +156,7 @@ func TestEventActivationResolver_EventActivationEventsField(t *testing.T) {
 		defer clusterAssetGetter.AssertExpectations(t)
 
 		specificationGetter := new(assetstoreMock.SpecificationGetter)
-		specificationGetter.On("AsyncApi", asyncApiBaseUrl, asyncApiFileName).Return(asyncApiSpec, nil)
+		specificationGetter.On("AsyncAPI", asyncApiBaseUrl, asyncApiFileName).Return(asyncApiSpec, nil)
 		defer specificationGetter.AssertExpectations(t)
 
 		retriever := new(assetstoreMock.AssetStoreRetriever)
