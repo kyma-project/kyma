@@ -179,7 +179,7 @@ type ComplexityRoot struct {
 		ClusterDocsTopic func(childComplexity int) int
 	}
 
-	ClusterMicrofrontend struct {
+	ClusterMicroFrontend struct {
 		Name            func(childComplexity int) int
 		Version         func(childComplexity int) int
 		Category        func(childComplexity int) int
@@ -394,7 +394,7 @@ type ComplexityRoot struct {
 		Name func(childComplexity int) int
 	}
 
-	Microfrontend struct {
+	MicroFrontend struct {
 		Name            func(childComplexity int) int
 		Version         func(childComplexity int) int
 		Category        func(childComplexity int) int
@@ -440,12 +440,14 @@ type ComplexityRoot struct {
 	}
 
 	NavigationNode struct {
-		Label            func(childComplexity int) int
-		NavigationPath   func(childComplexity int) int
-		ViewUrl          func(childComplexity int) int
-		ShowInNavigation func(childComplexity int) int
-		Order            func(childComplexity int) int
-		Settings         func(childComplexity int) int
+		Label               func(childComplexity int) int
+		NavigationPath      func(childComplexity int) int
+		ViewUrl             func(childComplexity int) int
+		ShowInNavigation    func(childComplexity int) int
+		Order               func(childComplexity int) int
+		Settings            func(childComplexity int) int
+		ExternalLink        func(childComplexity int) int
+		RequiredPermissions func(childComplexity int) int
 	}
 
 	Pod struct {
@@ -506,8 +508,8 @@ type ComplexityRoot struct {
 		Secrets               func(childComplexity int, namespace string, first *int, offset *int) int
 		Idppreset             func(childComplexity int, name string) int
 		Idppresets            func(childComplexity int, first *int, offset *int) int
-		Microfrontends        func(childComplexity int, namespace string) int
-		ClusterMicrofrontends func(childComplexity int) int
+		MicroFrontends        func(childComplexity int, namespace string) int
+		ClusterMicroFrontends func(childComplexity int) int
 		SelfSubjectRules      func(childComplexity int, namespace *string) int
 	}
 
@@ -519,6 +521,12 @@ type ComplexityRoot struct {
 		CreationTimestamp func(childComplexity int) int
 		Labels            func(childComplexity int) int
 		Json              func(childComplexity int) int
+	}
+
+	RequiredPermission struct {
+		Verbs    func(childComplexity int) int
+		ApiGroup func(childComplexity int) int
+		Resource func(childComplexity int) int
 	}
 
 	ResourceQuota struct {
@@ -869,8 +877,8 @@ type QueryResolver interface {
 	Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]Secret, error)
 	IDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	IDPPresets(ctx context.Context, first *int, offset *int) ([]IDPPreset, error)
-	Microfrontends(ctx context.Context, namespace string) ([]Microfrontend, error)
-	ClusterMicrofrontends(ctx context.Context) ([]ClusterMicrofrontend, error)
+	MicroFrontends(ctx context.Context, namespace string) ([]MicroFrontend, error)
+	ClusterMicroFrontends(ctx context.Context) ([]ClusterMicroFrontend, error)
 	SelfSubjectRules(ctx context.Context, namespace *string) ([]ResourceRule, error)
 }
 type ServiceBindingResolver interface {
@@ -3057,7 +3065,7 @@ func field_Query_IDPPresets_args(rawArgs map[string]interface{}) (map[string]int
 
 }
 
-func field_Query_microfrontends_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+func field_Query_microFrontends_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
 	if tmp, ok := rawArgs["namespace"]; ok {
@@ -3763,47 +3771,47 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.ClusterDocsTopicEvent.ClusterDocsTopic(childComplexity), true
 
-	case "ClusterMicrofrontend.name":
-		if e.complexity.ClusterMicrofrontend.Name == nil {
+	case "ClusterMicroFrontend.name":
+		if e.complexity.ClusterMicroFrontend.Name == nil {
 			break
 		}
 
-		return e.complexity.ClusterMicrofrontend.Name(childComplexity), true
+		return e.complexity.ClusterMicroFrontend.Name(childComplexity), true
 
-	case "ClusterMicrofrontend.version":
-		if e.complexity.ClusterMicrofrontend.Version == nil {
+	case "ClusterMicroFrontend.version":
+		if e.complexity.ClusterMicroFrontend.Version == nil {
 			break
 		}
 
-		return e.complexity.ClusterMicrofrontend.Version(childComplexity), true
+		return e.complexity.ClusterMicroFrontend.Version(childComplexity), true
 
-	case "ClusterMicrofrontend.category":
-		if e.complexity.ClusterMicrofrontend.Category == nil {
+	case "ClusterMicroFrontend.category":
+		if e.complexity.ClusterMicroFrontend.Category == nil {
 			break
 		}
 
-		return e.complexity.ClusterMicrofrontend.Category(childComplexity), true
+		return e.complexity.ClusterMicroFrontend.Category(childComplexity), true
 
-	case "ClusterMicrofrontend.viewBaseUrl":
-		if e.complexity.ClusterMicrofrontend.ViewBaseUrl == nil {
+	case "ClusterMicroFrontend.viewBaseUrl":
+		if e.complexity.ClusterMicroFrontend.ViewBaseUrl == nil {
 			break
 		}
 
-		return e.complexity.ClusterMicrofrontend.ViewBaseUrl(childComplexity), true
+		return e.complexity.ClusterMicroFrontend.ViewBaseUrl(childComplexity), true
 
-	case "ClusterMicrofrontend.placement":
-		if e.complexity.ClusterMicrofrontend.Placement == nil {
+	case "ClusterMicroFrontend.placement":
+		if e.complexity.ClusterMicroFrontend.Placement == nil {
 			break
 		}
 
-		return e.complexity.ClusterMicrofrontend.Placement(childComplexity), true
+		return e.complexity.ClusterMicroFrontend.Placement(childComplexity), true
 
-	case "ClusterMicrofrontend.navigationNodes":
-		if e.complexity.ClusterMicrofrontend.NavigationNodes == nil {
+	case "ClusterMicroFrontend.navigationNodes":
+		if e.complexity.ClusterMicroFrontend.NavigationNodes == nil {
 			break
 		}
 
-		return e.complexity.ClusterMicrofrontend.NavigationNodes(childComplexity), true
+		return e.complexity.ClusterMicroFrontend.NavigationNodes(childComplexity), true
 
 	case "ClusterServiceBroker.name":
 		if e.complexity.ClusterServiceBroker.Name == nil {
@@ -4611,40 +4619,40 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.LocalObjectReference.Name(childComplexity), true
 
-	case "Microfrontend.name":
-		if e.complexity.Microfrontend.Name == nil {
+	case "MicroFrontend.name":
+		if e.complexity.MicroFrontend.Name == nil {
 			break
 		}
 
-		return e.complexity.Microfrontend.Name(childComplexity), true
+		return e.complexity.MicroFrontend.Name(childComplexity), true
 
-	case "Microfrontend.version":
-		if e.complexity.Microfrontend.Version == nil {
+	case "MicroFrontend.version":
+		if e.complexity.MicroFrontend.Version == nil {
 			break
 		}
 
-		return e.complexity.Microfrontend.Version(childComplexity), true
+		return e.complexity.MicroFrontend.Version(childComplexity), true
 
-	case "Microfrontend.category":
-		if e.complexity.Microfrontend.Category == nil {
+	case "MicroFrontend.category":
+		if e.complexity.MicroFrontend.Category == nil {
 			break
 		}
 
-		return e.complexity.Microfrontend.Category(childComplexity), true
+		return e.complexity.MicroFrontend.Category(childComplexity), true
 
-	case "Microfrontend.viewBaseUrl":
-		if e.complexity.Microfrontend.ViewBaseUrl == nil {
+	case "MicroFrontend.viewBaseUrl":
+		if e.complexity.MicroFrontend.ViewBaseUrl == nil {
 			break
 		}
 
-		return e.complexity.Microfrontend.ViewBaseUrl(childComplexity), true
+		return e.complexity.MicroFrontend.ViewBaseUrl(childComplexity), true
 
-	case "Microfrontend.navigationNodes":
-		if e.complexity.Microfrontend.NavigationNodes == nil {
+	case "MicroFrontend.navigationNodes":
+		if e.complexity.MicroFrontend.NavigationNodes == nil {
 			break
 		}
 
-		return e.complexity.Microfrontend.NavigationNodes(childComplexity), true
+		return e.complexity.MicroFrontend.NavigationNodes(childComplexity), true
 
 	case "Mutation.createResource":
 		if e.complexity.Mutation.CreateResource == nil {
@@ -5049,6 +5057,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.NavigationNode.Settings(childComplexity), true
+
+	case "NavigationNode.externalLink":
+		if e.complexity.NavigationNode.ExternalLink == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.ExternalLink(childComplexity), true
+
+	case "NavigationNode.requiredPermissions":
+		if e.complexity.NavigationNode.RequiredPermissions == nil {
+			break
+		}
+
+		return e.complexity.NavigationNode.RequiredPermissions(childComplexity), true
 
 	case "Pod.name":
 		if e.complexity.Pod.Name == nil {
@@ -5602,24 +5624,24 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Query.Idppresets(childComplexity, args["first"].(*int), args["offset"].(*int)), true
 
-	case "Query.microfrontends":
-		if e.complexity.Query.Microfrontends == nil {
+	case "Query.microFrontends":
+		if e.complexity.Query.MicroFrontends == nil {
 			break
 		}
 
-		args, err := field_Query_microfrontends_args(rawArgs)
+		args, err := field_Query_microFrontends_args(rawArgs)
 		if err != nil {
 			return 0, false
 		}
 
-		return e.complexity.Query.Microfrontends(childComplexity, args["namespace"].(string)), true
+		return e.complexity.Query.MicroFrontends(childComplexity, args["namespace"].(string)), true
 
-	case "Query.clusterMicrofrontends":
-		if e.complexity.Query.ClusterMicrofrontends == nil {
+	case "Query.clusterMicroFrontends":
+		if e.complexity.Query.ClusterMicroFrontends == nil {
 			break
 		}
 
-		return e.complexity.Query.ClusterMicrofrontends(childComplexity), true
+		return e.complexity.Query.ClusterMicroFrontends(childComplexity), true
 
 	case "Query.selfSubjectRules":
 		if e.complexity.Query.SelfSubjectRules == nil {
@@ -5681,6 +5703,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ReplicaSet.Json(childComplexity), true
+
+	case "RequiredPermission.verbs":
+		if e.complexity.RequiredPermission.Verbs == nil {
+			break
+		}
+
+		return e.complexity.RequiredPermission.Verbs(childComplexity), true
+
+	case "RequiredPermission.apiGroup":
+		if e.complexity.RequiredPermission.ApiGroup == nil {
+			break
+		}
+
+		return e.complexity.RequiredPermission.ApiGroup(childComplexity), true
+
+	case "RequiredPermission.resource":
+		if e.complexity.RequiredPermission.Resource == nil {
+			break
+		}
+
+		return e.complexity.RequiredPermission.Resource(childComplexity), true
 
 	case "ResourceQuota.name":
 		if e.complexity.ResourceQuota.Name == nil {
@@ -9685,11 +9728,11 @@ func (ec *executionContext) _ClusterDocsTopicEvent_clusterDocsTopic(ctx context.
 	return ec._ClusterDocsTopic(ctx, field.Selections, &res)
 }
 
-var clusterMicrofrontendImplementors = []string{"ClusterMicrofrontend"}
+var clusterMicroFrontendImplementors = []string{"ClusterMicroFrontend"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _ClusterMicrofrontend(ctx context.Context, sel ast.SelectionSet, obj *ClusterMicrofrontend) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, clusterMicrofrontendImplementors)
+func (ec *executionContext) _ClusterMicroFrontend(ctx context.Context, sel ast.SelectionSet, obj *ClusterMicroFrontend) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, clusterMicroFrontendImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -9698,34 +9741,34 @@ func (ec *executionContext) _ClusterMicrofrontend(ctx context.Context, sel ast.S
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("ClusterMicrofrontend")
+			out.Values[i] = graphql.MarshalString("ClusterMicroFrontend")
 		case "name":
-			out.Values[i] = ec._ClusterMicrofrontend_name(ctx, field, obj)
+			out.Values[i] = ec._ClusterMicroFrontend_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "version":
-			out.Values[i] = ec._ClusterMicrofrontend_version(ctx, field, obj)
+			out.Values[i] = ec._ClusterMicroFrontend_version(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "category":
-			out.Values[i] = ec._ClusterMicrofrontend_category(ctx, field, obj)
+			out.Values[i] = ec._ClusterMicroFrontend_category(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "viewBaseUrl":
-			out.Values[i] = ec._ClusterMicrofrontend_viewBaseUrl(ctx, field, obj)
+			out.Values[i] = ec._ClusterMicroFrontend_viewBaseUrl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "placement":
-			out.Values[i] = ec._ClusterMicrofrontend_placement(ctx, field, obj)
+			out.Values[i] = ec._ClusterMicroFrontend_placement(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "navigationNodes":
-			out.Values[i] = ec._ClusterMicrofrontend_navigationNodes(ctx, field, obj)
+			out.Values[i] = ec._ClusterMicroFrontend_navigationNodes(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -9741,11 +9784,11 @@ func (ec *executionContext) _ClusterMicrofrontend(ctx context.Context, sel ast.S
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ClusterMicrofrontend_name(ctx context.Context, field graphql.CollectedField, obj *ClusterMicrofrontend) graphql.Marshaler {
+func (ec *executionContext) _ClusterMicroFrontend_name(ctx context.Context, field graphql.CollectedField, obj *ClusterMicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "ClusterMicrofrontend",
+		Object: "ClusterMicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -9768,11 +9811,11 @@ func (ec *executionContext) _ClusterMicrofrontend_name(ctx context.Context, fiel
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ClusterMicrofrontend_version(ctx context.Context, field graphql.CollectedField, obj *ClusterMicrofrontend) graphql.Marshaler {
+func (ec *executionContext) _ClusterMicroFrontend_version(ctx context.Context, field graphql.CollectedField, obj *ClusterMicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "ClusterMicrofrontend",
+		Object: "ClusterMicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -9795,11 +9838,11 @@ func (ec *executionContext) _ClusterMicrofrontend_version(ctx context.Context, f
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ClusterMicrofrontend_category(ctx context.Context, field graphql.CollectedField, obj *ClusterMicrofrontend) graphql.Marshaler {
+func (ec *executionContext) _ClusterMicroFrontend_category(ctx context.Context, field graphql.CollectedField, obj *ClusterMicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "ClusterMicrofrontend",
+		Object: "ClusterMicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -9822,11 +9865,11 @@ func (ec *executionContext) _ClusterMicrofrontend_category(ctx context.Context, 
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ClusterMicrofrontend_viewBaseUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterMicrofrontend) graphql.Marshaler {
+func (ec *executionContext) _ClusterMicroFrontend_viewBaseUrl(ctx context.Context, field graphql.CollectedField, obj *ClusterMicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "ClusterMicrofrontend",
+		Object: "ClusterMicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -9849,11 +9892,11 @@ func (ec *executionContext) _ClusterMicrofrontend_viewBaseUrl(ctx context.Contex
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ClusterMicrofrontend_placement(ctx context.Context, field graphql.CollectedField, obj *ClusterMicrofrontend) graphql.Marshaler {
+func (ec *executionContext) _ClusterMicroFrontend_placement(ctx context.Context, field graphql.CollectedField, obj *ClusterMicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "ClusterMicrofrontend",
+		Object: "ClusterMicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -9876,11 +9919,11 @@ func (ec *executionContext) _ClusterMicrofrontend_placement(ctx context.Context,
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _ClusterMicrofrontend_navigationNodes(ctx context.Context, field graphql.CollectedField, obj *ClusterMicrofrontend) graphql.Marshaler {
+func (ec *executionContext) _ClusterMicroFrontend_navigationNodes(ctx context.Context, field graphql.CollectedField, obj *ClusterMicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "ClusterMicrofrontend",
+		Object: "ClusterMicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -14645,11 +14688,11 @@ func (ec *executionContext) _LocalObjectReference_name(ctx context.Context, fiel
 	return graphql.MarshalString(res)
 }
 
-var microfrontendImplementors = []string{"Microfrontend"}
+var microFrontendImplementors = []string{"MicroFrontend"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _Microfrontend(ctx context.Context, sel ast.SelectionSet, obj *Microfrontend) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, microfrontendImplementors)
+func (ec *executionContext) _MicroFrontend(ctx context.Context, sel ast.SelectionSet, obj *MicroFrontend) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, microFrontendImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -14658,29 +14701,29 @@ func (ec *executionContext) _Microfrontend(ctx context.Context, sel ast.Selectio
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("Microfrontend")
+			out.Values[i] = graphql.MarshalString("MicroFrontend")
 		case "name":
-			out.Values[i] = ec._Microfrontend_name(ctx, field, obj)
+			out.Values[i] = ec._MicroFrontend_name(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "version":
-			out.Values[i] = ec._Microfrontend_version(ctx, field, obj)
+			out.Values[i] = ec._MicroFrontend_version(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "category":
-			out.Values[i] = ec._Microfrontend_category(ctx, field, obj)
+			out.Values[i] = ec._MicroFrontend_category(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "viewBaseUrl":
-			out.Values[i] = ec._Microfrontend_viewBaseUrl(ctx, field, obj)
+			out.Values[i] = ec._MicroFrontend_viewBaseUrl(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "navigationNodes":
-			out.Values[i] = ec._Microfrontend_navigationNodes(ctx, field, obj)
+			out.Values[i] = ec._MicroFrontend_navigationNodes(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -14696,11 +14739,11 @@ func (ec *executionContext) _Microfrontend(ctx context.Context, sel ast.Selectio
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Microfrontend_name(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+func (ec *executionContext) _MicroFrontend_name(ctx context.Context, field graphql.CollectedField, obj *MicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Microfrontend",
+		Object: "MicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -14723,11 +14766,11 @@ func (ec *executionContext) _Microfrontend_name(ctx context.Context, field graph
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Microfrontend_version(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+func (ec *executionContext) _MicroFrontend_version(ctx context.Context, field graphql.CollectedField, obj *MicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Microfrontend",
+		Object: "MicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -14750,11 +14793,11 @@ func (ec *executionContext) _Microfrontend_version(ctx context.Context, field gr
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Microfrontend_category(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+func (ec *executionContext) _MicroFrontend_category(ctx context.Context, field graphql.CollectedField, obj *MicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Microfrontend",
+		Object: "MicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -14777,11 +14820,11 @@ func (ec *executionContext) _Microfrontend_category(ctx context.Context, field g
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Microfrontend_viewBaseUrl(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+func (ec *executionContext) _MicroFrontend_viewBaseUrl(ctx context.Context, field graphql.CollectedField, obj *MicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Microfrontend",
+		Object: "MicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -14804,11 +14847,11 @@ func (ec *executionContext) _Microfrontend_viewBaseUrl(ctx context.Context, fiel
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Microfrontend_navigationNodes(ctx context.Context, field graphql.CollectedField, obj *Microfrontend) graphql.Marshaler {
+func (ec *executionContext) _MicroFrontend_navigationNodes(ctx context.Context, field graphql.CollectedField, obj *MicroFrontend) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "Microfrontend",
+		Object: "MicroFrontend",
 		Args:   nil,
 		Field:  field,
 	}
@@ -16111,6 +16154,13 @@ func (ec *executionContext) _NavigationNode(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "externalLink":
+			out.Values[i] = ec._NavigationNode_externalLink(ctx, field, obj)
+		case "requiredPermissions":
+			out.Values[i] = ec._NavigationNode_requiredPermissions(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -16282,6 +16332,94 @@ func (ec *executionContext) _NavigationNode_settings(ctx context.Context, field 
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NavigationNode_externalLink(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NavigationNode",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ExternalLink, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalString(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NavigationNode_requiredPermissions(ctx context.Context, field graphql.CollectedField, obj *NavigationNode) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NavigationNode",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.RequiredPermissions, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]RequiredPermission)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: &res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				return ec._RequiredPermission(ctx, field.Selections, &res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
 }
 
 var podImplementors = []string{"Pod"}
@@ -17057,19 +17195,19 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				}
 				wg.Done()
 			}(i, field)
-		case "microfrontends":
+		case "microFrontends":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_microfrontends(ctx, field)
+				out.Values[i] = ec._Query_microFrontends(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
 				wg.Done()
 			}(i, field)
-		case "clusterMicrofrontends":
+		case "clusterMicroFrontends":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
-				out.Values[i] = ec._Query_clusterMicrofrontends(ctx, field)
+				out.Values[i] = ec._Query_clusterMicroFrontends(ctx, field)
 				if out.Values[i] == graphql.Null {
 					invalid = true
 				}
@@ -19236,11 +19374,11 @@ func (ec *executionContext) _Query_IDPPresets(ctx context.Context, field graphql
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_microfrontends(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_microFrontends(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rawArgs := field.ArgumentMap(ec.Variables)
-	args, err := field_Query_microfrontends_args(rawArgs)
+	args, err := field_Query_microFrontends_args(rawArgs)
 	if err != nil {
 		ec.Error(ctx, err)
 		return graphql.Null
@@ -19254,7 +19392,7 @@ func (ec *executionContext) _Query_microfrontends(ctx context.Context, field gra
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().Microfrontends(rctx, args["namespace"].(string))
+		return ec.resolvers.Query().MicroFrontends(rctx, args["namespace"].(string))
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19262,7 +19400,7 @@ func (ec *executionContext) _Query_microfrontends(ctx context.Context, field gra
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]Microfrontend)
+	res := resTmp.([]MicroFrontend)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -19287,7 +19425,7 @@ func (ec *executionContext) _Query_microfrontends(ctx context.Context, field gra
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._Microfrontend(ctx, field.Selections, &res[idx1])
+				return ec._MicroFrontend(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -19302,7 +19440,7 @@ func (ec *executionContext) _Query_microfrontends(ctx context.Context, field gra
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _Query_clusterMicrofrontends(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+func (ec *executionContext) _Query_clusterMicroFrontends(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
@@ -19314,7 +19452,7 @@ func (ec *executionContext) _Query_clusterMicrofrontends(ctx context.Context, fi
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Query().ClusterMicrofrontends(rctx)
+		return ec.resolvers.Query().ClusterMicroFrontends(rctx)
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -19322,7 +19460,7 @@ func (ec *executionContext) _Query_clusterMicrofrontends(ctx context.Context, fi
 		}
 		return graphql.Null
 	}
-	res := resTmp.([]ClusterMicrofrontend)
+	res := resTmp.([]ClusterMicroFrontend)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -19347,7 +19485,7 @@ func (ec *executionContext) _Query_clusterMicrofrontends(ctx context.Context, fi
 			}
 			arr1[idx1] = func() graphql.Marshaler {
 
-				return ec._ClusterMicrofrontend(ctx, field.Selections, &res[idx1])
+				return ec._ClusterMicroFrontend(ctx, field.Selections, &res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -19747,6 +19885,136 @@ func (ec *executionContext) _ReplicaSet_json(ctx context.Context, field graphql.
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return res
+}
+
+var requiredPermissionImplementors = []string{"RequiredPermission"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _RequiredPermission(ctx context.Context, sel ast.SelectionSet, obj *RequiredPermission) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, requiredPermissionImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("RequiredPermission")
+		case "verbs":
+			out.Values[i] = ec._RequiredPermission_verbs(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "apiGroup":
+			out.Values[i] = ec._RequiredPermission_apiGroup(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "resource":
+			out.Values[i] = ec._RequiredPermission_resource(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RequiredPermission_verbs(ctx context.Context, field graphql.CollectedField, obj *RequiredPermission) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "RequiredPermission",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Verbs, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.([]string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+			return graphql.MarshalString(res[idx1])
+		}()
+	}
+
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RequiredPermission_apiGroup(ctx context.Context, field graphql.CollectedField, obj *RequiredPermission) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "RequiredPermission",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.APIGroup, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _RequiredPermission_resource(ctx context.Context, field graphql.CollectedField, obj *RequiredPermission) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "RequiredPermission",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Resource, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
 }
 
 var resourceQuotaImplementors = []string{"ResourceQuota"}
@@ -28090,7 +28358,7 @@ type ConfigMapEvent {
 
 # MF
 
-type Microfrontend {
+type MicroFrontend {
     name: String!
     version: String!
     category: String!
@@ -28098,7 +28366,7 @@ type Microfrontend {
     navigationNodes: [NavigationNode!]!
 }
 
-type ClusterMicrofrontend {
+type ClusterMicroFrontend {
     name: String!
     version: String!
     category: String!
@@ -28114,6 +28382,14 @@ type NavigationNode {
     showInNavigation: Boolean!
     order: Int!
     settings: Settings!
+    externalLink: String
+    requiredPermissions: [RequiredPermission!]!
+}
+
+type RequiredPermission {
+    verbs: [String!]!
+    apiGroup: String!
+    resource: String!
 }
 
 # SelfSubjectRules
@@ -28189,8 +28465,8 @@ type Query {
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 
-    microfrontends(namespace: String!): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-    clusterMicrofrontends: [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 }
