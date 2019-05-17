@@ -19,11 +19,11 @@ import (
 )
 
 const (
-	applicationName            = "test-app-haufmzt"
-	eventsServiceDeployment    = "test-app-haufmzt-event-service"
-	applicationProxyDeployment = "test-app-haufmzt-application-gateway"
-	eventsConfigMapName        = "test-app-haufmzt-configmap-events"
-	proxyConfigMapName         = "test-app-haufmzt-configmap-proxy"
+	applicationName            = "operator-test-app"
+	eventsServiceDeployment    = "operator-test-app-event-service"
+	applicationProxyDeployment = "operator-test-app-application-gateway"
+	eventsConfigMapName        = "operator-test-app-configmap-events"
+	proxyConfigMapName         = "operator-test-app-configmap-proxy"
 	integrationNamespace       = "kyma-integration"
 
 	imageKey     = "image"
@@ -48,14 +48,17 @@ func NewApplicationOperatorUpgradeTest(acCli appConnector.Interface, k8sCli k8sC
 func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Info("ApplicationOperator UpgradeTest creating resources...")
 
+	log.Info("Creating Application...")
 	if err := ut.createApplication(); err != nil {
 		return errors.Wrap(err, "could not create Application")
 	}
 
-	if err := ut.waitForApplication(stop); err != nil {
+	log.Info("Waiting for resources...")
+	if err := ut.waitForResources(stop); err != nil {
 		return errors.Wrap(err, "could not find resources")
 	}
 
+	log.Info("Creating verification data...")
 	if err := ut.setVerificationData(integrationNamespace); err != nil {
 		return errors.Wrap(err, "could not set verification data")
 	}
@@ -82,7 +85,7 @@ func (ut *UpgradeTest) createApplication() error {
 	return err
 }
 
-func (ut *UpgradeTest) waitForApplication(stop <-chan struct{}) error {
+func (ut *UpgradeTest) waitForResources(stop <-chan struct{}) error {
 	return ut.wait(2*time.Minute, ut.isApplicationReady, stop)
 }
 
@@ -102,7 +105,6 @@ func (ut *UpgradeTest) wait(timeout time.Duration, conditionFunc wait.ConditionF
 
 func (ut *UpgradeTest) isApplicationReady() (bool, error) {
 	application, err := ut.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Get(applicationName, metav1.GetOptions{})
-
 	if err != nil {
 		return false, err
 	}
@@ -127,6 +129,33 @@ func (ut *UpgradeTest) setVerificationData(namespace string) error {
 
 	err = ut.createConfigMap(proxyConfigMapName, namespace, proxyImage, proxyTimestamp)
 	return err
+}
+
+func (ut *UpgradeTest) getDeploymentData(name, namespace string) (image string, timestamp metav1.Time, err error) {
+	deployment, err := ut.getDeployment(name, namespace)
+	if err != nil {
+		return "", metav1.Time{}, err
+	}
+
+	imageVersion, err := getImageVersion(name, deployment.Spec.Template.Spec.Containers)
+	if err != nil {
+		return "", metav1.Time{}, err
+	}
+
+	return imageVersion, deployment.CreationTimestamp, nil
+}
+
+func (ut *UpgradeTest) getDeployment(name, namespace string) (*v1.Deployment, error) {
+	return ut.k8sCli.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
+}
+
+func getImageVersion(containerName string, containers []core.Container) (string, error) {
+	for _, c := range containers {
+		if strings.Contains(c.Name, containerName) {
+			return c.Image, nil
+		}
+	}
+	return "", fmt.Errorf(fmt.Sprintf("container name %s not found", containerName))
 }
 
 func (ut *UpgradeTest) createConfigMap(name, namespace, image string, timestamp metav1.Time) error {
@@ -157,11 +186,13 @@ func (ut *UpgradeTest) createConfigMap(name, namespace, image string, timestamp 
 func (ut *UpgradeTest) TestResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Info("ApplicationOperator UpgradeTest testing resources...")
 
+	log.Info("Verifying resources...")
 	if err := ut.verifyResources(integrationNamespace); err != nil {
 		return errors.Wrap(err, "image versions are not upgraded")
 	}
 
-	if err := ut.deleteResources(log, integrationNamespace); err != nil {
+	log.Info("Deleting resources...")
+	if err := ut.deleteResources(integrationNamespace); err != nil {
 		return errors.Wrap(err, "could not delete resources")
 	}
 
@@ -209,38 +240,11 @@ func (ut *UpgradeTest) verifyDeployment(name, configmapName, namespace string) e
 	return nil
 }
 
-func (ut *UpgradeTest) getDeploymentData(name, namespace string) (image string, timestamp metav1.Time, err error) {
-	deployment, err := ut.getDeployment(name, namespace)
-	if err != nil {
-		return "", metav1.Time{}, err
-	}
-
-	imageVersion, err := getImageVersion(name, deployment.Spec.Template.Spec.Containers)
-	if err != nil {
-		return "", metav1.Time{}, err
-	}
-
-	return imageVersion, deployment.CreationTimestamp, nil
-}
-
-func getImageVersion(containerName string, containers []core.Container) (string, error) {
-	for _, c := range containers {
-		if strings.Contains(c.Name, containerName) {
-			return c.Image, nil
-		}
-	}
-	return "", fmt.Errorf(fmt.Sprintf("container name %s not found", containerName))
-}
-
-func (ut *UpgradeTest) getDeployment(name, namespace string) (*v1.Deployment, error) {
-	return ut.k8sCli.AppsV1().Deployments(namespace).Get(name, metav1.GetOptions{})
-}
-
 func (ut *UpgradeTest) getConfigMap(name, namespace string) (*core.ConfigMap, error) {
 	return ut.k8sCli.CoreV1().ConfigMaps(namespace).Get(name, metav1.GetOptions{})
 }
 
-func (ut *UpgradeTest) deleteResources(log logrus.FieldLogger, namespace string) error {
+func (ut *UpgradeTest) deleteResources(namespace string) error {
 	if err := ut.deleteApplication(); err != nil {
 		return err
 	}
