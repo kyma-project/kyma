@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"net/http"
 	"os"
 	"time"
@@ -82,7 +83,20 @@ func main() {
 		}
 	}()
 
-	// Set up health check handlers
+	// Setup Monitoring Service
+	metricsServeMux := http.NewServeMux()
+	metricsServeMux.Handle("/metrics", promhttp.Handler())
+	metricsServer := http.Server{
+		Addr:    fmt.Sprintf(":%d", 9090),
+		Handler: metricsServeMux,
+	}
+	log.Info("HTTP metrics server starting on %v", 9090)
+	go func() {
+		if err := metricsServer.ListenAndServe(); err != nil {
+			log.Error(err, "HTTP metrics server failed with error|||")
+		}
+	}()
+	// Setup health check handlers
 	serveMux := http.NewServeMux()
 	serveMux.Handle("/v1/status/live", statusLiveHandler(&mgr, log))
 	serveMux.Handle("/v1/status/ready", statusReadyHandler(&mgr, log))
