@@ -48,7 +48,7 @@ func NewApplicationOperatorUpgradeTest(acCli appConnector.Interface, k8sCli k8sC
 func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLogger, namespace string) error {
 	log.Info("ApplicationOperator UpgradeTest creating resources...")
 
-	if err := ut.createApplication(log); err != nil {
+	if err := ut.createApplication(); err != nil {
 		return errors.Wrap(err, "could not create Application")
 	}
 
@@ -64,9 +64,7 @@ func (ut *UpgradeTest) CreateResources(stop <-chan struct{}, log logrus.FieldLog
 	return nil
 }
 
-func (ut *UpgradeTest) createApplication(log logrus.FieldLogger) error {
-	log.Info("Creating Application...")
-
+func (ut *UpgradeTest) createApplication() error {
 	_, err := ut.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Create(&v1alpha1.Application{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Application",
@@ -78,6 +76,7 @@ func (ut *UpgradeTest) createApplication(log logrus.FieldLogger) error {
 		Spec: v1alpha1.ApplicationSpec{
 			AccessLabel: "app-access-label",
 			Description: "Application used by upgradability test",
+			Services:    []v1alpha1.Service{},
 		},
 	})
 	return err
@@ -102,10 +101,10 @@ func (ut *UpgradeTest) wait(timeout time.Duration, conditionFunc wait.ConditionF
 }
 
 func (ut *UpgradeTest) isApplicationReady() (bool, error) {
-	application, e := ut.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Get(applicationName, metav1.GetOptions{})
+	application, err := ut.appConnectorInterface.ApplicationconnectorV1alpha1().Applications().Get(applicationName, metav1.GetOptions{})
 
-	if e != nil {
-		return false, e
+	if err != nil {
+		return false, err
 	}
 
 	return application.Status.InstallationStatus.Status == "DEPLOYED", nil
@@ -113,26 +112,24 @@ func (ut *UpgradeTest) isApplicationReady() (bool, error) {
 
 func (ut *UpgradeTest) setVerificationData(namespace string) error {
 	eventsImage, eventsTimestamp, err := ut.getDeploymentData(eventsServiceDeployment, namespace)
-
 	if err != nil {
 		return err
 	}
 
-	ut.createConfigMap(eventsConfigMapName, namespace, eventsImage, eventsTimestamp)
-
-	proxyImage, proxyTimestamp, e := ut.getDeploymentData(applicationProxyDeployment, namespace)
-
-	if e != nil {
-		return e
+	if err := ut.createConfigMap(eventsConfigMapName, namespace, eventsImage, eventsTimestamp); err != nil {
+		return err
 	}
 
-	ut.createConfigMap(proxyConfigMapName, namespace, proxyImage, proxyTimestamp)
+	proxyImage, proxyTimestamp, err := ut.getDeploymentData(applicationProxyDeployment, namespace)
+	if err != nil {
+		return err
+	}
 
-	return nil
+	err = ut.createConfigMap(proxyConfigMapName, namespace, proxyImage, proxyTimestamp)
+	return err
 }
 
 func (ut *UpgradeTest) createConfigMap(name, namespace, image string, timestamp metav1.Time) error {
-
 	configMap := &core.ConfigMap{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ConfigMap",
@@ -148,10 +145,9 @@ func (ut *UpgradeTest) createConfigMap(name, namespace, image string, timestamp 
 		},
 	}
 
-	_, e := ut.k8sCli.CoreV1().ConfigMaps(namespace).Create(configMap)
-
-	if e != nil {
-		return e
+	_, err := ut.k8sCli.CoreV1().ConfigMaps(namespace).Create(configMap)
+	if err != nil {
+		return err
 	}
 
 	return nil
@@ -187,34 +183,30 @@ func (ut *UpgradeTest) verifyResources(namespace string) error {
 
 func (ut *UpgradeTest) verifyDeployment(name, configmapName, namespace string) error {
 	image, timestamp, err := ut.getDeploymentData(name, namespace)
-
 	if err != nil {
 		return err
 	}
 
-	configMap, e := ut.getConfigMap(configmapName, namespace)
-
-	if e != nil {
-		return e
+	configMap, err := ut.getConfigMap(configmapName, namespace)
+	if err != nil {
+		return err
 	}
 
 	previousImage, ok := configMap.Data[imageKey]
-
 	if !ok {
 		return fmt.Errorf("pre-upgrade image not found")
 	}
 
 	previousTimestamp, ok := configMap.Data[timestampKey]
-
 	if !ok {
 		return fmt.Errorf("pre-upgrade timestamp not found")
 	}
 
-	if previousImage != image || previousTimestamp != timestamp.String() {
-		return nil
+	if previousImage == image && previousTimestamp == timestamp.String() {
+		return fmt.Errorf("image and timestamp not changed")
 	}
 
-	return fmt.Errorf("image and timestamp not changed")
+	return nil
 }
 
 func (ut *UpgradeTest) getDeploymentData(name, namespace string) (image string, timestamp metav1.Time, err error) {
@@ -223,10 +215,9 @@ func (ut *UpgradeTest) getDeploymentData(name, namespace string) (image string, 
 		return "", metav1.Time{}, err
 	}
 
-	imageVersion, e := getImageVersion(name, deployment.Spec.Template.Spec.Containers)
-
-	if e != nil {
-		return "", metav1.Time{}, e
+	imageVersion, err := getImageVersion(name, deployment.Spec.Template.Spec.Containers)
+	if err != nil {
+		return "", metav1.Time{}, err
 	}
 
 	return imageVersion, deployment.CreationTimestamp, nil
