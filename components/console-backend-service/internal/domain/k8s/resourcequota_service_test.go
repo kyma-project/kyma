@@ -36,6 +36,42 @@ func TestResourceQuotaResolver_ListSuccess(t *testing.T) {
 	assert.Len(t, result, 2)
 }
 
+func TestResourceQuota_Create(t *testing.T) {
+	const (
+		namespace = "production"
+	)
+	var testCases = []struct {
+		caseName               string
+		namespace              string
+		name                   string
+		resourceLimitsMemory   string
+		resourceRequestsMemory string
+		success                bool
+	}{
+		{"Success", "production", "mem-default", "1Gi", "512Mi", true},
+		{"WithAPIGroup", "production", "mem-default", "2Gi", "3006477108", true},
+		{"duplicate", "production", "rq1", "2Gi", "3006477108", false},
+	}
+	for _, testCase := range testCases {
+		t.Run(testCase.caseName, func(t *testing.T) {
+			rq1 := fixResourceQuota("rq1", "production")
+			rq2 := fixResourceQuota("rq2", "stage")
+
+			client := fake.NewSimpleClientset(rq1, rq2)
+			svc := k8s.NewResourceQuotaService(nil, nil, nil, client.CoreV1())
+			result, err := svc.CreateResourceQuota(namespace, testCase.name, testCase.resourceLimitsMemory, testCase.resourceRequestsMemory)
+
+			if testCase.success {
+				require.NoError(t, err)
+				assert.NotNil(t, result)
+			} else {
+				require.Error(t, err)
+				assert.Nil(t, result)
+			}
+
+		})
+	}
+}
 func TestResourceQuotaService_ListReplicaSets(t *testing.T) {
 	// GIVEN
 	rs1 := fixReplicaSet("rs1", "prod", nil)

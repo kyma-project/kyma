@@ -7,9 +7,9 @@ import (
 
 type resourceQuotaConverter struct{}
 
-func (c *resourceQuotaConverter) ToGQL(in *v1.ResourceQuota) *gqlschema.ResourceQuota {
+func (c *resourceQuotaConverter) ToGQL(in *v1.ResourceQuota) (*gqlschema.ResourceQuota, error) {
 	if in == nil {
-		return nil
+		return nil, nil
 	}
 
 	out := &gqlschema.ResourceQuota{
@@ -24,7 +24,7 @@ func (c *resourceQuotaConverter) ToGQL(in *v1.ResourceQuota) *gqlschema.Resource
 			CPU:    c.extractValue(in, v1.ResourceRequestsCPU),
 		},
 	}
-	return out
+	return out, nil
 }
 
 func (c *resourceQuotaConverter) extractValue(in *v1.ResourceQuota, resourceName v1.ResourceName) *string {
@@ -36,13 +36,16 @@ func (c *resourceQuotaConverter) extractValue(in *v1.ResourceQuota, resourceName
 	return &formattedVal
 }
 
-func (c *resourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) []gqlschema.ResourceQuota {
+func (c *resourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) ([]gqlschema.ResourceQuota, error) {
 	result := make([]gqlschema.ResourceQuota, 0)
 	for _, rq := range in {
-		converted := c.ToGQL(rq)
+		converted, err := c.ToGQL(rq)
+		if err != nil {
+			return nil, err
+		}
 		if converted != nil {
 			result = append(result, *converted)
 		}
 	}
-	return result
+	return result, nil
 }
