@@ -28,9 +28,9 @@ tests
      |      
      +--- prerequisites
           |
-          |--- application-gateway // A folder with shell scripts or deployment files for the Application Gateway
+          |--- application-gateway // A folder with shell scripts and deployment files for the Application Gateway
           |
-          +--- event-bus           // A folder with shell scripts or deployment files for the Event Bus
+          +--- event-bus           // A folder with shell scripts and deployment files for the Event Bus
 
 ```
 The content of the `prerequisites` subdirectory is deployed after load test cluster creation and before test execution.
