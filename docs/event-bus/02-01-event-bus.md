@@ -13,7 +13,7 @@ For example, whenever the `order-created` Event comes in, the Event Bus stores i
 
 
 1. A user creates a lambda or a service that an Event coming from an external solution triggers. 
-    >**NOTE**: For a service, the user must create a Kyma Subscription resource manually. For a lambda, it is created automatically.
+    >**NOTE**: For a service, the user must create a Kyma Subscription resource manually. If the user is creating a lambda in Kyma Console UI then it is created automatically else the user needs to create the Kyma Subscription manually.
 2. **subscription-controller-knative** reacts to the creation of Kyma Subscription.  It [verifies](#event-validation) if the Event type from the application can be consumed in the Namespace where the Kyma Subscription has been created.  If so, it creates the Knative Channel and Knative Subscription resources.
 3. **nats-controller** reacts to the creation of a Knative Channel and creates the required Kubernetes and Istio services.
 4. **nats-dispatcher** reacts to the creation of a Knative Subscription and creates the NATS Streaming Subscription. 
