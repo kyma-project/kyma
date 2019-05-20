@@ -14,26 +14,26 @@ func (r *backendModuleResolver) SetInstanceConverter(converter gqlBackendModuleC
 	r.backendModuleConverter = converter
 }
 
-func NewMicrofrontendService(informer cache.SharedIndexInformer) *microfrontendService {
-	return newMicrofrontendService(informer)
+func NewMicroFrontendService(informer cache.SharedIndexInformer) *microFrontendService {
+	return newMicroFrontendService(informer)
 }
 
-func NewMicrofrontendResolver(microfrontendLister microfrontendLister) *microfrontendResolver {
-	return newMicrofrontendResolver(microfrontendLister)
+func NewMicroFrontendResolver(microFrontendLister microFrontendLister) *microFrontendResolver {
+	return newMicroFrontendResolver(microFrontendLister)
 }
 
-func (r *microfrontendResolver) SetMicrofrontendConverter(converter gqlMicrofrontendConverter) {
-	r.microfrontendConverter = converter
+func (r *microFrontendResolver) SetMicroFrontendConverter(converter gqlMicroFrontendConverter) {
+	r.microFrontendConverter = converter
 }
 
-func NewClusterMicrofrontendService(informer cache.SharedIndexInformer) *clusterMicrofrontendService {
-	return newClusterMicrofrontendService(informer)
+func NewClusterMicroFrontendService(informer cache.SharedIndexInformer) *clusterMicroFrontendService {
+	return newClusterMicroFrontendService(informer)
 }
 
-func NewClusterMicrofrontendResolver(clusterMicrofrontendLister clusterMicrofrontendLister) *clusterMicrofrontendResolver {
-	return newClusterMicrofrontendResolver(clusterMicrofrontendLister)
+func NewClusterMicroFrontendResolver(clusterMicroFrontendLister clusterMicroFrontendLister) *clusterMicroFrontendResolver {
+	return newClusterMicroFrontendResolver(clusterMicroFrontendLister)
 }
 
-func (r *clusterMicrofrontendResolver) SetClusterMicrofrontendConverter(converter gqlClusterMicrofrontendConverter) {
-	r.clusterMicrofrontendConverter = converter
+func (r *clusterMicroFrontendResolver) SetClusterMicroFrontendConverter(converter gqlClusterMicroFrontendConverter) {
+	r.clusterMicroFrontendConverter = converter
 }
