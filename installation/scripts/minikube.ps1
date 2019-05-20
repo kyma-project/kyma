@@ -5,6 +5,8 @@ param (
     [string]$MEMORY = "8192"
 )
 
+Write-Output @"This script is deprecated and will be removed with Kyma release 1.14"@
+
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $KUBERNETES_VERSION = "1.12.5"
 

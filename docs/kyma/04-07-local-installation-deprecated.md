@@ -1,9 +1,9 @@
 ---
-title: Install Kyma locally
+title: Install Kyma locally (Scripts)
 type: Installation
 ---
 
->**WARNING:** Deprecated TBD
+>**WARNING:** Will be deprecated {TBD} with Kyma release 1.14
 
 This Installation guide shows you how to quickly deploy Kyma locally on the MacOS and Linux platforms. Kyma is installed locally using a proprietary installer based on a [Kubernetes operator](https://coreos.com/operators/). The document provides prerequisites and instructions on how to install Kyma on your machine, as well as the troubleshooting tips.
 

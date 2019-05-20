@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+echo "This script is deprecated and will be removed with Kyma release 1.14"
+
 set -o errexit
 
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"

@@ -5,6 +5,8 @@ param (
     [string]$PASSWORD = ""
 )
 
+Write-Output @"This script is deprecated and will be removed with Kyma release 1.14"@
+
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 $SCRIPTS_DIR = "${CURRENT_DIR}\..\scripts"
 $DOMAIN = "kyma.local"

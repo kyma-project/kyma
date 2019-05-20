@@ -7,10 +7,10 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 
 ## Prerequisites
 
-- [Kyma CLI](https://github.com/kyma-project/cli) 0.6.1
+- [Kyma CLI](https://github.com/kyma-project/cli)
 - [Docker](https://www.docker.com/get-started)
 - [Minikube](https://github.com/kubernetes/minikube) 0.33.0
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.0
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.5
 - [Helm](https://github.com/kubernetes/helm) 2.10.0
 - [jq](https://stedolan.github.io/jq/)
 - [wget](https://www.gnu.org/software/wget/)
@@ -31,25 +31,35 @@ Follow there instructions to install Kyma from a release or from sources:
   From a release
   </summary>
     
-  1. Provision minikube this command:
+  1. Provision a kubernetes cluster on minikube ready to be installed with Kyma run this command:
     
      ```bash
      kyma provision minikube
      ```
      > **NOTE:** Kyma CLI command above uses default minikube vm driver installed for your OS, for list of default vm driver for supported OS and other available vm drivers you can read from [here](http://github.com/kyma-project/cli)
-  2. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.  
+  2. Install Kyma with latest release, run following command:
+     ```bash
+     kyma install
+     ```
+     > **NOTE** If you need install a specific Kyma release use following steps
+     
+  3. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.  
   
-  3. Export the release version as an environment variable:
+  4. Export the release version as an environment variable:
      ```bash
      export KYMA_RELEASE={KYMA_RELEASE_VERSION}
      ```
-  4. Install Kyma release `$KYMA_RELEASE` in minikube:
+  5. Install Kyma release `$KYMA_RELEASE` in minikube:
      ```bash
      kyma install -r $KYMA_RELEASE
      ```
      
      Wait until installation process completed
      
+  6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
+  
+  7. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
+   
   </details>
   <details>
   <summary>
@@ -80,28 +90,19 @@ Follow there instructions to install Kyma from a release or from sources:
        ```
        </details>
      </div>
-  3. Choose the release from which you want to install Kyma. Go to the [GitHub releases page](https://github.com/kyma-project/kyma/releases) to find out more about each of the available releases. Run this command to list all of the available tags that correspond to releases:
-     ```bash
-     git tag
-     ```
-  4. Checkout the tag corresponding to the Kyma release you want to install. Run:
-     ```bash
-     git checkout {TAG}
-     ```
-   >**NOTE:** If you don't checkout any of the available tags, your sources match the state of the project's `master` branch at the moment of cloning the repository.
-  
-  5. Kyma comes with a local wildcard self-signed `server.crt` certificate. Add this certificate to your OS trusted certificates to access the Console UI. On MacOS, run:
+ 
+  3. Kyma comes with a local wildcard self-signed `server.crt` certificate. Add this certificate to your OS trusted certificates to access the Console UI. On MacOS, run:
      ```bash
      sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/workspace/raw/server.crt
      ```
      >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
-  6. Provision minikube with this command:
+  4. Provision a kubernetes cluster on minikube ready to be installed with Kyma run this command:
      ```bash
      kyma provision minikube
      ```
      > **NOTE:** Kyma CLI command above uses default minikube vm driver installed for your OS, for list of default vm driver for supported OS and other available vm drivers you can read from [here](http://github.com/kyma-project/cli)
-  7. Install Kyma with following command with with password for the `admin@kyma.cx` user:
+  5. Install Kyma with following command with password for the `admin@kyma.cx` user:
      
      ```bash
      kyma install --local --src-path {YOUR_KYMA_SOURCE_PATH} --password {YOUR_PASSWORD}
@@ -109,9 +110,9 @@ Follow there instructions to install Kyma from a release or from sources:
      
      Wait until installation process completed.
   
-  9. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password you set using the `--password` flag.
+  6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password you set using the `--password` flag.
 
-  10. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
+  7. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
 
    </details>
 </div>
@@ -125,58 +126,21 @@ To learn how to test Kyma, see [this](#details-testing-kyma) document.
 Use the `minikube.sh` script to restart the Minikube cluster without reinstalling Kyma. Follow these steps to stop and restart your cluster:
 
 1. Stop the Minikube cluster with Kyma installed. Run:
-  ```
-  minikube stop
-  ```
+   ```
+   minikube stop
+   ```
 2. Restart the cluster without reinstalling Kyma. Run:
-    <div tabs>
-      <details>
-      <summary>
-      MacOS
-      </summary>
+   ```bash
+   kyma provision minikube
+   ```
 
-      ```
-      ./scripts/minikube.sh --domain "kyma.local" --vm-driver hyperkit
-      ```
-      </details>
-      <details>
-      <summary>
-      Linux
-      </summary>
-
-      ```
-      ./scripts/minikube.sh --domain "kyma.local" --vm-driver virtualbox
-      ```
-      </details>
-    </div>
-
-The script discovers that a Minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the script to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
+The Kyma CLI discovers that a minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the Kyma CLI to start the minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
 
 To verify that the restart is successful, run this command and check if all Pods have the `RUNNING` status:
 
 ```
 kubectl get pods --all-namespaces
 ```
-
-## Enable Horizontal Pod Autoscaler (HPA)
-
-By default, the Horizontal Pod Autoscaler (HPA) is not enabled in your local Kyma installation, so you need to enable it manually.
-
-Kyma uses the `autoscaling/v1` stable version, which supports only CPU autoscaling. Once enabled, HPA automatically scales the number of lambda function Pods based on the observed CPU utilization.
-
->**NOTE:** The `autoscaling/v1` version does not support custom metrics. To use such metrics, you need the `autoscaling/v2beta1` version.
-
-Follow these steps to enable HPA:
-
-1. Enable the metrics server for resource metrics by running the following command:
-  ```
-  minikube addons enable metrics-server
-  ```
-
-2. Verify if the metrics server is active by checking the list of addons:
-  ```
-  minikube addons list
-  ```
 
 ## Troubleshooting
 
