@@ -9,8 +9,10 @@ Kyma uses [K6](https://docs.k6.io) as a tool for performance and load testing. O
 The `tests/perf` directory contains the source code for the performance test script.
 A Kyma performance test is a K6 test script that can contain prerequisites such as a custom test component or scenario deployments. Every test runs against the [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
-Each subdirectory in the `tests/perf/components` directory defines source code for one test suite and refers to one component or area. The `prerequisites` subdirectory contains `yaml` files of test component deployments and, if required, shell scripts such as custom configuration or custom scenario deployments.
+Each subdirectory in the `tests/perf/components` directory defines source code for one test suite and refers to one component or area. 
+The `prerequisites` subdirectory contains shell script and `yaml` files of test component deployments and, if required, shell scripts such as custom configuration or custom scenario deployments.
 There should be one `prerequisites` subdirectory for each component. The name of this subdirectory should be the same as the name of a given subdirectory with scripts under the `components` subdirectory.
+If test need some custom scenario deployment, you should provide a shell script with name **`setup.sh`** to bootstrap custom scenario deployment.
 
 See an exemplary directory structure for **application-gateway** and **event-bus** components:
 ```
@@ -125,7 +127,7 @@ See an example that deploys a test component on a Kyma cluster to execute a load
 1. Deploy an example test service:
 
 ```bash
-kubectl apply -f prerequisites/examples/example.yaml
+./prerequisites/examples/setup.sh
 ```
 
 2. After deploying the test service, start the load test locally, with an environment variable that represents the domain name of the Kyma test cluster:

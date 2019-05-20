@@ -76,48 +76,47 @@ echo -e $(kubectl config current-context)
 
 check_dependencies
 
-## Handle config if provided
+$( kubectl apply -f application-gateway.yaml )
 
+echo -e "${GREEN}Kubeconfig file present, fetching url${NC}"
+echo "Creating TokenRequest"
+printf "apiVersion: applicationconnector.kyma-project.io/v1alpha1\nkind: TokenRequest\nmetadata:\n  name: perf-app" > ${APP_CONNECTOR_CERT_DIR}/generated.yaml
 
-    echo -e "${GREEN}Kubeconfig file present, fetching url${NC}"
-    echo "Creating TokenRequest"
-    printf "apiVersion: applicationconnector.kyma-project.io/v1alpha1\nkind: TokenRequest\nmetadata:\n  name: perf-app" > ${APP_CONNECTOR_CERT_DIR}/generated.yaml
+# Create a TokenRequest and temporarily save it to the file
+kcapply=$( kubectl apply -f ${APP_CONNECTOR_CERT_DIR}/generated.yaml )
+if [[ $? != 0 ]]
+  then
+    echo $kcapply
+    echo -e "${RED}TokenRequest creation failed${NC}"
+    $( rm ${APP_CONNECTOR_CERT_DIR}/generated.yaml )
+    exit 1;
+fi
 
-    # Create a TokenRequest and temporarily save it to the file
-    kcapply=$( kubectl apply -f ${APP_CONNECTOR_CERT_DIR}/generated.yaml )
-    if [[ $? != 0 ]]
+echo "Polling CR for CSR url"
+i="0"
+while [ $i -lt 6 ]
+do
+  # Give controller some time to write the token to the CR
+  sleep $i;
+  tokenRequest=$( kubectl get TokenRequest perf-app -o=jsonpath='{.status.url}' )
+  if [[ ! -z "${tokenRequest}" ]]
+    then
+      break;
+  else
+    if [[ $1 -eq 5 ]]
       then
-        echo $kcapply
-        echo -e "${RED}TokenRequest creation failed${NC}"
-        $( rm ${APP_CONNECTOR_CERT_DIR}/generated.yaml )
+        echo -e "${RED}Maximum number of retries exceeded, exitting${NC}"
         exit 1;
     fi
+  fi
 
-    echo "Polling CR for CSR url"
-    i="0"
-    while [ $i -lt 6 ]
-    do
-      # Give controller some time to write the token to the CR
-      sleep $i;
-      tokenRequest=$( kubectl get TokenRequest perf-app -o=jsonpath='{.status.url}' )
-      if [[ ! -z "${tokenRequest}" ]]
-        then
-          break;
-      else
-        if [[ $1 -eq 5 ]]
-          then
-            echo -e "${RED}Maximum number of retries exceeded, exitting${NC}"
-            exit 1;
-        fi
-      fi
+   i=$[ $i + 1 ]
 
-      i=$[ $i + 1 ]
-
-    done
-    # Overwrite url with the fetched one
-    u=$tokenRequest
-    echo -e "${GREEN}Polling finished!${NC}"
-    echo ""
+done
+# Overwrite url with the fetched one
+u=$tokenRequest
+echo -e "${GREEN}Polling finished!${NC}"
+echo ""
 
 
 ## GET /info
