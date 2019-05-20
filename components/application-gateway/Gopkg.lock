@@ -88,7 +88,7 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "0cbfc3605f93f0e330f88d93a92a6172ee644586"
+  revision = "592a925fd6e79b6cb2e2484392c14bec9257f4d8"
   source = "github.com/crabtree/kyma"
 
 [[projects]]
@@ -393,6 +393,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "edbeb064ffe14f9cce3fff399b3dbbbbfb5ec84e70bc8f0af02b6b46ac13857b"
+  inputs-digest = "f4a3febcb3b244c4872ccc22b5cad6ebdfb9a61f945817ec8e24b0292a6ef18f"
   solver-name = "gps-cdcl"
   solver-version = 1
