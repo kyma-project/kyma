@@ -28,7 +28,7 @@ type (
 	}
 
 	provisioner interface {
-		Provision(ctx context.Context, osbCtx OsbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, osb.HTTPStatusCodeError)
+		Provision(ctx context.Context, osbCtx OsbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError)
 	}
 
 	deprovisioner interface {
@@ -205,12 +205,16 @@ func (srv *Server) provisionAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sResp, err := srv.provisioner.Provision(r.Context(), osbCtx, &sReq)
-	if err.ErrorMessage != nil {
-		if err.Description != nil {
-			srv.writeErrorResponse(w, err.StatusCode, *err.ErrorMessage, *err.Description)
-		} else {
-			srv.writeErrorResponse(w, err.StatusCode, *err.ErrorMessage, "")
+	if err != nil {
+		var errMsg string
+		var errDesc string
+		if err.ErrorMessage != nil {
+			errMsg = *err.ErrorMessage
 		}
+		if err.Description != nil {
+			errDesc = *err.Description
+		}
+		srv.writeErrorResponse(w, err.StatusCode, errMsg, errDesc)
 		return
 	}
 

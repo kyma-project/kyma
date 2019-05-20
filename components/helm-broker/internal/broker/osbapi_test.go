@@ -108,6 +108,7 @@ func (ts *osbapiTestSuite) OSBClient() osb.Client {
 	if ts.osbClient == nil {
 		config := osb.DefaultClientConfiguration()
 		config.URL = fmt.Sprintf("http://%s", ts.ServerAddr)
+		config.APIVersion = osb.Version2_13()
 
 		osbClient, err := osb.NewClient(config)
 		require.NoError(ts.t, err)
@@ -159,7 +160,6 @@ func TestOSBAPIStatusSuccess(t *testing.T) {
 	client := &http.Client{}
 	req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s/statusz", ts.ServerAddr), nil)
 	req.Header.Set(osb.APIVersionHeader, "2.13")
-	req.Header.Set(osb.OriginatingIdentityHeader, osb.PlatformKubernetes)
 
 	// WHEN
 	resp, err := client.Do(req)
@@ -183,13 +183,8 @@ func TestOSBAPICatalogSuccess(t *testing.T) {
 	fixBundle := ts.Exp.NewBundle()
 	ts.StorageFactory.Bundle().Upsert(fixBundle)
 
-	client := &http.Client{}
-	req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s/v2/catalog", ts.ServerAddr), nil)
-	req.Header.Set(osb.APIVersionHeader, "2.13")
-	req.Header.Set(osb.OriginatingIdentityHeader, osb.PlatformKubernetes)
-
 	// WHEN
-	_, err := client.Do(req)
+	_, err := ts.OSBClient().GetCatalog()
 
 	// THEN
 	require.NoError(t, err)

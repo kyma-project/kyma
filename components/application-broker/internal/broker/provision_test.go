@@ -142,7 +142,7 @@ func TestProvisionAsync(t *testing.T) {
 			actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
 			// THEN
-			assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+			assert.Nil(t, err)
 			assert.NotNil(t, actResp)
 			assert.True(t, actResp.Async)
 			expOpID := osb.OperationKey(fixOperationID())
@@ -152,7 +152,7 @@ func TestProvisionAsync(t *testing.T) {
 			case <-asyncFinished:
 				if tc.expectedEventActivationCreated == true {
 					eventActivation, err := sut.eaClient.EventActivations(fixNs()).Get(fixServiceID(), v1.GetOptions{})
-					assert.NoError(t, err)
+					assert.Nil(t, err)
 					assert.Equal(t, fixEventActivation(), eventActivation)
 				}
 			case <-time.After(time.Second):
@@ -180,7 +180,7 @@ func TestProvisionWhenAlreadyProvisioned(t *testing.T) {
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
 	// THEN
-	assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+	assert.Nil(t, err)
 	assert.NotNil(t, actResp)
 	assert.False(t, actResp.Async)
 }
@@ -203,7 +203,7 @@ func TestProvisionWhenProvisioningInProgress(t *testing.T) {
 	actResp, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
 
 	// THEN
-	assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+	assert.Nil(t, err)
 	assert.NotNil(t, actResp)
 	assert.True(t, actResp.Async)
 
@@ -321,7 +321,7 @@ func TestProvisionCreatingEventActivation(t *testing.T) {
 
 			// WHEN
 			_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
-			assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+			assert.Nil(t, err)
 
 			// THEN
 			select {
@@ -406,7 +406,7 @@ func TestProvisionErrorOnGettingServiceInstance(t *testing.T) {
 
 	// WHEN
 	_, err := sut.Provision(context.Background(), osbContext{}, fixProvisionRequest())
-	assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+	assert.Nil(t, err)
 
 	// THEN
 	select {

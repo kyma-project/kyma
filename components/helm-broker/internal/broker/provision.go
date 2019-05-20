@@ -39,9 +39,9 @@ type provisionService struct {
 	testHookAsyncCalled func(internal.OperationID)
 }
 
-func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, osb.HTTPStatusCodeError) {
+func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError) {
 	if !req.AcceptsIncomplete {
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("asynchronous operation mode required")}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("asynchronous operation mode required")}
 	}
 
 	// Single provisioning is supported concurrently.
@@ -54,28 +54,28 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 
 	switch state, err := svc.instanceStateGetter.IsProvisioned(iID); true {
 	case err != nil:
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is already provisioned: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is already provisioned: %v", err))}
 	case state:
 		if err := svc.compareProvisioningParameters(iID, paramHash); err != nil {
-			return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while comparing provisioning parameters %v: %v", req.Parameters, err))}
+			return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while comparing provisioning parameters %v: %v", req.Parameters, err))}
 		}
-		return &osb.ProvisionResponse{Async: false}, osb.HTTPStatusCodeError{}
+		return &osb.ProvisionResponse{Async: false}, nil
 	}
 
 	switch opIDInProgress, inProgress, err := svc.instanceStateGetter.IsProvisioningInProgress(iID); true {
 	case err != nil:
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is being provisioned: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is being provisioned: %v", err))}
 	case inProgress:
 		if err := svc.compareProvisioningParameters(iID, paramHash); err != nil {
-			return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while comparing provisioning parameters %v: %v", req.Parameters, err))}
+			return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while comparing provisioning parameters %v: %v", req.Parameters, err))}
 		}
 		opKeyInProgress := osb.OperationKey(opIDInProgress)
-		return &osb.ProvisionResponse{Async: true, OperationKey: &opKeyInProgress}, osb.HTTPStatusCodeError{}
+		return &osb.ProvisionResponse{Async: true, OperationKey: &opKeyInProgress}, nil
 	}
 
 	namespace, err := getNamespaceFromContext(req.Context)
 	if err != nil {
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting namespace from context: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting namespace from context: %v", err))}
 	}
 
 	// bundleID is in 1:1 match with serviceID (from service catalog)
@@ -83,20 +83,20 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	bundleID := internal.BundleID(svcID)
 	bundle, err := svc.bundleIDGetter.GetByID(bundleID)
 	if err != nil {
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting bundle: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting bundle: %v", err))}
 	}
 	instances, err := svc.instanceGetter.GetAll()
 	if err != nil {
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting instance collection: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting instance collection: %v", err))}
 	}
 	if !bundle.IsProvisioningAllowed(namespace, instances) {
 		svc.log.Infof("bundle with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", bundle.Name, bundle.ID, namespace)
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("bundle with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", bundle.Name, bundle.ID, namespace))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("bundle with name: %q (id: %s) and flag 'provisionOnlyOnce' in namespace %q will be not provisioned because his instance already exist", bundle.Name, bundle.ID, namespace))}
 	}
 
 	id, err := svc.operationIDProvider()
 	if err != nil {
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while generating ID for operation: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while generating ID for operation: %v", err))}
 	}
 	opID := internal.OperationID(id)
 
@@ -109,7 +109,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	}
 
 	if err := svc.operationInserter.Insert(&op); err != nil {
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance operation to storage: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance operation to storage: %v", err))}
 	}
 
 	svcPlanID := internal.ServicePlanID(req.PlanID)
@@ -118,7 +118,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	bundlePlanID := internal.BundlePlanID(svcPlanID)
 	bundlePlan, found := bundle.Plans[bundlePlanID]
 	if !found {
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("bundle does not contain requested plan (planID: %s): %v", err, bundlePlanID))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("bundle does not contain requested plan (planID: %s): %v", err, bundlePlanID))}
 	}
 	releaseName := createReleaseName(bundle.Name, bundlePlan.Name, iID)
 
@@ -132,7 +132,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 	}
 
 	if err = svc.instanceInserter.Insert(&i); err != nil {
-		return nil, osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance to storage: %v", err))}
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance to storage: %v", err))}
 	}
 
 	chartOverrides := internal.ChartValues(req.Parameters)
@@ -155,7 +155,7 @@ func (svc *provisionService) Provision(ctx context.Context, osbCtx OsbContext, r
 		Async:        true,
 	}
 
-	return resp, osb.HTTPStatusCodeError{}
+	return resp, nil
 }
 
 // provisioningInput holds all information required to provision a given instance

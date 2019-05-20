@@ -151,7 +151,7 @@ func TestProvisionServiceProvisionSuccessAsyncInstall(t *testing.T) {
 	resp, err := svc.Provision(ctx, osbCtx, &req)
 
 	// THEN
-	assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+	assert.Nil(t, err)
 	assert.True(t, resp.Async)
 	assert.EqualValues(t, ts.Exp.OperationID, *resp.OperationKey)
 
@@ -229,7 +229,7 @@ func TestProvisionServiceProvisionFailureAsync(t *testing.T) {
 	resp, err := svc.Provision(ctx, osbCtx, &req)
 
 	// THEN
-	assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+	assert.Nil(t, err)
 	assert.True(t, resp.Async)
 	assert.EqualValues(t, ts.Exp.OperationID, *resp.OperationKey)
 
@@ -291,7 +291,7 @@ func TestProvisionServiceProvisionSuccessRepeatedOnAlreadyFullyProvisionedInstan
 	resp, err := svc.Provision(ctx, osbCtx, &req)
 
 	// THEN
-	assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+	assert.Nil(t, err)
 	assert.False(t, resp.Async)
 	assert.Nil(t, resp.OperationKey)
 
@@ -349,7 +349,7 @@ func TestProvisionServiceProvisionSuccessRepeatedOnProvisioningInProgress(t *tes
 	resp, err := svc.Provision(ctx, osbCtx, &req)
 
 	// THEN
-	assert.Equal(t, osb.HTTPStatusCodeError{}, err)
+	assert.Nil(t, err)
 	assert.True(t, resp.Async)
 	assert.EqualValues(t, expOpID, *resp.OperationKey)
 
