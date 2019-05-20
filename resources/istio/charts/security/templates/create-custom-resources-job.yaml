@@ -59,6 +59,7 @@ metadata:
   annotations:  
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded  
+    sidecar.istio.io/inject: "false"
   labels: 
     app: {{ template "security.name" . }} 
     chart: {{ template "security.chart" . }}  

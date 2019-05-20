@@ -92,6 +92,11 @@ spec:
           ports:
             {{- range $key, $val := $spec.ports }}
             - containerPort: {{ $val.port }}
+            {{- if $.Values.global.isLocalEnv }}
+            {{- if $val.hostPort }}
+              hostPort: {{ $val.hostPort}}
+            {{- end }}
+            {{- end }}
             {{- end }}
             - containerPort: 15090
               protocol: TCP
