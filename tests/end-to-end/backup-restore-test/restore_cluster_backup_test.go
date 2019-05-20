@@ -12,7 +12,7 @@ import (
 	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
 	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
 
-	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
 	backupClient "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/backup"
 	"github.com/sirupsen/logrus"
 	. "github.com/smartystreets/goconvey/convey"
@@ -50,8 +50,11 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// myPrometheusTest, err := NewPrometheusTest()
 	// fatalOnError(t, err, "while creating structure for Prometheus test")
 
-	// appBrokerTest, err := NewAppBrokerTest()
-	// fatalOnError(t, err, "while creating structure for AppBroker test")
+	// myGrafanaTest, err := NewGrafanaTest()
+	// fatalOnError(t, err, "while creating structure for Grafana test")
+
+	appBrokerTest, err := NewAppBrokerTest()
+	fatalOnError(t, err, "while creating structure for AppBroker test")
 
 	// helmBrokerTest, err := NewHelmBrokerTest()
 	// fatalOnError(t, err, "while creating structure for HelmBroker test")
@@ -65,11 +68,8 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// apiControllerTest, err := NewApiControllerTestFromEnv()
 	// fatalOnError(t, err, "while creating structure for ApiController test")
 
-	// myGrafanaTest, err := NewGrafanaTest()
-	// fatalOnError(t, err, "while creating structure for Grafana test")
-
-	myMicroFrontendTest, err := NewMicrofrontendTest()
-	fatalOnError(t, err, "while creating structure for MicroFrontend test")
+	// myMicroFrontendTest, err := NewMicrofrontendTest()
+	// fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
 	// myAssetStoreTest, err := NewAssetStoreTest(t)
 	// fatalOnError(t, err, "while creating structure for AssetStore test")
@@ -83,12 +83,12 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 		// myDeploymentTest,
 		// myStatefulSetTest,
 		// helmBrokerTest,
-		// appBrokerTest,
+		appBrokerTest,
 		// scAddonsTest,
 		// myNamespaceControllerTest,
 		// apiControllerTest,
 		// myGrafanaTest,
-		myMicroFrontendTest,
+		// myMicroFrontendTest,
 		// myAssetStoreTest,
 		// myCmsTest,
 	}

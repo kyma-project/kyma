@@ -10,7 +10,8 @@ excludedNamespaces:
 - kyma-backup
 includedResources:
 - '*'
-excludedResources: null
+excludedResources:
+- pods
 includeClusterResources: true
 labelSelector: null
 storageLocation: default
