@@ -21,11 +21,18 @@ const (
 	CmsTypeLabel      = "cms.kyma-project.io/type"
 )
 
+type Config struct {
+	Address   string `envconfig:"default=minio.kyma.local"`
+	Secure    bool   `envconfig:"default=true"`
+	VerifySSL bool   `envconfig:"default=true"`
+}
+
 type assetStoreRetriever struct {
 	ClusterAssetGetter       shared.ClusterAssetGetter
 	AssetGetter              shared.AssetGetter
 	GqlClusterAssetConverter shared.GqlClusterAssetConverter
 	GqlAssetConverter        shared.GqlAssetConverter
+	SpecificationSvc         shared.SpecificationGetter
 }
 
 func (r *assetStoreRetriever) ClusterAsset() shared.ClusterAssetGetter {
@@ -44,6 +51,10 @@ func (r *assetStoreRetriever) AssetConverter() shared.GqlAssetConverter {
 	return r.GqlAssetConverter
 }
 
+func (r *assetStoreRetriever) Specification() shared.SpecificationGetter {
+	return r.SpecificationSvc
+}
+
 type PluggableContainer struct {
 	*module.Pluggable
 	cfg *resolverConfig
@@ -53,7 +64,7 @@ type PluggableContainer struct {
 	informerFactory     dynamicinformer.DynamicSharedInformerFactory
 }
 
-func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration) (*PluggableContainer, error) {
 	dynamicClient, err := dynamic.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Dynamic Clientset")
@@ -61,6 +72,7 @@ func New(restConfig *rest.Config, informerResyncPeriod time.Duration) (*Pluggabl
 
 	container := &PluggableContainer{
 		cfg: &resolverConfig{
+			cfg:                  reCfg,
 			dynamicClient:        dynamicClient,
 			informerResyncPeriod: informerResyncPeriod,
 		},
@@ -101,6 +113,11 @@ func (r *PluggableContainer) Enable() error {
 		return errors.Wrapf(err, "while creating asset service")
 	}
 
+	specificationService, err := newSpecificationService(r.cfg.cfg)
+	if err != nil {
+		return errors.Wrap(err, "while creating Specification Service")
+	}
+
 	r.Pluggable.EnableAndSyncDynamicInformerFactory(r.informerFactory, func() {
 		r.Resolver = &domainResolver{
 			clusterAssetResolver: newClusterAssetResolver(clusterAssetService),
@@ -110,6 +127,7 @@ func (r *PluggableContainer) Enable() error {
 		r.AssetStoreRetriever.AssetGetter = assetService
 		r.AssetStoreRetriever.GqlClusterAssetConverter = &clusterAssetConverter{}
 		r.AssetStoreRetriever.GqlAssetConverter = &assetConverter{}
+		r.AssetStoreRetriever.SpecificationSvc = specificationService
 	})
 
 	return nil
@@ -122,6 +140,7 @@ func (r *PluggableContainer) Disable() error {
 		r.AssetStoreRetriever.AssetGetter = disabled.NewAssetSvc(disabledErr)
 		r.AssetStoreRetriever.GqlClusterAssetConverter = disabled.NewGqlClusterAssetConverter(disabledErr)
 		r.AssetStoreRetriever.GqlAssetConverter = disabled.NewGqlAssetConverter(disabledErr)
+		r.AssetStoreRetriever.SpecificationSvc = disabled.NewSpecificationSvc(disabledErr)
 		r.informerFactory = nil
 	})
 
@@ -137,6 +156,7 @@ type Resolver interface {
 }
 
 type resolverConfig struct {
+	cfg                  Config
 	dynamicClient        dynamic.Interface
 	informerResyncPeriod time.Duration
 }

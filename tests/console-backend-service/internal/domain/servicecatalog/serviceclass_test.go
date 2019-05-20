@@ -75,11 +75,6 @@ func TestServiceClassesQueries(t *testing.T) {
 			instanceCreateParameterSchema
 			bindingCreateParameterSchema
 		}
-		apiSpec
-		openApiSpec
-		odataSpec
-		asyncApiSpec
-		content
 		docsTopic {
 			name
 			namespace
