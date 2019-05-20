@@ -16,37 +16,37 @@ import (
 	"k8s.io/client-go/tools/cache"
 )
 
-func TestMicrofrontendService_List(t *testing.T) {
+func TestMicroFrontendService_List(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		namespace := "test-namespace"
-		Microfrontend1 := fixMicrofrontend("1")
-		Microfrontend2 := fixMicrofrontend("2")
-		Microfrontend3 := fixMicrofrontend("3")
+		MicroFrontend1 := fixMicroFrontend("1")
+		MicroFrontend2 := fixMicroFrontend("2")
+		MicroFrontend3 := fixMicroFrontend("3")
 
-		MicrofrontendInformer := fixMFInformer(Microfrontend1, Microfrontend2, Microfrontend3)
-		svc := ui.NewMicrofrontendService(MicrofrontendInformer)
+		MicroFrontendInformer := fixMFInformer(MicroFrontend1, MicroFrontend2, MicroFrontend3)
+		svc := ui.NewMicroFrontendService(MicroFrontendInformer)
 
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, MicrofrontendInformer)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, MicroFrontendInformer)
 
-		microfrontends, err := svc.List(namespace)
+		microFrontends, err := svc.List(namespace)
 		require.NoError(t, err)
-		assert.Contains(t, microfrontends, Microfrontend1)
-		assert.Contains(t, microfrontends, Microfrontend2)
-		assert.Contains(t, microfrontends, Microfrontend3)
+		assert.Contains(t, microFrontends, MicroFrontend1)
+		assert.Contains(t, microFrontends, MicroFrontend2)
+		assert.Contains(t, microFrontends, MicroFrontend3)
 	})
 
 	t.Run("NotFound", func(t *testing.T) {
 		namespace := "test-namespace"
-		MicrofrontendInformer := fixMFInformer()
+		MicroFrontendInformer := fixMFInformer()
 
-		svc := ui.NewMicrofrontendService(MicrofrontendInformer)
+		svc := ui.NewMicroFrontendService(MicroFrontendInformer)
 
-		testingUtils.WaitForInformerStartAtMost(t, time.Second, MicrofrontendInformer)
+		testingUtils.WaitForInformerStartAtMost(t, time.Second, MicroFrontendInformer)
 
 		var emptyArray []*v1alpha1.MicroFrontend
-		microfrontends, err := svc.List(namespace)
+		microFrontends, err := svc.List(namespace)
 		require.NoError(t, err)
-		assert.Equal(t, emptyArray, microfrontends)
+		assert.Equal(t, emptyArray, microFrontends)
 	})
 }
 
@@ -59,7 +59,7 @@ func fixMFInformer(objects ...runtime.Object) cache.SharedIndexInformer {
 	return informer
 }
 
-func fixMicrofrontend(name string) *v1alpha1.MicroFrontend {
+func fixMicroFrontend(name string) *v1alpha1.MicroFrontend {
 	namespace := "test-namespace"
 	version := "v1"
 	category := "test-category"

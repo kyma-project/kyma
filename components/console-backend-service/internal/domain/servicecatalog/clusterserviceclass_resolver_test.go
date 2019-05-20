@@ -6,10 +6,9 @@ import (
 
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/cms-controller-manager/pkg/apis/cms/v1alpha1"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content/storage"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog/automock"
-	contentMock "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
+	cmsMock "github.com/kyma-project/kyma/components/console-backend-service/internal/domain/shared/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
@@ -34,7 +33,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassQuery(t *testing.T) {
 		converter.On("ToGQL", resource).Return(expected, nil).Once()
 		defer converter.AssertExpectations(t)
 
-		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil)
 		resolver.SetClassConverter(converter)
 
 		result, err := resolver.ClusterServiceClassQuery(nil, name)
@@ -49,7 +48,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassQuery(t *testing.T) {
 		resourceGetter.On("Find", name).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil)
 
 		result, err := resolver.ClusterServiceClassQuery(nil, name)
 
@@ -65,7 +64,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassQuery(t *testing.T) {
 		resourceGetter.On("Find", name).Return(resource, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil)
 
 		result, err := resolver.ClusterServiceClassQuery(nil, name)
 
@@ -102,7 +101,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassesQuery(t *testing.T) {
 		converter.On("ToGQLs", resources).Return(expected, nil)
 		defer converter.AssertExpectations(t)
 
-		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil)
 		resolver.SetClassConverter(converter)
 
 		result, err := resolver.ClusterServiceClassesQuery(nil, nil, nil)
@@ -117,7 +116,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassesQuery(t *testing.T) {
 		resourceGetter := automock.NewClusterServiceClassListGetter()
 		resourceGetter.On("List", pager.PagingParams{}).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
-		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil)
 		var expected []gqlschema.ClusterServiceClass
 
 		result, err := resolver.ClusterServiceClassesQuery(nil, nil, nil)
@@ -134,7 +133,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassesQuery(t *testing.T) {
 		resourceGetter := automock.NewClusterServiceClassListGetter()
 		resourceGetter.On("List", pager.PagingParams{}).Return(resources, expected).Once()
 		defer resourceGetter.AssertExpectations(t)
-		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(resourceGetter, nil, nil, nil)
 
 		_, err := resolver.ClusterServiceClassesQuery(nil, nil, nil)
 
@@ -175,7 +174,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassInstancesField(t *testin
 					ExternalName: externalName,
 				}
 
-				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
 
 				result, err := resolver.ClusterServiceClassInstancesField(nil, &parentObj, testCase.Namespace)
 
@@ -211,7 +210,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassInstancesField(t *testin
 					ExternalName: externalName,
 				}
 
-				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
 
 				result, err := resolver.ClusterServiceClassInstancesField(nil, parentObj, testCase.Namespace)
 
@@ -243,7 +242,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassInstancesField(t *testin
 					ExternalName: externalName,
 				}
 
-				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
 
 				_, err := resolver.ClusterServiceClassInstancesField(nil, &parentObj, testCase.Namespace)
 
@@ -278,7 +277,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassActivatedField(t *testin
 					ExternalName: externalName,
 				}
 
-				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
 
 				result, err := resolver.ClusterServiceClassActivatedField(nil, &parentObj, testCase.Namespace)
 
@@ -308,7 +307,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassActivatedField(t *testin
 					ExternalName: externalName,
 				}
 
-				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
 
 				result, err := resolver.ClusterServiceClassActivatedField(nil, parentObj, testCase.Namespace)
 
@@ -340,7 +339,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassActivatedField(t *testin
 					ExternalName: externalName,
 				}
 
-				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil, nil)
+				resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, resourceGetter, nil)
 
 				_, err := resolver.ClusterServiceClassActivatedField(nil, &parentObj, testCase.Namespace)
 
@@ -379,7 +378,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassPlansField(t *testing.T)
 		parentObj := gqlschema.ClusterServiceClass{
 			Name: name,
 		}
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, resourceGetter, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, resourceGetter, nil, nil)
 		resolver.SetPlanConverter(converter)
 
 		result, err := resolver.ClusterServiceClassPlansField(nil, &parentObj)
@@ -397,7 +396,7 @@ func TestClusterServiceClassResolver_ClusterServiceClassPlansField(t *testing.T)
 		parentObj := gqlschema.ClusterServiceClass{
 			Name: name,
 		}
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, resourceGetter, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, resourceGetter, nil, nil)
 
 		result, err := resolver.ClusterServiceClassPlansField(nil, &parentObj)
 
@@ -415,385 +414,9 @@ func TestClusterServiceClassResolver_ClusterServiceClassPlansField(t *testing.T)
 		parentObj := gqlschema.ClusterServiceClass{
 			Name: name,
 		}
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, resourceGetter, nil, nil, nil)
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, resourceGetter, nil, nil)
 
 		result, err := resolver.ClusterServiceClassPlansField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClusterServiceClassResolver_ClusterServiceClassContentField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		resource := &storage.Content{
-			Raw: map[string]interface{}{
-				"test": "data",
-			},
-		}
-		expected := new(gqlschema.JSON)
-		err := expected.UnmarshalGQL(resource.Raw)
-		require.NoError(t, err)
-
-		resourceGetter := new(contentMock.ContentGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("Content").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassContentField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.ContentGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("Content").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassContentField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.ContentGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("Content").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassContentField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClusterServiceClassResolver_ClusterServiceClassApiSpecField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		resource := &storage.ApiSpec{
-			Raw: map[string]interface{}{
-				"test": "data",
-			},
-		}
-		expected := new(gqlschema.JSON)
-		err := expected.UnmarshalGQL(resource.Raw)
-		require.NoError(t, err)
-
-		resourceGetter := new(contentMock.ApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.ApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.ApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassApiSpecField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClusterServiceClassResolver_ClusterServiceClassOpenApiSpecField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		resource := &storage.OpenApiSpec{
-			Raw: map[string]interface{}{
-				"test": "data",
-			},
-		}
-		expected := new(gqlschema.JSON)
-		err := expected.UnmarshalGQL(resource.Raw)
-		require.NoError(t, err)
-
-		resourceGetter := new(contentMock.OpenApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("OpenApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassOpenApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.OpenApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("OpenApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassOpenApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.OpenApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("OpenApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassOpenApiSpecField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClusterServiceClassResolver_ClusterServiceClassODataSpecField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		expected := "{}"
-		resource := &storage.ODataSpec{
-			Raw: expected,
-		}
-
-		resourceGetter := new(contentMock.ODataSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ODataSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassODataSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, &expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.ODataSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ODataSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassODataSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.ODataSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("ODataSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassODataSpecField(nil, &parentObj)
-
-		assert.Error(t, err)
-		assert.True(t, gqlerror.IsInternal(err))
-		assert.Nil(t, result)
-	})
-}
-
-func TestClusterServiceClassResolver_ClusterServiceClassAsyncApiSpecField(t *testing.T) {
-	t.Run("Success", func(t *testing.T) {
-		name := "name"
-		resource := &storage.AsyncApiSpec{
-			Raw: map[string]interface{}{
-				"test": "data",
-			},
-		}
-		expected := new(gqlschema.JSON)
-		err := expected.UnmarshalGQL(resource.Raw)
-		require.NoError(t, err)
-
-		resourceGetter := new(contentMock.AsyncApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(resource, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("AsyncApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassAsyncApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Equal(t, expected, result)
-	})
-
-	t.Run("NotFound", func(t *testing.T) {
-		name := "name"
-		resourceGetter := new(contentMock.AsyncApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, nil).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("AsyncApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassAsyncApiSpecField(nil, &parentObj)
-
-		require.NoError(t, err)
-		assert.Nil(t, result)
-	})
-
-	t.Run("Error", func(t *testing.T) {
-		expectedErr := errors.New("Test")
-		name := "name"
-		resourceGetter := new(contentMock.AsyncApiSpecGetter)
-		resourceGetter.On("Find", "service-class", name).Return(nil, expectedErr).Once()
-		defer resourceGetter.AssertExpectations(t)
-
-		retriever := new(contentMock.ContentRetriever)
-		retriever.On("AsyncApiSpec").Return(resourceGetter)
-
-		parentObj := gqlschema.ClusterServiceClass{
-			Name: name,
-		}
-
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever, nil)
-
-		result, err := resolver.ClusterServiceClassAsyncApiSpecField(nil, &parentObj)
 
 		assert.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -813,15 +436,15 @@ func TestClassResolver_ClusterServiceClassClusterDocsTopicField(t *testing.T) {
 			Name: name,
 		}
 
-		resourceGetter := new(contentMock.ClusterDocsTopicGetter)
+		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
 		resourceGetter.On("Find", name).Return(resources, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(contentMock.GqlClusterDocsTopicConverter)
+		converter := new(cmsMock.GqlClusterDocsTopicConverter)
 		converter.On("ToGQL", resources).Return(expected, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("ClusterDocsTopic").Return(resourceGetter)
 		retriever.On("ClusterDocsTopicConverter").Return(converter)
 
@@ -830,7 +453,7 @@ func TestClassResolver_ClusterServiceClassClusterDocsTopicField(t *testing.T) {
 			ExternalName: name,
 		}
 
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ClusterServiceClassClusterDocsTopicField(nil, &parentObj)
 
@@ -841,15 +464,15 @@ func TestClassResolver_ClusterServiceClassClusterDocsTopicField(t *testing.T) {
 	t.Run("NotFound", func(t *testing.T) {
 		name := "name"
 
-		resourceGetter := new(contentMock.ClusterDocsTopicGetter)
+		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
 		resourceGetter.On("Find", name).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		converter := new(contentMock.GqlClusterDocsTopicConverter)
+		converter := new(cmsMock.GqlClusterDocsTopicConverter)
 		converter.On("ToGQL", (*v1alpha1.ClusterDocsTopic)(nil)).Return(nil, nil).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("ClusterDocsTopic").Return(resourceGetter)
 		retriever.On("ClusterDocsTopicConverter").Return(converter)
 
@@ -858,7 +481,7 @@ func TestClassResolver_ClusterServiceClassClusterDocsTopicField(t *testing.T) {
 			ExternalName: name,
 		}
 
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ClusterServiceClassClusterDocsTopicField(nil, &parentObj)
 
@@ -870,11 +493,11 @@ func TestClassResolver_ClusterServiceClassClusterDocsTopicField(t *testing.T) {
 		expectedErr := errors.New("Test")
 		name := "name"
 
-		resourceGetter := new(contentMock.ClusterDocsTopicGetter)
+		resourceGetter := new(cmsMock.ClusterDocsTopicGetter)
 		resourceGetter.On("Find", name).Return(nil, expectedErr).Once()
 		defer resourceGetter.AssertExpectations(t)
 
-		retriever := new(contentMock.CmsRetriever)
+		retriever := new(cmsMock.CmsRetriever)
 		retriever.On("ClusterDocsTopic").Return(resourceGetter)
 
 		parentObj := gqlschema.ClusterServiceClass{
@@ -882,7 +505,7 @@ func TestClassResolver_ClusterServiceClassClusterDocsTopicField(t *testing.T) {
 			ExternalName: name,
 		}
 
-		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, nil, retriever)
+		resolver := servicecatalog.NewClusterServiceClassResolver(nil, nil, nil, retriever)
 
 		result, err := resolver.ClusterServiceClassClusterDocsTopicField(nil, &parentObj)
 
