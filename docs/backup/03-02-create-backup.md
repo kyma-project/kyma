@@ -12,7 +12,7 @@ Integrate these files with your scheduled or on-demand configurations to back up
 
 >**NOTE:** To fully back up a cluster, you must back up both user and system Namespaces. 
 
-Modify the files to adjust the backup scope. For details about the file format, see the [documentation](https://velero.io/docs/v1.0.0/index.html).
+Modify the files to adjust the backup scope. For details about the file format, see the [documentation](https://velero.io/docs/v1.0.0/output-file-format/).
 
 ## Create manual backups
 
