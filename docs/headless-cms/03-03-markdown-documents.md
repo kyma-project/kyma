@@ -30,13 +30,13 @@ type: {Document type}
 ```
 
 - The `title` metadata defines the title of your document. 
-- The `type` metadata groups single documents together. Multiple documents that use the same `type` generate a grouping. For example, if you have multiple tutorials, you can group them below a navigation node called **Tutorials**.
+- The `type` metadata groups single documents together. Multiple documents that use the same `type` generate a grouping. For example, if you have multiple tutorials, you can group them under a navigation node called **Tutorials**.
 
->**NOTE:** If there is only one document of a certain type, remove the `type` metadata, so that the document displays well in the UIs.
+>**NOTE:** If there is only one document of a certain type, remove the `type` metadata, so that the document displays well in the UI.
 
 ### Display
 
-In the Docs UI, which is the view displayed once you click on the question mark icon ![](./assets/docs-ui-question-mark.png) in the top-right corner of the Console, the metadata help create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation.
+In the Docs UI, which is the view displayed once you click on the question mark icon ![](./assets/docs-ui-question-mark.png) in the top-right corner of the Console, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation.
 
 <div tabs>
   <details>
@@ -81,7 +81,7 @@ title: Overview
   </details>
 </div>
 
-In the Service Catalog and Instances views, which contain Service Classes documentation, the `title` metadata displays as the name of a particular tab. If you don't provide `title`, the UIs display the file name as a fallback. See the following example:
+In the Service Catalog and Instances views, which contain Service Classes documentation, the `title` metadata displays as the name of a particular tab. If you don't provide `title`, these UIs display the file name as a fallback. See the following example:
 
 <div tabs>
   <details>
@@ -112,14 +112,14 @@ type: Details
   </details>
 </div>
 
->**NOTE:** A document with `title` **Overview** always displays as the first tab. Markdown files with `title` other than **Overview** appear in alphanumeric order.
+>**NOTE:** A document with the **Overview** `title` always displays as the first tab. Markdown files with `title` other than **Overview** appear in alphanumeric order.
 
 ## Content
 
 Content is the body of your document. Write content in [Markdown](https://daringfireball.net/projects/markdown/syntax) which is a simplified markup language.
 
 In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples:
-1. Linking - link between documents in the same topic or in different topics using metadata. 
+1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/links-in-docs.md) - link between documents in the same topic or in different topics using metadata. 
     <div tabs>
       <details>
       <summary>
@@ -139,7 +139,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       [Kyma in a nutshell](/root/kyma/#overview-kyma-in-a-nutshell)
       </details>
     </div>
-2. Documentation toggles - render several versions of a given section in one document or have several versions of one document.
+2. [Documentation toggles](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/documentation-toggle.md) - render several versions of a given section in one document or have several versions of one document.
     <div tabs>
       <details>
       <summary>
@@ -173,7 +173,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       ![](./assets/doc-toggle.png)
       </details>
     </div>
-3. Panels - use colorful containers that call out important or additional information within a topic.
+3. [Panels](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
     <div tabs>
       <details>
       <summary>
