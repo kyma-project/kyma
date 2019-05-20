@@ -56,6 +56,11 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 	certInfoData := r.Header.Get(CertificateInfoHeader)
 	applicationName := mux.Vars(r)["application"]
 
+	if applicationName == "" {
+		httptools.RespondWithError(w, apperrors.BadRequest("Application name not specified"))
+		return
+	}
+
 	log.Infof("Proxying request for %s application. Path: %s", applicationName, r.URL.Path)
 
 	application, err := ph.getApplication(applicationName)
@@ -115,7 +120,7 @@ func (ph *proxyHandler) determineHost(path string) (string, apperrors.AppError) 
 		return ph.appRegistryHost, nil
 	}
 
-	return "", apperrors.NotFound("Requested resource not found")
+	return "", apperrors.NotFound("Could not determine destination host. Requested resource not found")
 }
 
 func hasValidSubject(subjects []string, appName, group, tenant string) bool {

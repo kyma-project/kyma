@@ -2,21 +2,18 @@ package httptools
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/kyma-project/kyma/components/application-connector-proxy/internal/httpconsts"
 	"github.com/kyma-project/kyma/components/application-connector-proxy/internal/httperrors"
-	"net/http"
 
 	"github.com/kyma-project/kyma/components/application-connector-proxy/internal/apperrors"
 	log "github.com/sirupsen/logrus"
 )
 
-func RespondWithErrorAndLog(w http.ResponseWriter, apperr apperrors.AppError) {
+func RespondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
 	log.Errorln(apperr.Error())
 
-	RespondWithError(w, apperr)
-}
-
-func RespondWithError(w http.ResponseWriter, apperr apperrors.AppError) {
 	statusCode, responseBody := httperrors.AppErrorToResponse(apperr)
 
 	Respond(w, statusCode)
