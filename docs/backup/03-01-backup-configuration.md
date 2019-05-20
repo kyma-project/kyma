@@ -5,8 +5,8 @@ type: Details
 
 The Ark configuration consists of two custom resources:
 
-- [VolumeSnapshotLocation](https://github.com/heptio/velero/blob/master/docs/api-types/volumesnapshotlocation.md) CR defines the provider of physical volume snapshots.
-- [BackupStorageLocation](https://github.com/heptio/velero/blob/master/docs/api-types/backupstoragelocation.md) CR defines a bucket or storage location for cluster resources.
+- [VolumeSnapshotLocation](https://github.com/heptio/velero/blob/master/site/docs/master/api-types/volumesnapshotlocation.md) CR defines the provider of physical volume snapshots.
+- [BackupStorageLocation](https://github.com/heptio/velero/blob/master/site/docs/api-types/backupstoragelocation.md) CR defines a bucket or storage location for cluster resources.
 
 A sample BackupStorageLocation CR looks like this:
 
