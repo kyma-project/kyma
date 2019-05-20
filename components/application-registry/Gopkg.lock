@@ -167,7 +167,7 @@
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1",
     "components/cms-controller-manager/pkg/apis/cms/v1alpha1"
   ]
-  revision = "592a925fd6e79b6cb2e2484392c14bec9257f4d8"
+  revision = "0c48c155b997fad003004dd87851cb2e5475cf3b"
   source = "github.com/crabtree/kyma"
 
 [[projects]]
@@ -587,6 +587,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "bb819836c7ce680adbb919c259c99d8682e7b68f9da168a6d8b5fbd519277e7d"
+  inputs-digest = "e7a90e3d33fdb094b86e5cf76a3debf66e9b2a5d88f1773e8ebc76fdcd83e4f7"
   solver-name = "gps-cdcl"
   solver-version = 1
