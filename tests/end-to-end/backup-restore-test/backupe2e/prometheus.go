@@ -36,7 +36,6 @@ import (
 	prometheusClient "github.com/coreos/prometheus-operator/pkg/client/versioned"
 	"github.com/sirupsen/logrus"
 
-	// prometheusClientset "github.com/coreos/prometheus-operator/pkg/client/versioned/clientset"
 	"github.com/google/uuid"
 	"github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/utils/config"
 	. "github.com/smartystreets/goconvey/convey"
