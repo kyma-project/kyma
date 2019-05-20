@@ -2,10 +2,13 @@ package proxy
 
 import (
 	"crypto/x509/pkix"
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"regexp"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 
 	"github.com/kyma-project/kyma/components/application-connector-proxy/internal/httptools"
 
@@ -21,28 +24,39 @@ const (
 	CertificateInfoHeader = "X-Forwarded-Client-Cert"
 )
 
-// ApplicationsManager contains operations for managing Application CRD
-type ApplicationsManager interface {
+type ProxyHandler interface {
+	ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request)
+}
+
+// ApplicationManager contains operations for managing Application CRD
+type ApplicationManager interface {
 	Update(application *v1alpha1.Application) (*v1alpha1.Application, error)
 	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
 type proxyHandler struct {
-	applicationClient ApplicationsManager
+	applicationClient      ApplicationManager
+	eventServicePathPrefix string
+	eventServiceHost       string
+	appRegistryPathPrefix  string
+	appRegistryHost        string
 }
 
-func NewProxyHandler(applicationClient ApplicationsManager) *proxyHandler {
+func NewProxyHandler(applicationClient ApplicationManager, eventServicePathPrefix, eventServiceHost, appRegistryPathPrefix, appRegistryHost string) *proxyHandler {
 	return &proxyHandler{
-		applicationClient: applicationClient,
+		applicationClient:      applicationClient,
+		eventServicePathPrefix: eventServicePathPrefix,
+		eventServiceHost:       eventServiceHost,
+		appRegistryPathPrefix:  appRegistryPathPrefix,
+		appRegistryHost:        appRegistryHost,
 	}
 }
 
 func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request) {
 	certInfoData := r.Header.Get(CertificateInfoHeader)
-
-	subjects := extractSubjects(certInfoData)
-
 	applicationName := mux.Vars(r)["application"]
+
+	log.Infof("Proxying request for %s application. Path: %s", applicationName, r.URL.Path)
 
 	application, err := ph.getApplication(applicationName)
 	if err != nil {
@@ -50,14 +64,28 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 		return
 	}
 
+	subjects := extractSubjects(certInfoData)
 	if !hasValidSubject(subjects, application.Name, application.Spec.Group, application.Spec.Tenant) {
 		httptools.RespondWithError(w, apperrors.Forbidden("No valid subject found"))
 		return
 	}
 
+	path := strings.TrimPrefix(r.URL.Path, fmt.Sprintf("/%s", applicationName))
+
+	host, err := ph.determineHost(path)
+	if err != nil {
+		httptools.RespondWithError(w, err)
+		return
+	}
+
 	reverseProxy := &httputil.ReverseProxy{
 		Director: func(request *http.Request) {
-			// TODO - map request correctly
+			request.URL.Scheme = "http"
+			request.URL.Host = host
+		},
+		ModifyResponse: func(response *http.Response) error {
+			log.Infof("Host responded with status: %s", response.Status)
+			return nil
 		},
 	}
 
@@ -75,6 +103,19 @@ func (ph *proxyHandler) getApplication(appName string) (*v1alpha1.Application, a
 	}
 
 	return application, nil
+}
+
+func (ph *proxyHandler) determineHost(path string) (string, apperrors.AppError) {
+
+	if strings.HasPrefix(path, ph.eventServicePathPrefix) {
+		return ph.eventServiceHost, nil
+	}
+
+	if strings.HasPrefix(path, ph.appRegistryPathPrefix) {
+		return ph.appRegistryHost, nil
+	}
+
+	return "", apperrors.NotFound("Requested resource not found")
 }
 
 func hasValidSubject(subjects []string, appName, group, tenant string) bool {

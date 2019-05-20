@@ -6,10 +6,11 @@ import (
 	"github.com/gorilla/mux"
 )
 
-func NewHandler() *http.Handler {
+func NewHandler(proxyHandler ProxyHandler) http.Handler {
 
 	router := mux.NewRouter()
 
-	router.HandleFunc("/")
+	router.PathPrefix("/{application}/").HandlerFunc(proxyHandler.ProxyAppConnectorRequests)
 
+	return router
 }
