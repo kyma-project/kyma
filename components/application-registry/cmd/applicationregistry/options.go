@@ -12,6 +12,7 @@ type options struct {
 	namespace             string
 	requestTimeout        int
 	requestLogging        bool
+	specRequestTimeout    int
 	detailedErrorResponse bool
 	uploadServiceURL      string
 	insecureAssetDownload bool
@@ -23,6 +24,7 @@ func parseArgs() *options {
 	namespace := flag.String("namespace", "kyma-integration", "Namespace used by Application Registry")
 	requestTimeout := flag.Int("requestTimeout", 1, "Timeout for services.")
 	requestLogging := flag.Bool("requestLogging", false, "Flag for logging incoming requests.")
+	specRequestTimeout := flag.Int("specRequestTimeout", 5, "Timeout for Spec Service.")
 	detailedErrorResponse := flag.Bool("detailedErrorResponse", false, "Flag for showing full internal error response messages.")
 	uploadServiceURL := flag.String("uploadServiceURL", "http://assetstore-asset-upload-service.kyma-system.svc.cluster.local:3000", "Upload Service URL.")
 	insecureAssetDownload := flag.Bool("insecureAssetDownload", false, "Flag for skipping certificate verification for asset download. ")
@@ -35,6 +37,7 @@ func parseArgs() *options {
 		namespace:             *namespace,
 		requestTimeout:        *requestTimeout,
 		requestLogging:        *requestLogging,
+		specRequestTimeout:    *specRequestTimeout,
 		detailedErrorResponse: *detailedErrorResponse,
 		uploadServiceURL:      *uploadServiceURL,
 		insecureAssetDownload: *insecureAssetDownload,
@@ -43,7 +46,7 @@ func parseArgs() *options {
 
 func (o *options) String() string {
 	return fmt.Sprintf("--externalAPIPort=%d --proxyPort=%d --uploadServiceURL=%s"+
-		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --detailedErrorResponse=%t --insecureAssetDownload=%t",
+		"--namespace=%s --requestTimeout=%d  --requestLogging=%t --specRequestTimeout=%d --detailedErrorResponse=%t --insecureAssetDownload=%t",
 		o.externalAPIPort, o.proxyPort, o.uploadServiceURL,
-		o.namespace, o.requestTimeout, o.requestLogging, o.detailedErrorResponse, o.insecureAssetDownload)
+		o.namespace, o.requestTimeout, o.requestLogging, o.specRequestTimeout, o.detailedErrorResponse, o.insecureAssetDownload)
 }

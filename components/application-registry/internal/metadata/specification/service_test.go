@@ -36,7 +36,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -53,7 +53,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -70,7 +70,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.ODataApiType, baseDocs, swaggerApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -92,7 +92,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -114,7 +114,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -136,7 +136,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, modifiedSwaggerSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -154,7 +154,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 
 		assetStoreSvc := &mocks.Service{}
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -176,7 +176,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.ODataApiType, baseDocs, baseApiSpec, baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -193,7 +193,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, []byte(nil), baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -210,7 +210,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.NoneApiType, baseDocs, []byte(nil), baseEventSpec).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -227,7 +227,7 @@ func TestSpecService_PutSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Put", serviceId, docstopic.OpenApiType, baseDocs, baseApiSpec, baseEventSpec).Return(apperrors.Internal("Error"))
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.PutSpec(serviceDef, gatewayUrl)
@@ -246,7 +246,7 @@ func TestSpecService_GetSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Get", serviceId).Return(baseDocs, baseApiSpec, baseEventSpec, nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		docs, apiSpec, eventsSpec, err := specService.GetSpec(serviceId)
@@ -263,7 +263,7 @@ func TestSpecService_GetSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Get", serviceId).Return(nil, nil, nil, apperrors.Internal("Error"))
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		docs, apiSpec, eventsSpec, err := specService.GetSpec(serviceId)
@@ -284,7 +284,7 @@ func TestSpecService_RemoveSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Remove", serviceId).Return(nil)
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.RemoveSpec(serviceId)
@@ -298,7 +298,7 @@ func TestSpecService_RemoveSpec(t *testing.T) {
 		assetStoreSvc := &mocks.Service{}
 		assetStoreSvc.On("Remove", serviceId).Return(apperrors.Internal("Error"))
 
-		specService := NewSpecService(assetStoreSvc)
+		specService := NewSpecService(assetStoreSvc, 5)
 
 		// when
 		err := specService.RemoveSpec(serviceId)
