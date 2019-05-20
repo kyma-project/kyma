@@ -2,6 +2,14 @@
 
 
 [[projects]]
+  digest = "1:b5d66e2eeee93cefaa44afbf7a3f6aa49a01131327f9ef47d0a32aeb19978cbc"
+  name = "github.com/Azure/open-service-broker-azure"
+  packages = ["pkg/slice"]
+  pruneopts = "NUT"
+  revision = "ac1bd72f1c151edcdf2197d97c75e6764bf94317"
+  version = "v1.6.0"
+
+[[projects]]
   digest = "1:d8ebbd207f3d3266d4423ce4860c9f3794956306ded6c7ba312ecc69cdfbf04c"
   name = "github.com/PuerkitoBio/purell"
   packages = ["."]
@@ -842,6 +850,7 @@
   analyzer-name = "dep"
   analyzer-version = 1
   input-imports = [
+    "github.com/Azure/open-service-broker-azure/pkg/slice",
     "github.com/asaskevich/govalidator",
     "github.com/davecgh/go-spew/spew",
     "github.com/ghodss/yaml",
