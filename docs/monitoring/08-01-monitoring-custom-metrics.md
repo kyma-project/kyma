@@ -29,8 +29,6 @@ namespace "default" labeled
 
 For more details on deploying your application with Istio, read [this](https://istio.io/docs/setup/kubernetes/install/) documentation.
 
-For more details on installing the Istio sidecar, read [this](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/) documentation.
-
 The following ports are used in the Pod:
 
 - `8080` - Envoy captures the traffic only for ports listed in Pod's **containerPorts** (`containerPort: 8080`), or in the **traffic.sidecar.istio.io/includeInboundPorts** annotation. Thus, this port is a part of the Service Mesh and can be used for application's needs.
