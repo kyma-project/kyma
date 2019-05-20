@@ -10,7 +10,7 @@ The `tests/perf` directory contains the source code for the performance test scr
 A Kyma performance test is a K6 test script that can contain prerequisites such as a custom test component or scenario deployments. Every test runs against the [Kyma load test cluster](https://github.com/kyma-project/test-infra).
 
 Each subdirectory in the `tests/perf/components` directory defines source code for one test suite and refers to one component or area. 
-The `prerequisites` subdirectory contains shell script and `yaml` files of test component deployments and, if required, shell scripts such as custom configuration or custom scenario deployments.
+The `prerequisites` subdirectory contains shell script with name **`setup.sh`** and `yaml` files of test component deployments and, if required, shell scripts such as custom configuration or custom scenario deployments.
 There should be one `prerequisites` subdirectory for each component. The name of this subdirectory should be the same as the name of a given subdirectory with scripts under the `components` subdirectory.
 If test need some custom scenario deployment, you should provide a shell script with name **`setup.sh`** to bootstrap custom scenario deployment.
 
