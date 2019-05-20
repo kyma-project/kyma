@@ -73,11 +73,6 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 			relatedClusterServiceClassName
 			instanceCreateParameterSchema
 		}
-		apiSpec
-		openApiSpec
-		odataSpec
-		asyncApiSpec
-		content
 		clusterDocsTopic {
 			name
     		groupName
