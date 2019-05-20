@@ -138,3 +138,26 @@ This is an example of the `api` section of the request body for an API secured w
             },
         }
 ```
+
+## Specify custom headers and query parameters for authentication requests
+
+You can specify additional headers and query parameters that will be injected during authentication requests.
+
+This is an example of the `api` section of the request body for an API secured with Basic Authentication enriched with header `custom-header` with value `foo`, and query parameter `param` with value `bar`.
+
+```
+    "api": {
+        "targetUrl": "https://sampleapi.targeturl/v1",
+        "credentials": {
+            "headers": {
+                "custom-header": ["foo"]
+            },
+            "queryParameters": {
+                "param": ["bar"]
+            },
+            "basic": {
+                "username": "{USERNAME}",
+                "password": "{PASSWORD}"
+            },
+        }
+```
