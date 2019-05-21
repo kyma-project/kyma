@@ -658,6 +658,7 @@ type EventActivationEvent {
     eventType: String!
     version: String!
     description: String!
+    schema: JSON!
 }
 
 type EventActivation {
