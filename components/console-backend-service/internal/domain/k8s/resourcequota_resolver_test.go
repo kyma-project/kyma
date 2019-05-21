@@ -82,7 +82,7 @@ func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 		defer lister.AssertExpectations(t)
 
 		converter := automock.NewGQLResourceQuotaConverter()
-		converter.On("ToGQL", &resourceQuota).Return(&resourceQuotaGQL, nil).Once()
+		converter.On("ToGQL", &resourceQuota).Return(&resourceQuotaGQL).Once()
 		defer converter.AssertExpectations(t)
 
 		resolver := newResourceQuotaResolver(lister)
