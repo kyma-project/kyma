@@ -50,13 +50,13 @@ func (arc *AppRegistryClient) CreateOAuthSecuredAPI(t *testing.T, targetURL, aut
 }
 
 func (arc *AppRegistryClient) CreateNotSecuredAPICustomHeaders(t *testing.T, targetURL string, headers map[string][]string) string {
-	api := arc.baseAPI(targetURL).WithCustomHeaders(headers)
+	api := arc.baseAPI(targetURL).WithCustomHeaders(&headers)
 
 	return arc.createAPI(t, api)
 }
 
 func (arc *AppRegistryClient) CreateNotSecuredAPICustomQueryParams(t *testing.T, targetURL string, queryParams map[string][]string) string {
-	api := arc.baseAPI(targetURL).WithCustomQueryParams(queryParams)
+	api := arc.baseAPI(targetURL).WithCustomQueryParams(&queryParams)
 
 	return arc.createAPI(t, api)
 }
