@@ -16,6 +16,8 @@ import (
 	"testing"
 )
 
+const defaultSpecRequestTimeout = 5
+
 func TestAddingToAssetStore(t *testing.T) {
 	jsonApiSpec := []byte("{\"productsEndpoint\": \"Endpoint /products returns products.\"}}")
 	documentation := []byte("{\"description\": \"Some docs blah blah blah\"}}")
@@ -27,7 +29,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultSpecRequestTimeout)
 
 		{
 			urls := map[string]string{
@@ -64,7 +66,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultSpecRequestTimeout)
 
 		{
 			urls := map[string]string{
@@ -91,7 +93,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultSpecRequestTimeout)
 
 		{
 			urls := map[string]string{
@@ -118,7 +120,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultSpecRequestTimeout)
 
 		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
 			Return(upload.UploadedFile{}, apperrors.Internal("some error"))
@@ -136,7 +138,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultSpecRequestTimeout)
 
 		repositoryMock.On("Upsert", mock.Anything).Return(apperrors.Internal("some error"))
 		uploadClientMock.On("Upload", openApiSpecFileName, jsonApiSpec).
@@ -155,7 +157,7 @@ func TestAddingToAssetStore(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
 		uploadClientMock := &uploadMocks.Client{}
-		service := NewService(repositoryMock, uploadClientMock, false)
+		service := NewService(repositoryMock, uploadClientMock, false, defaultSpecRequestTimeout)
 
 		// when
 		err := service.Put("id1", "", []byte(nil), []byte(nil), []byte(nil))
@@ -175,7 +177,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 	t.Run("Should get specifications from asset store", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
-		service := NewService(repositoryMock, nil, false)
+		service := NewService(repositoryMock, nil, false, defaultSpecRequestTimeout)
 
 		apiTestServer := createTestServer(t, jsonApiSpec)
 		defer apiTestServer.Close()
@@ -212,7 +214,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 	t.Run("Should fail when failed to read DocsTopic CR", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
-		service := NewService(repositoryMock, nil, false)
+		service := NewService(repositoryMock, nil, false, defaultSpecRequestTimeout)
 
 		repositoryMock.On("Get", "id1").
 			Return(docstopic.Entry{}, apperrors.Internal("some error"))
@@ -232,7 +234,7 @@ func TestGettingFromAssetStore(t *testing.T) {
 	t.Run("Should return nil specs if Docs Topic CR doesn't exist", func(t *testing.T) {
 		// given
 		repositoryMock := &mocks.DocsTopicRepository{}
-		service := NewService(repositoryMock, nil, false)
+		service := NewService(repositoryMock, nil, false, defaultSpecRequestTimeout)
 
 		repositoryMock.On("Get", "id1").
 			Return(docstopic.Entry{}, apperrors.NotFound("object not found"))
@@ -265,7 +267,7 @@ func TestGettingFromAssetStoreIfStatusIsNotReady(t *testing.T) {
 			// given
 			repositoryMock := &mocks.DocsTopicRepository{}
 			uploadClientMock := &uploadMocks.Client{}
-			service := NewService(repositoryMock, uploadClientMock, false)
+			service := NewService(repositoryMock, uploadClientMock, false, defaultSpecRequestTimeout)
 
 			{
 				repositoryMock.On("Get", "id1").Return(createDocsTopic("id1", nil, testData.status), nil)
