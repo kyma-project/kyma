@@ -75,7 +75,6 @@ data:
   mixer.telemetry.autoscaleEnabled: "false"
   
   global.tracer.zipkin.address: zipkin.kyma-system:9411
-  # sidecarInjectorWebhook.enableNamespacesByDefault: "true"
 ---
 apiVersion: v1
 kind: ConfigMap

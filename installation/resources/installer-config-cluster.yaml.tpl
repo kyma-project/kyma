@@ -67,7 +67,6 @@ data:
   gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.proxy.excludeIPRanges: "__PROXY_EXCLUDE_IP_RANGES__"
   global.tracer.zipkin.address: zipkin.kyma-system:9411
-  # sidecarInjectorWebhook.enableNamespacesByDefault: "true"
 ---
 apiVersion: v1
 kind: ConfigMap
