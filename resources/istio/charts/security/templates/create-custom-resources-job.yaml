@@ -58,8 +58,7 @@ metadata:
   namespace: {{ .Release.Namespace }} 
   annotations:  
     "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-delete-policy": hook-succeeded  
-    sidecar.istio.io/inject: "false"
+    "helm.sh/hook-delete-policy": hook-succeeded
   labels: 
     app: {{ template "security.name" . }} 
     chart: {{ template "security.chart" . }}  
@@ -73,7 +72,9 @@ spec:
         app: {{ template "security.name" . }} 
         chart: {{ template "security.chart" . }}  
         heritage: {{ .Release.Service }}  
-        release: {{ .Release.Name }}  
+        release: {{ .Release.Name }}
+      annotations:
+        sidecar.istio.io/inject: "false"
     spec: 
       serviceAccountName: istio-security-post-install-account 
       containers: 
