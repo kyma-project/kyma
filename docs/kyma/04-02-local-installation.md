@@ -7,9 +7,9 @@ This Installation guide shows you how to quickly deploy Kyma locally on the MacO
 
 ## Prerequisites
 
-- [Kyma CLI](https://github.com/kyma-project/cli)
+- [Kyma CLI](https://github.com/kyma-project/cli) 
 - [Docker](https://www.docker.com/get-started)
-- [Minikube](https://github.com/kubernetes/minikube) 0.33.0
+- [Minikube](https://github.com/kubernetes/minikube) 1.0.1
 - [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) 1.12.5
 - [Helm](https://github.com/kubernetes/helm) 2.10.0
 - [jq](https://stedolan.github.io/jq/)
@@ -102,15 +102,15 @@ Follow there instructions to install Kyma from a release or from sources:
      kyma provision minikube
      ```
      > **NOTE:** Kyma CLI command above uses default minikube vm driver installed for your OS, for list of default vm driver for supported OS and other available vm drivers you can read from [here](http://github.com/kyma-project/cli)
-  5. Install Kyma with following command with password for the `admin@kyma.cx` user:
+  5. Install Kyma from sources run following command:
      
      ```bash
-     kyma install --local --src-path {YOUR_KYMA_SOURCE_PATH} --password {YOUR_PASSWORD}
+     kyma install --local --src-path {YOUR_KYMA_SOURCE_PATH}
      ```
      
      Wait until installation process completed.
   
-  6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password you set using the `--password` flag.
+  6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
 
   7. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
 

@@ -2,6 +2,8 @@
 
 # set -o errexit
 
+echo "The script clean-up.sh is deprecated and will be removed with Kyma release 1.14, please use Kyma CLI instead"
+
 kubectl delete installation/kyma-installation
 kubectl delete ns kyma-installer
 
