@@ -20,14 +20,3 @@ spec:
         port:
           number: 20001
         host: kiali
-    corsPolicy:
-      allowHeaders:
-      - authorization
-      - content-type
-      allowMethods:
-      - GET
-      - POST
-      - PUT
-      - DELETE
-      allowOrigin:
-      - "*"
