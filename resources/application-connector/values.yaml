@@ -46,8 +46,8 @@ global:
     dir: pr/
     version: PR-3991
   application_gateway_tests:
-    dir: develop/
-    version: 4b28ce69
+    dir: pr/
+    version: PR-3991
   application_registry:
     dir: pr/
     version: PR-3991
