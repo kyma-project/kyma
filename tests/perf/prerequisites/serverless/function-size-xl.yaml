@@ -16,8 +16,8 @@ spec:
           - name: size-xl
             resources:
               limits:
-                cpu: 100m
-                memory: 128Mi
+                cpu: "2"
+                memory: 1Gi
               requests:
                 cpu: 100m
                 memory: 100Mi

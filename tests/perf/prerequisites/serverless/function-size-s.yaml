@@ -13,7 +13,7 @@ spec:
       template:
         spec:
           containers:
-          - name: $FUNC_NAME
+          - name: size-s
             resources:
               limits:
                 cpu: 100m
