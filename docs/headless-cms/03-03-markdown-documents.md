@@ -3,7 +3,7 @@ title: Markdown documents
 type: Details
 ---
 
-The DocsTopic or ClusterDocsTopic CR supports various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure: 
+The DocsTopic or ClusterDocsTopic custom resource supports various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure: 
 
 ```
 ---
