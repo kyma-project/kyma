@@ -1,11 +1,14 @@
 package servicecatalog_test
 
 import (
+	"encoding/json"
 	"fmt"
 	"net"
 	"net/http"
 	"testing"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/acceptance/servicecatalog"
 
 	"github.com/kyma-project/kyma/tests/acceptance/pkg/retriever"
 
@@ -14,9 +17,9 @@ import (
 	scTypes "github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	scClient "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset"
 
-	bucTypes "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
-	bucClient "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned"
-	bucInterface "github.com/kyma-project/kyma/components/binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
+	bucTypes "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/apis/servicecatalog/v1alpha1"
+	bucClient "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned"
+	bucInterface "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1"
 
 	appTypes "github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	appClient "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned"
@@ -66,7 +69,7 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	}()
 
 	ts.enableApplicationInTestNamespace()
-	ts.waitForAppServiceClasses(time.Second * 90)
+	ts.waitForAppServiceClasses(timeoutPerAssert)
 
 	ts.createAndWaitForServiceInstanceA(timeoutPerStep)
 	ts.createAndWaitForServiceInstanceB(timeoutPerStep)
@@ -77,12 +80,14 @@ func TestServiceBindingUsagePrefixing(t *testing.T) {
 	ts.createTesterDeploymentAndService()
 
 	// when
-	ts.createBindingUsageForInstanceAWithoutPrefix()
-	ts.createBindingUsageForInstanceBWithPrefix()
+	ts.createBindingUsageForInstanceAWithoutPrefix(timeoutPerStep)
+	ts.createBindingUsageForInstanceBWithPrefix(timeoutPerStep)
 
 	// then
-	ts.assertInjectedEnvVariable(baseEnvName, ts.gatewayUrl, timeoutPerAssert)
-	ts.assertInjectedEnvVariable(ts.envPrefix+baseEnvName, ts.gatewayUrl, timeoutPerAssert)
+	ts.assertInjectedEnvVariables([]servicecatalog.EnvVariable{
+		{Name: ts.envPrefix + baseEnvName, Value: ts.gatewayUrl},
+		{Name: baseEnvName, Value: ts.gatewayUrl},
+	}, timeoutPerAssert)
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
@@ -145,8 +150,9 @@ type TestSuite struct {
 func (ts *TestSuite) createApplication() {
 	reCli := ts.applicationClient()
 
-	_, err := reCli.Create(ts.fixApplication())
+	app, err := reCli.Create(ts.fixApplication())
 	require.NoError(ts.t, err)
+	ts.t.Logf("Application created [%s]", app.Name)
 }
 
 func (ts *TestSuite) deleteApplication() {
@@ -161,8 +167,9 @@ func (ts *TestSuite) enableApplicationInTestNamespace() {
 	require.NoError(ts.t, err)
 
 	emCli := client.ApplicationconnectorV1alpha1().ApplicationMappings(ts.namespace)
-	_, err = emCli.Create(ts.fixApplicationMapping())
+	mapping, err := emCli.Create(ts.fixApplicationMapping())
 	require.NoError(ts.t, err)
+	ts.t.Logf("Mapping created, name [%s], namespace: [%s]", mapping.Name, mapping.Namespace)
 }
 
 func (ts *TestSuite) applicationClient() appInterface.ApplicationInterface {
@@ -254,6 +261,7 @@ func (ts *TestSuite) createTestNamespace() {
 		},
 	})
 	require.NoError(ts.t, err)
+	ts.t.Logf("Test namespace created [%s]", ts.namespace)
 }
 
 func (ts *TestSuite) deleteTestNamespace() {
@@ -268,10 +276,13 @@ func (ts *TestSuite) deleteTestNamespace() {
 // Binding helpers
 func (ts *TestSuite) createAndWaitForServiceBindingA(timeout time.Duration) {
 	ts.createAndWaitForServiceBinding(ts.bindingNameA, ts.serviceInstanceNameA, timeout)
+	ts.t.Logf("ServiceBinding [%s] for namespace [%s] is ready", ts.bindingNameA, ts.serviceInstanceNameA)
 }
 
 func (ts *TestSuite) createAndWaitForServiceBindingB(timeout time.Duration) {
 	ts.createAndWaitForServiceBinding(ts.bindingNameB, ts.serviceInstanceNameB, timeout)
+	ts.t.Logf("ServiceBinding [%s] for namespace [%s] is ready", ts.bindingNameB, ts.serviceInstanceNameB)
+
 }
 
 func (ts *TestSuite) deleteServiceBindingA(timeout time.Duration) {
@@ -295,7 +306,7 @@ func (ts *TestSuite) deleteServiceBinding(bindingName string, timeout time.Durat
 		switch {
 		case err == nil:
 			return fmt.Errorf(
-				"ServiceBiding %q still exists. [%s].",
+				"serviceBiding %q still exists. [%s]",
 				bindingName,
 				prettyBindingResourceStatus(binding.Status.Conditions))
 		case apiErrors.IsNotFound(err):
@@ -348,15 +359,19 @@ func (ts *TestSuite) createAndWaitForServiceBinding(bindingName, instanceName st
 }
 
 // BindingUsage helpers
-func (ts *TestSuite) createBindingUsageForInstanceAWithoutPrefix() {
-	ts.bindingUsage(ts.bindingNameA, "binding-usage-tester", "")
+func (ts *TestSuite) createBindingUsageForInstanceAWithoutPrefix(timeout time.Duration) {
+	sbuName := "binding-usage-tester"
+	ts.createAndWaitBindingUsage(ts.bindingNameA, sbuName, "", timeout)
+	ts.t.Logf("Binding usage [%s] is ready", sbuName)
 }
 
-func (ts *TestSuite) createBindingUsageForInstanceBWithPrefix() {
-	ts.bindingUsage(ts.bindingNameB, "binding-usage-tester-with-prefix", ts.envPrefix)
+func (ts *TestSuite) createBindingUsageForInstanceBWithPrefix(timeout time.Duration) {
+	sbuName := "binding-usage-tester-with-prefix"
+	ts.createAndWaitBindingUsage(ts.bindingNameB, sbuName, ts.envPrefix, timeout)
+	ts.t.Logf("Binding usage [%s] is ready", sbuName)
 }
 
-func (ts *TestSuite) bindingUsage(bindingName, sbuName, envPrefix string) {
+func (ts *TestSuite) createAndWaitBindingUsage(bindingName, sbuName, envPrefix string, timeout time.Duration) {
 	usageCli := ts.bindingUsageClient()
 	sbu := &bucTypes.ServiceBindingUsage{
 		TypeMeta: metav1.TypeMeta{
@@ -387,6 +402,29 @@ func (ts *TestSuite) bindingUsage(bindingName, sbuName, envPrefix string) {
 
 	_, err := usageCli.Create(sbu)
 	require.NoError(ts.t, err)
+
+	repeat.FuncAtMost(ts.t, func() error {
+		usage, err := usageCli.Get(sbuName, metav1.GetOptions{})
+		if err != nil {
+			return err
+		}
+
+		isNotReady := func(usage *bucTypes.ServiceBindingUsage) bool {
+			for _, cond := range usage.Status.Conditions {
+				if cond.Type == bucTypes.ServiceBindingUsageReady {
+					return cond.Status != bucTypes.ConditionTrue
+				}
+			}
+			return true
+		}
+
+		if isNotReady(usage) {
+			return fmt.Errorf("ServiceBindingUsage %s/%s is not in ready state. Status: %+v", usage.Namespace, usage.Name, usage.Status)
+		}
+
+		return nil
+	}, timeout)
+
 }
 
 func (ts *TestSuite) bindingUsageClient() bucInterface.ServiceBindingUsageInterface {
@@ -398,10 +436,13 @@ func (ts *TestSuite) bindingUsageClient() bucInterface.ServiceBindingUsageInterf
 // ServiceInstance helpers
 func (ts *TestSuite) createAndWaitForServiceInstanceA(timeout time.Duration) {
 	ts.createAndWaitForServiceInstance(ts.serviceInstanceNameA, ts.classExternalNameA, timeout)
+	ts.t.Logf("Service instance [%s] is ready", ts.serviceInstanceNameA)
 }
 
 func (ts *TestSuite) createAndWaitForServiceInstanceB(timeout time.Duration) {
 	ts.createAndWaitForServiceInstance(ts.serviceInstanceNameB, ts.classExternalNameB, timeout)
+	ts.t.Logf("Service instance [%s] is ready", ts.serviceInstanceNameA)
+
 }
 
 func (ts *TestSuite) deleteServiceInstanceA(timeout time.Duration) {
@@ -425,7 +466,7 @@ func (ts *TestSuite) deleteServiceInstance(instanceName string, timeout time.Dur
 		switch {
 		case err == nil:
 			return fmt.Errorf(
-				"ServiceInstance %q still exists. [%s].",
+				"serviceInstance %q still exists [%s]",
 				instanceName,
 				prettyInstanceResourceStatus(instance.Status.Conditions))
 		case apiErrors.IsNotFound(err):
@@ -480,7 +521,10 @@ func (ts *TestSuite) createAndWaitForServiceInstance(instanceName, classExternal
 // ServiceClass helpers
 func (ts *TestSuite) waitForAppServiceClasses(timeout time.Duration) {
 	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableA(), timeout)
+	ts.t.Logf("Service class [%s] is available in the testing namespace", ts.appSvcIDA)
 	repeat.FuncAtMost(ts.t, ts.serviceClassIsAvailableB(), timeout)
+	ts.t.Logf("Service class [%s] is available in the testing namespace", ts.appSvcIDB)
+
 }
 
 func (ts *TestSuite) serviceClassIsAvailableA() func() error {
@@ -540,6 +584,8 @@ func (ts *TestSuite) createTesterDeploymentAndService() {
 	serviceClient := clientset.CoreV1().Services(ts.namespace)
 	_, err = serviceClient.Create(svc)
 	require.NoError(ts.t, err)
+
+	ts.t.Logf("Tester deployment and service created")
 }
 
 func (*TestSuite) envTesterService(labels map[string]string) *k8sCoreTypes.Service {
@@ -598,8 +644,8 @@ func (ts *TestSuite) envTesterDeployment(labels map[string]string) *appsTypes.De
 	}
 }
 
-func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, timeout time.Duration) {
-	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs?name=%s&value=%s", ts.namespace, envName, envValue)
+func (ts *TestSuite) assertInjectedEnvVariables(requiredVariables []servicecatalog.EnvVariable, timeout time.Duration) {
+	url := fmt.Sprintf("http://acc-test-env-tester.%s.svc.cluster.local/envs", ts.namespace)
 
 	repeat.FuncAtMost(ts.t, func() error {
 		client := http.Client{
@@ -628,9 +674,33 @@ func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, 
 		}
 
 		if resp.StatusCode != http.StatusOK {
-			return fmt.Errorf("while checking if proper env is injected, received unexpected status code [got: %d, expected: %d]", resp.StatusCode, http.StatusOK)
+			return fmt.Errorf("while getting envs from [%s], received unexpected status code [got: %d, expected: %d]", url, resp.StatusCode, http.StatusOK)
 		}
 
+		decoder := json.NewDecoder(resp.Body)
+		var data []servicecatalog.EnvVariable
+		err = decoder.Decode(&data)
+		if err != nil {
+			return err
+		}
+
+		var missing []servicecatalog.EnvVariable
+		for _, req := range requiredVariables {
+			found := false
+			for _, act := range data {
+				if req.Value == act.Value && req.Name == act.Name {
+					found = true
+					break
+				}
+			}
+			if !found {
+				missing = append(missing, req)
+			}
+		}
+
+		if len(missing) > 0 {
+			return fmt.Errorf("environment variables were not injected: [%v]", missing)
+		}
 		err = resp.Body.Close()
 		if err != nil {
 			return err
@@ -638,6 +708,7 @@ func (ts *TestSuite) assertInjectedEnvVariable(envName string, envValue string, 
 
 		return nil
 	}, timeout)
+	ts.t.Logf("Environment variables are injected [%v]", requiredVariables)
 }
 
 func prettyBindingResourceStatus(conditions []scTypes.ServiceBindingCondition) string {

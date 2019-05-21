@@ -1,7 +1,9 @@
 package proxy
 
 import (
+	"bytes"
 	"encoding/json"
+	"io"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -23,6 +25,118 @@ import (
 func TestProxy(t *testing.T) {
 
 	proxyTimeout := 10
+
+	t.Run("should proxy and add addidtional query parameters", func(t *testing.T) {
+		// given
+		ts := NewTestServer(func(req *http.Request) {
+			assert.Equal(t, "param-value-1", req.URL.Query().Get("param1"))
+
+			assert.Equal(t, 2, len(req.URL.Query()["param2"]))
+			assert.Equal(t, "param-value-2.1", req.URL.Query().Get("param2"))
+			assert.Equal(t, "param-value-2.1", req.URL.Query()["param2"][0])
+			assert.Equal(t, "param-value-2.2", req.URL.Query()["param2"][1])
+		})
+		defer ts.Close()
+
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil).
+			Once()
+
+		credentials := &metadatamodel.Credentials{}
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+
+		additionalQueryParams := map[string][]string{
+			"param1": []string{"param-value-1"},
+			"param2": []string{"param-value-2.1", "param-value-2.2"},
+		}
+
+		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
+			TargetUrl:       ts.URL,
+			Credentials:     credentials,
+			QueryParameters: &additionalQueryParams,
+		}, nil).Once()
+
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
+	})
+
+	t.Run("should proxy and add addidtional headers", func(t *testing.T) {
+		// given
+		ts := NewTestServer(func(req *http.Request) {
+			assert.Equal(t, "custom-value-1", req.Header.Get("X-Custom1"))
+
+			assert.Equal(t, 2, len(req.Header["X-Custom2"]))
+			assert.Equal(t, "custom-value-2.1", req.Header.Get("X-Custom2"))
+			assert.Equal(t, "custom-value-2.1", req.Header["X-Custom2"][0])
+			assert.Equal(t, "custom-value-2.2", req.Header["X-Custom2"][1])
+		})
+		defer ts.Close()
+
+		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		require.NoError(t, err)
+
+		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
+
+		authStrategyMock := &authMock.Strategy{}
+		authStrategyMock.
+			On("AddAuthorization", mock.AnythingOfType("*http.Request"), mock.AnythingOfType("TransportSetter")).
+			Return(nil).
+			Once()
+
+		credentials := &metadatamodel.Credentials{}
+		authStrategyFactoryMock := &authMock.StrategyFactory{}
+		authStrategyFactoryMock.On("Create", credentials).Return(authStrategyMock).Once()
+
+		csrfFactoryMock, csrfStrategyMock := mockCSRFStrategy(authStrategyMock, calledOnce)
+
+		additionalHeaders := map[string][]string{
+			"X-Custom1": []string{"custom-value-1"},
+			"X-Custom2": []string{"custom-value-2.1", "custom-value-2.2"},
+		}
+
+		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
+		serviceDefServiceMock.On("GetAPI", "uuid-1").Return(&metadatamodel.API{
+			TargetUrl:   ts.URL,
+			Credentials: credentials,
+			Headers:     &additionalHeaders,
+		}, nil).Once()
+
+		handler := New(serviceDefServiceMock, authStrategyFactoryMock, csrfFactoryMock, createProxyConfig(proxyTimeout))
+		rr := httptest.NewRecorder()
+
+		// when
+		handler.ServeHTTP(rr, req)
+
+		// then
+		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, "test", rr.Body.String())
+		authStrategyFactoryMock.AssertExpectations(t)
+		authStrategyMock.AssertExpectations(t)
+		csrfFactoryMock.AssertExpectations(t)
+		csrfStrategyMock.AssertExpectations(t)
+	})
 
 	t.Run("should proxy and remove headers", func(t *testing.T) {
 		// given
@@ -323,15 +437,15 @@ func TestProxy(t *testing.T) {
 		assert.Equal(t, http.StatusInternalServerError, errorResponse.Code)
 	})
 
-	testRetryOnAuthFailure := func(statusCode int, t *testing.T) {
+	testRetryOnAuthFailure := func(testServerConstructor func(check func(req *http.Request)) *httptest.Server, requestBody io.Reader, expectedStatusCode int, t *testing.T) {
 		// given
-		tsf := NewTestServerForRetryTest(statusCode, func(req *http.Request) {
+		tsf := testServerConstructor(func(req *http.Request) {
 			assert.Equal(t, req.Method, http.MethodGet)
 			assert.Equal(t, req.RequestURI, "/orders/123")
 		})
 		defer tsf.Close()
 
-		req, _ := http.NewRequest(http.MethodGet, "/orders/123", nil)
+		req, _ := http.NewRequest(http.MethodGet, "/orders/123", requestBody)
 		req.Host = "app-test-uuid-1.namespace.svc.cluster.local"
 
 		serviceDefServiceMock := &metadataMock.ServiceDefinitionService{}
@@ -363,7 +477,7 @@ func TestProxy(t *testing.T) {
 		handler.ServeHTTP(rr, req)
 
 		// then
-		assert.Equal(t, http.StatusOK, rr.Code)
+		assert.Equal(t, expectedStatusCode, rr.Code)
 		assert.Equal(t, "test", rr.Body.String())
 
 		serviceDefServiceMock.AssertExpectations(t)
@@ -374,11 +488,28 @@ func TestProxy(t *testing.T) {
 	}
 
 	t.Run("should invalidate proxy and retry when 401 occurred", func(t *testing.T) {
-		testRetryOnAuthFailure(http.StatusUnauthorized, t)
+		testRetryOnAuthFailure(func(check func(req *http.Request)) *httptest.Server {
+			return NewTestServerForRetryTest(http.StatusUnauthorized, check)
+		}, nil, http.StatusOK, t)
 	})
 
 	t.Run("should invalidate proxy and retry when 403 occurred due to CRSF Token validation", func(t *testing.T) {
-		testRetryOnAuthFailure(http.StatusForbidden, t)
+		testRetryOnAuthFailure(func(check func(req *http.Request)) *httptest.Server {
+			return NewTestServerForRetryTest(http.StatusForbidden, check)
+		}, nil, http.StatusOK, t)
+	})
+
+	t.Run("should return 403 status when the call and the retry with body returned 403", func(t *testing.T) {
+		requestBody := bytes.NewBufferString("some body")
+		testRetryOnAuthFailure(func(check func(req *http.Request)) *httptest.Server {
+			return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				r.ParseForm()
+				check(r)
+				w.WriteHeader(http.StatusForbidden)
+				w.Write([]byte("test"))
+			}))
+
+		}, requestBody, http.StatusForbidden, t)
 	})
 }
 
@@ -415,18 +546,18 @@ func NewTestServer(check func(req *http.Request)) *httptest.Server {
 }
 
 func NewTestServerForRetryTest(status int, check func(req *http.Request)) *httptest.Server {
-	firstCall := true
+	willFail := true
 
 	return httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		r.ParseForm()
 		check(r)
-		if firstCall {
+		if willFail {
 			w.WriteHeader(status)
-			firstCall = false
+			willFail = false
 		} else {
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("test"))
 		}
+		w.Write([]byte("test"))
 	}))
 }
 

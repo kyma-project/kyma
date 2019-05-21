@@ -38,8 +38,9 @@ spec:
           - "--appTokenExpirationMinutes={{ .Values.deployment.args.appTokenExpirationMinutes }}"
           - "--runtimeTokenExpirationMinutes={{ .Values.deployment.args.runtimeTokenExpirationMinutes }}"
           - "--caSecretName={{ .Values.deployment.args.caSecretName }}"
+          - "--rootCACertificateSecretName={{ .Values.deployment.args.rootCACertificateSecretName }}"
           - "--connectorServiceHost=connector-service.{{ .Values.global.ingress.domainName }}"
-          - "--gatewayHost=gateway.{{ .Values.global.applicationConnector.domainName }}"
+          - "--gatewayBaseURL=https://gateway.{{ .Values.global.applicationConnector.domainName }}"
           - "--certificateProtectedHost=gateway.{{ .Values.global.applicationConnector.domainName }}"
           - "--appsInfoURL={{ tpl .Values.deployment.args.appsInfoURL . }}"
           - "--runtimesInfoURL={{ tpl .Values.deployment.args.runtimesInfoURL . }}"
@@ -67,9 +68,9 @@ spec:
             value: "{{ .Values.deployment.envvars.province }}"
         ports:
           - containerPort: {{ .Values.deployment.args.internalAPIPort }}
-            name: int-api-port
+            name: http-int
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
-            name: http-api-port
+            name: http-ext
           - containerPort: 9090
             name: metrics-port
         securityContext:

@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure Cosmos DB Database Account (Graph API)",
-      "description": "Documentation for Azure Cosmos DB Database Account (Graph API).",
-      "id": "5f5252a0-6922-4a0c-a755-f9be70d7c79b",
-      "type":"Service Class"
-    }
-}

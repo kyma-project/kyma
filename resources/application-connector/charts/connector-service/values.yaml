@@ -1,6 +1,7 @@
 deployment:
   image:
     pullPolicy: IfNotPresent
+    pullSecret: ""
   runAsUser: 1000
   args:
     internalAPIPort: &internalAPIPort 8080
@@ -9,6 +10,7 @@ deployment:
     appTokenExpirationMinutes: 5
     runtimeTokenExpirationMinutes: 10
     caSecretName: connector-service-app-ca
+    rootCACertificateSecretName: ""
     appsInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/applications/management/info
     runtimesInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/runtimes/management/info
     appValidityTime: "92d"
@@ -42,6 +44,14 @@ ingress:
   authSecret: kyma-integration/nginx-auth-ca
   tlsSecret: application-connector-ingress-tls-cert
 
+istio:
+  rbac:
+    enabled: true
+    connectorServiceInternalApi:
+      subjects:
+          - user: cluster.local/ns/kyma-integration/sa/connection-token-handler
+          - user: cluster.local/ns/kyma-integration/sa/{{ .Chart.Name }}-tests
+          - user: cluster.local/ns/kyma-system/sa/core-console-backend-service
 tests:
   enabled: true
   skipSslVerify: true

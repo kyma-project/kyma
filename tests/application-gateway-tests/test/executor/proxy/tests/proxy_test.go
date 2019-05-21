@@ -20,18 +20,18 @@ func TestProxyService(t *testing.T) {
 	client := registry.NewAppRegistryClient("http://application-registry-external-api:8081", testSuit.ApplicationName())
 
 	t.Run("no-auth api test", func(t *testing.T) {
-		apiId := client.CreateNotSecuredAPI(t, testSuit.GetMockServiceURL())
-		t.Logf("Created service with apiId: %s", apiId)
+		apiID := client.CreateNotSecuredAPI(t, testSuit.GetMockServiceURL())
+		t.Logf("Created service with apiID: %s", apiID)
 		defer func() {
-			t.Logf("Cleaning up service %s", apiId)
-			client.CleanupService(t, apiId)
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
 		}()
 
 		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiId)
+		testSuit.AddDenierLabel(t, apiID)
 
 		t.Log("Calling Access Service")
-		resp := testSuit.CallAccessService(t, apiId, "status/ok")
+		resp := testSuit.CallAccessService(t, apiID, "status/ok")
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		t.Log("Successfully accessed application")
@@ -41,18 +41,68 @@ func TestProxyService(t *testing.T) {
 		userName := "myUser"
 		password := "mySecret"
 
-		apiId := client.CreateBasicAuthSecuredAPI(t, testSuit.GetMockServiceURL(), userName, password)
-		t.Logf("Created service with apiId: %s", apiId)
+		apiID := client.CreateBasicAuthSecuredAPI(t, testSuit.GetMockServiceURL(), userName, password)
+		t.Logf("Created service with apiID: %s", apiID)
 		defer func() {
-			t.Logf("Cleaning up service %s", apiId)
-			client.CleanupService(t, apiId)
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
 		}()
 
 		t.Log("Labeling tests pod with denier label")
-		testSuit.AddDenierLabel(t, apiId)
+		testSuit.AddDenierLabel(t, apiID)
 
 		t.Log("Calling Access Service")
-		resp := testSuit.CallAccessService(t, apiId, fmt.Sprintf("auth/basic/%s/%s", userName, password))
+		resp := testSuit.CallAccessService(t, apiID, fmt.Sprintf("auth/basic/%s/%s", userName, password))
+		util.RequireStatus(t, http.StatusOK, resp)
+
+		t.Log("Successfully accessed application")
+	})
+
+	t.Run("additional header test", func(t *testing.T) {
+		headerName := "Custom"
+		headerValue := "CustomValue"
+
+		headers := map[string][]string{
+			headerName: []string{headerValue},
+		}
+
+		apiID := client.CreateNotSecuredAPICustomHeaders(t, testSuit.GetMockServiceURL(), headers)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+
+		t.Log("Labeling tests pod with denier label")
+		testSuit.AddDenierLabel(t, apiID)
+
+		t.Log("Calling Access Service")
+		resp := testSuit.CallAccessService(t, apiID, fmt.Sprintf("headers/%s/%s", headerName, headerValue))
+		util.RequireStatus(t, http.StatusOK, resp)
+
+		t.Log("Successfully accessed application")
+	})
+
+	t.Run("additional query parameters test", func(t *testing.T) {
+		paramName := "customParam"
+		paramValue := "customValue"
+
+		queryParams := map[string][]string{
+			paramName: []string{paramValue},
+		}
+
+		apiID := client.CreateNotSecuredAPICustomQueryParams(t, testSuit.GetMockServiceURL(), queryParams)
+		t.Logf("Created service with apiID: %s", apiID)
+		defer func() {
+			t.Logf("Cleaning up service %s", apiID)
+			client.CleanupService(t, apiID)
+		}()
+
+		t.Log("Labeling tests pod with denier label")
+		testSuit.AddDenierLabel(t, apiID)
+
+		t.Log("Calling Access Service")
+		resp := testSuit.CallAccessService(t, apiID, fmt.Sprintf("queryparams/%s/%s", paramName, paramValue))
 		util.RequireStatus(t, http.StatusOK, resp)
 
 		t.Log("Successfully accessed application")

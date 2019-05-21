@@ -10,7 +10,7 @@ metadata:
 spec:
   replicas: 1
   strategy:
-    type: {{ .Values.webhook.updateStrategy }}
+{{ toYaml .Values.webhook.updateStrategy | indent 4 }}
   minReadySeconds: {{ .Values.webhook.minReadySeconds }}
   selector:
     matchLabels:
@@ -61,7 +61,7 @@ spec:
         readinessProbe:
           httpGet:
             port: 8080
-            path: /healthz
+            path: /healthz/ready
             scheme: HTTP
           failureThreshold: 1
           initialDelaySeconds: 10

@@ -53,6 +53,10 @@ required= [
   branch = "master"
 
 [[constraint]]
+  name = "github.com/komkom/go-jsonhash"
+  branch = "master"
+
+[[constraint]]
   name = "k8s.io/helm"
   version = "2.8.2"
 
@@ -81,3 +85,15 @@ required= [
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
   version = "=v0.1.28"
+
+[[constraint]]
+  name="sigs.k8s.io/controller-runtime"
+  version = "=v0.1.7"
+
+[[constraint]]
+  name = "github.com/kyma-project/kyma"
+  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
+
+[[constraint]]
+  name = "github.com/SpectoLabs/hoverfly"
+  revision = "fc31737b316a35bd2a15da3e36c1baa325e87854"

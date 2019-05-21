@@ -1,7 +1,10 @@
 package v1alpha1
 
 import (
+	"encoding/json"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
@@ -51,10 +54,42 @@ type ClusterMicroFrontendSpec struct {
 }
 
 type NavigationNode struct {
-	Label            string `json:"label"`
-	NavigationPath   string `json:"navigationPath"`
-	ViewURL          string `json:"viewUrl"`
-	ShowInNavigation bool   `json:"showInNavigation"`
+	Label               string                `json:"label"`
+	NavigationPath      string                `json:"navigationPath"`
+	ViewURL             string                `json:"viewUrl"`
+	ShowInNavigation    bool                  `json:"showInNavigation"`
+	Order               int                   `json:"order"`
+	Settings            *runtime.RawExtension `json:"settings"`
+	RequiredPermissions []RequiredPermission  `json:"requiredPermissions"`
+	ExternalLink        string                `json:"externalLink"`
+}
+
+type RequiredPermission struct {
+	APIGroup string   `json:"apiGroup"`
+	Resource string   `json:"resource"`
+	Verbs    []string `json:"verbs"`
+}
+
+func (n *NavigationNode) UnmarshalJSON(data []byte) error {
+	type Alias NavigationNode
+	aux := &struct {
+		ShowInNavigation *bool `json:"showInNavigation"`
+		*Alias
+	}{
+		Alias: (*Alias)(n),
+	}
+
+	if err := json.Unmarshal(data, &aux); err != nil {
+		return err
+	}
+
+	if aux.ShowInNavigation == nil {
+		n.ShowInNavigation = true
+		return nil
+	}
+
+	n.ShowInNavigation = *aux.ShowInNavigation
+	return nil
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

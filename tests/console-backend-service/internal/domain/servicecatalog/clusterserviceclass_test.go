@@ -39,12 +39,12 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 
 	clusterDocsTopicClient := resource.NewClusterDocsTopic(cmsCli, t.Logf)
 
-	t.Log(fmt.Sprintf("Create clusterDocsTopic %s", expectedResource.ExternalName))
-	err = clusterDocsTopicClient.Create(fixClusterDocsTopicMeta(expectedResource.ExternalName), fixCommonClusterDocsTopicSpec())
+	t.Log(fmt.Sprintf("Create clusterDocsTopic %s", expectedResource.Name))
+	err = clusterDocsTopicClient.Create(fixClusterDocsTopicMeta(expectedResource.Name), fixCommonClusterDocsTopicSpec())
 	require.NoError(t, err)
 
-	t.Log(fmt.Sprintf("Wait for clusterDocsTopic %s Ready", expectedResource.ExternalName))
-	err = wait.ForClusterDocsTopicReady(expectedResource.ExternalName, clusterDocsTopicClient.Get)
+	t.Log(fmt.Sprintf("Wait for clusterDocsTopic %s Ready", expectedResource.Name))
+	err = wait.ForClusterDocsTopicReady(expectedResource.Name, clusterDocsTopicClient.Get)
 	require.NoError(t, err)
 
 	resourceDetailsQuery := `
@@ -73,11 +73,6 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 			relatedClusterServiceClassName
 			instanceCreateParameterSchema
 		}
-		apiSpec
-		openApiSpec
-		odataSpec
-		asyncApiSpec
-		content
 		clusterDocsTopic {
 			name
     		groupName
@@ -114,6 +109,10 @@ func TestClusterServiceClassesQueries(t *testing.T) {
 		checkClusterClass(t, expectedResource, res.ClusterServiceClass)
 	})
 
+	t.Log(fmt.Sprintf("Delete clusterDocsTopic %s", expectedResource.Name))
+	err = clusterDocsTopicClient.Delete(expectedResource.Name)
+	require.NoError(t, err)
+
 	t.Log("Checking authorization directives...")
 	ops := &auth.OperationsInput{
 		auth.Get:  {fixClusterServiceClassRequest(resourceDetailsQuery, "test")},
@@ -135,7 +134,7 @@ func checkClusterClass(t *testing.T, expected, actual shared.ClusterServiceClass
 
 	// ClusterDocsTopic
 	require.NotEmpty(t, actual.ClusterDocsTopic)
-	checkClusterDocsTopic(t, fixture.ClusterDocsTopic(expected.ExternalName), actual.ClusterDocsTopic)
+	checkClusterDocsTopic(t, fixture.ClusterDocsTopic(expected.Name), actual.ClusterDocsTopic)
 }
 
 func checkClusterPlan(t *testing.T, expected, actual shared.ClusterServicePlan) {

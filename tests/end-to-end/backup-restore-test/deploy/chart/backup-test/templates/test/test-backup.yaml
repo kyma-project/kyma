@@ -9,6 +9,15 @@ rules:
 - apiGroups: ["apiextensions.k8s.io"]
   resources: ["customresourcedefinitions"]
   verbs: ["get"]
+- apiGroups: ["servicecatalog.k8s.io"]
+  resources: ["serviceinstances", "servicebindings", "serviceclasses", "clusterserviceclasses", "servicebrokers", "clusterservicebrokers", "serviceplans", "clusterserviceplans"]
+  verbs: ["get", "delete", "create", "list"]
+- apiGroups: ["applicationconnector.kyma-project.io"]
+  resources: ["applications", "applicationmappings", "eventactivations"]
+  verbs: ["get", "create", "delete", "list"]
+- apiGroups: ["servicecatalog.kyma-project.io"]
+  resources: ["servicebindingusages", "usagekinds"]
+  verbs: ["create", "delete", "get", "list"]
 - apiGroups: [""]
   resources: ["pods"]
   verbs: ["*"]
@@ -86,11 +95,31 @@ metadata:
     heritage: "{{ .Release.Service }}"
   annotations:
     "helm.sh/hook": test-success
-    "sidecar.istio.io/inject": "false"
+    "sidecar.istio.io/inject": "true"
 spec:
+  shareProcessNamespace: true
   serviceAccount: {{ template "backup-test.fullname" . }}
   containers:
   - name: backup-test
+    command:
+    - "/bin/sh"
+    args:
+    - "-c"
+    - |
+      sleep 10
+
+      while ! curl -Ik https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT_HTTPS >/dev/null 2>/dev/null
+      do
+          sleep 1
+      done
+
+      /restore.test -test.v
+      exit_code=$?
+
+      pkill -TERM pilot-agent
+      sleep 4
+
+      exit $exit_code
     image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
     imagePullPolicy: Always
     env:
@@ -103,6 +132,6 @@ spec:
     - name: ALL_BACKUP_CONFIGURATION_FILE
       value: "/all-backup.yaml"
     - name: SYSTEM_BACKUP_CONFIGURATION_FILE
-      value: "/system-backup.yaml"
+      value: /system-backup.yaml
   restartPolicy: Never
 ---

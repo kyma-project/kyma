@@ -1,8 +1,0 @@
-{
-    "spec": {
-      "displayName": "Azure Text Analytics",
-      "description": "Detect sentiment, key phrases, and language from your text",
-      "id": "8f6c848a-4ce1-4a69-9248-63545d3e7e9c",
-      "type":"Service Class"
-    }
-}

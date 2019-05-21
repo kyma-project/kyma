@@ -1,30 +1,35 @@
 {{ if and ( .Values.tests.enabled ) ( not .Values.global.isLocalEnv ) }}
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: {{ .Chart.Name }}-tests
   namespace: {{ .Values.global.namespace }}
-  annotations:
-    sidecar.istio.io/inject: "false"
-    "helm.sh/hook": test-success
-  labels:
-    "helm-chart-test": "true"
 spec:
-  containers:
-  - name: {{ .Chart.Name }}-tests
-    image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connector_service_tests.dir }}connector-service-tests:{{ .Values.global.connector_service_tests.version }}
-    imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
-    env:
-    - name: INTERNAL_API_URL
-      value: http://{{ .Chart.Name }}-internal-api.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.service.internalapi.port }}
-    - name: EXTERNAL_API_URL
-      value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.service.externalapi.port }}
-    - name: GATEWAY_URL
-      value: https://gateway.{{ .Values.global.applicationConnector.domainName }}
-    - name: SKIP_SSL_VERIFY
-      value: "{{ .Values.tests.skipSslVerify }}"
-    - name: CENTRAL
-      value: "{{ .Values.tests.central }}"
-
-  restartPolicy: Never
+  template:
+    spec:
+      shareProcessNamespace: true
+      serviceAccountName: {{ .Chart.Name }}-tests
+      containers:
+      - name: {{ .Chart.Name }}-tests
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.connector_service_tests.dir }}connector-service-tests:{{ .Values.global.connector_service_tests.version }}
+        imagePullPolicy: {{ .Values.tests.image.pullPolicy }}
+        env:
+        - name: INTERNAL_API_URL
+          value: http://{{ .Chart.Name }}-internal-api.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.service.internalapi.port }}
+        - name: EXTERNAL_API_URL
+          value: http://{{ .Chart.Name }}-external-api.{{ .Values.global.namespace }}.svc.cluster.local:{{ .Values.service.externalapi.port }}
+        - name: GATEWAY_URL
+          value: https://gateway.{{ .Values.global.applicationConnector.domainName }}
+        - name: SKIP_SSL_VERIFY
+          value: "{{ .Values.tests.skipSslVerify }}"
+        - name: CENTRAL
+          value: "{{ .Values.tests.central }}"
+        command:
+        - "/bin/sh"
+        args:
+          - "-c"
+          - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
+      restartPolicy: Never
+{{ end }}
 {{ end }}

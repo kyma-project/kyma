@@ -1,0 +1,17 @@
+hydraServer:
+  port: 4444
+  adminPort: 4445
+  image:
+    repository: oryd/hydra
+    tag: v1.0.0-rc.8
+  config:
+    oauth2:
+      shareErrorDebug: "1"
+    databaseUrl: memory
+    oidc:
+      subjectTypesSupported: "public,pairwise"
+  service:
+    port: 80
+    adminPort: 4445
+loginConsent:
+  name: non-existing-application

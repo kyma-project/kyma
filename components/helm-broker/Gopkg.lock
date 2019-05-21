@@ -20,10 +20,9 @@
   version = "v2.17.1"
 
 [[projects]]
-  branch = "master"
   name = "github.com/SpectoLabs/hoverfly"
   packages = ["core/certs"]
-  revision = "2487055325a19f02e4cdcd05cf265709a3c08067"
+  revision = "fc31737b316a35bd2a15da3e36c1baa325e87854"
 
 [[projects]]
   branch = "master"
@@ -176,6 +175,18 @@
   packages = ["."]
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
+
+[[projects]]
+  name = "github.com/go-logr/logr"
+  packages = ["."]
+  revision = "9fb12b3b21c5415d16ac18dc5cd42c1cfdd40c4e"
+  version = "v0.1.0"
+
+[[projects]]
+  name = "github.com/go-logr/zapr"
+  packages = ["."]
+  revision = "03f06a783fbb7dfaf3f629c7825480e43a7105e6"
+  version = "v0.1.1"
 
 [[projects]]
   name = "github.com/gobwas/glob"
@@ -354,9 +365,9 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/knative/pkg"
-  packages = ["configmap"]
-  revision = "ac1f8182274a10bde23df8f964484bce87f06752"
+  name = "github.com/komkom/go-jsonhash"
+  packages = ["."]
+  revision = "a6a43ccde81e32de31ce3c12f12f510568a96c94"
 
 [[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
@@ -382,6 +393,11 @@
   ]
   revision = "0aaf02aba556b945a357fce4e82f62122d158f2a"
   version = "v0.1.28"
+
+[[projects]]
+  name = "github.com/kyma-project/kyma"
+  packages = ["components/cms-controller-manager/pkg/apis/cms/v1alpha1"]
+  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
 
 [[projects]]
   name = "github.com/matttproud/golang_protobuf_extensions"
@@ -816,47 +832,9 @@
   packages = [
     "discovery",
     "discovery/fake",
-    "informers",
-    "informers/admissionregistration",
-    "informers/admissionregistration/v1alpha1",
-    "informers/admissionregistration/v1beta1",
-    "informers/apps",
-    "informers/apps/v1",
-    "informers/apps/v1beta1",
-    "informers/apps/v1beta2",
-    "informers/autoscaling",
-    "informers/autoscaling/v1",
-    "informers/autoscaling/v2beta1",
-    "informers/batch",
-    "informers/batch/v1",
-    "informers/batch/v1beta1",
-    "informers/batch/v2alpha1",
-    "informers/certificates",
-    "informers/certificates/v1beta1",
-    "informers/core",
+    "dynamic",
     "informers/core/v1",
-    "informers/events",
-    "informers/events/v1beta1",
-    "informers/extensions",
-    "informers/extensions/v1beta1",
     "informers/internalinterfaces",
-    "informers/networking",
-    "informers/networking/v1",
-    "informers/policy",
-    "informers/policy/v1beta1",
-    "informers/rbac",
-    "informers/rbac/v1",
-    "informers/rbac/v1alpha1",
-    "informers/rbac/v1beta1",
-    "informers/scheduling",
-    "informers/scheduling/v1alpha1",
-    "informers/scheduling/v1beta1",
-    "informers/settings",
-    "informers/settings/v1alpha1",
-    "informers/storage",
-    "informers/storage/v1",
-    "informers/storage/v1alpha1",
-    "informers/storage/v1beta1",
     "kubernetes",
     "kubernetes/fake",
     "kubernetes/scheme",
@@ -918,31 +896,7 @@
     "kubernetes/typed/storage/v1alpha1/fake",
     "kubernetes/typed/storage/v1beta1",
     "kubernetes/typed/storage/v1beta1/fake",
-    "listers/admissionregistration/v1alpha1",
-    "listers/admissionregistration/v1beta1",
-    "listers/apps/v1",
-    "listers/apps/v1beta1",
-    "listers/apps/v1beta2",
-    "listers/autoscaling/v1",
-    "listers/autoscaling/v2beta1",
-    "listers/batch/v1",
-    "listers/batch/v1beta1",
-    "listers/batch/v2alpha1",
-    "listers/certificates/v1beta1",
     "listers/core/v1",
-    "listers/events/v1beta1",
-    "listers/extensions/v1beta1",
-    "listers/networking/v1",
-    "listers/policy/v1beta1",
-    "listers/rbac/v1",
-    "listers/rbac/v1alpha1",
-    "listers/rbac/v1beta1",
-    "listers/scheduling/v1alpha1",
-    "listers/scheduling/v1beta1",
-    "listers/settings/v1alpha1",
-    "listers/storage/v1",
-    "listers/storage/v1alpha1",
-    "listers/storage/v1beta1",
     "pkg/apis/clientauthentication",
     "pkg/apis/clientauthentication/v1alpha1",
     "pkg/apis/clientauthentication/v1beta1",
@@ -950,6 +904,7 @@
     "plugin/pkg/client/auth/exec",
     "rest",
     "rest/watch",
+    "restmapper",
     "testing",
     "third_party/forked/golang/template",
     "tools/auth",
@@ -1004,9 +959,21 @@
   packages = ["pkg/util/proto"]
   revision = "d7c86cdc46e3a4fcf892b32dd7bc3aa775e0870e"
 
+[[projects]]
+  name = "sigs.k8s.io/controller-runtime"
+  packages = [
+    "pkg/client",
+    "pkg/client/apiutil",
+    "pkg/client/fake",
+    "pkg/runtime/log",
+    "pkg/runtime/scheme"
+  ]
+  revision = "5fd1e9e9fac5261e9ad9d47c375afc014fc31d21"
+  version = "v0.1.7"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "04816446d265b7762df2cfcde7582cc3af093aaed92c91f38d608a011653c484"
+  inputs-digest = "4928e27311a1ca31b669aa840eb5aa7e45f7082fd070aefd71f35433c850459e"
   solver-name = "gps-cdcl"
   solver-version = 1

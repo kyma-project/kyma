@@ -19,7 +19,7 @@ metadata:
     nginx.ingress.kubernetes.io/ssl-redirect: "true"
     nginx.ingress.kubernetes.io/proxy-body-size: 5m
     nginx.ingress.kubernetes.io/configuration-snippet: |
-      if ($ssl_client_s_dn !~ '(.*(CN={{ .Values.global.subjectCN }}(,|]|$)).*)') {
+      if ($ssl_client_s_dn !~ '{{ .Values.global.ingressValidationRule }}') {
           return 403;
       }
 spec:
@@ -28,6 +28,10 @@ spec:
     http:
       paths:
       - path: /{{ .Release.Name }}/v1/events
+        backend:
+          serviceName: {{ .Release.Name }}-event-service-external-api
+          servicePort: 8081
+      - path: /{{ .Release.Name }}/v1/events/subscribed
         backend:
           serviceName: {{ .Release.Name }}-event-service-external-api
           servicePort: 8081

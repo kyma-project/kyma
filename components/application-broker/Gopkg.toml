@@ -69,7 +69,7 @@ required = [
 
 [[constraint]]
   name = "github.com/pmorie/go-open-service-broker-client"
-  version = "0.0.1"
+  version = "0.0.12"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"

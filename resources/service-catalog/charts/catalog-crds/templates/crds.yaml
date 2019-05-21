@@ -2,9 +2,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: clusterservicebrokers.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
-    "helm.sh/hook-delete-policy": before-hook-creation
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -13,57 +10,22 @@ spec:
     plural: clusterservicebrokers
     singular: clusterservicebroker
     kind: ClusterServiceBroker
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
+  additionalPrinterColumns:
+    - name: URL
+      type: string
+      JSONPath: .spec.url
+    - name: Status
+      type: string
+      JSONPath: .status.lastConditionState
+    - name: Age
+      type: date
+      JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          required:
-          - "url"
-          properties:
-            url:
-              type: string
-            insecureSkipTLSVerify:
-              type: boolean
-            caBundle:
-              type: string
-            relistBehavior:
-              type: string
-            relistDuration:
-              type: integer
-              minimum: 1
-            relistRequests:
-              type: integer
-              minimum: 0
-            catalogRestrictions:
-              type: object
-              properties:
-                servicePlan:
-                  type: array
-                  items:
-                    type: string
-                serviceClass:
-                  type: array
-                  items:
-                    type: string
-            authInfo:
-              type: object
-              properties:
-                basic:
-                  type: object
-                  required:
-                  - "secretRef"
-                  properties:
-                    secretRef:
-                      type: string
-                bearer:
-                  type: object
-                  required:
-                  - "secretRef"
-                  properties:
-                    secretRef:
-                      type: string
 
 ---
 
@@ -71,8 +33,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: servicebrokers.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -81,57 +41,22 @@ spec:
     plural: servicebrokers
     singular: servicebroker
     kind: ServiceBroker
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
+  additionalPrinterColumns:
+  - name: URL
+    type: string
+    JSONPath: .spec.url
+  - name: Status
+    type: string
+    JSONPath: .status.lastConditionState
+  - name: Age
+    type: date
+    JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          required:
-          - "url"
-          properties:
-            url:
-              type: string
-            insecureSkipTLSVerify:
-              type: boolean
-            caBundle:
-              type: string
-            relistBehavior:
-              type: string
-            relistDuration:
-              type: integer
-              minimum: 1
-            relistRequests:
-              type: integer
-              minimum: 0
-            catalogRestrictions:
-              type: object
-              properties:
-                servicePlan:
-                  type: array
-                  items:
-                    type: string
-                serviceClass:
-                  type: array
-                  items:
-                    type: string
-            authInfo:
-              type: object
-              properties:
-                basic:
-                  type: object
-                  required:
-                  - "secretRef"
-                  properties:
-                    secretRef:
-                      type: string
-                bearer:
-                  type: object
-                  required:
-                  - "secretRef"
-                  properties:
-                    secretRef:
-                      type: string
 
 ---
 
@@ -139,8 +64,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: serviceclasses.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -149,46 +72,22 @@ spec:
     plural: serviceclasses
     singular: serviceclass
     kind: ServiceClass
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
+  additionalPrinterColumns:
+  - name: External-Name
+    type: string
+    JSONPath: .spec.externalName
+  - name: Broker
+    type: string
+    JSONPath: .spec.clusterServiceBrokerName
+  - name: Age
+    type: date
+    JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          required:
-          - "serviceBrokerName"
-          - "externalID"
-          - "externalName"
-          - "description"
-          properties:
-            serviceBrokerName:
-              type: string
-            externalName:
-              type: string
-              maxLength: 63
-            externalID:
-              type: string
-              maxLength: 63
-            description:
-              type: string
-            bindable:
-              type: boolean
-            bindingRetrievable:
-              type: boolean
-            planUpdatable:
-              type: boolean
-            tags:
-              type: array
-              items:
-                type: string
-            requires:
-              type: array
-              items:
-                type: string
-            externalMetadata:
-              type: object
-            defaultProvisionParameters:
-              type: object
 
 ---
 
@@ -196,8 +95,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: clusterserviceclasses.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -206,54 +103,29 @@ spec:
     plural: clusterserviceclasses
     singular: clusterserviceclass
     kind: ClusterServiceClass
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
+  additionalPrinterColumns:
+  - name: External-Name
+    type: string
+    JSONPath: .spec.externalName
+  - name: Broker
+    type: string
+    JSONPath: .spec.clusterServiceBrokerName
+  - name: Age
+    type: date
+    JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-  validation:
-      openAPIV3Schema:
-        properties:
-          spec:
-            required:
-            - "clusterServiceBrokerName"
-            - "externalName"
-            - "externalID"
-            - "description"
-            properties:
-              clusterServiceBrokerName:
-                type: string
-              externalName:
-                type: string
-                maxLength: 63
-              externalID:
-                type: string
-                maxLength: 63
-              description:
-                type: string
-              bindable:
-                type: boolean
-              bindingRetrievable:
-                type: boolean
-              planUpdatable:
-                type: boolean
-              tags:
-                type: array
-                items:
-                  type: string
-              requires:
-                type: array
-                items:
-                  type: string
-              externalMetadata:
-                type: object
-              defaultProvisionParameters:
-                type: object
+
 ---
 
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: serviceplans.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -262,51 +134,25 @@ spec:
     plural: serviceplans
     singular: serviceplan
     kind: ServicePlan
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
+  additionalPrinterColumns:
+  - name: External-Name
+    type: string
+    JSONPath: .spec.externalName
+  - name: Broker
+    type: string
+    JSONPath: .spec.serviceBrokerName
+  - name: Class
+    type: string
+    JSONPath: .spec.serviceClassRef.Name
+  - name: Age
+    type: date
+    JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          required:
-          - "serviceClassRef"
-          - "serviceBrokerName"
-          - "externalName"
-          - "externalID"
-          - "description"
-          properties:
-            serviceClassRef:
-              type: object
-              required:
-              - "name"
-              properties:
-                name:
-                  type: string
-                  maxLength: 63
-            serviceBrokerName:
-              type: string
-            externalName:
-              type: string
-              maxLength: 63
-            externalID:
-              type: string
-              maxLength: 63
-            description:
-              type: string
-            bindable:
-              type: boolean
-            free:
-              type: boolean
-            instanceCreateParameterSchema:
-              type: object
-            instanceUpdateParameterSchema:
-              type: object
-            serviceBindingCreateParameterSchema:
-              type: object
-            serviceBindingCreateResponseSchema:
-              type: object
-            defaultProvisionParameters:
-              type: object
 
 ---
 
@@ -314,8 +160,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: clusterserviceplans.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -324,59 +168,32 @@ spec:
     plural: clusterserviceplans
     singular: clusterserviceplan
     kind: ClusterServicePlan
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
+  additionalPrinterColumns:
+  - name: External-Name
+    type: string
+    JSONPath: .spec.externalName
+  - name: Broker
+    type: string
+    JSONPath: .spec.clusterServiceBrokerName
+  - name: Class
+    type: string
+    JSONPath: .spec.clusterServiceClassRef.name
+  - name: Age
+    type: date
+    JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          required:
-          - "clusterServiceClassRef"
-          - "clusterServiceBrokerName"
-          - "externalName"
-          - "externalID"
-          - "description"
-          properties:
-            clusterServiceClassRef:
-              type: object
-              required:
-              - "name"
-              properties:
-                name:
-                  type: string
-                  maxLength: 63
-            clusterServiceBrokerName:
-              type: string
-            externalName:
-              type: string
-              maxLength: 63
-            externalID:
-              type: string
-              maxLength: 63
-            description:
-              type: string
-            bindable:
-              type: boolean
-            free:
-              type: boolean
-            instanceCreateParameterSchema:
-              type: object
-            instanceUpdateParameterSchema:
-              type: object
-            serviceBindingCreateParameterSchema:
-              type: object
-            serviceBindingCreateResponseSchema:
-              type: object
-            defaultProvisionParameters:
-              type: object
+
 ---
 
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: serviceinstances.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -385,106 +202,25 @@ spec:
     plural: serviceinstances
     singular: serviceinstance
     kind: ServiceInstance
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
+  additionalPrinterColumns:
+  - name: Class
+    type: string
+    JSONPath: .status.userSpecifiedClassName
+  - name: Plan
+    type: string
+    JSONPath: .status.userSpecifiedPlanName
+  - name: Status
+    type: string
+    JSONPath: .status.lastConditionState
+  - name: Age
+    type: date
+    JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-  validation:
-      openAPIV3Schema:
-        properties:
-          spec:
-            properties:
-              planReference:
-                type: object
-                properties:
-                  clusterServiceClassExternalName:
-                    type: string
-                  clusterServicePlanExternalName:
-                    type: string
-                  clusterServiceClassExternalID:
-                    type: string
-                  clusterServicePlanExternalID:
-                    type: string
-                  clusterServiceClassName:
-                    type: string
-                  clusterServicePlanName:
-                    type: string
-                  serviceClassExternalName:
-                    type: string
-                  servicePlanExternalName:
-                    type: string
-                  serviceClassExternalID:
-                    type: string
-                  servicePlanExternalID:
-                    type: string
-                  serviceClassName:
-                    type: string
-                  servicePlanName:
-                    type: string
-              clusterServiceClassRef:
-                type: object
-                required:
-                - "name"
-                properties:
-                  name:
-                    type: string
-              clusterServicePlanRef:
-                type: object
-                required:
-                - "name"
-                properties:
-                  name:
-                    type: string
-              serviceClassRef:
-                type: object
-                required:
-                - "name"
-                properties:
-                  name:
-                    type: string
-              servicePlanRef:
-                type: object
-                required:
-                - "name"
-                properties:
-                  name:
-                    type: string
-              parameters:
-                type: object
-              parametersFromSource:
-                type: array
-                items:
-                  type: object
-                  required:
-                  - "name"
-                  - "key"
-                  properties:
-                    name:
-                      type: string
-                    key:
-                      type: string
-              externalID:
-                type: string
-              userInfo:
-                type: object
-                properties:
-                  username:
-                    type: string
-                  UID:
-                    type: string
-                  groups:
-                    type: array
-                    items:
-                      type: string
-                  extra:
-                    type: object
-                    properties:
-                      key:
-                        type: string
-                      values:
-                        type: array
-                        items:
-                          type: string
-              updateRequests:
-                type: integer
 
 ---
 
@@ -492,8 +228,6 @@ apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
   name: servicebindings.servicecatalog.k8s.io
-  annotations:
-    "helm.sh/hook": crd-install
 spec:
   group: servicecatalog.k8s.io
   version: v1beta1
@@ -502,108 +236,22 @@ spec:
     plural: servicebindings
     singular: servicebinding
     kind: ServiceBinding
+    # categories is a list of grouped resources the custom resource belongs to.
+    categories:
+      - all
+      - svcat
+  additionalPrinterColumns:
+  - name: Service-Instance
+    type: string
+    JSONPath: .spec.instanceRef.name
+  - name: Secret-Name
+    type: string
+    JSONPath: .spec.secretName
+  - name: Status
+    type: string
+    JSONPath: .status.lastConditionState
+  - name: Age
+    type: date
+    JSONPath: .metadata.creationTimestamp
   subresources:
     status: {}
-  validation:
-      openAPIV3Schema:
-        properties:
-          spec:
-            required:
-            - "instanceRef"
-            properties:
-              instanceRef:
-                type: object
-                required:
-                - "name"
-                properties:
-                  name:
-                    type: string
-                    maxLength: 253
-              secretName:
-                type: string
-                maxLength: 253
-              externalID:
-                type: string
-              secretTransform:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    renameKey:
-                      type: object
-                      required:
-                      - "from"
-                      - "to"
-                      properties:
-                        from:
-                          type: string
-                        to:
-                          type: string
-                    addKey:
-                      type: object
-                      required:
-                      - "key"
-                      properties:
-                        key:
-                          type: string
-                        value:
-                          type: array
-                          items:
-                            type: byte
-                        stringValue:
-                          type: string
-                        JSONPathExpression:
-                          type: string
-                    addKeysFrom:
-                      secretRef:
-                        type: object
-                        required:
-                        - "name"
-                        - "namespace"
-                        properties:
-                          name:
-                            type: string
-                          namespace:
-                            type: string
-                    removeKey:
-                      type: object
-                      required:
-                      - "key"
-                      properties:
-                        key:
-                          type: string
-              userInfo:
-                type: object
-                properties:
-                  username:
-                    type: string
-                  UID:
-                    type: string
-                  groups:
-                    type: array
-                    items:
-                      type: string
-                  extra:
-                    type: object
-                    properties:
-                      key:
-                        type: string
-                      values:
-                        type: array
-                        items:
-                          type: string
-              parameters:
-                type: object
-              parametersFromSource:
-                type: array
-                items:
-                  type: object
-                  required:
-                  - "name"
-                  - "key"
-                  properties:
-                    name:
-                      type: string
-                    key:
-                      type: string
----

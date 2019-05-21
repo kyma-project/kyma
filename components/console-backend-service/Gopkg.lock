@@ -44,17 +44,6 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:d1de7e0984d40e19819546c8deb7dc451d3c4c59fd12977773aaa6b528523f7f"
-  name = "github.com/allegro/bigcache"
-  packages = [
-    ".",
-    "queue",
-  ]
-  pruneopts = "NUT"
-  revision = "f31987a23e44c5121ef8c8b2f2ea2e8ffa37b068"
-  version = "v1.1.0"
-
-[[projects]]
   digest = "1:c91a5363a19174cb0181832821a7bb9da0aeefb5e2180724614b1005c2269712"
   name = "github.com/coreos/go-oidc"
   packages = ["."]
@@ -79,14 +68,6 @@
   version = "v1.13.1"
 
 [[projects]]
-  digest = "1:b7ffca49e9cfd3dfb04a8e0a59347708c6f78f68476a32c5e0a0edca5d1b258c"
-  name = "github.com/dustin/go-humanize"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "9f541cc9db5d55bce703bd99987c9d5cb8eea45e"
-  version = "v1.0.0"
-
-[[projects]]
   digest = "1:3537d33c077a9666720dc987fddfecb07270606ac0a58f67abd08e3b252c0a45"
   name = "github.com/emicklei/go-restful"
   packages = [
@@ -104,14 +85,6 @@
   pruneopts = "NUT"
   revision = "0ca9ea5df5451ffdf184b4428c902747c2c11cd7"
   version = "v1.0.0"
-
-[[projects]]
-  digest = "1:5e92676b56ce4c69edf9ee1f6343c56f637e30af11b9d8b5edd1b6530f3fbc3d"
-  name = "github.com/go-ini/ini"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "6ed8d5f64cd79a498d1f3fab5880cc376ce41bbe"
-  version = "v1.41.0"
 
 [[projects]]
   digest = "1:260f7ebefc63024c8dfe2c9f1a2935a89fa4213637a1f522f592f80c001cc441"
@@ -270,14 +243,6 @@
   revision = "e14f8d59a22d460d56c5ee92507cd94c78fbf274"
 
 [[projects]]
-  digest = "1:4059c14e87a2de3a434430340521b5feece186c1469eff0834c29a63870de3ed"
-  name = "github.com/konsorten/go-windows-terminal-sequences"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
-  version = "v1.0.1"
-
-[[projects]]
   digest = "1:bc84096300a94af149177a7a11f414bca6483069bc0a90db7709b75f4ba57c35"
   name = "github.com/kubeless/kubeless"
   packages = [
@@ -328,9 +293,21 @@
   version = "v0.1.36"
 
 [[projects]]
-  digest = "1:45efec0a59ce421ab70e297521fc0e6813a2c99953bd151d8738185832e2fa4d"
+  digest = "1:d69fd1eaf051eefb6b11abed5605e027e36967b09f72877925b139c346da465b"
   name = "github.com/kyma-project/kyma"
   packages = [
+    "common/microfrontend-client/pkg/apis/ui",
+    "common/microfrontend-client/pkg/apis/ui/v1alpha1",
+    "common/microfrontend-client/pkg/client/clientset/versioned",
+    "common/microfrontend-client/pkg/client/clientset/versioned/fake",
+    "common/microfrontend-client/pkg/client/clientset/versioned/scheme",
+    "common/microfrontend-client/pkg/client/clientset/versioned/typed/ui/v1alpha1",
+    "common/microfrontend-client/pkg/client/clientset/versioned/typed/ui/v1alpha1/fake",
+    "common/microfrontend-client/pkg/client/informers/externalversions",
+    "common/microfrontend-client/pkg/client/informers/externalversions/internalinterfaces",
+    "common/microfrontend-client/pkg/client/informers/externalversions/ui",
+    "common/microfrontend-client/pkg/client/informers/externalversions/ui/v1alpha1",
+    "common/microfrontend-client/pkg/client/listers/ui/v1alpha1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/meta/v1",
     "components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
@@ -398,7 +375,7 @@
     "tools/failery",
   ]
   pruneopts = "NUT"
-  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
+  revision = "48aaeb726182c971b1c557276159142e3d73f551"
 
 [[projects]]
   branch = "master"
@@ -411,30 +388,6 @@
   ]
   pruneopts = "NUT"
   revision = "60711f1a8329503b04e1c88535f419d0bb440bff"
-
-[[projects]]
-  digest = "1:c81d6dbae2813905ce99a759e2918f0725cd400cd52642256e93ef3c1eaf7873"
-  name = "github.com/minio/minio-go"
-  packages = [
-    ".",
-    "pkg/credentials",
-    "pkg/encrypt",
-    "pkg/policy",
-    "pkg/s3signer",
-    "pkg/s3utils",
-    "pkg/set",
-  ]
-  pruneopts = "NUT"
-  revision = "9e124ec59547551cb3f1324f73623bbb30650cf8"
-  version = "4.0.9"
-
-[[projects]]
-  digest = "1:a4df73029d2c42fabcb6b41e327d2f87e685284ec03edf76921c267d9cfc9c23"
-  name = "github.com/mitchellh/go-homedir"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "ae18d6b8b3205b561c79e8e5f69bff09736185f4"
-  version = "v1.0.0"
 
 [[projects]]
   digest = "1:730bb303c6e80807a43c37b546e06de0fa32f9cde76a198e87653ce8859fd028"
@@ -512,14 +465,6 @@
   version = "v1.6.0"
 
 [[projects]]
-  digest = "1:e256b859ab89f005f2f639f5ed9807d0873d9135e27c6382f419b840ff9abe71"
-  name = "github.com/sirupsen/logrus"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "e1e72e9de974bd926e5c56f83753fba2df402ce5"
-  version = "v1.3.0"
-
-[[projects]]
   digest = "1:9d8420bbf131d1618bde6530af37c3799340d3762cc47210c1d9532a4c3a2779"
   name = "github.com/spf13/pflag"
   packages = ["."]
@@ -546,14 +491,6 @@
   pruneopts = "NUT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
-
-[[projects]]
-  digest = "1:4c1df0afdb3834ec77c6f71f6fd9cd09c3e3a39517d324143132098a9ba2777e"
-  name = "github.com/thoas/go-funk"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "9132db0aefe2a09565f5124e267ac9a89845d8f6"
-  version = "0.4"
 
 [[projects]]
   digest = "1:5dba68a1600a235630e208cb7196b24e58fcbb77bb7a6bec08fcd23f081b0a58"
@@ -1107,7 +1044,6 @@
     "github.com/99designs/gqlgen/graphql",
     "github.com/99designs/gqlgen/graphql/introspection",
     "github.com/99designs/gqlgen/handler",
-    "github.com/allegro/bigcache",
     "github.com/golang/glog",
     "github.com/googleapis/gnostic/OpenAPIv2",
     "github.com/gorilla/mux",
@@ -1122,6 +1058,10 @@
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/fake",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/clientset_generated/clientset/typed/servicecatalog/v1beta1",
     "github.com/kubernetes-incubator/service-catalog/pkg/client/informers_generated/externalversions",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/apis/ui/v1alpha1",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/clientset/versioned/fake",
+    "github.com/kyma-project/kyma/common/microfrontend-client/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/components/api-controller/pkg/apis/gateway.kyma-project.io/v1alpha2",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned",
     "github.com/kyma-project/kyma/components/api-controller/pkg/clients/gateway.kyma-project.io/clientset/versioned/fake",
@@ -1150,14 +1090,12 @@
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/clientset/versioned/typed/servicecatalog/v1alpha1",
     "github.com/kyma-project/kyma/components/service-binding-usage-controller/pkg/client/informers/externalversions",
     "github.com/kyma-project/kyma/tools/failery",
-    "github.com/minio/minio-go",
     "github.com/moby/moby/pkg/namesgenerator",
     "github.com/pkg/errors",
     "github.com/rs/cors",
     "github.com/stretchr/testify/assert",
     "github.com/stretchr/testify/mock",
     "github.com/stretchr/testify/require",
-    "github.com/thoas/go-funk",
     "github.com/urfave/cli",
     "github.com/vektah/gqlparser",
     "github.com/vektah/gqlparser/ast",
@@ -1165,6 +1103,7 @@
     "golang.org/x/tools/cmd/goimports",
     "k8s.io/api/apps/v1",
     "k8s.io/api/apps/v1beta2",
+    "k8s.io/api/authorization/v1",
     "k8s.io/api/core/v1",
     "k8s.io/apimachinery/pkg/api/errors",
     "k8s.io/apimachinery/pkg/api/resource",
@@ -1191,10 +1130,12 @@
     "k8s.io/client-go/dynamic",
     "k8s.io/client-go/dynamic/fake",
     "k8s.io/client-go/informers",
+    "k8s.io/client-go/informers/core/v1",
     "k8s.io/client-go/kubernetes",
     "k8s.io/client-go/kubernetes/fake",
     "k8s.io/client-go/kubernetes/scheme",
     "k8s.io/client-go/kubernetes/typed/apps/v1",
+    "k8s.io/client-go/kubernetes/typed/authorization/v1",
     "k8s.io/client-go/kubernetes/typed/authorization/v1beta1",
     "k8s.io/client-go/kubernetes/typed/core/v1",
     "k8s.io/client-go/rest",

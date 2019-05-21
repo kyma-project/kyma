@@ -1,36 +1,50 @@
 ---
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: test-{{ .Release.Name }}-apiserver-proxy
   namespace: kyma-system
-  annotations:
-    sidecar.istio.io/inject: "false"
-    "helm.sh/hook": test-success
   labels:
-    "helm-chart-test": "true"
+    require-static-users: "true" # the test will fail if run on the cluster without static users
 spec:
-{{- if .Values.global.isLocalEnv }} 
-  hostNetwork: true
-  dnsPolicy: ClusterFirstWithHostNet
-{{- end }}
-  containers:
-    - name: test-{{ .Release.Name }}-apiserver-proxy
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_apiserver_proxy.dir }}apiserver-proxy-test:{{ .Values.global.test_apiserver_proxy.version }}
-      imagePullPolicy: Always
-      env:
-      - name: POD_NAME
-        value: test-{{ .Release.Name }}-apiserver-proxy
-      - name: DOMAIN
-        value: {{ .Values.global.ingress.domainName }}
-      - name: USER_EMAIL
-        valueFrom:
-          secretKeyRef:
-            name: admin-user
-            key: email
-      - name: USER_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: admin-user
-            key: password
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      {{ if .Values.global.isLocalEnv }}
+      hostAliases:
+      - ip: {{ .Values.minikubeIP }}
+        hostnames:
+            - "configurations-generator.{{ .Values.global.ingress.domainName }}"
+            - "dex.{{ .Values.global.ingress.domainName }}"
+            - "apiserver.{{ .Values.global.ingress.domainName }}"
+      {{ end }}
+      shareProcessNamespace: true
+      containers:
+      - name: test-{{ .Release.Name }}-apiserver-proxy
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.test_apiserver_proxy.dir }}apiserver-proxy-test:{{ .Values.global.test_apiserver_proxy.version }}
+        imagePullPolicy: Always
+        command: ["/bin/bash"]
+        args: ["-c", "sleep 10; ./test.sh; exit_code=$?; pkill -INT pilot-agent; exit $exit_code;"]
+        env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: DOMAIN
+              value: {{ .Values.global.ingress.domainName }}
+            - name: USER_EMAIL
+              valueFrom:
+                  secretKeyRef:
+                      name: admin-user
+                      key: email
+            - name: USER_PASSWORD
+              valueFrom:
+                  secretKeyRef:
+                      name: admin-user
+                      key: password
+      restartPolicy: Never
+{{- end}}

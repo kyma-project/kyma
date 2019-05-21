@@ -19,10 +19,10 @@ func TestGetCatalogHappyPath(t *testing.T) {
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
 	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixApp()}, nil).Once()
-	tc.appEnabledCheckerMock.On("IsApplicationEnabled", "stage", string(tc.fixApp().Name)).Return(true, nil)
+	tc.enableServices("stage", string(tc.fixApp().Name), tc.fixApp().Services[0].ID)
 	tc.converterMock.On("Convert", tc.fixApp().Name, tc.fixApp().Services[0]).Return(tc.fixService(), nil)
 
-	svc := broker.NewCatalogService(tc.finderMock, tc.appEnabledCheckerMock, tc.converterMock)
+	svc := broker.NewCatalogService(tc.finderMock, tc.serviceCheckerFactory, tc.converterMock)
 	osbCtx := broker.NewOSBContext("not", "important", "stage")
 
 	// WHEN
@@ -40,9 +40,9 @@ func TestGetCatalogNotEnabled(t *testing.T) {
 	tc := newCatalogTC()
 	defer tc.AssertExpectations(t)
 	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixApp()}, nil).Once()
-	tc.appEnabledCheckerMock.On("IsApplicationEnabled", "stage", string(tc.fixApp().Name)).Return(false, nil)
+	tc.applicationDisabled("stage", string(tc.fixApp().Name))
 
-	svc := broker.NewCatalogService(tc.finderMock, tc.appEnabledCheckerMock, tc.converterMock)
+	svc := broker.NewCatalogService(tc.finderMock, tc.serviceCheckerFactory, tc.converterMock)
 	osbCtx := broker.NewOSBContext("not", "important", "stage")
 
 	// WHEN
@@ -54,6 +54,27 @@ func TestGetCatalogNotEnabled(t *testing.T) {
 	assert.Len(t, resp.Services, 0)
 }
 
+func TestGetCatalogWithEnabledSelectedServices(t *testing.T) {
+	// GIVEN
+	tc := newCatalogTC()
+	defer tc.AssertExpectations(t)
+	tc.finderMock.On("FindAll").Return([]*internal.Application{tc.fixAppWithTwoServices()}, nil).Once()
+	tc.enableServices("stage", string(tc.fixAppWithTwoServices().Name), tc.fixAppWithTwoServices().Services[0].ID)
+	tc.converterMock.On("Convert", tc.fixApp().Name, tc.fixApp().Services[0]).Return(tc.fixService(), nil).Once()
+
+	svc := broker.NewCatalogService(tc.finderMock, tc.serviceCheckerFactory, tc.converterMock)
+	osbCtx := broker.NewOSBContext("not", "important", "stage")
+
+	// WHEN
+	resp, err := svc.GetCatalog(context.Background(), *osbCtx)
+
+	// THEN
+	require.NoError(t, err)
+	require.NotNil(t, resp)
+	assert.Len(t, resp.Services, 1)
+	assert.Equal(t, tc.fixService(), resp.Services[0])
+}
+
 func TestConvertService(t *testing.T) {
 	const fixAppName = "fix-app-name"
 
@@ -62,7 +83,11 @@ func TestConvertService(t *testing.T) {
 
 		expectedService func() osb.Service
 	}{
-		"simpleAPIBasedService": {
+		"should convert simple api service": {
+			givenService:    fixAPIBasedService,
+			expectedService: fixOsbService,
+		},
+		"should support special characters on DisplayName field": {
 			givenService: func() internal.Service {
 				svc := fixAPIBasedService()
 				svc.DisplayName = "*Service Name\ną-'#$\tÜ"
@@ -71,6 +96,32 @@ func TestConvertService(t *testing.T) {
 			expectedService: func() osb.Service {
 				svc := fixOsbService()
 				svc.Metadata["displayName"] = "*Service Name\ną-'#$\tÜ"
+				return svc
+			},
+		},
+		"should override provisionOnlyOnce label to true": {
+			givenService: func() internal.Service {
+				svc := fixAPIBasedService()
+				svc.Labels["provisionOnlyOnce"] = "false"
+				return svc
+			},
+			expectedService: func() osb.Service {
+				svc := fixOsbService()
+				l := svc.Metadata["labels"].(map[string]string)
+				l["provisionOnlyOnce"] = "true"
+				return svc
+			},
+		},
+		"should always add provisionOnlyOnce label set to true": {
+			givenService: func() internal.Service {
+				svc := fixAPIBasedService()
+				delete(svc.Labels, "provisionOnlyOnce")
+				return svc
+			},
+			expectedService: func() osb.Service {
+				svc := fixOsbService()
+				l := svc.Metadata["labels"].(map[string]string)
+				l["provisionOnlyOnce"] = "true"
 				return svc
 			},
 		},
@@ -169,14 +220,15 @@ func fixOsbService() osb.Service {
 		Tags: []string{"tag1", "tag2"},
 		Metadata: map[string]interface{}{
 			"providerDisplayName":  "HakunaMatata",
-			"displayName":          "service-name",
+			"displayName":          "Service Name",
 			"longDescription":      "long description",
 			"applicationServiceId": "0023-abcd-2098",
 			"bindingLabels": map[string]string{
 				"access-label-1": "true",
 			},
 			"labels": map[string]string{
-				"connected-app": "ec-prod",
+				"connected-app":     "ec-prod",
+				"provisionOnlyOnce": "true",
 			},
 		},
 	}
@@ -185,20 +237,42 @@ func fixOsbService() osb.Service {
 type catalogTestCase struct {
 	finderMock            *automock.AppFinder
 	converterMock         *automock.Converter
-	appEnabledCheckerMock *automock.AppEnabledChecker
+	serviceCheckerFactory *automock.ServiceCheckerFactory
 }
 
 func newCatalogTC() *catalogTestCase {
 	return &catalogTestCase{
 		finderMock:            &automock.AppFinder{},
 		converterMock:         &automock.Converter{},
-		appEnabledCheckerMock: &automock.AppEnabledChecker{},
+		serviceCheckerFactory: &automock.ServiceCheckerFactory{},
 	}
 }
 
 func (tc *catalogTestCase) AssertExpectations(t *testing.T) {
 	tc.finderMock.AssertExpectations(t)
 	tc.converterMock.AssertExpectations(t)
+}
+
+func (tc *catalogTestCase) fixAppWithTwoServices() *internal.Application {
+	return &internal.Application{
+		Name: "ec-prod",
+		Services: []internal.Service{
+			{
+				ID: "00-1",
+				APIEntry: &internal.APIEntry{
+					GatewayURL:  "www.gate1.com",
+					AccessLabel: "free",
+				},
+			},
+			{
+				ID: "00-2",
+				APIEntry: &internal.APIEntry{
+					GatewayURL:  "www.gate2.com",
+					AccessLabel: "free",
+				},
+			},
+		},
+	}
 }
 
 func (tc *catalogTestCase) fixApp() *internal.Application {
@@ -218,4 +292,27 @@ func (tc *catalogTestCase) fixApp() *internal.Application {
 
 func (tc *catalogTestCase) fixService() osb.Service {
 	return osb.Service{ID: "bundleID"}
+}
+
+func (tc *catalogTestCase) enableServices(namespace string, name string, serviceID ...internal.ApplicationServiceID) {
+	serviceIDs := make(map[internal.ApplicationServiceID]struct{})
+	for _, id := range serviceID {
+		serviceIDs[id] = struct{}{}
+	}
+	checker := &serviceChecker{serviceIDs: serviceIDs}
+	tc.serviceCheckerFactory.On("NewServiceChecker", namespace, name).Return(checker, nil)
+}
+
+func (tc *catalogTestCase) applicationDisabled(namespace string, name string) {
+	checker := &serviceChecker{serviceIDs: map[internal.ApplicationServiceID]struct{}{}}
+	tc.serviceCheckerFactory.On("NewServiceChecker", namespace, name).Return(checker, nil)
+}
+
+type serviceChecker struct {
+	serviceIDs map[internal.ApplicationServiceID]struct{}
+}
+
+func (c *serviceChecker) IsServiceEnabled(svc internal.Service) bool {
+	_, exists := c.serviceIDs[svc.ID]
+	return exists
 }

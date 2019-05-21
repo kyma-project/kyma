@@ -20,7 +20,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		updateCacheEntryFunction := func(id string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnauthorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", &http.Request{}, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: 500}
 
 		// when
@@ -55,7 +55,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: 401}
 
 		// when
@@ -90,7 +90,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
 		// when
@@ -106,7 +106,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		updateCacheEntryFunction := func(id string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnauthorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", &http.Request{}, nil, 10, updateCacheEntryFunction)
 		rr.retried = true
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
@@ -123,7 +123,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		updateCacheEntryFunction := func(id string) (*CacheEntry, apperrors.AppError) {
 			return nil, nil
 		}
-		rr := newUnauthorizedResponseRetrier("", &http.Request{}, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("", &http.Request{}, nil, 10, updateCacheEntryFunction)
 		rr.retried = true
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
@@ -159,7 +159,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -194,7 +194,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusForbidden}
 
 		// when
@@ -214,7 +214,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -243,7 +243,7 @@ func TestForbiddenResponseRetrier_CheckResponse(t *testing.T) {
 		req, err := http.NewRequest(http.MethodGet, "/orders/123", nil)
 		require.NoError(t, err)
 
-		rr := newUnauthorizedResponseRetrier("id1", req, 10, updateCacheEntryFunction)
+		rr := newUnauthorizedResponseRetrier("id1", req, nil, 10, updateCacheEntryFunction)
 		response := &http.Response{StatusCode: http.StatusUnauthorized}
 
 		// when
@@ -259,7 +259,7 @@ func newUpdateCacheEntryFunction(t *testing.T, url string, strategy authorizatio
 	return func(id string) (*CacheEntry, apperrors.AppError) {
 		assert.Equal(t, "id1", id)
 
-		proxy, err := makeProxy(url, "id1", true)
+		proxy, err := makeProxy(url, nil, nil, "id1", true)
 		require.NoError(t, err)
 
 		return &CacheEntry{

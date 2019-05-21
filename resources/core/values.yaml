@@ -2,16 +2,6 @@ dex:
   tls:
     createSecret: false
 
-minio:
-  service:
-    type: NodePort
-  accessKey: "admin"
-  secretKey: "topSecretKey"
-  resources:
-    limits:
-      memory: 128Mi
-      cpu: 250m
-
 console:
   cluster:
     headerLogoUrl: "assets/logo.svg"
@@ -34,10 +24,13 @@ global:
     secretName: etcd-backup-abs-credentials
   acceptance_tests:
     dir: develop/
-    version: ff50edcf
+    version: "cb16ab4c"
+  ui_acceptance_tests:
+    dir:
+    version: "d1e8904d"
   api_controller:
     dir: develop/
-    version: "0bcf18a4"
+    version: "1323f962"
   api_controller_acceptance_tests:
     dir: develop/
     version: 736988df
@@ -49,8 +42,6 @@ global:
     dir: develop/
     version: aabedc33
   docs:
-    dir: develop/
-    version: 98a43f0c
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
     # Example: clusterDocsTopicsVersion: "0.9.0"
@@ -60,22 +51,22 @@ global:
     version: 8a10f0ed
   kubeless_integration_tests:
     dir: develop/tests/
-    version: 50d9482b
+    version: 3c2c6431
   kubeless_tests:
     dir: develop/
     version: a9bfa9fc
   test_apiserver_proxy:
     dir: develop/
-    version: "eb39c791"
+    version: 5c4376db
   test_namespace_controller:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
     dir: develop/
-    version: '9ecc0bcc'
+    version: 48aaeb72
   console_backend_service_test:
     dir: develop/
-    version: '9ecc0bcc'
+    version: 48aaeb72
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

@@ -69,8 +69,8 @@ func NewServiceClassService(informer cache.SharedIndexInformer) (*serviceClassSe
 	return newServiceClassService(informer)
 }
 
-func NewServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, contentRetriever shared.ContentRetriever, cmsRetriever shared.CmsRetriever) *serviceClassResolver {
-	return newServiceClassResolver(classLister, planLister, instanceLister, contentRetriever, cmsRetriever)
+func NewServiceClassResolver(classLister serviceClassListGetter, planLister servicePlanLister, instanceLister instanceListerByServiceClass, cmsRetriever shared.CmsRetriever) *serviceClassResolver {
+	return newServiceClassResolver(classLister, planLister, instanceLister, cmsRetriever)
 }
 
 func (r *serviceClassResolver) SetClassConverter(converter gqlServiceClassConverter) {
@@ -87,8 +87,8 @@ func NewClusterServiceClassService(informer cache.SharedIndexInformer) (*cluster
 	return newClusterServiceClassService(informer)
 }
 
-func NewClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, contentRetriever shared.ContentRetriever, cmsRetriever shared.CmsRetriever) *clusterServiceClassResolver {
-	return newClusterServiceClassResolver(classLister, planLister, instanceLister, contentRetriever, cmsRetriever)
+func NewClusterServiceClassResolver(classLister clusterServiceClassListGetter, planLister clusterServicePlanLister, instanceLister instanceListerByClusterServiceClass, cmsRetriever shared.CmsRetriever) *clusterServiceClassResolver {
+	return newClusterServiceClassResolver(classLister, planLister, instanceLister, cmsRetriever)
 }
 
 func (r *clusterServiceClassResolver) SetClassConverter(converter gqlClusterServiceClassConverter) {
@@ -151,5 +151,5 @@ func NewServiceBindingService(client v1beta1.ServicecatalogV1beta1Interface, inf
 // Service Catalog Module
 
 func (r *PluggableContainer) SetFakeClient() {
-	r.cfg.client = fake.NewSimpleClientset()
+	r.cfg.scCli = fake.NewSimpleClientset()
 }

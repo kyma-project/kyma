@@ -16,7 +16,6 @@ import (
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/assetstore"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/authentication"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/cms"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/content"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/kubeless"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/servicecatalog"
@@ -32,7 +31,6 @@ type RootResolver struct {
 	sc             *servicecatalog.PluggableContainer
 	sca            *servicecatalogaddons.PluggableContainer
 	app            *application.PluggableContainer
-	content        *content.PluggableContainer
 	assetstore     *assetstore.PluggableContainer
 	cms            *cms.PluggableContainer
 	kubeless       *kubeless.PluggableResolver
@@ -40,17 +38,11 @@ type RootResolver struct {
 	authentication *authentication.PluggableResolver
 }
 
-func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
+func New(restConfig *rest.Config, appCfg application.Config, assetstoreCfg assetstore.Config, informerResyncPeriod time.Duration, featureToggles experimental.FeatureToggles) (*RootResolver, error) {
 	uiContainer, err := ui.New(restConfig, informerResyncPeriod)
 	makePluggable := module.MakePluggableFunc(uiContainer.BackendModuleInformer)
 
-	contentContainer, err := content.New(contentCfg)
-	if err != nil {
-		return nil, errors.Wrap(err, "while initializing Content resolver")
-	}
-	makePluggable(contentContainer)
-
-	assetStoreContainer, err := assetstore.New(restConfig, informerResyncPeriod)
+	assetStoreContainer, err := assetstore.New(restConfig, assetstoreCfg, informerResyncPeriod)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing AssetStore resolver")
 	}
@@ -62,7 +54,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 	makePluggable(cmsContainer)
 
-	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, contentContainer.ContentRetriever, cmsContainer.CmsRetriever)
+	scContainer, err := servicecatalog.New(restConfig, informerResyncPeriod, cmsContainer.CmsRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing ServiceCatalog container")
 	}
@@ -74,7 +66,7 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 	}
 	makePluggable(scaContainer)
 
-	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, contentContainer.ContentRetriever, assetStoreContainer.AssetStoreRetriever)
+	appContainer, err := application.New(restConfig, appCfg, informerResyncPeriod, assetStoreContainer.AssetStoreRetriever)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing Application resolver")
 	}
@@ -109,7 +101,6 @@ func New(restConfig *rest.Config, contentCfg content.Config, appCfg application.
 		sc:             scContainer,
 		sca:            scaContainer,
 		app:            appContainer,
-		content:        contentContainer,
 		assetstore:     assetStoreContainer,
 		cms:            cmsContainer,
 		ac:             acResolver,
@@ -128,7 +119,6 @@ func (r *RootResolver) WaitForCacheSync(stopCh <-chan struct{}) {
 	r.sc.StopCacheSyncOnClose(stopCh)
 	r.sca.StopCacheSyncOnClose(stopCh)
 	r.app.StopCacheSyncOnClose(stopCh)
-	r.content.StopCacheSyncOnClose(stopCh)
 	r.cms.StopCacheSyncOnClose(stopCh)
 	r.assetstore.StopCacheSyncOnClose(stopCh)
 	r.ac.StopCacheSyncOnClose(stopCh)
@@ -302,6 +292,26 @@ func (r *mutationResolver) DeleteApplication(ctx context.Context, name string) (
 	return r.app.Resolver.DeleteApplication(ctx, name)
 }
 
+func (r *mutationResolver) CreateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.CreateAddonsConfiguration(ctx, name, urls, labels)
+}
+
+func (r *mutationResolver) UpdateAddonsConfiguration(ctx context.Context, name string, urls []string, labels *gqlschema.Labels) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.UpdateAddonsConfiguration(ctx, name, urls, labels)
+}
+
+func (r *mutationResolver) DeleteAddonsConfiguration(ctx context.Context, name string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.DeleteAddonsConfiguration(ctx, name)
+}
+
+func (r *mutationResolver) AddAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddAddonsConfigurationURLs(ctx, name, urls)
+}
+
+func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, urls)
+}
+
 // Queries
 
 type queryResolver struct {
@@ -408,6 +418,10 @@ func (r *queryResolver) UsageKinds(ctx context.Context, first *int, offset *int)
 	return r.sca.Resolver.ListUsageKinds(ctx, first, offset)
 }
 
+func (r *queryResolver) AddonsConfigurations(ctx context.Context, first *int, offset *int) ([]gqlschema.AddonsConfiguration, error) {
+	return r.sca.Resolver.AddonsConfigurationsQuery(ctx, first, offset)
+}
+
 func (r *queryResolver) BindableResources(ctx context.Context, namespace string) ([]gqlschema.BindableResourcesOutputItem, error) {
 	return r.sca.Resolver.ListBindableResources(ctx, namespace)
 }
@@ -422,14 +436,6 @@ func (r *queryResolver) ServiceBindingUsage(ctx context.Context, name, namespace
 
 func (r *queryResolver) ClusterDocsTopics(ctx context.Context, viewContext *string, groupName *string) ([]gqlschema.ClusterDocsTopic, error) {
 	return r.cms.Resolver.ClusterDocsTopicsQuery(ctx, viewContext, groupName)
-}
-
-func (r *queryResolver) Content(ctx context.Context, contentType, id string) (*gqlschema.JSON, error) {
-	return r.content.Resolver.ContentQuery(ctx, contentType, id)
-}
-
-func (r *queryResolver) Topics(ctx context.Context, input []gqlschema.InputTopic, internal *bool) ([]gqlschema.TopicEntry, error) {
-	return r.content.Resolver.TopicsQuery(ctx, input, internal)
 }
 
 func (r *queryResolver) Application(ctx context.Context, name string) (*gqlschema.Application, error) {
@@ -470,6 +476,18 @@ func (r *queryResolver) Secret(ctx context.Context, name, namespace string) (*gq
 
 func (r *queryResolver) Secrets(ctx context.Context, namespace string, first *int, offset *int) ([]gqlschema.Secret, error) {
 	return r.k8s.SecretsQuery(ctx, namespace, first, offset)
+}
+
+func (r *queryResolver) MicroFrontends(ctx context.Context, namespace string) ([]gqlschema.MicroFrontend, error) {
+	return r.ui.MicroFrontendsQuery(ctx, namespace)
+}
+
+func (r *queryResolver) ClusterMicroFrontends(ctx context.Context) ([]gqlschema.ClusterMicroFrontend, error) {
+	return r.ui.ClusterMicroFrontendsQuery(ctx)
+}
+
+func (r *queryResolver) SelfSubjectRules(ctx context.Context, namespace *string) ([]gqlschema.ResourceRule, error) {
+	return r.k8s.SelfSubjectRulesQuery(ctx, namespace)
 }
 
 // Subscriptions
@@ -532,6 +550,10 @@ func (r *subscriptionResolver) ConfigMapEvent(ctx context.Context, namespace str
 
 func (r *subscriptionResolver) SecretEvent(ctx context.Context, namespace string) (<-chan gqlschema.SecretEvent, error) {
 	return r.k8s.SecretEventSubscription(ctx, namespace)
+}
+
+func (r *subscriptionResolver) AddonsConfigurationEvent(ctx context.Context) (<-chan gqlschema.AddonsConfigurationEvent, error) {
+	return r.sca.Resolver.AddonsConfigurationEventSubscription(ctx)
 }
 
 // Service Instance
@@ -641,26 +663,6 @@ func (r *serviceClassResolver) Plans(ctx context.Context, obj *gqlschema.Service
 	return r.sc.Resolver.ServiceClassPlansField(ctx, obj)
 }
 
-func (r *serviceClassResolver) APISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.Resolver.ServiceClassApiSpecField(ctx, obj)
-}
-
-func (r *serviceClassResolver) OpenAPISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.Resolver.ServiceClassOpenApiSpecField(ctx, obj)
-}
-
-func (r *serviceClassResolver) OdataSpec(ctx context.Context, obj *gqlschema.ServiceClass) (*string, error) {
-	return r.sc.Resolver.ServiceClassODataSpecField(ctx, obj)
-}
-
-func (r *serviceClassResolver) AsyncAPISpec(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.Resolver.ServiceClassAsyncApiSpecField(ctx, obj)
-}
-
-func (r *serviceClassResolver) Content(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.Resolver.ServiceClassContentField(ctx, obj)
-}
-
 func (r *serviceClassResolver) ClusterDocsTopic(ctx context.Context, obj *gqlschema.ServiceClass) (*gqlschema.ClusterDocsTopic, error) {
 	return r.sc.Resolver.ServiceClassClusterDocsTopicField(ctx, obj)
 }
@@ -685,26 +687,6 @@ func (r *clusterServiceClassResolver) Activated(ctx context.Context, obj *gqlsch
 
 func (r *clusterServiceClassResolver) Plans(ctx context.Context, obj *gqlschema.ClusterServiceClass) ([]gqlschema.ClusterServicePlan, error) {
 	return r.sc.Resolver.ClusterServiceClassPlansField(ctx, obj)
-}
-
-func (r *clusterServiceClassResolver) APISpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.Resolver.ClusterServiceClassApiSpecField(ctx, obj)
-}
-
-func (r *clusterServiceClassResolver) OpenAPISpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.Resolver.ClusterServiceClassOpenApiSpecField(ctx, obj)
-}
-
-func (r *clusterServiceClassResolver) OdataSpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*string, error) {
-	return r.sc.Resolver.ClusterServiceClassODataSpecField(ctx, obj)
-}
-
-func (r *clusterServiceClassResolver) AsyncAPISpec(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.Resolver.ClusterServiceClassAsyncApiSpecField(ctx, obj)
-}
-
-func (r *clusterServiceClassResolver) Content(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.JSON, error) {
-	return r.sc.Resolver.ClusterServiceClassContentField(ctx, obj)
 }
 
 func (r *clusterServiceClassResolver) ClusterDocsTopic(ctx context.Context, obj *gqlschema.ClusterServiceClass) (*gqlschema.ClusterDocsTopic, error) {

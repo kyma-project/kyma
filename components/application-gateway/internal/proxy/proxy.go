@@ -1,8 +1,11 @@
 package proxy
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
+	"io"
+	"io/ioutil"
 	"net/http"
 	"time"
 
@@ -72,7 +75,10 @@ func (p *proxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.addModifyResponseHandler(newRequest, id, cacheEntry)
+	if err := p.addModifyResponseHandler(newRequest, id, cacheEntry); err != nil {
+		handleErrors(w, err)
+		return
+	}
 
 	p.executeRequest(w, newRequest, cacheEntry)
 }
@@ -86,9 +92,9 @@ func (p *proxy) getOrCreateCacheEntry(id string) (*CacheEntry, apperrors.AppErro
 
 	if found {
 		return cacheObj, nil
-	} else {
-		return p.createCacheEntry(id)
 	}
+
+	return p.createCacheEntry(id)
 }
 
 func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
@@ -97,7 +103,7 @@ func (p *proxy) createCacheEntry(id string) (*CacheEntry, apperrors.AppError) {
 		return nil, err
 	}
 
-	proxy, err := makeProxy(serviceApi.TargetUrl, id, p.skipVerify)
+	proxy, err := makeProxy(serviceApi.TargetUrl, serviceApi.Headers, serviceApi.QueryParameters, id, p.skipVerify)
 	if err != nil {
 		return nil, err
 	}
@@ -138,17 +144,57 @@ func (p *proxy) addAuthorization(r *http.Request, cacheEntry *CacheEntry) apperr
 	return cacheEntry.CSRFTokenStrategy.AddCSRFToken(r)
 }
 
-func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) {
-	cacheEntry.Proxy.ModifyResponse = p.createModifyResponseFunction(id, r)
+func (p *proxy) addModifyResponseHandler(r *http.Request, id string, cacheEntry *CacheEntry) apperrors.AppError {
+	modifyResponseFunction, err := p.createModifyResponseFunction(id, r)
+	if err != nil {
+		return err
+	}
+
+	cacheEntry.Proxy.ModifyResponse = modifyResponseFunction
+	return nil
 }
 
-func (p *proxy) createModifyResponseFunction(id string, r *http.Request) func(*http.Response) error {
+func (p *proxy) createModifyResponseFunction(id string, r *http.Request) (func(*http.Response) error, apperrors.AppError) {
 	// Handle the case when credentials has been changed or OAuth token has expired
-	return func(response *http.Response) error {
-		retrier := newUnauthorizedResponseRetrier(id, r, p.proxyTimeout, p.createCacheEntry)
+	secondRequestBody, err := copyRequestBody(r)
+	if err != nil {
+		return nil, err
+	}
 
+	modifyResponseFunction := func(response *http.Response) error {
+		retrier := newUnauthorizedResponseRetrier(id, r, secondRequestBody, p.proxyTimeout, p.createCacheEntry)
 		return retrier.RetryIfFailedToAuthorize(response)
 	}
+
+	return modifyResponseFunction, nil
+}
+
+func copyRequestBody(r *http.Request) (io.ReadCloser, apperrors.AppError) {
+	if r.Body == nil {
+		return nil, nil
+	}
+
+	bodyCopy, secondRequestBody, err := drainBody(r.Body)
+	if err != nil {
+		return nil, apperrors.Internal("failed to drain request body, %s", err)
+	}
+	r.Body = bodyCopy
+
+	return secondRequestBody, nil
+}
+
+func drainBody(b io.ReadCloser) (r1, r2 io.ReadCloser, err error) {
+	if b == http.NoBody {
+		return http.NoBody, http.NoBody, nil
+	}
+	var buf bytes.Buffer
+	if _, err = buf.ReadFrom(b); err != nil {
+		return nil, b, err
+	}
+	if err = b.Close(); err != nil {
+		return nil, b, err
+	}
+	return ioutil.NopCloser(&buf), ioutil.NopCloser(bytes.NewReader(buf.Bytes())), nil
 }
 
 func (p *proxy) executeRequest(w http.ResponseWriter, r *http.Request, cacheEntry *CacheEntry) {

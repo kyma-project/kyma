@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: helm-repos-urls
+  name: {{ .Values.global.cfgReposUrlName }}
   namespace: {{ .Release.Namespace }}
   labels:
     app: {{ template "fullname" . }}
     chart: "{{ .Chart.Name }}-{{ .Chart.Version }}"
     helm-broker-repo: "true"
 data:
-  URLs: "https://github.com/kyma-project/bundles/releases/download/0.3.1/"
+  URLs: "https://github.com/kyma-project/bundles/releases/download/0.6.0/"

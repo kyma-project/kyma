@@ -13,15 +13,9 @@ Use the following environment variables to configure the application:
 | APP_VERBOSE | No | No | Show detailed logs in the application. |
 | APP_KUBECONFIG_PATH | No |  | The path to the `kubeconfig` file, needed for running an application outside of the cluster. |
 | APP_INFORMER_RESYNC_PERIOD | No | `10m` | The period of time after which the system resynchronizes the informers. |
-| APP_CONTENT_ADDRESS | No | `minio.kyma.local` | The address of the content storage server. |
-| APP_CONTENT_PORT | No | `443` | The port on which the content storage server listens. |
-| APP_CONTENT_ACCESS_KEY | Yes |  | The access key required to sign in to the content storage server. |
-| APP_CONTENT_SECRET_KEY | Yes |  | The secret key required to sign in to the content storage server. |
-| APP_CONTENT_BUCKET | No | `content` | The name of the bucket with the content. |
-| APP_CONTENT_SECURE | No | `true` | Use HTTPS for the connection with the content storage server. |
-| APP_CONTENT_EXTERNAL_ADDRESS | No |  | The external address of the content storage server. If not set, the system uses the `APP_CONTENT_ADDRESS` variable. |
-| APP_CONTENT_ASSETS_FOLDER | No | `assets` | The name of the `assets` folder. |
-| APP_CONTENT_VERIFY_SSL | No | `true` | Ignore invalid SSL certificates. |
+| APP_ASSET_STORE_ADDRESS | No | `minio.kyma.local` | The address of the content storage server. |
+| APP_ASSET_STORE_SECURE | No | `true` | Use HTTPS for the connection with the content storage server. |
+| APP_ASSET_STORE_VERIFY_SSL | No | `true` | Ignore invalid SSL certificates. |
 | APP_APPLICATION_GATEWAY_STATUS_REFRESH_PERIOD | No | `15s` | The period of time after which the application refreshes the Application statuses. |
 | APP_APPLICATION_GATEWAY_STATUS_CALL_TIMEOUT | No | `500ms` | The timeout of the HTTP call status check. |
 | APP_APPLICATION_GATEWAY_INTEGRATION_NAMESPACE | Yes |  | The namespace with gateway services. |

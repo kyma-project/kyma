@@ -13,6 +13,7 @@ spec:
     metadata:
       annotations:
         sidecar.istio.io/inject: "false"
+        recreate: {{ .Release.Time.Seconds | quote }}
       labels:
         app: {{ template "name" . }}
         release: {{ .Release.Name }}
@@ -54,10 +55,7 @@ spec:
                   name: assetstore-minio
                   key: accesskey
             - name: APP_UPLOAD_EXTERNAL_ENDPOINT
-              valueFrom:
-                configMapKeyRef:
-                  name: assetstore-minio-docs-upload
-                  key: APP_EXTERNAL_ENDPOINT
+              value: {{ if .Values.global.minioExternalEndpoint }}{{ .Values.global.minioExternalEndpoint }}{{ else }}'https://minio.{{ .Values.global.ingress.domainName }}'{{ end }}
             - name: APP_UPLOAD_SECRET_KEY
               valueFrom:
                 secretKeyRef:

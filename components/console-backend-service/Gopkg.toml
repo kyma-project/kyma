@@ -38,7 +38,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kubernetes-incubator/service-catalog"
-  version = "=v0.1.36"
+  version = "v0.1.36"
 
 [[constraint]]
   name = "github.com/stretchr/testify"
@@ -47,14 +47,6 @@ required = [
 [[constraint]]
   name = "github.com/rs/cors"
   version = "1.3.0"
-
-[[constraint]]
-  name = "github.com/allegro/bigcache"
-  version = "1.1.0"
-
-[[constraint]]
-  name = "github.com/minio/minio-go"
-  version = "4.0.8"
 
 [[constraint]]
   name = "github.com/99designs/gqlgen"
@@ -70,7 +62,7 @@ required = [
 
 [[constraint]]
   name = "github.com/kyma-project/kyma"
-  revision = "1c4c7390617114ea7b28bcfe5664691e4a6d2384"
+  revision = "48aaeb726182c971b1c557276159142e3d73f551"
 
 [[override]]
   name = "k8s.io/api"
@@ -82,10 +74,6 @@ required = [
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.12.3"
-
-[[override]]
-  name = "k8s.io/client-go"
   version = "kubernetes-1.12.3"
 
 [[constraint]]

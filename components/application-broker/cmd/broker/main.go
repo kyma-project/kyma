@@ -43,22 +43,47 @@ func main() {
 
 	log := logger.New(&cfg.Logger)
 
+	// setup graceful shutdown signals
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+
+	stopCh := make(chan struct{})
+	cancelOnInterrupt(ctx, stopCh, cancelFunc)
+
+	k8sConfig, err := restclient.InClusterConfig()
+	fatalOnError(err)
+
+	appClient, err := appCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	mClient, err := mappingCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	scClientSet, err := scCs.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
+	fatalOnError(err)
+
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient)
+
+	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
+}
+
+// SetupServerAndRunControllers setups the application - create and start informers, create all services and HTTP server.
+func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh chan struct{},
+	k8sClient kubernetes.Interface,
+	scClientSet scCs.Interface,
+	appClient appCli.Interface,
+	mClient mappingCli.Interface,
+) *broker.Server {
+
 	// create storage factory
 	storageConfig := storage.ConfigList(cfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	fatalOnError(err)
 
-	k8sConfig, err := restclient.InClusterConfig()
-	fatalOnError(err)
-
 	// k8s
-	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
-	fatalOnError(err)
 	nsInformer := v1.NewNamespaceInformer(k8sClient, informerResyncPeriod, cache.Indexers{})
 
 	// ServiceCatalog
-	scClientSet, err := scCs.NewForConfig(k8sConfig)
-	fatalOnError(err)
 
 	scInformerFactory := catalogInformers.NewSharedInformerFactory(scClientSet, informerResyncPeriod)
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
@@ -73,14 +98,10 @@ func main() {
 	log.Info("Instance storage populated")
 
 	// Applications
-	appClient, err := appCli.NewForConfig(k8sConfig)
-	fatalOnError(err)
 	appInformerFactory := appInformer.NewSharedInformerFactory(appClient, informerResyncPeriod)
 	appInformersGroup := appInformerFactory.Applicationconnector().V1alpha1()
 
 	// Mapping
-	mClient, err := mappingCli.NewForConfig(k8sConfig)
-	fatalOnError(err)
 	mInformerFactory := mappingInformer.NewSharedInformerFactory(mClient, informerResyncPeriod)
 	mInformersGroup := mInformerFactory.Applicationconnector().V1alpha1()
 
@@ -96,20 +117,13 @@ func main() {
 	brokerService, err := broker.NewNsBrokerService()
 	fatalOnError(err)
 
-	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), brokerService, nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, int32(cfg.Port), log)
+	nsBrokerFacade := nsbroker.NewFacade(scClientSet.ServicecatalogV1beta1(), k8sClient.CoreV1(), nsBrokerSyncer, cfg.Namespace, cfg.UniqueSelectorLabelKey, cfg.UniqueSelectorLabelValue, cfg.ServiceName, int32(cfg.Port), log)
 
 	mappingCtrl := mapping.New(mInformersGroup.ApplicationMappings().Informer(), nsInformer, k8sClient.CoreV1().Namespaces(), sFact.Application(), nsBrokerFacade, nsBrokerSyncer, log)
 
 	// create broker
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(), siFacade, mInformersGroup.ApplicationMappings().Lister(), brokerService, log)
-
-	// setup graceful shutdown signals
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
-
-	stopCh := make(chan struct{})
-	cancelOnInterrupt(ctx, stopCh, cancelFunc)
 
 	// start informers
 	scInformerFactory.Start(stopCh)
@@ -123,12 +137,19 @@ func main() {
 	mInformerFactory.WaitForCacheSync(stopCh)
 	cache.WaitForCacheSync(stopCh, nsInformer.HasSynced)
 
+	// migration old ServiceBrokers & Services setup
+	migrationService, err := nsbroker.NewMigrationService(k8sClient.CoreV1(), scClientSet.ServicecatalogV1beta1(), cfg.Namespace, cfg.ServiceName, log)
+	fatalOnError(err)
+	// The migration is done synchronously to prevent HTTP 404 when ServiceCatalog is doing a call via a legacy service.
+	// In such case the broker returns 404 which could mean the service instance does not exists - it could make a problem.
+	migrationService.Migrate()
+
 	// start services & ctrl
 	go appSyncCtrl.Run(stopCh)
 	go mappingCtrl.Run(stopCh)
 	go relistRequester.Run(stopCh)
 
-	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
+	return srv
 }
 
 func fatalOnError(err error) {

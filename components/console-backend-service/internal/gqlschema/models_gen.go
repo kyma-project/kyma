@@ -16,6 +16,17 @@ type API struct {
 	AuthenticationPolicies []AuthenticationPolicy `json:"authenticationPolicies"`
 }
 
+type AddonsConfiguration struct {
+	Name   string   `json:"name"`
+	Urls   []string `json:"urls"`
+	Labels Labels   `json:"labels"`
+}
+
+type AddonsConfigurationEvent struct {
+	Type                SubscriptionEventType `json:"type"`
+	AddonsConfiguration AddonsConfiguration   `json:"addonsConfiguration"`
+}
+
 type ApiService struct {
 	Name string `json:"name"`
 	Port int    `json:"port"`
@@ -87,6 +98,15 @@ type ClusterAssetEvent struct {
 type ClusterDocsTopicEvent struct {
 	Type             SubscriptionEventType `json:"type"`
 	ClusterDocsTopic ClusterDocsTopic      `json:"clusterDocsTopic"`
+}
+
+type ClusterMicroFrontend struct {
+	Name            string           `json:"name"`
+	Version         string           `json:"version"`
+	Category        string           `json:"category"`
+	ViewBaseURL     string           `json:"viewBaseUrl"`
+	Placement       string           `json:"placement"`
+	NavigationNodes []NavigationNode `json:"navigationNodes"`
 }
 
 type ClusterServiceBroker struct {
@@ -280,6 +300,25 @@ type LocalObjectReferenceInput struct {
 	Name string `json:"name"`
 }
 
+type MicroFrontend struct {
+	Name            string           `json:"name"`
+	Version         string           `json:"version"`
+	Category        string           `json:"category"`
+	ViewBaseURL     string           `json:"viewBaseUrl"`
+	NavigationNodes []NavigationNode `json:"navigationNodes"`
+}
+
+type NavigationNode struct {
+	Label               string               `json:"label"`
+	NavigationPath      string               `json:"navigationPath"`
+	ViewURL             string               `json:"viewUrl"`
+	ShowInNavigation    bool                 `json:"showInNavigation"`
+	Order               int                  `json:"order"`
+	Settings            Settings             `json:"settings"`
+	ExternalLink        *string              `json:"externalLink"`
+	RequiredPermissions []RequiredPermission `json:"requiredPermissions"`
+}
+
 type Pod struct {
 	Name              string           `json:"name"`
 	NodeName          string           `json:"nodeName"`
@@ -307,6 +346,12 @@ type ReplicaSet struct {
 	JSON              JSON      `json:"json"`
 }
 
+type RequiredPermission struct {
+	Verbs    []string `json:"verbs"`
+	APIGroup string   `json:"apiGroup"`
+	Resource string   `json:"resource"`
+}
+
 type ResourceAttributes struct {
 	Verb            string  `json:"verb"`
 	APIGroup        *string `json:"apiGroup"`
@@ -329,6 +374,12 @@ type ResourceQuota struct {
 type ResourceQuotasStatus struct {
 	Exceeded       bool            `json:"exceeded"`
 	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
+}
+
+type ResourceRule struct {
+	Verbs     []string `json:"verbs"`
+	APIGroups []string `json:"apiGroups"`
+	Resources []string `json:"resources"`
 }
 
 type ResourceType struct {

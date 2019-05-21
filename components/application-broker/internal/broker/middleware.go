@@ -3,43 +3,31 @@ package broker
 import (
 	"net/http"
 
+	"github.com/gorilla/mux"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
-	"github.com/sirupsen/logrus"
 )
 
-// OSBContextMiddleware implements Handler interface
+// OSBContextMiddleware implements Handler interface, creates an osbContext instance from HTTP data and stores in the request context.
 type OSBContextMiddleware struct {
-	brokerService brokerService
-	log           logrus.FieldLogger
-}
-
-//go:generate mockery -name=brokerService -output=automock -outpkg=automock -case=underscore
-type brokerService interface {
-	GetNsFromBrokerURL(url string) (string, error)
-}
-
-// NewOsbContextMiddleware created OsbContext middleware
-func NewOsbContextMiddleware(brokerService brokerService, log logrus.FieldLogger) *OSBContextMiddleware {
-	return &OSBContextMiddleware{
-		brokerService: brokerService,
-		log:           log.WithField("service", "OSBContextMiddleware"),
-	}
 }
 
 // ServeHTTP adds content of Open Service Broker Api headers to the requests
 func (m *OSBContextMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-	brokerNamespace, err := m.brokerService.GetNsFromBrokerURL(r.Host)
-	if err != nil {
-		errMsg := "misconfiguration, broker is running as a namespace-scoped, but cannot extract namespace from request"
-		m.log.Error(errMsg, err)
-		writeErrorResponse(rw, http.StatusInternalServerError, "OSBContextMiddlewareError", errMsg)
-		return
-	}
+	brokerNamespace := mux.Vars(r)["namespace"]
 
 	osbCtx := osbContext{
 		APIVersion:          r.Header.Get(osb.APIVersionHeader),
 		OriginatingIdentity: r.Header.Get(osb.OriginatingIdentityHeader),
 		BrokerNamespace:     brokerNamespace,
+	}
+
+	if err := osbCtx.validateAPIVersion(); err != nil {
+		writeErrorResponse(rw, http.StatusPreconditionFailed, err.Error(), "Requests requires the 'X-Broker-API-Version' header specified")
+		return
+	}
+	if err := osbCtx.validateOriginatingIdentity(); err != nil {
+		writeErrorResponse(rw, http.StatusPreconditionFailed, err.Error(), "Requests requires the 'X-Broker-API-Originating-Identity' header specified")
+		return
 	}
 
 	r = r.WithContext(contextWithOSB(r.Context(), osbCtx))

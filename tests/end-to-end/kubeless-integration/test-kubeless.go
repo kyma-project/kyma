@@ -35,11 +35,11 @@ func deleteK8s(yamlFile string) {
 }
 
 func printContentsOfNamespace(namespace string) {
-	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation")
+	getResourcesCmd := exec.Command("kubectl", "-n", namespace, "get", "deployments,services,replicasets,pods,serviceinstances,servicebindings,servicebindingusages,functions,subscriptions.eventing.kyma-project.io,apis.gateway.kyma-project.io,eventactivations.applicationconnector.kyma-project.io")
 	stdoutStderr, err := getResourcesCmd.CombinedOutput()
 	output := string(stdoutStderr)
 	if err != nil {
-		log.Fatal("Unable to get all,serviceinstance,servicebinding,servicebindingusage,function,subscription,api,eventactivation:\n", output)
+		log.Fatal("Unable to get deployments,services,replicasets,pods,serviceinstances,servicebindings,servicebindingusages,functions,subscriptions.eventing.kyma-project.io,apis.gateway.kyma-project.io,eventactivations.applicationconnector.kyma-project.io:\n", output)
 	}
 	log.Printf("Current contents of the ns:%s is:\n %v", namespace, output)
 }
@@ -285,13 +285,7 @@ func deleteFun(namespace, name string) {
 		log.Fatal("Unable to delete function ", name, ":\n", output)
 	}
 
-	cmd = exec.Command("kubectl", "-n", namespace, "delete", "pod", "-l", "function="+name, "--grace-period=0", "--force")
-	stdoutStderr, err = cmd.CombinedOutput()
-	if err != nil && !strings.Contains(string(stdoutStderr), "No resources found") && !strings.Contains(string(stdoutStderr), "warning: Immediate deletion does not wait for confirmation that the running resource has been terminated") {
-		log.Fatal("Unable to delete function pod:\n", string(stdoutStderr))
-	}
-
-	timeout := time.After(2 * time.Minute)
+	timeout := time.After(6 * time.Minute)
 	tick := time.Tick(1 * time.Second)
 	for {
 		select {
@@ -384,10 +378,10 @@ func randomString(n int) string {
 }
 
 func publishEvent(testID string) {
-	cmd := exec.Command("curl", "-s", "http://event-bus-publish:8080/v1/events", "-H", "Content-Type: application/json", "-d", `{"source-id": "dummy", "event-type": "test", "event-type-version": "v1", "event-time": "0001-01-01T00:00:00+00:00", "data": "`+testID+`"}`)
+	cmd := exec.Command("curl", "-s", "http://event-bus-publish.kyma-system:8080/v1/events", "-H", "Content-Type: application/json", "-d", `{"source-id": "dummy", "event-type": "test", "event-type-version": "v1", "event-time": "0001-01-01T00:00:00+00:00", "data": "`+testID+`"}`)
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Fatal("Unable to publish event:\n", string(stdoutStderr))
+		log.Fatalf("Unable to publish event(error: %s): %s\n", err, string(stdoutStderr))
 	}
 }
 
@@ -492,29 +486,27 @@ func ensureServceBindingIsReady(namespace, svcBinding string) {
 func cleanup() {
 	log.Println("Cleaning up")
 	var wg sync.WaitGroup
-	wg.Add(5)
+	wg.Add(4)
 	go func() {
+		defer wg.Done()
 		deleteK8s("k8syaml/k8s.yaml")
-		defer wg.Done()
 	}()
 	go func() {
+		defer wg.Done()
 		deleteFun("kubeless-test", "test-hello")
-		defer wg.Done()
 	}()
 	go func() {
+		defer wg.Done()
 		deleteFun("kubeless-test", "test-event")
-		defer wg.Done()
 	}()
 	go func() {
+		defer wg.Done()
+		deleteK8s("svc-binding.yaml")
 		deleteK8s("k8syaml/svcbind-lambda.yaml")
 		deleteK8s("svc-instance.yaml")
-		defer wg.Done()
-	}()
-	go func() {
-		deleteNamespace("kubeless-test")
-		defer wg.Done()
 	}()
 	wg.Wait()
+	deleteNamespace("kubeless-test")
 }
 
 var testDataRegex = regexp.MustCompile(`(?m)^OK ([a-z0-9]{8})$`)
@@ -534,16 +526,17 @@ func main() {
 	wg.Add(3)
 
 	go func() {
+		defer wg.Done()
 		log.Println("Deploying test-hello function")
 		deployFun("kubeless-test", "test-hello", "nodejs6", "hello.js", "hello.handler")
 		log.Println("Verifying correct function output for test-hello")
 		host := fmt.Sprintf("https://test-hello.%s", os.Getenv("DOMAIN_NAME"))
 		ensureOutputIsCorrect(host, "hello world", testID, "kubeless-test", "test-hello")
 		log.Println("Function test-hello works correctly")
-		defer wg.Done()
 	}()
 
 	go func() {
+		defer wg.Done()
 		log.Println("Deploying test-event function")
 		deployFun("kubeless-test", "test-event", "nodejs6", "event.js", "event.handler")
 		time.Sleep(2 * time.Minute) // Sometimes subsctiptions take long time. So lambda might not get the events
@@ -552,10 +545,10 @@ func main() {
 		log.Println("Verifying correct event processing for test-event")
 		ensureCorrectLog("kubeless-test", "test-event", testDataRegex, testID, false)
 		log.Println("Function test-event works correctly")
-		defer wg.Done()
 	}()
 
 	go func() {
+		defer wg.Done()
 		log.Println("Deploying svc-instance")
 		deployK8s("svc-instance.yaml")
 		ensureSvcInstanceIsDeployed("kubeless-test", "redis")
@@ -571,7 +564,6 @@ func main() {
 		log.Println("Verifying service connection for test-svcbind")
 		ensureCorrectLog("kubeless-test", "test-svcbind", testDataRegex, testID, true)
 		log.Println("Function test-svcbind works correctly")
-		defer wg.Done()
 	}()
 
 	wg.Wait()

@@ -35,6 +35,32 @@ function require_mtls_enabled() {
     fi
 }
 
+function configure_policy_checks(){
+  echo "--> Enable policy checks if not enabled"
+  local istioConfigmap="$(kubectl -n istio-system get cm istio -o jsonpath='{@.data.mesh}')"
+  local policyChecksDisabled=$(grep "disablePolicyChecks: true" <<< "$istioConfigmap")
+  if [[ -n ${policyChecksDisabled} ]]; then
+    istioConfigmap=$(sed 's/disablePolicyChecks: true/disablePolicyChecks: false/' <<< "$istioConfigmap")
+
+    # Escape commented escaped newlines
+    istioConfigmap=$(sed 's/\\n/\\\\n/g' <<< "$istioConfigmap")
+
+    # Escape new lines and double quotes for kubectl
+    istioConfigmap=$(sed -e ':a' -e 'N' -e '$!ba' -e 's/\n/\\n/g' <<< "$istioConfigmap")
+    istioConfigmap=$(sed 's/"/\\"/g' <<< "$istioConfigmap")
+
+    set +e
+    local out
+    out=$(kubectl patch -n istio-system configmap istio --type merge -p '{"data": {"mesh":"'"$istioConfigmap"'"}}')
+    local result=$?
+    set -e
+    echo "$out"
+    if [[ ${result} -ne 0 ]] && [[ ! "$out" = *"not patched"* ]]; then
+      exit ${result}
+    fi
+  fi
+}
+
 function run_all_patches() {
   echo "--> Patch resources"
   for f in $(find ${CONFIG_DIR} -name '*\.patch\.json' -maxdepth 1); do
@@ -57,12 +83,13 @@ function run_all_patches() {
 function remove_not_used() {
   echo "--> Delete resources"
   while read line; do
+    if [[ "$line" == "" ]]; then
+        continue
+    fi
     echo "    Delete $line"
     local type=$(cut -d' ' -f1 <<< ${line})
     local name=$(cut -d' ' -f2 <<< ${line})
-    set +e
-    kubectl delete ${type} ${name} -n istio-system
-    set -e
+    kubectl delete ${type} ${name} -n istio-system --ignore-not-found=true
   done <${CONFIG_DIR}/delete
 }
 
@@ -136,6 +163,7 @@ require_istio_system
 require_istio_version
 require_mtls_enabled
 check_requirements
+configure_policy_checks
 configure_sidecar_injector
 restart_sidecar_injector
 run_all_patches

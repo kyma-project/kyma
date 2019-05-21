@@ -7,14 +7,14 @@ metadata:
 spec:
   displayName: Brokers
   version: v1
-  category: Service Catalog
+  category: Configuration
   placement: namespace
   viewBaseUrl: 'https://brokers.{{ js .Values.global.ingress.domainName }}'
   navigationNodes:
     - label: Brokers
       navigationPath: brokers
       viewUrl: ''
-      order: 3
+      order: -2
 ---
 apiVersion: "ui.kyma-project.io/v1alpha1"
 kind: ClusterMicroFrontend
@@ -33,3 +33,9 @@ spec:
       navigationPath: service-brokers
       viewUrl: '/home/settings/serviceBrokers'
       order: 2
+      requiredPermissions:
+        - apiGroup: servicecatalog.k8s.io
+          resource: clusterservicebrokers
+          verbs:
+            - list
+            - watch

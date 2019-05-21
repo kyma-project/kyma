@@ -17,6 +17,14 @@ spec:
       order: 1
       settings:
         readOnly: {{ not .Values.connector_service.enabled }}
+      requiredPermissions:
+        - apiGroup: applicationconnector.kyma-project.io
+          resource: applications
+          verbs:
+            - create
+            - list
+            - update
+            - delete
     - label: Application Details
       navigationPath: apps/details
       viewUrl: '/home/settings/apps'

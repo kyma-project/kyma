@@ -15,6 +15,7 @@ const (
 	defaultMaxRequests          = 100
 	defaultMaxRequestSize       = 65536
 	defaultMaxChannelNameLength = 33
+	defaultMonitoringPort		= 9090
 
 	// option names
 	port                      = "port"
@@ -29,6 +30,7 @@ const (
 	maxSourceIDLength         = "max_source_id_length"
 	maxEventTypeLength        = "max_event_type_length"
 	maxEventTypeVersionLength = "max_event_type_version_length"
+	monitoringPort            = "monitoring_port"
 )
 
 type Options struct {
@@ -38,6 +40,7 @@ type Options struct {
 	MaxChannelNameLength int
 	TraceOptions         *trace.Options
 	EventOptions         *publish.EventOptions
+	MonitoringPort		 int
 }
 
 func ParseFlags() *Options {
@@ -58,6 +61,8 @@ func ParseFlags() *Options {
 	flag.IntVar(&opts.EventOptions.MaxSourceIDLength, maxSourceIDLength, publish.DefaultMaxSourceIDLength, "The maximum source id length")
 	flag.IntVar(&opts.EventOptions.MaxEventTypeLength, maxEventTypeLength, publish.DefaultMaxEventTypeLength, "The maximum event type length")
 	flag.IntVar(&opts.EventOptions.MaxEventTypeVersionLength, maxEventTypeVersionLength, publish.DefaultMaxEventTypeVersionLength, "The maximum event type version length")
+	// monitoring flags
+	flag.IntVar(&opts.MonitoringPort, monitoringPort, defaultMonitoringPort, "The port used to expose prometheus metrics")
 
 	flag.Parse()
 	return opts
@@ -89,5 +94,6 @@ func (options *Options) Print() {
 	log.Printf(" %s %v", maxSourceIDLength, options.EventOptions.MaxSourceIDLength)
 	log.Printf(" %s %v", maxEventTypeLength, options.EventOptions.MaxEventTypeLength)
 	log.Printf(" %s %v", maxEventTypeVersionLength, options.EventOptions.MaxEventTypeVersionLength)
+	log.Printf(" %s %v", monitoringPort, options.MonitoringPort)
 	log.Println(strings.Repeat("-", 50))
 }

@@ -28,7 +28,7 @@ Run end-to-end upgrade tests for the Kyma [upgrade plan](https://github.com/kyma
 Use the following environment variables to configure the application:
 
 | Name | Required | Default | Description |
-|-----|:---------:|:--------:|------------|
+|-----|:---------:|--------|------------|
 | **APP_LOGGER_LEVEL** | NO | `info` | A parameter that sets the logging level in an application. The possible values are `debug`, `info`, `warn`, `warning`, `error`, `fatal`, and `panic`. |
 | **APP_KUBECONFIG_PATH** | NO | - | A path to the `kubeconfig` file needed to run an application outside of the cluster. |
 | **APP_MAX_CONCURRENCY_LEVEL** | NO | `1` | A maximum concurrency level used for running tests. |
@@ -105,12 +105,12 @@ Run the application using Helm:
 
 1. Prepare the upgrade data:
     ```bash
-    helm install --name e2e-test-upgrade --namespace {namespace} ./chart/upgrade/ --wait
+    helm install --name e2e-test-upgrade --namespace {namespace} ./chart/upgrade/ --wait --tls
     ```
 
 2. Run tests:
     ```bash
-    helm test e2e-test-upgrade
+    helm test e2e-test-upgrade --tls
     ```
 
 ### Run tests using Telepresence

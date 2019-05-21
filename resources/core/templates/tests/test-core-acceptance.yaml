@@ -1,48 +1,58 @@
-apiVersion: v1
-kind: Pod
+{{- if .Capabilities.APIVersions.Has "testing.kyma-project.io/v1alpha1" }}
+apiVersion: "testing.kyma-project.io/v1alpha1"
+kind: TestDefinition
 metadata:
   name: test-{{ template "fullname" . }}-acceptance
-  annotations:
-    sidecar.istio.io/inject: "false"
-    "helm.sh/hook": test-success
-  labels:
-    "helm-chart-test": "true"
 spec:
-  serviceAccountName:  test-{{ template "fullname" . }}-acceptance
-  containers:
-    - name: test-{{ template "fullname" . }}-acceptance
-      image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
-      env:
-      - name: HELM_BROKER_URL
-        value: http://helm-broker.kyma-system.svc.cluster.local
-      - name: RELEASE_NAMESPACE
-        value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
-      - name: KYMA_DOMAIN
-        value: {{ .Values.global.ingress.domainName }}
-      - name: IS_LOCAL_ENV
-        value: {{ .Values.global.isLocalEnv | toString | quote }}
-      - name: DEX_USER_EMAIL
-        valueFrom:
-          secretKeyRef:
-            name: admin-user
-            key: email
-      - name: DEX_USER_PASSWORD
-        valueFrom:
-          secretKeyRef:
-            name: admin-user
-            key: password
-      - name: INGRESSGATEWAY_FQDN
-        value: istio-ingressgateway.istio-system.svc.cluster.local
-      - name: STUBS_DOCKER_IMAGE
-        value: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
-      - name: APPLICATION_UNLINKING_TIMEOUT
-        value: {{ .Values.test.acceptance.core.application.unlinkingTimeout | quote }}
-      - name: APPLICATION_LINKING_TIMEOUT
-        value: {{ .Values.test.acceptance.core.application.linkingTimeout | quote }}
-      - name: APPLICATION_KEEP_RESOURCES
-        value: "false"
-      - name: APPLICATION_DISABLED
-        value: {{ .Values.test.acceptance.core.application.disabled | quote }}
-      - name: TEAR_DOWN_TIMEOUT_PER_STEP
-        value: {{ .Values.test.acceptance.core.application.tearDownTimeoutPerStep | quote }}
-  restartPolicy: Never
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+    spec:
+      shareProcessNamespace: true
+      serviceAccountName:  test-{{ template "fullname" . }}-acceptance
+      containers:
+      - name: test-{{ template "fullname" . }}-acceptance
+        image: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
+        env:
+        - name: HELM_BROKER_URL
+          value: http://helm-broker.kyma-system.svc.cluster.local
+        - name: APPLICATION_BROKER_URL
+          value: http://application-broker.kyma-integration.svc.cluster.local
+        - name: RELEASE_NAMESPACE
+          value: {{ .Values.test.acceptance.core.application.brokerNamespace }}
+        - name: DOMAIN_NAME
+          value: {{ .Values.global.ingress.domainName }}
+        - name: IS_LOCAL_ENV
+          value: {{ .Values.global.isLocalEnv | toString | quote }}
+        - name: DEX_USER_EMAIL
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: email
+        - name: DEX_USER_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: admin-user
+              key: password
+        - name: INGRESSGATEWAY_ADDRESS
+          value: istio-ingressgateway.istio-system.svc.cluster.local
+        - name: STUBS_DOCKER_IMAGE
+          value: {{ .Values.global.containerRegistry.path }}/{{ .Values.global.acceptance_tests.dir }}acceptance-tests:{{ .Values.global.acceptance_tests.version }}
+        - name: APPLICATION_UNLINKING_TIMEOUT
+          value: {{ .Values.test.acceptance.core.application.unlinkingTimeout | quote }}
+        - name: APPLICATION_LINKING_TIMEOUT
+          value: {{ .Values.test.acceptance.core.application.linkingTimeout | quote }}
+        - name: APPLICATION_KEEP_RESOURCES
+          value: "false"
+        - name: APPLICATION_DISABLED
+          value: {{ .Values.test.acceptance.core.application.disabled | quote }}
+        - name: TEAR_DOWN_TIMEOUT_PER_STEP
+          value: {{ .Values.test.acceptance.core.application.tearDownTimeoutPerStep | quote }}
+        command:
+        - "/bin/sh"
+        args:
+        - "-c"
+        - "echo 'TESTING start'; sleep 10; ./entrypoint.sh; exit_code=$?; echo code is $exit_code; echo 'killing pilot-agent...'; pkill -INT pilot-agent; sleep 4; exit $exit_code;"
+    restartPolicy: Never
+{{- end }}
