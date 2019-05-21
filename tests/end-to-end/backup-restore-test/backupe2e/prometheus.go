@@ -26,7 +26,6 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -273,9 +272,7 @@ func (pt *prometheusTest) TestResources(namespace string) {
 			if s != "" {
 				pt.finalResult = s
 			}
-
 		}
-
 	}
 
 	So(strings.TrimSpace(pt.finalResult), ShouldEqual, strings.TrimSpace(pt.expectedResult))
@@ -345,6 +342,7 @@ func (pt *prometheusTest) deleteServices(namespace, serviceName, labelSelector s
 
 	serviceList, err := pt.coreClient.CoreV1().Services(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
+		pt.log.Errorf("Error while listing SVC for Prometheus: %v", err)
 		return err
 	}
 
@@ -354,6 +352,7 @@ func (pt *prometheusTest) deleteServices(namespace, serviceName, labelSelector s
 				PropagationPolicy: &deletePolicy,
 			})
 			if err != nil {
+				pt.log.Errorf("Error while deleting SVC for Prometheus: %v", err)
 				return err
 			}
 		}
@@ -369,12 +368,6 @@ func (pt *prometheusTest) savePrometheusResource(namespace, name string) error {
 		return err
 	}
 	backedupPrometheus = backedupPrometheusLocal
-	byteArr, err := json.Marshal(backedupPrometheus)
-	if err != nil {
-		return err
-	}
-	pt.log.Infoln("------------- Prometheus obj after saving -------------------")
-	pt.log.Infof("%v", string(byteArr))
 	return nil
 }
 
@@ -399,23 +392,20 @@ func (pt *prometheusTest) createPrometheusFromSavedResource() error {
 		CreationTimestamp: backedupPrometheus.CreationTimestamp,
 	}
 
-	byteArr, err := json.Marshal(backedupPrometheus)
-	if err != nil {
-		return err
-	}
-
-	pt.log.Infoln("------------- Prometheus obj while creation -------------------")
-	pt.log.Infof("%v", string(byteArr))
 	for {
 		_, err := pt.prometheusClient.MonitoringV1().Prometheuses(backedupPrometheus.Namespace).Get(backedupPrometheus.Name, metav1.GetOptions{})
 		if err != nil && strings.Contains(err.Error(), "not found") {
-			log.Printf("err: %s", err.Error())
 			break
 		}
 	}
+	_, err := pt.prometheusClient.MonitoringV1().Prometheuses(backedupPrometheus.ObjectMeta.Namespace).Create(backedupPrometheus)
 
-	_, err = pt.prometheusClient.MonitoringV1().Prometheuses(backedupPrometheus.ObjectMeta.Namespace).Create(backedupPrometheus)
-	return err
+	if err != nil {
+		pt.log.Errorf("Error while creating Prometheus CR created from saved resource: %v", err)
+		return err
+	}
+	pt.log.Infoln("Prometheus CR created from saved resource!")
+	return nil
 }
 
 func (pt *prometheusTest) deletePrometheus(namespace, name string) error {
@@ -425,6 +415,7 @@ func (pt *prometheusTest) deletePrometheus(namespace, name string) error {
 		PropagationPolicy: &deletePolicy,
 	})
 	if err != nil {
+		pt.log.Errorf("Error while deleting Prometheus CR: %v", err)
 		return err
 	}
 
@@ -440,15 +431,17 @@ func (pt *prometheusTest) deleteStatefulset(namespace, statefulsetName string) e
 		PropagationPolicy: &deletePolicy,
 	})
 	if err != nil {
+		pt.log.Errorf("Error while deleting monitoring sts: %v", err)
 		return err
 	}
-	pt.log.Info("Deletion of sts: Prometheus is successful!")
+	pt.log.Info("Deletion of sts: monitoring is successful!")
 	return nil
 }
 
 func (pt *prometheusTest) deletePod(namespace, podName, labelSelector string) error {
 	podList, err := pt.coreClient.CoreV1().Pods(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
+		pt.log.Errorf("Error while listing prometheus pods: %v", err)
 		return err
 	}
 
@@ -457,6 +450,7 @@ func (pt *prometheusTest) deletePod(namespace, podName, labelSelector string) er
 			// Delete Pod
 			err = pt.coreClient.CoreV1().Pods(namespace).Delete(podName, &metav1.DeleteOptions{})
 			if err != nil {
+				pt.log.Errorf("Error while deleting prometheus pods: %v", err)
 				return err
 			}
 		}
@@ -469,6 +463,7 @@ func (pt *prometheusTest) deletePod(namespace, podName, labelSelector string) er
 func (pt *prometheusTest) deletePVC(namespace, pvcName, labelSelector string) error {
 	pvcList, err := pt.coreClient.CoreV1().PersistentVolumeClaims(namespace).List(metav1.ListOptions{LabelSelector: labelSelector})
 	if err != nil {
+		pt.log.Errorf("Error while listing PVC for prometheus: %v", err)
 		return err
 	}
 
@@ -476,6 +471,7 @@ func (pt *prometheusTest) deletePVC(namespace, pvcName, labelSelector string) er
 		if pvc.Name == pvcName {
 			err = pt.coreClient.CoreV1().PersistentVolumeClaims(namespace).Delete(pvcName, &metav1.DeleteOptions{})
 			if err != nil {
+				pt.log.Errorf("Error while deleting PVC for prometheus: %v", err)
 				return err
 			}
 			pt.log.Infof("Deletion of pvc: %v is successful!", pvcName)
