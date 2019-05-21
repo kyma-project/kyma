@@ -143,7 +143,7 @@ This is an example of the `api` section of the request body for an API secured w
 
 You can specify additional headers and query parameters that will be injected during authentication requests.
 
-This is an example of the `api` section of the request body for an API secured with Basic Authentication enriched with header `custom-header` with value `foo`, and query parameter `param` with value `bar`.
+This is an example of the **api** section of the request body for an API secured with Basic Authentication. It is enriched with the **custom-header** header with the `foo` value, and the **param** query parameter with the `bar` value.
 
 ```
     "api": {
