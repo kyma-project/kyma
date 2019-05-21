@@ -1,4 +1,4 @@
-package proxy
+package validationproxy
 
 import (
 	"net/http"

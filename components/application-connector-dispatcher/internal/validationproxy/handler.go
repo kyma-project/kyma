@@ -1,8 +1,7 @@
-package proxy
+package validationproxy
 
 import (
 	"crypto/x509/pkix"
-	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"regexp"
@@ -10,14 +9,13 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/application-connector-proxy/internal/httptools"
+	"github.com/kyma-project/kyma/components/application-connector-dispatcher/internal/httptools"
 
-	"github.com/kyma-project/kyma/components/application-connector-proxy/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connector-dispatcher/internal/apperrors"
 
 	"github.com/gorilla/mux"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	k8serrors "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -35,16 +33,18 @@ type ApplicationManager interface {
 }
 
 type proxyHandler struct {
-	applicationClient      ApplicationManager
+	group                  string
+	tenant                 string
 	eventServicePathPrefix string
 	eventServiceHost       string
 	appRegistryPathPrefix  string
 	appRegistryHost        string
 }
 
-func NewProxyHandler(applicationClient ApplicationManager, eventServicePathPrefix, eventServiceHost, appRegistryPathPrefix, appRegistryHost string) *proxyHandler {
+func NewProxyHandler(group, tenant, eventServicePathPrefix, eventServiceHost, appRegistryPathPrefix, appRegistryHost string) *proxyHandler {
 	return &proxyHandler{
-		applicationClient:      applicationClient,
+		group:                  group,
+		tenant:                 tenant,
 		eventServicePathPrefix: eventServicePathPrefix,
 		eventServiceHost:       eventServiceHost,
 		appRegistryPathPrefix:  appRegistryPathPrefix,
@@ -63,21 +63,13 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 
 	log.Infof("Proxying request for %s application. Path: %s", applicationName, r.URL.Path)
 
-	application, err := ph.getApplication(applicationName)
-	if err != nil {
-		httptools.RespondWithError(w, err)
-		return
-	}
-
 	subjects := extractSubjects(certInfoData)
-	if !hasValidSubject(subjects, application.Name, application.Spec.Group, application.Spec.Tenant) {
+	if !hasValidSubject(subjects, applicationName, ph.group, ph.tenant) {
 		httptools.RespondWithError(w, apperrors.Forbidden("No valid subject found"))
 		return
 	}
 
-	path := strings.TrimPrefix(r.URL.Path, fmt.Sprintf("/%s", applicationName))
-
-	host, err := ph.determineHost(path)
+	host, err := ph.determineHost(r.URL.Path)
 	if err != nil {
 		httptools.RespondWithError(w, err)
 		return
@@ -95,19 +87,6 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 	}
 
 	reverseProxy.ServeHTTP(w, r)
-}
-
-func (ph *proxyHandler) getApplication(appName string) (*v1alpha1.Application, apperrors.AppError) {
-	application, err := ph.applicationClient.Get(appName, v1.GetOptions{})
-	if err != nil {
-		if k8serrors.IsNotFound(err) {
-			return nil, apperrors.NotFound("Application %s not found", appName)
-		}
-
-		return nil, apperrors.Internal("Failed to get %s Application: %s", appName, err.Error())
-	}
-
-	return application, nil
 }
 
 func (ph *proxyHandler) determineHost(path string) (string, apperrors.AppError) {
