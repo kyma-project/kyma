@@ -1,0 +1,27 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: {{ .Release.Name }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  hosts:
+    - gateway.{{ .Values.global.domainName }} # TODO - do we want gateway on 443 port?
+  gateways:
+    - {{ .Values.istio.gateway.name }}.{{ .Values.istio.gateway.namespace }}.svc.cluster.local
+  http:
+    - match:
+        - port: 9443
+          uri:
+            prefix: /{{ .Release.Name }}/v1/metadata
+        - port: 9443
+          uri:
+            prefix: /{{ .Release.Name }}/v1/events
+      route:
+        - destination:
+            port:
+              number: {{ .Values.validationProxy.args.proxyPort }}
+            host: {{ .Release.Name }}-validation-proxy

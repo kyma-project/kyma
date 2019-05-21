@@ -22,6 +22,11 @@ validationProxy:
     proxyPort: 8081
     appRegistryHost: application-registry-external-api:8080
 
+# TODO - can it be here? should we do the config map?
+istio:
+  gateway:
+    name: kyma-gateway
+    namespace: kyma-system
 
 acceptanceTest:
   image:
