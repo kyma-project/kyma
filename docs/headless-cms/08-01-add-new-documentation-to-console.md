@@ -30,7 +30,7 @@ spec:
   displayName: "Concepts" # The name of the topic that shows in the Documentation view under the main Prometheus section.
   description: "Some docs about Prometheus concepts"
   sources:
-    - type: markdown # This type indicates that the Asset Metadata Service must extract front matter metadata from the source Prometheus documents and add them to a ClusterDocsTopic as a status.
+    - type: markdown # This type indicates that the Asset Metadata Service must extract Front Matter metadata from the source Prometheus documents and add them to a ClusterDocsTopic as a status.
       name: docs
       mode: package # This mode indicates that the source file is compressed and the Asset Controller must unpack it first to process it.
       url: https://github.com/prometheus/docs/archive/master.zip # The source location of Prometheus documents.
