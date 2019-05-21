@@ -1,8 +1,6 @@
 package application
 
 import (
-	"fmt"
-
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/kymahelm"
 	"github.com/pkg/errors"
@@ -106,10 +104,10 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 
 func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
 	overridesData := r.overridesDefaults
+	// TODO - should we do it if has both group and tenant or if at least one is present - adjust with validation proxy
 	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
-		overridesData.IngressValidationRule = fmt.Sprintf(fullValidationRegexFormat, application.Spec.Group, application.Spec.Tenant, application.Name)
-	} else {
-		overridesData.IngressValidationRule = fmt.Sprintf(applicationValidationRegexFormat, application.Name)
+		overridesData.Tenant = application.Spec.Tenant
+		overridesData.Group = application.Spec.Group
 	}
 
 	return kymahelm.ParseOverrides(overridesData, overridesTemplate)

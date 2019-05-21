@@ -1,0 +1,59 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-validation-proxy
+  labels:
+    app: {{ .Release.Name }}-validation-proxy
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/inject: "true"
+      labels:
+        app: {{ .Release.Name }}-validation-proxy
+        release: {{ .Release.Name }}-validation-proxy
+    spec:
+      serviceAccountName: {{.Release.Name }}-validation-proxy
+      containers:
+        - name: {{ .Release.Name }}-validation-proxy
+          image: {{ .Values.global.appConnectorValidationProxy }}
+          imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
+          args:
+            - "/appconnectorvalidationproxy"
+            - "--proxyPort={{ .Values.validationProxy.args.proxyPort }}"
+            - "--tenant={{ .Values.global.tenant }}"
+            - "--group={{ .Values.global.group }}"
+            - "--eventServicePathPrefix=/{{ .Release.Name }}/v1/events"
+            - "--eventServiceHost={{ .Release.Name }}-event-service-external-api:{{ .Values.eventService.service.externalapi }}"
+            - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
+            - "--appRegistryHost={{ .Values.validationProxy.args.appRegistryHost }}"
+# TODO - consider adding health endpoint and redinnes / livenes probes
+          ports:
+            - containerPort: {{ .Values.validationProxy.args.proxyPort }}
+              name: http-proxy
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-validation-proxy
+  labels:
+    application: {{ .Release.Name }}
+    app: {{ .Release.Name }}-validation-proxy
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.validationProxy.args.proxyPort }}
+      protocol: TCP
+      name: http-proxy
+  selector:
+    app: {{ .Release.Name }}-validation-proxy
+    release: {{ .Release.Name }}-validation-proxy

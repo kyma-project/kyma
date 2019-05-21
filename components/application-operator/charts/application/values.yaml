@@ -14,10 +14,14 @@ service:
   externalapi:
     port: *externalAPIPort
 
-ingress:
-  enabled: true
-  authSecret: kyma-integration/nginx-auth-ca
-  tlsSecret: application-connector-ingress-tls-cert
+
+validationProxy:
+  image:
+    pullPolicy: IfNotPresent
+  args:
+    proxyPort: 8081
+    appRegistryHost: application-registry-external-api:8080
+
 
 acceptanceTest:
   image:
