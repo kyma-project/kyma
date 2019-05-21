@@ -81,7 +81,7 @@ istio-ingressgateway:
     name: tls
   - port: 9443
     targetPort: 9443
-    name: app-connector-port
+    name: https-app-connector
   #### MESH EXPANSION PORTS  ########
   # Pilot and Citadel MTLS ports are enabled in gateway - but will only redirect
   # to pilot/citadel if global.meshExpansion settings are enabled.
