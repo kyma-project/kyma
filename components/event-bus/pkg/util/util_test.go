@@ -6,7 +6,7 @@ import (
 	"github.com/kyma-project/kyma/components/event-bus/pkg/util"
 )
 
-func Test_GetChannelName(t *testing.T) {
+func TestGetChannelName(t *testing.T) {
 	// define the test-case struct
 	type TestCase struct {
 		name                string
