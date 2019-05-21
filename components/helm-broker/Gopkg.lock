@@ -364,6 +364,12 @@
   version = "v1.1.5"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/komkom/go-jsonhash"
+  packages = ["."]
+  revision = "a6a43ccde81e32de31ce3c12f12f510568a96c94"
+
+[[projects]]
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
   revision = "5c8c8bd35d3832f5d134ae1e1e375b69a4d25242"
@@ -968,6 +974,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7d98b94c33beacd47358257504e3b41f3a52aa7a6bb3ddaaa5ff7b6906960784"
+  inputs-digest = "4928e27311a1ca31b669aa840eb5aa7e45f7082fd070aefd71f35433c850459e"
   solver-name = "gps-cdcl"
   solver-version = 1

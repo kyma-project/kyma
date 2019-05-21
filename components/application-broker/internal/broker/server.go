@@ -26,7 +26,7 @@ type (
 	}
 
 	provisioner interface {
-		Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, error)
+		Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError)
 	}
 
 	deprovisioner interface {
@@ -115,9 +115,6 @@ func (srv *Server) run(ctx context.Context, addr string, listenAndServe func(srv
 func (srv *Server) createHandler() http.Handler {
 	var rtr = mux.NewRouter()
 
-	// TODO: middleware: validate osbCtx.APIVersion that matches 2.12
-	// TODO: middleware: add support for osbCtx.OriginatingIdentity
-
 	rtr.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprint(w, "OK")
@@ -186,6 +183,12 @@ func (srv *Server) provisionAction(w http.ResponseWriter, r *http.Request) {
 
 	if err := httpBodyToDTO(r, &inDTO); err != nil {
 		srv.writeErrorResponse(w, http.StatusBadRequest, err.Error(), "")
+		return
+	}
+
+	if err := inDTO.Validate(); err != nil {
+		srv.writeErrorResponse(w, http.StatusBadRequest, err.Error(), "")
+		return
 	}
 
 	instanceID := mux.Vars(r)["instance_id"]
@@ -204,13 +207,16 @@ func (srv *Server) provisionAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	sResp, err := srv.provisioner.Provision(r.Context(), osbCtx, &sReq)
-
-	switch {
-	case IsForbiddenError(err):
-		srv.writeErrorResponse(w, http.StatusForbidden, err.Error(), "")
-		return
-	case err != nil:
-		srv.writeErrorResponse(w, http.StatusBadRequest, err.Error(), "")
+	if err != nil {
+		var errMsg string
+		var errDesc string
+		if err.ErrorMessage != nil {
+			errMsg = *err.ErrorMessage
+		}
+		if err.Description != nil {
+			errDesc = *err.Description
+		}
+		srv.writeErrorResponse(w, err.StatusCode, errMsg, errDesc)
 		return
 	}
 
@@ -361,11 +367,13 @@ func (srv *Server) bindAction(w http.ResponseWriter, r *http.Request) {
 	err := httpBodyToDTO(r, &params)
 	if err != nil {
 		srv.writeErrorResponse(w, http.StatusBadRequest, err.Error(), "cannot get bind parameters from request body")
+		return
 	}
 
 	err = params.Validate()
 	if err != nil {
 		srv.writeErrorResponse(w, http.StatusBadRequest, err.Error(), "")
+		return
 	}
 
 	q := r.URL.Query()
@@ -449,12 +457,6 @@ func writeErrorResponse(w http.ResponseWriter, code int, errorMsg, desc string) 
 		dto.Desc = desc
 	}
 	writeResponse(w, code, &dto)
-}
-
-type osbContext struct {
-	APIVersion          string
-	OriginatingIdentity string
-	BrokerNamespace     string
 }
 
 func httpBodyToDTO(r *http.Request, object interface{}) error {
