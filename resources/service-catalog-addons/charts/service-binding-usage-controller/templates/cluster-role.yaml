@@ -19,7 +19,7 @@ rules:
   verbs: ["get","list","watch", "update"]
 - apiGroups: ["servicecatalog.kyma-project.io"]
   resources: ["servicebindingusages", "usagekinds"]
-  verbs: ["get", "list", "watch", "update"]
+  verbs: ["get", "list", "watch", "create", "update", "delete"]
 - apiGroups: ["servicecatalog.k8s.io"]
   resources: ["servicebindings","serviceinstances","clusterserviceclasses","serviceclasses"]
   verbs:     ["get","list","watch"]

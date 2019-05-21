@@ -96,7 +96,7 @@ kubectl label installation/kyma-installation action=install
 
 Overrides for sub-charts follow the same convention as top-level charts. However, overrides require additional information about sub-chart location.
 
-When a sub-chart contains the `values.yaml` file, the information about the chart location is not necessary because the chart and it's `values.yaml` file are on the same level in the directory hierarchy.
+When a sub-chart contains the `values.yaml` file, the information about the chart location is not necessary because the chart and its `values.yaml` file are on the same level in the directory hierarchy.
 
 The situation is different when the Installer installs a chart with sub-charts.
 All template values for a sub-chart must be prefixed with a sub-chart "path" that is relative to the top-level "parent" chart.

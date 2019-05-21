@@ -11,15 +11,29 @@ kubectl get crd applicationmappings.applicationconnector.kyma-project.io -o yaml
 
 ## Sample custom resource
 
-This is a sample ApplicationMapping resource which enables the `test` Application in the `production` Namespace:
+This is a sample ApplicationMapping resource which enables the `test` Application in the `production` Namespace. In this example, all services provided by the Application are enabled:
 
-```
+```yaml
 apiVersion: applicationconnector.kyma-project.io/v1alpha1
 kind: ApplicationMapping
 metadata:
   name: test
   namespace: production
 ```
+
+Using ApplicationMapping, you can also enable only the selected services in a given Namespace. See the example:
+```yaml
+apiVersion: applicationconnector.kyma-project.io/v1alpha1
+kind: ApplicationMapping
+metadata:
+  name: test
+  namespace: production
+spec:
+  services:
+    - id: ac031e8c-9aa4-4cb7-8999-0d358726ffaa
+    - id: bef3143c-d1a5-674c-8dc9-ab4788896fba
+```
+The `services` list contains IDs of enabled services. If the list is specified, only the selected services are enabled. If the list is empty, all services of the Application are enabled.
 
 ## Custom resource parameters
 
