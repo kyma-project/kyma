@@ -13,7 +13,6 @@ func Test_EncodeChannelName(t *testing.T) {
 		sourceID            string
 		eventType           string
 		eventTypeVersion    string
-		expected            string
 		expectedChannelName string
 	}
 
@@ -24,7 +23,6 @@ func Test_EncodeChannelName(t *testing.T) {
 			sourceID:            "ec-default",
 			eventType:           "order.created",
 			eventTypeVersion:    "v1",
-			expected:            "ec-ddefault--order-pcreated--v1",
 			expectedChannelName: "kf5wxkg4bobejchlt6ekbpuwiixddqenw",
 		},
 	}
