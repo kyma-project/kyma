@@ -34,17 +34,21 @@ type ErrorResponse struct {
 }
 
 type API struct {
-	TargetUrl        string          `json:"targetUrl"`
-	Credentials      *Credentials    `json:"credentials,omitempty"`
-	Spec             json.RawMessage `json:"spec,omitempty"`
-	SpecificationUrl string          `json:"specificationUrl,omitempty"`
-	ApiType          string          `json:"apiType"`
+	TargetUrl        string               `json:"targetUrl"`
+	Credentials      *Credentials         `json:"credentials,omitempty"`
+	Spec             json.RawMessage      `json:"spec,omitempty"`
+	SpecificationUrl string               `json:"specificationUrl,omitempty"`
+	ApiType          string               `json:"apiType"`
+	Headers          *map[string][]string `json:"headers,omitempty"`
+	QueryParameters  *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type Credentials struct {
-	Oauth          *Oauth          `json:"oauth,omitempty"`
-	Basic          *Basic          `json:"basic,omitempty"`
-	CertificateGen *CertificateGen `json:"certificateGen,omitempty"`
+	Oauth           *Oauth               `json:"oauth,omitempty"`
+	Basic           *Basic               `json:"basic,omitempty"`
+	CertificateGen  *CertificateGen      `json:"certificateGen,omitempty"`
+	Headers         *map[string][]string `json:"headers,omitempty"`
+	QueryParameters *map[string][]string `json:"queryParameters,omitempty"`
 }
 
 type Oauth struct {
@@ -103,6 +107,18 @@ func (api *API) WithOAuth(url, clientID, clientSecret string) *API {
 		ClientSecret: clientSecret,
 		URL:          url,
 	}
+
+	return api
+}
+
+func (api *API) WithCustomHeaders(headers *map[string][]string) *API {
+	api.Headers = headers
+
+	return api
+}
+
+func (api *API) WithCustomQueryParams(queryParams *map[string][]string) *API {
+	api.QueryParameters = queryParams
 
 	return api
 }
