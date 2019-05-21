@@ -4,7 +4,7 @@
 
 ## Introduction
 
-This chart bootstraps all [Istio](https://istio.io/docs/concepts/what-is-istio/) components deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
+This chart bootstraps all Istio [components](https://istio.io/docs/concepts/what-is-istio/) deployment on a [Kubernetes](http://kubernetes.io) cluster using the [Helm](https://helm.sh) package manager.
 
 ## Chart Details
 
@@ -107,13 +107,13 @@ The chart deploys Pods that consume minimum resources as specified in the resour
 
 1. Add `istio.io` chart repository and point to the release:
     ```
-    $ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.0/charts
+    $ helm repo add istio.io https://storage.googleapis.com/istio-release/releases/1.1.6/charts
     ```
 
 
 1. To install the chart with the release name `istio` in namespace $NAMESPACE you defined above:
 
-    - With [automatic sidecar injection](https://istio.io/docs/setup/kubernetes/additional-setup/sidecar-injection/#automatic-sidecar-injection) (requires Kubernetes >=1.9.0):
+    - With [automatic sidecar injection](https://istio.io/docs/setup/kubernetes/sidecar-injection/#automatic-sidecar-injection) (requires Kubernetes >=1.9.0):
     ```
     $ helm install istio --name istio --namespace $NAMESPACE
     ```
