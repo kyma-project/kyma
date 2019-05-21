@@ -11,7 +11,7 @@ By default, following changes are applied:
  * Sidecar injection is enabled in all Namespaces, except those labeled with `istio-injection: disabled`.
  * A DestinationRule CR disabling mTLS for requests to Helm Tiller.
 
-Changes moved into the istio chart:
-- Configuration of zipkin as a tracer, done by official istio values (`global.tracer.zipkin.address`)
-- HostPorts in ingress-gateway deployment, done by editing the istio chart (`istio/charts/gateways` `templates/deployment.yaml` and `values.yaml`)
+Changes moved into the Istio chart:
+- Configuration of Zipkin as a tracer, done by official Istio values (`global.tracer.zipkin.address`)
+- HostPorts in ingress-gateway deployment, done by editing the Istio chart (`istio/charts/gateways` `templates/deployment.yaml` and `values.yaml`)
 
