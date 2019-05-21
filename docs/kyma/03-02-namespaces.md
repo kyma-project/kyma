@@ -38,5 +38,3 @@ metadata:
     env: "true"
 EOF
 ```
-
-Initially, the system deploys two template roles: `kyma-reader-role` and `kyma-admin-role`. The controller finds the template roles by filtering the roles available in the `kyma-system` Namespace by the label `env: "true"`. The controller copies these roles into the newly created Namespace.
