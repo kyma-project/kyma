@@ -24,6 +24,8 @@ models:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Timestamp"
   Settings:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.Settings"
+  ApplicationMappingService:
+    model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.ApplicationMappingService"
   DocsTopic:
     model: "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema.DocsTopic"
     fields:

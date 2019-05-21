@@ -93,7 +93,7 @@ if [[ ${buildErrCheckResult} != 0 ]]; then
     exit 1
 fi
 
-errCheckResult=$(./errcheck-vendored -blank -asserts -ignoregenerated ./...)
+errCheckResult=$(./errcheck-vendored -blank -asserts -ignoregenerated -exclude automock ./...)
 rm errcheck-vendored
 
 if [[ $(echo ${#errCheckResult}) != 0 ]]; then

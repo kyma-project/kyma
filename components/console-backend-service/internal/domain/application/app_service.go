@@ -231,7 +231,8 @@ func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Ap
 }
 
 // Enable enables Application in given namespace by creating ApplicationMapping
-func (svc *applicationService) Enable(namespace, name string) (*mappingTypes.ApplicationMapping, error) {
+func (svc *applicationService) Enable(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error) {
+	mappingServices := svc.transformApplicationMappingService(services)
 	em, err := svc.mCli.ApplicationMappings(namespace).Create(&mappingTypes.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ApplicationMapping",
@@ -240,8 +241,43 @@ func (svc *applicationService) Enable(namespace, name string) (*mappingTypes.App
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
+		Spec: mappingTypes.ApplicationMappingSpec{
+			Services: mappingServices,
+		},
 	})
 	return em, err
+}
+
+// UpdateApplicationMapping updates ApplicationMapping based on its name and namespace
+func (svc *applicationService) UpdateApplicationMapping(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error) {
+	em, err := svc.mCli.ApplicationMappings(namespace).Get(name, metav1.GetOptions{})
+	if err != nil {
+		return nil, errors.Wrapf(err, "while fetching %s", pretty.ApplicationMapping)
+	}
+
+	emUpdate := em.DeepCopy()
+	emUpdate.Spec.Services = svc.transformApplicationMappingService(services)
+	emDone, err := svc.mCli.ApplicationMappings(namespace).Update(emUpdate)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while updating %s", pretty.ApplicationMapping)
+	}
+
+	return emDone, nil
+}
+
+func (svc *applicationService) transformApplicationMappingService(services []*gqlschema.ApplicationMappingService) []mappingTypes.ApplicationMappingService {
+	if services == nil {
+		return nil
+	}
+
+	ms := []mappingTypes.ApplicationMappingService{}
+	for _, service := range services {
+		var ams mappingTypes.ApplicationMappingService
+		ams.ID = service.ID
+		ms = append(ms, ams)
+	}
+
+	return ms
 }
 
 // Disable disables Application in given namespace by removing ApplicationMapping

@@ -6,6 +6,7 @@ import (
 	"testing"
 	"time"
 
+	mappingTypes "github.com/kyma-project/kyma/components/application-broker/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/automock"
@@ -296,6 +297,7 @@ func TestConnectorServiceQueryFail(t *testing.T) {
 	assert.True(t, gqlerror.IsInternal(err))
 	assert.Zero(t, gotURLObj)
 }
+
 func TestApplicationResolver_ApplicationEventSubscription(t *testing.T) {
 	t.Run("Success", func(t *testing.T) {
 		ctx, cancel := context.WithTimeout(context.Background(), (-24 * time.Hour))
@@ -327,6 +329,122 @@ func TestApplicationResolver_ApplicationEventSubscription(t *testing.T) {
 		require.NoError(t, err)
 		appSvc.AssertCalled(t, "Unsubscribe", mock.Anything)
 	})
+}
+
+func TestApplicationResolver_EnableApplicationMutation(t *testing.T) {
+	fixNamespace := "fix-namespace"
+	fixName := "fix-name"
+	trueVal := true
+	falseVal := false
+
+	for name, tc := range map[string]struct {
+		allServices *bool
+		services    []*gqlschema.ApplicationMappingService
+		amExpected  []mappingTypes.ApplicationMappingService
+		expected    []*gqlschema.ApplicationMappingService
+	}{
+		"nil Allservices, nil service list": {
+			allServices: nil,
+			services:    nil,
+			amExpected:  nil,
+			expected:    nil,
+		},
+		"true Allservices, nil service list": {
+			allServices: &trueVal,
+			services:    nil,
+			amExpected:  nil,
+			expected:    nil,
+		},
+		"false Allservices, nil service list": {
+			allServices: &falseVal,
+			services:    nil,
+			amExpected:  []mappingTypes.ApplicationMappingService{},
+			expected:    []*gqlschema.ApplicationMappingService{},
+		},
+		"nil Allservices, empty service list": {
+			allServices: nil,
+			services:    []*gqlschema.ApplicationMappingService{},
+			amExpected:  nil,
+			expected:    nil,
+		},
+		"true Allservices, empty service list": {
+			allServices: &trueVal,
+			services:    []*gqlschema.ApplicationMappingService{},
+			amExpected:  nil,
+			expected:    nil,
+		},
+		"false Allservices, empty service list": {
+			allServices: &falseVal,
+			services:    []*gqlschema.ApplicationMappingService{},
+			amExpected:  []mappingTypes.ApplicationMappingService{},
+			expected:    []*gqlschema.ApplicationMappingService{},
+		},
+		"nil Allservices, not empty service list": {
+			allServices: nil,
+			services: []*gqlschema.ApplicationMappingService{
+				{
+					ID: "30a09ece-ea06-42cd-ba6b-79f0c88675a0",
+				},
+			},
+			amExpected: nil,
+			expected:   nil,
+		},
+		"true Allservices, not empty service list": {
+			allServices: &trueVal,
+			services: []*gqlschema.ApplicationMappingService{
+				{
+					ID: "30a09ece-ea06-42cd-ba6b-79f0c88675a0",
+				},
+			},
+			amExpected: nil,
+			expected:   nil,
+		},
+		"false Allservices, not empty service list": {
+			allServices: &falseVal,
+			services: []*gqlschema.ApplicationMappingService{
+				{
+					ID: "30a09ece-ea06-42cd-ba6b-79f0c88675a0",
+				},
+			},
+			amExpected: []mappingTypes.ApplicationMappingService{
+				{
+					ID: "30a09ece-ea06-42cd-ba6b-79f0c88675a0",
+				},
+			},
+			expected: []*gqlschema.ApplicationMappingService{
+				{
+					ID: "30a09ece-ea06-42cd-ba6b-79f0c88675a0",
+				},
+			},
+		},
+	} {
+		t.Run(name, func(t *testing.T) {
+			// GIVEN
+			appSvc := automock.NewApplicationSvc()
+			defer appSvc.AssertExpectations(t)
+			appSvc.On("Enable", fixNamespace, fixName, tc.expected).Return(&mappingTypes.ApplicationMapping{
+				ObjectMeta: v1.ObjectMeta{
+					Name:      fixName,
+					Namespace: fixNamespace,
+				},
+				Spec: mappingTypes.ApplicationMappingSpec{
+					Services: tc.amExpected,
+				},
+			}, nil)
+			resolver := application.NewApplicationResolver(appSvc, nil)
+
+			// WHEN
+			out, err := resolver.EnableApplicationMutation(context.Background(), fixName, fixNamespace, tc.allServices, tc.services)
+			require.NoError(t, err)
+
+			// THEN
+			if tc.allServices == nil || *tc.allServices {
+				assert.Nil(t, out.Services)
+			} else {
+				assert.Len(t, out.Services, len(tc.expected))
+			}
+		})
+	}
 }
 
 func ptrStr(str string) *string {

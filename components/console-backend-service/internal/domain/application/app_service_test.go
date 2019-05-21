@@ -17,9 +17,11 @@ import (
 	appFakeCli "github.com/kyma-project/kyma/components/application-operator/pkg/client/clientset/versioned/fake"
 	appInformer "github.com/kyma-project/kyma/components/application-operator/pkg/client/informers/externalversions"
 
+	"github.com/kyma-project/kyma/components/application-broker/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1/fake"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/listener"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/application/pretty"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/pager"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
@@ -419,6 +421,180 @@ func TestApplicationService_Update_SuccessAfterRetry(t *testing.T) {
 	require.NoError(t, err)
 	assert.Equal(t, fixLabels, app.Spec.Labels)
 	assert.Equal(t, fixDesc, app.Spec.Description)
+}
+
+func TestApplicationService_Enable(t *testing.T) {
+	fixNamespace := "fix-namespace"
+	fixName := "fix-name"
+
+	t.Run("Should return ApplicationMapping with one service", func(t *testing.T) {
+		// GIVEN
+		aCli := appFakeCli.NewSimpleClientset()
+		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&aCli.Fake}}
+
+		svc, err := application.NewApplicationService(application.Config{}, aCli.ApplicationconnectorV1alpha1(), mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		serviceID := "173626e3-4a8b-4d65-8847-a0bf31e674e8"
+		services := []*gqlschema.ApplicationMappingService{
+			{
+				ID: serviceID,
+			},
+		}
+
+		// WHEN
+		am, err := svc.Enable(fixNamespace, fixName, services)
+
+		// THEN
+		assert.NoError(t, err)
+		assert.Equal(t, "ApplicationMapping", am.Kind)
+		assert.Equal(t, fixNamespace, am.Namespace)
+		assert.Equal(t, fixName, am.Name)
+		assert.Len(t, am.Spec.Services, 1)
+		assert.Equal(t, serviceID, am.Spec.Services[0].ID)
+	})
+
+	t.Run("Should return ApplicationMapping with services list", func(t *testing.T) {
+		// GIVEN
+		aCli := appFakeCli.NewSimpleClientset()
+		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&aCli.Fake}}
+
+		svc, err := application.NewApplicationService(application.Config{}, aCli.ApplicationconnectorV1alpha1(), mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		services := []*gqlschema.ApplicationMappingService{}
+
+		// WHEN
+		am, err := svc.Enable(fixNamespace, fixName, services)
+
+		// THEN
+		assert.NoError(t, err)
+		assert.Equal(t, "ApplicationMapping", am.Kind)
+		assert.Equal(t, fixNamespace, am.Namespace)
+		assert.Equal(t, fixName, am.Name)
+		assert.Len(t, am.Spec.Services, 0)
+	})
+
+	t.Run("Should return ApplicationMapping with NIL services list", func(t *testing.T) {
+		// GIVEN
+		aCli := appFakeCli.NewSimpleClientset()
+		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&aCli.Fake}}
+
+		svc, err := application.NewApplicationService(application.Config{}, aCli.ApplicationconnectorV1alpha1(), mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+
+		// WHEN
+		am, err := svc.Enable(fixNamespace, fixName, nil)
+
+		// THEN
+		assert.NoError(t, err)
+		assert.Equal(t, "ApplicationMapping", am.Kind)
+		assert.Equal(t, fixNamespace, am.Namespace)
+		assert.Equal(t, fixName, am.Name)
+		assert.Nil(t, am.Spec.Services)
+	})
+}
+
+func TestApplicationService_UpdateApplicationMapping(t *testing.T) {
+	fixNamespace := "fix-namespace"
+	fixName := "fix-name"
+
+	t.Run("Should return updated ApplicationMapping with two services", func(t *testing.T) {
+		// GIVEN
+		aCli := appFakeCli.NewSimpleClientset()
+		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&aCli.Fake}}
+
+		svc, err := application.NewApplicationService(application.Config{}, aCli.ApplicationconnectorV1alpha1(), mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+		serviceIDOne := "47f8ec38-7bee-400a-8e3e-fcf238e4d916"
+		serviceIDTwo := "63d1125b-1451-4122-82f1-54e482248b33"
+		services := []*gqlschema.ApplicationMappingService{
+			{
+				ID: "173626e3-4a8b-4d65-8847-a0bf31e674e8",
+			},
+		}
+		newServices := []*gqlschema.ApplicationMappingService{
+			{
+				ID: serviceIDOne,
+			},
+			{
+				ID: serviceIDTwo,
+			},
+		}
+
+		_, err = svc.Enable(fixNamespace, fixName, services)
+		assert.NoError(t, err)
+
+		// WHEN
+		am, err := svc.UpdateApplicationMapping(fixNamespace, fixName, newServices)
+
+		// THEN
+		assert.NoError(t, err)
+		assert.Equal(t, "ApplicationMapping", am.Kind)
+		assert.Equal(t, fixNamespace, am.Namespace)
+		assert.Equal(t, fixName, am.Name)
+		assert.Len(t, am.Spec.Services, 2)
+		assert.Equal(t, serviceIDOne, am.Spec.Services[0].ID)
+		assert.Equal(t, serviceIDTwo, am.Spec.Services[1].ID)
+	})
+
+	t.Run("Should return updated ApplicationMapping with empty services list", func(t *testing.T) {
+		// GIVEN
+		aCli := appFakeCli.NewSimpleClientset()
+		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&aCli.Fake}}
+
+		svc, err := application.NewApplicationService(application.Config{}, aCli.ApplicationconnectorV1alpha1(), mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+
+		services := []*gqlschema.ApplicationMappingService{
+			{
+				ID: "173626e3-4a8b-4d65-8847-a0bf31e674e8",
+			},
+			{
+				ID: "63d1125b-1451-4122-82f1-54e482248b33",
+			},
+		}
+		newServices := []*gqlschema.ApplicationMappingService{}
+
+		_, err = svc.Enable(fixNamespace, fixName, services)
+		assert.NoError(t, err)
+
+		// WHEN
+		am, err := svc.UpdateApplicationMapping(fixNamespace, fixName, newServices)
+
+		// THEN
+		assert.NoError(t, err)
+		assert.Equal(t, "ApplicationMapping", am.Kind)
+		assert.Equal(t, fixNamespace, am.Namespace)
+		assert.Equal(t, fixName, am.Name)
+		assert.Len(t, am.Spec.Services, 0)
+	})
+
+	t.Run("Should return updated ApplicationMapping with NIL services list", func(t *testing.T) {
+		// GIVEN
+		aCli := appFakeCli.NewSimpleClientset()
+		mCli := fake.FakeApplicationMappings{Fake: &fake.FakeApplicationconnectorV1alpha1{&aCli.Fake}}
+
+		svc, err := application.NewApplicationService(application.Config{}, aCli.ApplicationconnectorV1alpha1(), mCli.Fake, newDummyInformer(), nil, newDummyInformer())
+		require.NoError(t, err)
+
+		services := []*gqlschema.ApplicationMappingService{
+			{
+				ID: "173626e3-4a8b-4d65-8847-a0bf31e674e8",
+			},
+		}
+
+		_, err = svc.Enable(fixNamespace, fixName, services)
+		assert.NoError(t, err)
+
+		// WHEN
+		am, err := svc.UpdateApplicationMapping(fixNamespace, fixName, nil)
+
+		// THEN
+		assert.NoError(t, err)
+		assert.Equal(t, "ApplicationMapping", am.Kind)
+		assert.Equal(t, fixNamespace, am.Namespace)
+		assert.Equal(t, fixName, am.Name)
+		assert.Nil(t, am.Spec.Services)
+	})
 }
 
 func TestApplicationService_Subscribe(t *testing.T) {

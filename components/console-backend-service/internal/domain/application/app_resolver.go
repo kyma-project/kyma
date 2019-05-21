@@ -27,7 +27,8 @@ type appSvc interface {
 	Create(name string, description string, labels gqlschema.Labels) (*appTypes.Application, error)
 	Delete(name string) error
 	Disable(namespace, name string) error
-	Enable(namespace, name string) (*mappingTypes.ApplicationMapping, error)
+	Enable(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error)
+	UpdateApplicationMapping(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error)
 	GetConnectionURL(application string) (string, error)
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
@@ -159,9 +160,9 @@ func (r *applicationResolver) ConnectorServiceQuery(ctx context.Context, applica
 	return dto, nil
 }
 
-func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
-	em, err := r.appSvc.Enable(namespace, application)
-
+func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
+	services = configureServices(allServices, services)
+	em, err := r.appSvc.Enable(namespace, application, services)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.Application))
 		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithNamespace(namespace))
@@ -170,7 +171,60 @@ func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, app
 	return &gqlschema.ApplicationMapping{
 		Namespace:   em.Namespace,
 		Application: em.Name,
+		AllServices: allServices,
+		Services:    r.transformApplicationMappingService(em.Spec.Services),
 	}, nil
+}
+
+func (r *applicationResolver) OverloadApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
+	services = configureServices(allServices, services)
+	em, err := r.appSvc.UpdateApplicationMapping(namespace, application, services)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while updating %s", pretty.ApplicationMapping))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping, gqlerror.WithName(application), gqlerror.WithNamespace(namespace))
+	}
+
+	return &gqlschema.ApplicationMapping{
+		Namespace:   em.Namespace,
+		Application: em.Name,
+		AllServices: allServices,
+		Services:    r.transformApplicationMappingService(em.Spec.Services),
+	}, nil
+}
+
+func configureServices(allServices *bool, services []*gqlschema.ApplicationMappingService) []*gqlschema.ApplicationMappingService {
+	var all bool
+
+	if allServices == nil {
+		all = true
+	} else {
+		all = *allServices
+	}
+
+	if all {
+		services = nil
+	} else {
+		if services == nil {
+			services = []*gqlschema.ApplicationMappingService{}
+		}
+	}
+
+	return services
+}
+
+func (r *applicationResolver) transformApplicationMappingService(services []mappingTypes.ApplicationMappingService) []*gqlschema.ApplicationMappingService {
+	if services == nil {
+		return nil
+	}
+
+	ms := []*gqlschema.ApplicationMappingService{}
+	for _, service := range services {
+		var ams gqlschema.ApplicationMappingService
+		ams.ID = service.ID
+		ms = append(ms, &ams)
+	}
+
+	return ms
 }
 
 func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {

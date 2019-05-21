@@ -44,8 +44,10 @@ type ApplicationEvent struct {
 }
 
 type ApplicationMapping struct {
-	Namespace   string `json:"namespace"`
-	Application string `json:"application"`
+	Namespace   string                       `json:"namespace"`
+	Application string                       `json:"application"`
+	AllServices *bool                        `json:"allServices"`
+	Services    []*ApplicationMappingService `json:"services"`
 }
 
 type ApplicationMutationOutput struct {
