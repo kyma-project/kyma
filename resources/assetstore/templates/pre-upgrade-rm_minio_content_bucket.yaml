@@ -3,7 +3,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ template "fullname" . }}-migration
+  name: {{ template "fullname" . }}-rm-minio-content-bucket
   annotations:
     "helm.sh/hook": pre-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded
@@ -43,7 +43,7 @@ spec:
           projected:
             sources:
             - configMap:
-                name: {{ template "fullname" . }}-migration
+                name: {{ template "fullname" . }}-rm-minio-content-bucket
             - secret:
                 name: {{ default "assetstore-minio" .Values.existingSecret }}
       containers:
