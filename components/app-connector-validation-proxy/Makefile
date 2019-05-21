@@ -1,5 +1,5 @@
-VALIDATION_PROXY_APP_NAME = application-connector-validation-proxy
-IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(VALIDATION_PROXY_APP_NAME)
+APP_NAME = app-connector-validation-proxy
+IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 
 .PHONY: build
@@ -8,11 +8,11 @@ build:
 
 .PHONY: build-image
 build-image:
-	docker build -t $(VALIDATION_PROXY_APP_NAME):latest . -f Dockerfile.validation-proxy
+	docker build -t $(APP_NAME):latest .
 
 .PHONY: push-image
 push-image:
-	docker tag $(VALIDATION_PROXY_APP_NAME) $(IMG):$(TAG)
+	docker tag $(APP_NAME) $(IMG):$(TAG)
 	docker push $(IMG):$(TAG)
 
 .PHONY: ci-pr

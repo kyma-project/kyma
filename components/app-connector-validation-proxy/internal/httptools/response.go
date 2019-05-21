@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/application-connector-dispatcher/internal/httpconsts"
-	"github.com/kyma-project/kyma/components/application-connector-dispatcher/internal/httperrors"
+	"github.com/kyma-project/kyma/components/app-connector-validation-proxy/internal/httpconsts"
+	"github.com/kyma-project/kyma/components/app-connector-validation-proxy/internal/httperrors"
 
-	"github.com/kyma-project/kyma/components/application-connector-dispatcher/internal/apperrors"
+	"github.com/kyma-project/kyma/components/app-connector-validation-proxy/internal/apperrors"
 	log "github.com/sirupsen/logrus"
 )
 

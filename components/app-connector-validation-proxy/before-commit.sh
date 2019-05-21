@@ -33,7 +33,7 @@ if [ "$1" == "$CI_FLAG" ]; then
 	buildEnv="env CGO_ENABLED=0"
 fi
 
-${buildEnv} go build -o validationproxy ./cmd/validationproxy
+${buildEnv} go build -o appconnectorvalidationproxy ./cmd/appconnectorvalidationproxy
 
 goBuildResult=$?
 if [ ${goBuildResult} != 0 ]; then
