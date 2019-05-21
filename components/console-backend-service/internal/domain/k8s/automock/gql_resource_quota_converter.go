@@ -13,7 +13,7 @@ type gqlResourceQuotaConverter struct {
 }
 
 // ToGQL provides a mock function with given fields: in
-func (_m *gqlResourceQuotaConverter) ToGQL(in *v1.ResourceQuota) (*gqlschema.ResourceQuota, error) {
+func (_m *gqlResourceQuotaConverter) ToGQL(in *v1.ResourceQuota) *gqlschema.ResourceQuota {
 	ret := _m.Called(in)
 
 	var r0 *gqlschema.ResourceQuota
@@ -25,18 +25,11 @@ func (_m *gqlResourceQuotaConverter) ToGQL(in *v1.ResourceQuota) (*gqlschema.Res
 		}
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func(*v1.ResourceQuota) error); ok {
-		r1 = rf(in)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }
 
 // ToGQLs provides a mock function with given fields: in
-func (_m *gqlResourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) ([]gqlschema.ResourceQuota, error) {
+func (_m *gqlResourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) []gqlschema.ResourceQuota {
 	ret := _m.Called(in)
 
 	var r0 []gqlschema.ResourceQuota
@@ -48,12 +41,5 @@ func (_m *gqlResourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) ([]gqlschema
 		}
 	}
 
-	var r1 error
-	if rf, ok := ret.Get(1).(func([]*v1.ResourceQuota) error); ok {
-		r1 = rf(in)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
+	return r0
 }

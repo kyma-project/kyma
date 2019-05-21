@@ -1,7 +1,6 @@
 package k8s
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
 
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
@@ -16,7 +15,7 @@ func TestResourceQuotaConverter_ToGQLs(t *testing.T) {
 	converter := &resourceQuotaConverter{}
 
 	// WHEN
-	result, err := converter.ToGQLs([]*v1.ResourceQuota{
+	result := converter.ToGQLs([]*v1.ResourceQuota{
 		{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "mem-default",
@@ -26,7 +25,6 @@ func TestResourceQuotaConverter_ToGQLs(t *testing.T) {
 	})
 
 	// THEN
-	require.NoError(t, err)
 	assert.Equal(t, []gqlschema.ResourceQuota{
 		{Name: "mem-default"},
 	}, result)
@@ -83,10 +81,9 @@ func TestResourceQuotaConverter_ToGQL(t *testing.T) {
 			converter := &resourceQuotaConverter{}
 
 			// WHEN
-			result, err := converter.ToGQL(tc.given)
+			result := converter.ToGQL(tc.given)
 
 			// THEN
-			require.NoError(t, err)
 			assert.Equal(t, tc.expected, result)
 		})
 
