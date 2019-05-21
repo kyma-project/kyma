@@ -20,6 +20,14 @@
   revision = "342cbe0a0415"
 
 [[projects]]
+  branch = "master"
+  digest = "1:e2b86e41f3d669fc36b50d31d32d22c8ac656c75aa5ea89717ce7177e134ff2a"
+  name = "github.com/golang/glog"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
+
+[[projects]]
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
   name = "github.com/google/gofuzz"
   packages = ["."]
@@ -47,8 +55,7 @@
   name = "github.com/kyma-project/kyma"
   packages = ["components/application-operator/pkg/apis/applicationconnector/v1alpha1"]
   pruneopts = "NUT"
-  revision = "9d98b4aa00ea3c756aeefa5f112fb878cb13b184"
-  version = "1.1.0"
+  revision = "aca05764ebd6462544471ac47ab727f350047458"
 
 [[projects]]
   digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
@@ -161,8 +168,7 @@
   version = "v0.9.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e3c7b3882a1db11a9f018552ff177a16a7c60787ac8405b605f3f4c28f752e5e"
+  digest = "1:73c80bc2de37b688a90ce444edcd8a06b465113ba5be08c67bfe44f727ccdad6"
   name = "k8s.io/apimachinery"
   packages = [
     "pkg/api/resource",
@@ -188,15 +194,8 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "b74e4c97951f106696db86d7593effcb1463ca30"
-
-[[projects]]
-  digest = "1:2c16dda1c44c2564a7818fbacb701323c16d77c21b969987c1bec08d3ee0b050"
-  name = "k8s.io/klog"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "e531227889390a39d9533dde61f590fe9f4b0035"
-  version = "v0.3.0"
+  revision = "eddba98df674a16931d2d4ba75edc3a389bf633a"
+  version = "kubernetes-1.12.3"
 
 [solve-meta]
   analyzer-name = "dep"
