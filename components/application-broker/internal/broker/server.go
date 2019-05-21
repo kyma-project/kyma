@@ -99,7 +99,7 @@ func RunTLS(ctx context.Context, addr string, cert string, key string) error {
 func (srv *Server) run(ctx context.Context, addr string, listenAndServe func(srv *http.Server) error) error {
 	httpSrv := &http.Server{
 		Addr:    addr,
-		Handler: srv.createHandler(),
+		Handler: srv.CreateHandler(),
 	}
 	go func() {
 		<-ctx.Done()
@@ -112,7 +112,8 @@ func (srv *Server) run(ctx context.Context, addr string, listenAndServe func(srv
 	return listenAndServe(httpSrv)
 }
 
-func (srv *Server) createHandler() http.Handler {
+// CreateHandler creates an http handler
+func (srv *Server) CreateHandler() http.Handler {
 	var rtr = mux.NewRouter()
 
 	rtr.HandleFunc("/statusz", func(w http.ResponseWriter, req *http.Request) {
