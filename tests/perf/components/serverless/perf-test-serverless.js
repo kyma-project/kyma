@@ -1,6 +1,6 @@
 import http from "k6/http"
-import { check } from "k6";
-import { Trend } from "k6/metrics";
+import { check } from "k6"
+import { Trend } from "k6/metrics"
 
 var httpReqDurationNoFunc = new Trend("http_req_duration_no_func", true)
 var httpReqWaitingNoFunc = new Trend("http_req_waiting_no_func", true)
@@ -50,7 +50,7 @@ export let configuration =
     //   url: `https://size-xl.${__ENV.CLUSTER_DOMAIN_NAME}`,
     //   tags: {
     //     tags: {
-    //       'testName': 'size-xlc'
+    //       'testName': 'size-xl'
     //     }
     //   }
     // }
@@ -70,7 +70,6 @@ export default function () {
     // same as http_req_waiting but without function execution time
     httpReqWaitingNoFunc.add(res.timings.waiting - funcDelay)
 
-    // TODO: report custom metric where delay is substracted
     check(res, {
       "status was 200": (r) => r.status == 200,
     }, element.tags);
