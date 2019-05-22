@@ -67,6 +67,22 @@ data:
   gateways.istio-ingressgateway.loadBalancerIP: "__EXTERNAL_PUBLIC_IP__"
   global.proxy.excludeIPRanges: "__PROXY_EXCLUDE_IP_RANGES__"
   global.tracer.zipkin.address: zipkin.kyma-system:9411
+
+  pilot.resources.limits.memory: 1024Mi
+  pilot.resources.limits.cpu: 500m
+  pilot.resources.requests.memory: 512Mi
+  pilot.resources.requests.cpu: 250m
+
+  mixer.policy.resources.limits.memory: 2048Mi
+  mixer.policy.resources.limits.cpu: 500m
+  mixer.policy.resources.requests.memory: 512Mi
+  mixer.policy.resources.requests.cpu: 300m
+
+  mixer.telemetry.resources.limits.memory: 2048Mi
+  mixer.telemetry.resources.limits.cpu: 500m
+  mixer.telemetry.resources.requests.memory: 512Mi
+  mixer.telemetry.resources.requests.cpu: 300m
+  mixer.loadshedding.mode: disabled
 ---
 apiVersion: v1
 kind: ConfigMap
