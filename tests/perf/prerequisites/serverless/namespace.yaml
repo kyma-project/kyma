@@ -4,3 +4,10 @@ metadata:
   name: $NAMESPACE
   labels:
     env: "true"
+---
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: kyma-default
+  namespace: $NAMESPACE
+spec:
