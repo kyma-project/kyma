@@ -22,7 +22,8 @@ spec:
     spec:
       containers:
         - name: {{ .Chart.Name }}
-          image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-subscription-controller-knative:{{ .Values.global.event_bus.version }}"
+          # image: "{{ .Values.global.containerRegistry.path }}/{{ .Values.global.event_bus.dir }}event-bus-subscription-controller-knative:{{ .Values.global.event_bus.version }}"
+          image: "eu.gcr.io/kyma-project/pr/event-bus-subscription-controller-knative:PR-4170"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           args:
             - --port={{ .Values.port }}
