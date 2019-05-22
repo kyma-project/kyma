@@ -3,11 +3,9 @@ package k8s
 import (
 	"context"
 	"errors"
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
-
-	//	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"testing"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
