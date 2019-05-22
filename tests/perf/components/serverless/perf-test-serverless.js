@@ -1,5 +1,9 @@
 import http from "k6/http"
 import { check } from "k6";
+import { Trend } from "k6/metrics";
+
+var httpReqDurationNoFunc = new Trend("http_req_duration_no_func", true)
+var httpReqWaitingNoFunc = new Trend("http_req_waiting_no_func", true)
 
 export let options = {
   // unlimited
@@ -54,10 +58,18 @@ export let configuration =
 
 // each virtual user runs this function in a loop
 export default function () {
+  let funcDelay = parseInt(`${__ENV.FUNC_DELAY}`)
+
   // call all lambda functions
   configuration.forEach(function (element) {
     let res = http.get(element.url, element.tags);
-    
+
+    // report custom trend
+    // same as http_req_duration but without function execution time
+    httpReqDurationNoFunc.add(res.timings.duration - funcDelay);
+    // same as http_req_waiting but without function execution time
+    httpReqWaitingNoFunc.add(res.timings.waiting - funcDelay)
+
     // TODO: report custom metric where delay is substracted
     check(res, {
       "status was 200": (r) => r.status == 200,
