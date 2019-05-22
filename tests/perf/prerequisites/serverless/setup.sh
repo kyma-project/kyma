@@ -6,10 +6,11 @@ set -o pipefail
 export NAMESPACE=serverless
 resources=(
     namespace.yaml
+    resource_quota.yaml
     function-size-s.yaml
     function-size-m.yaml
     function-size-l.yaml
-    function-size-xl.yaml
+    # function-size-xl.yaml
 )
 
 # TODO: XXX can be replaced by kubectl wait -f {filename}
@@ -41,28 +42,29 @@ for resource in "${resources[@]}"; do
     envsubst <"$PREREQ_PATH/serverless/$resource" | kubectl -n "$NAMESPACE" apply -f -
 done
 
-# wait for functions to be ready
-kubectl wait --for=condition=Ready -n "$NAMESPACE" -l function=size-s pod
-kubectl wait --for=condition=Ready -n "$NAMESPACE" -l function=size-m pod
-kubectl wait --for=condition=Ready -n "$NAMESPACE" -l function=size-l pod
-kubectl wait --for=condition=Ready -n "$NAMESPACE" -l function=size-xl pod
+# TODO: add timeout for kubectl wait
+# wait for resources to be ready
+kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deploy-l function=size-s deployment
+kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" -l function=size-m deployment
+kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" -l function=size-l deployment
+# kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" -l function=size-xl deployment
 
 waitFor "hpa" "size-s"
 waitFor "hpa" "size-m"
 waitFor "hpa" "size-l"
-waitFor "hpa" "size-xl"
+# waitFor "hpa" "size-xl"
 
 waitFor "function" "size-s"
 waitFor "function" "size-m"
 waitFor "function" "size-l"
-waitFor "function" "size-xl"
+# waitFor "function" "size-xl"
 
 waitFor "service" "size-s"
 waitFor "service" "size-m"
 waitFor "service" "size-l"
-waitFor "service" "size-xl"
+# waitFor "service" "size-xl"
 
 waitFor "api" "size-s"
 waitFor "api" "size-m"
 waitFor "api" "size-l"
-waitFor "api" "size-xl"
+# waitFor "api" "size-xl"
