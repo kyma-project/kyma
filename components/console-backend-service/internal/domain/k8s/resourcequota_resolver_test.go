@@ -48,6 +48,7 @@ func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 		namespace              = "production"
 		resourceLimitsMemory   = "1Gi"
 		resourceRequestsMemory = "512Mi"
+		invalidResourceRequestsMemory = "invalid"
 	)
 
 	var (
@@ -104,6 +105,21 @@ func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 		resolver := newResourceQuotaResolver(lister)
 
 		result, err := resolver.CreateResourceQuota(nil, namespace, name, resourceLimitsMemory, resourceRequestsMemory)
+
+		require.Error(t, err)
+		assert.True(t, gqlerror.IsInternal(err))
+		assert.Nil(t, result)
+	})
+	t.Run("ErrorWhileInvalidMemoryRequest", func(t *testing.T) {
+		expected := errors.New("fix")
+
+		lister := automock.NewResourceQuotaLister()
+		lister.On("CreateResourceQuota", namespace, name, resourceLimitsMemory, invalidResourceRequestsMemory).Return(nil, expected).Once()
+		defer lister.AssertExpectations(t)
+
+		resolver := newResourceQuotaResolver(lister)
+
+		result, err := resolver.CreateResourceQuota(nil, namespace, name, resourceLimitsMemory, invalidResourceRequestsMemory)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
