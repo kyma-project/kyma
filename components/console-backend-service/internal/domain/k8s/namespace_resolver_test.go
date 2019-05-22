@@ -116,7 +116,7 @@ func TestNamespaceResolver_CreateNamespace(t *testing.T) {
 			"test": "true",
 			"env":  "true",
 		}
-		resource := fixNamespace(name, labels)
+		resource := fixNamespace(name, expectedLabels)
 		expected := gqlschema.NamespaceCreationOutput{
 			Name:   name,
 			Labels: expectedLabels,
