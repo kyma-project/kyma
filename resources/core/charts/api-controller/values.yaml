@@ -1,2 +1,12 @@
 tests:
   enabled: true
+
+mtls:
+  enabled: "true"
+
+# values listed below will be used to set corsPolicy in created VirtualServices (https://istio.io/docs/reference/config/networking/v1alpha3/virtual-service/#CorsPolicy)
+# a value may be a single string (e.g. "*", "console.kyma.local") or a comma-separated list of strings (e.g. "https://console.kyma.local,https://lambdas-ui.kyma.local", "GET,POST,PUT,DELETE")
+cors:
+  allow-origin: "*"
+  allow-methods: "GET,POST,PUT,DELETE" # no possibility to use "*"
+  allow-headers: "*"
