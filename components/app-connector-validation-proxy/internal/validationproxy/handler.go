@@ -14,8 +14,6 @@ import (
 	"github.com/kyma-project/kyma/components/app-connector-validation-proxy/internal/apperrors"
 
 	"github.com/gorilla/mux"
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -24,12 +22,6 @@ const (
 
 type ProxyHandler interface {
 	ProxyAppConnectorRequests(w http.ResponseWriter, r *http.Request)
-}
-
-// ApplicationManager contains operations for managing Application CRD
-type ApplicationManager interface {
-	Update(application *v1alpha1.Application) (*v1alpha1.Application, error)
-	Get(name string, options v1.GetOptions) (*v1alpha1.Application, error)
 }
 
 type proxyHandler struct {
@@ -79,6 +71,7 @@ func (ph *proxyHandler) ProxyAppConnectorRequests(w http.ResponseWriter, r *http
 		Director: func(request *http.Request) {
 			request.URL.Scheme = "http"
 			request.URL.Host = host
+			log.Infof("Proxying request to target URL: %s", request.URL)
 		},
 		ModifyResponse: func(response *http.Response) error {
 			log.Infof("Host responded with status: %s", response.Status)

@@ -12,9 +12,6 @@ import (
 
 const (
 	applicationChartDirectory = "application"
-
-	fullValidationRegexFormat        = "(?=.*(,|^)OU=%s(,|]|$))(?=.*(,|^)O=%s(,|]|$))(?=.*(,|^)CN=%s(,|]|$)).*"
-	applicationValidationRegexFormat = "(.*(CN=%s(,|]|$)).*)"
 )
 
 type ApplicationClient interface {
@@ -104,8 +101,8 @@ func (r *releaseManager) upgradeChart(application *v1alpha1.Application) (hapi_4
 
 func (r *releaseManager) prepareOverrides(application *v1alpha1.Application) (string, error) {
 	overridesData := r.overridesDefaults
-	// TODO - should we do it if has both group and tenant or if at least one is present - adjust with validation proxy
-	if application.Spec.HasTenant() == true && application.Spec.HasGroup() == true {
+
+	if application.Spec.HasTenant() == true || application.Spec.HasGroup() == true {
 		overridesData.Tenant = application.Spec.Tenant
 		overridesData.Group = application.Spec.Group
 	}

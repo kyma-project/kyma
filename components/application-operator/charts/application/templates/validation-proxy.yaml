@@ -20,10 +20,9 @@ spec:
         app: {{ .Release.Name }}-validation-proxy
         release: {{ .Release.Name }}-validation-proxy
     spec:
-      serviceAccountName: {{.Release.Name }}-validation-proxy
       containers:
         - name: {{ .Release.Name }}-validation-proxy
-          image: {{ .Values.global.appConnectorValidationProxy }}
+          image: {{ .Values.global.appConnectorValidationProxyImage }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           args:
             - "/appconnectorvalidationproxy"
@@ -31,13 +30,13 @@ spec:
             - "--tenant={{ .Values.global.tenant }}"
             - "--group={{ .Values.global.group }}"
             - "--eventServicePathPrefix=/{{ .Release.Name }}/v1/events"
-            - "--eventServiceHost={{ .Release.Name }}-event-service-external-api:{{ .Values.eventService.service.externalapi }}"
+            - "--eventServiceHost={{ .Release.Name }}-event-service-external-api:{{ .Values.eventService.service.externalapi.port }}"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
             - "--appRegistryHost={{ .Values.validationProxy.args.appRegistryHost }}"
-# TODO - consider adding health endpoint and redinnes / livenes probes
           ports:
             - containerPort: {{ .Values.validationProxy.args.proxyPort }}
               name: http-proxy
+# TODO - consider adding health endpoint and redinnes / livenes probes
 ---
 apiVersion: v1
 kind: Service

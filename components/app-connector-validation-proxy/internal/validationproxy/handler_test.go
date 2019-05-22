@@ -140,7 +140,7 @@ func TestProxyHandler_ProxyAppConnectorRequests(t *testing.T) {
 				body, err := json.Marshal(event{Title: eventTitle})
 				require.NoError(t, err)
 
-				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v1/events", applicationName), bytes.NewReader(body)) // TODO - consider adding body
+				req, err := http.NewRequest(http.MethodPost, fmt.Sprintf("/%s/v1/events", applicationName), bytes.NewReader(body))
 				require.NoError(t, err)
 				req.Header.Set(CertificateInfoHeader, testCase.certInfoHeader)
 				req = mux.SetURLVars(req, map[string]string{"application": applicationName})

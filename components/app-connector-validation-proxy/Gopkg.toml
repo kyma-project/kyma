@@ -7,10 +7,6 @@ required = [
   version = "1.7.2"
 
 [[constraint]]
-  name = "github.com/kyma-project/kyma"
-  revision = "aca05764ebd6462544471ac47ab727f350047458"
-
-[[constraint]]
   name = "github.com/sirupsen/logrus"
   version = "1.4.2"
 

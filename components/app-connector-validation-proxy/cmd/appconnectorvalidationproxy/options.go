@@ -20,16 +20,16 @@ func parseArgs() *options {
 	tenant := flag.String("tenant", "", "Name of the application tenant")
 	group := flag.String("group", "", "Name of the application group")
 	eventServicePathPrefix := flag.String("eventServicePathPrefix", "/v1/events", "Prefix of paths that will be directed to the Event Service")
-	eventServiceHost := flag.String("eventServiceHost", "events-api:8080", "Host of the Event Service") // TODO - consider changing to URL
+	eventServiceHost := flag.String("eventServiceHost", "events-api:8080", "Host (and port) of the Event Service")
 	appRegistryPathPrefix := flag.String("appRegistryPathPrefix", "/v1/metadata", "Prefix of paths that will be directed to the Application Registry")
-	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host of the Application Registry") // TODO - consider changing to URL
+	appRegistryHost := flag.String("appRegistryHost", "application-registry-external-api:8081", "Host (and port) of the Application Registry")
 
 	flag.Parse()
 
 	return &options{
-		proxyPort:              *proxyPort,
-		tenant:                 *tenant,
-		group:                  *group,
+		proxyPort: *proxyPort,
+		tenant:    *tenant,
+		group:     *group,
 		eventServicePathPrefix: *eventServicePathPrefix,
 		eventServiceHost:       *eventServiceHost,
 		appRegistryPathPrefix:  *appRegistryPathPrefix,
