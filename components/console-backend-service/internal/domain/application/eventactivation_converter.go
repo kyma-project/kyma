@@ -104,12 +104,7 @@ func (c *eventActivationConverter) getPayload(in interface{}) map[string]interfa
 		return nil
 	}
 
-	result, exists := c.convertToMap(payload)
-	if !exists {
-		return nil
-	}
-
-	return result
+	return c.convertToMap(payload)
 }
 
 func (c *eventActivationConverter) convertToMap(in interface{}) map[string]interface{} {
