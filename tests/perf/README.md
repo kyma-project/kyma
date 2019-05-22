@@ -69,7 +69,7 @@ The file `setup.sh` will be executed from Kyma load test generator to bootstrap 
 
 WORKING_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 
-kubectl apply -f ${WORKING_DIR}/example.yaml
+kubectl apply -f ${WORKING_DIR}/example.yaml -n example-test-namespace
 ```
 
 The example `setup.sh` above trigger a `kubectl apply` command for an example deployment which described in the file `example.yaml` and placed in the same directory as `setup.sh`, here is the important line is the 
