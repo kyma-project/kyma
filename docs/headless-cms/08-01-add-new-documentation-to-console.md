@@ -3,7 +3,7 @@ title: Add new documents to the Documentation view in the Console UI
 type: Tutorial
 ---
 
-This tutorial shows how you can customize the Documentation view that is available in the Console UI under the ![](./assets/docs.png) icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** documentation topics with a set of Markdown subdocuments. The Markdown sources used in this tutorial point to specific topics in the official Prometheus documentation.  
+This tutorial shows how you can customize the Documentation view that is available in the Console UI under the question mark icon on the top navigation panel. The purpose of this tutorial is to create a new **Prometheus** documentation section that contains **Concepts** and **Guides** documentation topics with a set of Markdown subdocuments. The Markdown sources used in this tutorial point to specific topics in the official Prometheus documentation.  
 
 >**NOTE:** The Documentation view only displays documents uploaded through ClusterDocsTopics. Make sure they have valid [definitions](#custom-resource-clusterdocstopic) and that the Markdown documents they render have correct [metadata and structure](#details-markdown-documents).
 
@@ -14,7 +14,7 @@ This tutorial shows how you can customize the Documentation view that is availab
 
 ## Steps
 
-1. Open the terminal and apply these ClusterDocsTopic custom resources:
+1. Open the terminal and create these ClusterDocsTopic custom resources:
 
 ```yaml
 cat <<EOF | kubectl apply -f -
