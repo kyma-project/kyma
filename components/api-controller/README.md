@@ -37,6 +37,9 @@ Use these environment variables to configure the application:
 | **DEFAULT_JWKS_URI** | Yes | - | Used to set default jwksUri in NetworkPolicy. | any string |
 | **GATEWAY_FQDN** | Yes | - | Used to set gateway in the VirtualServices specification. | any string |
 | **DOMAIN_NAME** | Yes | - | Used to set a hostname in the VirtualServices specification if a short version of the hostname is provided. | any string |
+| **CORS_ALLOW_ORIGIN** | No | `""` | Used to set corsPolicy.allowOrigin field in the VirtualServices specification. | `"*"` or comma-separated list of origins |
+| **CORS_ALLOW_METHODS** | No | `""` | Used to set corsPolicy.allowMethods field in the VirtualServices specification. | comma-separated list of methods |
+| **CORS_ALLOW_HEADERS** | No | `""` | Used to set corsPolicy.allowHeaders field in the VirtualServices specification. | `"*"` or comma-separated list of headers |
 
 
 ### Test
