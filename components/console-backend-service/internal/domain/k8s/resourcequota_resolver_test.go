@@ -5,8 +5,8 @@ import (
 	"errors"
 	"testing"
 
-	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/automock"
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlerror"
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -42,42 +42,48 @@ func TestResourceQuotaResolver_ResourceQuotasQuery(t *testing.T) {
 
 func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 	const (
-		name                   = "mem-default"
-		namespace              = "production"
-		resourceLimitsMemory   = "1Gi"
-		resourceRequestsMemory = "512Mi"
+		name                          = "mem-default"
+		namespace                     = "production"
+		resourceLimitsMemory          = "1Gi"
+		resourceRequestsMemory        = "512Mi"
 		invalidResourceRequestsMemory = "invalid"
 	)
 
-	var (
-		resourceQuotaGQL = gqlschema.ResourceQuota{
-			Name: name,
-			Limits: gqlschema.ResourceValues{
-				Memory: ptrStr(resourceLimitsMemory),
+	resourceQuotaInputGQL := gqlschema.ResourceQuotaInput{
+		Limits: gqlschema.ResourceValuesInput{
+			Memory: ptrStr(resourceLimitsMemory),
+		},
+		Requests: gqlschema.ResourceValuesInput{
+			Memory: ptrStr(resourceRequestsMemory),
+		},
+	}
+	resourceQuotaGQL := gqlschema.ResourceQuota{
+		Name: name,
+		Limits: gqlschema.ResourceValues{
+			Memory: ptrStr(resourceLimitsMemory),
+		},
+		Requests: gqlschema.ResourceValues{
+			Memory: ptrStr(resourceRequestsMemory),
+		},
+	}
+	resourceQuota := v1.ResourceQuota{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+		Spec: v1.ResourceQuotaSpec{
+			Hard: v1.ResourceList{
+				v1.ResourceLimitsMemory:   resource.MustParse(resourceLimitsMemory),
+				v1.ResourceRequestsMemory: resource.MustParse(resourceRequestsMemory),
 			},
-			Requests: gqlschema.ResourceValues{
-				Memory: ptrStr(resourceRequestsMemory),
-			},
-		}
-		resourceQuota = v1.ResourceQuota{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      name,
-				Namespace: namespace,
-			},
-			Spec: v1.ResourceQuotaSpec{
-				Hard: v1.ResourceList{
-					v1.ResourceLimitsMemory:   resource.MustParse(resourceLimitsMemory),
-					v1.ResourceRequestsMemory: resource.MustParse(resourceRequestsMemory),
-				},
-			},
-		}
-	)
+		},
+	}
 
 	t.Run("Success", func(t *testing.T) {
 		createdResourceQuota := resourceQuota
 
 		lister := automock.NewResourceQuotaLister()
-		lister.On("CreateResourceQuota", namespace, name, resourceLimitsMemory, resourceRequestsMemory).Return(&createdResourceQuota, nil).Once()
+		lister.On("CreateResourceQuota", namespace, name, resourceQuotaInputGQL).Return(&createdResourceQuota, nil).Once()
 		defer lister.AssertExpectations(t)
 
 		converter := automock.NewGQLResourceQuotaConverter()
@@ -87,7 +93,7 @@ func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 		resolver := newResourceQuotaResolver(lister)
 		resolver.SetResourceQuotaConverter(converter)
 
-		result, err := resolver.CreateResourceQuota(nil, namespace, name, resourceLimitsMemory, resourceRequestsMemory)
+		result, err := resolver.CreateResourceQuota(nil, namespace, name, resourceQuotaInputGQL)
 
 		require.NoError(t, err)
 		assert.Equal(t, &resourceQuotaGQL, result)
@@ -97,12 +103,12 @@ func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 		expected := errors.New("fix")
 
 		lister := automock.NewResourceQuotaLister()
-		lister.On("CreateResourceQuota", namespace, name, resourceLimitsMemory, resourceRequestsMemory).Return(nil, expected).Once()
+		lister.On("CreateResourceQuota", namespace, name, resourceQuotaInputGQL).Return(nil, expected).Once()
 		defer lister.AssertExpectations(t)
 
 		resolver := newResourceQuotaResolver(lister)
 
-		result, err := resolver.CreateResourceQuota(nil, namespace, name, resourceLimitsMemory, resourceRequestsMemory)
+		result, err := resolver.CreateResourceQuota(nil, namespace, name, resourceQuotaInputGQL)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))
@@ -112,12 +118,12 @@ func TestResourceQuotaResolver_CreateResourceQuota(t *testing.T) {
 		expected := errors.New("fix")
 
 		lister := automock.NewResourceQuotaLister()
-		lister.On("CreateResourceQuota", namespace, name, resourceLimitsMemory, invalidResourceRequestsMemory).Return(nil, expected).Once()
+		lister.On("CreateResourceQuota", namespace, name, resourceQuotaInputGQL).Return(nil, expected).Once()
 		defer lister.AssertExpectations(t)
 
 		resolver := newResourceQuotaResolver(lister)
 
-		result, err := resolver.CreateResourceQuota(nil, namespace, name, resourceLimitsMemory, invalidResourceRequestsMemory)
+		result, err := resolver.CreateResourceQuota(nil, namespace, name, resourceQuotaInputGQL)
 
 		require.Error(t, err)
 		assert.True(t, gqlerror.IsInternal(err))

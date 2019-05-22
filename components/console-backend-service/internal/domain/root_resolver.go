@@ -196,8 +196,8 @@ type mutationResolver struct {
 	*RootResolver
 }
 
-func (r *mutationResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, memoryLimits string, memoryRequests string) (*gqlschema.ResourceQuota, error) {
-	return r.k8s.CreateResourceQuota(ctx, namespace, name, memoryLimits, memoryRequests)
+func (r *mutationResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuotaInput gqlschema.ResourceQuotaInput) (*gqlschema.ResourceQuota, error) {
+	return r.k8s.CreateResourceQuota(ctx, namespace, name, resourceQuotaInput)
 }
 
 func (r *mutationResolver) CreateResource(ctx context.Context, namespace string, resource gqlschema.JSON) (*gqlschema.JSON, error) {

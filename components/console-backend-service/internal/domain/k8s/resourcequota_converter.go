@@ -36,7 +36,7 @@ func (c *resourceQuotaConverter) extractValue(in *v1.ResourceQuota, resourceName
 	return &formattedVal
 }
 
-func (c *resourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) ([]gqlschema.ResourceQuota) {
+func (c *resourceQuotaConverter) ToGQLs(in []*v1.ResourceQuota) []gqlschema.ResourceQuota {
 	result := make([]gqlschema.ResourceQuota, 0)
 	for _, rq := range in {
 		converted := c.ToGQL(rq)

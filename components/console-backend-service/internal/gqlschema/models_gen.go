@@ -371,6 +371,11 @@ type ResourceQuota struct {
 	Requests ResourceValues `json:"requests"`
 }
 
+type ResourceQuotaInput struct {
+	Limits   ResourceValuesInput `json:"limits"`
+	Requests ResourceValuesInput `json:"requests"`
+}
+
 type ResourceQuotasStatus struct {
 	Exceeded       bool            `json:"exceeded"`
 	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
@@ -388,6 +393,11 @@ type ResourceType struct {
 }
 
 type ResourceValues struct {
+	Memory *string `json:"memory"`
+	CPU    *string `json:"cpu"`
+}
+
+type ResourceValuesInput struct {
 	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
 }

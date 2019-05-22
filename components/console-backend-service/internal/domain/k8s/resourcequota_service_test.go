@@ -4,6 +4,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
 	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s"
 	testingUtils "github.com/kyma-project/kyma/components/console-backend-service/internal/testing"
 	"github.com/stretchr/testify/assert"
@@ -40,35 +42,41 @@ func TestResourceQuota_Create(t *testing.T) {
 	const (
 		namespace = "production"
 	)
-	var testCases = []struct {
-		caseName               string
+
+	rq1 := fixResourceQuota("rq1", "production")
+	rq2 := fixResourceQuota("rq2", "stage")
+	client := fake.NewSimpleClientset(rq1, rq2)
+	svc := k8s.NewResourceQuotaService(nil, nil, nil, client.CoreV1())
+
+	for caseName, test := range map[string]struct {
 		namespace              string
 		name                   string
 		resourceLimitsMemory   string
 		resourceRequestsMemory string
 		success                bool
 	}{
-		{"Success", "production", "mem-default", "1Gi", "512Mi", true},
-		{"WithAPIGroup", "production", "mem-default", "2Gi", "3006477108", true},
-		{"duplicate", "production", "rq1", "2Gi", "3006477108", false},
-	}
-	for _, testCase := range testCases {
-		t.Run(testCase.caseName, func(t *testing.T) {
-			rq1 := fixResourceQuota("rq1", "production")
-			rq2 := fixResourceQuota("rq2", "stage")
+		"Success":            {"production", "mem-default", "1Gi", "512Mi", true},
+		"DifferentNamespace": {"stage", "test", "2Gi", "3006477108", true},
+		"Duplicate":          {"production", "rq1", "2Gi", "3006477108", false},
+	} {
+		t.Run(caseName, func(t *testing.T) {
+			resourceQuotaInputGQL := gqlschema.ResourceQuotaInput{
+				Limits: gqlschema.ResourceValuesInput{
+					Memory: &test.resourceLimitsMemory,
+				},
+				Requests: gqlschema.ResourceValuesInput{
+					Memory: &test.resourceRequestsMemory,
+				},
+			}
+			result, err := svc.CreateResourceQuota(namespace, test.name, resourceQuotaInputGQL)
 
-			client := fake.NewSimpleClientset(rq1, rq2)
-			svc := k8s.NewResourceQuotaService(nil, nil, nil, client.CoreV1())
-			result, err := svc.CreateResourceQuota(namespace, testCase.name, testCase.resourceLimitsMemory, testCase.resourceRequestsMemory)
-
-			if testCase.success {
+			if test.success {
 				require.NoError(t, err)
 				assert.NotNil(t, result)
 			} else {
 				require.Error(t, err)
 				assert.Nil(t, result)
 			}
-
 		})
 	}
 }

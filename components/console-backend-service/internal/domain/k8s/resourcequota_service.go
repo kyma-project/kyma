@@ -4,10 +4,14 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/domain/k8s/pretty"
+
+	"k8s.io/apimachinery/pkg/api/resource"
+
+	"github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
 	"github.com/pkg/errors"
 	apps "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	coreV1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/tools/cache"
@@ -47,7 +51,17 @@ func (svc *resourceQuotaService) ListResourceQuotas(namespace string) ([]*v1.Res
 	return result, nil
 }
 
-func (svc *resourceQuotaService) CreateResourceQuota(namespace string, name string, memoryLimits string, memoryRequests string) (*v1.ResourceQuota, error) {
+func (svc *resourceQuotaService) CreateResourceQuota(namespace string, name string, resourceQuotaInput gqlschema.ResourceQuotaInput) (*v1.ResourceQuota, error) {
+	memoryLimitsParsed, err := resource.ParseQuantity(*resourceQuotaInput.Limits.Memory)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while parsing %s memory limits", pretty.ResourceQuota)
+	}
+
+	memoryRequestsParsed, err := resource.ParseQuantity(*resourceQuotaInput.Requests.Memory)
+	if err != nil {
+		return nil, errors.Wrapf(err, "while parsing %s memory requests", pretty.ResourceQuota)
+	}
+
 	ResourceQuota := &v1.ResourceQuota{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
@@ -55,8 +69,8 @@ func (svc *resourceQuotaService) CreateResourceQuota(namespace string, name stri
 		},
 		Spec: v1.ResourceQuotaSpec{
 			Hard: v1.ResourceList{
-				v1.ResourceLimitsMemory:   resource.MustParse(memoryLimits),
-				v1.ResourceRequestsMemory: resource.MustParse(memoryRequests),
+				v1.ResourceLimitsMemory:   memoryLimitsParsed,
+				v1.ResourceRequestsMemory: memoryRequestsParsed,
 			},
 		},
 	}

@@ -2,6 +2,8 @@
 
 package automock
 
+import gqlschema "github.com/kyma-project/kyma/components/console-backend-service/internal/gqlschema"
+
 import mock "github.com/stretchr/testify/mock"
 import v1 "k8s.io/api/core/v1"
 
@@ -10,13 +12,13 @@ type resourceQuotaLister struct {
 	mock.Mock
 }
 
-// CreateResourceQuota provides a mock function with given fields: namespace, name, memoryLimits, memoryRequests
-func (_m *resourceQuotaLister) CreateResourceQuota(namespace string, name string, memoryLimits string, memoryRequests string) (*v1.ResourceQuota, error) {
-	ret := _m.Called(namespace, name, memoryLimits, memoryRequests)
+// CreateResourceQuota provides a mock function with given fields: namespace, name, ResourceQuotaInput
+func (_m *resourceQuotaLister) CreateResourceQuota(namespace string, name string, ResourceQuotaInput gqlschema.ResourceQuotaInput) (*v1.ResourceQuota, error) {
+	ret := _m.Called(namespace, name, ResourceQuotaInput)
 
 	var r0 *v1.ResourceQuota
-	if rf, ok := ret.Get(0).(func(string, string, string, string) *v1.ResourceQuota); ok {
-		r0 = rf(namespace, name, memoryLimits, memoryRequests)
+	if rf, ok := ret.Get(0).(func(string, string, gqlschema.ResourceQuotaInput) *v1.ResourceQuota); ok {
+		r0 = rf(namespace, name, ResourceQuotaInput)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).(*v1.ResourceQuota)
@@ -24,8 +26,8 @@ func (_m *resourceQuotaLister) CreateResourceQuota(namespace string, name string
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(string, string, string, string) error); ok {
-		r1 = rf(namespace, name, memoryLimits, memoryRequests)
+	if rf, ok := ret.Get(1).(func(string, string, gqlschema.ResourceQuotaInput) error); ok {
+		r1 = rf(namespace, name, ResourceQuotaInput)
 	} else {
 		r1 = ret.Error(1)
 	}
