@@ -16,25 +16,25 @@ Modify the files to adjust the backup scope. For details about the file format, 
 
 ## Create manual backups
 
-If you want to use sample backup configurations, you must use Backup custom resources instead of Ark CLI. Add the following two CRs to the `heptio-ark` Namespace to instruct the Ark server to create a backup. Make sure the indentation is correct.
+If you want to use sample backup configurations, you must use Backup custom resources instead of Velero CLI. Add the following two CRs to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
 
 A sample backup configuration looks like this:
 
 ```yaml
 ---
-apiVersion: ark.heptio.com/v1
+apiVersion: velero.io/v1
 kind: Backup
 metadata:
   name: kyma-system-backup
-  namespace: heptio-ark
+  namespace: kyma-backup
 spec:
     <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP FILE HERE>
 ---
-apiVersion: ark.heptio.com/v1
+apiVersion: velero.io/v1
 kind: Backup
 metadata:
   name: kyma-backup
-  namespace: heptio-ark
+  namespace: kyma-backup
 spec:
     <INCLUDE CONTENT OF USER NAMESPACE BACKUP FILE HERE>
 ```
@@ -45,27 +45,27 @@ To create the backup, run the following command:
 
 ## Schedule periodic backups
 
-If you want to use sample backup configurations, ou must use Schedule custom resources instead of Ark CLI. Create two Schedule custom resources in the `heptio-ark` Namespace to instruct the Ark Server to schedule a cluster backup. Make sure the indentation is correct.
+If you want to use sample backup configurations, ou must use Schedule custom resources instead of Velero CLI. Create two Schedule custom resources in the `kyma-backup` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
 
 A sample scheduled backup configuration looks like this:
 
 ```yaml
 ---
-apiVersion: ark.heptio.com/v1
+apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: kyma-system-backup
-  namespace: heptio-ark
+  namespace: kyma-backup
 spec:
     template:
         <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP SPEC HERE>
     schedule: 0 1 * * *
 ---
-apiVersion: ark.heptio.com/v1
+apiVersion: velero.io/v1
 kind: Schedule
 metadata:
   name: kyma-backup
-  namespace: heptio-ark
+  namespace: kyma-backup
 spec:
     template:
         <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP SPEC HERE>

@@ -12,9 +12,9 @@ To set up the project, use these tools:
 * Version 1.11 or higher of [Go](https://golang.org/dl/)
 * Version 0.5 or higher of [Dep](https://github.com/golang/dep)
 * The latest version of [Docker](https://www.docker.com/)
-* [Ark](../../../resources/ark/README.md#details)
+* [Velero](../../../resources/velero/README.md#details)
 
->**NOTE:** Use [these](../../../docs/backup/03-01-backup-configuration.md) guidelines to configure Ark for a specific storage provider.
+>**NOTE:** Use [these](../../../docs/backup/03-01-backup-configuration.md) guidelines to configure Velero for a specific storage provider.
 
 
 ## Usage
@@ -70,7 +70,7 @@ The test creates a new Namespace called `{TestName}-{UUID}`. This Namespace shou
 
 ### Run end-to-end tests locally
 
-> **NOTE:** Before running the test, configure Ark using [these](../../../docs/backup/03-01-backup-configuration.md) guidelines.
+> **NOTE:** Before running the test, configure Velero using [these](../../../docs/backup/03-01-backup-configuration.md) guidelines.
 
 Run tests:
 ```bash
