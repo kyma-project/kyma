@@ -88,8 +88,7 @@
     "components/application-operator/pkg/client/clientset/versioned/scheme",
     "components/application-operator/pkg/client/clientset/versioned/typed/applicationconnector/v1alpha1"
   ]
-  revision = "0c48c155b997fad003004dd87851cb2e5475cf3b"
-  source = "github.com/crabtree/kyma"
+  revision = "27571a1aefad57b84a8ab24e8b0d56b6a05bdb22"
 
 [[projects]]
   name = "github.com/modern-go/concurrent"
@@ -393,6 +392,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "2e249ed51dcabc48f921a8d86be8bd13b329930891848d9e81532d3958da66ca"
+  inputs-digest = "ec976a4fda8ed0dfbc8430c7ed137f7009ad56a599ff674255e6f62840ef2359"
   solver-name = "gps-cdcl"
   solver-version = 1
