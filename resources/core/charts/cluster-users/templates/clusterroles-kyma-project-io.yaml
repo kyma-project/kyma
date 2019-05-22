@@ -35,7 +35,6 @@ rules:
     - "assetstore.kyma-project.io"
     - "cms.kyma-project.io"
     - "eventing.kyma-project.io"
-    - "testing.kyma-project.io"
 {{ toYaml .Values.clusterRoles.apiGroups.kyma | indent 4 }}
   resources:
     - "*"
