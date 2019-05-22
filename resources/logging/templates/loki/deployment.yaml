@@ -16,6 +16,9 @@ spec:
     matchLabels:
       app: {{ template "loki.name" . }}
       release: {{ .Release.Name }}
+      kyma-alerts: enabled
+      kyma-component: ui
+      kyma-grafana: enabled
   strategy:
     type: {{ .Values.loki.deploymentStrategy }}
   {{- if ne .Values.loki.deploymentStrategy "RollingUpdate" }}
@@ -27,6 +30,9 @@ spec:
         app: {{ template "loki.name" . }}
         name: {{ template "loki.name" . }}
         release: {{ .Release.Name }}
+        kyma-alerts: enabled
+        kyma-component: ui
+        kyma-grafana: enabled
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/loki/secret.yaml") . | sha256sum }}
         {{- with .Values.loki.podAnnotations }}
