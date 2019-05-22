@@ -30,7 +30,7 @@ fi
 buildEnv=""
 if [ "$1" == "$CI_FLAG" ]; then
 	# build binary statically
-	buildEnv="env CGO_ENABLED=0"
+	buildEnv="env CGO_ENABLED=0 GOOS=linux GOARCH=amd64"
 fi
 
 ${buildEnv} go build -o application-broker ./cmd/broker

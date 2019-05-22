@@ -125,7 +125,7 @@ func New(applicationFinder appFinder,
 			conv:              &appToServiceConverter{},
 			appEnabledChecker: enabledChecker,
 		},
-		provisioner:   NewProvisioner(instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, eaClient, instStorage, idp, log),
+		provisioner:   NewProvisioner(instStorage, instStorage, stateService, opStorage, opStorage, accessChecker, applicationFinder, serviceInstanceGetter, eaClient, instStorage, idp, log),
 		deprovisioner: NewDeprovisioner(instStorage, stateService, opStorage, opStorage, idp, log),
 		binder: &bindService{
 			appSvcFinder: applicationFinder,

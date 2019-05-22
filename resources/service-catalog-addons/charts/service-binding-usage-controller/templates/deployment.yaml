@@ -39,10 +39,9 @@ spec:
           ports:
             - containerPort: {{ .Values.service.internalPort }}
           livenessProbe:
-            exec:
-              command:
-                - curl
-                - localhost:{{ .Values.service.internalPort }}/statusz
+            httpGet:
+              path: /statusz
+              port: {{ .Values.service.internalPort }}
             periodSeconds: 10
             timeoutSeconds: 2
             successThreshold: 1

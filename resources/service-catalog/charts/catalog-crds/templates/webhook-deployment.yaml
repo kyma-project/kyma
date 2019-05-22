@@ -61,7 +61,7 @@ spec:
         readinessProbe:
           httpGet:
             port: 8080
-            path: /healthz
+            path: /healthz/ready
             scheme: HTTP
           failureThreshold: 1
           initialDelaySeconds: 10

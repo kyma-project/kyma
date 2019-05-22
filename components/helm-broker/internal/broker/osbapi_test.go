@@ -9,6 +9,7 @@ import (
 	"testing"
 	"time"
 
+	jsonhash "github.com/komkom/go-jsonhash"
 	"github.com/pborman/uuid"
 	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
@@ -107,6 +108,7 @@ func (ts *osbapiTestSuite) OSBClient() osb.Client {
 	if ts.osbClient == nil {
 		config := osb.DefaultClientConfiguration()
 		config.URL = fmt.Sprintf("http://%s", ts.ServerAddr)
+		config.APIVersion = osb.Version2_13()
 
 		osbClient, err := osb.NewClient(config)
 		require.NoError(ts.t, err)
@@ -155,8 +157,12 @@ func TestOSBAPIStatusSuccess(t *testing.T) {
 	ts.ServerRun()
 	defer ts.ServerShutdown()
 
+	client := &http.Client{}
+	req, _ := http.NewRequest("GET", fmt.Sprintf("http://%s/statusz", ts.ServerAddr), nil)
+	req.Header.Set(osb.APIVersionHeader, "2.13")
+
 	// WHEN
-	resp, err := http.Get(fmt.Sprintf("http://%s/statusz", ts.ServerAddr))
+	resp, err := client.Do(req)
 
 	// THEN
 	require.NoError(t, err)
@@ -209,8 +215,9 @@ func TestOSBAPIProvisionSuccess(t *testing.T) {
 		Context: map[string]interface{}{
 			"namespace": string(ts.Exp.Namespace),
 		},
-		OrganizationGUID: nsUID,
-		SpaceGUID:        nsUID,
+		OrganizationGUID:    nsUID,
+		SpaceGUID:           nsUID,
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 
 	// WHEN
@@ -226,6 +233,90 @@ func TestOSBAPIProvisionSuccess(t *testing.T) {
 }
 
 func TestOSBAPIProvisionRepeatedOnAlreadyFullyProvisionedInstance(t *testing.T) {
+	// GIVEN
+	ts := newOSBAPITestSuite(t, nil)
+
+	fixInstance := ts.Exp.NewInstance()
+	fixInstance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
+	ts.StorageFactory.Instance().Insert(fixInstance)
+
+	fixOperation := ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateSucceeded)
+	ts.StorageFactory.InstanceOperation().Insert(fixOperation)
+
+	ts.ServerRun()
+	defer ts.ServerShutdown()
+
+	nsUID := uuid.NewRandom().String()
+	req := &osb.ProvisionRequest{
+		AcceptsIncomplete: true,
+		InstanceID:        string(ts.Exp.InstanceID),
+		ServiceID:         string(ts.Exp.Service.ID),
+		PlanID:            string(ts.Exp.ServicePlan.ID),
+		Context: map[string]interface{}{
+			"namespace": string(ts.Exp.Namespace),
+		},
+		OrganizationGUID:    nsUID,
+		SpaceGUID:           nsUID,
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
+	}
+
+	// WHEN
+	resp, err := ts.OSBClient().ProvisionInstance(req)
+
+	// THEN
+	require.NoError(t, err)
+
+	assert.False(t, resp.Async)
+	assert.Nil(t, resp.OperationKey)
+
+	// No activity on tiller should happen
+	defer ts.HelmClient.AssertExpectations(t)
+}
+
+func TestOSBAPIProvisionRepeatedOnProvisioningInProgress(t *testing.T) {
+	// GIVEN
+	ts := newOSBAPITestSuite(t, nil)
+
+	fixInstance := ts.Exp.NewInstance()
+	fixInstance.ParamsHash = jsonhash.HashS(map[string]interface{}{})
+	ts.StorageFactory.Instance().Insert(fixInstance)
+
+	fixOperation := ts.Exp.NewInstanceOperation(internal.OperationTypeCreate, internal.OperationStateInProgress)
+	expOpID := internal.OperationID("fix-op-id")
+	fixOperation.OperationID = expOpID
+	ts.StorageFactory.InstanceOperation().Insert(fixOperation)
+
+	ts.ServerRun()
+	defer ts.ServerShutdown()
+
+	nsUID := uuid.NewRandom().String()
+	req := &osb.ProvisionRequest{
+		AcceptsIncomplete: true,
+		InstanceID:        string(ts.Exp.InstanceID),
+		ServiceID:         string(ts.Exp.Service.ID),
+		PlanID:            string(ts.Exp.ServicePlan.ID),
+		Context: map[string]interface{}{
+			"namespace": string(ts.Exp.Namespace),
+		},
+		OrganizationGUID:    nsUID,
+		SpaceGUID:           nsUID,
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
+	}
+
+	// WHEN
+	resp, err := ts.OSBClient().ProvisionInstance(req)
+
+	// THEN
+	require.NoError(t, err)
+
+	assert.True(t, resp.Async)
+	assert.EqualValues(t, expOpID, *resp.OperationKey)
+
+	// No activity on tiller should happen
+	defer ts.HelmClient.AssertExpectations(t)
+}
+
+func TestOSBAPIProvisionConflictErrorOnAlreadyFullyProvisionedInstance(t *testing.T) {
 	// GIVEN
 	ts := newOSBAPITestSuite(t, nil)
 
@@ -247,24 +338,23 @@ func TestOSBAPIProvisionRepeatedOnAlreadyFullyProvisionedInstance(t *testing.T) 
 		Context: map[string]interface{}{
 			"namespace": string(ts.Exp.Namespace),
 		},
-		OrganizationGUID: nsUID,
-		SpaceGUID:        nsUID,
+		OrganizationGUID:    nsUID,
+		SpaceGUID:           nsUID,
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 
 	// WHEN
 	resp, err := ts.OSBClient().ProvisionInstance(req)
 
 	// THEN
-	require.NoError(t, err)
-
-	assert.False(t, resp.Async)
-	assert.Nil(t, resp.OperationKey)
+	assert.Nil(t, resp)
+	assert.Equal(t, osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: ptrStr(fmt.Sprintf("while comparing provisioning parameters map[]: provisioning parameters hash differs - new hqB_njX1ZeC2Y0XVG9_uBw==, old TODO, for instance fix-I-ID")), Description: ptrStr("")}, err)
 
 	// No activity on tiller should happen
 	defer ts.HelmClient.AssertExpectations(t)
 }
 
-func TestOSBAPIProvisionRepeatedOnProvisioningInProgress(t *testing.T) {
+func TestOSBAPIProvisionConflictErrorOnProvisioningInProgress(t *testing.T) {
 	// GIVEN
 	ts := newOSBAPITestSuite(t, nil)
 
@@ -288,18 +378,17 @@ func TestOSBAPIProvisionRepeatedOnProvisioningInProgress(t *testing.T) {
 		Context: map[string]interface{}{
 			"namespace": string(ts.Exp.Namespace),
 		},
-		OrganizationGUID: nsUID,
-		SpaceGUID:        nsUID,
+		OrganizationGUID:    nsUID,
+		SpaceGUID:           nsUID,
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 
 	// WHEN
 	resp, err := ts.OSBClient().ProvisionInstance(req)
 
 	// THEN
-	require.NoError(t, err)
-
-	assert.True(t, resp.Async)
-	assert.EqualValues(t, expOpID, *resp.OperationKey)
+	assert.Nil(t, resp)
+	assert.Equal(t, osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: ptrStr(fmt.Sprintf("while comparing provisioning parameters map[]: provisioning parameters hash differs - new hqB_njX1ZeC2Y0XVG9_uBw==, old TODO, for instance fix-I-ID")), Description: ptrStr("")}, err)
 
 	// No activity on tiller should happen
 	defer ts.HelmClient.AssertExpectations(t)
@@ -319,10 +408,11 @@ func TestOSBAPIDeprovisionOnAlreadyDeprovisionedInstance(t *testing.T) {
 	defer ts.ServerShutdown()
 
 	req := &osb.DeprovisionRequest{
-		AcceptsIncomplete: true,
-		InstanceID:        string(ts.Exp.InstanceID),
-		ServiceID:         string(ts.Exp.Service.ID),
-		PlanID:            string(ts.Exp.ServicePlan.ID),
+		AcceptsIncomplete:   true,
+		InstanceID:          string(ts.Exp.InstanceID),
+		ServiceID:           string(ts.Exp.Service.ID),
+		PlanID:              string(ts.Exp.ServicePlan.ID),
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 
 	// WHEN
@@ -347,10 +437,11 @@ func TestOSBAPIDeprovisionOnAlreadyDeprovisionedAndRemovedInstance(t *testing.T)
 	defer ts.ServerShutdown()
 
 	req := &osb.DeprovisionRequest{
-		AcceptsIncomplete: true,
-		InstanceID:        string(ts.Exp.InstanceID),
-		ServiceID:         string(ts.Exp.Service.ID),
-		PlanID:            string(ts.Exp.ServicePlan.ID),
+		AcceptsIncomplete:   true,
+		InstanceID:          string(ts.Exp.InstanceID),
+		ServiceID:           string(ts.Exp.Service.ID),
+		PlanID:              string(ts.Exp.ServicePlan.ID),
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 
 	// WHEN
@@ -382,10 +473,11 @@ func TestOSBAPIDeprovisionRepeatedOnDeprovisioningInProgress(t *testing.T) {
 	defer ts.ServerShutdown()
 
 	req := &osb.DeprovisionRequest{
-		AcceptsIncomplete: true,
-		InstanceID:        string(ts.Exp.InstanceID),
-		ServiceID:         string(ts.Exp.Service.ID),
-		PlanID:            string(ts.Exp.ServicePlan.ID),
+		AcceptsIncomplete:   true,
+		InstanceID:          string(ts.Exp.InstanceID),
+		ServiceID:           string(ts.Exp.Service.ID),
+		PlanID:              string(ts.Exp.ServicePlan.ID),
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 
 	// WHEN
@@ -420,10 +512,11 @@ func TestOSBAPIDeprovisionSuccess(t *testing.T) {
 	ts.StorageFactory.Instance().Insert(fixInstance)
 
 	req := &osb.DeprovisionRequest{
-		AcceptsIncomplete: true,
-		InstanceID:        string(ts.Exp.InstanceID),
-		ServiceID:         string(ts.Exp.Service.ID),
-		PlanID:            string(ts.Exp.ServicePlan.ID),
+		AcceptsIncomplete:   true,
+		InstanceID:          string(ts.Exp.InstanceID),
+		ServiceID:           string(ts.Exp.Service.ID),
+		PlanID:              string(ts.Exp.ServicePlan.ID),
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 
 	// WHEN
@@ -456,10 +549,11 @@ func TestOSBAPILastOperationSuccess(t *testing.T) {
 	// WHEN
 	opKey := osb.OperationKey(ts.Exp.OperationID)
 	req := &osb.LastOperationRequest{
-		InstanceID:   string(ts.Exp.InstanceID),
-		ServiceID:    ptr.String(string(ts.Exp.Service.ID)),
-		PlanID:       ptr.String(string(ts.Exp.ServicePlan.ID)),
-		OperationKey: &opKey,
+		InstanceID:          string(ts.Exp.InstanceID),
+		ServiceID:           ptr.String(string(ts.Exp.Service.ID)),
+		PlanID:              ptr.String(string(ts.Exp.ServicePlan.ID)),
+		OperationKey:        &opKey,
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 	resp, err := ts.OSBClient().PollLastOperation(req)
 
@@ -481,10 +575,11 @@ func TestOSBAPILastOperationForNonExistingInstance(t *testing.T) {
 	// WHEN
 	opKey := osb.OperationKey(ts.Exp.OperationID)
 	req := &osb.LastOperationRequest{
-		InstanceID:   string(ts.Exp.InstanceID),
-		ServiceID:    ptr.String(string(ts.Exp.Service.ID)),
-		PlanID:       ptr.String(string(ts.Exp.ServicePlan.ID)),
-		OperationKey: &opKey,
+		InstanceID:          string(ts.Exp.InstanceID),
+		ServiceID:           ptr.String(string(ts.Exp.Service.ID)),
+		PlanID:              ptr.String(string(ts.Exp.ServicePlan.ID)),
+		OperationKey:        &opKey,
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 	_, err := ts.OSBClient().PollLastOperation(req)
 
@@ -510,6 +605,7 @@ func TestOSBAPIBindFailureWithDisallowedParametersFieldInReq(t *testing.T) {
 		Parameters: map[string]interface{}{
 			"params": "set-but-not-allowed",
 		},
+		OriginatingIdentity: &osb.OriginatingIdentity{Platform: osb.PlatformKubernetes, Value: "{}"},
 	}
 	_, err := ts.OSBClient().Bind(req)
 
@@ -530,4 +626,8 @@ type fakeBindTmplResolver struct{}
 
 func (fakeBindTmplResolver) Resolve(bindYAML bind.RenderedBindYAML, ns internal.Namespace) (*bind.ResolveOutput, error) {
 	return &bind.ResolveOutput{}, nil
+}
+
+func ptrStr(str string) *string {
+	return &str
 }

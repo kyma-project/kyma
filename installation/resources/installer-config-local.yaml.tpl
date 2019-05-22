@@ -55,12 +55,26 @@ data:
   gateways.istio-ingressgateway.autoscaleEnabled: "false"
 
   pilot.resources.limits.memory: 1024Mi
-  pilot.resources.limits.cpu: 200m
-  pilot.resources.requests.memory: 256Mi
-  pilot.resources.requests.cpu: 100m
+  pilot.resources.limits.cpu: 500m
+  pilot.resources.requests.memory: 512Mi
+  pilot.resources.requests.cpu: 250m
+  pilot.autoscaleEnabled: "false"
 
-  mixer.resources.limits.memory: 256Mi
-  mixer.resources.requests.memory: 128Mi
+  mixer.policy.resources.limits.memory: 2048Mi
+  mixer.policy.resources.limits.cpu: 500m
+  mixer.policy.resources.requests.memory: 512Mi
+  mixer.policy.resources.requests.cpu: 300m
+
+  mixer.telemetry.resources.limits.memory: 2048Mi
+  mixer.telemetry.resources.limits.cpu: 500m
+  mixer.telemetry.resources.requests.memory: 512Mi
+  mixer.telemetry.resources.requests.cpu: 300m
+  mixer.loadshedding.mode: disabled
+
+  mixer.policy.autoscaleEnabled: "false"
+  mixer.telemetry.autoscaleEnabled: "false"
+  
+  global.tracer.zipkin.address: zipkin.kyma-system:9411
 ---
 apiVersion: v1
 kind: ConfigMap

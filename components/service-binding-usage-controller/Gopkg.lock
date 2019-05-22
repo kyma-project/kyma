@@ -436,8 +436,8 @@
     "storage/v1alpha1",
     "storage/v1beta1"
   ]
-  revision = "2d6f90ab1293a1fb871cf149423ebb72aa7423aa"
-  version = "kubernetes-1.11.1"
+  revision = "f1b257a4ce9632d2f06a58c3417d1523149bc94d"
+  version = "kubernetes-1.11.10"
 
 [[projects]]
   name = "k8s.io/apimachinery"
@@ -484,11 +484,10 @@
     "third_party/forked/golang/json",
     "third_party/forked/golang/reflect"
   ]
-  revision = "103fd098999dc9c0c88536f5c9ad2e5da39373ae"
-  version = "kubernetes-1.11.0"
+  revision = "c182ff3b98419e7305cc361fd1811988591656cf"
+  version = "kubernetes-1.11.10"
 
 [[projects]]
-  branch = "release-8.0"
   name = "k8s.io/client-go"
   packages = [
     "discovery",
@@ -583,7 +582,8 @@
     "util/retry",
     "util/workqueue"
   ]
-  revision = "1f13a808da65775f22cbf47862c4e5898d8f4ca1"
+  revision = "3ec0d5188431b312d6b3d5b6e46e022d5c0843a4"
+  version = "kubernetes-1.11.10"
 
 [[projects]]
   branch = "release-1.10"
@@ -643,6 +643,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d8891a848e073e4d5197478120998b58203d29b3d3838dd76cf6bd05ef3db9a2"
+  inputs-digest = "d7a4be0fb0379c0be7eb4894ae825b05ff1cf10fbdf59e327cb8e458ea1c694c"
   solver-name = "gps-cdcl"
   solver-version = 1
