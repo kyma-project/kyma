@@ -182,6 +182,6 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </details>
     </div>
 
- Read the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma. 
+Read the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma. 
 
- >**CAUTION:** Markdown customized in a different way than in Kyma may not render properly in the Console UI.
+>**CAUTION:** Markdown customized in a different way than in Kyma may not render properly in the Console UI.
