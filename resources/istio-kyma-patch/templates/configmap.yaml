@@ -23,6 +23,10 @@ data:
         "op": "add",
         "path": "/spec/template/spec/containers/0/ports/2/hostPort",
         "value": 443
+      },{
+        "op": "add",
+        "path": "/spec/template/spec/containers/0/ports/3/hostPort",
+        "value": 9443
       }
       {{ end }}
     ]
