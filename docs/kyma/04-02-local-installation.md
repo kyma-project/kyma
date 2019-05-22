@@ -24,20 +24,20 @@ Virtualization:
 
 ## Install Kyma and access the Console UI
 
-Follow there instructions to install Kyma from a release or from sources:
+Follow these instructions to install Kyma from a release or from sources:
 <div tabs>
   <details>
   <summary>
   From a release
   </summary>
     
-  1. Provision a kubernetes cluster on minikube ready to be installed with Kyma run this command:
+  1. Provision a Kubernetes cluster on Minikube. Run:
     
      ```bash
      kyma provision minikube
      ```
-     > **NOTE:** Kyma CLI command above uses default minikube vm driver installed for your OS, for list of default vm driver for supported OS and other available vm drivers you can read from [here](http://github.com/kyma-project/cli)
-  2. Install Kyma with latest release, run following command:
+     > **NOTE:** The `provision command uses default Minikube vm driver installed for your OS. For a list of supported vm drivers see [this document](http://github.com/kyma-project/cli).
+  2. Install Kyma from the latest release. Run:
      ```bash
      kyma install
      ```
@@ -49,12 +49,12 @@ Follow there instructions to install Kyma from a release or from sources:
      ```bash
      export KYMA_RELEASE={KYMA_RELEASE_VERSION}
      ```
-  5. Install Kyma release `$KYMA_RELEASE` in minikube:
+  5. Install Kyma release on Minikube:
      ```bash
      kyma install -r $KYMA_RELEASE
      ```
      
-     Wait until installation process completed
+ 
      
   6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
   
@@ -68,7 +68,7 @@ Follow there instructions to install Kyma from a release or from sources:
     
   1. Open a terminal window and navigate to a space in which you want to store local Kyma sources.
     
-  2. Clone the Kyma repository to your machine using either HTTPS or SHH. Run this command to clone the repository.
+  2. Clone the `Kyma` repository using either HTTPS or SHH. Run:
      
      <div tabs>
        <details>
@@ -97,18 +97,17 @@ Follow there instructions to install Kyma from a release or from sources:
      ```
      >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
-  4. Provision a kubernetes cluster on minikube ready to be installed with Kyma run this command:
+  4. Provision a Kubernetes cluster on Minikube. Run:
      ```bash
      kyma provision minikube
      ```
-     > **NOTE:** Kyma CLI command above uses default minikube vm driver installed for your OS, for list of default vm driver for supported OS and other available vm drivers you can read from [here](http://github.com/kyma-project/cli)
-  5. Install Kyma from sources run following command:
+     >  **NOTE:** The `provision command uses default Minikube vm driver installed for your OS. For a list of supported vm drivers see [this document](http://github.com/kyma-project/cli).
+  5. Install Kyma from sources. Run:
      
      ```bash
      kyma install --local --src-path {YOUR_KYMA_SOURCE_PATH}
      ```
      
-     Wait until installation process completed.
   
   6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
 
@@ -134,7 +133,7 @@ Use the `minikube.sh` script to restart the Minikube cluster without reinstallin
    kyma provision minikube
    ```
 
-The Kyma CLI discovers that a minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the Kyma CLI to start the minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
+The Kyma CLI discovers that a Minikube cluster is initialized and asks if you want to delete it. Answering `no` causes the Kyma CLI to start the Minikube cluster and restarts all of the previously installed components. Even though this procedure takes some time, it is faster than a clean installation as you don't download all of the required Docker images.
 
 To verify that the restart is successful, run this command and check if all Pods have the `RUNNING` status:
 
