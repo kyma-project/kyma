@@ -7,18 +7,18 @@ const (
     applicationGatewayTestsImage: {{ .ApplicationGatewayTestsImage }}
     eventServiceImage: {{ .EventServiceImage }}
     eventServiceTestsImage: {{ .EventServiceTestsImage }}
-    appConnectorValidationProxyImage: {{ .AppConnectorValidationProxyImage }}
+    applicationConnectivityValidatorImage: {{ .ApplicationConnectivityValidatorImage }}
     tenant: {{ .Tenant }}
     group: {{ .Group }}`
 )
 
 type OverridesData struct {
-	DomainName                       string
-	ApplicationGatewayImage          string
-	ApplicationGatewayTestsImage     string
-	EventServiceImage                string
-	EventServiceTestsImage           string
-	AppConnectorValidationProxyImage string
-	Tenant                           string
-	Group                            string
+	DomainName                            string
+	ApplicationGatewayImage               string
+	ApplicationGatewayTestsImage          string
+	EventServiceImage                     string
+	EventServiceTestsImage                string
+	ApplicationConnectivityValidatorImage string
+	Tenant                                string
+	Group                                 string
 }

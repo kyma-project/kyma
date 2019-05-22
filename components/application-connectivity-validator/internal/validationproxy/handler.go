@@ -9,9 +9,9 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"github.com/kyma-project/kyma/components/app-connector-validation-proxy/internal/httptools"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/httptools"
 
-	"github.com/kyma-project/kyma/components/app-connector-validation-proxy/internal/apperrors"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/apperrors"
 
 	"github.com/gorilla/mux"
 )

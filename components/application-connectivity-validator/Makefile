@@ -1,4 +1,4 @@
-APP_NAME = app-connector-validation-proxy
+APP_NAME = application-connectivity-validator
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 

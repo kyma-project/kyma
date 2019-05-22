@@ -15,7 +15,7 @@ service:
     port: *externalAPIPort
 
 
-validationProxy:
+applicationConnectivityValidator:
   image:
     pullPolicy: IfNotPresent
   args:

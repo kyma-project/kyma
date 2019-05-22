@@ -1,9 +1,9 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-validation-proxy
+  name: {{ .Release.Name }}-connectivity-validator
   labels:
-    app: {{ .Release.Name }}-validation-proxy
+    app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
@@ -17,42 +17,42 @@ spec:
       annotations:
         sidecar.istio.io/inject: "true"
       labels:
-        app: {{ .Release.Name }}-validation-proxy
-        release: {{ .Release.Name }}-validation-proxy
+        app: {{ .Release.Name }}-connectivity-validator
+        release: {{ .Release.Name }}-connectivity-validator
     spec:
       containers:
-        - name: {{ .Release.Name }}-validation-proxy
-          image: {{ .Values.global.appConnectorValidationProxyImage }}
+        - name: {{ .Release.Name }}-connectivity-validator
+          image: {{ .Values.global.applicationConnectivityValidatorImage }}
           imagePullPolicy: {{ .Values.deployment.image.pullPolicy }}
           args:
-            - "/appconnectorvalidationproxy"
-            - "--proxyPort={{ .Values.validationProxy.args.proxyPort }}"
+            - "/applicationconnectivityvalidator"
+            - "--proxyPort={{ .Values.applicationConnectivityValidator.args.proxyPort }}"
             - "--tenant={{ .Values.global.tenant }}"
             - "--group={{ .Values.global.group }}"
             - "--eventServicePathPrefix=/{{ .Release.Name }}/v1/events"
             - "--eventServiceHost={{ .Release.Name }}-event-service-external-api:{{ .Values.eventService.service.externalapi.port }}"
             - "--appRegistryPathPrefix=/{{ .Release.Name }}/v1/metadata"
-            - "--appRegistryHost={{ .Values.validationProxy.args.appRegistryHost }}"
+            - "--appRegistryHost={{ .Values.applicationConnectivityValidator.args.appRegistryHost }}"
           ports:
-            - containerPort: {{ .Values.validationProxy.args.proxyPort }}
+            - containerPort: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
               name: http-proxy
 # TODO - consider adding health endpoint and redinnes / livenes probes
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Release.Name }}-validation-proxy
+  name: {{ .Release.Name }}-connectivity-validator
   labels:
     application: {{ .Release.Name }}
-    app: {{ .Release.Name }}-validation-proxy
+    app: {{ .Release.Name }}-connectivity-validator
     release: {{ .Release.Name }}
     heritage: {{ .Release.Service }}
 spec:
   type: ClusterIP
   ports:
-    - port: {{ .Values.validationProxy.args.proxyPort }}
+    - port: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
       protocol: TCP
       name: http-proxy
   selector:
-    app: {{ .Release.Name }}-validation-proxy
-    release: {{ .Release.Name }}-validation-proxy
+    app: {{ .Release.Name }}-connectivity-validator
+    release: {{ .Release.Name }}-connectivity-validator

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kyma-project/kyma/components/app-connector-validation-proxy/internal/validationproxy"
+	"github.com/kyma-project/kyma/components/application-connectivity-validator/internal/validationproxy"
 	log "github.com/sirupsen/logrus"
 )
 

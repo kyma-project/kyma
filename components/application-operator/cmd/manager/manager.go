@@ -76,12 +76,12 @@ func main() {
 
 func newReleaseManager(options *options, cfg *rest.Config) (appRelease.ReleaseManager, error) {
 	overridesDefaults := appRelease.OverridesData{
-		DomainName:                       options.domainName,
-		ApplicationGatewayImage:          options.applicationGatewayImage,
-		ApplicationGatewayTestsImage:     options.applicationGatewayTestsImage,
-		EventServiceImage:                options.eventServiceImage,
-		EventServiceTestsImage:           options.eventServiceTestsImage,
-		AppConnectorValidationProxyImage: options.appConnectorValidationProxyImage,
+		DomainName:                            options.domainName,
+		ApplicationGatewayImage:               options.applicationGatewayImage,
+		ApplicationGatewayTestsImage:          options.applicationGatewayTestsImage,
+		EventServiceImage:                     options.eventServiceImage,
+		EventServiceTestsImage:                options.eventServiceTestsImage,
+		ApplicationConnectivityValidatorImage: options.applicationConnectivityValidatorImage,
 	}
 
 	appClient, err := versioned.NewForConfig(cfg)

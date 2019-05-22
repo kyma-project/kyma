@@ -30,7 +30,7 @@ const (
     applicationGatewayTestsImage: 
     eventServiceImage: 
     eventServiceTestsImage: 
-    appConnectorValidationProxyImage: 
+    applicationConnectivityValidatorImage: 
     tenant: %s
     group: %s`
 )

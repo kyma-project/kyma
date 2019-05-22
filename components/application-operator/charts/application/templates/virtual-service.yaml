@@ -23,5 +23,5 @@ spec:
       route:
         - destination:
             port:
-              number: {{ .Values.validationProxy.args.proxyPort }}
-            host: {{ .Release.Name }}-validation-proxy
+              number: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
+            host: {{ .Release.Name }}-connectivity-validator
