@@ -46,7 +46,7 @@ done
 kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deployment/size-s
 kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deployment/size-m
 kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deployment/size-l
-# kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" 
+# kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deployment/size-xl
 
 waitFor "hpa" "size-s"
 waitFor "hpa" "size-m"

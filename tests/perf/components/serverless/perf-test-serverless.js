@@ -1,13 +1,14 @@
 import http from "k6/http"
-import { check, sleep } from "k6";
+import { check } from "k6";
 
 export let options = {
-  rps: 1000,
+  // unlimited
+  rps: 0,
   tags: {
     "component": "serverless",
     "revision": `${__ENV.REVISION}`
   },
-  // ramp up #virtual users (VU) over time to get maximum througput
+  // ramp up #virtual users (VU) over time to get maximum throughput
   stages: [
     { duration: "90s", target: 10 },
     { duration: "90s", target: 100 },
@@ -51,10 +52,13 @@ export let configuration =
     // }
   ]
 
+// each virtual user runs this function in a loop
 export default function () {
+  // call all lambda functions
   configuration.forEach(function (element) {
     let res = http.get(element.url, element.tags);
-
+    
+    // TODO: report custom metric where delay is substracted
     check(res, {
       "status was 200": (r) => r.status == 200,
     }, element.tags);
