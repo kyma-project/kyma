@@ -3,8 +3,8 @@ package plugins
 import (
 	"github.com/pkg/errors"
 
-	"github.com/heptio/ark/pkg/apis/ark/v1"
-	"github.com/heptio/ark/pkg/restore"
+	"github.com/heptio/velero/pkg/apis/velero/v1"
+	"github.com/heptio/velero/pkg/restore"
 	"github.com/sirupsen/logrus"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -17,7 +17,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 )
 
-// SetOwnerReference is a plugin for ark to set new value of UID in metadata.ownerReference field
+// SetOwnerReference is a plugin for velero to set new value of UID in metadata.ownerReference field
 // based on new values of other restored objects
 type SetOwnerReference struct {
 	Log logrus.FieldLogger
@@ -44,7 +44,7 @@ func (p *SetOwnerReference) Execute(item runtime.Unstructured, restore *v1.Resto
 	}
 
 	// Secret's name and service binding's name are not always equal (they are when created in kyma's console, but can be different when created by from yaml's)
-	// Searching service binding by name is a workaround before https://github.com/heptio/ark/issues/965 will be resolved
+	// Searching service binding by name is a workaround before https://github.com/heptio/velero/issues/965 will be resolved
 	sb, err := scClient.ServiceBindings(metadata.GetNamespace()).Get(metadata.GetName(), metav1.GetOptions{})
 	switch {
 	case err == nil:
