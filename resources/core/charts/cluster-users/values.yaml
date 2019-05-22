@@ -29,6 +29,7 @@ clusterRoles:
       - "ui.kyma-project.io"
       - "kyma.cx"
       - "ui.kyma.cx"
+      - "testing.kyma-project.io"
   verbs:
     edit:
       - "create"
