@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-echo "The script minikube.sh is deprecated and will be removed with Kyma release 1.14, please use Kyma CLI instead"
+echo "The script minikube.sh is deprecated and will be removed with Kyma release 1.4, please use Kyma CLI instead"
 
 set -o errexit
 

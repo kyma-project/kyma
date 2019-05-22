@@ -2,7 +2,7 @@
 
 set -o errexit
 
-echo "The script configure-components.sh is deprecated and will be removed with Kyma release 1.14, please use Kyma CLI instead"
+echo "The script configure-components.sh is deprecated and will be removed with Kyma release 1.4, please use Kyma CLI instead"
 
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 

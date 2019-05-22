@@ -37,28 +37,23 @@ Follow these instructions to install Kyma from a release or from sources:
      kyma provision minikube
      ```
      > **NOTE:** The `provision command uses default Minikube vm driver installed for your OS. For a list of supported vm drivers see [this document](http://github.com/kyma-project/cli).
-  2. Install Kyma from the latest release. Run:
-     ```bash
-     kyma install
-     ```
-     > **NOTE** If you need install a specific Kyma release use following steps
-     
-  3. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the latest release.  
   
-  4. Export the release version as an environment variable:
+  2. Choose the release from which you want to install Kyma. Go to the GitHub [releases](https://github.com/kyma-project/kyma/releases/) page to find out more about each of the available releases.
+ 
+     > **NOTE** Not specifying the release as a parameter in the command triggers the installation of the latest release.
+     
+  3. Export the release version as an environment variable:
      ```bash
      export KYMA_RELEASE={KYMA_RELEASE_VERSION}
      ```
-  5. Install Kyma release on Minikube:
+  4. Install Kyma on Minikube:
      ```bash
-     kyma install -r $KYMA_RELEASE
+     kyma install --release $KYMA_RELEASE
      ```
      
- 
-     
-  6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
+  5. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
   
-  7. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
+  6. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
    
   </details>
   <details>

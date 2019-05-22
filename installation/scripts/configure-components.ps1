@@ -4,7 +4,7 @@ $FILE_PATH = "${CURRENT_DIR}\..\${FILE_NAME}"
 $CM_NAME = "kyma-sub-components"
 $CM_NS = "kyma-installer"
 
-Write-Output @"The script configure-components.ps1 is deprecated and will be removed with Kyma release 1.14, please use Kyma CLI instead"@
+Write-Output @"The script configure-components.ps1 is deprecated and will be removed with Kyma release 1.4, please use Kyma CLI instead"@
 
 # Do nothing if the components.env file is empty or does not exist at all
 if(![System.IO.File]::Exists($FILE_PATH) -or ((Get-Content $FILE_PATH).Length -eq 0)) {

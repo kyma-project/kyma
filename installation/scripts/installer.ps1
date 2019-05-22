@@ -2,7 +2,7 @@ param (
     [string]$CR_PATH = $null,
     [switch]$LOCAL = $false
 )
-Write-Output @"The script installer.ps1 is deprecated and will be removed with Kyma release 1.14, please use Kyma CLI instead"@
+Write-Output @"The script installer.ps1 is deprecated and will be removed with Kyma release 1.4, please use Kyma CLI instead"@
 $CURRENT_DIR = Split-Path $MyInvocation.MyCommand.Path
 
 $cmd = "kubectl apply -f ${CURRENT_DIR}\..\resources\default-sa-rbac-role.yaml"
