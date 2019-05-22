@@ -4,6 +4,7 @@ set -e
 set -o pipefail
 
 export NAMESPACE=serverless
+export FUNC_DELAY=200 # delay in ms
 resources=(
     namespace.yaml
     resource_quota.yaml
@@ -13,7 +14,6 @@ resources=(
     # function-size-xl.yaml
 )
 
-# TODO: XXX can be replaced by kubectl wait -f {filename}
 # wait for resource with the given name until it exists or there is a timeout
 function waitFor() {
     echo "waiting for $1/$2"
@@ -42,12 +42,11 @@ for resource in "${resources[@]}"; do
     envsubst <"$PREREQ_PATH/serverless/$resource" | kubectl -n "$NAMESPACE" apply -f -
 done
 
-# TODO: add timeout for kubectl wait
 # wait for resources to be ready
-kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deploy-l function=size-s deployment
-kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" -l function=size-m deployment
-kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" -l function=size-l deployment
-# kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" -l function=size-xl deployment
+kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deployment/size-s
+kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deployment/size-m
+kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" deployment/size-l
+# kubectl wait --timeout=30s --for=condition=Available -n "$NAMESPACE" 
 
 waitFor "hpa" "size-s"
 waitFor "hpa" "size-m"
