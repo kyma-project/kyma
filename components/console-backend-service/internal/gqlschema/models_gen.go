@@ -237,6 +237,7 @@ type EventActivationEvent struct {
 	EventType   string `json:"eventType"`
 	Version     string `json:"version"`
 	Description string `json:"description"`
+	Schema      JSON   `json:"schema"`
 }
 
 type ExceededQuota struct {

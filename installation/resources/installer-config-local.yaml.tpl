@@ -73,6 +73,8 @@ data:
 
   mixer.policy.autoscaleEnabled: "false"
   mixer.telemetry.autoscaleEnabled: "false"
+  
+  global.tracer.zipkin.address: zipkin.kyma-system:9411
 ---
 apiVersion: v1
 kind: ConfigMap

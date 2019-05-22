@@ -39,7 +39,9 @@ func NewService(secretsRepository secrets.Repository) Service {
 
 func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.API, apperrors.AppError) {
 	api := &model.API{
-		TargetUrl: applicationAPI.TargetUrl,
+		TargetUrl:       applicationAPI.TargetUrl,
+		Headers:         applicationAPI.Headers,
+		QueryParameters: applicationAPI.QueryParameters,
 	}
 
 	if applicationAPI.Credentials != nil {
@@ -56,19 +58,22 @@ func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.
 			api.Credentials = &model.Credentials{
 				OAuth: getOAuthCredentials(secret, applicationAPI.Credentials.Url),
 			}
-			api.Credentials.CSRFTokenEndpointURL = applicationAPI.Credentials.CSRFTokenEndpointURL
 		} else if credentialsType == TypeBasic {
 			api.Credentials = &model.Credentials{
 				BasicAuth: getBasicAuthCredentials(secret),
 			}
-			api.Credentials.CSRFTokenEndpointURL = applicationAPI.Credentials.CSRFTokenEndpointURL
 		} else if credentialsType == TypeCertificateGen {
 			api.Credentials = &model.Credentials{
 				CertificateGen: getCertificateGenCredentials(secret),
 			}
-			api.Credentials.CSRFTokenEndpointURL = applicationAPI.Credentials.CSRFTokenEndpointURL
 		} else {
 			api.Credentials = nil
+		}
+
+		if api.Credentials != nil {
+			api.Credentials.CSRFTokenEndpointURL = applicationAPI.Credentials.CSRFTokenEndpointURL
+			api.Credentials.Headers = applicationAPI.Credentials.Headers
+			api.Credentials.QueryParameters = applicationAPI.Credentials.QueryParameters
 		}
 	}
 

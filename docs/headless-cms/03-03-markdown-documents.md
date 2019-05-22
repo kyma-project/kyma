@@ -3,7 +3,7 @@ title: Markdown documents
 type: Details
 ---
 
-The DocsTopic or ClusterDocsTopic CR supports various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure: 
+The DocsTopic or ClusterDocsTopic custom resource supports various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure: 
 
 ```
 ---
@@ -36,7 +36,7 @@ type: {Document type}
 
 ### Display
 
-In the Docs UI, which is the view displayed once you click on the question mark icon ![](./assets/docs-ui-question-mark.png) in the top-right corner of the Console, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation.
+In the Documentation view (Docs UI), that is available in the Console UI under the questoion mark icon on the top navigation panel, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
 
 <div tabs>
   <details>
@@ -105,7 +105,7 @@ type: Details
   </details>
   <details>
   <summary>
-  Service Catalog preview
+  Service Catalog UI preview
   </summary>
 
 ![](./assets/tabs-catalog-ui.png)
@@ -119,17 +119,19 @@ type: Details
 Content is the body of your document. Write content in [Markdown](https://daringfireball.net/projects/markdown/syntax) which is a simplified markup language.
 
 In Kyma, to make documentation more reader-friendly, some Markdown features are customized. See the following examples:
-1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/links-in-docs.md) - link between documents in the same topic or in different topics using metadata. 
+
+1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/links-in-docs.md) - link between documents in the same topic or in different topics using metadata.
+
     <div tabs>
       <details>
       <summary>
       Source
       </summary>
 
-      Create a reference using the /{type-of-topic}/{id}#{type}-{title}-{header} pattern:
-      ```
-      [Kyma in a nutshell](/root/kyma/#overview-in-a-nutshell)
-      ```
+    Create a reference using the /{type-of-topic}/{id}#{type}-{title}-{header} pattern:
+    ```
+    [Kyma in a nutshell](/root/kyma/#overview-in-a-nutshell)
+    ```
       </details>
       <details>
       <summary>
@@ -139,30 +141,36 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       [Kyma in a nutshell](/root/kyma/#overview-kyma-in-a-nutshell)
       </details>
     </div>
+
 2. [Documentation toggles](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/documentation-toggle.md) - render several versions of a given section in one document or have several versions of one document.
+
     <div tabs>
       <details>
       <summary>
       Source
       </summary>
 
-      ```    
-      <div tabs>
-      <details>
-      <summary>
-      HTTPS
-      </summary>
-
-      `git clone https://github.com/kyma-project/kyma.git ; cd kyma`
+    ![](./assets/docs-toggle-source.png)
       </details>
       <details>
       <summary>
-      SSH
+      Preview
       </summary>
 
-      `git clone git@github.com:kyma-project/kyma.git ; cd kyma`
+    ![](./assets/docs-toggle.png)
       </details>
     </div>
+    
+3. [Panels](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
+
+    <div tabs>
+      <details>
+      <summary>
+      Source
+      </summary>
+
+    ```
+    >**TIP:** If you contribute to the [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository, you do not have to compress your bundles as the system does it automatically.
     ```
       </details>
       <details>
@@ -170,29 +178,10 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       Preview
       </summary>
 
-      ![](./assets/doc-toggle.png)
-      </details>
-    </div>
-3. [Panels](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
-    <div tabs>
-      <details>
-      <summary>
-      Source
-      </summary>
-
-      ```
-      >**TIP:** If you contribute to the [bundles](https://github.com/kyma-project/bundles/tree/master/bundles) repository, you do not have to compress your bundles as the system does it automatically.
-      ``` 
-      </details>
-      <details>
-      <summary>
-      Preview
-      </summary>
-
-      ![](./assets/tip-panel.png)
+    ![](./assets/tip-panel.png)
       </details>
     </div>
 
- Read the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma. 
+Read the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma. 
 
- >**CAUTION:** Markdown customized in a different way than in Kyma may not render properly in the Console UI.
+>**CAUTION:** Markdown customized in a different way than in Kyma may not render properly in the Console UI.

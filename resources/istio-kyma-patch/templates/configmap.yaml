@@ -7,44 +7,6 @@ metadata:
     app: istio-kyma-patch
     chart: {{ .Chart.Name }}-{{ .Chart.Version }}
 data:
-  istio-ingressgateway.deployment.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/15",
-        "value": "zipkin.kyma-system:9411"
-      }
-      {{ if .Values.global.isLocalEnv }}
-      ,{
-        "op": "add",
-        "path": "/spec/template/spec/containers/0/ports/1/hostPort",
-        "value": 80
-      },{
-        "op": "add",
-        "path": "/spec/template/spec/containers/0/ports/2/hostPort",
-        "value": 443
-      }
-      {{ end }}
-    ]
-
-  istio-policy.deployment.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/6",
-        "value": "--trace_zipkin_url=http://zipkin.kyma-system:9411/api/v1/spans"
-      }
-    ]
-
-  istio-telemetry.deployment.patch.json: |
-    [
-      {
-        "op": "replace",
-        "path": "/spec/template/spec/containers/0/args/6",
-        "value": "--trace_zipkin_url=http://zipkin.kyma-system:9411/api/v1/spans"
-      }
-    ]
-
   istio-sidecar-injector.mutatingwebhookconfiguration.patch.json: |
     [
       {

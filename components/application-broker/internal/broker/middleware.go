@@ -21,6 +21,15 @@ func (m *OSBContextMiddleware) ServeHTTP(rw http.ResponseWriter, r *http.Request
 		BrokerNamespace:     brokerNamespace,
 	}
 
+	if err := osbCtx.validateAPIVersion(); err != nil {
+		writeErrorResponse(rw, http.StatusPreconditionFailed, err.Error(), "Requests requires the 'X-Broker-API-Version' header specified")
+		return
+	}
+	if err := osbCtx.validateOriginatingIdentity(); err != nil {
+		writeErrorResponse(rw, http.StatusPreconditionFailed, err.Error(), "Requests requires the 'X-Broker-API-Originating-Identity' header specified")
+		return
+	}
+
 	r = r.WithContext(contextWithOSB(r.Context(), osbCtx))
 
 	next(rw, r)

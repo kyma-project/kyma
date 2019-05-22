@@ -12,7 +12,7 @@ Integrate these files with your scheduled or on-demand configurations to back up
 
 >**NOTE:** To fully back up a cluster, you must back up both user and system Namespaces. 
 
-Modify the files to adjust the backup scope. For details about the file format, see the [Ark documentation](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md).
+Modify the files to adjust the backup scope. For details about the file format, see the [documentation](https://velero.io/docs/v1.0.0/output-file-format/).
 
 ## Create manual backups
 
@@ -78,7 +78,7 @@ To schedule a backup, run the following command:
 
 ## Backup retention period
 
-To set the retention period of a backup, define the **ttl** parameter in the Backup specification [definition](https://github.com/heptio/velero/blob/master/docs/api-types/backup.md#definition):
+To set the retention period of a backup, define the **ttl** parameter in the Backup specification [definition](https://velero.io/docs/v1.0.0/output-file-format/):
 
 ```  The amount of time before this backup is eligible for garbage collection.
   ttl: 24h0m0s 
