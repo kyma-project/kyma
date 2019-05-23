@@ -67,7 +67,7 @@ func createCertInfos(infoParts [][]string) []CertInfo {
 
 func checkForCorrectness(data []string) apperrors.AppError {
 	if len(data)%3 != 0 {
-		return apperrors.BadRequest("Certificate header is empty")
+		return apperrors.BadRequest("Certificate data is corrupted")
 	}
 	return nil
 }
