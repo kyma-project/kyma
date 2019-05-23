@@ -13,7 +13,7 @@ spec:
     spec:
       containers:
       - name: post-upgrade
-        image: eu.gcr.io/kyma-project/snapshot/test/post-upgrade:test
+        image: eu.gcr.io/kyma-project/event-bus/knative-eventing-post-upgrade:1.0.0
       restartPolicy: Never
       serviceAccountName: knative-eventing-post-upgrade
   backoffLimit: 1
