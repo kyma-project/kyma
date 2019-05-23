@@ -4,7 +4,7 @@ set -e
 set -o pipefail
 
 WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-TIMEOUT=60 # seconds
+TIMEOUT=300 # seconds
 
 export NAMESPACE=serverless
 export FUNC_DELAY=200 # delay in ms
