@@ -89,9 +89,13 @@ func (s *MigrationService) migrateServiceBroker(broker *v1beta1.ServiceBroker) e
 		return errors.Wrapf(err, "while updating ServiceBroker in namespace %s", broker.Namespace)
 	}
 
+	// do not delete the main service for application-broker
+	if broker.Namespace == s.workingNs && existingServiceName == s.serviceName {
+		return nil
+	}
 	// ensure the service is deleted
-	s.log.Infof("Deleting service %s/%s", s.workingNs, existingServiceName)
-	err = s.serviceInterface.Services(s.workingNs).Delete(existingServiceName, &v1.DeleteOptions{})
+	s.log.Infof("Deleting service %s/%s", broker.Namespace, existingServiceName)
+	err = s.serviceInterface.Services(broker.Namespace).Delete(existingServiceName, &v1.DeleteOptions{})
 	switch {
 	case err == nil:
 	case apierrors.IsNotFound(err):
