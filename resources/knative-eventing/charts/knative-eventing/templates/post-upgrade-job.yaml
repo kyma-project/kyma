@@ -5,6 +5,7 @@ metadata:
   namespace: knative-eventing
   annotations:
     "helm.sh/hook": "post-upgrade"
+    "helm.sh/hook-delete-policy": hook-succeeded
 spec:
   template:
     metadata:
