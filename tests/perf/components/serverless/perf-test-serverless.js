@@ -20,40 +20,10 @@ export let options = {
   ],
 }
 
-export let configuration =
-  [
-    {
-      url: `https://size-s.${__ENV.CLUSTER_DOMAIN_NAME}`,
-      tags: {
-        tags: {
-          'testName': 'size-s'
-        }
-      }
-    },
-    {
-      url: `https://size-m.${__ENV.CLUSTER_DOMAIN_NAME}`,
-      tags: {
-        tags: {
-          'testName': 'size-m'
-        }
-      }
-    },
-    {
-      url: `https://size-l.${__ENV.CLUSTER_DOMAIN_NAME}`,
-      tags: {
-        tags: {
-          'testName': 'size-l'
-        }
-      }
-    },
-    // {
-    //   url: `https://size-xl.${__ENV.CLUSTER_DOMAIN_NAME}`,
-    //   tags: {
-    //     tags: {
-    //       'testName': 'size-xl'
-    //     }
-    //   }
-    // }
+export let functionNames =
+  ['size-s',
+    'size-l',
+    'size-m',
   ]
 
 // each virtual user runs this function in a loop
@@ -61,8 +31,12 @@ export default function () {
   let funcDelay = parseInt(`${__ENV.FUNC_DELAY}`)
 
   // call all lambda functions
-  configuration.forEach(function (element) {
-    let res = http.get(element.url, element.tags);
+  functionNames.forEach(function (functionName) {
+    let url = `https://${functionName}.${__ENV.CLUSTER_DOMAIN_NAME}`
+    let tags = {
+      'testName': functionName,
+    }
+    let res = http.get(url, { 'tags': tags })
 
     // report custom trend
     // same as http_req_duration but without function execution time
@@ -72,6 +46,6 @@ export default function () {
 
     check(res, {
       "status was 200": (r) => r.status == 200,
-    }, element.tags);
+    }, { 'tags': tags });
   });
 };
