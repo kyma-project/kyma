@@ -47,3 +47,14 @@ To check the restore progress, run this command:
 To validate the result of the restore use the `kubectl get` command.
 
 > **NOTE:** Even if the restore process is complete, it may take some time for the resources to become available again.
+
+> **NOTE:** In order to make Prometheus work after restore following steps need to be done:
+```
+### Save the prometheus resource in a file
+kubectl get Prometheus -n kyma-system monitoring -oyaml --export > prom.yaml
+
+### Delete metadata.generation and metadata.annotation["kubectl.kubernetes.io/last-applied-configuration"]
+
+### Reapply the prometheus resource using the file
+kubectl -n kyma-system apply -f prom.yaml
+```
