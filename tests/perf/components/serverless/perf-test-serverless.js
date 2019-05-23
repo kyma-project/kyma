@@ -14,16 +14,17 @@ export let options = {
   },
   // ramp up #virtual users (VU) over time to get maximum throughput
   stages: [
-    { duration: "90s", target: 10 },
-    { duration: "90s", target: 100 },
-    { duration: "90s", target: 1000 },
+    { duration: "90s", target: 2 ** 3 },
+    { duration: "90s", target: 2 ** 4 },
+    { duration: "90s", target: 2 ** 5 },
   ],
 }
 
 export let functionNames =
   ['size-s',
     'size-l',
-    'size-m',
+    // 'size-m',
+    // 'size-xl',
   ]
 
 // each virtual user runs this function in a loop
