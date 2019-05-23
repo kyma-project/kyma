@@ -83,3 +83,11 @@ func NewSelfSubjectRulesSvc() *selfSubjectRulesSvc {
 func NewSelfSubjectRulesConverter() *gqlSelfSubjectRulesConverter {
 	return new(gqlSelfSubjectRulesConverter)
 }
+
+func NewNamespaceSvc() *namespaceSvc {
+	return new(namespaceSvc)
+}
+
+func NewNamespaceConverter() *gqlNamespaceConverter {
+	return new(gqlNamespaceConverter)
+}
