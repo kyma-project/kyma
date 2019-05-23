@@ -3,11 +3,16 @@ package certificates
 import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
 const ClientCertHeader = "X-Forwarded-Client-Cert"
+
+type HeaderParser struct {
+	Organization string
+	Unit         string
+	Central      bool
+}
 
 type CertInfo struct {
 	Hash    string
@@ -15,13 +20,7 @@ type CertInfo struct {
 	URI     string
 }
 
-type ValidationInfo struct {
-	Organization string
-	Unit         string
-	Central      bool
-}
-
-func ParseCertificateHeader(r http.Request, vi ValidationInfo) (CertInfo, apperrors.AppError) {
+func (hp *HeaderParser) ParseCertificateHeader(r http.Request) (CertInfo, apperrors.AppError) {
 	certHeader := r.Header.Get(ClientCertHeader)
 
 	if certHeader == "" {
@@ -38,10 +37,10 @@ func ParseCertificateHeader(r http.Request, vi ValidationInfo) (CertInfo, apperr
 
 	certInfos := createCertInfos(infoParts)
 
-	if vi.Central {
+	if hp.Central {
 		return getCertInfoWithNonEmptySubject(certInfos)
 	} else {
-		return getCertInfoWithMatchingSubject(certInfos, vi.Organization, vi.Unit)
+		return getCertInfoWithMatchingSubject(certInfos, hp.Organization, hp.Unit)
 	}
 }
 
@@ -106,27 +105,4 @@ func isInfoPartValid(i []string) bool {
 
 func isSubjectMatching(i CertInfo, organization string, unit string) bool {
 	return GetOrganization(i.Subject) == organization && GetOrganizationalUnit(i.Subject) == unit
-}
-
-func GetOrganization(subject string) string {
-	return getRegexMatch("O=([^,]+)", subject)
-}
-
-func GetOrganizationalUnit(subject string) string {
-	return getRegexMatch("OU=([^,]+)", subject)
-}
-
-func GetCommonName(subject string) string {
-	return getRegexMatch("CN=([^,]+)", subject)
-}
-
-func getRegexMatch(regex, text string) string {
-	cnRegex := regexp.MustCompile(regex)
-	matches := cnRegex.FindStringSubmatch(text)
-
-	if len(matches) != 2 {
-		return ""
-	}
-
-	return matches[1]
 }

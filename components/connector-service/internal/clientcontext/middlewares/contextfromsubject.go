@@ -14,13 +14,13 @@ type contextFromSubjectExtractor func(subject string) (clientcontext.ContextExte
 
 type contextFromSubjMiddleware struct {
 	contextFromSubject contextFromSubjectExtractor
-	validationInfo     certificates.ValidationInfo
+	headerParser       certificates.HeaderParser
 }
 
-func NewContextFromSubjMiddleware(validationInfo certificates.ValidationInfo) *contextFromSubjMiddleware {
+func NewContextFromSubjMiddleware(headerParser certificates.HeaderParser) *contextFromSubjMiddleware {
 	var contextFromSubjectExtractor contextFromSubjectExtractor
 
-	if validationInfo.Central {
+	if headerParser.Central {
 		contextFromSubjectExtractor = fullContextFromSubject
 	} else {
 		contextFromSubjectExtractor = applicationContextFromSubject
@@ -28,7 +28,7 @@ func NewContextFromSubjMiddleware(validationInfo certificates.ValidationInfo) *c
 
 	return &contextFromSubjMiddleware{
 		contextFromSubject: contextFromSubjectExtractor,
-		validationInfo:     validationInfo,
+		headerParser:       headerParser,
 	}
 }
 
@@ -48,7 +48,7 @@ func (cc *contextFromSubjMiddleware) Middleware(handler http.Handler) http.Handl
 
 func (cc *contextFromSubjMiddleware) parseContextFromSubject(r *http.Request) (clientcontext.ContextExtender, apperrors.AppError) {
 
-	certInfo, e := certificates.ParseCertificateHeader(*r, cc.validationInfo)
+	certInfo, e := cc.headerParser.ParseCertificateHeader(*r)
 
 	if e != nil {
 		return nil, e

@@ -23,48 +23,48 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 	testCases := []struct {
 		certificateHeader string
 		contextExtender   clientcontext.ContextExtender
-		validationInfo    certificates.ValidationInfo
+		validationInfo    certificates.HeaderParser
 		isError           bool
 	}{
 		{
 			certificateHeader: fullSubject,
-			validationInfo:    certificates.ValidationInfo{Organization: "Organization", Unit: "OrgUnit", Central: true},
+			validationInfo:    certificates.HeaderParser{Organization: "Organization", Unit: "OrgUnit", Central: true},
 			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup}},
 			isError:           false,
 		},
 		{
 			certificateHeader: "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			validationInfo:    certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: true},
+			validationInfo:    certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: true},
 			contextExtender:   clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup},
 			isError:           false,
 		},
 		{
 			certificateHeader: "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			validationInfo:    certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: false},
+			validationInfo:    certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: false},
 			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
 			isError:           false,
 		},
 		{
 			certificateHeader: "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
-			validationInfo:    certificates.ValidationInfo{Organization: "", Unit: "", Central: false},
+			validationInfo:    certificates.HeaderParser{Organization: "", Unit: "", Central: false},
 			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
 			isError:           false,
 		},
 		{
 			certificateHeader: "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
-			validationInfo:    certificates.ValidationInfo{Organization: "", Unit: "", Central: true},
+			validationInfo:    certificates.HeaderParser{Organization: "", Unit: "", Central: true},
 			contextExtender:   nil,
 			isError:           true,
 		},
 		{
 			certificateHeader: "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			validationInfo:    certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: true},
+			validationInfo:    certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: true},
 			contextExtender:   nil,
 			isError:           true,
 		},
 		{
 			certificateHeader: "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			validationInfo:    certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: false},
+			validationInfo:    certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: false},
 			contextExtender:   nil,
 			isError:           true,
 		},
@@ -104,7 +104,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "", Unit: "", Central: true})
+		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "", Unit: "", Central: true})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -129,7 +129,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=test-app,OU=OrgUnit")
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "Organization", Unit: "OrgUnit", Central: false})
+		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "Organization", Unit: "OrgUnit", Central: false})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -154,7 +154,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=tenant,CN=*Runtime*,OU=group")
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: true})
+		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: true})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -173,7 +173,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=,OU=OrgUnit")
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "Organization", Unit: "OrgUnit", Central: false})
+		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "Organization", Unit: "OrgUnit", Central: false})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -194,7 +194,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: true})
+		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: true})
 
 		// when
 		resultHandler := middleware.Middleware(handler)

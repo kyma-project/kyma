@@ -62,24 +62,26 @@ func createAPIHandlers(tokenManager tokens.Manager, tokenCreatorProvider tokens.
 
 	return Handlers{
 		internalAPI: newInternalHandler(tokenCreatorProvider, opts, globalMiddlewares, revokedCertsRepo, contextExtractor),
-		externalAPI: newExternalHandler(tokenManager, tokenCreatorProvider, opts, globalMiddlewares, secretsRepository, revokedCertsRepo, contextExtractor),
+		externalAPI: newExternalHandler(tokenManager, tokenCreatorProvider, opts, env, globalMiddlewares, secretsRepository, revokedCertsRepo, contextExtractor),
 	}
 }
 
-func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider, opts *options, globalMiddlewares []mux.MiddlewareFunc,
+func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens.TokenCreatorProvider, opts *options, env *environment, globalMiddlewares []mux.MiddlewareFunc,
 	secretsRepository secrets.Repository, revocationListRepository revocation.RevocationListRepository, contextExtractor *clientcontext.ContextExtractor) http.Handler {
 
 	lookupEnabled := clientcontext.LookupEnabledType(opts.lookupEnabled)
 
 	lookupService := middlewares.NewGraphQLLookupService()
 
+	headerParser := certificates.HeaderParser{Organization: env.organization, Unit: env.organizationalUnit, Central: opts.central}
+
 	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName)
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
 	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayBaseURL, opts.lookupConfigMapPath, lookupEnabled, clientcontext.ExtractApplicationContext, lookupService)
-	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(opts.central)
-	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository)
+	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser)
+	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository, headerParser)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{
 		AppTokenResolverMiddleware:      appTokenResolverMiddleware.Middleware,
@@ -101,6 +103,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 		ContextExtractor:            contextExtractor.CreateApplicationClientContextService,
 		CertService:                 appCertificateService,
 		RevokedCertsRepo:            revocationListRepository,
+		HeaderParser:                headerParser,
 	}
 
 	handlerBuilder.WithApps(appHandlerConfig)
@@ -117,6 +120,7 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 			ContextExtractor:            contextExtractor.CreateClusterClientContextService,
 			CertService:                 runtimeCertificateService,
 			RevokedCertsRepo:            revocationListRepository,
+			HeaderParser:                headerParser,
 		}
 
 		handlerBuilder.WithRuntimes(runtimeHandlerConfig)
