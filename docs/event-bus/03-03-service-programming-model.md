@@ -3,23 +3,23 @@ title: Service Programming Model
 type: Details
 ---
 
-You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a Subscription custom resource.
+You can configure a microservice deployed in Kyma to receive Events from the Event Bus by creating a [Subscription](/components/event-bus/#custom-resource-subscription) custom resource.
 
-## Event Delivery
+## Event delivery
 
-The Event is delivered as an `HTTP POST` request. Event Metadata is a part of an HTTP request Headers. Event Payload is the body of the request.
+The Event is delivered as an HTTP POST request. Event metadata is a part of an HTTP request headers. Event payload is the body of the request.
 
-![TEST](./assets/service-programming-model.png)
+![eventdelivery](./assets/event-delivery.svg)
 
-The Event Delivery workflow is as follows:
+The Event delivery workflow is as follows:
 
-1. The Event is published to the Kyma Event Bus from an external system instance in a bound Application.
-2. The Event Bus checks for the Event subscription and activation. It creates an `HTTP POST` request using Event Payload and Metadata.
-3. The Service receives the `HTTP POST` request. The Event Metadata is represented in the `HTTP Request Headers` request and the Event Payload is represented in the `HTTP Request Body`.
+1. An external system uses the bound Application to publish an Event to the Event Bus.
+2. The Event Bus checks for the Event subscription and activation. It creates a POST request using Event payload and metadata.
+3. The service receives the POST request. The HTTP request headers represent Event metadata and HTTP request body represents the Event payload.
 
-## Event Metadata
+## Event metadata
 
-The following HTTP Headers provide information about the Event Metadata.
+The following HTTP Headers provide information about the Event metadata.
 
 |Header| Description|
 |------|--------|
@@ -27,7 +27,7 @@ The following HTTP Headers provide information about the Event Metadata.
 | **ce-event-time** | Business Event's time delivered to the microservice. |
 | **ce-event-type** | Business Event's type delivered to the microservice. |
 | **ce-event-type-version** | Business Event's version delivered to the microservice. |
-| **ce-source-id** | Identifies the origin of events. This can be an external solution or a defined identifier for internally generated events. |
+| **ce-source-id** | Identifies the origin of Events. This can be an external solution or a defined identifier for internally generated Events. |
 | **kyma-subscription** | Subscription name defined in the subscription contract, or in a CRD. This business Event is published to its subscribers. |
 | **x-b3-flags** | Header used by the Zipkin tracer in Envoy. It encodes one or more options. See more on Zipkin tracing [here](https://github.com/openzipkin/b3-propagation). |
 | **x-b3-parentspanid** | Header used by the Zipkin tracer in Envoy. The **ParentSpanId** is 64-bit in length and indicates the position of the parent operation in the trace tree. When the span is the root of the trace tree, the **ParentSpanId** is absent. |
@@ -39,11 +39,11 @@ The following HTTP Headers provide information about the Event Metadata.
 | **x-envoy-expected-rq-timeout-ms** | Time in milliseconds in which the router expects the request to be completed. Envoy sets this header so that the upstream host receiving the request can make decisions based on the request timeout. It is set on internal requests and is either taken from the **x-envoy-upstream-rq-timeout-ms** header or from the route timeout. |
 | **x-istio-attributes** | Istio-specific metadata. |
 
-## Event Payload
+## Event payload
 
-The Event Payload is delivered as the body of the HTTP Request in JSON format. The JSON schema is available in the Service Catalog in the registered service for the remote Events.
+The Event payload is delivered as the body of the HTTP Request in `JSON` format. The `JSON` schema is available in the Service Catalog in the registered service for the remote Events.
 
-## Event Payload Example
+## Event payload example
 
 In this example, you write a service for an `order.created` Event published by the external solution service. The published Event schema looks as follows:
 
@@ -69,10 +69,11 @@ The HTTP POST request payload is a JSON object:
 {"orderCode": "4caad296-e0c5-491e-98ac-0ed118f9474e"}
 ```
 
-## Successful Delivery
+## Successful delivery
 
-A message delivered to a subscriber is considered successfully consumed if the service's HTTP response status code is
-`2xx`, for example:
+The service's HTTP response status code `2xx` means that the message was successfully delivered to the subscriber.
+For example:
+
 ```json
 {
     "event-id": "22ae22a4-f5b7-4fa1-ada9-558a10a96f3d",
@@ -80,7 +81,7 @@ A message delivered to a subscriber is considered successfully consumed if the s
     "reason": "Message successfully published to the channel"
 }
 ```
-If the status code is not `2xx` (< `200` or >= `300`), it means that the message was not consumed successfully and
+If the status code is not `2xx` (< `200` or >= `300`), it means that the delivery was unsuccessful and
 that the Event Bus will try to deliver it again. This implies **At-least-once** delivery guarantee.
 >**NOTE**: If there were no subscriptions or consumers to this `event-type`, the message is ignored and the response
 will look like this:
@@ -92,6 +93,6 @@ will look like this:
 }
 ```
 
-## Event Subscription Service Example
+## Event Subscription service example
 
 Refer to [this](https://github.com/kyma-project/examples/tree/master/event-subscription/service) example to find a complete scenario for implementing a subscriber service to a business Event.

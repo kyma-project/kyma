@@ -57,6 +57,11 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
     kubectl create clusterrolebinding cluster-admin-binding --clusterrole=cluster-admin --user=$(gcloud config get-value account)
     ```
 
+4. Install Tiller on your GKE cluster. Run:
+    ```
+    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
+    ```
+
 ### Prepare the configuration file
 
 Use the GitHub release 0.8 or higher.
@@ -67,20 +72,14 @@ Use the GitHub release 0.8 or higher.
     ```
     export KYMA_VERSION={KYMA_RELEASE_VERSION}
     ```
- 
-3. Install Tiller on your GKE cluster. Run:
 
-    ```
-    kubectl apply -f https://raw.githubusercontent.com/kyma-project/kyma/$KYMA_VERSION/installation/resources/tiller.yaml
-    ```
-
-4. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
+3. Download the `kyma-config-cluster.yaml` and `kyma-installer-cluster.yaml` files from the latest release. Run:
    ```
    wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-config-cluster.yaml
    wget https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
    ```
 
-5. Prepare the deployment file.
+4. Prepare the deployment file.
 
     - Run this command:
     ```
@@ -93,7 +92,7 @@ Use the GitHub release 0.8 or higher.
     cat kyma-installer-cluster.yaml <(echo -e "\n---") kyma-config-cluster.yaml | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__.*__//g" > my-kyma.yaml
     ```
 
-6. The output of this operation is the `my-kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
+5. The output of this operation is the `my-kyma.yaml` file. Use it to deploy Kyma on your GKE cluster.
 
 
 ### Deploy Kyma

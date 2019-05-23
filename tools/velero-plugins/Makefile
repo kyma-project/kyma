@@ -1,4 +1,4 @@
-APP_NAME = ark-plugins
+APP_NAME = velero-plugins
 IMG = $(DOCKER_PUSH_REPOSITORY)$(DOCKER_PUSH_DIRECTORY)/$(APP_NAME)
 TAG = $(DOCKER_TAG)
 binary=$(APP_NAME)
@@ -28,7 +28,3 @@ ci-release: build build-image push-image
 .PHONY: clean
 clean:
 	rm -f $(binary)
-
-#.PHONY: path-to-referenced-charts
-#path-to-referenced-charts:
-#	@echo "resources/ark"

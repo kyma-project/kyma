@@ -341,6 +341,7 @@ type ComplexityRoot struct {
 		EventType   func(childComplexity int) int
 		Version     func(childComplexity int) int
 		Description func(childComplexity int) int
+		Schema      func(childComplexity int) int
 	}
 
 	ExceededQuota struct {
@@ -4450,6 +4451,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EventActivationEvent.Description(childComplexity), true
+
+	case "EventActivationEvent.schema":
+		if e.complexity.EventActivationEvent.Schema == nil {
+			break
+		}
+
+		return e.complexity.EventActivationEvent.Schema(childComplexity), true
 
 	case "ExceededQuota.quotaName":
 		if e.complexity.ExceededQuota.QuotaName == nil {
@@ -13525,6 +13533,11 @@ func (ec *executionContext) _EventActivationEvent(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "schema":
+			out.Values[i] = ec._EventActivationEvent_schema(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13615,6 +13628,33 @@ func (ec *executionContext) _EventActivationEvent_description(ctx context.Contex
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EventActivationEvent_schema(ctx context.Context, field graphql.CollectedField, obj *EventActivationEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EventActivationEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Schema, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var exceededQuotaImplementors = []string{"ExceededQuota"}
@@ -28261,6 +28301,7 @@ type EventActivationEvent {
     eventType: String!
     version: String!
     description: String!
+    schema: JSON!
 }
 
 type EventActivation {

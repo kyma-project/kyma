@@ -43,22 +43,47 @@ func main() {
 
 	log := logger.New(&cfg.Logger)
 
+	// setup graceful shutdown signals
+	ctx, cancelFunc := context.WithCancel(context.Background())
+	defer cancelFunc()
+
+	stopCh := make(chan struct{})
+	cancelOnInterrupt(ctx, stopCh, cancelFunc)
+
+	k8sConfig, err := restclient.InClusterConfig()
+	fatalOnError(err)
+
+	appClient, err := appCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	mClient, err := mappingCli.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	scClientSet, err := scCs.NewForConfig(k8sConfig)
+	fatalOnError(err)
+	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
+	fatalOnError(err)
+
+	srv := SetupServerAndRunControllers(cfg, log, stopCh, k8sClient, scClientSet, appClient, mClient)
+
+	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
+}
+
+// SetupServerAndRunControllers setups the application - create and start informers, create all services and HTTP server.
+func SetupServerAndRunControllers(cfg *config.Config, log *logrus.Entry, stopCh chan struct{},
+	k8sClient kubernetes.Interface,
+	scClientSet scCs.Interface,
+	appClient appCli.Interface,
+	mClient mappingCli.Interface,
+) *broker.Server {
+
 	// create storage factory
 	storageConfig := storage.ConfigList(cfg.Storage)
 	sFact, err := storage.NewFactory(&storageConfig)
 	fatalOnError(err)
 
-	k8sConfig, err := restclient.InClusterConfig()
-	fatalOnError(err)
-
 	// k8s
-	k8sClient, err := kubernetes.NewForConfig(k8sConfig)
-	fatalOnError(err)
 	nsInformer := v1.NewNamespaceInformer(k8sClient, informerResyncPeriod, cache.Indexers{})
 
 	// ServiceCatalog
-	scClientSet, err := scCs.NewForConfig(k8sConfig)
-	fatalOnError(err)
 
 	scInformerFactory := catalogInformers.NewSharedInformerFactory(scClientSet, informerResyncPeriod)
 	scInformersGroup := scInformerFactory.Servicecatalog().V1beta1()
@@ -73,14 +98,10 @@ func main() {
 	log.Info("Instance storage populated")
 
 	// Applications
-	appClient, err := appCli.NewForConfig(k8sConfig)
-	fatalOnError(err)
 	appInformerFactory := appInformer.NewSharedInformerFactory(appClient, informerResyncPeriod)
 	appInformersGroup := appInformerFactory.Applicationconnector().V1alpha1()
 
 	// Mapping
-	mClient, err := mappingCli.NewForConfig(k8sConfig)
-	fatalOnError(err)
 	mInformerFactory := mappingInformer.NewSharedInformerFactory(mClient, informerResyncPeriod)
 	mInformersGroup := mInformerFactory.Applicationconnector().V1alpha1()
 
@@ -103,13 +124,6 @@ func main() {
 	// create broker
 	srv := broker.New(sFact.Application(), sFact.Instance(), sFact.InstanceOperation(), accessChecker,
 		mClient.ApplicationconnectorV1alpha1(), siFacade, mInformersGroup.ApplicationMappings().Lister(), brokerService, log)
-
-	// setup graceful shutdown signals
-	ctx, cancelFunc := context.WithCancel(context.Background())
-	defer cancelFunc()
-
-	stopCh := make(chan struct{})
-	cancelOnInterrupt(ctx, stopCh, cancelFunc)
 
 	// start informers
 	scInformerFactory.Start(stopCh)
@@ -135,7 +149,7 @@ func main() {
 	go mappingCtrl.Run(stopCh)
 	go relistRequester.Run(stopCh)
 
-	fatalOnError(srv.Run(ctx, fmt.Sprintf(":%d", cfg.Port)))
+	return srv
 }
 
 func fatalOnError(err error) {
