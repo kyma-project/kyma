@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	istioAuthenticationClient "github.com/kyma-project/kyma/components/api-controller/pkg/clients/authentication.istio.io/clientset/versioned"
@@ -39,6 +40,8 @@ func main() {
 
 	domainName := initDomainName()
 
+	corsConfig := getCORSConfig()
+
 	apiExtensionsClientSet := apiExtensionsClient.NewForConfigOrDie(kubeConfig)
 
 	registerer := crd.NewRegistrar(apiExtensionsClientSet)
@@ -48,7 +51,7 @@ func main() {
 	serviceV1Interface := serviceV1.New(k8sClientSet)
 
 	istioNetworkingClientSet := istioNetworkingClient.NewForConfigOrDie(kubeConfig)
-	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, k8sClientSet, istioGateway)
+	istioNetworkingV1Interface := istioNetworkingV1.New(istioNetworkingClientSet, k8sClientSet, istioGateway, corsConfig)
 
 	istioAuthenticationClientSet := istioAuthenticationClient.NewForConfigOrDie(kubeConfig)
 	authenticationV2Interface := authenticationV2.New(istioAuthenticationClientSet, jwtDefaultConfig, mTLSOptionEnabled)
@@ -126,4 +129,27 @@ func initDomainName() string {
 
 func isAuthPolicyMTLSEnabled() bool {
 	return os.Getenv("ENABLE_MTLS") == "true"
+}
+
+func getCORSConfig() istioNetworkingV1.CORSConfig {
+	separator := ","
+	allowOrigin := os.Getenv("CORS_ALLOW_ORIGIN")
+	allowMethods := os.Getenv("CORS_ALLOW_METHODS")
+	allowHeaders := os.Getenv("CORS_ALLOW_HEADERS")
+
+	return istioNetworkingV1.CORSConfig{
+		AllowOrigin:  removeEmptyStrings(strings.Split(allowOrigin, separator)),
+		AllowMethods: removeEmptyStrings(strings.Split(allowMethods, separator)),
+		AllowHeaders: removeEmptyStrings(strings.Split(allowHeaders, separator)),
+	}
+}
+
+func removeEmptyStrings(strings []string) []string {
+	result := make([]string, 0)
+	for _, s := range strings {
+		if s != "" {
+			result = append(result, s)
+		}
+	}
+	return result
 }
