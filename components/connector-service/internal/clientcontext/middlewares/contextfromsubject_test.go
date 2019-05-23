@@ -28,7 +28,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 	}{
 		{
 			certificateHeader: fullSubject,
-			validationInfo:    certificates.ValidationInfo{"Organization", "OrgUnit", true},
+			validationInfo:    certificates.ValidationInfo{Organization: "Organization", Unit: "OrgUnit", Central: true},
 			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup}},
 			isError:           false,
 		},
