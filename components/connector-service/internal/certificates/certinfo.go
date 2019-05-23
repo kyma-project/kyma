@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-const clientCertHeader = "X-Forwarded-Client-Cert"
+const ClientCertHeader = "X-Forwarded-Client-Cert"
 
 type CertInfo struct {
 	Hash    string
@@ -22,9 +22,17 @@ type ValidationInfo struct {
 }
 
 func ParseCertificateHeader(r http.Request, vi ValidationInfo) (CertInfo, apperrors.AppError) {
-	certHeader := r.Header.Get(clientCertHeader)
+	certHeader := r.Header.Get(ClientCertHeader)
+
+	if certHeader == "" {
+		return CertInfo{}, apperrors.BadRequest("Certificate header is empty")
+	}
 
 	data := strings.Split(certHeader, ";")
+
+	if err := checkForCorrectness(data); err != nil {
+		return CertInfo{}, err
+	}
 
 	infoParts := groupData(data)
 
@@ -56,6 +64,13 @@ func createCertInfos(infoParts [][]string) []CertInfo {
 	}
 
 	return certInfos
+}
+
+func checkForCorrectness(data []string) apperrors.AppError {
+	if len(data)%3 != 0 {
+		return apperrors.BadRequest("Certificate header is empty")
+	}
+	return nil
 }
 
 func getCertInfoWithNonEmptySubject(infos []CertInfo) (CertInfo, apperrors.AppError) {
