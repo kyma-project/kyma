@@ -13,6 +13,7 @@ import (
 	knative "github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
 	"github.com/kyma-project/kyma/components/event-bus/internal/publish"
 	"github.com/kyma-project/kyma/components/event-bus/internal/trace"
+	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 )
@@ -124,7 +125,7 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 	}
 
 	// get the channel name and validate its length
-	channelName := knative.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType,
+	channelName := eventBusUtil.GetChannelName(&publishRequest.SourceID, &publishRequest.EventType,
 		&publishRequest.EventTypeVersion)
 	if err = validators.ValidateChannelNameLength(&channelName, opts.MaxChannelNameLength); err != nil {
 		log.Printf("publish message failed: %v", err)

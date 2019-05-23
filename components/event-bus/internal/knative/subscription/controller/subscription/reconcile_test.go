@@ -4,12 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"testing"
+	"time"
+
 	"github.com/google/go-cmp/cmp"
 	"github.com/google/go-cmp/cmp/cmpopts"
 	"github.com/knative/pkg/apis"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
-	"testing"
-	"time"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -20,6 +21,7 @@ import (
 	eventingv1alpha1 "github.com/kyma-project/kyma/components/event-bus/api/push/eventing.kyma-project.io/v1alpha1"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/subscription/opts"
 	"github.com/kyma-project/kyma/components/event-bus/internal/knative/util"
+	eventBusUtil "github.com/kyma-project/kyma/components/event-bus/pkg/util"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -413,7 +415,7 @@ func makeKnChannel(provisioner string, namespace string, name string, labels *ma
 }
 
 func makeKnChannelName(kySub *eventingv1alpha1.Subscription) string {
-	return util.GetChannelName(&kySub.SourceID, &kySub.EventType, &kySub.EventTypeVersion)
+	return eventBusUtil.GetChannelName(&kySub.SourceID, &kySub.EventType, &kySub.EventTypeVersion)
 }
 
 func makeKnSubscriptionName(kySub *eventingv1alpha1.Subscription) string {
