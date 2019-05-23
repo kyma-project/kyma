@@ -46,6 +46,6 @@ export default function () {
 
     check(res, {
       "status was 200": (r) => r.status == 200,
-    }, { 'tags': tags });
+    }, tags);
   });
 };
