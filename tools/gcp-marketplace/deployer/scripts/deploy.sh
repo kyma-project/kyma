@@ -63,15 +63,15 @@ validateEnvironment() {
     local discoverUnsetVar=false
 
     for var in APPLICATION_NAME NAMESPACE TILLER_RESOURCE KYMA_INSTALLER_RESOURCE KYMA_CONFIG_RESOURCE; do
-		if [ -z "${!var}" ] ; then
-			echo "ERROR: $var is not set"
-			discoverUnsetVar=true
-		fi
-	done
+        if [ -z "${!var}" ] ; then
+            echo "ERROR: $var is not set"
+            discoverUnsetVar=true
+        fi
+    done
 
     if [ "${discoverUnsetVar}" = true ] ; then
-		exit 1
-	fi
+        exit 1
+    fi
 }
 
 main() {
