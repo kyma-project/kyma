@@ -16,7 +16,7 @@ spec:
         image: eu.gcr.io/kyma-project/snapshot/test/post-upgrade:test
       restartPolicy: Never
       serviceAccountName: knative-eventing-post-upgrade
-  backoffLimit: 2
+  backoffLimit: 1
 ---
 apiVersion: v1
 kind: ServiceAccount
