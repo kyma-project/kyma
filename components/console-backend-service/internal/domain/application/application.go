@@ -41,7 +41,6 @@ func (r *applicationRetriever) Application() shared.ApplicationLister {
 type Config struct {
 	Gateway   gateway.Config
 	Connector ConnectorSvcCfg
-	VerifySSL bool `envconfig:"default=true"`
 }
 
 type ConnectorSvcCfg struct {
@@ -60,7 +59,7 @@ type PluggableContainer struct {
 	gatewayService         *gateway.Service
 }
 
-func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, contentRetriever shared.ContentRetriever, assetStoreRetriever shared.AssetStoreRetriever) (*PluggableContainer, error) {
+func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Duration, assetStoreRetriever shared.AssetStoreRetriever) (*PluggableContainer, error) {
 	mCli, err := mappingClient.NewForConfig(restConfig)
 	if err != nil {
 		return nil, errors.Wrap(err, "while initializing application broker Clientset")
@@ -83,7 +82,6 @@ func New(restConfig *rest.Config, reCfg Config, informerResyncPeriod time.Durati
 			k8sCli:               k8sCli,
 			cfg:                  reCfg,
 			informerResyncPeriod: informerResyncPeriod,
-			contentRetriever:     contentRetriever,
 			assetStoreRetriever:  assetStoreRetriever,
 		},
 		Pluggable:            module.NewPluggable("application"),
@@ -139,7 +137,7 @@ func (r *PluggableContainer) Enable() error {
 
 		r.Resolver = &domainResolver{
 			applicationResolver:     NewApplicationResolver(appService, gatewayService),
-			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.contentRetriever, r.cfg.assetStoreRetriever, r.cfg.cfg.VerifySSL),
+			eventActivationResolver: newEventActivationResolver(eventActivationService, r.cfg.assetStoreRetriever),
 		}
 		r.ApplicationRetriever.ApplicationLister = appService
 	})
@@ -165,7 +163,6 @@ type resolverConfig struct {
 	appClient            appClient.Interface
 	k8sCli               k8sClient.Interface
 	informerResyncPeriod time.Duration
-	contentRetriever     shared.ContentRetriever
 	assetStoreRetriever  shared.AssetStoreRetriever
 }
 

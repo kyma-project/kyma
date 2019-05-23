@@ -27,7 +27,7 @@ global:
     version: "cb16ab4c"
   ui_acceptance_tests:
     dir:
-    version: "83aa639b"
+    version: "d1e8904d"
   api_controller:
     dir: develop/
     version: "1323f962"
@@ -44,7 +44,7 @@ global:
   docs:
     # - Change the value below to the branch from your fork if you want to point to documentation sources from your fork
     # - Change the value below to the release branch during the release
-    # Example: clusterDocsTopicsVersion: "0.9.0"
+    # Example: clusterDocsTopicsVersion: "release-0.9"
     clusterDocsTopicsVersion: master
   namespace_controller:
     dir: develop/
@@ -66,7 +66,7 @@ global:
     version: 'PR-4108'
   console_backend_service_test:
     dir: develop/
-    version: 'c19f5756'
+    version: 48aaeb72
   cluster_users_test:
     dir: develop/
     version: 3d94e9d8

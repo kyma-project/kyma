@@ -53,6 +53,10 @@ required= [
   branch = "master"
 
 [[constraint]]
+  name = "github.com/komkom/go-jsonhash"
+  branch = "master"
+
+[[constraint]]
   name = "k8s.io/helm"
   version = "2.8.2"
 

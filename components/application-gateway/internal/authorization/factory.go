@@ -36,27 +36,29 @@ type authorizationStrategyFactory struct {
 
 // Create creates strategy for credentials provided
 func (asf authorizationStrategyFactory) Create(c *metadatamodel.Credentials) Strategy {
+	var strategy Strategy
 
 	if c != nil && c.OAuth != nil {
-		oauthStrategy := newOAuthStrategy(asf.oauthClient, c.OAuth.ClientID, c.OAuth.ClientSecret, c.OAuth.URL)
-
-		return newExternalTokenStrategy(oauthStrategy)
+		strategy = newOAuthStrategy(asf.oauthClient, c.OAuth.ClientID, c.OAuth.ClientSecret, c.OAuth.URL)
 	} else if c != nil && c.BasicAuth != nil {
-		basicAuthStrategy := newBasicAuthStrategy(c.BasicAuth.Username, c.BasicAuth.Password)
-
-		return newExternalTokenStrategy(basicAuthStrategy)
+		strategy = newBasicAuthStrategy(c.BasicAuth.Username, c.BasicAuth.Password)
 	} else if c != nil && c.CertificateGen != nil {
-		certificateGenStrategy := newCertificateGenStrategy(c.CertificateGen.Certificate, c.CertificateGen.PrivateKey)
-
-		return newExternalTokenStrategy(certificateGenStrategy)
+		strategy = newCertificateGenStrategy(c.CertificateGen.Certificate, c.CertificateGen.PrivateKey)
 	} else {
-		noAuthStrategy := newNoAuthStrategy()
-
-		return newExternalTokenStrategy(noAuthStrategy)
+		strategy = newNoAuthStrategy()
 	}
+
+	var headers *map[string][]string
+	var queryParams *map[string][]string
+	if c != nil {
+		headers = c.Headers
+		queryParams = c.QueryParameters
+	}
+
+	return newExternalTokenStrategy(strategy, headers, queryParams)
 }
 
-// Factory configuration options
+// FactoryConfiguration holds factory configuration options
 type FactoryConfiguration struct {
 	OAuthClientTimeout int
 }

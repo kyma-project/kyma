@@ -53,6 +53,8 @@ func (sas defaultService) New(application, id string, api *model.API) (*applicat
 	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.AccessLabel = resourceName
+	serviceAPI.Headers = api.Headers
+	serviceAPI.QueryParameters = api.QueryParameters
 
 	err := sas.accessServiceManager.Create(application, id, resourceName)
 	if err != nil {
@@ -81,6 +83,8 @@ func (sas defaultService) Read(application string, applicationAPI *applications.
 		TargetUrl:        applicationAPI.TargetUrl,
 		SpecificationUrl: applicationAPI.SpecificationUrl,
 		ApiType:          applicationAPI.ApiType,
+		Headers:          applicationAPI.Headers,
+		QueryParameters:  applicationAPI.QueryParameters,
 	}
 
 	if applicationAPI.Credentials.Type != "" {
@@ -126,6 +130,8 @@ func (sas defaultService) Update(application, id string, api *model.API) (*appli
 	serviceAPI.ApiType = api.ApiType
 	serviceAPI.GatewayURL = gatewayUrl
 	serviceAPI.AccessLabel = resourceName
+	serviceAPI.Headers = api.Headers
+	serviceAPI.QueryParameters = api.QueryParameters
 
 	err := sas.accessServiceManager.Upsert(application, id, resourceName)
 	if err != nil {

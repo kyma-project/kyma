@@ -22,6 +22,17 @@ type ProvisionRequestDTO struct {
 	Context          contextDTO             `json:"context,omitempty"`
 }
 
+// Validate validates necessary provisioning parameters
+func (params *ProvisionRequestDTO) Validate() error {
+	if params.OrganizationGUID == "" {
+		return errors.New("OrganizationGUID must be non-empty string")
+	}
+	if params.SpaceGUID == "" {
+		return errors.New("SpaceGUID must be non-empty string")
+	}
+	return nil
+}
+
 // ProvisionSuccessResponseDTO represents response after successful provisioning
 type ProvisionSuccessResponseDTO struct {
 	DashboardURL *string               `json:"dashboard_url"`

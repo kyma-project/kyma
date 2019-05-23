@@ -111,27 +111,6 @@ enum DocsTopicPhaseType {
     FAILED
 }
 
-# Content
-
-type Title {
-    name: String!
-    anchor: String!
-    titles: [Title!]
-}
-
-type Section {
-    name: String!
-    anchor: String!
-    titles: [Title!]!
-    topicType: String!
-}
-
-type TopicEntry {
-    contentType: String!
-    id: String!
-    sections: [Section!]!
-}
-
 # Service Catalog
 
 type AddonsConfiguration {
@@ -236,11 +215,6 @@ type ServiceClass {
     plans: [ServicePlan!]!
     activated: Boolean!
     instances: [ServiceInstance!]!
-    apiSpec: JSON @deprecated(reason: "No longer supported")
-    openApiSpec: JSON @deprecated(reason: "No longer supported")
-    odataSpec: String @deprecated(reason: "No longer supported")
-    asyncApiSpec: JSON @deprecated(reason: "No longer supported")
-    content: JSON @deprecated(reason: "No longer supported")
 
     # Depends on cms domain
     clusterDocsTopic: ClusterDocsTopic
@@ -263,11 +237,6 @@ type ClusterServiceClass {
     plans: [ClusterServicePlan!]!
     activated(namespace: String): Boolean!
     instances(namespace: String): [ServiceInstance!]!
-    apiSpec: JSON @deprecated(reason: "No longer supported")
-    openApiSpec: JSON @deprecated(reason: "No longer supported")
-    odataSpec: String @deprecated(reason: "No longer supported")
-    asyncApiSpec: JSON @deprecated(reason: "No longer supported")
-    content: JSON @deprecated(reason: "No longer supported")
 
     # Depends on cms domain
     clusterDocsTopic: ClusterDocsTopic
@@ -689,6 +658,7 @@ type EventActivationEvent {
     eventType: String!
     version: String!
     description: String!
+    schema: JSON!
 }
 
 type EventActivation {
@@ -786,7 +756,7 @@ type ConfigMapEvent {
 
 # MF
 
-type Microfrontend {
+type MicroFrontend {
     name: String!
     version: String!
     category: String!
@@ -794,7 +764,7 @@ type Microfrontend {
     navigationNodes: [NavigationNode!]!
 }
 
-type ClusterMicrofrontend {
+type ClusterMicroFrontend {
     name: String!
     version: String!
     category: String!
@@ -810,6 +780,14 @@ type NavigationNode {
     showInNavigation: Boolean!
     order: Int!
     settings: Settings!
+    externalLink: String
+    requiredPermissions: [RequiredPermission!]!
+}
+
+type RequiredPermission {
+    verbs: [String!]!
+    apiGroup: String!
+    resource: String!
 }
 
 # SelfSubjectRules
@@ -873,8 +851,6 @@ type Query {
 
     functions(namespace: String!, first: Int, offset: Int): [Function!]! @HasAccess(attributes: {resource: "functions", verb: "list", apiGroup: "kubeless.io", apiVersion: "v1beta1", namespaceArg: "namespace"})
 
-    content(contentType: String!, id: String!): JSON @deprecated(reason: "No longer supported")
-    topics(input: [InputTopic!]!, internal: Boolean): [TopicEntry!] @deprecated(reason: "No longer supported")
     eventActivations(namespace: String!): [EventActivation!]! @HasAccess(attributes: {resource: "eventactivations", verb: "list", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
 
     limitRanges(namespace: String!): [LimitRange!]! @HasAccess(attributes: {resource: "limitranges", verb: "list", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
@@ -887,8 +863,8 @@ type Query {
     IDPPreset(name: String!): IDPPreset @HasAccess(attributes: {resource: "idppresets", verb: "get", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
     IDPPresets(first: Int, offset: Int): [IDPPreset!]! @HasAccess(attributes: {resource: "idppresets", verb: "list", apiGroup: "authentication.kyma-project.io", apiVersion: "v1alpha1"})
 
-    microfrontends(namespace: String!): [Microfrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
-    clusterMicrofrontends: [ClusterMicrofrontend!]! @HasAccess(attributes: {resource: "clusterMicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    microFrontends(namespace: String!): [MicroFrontend!]! @HasAccess(attributes: {resource: "microfrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
+    clusterMicroFrontends: [ClusterMicroFrontend!]! @HasAccess(attributes: {resource: "clustermicrofrontends", verb: "list", apiGroup: "ui.kyma-project.io", apiVersion: "v1alpha1"})
     
     selfSubjectRules(namespace: String): [ResourceRule!]! @HasAccess(attributes: {apiGroup: "authorization.k8s.io", resource: "selfsubjectrulesreviews", verb: "create", apiVersion: "v1" namespaceArg: "namespace"})
 }

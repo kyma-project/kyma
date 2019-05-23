@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: kiali-virtualservice
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ template "kiali.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version }}
+spec:
+  gateways:
+  - kyma-gateway.kyma-system.svc.cluster.local
+  hosts:
+  - {{ .Values.global.domainName }} 
+  http:
+  - match:
+    - uri:
+        regex: /.*
+    route:
+    - destination:
+        port:
+          number: 20001
+        host: kiali

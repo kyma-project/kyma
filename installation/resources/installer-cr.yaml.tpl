@@ -26,7 +26,7 @@ spec:
       namespace: "knative-serving"
     - name: "knative-eventing"
       namespace: "knative-eventing"
-    # - name: "prometheus-operator"
+    #- name: "prometheus-operator"
     # namespace: "kyma-system"
     - name: "dex"
       namespace: "kyma-system"

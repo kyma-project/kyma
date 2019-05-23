@@ -83,12 +83,13 @@ function run_all_patches() {
 function remove_not_used() {
   echo "--> Delete resources"
   while read line; do
+    if [[ "$line" == "" ]]; then
+        continue
+    fi
     echo "    Delete $line"
     local type=$(cut -d' ' -f1 <<< ${line})
     local name=$(cut -d' ' -f2 <<< ${line})
-    set +e
-    kubectl delete ${type} ${name} -n istio-system
-    set -e
+    kubectl delete ${type} ${name} -n istio-system --ignore-not-found=true
   done <${CONFIG_DIR}/delete
 }
 

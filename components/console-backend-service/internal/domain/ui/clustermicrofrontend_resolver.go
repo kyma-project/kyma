@@ -11,38 +11,38 @@ import (
 	"github.com/pkg/errors"
 )
 
-//go:generate mockery -name=clusterMicrofrontendLister -output=automock -outpkg=automock -case=underscore
-type clusterMicrofrontendLister interface {
+//go:generate mockery -name=clusterMicroFrontendLister -output=automock -outpkg=automock -case=underscore
+type clusterMicroFrontendLister interface {
 	List() ([]*v1alpha1.ClusterMicroFrontend, error)
 }
 
-//go:generate mockery -name=gqlClusterMicrofrontendConverter -output=automock -outpkg=automock -case=underscore
-type gqlClusterMicrofrontendConverter interface {
-	ToGQL(in *v1alpha1.ClusterMicroFrontend) (*gqlschema.ClusterMicrofrontend, error)
-	ToGQLs(in []*v1alpha1.ClusterMicroFrontend) ([]gqlschema.ClusterMicrofrontend, error)
+//go:generate mockery -name=gqlClusterMicroFrontendConverter -output=automock -outpkg=automock -case=underscore
+type gqlClusterMicroFrontendConverter interface {
+	ToGQL(in *v1alpha1.ClusterMicroFrontend) (*gqlschema.ClusterMicroFrontend, error)
+	ToGQLs(in []*v1alpha1.ClusterMicroFrontend) ([]gqlschema.ClusterMicroFrontend, error)
 }
 
-type clusterMicrofrontendResolver struct {
-	clusterMicrofrontendLister    clusterMicrofrontendLister
-	clusterMicrofrontendConverter gqlClusterMicrofrontendConverter
+type clusterMicroFrontendResolver struct {
+	clusterMicroFrontendLister    clusterMicroFrontendLister
+	clusterMicroFrontendConverter gqlClusterMicroFrontendConverter
 }
 
-func newClusterMicrofrontendResolver(clusterMicrofrontendLister clusterMicrofrontendLister) *clusterMicrofrontendResolver {
-	return &clusterMicrofrontendResolver{
-		clusterMicrofrontendLister:    clusterMicrofrontendLister,
-		clusterMicrofrontendConverter: &clusterMicrofrontendConverter{},
+func newClusterMicroFrontendResolver(clusterMicroFrontendLister clusterMicroFrontendLister) *clusterMicroFrontendResolver {
+	return &clusterMicroFrontendResolver{
+		clusterMicroFrontendLister:    clusterMicroFrontendLister,
+		clusterMicroFrontendConverter: newClusterMicroFrontendConverter(),
 	}
 }
 
-func (r *clusterMicrofrontendResolver) ClusterMicrofrontendsQuery(ctx context.Context) ([]gqlschema.ClusterMicrofrontend, error) {
-	items, err := r.clusterMicrofrontendLister.List()
+func (r *clusterMicroFrontendResolver) ClusterMicroFrontendsQuery(ctx context.Context) ([]gqlschema.ClusterMicroFrontend, error) {
+	items, err := r.clusterMicroFrontendLister.List()
 
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while listing %s", pretty.ClusterMicroFrontends))
 		return nil, gqlerror.New(err, pretty.ClusterMicroFrontends)
 	}
 
-	cmfs, err := r.clusterMicrofrontendConverter.ToGQLs(items)
+	cmfs, err := r.clusterMicroFrontendConverter.ToGQLs(items)
 	if err != nil {
 		return nil, err
 	}
