@@ -37,6 +37,25 @@ spec:
                 return;
         }
     }
+  horizontalPodAutoscaler:
+    metadata:
+      creationTimestamp: null
+      labels:
+        function: size-l
+      name: size-l
+      namespace: serverless
+    spec:
+      maxReplicas: 10
+      metrics:
+      - resource:
+          name: cpu
+          targetAverageUtilization: 50
+        type: Resource
+      minReplicas: 5
+      scaleTargetRef:
+        apiVersion: apps/v1beta1
+        kind: Deployment
+        name: size-l
 ---
 apiVersion: gateway.kyma-project.io/v1alpha2
 kind: Api
@@ -50,18 +69,3 @@ spec:
   service:
     name: size-l
     port: 8080
----
-apiVersion: autoscaling/v1
-kind: HorizontalPodAutoscaler
-metadata:
-  labels:
-    function: size-l
-  name: size-l
-spec:
-  maxReplicas: 10
-  minReplicas: 5
-  scaleTargetRef:
-    apiVersion: apps/v1beta1
-    kind: Deployment
-    name: size-l
-  targetCPUUtilizationPercentage: 50
