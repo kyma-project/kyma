@@ -161,3 +161,8 @@ You can also use the **-e** CLI flag for all platforms:
 ```bash
 k6 run -e CLUSTER_DOMAIN_NAME=loadtest.cluster.kyma.cx -e REVISION=123 components/examples/http-db-service.js
 ```
+
+If you want to use k6 with Grafana locally:
+
+- [Start Influxdb & grafana](https://docs.k6.io/docs/influxdb-grafana#section-using-our-docker-compose-setup)
+- Run k6 with `--out influxdb=http://localhost:8086/myk6db` option
