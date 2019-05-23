@@ -39,11 +39,9 @@ spec:
     }
   horizontalPodAutoscaler:
     metadata:
-      creationTimestamp: null
       labels:
         function: size-xl
       name: size-xl
-      namespace: serverless
     spec:
       maxReplicas: 20
       metrics:
