@@ -1,10 +1,9 @@
 package middlewares
 
 import (
-	"net/http"
-	"regexp"
-
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"github.com/kyma-project/kyma/components/connector-service/internal/httphelpers"
+	"net/http"
 
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 
@@ -15,12 +14,13 @@ type contextFromSubjectExtractor func(subject string) (clientcontext.ContextExte
 
 type contextFromSubjMiddleware struct {
 	contextFromSubject contextFromSubjectExtractor
+	validationInfo     certificates.ValidationInfo
 }
 
-func NewContextFromSubjMiddleware(extractFullContext bool) *contextFromSubjMiddleware {
+func NewContextFromSubjMiddleware(validationInfo certificates.ValidationInfo) *contextFromSubjMiddleware {
 	var contextFromSubjectExtractor contextFromSubjectExtractor
 
-	if extractFullContext {
+	if validationInfo.Central {
 		contextFromSubjectExtractor = fullContextFromSubject
 	} else {
 		contextFromSubjectExtractor = applicationContextFromSubject
@@ -28,6 +28,7 @@ func NewContextFromSubjMiddleware(extractFullContext bool) *contextFromSubjMiddl
 
 	return &contextFromSubjMiddleware{
 		contextFromSubject: contextFromSubjectExtractor,
+		validationInfo:     validationInfo,
 	}
 }
 
@@ -35,7 +36,7 @@ func (cc *contextFromSubjMiddleware) Middleware(handler http.Handler) http.Handl
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		contextExtender, err := cc.parseContextFromSubject(r)
 		if err != nil {
-			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Invalid certificate subject"))
+			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Invalid certificate"))
 			return
 		}
 
@@ -46,19 +47,26 @@ func (cc *contextFromSubjMiddleware) Middleware(handler http.Handler) http.Handl
 }
 
 func (cc *contextFromSubjMiddleware) parseContextFromSubject(r *http.Request) (clientcontext.ContextExtender, apperrors.AppError) {
-	subject := r.Header.Get(clientcontext.SubjectHeader)
+
+	certInfo, e := certificates.ParseCertificateHeader(*r, cc.validationInfo)
+
+	if e != nil {
+		return nil, e
+	}
+
+	subject := certInfo.Subject
 	if subject == "" {
-		return nil, apperrors.BadRequest("Failed to get certificate subject from header.")
+		return nil, apperrors.BadRequest("Failed to get certificate from header.")
 	}
 
 	return cc.contextFromSubject(subject)
 }
 
 func applicationContextFromSubject(subject string) (clientcontext.ContextExtender, apperrors.AppError) {
-	appName := getCommonName(subject)
+	appName := certificates.GetCommonName(subject)
 
 	if isEmpty(appName) {
-		return nil, apperrors.BadRequest("Empty Common Name in subject header")
+		return nil, apperrors.BadRequest("Empty Common Name in certificate header")
 	}
 
 	return clientcontext.ApplicationContext{
@@ -68,12 +76,12 @@ func applicationContextFromSubject(subject string) (clientcontext.ContextExtende
 }
 
 func fullContextFromSubject(subject string) (clientcontext.ContextExtender, apperrors.AppError) {
-	tenant := getOrganization(subject)
-	group := getOrganizationalUnit(subject)
-	commonName := getCommonName(subject)
+	tenant := certificates.GetOrganization(subject)
+	group := certificates.GetOrganizationalUnit(subject)
+	commonName := certificates.GetCommonName(subject)
 
 	if isAnyEmpty(tenant, group, commonName) {
-		return nil, apperrors.BadRequest("Invalid subject header, one of the values not provided")
+		return nil, apperrors.BadRequest("Invalid certificate header, one of the values not provided")
 	}
 
 	clusterContext := clientcontext.ClusterContext{
@@ -99,29 +107,6 @@ func isAnyEmpty(str ...string) bool {
 	}
 
 	return false
-}
-
-func getCommonName(subject string) string {
-	return getRegexMatch("CN=([^,]+)", subject)
-}
-
-func getOrganization(subject string) string {
-	return getRegexMatch("O=([^,]+)", subject)
-}
-
-func getOrganizationalUnit(subject string) string {
-	return getRegexMatch("OU=([^,]+)", subject)
-}
-
-func getRegexMatch(regex, text string) string {
-	cnRegex := regexp.MustCompile(regex)
-	matches := cnRegex.FindStringSubmatch(text)
-
-	if len(matches) != 2 {
-		return ""
-	}
-
-	return matches[1]
 }
 
 func isEmpty(str string) bool {

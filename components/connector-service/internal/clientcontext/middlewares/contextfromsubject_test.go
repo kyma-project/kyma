@@ -1,6 +1,8 @@
 package middlewares
 
 import (
+	"fmt"
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
 	"net/http"
 	"net/http/httptest"
 
@@ -19,60 +21,60 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 	subjTenant := "tenant"
 
 	testCases := []struct {
-		subject            string
-		contextExtender    clientcontext.ContextExtender
-		extractFullContext bool
-		isError            bool
+		certificateHeader string
+		contextExtender   clientcontext.ContextExtender
+		validationInfo    certificates.ValidationInfo
+		isError           bool
 	}{
 		{
-			subject:            fullSubject,
-			extractFullContext: true,
-			contextExtender:    clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup}},
-			isError:            false,
+			certificateHeader: fullSubject,
+			validationInfo:    certificates.ValidationInfo{"Organization", "OrgUnit", true},
+			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup}},
+			isError:           false,
 		},
 		{
-			subject:            "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			extractFullContext: true,
-			contextExtender:    clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup},
-			isError:            false,
+			certificateHeader: "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
+			validationInfo:    certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: true},
+			contextExtender:   clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup},
+			isError:           false,
 		},
 		{
-			subject:            "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			extractFullContext: false,
-			contextExtender:    clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
-			isError:            false,
+			certificateHeader: "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
+			validationInfo:    certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: false},
+			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
+			isError:           false,
 		},
 		{
-			subject:            "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
-			extractFullContext: false,
-			contextExtender:    clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
-			isError:            false,
+			certificateHeader: "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
+			validationInfo:    certificates.ValidationInfo{Organization: "", Unit: "", Central: false},
+			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
+			isError:           false,
 		},
 		{
-			subject:            "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
-			extractFullContext: true,
-			contextExtender:    nil,
-			isError:            true,
+			certificateHeader: "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
+			validationInfo:    certificates.ValidationInfo{Organization: "", Unit: "", Central: true},
+			contextExtender:   nil,
+			isError:           true,
 		},
 		{
-			subject:            "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			extractFullContext: true,
-			contextExtender:    nil,
-			isError:            true,
+			certificateHeader: "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
+			validationInfo:    certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: true},
+			contextExtender:   nil,
+			isError:           true,
 		},
 		{
-			subject:            "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			extractFullContext: false,
-			contextExtender:    nil,
-			isError:            true,
+			certificateHeader: "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
+			validationInfo:    certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: false},
+			contextExtender:   nil,
+			isError:           true,
 		},
 	}
 
 	t.Run("should parse context data from fullSubject", func(t *testing.T) {
 		for _, test := range testCases {
-			req := prepareRequestWithSubject(t, test.subject)
+			req := prepareRequestWithSubject(t, test.certificateHeader)
 
-			ctxFromSubjMiddleware := NewContextFromSubjMiddleware(test.extractFullContext)
+			ctxFromSubjMiddleware := NewContextFromSubjMiddleware(test.validationInfo)
 
 			extender, err := ctxFromSubjMiddleware.parseContextFromSubject(req)
 			if test.isError {
@@ -102,7 +104,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(true)
+		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "", Unit: "", Central: true})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -127,7 +129,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=test-app,OU=OrgUnit")
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(false)
+		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "Organization", Unit: "OrgUnit", Central: false})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -152,7 +154,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=tenant,CN=*Runtime*,OU=group")
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(true)
+		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: true})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -171,7 +173,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=,OU=OrgUnit")
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(false)
+		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "Organization", Unit: "OrgUnit", Central: false})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -181,7 +183,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		assert.Equal(t, http.StatusBadRequest, rr.Code)
 	})
 
-	t.Run("should return 400 when no Subject header is passed", func(t *testing.T) {
+	t.Run("should return 400 when no Subject in certificate header is passed", func(t *testing.T) {
 		// given
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
@@ -192,7 +194,7 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(true)
+		middleware := NewContextFromSubjMiddleware(certificates.ValidationInfo{Organization: "tenant", Unit: "group", Central: true})
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -204,9 +206,11 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 }
 
 func prepareRequestWithSubject(t *testing.T, subject string) *http.Request {
+	certificateHeader := fmt.Sprintf("Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject=\"%s\";URI=spiffe://cluster.local/ns/kyma-integration/sa/default", subject)
+
 	req, err := http.NewRequest("GET", "/", nil)
 	require.NoError(t, err)
-	req.Header.Set(clientcontext.SubjectHeader, subject)
+	req.Header.Set(certificates.ClientCertHeader, certificateHeader)
 
 	return req
 }
