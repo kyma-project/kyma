@@ -3,6 +3,7 @@ package testkit
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 )
 
@@ -28,7 +29,7 @@ func SendEvent(url string, event *ExampleEvent) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return err
+		return fmt.Errorf("send event failed: %v", response.StatusCode)
 	}
 
 	return nil

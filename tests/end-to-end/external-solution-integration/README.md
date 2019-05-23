@@ -2,9 +2,8 @@
 
 ## Requirements
 
-Mock App running, accessible via {MOCKBASEURL}
+* running kyma cluster
 
-Env Variables:
-- KUBECONFIG
-- ISLOCALKYMA
-- MOCKBASEURL
+## Running
+
+kubectl apply -f deploy.yaml

@@ -1,12 +1,13 @@
 package resourceskit
 
 import (
+	"time"
+
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/apis/applicationconnector/v1alpha1"
 	"github.com/kyma-project/kyma/components/connection-token-handler/pkg/client/clientset/versioned"
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/consts"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
-	"time"
 )
 
 type TokenRequestClient interface {

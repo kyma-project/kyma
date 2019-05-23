@@ -1,64 +1,93 @@
 package main
 
 import (
-	"fmt"
-	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testsuite"
-	"github.com/sirupsen/logrus"
-	"k8s.io/client-go/rest"
 	"time"
+
+	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/testsuite"
+	log "github.com/sirupsen/logrus"
+	"k8s.io/client-go/rest"
 )
 
 //TODO: This is example use of testing suite, this still needs to be finished and cleaned up
 func main() {
 	time.Sleep(10 * time.Second)
+	log.SetReportCaller(true)
+	log.SetLevel(log.TraceLevel)
 
 	config, err := rest.InClusterConfig()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
-	ts, err := testsuite.NewTestSuite(config, logrus.New())
+	ts, err := testsuite.NewTestSuite(config, log.New())
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
+	log.RegisterExitHandler(func() {
+		log.Error("Starting cleanup")
+		err := ts.CleanUp()
+		if err != nil {
+			log.Error(err)
+		}
+	})
+
+	defer func() {
+		log.Info("Starting cleanup")
+		err := ts.CleanUp()
+		if err != nil {
+			log.Error(err)
+		}
+	}()
+
+	log.Trace("creating resources")
 	err = ts.CreateResources()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
+		return
 	}
 
 	url := ts.GetTestServiceURL()
 
 	//cert, err := ts.FetchCertificate()
 
+	log.Trace("registering Service")
 	id, err := ts.RegisterService(url)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
-	fmt.Println("ID:", id)
+	log.Debug("ID:", id)
 
+	log.Trace("Creating Instance")
 	_, err = ts.CreateInstance(id)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	time.Sleep(120 * time.Second)
 
+	log.Trace("Creating Service Binding")
 	err = ts.CreateServiceBinding()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	//TODO: Get rid of constant time waits, you can check for readiness of SI / SB / SBU
 	time.Sleep(30 * time.Second)
 
+	log.Trace("Creating Service Binding Usage")
 	err = ts.CreateServiceBindingUsage()
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
 
 	//TODO: Sending event
+	log.Trace("Sending Event")
+	err = ts.SendEvent()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	//TODO: Check
 

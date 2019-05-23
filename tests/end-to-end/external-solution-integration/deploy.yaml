@@ -1,34 +1,25 @@
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: v1
+kind: Pod
 metadata:
   name: e2e
   namespace: production
   labels:
     app: e2e
+  annotations:
+    sidecar.istio.io/inject: "true"
 spec:
-  replicas: 1
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 0
-  template:
-    metadata:
-      annotations:
-        sidecar.istio.io/inject: "true"
-      labels:
-        app: e2e
-    spec:
-      containers:
-      - name: e2e
-        image: jmedrek/e2e:0.29
-        imagePullPolicy: IfNotPresent
-        args:
-        - "/e2e"
-        env:
-        - name: KUBERNETES_SERVICE_HOST
-          value: "kubernetes.default.svc.cluster.local"
-        - name: KUBERNETES_SERVICE_PORT
-          value: "443"
+  restartPolicy: Never
+  containers:
+  - name: e2e
+    image: k15r/e2e:bla
+    imagePullPolicy: Always
+    args:
+    - "/e2e"
+    env:
+    - name: KUBERNETES_SERVICE_HOST
+      value: "kubernetes.default.svc.cluster.local"
+    - name: KUBERNETES_SERVICE_PORT
+      value: "443"
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole

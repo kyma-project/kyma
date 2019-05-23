@@ -3,12 +3,14 @@ package testkit
 import (
 	"encoding/json"
 	"fmt"
+	"net/http"
+
 	"github.com/kyma-project/kyma/tests/end-to-end/external-solution-integration/resourceskit"
+	log "github.com/sirupsen/logrus"
 	model "k8s.io/api/apps/v1"
 	core "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/apis/meta/v1"
+	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
-	"net/http"
 )
 
 const (
@@ -44,14 +46,13 @@ func NewTestService(k8sClient resourceskit.K8sResourcesClient) TestService {
 }
 
 func (ts *testService) CreateTestService() error {
-	var e error
-	e = ts.createDeployment()
-	if e != nil {
-		return e
+	err := ts.createDeployment()
+	if err != nil {
+		return err
 	}
-	e = ts.createService()
-	if e != nil {
-		return e
+	err = ts.createService()
+	if err != nil {
+		return err
 	}
 	return nil
 }
@@ -72,10 +73,10 @@ func (ts *testService) CheckValue() (int, error) {
 		counter int
 	}
 
-	e := json.NewDecoder(resp.Body).Decode(&response)
+	err = json.NewDecoder(resp.Body).Decode(&response)
 
-	if e != nil {
-		return 0, e
+	if err != nil {
+		return 0, err
 	}
 
 	return response.counter, nil
@@ -99,18 +100,18 @@ func (ts *testService) IsReady() (bool, error) {
 }
 
 func (ts *testService) DeleteTestService() error {
-	var e error
+	err := ts.K8sResourcesClient.DeleteDeployment(testServiceName, &v1.DeleteOptions{})
 
-	e = ts.K8sResourcesClient.DeleteDeployment(testServiceName, &v1.DeleteOptions{})
-
-	if e != nil {
-		return e
+	if err != nil {
+		log.Error(err)
+		return err
 	}
 
-	e = ts.K8sResourcesClient.DeleteService(testServiceName, &v1.DeleteOptions{})
+	err = ts.K8sResourcesClient.DeleteService(testServiceName, &v1.DeleteOptions{})
 
-	if e != nil {
-		return e
+	if err != nil {
+		log.Error(err)
+		return err
 	}
 
 	return nil
@@ -167,8 +168,8 @@ func (ts *testService) createDeployment() error {
 			},
 		},
 	}
-	_, e := ts.K8sResourcesClient.CreateDeployment(deployment)
-	return e
+	_, err := ts.K8sResourcesClient.CreateDeployment(deployment)
+	return err
 }
 
 func (ts *testService) createService() error {
@@ -194,6 +195,6 @@ func (ts *testService) createService() error {
 			},
 		},
 	}
-	_, e := ts.K8sResourcesClient.CreateService(service)
-	return e
+	_, err := ts.K8sResourcesClient.CreateService(service)
+	return err
 }
