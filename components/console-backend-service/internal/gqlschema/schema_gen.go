@@ -79,12 +79,13 @@ type ComplexityRoot struct {
 	}
 
 	Application struct {
-		Name                func(childComplexity int) int
-		Description         func(childComplexity int) int
-		Labels              func(childComplexity int) int
-		Services            func(childComplexity int) int
-		EnabledInNamespaces func(childComplexity int) int
-		Status              func(childComplexity int) int
+		Name                   func(childComplexity int) int
+		Description            func(childComplexity int) int
+		Labels                 func(childComplexity int) int
+		Services               func(childComplexity int) int
+		EnabledInNamespaces    func(childComplexity int) int
+		EnabledMappingServices func(childComplexity int) int
+		Status                 func(childComplexity int) int
 	}
 
 	ApplicationEntry struct {
@@ -326,6 +327,11 @@ type ComplexityRoot struct {
 		Phase   func(childComplexity int) int
 		Reason  func(childComplexity int) int
 		Message func(childComplexity int) int
+	}
+
+	EnabledService struct {
+		Id          func(childComplexity int) int
+		DisplayName func(childComplexity int) int
 	}
 
 	EnvPrefix struct {
@@ -776,10 +782,17 @@ type ComplexityRoot struct {
 		Name      func(childComplexity int) int
 		Namespace func(childComplexity int) int
 	}
+
+	EnabledMappingService struct {
+		Namespace   func(childComplexity int) int
+		AllServices func(childComplexity int) int
+		Services    func(childComplexity int) int
+	}
 }
 
 type ApplicationResolver interface {
 	EnabledInNamespaces(ctx context.Context, obj *Application) ([]string, error)
+	EnabledMappingServices(ctx context.Context, obj *Application) ([]*EnabledMappingService, error)
 	Status(ctx context.Context, obj *Application) (ApplicationStatus, error)
 }
 type AssetResolver interface {
@@ -3525,6 +3538,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Application.EnabledInNamespaces(childComplexity), true
 
+	case "Application.enabledMappingServices":
+		if e.complexity.Application.EnabledMappingServices == nil {
+			break
+		}
+
+		return e.complexity.Application.EnabledMappingServices(childComplexity), true
+
 	case "Application.status":
 		if e.complexity.Application.Status == nil {
 			break
@@ -4513,6 +4533,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.DocsTopicStatus.Message(childComplexity), true
+
+	case "EnabledService.id":
+		if e.complexity.EnabledService.Id == nil {
+			break
+		}
+
+		return e.complexity.EnabledService.Id(childComplexity), true
+
+	case "EnabledService.displayName":
+		if e.complexity.EnabledService.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.EnabledService.DisplayName(childComplexity), true
 
 	case "EnvPrefix.name":
 		if e.complexity.EnvPrefix.Name == nil {
@@ -6944,6 +6978,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UsageKindResource.Namespace(childComplexity), true
 
+	case "enabledMappingService.namespace":
+		if e.complexity.EnabledMappingService.Namespace == nil {
+			break
+		}
+
+		return e.complexity.EnabledMappingService.Namespace(childComplexity), true
+
+	case "enabledMappingService.allServices":
+		if e.complexity.EnabledMappingService.AllServices == nil {
+			break
+		}
+
+		return e.complexity.EnabledMappingService.AllServices(childComplexity), true
+
+	case "enabledMappingService.services":
+		if e.complexity.EnabledMappingService.Services == nil {
+			break
+		}
+
+		return e.complexity.EnabledMappingService.Services(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -7553,6 +7608,12 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 				}
 				wg.Done()
 			}(i, field)
+		case "enabledMappingServices":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Application_enabledMappingServices(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		case "status":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -7747,6 +7808,67 @@ func (ec *executionContext) _Application_enabledInNamespaces(ctx context.Context
 		}()
 	}
 
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Application_enabledMappingServices(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Application",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Application().EnabledMappingServices(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*EnabledMappingService)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				if res[idx1] == nil {
+					return graphql.Null
+				}
+
+				return ec._enabledMappingService(ctx, field.Selections, res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
 	return arr1
 }
 
@@ -13448,6 +13570,95 @@ func (ec *executionContext) _DocsTopicStatus_message(ctx context.Context, field 
 	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
 		return obj.Message, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+var enabledServiceImplementors = []string{"EnabledService"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _EnabledService(ctx context.Context, sel ast.SelectionSet, obj *EnabledService) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, enabledServiceImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EnabledService")
+		case "id":
+			out.Values[i] = ec._EnabledService_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "displayName":
+			out.Values[i] = ec._EnabledService_displayName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EnabledService_id(ctx context.Context, field graphql.CollectedField, obj *EnabledService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EnabledService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EnabledService_displayName(ctx context.Context, field graphql.CollectedField, obj *EnabledService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EnabledService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
 	})
 	if resTmp == nil {
 		if !ec.HasError(rctx) {
@@ -27498,6 +27709,156 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+var enabledMappingServiceImplementors = []string{"enabledMappingService"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _enabledMappingService(ctx context.Context, sel ast.SelectionSet, obj *EnabledMappingService) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, enabledMappingServiceImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("enabledMappingService")
+		case "namespace":
+			out.Values[i] = ec._enabledMappingService_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "allServices":
+			out.Values[i] = ec._enabledMappingService_allServices(ctx, field, obj)
+		case "services":
+			out.Values[i] = ec._enabledMappingService_services(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _enabledMappingService_namespace(ctx context.Context, field graphql.CollectedField, obj *EnabledMappingService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "enabledMappingService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _enabledMappingService_allServices(ctx context.Context, field graphql.CollectedField, obj *EnabledMappingService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "enabledMappingService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AllServices, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalBoolean(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _enabledMappingService_services(ctx context.Context, field graphql.CollectedField, obj *EnabledMappingService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "enabledMappingService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Services, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*EnabledService)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				if res[idx1] == nil {
+					return graphql.Null
+				}
+
+				return ec._EnabledService(ctx, field.Selections, res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
 func UnmarshalCreateServiceBindingUsageInput(v interface{}) (CreateServiceBindingUsageInput, error) {
 	var it CreateServiceBindingUsageInput
 	var asMap = v.(map[string]interface{})
@@ -28487,7 +28848,19 @@ type Application {
     labels: Labels!
     services: [ApplicationService!]!
     enabledInNamespaces: [String!]!
+    enabledMappingServices: [enabledMappingService]
     status: ApplicationStatus!
+}
+
+type enabledMappingService {
+    namespace: String!
+    allServices: Boolean
+    services: [EnabledService]
+}
+
+type EnabledService {
+    id: String!
+    displayName: String!
 }
 
 type ConnectorService {

@@ -202,6 +202,46 @@ func TestServiceListApplicationsInNamespaceSuccess(t *testing.T) {
 	assert.Contains(t, nsList, fixAppB)
 }
 
+func TestApplicationService_ListApplicationMapping(t *testing.T) {
+	// given
+	const (
+		fixNamespace      = "prod"
+		fixOtherNamespace = "other"
+		fixAppName        = "app-name-a"
+	)
+
+	fixApp := fixApplicationCR(fixAppName)
+
+	fixMappingAppA := fixApplicationMappingCR(fixAppName, fixNamespace)
+	fixMappingAppAo := fixApplicationMappingCR(fixAppName, fixOtherNamespace)
+	fixMappingAppB := fixApplicationMappingCR("app-name-b", fixNamespace)
+	fixMappingAppBo := fixApplicationMappingCR("app-name-b", fixOtherNamespace)
+
+	mCli := mappingFakeCli.NewSimpleClientset(&fixMappingAppA, &fixMappingAppAo, &fixMappingAppB, &fixMappingAppBo)
+	mInformerFactory := mappingInformer.NewSharedInformerFactory(mCli, 0)
+	mInformer := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Informer()
+	mLister := mInformerFactory.Applicationconnector().V1alpha1().ApplicationMappings().Lister()
+
+	aCli := appFakeCli.NewSimpleClientset(fixApp)
+	aInformerFactory := appInformer.NewSharedInformerFactory(aCli, 0)
+	aInformer := aInformerFactory.Applicationconnector().V1alpha1().Applications().Informer()
+
+	svc, err := application.NewApplicationService(application.Config{}, nil, nil, mInformer, mLister, aInformer)
+	require.NoError(t, err)
+
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, mInformer)
+	testingUtils.WaitForInformerStartAtMost(t, time.Second, aInformer)
+
+	// when
+	list, err := svc.ListApplicationMapping(fixAppName)
+	require.NoError(t, err)
+
+	// then
+	assert.Len(t, list, 2)
+	assert.Contains(t, list, &fixMappingAppA)
+	assert.Contains(t, list, &fixMappingAppAo)
+}
+
 func TestGetConnectionURLSuccess(t *testing.T) {
 	// given
 	testServer := newTestServer(`{"url": "http://gotURL-with-token", "token": "token"}`, http.StatusCreated)

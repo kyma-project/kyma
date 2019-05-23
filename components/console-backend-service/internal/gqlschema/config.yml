@@ -92,6 +92,8 @@ models:
     fields:
       enabledInNamespaces:
         resolver: true
+      enabledMappingServices:
+        resolver: true
       status:
         resolver: true
   ServiceBinding:

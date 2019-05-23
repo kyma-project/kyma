@@ -447,6 +447,73 @@ func TestApplicationResolver_EnableApplicationMutation(t *testing.T) {
 	}
 }
 
+func TestApplicationResolver_ApplicationEnabledMappingServices(t *testing.T) {
+	// GIVEN
+	const (
+		serviceIdOne     = "abe498d4-dc37-46f1-9f87-db1ddd55b409"
+		serviceIdTwo     = "952404e7-f7b9-44ac-9f5d-eeb695c3c46e"
+		serviceIdThree   = "afcd698b-968c-4d1c-a3c8-5d96968a139e"
+		serviceNameOne   = "service-name-one"
+		serviceNameTwo   = "service-name-two"
+		serviceNameThree = "service-name-three"
+		fixNamespace     = "fix-namespace"
+	)
+	app := &gqlschema.Application{
+		Name: "fix-name",
+		Services: []gqlschema.ApplicationService{
+			{
+				ID:          serviceIdOne,
+				DisplayName: serviceNameOne,
+			},
+			{
+				ID:          serviceIdTwo,
+				DisplayName: serviceNameTwo,
+			},
+			{
+				ID:          serviceIdThree,
+				DisplayName: serviceNameThree,
+			},
+		},
+	}
+	appSvc := automock.NewApplicationSvc()
+	defer appSvc.AssertExpectations(t)
+	appSvc.On("ListApplicationMapping", app.Name).Return([]*mappingTypes.ApplicationMapping{
+		{
+			ObjectMeta: v1.ObjectMeta{
+				Name:      app.Name,
+				Namespace: fixNamespace,
+			},
+			Spec: mappingTypes.ApplicationMappingSpec{
+				Services: []mappingTypes.ApplicationMappingService{
+					{
+						ID: serviceIdThree,
+					},
+					{
+						ID: serviceIdOne,
+					},
+					{
+						ID: serviceIdTwo,
+					},
+				},
+			},
+		},
+	}, nil)
+	resolver := application.NewApplicationResolver(appSvc, nil)
+
+	// WHEN
+	out, err := resolver.ApplicationEnabledMappingServices(context.Background(), app)
+	require.NoError(t, err)
+
+	// THEN
+	assert.Len(t, out, 1)
+	assert.Equal(t, out[0].Namespace, fixNamespace)
+	assert.False(t, *out[0].AllServices)
+	assert.Len(t, out[0].Services, 3)
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{ID: serviceIdOne, DisplayName: serviceNameOne})
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{ID: serviceIdTwo, DisplayName: serviceNameTwo})
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{ID: serviceIdThree, DisplayName: serviceNameThree})
+}
+
 func ptrStr(str string) *string {
 	return &str
 }

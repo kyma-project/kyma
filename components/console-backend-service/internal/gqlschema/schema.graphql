@@ -608,7 +608,19 @@ type Application {
     labels: Labels!
     services: [ApplicationService!]!
     enabledInNamespaces: [String!]!
+    enabledMappingServices: [enabledMappingService]
     status: ApplicationStatus!
+}
+
+type enabledMappingService {
+    namespace: String!
+    allServices: Boolean
+    services: [EnabledService]
+}
+
+type EnabledService {
+    id: String!
+    displayName: String!
 }
 
 type ConnectorService {

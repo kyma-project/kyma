@@ -280,6 +280,23 @@ func (svc *applicationService) transformApplicationMappingService(services []*gq
 	return ms
 }
 
+// ListApplicationMapping return list of ApplicationMapping from all namespaces base on name
+func (svc *applicationService) ListApplicationMapping(name string) ([]*mappingTypes.ApplicationMapping, error) {
+	mappings, err := svc.mappingLister.ApplicationMappings(metav1.NamespaceAll).List(labels.Everything())
+	if err != nil {
+		return nil, errors.Wrapf(err, "while listing %s", pretty.ApplicationMapping)
+	}
+
+	result := make([]*mappingTypes.ApplicationMapping, 0)
+	for _, mapping := range mappings {
+		if mapping.Name == name {
+			result = append(result, mapping)
+		}
+	}
+
+	return result, nil
+}
+
 // Disable disables Application in given namespace by removing ApplicationMapping
 func (svc *applicationService) Disable(namespace, name string) error {
 	return svc.mCli.ApplicationMappings(namespace).Delete(name, &metav1.DeleteOptions{})

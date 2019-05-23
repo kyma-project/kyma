@@ -625,6 +625,10 @@ func (r *appResolver) EnabledInNamespaces(ctx context.Context, obj *gqlschema.Ap
 	return r.app.Resolver.ApplicationEnabledInNamespacesField(ctx, obj)
 }
 
+func (r *appResolver) EnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error) {
+	return r.app.Resolver.ApplicationEnabledMappingServices(ctx, obj)
+}
+
 func (r *appResolver) Status(ctx context.Context, obj *gqlschema.Application) (gqlschema.ApplicationStatus, error) {
 	return r.app.Resolver.ApplicationStatusField(ctx, obj)
 }

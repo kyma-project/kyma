@@ -227,6 +227,11 @@ type DocsTopicStatus struct {
 	Message string             `json:"message"`
 }
 
+type EnabledService struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName"`
+}
+
 type EnvPrefix struct {
 	Name string `json:"name"`
 }
@@ -556,6 +561,12 @@ type UsageKind struct {
 type UsageKindResource struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+type EnabledMappingService struct {
+	Namespace   string            `json:"namespace"`
+	AllServices *bool             `json:"allServices"`
+	Services    []*EnabledService `json:"services"`
 }
 
 type ApplicationStatus string

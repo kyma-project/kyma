@@ -179,6 +179,7 @@ type Resolver interface {
 	OverloadApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error)
 	DisableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error)
 	ApplicationEnabledInNamespacesField(ctx context.Context, obj *gqlschema.Application) ([]string, error)
+	ApplicationEnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error)
 	ApplicationStatusField(ctx context.Context, app *gqlschema.Application) (gqlschema.ApplicationStatus, error)
 	EventActivationsQuery(ctx context.Context, namespace string) ([]gqlschema.EventActivation, error)
 	EventActivationEventsField(ctx context.Context, eventActivation *gqlschema.EventActivation) ([]gqlschema.EventActivationEvent, error)

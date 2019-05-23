@@ -29,6 +29,7 @@ type appSvc interface {
 	Disable(namespace, name string) error
 	Enable(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error)
 	UpdateApplicationMapping(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error)
+	ListApplicationMapping(name string) ([]*mappingTypes.ApplicationMapping, error)
 	GetConnectionURL(application string) (string, error)
 	Subscribe(listener resource.Listener)
 	Unsubscribe(listener resource.Listener)
@@ -252,6 +253,59 @@ func (r *applicationResolver) ApplicationEnabledInNamespacesField(ctx context.Co
 		return []string{}, gqlerror.New(err, pretty.Namespaces)
 	}
 	return items, nil
+}
+
+func (r *applicationResolver) ApplicationEnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error) {
+	if obj == nil {
+		glog.Error(fmt.Errorf("while resolving 'EnabledMappingServices' field obj is empty"))
+		return nil, gqlerror.NewInternal()
+	}
+
+	items, err := r.appSvc.ListApplicationMapping(obj.Name)
+	if err != nil {
+		glog.Error(errors.Wrapf(err, "while listing %s for %s %q", pretty.ApplicationMapping, pretty.Application, obj.Name))
+		return nil, gqlerror.New(err, pretty.ApplicationMapping)
+	}
+
+	var collection []*gqlschema.EnabledMappingService
+	for _, mapping := range items {
+		ems := &gqlschema.EnabledMappingService{}
+
+		ems.Namespace = mapping.Namespace
+		all := mapping.IsAllApplicationServicesEnabled()
+		ems.AllServices = &all
+		ems.Services = findEnabledServices(obj.Services, mapping)
+		collection = append(collection, ems)
+	}
+
+	return collection, nil
+}
+
+func findEnabledServices(appServices []gqlschema.ApplicationService, mapping *mappingTypes.ApplicationMapping) []*gqlschema.EnabledService {
+	if mapping.IsAllApplicationServicesEnabled() {
+		return nil
+	}
+
+	nameFinder := func(appServices []gqlschema.ApplicationService, id string) string {
+		for _, val := range appServices {
+			if val.ID == id {
+				return val.DisplayName
+			}
+		}
+
+		return ""
+	}
+
+	var result []*gqlschema.EnabledService
+	for _, srv := range mapping.Spec.Services {
+		es := &gqlschema.EnabledService{}
+		es.ID = srv.ID
+		es.DisplayName = nameFinder(appServices, srv.ID)
+
+		result = append(result, es)
+	}
+
+	return result
 }
 
 func (r *applicationResolver) ApplicationStatusField(ctx context.Context, app *gqlschema.Application) (gqlschema.ApplicationStatus, error) {

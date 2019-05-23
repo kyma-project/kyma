@@ -24,6 +24,15 @@ func (_m *Resolver) ApplicationEnabledInNamespacesField(ctx context.Context, obj
 	return r0, r1
 }
 
+// ApplicationEnabledMappingServices provides a failing mock function with given fields: ctx, obj
+func (_m *Resolver) ApplicationEnabledMappingServices(ctx context.Context, obj *gqlschema.Application) ([]*gqlschema.EnabledMappingService, error) {
+	var r0 []*gqlschema.EnabledMappingService
+	var r1 error
+	r1 = _m.err
+
+	return r0, r1
+}
+
 // ApplicationEventSubscription provides a failing mock function with given fields: ctx
 func (_m *Resolver) ApplicationEventSubscription(ctx context.Context) (<-chan gqlschema.ApplicationEvent, error) {
 	var r0 <-chan gqlschema.ApplicationEvent

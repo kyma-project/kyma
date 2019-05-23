@@ -154,6 +154,29 @@ func (_m *appSvc) List(params pager.PagingParams) ([]*v1alpha1.Application, erro
 	return r0, r1
 }
 
+// ListApplicationMapping provides a mock function with given fields: name
+func (_m *appSvc) ListApplicationMapping(name string) ([]*applicationconnectorv1alpha1.ApplicationMapping, error) {
+	ret := _m.Called(name)
+
+	var r0 []*applicationconnectorv1alpha1.ApplicationMapping
+	if rf, ok := ret.Get(0).(func(string) []*applicationconnectorv1alpha1.ApplicationMapping); ok {
+		r0 = rf(name)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]*applicationconnectorv1alpha1.ApplicationMapping)
+		}
+	}
+
+	var r1 error
+	if rf, ok := ret.Get(1).(func(string) error); ok {
+		r1 = rf(name)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
 // ListInNamespace provides a mock function with given fields: namespace
 func (_m *appSvc) ListInNamespace(namespace string) ([]*v1alpha1.Application, error) {
 	ret := _m.Called(namespace)
