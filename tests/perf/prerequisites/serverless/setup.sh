@@ -3,7 +3,7 @@
 set -e
 set -o pipefail
 
-_SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+WORKING_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
 TIMEOUT=60 # seconds
 
 export NAMESPACE=serverless
@@ -48,7 +48,7 @@ function waitFor() {
 
 for resource in "${resources[@]}"; do
     echo "deploying: $resource"
-    envsubst <"${_SCRIPTS_DIR}/$resource" | kubectl -n "$NAMESPACE" apply -f -
+    envsubst <"${WORKING_DIR}/$resource" | kubectl -n "$NAMESPACE" apply -f -
 done
 
 for func in "${functions[@]}"; do
