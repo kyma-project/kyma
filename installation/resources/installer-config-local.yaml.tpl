@@ -38,7 +38,6 @@ data:
   global.etcdBackup.enabled: "false"
   global.adminPassword: ""
   nginx-ingress.controller.service.loadBalancerIP: ""
-  cluster-users.users.adminGroup: ""
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -73,7 +72,7 @@ data:
 
   mixer.policy.autoscaleEnabled: "false"
   mixer.telemetry.autoscaleEnabled: "false"
-  
+
   global.tracer.zipkin.address: zipkin.kyma-system:9411
 ---
 apiVersion: v1
