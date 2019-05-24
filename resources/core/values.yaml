@@ -62,8 +62,8 @@ global:
     dir: develop/
     version: 6b4c356f
   console_backend_service:
-    dir: pr/
-    version: PR-4161
+    dir: develop/
+    version: da6fa1b0
   console_backend_service_test:
     dir: develop/
     version: 48aaeb72
