@@ -31,22 +31,22 @@ spec:
     - match:
         - uri:
             exact: /v1/applications/management/info
-          port: 9443
+          port: {{ .Values.global.istio.virtualServicePort }}
         - uri:
             exact: /v1/applications/certificates/renewals
-          port: 9443
+          port: {{ .Values.global.istio.virtualServicePort }}
         - uri:
             exact: /v1/applications/certificates/revocations
-          port: 9443
+          port: {{ .Values.global.istio.virtualServicePort }}
         - uri:
             exact: /v1/runtimes/management/info
-          port: 9443
+          port: {{ .Values.global.istio.virtualServicePort }}
         - uri:
             exact: /v1/runtimes/certificates/renewals
-          port: 9443
+          port: {{ .Values.global.istio.virtualServicePort }}
         - uri:
             exact: /v1/runtimes/certificates/revocations
-          port: 9443
+          port: {{ .Values.global.istio.virtualServicePort }}
       route:
         - destination:
             port:
