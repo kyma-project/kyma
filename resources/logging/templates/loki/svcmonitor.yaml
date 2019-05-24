@@ -3,6 +3,7 @@ kind: ServiceMonitor
 metadata:
   name: {{ template "loki.fullname" . }}
   labels:
+    prometheus: monitoring
     app: {{ template "loki.name" . }}
     chart: {{ template "loki.chart" . }}
     release: {{ .Release.Name }}
