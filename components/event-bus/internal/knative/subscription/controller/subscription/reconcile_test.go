@@ -399,7 +399,9 @@ func makeKnChannel(provisioner string, namespace string, name string, labels *ma
 		},
 		Spec: evapisv1alpha1.ChannelSpec{
 			Provisioner: &corev1.ObjectReference{
-				Name: provisioner,
+				Name:       provisioner,
+				APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
+				Kind:       "ClusterChannelProvisioner",
 			},
 		},
 		Status: evapisv1alpha1.ChannelStatus{
