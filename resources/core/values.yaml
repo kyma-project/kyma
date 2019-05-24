@@ -29,8 +29,8 @@ global:
     dir:
     version: "83aa639b"
   api_controller:
-    dir: pr/
-    version: "PR-4187"
+    dir: develop/
+    version: "0a2e0fc9"
   api_controller_acceptance_tests:
     dir: develop/
     version: 736988df
