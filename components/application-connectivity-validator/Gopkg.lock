@@ -2,67 +2,52 @@
 
 
 [[projects]]
-  digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
-  pruneopts = "NUT"
   revision = "8991bc29aa16c548c550c7ff78260e27b9ab7c73"
   version = "v1.1.1"
 
 [[projects]]
-  digest = "1:caf94762c0e0a1bdd44d9307d319f2841939399c86db9f04b4d2e470c51aa007"
   name = "github.com/gorilla/mux"
   packages = ["."]
-  pruneopts = "NUT"
   revision = "ed099d42384823742bba0bf9a72b53b55c9e2e38"
   version = "v1.7.2"
 
 [[projects]]
-  digest = "1:58999a98719fddbac6303cb17e8d85b945f60b72f48e3a2df6b950b97fa926f1"
   name = "github.com/konsorten/go-windows-terminal-sequences"
   packages = ["."]
-  pruneopts = "NUT"
   revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
   version = "v1.0.2"
 
 [[projects]]
-  digest = "1:0028cb19b2e4c3112225cd871870f2d9cf49b9b4276531f03438a88e94be86fe"
   name = "github.com/pmezard/go-difflib"
   packages = ["difflib"]
-  pruneopts = "NUT"
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
 
 [[projects]]
-  digest = "1:f4aaa07a6c33f2b354726d0571acbc8ca118837c75709f6353203ae1a3f8eeab"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  pruneopts = "NUT"
   revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:85adecf1dbfae5769cc62a8bcea6498f8e9f0e2452e4e6686eb36fa4428a5a6e"
   name = "github.com/stretchr/testify"
   packages = [
     "assert",
-    "require",
+    "require"
   ]
-  pruneopts = "NUT"
   revision = "ffdc059bfe9ce6a4e144ba849dbedead332c6053"
   version = "v1.3.0"
 
 [[projects]]
   branch = "master"
-  digest = "1:dc9d50f9ac509c3df6d849fab9b18fa737593f85dee991054d0da1e3f7c3012b"
   name = "golang.org/x/sys"
   packages = ["unix"]
-  pruneopts = "NUT"
   revision = "61b9204099cb1bebc803c9ffb9b2d3acd9d457d9"
 
 [[projects]]
   branch = "master"
-  digest = "1:99086e459644a91580b93e8bbf86dea957a490641c43fbbedd592b4b90a031a0"
   name = "golang.org/x/tools"
   packages = [
     "cmd/goimports",
@@ -76,20 +61,13 @@
     "internal/fastwalk",
     "internal/gopathwalk",
     "internal/module",
-    "internal/semver",
+    "internal/semver"
   ]
-  pruneopts = "NUT"
   revision = "d88f79806bbd013f54a668506864ce559edf6f0a"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  input-imports = [
-    "github.com/gorilla/mux",
-    "github.com/sirupsen/logrus",
-    "github.com/stretchr/testify/assert",
-    "github.com/stretchr/testify/require",
-    "golang.org/x/tools/cmd/goimports",
-  ]
+  inputs-digest = "34da71a35ffbd56dfba85434cd53b002794b0ddf17cee0a4737724fd529dc84b"
   solver-name = "gps-cdcl"
   solver-version = 1
