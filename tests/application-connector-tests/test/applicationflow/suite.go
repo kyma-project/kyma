@@ -32,8 +32,8 @@ import (
 )
 
 const (
-	defaultCheckInterval   = time.Second * 2
-	infoURLRetrivalTimeout = time.Second * 15
+	defaultCheckInterval    = time.Second * 2
+	infoURLRetrievalTimeout = time.Second * 15
 
 	testGroup  = "app-connector-test-group"
 	testTenant = "app-connector-test-tenant"
@@ -160,7 +160,7 @@ func (ts *TestSuite) getInfoURL(t *testing.T, application *types.Application) st
 
 	tokenRequestName := tokenRequest.Name
 
-	err = testkit.WaitForFunction(defaultCheckInterval, infoURLRetrivalTimeout, func() bool {
+	err = testkit.WaitForFunction(defaultCheckInterval, infoURLRetrievalTimeout, func() bool {
 		t.Log("Waiting for Info URL in Token Request...")
 		tokenRequest, err = ts.tokenRequestClient.Get(tokenRequestName, v1.GetOptions{})
 		return err == nil && tokenRequest.Status.State == "OK"
