@@ -15,7 +15,7 @@ Write-Output @"
 "@
 
 function CheckIfMinikubeIsInitialized() {
-    $cmd = "minikube status --format '{{.ClusterStatus}}'"
+    $cmd = "minikube status --format '{{.Host}}'"
     $minikubeStatus = (Invoke-Expression -Command $cmd) | Out-String
 
     if ($minikubeStatus -ne "") {
