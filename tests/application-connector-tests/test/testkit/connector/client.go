@@ -16,17 +16,9 @@ import (
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit"
 
 	"github.com/pkg/errors"
-
-	"github.com/kyma-project/kyma/components/application-operator/pkg/apis/applicationconnector/v1alpha1"
 )
 
 const (
-	tokenEndpoint = "/v1/applications/tokens"
-
-	ApplicationHeader = "Application"
-	GroupHeader       = "Group"
-	TenantHeader      = "Tenant"
-
 	rsaKeySize = 4096
 )
 
@@ -43,13 +35,8 @@ func NewConnectorClient(connectorServiceInternalURL string) *Client {
 	}
 }
 
-func (c *Client) EstablishApplicationConnection(application *v1alpha1.Application) (ApplicationConnection, error) {
-	tokenResponse, err := c.requestToken(application)
-	if err != nil {
-		return ApplicationConnection{}, err
-	}
-
-	csrInfo, err := c.requestSigningRequestInfo(tokenResponse.URL)
+func (c *Client) EstablishApplicationConnection(infoURL string) (ApplicationConnection, error) {
+	csrInfo, err := c.requestSigningRequestInfo(infoURL)
 	if err != nil {
 		return ApplicationConnection{}, err
 	}
@@ -85,6 +72,8 @@ func (c *Client) requestManagementInfo(key *rsa.PrivateKey, certs []*x509.Certif
 		return ManagementInfoResponse{}, errors.Wrap(err, "Failed to fetch Management Info")
 	}
 
+	// TODO - http code checks?
+
 	var managementInfo ManagementInfoResponse
 	err = json.NewDecoder(response.Body).Decode(&managementInfo)
 	if err != nil {
@@ -116,33 +105,6 @@ func (c *Client) generateCertificates(csrInfo CSRInfoResponse) (*rsa.PrivateKey,
 	}
 
 	return clientKey, certificates, nil
-}
-
-func (c *Client) requestToken(application *v1alpha1.Application) (TokenResponse, error) {
-	req, err := http.NewRequest(http.MethodPost, c.connectorServiceInternalURL+tokenEndpoint, nil)
-	if err != nil {
-		return TokenResponse{}, err
-	}
-	req.Header.Set(ApplicationHeader, application.Name)
-
-	if application.Spec.HasGroup() && application.Spec.HasTenant() {
-		req.Header.Set(TenantHeader, application.Spec.Tenant)
-		req.Header.Set(GroupHeader, application.Spec.Group)
-	}
-
-	response, err := c.httpClient.Do(req)
-	if err != nil {
-		return TokenResponse{}, errors.Wrap(err, "Failed to fetch token")
-	}
-	defer response.Body.Close()
-
-	var tokenResponse TokenResponse
-	err = json.NewDecoder(response.Body).Decode(&tokenResponse)
-	if err != nil {
-		return TokenResponse{}, errors.Wrap(err, "Failed to decode token response")
-	}
-
-	return tokenResponse, nil
 }
 
 func (c *Client) requestSigningRequestInfo(signingRequestInfoURL string) (CSRInfoResponse, error) {
@@ -182,7 +144,12 @@ func (c *Client) requestCertificate(certificatesURL string, csr []byte) (CrtResp
 	if err != nil {
 		return CrtResponse{}, err
 	}
-	defer response.Body.Close()
+	defer func() {
+		err := response.Body.Close()
+		if err != nil {
+			fmt.Println(err)
+		}
+	}()
 
 	var certificateResponse CrtResponse
 	err = json.NewDecoder(response.Body).Decode(&certificateResponse)
@@ -205,7 +172,8 @@ func decodeCertificateResponse(certResponse CrtResponse) ([]*x509.Certificate, e
 		}
 
 		certificates = append(certificates, cert)
-		rawPem = rest
+
+		block, rest = pem.Decode(rest)
 	}
 
 	if len(certificates) < 2 {

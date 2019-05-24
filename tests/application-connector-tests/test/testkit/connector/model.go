@@ -3,6 +3,7 @@ package connector
 import (
 	"crypto/rsa"
 	"crypto/x509"
+	"fmt"
 	"net/http"
 
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit"
@@ -17,6 +18,14 @@ type ApplicationConnection struct {
 
 func (ac ApplicationConnection) NewMTLSClient() *http.Client {
 	return testkit.NewMTLSClient(ac.ClientKey, ac.Certificates)
+}
+
+func (ac ApplicationConnection) RegistryURL() string {
+	return fmt.Sprintf("%s/%s", ac.ManagementURLs.MetadataUrl, ac.ClientIdentity.Application)
+}
+
+func (ac ApplicationConnection) EventsURL() string {
+	return fmt.Sprintf("%s/%s", ac.ManagementURLs.EventsUrl, ac.ClientIdentity.Application)
 }
 
 type TokenResponse struct {

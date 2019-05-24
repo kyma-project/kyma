@@ -1,32 +1,33 @@
 package testkit
 
 import (
-	"errors"
-	"fmt"
 	"log"
 	"os"
+	"strconv"
 )
 
 // TODO - Envs:
-// Connector Internal API url
+// Namespace
 //
 const (
-	connectorInternalAPIURLEnv = "CONNECTOR_INTERNAL_API_URL"
+	isCentralEnv = "CENTRAL"
 )
 
 type TestConfig struct {
 	ConnectorInternalAPIURL string
+	IsCentral               bool
 }
 
 func ReadConfig() (TestConfig, error) {
 
-	connectorInternalURL, found := os.LookupEnv(connectorInternalAPIURLEnv)
-	if !found {
-		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", connectorInternalAPIURLEnv))
+	central := false
+	c, found := os.LookupEnv(isCentralEnv)
+	if found {
+		central, _ = strconv.ParseBool(c)
 	}
 
 	config := TestConfig{
-		ConnectorInternalAPIURL: connectorInternalURL,
+		IsCentral: central,
 	}
 
 	log.Printf("Read configuration: %+v", config)
