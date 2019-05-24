@@ -38,22 +38,14 @@ Follow these instructions to install Kyma from a release or from sources:
      ```
      > **NOTE:** The `provision` command uses default Minikube VM driver installed for your operating system. For a list of supported VM drivers see [this document](https://kubernetes.io/docs/setup/minikube/#quickstart).
   
-  2. Choose the release from which you want to install Kyma. Go to the GitHub [releases](https://github.com/kyma-project/kyma/releases/) page to find out more about each of the available releases.
- 
-     > **NOTE** Not specifying the release as a parameter in the command triggers the installation of the latest release.
-     
-  3. Export the release version as an environment variable:
-     ```bash
-     export KYMA_RELEASE={KYMA_RELEASE_VERSION}
-     ```
-  4. Install Kyma on Minikube:
+  2. Install Kyma on Minikube:
      ```bash
      kyma install 
      ```
      
-  5. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
+  3. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
   
-  6. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
+  4. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
    
   </details>
   <details>
