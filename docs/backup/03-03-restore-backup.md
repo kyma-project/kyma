@@ -19,7 +19,7 @@ metadata:
   name: kyma-restore
   namespace: kyma-backup
 spec:
-    backupName: null # specify to restore a specific backup
+    backupName: kyma-backup # specify to restore a specific backup
     scheduleName: kyma-backup # Applies only if no backup is specified.
     restorePVs: true
     includeClusterResources: true
@@ -30,7 +30,7 @@ metadata:
   name: kyma-system-restore
   namespace: kyma-backup
 spec:
-    backupName: null # specify to restore a specific backup
+    backupName: kyma-backup # specify to restore a specific backup
     scheduleName: kyma-system-backup # Applies only if no backup is specified.
     restorePVs: true
     includeClusterResources: true
@@ -54,6 +54,7 @@ To validate the result of the restore use the `kubectl get` command.
 kubectl get Prometheus -n kyma-system monitoring -oyaml --export > prom.yaml
 
 ### Delete metadata.generation and metadata.annotation["kubectl.kubernetes.io/last-applied-configuration"]
+sed -i prom.yaml '/last-applied-configuration/d;/generation/d;/selfLink/d' prom.yaml
 
 ### Reapply the prometheus resource using the file
 kubectl -n kyma-system apply -f prom.yaml

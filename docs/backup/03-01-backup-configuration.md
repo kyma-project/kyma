@@ -5,7 +5,7 @@ type: Details
 
 The Velero configuration consists of two custom resources:
 
-- [VolumeSnapshotLocation](https://velero.io/docs/v1.0.0/api-types/volumesnapshotlocation/) CR defines the provider of physical volume snapshots.
+- [VolumeSnapshotLocation](https://velero.io/docs/v1.0.0/api-types/volumesnapshotlocation/) CR defines the provider(e.g. aws, gcp or azure) of physical volume snapshots.
 - [BackupStorageLocation](https://velero.io/docs/v1.0.0/api-types/backupstoragelocation/) CR defines a bucket or storage location for cluster resources.
 
 A sample BackupStorageLocation CR looks like this:

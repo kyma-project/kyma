@@ -16,7 +16,7 @@ Modify the files to adjust the backup scope. For details about the file format, 
 
 ## Create manual backups
 
-If you want to use sample backup configurations, you must use Backup custom resources instead of Velero CLI. Add the following two CRs to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
+If you want to use sample backup configurations, you can use Backup custom resources. Add the following two CRs to the `kyma-backup` Namespace to instruct the Velero server to create a backup. Make sure the indentation is correct.
 
 A sample backup configuration looks like this:
 
@@ -28,7 +28,7 @@ metadata:
   name: kyma-system-backup
   namespace: kyma-backup
 spec:
-    <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP FILE HERE>
+    <INCLUDE CONTENT OF SYSTEM NAMESPACE BACKUP FILE HERE> ### E.g. docs/backup/assets/system-backup.yaml
 ---
 apiVersion: velero.io/v1
 kind: Backup
@@ -36,7 +36,7 @@ metadata:
   name: kyma-backup
   namespace: kyma-backup
 spec:
-    <INCLUDE CONTENT OF USER NAMESPACE BACKUP FILE HERE>
+    <INCLUDE CONTENT OF USER NAMESPACE BACKUP FILE HERE> ### E.g. docs/backup/assets/all-backup.yaml
 ```
 
 To create the backup, run the following command:
@@ -45,7 +45,7 @@ To create the backup, run the following command:
 
 ## Schedule periodic backups
 
-If you want to use sample backup configurations, ou must use Schedule custom resources instead of Velero CLI. Create two Schedule custom resources in the `kyma-backup` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
+If you want to use sample backup configurations, you can use Schedule custom resources. Create two Schedule custom resources in the `kyma-backup` Namespace to instruct the Velero Server to schedule a cluster backup. Make sure the indentation is correct.
 
 A sample scheduled backup configuration looks like this:
 

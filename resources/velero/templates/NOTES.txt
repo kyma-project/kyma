@@ -1,4 +1,3 @@
 Once the Velero server is up and running, you need the client before you can use it.
 1. wget https://github.com/heptio/velero/releases/download/{{ .Values.image.tag }}/velero-{{ .Values.image.tag }}-darwin-amd64.tar.gz
 2. tar -xvf velero-{{ .Values.image.tag }}-darwin-amd64.tar.gz -C velero-client
-
