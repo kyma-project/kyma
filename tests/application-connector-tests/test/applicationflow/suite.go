@@ -34,6 +34,9 @@ import (
 const (
 	defaultCheckInterval   = time.Second * 2
 	infoURLRetrivalTimeout = time.Second * 15
+
+	testGroup  = "app-connector-test-group"
+	testTenant = "app-connector-test-tenant"
 )
 
 type TestSuite struct {
@@ -42,13 +45,16 @@ type TestSuite struct {
 	tokenRequestClient             tokenreqclient.TokenRequestInterface
 
 	connectorServiceClient *connector.Client
+
+	isCentral     bool
+	defaultGroup  string
+	defaultTenant string
 }
 
 func NewTestSuite(t *testing.T) *TestSuite {
 	config, err := testkit.ReadConfig()
 	require.NoError(t, err)
 
-	// TODO - try to get local config if cluster not found
 	k8sConfig, err := restclient.InClusterConfig()
 	if err != nil {
 		t.Logf("Failed to read in cluster config, trying with local config")
@@ -58,26 +64,43 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		require.NoError(t, err)
 	}
 
-	//coreClientset, err := kubernetes.NewForConfig(k8sConfig)
-	//require.NoError(t, err)
-
 	applicationClientset, err := versioned.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
 	tokenRequestClientset, err := tokenreqversioned.NewForConfig(k8sConfig)
 	require.NoError(t, err)
 
+	var defaultGroup, defaultTenant string
+
+	if config.IsCentral {
+		defaultGroup = testGroup
+		defaultTenant = testTenant
+	}
+
 	return &TestSuite{
 		applicationInstallationTimeout: 180 * time.Second,
 		applicationClient:              applicationClientset.ApplicationconnectorV1alpha1().Applications(),
 		tokenRequestClient:             tokenRequestClientset.ApplicationconnectorV1alpha1().TokenRequests("kyma-integration"), // TODO - namespace as env
 		connectorServiceClient:         connector.NewConnectorClient(config.ConnectorInternalAPIURL),
+		isCentral:                      config.IsCentral,
+		defaultTenant:                  defaultTenant,
+		defaultGroup:                   defaultGroup,
 	}
+}
+
+func (ts *TestSuite) IsCentral() bool {
+	return ts.isCentral
 }
 
 func (ts *TestSuite) CleanupApplication(t *testing.T, applicationName string) {
 	t.Logf("Cleaning up %s application", applicationName)
 	err := ts.applicationClient.Delete(applicationName, &metav1.DeleteOptions{})
+	require.NoError(t, err)
+}
+
+func (ts *TestSuite) cleanupTokenRequest(t *testing.T, tokenRequestName string) {
+	t.Logf("Cleaning up %s token request", tokenRequestName)
+	err := ts.tokenRequestClient.Delete(tokenRequestName, &metav1.DeleteOptions{})
 	require.NoError(t, err)
 }
 
@@ -92,10 +115,10 @@ func (ts *TestSuite) PrepareTestApplication(t *testing.T, namePrefix string) *ty
 		Spec: types.ApplicationSpec{
 			Services:    []types.Service{},
 			Description: "Application deployed by Application Connector Tests",
+			Group:       ts.defaultGroup,
+			Tenant:      ts.defaultTenant,
 		},
 	}
-
-	// TODO - handle group and tenant
 
 	return application
 }
@@ -133,6 +156,7 @@ func (ts *TestSuite) getInfoURL(t *testing.T, application *types.Application) st
 
 	tokenRequest, err := ts.tokenRequestClient.Create(tokenRequest)
 	require.NoError(t, err)
+	defer ts.cleanupTokenRequest(t, tokenRequest.Name)
 
 	tokenRequestName := tokenRequest.Name
 
@@ -177,4 +201,13 @@ func (ts *TestSuite) ShouldFailToAccessApplication(t *testing.T, credentials con
 	_, errorResponse = applicationConnectorClient.SendEvent(t, eventId)
 	require.NotNil(t, errorResponse)
 	require.Equal(t, expectedStatus, errorResponse.Code)
+}
+
+func (ts *TestSuite) ModifyGroupAndTenant(application types.Application, group, tenant string) *types.Application {
+	modifiedApp := application.DeepCopy()
+
+	modifiedApp.Spec.Group = group
+	modifiedApp.Spec.Tenant = tenant
+
+	return modifiedApp
 }

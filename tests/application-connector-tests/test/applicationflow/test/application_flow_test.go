@@ -40,5 +40,24 @@ func TestApplicationFlow(t *testing.T) {
 		testSuite.ShouldFailToAccessApplication(t, newAppConnection.Credentials, applicationConnection.ManagementURLs, http.StatusForbidden)
 	})
 
-	// TODO - if central check group and tenant not matching
+	if testSuite.IsCentral() {
+
+		t.Run("should receive 403 if certificate issued for Application with invalid group", func(t *testing.T) {
+			modifiedApp := testSuite.ModifyGroupAndTenant(*application, "invalid-group", application.Spec.Tenant)
+
+			newAppConnection := testSuite.EstablishMTLSConnection(t, modifiedApp)
+
+			testSuite.ShouldFailToAccessApplication(t, newAppConnection.Credentials, applicationConnection.ManagementURLs, http.StatusForbidden)
+		})
+
+		t.Run("should receive 403 if certificate issued for Application with invalid tenant", func(t *testing.T) {
+			modifiedApp := testSuite.ModifyGroupAndTenant(*application, application.Spec.Group, "invalid-tenant")
+
+			newAppConnection := testSuite.EstablishMTLSConnection(t, modifiedApp)
+
+			testSuite.ShouldFailToAccessApplication(t, newAppConnection.Credentials, applicationConnection.ManagementURLs, http.StatusForbidden)
+		})
+
+	}
+
 }

@@ -64,6 +64,8 @@ func (c *Client) EstablishApplicationConnection(infoURL string) (ApplicationConn
 func (c *Client) requestManagementInfo(key *rsa.PrivateKey, certs []*x509.Certificate, managementInfoURL string) (ManagementInfoResponse, error) {
 	mtlsClient := testkit.NewMTLSClient(key, certs)
 
+	fmt.Println(managementInfoURL)
+
 	req, err := http.NewRequest(http.MethodGet, managementInfoURL, nil)
 	if err != nil {
 		return ManagementInfoResponse{}, err
