@@ -774,8 +774,8 @@ metadata:
 ---
 apiVersion: v1
 data:
-  {{ if (ne "" .Values.global.domainName) }}
-  {{ .Values.global.domainName }}: ""
+  {{ if (ne "" .Values.domainName) }}
+  {{ .Values.domainName }}: ""
   {{ end }}
 kind: ConfigMap
 metadata:
