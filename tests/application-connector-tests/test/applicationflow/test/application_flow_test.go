@@ -23,22 +23,21 @@ func TestApplicationFlow(t *testing.T) {
 	testSuite.WaitForApplicationToBeDeployed(t, application.Name)
 	t.Logf("Application created")
 
-	t.Run("should successfully access Application", func(t *testing.T) {
-		t.Logf("Exchanging certificates to establish connection for %s application...", application.Name)
-		appConnection := testSuite.EstablishMTLSConnection(t, application)
-		t.Logf("Connection established")
+	t.Logf("Exchanging certificates to establish connection for %s application...", application.Name)
+	applicationConnection := testSuite.EstablishMTLSConnection(t, application)
+	t.Logf("Connection established")
 
-		testSuite.ShouldAccessApplication(t, appConnection)
-	})
+	t.Logf("Accessing Application")
+	testSuite.ShouldAccessApplication(t, applicationConnection.Credentials, applicationConnection.ManagementURLs)
 
 	t.Run("should receive 403 if certificate issued for different Application", func(t *testing.T) {
 		notDeployedApplication := testSuite.PrepareTestApplication(t, applicationNamePrefix)
 
 		t.Logf("Exchanging certificates to establish connection for %s application...", notDeployedApplication.Name)
-		appConnection := testSuite.EstablishMTLSConnection(t, notDeployedApplication)
+		newAppConnection := testSuite.EstablishMTLSConnection(t, notDeployedApplication)
 		t.Logf("Connection established")
 
-		testSuite.ShouldFailToAccessApplication(t, appConnection, http.StatusForbidden)
+		testSuite.ShouldFailToAccessApplication(t, newAppConnection.Credentials, applicationConnection.ManagementURLs, http.StatusForbidden)
 	})
 
 	// TODO - if central check group and tenant not matching

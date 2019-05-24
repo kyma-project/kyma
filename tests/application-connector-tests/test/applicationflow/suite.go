@@ -6,6 +6,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/util"
+
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/services"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/tools/clientcmd"
@@ -153,25 +155,25 @@ func (ts *TestSuite) EstablishMTLSConnection(t *testing.T, application *types.Ap
 	return applicationConnection
 }
 
-func (ts *TestSuite) ShouldAccessApplication(t *testing.T, appConnection connector.ApplicationConnection) {
-	applicationConnectorClient := services.NewApplicationConnectorClient(appConnection)
+func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector.ApplicationCredentials, urls connector.ManagementInfoURLs) {
+	applicationConnectorClient := services.NewApplicationConnectorClient(credentials, urls)
 	apis, errorResponse := applicationConnectorClient.GetAllAPIs(t)
-	require.Nil(t, errorResponse)
+	util.RequireNoError(t, errorResponse)
 	require.NotNil(t, apis)
 
-	eventId := rand.String(10)
+	eventId := "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa"
 	publishResponse, errorResponse := applicationConnectorClient.SendEvent(t, eventId)
-	require.Nil(t, errorResponse)
+	util.RequireNoError(t, errorResponse)
 	require.Equal(t, eventId, publishResponse.EventID)
 }
 
-func (ts *TestSuite) ShouldFailToAccessApplication(t *testing.T, appConnection connector.ApplicationConnection, expectedStatus int) {
-	applicationConnectorClient := services.NewApplicationConnectorClient(appConnection)
+func (ts *TestSuite) ShouldFailToAccessApplication(t *testing.T, credentials connector.ApplicationCredentials, urls connector.ManagementInfoURLs, expectedStatus int) {
+	applicationConnectorClient := services.NewApplicationConnectorClient(credentials, urls)
 	_, errorResponse := applicationConnectorClient.GetAllAPIs(t)
 	require.NotNil(t, errorResponse)
 	require.Equal(t, expectedStatus, errorResponse.Code)
 
-	eventId := rand.String(10)
+	eventId := "bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb"
 	_, errorResponse = applicationConnectorClient.SendEvent(t, eventId)
 	require.NotNil(t, errorResponse)
 	require.Equal(t, expectedStatus, errorResponse.Code)

@@ -11,44 +11,43 @@ import (
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/connector"
 )
 
-const (
-	getAllAPIsEndpoint = "/v1/metadata/services"
-	sendEventEndpoint  = "/v1/events"
-)
-
 type ApplicationConnectorClient struct {
-	applicationConnection connector.ApplicationConnection
+	applicationCredentials connector.ApplicationCredentials
+	managementURLs         connector.ManagementInfoURLs
 
 	httpClient *http.Client
 }
 
-func NewApplicationConnectorClient(applicationConnection connector.ApplicationConnection) *ApplicationConnectorClient {
+func NewApplicationConnectorClient(credentials connector.ApplicationCredentials, urls connector.ManagementInfoURLs) *ApplicationConnectorClient {
 	return &ApplicationConnectorClient{
-		applicationConnection: applicationConnection,
-		httpClient:            applicationConnection.NewMTLSClient(),
+		applicationCredentials: credentials,
+		managementURLs:         urls,
+		httpClient:             credentials.NewMTLSClient(),
 	}
 }
 
-func (arc *ApplicationConnectorClient) GetAllAPIs(t *testing.T) (services []Service, errorResponse *ErrorResponse) {
-	req, err := http.NewRequest(http.MethodGet, arc.applicationConnection.RegistryURL()+getAllAPIsEndpoint, nil)
+func (arc *ApplicationConnectorClient) GetAllAPIs(t *testing.T) ([]Service, *ErrorResponse) {
+	req, err := http.NewRequest(http.MethodGet, arc.managementURLs.MetadataUrl, nil)
 	require.NoError(t, err)
 
 	response, err := arc.httpClient.Do(req)
 	require.NoError(t, err)
 
 	if response.StatusCode != http.StatusOK {
-		err = json.NewDecoder(response.Body).Decode(errorResponse)
+		var errorResponse ErrorResponse
+		err = json.NewDecoder(response.Body).Decode(&errorResponse)
 		require.NoError(t, err)
-		return nil, errorResponse
+		return nil, &errorResponse
 	}
 
+	var services []Service
 	err = json.NewDecoder(response.Body).Decode(&services)
 	require.NoError(t, err)
 
 	return services, nil
 }
 
-func (arc *ApplicationConnectorClient) SendEvent(t *testing.T, eventId string) (publishResponse PublishResponse, errorResponse *ErrorResponse) {
+func (arc *ApplicationConnectorClient) SendEvent(t *testing.T, eventId string) (PublishResponse, *ErrorResponse) {
 	publishRequest := PublishRequest{
 		EventType:        "order.created",
 		EventTypeVersion: "v1",
@@ -59,17 +58,20 @@ func (arc *ApplicationConnectorClient) SendEvent(t *testing.T, eventId string) (
 	publishRequestEncoded, err := json.Marshal(publishRequest)
 	require.NoError(t, err)
 
-	req, err := http.NewRequest(http.MethodPost, arc.applicationConnection.EventsURL()+sendEventEndpoint, bytes.NewBuffer(publishRequestEncoded))
+	req, err := http.NewRequest(http.MethodPost, arc.managementURLs.EventsUrl, bytes.NewBuffer(publishRequestEncoded))
 	require.NoError(t, err)
 
 	response, err := arc.httpClient.Do(req)
 	require.NoError(t, err)
 
 	if response.StatusCode != http.StatusOK {
-		err = json.NewDecoder(response.Body).Decode(errorResponse)
-		return PublishResponse{}, errorResponse
+		var errorResponse ErrorResponse
+		err = json.NewDecoder(response.Body).Decode(&errorResponse)
+		require.NoError(t, err)
+		return PublishResponse{}, &errorResponse
 	}
 
+	var publishResponse PublishResponse
 	err = json.NewDecoder(response.Body).Decode(&publishResponse)
 	require.NoError(t, err)
 

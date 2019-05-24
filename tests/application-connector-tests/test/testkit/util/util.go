@@ -4,6 +4,10 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit/services"
 )
 
 func RequireStatus(t *testing.T, expectedStatus int, response *http.Response) {
@@ -11,6 +15,10 @@ func RequireStatus(t *testing.T, expectedStatus int, response *http.Response) {
 		LogResponse(t, response)
 		t.Fatal("Invalid response code")
 	}
+}
+
+func RequireNoError(t *testing.T, errorResponse *services.ErrorResponse) {
+	require.Nil(t, errorResponse)
 }
 
 func LogResponse(t *testing.T, resp *http.Response) {

@@ -52,8 +52,10 @@ func (c *Client) EstablishApplicationConnection(infoURL string) (ApplicationConn
 	}
 
 	return ApplicationConnection{
-		ClientKey:      clientKey,
-		Certificates:   certificates,
+		Credentials: ApplicationCredentials{
+			ClientKey:    clientKey,
+			Certificates: certificates,
+		},
 		ClientIdentity: managementInfo.ClientIdentity,
 		ManagementURLs: managementInfo.URLs,
 	}, nil
@@ -72,11 +74,16 @@ func (c *Client) requestManagementInfo(key *rsa.PrivateKey, certs []*x509.Certif
 		return ManagementInfoResponse{}, errors.Wrap(err, "Failed to fetch Management Info")
 	}
 
+	if response.StatusCode != http.StatusOK {
+		return ManagementInfoResponse{}, errors.New("Failed to fetch Management Info. Received status: " + response.Status)
+	}
+
 	// TODO - http code checks?
 
 	var managementInfo ManagementInfoResponse
 	err = json.NewDecoder(response.Body).Decode(&managementInfo)
 	if err != nil {
+		// TODO - Error response
 		return ManagementInfoResponse{}, errors.Wrap(err, "Failed to decode Management Info Response")
 	}
 
