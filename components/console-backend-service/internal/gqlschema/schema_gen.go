@@ -341,6 +341,7 @@ type ComplexityRoot struct {
 		EventType   func(childComplexity int) int
 		Version     func(childComplexity int) int
 		Description func(childComplexity int) int
+		Schema      func(childComplexity int) int
 	}
 
 	ExceededQuota struct {
@@ -426,17 +427,25 @@ type ComplexityRoot struct {
 		DeleteSecret                  func(childComplexity int, name string, namespace string) int
 		UpdateReplicaSet              func(childComplexity int, name string, namespace string, replicaSet JSON) int
 		DeleteReplicaSet              func(childComplexity int, name string, namespace string) int
+		CreateResourceQuota           func(childComplexity int, namespace string, name string, resourceQuota ResourceQuotaInput) int
 		UpdateConfigMap               func(childComplexity int, name string, namespace string, configMap JSON) int
 		DeleteConfigMap               func(childComplexity int, name string, namespace string) int
 		CreateIdppreset               func(childComplexity int, name string, issuer string, jwksUri string) int
 		DeleteIdppreset               func(childComplexity int, name string) int
 		UpdateService                 func(childComplexity int, name string, namespace string, service JSON) int
 		DeleteService                 func(childComplexity int, name string, namespace string) int
+		CreateNamespace               func(childComplexity int, name string, labels *Labels) int
 	}
 
 	Namespace struct {
 		Name         func(childComplexity int) int
+		Labels       func(childComplexity int) int
 		Applications func(childComplexity int) int
+	}
+
+	NamespaceCreationOutput struct {
+		Name   func(childComplexity int) int
+		Labels func(childComplexity int) int
 	}
 
 	NavigationNode struct {
@@ -826,12 +835,14 @@ type MutationResolver interface {
 	DeleteSecret(ctx context.Context, name string, namespace string) (*Secret, error)
 	UpdateReplicaSet(ctx context.Context, name string, namespace string, replicaSet JSON) (*ReplicaSet, error)
 	DeleteReplicaSet(ctx context.Context, name string, namespace string) (*ReplicaSet, error)
+	CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuota ResourceQuotaInput) (*ResourceQuota, error)
 	UpdateConfigMap(ctx context.Context, name string, namespace string, configMap JSON) (*ConfigMap, error)
 	DeleteConfigMap(ctx context.Context, name string, namespace string) (*ConfigMap, error)
 	CreateIDPPreset(ctx context.Context, name string, issuer string, jwksUri string) (*IDPPreset, error)
 	DeleteIDPPreset(ctx context.Context, name string) (*IDPPreset, error)
 	UpdateService(ctx context.Context, name string, namespace string, service JSON) (*Service, error)
 	DeleteService(ctx context.Context, name string, namespace string) (*Service, error)
+	CreateNamespace(ctx context.Context, name string, labels *Labels) (NamespaceCreationOutput, error)
 }
 type NamespaceResolver interface {
 	Applications(ctx context.Context, obj *Namespace) ([]string, error)
@@ -1768,6 +1779,39 @@ func field_Mutation_deleteReplicaSet_args(rawArgs map[string]interface{}) (map[s
 
 }
 
+func field_Mutation_createResourceQuota_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg1
+	var arg2 ResourceQuotaInput
+	if tmp, ok := rawArgs["resourceQuota"]; ok {
+		var err error
+		arg2, err = UnmarshalResourceQuotaInput(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["resourceQuota"] = arg2
+	return args, nil
+
+}
+
 func field_Mutation_updateConfigMap_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	args := map[string]interface{}{}
 	var arg0 string
@@ -1926,6 +1970,35 @@ func field_Mutation_deleteService_args(rawArgs map[string]interface{}) (map[stri
 		}
 	}
 	args["namespace"] = arg1
+	return args, nil
+
+}
+
+func field_Mutation_createNamespace_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["name"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["name"] = arg0
+	var arg1 *Labels
+	if tmp, ok := rawArgs["labels"]; ok {
+		var err error
+		var ptr1 Labels
+		if tmp != nil {
+			err = (&ptr1).UnmarshalGQL(tmp)
+			arg1 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["labels"] = arg1
 	return args, nil
 
 }
@@ -4451,6 +4524,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.EventActivationEvent.Description(childComplexity), true
 
+	case "EventActivationEvent.schema":
+		if e.complexity.EventActivationEvent.Schema == nil {
+			break
+		}
+
+		return e.complexity.EventActivationEvent.Schema(childComplexity), true
+
 	case "ExceededQuota.quotaName":
 		if e.complexity.ExceededQuota.QuotaName == nil {
 			break
@@ -4930,6 +5010,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteReplicaSet(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
+	case "Mutation.createResourceQuota":
+		if e.complexity.Mutation.CreateResourceQuota == nil {
+			break
+		}
+
+		args, err := field_Mutation_createResourceQuota_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateResourceQuota(childComplexity, args["namespace"].(string), args["name"].(string), args["resourceQuota"].(ResourceQuotaInput)), true
+
 	case "Mutation.updateConfigMap":
 		if e.complexity.Mutation.UpdateConfigMap == nil {
 			break
@@ -5002,6 +5094,18 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Mutation.DeleteService(childComplexity, args["name"].(string), args["namespace"].(string)), true
 
+	case "Mutation.createNamespace":
+		if e.complexity.Mutation.CreateNamespace == nil {
+			break
+		}
+
+		args, err := field_Mutation_createNamespace_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.CreateNamespace(childComplexity, args["name"].(string), args["labels"].(*Labels)), true
+
 	case "Namespace.name":
 		if e.complexity.Namespace.Name == nil {
 			break
@@ -5009,12 +5113,33 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Namespace.Name(childComplexity), true
 
+	case "Namespace.labels":
+		if e.complexity.Namespace.Labels == nil {
+			break
+		}
+
+		return e.complexity.Namespace.Labels(childComplexity), true
+
 	case "Namespace.applications":
 		if e.complexity.Namespace.Applications == nil {
 			break
 		}
 
 		return e.complexity.Namespace.Applications(childComplexity), true
+
+	case "NamespaceCreationOutput.name":
+		if e.complexity.NamespaceCreationOutput.Name == nil {
+			break
+		}
+
+		return e.complexity.NamespaceCreationOutput.Name(childComplexity), true
+
+	case "NamespaceCreationOutput.labels":
+		if e.complexity.NamespaceCreationOutput.Labels == nil {
+			break
+		}
+
+		return e.complexity.NamespaceCreationOutput.Labels(childComplexity), true
 
 	case "NavigationNode.label":
 		if e.complexity.NavigationNode.Label == nil {
@@ -13525,6 +13650,11 @@ func (ec *executionContext) _EventActivationEvent(ctx context.Context, sel ast.S
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "schema":
+			out.Values[i] = ec._EventActivationEvent_schema(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13615,6 +13745,33 @@ func (ec *executionContext) _EventActivationEvent_description(ctx context.Contex
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EventActivationEvent_schema(ctx context.Context, field graphql.CollectedField, obj *EventActivationEvent) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EventActivationEvent",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Schema, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(JSON)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var exceededQuotaImplementors = []string{"ExceededQuota"}
@@ -14979,6 +15136,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updateReplicaSet(ctx, field)
 		case "deleteReplicaSet":
 			out.Values[i] = ec._Mutation_deleteReplicaSet(ctx, field)
+		case "createResourceQuota":
+			out.Values[i] = ec._Mutation_createResourceQuota(ctx, field)
 		case "updateConfigMap":
 			out.Values[i] = ec._Mutation_updateConfigMap(ctx, field)
 		case "deleteConfigMap":
@@ -14991,6 +15150,11 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			out.Values[i] = ec._Mutation_updateService(ctx, field)
 		case "deleteService":
 			out.Values[i] = ec._Mutation_deleteService(ctx, field)
+		case "createNamespace":
+			out.Values[i] = ec._Mutation_createNamespace(ctx, field)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -15804,6 +15968,41 @@ func (ec *executionContext) _Mutation_deleteReplicaSet(ctx context.Context, fiel
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Mutation_createResourceQuota(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createResourceQuota_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateResourceQuota(rctx, args["namespace"].(string), args["name"].(string), args["resourceQuota"].(ResourceQuotaInput))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ResourceQuota)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ResourceQuota(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Mutation_updateConfigMap(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -16013,6 +16212,40 @@ func (ec *executionContext) _Mutation_deleteService(ctx context.Context, field g
 	return ec._Service(ctx, field.Selections, res)
 }
 
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_createNamespace(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_createNamespace_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().CreateNamespace(rctx, args["name"].(string), args["labels"].(*Labels))
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(NamespaceCreationOutput)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	return ec._NamespaceCreationOutput(ctx, field.Selections, &res)
+}
+
 var namespaceImplementors = []string{"Namespace"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -16033,6 +16266,8 @@ func (ec *executionContext) _Namespace(ctx context.Context, sel ast.SelectionSet
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "labels":
+			out.Values[i] = ec._Namespace_labels(ctx, field, obj)
 		case "applications":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -16078,6 +16313,30 @@ func (ec *executionContext) _Namespace_name(ctx context.Context, field graphql.C
 }
 
 // nolint: vetshadow
+func (ec *executionContext) _Namespace_labels(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Namespace",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
+}
+
+// nolint: vetshadow
 func (ec *executionContext) _Namespace_applications(ctx context.Context, field graphql.CollectedField, obj *Namespace) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
@@ -16108,6 +16367,95 @@ func (ec *executionContext) _Namespace_applications(ctx context.Context, field g
 	}
 
 	return arr1
+}
+
+var namespaceCreationOutputImplementors = []string{"NamespaceCreationOutput"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _NamespaceCreationOutput(ctx context.Context, sel ast.SelectionSet, obj *NamespaceCreationOutput) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, namespaceCreationOutputImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("NamespaceCreationOutput")
+		case "name":
+			out.Values[i] = ec._NamespaceCreationOutput_name(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "labels":
+			out.Values[i] = ec._NamespaceCreationOutput_labels(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NamespaceCreationOutput_name(ctx context.Context, field graphql.CollectedField, obj *NamespaceCreationOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NamespaceCreationOutput",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Name, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _NamespaceCreationOutput_labels(ctx context.Context, field graphql.CollectedField, obj *NamespaceCreationOutput) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "NamespaceCreationOutput",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Labels, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(Labels)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return res
 }
 
 var navigationNodeImplementors = []string{"NavigationNode"}
@@ -27430,6 +27778,64 @@ func UnmarshalResourceAttributes(v interface{}) (ResourceAttributes, error) {
 	return it, nil
 }
 
+func UnmarshalResourceQuotaInput(v interface{}) (ResourceQuotaInput, error) {
+	var it ResourceQuotaInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "limits":
+			var err error
+			it.Limits, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		case "requests":
+			var err error
+			it.Requests, err = UnmarshalResourceValuesInput(v)
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
+func UnmarshalResourceValuesInput(v interface{}) (ResourceValuesInput, error) {
+	var it ResourceValuesInput
+	var asMap = v.(map[string]interface{})
+
+	for k, v := range asMap {
+		switch k {
+		case "memory":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.Memory = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		case "cpu":
+			var err error
+			var ptr1 string
+			if v != nil {
+				ptr1, err = graphql.UnmarshalString(v)
+				it.CPU = &ptr1
+			}
+
+			if err != nil {
+				return it, err
+			}
+		}
+	}
+
+	return it, nil
+}
+
 func UnmarshalServiceBindingRefInput(v interface{}) (ServiceBindingRefInput, error) {
 	var it ServiceBindingRefInput
 	var asMap = v.(map[string]interface{})
@@ -28183,6 +28589,16 @@ type ResourceQuota {
     requests: ResourceValues!
 }
 
+input ResourceValuesInput {
+    memory: String
+    cpu: String
+}
+
+input ResourceQuotaInput {
+    limits: ResourceValuesInput!
+    requests: ResourceValuesInput!
+}
+
 type ResourceQuotasStatus {
     exceeded: Boolean!
     exceededQuotas: [ExceededQuota!]!
@@ -28198,9 +28614,15 @@ type ExceededQuota {
 
 type Namespace {
     name: String!
+    labels: Labels
 
     # Depends on application module
     applications: [String!]
+}
+
+type NamespaceCreationOutput {
+    name: String!
+    labels: Labels!
 }
 
 type Application {
@@ -28261,6 +28683,7 @@ type EventActivationEvent {
     eventType: String!
     version: String!
     description: String!
+    schema: JSON!
 }
 
 type EventActivation {
@@ -28504,6 +28927,8 @@ type Mutation {
     updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
 
+    createResourceQuota(namespace: String!, name: String!, resourceQuota: ResourceQuotaInput!): ResourceQuota @HasAccess(attributes: {resource: "resourcequotas", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
+
     updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
 
@@ -28512,6 +28937,8 @@ type Mutation {
 
     updateService(name: String!, namespace: String!, service: JSON!): Service @HasAccess(attributes: {resource: "services", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteService(name: String!, namespace: String!): Service @HasAccess(attributes: {resource: "services", verb: "delete", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
+
+    createNamespace(name: String!, labels: Labels): NamespaceCreationOutput! @HasAccess(attributes: {resource: "namespaces", verb: "create", apiGroup: "", apiVersion: "v1"})
 }
 
 # Subscriptions

@@ -22,13 +22,21 @@ type istioImpl struct {
 	istioNetworkingInterface istioNetworking.Interface
 	kubernetesInterface      k8sClient.Interface
 	istioGateway             string
+	corsConfig               CORSConfig
 }
 
-func New(i istioNetworking.Interface, k k8sClient.Interface, istioGateway string) Interface {
+type CORSConfig struct {
+	AllowMethods []string
+	AllowHeaders []string
+	AllowOrigin  []string
+}
+
+func New(i istioNetworking.Interface, k k8sClient.Interface, istioGateway string, corsConfig CORSConfig) Interface {
 	return &istioImpl{
 		istioNetworkingInterface: i,
 		kubernetesInterface:      k,
 		istioGateway:             istioGateway,
+		corsConfig:               corsConfig,
 	}
 }
 
@@ -42,7 +50,7 @@ func (e HostnameNotAvailableError) Error() string {
 
 func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
 
-	virtualService := toVirtualService(dto, a.istioGateway)
+	virtualService := toVirtualService(dto, a.istioGateway, a.corsConfig)
 
 	log.Infof("Creating virtual service: %+v", virtualService)
 
@@ -66,7 +74,7 @@ func (a *istioImpl) Create(dto *Dto) (*kymaMeta.GatewayResource, error) {
 
 func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, error) {
 
-	newVirtualService := toVirtualService(newDto, a.istioGateway)
+	newVirtualService := toVirtualService(newDto, a.istioGateway, a.corsConfig)
 
 	log.Infof("Trying to create or update virtual service: %+v", newVirtualService)
 
@@ -82,7 +90,7 @@ func (a *istioImpl) Update(oldDto, newDto *Dto) (*kymaMeta.GatewayResource, erro
 		return createdResource, nil
 	}
 
-	oldVirtualService := toVirtualService(oldDto, a.istioGateway)
+	oldVirtualService := toVirtualService(oldDto, a.istioGateway, a.corsConfig)
 
 	if a.isEqual(oldVirtualService, newVirtualService) {
 
@@ -154,7 +162,7 @@ func (a *istioImpl) isEqual(oldRule, newRule *istioNetworkingApi.VirtualService)
 	return reflect.DeepEqual(oldRule.Spec, newRule.Spec)
 }
 
-func toVirtualService(dto *Dto, istioGateway string) *istioNetworkingApi.VirtualService {
+func toVirtualService(dto *Dto, istioGateway string, corsConfig CORSConfig) *istioNetworkingApi.VirtualService {
 
 	objectMeta := k8sMeta.ObjectMeta{
 		Name:            dto.MetaDto.Name,
@@ -176,7 +184,7 @@ func toVirtualService(dto *Dto, istioGateway string) *istioNetworkingApi.Virtual
 						},
 					},
 				},
-				Route: []*istioNetworkingApi.DestinationWeight{
+				Route: []*istioNetworkingApi.HTTPRouteDestination{
 					{
 						Destination: &istioNetworkingApi.Destination{
 							Host: fmt.Sprintf("%s.%s.svc.cluster.local", dto.ServiceName, dto.MetaDto.Namespace),
@@ -188,6 +196,14 @@ func toVirtualService(dto *Dto, istioGateway string) *istioNetworkingApi.Virtual
 				},
 			},
 		},
+	}
+
+	if len(corsConfig.AllowHeaders) > 0 || len(corsConfig.AllowMethods) > 0 || len(corsConfig.AllowOrigin) > 0 {
+		spec.Http[0].CorsPolicy = &istioNetworkingApi.CorsPolicy{
+			AllowOrigin:  corsConfig.AllowOrigin,
+			AllowMethods: corsConfig.AllowMethods,
+			AllowHeaders: corsConfig.AllowHeaders,
+		}
 	}
 
 	return &istioNetworkingApi.VirtualService{

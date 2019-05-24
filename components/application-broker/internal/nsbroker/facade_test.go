@@ -30,7 +30,7 @@ func TestNsBrokerCreateHappyPath(t *testing.T) {
 	mockBrokerSyncer := &automock.BrokerSyncer{}
 	defer mockBrokerSyncer.AssertExpectations(t)
 
-	svcURL := fmt.Sprintf("http://%s.%s.svc.cluster.local/%s/", fixABService(), fixWorkingNs(), "stage")
+	svcURL := fmt.Sprintf("http://%s.%s.svc.cluster.local/%s", fixABService(), fixWorkingNs(), "stage")
 	mockBrokerSyncer.On("SyncBroker", "stage").Once().Return(nil)
 
 	sut := nsbroker.NewFacade(scFakeClientset.ServicecatalogV1beta1(), k8sFakeClientset.CoreV1(), mockBrokerSyncer, fixWorkingNs(), fixABSelectorKey(), fixABSelectorValue(), fixABService(), fixTargetPort(), spy.NewLogDummy())
