@@ -329,7 +329,7 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
-	EnabledService struct {
+	EnabledApplicationService struct {
 		Id          func(childComplexity int) int
 		DisplayName func(childComplexity int) int
 		Exist       func(childComplexity int) int
@@ -4535,26 +4535,26 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DocsTopicStatus.Message(childComplexity), true
 
-	case "EnabledService.id":
-		if e.complexity.EnabledService.Id == nil {
+	case "EnabledApplicationService.id":
+		if e.complexity.EnabledApplicationService.Id == nil {
 			break
 		}
 
-		return e.complexity.EnabledService.Id(childComplexity), true
+		return e.complexity.EnabledApplicationService.Id(childComplexity), true
 
-	case "EnabledService.displayName":
-		if e.complexity.EnabledService.DisplayName == nil {
+	case "EnabledApplicationService.displayName":
+		if e.complexity.EnabledApplicationService.DisplayName == nil {
 			break
 		}
 
-		return e.complexity.EnabledService.DisplayName(childComplexity), true
+		return e.complexity.EnabledApplicationService.DisplayName(childComplexity), true
 
-	case "EnabledService.exist":
-		if e.complexity.EnabledService.Exist == nil {
+	case "EnabledApplicationService.exist":
+		if e.complexity.EnabledApplicationService.Exist == nil {
 			break
 		}
 
-		return e.complexity.EnabledService.Exist(childComplexity), true
+		return e.complexity.EnabledApplicationService.Exist(childComplexity), true
 
 	case "EnvPrefix.name":
 		if e.complexity.EnvPrefix.Name == nil {
@@ -13591,11 +13591,11 @@ func (ec *executionContext) _DocsTopicStatus_message(ctx context.Context, field 
 	return graphql.MarshalString(res)
 }
 
-var enabledServiceImplementors = []string{"EnabledService"}
+var enabledApplicationServiceImplementors = []string{"EnabledApplicationService"}
 
 // nolint: gocyclo, errcheck, gas, goconst
-func (ec *executionContext) _EnabledService(ctx context.Context, sel ast.SelectionSet, obj *EnabledService) graphql.Marshaler {
-	fields := graphql.CollectFields(ctx, sel, enabledServiceImplementors)
+func (ec *executionContext) _EnabledApplicationService(ctx context.Context, sel ast.SelectionSet, obj *EnabledApplicationService) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, enabledApplicationServiceImplementors)
 
 	out := graphql.NewOrderedMap(len(fields))
 	invalid := false
@@ -13604,19 +13604,19 @@ func (ec *executionContext) _EnabledService(ctx context.Context, sel ast.Selecti
 
 		switch field.Name {
 		case "__typename":
-			out.Values[i] = graphql.MarshalString("EnabledService")
+			out.Values[i] = graphql.MarshalString("EnabledApplicationService")
 		case "id":
-			out.Values[i] = ec._EnabledService_id(ctx, field, obj)
+			out.Values[i] = ec._EnabledApplicationService_id(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "displayName":
-			out.Values[i] = ec._EnabledService_displayName(ctx, field, obj)
+			out.Values[i] = ec._EnabledApplicationService_displayName(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
 		case "exist":
-			out.Values[i] = ec._EnabledService_exist(ctx, field, obj)
+			out.Values[i] = ec._EnabledApplicationService_exist(ctx, field, obj)
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
@@ -13632,11 +13632,11 @@ func (ec *executionContext) _EnabledService(ctx context.Context, sel ast.Selecti
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _EnabledService_id(ctx context.Context, field graphql.CollectedField, obj *EnabledService) graphql.Marshaler {
+func (ec *executionContext) _EnabledApplicationService_id(ctx context.Context, field graphql.CollectedField, obj *EnabledApplicationService) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "EnabledService",
+		Object: "EnabledApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
@@ -13659,11 +13659,11 @@ func (ec *executionContext) _EnabledService_id(ctx context.Context, field graphq
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _EnabledService_displayName(ctx context.Context, field graphql.CollectedField, obj *EnabledService) graphql.Marshaler {
+func (ec *executionContext) _EnabledApplicationService_displayName(ctx context.Context, field graphql.CollectedField, obj *EnabledApplicationService) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "EnabledService",
+		Object: "EnabledApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
@@ -13686,11 +13686,11 @@ func (ec *executionContext) _EnabledService_displayName(ctx context.Context, fie
 }
 
 // nolint: vetshadow
-func (ec *executionContext) _EnabledService_exist(ctx context.Context, field graphql.CollectedField, obj *EnabledService) graphql.Marshaler {
+func (ec *executionContext) _EnabledApplicationService_exist(ctx context.Context, field graphql.CollectedField, obj *EnabledApplicationService) graphql.Marshaler {
 	ctx = ec.Tracer.StartFieldExecution(ctx, field)
 	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
 	rctx := &graphql.ResolverContext{
-		Object: "EnabledService",
+		Object: "EnabledApplicationService",
 		Args:   nil,
 		Field:  field,
 	}
@@ -27770,6 +27770,9 @@ func (ec *executionContext) _enabledMappingService(ctx context.Context, sel ast.
 			}
 		case "allServices":
 			out.Values[i] = ec._enabledMappingService_allServices(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		case "services":
 			out.Values[i] = ec._enabledMappingService_services(ctx, field, obj)
 		default:
@@ -27826,16 +27829,15 @@ func (ec *executionContext) _enabledMappingService_allServices(ctx context.Conte
 		return obj.AllServices, nil
 	})
 	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
 		return graphql.Null
 	}
-	res := resTmp.(*bool)
+	res := resTmp.(bool)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
-
-	if res == nil {
-		return graphql.Null
-	}
-	return graphql.MarshalBoolean(*res)
+	return graphql.MarshalBoolean(res)
 }
 
 // nolint: vetshadow
@@ -27856,7 +27858,7 @@ func (ec *executionContext) _enabledMappingService_services(ctx context.Context,
 	if resTmp == nil {
 		return graphql.Null
 	}
-	res := resTmp.([]*EnabledService)
+	res := resTmp.([]*EnabledApplicationService)
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 
@@ -27885,7 +27887,7 @@ func (ec *executionContext) _enabledMappingService_services(ctx context.Context,
 					return graphql.Null
 				}
 
-				return ec._EnabledService(ctx, field.Selections, res[idx1])
+				return ec._EnabledApplicationService(ctx, field.Selections, res[idx1])
 			}()
 		}
 		if isLen1 {
@@ -28894,11 +28896,11 @@ type Application {
 
 type enabledMappingService {
     namespace: String!
-    allServices: Boolean
-    services: [EnabledService]
+    allServices: Boolean!
+    services: [EnabledApplicationService]
 }
 
-type EnabledService {
+type EnabledApplicationService {
     id: String!
     displayName: String!
     exist: Boolean!
@@ -29188,7 +29190,7 @@ type Mutation {
     deleteApplication(name: String!): DeleteApplicationOutput! @HasAccess(attributes: {resource: "applications", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
     enableApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
-    overloadApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    overloadApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     disableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "application", namespaceArg: "namespace"})
 
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod @HasAccess(attributes: {resource: "pods", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})

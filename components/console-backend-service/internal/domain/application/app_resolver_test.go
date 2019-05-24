@@ -511,24 +511,24 @@ func TestApplicationResolver_ApplicationEnabledMappingServices(t *testing.T) {
 	// THEN
 	assert.Len(t, out, 1)
 	assert.Equal(t, out[0].Namespace, fixNamespace)
-	assert.False(t, *out[0].AllServices)
+	assert.False(t, out[0].AllServices)
 	assert.Len(t, out[0].Services, 4)
-	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledApplicationService{
 		ID:          serviceIdOne,
 		Exist:       true,
 		DisplayName: serviceNameOne,
 	})
-	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledApplicationService{
 		ID:          serviceIdTwo,
 		Exist:       true,
 		DisplayName: serviceNameTwo,
 	})
-	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledApplicationService{
 		ID:          serviceIdThree,
 		Exist:       true,
 		DisplayName: serviceNameThree,
 	})
-	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledApplicationService{
 		ID:          serviceIdFour,
 		Exist:       false,
 		DisplayName: "",

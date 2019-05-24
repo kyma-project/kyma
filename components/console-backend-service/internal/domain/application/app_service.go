@@ -55,6 +55,8 @@ type applicationService struct {
 	httpClient      *http.Client
 	appNameRegex    *regexp.Regexp
 	notifier        notifier
+
+	appMappingConverter applicationMappingConverter
 }
 
 func newApplicationService(cfg Config, aCli appCli.ApplicationconnectorV1alpha1Interface, mCli mappingCli.ApplicationconnectorV1alpha1Interface, mInformer cache.SharedIndexInformer, mLister mappingLister.ApplicationMappingLister, appInformer cache.SharedIndexInformer) (*applicationService, error) {
@@ -93,6 +95,8 @@ func newApplicationService(cfg Config, aCli appCli.ApplicationconnectorV1alpha1I
 		},
 		notifier:     notifier,
 		appNameRegex: regex,
+
+		appMappingConverter: applicationMappingConverter{},
 	}, nil
 }
 
@@ -232,7 +236,7 @@ func (svc *applicationService) ListInNamespace(namespace string) ([]*v1alpha1.Ap
 
 // Enable enables Application in given namespace by creating ApplicationMapping
 func (svc *applicationService) Enable(namespace, name string, services []*gqlschema.ApplicationMappingService) (*mappingTypes.ApplicationMapping, error) {
-	mappingServices := svc.transformApplicationMappingService(services)
+	mappingServices := svc.appMappingConverter.transformApplicationMappingServiceFromGQL(services)
 	em, err := svc.mCli.ApplicationMappings(namespace).Create(&mappingTypes.ApplicationMapping{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "ApplicationMapping",
@@ -256,28 +260,13 @@ func (svc *applicationService) UpdateApplicationMapping(namespace, name string, 
 	}
 
 	emUpdate := em.DeepCopy()
-	emUpdate.Spec.Services = svc.transformApplicationMappingService(services)
+	emUpdate.Spec.Services = svc.appMappingConverter.transformApplicationMappingServiceFromGQL(services)
 	emDone, err := svc.mCli.ApplicationMappings(namespace).Update(emUpdate)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while updating %s", pretty.ApplicationMapping)
 	}
 
 	return emDone, nil
-}
-
-func (svc *applicationService) transformApplicationMappingService(services []*gqlschema.ApplicationMappingService) []mappingTypes.ApplicationMappingService {
-	if services == nil {
-		return nil
-	}
-
-	ms := []mappingTypes.ApplicationMappingService{}
-	for _, service := range services {
-		var ams mappingTypes.ApplicationMappingService
-		ams.ID = service.ID
-		ms = append(ms, ams)
-	}
-
-	return ms
 }
 
 // ListApplicationMapping return list of ApplicationMapping from all namespaces base on name

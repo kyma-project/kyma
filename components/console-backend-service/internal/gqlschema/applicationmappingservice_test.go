@@ -22,7 +22,7 @@ func TestApplicationMappingService_UnmarshalGQL(t *testing.T) {
 		"input error": {
 			input:  "wrong input",
 			err:    true,
-			errMsg: "unexpected services type: string, should be map[string]string",
+			errMsg: "unexpected services type: string, should be map[string]interface{}",
 		},
 		"missing parameter error": {
 			input:  map[string]interface{}{"wrong_param": "1234-abcd"},

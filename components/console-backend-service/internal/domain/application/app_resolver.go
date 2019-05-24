@@ -41,16 +41,18 @@ type statusGetter interface {
 }
 
 type applicationResolver struct {
-	appSvc       appSvc
-	appConverter applicationConverter
-	statusGetter statusGetter
+	appSvc              appSvc
+	appConverter        applicationConverter
+	appMappingConverter applicationMappingConverter
+	statusGetter        statusGetter
 }
 
 func NewApplicationResolver(appSvc appSvc, statusGetter statusGetter) *applicationResolver {
 	return &applicationResolver{
-		appSvc:       appSvc,
-		statusGetter: statusGetter,
-		appConverter: applicationConverter{},
+		appSvc:              appSvc,
+		statusGetter:        statusGetter,
+		appConverter:        applicationConverter{},
+		appMappingConverter: applicationMappingConverter{},
 	}
 }
 
@@ -162,7 +164,7 @@ func (r *applicationResolver) ConnectorServiceQuery(ctx context.Context, applica
 }
 
 func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
-	services = configureServices(allServices, services)
+	services = r.configureServices(allServices, services)
 	em, err := r.appSvc.Enable(namespace, application, services)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while enabling %s", pretty.Application))
@@ -173,12 +175,12 @@ func (r *applicationResolver) EnableApplicationMutation(ctx context.Context, app
 		Namespace:   em.Namespace,
 		Application: em.Name,
 		AllServices: allServices,
-		Services:    r.transformApplicationMappingService(em.Spec.Services),
+		Services:    r.appMappingConverter.transformApplicationMappingServiceToGQL(em.Spec.Services),
 	}, nil
 }
 
 func (r *applicationResolver) OverloadApplicationMutation(ctx context.Context, application string, namespace string, allServices *bool, services []*gqlschema.ApplicationMappingService) (*gqlschema.ApplicationMapping, error) {
-	services = configureServices(allServices, services)
+	services = r.configureServices(allServices, services)
 	em, err := r.appSvc.UpdateApplicationMapping(namespace, application, services)
 	if err != nil {
 		glog.Error(errors.Wrapf(err, "while updating %s", pretty.ApplicationMapping))
@@ -189,11 +191,11 @@ func (r *applicationResolver) OverloadApplicationMutation(ctx context.Context, a
 		Namespace:   em.Namespace,
 		Application: em.Name,
 		AllServices: allServices,
-		Services:    r.transformApplicationMappingService(em.Spec.Services),
+		Services:    r.appMappingConverter.transformApplicationMappingServiceToGQL(em.Spec.Services),
 	}, nil
 }
 
-func configureServices(allServices *bool, services []*gqlschema.ApplicationMappingService) []*gqlschema.ApplicationMappingService {
+func (r *applicationResolver) configureServices(allServices *bool, services []*gqlschema.ApplicationMappingService) []*gqlschema.ApplicationMappingService {
 	var all bool
 
 	if allServices == nil {
@@ -211,21 +213,6 @@ func configureServices(allServices *bool, services []*gqlschema.ApplicationMappi
 	}
 
 	return services
-}
-
-func (r *applicationResolver) transformApplicationMappingService(services []mappingTypes.ApplicationMappingService) []*gqlschema.ApplicationMappingService {
-	if services == nil {
-		return nil
-	}
-
-	ms := []*gqlschema.ApplicationMappingService{}
-	for _, service := range services {
-		var ams gqlschema.ApplicationMappingService
-		ams.ID = service.ID
-		ms = append(ms, &ams)
-	}
-
-	return ms
 }
 
 func (r *applicationResolver) DisableApplicationMutation(ctx context.Context, application string, namespace string) (*gqlschema.ApplicationMapping, error) {
@@ -272,20 +259,17 @@ func (r *applicationResolver) ApplicationEnabledMappingServices(ctx context.Cont
 		ems := &gqlschema.EnabledMappingService{}
 
 		ems.Namespace = mapping.Namespace
-		all := mapping.IsAllApplicationServicesEnabled()
-		ems.AllServices = &all
-		ems.Services = findEnabledServices(obj.Services, mapping)
+		ems.AllServices = mapping.IsAllApplicationServicesEnabled()
+		if !ems.AllServices {
+			ems.Services = r.findEnabledApplicationService(obj.Services, mapping)
+		}
 		collection = append(collection, ems)
 	}
 
 	return collection, nil
 }
 
-func findEnabledServices(appServices []gqlschema.ApplicationService, mapping *mappingTypes.ApplicationMapping) []*gqlschema.EnabledService {
-	if mapping.IsAllApplicationServicesEnabled() {
-		return nil
-	}
-
+func (r *applicationResolver) findEnabledApplicationService(appServices []gqlschema.ApplicationService, mapping *mappingTypes.ApplicationMapping) []*gqlschema.EnabledApplicationService {
 	nameFinder := func(appServices []gqlschema.ApplicationService, id string) (string, bool) {
 		for _, val := range appServices {
 			if val.ID == id {
@@ -296,9 +280,9 @@ func findEnabledServices(appServices []gqlschema.ApplicationService, mapping *ma
 		return "", false
 	}
 
-	var result []*gqlschema.EnabledService
+	var result []*gqlschema.EnabledApplicationService
 	for _, srv := range mapping.Spec.Services {
-		es := &gqlschema.EnabledService{}
+		es := &gqlschema.EnabledApplicationService{}
 		es.ID = srv.ID
 		name, exist := nameFinder(appServices, srv.ID)
 		if exist {

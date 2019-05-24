@@ -19,7 +19,7 @@ func (ams *ApplicationMappingService) UnmarshalGQL(input interface{}) error {
 	}
 	value, ok := input.(map[string]interface{})
 	if !ok {
-		return errors.Errorf("unexpected services type: %T, should be map[string]string", input)
+		return errors.Errorf("unexpected services type: %T, should be map[string]interface{}", input)
 	}
 
 	idval, ok := value["id"]
