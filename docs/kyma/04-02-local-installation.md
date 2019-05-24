@@ -36,7 +36,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```bash
      kyma provision minikube
      ```
-     > **NOTE:** The `provision command uses default Minikube vm driver installed for your OS. For a list of supported vm drivers see [this document](http://github.com/kyma-project/cli).
+     > **NOTE:** The `provision` command uses default Minikube VM driver installed for your operating system. For a list of supported VM drivers see [this document](https://kubernetes.io/docs/setup/minikube/#quickstart).
   
   2. Choose the release from which you want to install Kyma. Go to the GitHub [releases](https://github.com/kyma-project/kyma/releases/) page to find out more about each of the available releases.
  
@@ -48,7 +48,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```
   4. Install Kyma on Minikube:
      ```bash
-     kyma install --release $KYMA_RELEASE
+     kyma install 
      ```
      
   5. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
@@ -104,7 +104,7 @@ Follow these instructions to install Kyma from a release or from sources:
      ```
      
   
-  6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal after installation finished.
+  6. After the installation is completed, you can access the Console UI. Go to [this](https://console.kyma.local) address and select **Login with Email**. Use the **admin@kyma.cx** email address and the password printed in the terminal once the installation process is completed.
 
   7. At this point, Kyma is ready for you to explore. See what you can achieve using the Console UI or check out one of the [available examples](https://github.com/kyma-project/examples).
 

@@ -7,7 +7,7 @@ The custom scripts allow you to remove Kyma from a Minikube cluster and reinstal
 
 > **NOTE:** These scripts do not delete the cluster from your Minikube. This allows you to quickly reinstall Kyma.
 
-1. Use the `Kyma CLI` uninstall Kyma from the cluster. Run:
+1. Use Kyma CLI to uninstall Kyma from the cluster. Run:
   ```bash
   kyma uninstall
   ```
