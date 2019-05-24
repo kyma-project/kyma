@@ -3,7 +3,7 @@ title: Restore a Kyma cluster
 type: Details
 ---
 
-Restoring a Kyma cluster requires a fresh Kyma installation. As soon as the cluster is up and running, instruct Velero to start the restore process. Make sure to restore the system and user Namespaces at the same time so both are in sync.
+Restoring a Kyma cluster requires a fresh Kyma installation with the same version you want to restore with. As soon as the cluster is up and running, instruct Velero to start the restore process. Restore the system [backup](assets/system-backup.yaml) followed by user Namespaces [backup](assets/all-backup.yaml).
 
 Use this command to list available backups:
 
