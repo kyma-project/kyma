@@ -94,7 +94,7 @@ func Test_encodeChannelName(t *testing.T) {
 	// run the test-cases
 	for _, testCase := range testCases {
 		t.Run(testCase.name, func(t *testing.T) {
-			result := encodeChannelName(&testCase.sourceID, &testCase.eventType, &testCase.eventTypeVersion)
+			result := EncodeChannelName(&testCase.sourceID, &testCase.eventType, &testCase.eventTypeVersion)
 
 			// check the channel name encoding correctness
 			if result != testCase.expected {

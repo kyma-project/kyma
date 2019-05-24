@@ -6,6 +6,8 @@ import (
 	"testing"
 
 	"github.com/gorilla/mux"
+
+	osb "github.com/pmorie/go-open-service-broker-client/v2"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -16,6 +18,8 @@ func TestOSBContextForNsScopedBroker(t *testing.T) {
 	sut := &OSBContextMiddleware{}
 	req := httptest.NewRequest(http.MethodGet, url, nil)
 	req = mux.SetURLVars(req, map[string]string{"namespace": "stage"})
+	req.Header.Set(osb.APIVersionHeader, "2.13")
+	req.Header.Set(osb.OriginatingIdentityHeader, osb.PlatformKubernetes)
 	rw := httptest.NewRecorder()
 	nextCalled := false
 
@@ -30,4 +34,23 @@ func TestOSBContextForNsScopedBroker(t *testing.T) {
 	// THEN
 	assert.True(t, nextCalled)
 
+}
+
+func TestOSBContextPreconditionError(t *testing.T) {
+	// GIVEN
+	url := "http://ab-ns-for-stage.kyma-system.svc.cluster.local/stage/v2/catalog"
+
+	sut := &OSBContextMiddleware{}
+	req := httptest.NewRequest(http.MethodGet, url, nil)
+	req = mux.SetURLVars(req, map[string]string{"namespace": "stage"})
+	rw := httptest.NewRecorder()
+	nextCalled := false
+
+	// WHEN
+	sut.ServeHTTP(rw, req, func(nextRw http.ResponseWriter, nextReq *http.Request) {
+		nextCalled = true
+	})
+	// THEN
+	assert.False(t, nextCalled)
+	assert.Equal(t, http.StatusPreconditionFailed, rw.Result().StatusCode)
 }

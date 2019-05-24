@@ -47,18 +47,18 @@ global:
     version: PR-4192
   application_gateway:
     dir: develop/
-    version: 0f47c038
+    version: f76e0544
   application_gateway_tests:
     dir: develop/
-    version: 4b28ce69
+    version: 27571a1a
   application_registry:
     dir: develop/
-    version: 7433b9cc
+    version: f76e0544
   application_registry_tests:
     dir: develop/
     version: 4c614be5
   application_broker:
     dir: develop/
-    version: e9e5bd30
+    version: d999e831
 connectivity_certs_controller:
   enabled: false

@@ -86,11 +86,22 @@ func TestEventActivationConverter_ToGQLEvents(t *testing.T) {
 			EventType:   "sell",
 			Version:     "v1",
 			Description: "desc",
+			Schema: gqlschema.JSON{
+				"type": "string",
+			},
 		})
 		assert.Contains(t, result, gqlschema.EventActivationEvent{
 			EventType:   "sell",
 			Version:     "v2",
 			Description: "desc",
+			Schema: gqlschema.JSON{
+				"type": "object",
+				"properties": map[string]interface{}{
+					"name": map[string]interface{}{
+						"type": "string",
+					},
+				},
+			},
 		})
 	})
 
@@ -154,11 +165,22 @@ func fixAsyncApiSpec() *spec.AsyncAPISpec {
 				"sell.v1": map[string]interface{}{
 					"subscribe": map[string]interface{}{
 						"summary": "desc",
+						"payload": map[string]interface{}{
+							"type": "string",
+						},
 					},
 				},
 				"sell.v2": map[string]interface{}{
 					"subscribe": map[string]interface{}{
 						"summary": "desc",
+						"payload": map[string]interface{}{
+							"type": "object",
+							"properties": map[string]interface{}{
+								"name": map[string]interface{}{
+									"type": "string",
+								},
+							},
+						},
 					},
 				},
 			},

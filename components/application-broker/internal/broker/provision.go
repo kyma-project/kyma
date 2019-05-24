@@ -6,6 +6,9 @@ import (
 	"sync"
 	"time"
 
+	"net/http"
+
+	"github.com/komkom/go-jsonhash"
 	"github.com/kubernetes-incubator/service-catalog/pkg/apis/servicecatalog/v1beta1"
 	"github.com/kyma-project/kyma/components/application-broker/internal"
 	"github.com/kyma-project/kyma/components/application-broker/internal/access"
@@ -21,10 +24,11 @@ import (
 const serviceCatalogAPIVersion = "servicecatalog.k8s.io/v1beta1"
 
 // NewProvisioner creates provisioner
-func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, iStateUpdater instanceStateUpdater,
+func NewProvisioner(instanceInserter instanceInserter, instanceGetter instanceGetter, instanceStateGetter instanceStateGetter, operationInserter operationInserter, operationUpdater operationUpdater, accessChecker access.ProvisionChecker, appSvcFinder appSvcFinder, serviceInstanceGetter serviceInstanceGetter, eaClient v1client.ApplicationconnectorV1alpha1Interface, iStateUpdater instanceStateUpdater,
 	operationIDProvider func() (internal.OperationID, error), log logrus.FieldLogger) *ProvisionService {
 	return &ProvisionService{
 		instanceInserter:      instanceInserter,
+		instanceGetter:        instanceGetter,
 		instanceStateGetter:   instanceStateGetter,
 		instanceStateUpdater:  iStateUpdater,
 		operationInserter:     operationInserter,
@@ -42,6 +46,7 @@ func NewProvisioner(instanceInserter instanceInserter, instanceStateGetter insta
 // ProvisionService performs provisioning action
 type ProvisionService struct {
 	instanceInserter      instanceInserter
+	instanceGetter        instanceGetter
 	instanceStateUpdater  instanceStateUpdater
 	operationInserter     operationInserter
 	operationUpdater      operationUpdater
@@ -60,38 +65,44 @@ type ProvisionService struct {
 }
 
 // Provision action
-func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, error) {
+func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, req *osb.ProvisionRequest) (*osb.ProvisionResponse, *osb.HTTPStatusCodeError) {
 	if !req.AcceptsIncomplete {
-		return nil, errors.New("asynchronous operation mode required")
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr("asynchronous operation mode required")}
 	}
 
 	svc.mu.Lock()
 	defer svc.mu.Unlock()
 
 	iID := internal.InstanceID(req.InstanceID)
+	paramHash := jsonhash.HashS(req.Parameters)
 
 	switch state, err := svc.instanceStateGetter.IsProvisioned(iID); true {
 	case err != nil:
-		return nil, errors.Wrap(err, "while checking if instance is already provisioned")
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is already provisioned: %v", err))}
 	case state:
+		if err := svc.compareProvisioningParameters(iID, paramHash); err != nil {
+			return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while comparing provisioning parameters %v: %v", req.Parameters, err))}
+		}
 		return &osb.ProvisionResponse{Async: false}, nil
 	}
 
 	switch opIDInProgress, inProgress, err := svc.instanceStateGetter.IsProvisioningInProgress(iID); true {
 	case err != nil:
-		return nil, errors.Wrap(err, "while checking if instance is being provisioned")
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while checking if instance is being provisioned: %v", err))}
 	case inProgress:
+		if err := svc.compareProvisioningParameters(iID, paramHash); err != nil {
+			return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusConflict, ErrorMessage: strPtr(fmt.Sprintf("while comparing provisioning parameters %v: %v", req.Parameters, err))}
+		}
 		opKeyInProgress := osb.OperationKey(opIDInProgress)
 		return &osb.ProvisionResponse{Async: true, OperationKey: &opKeyInProgress}, nil
 	}
 
 	id, err := svc.operationIDProvider()
 	if err != nil {
-		return nil, errors.Wrap(err, "while generating ID for operation")
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while generating ID for operation: %v", err))}
 	}
 	opID := internal.OperationID(id)
 
-	paramHash := "TODO"
 	op := internal.InstanceOperation{
 		InstanceID:  iID,
 		OperationID: opID,
@@ -101,7 +112,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	}
 
 	if err := svc.operationInserter.Insert(&op); err != nil {
-		return nil, errors.Wrap(err, "while inserting instance operation to storage")
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance operation to storage: %v", err))}
 	}
 
 	svcID := internal.ServiceID(req.ServiceID)
@@ -109,17 +120,17 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 
 	app, err := svc.appSvcFinder.FindOneByServiceID(internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting application with id: %s to storage", req.ServiceID)
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting application with id: %s to storage: %v", req.ServiceID, err))}
 	}
 
 	namespace, err := getNamespaceFromContext(req.Context)
 	if err != nil {
-		return nil, errors.Wrap(err, "while getting namespace from context")
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting namespace from context %v", err))}
 	}
 
 	service, err := getSvcByID(app.Services, internal.ApplicationServiceID(req.ServiceID))
 	if err != nil {
-		return nil, errors.Wrapf(err, "while getting service [%s] from Application [%s]", req.ServiceID, app.Name)
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while getting service [%s] from Application [%s]: %v", req.ServiceID, app.Name, err))}
 	}
 
 	i := internal.Instance{
@@ -132,7 +143,7 @@ func (svc *ProvisionService) Provision(ctx context.Context, osbCtx osbContext, r
 	}
 
 	if err = svc.instanceInserter.Insert(&i); err != nil {
-		return nil, errors.Wrap(err, "while inserting instance to storage")
+		return nil, &osb.HTTPStatusCodeError{StatusCode: http.StatusBadRequest, ErrorMessage: strPtr(fmt.Sprintf("while inserting instance to storage: %v", err))}
 	}
 
 	opKey := osb.OperationKey(op.OperationID)
@@ -260,6 +271,23 @@ func (svc *ProvisionService) ensureEaUpdate(appID, ns string, si *v1beta1.Servic
 	return nil
 }
 
+func (svc *ProvisionService) compareProvisioningParameters(iID internal.InstanceID, newHash string) error {
+	instance, err := svc.instanceGetter.Get(iID)
+	switch {
+	case err == nil:
+	case IsNotFoundError(err):
+		return nil
+	default:
+		return errors.Wrapf(err, "while getting instance %s from storage", iID)
+	}
+
+	if instance.ParamsHash != newHash {
+		return errors.Errorf("provisioning parameters hash differs - new %s, old %s, for instance %s", newHash, instance.ParamsHash, iID)
+	}
+
+	return nil
+}
+
 func getNamespaceFromContext(contextProfile map[string]interface{}) (internal.Namespace, error) {
 	return internal.Namespace(contextProfile["namespace"].(string)), nil
 }
@@ -271,4 +299,8 @@ func getSvcByID(services []internal.Service, id internal.ApplicationServiceID) (
 		}
 	}
 	return internal.Service{}, errors.Errorf("cannot find service with ID [%s]", id)
+}
+
+func strPtr(str string) *string {
+	return &str
 }
