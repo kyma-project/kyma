@@ -154,7 +154,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 
 1. Deploy Kyma. Run:
     ```
-    kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml && kubectl label installation/kyma-installation action=install --overwrite
+    kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
     ```
 
 2. Check if the Pods of Tiller and the Kyma Installer are running:
