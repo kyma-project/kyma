@@ -14,7 +14,7 @@ In addition to the tools required to install Kyma on a custer, you also need:
 
 1. Clone the repository using the `git clone https://github.com/kyma-project/kyma.git` command and navigate to the root folder.
 
-2. Build an image that is based on the current Installer image and includes the current installation and resources charts. Run:
+2. Build a Kyma-Installer image that is based on the current Installer binary and includes the current installation configurations and resources charts. Run:
 
     ```
     docker build -t kyma-installer -f tools/kyma-installer/kyma.Dockerfile .
@@ -26,78 +26,32 @@ In addition to the tools required to install Kyma on a custer, you also need:
     docker push {YOUR_DOCKER_LOGIN}/kyma-installer
     ```
 
-4. Prepare the deployment file.
-<!--
-TODO: This should be the end of this file. We're duplicating instructions from two other files here.
-TODO: The next part of this instruction should point to the other ones: "xip.io" or "own domain".
---!>
-<div tabs>
-  <details>
-  <summary>
-  GKE - xip.io
-  </summary>
-
-
+4. Prepare the Kyma deployment file.
 Run this command:
 
 ```
 (cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) > my-kyma.yaml
 ```
 
-  </details>
-  <details>
-  <summary>
-  GKE - own domain
-  </summary>
-
-
-Run this command:
-
+5. The output of this operation is the `my_kyma.yaml` file.
+Find the following section in `my_kyma.yaml` and modify the file by changing the `image` attribute to the new value: "{YOUR_DOCKER_LOGIN}/kyma-installer":
 ```
-(cat installation/resources/installer.yaml ; echo "---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__DOMAIN__/$DOMAIN/g" |sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
-```
-
-
-  </details>
-  <details>
-  <summary>
-  AKS - xip.io
-  </summary>
-
-
-Run this command:
-
-```
-(cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+spec:
+  template:
+    metadata:
+      labels:
+        name: kyma-installer
+    spec:
+      serviceAccountName: kyma-installer
+      containers:
+      - name: kyma-installer-container
+        image: {YOUR_DOCKER_LOGIN}/kyma-installer
+        imagePullPolicy: IfNotPresent
 ```
 
-Alternatively, run this command if you deploy Kyma with Kubernetes version 1.14 and above:
-
+6. Install Kyma using the custom Kyma-Installer image.
+Select the installation scenario that fits your requirements - GKE or AKS, with the XIP.io or your own DNS domain.
+Remember: During the installation, in the step `Deploy Kyma.`, apply your modified Kyma deployment file `my-kyma.yaml` instead of the released one! Execute:
 ```
-(cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__.*__//g" > my-kyma.yaml
+kubectl apply -f my-kyma.yaml
 ```
-
-  </details>
-  <details>
-  <summary>
-  AKS - own domain
-  </summary>
-
-
-Run this command:
-
-```
-(cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
-```
-
-Alternatively, run this command if you deploy Kyma with Kubernetes version 1.14 and above:
-
-```
-(cat installation/resources/installer.yaml ; echo "\n---" ; cat installation/resources/installer-config-cluster.yaml.tpl ; echo "\n---" ; cat installation/resources/installer-cr-cluster.yaml.tpl) | sed -e "s/__PROMTAIL_CONFIG_NAME__/promtail-k8s-1-14.yaml/g" | sed -e "s/__PROXY_EXCLUDE_IP_RANGES__/10.0.0.1/g" | sed -e "s/__DOMAIN__/$SUB_DOMAIN.$DNS_DOMAIN/g" | sed -e "s/__TLS_CERT__/$TLS_CERT/g" | sed -e "s/__TLS_KEY__/$TLS_KEY/g" | sed -e "s/__.*__//g" > my-kyma.yaml
-```
-
-
-  </details>
-</div>
-
-5. The output of this operation is the `my_kyma.yaml` file. Modify it to fetch the proper image with the changes you made ({YOUR_DOCKER_LOGIN}/kyma-installer). Use the modified file to deploy Kyma on your GKE cluster.
