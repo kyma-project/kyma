@@ -196,6 +196,10 @@ type mutationResolver struct {
 	*RootResolver
 }
 
+func (r *mutationResolver) CreateResourceQuota(ctx context.Context, namespace string, name string, resourceQuotaInput gqlschema.ResourceQuotaInput) (*gqlschema.ResourceQuota, error) {
+	return r.k8s.CreateResourceQuota(ctx, namespace, name, resourceQuotaInput)
+}
+
 func (r *mutationResolver) CreateResource(ctx context.Context, namespace string, resource gqlschema.JSON) (*gqlschema.JSON, error) {
 	return r.k8s.CreateResourceMutation(ctx, namespace, resource)
 }
@@ -310,6 +314,10 @@ func (r *mutationResolver) AddAddonsConfigurationURLs(ctx context.Context, name 
 
 func (r *mutationResolver) RemoveAddonsConfigurationURLs(ctx context.Context, name string, urls []string) (*gqlschema.AddonsConfiguration, error) {
 	return r.sca.Resolver.RemoveAddonsConfigurationURLs(ctx, name, urls)
+}
+
+func (r *mutationResolver) CreateNamespace(ctx context.Context, name string, labels *gqlschema.Labels) (gqlschema.NamespaceCreationOutput, error) {
+	return r.k8s.CreateNamespace(ctx, name, labels)
 }
 
 // Queries

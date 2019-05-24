@@ -8,6 +8,10 @@ func NewResourceQuotaLister() *resourceQuotaLister {
 	return new(resourceQuotaLister)
 }
 
+func NewGQLResourceQuotaConverter() *gqlResourceQuotaConverter {
+	return new(gqlResourceQuotaConverter)
+}
+
 func NewStatefulSetLister() *statefulSetLister {
 	return new(statefulSetLister)
 }
@@ -82,4 +86,12 @@ func NewSelfSubjectRulesSvc() *selfSubjectRulesSvc {
 
 func NewSelfSubjectRulesConverter() *gqlSelfSubjectRulesConverter {
 	return new(gqlSelfSubjectRulesConverter)
+}
+
+func NewNamespaceSvc() *namespaceSvc {
+	return new(namespaceSvc)
+}
+
+func NewNamespaceConverter() *gqlNamespaceConverter {
+	return new(gqlNamespaceConverter)
 }

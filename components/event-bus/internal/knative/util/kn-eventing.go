@@ -59,7 +59,7 @@ return
 type KnativeAccessLib interface {
 	GetChannel(name string, namespace string) (*evapisv1alpha1.Channel, error)
 	CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
-		timeout time.Duration)(*evapisv1alpha1.Channel, error)
+		timeout time.Duration) (*evapisv1alpha1.Channel, error)
 	DeleteChannel(name string, namespace string) error
 	CreateSubscription(name string, namespace string, channelName string, uri *string) error
 	DeleteSubscription(name string, namespace string) error
@@ -116,7 +116,7 @@ func (k *KnativeLib) GetChannel(name string, namespace string) (*evapisv1alpha1.
 
 // CreateChannel creates a Knative/Eventing channel controlled by the specified provisioner
 func (k *KnativeLib) CreateChannel(provisioner string, name string, namespace string, labels *map[string]string,
-	timeout time.Duration)(*evapisv1alpha1.Channel, error) {
+	timeout time.Duration) (*evapisv1alpha1.Channel, error) {
 	c := makeChannel(provisioner, name, namespace, labels)
 	if channel, err := k.evClient.Channels(namespace).Create(c); err != nil && !k8serrors.IsAlreadyExists(err) {
 		log.Printf("ERROR: CreateChannel(): creating channel: %v", err)
@@ -284,7 +284,9 @@ func makeChannel(provisioner string, name string, namespace string, labels *map[
 		},
 		Spec: evapisv1alpha1.ChannelSpec{
 			Provisioner: &corev1.ObjectReference{
-				Name: provisioner,
+				Name:       provisioner,
+				APIVersion: evapisv1alpha1.SchemeGroupVersion.String(),
+				Kind:       "ClusterChannelProvisioner",
 			},
 		},
 	}

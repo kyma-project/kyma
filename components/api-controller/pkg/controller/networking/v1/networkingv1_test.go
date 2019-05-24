@@ -23,13 +23,13 @@ func TestCreateVirtualService(t *testing.T) {
 
 	t.Run("Should create a virtualservice if name and hostname is unique", func(t *testing.T) {
 		dto := fakeDto()
-		virtualService := toVirtualService(dto, testingGateway)
+		virtualService := toVirtualService(dto, testingGateway, defaultCorsConfig())
 		fakeClientset := fake.NewSimpleClientset(virtualService)
 
 		dto.MetaDto.Name = "another-fake-vsvc"
 		dto.Hostname = "anotherFakeHostname.fakeDomain.com"
 
-		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 		_, err := virtualServiceCtrl.Create(dto)
 
 		if err != nil {
@@ -39,10 +39,10 @@ func TestCreateVirtualService(t *testing.T) {
 
 	t.Run("Should not create a virtualservice if the same virtualservice already exists", func(t *testing.T) {
 		dto := fakeDto()
-		virtualService := toVirtualService(dto, testingGateway)
+		virtualService := toVirtualService(dto, testingGateway, defaultCorsConfig())
 		fakeClientset := fake.NewSimpleClientset(virtualService)
 
-		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 		_, err := virtualServiceCtrl.Create(dto)
 
 		if err == nil {
@@ -52,7 +52,7 @@ func TestCreateVirtualService(t *testing.T) {
 
 	t.Run("Should not create a virtualservice if hostname is already used by other virtualservice", func(t *testing.T) {
 		dto := fakeDto()
-		virtualService := toVirtualService(dto, testingGateway)
+		virtualService := toVirtualService(dto, testingGateway, defaultCorsConfig())
 		// UID needs to be set manually for testing purposes. It is used to uniquely identify resource (virtualService).
 		// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 		virtualService.UID = types.UID("12345")
@@ -60,7 +60,7 @@ func TestCreateVirtualService(t *testing.T) {
 
 		dto.MetaDto.Name = "another-fake-vsvc"
 
-		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 		_, err := virtualServiceCtrl.Create(dto)
 
 		if err == nil {
@@ -74,7 +74,7 @@ func TestUpdateVirtualService(t *testing.T) {
 	k8sClientset := k8sFake.NewSimpleClientset(fakeNamespace(defaultNamespace), fakeNamespace(customNamespace))
 
 	oldApi := fakeDto()
-	virtualService := toVirtualService(oldApi, testingGateway)
+	virtualService := toVirtualService(oldApi, testingGateway, defaultCorsConfig())
 	// UID needs to be set manually for testing purposes. It is used to uniquely identify resource (virtualService).
 	// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 	virtualService.UID = types.UID("12345")
@@ -90,7 +90,7 @@ func TestUpdateVirtualService(t *testing.T) {
 		// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 		oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
 
-		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 		updatedResource, err := virtualServiceCtrl.Update(oldApi, &newApi)
 
 		if err != nil {
@@ -110,7 +110,7 @@ func TestUpdateVirtualService(t *testing.T) {
 		// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 		oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
 
-		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 		_, err := virtualServiceCtrl.Update(oldApi, &newApi)
 
 		if err != nil {
@@ -127,7 +127,7 @@ func TestUpdateVirtualService(t *testing.T) {
 		// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 		oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
 
-		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 		updatedResource, err := virtualServiceCtrl.Update(oldApi, &newApi)
 
 		if err != nil {
@@ -139,7 +139,7 @@ func TestUpdateVirtualService(t *testing.T) {
 	})
 
 	t.Run("should not update virtualService if hostname is already used by other virtualservice", func(t *testing.T) {
-		virtualServiceWithWantedHostname := toVirtualService(oldApi, testingGateway)
+		virtualServiceWithWantedHostname := toVirtualService(oldApi, testingGateway, defaultCorsConfig())
 		virtualServiceWithWantedHostname.Name = "fake-vsvc-with-wanted-hostname"
 		virtualServiceWithWantedHostname.Spec.Hosts = []string{"wanted-hostname"}
 		virtualServiceWithWantedHostname.UID = "09876" // UID must be different than the UID of previously created virtualservice
@@ -155,7 +155,7 @@ func TestUpdateVirtualService(t *testing.T) {
 			// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 			oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
 
-			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 			_, err := virtualServiceCtrl.Update(oldApi, &newApi)
 
 			if err == nil {
@@ -175,7 +175,7 @@ func TestUpdateVirtualService(t *testing.T) {
 			// Normally it is assigned by kubernetes after the resource is created, but fake clientset doesn't create it.
 			oldApi.Status.Resource = *gatewayResourceFrom(virtualService)
 
-			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 			updatedResource, err := virtualServiceCtrl.Update(oldApi, &newApi)
 
 			if err == nil {
@@ -189,7 +189,7 @@ func TestUpdateVirtualService(t *testing.T) {
 	})
 
 	t.Run("virtualService was not created due to already occupied hostname, so it should", func(t *testing.T) {
-		virtualServiceWithWantedHostname := toVirtualService(oldApi, testingGateway)
+		virtualServiceWithWantedHostname := toVirtualService(oldApi, testingGateway, defaultCorsConfig())
 		virtualServiceWithWantedHostname.Name = "fake-vsvc-with-wanted-hostname"
 		virtualServiceWithWantedHostname.Spec.Hosts = []string{"wanted-hostname"}
 		virtualServiceWithWantedHostname.UID = "09876" // UID must be different than the UID of previously created virtualservice
@@ -200,7 +200,7 @@ func TestUpdateVirtualService(t *testing.T) {
 			oldWrongApi := Dto{}
 			newApi := fakeDto()
 
-			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 			updatedResource, err := virtualServiceCtrl.Update(&oldWrongApi, newApi)
 
 			if err != nil {
@@ -217,7 +217,7 @@ func TestUpdateVirtualService(t *testing.T) {
 			newApi := fakeDto()
 			newApi.Hostname = "wanted-hostname"
 
-			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+			virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 			updatedResource, err := virtualServiceCtrl.Update(&oldWrongApi, newApi)
 
 			if err == nil {
@@ -235,11 +235,11 @@ func TestDeleteVirtualService(t *testing.T) {
 	k8sClientset := k8sFake.NewSimpleClientset(fakeNamespace(defaultNamespace))
 
 	dto := fakeDto()
-	virtualService := toVirtualService(dto, testingGateway)
+	virtualService := toVirtualService(dto, testingGateway, defaultCorsConfig())
 
 	t.Run("Should delete virtual service if exists and dto not empty", func(t *testing.T) {
 		fakeClientset := fake.NewSimpleClientset(virtualService)
-		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 		err := virtualServiceCtrl.Delete(dto)
 
 		if err != nil {
@@ -249,7 +249,7 @@ func TestDeleteVirtualService(t *testing.T) {
 
 	t.Run("Should not return error if virtual service doesn't exist", func(t *testing.T) {
 		fakeClientset := fake.NewSimpleClientset()
-		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway)
+		virtualServiceCtrl := New(fakeClientset, k8sClientset, testingGateway, defaultCorsConfig())
 		err := virtualServiceCtrl.Delete(dto)
 
 		if err != nil {
@@ -276,4 +276,8 @@ func fakeNamespace(name string) *k8sCore.Namespace {
 			Name: name,
 		},
 	}
+}
+
+func defaultCorsConfig() CORSConfig {
+	return CORSConfig{}
 }
