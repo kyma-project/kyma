@@ -621,6 +621,7 @@ type enabledMappingService {
 type EnabledService {
     id: String!
     displayName: String!
+    exist: Boolean!
 }
 
 type ConnectorService {

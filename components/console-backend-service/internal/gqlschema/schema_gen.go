@@ -332,6 +332,7 @@ type ComplexityRoot struct {
 	EnabledService struct {
 		Id          func(childComplexity int) int
 		DisplayName func(childComplexity int) int
+		Exist       func(childComplexity int) int
 	}
 
 	EnvPrefix struct {
@@ -4547,6 +4548,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.EnabledService.DisplayName(childComplexity), true
+
+	case "EnabledService.exist":
+		if e.complexity.EnabledService.Exist == nil {
+			break
+		}
+
+		return e.complexity.EnabledService.Exist(childComplexity), true
 
 	case "EnvPrefix.name":
 		if e.complexity.EnvPrefix.Name == nil {
@@ -13607,6 +13615,11 @@ func (ec *executionContext) _EnabledService(ctx context.Context, sel ast.Selecti
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "exist":
+			out.Values[i] = ec._EnabledService_exist(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -13670,6 +13683,33 @@ func (ec *executionContext) _EnabledService_displayName(ctx context.Context, fie
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EnabledService_exist(ctx context.Context, field graphql.CollectedField, obj *EnabledService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EnabledService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Exist, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
 }
 
 var envPrefixImplementors = []string{"EnvPrefix"}
@@ -28861,6 +28901,7 @@ type enabledMappingService {
 type EnabledService {
     id: String!
     displayName: String!
+    exist: Boolean!
 }
 
 type ConnectorService {

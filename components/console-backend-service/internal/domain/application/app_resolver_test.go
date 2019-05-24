@@ -453,6 +453,7 @@ func TestApplicationResolver_ApplicationEnabledMappingServices(t *testing.T) {
 		serviceIdOne     = "abe498d4-dc37-46f1-9f87-db1ddd55b409"
 		serviceIdTwo     = "952404e7-f7b9-44ac-9f5d-eeb695c3c46e"
 		serviceIdThree   = "afcd698b-968c-4d1c-a3c8-5d96968a139e"
+		serviceIdFour    = "eccbfd17-00e0-440c-b047-119bfcfa56ed"
 		serviceNameOne   = "service-name-one"
 		serviceNameTwo   = "service-name-two"
 		serviceNameThree = "service-name-three"
@@ -494,6 +495,9 @@ func TestApplicationResolver_ApplicationEnabledMappingServices(t *testing.T) {
 					{
 						ID: serviceIdTwo,
 					},
+					{
+						ID: serviceIdFour,
+					},
 				},
 			},
 		},
@@ -508,10 +512,27 @@ func TestApplicationResolver_ApplicationEnabledMappingServices(t *testing.T) {
 	assert.Len(t, out, 1)
 	assert.Equal(t, out[0].Namespace, fixNamespace)
 	assert.False(t, *out[0].AllServices)
-	assert.Len(t, out[0].Services, 3)
-	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{ID: serviceIdOne, DisplayName: serviceNameOne})
-	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{ID: serviceIdTwo, DisplayName: serviceNameTwo})
-	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{ID: serviceIdThree, DisplayName: serviceNameThree})
+	assert.Len(t, out[0].Services, 4)
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{
+		ID:          serviceIdOne,
+		Exist:       true,
+		DisplayName: serviceNameOne,
+	})
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{
+		ID:          serviceIdTwo,
+		Exist:       true,
+		DisplayName: serviceNameTwo,
+	})
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{
+		ID:          serviceIdThree,
+		Exist:       true,
+		DisplayName: serviceNameThree,
+	})
+	assert.Contains(t, out[0].Services, &gqlschema.EnabledService{
+		ID:          serviceIdFour,
+		Exist:       false,
+		DisplayName: "",
+	})
 }
 
 func ptrStr(str string) *string {

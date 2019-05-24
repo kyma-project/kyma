@@ -286,21 +286,27 @@ func findEnabledServices(appServices []gqlschema.ApplicationService, mapping *ma
 		return nil
 	}
 
-	nameFinder := func(appServices []gqlschema.ApplicationService, id string) string {
+	nameFinder := func(appServices []gqlschema.ApplicationService, id string) (string, bool) {
 		for _, val := range appServices {
 			if val.ID == id {
-				return val.DisplayName
+				return val.DisplayName, true
 			}
 		}
 
-		return ""
+		return "", false
 	}
 
 	var result []*gqlschema.EnabledService
 	for _, srv := range mapping.Spec.Services {
 		es := &gqlschema.EnabledService{}
 		es.ID = srv.ID
-		es.DisplayName = nameFinder(appServices, srv.ID)
+		name, exist := nameFinder(appServices, srv.ID)
+		if exist {
+			es.Exist = true
+			es.DisplayName = name
+		} else {
+			es.Exist = false
+		}
 
 		result = append(result, es)
 	}

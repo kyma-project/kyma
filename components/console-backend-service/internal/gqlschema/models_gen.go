@@ -230,6 +230,7 @@ type DocsTopicStatus struct {
 type EnabledService struct {
 	ID          string `json:"id"`
 	DisplayName string `json:"displayName"`
+	Exist       bool   `json:"exist"`
 }
 
 type EnvPrefix struct {
