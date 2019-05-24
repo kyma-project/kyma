@@ -248,28 +248,6 @@ serviceMonitors:
     interval: 30s
   - port: http-monitoring
     interval: 30s
-- name: loki
-  serviceMonitorSelectorLabels:
-    prometheus: monitoring
-  selector:
-    app: loki
-  namespaceSelector:
-    matchNames:
-    - kyma-system
-  endpoints:
-  - port: http
-    interval: 30s
-- name: promtail
-  serviceMonitorSelectorLabels:
-    prometheus: monitoring
-  selector:
-    app: promtail
-  namespaceSelector:
-    matchNames:
-    - kyma-system
-  endpoints:
-  - port: http-metrics
-    interval: 30s
   ## Name of the ServiceMonitor to create
   ##
   # - name: ""
