@@ -11,8 +11,6 @@ data:
   APP_UPLOAD_SECURE: 'false'
   APP_UPLOAD_PORT: '{{ .Values.service.port }}'
   APP_UPLOAD_ENDPOINT_WITH_PORT: '{{ template "minio.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}'
-  APP_BUCKET_NAME: content
   APP_BUCKET_REGION: us-east-1
   APP_EXTERNAL_ENDPOINT: {{ if .Values.global.minioExternalEndpoint }}{{ .Values.global.minioExternalEndpoint }}{{ else }}'https://minio.{{ .Values.global.ingress.domainName }}'{{ end }}
-  APP_ASSETS_FOLDER: assets
   APP_VERBOSE: 'true'
