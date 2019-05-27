@@ -8,5 +8,3 @@ spec:
   peers:
     - mtls:
         mode: "PERMISSIVE"
-
-        ## TODO - check if will be needed still
