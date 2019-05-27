@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 ROOT_PATH=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
 source "${ROOT_PATH}/utils.sh"
+source "${ROOT_PATH}/testing-common.sh"
 
 #copied from  testing-common.sh: in testing-common.sh we use Octopus, here helm test. TODO later: rewrite e2e-testing to Octopus.
 
@@ -212,6 +213,9 @@ echo "----------------------------"
 
 exitCode=0
 
+# creates a config map which provides the testing bundles
+injectTestingBundles
+trap removeTestingBundles ERR EXIT
 
 testcase="${ROOT_PATH}"/../../tests/end-to-end/backup-restore-test/deploy/chart/backup-test
 release=$(basename "$testcase")
@@ -237,7 +241,6 @@ if [ $cleanupResult -ne 0 ]
 then
    exitCode=$cleanupResult
 fi
-
 
 for release in $releasesToClean; do
     cleanupHelmE2ERelease "${release}"
