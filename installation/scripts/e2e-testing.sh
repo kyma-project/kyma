@@ -37,8 +37,9 @@ function printLogsFromPod() {
           log "FAILED" red
           success=0
           continue
+        else
+          echo "${result}"
         fi
-        echo "${result}"
     done
     if [ ${success} -ne 0 ]
     then
