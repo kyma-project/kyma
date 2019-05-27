@@ -36,9 +36,9 @@ type: {Document type}
 
 ### Display
 
-In the Documentation view (Docs UI), that is available in the Console UI under the questoion mark icon on the top navigation panel, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
+In the Documentation view (Docs UI), that is available in the Console UI under the question mark icon on the top navigation panel, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
 
-<div tabs>
+<div tabs name="docs-ui">
   <details>
   <summary>
   Metadata source
@@ -83,7 +83,7 @@ title: Overview
 
 In the Service Catalog and Instances views, which contain Service Classes documentation, the `title` metadata displays as the name of a particular tab. If you don't provide `title`, these UIs display the file name as a fallback. See the following example:
 
-<div tabs>
+<div tabs name="service-catalog">
   <details>
   <summary>
   Metadata source
@@ -122,7 +122,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
 
 1. [Linking](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/links-in-docs.md) - link between documents in the same topic or in different topics using metadata.
 
-    <div tabs>
+    <div tabs name="linking">
       <details>
       <summary>
       Source
@@ -144,7 +144,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
 
 2. [Documentation toggles](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/documentation-toggle.md) - render several versions of a given section in one document or have several versions of one document.
 
-    <div tabs>
+    <div tabs name="toogles">
       <details>
       <summary>
       Source
@@ -163,7 +163,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
     
 3. [Panels](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
 
-    <div tabs>
+    <div tabs name="panels">
       <details>
       <summary>
       Source

@@ -26,7 +26,7 @@ Virtualization:
 1. Open a terminal window and navigate to a space in which you want to store your local Kyma sources.
 
 2. Clone the Kyma repository to your machine using either HTTPS or SSH. Run this command to clone the repository and change your working directory to `kyma`:
-    <div tabs>
+    <div tabs name="instalation-protocols">
       <details>
       <summary>
       HTTPS
@@ -70,7 +70,7 @@ Virtualization:
   >**NOTE:** Mozilla Firefox uses its own certificate keychain. If you want to access the Console UI though Firefox, add the Kyma wildcard certificate to the certificate keychain of the browser. To access the Application Connector and connect an external solution to the local deployment of Kyma, you must add the certificate to the trusted certificate storage of your programming environment. Read [this](/components/application-connector#details-access-the-application-connector-on-a-local-kyma-deployment) document to learn more.
 
 7. Start the installation. Trigger the `run.sh` script to start Minikube with a Kyma-specific configuration and install the necessary components. Define the password used to log in to the Console UI using the `--password` flag. Run:
-    <div tabs>
+    <div tabs name="os-start">
       <details>
       <summary>
       MacOS
@@ -114,7 +114,7 @@ Use the `minikube.sh` script to restart the Minikube cluster without reinstallin
   minikube stop
   ```
 2. Restart the cluster without reinstalling Kyma. Run:
-    <div tabs>
+    <div tabs name="os-restart">
       <details>
       <summary>
       MacOS

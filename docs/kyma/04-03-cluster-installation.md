@@ -13,7 +13,7 @@ If you need to use Helm and access Tiller, complete the [additional configuratio
 
 Choose your cloud provider and get started:
 
-<div tabs>
+<div tabs name="provider">
   <details>
   <summary>
   GKE
