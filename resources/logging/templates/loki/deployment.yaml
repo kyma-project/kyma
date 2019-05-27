@@ -53,9 +53,20 @@ spec:
             - name: http
               containerPort: {{ .Values.loki.port }}
               protocol: TCP
-
           resources:
             {{- toYaml .Values.loki.resources | nindent 12 }}
+        - name: "loki-health"
+          image: k8s.gcr.io/busybox
+          args:
+            - /bin/sh
+            - -c
+            - while true; do sleep 2; done;
+          livenessProbe:
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - cat /dev/null | nc 127.0.0.1 {{ .Values.loki.port }}
       nodeSelector:
         {{- toYaml .Values.loki.nodeSelector | nindent 8 }}
       affinity:
