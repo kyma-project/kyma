@@ -38,6 +38,22 @@ func NewService(secretsRepository secrets.Repository) Service {
 }
 
 func (sas defaultService) Read(applicationAPI *applications.ServiceAPI) (*model.API, apperrors.AppError) {
+
+	//TODO: Fetch Secret applicationAPI.SecretID. I decided to create secret per service
+	//		analogical to credentialsSecret
+	//api := &model.API{
+	//	TargetUrl: applicationAPI.TargetUrl,
+	//}
+	//if applicationAPI.SecretID != nil {
+	//	secretName := applicationAPI.SecretID
+	//	serviceSecret, err := sas.secretsRepository.Get(secretName)
+	//	if err != nil {
+	//		return nil, err
+	//	}
+	//	api.Headers = serviceSecret.Headers
+	//	api.QueryParameters = serviceSecret.QueryParameters
+	//}
+
 	api := &model.API{
 		TargetUrl:       applicationAPI.TargetUrl,
 		Headers:         applicationAPI.Headers,
