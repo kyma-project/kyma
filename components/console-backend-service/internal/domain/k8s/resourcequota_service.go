@@ -57,12 +57,12 @@ func (svc *resourceQuotaService) CreateResourceQuota(namespace string, name stri
 	var errs apierror.ErrorFieldAggregate
 	memoryLimitsParsed, err := resource.ParseQuantity(*resourceQuotaInput.Limits.Memory)
 	if err != nil {
-		errs = append(errs, apierror.NewInvalidField("limits.memory", *ptrStr(*resourceQuotaInput.Limits.Memory), fmt.Sprintf("while parsing %s memory limits", pretty.ResourceQuota)))
+		errs = append(errs, apierror.NewInvalidField("limits.memory", *resourceQuotaInput.Limits.Memory, fmt.Sprintf("while parsing %s memory limits", pretty.ResourceQuota)))
 	}
 
 	memoryRequestsParsed, err := resource.ParseQuantity(*resourceQuotaInput.Requests.Memory)
 	if err != nil {
-		errs = append(errs, apierror.NewInvalidField("requests.memory", *ptrStr(*resourceQuotaInput.Requests.Memory), fmt.Sprintf("while parsing %s memory requests", pretty.ResourceQuota)))
+		errs = append(errs, apierror.NewInvalidField("requests.memory", *resourceQuotaInput.Requests.Memory, fmt.Sprintf("while parsing %s memory requests", pretty.ResourceQuota)))
 	}
 
 	if len(errs) > 0 {
@@ -142,7 +142,4 @@ func (svc *resourceQuotaService) ListPods(namespace string, labelSelector map[st
 	}
 
 	return pods.Items, err
-}
-func ptrStr(str string) *string {
-	return &str
 }
