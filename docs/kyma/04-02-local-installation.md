@@ -20,7 +20,8 @@ Virtualization:
 - [Hyperkit driver](https://github.com/kubernetes/minikube/blob/master/docs/drivers.md#hyperkit-driver) - MacOS only
 - [VirtualBox](https://www.virtualbox.org/) - Linux only
 
-> **NOTE:** To work with Kyma, use only the provided scripts and commands. Kyma requires a specific Minikube configuration and does not work on a basic Minikube cluster that you can start using the `minikube start` command.
+> **NOTE**: To work with Kyma, use only the provided commands. Kyma requires a specific Minikube configuration and does not work on a basic Minikube cluster that you can start using the `minikube start` command.
+
 
 ## Install Kyma and access the Console UI
 
