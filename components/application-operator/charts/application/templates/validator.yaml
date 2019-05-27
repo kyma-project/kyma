@@ -36,7 +36,6 @@ spec:
           ports:
             - containerPort: {{ .Values.applicationConnectivityValidator.args.proxyPort }}
               name: http-proxy
-# TODO - consider adding health endpoint and redinnes / livenes probes
 ---
 apiVersion: v1
 kind: Service

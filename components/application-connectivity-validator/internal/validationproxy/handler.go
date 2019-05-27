@@ -114,7 +114,7 @@ func newSubjectValidator(appName, group, tenant string) func(subject pkix.Name) 
 		return appName == subject.CommonName
 	}
 
-	if group == "" && tenant == "" {
+	if group == "" || tenant == "" {
 		return validateCommonName
 	}
 
