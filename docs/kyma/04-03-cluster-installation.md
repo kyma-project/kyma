@@ -9,6 +9,8 @@ This installation guide explains how you can quickly deploy Kyma on a cluster wi
 
 If you need to use Helm and access Tiller, complete the [additional configuration](#installation-use-helm) after the installation.
 
+>**CAUTION:** These instructions are valid starting with Kyma 1.2. If you want to install older releases, refer to the respective documentation versions.
+
 Choose your cloud provider and get started:
 
 <div tabs>
