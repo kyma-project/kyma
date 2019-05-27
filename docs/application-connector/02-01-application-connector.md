@@ -10,8 +10,8 @@ type: Architecture
 
 The Application Connector is being exposed by Istio Ingress Gateway as the rest of the Kyma.
 The DNS name of the Ingress is cluster-dependant and follows the `gateway.{cluster-dns}` format, for example `gateway.servicemanager.cluster.kyma.cx`.
-Application Connector is exposed on **port 9443** as it secures the endpoints with certificate validation. Each call must include a valid client certificate.
-You can access every exposed Application (App) by using the assigned path. For example, to reach the gateway for the `user-custom` App, use this URL: `gateway.servicemanager.cluster.kyma.cx:9443/user-custom`. 
+Istio Ingress Gateway secures the endpoints with certificate validation. Each call must include a valid client certificate.
+You can access every exposed Application (App) by using the assigned path. For example, to reach the gateway for the `user-custom` App, use this URL: `gateway.servicemanager.cluster.kyma.cx/user-custom`. 
 
 ## Application Connectivity Validator
 
