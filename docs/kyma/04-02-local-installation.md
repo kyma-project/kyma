@@ -56,7 +56,7 @@ Follow these instructions to install Kyma from a release or from sources:
     
   1. Open a terminal window and navigate to a space in which you want to store local Kyma sources.
     
-  2. Clone the `Kyma` repository using either HTTPS or SHH. Run:
+  2. Clone the `Kyma` repository using either HTTPS or SSH. Run:
      
      <div tabs>
        <details>
