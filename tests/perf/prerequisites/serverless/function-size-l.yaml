@@ -38,6 +38,7 @@ spec:
         }
     }
   horizontalPodAutoscaler:
+    namespace: $NAMESPACE  
     metadata:
       labels:
         function: size-l

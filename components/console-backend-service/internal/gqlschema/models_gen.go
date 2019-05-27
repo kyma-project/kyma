@@ -44,8 +44,10 @@ type ApplicationEvent struct {
 }
 
 type ApplicationMapping struct {
-	Namespace   string `json:"namespace"`
-	Application string `json:"application"`
+	Namespace   string                       `json:"namespace"`
+	Application string                       `json:"application"`
+	AllServices *bool                        `json:"allServices"`
+	Services    []*ApplicationMappingService `json:"services"`
 }
 
 type ApplicationMutationOutput struct {
@@ -225,6 +227,12 @@ type DocsTopicStatus struct {
 	Message string             `json:"message"`
 }
 
+type EnabledApplicationService struct {
+	ID          string `json:"id"`
+	DisplayName string `json:"displayName"`
+	Exist       bool   `json:"exist"`
+}
+
 type EnvPrefix struct {
 	Name string `json:"name"`
 }
@@ -377,6 +385,11 @@ type ResourceQuota struct {
 	Requests ResourceValues `json:"requests"`
 }
 
+type ResourceQuotaInput struct {
+	Limits   ResourceValuesInput `json:"limits"`
+	Requests ResourceValuesInput `json:"requests"`
+}
+
 type ResourceQuotasStatus struct {
 	Exceeded       bool            `json:"exceeded"`
 	ExceededQuotas []ExceededQuota `json:"exceededQuotas"`
@@ -394,6 +407,11 @@ type ResourceType struct {
 }
 
 type ResourceValues struct {
+	Memory *string `json:"memory"`
+	CPU    *string `json:"cpu"`
+}
+
+type ResourceValuesInput struct {
 	Memory *string `json:"memory"`
 	CPU    *string `json:"cpu"`
 }
@@ -559,6 +577,12 @@ type UsageKind struct {
 type UsageKindResource struct {
 	Name      string `json:"name"`
 	Namespace string `json:"namespace"`
+}
+
+type EnabledMappingService struct {
+	Namespace   string                       `json:"namespace"`
+	AllServices bool                         `json:"allServices"`
+	Services    []*EnabledApplicationService `json:"services"`
 }
 
 type ApplicationStatus string

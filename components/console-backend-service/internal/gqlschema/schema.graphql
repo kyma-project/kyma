@@ -8,6 +8,8 @@ scalar Timestamp
 
 scalar Settings
 
+scalar ApplicationMappingService
+
 # Directives
 
 directive @HasAccess(attributes: ResourceAttributes!) on FIELD_DEFINITION
@@ -580,6 +582,16 @@ type ResourceQuota {
     requests: ResourceValues!
 }
 
+input ResourceValuesInput {
+    memory: String
+    cpu: String
+}
+
+input ResourceQuotaInput {
+    limits: ResourceValuesInput!
+    requests: ResourceValuesInput!
+}
+
 type ResourceQuotasStatus {
     exceeded: Boolean!
     exceededQuotas: [ExceededQuota!]!
@@ -612,7 +624,20 @@ type Application {
     labels: Labels!
     services: [ApplicationService!]!
     enabledInNamespaces: [String!]!
+    enabledMappingServices: [enabledMappingService]
     status: ApplicationStatus!
+}
+
+type enabledMappingService {
+    namespace: String!
+    allServices: Boolean!
+    services: [EnabledApplicationService]
+}
+
+type EnabledApplicationService {
+    id: String!
+    displayName: String!
+    exist: Boolean!
 }
 
 type ConnectorService {
@@ -622,6 +647,8 @@ type ConnectorService {
 type ApplicationMapping {
     namespace: String!
     application: String!
+    allServices: Boolean
+    services: [ApplicationMappingService]
 }
 
 type ApplicationService {
@@ -896,7 +923,8 @@ type Mutation {
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteApplication(name: String!): DeleteApplicationOutput! @HasAccess(attributes: {resource: "applications", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
-    enableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    enableApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    overloadApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     disableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "application", namespaceArg: "namespace"})
 
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod @HasAccess(attributes: {resource: "pods", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
@@ -907,6 +935,8 @@ type Mutation {
 
     updateReplicaSet(name: String!, namespace: String!, replicaSet: JSON!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "update", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
     deleteReplicaSet(name: String!, namespace: String!): ReplicaSet @HasAccess(attributes: {resource: "replicasets", verb: "delete", apiGroup: "apps", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
+
+    createResourceQuota(namespace: String!, name: String!, resourceQuota: ResourceQuotaInput!): ResourceQuota @HasAccess(attributes: {resource: "resourcequotas", verb: "create", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace"})
 
     updateConfigMap(name: String!, namespace: String!, configMap: JSON!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "update", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})
     deleteConfigMap(name: String!, namespace: String!): ConfigMap @HasAccess(attributes: {resource: "configmaps", verb: "delete", apiGroup: "", apiVersion: "v1", nameArg: "name", namespaceArg: "namespace"})

@@ -22,8 +22,8 @@ export let options = {
 
 export let functionNames =
   ['size-s',
-    'size-l',
-    // 'size-m',
+    'size-m',
+    // 'size-l',
     // 'size-xl',
   ]
 
