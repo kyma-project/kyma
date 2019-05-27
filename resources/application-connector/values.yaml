@@ -62,3 +62,12 @@ global:
     version: d999e831
 connectivity_certs_controller:
   enabled: false
+
+tests:
+  application_connector_tests:
+    connector_service:
+      central: false
+    image:
+      dir: pr/
+      version: PR-4220
+      pullPolicy: IfNotPresent
