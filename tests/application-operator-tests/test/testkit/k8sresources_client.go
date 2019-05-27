@@ -55,7 +55,6 @@ func initClient(k8sConfig *restclient.Config, namespace string) (K8sResourcesCli
 	}
 
 	istioClientset, err := v1alpha3.NewForConfig(k8sConfig)
-
 	if err != nil {
 		return nil, err
 	}

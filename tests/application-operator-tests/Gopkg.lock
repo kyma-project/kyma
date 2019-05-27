@@ -26,21 +26,6 @@
   version = "2.19.0"
 
 [[projects]]
-  branch = "master"
-  name = "github.com/alecthomas/template"
-  packages = [
-    ".",
-    "parse"
-  ]
-  revision = "a0175ee3bccc567396460bf5acd36800cb10c49c"
-
-[[projects]]
-  branch = "master"
-  name = "github.com/alecthomas/units"
-  packages = ["."]
-  revision = "2efee857e7cfd4f3d0138cc3cbb1b4966962b93a"
-
-[[projects]]
   name = "github.com/cyphar/filepath-securejoin"
   packages = ["."]
   revision = "a261ee33d7a517f054effbf451841abaafe3e0fd"
@@ -141,12 +126,6 @@
   version = "v1.1.6"
 
 [[projects]]
-  name = "github.com/konsorten/go-windows-terminal-sequences"
-  packages = ["."]
-  revision = "f55edac94c9bbba5d6182a4be46d86a2c9b5b50e"
-  version = "v1.0.2"
-
-[[projects]]
   name = "github.com/kyma-project/kyma"
   packages = [
     "components/api-controller/pkg/apis/networking.istio.io/v1alpha3",
@@ -182,18 +161,6 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
-
-[[projects]]
-  name = "github.com/prometheus/common"
-  packages = ["log"]
-  revision = "17f5ca1748182ddf24fc33a5a7caaaf790a52fcc"
-  version = "v0.4.1"
-
-[[projects]]
-  name = "github.com/sirupsen/logrus"
-  packages = ["."]
-  revision = "839c75faf7f98a33d445d181f3018b5c3409a45e"
-  version = "v1.4.2"
 
 [[projects]]
   name = "github.com/spf13/pflag"
@@ -239,9 +206,7 @@
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows",
-    "windows/registry",
-    "windows/svc/eventlog"
+    "windows"
   ]
   revision = "abf6ff778158be18fc3dadf08deffdaf3cc2df5f"
 
@@ -319,12 +284,6 @@
   ]
   revision = "869adfc8d5a43efc0d05780ad109106f457f51e4"
   version = "v1.21.0"
-
-[[projects]]
-  name = "gopkg.in/alecthomas/kingpin.v2"
-  packages = ["."]
-  revision = "947dcec5ba9c011838740e680966fd7087a71d0d"
-  version = "v2.2.6"
 
 [[projects]]
   name = "gopkg.in/inf.v0"
@@ -493,6 +452,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "5254cb0792f1f9f6a7f28c95184a56bdde2da813905c3dee652d7695a4803d67"
+  inputs-digest = "b0c595d023bcffb5fe10d1d59067bdff0970866227d3b4048fdd0a88f76a983e"
   solver-name = "gps-cdcl"
   solver-version = 1

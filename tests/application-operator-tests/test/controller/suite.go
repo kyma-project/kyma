@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	testAppName              = "operator-app-test-%s"
+	testAppName              = "operator-test-%s"
 	defaultCheckInterval     = 2 * time.Second
 	installationStartTimeout = 10 * time.Second
 	waitBeforeCheck          = 2 * time.Second
