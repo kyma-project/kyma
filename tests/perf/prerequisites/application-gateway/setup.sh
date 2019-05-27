@@ -230,7 +230,7 @@ echo "Cleaning up..."
 $( rm ${APP_CONNECTOR_CERT_DIR}/generated.csr )
 $( rm ${APP_CONNECTOR_CERT_DIR}/generated.yaml )
 
-$( kubectl kubectl -n app-gateway-test delete TokenRequest perf-app &> /dev/null; )
+$( kubectl -n app-gateway-test delete TokenRequest perf-app &> /dev/null; )
 
 
 echo ""
