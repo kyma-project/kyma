@@ -25,7 +25,7 @@ Install Kyma on a [Google Kubernetes Engine](https://cloud.google.com/kubernetes
 - [wget](https://www.gnu.org/software/wget/)
 - A domain for your GKE cluster
 
-## Choose the right version
+## Choose the release to install
 
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
 
@@ -93,6 +93,7 @@ Follow these steps:
     ```
     mkdir letsencrypt
     ```
+    
 3. Create a new service account and assign it to the **dns.admin** role. Run these commands:
     ```
     gcloud iam service-accounts create dnsmanager --display-name "dnsmanager" --project "$GCP_PROJECT"
@@ -174,7 +175,6 @@ Follow these steps:
 
 ## Install Kyma
 
-
 1. Deploy Kyma. Run:
     ```
     kubectl apply -f https://github.com/kyma-project/kyma/releases/download/$KYMA_VERSION/kyma-installer-cluster.yaml
@@ -238,7 +238,7 @@ Install Kyma on an [Azure Kubernetes Service](https://azure.microsoft.com/servic
 - [az](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli)
 - A domain for your AKS cluster
 
-## Choose the right version
+## Choose the release to install
 
 1. Go to [this](https://github.com/kyma-project/kyma/releases/) page and choose the release you want to install.
 
@@ -353,7 +353,6 @@ Follow these steps:
     ```
 ## Prepare the AKS cluster
 
-Set the following environment variables:
 1. Select a name for your cluster. Set the cluster name, the resource group and region as environment variables. Run:
   ```
   export RS_GROUP={YOUR_RESOURCE_GROUP_NAME}
@@ -405,7 +404,6 @@ Set the following environment variables:
     >**TIP:** An example config map is available [here](./assets/owndomain-overrides.yaml) and [here](./assets/aks-overrides.yaml)
 
 ## Install Kyma
-
 
 1. Deploy Kyma. Run:
     ```
