@@ -18,8 +18,8 @@ spec:
     hosts:
     - "*.{{.Values.global.ingress.domainName}}"
   - port:
-      name: https-9443
-      number: 9443
+      name: https-mtls
+      number: 443
       protocol: HTTPS
     tls:
       caCertificates: /etc/istio/ingressgateway-ca-certs/tls.crt
@@ -27,7 +27,7 @@ spec:
       privateKey: /etc/istio/ingressgateway-certs/tls.key
       serverCertificate: /etc/istio/ingressgateway-certs/tls.crt
     hosts:
-      - "*.{{.Values.global.ingress.domainName}}"
+      - "gateway.{{.Values.global.ingress.domainName}}"
   - port:
       number: 80
       name: http
