@@ -9,6 +9,8 @@ This guide explains how to deploy Kyma on a cluster using your own domain.
 
 Choose your cloud provider and get started:
 
+>**CAUTION:** These instructions are valid starting with Kyma 1.2. If you want to install older releases, refer to the respective documentation versions.
+
 <div tabs>
   <details>
   <summary>
