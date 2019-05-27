@@ -25,15 +25,26 @@ function cleanupHelmTestPods() {
 }
 
 function printLogsFromPod() {
+    local success=0
     local namespace=$1 pod=$2
     local tailLimit=2000 bytesLimit=500000
     log "Fetching logs from '${pod}' with options tailLimit=${tailLimit} and bytesLimit=${bytesLimit}" nc bold
-    result=$(kubectl $(context_arg)  logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} ${pod})
-    if [ "${#result}" -eq 0 ]; then
-        log "FAILED" red
-        return 1
+    for container in $(kubectl get pods ${pod} -n ${namespace} -o jsonpath='{range .spec.containers[*]}{.name}{"\n"}'| grep -v istio-proxy)
+    do
+        echo "Pod: ${pod} Container: ${container}"
+        result=$(kubectl $(context_arg)  logs --tail=${tailLimit} --limit-bytes=${bytesLimit} -n ${namespace} ${pod})
+        if [ "${#result}" -eq 0 ]; then
+          log "FAILED" red
+          success=0
+          continue
+        fi
+        echo "${result}"
+    done
+    if [ ${success} -ne 0 ]
+    then
+        exit 1
     fi
-    echo "${result}"
+
 }
 
 function printLogsFromFailedHelmTests() {
