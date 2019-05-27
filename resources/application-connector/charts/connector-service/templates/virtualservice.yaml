@@ -28,27 +28,3 @@ spec:
             port:
               number: {{ .Values.service.externalapi.port }}
             host: {{ .Chart.Name }}-external-api
-    - match:
-        - uri:
-            exact: /v1/applications/management/info
-          port: {{ .Values.global.istio.virtualServicePort }}
-        - uri:
-            exact: /v1/applications/certificates/renewals
-          port: {{ .Values.global.istio.virtualServicePort }}
-        - uri:
-            exact: /v1/applications/certificates/revocations
-          port: {{ .Values.global.istio.virtualServicePort }}
-        - uri:
-            exact: /v1/runtimes/management/info
-          port: {{ .Values.global.istio.virtualServicePort }}
-        - uri:
-            exact: /v1/runtimes/certificates/renewals
-          port: {{ .Values.global.istio.virtualServicePort }}
-        - uri:
-            exact: /v1/runtimes/certificates/revocations
-          port: {{ .Values.global.istio.virtualServicePort }}
-      route:
-        - destination:
-            port:
-              number: {{ .Values.service.externalapi.port }}
-            host: {{ .Chart.Name }}-external-api

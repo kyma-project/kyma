@@ -8,7 +8,6 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   istio:
-    virtualServicePort: 9443
     tls:
       secretName: istio-ingress-certs
     gateway:
@@ -20,8 +19,8 @@ global:
     dir: pr/
     version: PR-4192
   application_operator_tests:
-    dir: develop/
-    version: 68a39bb5
+    dir: pr/
+    version: PR-4192
   connector_service:
     dir: pr/
     version: PR-4200

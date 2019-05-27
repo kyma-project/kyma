@@ -11,8 +11,8 @@ deployment:
     runtimeTokenExpirationMinutes: 10
     caSecretName: connector-service-app-ca
     rootCACertificateSecretName: ""
-    appsInfoURL: https://connector-service.{{ .Values.global.applicationConnector.domainName }}:{{ .Values.global.istio.virtualServicePort }}/v1/applications/management/info
-    runtimesInfoURL: https://connector-service.{{ .Values.global.applicationConnector.domainName }}:{{ .Values.global.istio.virtualServicePort }}/v1/runtimes/management/info
+    appsInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/applications/management/info
+    runtimesInfoURL: https://gateway.{{ .Values.global.applicationConnector.domainName }}/v1/runtimes/management/info
     appValidityTime: "92d"
     runtimeValidityTime: "92d"
     central: &central false
