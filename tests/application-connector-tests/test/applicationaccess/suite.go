@@ -1,4 +1,4 @@
-package applicationflow
+package applicationaccess
 
 import (
 	"fmt"
@@ -32,6 +32,8 @@ import (
 )
 
 const (
+	applicationInstallationTimeout = 180 * time.Second
+
 	defaultCheckInterval    = time.Second * 2
 	infoURLRetrievalTimeout = time.Second * 15
 
@@ -78,10 +80,10 @@ func NewTestSuite(t *testing.T) *TestSuite {
 	}
 
 	return &TestSuite{
-		applicationInstallationTimeout: 180 * time.Second,
+		applicationInstallationTimeout: applicationInstallationTimeout,
 		applicationClient:              applicationClientset.ApplicationconnectorV1alpha1().Applications(),
-		tokenRequestClient:             tokenRequestClientset.ApplicationconnectorV1alpha1().TokenRequests("kyma-integration"), // TODO - namespace as env
-		connectorServiceClient:         connector.NewConnectorClient(config.ConnectorInternalAPIURL),
+		tokenRequestClient:             tokenRequestClientset.ApplicationconnectorV1alpha1().TokenRequests(config.Namespace),
+		connectorServiceClient:         connector.NewConnectorClient(),
 		isCentral:                      config.IsCentral,
 		defaultTenant:                  defaultTenant,
 		defaultGroup:                   defaultGroup,
@@ -150,8 +152,7 @@ func (ts *TestSuite) getInfoURL(t *testing.T, application *types.Application) st
 		TypeMeta:   v1.TypeMeta{Kind: "TokenRequest", APIVersion: tokenreq.SchemeGroupVersion.String()},
 		ObjectMeta: v1.ObjectMeta{Name: application.Name},
 		Context:    tokenreq.ClusterContext{Group: application.Spec.Group, Tenant: application.Spec.Tenant},
-		// TODO - change in client
-		Status: tokenreq.TokenRequestStatus{ExpireAfter: v1.Date(2999, time.December, 12, 12, 12, 12, 12, time.Local)},
+		Status:     tokenreq.TokenRequestStatus{ExpireAfter: v1.Date(2999, time.December, 12, 12, 12, 12, 12, time.Local)},
 	}
 
 	tokenRequest, err := ts.tokenRequestClient.Create(tokenRequest)

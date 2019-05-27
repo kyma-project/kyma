@@ -11,6 +11,7 @@ import (
 	"encoding/pem"
 	"fmt"
 	"net/http"
+	"net/http/httputil"
 	"strings"
 
 	"github.com/kyma-project/kyma/tests/application-connector-tests/test/testkit"
@@ -23,15 +24,12 @@ const (
 )
 
 type Client struct {
-	httpClient                  *http.Client
-	connectorServiceInternalURL string
+	httpClient *http.Client
 }
 
-// TODO - possibly do it with Connection Token Handler
-func NewConnectorClient(connectorServiceInternalURL string) *Client {
+func NewConnectorClient() *Client {
 	return &Client{
-		httpClient:                  &http.Client{},
-		connectorServiceInternalURL: connectorServiceInternalURL,
+		httpClient: &http.Client{},
 	}
 }
 
@@ -64,8 +62,6 @@ func (c *Client) EstablishApplicationConnection(infoURL string) (ApplicationConn
 func (c *Client) requestManagementInfo(key *rsa.PrivateKey, certs []*x509.Certificate, managementInfoURL string) (ManagementInfoResponse, error) {
 	mtlsClient := testkit.NewMTLSClient(key, certs)
 
-	fmt.Println(managementInfoURL)
-
 	req, err := http.NewRequest(http.MethodGet, managementInfoURL, nil)
 	if err != nil {
 		return ManagementInfoResponse{}, err
@@ -75,17 +71,16 @@ func (c *Client) requestManagementInfo(key *rsa.PrivateKey, certs []*x509.Certif
 	if err != nil {
 		return ManagementInfoResponse{}, errors.Wrap(err, "Failed to fetch Management Info")
 	}
+	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return ManagementInfoResponse{}, errors.New("Failed to fetch Management Info. Received status: " + response.Status)
+		responseError := errors.New(fmt.Sprintf("Failed to fetch Management Info. Received status: %s", response.Status))
+		return ManagementInfoResponse{}, dumpErrorResponse(responseError, response)
 	}
-
-	// TODO - http code checks?
 
 	var managementInfo ManagementInfoResponse
 	err = json.NewDecoder(response.Body).Decode(&managementInfo)
 	if err != nil {
-		// TODO - Error response
 		return ManagementInfoResponse{}, errors.Wrap(err, "Failed to decode Management Info Response")
 	}
 
@@ -128,6 +123,11 @@ func (c *Client) requestSigningRequestInfo(signingRequestInfoURL string) (CSRInf
 	}
 	defer response.Body.Close()
 
+	if response.StatusCode != http.StatusOK {
+		responseError := errors.New(fmt.Sprintf("Failed to fetch fetch CSR Info Response. Received status: %s", response.Status))
+		return CSRInfoResponse{}, dumpErrorResponse(responseError, response)
+	}
+
 	var csrInfoResponse CSRInfoResponse
 	err = json.NewDecoder(response.Body).Decode(&csrInfoResponse)
 	if err != nil {
@@ -153,12 +153,12 @@ func (c *Client) requestCertificate(certificatesURL string, csr []byte) (CrtResp
 	if err != nil {
 		return CrtResponse{}, err
 	}
-	defer func() {
-		err := response.Body.Close()
-		if err != nil {
-			fmt.Println(err)
-		}
-	}()
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusCreated {
+		responseError := errors.New(fmt.Sprintf("Failed to fetch fetch Certificates. Received status: %s", response.Status))
+		return CrtResponse{}, dumpErrorResponse(responseError, response)
+	}
 
 	var certificateResponse CrtResponse
 	err = json.NewDecoder(response.Body).Decode(&certificateResponse)
@@ -235,4 +235,13 @@ func extractSubject(subject string) map[string]string {
 	}
 
 	return result
+}
+
+func dumpErrorResponse(responseError error, response *http.Response) error {
+	dump, err := httputil.DumpResponse(response, true)
+	if err != nil {
+		return errors.WithMessagef(responseError, "Failed to dump response: %s", err.Error())
+	}
+
+	return errors.WithMessagef(responseError, "Response: %s", string(dump))
 }

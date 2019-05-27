@@ -1,9 +1,12 @@
 package testkit
 
 import (
+	"fmt"
 	"log"
 	"os"
 	"strconv"
+
+	"github.com/pkg/errors"
 )
 
 // TODO - Envs:
@@ -11,11 +14,12 @@ import (
 //
 const (
 	isCentralEnv = "CENTRAL"
+	namespaceEnv = "NAMESPACE"
 )
 
 type TestConfig struct {
-	ConnectorInternalAPIURL string
-	IsCentral               bool
+	IsCentral bool
+	Namespace string
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -26,8 +30,14 @@ func ReadConfig() (TestConfig, error) {
 		central, _ = strconv.ParseBool(c)
 	}
 
+	namespace, found := os.LookupEnv(namespaceEnv)
+	if !found {
+		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", namespaceEnv))
+	}
+
 	config := TestConfig{
 		IsCentral: central,
+		Namespace: namespace,
 	}
 
 	log.Printf("Read configuration: %+v", config)
