@@ -36,7 +36,7 @@ func (cc *contextFromSubjMiddleware) Middleware(handler http.Handler) http.Handl
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		contextExtender, err := cc.parseContextFromSubject(r)
 		if err != nil {
-			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Invalid certificate", err.Error()))
+			httphelpers.RespondWithErrorAndLog(w, apperrors.BadRequest("Invalid certificate: %s", err.Error()))
 			return
 		}
 

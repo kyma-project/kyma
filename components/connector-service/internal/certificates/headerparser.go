@@ -3,7 +3,7 @@ package certificates
 import (
 	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"net/http"
-	"strings"
+	"regexp"
 )
 
 const ClientCertHeader = "X-Forwarded-Client-Cert"
@@ -17,7 +17,6 @@ type HeaderParser struct {
 type CertInfo struct {
 	Hash    string
 	Subject string
-	URI     string
 }
 
 func (hp *HeaderParser) ParseCertificateHeader(r http.Request) (CertInfo, apperrors.AppError) {
@@ -27,15 +26,15 @@ func (hp *HeaderParser) ParseCertificateHeader(r http.Request) (CertInfo, apperr
 		return CertInfo{}, apperrors.BadRequest("Certificate header is empty")
 	}
 
-	data := strings.Split(certHeader, ";")
+	subjectRegex := regexp.MustCompile(`Subject="(.*?)"`)
 
-	if err := checkForCorrectness(data); err != nil {
-		return CertInfo{}, err
-	}
+	subjects := extractFromHeader(certHeader, subjectRegex)
 
-	infoParts := groupData(data)
+	hashRegex := regexp.MustCompile(`Hash=([0-9a-f]*)`)
 
-	certInfos := createCertInfos(infoParts)
+	hashes := extractFromHeader(certHeader, hashRegex)
+
+	certInfos := createCertInfos(subjects, hashes)
 
 	if hp.Central {
 		return getCertInfoWithNonEmptySubject(certInfos)
@@ -44,32 +43,33 @@ func (hp *HeaderParser) ParseCertificateHeader(r http.Request) (CertInfo, apperr
 	}
 }
 
-func groupData(split []string) [][]string {
-	certs := make([][]string, 0)
-	for i := 0; i < len(split); i += 3 {
-		batch := split[i : i+3]
-		certs = append(certs, batch)
+func extractFromHeader(certHeader string, regex *regexp.Regexp) []string {
+	var matchedStrings []string
+
+	matches := regex.FindAllStringSubmatch(certHeader, -1)
+
+	for _, match := range matches {
+		hash := get(match, 1)
+		matchedStrings = append(matchedStrings, hash)
 	}
-	return certs
+
+	return matchedStrings
 }
 
-func createCertInfos(infoParts [][]string) []CertInfo {
+func get(array []string, index int) string {
+	if len(array) > index {
+		return array[index]
+	}
+	return ""
+}
+
+func createCertInfos(subjects, hashes []string) []CertInfo {
 	certInfos := make([]CertInfo, 0)
-	for _, i := range infoParts {
-		if isInfoPartValid(i) {
-			certInfo := createCertInfo(i)
-			certInfos = append(certInfos, certInfo)
-		}
+	for i := 0; i < len(subjects); i++ {
+		certInfo := newCertInfo(subjects[i], hashes[i])
+		certInfos = append(certInfos, certInfo)
 	}
-
 	return certInfos
-}
-
-func checkForCorrectness(data []string) apperrors.AppError {
-	if len(data)%3 != 0 {
-		return apperrors.BadRequest("Certificate data is corrupted")
-	}
-	return nil
 }
 
 func getCertInfoWithNonEmptySubject(infos []CertInfo) (CertInfo, apperrors.AppError) {
@@ -90,17 +90,12 @@ func getCertInfoWithMatchingSubject(infos []CertInfo, organization, unit string)
 	return CertInfo{}, apperrors.BadRequest("Failed to get certificate subject from header.")
 }
 
-func createCertInfo(i []string) CertInfo {
+func newCertInfo(subject, hash string) CertInfo {
 	certInfo := CertInfo{
-		Hash:    strings.Trim(i[0], "Hash="),
-		Subject: strings.Trim(strings.Trim(i[1], "Subject="), "\""),
-		URI:     strings.Trim(i[2], "URI="),
+		Hash:    hash,
+		Subject: subject,
 	}
 	return certInfo
-}
-
-func isInfoPartValid(i []string) bool {
-	return strings.Contains(i[0], "Hash") && strings.Contains(i[1], "Subject") && strings.Contains(i[2], "URI")
 }
 
 func isSubjectMatching(i CertInfo, organization string, unit string) bool {
