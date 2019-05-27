@@ -58,27 +58,16 @@ Follow these instructions to install Kyma from a release or from sources:
     
   2. Clone the `Kyma` repository using either HTTPS or SSH. Run:
      
-     <div tabs>
-       <details>
-       <summary>
-       HTTPS
-       </summary>
-     
-        ```bash
-        git clone https://github.com/kyma-project/kyma.git
-        ```
-       </details>
-       <details>
-       <summary>
-       SSH
-       </summary>
-     
-       ```bash
-       git clone git@github.com:kyma-project/kyma.git
-       ```
-       </details>
-     </div>
- 
+     For HTTPS run command:
+     ```bash
+     git clone https://github.com/kyma-project/kyma.git
+     ```
+
+     For SSH run command:     
+     ```bash
+     git clone git@github.com:kyma-project/kyma.git
+     ```
+
   3. Kyma comes with a local wildcard self-signed `server.crt` certificate. Add this certificate to your OS trusted certificates to access the Console UI. On MacOS, run:
      ```bash
      sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain certs/workspace/raw/server.crt
