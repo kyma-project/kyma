@@ -43,10 +43,7 @@ minio:
     MINIO_BROWSER: "off"
   
   defaultBucket:
-    enabled: true
-    name: content
-    policy: download
-    pruge: false
+    enabled: false
   
   resources:
     requests:

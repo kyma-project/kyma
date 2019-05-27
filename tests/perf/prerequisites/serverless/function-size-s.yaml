@@ -39,6 +39,7 @@ spec:
     }
   horizontalPodAutoscaler:
     metadata:
+      namespace: $NAMESPACE
       labels:
         function: size-s
       name: size-s
