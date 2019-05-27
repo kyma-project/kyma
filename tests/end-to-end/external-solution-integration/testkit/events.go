@@ -29,7 +29,7 @@ func SendEvent(url string, event *ExampleEvent) error {
 	defer response.Body.Close()
 
 	if response.StatusCode != http.StatusOK {
-		return fmt.Errorf("send event failed: %v", response.StatusCode)
+		return fmt.Errorf("send event failed: %v\nrequest: %v\nresponse: %v", response.StatusCode, request, response)
 	}
 
 	return nil

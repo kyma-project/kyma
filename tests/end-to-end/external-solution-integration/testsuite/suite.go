@@ -41,6 +41,7 @@ type testSuite struct {
 	testService    testkit.TestService
 	connClient     testkit.ConnectorClient
 	registryClient testkit.RegistryClient
+	serviceID      string
 }
 
 func NewTestSuite(config *rest.Config, logger log.FieldLogger) (TestSuite, error) {
@@ -234,6 +235,9 @@ func (ts *testSuite) RegisterService(targetURL string) (string, error) {
 	service := prepareService(targetURL)
 
 	id, err := ts.registryClient.RegisterService(service)
+	if err == nil {
+		ts.serviceID = id
+	}
 	return id, err
 }
 
@@ -363,6 +367,14 @@ func (ts *testSuite) CleanUp() error {
 	if err != nil {
 		log.Error(err)
 		errorOccured = true
+	}
+
+	if ts.serviceID != "" {
+		err = ts.registryClient.DeleteService(ts.serviceID)
+		if err != nil {
+			log.Error(err)
+			errorOccured = true
+		}
 	}
 
 	if errorOccured {
