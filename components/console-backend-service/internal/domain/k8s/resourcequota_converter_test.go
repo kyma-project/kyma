@@ -89,7 +89,3 @@ func TestResourceQuotaConverter_ToGQL(t *testing.T) {
 
 	}
 }
-
-func ptrStr(str string) *string {
-	return &str
-}
