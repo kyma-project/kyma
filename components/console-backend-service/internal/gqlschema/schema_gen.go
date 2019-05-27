@@ -79,12 +79,13 @@ type ComplexityRoot struct {
 	}
 
 	Application struct {
-		Name                func(childComplexity int) int
-		Description         func(childComplexity int) int
-		Labels              func(childComplexity int) int
-		Services            func(childComplexity int) int
-		EnabledInNamespaces func(childComplexity int) int
-		Status              func(childComplexity int) int
+		Name                   func(childComplexity int) int
+		Description            func(childComplexity int) int
+		Labels                 func(childComplexity int) int
+		Services               func(childComplexity int) int
+		EnabledInNamespaces    func(childComplexity int) int
+		EnabledMappingServices func(childComplexity int) int
+		Status                 func(childComplexity int) int
 	}
 
 	ApplicationEntry struct {
@@ -101,6 +102,8 @@ type ComplexityRoot struct {
 	ApplicationMapping struct {
 		Namespace   func(childComplexity int) int
 		Application func(childComplexity int) int
+		AllServices func(childComplexity int) int
+		Services    func(childComplexity int) int
 	}
 
 	ApplicationMutationOutput struct {
@@ -326,6 +329,12 @@ type ComplexityRoot struct {
 		Message func(childComplexity int) int
 	}
 
+	EnabledApplicationService struct {
+		Id          func(childComplexity int) int
+		DisplayName func(childComplexity int) int
+		Exist       func(childComplexity int) int
+	}
+
 	EnvPrefix struct {
 		Name func(childComplexity int) int
 	}
@@ -419,7 +428,8 @@ type ComplexityRoot struct {
 		CreateApplication             func(childComplexity int, name string, description *string, labels *Labels) int
 		UpdateApplication             func(childComplexity int, name string, description *string, labels *Labels) int
 		DeleteApplication             func(childComplexity int, name string) int
-		EnableApplication             func(childComplexity int, application string, namespace string) int
+		EnableApplication             func(childComplexity int, application string, namespace string, allServices *bool, services []*ApplicationMappingService) int
+		OverloadApplication           func(childComplexity int, application string, namespace string, allServices *bool, services []*ApplicationMappingService) int
 		DisableApplication            func(childComplexity int, application string, namespace string) int
 		UpdatePod                     func(childComplexity int, name string, namespace string, pod JSON) int
 		DeletePod                     func(childComplexity int, name string, namespace string) int
@@ -781,10 +791,17 @@ type ComplexityRoot struct {
 		Name      func(childComplexity int) int
 		Namespace func(childComplexity int) int
 	}
+
+	EnabledMappingService struct {
+		Namespace   func(childComplexity int) int
+		AllServices func(childComplexity int) int
+		Services    func(childComplexity int) int
+	}
 }
 
 type ApplicationResolver interface {
 	EnabledInNamespaces(ctx context.Context, obj *Application) ([]string, error)
+	EnabledMappingServices(ctx context.Context, obj *Application) ([]*EnabledMappingService, error)
 	Status(ctx context.Context, obj *Application) (ApplicationStatus, error)
 }
 type AssetResolver interface {
@@ -827,7 +844,8 @@ type MutationResolver interface {
 	CreateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	UpdateApplication(ctx context.Context, name string, description *string, labels *Labels) (ApplicationMutationOutput, error)
 	DeleteApplication(ctx context.Context, name string) (DeleteApplicationOutput, error)
-	EnableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
+	EnableApplication(ctx context.Context, application string, namespace string, allServices *bool, services []*ApplicationMappingService) (*ApplicationMapping, error)
+	OverloadApplication(ctx context.Context, application string, namespace string, allServices *bool, services []*ApplicationMappingService) (*ApplicationMapping, error)
 	DisableApplication(ctx context.Context, application string, namespace string) (*ApplicationMapping, error)
 	UpdatePod(ctx context.Context, name string, namespace string, pod JSON) (*Pod, error)
 	DeletePod(ctx context.Context, name string, namespace string) (*Pod, error)
@@ -1580,6 +1598,106 @@ func field_Mutation_enableApplication_args(rawArgs map[string]interface{}) (map[
 		}
 	}
 	args["namespace"] = arg1
+	var arg2 *bool
+	if tmp, ok := rawArgs["allServices"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["allServices"] = arg2
+	var arg3 []*ApplicationMappingService
+	if tmp, ok := rawArgs["services"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg3 = make([]*ApplicationMappingService, len(rawIf1))
+		for idx1 := range rawIf1 {
+			var ptr2 ApplicationMappingService
+			if rawIf1[idx1] != nil {
+				err = (&ptr2).UnmarshalGQL(rawIf1[idx1])
+				arg3[idx1] = &ptr2
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["services"] = arg3
+	return args, nil
+
+}
+
+func field_Mutation_overloadApplication_args(rawArgs map[string]interface{}) (map[string]interface{}, error) {
+	args := map[string]interface{}{}
+	var arg0 string
+	if tmp, ok := rawArgs["application"]; ok {
+		var err error
+		arg0, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["application"] = arg0
+	var arg1 string
+	if tmp, ok := rawArgs["namespace"]; ok {
+		var err error
+		arg1, err = graphql.UnmarshalString(tmp)
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["namespace"] = arg1
+	var arg2 *bool
+	if tmp, ok := rawArgs["allServices"]; ok {
+		var err error
+		var ptr1 bool
+		if tmp != nil {
+			ptr1, err = graphql.UnmarshalBoolean(tmp)
+			arg2 = &ptr1
+		}
+
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["allServices"] = arg2
+	var arg3 []*ApplicationMappingService
+	if tmp, ok := rawArgs["services"]; ok {
+		var err error
+		var rawIf1 []interface{}
+		if tmp != nil {
+			if tmp1, ok := tmp.([]interface{}); ok {
+				rawIf1 = tmp1
+			} else {
+				rawIf1 = []interface{}{tmp}
+			}
+		}
+		arg3 = make([]*ApplicationMappingService, len(rawIf1))
+		for idx1 := range rawIf1 {
+			var ptr2 ApplicationMappingService
+			if rawIf1[idx1] != nil {
+				err = (&ptr2).UnmarshalGQL(rawIf1[idx1])
+				arg3[idx1] = &ptr2
+			}
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	args["services"] = arg3
 	return args, nil
 
 }
@@ -3493,6 +3611,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Application.EnabledInNamespaces(childComplexity), true
 
+	case "Application.enabledMappingServices":
+		if e.complexity.Application.EnabledMappingServices == nil {
+			break
+		}
+
+		return e.complexity.Application.EnabledMappingServices(childComplexity), true
+
 	case "Application.status":
 		if e.complexity.Application.Status == nil {
 			break
@@ -3548,6 +3673,20 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.ApplicationMapping.Application(childComplexity), true
+
+	case "ApplicationMapping.allServices":
+		if e.complexity.ApplicationMapping.AllServices == nil {
+			break
+		}
+
+		return e.complexity.ApplicationMapping.AllServices(childComplexity), true
+
+	case "ApplicationMapping.services":
+		if e.complexity.ApplicationMapping.Services == nil {
+			break
+		}
+
+		return e.complexity.ApplicationMapping.Services(childComplexity), true
 
 	case "ApplicationMutationOutput.name":
 		if e.complexity.ApplicationMutationOutput.Name == nil {
@@ -4468,6 +4607,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.DocsTopicStatus.Message(childComplexity), true
 
+	case "EnabledApplicationService.id":
+		if e.complexity.EnabledApplicationService.Id == nil {
+			break
+		}
+
+		return e.complexity.EnabledApplicationService.Id(childComplexity), true
+
+	case "EnabledApplicationService.displayName":
+		if e.complexity.EnabledApplicationService.DisplayName == nil {
+			break
+		}
+
+		return e.complexity.EnabledApplicationService.DisplayName(childComplexity), true
+
+	case "EnabledApplicationService.exist":
+		if e.complexity.EnabledApplicationService.Exist == nil {
+			break
+		}
+
+		return e.complexity.EnabledApplicationService.Exist(childComplexity), true
+
 	case "EnvPrefix.name":
 		if e.complexity.EnvPrefix.Name == nil {
 			break
@@ -4924,7 +5084,19 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.EnableApplication(childComplexity, args["application"].(string), args["namespace"].(string)), true
+		return e.complexity.Mutation.EnableApplication(childComplexity, args["application"].(string), args["namespace"].(string), args["allServices"].(*bool), args["services"].([]*ApplicationMappingService)), true
+
+	case "Mutation.overloadApplication":
+		if e.complexity.Mutation.OverloadApplication == nil {
+			break
+		}
+
+		args, err := field_Mutation_overloadApplication_args(rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Mutation.OverloadApplication(childComplexity, args["application"].(string), args["namespace"].(string), args["allServices"].(*bool), args["services"].([]*ApplicationMappingService)), true
 
 	case "Mutation.disableApplication":
 		if e.complexity.Mutation.DisableApplication == nil {
@@ -6931,6 +7103,27 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.UsageKindResource.Namespace(childComplexity), true
 
+	case "enabledMappingService.namespace":
+		if e.complexity.EnabledMappingService.Namespace == nil {
+			break
+		}
+
+		return e.complexity.EnabledMappingService.Namespace(childComplexity), true
+
+	case "enabledMappingService.allServices":
+		if e.complexity.EnabledMappingService.AllServices == nil {
+			break
+		}
+
+		return e.complexity.EnabledMappingService.AllServices(childComplexity), true
+
+	case "enabledMappingService.services":
+		if e.complexity.EnabledMappingService.Services == nil {
+			break
+		}
+
+		return e.complexity.EnabledMappingService.Services(childComplexity), true
+
 	}
 	return 0, false
 }
@@ -7540,6 +7733,12 @@ func (ec *executionContext) _Application(ctx context.Context, sel ast.SelectionS
 				}
 				wg.Done()
 			}(i, field)
+		case "enabledMappingServices":
+			wg.Add(1)
+			go func(i int, field graphql.CollectedField) {
+				out.Values[i] = ec._Application_enabledMappingServices(ctx, field, obj)
+				wg.Done()
+			}(i, field)
 		case "status":
 			wg.Add(1)
 			go func(i int, field graphql.CollectedField) {
@@ -7734,6 +7933,67 @@ func (ec *executionContext) _Application_enabledInNamespaces(ctx context.Context
 		}()
 	}
 
+	return arr1
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Application_enabledMappingServices(ctx context.Context, field graphql.CollectedField, obj *Application) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "Application",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Application().EnabledMappingServices(rctx, obj)
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*EnabledMappingService)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				if res[idx1] == nil {
+					return graphql.Null
+				}
+
+				return ec._enabledMappingService(ctx, field.Selections, res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
 	return arr1
 }
 
@@ -7995,6 +8255,10 @@ func (ec *executionContext) _ApplicationMapping(ctx context.Context, sel ast.Sel
 			if out.Values[i] == graphql.Null {
 				invalid = true
 			}
+		case "allServices":
+			out.Values[i] = ec._ApplicationMapping_allServices(ctx, field, obj)
+		case "services":
+			out.Values[i] = ec._ApplicationMapping_services(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -8058,6 +8322,71 @@ func (ec *executionContext) _ApplicationMapping_application(ctx context.Context,
 	rctx.Result = res
 	ctx = ec.Tracer.StartFieldChildExecution(ctx)
 	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ApplicationMapping_allServices(ctx context.Context, field graphql.CollectedField, obj *ApplicationMapping) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ApplicationMapping",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AllServices, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+	return graphql.MarshalBoolean(*res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _ApplicationMapping_services(ctx context.Context, field graphql.CollectedField, obj *ApplicationMapping) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "ApplicationMapping",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Services, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*ApplicationMappingService)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+
+	for idx1 := range res {
+		arr1[idx1] = func() graphql.Marshaler {
+
+			if res[idx1] == nil {
+				return graphql.Null
+			}
+			return *res[idx1]
+		}()
+	}
+
+	return arr1
 }
 
 var applicationMutationOutputImplementors = []string{"ApplicationMutationOutput"}
@@ -13379,6 +13708,127 @@ func (ec *executionContext) _DocsTopicStatus_message(ctx context.Context, field 
 	return graphql.MarshalString(res)
 }
 
+var enabledApplicationServiceImplementors = []string{"EnabledApplicationService"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _EnabledApplicationService(ctx context.Context, sel ast.SelectionSet, obj *EnabledApplicationService) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, enabledApplicationServiceImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("EnabledApplicationService")
+		case "id":
+			out.Values[i] = ec._EnabledApplicationService_id(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "displayName":
+			out.Values[i] = ec._EnabledApplicationService_displayName(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "exist":
+			out.Values[i] = ec._EnabledApplicationService_exist(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EnabledApplicationService_id(ctx context.Context, field graphql.CollectedField, obj *EnabledApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EnabledApplicationService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.ID, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EnabledApplicationService_displayName(ctx context.Context, field graphql.CollectedField, obj *EnabledApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EnabledApplicationService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.DisplayName, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _EnabledApplicationService_exist(ctx context.Context, field graphql.CollectedField, obj *EnabledApplicationService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "EnabledApplicationService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Exist, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
+}
+
 var envPrefixImplementors = []string{"EnvPrefix"}
 
 // nolint: gocyclo, errcheck, gas, goconst
@@ -15122,6 +15572,8 @@ func (ec *executionContext) _Mutation(ctx context.Context, sel ast.SelectionSet)
 			}
 		case "enableApplication":
 			out.Values[i] = ec._Mutation_enableApplication(ctx, field)
+		case "overloadApplication":
+			out.Values[i] = ec._Mutation_overloadApplication(ctx, field)
 		case "disableApplication":
 			out.Values[i] = ec._Mutation_disableApplication(ctx, field)
 		case "updatePod":
@@ -15706,7 +16158,42 @@ func (ec *executionContext) _Mutation_enableApplication(ctx context.Context, fie
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["namespace"].(string))
+		return ec.resolvers.Mutation().EnableApplication(rctx, args["application"].(string), args["namespace"].(string), args["allServices"].(*bool), args["services"].([]*ApplicationMappingService))
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*ApplicationMapping)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	if res == nil {
+		return graphql.Null
+	}
+
+	return ec._ApplicationMapping(ctx, field.Selections, res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _Mutation_overloadApplication(ctx context.Context, field graphql.CollectedField) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rawArgs := field.ArgumentMap(ec.Variables)
+	args, err := field_Mutation_overloadApplication_args(rawArgs)
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	rctx := &graphql.ResolverContext{
+		Object: "Mutation",
+		Args:   args,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, nil, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return ec.resolvers.Mutation().OverloadApplication(rctx, args["application"].(string), args["namespace"].(string), args["allServices"].(*bool), args["services"].([]*ApplicationMappingService))
 	})
 	if resTmp == nil {
 		return graphql.Null
@@ -27570,6 +28057,158 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 	return ec.___Type(ctx, field.Selections, res)
 }
 
+var enabledMappingServiceImplementors = []string{"enabledMappingService"}
+
+// nolint: gocyclo, errcheck, gas, goconst
+func (ec *executionContext) _enabledMappingService(ctx context.Context, sel ast.SelectionSet, obj *EnabledMappingService) graphql.Marshaler {
+	fields := graphql.CollectFields(ctx, sel, enabledMappingServiceImplementors)
+
+	out := graphql.NewOrderedMap(len(fields))
+	invalid := false
+	for i, field := range fields {
+		out.Keys[i] = field.Alias
+
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("enabledMappingService")
+		case "namespace":
+			out.Values[i] = ec._enabledMappingService_namespace(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "allServices":
+			out.Values[i] = ec._enabledMappingService_allServices(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				invalid = true
+			}
+		case "services":
+			out.Values[i] = ec._enabledMappingService_services(ctx, field, obj)
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+
+	if invalid {
+		return graphql.Null
+	}
+	return out
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _enabledMappingService_namespace(ctx context.Context, field graphql.CollectedField, obj *EnabledMappingService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "enabledMappingService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Namespace, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalString(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _enabledMappingService_allServices(ctx context.Context, field graphql.CollectedField, obj *EnabledMappingService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "enabledMappingService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AllServices, nil
+	})
+	if resTmp == nil {
+		if !ec.HasError(rctx) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+	return graphql.MarshalBoolean(res)
+}
+
+// nolint: vetshadow
+func (ec *executionContext) _enabledMappingService_services(ctx context.Context, field graphql.CollectedField, obj *EnabledMappingService) graphql.Marshaler {
+	ctx = ec.Tracer.StartFieldExecution(ctx, field)
+	defer func() { ec.Tracer.EndFieldExecution(ctx) }()
+	rctx := &graphql.ResolverContext{
+		Object: "enabledMappingService",
+		Args:   nil,
+		Field:  field,
+	}
+	ctx = graphql.WithResolverContext(ctx, rctx)
+	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
+	resTmp := ec.FieldMiddleware(ctx, obj, func(rctx context.Context) (interface{}, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Services, nil
+	})
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]*EnabledApplicationService)
+	rctx.Result = res
+	ctx = ec.Tracer.StartFieldChildExecution(ctx)
+
+	arr1 := make(graphql.Array, len(res))
+	var wg sync.WaitGroup
+
+	isLen1 := len(res) == 1
+	if !isLen1 {
+		wg.Add(len(res))
+	}
+
+	for idx1 := range res {
+		idx1 := idx1
+		rctx := &graphql.ResolverContext{
+			Index:  &idx1,
+			Result: res[idx1],
+		}
+		ctx := graphql.WithResolverContext(ctx, rctx)
+		f := func(idx1 int) {
+			if !isLen1 {
+				defer wg.Done()
+			}
+			arr1[idx1] = func() graphql.Marshaler {
+
+				if res[idx1] == nil {
+					return graphql.Null
+				}
+
+				return ec._EnabledApplicationService(ctx, field.Selections, res[idx1])
+			}()
+		}
+		if isLen1 {
+			f(idx1)
+		} else {
+			go f(idx1)
+		}
+
+	}
+	wg.Wait()
+	return arr1
+}
+
 func UnmarshalCreateServiceBindingUsageInput(v interface{}) (CreateServiceBindingUsageInput, error) {
 	var it CreateServiceBindingUsageInput
 	var asMap = v.(map[string]interface{})
@@ -28016,6 +28655,8 @@ scalar Labels
 scalar Timestamp
 
 scalar Settings
+
+scalar ApplicationMappingService
 
 # Directives
 
@@ -28631,7 +29272,20 @@ type Application {
     labels: Labels!
     services: [ApplicationService!]!
     enabledInNamespaces: [String!]!
+    enabledMappingServices: [enabledMappingService]
     status: ApplicationStatus!
+}
+
+type enabledMappingService {
+    namespace: String!
+    allServices: Boolean!
+    services: [EnabledApplicationService]
+}
+
+type EnabledApplicationService {
+    id: String!
+    displayName: String!
+    exist: Boolean!
 }
 
 type ConnectorService {
@@ -28641,6 +29295,8 @@ type ConnectorService {
 type ApplicationMapping {
     namespace: String!
     application: String!
+    allServices: Boolean
+    services: [ApplicationMappingService]
 }
 
 type ApplicationService {
@@ -28915,7 +29571,8 @@ type Mutation {
     updateApplication(name: String!, description: String, labels: Labels): ApplicationMutationOutput! @HasAccess(attributes: {resource: "applications", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
     deleteApplication(name: String!): DeleteApplicationOutput! @HasAccess(attributes: {resource: "applications", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "name"})
 
-    enableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    enableApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "create", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
+    overloadApplication(application: String!, namespace: String!, allServices: Boolean, services: [ApplicationMappingService]): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "update", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", namespaceArg: "namespace"})
     disableApplication(application: String!, namespace: String!): ApplicationMapping @HasAccess(attributes: {resource: "applicationmappings", verb: "delete", apiGroup: "applicationconnector.kyma-project.io", apiVersion: "v1alpha1", nameArg: "application", namespaceArg: "namespace"})
 
     updatePod(name: String!, namespace: String!, pod: JSON!): Pod @HasAccess(attributes: {resource: "pods", verb: "update", apiGroup: "", apiVersion: "v1", namespaceArg: "namespace", nameArg: "name"})
