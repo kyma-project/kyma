@@ -71,6 +71,7 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 	}
 
 	accessServiceManager := newAccessServiceManager(coreClientset, opt.namespace, opt.proxyPort)
+	//TODO: Rename to credentialsSecretsService and add new secretsService
 	secretsService := newSecretsRepository(coreClientset, nameResolver, opt.namespace)
 
 	uuidGenerator := metauuid.GeneratorFunc(func() (string, error) {
@@ -81,6 +82,7 @@ func newServiceDefinitionService(opt *options, nameResolver k8sconsts.NameResolv
 		return uuidInstance.String(), nil
 	})
 
+	//TODO: Add also the new secretsService
 	serviceAPIService := serviceapi.NewService(nameResolver, accessServiceManager, secretsService, istioService)
 
 	return metadata.NewServiceDefinitionService(uuidGenerator, serviceAPIService, applicationServiceRepository, specificationService), nil
@@ -122,6 +124,7 @@ func newAccessServiceManager(coreClientset *kubernetes.Clientset, namespace stri
 	return accessservice.NewAccessServiceManager(si, config)
 }
 
+//TODO: Rename to newCredentialsSecretsRepository and add one for the new secret
 func newSecretsRepository(coreClientset *kubernetes.Clientset, nameResolver k8sconsts.NameResolver, namespace string) secrets.Service {
 	sei := coreClientset.CoreV1().Secrets(namespace)
 	strategyFactory := strategy.NewSecretsStrategyFactory(certificates.GenerateKeyAndCertificate)

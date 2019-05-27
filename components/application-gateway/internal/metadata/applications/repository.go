@@ -37,12 +37,12 @@ type Credentials struct {
 
 // ServiceAPI stores information needed to call an API
 type ServiceAPI struct {
-	GatewayURL      string
-	AccessLabel     string
-	TargetUrl       string
+	GatewayURL  string
+	AccessLabel string
+	TargetUrl   string
 	//TODO: Add SecretID field pointing to the Secret with Headers and QueryParameters
 	//SecretID string
-	Credentials     *Credentials
+	Credentials *Credentials
 	//TODO: Delete Headers and QueryParameters fields from here
 	Headers         *map[string][]string
 	QueryParameters *map[string][]string

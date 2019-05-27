@@ -10,6 +10,7 @@ import (
 
 type modificationFunction func(modStrategy strategy.ModificationStrategy, application, name, serviceID string, newData strategy.SecretData) apperrors.AppError
 
+//TODO: Rename to CredentialsService add new service for the new secret
 type Service interface {
 	Get(application string, credentials applications.Credentials) (model.Credentials, apperrors.AppError)
 	Create(application, serviceID string, credentials *model.Credentials) (applications.Credentials, apperrors.AppError)
@@ -17,12 +18,14 @@ type Service interface {
 	Delete(name string) apperrors.AppError
 }
 
+//TODO: Rename to credentialsService
 type service struct {
 	nameResolver    k8sconsts.NameResolver
 	repository      Repository
 	strategyFactory strategy.Factory
 }
 
+//TODO: Rename to NewCredentialsService
 func NewService(repository Repository, nameResolver k8sconsts.NameResolver, strategyFactory strategy.Factory) Service {
 	return &service{
 		nameResolver:    nameResolver,

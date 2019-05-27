@@ -29,6 +29,7 @@ type defaultService struct {
 	istioService         istio.Service
 }
 
+//TODO: Add also the new secret service
 func NewService(
 	nameResolver k8sconsts.NameResolver,
 	accessServiceManager accessservice.AccessServiceManager,
