@@ -150,7 +150,24 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       Source
       </summary>
 
-    ![](./assets/docs-toggle-source.png)
+    ```
+    <div tabs>
+      <details>
+      <summary>
+      HTTPS
+      </summary>
+
+      https://github.com/kyma-project/kyma.git
+      </details>
+      <details>
+      <summary>
+      SSH
+      </summary>
+
+      git@github.com:kyma-project/kyma.git
+      </details>
+    </div>
+    ```
       </details>
       <details>
       <summary>
