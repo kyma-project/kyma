@@ -13,3 +13,4 @@ Kyma-specific changes:
  * The `knative-eventing` Namespace is no longer created. This happens during the installation process.
  * The `in-memory-channel` no longer exists, as Kyma uses NATS Streaming-based provisioner out of the box.
  * The image versions are changed to use the release tag.
+ * Added requests.memory, requests.cpu, limits.cpu and limits.memory for deployment/eventing-controller, deployment/webhook (values motivated from knative/serving charts)
