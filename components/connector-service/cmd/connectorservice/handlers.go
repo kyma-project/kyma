@@ -73,14 +73,14 @@ func newExternalHandler(tokenManager tokens.Manager, tokenCreatorProvider tokens
 
 	lookupService := middlewares.NewGraphQLLookupService()
 
-	headerParser := certificates.HeaderParser{Organization: env.organization, Unit: env.organizationalUnit, Central: opts.central}
+	headerParser := certificates.NewHeaderParser(env.country, env.locality, env.province, env.organization, env.organizationalUnit, opts.central)
 
 	appCertificateService := certificates.NewCertificateService(secretsRepository, certificates.NewCertificateUtility(opts.appCertificateValidityTime), opts.caSecretName, opts.rootCACertificateSecretName)
 
 	appTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewApplicationContextExtender)
 	clusterTokenResolverMiddleware := middlewares.NewTokenResolverMiddleware(tokenManager, clientcontext.NewClusterContextExtender)
 	runtimeURLsMiddleware := middlewares.NewRuntimeURLsMiddleware(opts.gatewayBaseURL, opts.lookupConfigMapPath, lookupEnabled, clientcontext.ExtractApplicationContext, lookupService)
-	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser)
+	contextFromSubjMiddleware := clientcontextmiddlewares.NewContextFromSubjMiddleware(headerParser, opts.central)
 	checkForRevokedCertMiddleware := certificateMiddlewares.NewRevocationCheckMiddleware(revocationListRepository, headerParser)
 
 	functionalMiddlewares := externalapi.FunctionalMiddlewares{

@@ -10,6 +10,18 @@ func GetOrganizationalUnit(subject string) string {
 	return getRegexMatch("OU=([^,]+)", subject)
 }
 
+func GetCountry(subject string) string {
+	return getRegexMatch("C=([^,]+)", subject)
+}
+
+func GetProvince(subject string) string {
+	return getRegexMatch("ST=([^,]+)", subject)
+}
+
+func GetLocality(subject string) string {
+	return getRegexMatch("L=([^,]+)", subject)
+}
+
 func GetCommonName(subject string) string {
 	return getRegexMatch("CN=([^,]+)", subject)
 }

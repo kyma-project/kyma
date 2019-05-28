@@ -2,7 +2,9 @@ package externalapi
 
 import (
 	"errors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	certmocks "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,11 +18,12 @@ func TestRevocationHandler(t *testing.T) {
 
 	urlRevocation := "/v1/applications/certificates/revocations"
 	hash := "f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad"
+	certInfo := certificates.CertInfo{Hash: hash, Subject: ""}
 
 	testCertHeader := "Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject=\"CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE\";" +
 		"URI=spiffe://cluster.local/ns/kyma-integration/sa/default;Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject=\"\";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
 
-	headerParser := certificates.HeaderParser{Organization: "Organization", Unit: "OrgUnit", Central: true}
+	headerParser := &certmocks.HeaderParser{}
 
 	t.Run("should revoke certificate and return http code 201", func(t *testing.T) {
 		//given
@@ -33,6 +36,7 @@ func TestRevocationHandler(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, urlRevocation, nil)
 		req.Header.Set(certificates.ClientCertHeader, testCertHeader)
+		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
 		//when
 		handler.Revoke(rr, req)
@@ -53,6 +57,7 @@ func TestRevocationHandler(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, urlRevocation, nil)
 		req.Header.Set(certificates.ClientCertHeader, testCertHeader)
+		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
 		//when
 		handler.Revoke(rr, req)
@@ -82,6 +87,8 @@ func TestRevocationHandler(t *testing.T) {
 		req := httptest.NewRequest(http.MethodPost, urlRevocation, nil)
 		req.Header.Set(certificates.ClientCertHeader, testCert)
 
+		headerParser.On("ParseCertificateHeader", *req).Return(certificates.CertInfo{}, apperrors.BadRequest("Cert header is empty"))
+
 		//when
 		handler.Revoke(rr, req)
 
@@ -101,6 +108,7 @@ func TestRevocationHandler(t *testing.T) {
 
 		req := httptest.NewRequest(http.MethodPost, urlRevocation, nil)
 		req.Header.Set(certificates.ClientCertHeader, testCertHeader)
+		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
 		//when
 		handler.Revoke(rr, req)

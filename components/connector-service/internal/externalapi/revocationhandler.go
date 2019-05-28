@@ -13,10 +13,10 @@ type revocationHandler struct {
 	headerParser   certificates.HeaderParser
 }
 
-func NewRevocationHandler(revocationList revocation.RevocationListRepository, validationInfo certificates.HeaderParser) *revocationHandler {
+func NewRevocationHandler(revocationList revocation.RevocationListRepository, headerParser certificates.HeaderParser) *revocationHandler {
 	return &revocationHandler{
 		revocationList: revocationList,
-		headerParser:   validationInfo,
+		headerParser:   headerParser,
 	}
 }
 

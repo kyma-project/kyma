@@ -2,7 +2,9 @@ package middlewares
 
 import (
 	"errors"
+	"github.com/kyma-project/kyma/components/connector-service/internal/apperrors"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	certmock "github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -16,10 +18,12 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 
 	hash := "f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad"
 
+	certInfo := certificates.CertInfo{Hash: hash, Subject: ""}
+
 	testCertHeader := "Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;Subject=\"CN=test-application,OU=OrgUnit,O=Organization,L=Waldorf,ST=Waldorf,C=DE\";" +
 		"URI=spiffe://cluster.local/ns/kyma-integration/sa/default;Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject=\"\";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
 
-	headerParser := certificates.HeaderParser{Organization: "Organization", Unit: "OrgUnit", Central: true}
+	headerParser := &certmock.HeaderParser{}
 
 	t.Run("should return http code 403 when certificate fingerprint present on revocation list", func(t *testing.T) {
 		// given
@@ -35,6 +39,8 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 
 		repository := &mocks.RevocationListRepository{}
 		repository.On("Contains", hash).Return(true, nil)
+
+		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
 		middleware := NewRevocationCheckMiddleware(repository, headerParser)
 
@@ -60,6 +66,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 
 		repository := &mocks.RevocationListRepository{}
 		repository.On("Contains", hash).Return(false, nil)
+		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
 		middleware := NewRevocationCheckMiddleware(repository, headerParser)
 
@@ -85,6 +92,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 
 		repository := &mocks.RevocationListRepository{}
 		repository.On("Contains", hash).Return(false, errors.New("Some error"))
+		headerParser.On("ParseCertificateHeader", *req).Return(certInfo, nil)
 
 		middleware := NewRevocationCheckMiddleware(repository, headerParser)
 
@@ -98,8 +106,7 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 
 	t.Run("should return http code 400 when certificate contains corrupted data", func(t *testing.T) {
 		// given
-		testCertHeader := "Hash=f4cf22fb633d4df500e371daf703d4b4d14a0ea9d69cd631f95f9e6ba840f8ad;" +
-			"URI=spiffe://cluster.local/ns/kyma-integration/sa/default;Hash=6d1f9f3a6ac94ff925841aeb9c15bb3323014e3da2c224ea7697698acf413226;Subject=\"\";URI=spiffe://cluster.local/ns/istio-system/sa/istio-ingressgateway-service-account"
+		testCertHeader := "Hash=;URI=spiffe://cluster.local/ns/kyma-integration/sa/default;Subject=\"\""
 		handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(http.StatusOK)
 		})
@@ -107,6 +114,8 @@ func TestRevocationCheckMiddleware(t *testing.T) {
 		req, err := http.NewRequest("POST", "/", nil)
 		require.NoError(t, err)
 		req.Header.Set(certificates.ClientCertHeader, testCertHeader)
+
+		headerParser.On("ParseCertificateHeader", *req).Return(certificates.CertInfo{}, apperrors.BadRequest("Something wrong with cert"))
 
 		rr := httptest.NewRecorder()
 

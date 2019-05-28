@@ -3,6 +3,7 @@ package middlewares
 import (
 	"fmt"
 	"github.com/kyma-project/kyma/components/connector-service/internal/certificates"
+	"github.com/kyma-project/kyma/components/connector-service/internal/certificates/mocks"
 	"net/http"
 	"net/http/httptest"
 
@@ -14,78 +15,13 @@ import (
 )
 
 func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
-	fullSubject := "C=DE,ST=Waldorf,L=Waldorf,O=tenant,CN=test-app,OU=group"
+	fullSubject := certificates.CertInfo{Hash: "", Subject: "C=DE,ST=Waldorf,L=Waldorf,O=tenant,CN=test-app,OU=group"}
 
 	subjAppName := "test-app"
 	subjGroup := "group"
 	subjTenant := "tenant"
 
-	testCases := []struct {
-		certificateHeader string
-		contextExtender   clientcontext.ContextExtender
-		validationInfo    certificates.HeaderParser
-		isError           bool
-	}{
-		{
-			certificateHeader: fullSubject,
-			validationInfo:    certificates.HeaderParser{Organization: "Organization", Unit: "OrgUnit", Central: true},
-			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup}},
-			isError:           false,
-		},
-		{
-			certificateHeader: "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			validationInfo:    certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: true},
-			contextExtender:   clientcontext.ClusterContext{Tenant: subjTenant, Group: subjGroup},
-			isError:           false,
-		},
-		{
-			certificateHeader: "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			validationInfo:    certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: false},
-			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
-			isError:           false,
-		},
-		{
-			certificateHeader: "CN=test-app,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
-			validationInfo:    certificates.HeaderParser{Organization: "", Unit: "", Central: false},
-			contextExtender:   clientcontext.ApplicationContext{Application: subjAppName, ClusterContext: clientcontext.ClusterContext{}},
-			isError:           false,
-		},
-		{
-			certificateHeader: "CN=*Runtime*,C=DE,ST=Waldorf,L=Waldorf,O=,OU=",
-			validationInfo:    certificates.HeaderParser{Organization: "", Unit: "", Central: true},
-			contextExtender:   nil,
-			isError:           true,
-		},
-		{
-			certificateHeader: "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			validationInfo:    certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: true},
-			contextExtender:   nil,
-			isError:           true,
-		},
-		{
-			certificateHeader: "CN=,C=DE,ST=Waldorf,L=Waldorf,O=tenant,OU=group",
-			validationInfo:    certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: false},
-			contextExtender:   nil,
-			isError:           true,
-		},
-	}
-
-	t.Run("should parse context data from fullSubject", func(t *testing.T) {
-		for _, test := range testCases {
-			req := prepareRequestWithSubject(t, test.certificateHeader)
-
-			ctxFromSubjMiddleware := NewContextFromSubjMiddleware(test.validationInfo)
-
-			extender, err := ctxFromSubjMiddleware.parseContextFromSubject(req)
-			if test.isError {
-				require.Error(t, err)
-			} else {
-				require.NoError(t, err)
-			}
-
-			assert.Equal(t, test.contextExtender, extender)
-		}
-	})
+	hp := &mocks.HeaderParser{}
 
 	t.Run("should create ApplicationContext", func(t *testing.T) {
 		// given
@@ -100,11 +36,13 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		req := prepareRequestWithSubject(t, fullSubject)
+		req := prepareRequestWithSubject(t, fullSubject.Subject)
+
+		hp.On("ParseCertificateHeader", *req).Return(fullSubject, nil)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "", Unit: "", Central: true})
+		middleware := NewContextFromSubjMiddleware(hp, true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -126,10 +64,15 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=test-app,OU=OrgUnit")
+		certInfo := certificates.CertInfo{Hash: "", Subject: "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=test-app,OU=OrgUnit"}
+
+		req := prepareRequestWithSubject(t, certInfo.Subject)
+
+		hp.On("ParseCertificateHeader", *req).Return(certInfo, nil)
+
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "Organization", Unit: "OrgUnit", Central: false})
+		middleware := NewContextFromSubjMiddleware(hp, false)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -151,10 +94,15 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=tenant,CN=*Runtime*,OU=group")
+		certInfo := certificates.CertInfo{Hash: "", Subject: "C=DE,ST=Waldorf,L=Waldorf,O=tenant,CN=*Runtime*,OU=group"}
+
+		req := prepareRequestWithSubject(t, certInfo.Subject)
+
+		hp.On("ParseCertificateHeader", *req).Return(certInfo, nil)
+
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: true})
+		middleware := NewContextFromSubjMiddleware(hp, true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -170,10 +118,15 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 			w.WriteHeader(http.StatusOK)
 		})
 
-		req := prepareRequestWithSubject(t, "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=,OU=OrgUnit")
+		certInfo := certificates.CertInfo{Hash: "", Subject: "C=DE,ST=Waldorf,L=Waldorf,O=Organization,CN=,OU=OrgUnit"}
+
+		req := prepareRequestWithSubject(t, certInfo.Subject)
+
+		hp.On("ParseCertificateHeader", *req).Return(certInfo, nil)
+
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "Organization", Unit: "OrgUnit", Central: false})
+		middleware := NewContextFromSubjMiddleware(hp, false)
 
 		// when
 		resultHandler := middleware.Middleware(handler)
@@ -190,11 +143,14 @@ func TestApplicationContextFromSubjMiddleware_Middleware(t *testing.T) {
 		})
 
 		req, err := http.NewRequest("GET", "/", nil)
+
+		hp.On("ParseCertificateHeader", *req).Return(certificates.CertInfo{}, nil)
+
 		require.NoError(t, err)
 
 		rr := httptest.NewRecorder()
 
-		middleware := NewContextFromSubjMiddleware(certificates.HeaderParser{Organization: "tenant", Unit: "group", Central: true})
+		middleware := NewContextFromSubjMiddleware(hp, true)
 
 		// when
 		resultHandler := middleware.Middleware(handler)

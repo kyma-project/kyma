@@ -17,10 +17,10 @@ type contextFromSubjMiddleware struct {
 	headerParser       certificates.HeaderParser
 }
 
-func NewContextFromSubjMiddleware(headerParser certificates.HeaderParser) *contextFromSubjMiddleware {
+func NewContextFromSubjMiddleware(headerParser certificates.HeaderParser, central bool) *contextFromSubjMiddleware {
 	var contextFromSubjectExtractor contextFromSubjectExtractor
 
-	if headerParser.Central {
+	if central {
 		contextFromSubjectExtractor = fullContextFromSubject
 	} else {
 		contextFromSubjectExtractor = applicationContextFromSubject

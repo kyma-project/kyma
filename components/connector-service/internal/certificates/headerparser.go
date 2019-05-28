@@ -8,10 +8,17 @@ import (
 
 const ClientCertHeader = "X-Forwarded-Client-Cert"
 
-type HeaderParser struct {
-	Organization string
-	Unit         string
-	Central      bool
+type HeaderParser interface {
+	ParseCertificateHeader(r http.Request) (CertInfo, apperrors.AppError)
+}
+
+type headerParser struct {
+	country      string
+	locality     string
+	organization string
+	unit         string
+	province     string
+	central      bool
 }
 
 type CertInfo struct {
@@ -19,7 +26,18 @@ type CertInfo struct {
 	Subject string
 }
 
-func (hp *HeaderParser) ParseCertificateHeader(r http.Request) (CertInfo, apperrors.AppError) {
+func NewHeaderParser(country, province, locality, organization, unit string, central bool) HeaderParser {
+	return &headerParser{
+		country:      country,
+		locality:     locality,
+		organization: organization,
+		unit:         unit,
+		province:     province,
+		central:      central,
+	}
+}
+
+func (hp *headerParser) ParseCertificateHeader(r http.Request) (CertInfo, apperrors.AppError) {
 	certHeader := r.Header.Get(ClientCertHeader)
 
 	if certHeader == "" {
@@ -36,10 +54,10 @@ func (hp *HeaderParser) ParseCertificateHeader(r http.Request) (CertInfo, apperr
 
 	certInfos := createCertInfos(subjects, hashes)
 
-	if hp.Central {
-		return getCertInfoWithNonEmptySubject(certInfos)
+	if hp.central {
+		return hp.getCertInfoWithNonEmptySubject(certInfos)
 	} else {
-		return getCertInfoWithMatchingSubject(certInfos, hp.Organization, hp.Unit)
+		return hp.getCertInfoWithMatchingSubject(certInfos)
 	}
 }
 
@@ -72,18 +90,18 @@ func createCertInfos(subjects, hashes []string) []CertInfo {
 	return certInfos
 }
 
-func getCertInfoWithNonEmptySubject(infos []CertInfo) (CertInfo, apperrors.AppError) {
+func (hp *headerParser) getCertInfoWithNonEmptySubject(infos []CertInfo) (CertInfo, apperrors.AppError) {
 	for _, i := range infos {
-		if i.Subject != "" {
+		if hp.isSubjectMatchingCentral(i) {
 			return i, nil
 		}
 	}
 	return CertInfo{}, apperrors.BadRequest("Failed to get certificate subject from header.")
 }
 
-func getCertInfoWithMatchingSubject(infos []CertInfo, organization, unit string) (CertInfo, apperrors.AppError) {
+func (hp *headerParser) getCertInfoWithMatchingSubject(infos []CertInfo) (CertInfo, apperrors.AppError) {
 	for _, i := range infos {
-		if isSubjectMatching(i, organization, unit) {
+		if hp.isSubjectMatching(i) {
 			return i, nil
 		}
 	}
@@ -98,6 +116,11 @@ func newCertInfo(subject, hash string) CertInfo {
 	return certInfo
 }
 
-func isSubjectMatching(i CertInfo, organization string, unit string) bool {
-	return GetOrganization(i.Subject) == organization && GetOrganizationalUnit(i.Subject) == unit
+func (hp *headerParser) isSubjectMatching(i CertInfo) bool {
+	return GetOrganization(i.Subject) == hp.organization && GetOrganizationalUnit(i.Subject) == hp.unit &&
+		GetCountry(i.Subject) == hp.country && GetLocality(i.Subject) == hp.locality && GetProvince(i.Subject) == hp.province
+}
+
+func (hp *headerParser) isSubjectMatchingCentral(i CertInfo) bool {
+	return GetCountry(i.Subject) == hp.country && GetLocality(i.Subject) == hp.locality && GetProvince(i.Subject) == hp.province
 }
