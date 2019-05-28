@@ -15,12 +15,13 @@ For more details, see this [Dockerfile](Dockerfile).
 
 ## Prerequisites
 
-To set up the project, use these tools:
-* Version 1.11.4 of [Go](https://golang.org/dl/)
-* Version v0.5.0 of [Dep](https://github.com/golang/dep)
-* The latest version of [Docker](https://www.docker.com/)
+To set up the project, download these tools:
 
-These versions are compliant with the `buildpack` used on Prow. For more information read [this](https://github.com/kyma-project/test-infra/blob/master/prow/images/buildpack-golang/README.md) document.
+* [Go](https://golang.org/dl/) 1.11.4
+* [Dep](https://github.com/golang/dep) v0.5.0
+* [Docker](https://www.docker.com/)
+
+These Go and Dep versions are compliant with the `buildpack` used by Prow. For more details read [this](https://github.com/kyma-project/test-infra/blob/master/prow/images/buildpack-golang/README.md) document.
 
 ## Usage
 
