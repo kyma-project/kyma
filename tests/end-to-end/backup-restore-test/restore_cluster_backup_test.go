@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e"
 
-	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
+	. "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/asset-store"
 	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/cms"
 
 	// . "github.com/kyma-project/kyma/tests/end-to-end/backup-restore-test/backupe2e/service-catalog"
@@ -38,20 +38,20 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	cfg, err := loadConfig()
 	fatalOnError(t, err, "while reading configuration from environment variables")
 
-	myFunctionTest, err := NewFunctionTest()
-	fatalOnError(t, err, "while creating structure for Function test")
+	// myFunctionTest, err := NewFunctionTest()
+	// fatalOnError(t, err, "while creating structure for Function test")
 
-	myStatefulSetTest, err := NewStatefulSetTest()
-	fatalOnError(t, err, "while creating structure for StatefulSet test")
+	// myStatefulSetTest, err := NewStatefulSetTest()
+	// fatalOnError(t, err, "while creating structure for StatefulSet test")
 
-	myDeploymentTest, err := NewDeploymentTest()
-	fatalOnError(t, err, "while creating structure for Deployment test")
+	// myDeploymentTest, err := NewDeploymentTest()
+	// fatalOnError(t, err, "while creating structure for Deployment test")
 
-	myPrometheusTest, err := NewPrometheusTest()
-	fatalOnError(t, err, "while creating structure for Prometheus test")
+	// myPrometheusTest, err := NewPrometheusTest()
+	// fatalOnError(t, err, "while creating structure for Prometheus test")
 
-	myGrafanaTest, err := NewGrafanaTest()
-	fatalOnError(t, err, "while creating structure for Grafana test")
+	// myGrafanaTest, err := NewGrafanaTest()
+	// fatalOnError(t, err, "while creating structure for Grafana test")
 
 	// appBrokerTest, err := NewAppBrokerTest()
 	// fatalOnError(t, err, "while creating structure for AppBroker test")
@@ -71,19 +71,19 @@ func TestBackupAndRestoreCluster(t *testing.T) {
 	// myMicroFrontendTest, err := NewMicrofrontendTest()
 	// fatalOnError(t, err, "while creating structure for MicroFrontend test")
 
-	// myAssetStoreTest, err := NewAssetStoreTest(t)
-	// fatalOnError(t, err, "while creating structure for AssetStore test")
+	myAssetStoreTest, err := NewAssetStoreTest(t)
+	fatalOnError(t, err, "while creating structure for AssetStore test")
 
 	// myCmsTest, err := NewCmsTest(t)
 	// fatalOnError(t, err, "while creating structure for Cms test")
 
 	backupTests := []BackupTest{
-		myPrometheusTest,
-		myFunctionTest,
-		myDeploymentTest,
-		myStatefulSetTest,
-		myGrafanaTest,
-		// myAssetStoreTest,
+		// myPrometheusTest,
+		// myFunctionTest,
+		// myDeploymentTest,
+		// myStatefulSetTest,
+		// myGrafanaTest,
+		myAssetStoreTest,
 		// appBrokerTest,
 		// scAddonsTest,
 		// helmBrokerTest,
