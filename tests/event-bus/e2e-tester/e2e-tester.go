@@ -516,8 +516,8 @@ func createEventActivation(subscriberNamespace string, noOfRetries int) bool {
 	return eventActivationOK
 }
 
-func createSubscription(subscriberNamespace string, subscriptionName string, subscriberEventEndpointURL string) bool {
-	_, err := subClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Create(util.NewSubscription(subscriptionName, subscriberNamespace, subscriberEventEndpointURL, eventType, "v1", srcID))
+func createSubscription(subscriberNamespace string, subName string, subscriberEventEndpointURL string) bool {
+	_, err := subClient.EventingV1alpha1().Subscriptions(subscriberNamespace).Create(util.NewSubscription(subName, subscriberNamespace, subscriberEventEndpointURL, eventType, "v1", srcID))
 	if err != nil {
 		if !strings.Contains(err.Error(), "already exists") {
 			log.Printf("Error in creating subscription: %v\n", err)
