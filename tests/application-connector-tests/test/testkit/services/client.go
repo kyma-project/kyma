@@ -18,11 +18,11 @@ type ApplicationConnectorClient struct {
 	httpClient *http.Client
 }
 
-func NewApplicationConnectorClient(credentials connector.ApplicationCredentials, urls connector.ManagementInfoURLs) *ApplicationConnectorClient {
+func NewApplicationConnectorClient(credentials connector.ApplicationCredentials, urls connector.ManagementInfoURLs, skipSSLVerify bool) *ApplicationConnectorClient {
 	return &ApplicationConnectorClient{
 		applicationCredentials: credentials,
 		managementURLs:         urls,
-		httpClient:             credentials.NewMTLSClient(),
+		httpClient:             credentials.NewMTLSClient(skipSSLVerify),
 	}
 }
 

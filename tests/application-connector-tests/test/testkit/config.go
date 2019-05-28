@@ -13,13 +13,15 @@ import (
 // Namespace
 //
 const (
-	isCentralEnv = "CENTRAL"
-	namespaceEnv = "NAMESPACE"
+	isCentralEnv     = "CENTRAL"
+	skipSSLVerifyEnv = "SKIP_SSL_VERIFY"
+	namespaceEnv     = "NAMESPACE"
 )
 
 type TestConfig struct {
-	IsCentral bool
-	Namespace string
+	IsCentral     bool
+	SkipSSLVerify bool
+	Namespace     string
 }
 
 func ReadConfig() (TestConfig, error) {
@@ -30,14 +32,21 @@ func ReadConfig() (TestConfig, error) {
 		central, _ = strconv.ParseBool(c)
 	}
 
+	skipVerify := false
+	sv, found := os.LookupEnv(skipSSLVerifyEnv)
+	if found {
+		skipVerify, _ = strconv.ParseBool(sv)
+	}
+
 	namespace, found := os.LookupEnv(namespaceEnv)
 	if !found {
 		return TestConfig{}, errors.New(fmt.Sprintf("failed to read %s environment variable", namespaceEnv))
 	}
 
 	config := TestConfig{
-		IsCentral: central,
-		Namespace: namespace,
+		IsCentral:     central,
+		SkipSSLVerify: skipVerify,
+		Namespace:     namespace,
 	}
 
 	log.Printf("Read configuration: %+v", config)

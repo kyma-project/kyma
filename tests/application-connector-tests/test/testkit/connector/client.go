@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/base64"
@@ -24,12 +25,18 @@ const (
 )
 
 type Client struct {
+	skipVerify bool
 	httpClient *http.Client
 }
 
-func NewConnectorClient() *Client {
+func NewConnectorClient(skipSSLVerify bool) *Client {
 	return &Client{
-		httpClient: &http.Client{},
+		skipVerify: skipSSLVerify,
+		httpClient: &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSLVerify},
+			},
+		},
 	}
 }
 
@@ -60,7 +67,7 @@ func (c *Client) EstablishApplicationConnection(infoURL string) (ApplicationConn
 }
 
 func (c *Client) requestManagementInfo(key *rsa.PrivateKey, certs []*x509.Certificate, managementInfoURL string) (ManagementInfoResponse, error) {
-	mtlsClient := testkit.NewMTLSClient(key, certs)
+	mtlsClient := testkit.NewMTLSClient(key, certs, c.skipVerify)
 
 	req, err := http.NewRequest(http.MethodGet, managementInfoURL, nil)
 	if err != nil {

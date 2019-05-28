@@ -49,6 +49,7 @@ type TestSuite struct {
 	connectorServiceClient *connector.Client
 
 	isCentral     bool
+	skipSSLVerify bool
 	defaultGroup  string
 	defaultTenant string
 }
@@ -83,8 +84,9 @@ func NewTestSuite(t *testing.T) *TestSuite {
 		applicationInstallationTimeout: applicationInstallationTimeout,
 		applicationClient:              applicationClientset.ApplicationconnectorV1alpha1().Applications(),
 		tokenRequestClient:             tokenRequestClientset.ApplicationconnectorV1alpha1().TokenRequests(config.Namespace),
-		connectorServiceClient:         connector.NewConnectorClient(),
+		connectorServiceClient:         connector.NewConnectorClient(config.SkipSSLVerify),
 		isCentral:                      config.IsCentral,
+		skipSSLVerify:                  config.SkipSSLVerify,
 		defaultTenant:                  defaultTenant,
 		defaultGroup:                   defaultGroup,
 	}
@@ -181,7 +183,7 @@ func (ts *TestSuite) EstablishMTLSConnection(t *testing.T, application *types.Ap
 }
 
 func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector.ApplicationCredentials, urls connector.ManagementInfoURLs) {
-	applicationConnectorClient := services.NewApplicationConnectorClient(credentials, urls)
+	applicationConnectorClient := services.NewApplicationConnectorClient(credentials, urls, ts.skipSSLVerify)
 	apis, errorResponse := applicationConnectorClient.GetAllAPIs(t)
 	util.RequireNoError(t, errorResponse)
 	require.NotNil(t, apis)
@@ -193,7 +195,7 @@ func (ts *TestSuite) ShouldAccessApplication(t *testing.T, credentials connector
 }
 
 func (ts *TestSuite) ShouldFailToAccessApplication(t *testing.T, credentials connector.ApplicationCredentials, urls connector.ManagementInfoURLs, expectedStatus int) {
-	applicationConnectorClient := services.NewApplicationConnectorClient(credentials, urls)
+	applicationConnectorClient := services.NewApplicationConnectorClient(credentials, urls, ts.skipSSLVerify)
 	_, errorResponse := applicationConnectorClient.GetAllAPIs(t)
 	require.NotNil(t, errorResponse)
 	require.Equal(t, expectedStatus, errorResponse.Code)

@@ -19,8 +19,8 @@ type ApplicationCredentials struct {
 	Certificates []*x509.Certificate
 }
 
-func (ac ApplicationCredentials) NewMTLSClient() *http.Client {
-	return testkit.NewMTLSClient(ac.ClientKey, ac.Certificates)
+func (ac ApplicationCredentials) NewMTLSClient(skipSSLVerify bool) *http.Client {
+	return testkit.NewMTLSClient(ac.ClientKey, ac.Certificates, skipSSLVerify)
 }
 
 type TokenResponse struct {

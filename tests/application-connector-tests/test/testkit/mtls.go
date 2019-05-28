@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func NewMTLSClient(key *rsa.PrivateKey, certificates []*x509.Certificate) *http.Client {
+func NewMTLSClient(key *rsa.PrivateKey, certificates []*x509.Certificate, skipVerify bool) *http.Client {
 	var rawCerts [][]byte
 
 	for _, cert := range certificates {
@@ -22,7 +22,8 @@ func NewMTLSClient(key *rsa.PrivateKey, certificates []*x509.Certificate) *http.
 	return &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				Certificates: []tls.Certificate{tlsCertificate},
+				InsecureSkipVerify: skipVerify,
+				Certificates:       []tls.Certificate{tlsCertificate},
 			},
 		},
 	}

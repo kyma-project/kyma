@@ -11,7 +11,7 @@ const (
 	applicationNamePrefix = "app-conn-tests"
 )
 
-func TestApplicationFlow(t *testing.T) {
+func TestApplicationAccess(t *testing.T) {
 
 	t.Logf("Stating Application flow tests")
 	testSuite := applicationaccess.NewTestSuite(t)
