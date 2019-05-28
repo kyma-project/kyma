@@ -46,7 +46,7 @@ func Add(mgr manager.Manager) error {
 		return errors.Wrapf(err, "while initializing Store client")
 	}
 
-	store := store.New(minioClient)
+	store := store.New(minioClient, cfg.Store.UploadWorkerCount)
 	loader := loader.New(cfg.Loader.TemporaryDirectory, cfg.Loader.VerifySSL)
 	findBucketFnc := bucketFinder(mgr)
 	deleteFinalizer := finalizer.New(deleteClusterAssetFinalizerName)
@@ -88,7 +88,7 @@ func bucketFinder(mgr manager.Manager) func(ctx context.Context, namespace, name
 			return nil, false, err
 		}
 
-		if instance == nil || instance.Status.Phase != assetstorev1alpha2.BucketReady {
+		if instance.Status.Phase != assetstorev1alpha2.BucketReady {
 			return nil, false, nil
 		}
 

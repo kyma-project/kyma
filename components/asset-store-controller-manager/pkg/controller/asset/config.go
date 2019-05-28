@@ -12,7 +12,7 @@ type Config struct {
 	Store   store.Config
 	Loader  loader.Config
 	Webhook assethook.Config
-
+	MaxConcurrentReconciles int `envconfig:"default=1"`
 	AssetRelistInterval time.Duration `envconfig:"default=30s"`
 }
 

@@ -4,9 +4,12 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"path/filepath"
 	"reflect"
 	"strconv"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/kyma-project/kyma/components/asset-store-controller-manager/pkg/apis/assetstore/v1alpha2"
@@ -16,11 +19,12 @@ import (
 )
 
 type Config struct {
-	Endpoint         string `envconfig:"default=minio.kyma.local"`
-	ExternalEndpoint string `envconfig:"default=https://minio.kyma.local"`
-	AccessKey        string `envconfig:""`
-	SecretKey        string `envconfig:""`
-	UseSSL           bool   `envconfig:"default=true"`
+	Endpoint          string `envconfig:"default=minio.kyma.local"`
+	ExternalEndpoint  string `envconfig:"default=https://minio.kyma.local"`
+	AccessKey         string `envconfig:""`
+	SecretKey         string `envconfig:""`
+	UseSSL            bool   `envconfig:"default=true"`
+	UploadWorkerCount int    `envconfig:"default=10"`
 }
 
 //go:generate mockery -name=MinioClient -output=automock -outpkg=automock -case=underscore
@@ -49,12 +53,14 @@ type Store interface {
 }
 
 type store struct {
-	client MinioClient
+	client            MinioClient
+	uploadWorkerCount int
 }
 
-func New(client MinioClient) Store {
+func New(client MinioClient, uploadWorkerCount int) Store {
 	return &store{
-		client: client,
+		client:            client,
+		uploadWorkerCount: uploadWorkerCount,
 	}
 }
 
@@ -158,18 +164,82 @@ func (s *store) ContainsAllObjects(ctx context.Context, bucketName, assetName st
 	return true, nil
 }
 
-func (s *store) PutObjects(ctx context.Context, bucketName, assetName, sourceBasePath string, files []string) error {
-	for _, file := range files {
-		bucketPath := filepath.Join(assetName, file)
-		sourcePath := filepath.Join(sourceBasePath, file)
+func iterateSlice(files []string, fileNameChan chan string) {
+	defer close(fileNameChan)
+	for _, fileName := range files {
+		fileNameChan <- fileName
+	}
+}
 
-		_, err := s.client.FPutObjectWithContext(ctx, bucketName, bucketPath, sourcePath, minio.PutObjectOptions{})
-		if err != nil {
-			return err
+type objectAttrs struct {
+	bucketName, assetName, sourceBasePath string
+}
+
+func (s store) startWorkers(
+	ctx context.Context,
+	attrs objectAttrs,
+	fileNameChan chan string,
+	errChan chan error) {
+	defer close(errChan)
+
+	var waitGroup sync.WaitGroup
+	for i := 0; i < s.uploadWorkerCount; i++ {
+		waitGroup.Add(1)
+		go func() {
+			defer waitGroup.Done()
+			s.putObject(ctx, attrs, fileNameChan, errChan)
+		}()
+	}
+	waitGroup.Wait()
+}
+
+func (s *store) PutObjects(ctx context.Context, bucketName, assetName, sourceBasePath string, files []string) error {
+	id := time.Now().UnixNano()
+	logrus.Info("---> start putting objects ", id)
+	fileNameChan := make(chan string)
+	go iterateSlice(files, fileNameChan)
+
+	errChan := make(chan error)
+	objAttrs := objectAttrs{
+		bucketName:     bucketName,
+		assetName:      assetName,
+		sourceBasePath: sourceBasePath,
+	}
+	go s.startWorkers(ctx, objAttrs, fileNameChan, errChan)
+
+	var errorMessages []string
+	for err := range errChan {
+		errorMessages = append(errorMessages, err.Error())
+	}
+	if len(errorMessages) == 0 {
+		return nil
+	}
+	errMsg := strings.Join(errorMessages, "\n")
+	logrus.Info("---> end putting objects ", id)
+	return errors.New(errMsg)
+}
+
+func (s *store) putObject(ctx context.Context, attrs objectAttrs, fileNameChan chan string, errChan chan error) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-errChan:
+			return
+		case file, ok := <-fileNameChan:
+			if !ok {
+				return
+			}
+			bucketPath := filepath.Join(attrs.assetName, file)
+			sourcePath := filepath.Join(attrs.sourceBasePath, file)
+			_, err := s.client.FPutObjectWithContext(
+				ctx, attrs.bucketName, bucketPath, sourcePath, minio.PutObjectOptions{})
+			if err != nil {
+				errChan <- err
+			}
+		default:
 		}
 	}
-
-	return nil
 }
 
 func (s *store) ListObjects(ctx context.Context, bucketName, prefix string) ([]string, error) {

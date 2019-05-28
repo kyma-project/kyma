@@ -10,7 +10,7 @@ func Filter(paths []string, filter string) ([]string, error) {
 		return paths, nil
 	}
 
-	filtered := []string{}
+	var filtered []string
 	regex, err := regexp.Compile(filter)
 	if err != nil {
 		return nil, errors.Wrapf(err, "while compiling path filter regex")
