@@ -15,9 +15,6 @@ spec:
     matchLabels:
       app: {{ template "promtail.name" . }}
       release: {{ .Release.Name }}
-      kyma-alerts: enabled
-      kyma-component: ui
-      kyma-grafana: enabled
   updateStrategy:
     type: {{ .Values.promtail.deploymentStrategy }}
   {{- if ne .Values.promtail.deploymentStrategy "RollingUpdate" }}
@@ -28,9 +25,6 @@ spec:
       labels:
         app: {{ template "promtail.name" . }}
         release: {{ .Release.Name }}
-        kyma-alerts: enabled
-        kyma-component: ui
-        kyma-grafana: enabled
       annotations:
         {{ toYaml .Values.promtail.podAnnotations | nindent 8 }}
     spec:
