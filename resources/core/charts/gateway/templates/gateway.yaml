@@ -22,7 +22,7 @@ spec:
       number: 443
       protocol: HTTPS
     tls:
-      caCertificates: /etc/istio/ingressgateway-ca-certs/tls.crt
+      caCertificates: /etc/istio/application-connector-ca-certs/ca.crt
       mode: MUTUAL
       privateKey: /etc/istio/ingressgateway-certs/tls.key
       serverCertificate: /etc/istio/ingressgateway-certs/tls.crt

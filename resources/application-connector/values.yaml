@@ -8,6 +8,7 @@ global:
   isLocalEnv: false
   namespace: kyma-integration
   istio:
+    namespace: istio-system
     tls:
       secretName: istio-ingress-certs
     gateway:
