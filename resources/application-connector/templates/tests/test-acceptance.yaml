@@ -22,6 +22,8 @@ spec:
           env:
           - name: NAMESPACE
             value: {{ .Values.global.namespace }}
+          - name: SKIP_SSL_VERIFY
+            value: "{{ .Values.tests.application_connector_tests.skipSslVerify }}"
           - name: CENTRAL
             value: "{{ .Values.tests.application_connector_tests.connector_service.central }}"
       restartPolicy: Never

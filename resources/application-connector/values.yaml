@@ -67,6 +67,7 @@ tests:
   application_connector_tests:
     connector_service:
       central: false
+    skipSslVerify: true
     image:
       dir: pr/
       version: PR-4220
