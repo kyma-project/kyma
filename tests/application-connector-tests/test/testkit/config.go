@@ -9,9 +9,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// TODO - Envs:
-// Namespace
-//
 const (
 	isCentralEnv     = "CENTRAL"
 	skipSSLVerifyEnv = "SKIP_SSL_VERIFY"
