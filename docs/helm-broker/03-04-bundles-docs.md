@@ -39,4 +39,4 @@ During the provisioning process, the Helm Broker pushes the **addonRepositoryURL
 
 ### Documentation structure
 
-Deliver documentation for your bundle in Markdown files with specified metadata. To learn more about the metadata and content of the Markdown files with documentation, read [this](/components/headless-cms/#details-markdown-documents) document.
+Deliver documentation for your bundle in Markdown files with specified metadata. To learn more about the metadata and content of the Markdown files, read [this](/components/headless-cms/#details-markdown-documents) document.
