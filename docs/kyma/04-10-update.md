@@ -80,12 +80,12 @@ Read about each update step in the following sections.
   kubectl edit deployment kyma-installer -n kyma-installer
   ```
   Change the `image` and `imagePullPolicy` attributes in this section:  
-  ```  
-  spec:
+    ```  
+         spec:
            containers:
            - image: <your_image_name>:<your_tag>
              imagePullPolicy: Always
-  ```  
+    ```  
 > **NOTE:** If the desired image name and `imagePullPolicy` is already set in the deployment configuration, restart the Pod by running `kubectl delete pod -n kyma-installer {INSTALLER_POD_NAME}`.
 
 ### Trigger the update process
@@ -95,18 +95,3 @@ Execute the following command to trigger the update process:
 ```
 kubectl label installation/kyma-installation action=install
 ```
-
-
-```\s*$
-
-
-```  
-     spec:
-       containers:
-       - image: <your_image_name>:<your_tag>
-         imagePullPolicy: Always
-```  
-
-kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.ca\.crt']}" | base64 --decode > "$(helm home)/ca.pem";
-kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.crt']}" | base64 --decode > "$(helm home)/cert.pem";
-kubectl get -n kyma-installer secret helm-secret -o jsonpath="{.data['global\.helm\.tls\.key']}" | base64 --decode > "$(helm home)/key.pem";
