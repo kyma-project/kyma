@@ -72,7 +72,7 @@ spec:
               command:
                 - /bin/sh
                 - -c
-                - wget -O- http://127.0.0.1:15020/healthz/ready 
+                - wget -O- http://127.0.0.1:{{ .Values.loki.port }}/ready 
       nodeSelector:
         {{- toYaml .Values.loki.nodeSelector | nindent 8 }}
       affinity:
