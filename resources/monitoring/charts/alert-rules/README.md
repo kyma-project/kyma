@@ -16,7 +16,7 @@ You can define the following alert rules:
 
 - Monitor Persistent Volume Claims (PVCs)
 
-    The Alertmanager sends out alerts when the PVC exceeds 90% for the following system Namespaces: `kyma-system`, `kyma-integration`, `heptio-ark`, `istio-system`, `kube-public`, or `kube-system`. To avoid this, increase the capacity of the PVC.
+    The Alertmanager sends out alerts when the PVC exceeds 90% for the following system Namespaces: `kyma-system`, `kyma-integration`, `kyma-backup`, `istio-system`, `kube-public`, or `kube-system`. To avoid this, increase the capacity of the PVC.
 
 -  Monitor CPU Usage
 

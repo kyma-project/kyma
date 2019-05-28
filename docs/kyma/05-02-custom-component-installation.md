@@ -8,8 +8,8 @@ By default, you install Kyma with a set of components provided in the [**Kyma Li
 During installation, the Installer applies the content of the local or cluster installation file that includes the list of component names and Namespaces in which the components are installed. The Installer skips the lines starting with a hashtag (#):
 
 ```
-#- name: "ark"
-#  namespace: "heptio-ark"
+#- name: "velero"
+#  namespace: "kyma-backup"
 ```
 
 You can modify the component list as follows:
