@@ -36,7 +36,7 @@ const (
 	fail    = 1
 	retries = 20
 
-	sourceIdHeader         = "Ce-Source-Id"
+	sourceIDHeader         = "Ce-Source-Id"
 	eventTypeHeader        = "Ce-Event-Type"
 	eventTypeVersionHeader = "Ce-Event-Type-Version"
 	customHeader           = "Ce-X-Custom-Header"
@@ -319,7 +319,7 @@ func publishHeadersTestEvent(publishEventURL string) (*api.PublishResponse, erro
 
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", publishEventURL, strings.NewReader(payload))
-	req.Header.Add(sourceIdHeader, ceSourceIDHeaderValue)
+	req.Header.Add(sourceIDHeader, ceSourceIDHeaderValue)
 	req.Header.Add(eventTypeHeader, ceEventTypeHeaderValue)
 	req.Header.Add(eventTypeVersionHeader, ceEventTypeVersionHeaderValue)
 	req.Header.Add(customHeader, customHeaderValue)
@@ -401,8 +401,8 @@ func checkSubscriberReceivedEventHeaders() error {
 			continue
 		}
 
-		if resp[sourceIdHeader][0] != srcID {
-			return fmt.Errorf("wrong response: %s, want: %s", resp[sourceIdHeader][0], srcID)
+		if resp[sourceIDHeader][0] != srcID {
+			return fmt.Errorf("wrong response: %s, want: %s", resp[sourceIDHeader][0], srcID)
 		}
 		if resp[eventTypeHeader][0] != eventType {
 			return fmt.Errorf("wrong response: %s, want: %s", resp[eventTypeHeader][0], eventType)
