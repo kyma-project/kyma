@@ -719,6 +719,8 @@ spec:
         - containerPort: 9090
           name: metrics
         resources:
+          requests:
+            memory: 100Mi
           limits:
             memory: 1000Mi
         terminationMessagePolicy: FallbackToLogsOnError
@@ -764,6 +766,8 @@ spec:
         image: gcr.io/knative-releases/github.com/knative/eventing/cmd/webhook:v0.5.0
         name: webhook
         resources:
+          requests:
+            memory: 100Mi
           limits:
             memory: 1000Mi
         terminationMessagePolicy: FallbackToLogsOnError
