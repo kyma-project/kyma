@@ -92,7 +92,7 @@ The `plans` directory must contain at least one plan. Each plan must contain the
 
 ## docs directory
 
-In the `docs` directory, provide documentation for your bundle. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the bundle is uploaded.
+In the `docs` directory, provide documentation for your bundle. The documentation can include Markdown documents, AsyncAPI, OData, and OpenAPI specification files. Create the `assets` directory inside the `docs` directory to store assets, such as images. The `docs` directory must contain a `meta.yaml` which provides information on how documentation for the bundle is uploaded.
 As the Helm Broker is installed as a ClusterServiceBroker, documentation for bundles is provided using [ClusterDocsTopics](/components/headless-cms/#custom-resource-clusterdocstopic).
 
 The `meta.yaml` file contains the specification of the ClusterDocsTopic. The example structure of the `meta.yaml` file looks as follows:
