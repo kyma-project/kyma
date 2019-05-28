@@ -3,7 +3,6 @@
 ## Overview
 
 This project contains the acceptance tests that you can run as part of the Kyma Application Connector testing process.
-The tests are written in Go. Run them as standard Go tests.
 
 ## Usage
 
@@ -18,7 +17,7 @@ Environment parameters used by the tests:
 
 ### Run locally
 
-If test is not able to find `InClusterConfig`, it will try to use the local `kubeconfig` file.
+If the test is not able to find `InClusterConfig`, it will try to use the local `kubeconfig` file.
 
 To run tests locally export required environment variables:
 ```
@@ -27,7 +26,7 @@ export CENTRAL=false
 export SKIP_SSL_VERIFY=true
 ```
  
-Use `go test` to run the tests:
+And use `go test` to run the tests:
 ```
 go test ./test/... -v
 ```
