@@ -123,7 +123,8 @@ spec:
       sleep 4
 
       exit $exit_code
-    image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
+    # image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
+    image: eu.gcr.io/kyma-project/pr/tests/backup-restore-test:PR-4315
     imagePullPolicy: Always
     env:
     - name: DOMAIN
