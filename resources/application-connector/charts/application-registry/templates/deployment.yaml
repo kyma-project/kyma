@@ -35,6 +35,7 @@ spec:
           - "--requestTimeout={{ .Values.deployment.args.requestTimeout }}"
           - "--requestLogging={{ .Values.deployment.args.requestLogging }}"
           - "--specRequestTimeout={{ .Values.deployment.args.specRequestTimeout }}"
+          - "--assetstoreRequestTimeout={{ .Values.deployment.args.assetstoreRequestTimeout }}"
           - "--insecureAssetDownload={{ .Values.deployment.args.insecureAssetDownload }}"
         ports:
           - containerPort: {{ .Values.deployment.args.externalAPIPort }}
