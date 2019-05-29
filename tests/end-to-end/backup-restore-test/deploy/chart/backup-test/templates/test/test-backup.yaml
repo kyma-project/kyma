@@ -121,7 +121,7 @@ spec:
 
       pkill -TERM pilot-agent
       sleep 4
-
+^
       exit $exit_code
     image: "{{ .Values.containerRegistry.path }}/{{ .Values.image.dir }}tests/backup-restore-test:{{ .Values.image.tag }}"
     imagePullPolicy: Always

@@ -48,10 +48,10 @@ global:
   #    region:
   #    apiTimeout:
 
-  backupStorageLocation:
-    name:
-    bucket:
-    provider: gcp
+  backupStorageLocation: {}
+  # name:
+  # bucket:
+  # provider:
     # prefix:
     config:
       resourceGroup:  # Only for Azure
