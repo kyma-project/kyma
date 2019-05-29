@@ -49,13 +49,13 @@ global:
   #    apiTimeout:
 
   backupStorageLocation: {}
-  # name:
-  # bucket:
-  # provider:
+    # name:
+    # bucket:
+    # provider:
     # prefix:
-    config:
-      resourceGroup:  # Only for Azure
-      storageAccount: # Only for Azure
+    # config:
+    #   resourceGroup:  # Only for Azure
+    #   storageAccount: # Only for Azure
     #  region:
     #  s3ForcePathStyle:
     #  s3Url:
