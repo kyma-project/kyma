@@ -3,7 +3,7 @@ title: Markdown documents
 type: Details
 ---
 
-The DocsTopic or ClusterDocsTopic custom resource supports various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure: 
+The DocsTopic or ClusterDocsTopic custom resource supports various documentation formats, including Markdown (`.md`) documents. Each `.md` file must consist of two parts: metadata and content. The following example illustrates the required structure:
 
 ```
 ---
@@ -16,7 +16,7 @@ another_metadata: {value or text string}
 
 ## Metadata
 
-Each Markdown document displayed in the Kyma Console requires metadata in a specific format called [Front Matter](https://forestry.io/docs/editing/front-matter/). 
+Each Markdown document displayed in the Kyma Console requires metadata in a specific format called [Front Matter](https://forestry.io/docs/editing/front-matter/).
 
 ### Structure
 
@@ -29,14 +29,14 @@ type: {Document type}
 ---
 ```
 
-- The `title` metadata defines the title of your document. 
+- The `title` metadata defines the title of your document.
 - The `type` metadata groups single documents together. Multiple documents that use the same `type` generate a grouping. For example, if you have multiple tutorials, you can group them under a navigation node called **Tutorials**.
 
 >**NOTE:** If there is only one document of a certain type, remove the `type` metadata, so that the document displays well in the UI.
 
 ### Display
 
-In the Documentation view (Docs UI), that is available in the Console UI under the questoion mark icon on the top navigation panel, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
+In the Documentation view (Docs UI), that is available in the Console UI under the question mark icon on the top navigation panel, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
 
 <div tabs>
   <details>
@@ -50,7 +50,7 @@ In the Documentation view (Docs UI), that is available in the Console UI under t
 title: Sidecar Proxy Injection
 type: Details
 ---
-``` 
+```
 ```
 //03-02-istio-patch.md
 ---
@@ -94,7 +94,7 @@ In the Service Catalog and Instances views, which contain Service Classes docume
 ---
 title: Overview
 ---
-``` 
+```
 ```
 //plan-details.md
 ---
@@ -177,7 +177,7 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
     ![](./assets/docs-toggle.png)
       </details>
     </div>
-    
+
 3. [Panels](https://github.com/kyma-project/community/blob/master/guidelines/content-guidelines/formatting.md#panels) - use colorful containers that call out important or additional information within a topic.
 
     <div tabs>
@@ -199,6 +199,6 @@ In Kyma, to make documentation more reader-friendly, some Markdown features are 
       </details>
     </div>
 
-Read the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma. 
+Read the [Content Guidelines](https://github.com/kyma-project/community/tree/master/guidelines/content-guidelines) to learn more about the customized Markdown features and other rules of writing content in Kyma.
 
 >**CAUTION:** Markdown customized in a different way than in Kyma may not render properly in the Console UI.
