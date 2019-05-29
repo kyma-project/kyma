@@ -36,7 +36,7 @@ type: {Document type}
 
 ### Display
 
-In the Documentation view (Docs UI), that is available in the Console UI under the question mark icon on the top navigation panel, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
+In the Documentation view (Docs UI), that is available in the Console UI under the questoion mark icon on the top navigation panel, the metadata allow you to create the left-side navigation structure. The Docs UI displays documents grouped under a common `type` in alphanumeric order as per files names. The following example shows four documents, their metadata, and corresponding places in the left-side navigation:
 
 <div tabs>
   <details>

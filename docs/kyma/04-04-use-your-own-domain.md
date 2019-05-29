@@ -11,7 +11,7 @@ Choose your cloud provider and get started:
 
 >**CAUTION:** These instructions are valid starting with Kyma 1.2. If you want to install older releases, refer to the respective documentation versions.
 
-<div tabs name="provider-domain">
+<div tabs>
   <details>
   <summary>
   GKE
