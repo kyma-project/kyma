@@ -36,8 +36,8 @@ nodeSelector: {}
 
 ## Parameters for the ' default' Config resource
 ## See https://github.com/helm/charts/tree/master/stable/velero#configuration
-configuration:
-  provider: gcp
+# configuration:
+#   provider:
 
 global:
   isLocalEnv: false
