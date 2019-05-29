@@ -48,6 +48,9 @@ EOF
 
 startTime=$(date +%s)
 
+echo "Start time"
+echo ${startTime}
+
 testExitCode=0
 previousPrintTime=-1
 
@@ -88,6 +91,9 @@ do
     fi
     sleep 3
 done
+
+echo "End time"
+$(date +%s)
 
 echo "Test summary"
 kubectl get cts  ${suiteName} -o=go-template --template='{{range .status.results}}{{printf "Test status: %s - %s" .name .status }}{{ if gt (len .executions) 1 }}{{ print " (Retried)" }}{{end}}{{print "\n"}}{{end}}'
