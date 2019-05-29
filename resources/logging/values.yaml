@@ -167,7 +167,6 @@ promtail:
   #  prometheus.io/port: "http-metrics"
   #For pods running sidecars w/o service there's a problem with envoy readiness probe.
   #Details https://github.com/istio/istio/issues/9504#issuecomment-439432130
-
     readiness.status.sidecar.istio.io/applicationPorts: ""
 
   ## Deployment annotations
