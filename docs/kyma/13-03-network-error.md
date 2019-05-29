@@ -7,7 +7,6 @@ If you try to access the Console of a local or a cluster Kyma deployment and you
 Fix this by following one of these two approaches:
 
 - Add the Kyma certificate to the trusted certificates list of your OS:
-
     <div tabs>
       <details>
       <summary>
