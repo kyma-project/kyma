@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"log"
 	"net/http"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	api "github.com/kyma-project/kyma/components/event-bus/api/publish"
@@ -23,7 +24,7 @@ var (
 )
 
 type Message struct {
-	Headers map[string]string `json:"headers,omitempty"`
+	Headers map[string][]string `json:"headers,omitempty"`
 	Payload api.AnyValue      `json:"payload,omitempty"`
 }
 
@@ -58,7 +59,7 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		w.WriteHeader(http.StatusOK)
 		reason := getPublishStatusReason(&status)
 		publishResponse := &api.PublishResponse{
-			EventID: message.Headers[trace.HeaderEventID],
+			EventID: message.Headers[trace.HeaderEventID][0],
 			Status:  status,
 			Reason:  reason,
 		}
@@ -72,6 +73,17 @@ func KnativePublishHandler(knativeLib *knative.KnativeLib, knativePublisher *pub
 		// add span tags for the message properties
 		addSpanTagsForMessage(traceSpan, message)
 	}
+}
+
+func filterCEHeaders(req  *http.Request) map[string][]string {
+	//forward `ce-` headers only
+	headers := make(map[string][]string)
+	for k := range req.Header {
+		if strings.HasPrefix(strings.ToUpper(k), "CE-") {
+			headers[k] = req.Header[k]
+		}
+	}
+	return headers
 }
 
 func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knativeLib *knative.KnativeLib,
@@ -112,8 +124,10 @@ func handleKnativePublishRequest(w http.ResponseWriter, r *http.Request, knative
 		publishRequest.EventID = eventID
 	}
 
+	headers := filterCEHeaders(r)
+
 	// build the message from the publish-request and the trace-context
-	message := buildMessage(publishRequest, context)
+	message := buildMessage(publishRequest, context, headers)
 
 	// marshal the message
 	messagePayload, errMarshal := json.Marshal(message.Payload)
@@ -178,17 +192,17 @@ func generateEventID() (string, error) {
 	}
 }
 
-func buildMessage(publishRequest *api.PublishRequest, traceContext *api.TraceContext) *Message {
+func buildMessage(publishRequest *api.PublishRequest, traceContext *api.TraceContext,
+	headers map[string][]string) *Message {
 
-	headers := make(map[string]string)
-	headers[trace.HeaderSourceID] = publishRequest.SourceID
-	headers[trace.HeaderEventType] = publishRequest.EventType
-	headers[trace.HeaderEventTypeVersion] = publishRequest.EventTypeVersion
-	headers[trace.HeaderEventID] = publishRequest.EventID
-	headers[trace.HeaderEventTime] = publishRequest.EventTime
+	headers[trace.HeaderSourceID] = []string{publishRequest.SourceID}
+	headers[trace.HeaderEventType] = []string{publishRequest.EventType}
+	headers[trace.HeaderEventTypeVersion] = []string{publishRequest.EventTypeVersion}
+	headers[trace.HeaderEventID] = []string{publishRequest.EventID}
+	headers[trace.HeaderEventTime] = []string{publishRequest.EventTime}
 	if traceContext != nil {
 		for k, v := range *traceContext {
-			headers[k] = v
+			headers[k] = []string{v}
 		}
 	}
 

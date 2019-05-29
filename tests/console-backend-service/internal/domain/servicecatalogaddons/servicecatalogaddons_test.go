@@ -28,8 +28,7 @@ func TestMain(m *testing.M) {
 	scInstaller, err := setup.NewServiceCatalogConfigurer(TestNamespace, false)
 	exit.OnError(err, "while initializing Service Catalog Configurer for module %s", ModuleName)
 
-	err = scInstaller.Setup()
-	if err != nil {
+	if err = scInstaller.Setup(); err != nil {
 		cleanupErr := scInstaller.Cleanup()
 		log.Printf("Error while cleanup after failed setup for %s: %s", ModuleName, cleanupErr.Error())
 		exit.OnError(err, "while setup for module %s", ModuleName)

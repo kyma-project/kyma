@@ -1,7 +1,0 @@
-appVersion: 0.9.7
-name: ark
-version: 0.0.2
-description: Ark for Kyma
-keywords:
-  - Backup
-  - Heptio-Ark

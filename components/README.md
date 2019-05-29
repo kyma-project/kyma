@@ -22,7 +22,7 @@ This table lists the available types:
 |proxy| Acts as a proxy for an existing component, usually introducing a security model for this component. It uses the component's name. | apiserver-proxy|
 |service| Serves an HTTP/S-based API, usually securely exposed to the public. It uses the domain name and the API it serves.|connector-service|
 |broker| Implements the [OpenServiceBroker](https://www.openservicebrokerapi.org/) specification to enrich the Kyma Service Catalog with the services of a provider. It uses the name of the provider it integrates with.|azure-broker|
-|configurer| A one-time task which usually runs as an [Init Container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) in order to configure the application.|ark-plugins-configurer (not migrated yet)|
+|configurer| A one-time task which usually runs as an [Init Container](https://kubernetes.io/docs/concepts/workloads/pods/init-containers/) in order to configure the application.|velero-plugins-configurer
 
 ## Development
 
